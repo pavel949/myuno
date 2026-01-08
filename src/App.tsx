@@ -14,6 +14,12 @@ import Bookings from "./pages/Bookings";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
+// Beauty & Spa Mini-App
+import BeautySpaIndex from "./pages/beauty/BeautySpaIndex";
+import SalonDetail from "./pages/beauty/SalonDetail";
+import BeautyBooking from "./pages/beauty/BeautyBooking";
+import BeautyServices from "./pages/beauty/BeautyServices";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -31,6 +37,13 @@ const App = () => (
               <Route path="/map" element={<MapView />} />
               <Route path="/bookings" element={<Bookings />} />
               <Route path="/profile" element={<Profile />} />
+              
+              {/* Beauty & Spa Mini-App Routes */}
+              <Route path="/beauty" element={<BeautySpaIndex />} />
+              <Route path="/beauty/salon/:id" element={<SalonDetail />} />
+              <Route path="/beauty/booking/:id" element={<BeautyBooking />} />
+              <Route path="/beauty/services" element={<BeautyServices />} />
+              
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

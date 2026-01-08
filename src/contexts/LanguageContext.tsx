@@ -105,6 +105,22 @@ const translations: Record<Language, Record<string, string>> = {
     'home.featuredServices': 'Популярные услуги',
     'home.categories': 'Категории',
     'home.nearYou': 'Рядом с вами',
+    
+    // Beauty & Spa
+    'beauty.title': 'Красота и СПА',
+    'beauty.salons': 'Салоны',
+    'beauty.services': 'Услуги',
+    'beauty.selectServices': 'Выберите услуги',
+    'beauty.popularServices': 'Популярные услуги',
+    'beauty.nearbySalons': 'Салоны рядом',
+    'beauty.searchSalons': 'Поиск салонов...',
+    'beauty.searchServices': 'Поиск услуг...',
+    'beauty.bookAppointment': 'Записаться',
+    'beauty.selectDate': 'Выберите дату',
+    'beauty.selectTime': 'Выберите время',
+    'beauty.contactInfo': 'Контактная информация',
+    'beauty.confirmBooking': 'Подтвердить бронирование',
+    'beauty.bookingSuccess': 'Бронирование создано!',
   },
   en: {
     // Navigation
@@ -202,6 +218,22 @@ const translations: Record<Language, Record<string, string>> = {
     'home.featuredServices': 'Featured Services',
     'home.categories': 'Categories',
     'home.nearYou': 'Near You',
+    
+    // Beauty & Spa
+    'beauty.title': 'Beauty & Spa',
+    'beauty.salons': 'Salons',
+    'beauty.services': 'Services',
+    'beauty.selectServices': 'Select Services',
+    'beauty.popularServices': 'Popular Services',
+    'beauty.nearbySalons': 'Nearby Salons',
+    'beauty.searchSalons': 'Search salons...',
+    'beauty.searchServices': 'Search services...',
+    'beauty.bookAppointment': 'Book Appointment',
+    'beauty.selectDate': 'Select Date',
+    'beauty.selectTime': 'Select Time',
+    'beauty.contactInfo': 'Contact Information',
+    'beauty.confirmBooking': 'Confirm Booking',
+    'beauty.bookingSuccess': 'Booking Confirmed!',
   },
 };
 
