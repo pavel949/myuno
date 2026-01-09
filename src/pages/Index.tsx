@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Sparkles, UtensilsCrossed, Dumbbell, Stethoscope, 
-  GraduationCap, Building, Car, Ticket, ShoppingBag, Wrench,
+  GraduationCap, Home, Car, Ticket, ShoppingBag, Wrench,
   ArrowRight, MapPin
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -16,7 +16,7 @@ const categories = [
   { id: 'fitness', icon: Dumbbell, path: '/discover', color: 'from-blue-500 to-cyan-500' },
   { id: 'medical', icon: Stethoscope, path: '/discover', color: 'from-emerald-500 to-green-500' },
   { id: 'kids-education', icon: GraduationCap, path: '/discover', color: 'from-yellow-500 to-orange-500' },
-  { id: 'real-estate', icon: Building, path: '/discover', color: 'from-slate-500 to-gray-500' },
+  { id: 'real-estate', icon: Home, path: '/property', color: 'from-teal-500 to-emerald-500' },
   { id: 'transport', icon: Car, path: '/discover', color: 'from-indigo-500 to-blue-500' },
   { id: 'events', icon: Ticket, path: '/discover', color: 'from-purple-500 to-pink-500' },
 ];
@@ -150,28 +150,56 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Quick Access to Beauty & Spa */}
-        <div 
-          onClick={() => navigate('/beauty')}
-          className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-pink-500/20 via-purple-500/20 to-primary/20 p-6 border border-primary/20 cursor-pointer hover:border-primary/40 transition-all group"
-        >
-          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1540555700478-4be289fbec6c?w=800')] bg-cover bg-center opacity-10 group-hover:opacity-20 transition-opacity" />
-          <div className="relative z-10 flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="w-5 h-5 text-primary" />
-                <span className="text-sm font-medium text-primary">
-                  {t('category.beauty-spa')}
-                </span>
+        {/* Quick Access Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Beauty & Spa Card */}
+          <div 
+            onClick={() => navigate('/beauty')}
+            className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-pink-500/20 via-purple-500/20 to-primary/20 p-6 border border-primary/20 cursor-pointer hover:border-primary/40 transition-all group"
+          >
+            <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1540555700478-4be289fbec6c?w=800')] bg-cover bg-center opacity-10 group-hover:opacity-20 transition-opacity" />
+            <div className="relative z-10 flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                  <span className="text-sm font-medium text-primary">
+                    {t('category.beauty-spa')}
+                  </span>
+                </div>
+                <h3 className="text-lg font-display font-bold mb-1">
+                  {language === 'ru' ? 'Мир красоты' : 'Beauty World'}
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  {language === 'ru' ? 'СПА, массаж, салоны' : 'Spas, massage, salons'}
+                </p>
               </div>
-              <h3 className="text-xl font-display font-bold mb-1">
-                {language === 'ru' ? 'Откройте мир красоты' : 'Discover Beauty World'}
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                {language === 'ru' ? 'СПА, массаж, салоны красоты' : 'Spas, massage, beauty salons'}
-              </p>
+              <ArrowRight className="w-6 h-6 text-primary group-hover:translate-x-1 transition-transform" />
             </div>
-            <ArrowRight className="w-6 h-6 text-primary group-hover:translate-x-1 transition-transform" />
+          </div>
+
+          {/* Property Card */}
+          <div 
+            onClick={() => navigate('/property')}
+            className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-teal-500/20 via-emerald-500/20 to-primary/20 p-6 border border-primary/20 cursor-pointer hover:border-primary/40 transition-all group"
+          >
+            <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800')] bg-cover bg-center opacity-10 group-hover:opacity-20 transition-opacity" />
+            <div className="relative z-10 flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Home className="w-5 h-5 text-primary" />
+                  <span className="text-sm font-medium text-primary">
+                    {t('category.real-estate')}
+                  </span>
+                </div>
+                <h3 className="text-lg font-display font-bold mb-1">
+                  {language === 'ru' ? 'Недвижимость' : 'Real Estate'}
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  {language === 'ru' ? 'Виллы, квартиры, кондо' : 'Villas, apartments, condos'}
+                </p>
+              </div>
+              <ArrowRight className="w-6 h-6 text-primary group-hover:translate-x-1 transition-transform" />
+            </div>
           </div>
         </div>
       </div>

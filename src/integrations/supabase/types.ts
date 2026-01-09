@@ -454,6 +454,182 @@ export type Database = {
         }
         Relationships: []
       }
+      properties: {
+        Row: {
+          address: string | null
+          amenities: string[] | null
+          area_sqm: number | null
+          available_from: string | null
+          bathrooms: number | null
+          bedrooms: number | null
+          cover_image: string | null
+          created_at: string
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          district: string | null
+          id: string
+          images: string[] | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          lat: number | null
+          listing_type: string
+          lng: number | null
+          location_id: string | null
+          max_guests: number | null
+          min_stay_nights: number | null
+          price: number | null
+          price_period: string | null
+          property_type: string
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          title_en: string
+          title_ru: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          amenities?: string[] | null
+          area_sqm?: number | null
+          available_from?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          cover_image?: string | null
+          created_at?: string
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          listing_type: string
+          lng?: number | null
+          location_id?: string | null
+          max_guests?: number | null
+          min_stay_nights?: number | null
+          price?: number | null
+          price_period?: string | null
+          property_type: string
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          title_en: string
+          title_ru: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          amenities?: string[] | null
+          area_sqm?: number | null
+          available_from?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          cover_image?: string | null
+          created_at?: string
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          listing_type?: string
+          lng?: number | null
+          location_id?: string | null
+          max_guests?: number | null
+          min_stay_nights?: number | null
+          price?: number | null
+          price_period?: string | null
+          property_type?: string
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          title_en?: string
+          title_ru?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "properties_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_inquiries: {
+        Row: {
+          check_in: string | null
+          check_out: string | null
+          created_at: string
+          email: string | null
+          guests: number | null
+          id: string
+          message: string | null
+          name: string
+          phone: string | null
+          property_id: string
+          status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string
+          email?: string | null
+          guests?: number | null
+          id?: string
+          message?: string | null
+          name: string
+          phone?: string | null
+          property_id: string
+          status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string
+          email?: string | null
+          guests?: number | null
+          id?: string
+          message?: string | null
+          name?: string
+          phone?: string | null
+          property_id?: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_inquiries_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       providers: {
         Row: {
           cover_image: string | null

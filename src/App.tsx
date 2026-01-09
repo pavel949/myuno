@@ -21,6 +21,12 @@ import BeautyBooking from "./pages/beauty/BeautyBooking";
 import BeautyServices from "./pages/beauty/BeautyServices";
 import BeautyMap from "./pages/beauty/BeautyMap";
 
+// Property Mini-App
+import PropertyIndex from "./pages/property/PropertyIndex";
+import PropertyDetail from "./pages/property/PropertyDetail";
+import PropertyInquiry from "./pages/property/PropertyInquiry";
+import PropertyMap from "./pages/property/PropertyMap";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -45,6 +51,12 @@ const App = () => (
               <Route path="/beauty/booking/:id" element={<BeautyBooking />} />
               <Route path="/beauty/services" element={<BeautyServices />} />
               <Route path="/beauty/map" element={<BeautyMap />} />
+              
+              {/* Property Mini-App Routes */}
+              <Route path="/property" element={<PropertyIndex />} />
+              <Route path="/property/:id" element={<PropertyDetail />} />
+              <Route path="/property/inquiry/:id" element={<PropertyInquiry />} />
+              <Route path="/property/map" element={<PropertyMap />} />
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
