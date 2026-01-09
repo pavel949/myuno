@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart, GraduationCap, User, Trash2, Ticket, Home, Car, Stethoscope, Dumbbell } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -6,14 +6,19 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useFavorites } from '@/hooks/useFavorites';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 
 type FilterType = 'all' | 'course' | 'tutor' | 'event' | 'property' | 'vehicle' | 'clinic' | 'gym';
 
 export default function Favorites() {
   const { language } = useLanguage();
   const navigate = useNavigate();
-  const { favorites, loading, toggleFavorite } = useFavorites();
+  const { favorites, loading, toggleFavorite, refetch } = useFavorites();
   const [filter, setFilter] = useState<FilterType>('all');
+
+  const handleRefresh = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
 
   const filters: { value: FilterType; label: string; icon: any }[] = [
     { value: 'all', label: language === 'ru' ? 'Все' : 'All', icon: Heart },
@@ -63,7 +68,8 @@ export default function Favorites() {
 
   return (
     <AppLayout>
-      <div className="p-4 space-y-4">
+      <PullToRefresh onRefresh={handleRefresh} className="h-[calc(100vh-8rem)]">
+        <div className="p-4 space-y-4">
         <h1 className="text-2xl font-bold text-foreground">
           {language === 'ru' ? 'Избранное' : 'Favorites'}
         </h1>
@@ -166,6 +172,7 @@ export default function Favorites() {
           })}
         </div>
       </div>
+      </PullToRefresh>
     </AppLayout>
   );
 }
