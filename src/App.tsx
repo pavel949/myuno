@@ -37,6 +37,16 @@ import TransportIndex from "./pages/transport/TransportIndex";
 import VehicleDetail from "./pages/transport/VehicleDetail";
 import TransportBooking from "./pages/transport/TransportBooking";
 
+// Fitness Mini-App
+import FitnessIndex from "./pages/fitness/FitnessIndex";
+import GymDetail from "./pages/fitness/GymDetail";
+import FitnessBooking from "./pages/fitness/FitnessBooking";
+
+// Medical Mini-App
+import MedicalIndex from "./pages/medical/MedicalIndex";
+import ClinicDetail from "./pages/medical/ClinicDetail";
+import MedicalAppointment from "./pages/medical/MedicalAppointment";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -77,6 +87,16 @@ const App = () => (
               <Route path="/transport" element={<TransportIndex />} />
               <Route path="/transport/vehicle/:id" element={<VehicleDetail />} />
               <Route path="/transport/booking/:id" element={<TransportBooking />} />
+              
+              {/* Fitness Mini-App Routes */}
+              <Route path="/fitness" element={<FitnessIndex />} />
+              <Route path="/fitness/gym/:id" element={<GymDetail />} />
+              <Route path="/fitness/booking/:id" element={<FitnessBooking />} />
+              
+              {/* Medical Mini-App Routes */}
+              <Route path="/medical" element={<MedicalIndex />} />
+              <Route path="/medical/clinic/:id" element={<ClinicDetail />} />
+              <Route path="/medical/appointment/:id" element={<MedicalAppointment />} />
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
