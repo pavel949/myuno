@@ -12,12 +12,12 @@ import { cn } from '@/lib/utils';
 
 const categories = [
   { id: 'beauty-spa', icon: Sparkles, path: '/beauty', color: 'from-pink-500 to-purple-500' },
-  { id: 'restaurants', icon: UtensilsCrossed, path: '/discover', color: 'from-orange-500 to-red-500' },
+  { id: 'restaurants', icon: UtensilsCrossed, path: '/food', color: 'from-orange-500 to-red-500' },
   { id: 'fitness', icon: Dumbbell, path: '/discover', color: 'from-blue-500 to-cyan-500' },
   { id: 'medical', icon: Stethoscope, path: '/discover', color: 'from-emerald-500 to-green-500' },
   { id: 'kids-education', icon: GraduationCap, path: '/discover', color: 'from-yellow-500 to-orange-500' },
   { id: 'real-estate', icon: Home, path: '/property', color: 'from-teal-500 to-emerald-500' },
-  { id: 'transport', icon: Car, path: '/discover', color: 'from-indigo-500 to-blue-500' },
+  { id: 'transport', icon: Car, path: '/transport', color: 'from-indigo-500 to-blue-500' },
   { id: 'events', icon: Ticket, path: '/discover', color: 'from-purple-500 to-pink-500' },
 ];
 
@@ -177,6 +177,31 @@ const Index = () => {
             </div>
           </div>
 
+          {/* Food & Delivery Card */}
+          <div 
+            onClick={() => navigate('/food')}
+            className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-orange-500/20 via-red-500/20 to-primary/20 p-6 border border-primary/20 cursor-pointer hover:border-primary/40 transition-all group"
+          >
+            <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800')] bg-cover bg-center opacity-10 group-hover:opacity-20 transition-opacity" />
+            <div className="relative z-10 flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <UtensilsCrossed className="w-5 h-5 text-primary" />
+                  <span className="text-sm font-medium text-primary">
+                    {t('category.restaurants')}
+                  </span>
+                </div>
+                <h3 className="text-lg font-display font-bold mb-1">
+                  {language === 'ru' ? 'Еда и Доставка' : 'Food & Delivery'}
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  {language === 'ru' ? 'Рестораны, кафе, доставка' : 'Restaurants, cafes, delivery'}
+                </p>
+              </div>
+              <ArrowRight className="w-6 h-6 text-primary group-hover:translate-x-1 transition-transform" />
+            </div>
+          </div>
+
           {/* Property Card */}
           <div 
             onClick={() => navigate('/property')}
@@ -196,6 +221,31 @@ const Index = () => {
                 </h3>
                 <p className="text-xs text-muted-foreground">
                   {language === 'ru' ? 'Виллы, квартиры, кондо' : 'Villas, apartments, condos'}
+                </p>
+              </div>
+              <ArrowRight className="w-6 h-6 text-primary group-hover:translate-x-1 transition-transform" />
+            </div>
+          </div>
+
+          {/* Transport Card */}
+          <div 
+            onClick={() => navigate('/transport')}
+            className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-500/20 via-blue-500/20 to-primary/20 p-6 border border-primary/20 cursor-pointer hover:border-primary/40 transition-all group"
+          >
+            <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800')] bg-cover bg-center opacity-10 group-hover:opacity-20 transition-opacity" />
+            <div className="relative z-10 flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Car className="w-5 h-5 text-primary" />
+                  <span className="text-sm font-medium text-primary">
+                    {t('category.transport')}
+                  </span>
+                </div>
+                <h3 className="text-lg font-display font-bold mb-1">
+                  {language === 'ru' ? 'Транспорт' : 'Transport'}
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  {language === 'ru' ? 'Аренда авто, такси, трансферы' : 'Car rental, taxi, transfers'}
                 </p>
               </div>
               <ArrowRight className="w-6 h-6 text-primary group-hover:translate-x-1 transition-transform" />
