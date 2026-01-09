@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { AnimatedList, AnimatedItem, AnimatedGrid, AnimatedCard } from '@/components/layout/AnimatedList';
 
 // Combined demo data from all mini-apps
 const allItems = [
@@ -177,27 +178,28 @@ export default function Search() {
                 <h3 className="text-sm font-medium text-muted-foreground mb-3">
                   {language === 'ru' ? 'Популярные категории' : 'Popular Categories'}
                 </h3>
-                <div className="grid grid-cols-2 gap-3">
+                <AnimatedGrid className="grid grid-cols-2 gap-3" staggerDelay={0.06}>
                   {popularCategories.slice(0, 6).map(type => {
                     const config = typeConfig[type];
                     const Icon = config.icon;
                     return (
-                      <button
-                        key={type}
-                        onClick={() => setSelectedType(type)}
-                        className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:border-primary/30 transition-all"
-                      >
-                        <div className={cn(
-                          "w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-br",
-                          config.color
-                        )}>
-                          <Icon className="w-5 h-5 text-white" />
-                        </div>
-                        <span className="font-medium">{config.label[language]}</span>
-                      </button>
+                      <AnimatedCard key={type}>
+                        <button
+                          onClick={() => setSelectedType(type)}
+                          className="w-full flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:border-primary/30 transition-all"
+                        >
+                          <div className={cn(
+                            "w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-br",
+                            config.color
+                          )}>
+                            <Icon className="w-5 h-5 text-white" />
+                          </div>
+                          <span className="font-medium">{config.label[language]}</span>
+                        </button>
+                      </AnimatedCard>
                     );
                   })}
-                </div>
+                </AnimatedGrid>
               </div>
             </div>
           )}
@@ -224,50 +226,51 @@ export default function Search() {
                   </p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <AnimatedList className="space-y-3">
                   {filteredResults.map(item => {
                     const config = typeConfig[item.type];
                     const Icon = config.icon;
                     return (
-                      <div
-                        key={item.id}
-                        onClick={() => navigate(item.path)}
-                        className="flex gap-3 p-3 rounded-xl bg-card border border-border hover:border-primary/30 transition-all cursor-pointer"
-                      >
-                        <img
-                          src={item.image}
-                          alt={language === 'ru' ? item.title_ru : item.title_en}
-                          className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Badge 
-                              variant="secondary" 
-                              className={cn("text-xs gap-1")}
-                            >
-                              <Icon className="w-3 h-3" />
-                              {config.label[language]}
-                            </Badge>
-                          </div>
-                          <h3 className="font-semibold truncate">
-                            {language === 'ru' ? item.title_ru : item.title_en}
-                          </h3>
-                          <p className="text-sm text-muted-foreground truncate">
-                            {language === 'ru' ? item.location_ru : item.location}
-                          </p>
-                          <div className="flex items-center justify-between mt-1">
-                            <span className="text-sm font-medium text-primary">
-                              {item.price > 0 ? `฿${item.price.toLocaleString()}` : (language === 'ru' ? 'Бесплатно' : 'Free')}
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              ⭐ {item.rating}
-                            </span>
+                      <AnimatedItem key={item.id}>
+                        <div
+                          onClick={() => navigate(item.path)}
+                          className="flex gap-3 p-3 rounded-xl bg-card border border-border hover:border-primary/30 transition-all cursor-pointer"
+                        >
+                          <img
+                            src={item.image}
+                            alt={language === 'ru' ? item.title_ru : item.title_en}
+                            className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Badge 
+                                variant="secondary" 
+                                className={cn("text-xs gap-1")}
+                              >
+                                <Icon className="w-3 h-3" />
+                                {config.label[language]}
+                              </Badge>
+                            </div>
+                            <h3 className="font-semibold truncate">
+                              {language === 'ru' ? item.title_ru : item.title_en}
+                            </h3>
+                            <p className="text-sm text-muted-foreground truncate">
+                              {language === 'ru' ? item.location_ru : item.location}
+                            </p>
+                            <div className="flex items-center justify-between mt-1">
+                              <span className="text-sm font-medium text-primary">
+                                {item.price > 0 ? `฿${item.price.toLocaleString()}` : (language === 'ru' ? 'Бесплатно' : 'Free')}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                ⭐ {item.rating}
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      </AnimatedItem>
                     );
                   })}
-                </div>
+                </AnimatedList>
               )}
             </div>
           )}
