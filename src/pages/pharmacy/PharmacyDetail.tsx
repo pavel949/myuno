@@ -16,18 +16,18 @@ import {
 import { toast } from "sonner";
 
 const PRODUCT_CATEGORIES = [
-  { id: 'all', labelEn: 'All', labelRu: 'Все' },
-  { id: 'general', labelEn: 'General', labelRu: 'Общие' },
-  { id: 'vitamins', labelEn: 'Vitamins', labelRu: 'Витамины' },
-  { id: 'first_aid', labelEn: 'First Aid', labelRu: 'Первая помощь' },
-  { id: 'skincare', labelEn: 'Skincare', labelRu: 'Уход за кожей' },
-  { id: 'personal_care', labelEn: 'Personal Care', labelRu: 'Личная гигиена' },
+  { id: 'all', labelKey: 'pharmacy.all' },
+  { id: 'general', labelKey: 'pharmacy.general' },
+  { id: 'vitamins', labelKey: 'pharmacy.vitamins' },
+  { id: 'first_aid', labelKey: 'pharmacy.firstAid' },
+  { id: 'skincare', labelKey: 'pharmacy.skincare' },
+  { id: 'personal_care', labelKey: 'pharmacy.personalCare' },
 ];
 
 export default function PharmacyDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const { pharmacy, isLoading } = usePharmacy(id);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const { products, isLoading: productsLoading } = usePharmacyProducts(id, selectedCategory);
@@ -50,9 +50,9 @@ export default function PharmacyDetail() {
       <AppLayout>
         <PageContainer>
           <div className="text-center py-12">
-            <p>{language === 'ru' ? 'Аптека не найдена' : 'Pharmacy not found'}</p>
+            <p>{t('pharmacy.notFound')}</p>
             <Button onClick={() => navigate('/pharmacy')} className="mt-4">
-              {language === 'ru' ? 'Назад' : 'Go Back'}
+              {t('action.back')}
             </Button>
           </div>
         </PageContainer>
@@ -73,7 +73,7 @@ export default function PharmacyDetail() {
       providerName: language === 'ru' ? pharmacy.name_ru : pharmacy.name_en,
       providerNameRu: pharmacy.name_ru,
     });
-    toast.success(language === 'ru' ? 'Добавлено в корзину' : 'Added to cart');
+    toast.success(t('pharmacy.addedToCart'));
   };
 
   return (
@@ -96,7 +96,7 @@ export default function PharmacyDetail() {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           {pharmacy.is_24h && (
-            <Badge className="absolute top-4 right-4 bg-green-500 text-white">24/7</Badge>
+            <Badge className="absolute top-4 right-4 bg-green-500 text-white">{t('pharmacy.24h')}</Badge>
           )}
         </div>
 
@@ -116,7 +116,7 @@ export default function PharmacyDetail() {
             {pharmacy.is_verified && (
               <Badge className="bg-primary/10 text-primary">
                 <Shield className="w-3 h-3 mr-1" />
-                {language === 'ru' ? 'Проверено' : 'Verified'}
+                {t('pharmacy.verified')}
               </Badge>
             )}
           </div>
@@ -130,12 +130,12 @@ export default function PharmacyDetail() {
             {pharmacy.delivery_available && (
               <Badge variant="secondary">
                 <Truck className="w-3 h-3 mr-1" />
-                {language === 'ru' ? `Доставка от ฿${pharmacy.delivery_fee}` : `Delivery from ฿${pharmacy.delivery_fee}`}
+                {t('pharmacy.deliveryFrom')} ฿{pharmacy.delivery_fee}
               </Badge>
             )}
             {pharmacy.has_pharmacist && (
               <Badge variant="secondary">
-                {language === 'ru' ? 'Есть фармацевт' : 'Pharmacist available'}
+                {t('pharmacy.pharmacistAvailable')}
               </Badge>
             )}
           </div>
@@ -153,14 +153,14 @@ export default function PharmacyDetail() {
         {/* Products */}
         <div>
           <h2 className="font-semibold mb-4">
-            {language === 'ru' ? 'Товары' : 'Products'}
+            {t('pharmacy.products')}
           </h2>
 
           <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide">
             {PRODUCT_CATEGORIES.map(cat => (
               <FilterChip
                 key={cat.id}
-                label={language === 'ru' ? cat.labelRu : cat.labelEn}
+                label={t(cat.labelKey)}
                 isActive={selectedCategory === cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
               />
@@ -175,7 +175,7 @@ export default function PharmacyDetail() {
             </div>
           ) : products.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              {language === 'ru' ? 'Товары не найдены' : 'No products found'}
+              {t('pharmacy.noProducts')}
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
@@ -226,7 +226,7 @@ export default function PharmacyDetail() {
               onClick={() => navigate('/cart')}
             >
               <ShoppingCart className="w-5 h-5 mr-2" />
-              {language === 'ru' ? `Корзина (${itemCount})` : `Cart (${itemCount})`}
+              {t('pharmacy.cart')} ({itemCount})
             </Button>
           </div>
         )}

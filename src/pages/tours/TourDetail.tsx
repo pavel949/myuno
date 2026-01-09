@@ -12,11 +12,11 @@ import { FavoriteButton } from "@/components/uno/FavoriteButton";
 export default function TourDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const { tour, isLoading, error } = useTour(id);
 
   if (isLoading) return <AppLayout showBottomNav={false}><div className="flex items-center justify-center min-h-screen"><LoadingSpinner size="lg" /></div></AppLayout>;
-  if (error || !tour) return <AppLayout><PageContainer><div className="text-center py-12"><p>{language === 'ru' ? 'Тур не найден' : 'Tour not found'}</p><Button onClick={() => navigate('/tours')} className="mt-4">{language === 'ru' ? 'Назад' : 'Back'}</Button></div></PageContainer></AppLayout>;
+  if (error || !tour) return <AppLayout><PageContainer><div className="text-center py-12"><p>{t('tours.notFound')}</p><Button onClick={() => navigate('/tours')} className="mt-4">{t('action.back')}</Button></div></PageContainer></AppLayout>;
 
   return (
     <AppLayout showBottomNav={false}>
@@ -41,20 +41,20 @@ export default function TourDetail() {
           </div>
 
           <div className="py-4 border-b">
-            <h2 className="font-semibold mb-2">{language === 'ru' ? 'Описание' : 'Description'}</h2>
+            <h2 className="font-semibold mb-2">{t('tours.description')}</h2>
             <p className="text-muted-foreground text-sm">{language === 'ru' ? tour.description_ru : tour.description_en}</p>
           </div>
 
           {tour.highlights.length > 0 && (
             <div className="py-4 border-b">
-              <h2 className="font-semibold mb-3">{language === 'ru' ? 'Включено' : 'Highlights'}</h2>
+              <h2 className="font-semibold mb-3">{t('tours.highlights')}</h2>
               <div className="flex flex-wrap gap-2">{tour.highlights.map((h, i) => <Badge key={i} variant="secondary">{h}</Badge>)}</div>
             </div>
           )}
 
           {tour.itinerary.length > 0 && (
             <div className="py-4 border-b">
-              <h2 className="font-semibold mb-3">{language === 'ru' ? 'Маршрут' : 'Itinerary'}</h2>
+              <h2 className="font-semibold mb-3">{t('tours.itinerary')}</h2>
               <div className="space-y-3">
                 {tour.itinerary.map((item, i) => (
                   <div key={i} className="flex gap-3">
@@ -68,7 +68,7 @@ export default function TourDetail() {
 
           {tour.includes.length > 0 && (
             <div className="py-4">
-              <h2 className="font-semibold mb-3">{language === 'ru' ? 'Включено' : 'Included'}</h2>
+              <h2 className="font-semibold mb-3">{t('tours.includes')}</h2>
               <ul className="space-y-2">{tour.includes.map((item, i) => <li key={i} className="flex items-center gap-2 text-sm"><Check className="w-4 h-4 text-green-500" />{item}</li>)}</ul>
             </div>
           )}
@@ -76,8 +76,8 @@ export default function TourDetail() {
 
         <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4">
           <div className="flex items-center justify-between max-w-lg mx-auto">
-            <div><span className="text-2xl font-bold text-primary">฿{tour.price?.toLocaleString()}</span><span className="text-sm text-muted-foreground">{language === 'ru' ? ' /чел' : ' /person'}</span></div>
-            <Button size="lg" onClick={() => navigate(`/tours/${tour.id}/book`)}><Calendar className="w-4 h-4 mr-2" />{language === 'ru' ? 'Забронировать' : 'Book Now'}</Button>
+            <div><span className="text-2xl font-bold text-primary">฿{tour.price?.toLocaleString()}</span><span className="text-sm text-muted-foreground">{t('tours.perPerson')}</span></div>
+            <Button size="lg" onClick={() => navigate(`/tours/${tour.id}/book`)}><Calendar className="w-4 h-4 mr-2" />{t('tours.bookNow')}</Button>
           </div>
         </div>
       </div>
