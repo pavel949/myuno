@@ -1,12 +1,13 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bell, Menu } from 'lucide-react';
+import { Bell, Menu, ShoppingBag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { PremiumButton } from '@/components/uno/PremiumButton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useCart } from '@/contexts/CartContext';
 
 interface AppHeaderProps {
   title?: string;
@@ -19,7 +20,9 @@ export function AppHeader({ title, showBack, onMenuClick, className }: AppHeader
   const { user } = useAuth();
   const { t } = useLanguage();
   const { unreadCount } = useNotifications();
+  const { getItemCount } = useCart();
   const navigate = useNavigate();
+  const cartItemCount = getItemCount();
 
   return (
     <header
@@ -59,6 +62,21 @@ export function AppHeader({ title, showBack, onMenuClick, className }: AppHeader
 
         {/* Right side */}
         <div className="flex items-center gap-2">
+          {/* Cart Button */}
+          <button 
+            onClick={() => navigate('/cart')}
+            className="relative flex items-center justify-center w-9 h-9 rounded-lg hover:bg-secondary transition-colors"
+          >
+            <ShoppingBag className="w-5 h-5" />
+            {cartItemCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-primary rounded-full flex items-center justify-center">
+                <span className="text-[10px] font-bold text-primary-foreground">
+                  {cartItemCount > 99 ? '99+' : cartItemCount}
+                </span>
+              </span>
+            )}
+          </button>
+
           <LanguageSwitcher size="sm" />
           
           {user ? (

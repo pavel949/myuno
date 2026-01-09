@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { CartProvider } from "@/contexts/CartContext";
 
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -81,86 +82,94 @@ import Notifications from "./pages/Notifications";
 // View History
 import ViewHistory from "./pages/ViewHistory";
 
+// Cart
+import Cart from "./pages/Cart";
+
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
       <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/discover" element={<Discover />} />
-              <Route path="/map" element={<MapView />} />
-              <Route path="/bookings" element={<Bookings />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/favorites" element={<Favorites />} />
-              <Route path="/search" element={<Search />} />
-              <Route path="/notifications" element={<Notifications />} />
-              <Route path="/history" element={<ViewHistory />} />
-              {/* Beauty & Spa Mini-App Routes */}
-              <Route path="/beauty" element={<BeautySpaIndex />} />
-              <Route path="/beauty/salon/:id" element={<SalonDetail />} />
-              <Route path="/beauty/booking/:id" element={<BeautyBooking />} />
-              <Route path="/beauty/services" element={<BeautyServices />} />
-              <Route path="/beauty/map" element={<BeautyMap />} />
-              
-              {/* Property Mini-App Routes */}
-              <Route path="/property" element={<PropertyIndex />} />
-              <Route path="/property/:id" element={<PropertyDetail />} />
-              <Route path="/property/inquiry/:id" element={<PropertyInquiry />} />
-              <Route path="/property/map" element={<PropertyMap />} />
-              
-              {/* Food & Delivery Mini-App Routes */}
-              <Route path="/food" element={<FoodIndex />} />
-              <Route path="/food/restaurant/:id" element={<RestaurantDetail />} />
-              <Route path="/food/checkout" element={<FoodCheckout />} />
-              
-              {/* Transport Mini-App Routes */}
-              <Route path="/transport" element={<TransportIndex />} />
-              <Route path="/transport/vehicle/:id" element={<VehicleDetail />} />
-              <Route path="/transport/booking/:id" element={<TransportBooking />} />
-              
-              {/* Fitness Mini-App Routes */}
-              <Route path="/fitness" element={<FitnessIndex />} />
-              <Route path="/fitness/gym/:id" element={<GymDetail />} />
-              <Route path="/fitness/booking/:id" element={<FitnessBooking />} />
-              
-              {/* Medical Mini-App Routes */}
-              <Route path="/medical" element={<MedicalIndex />} />
-              <Route path="/medical/clinic/:id" element={<ClinicDetail />} />
-              <Route path="/medical/appointment/:id" element={<MedicalAppointment />} />
-              {/* Events Mini-App Routes */}
-              <Route path="/events" element={<EventsIndex />} />
-              <Route path="/events/:id" element={<EventDetail />} />
-              <Route path="/events/booking/:id" element={<EventBooking />} />
-              
-              {/* Education Mini-App Routes */}
-              <Route path="/education" element={<EducationIndex />} />
-              <Route path="/education/course/:id" element={<CourseDetail />} />
-              <Route path="/education/tutor/:id" element={<TutorDetail />} />
-              <Route path="/education/booking/:id" element={<EducationBooking />} />
-              
-              {/* Flowers Mini-App Routes */}
-              <Route path="/flowers" element={<FlowersIndex />} />
-              <Route path="/flowers/shop/:id" element={<FlowerShopDetail />} />
-              <Route path="/flowers/order/:id" element={<FlowersOrder />} />
-              
-              {/* Home Services Mini-App Routes */}
-              <Route path="/services" element={<ServicesIndex />} />
-              <Route path="/services/provider/:id" element={<ServiceProviderDetail />} />
-              <Route path="/services/booking/:id" element={<ServiceBooking />} />
-              <Route path="/services/map" element={<ServicesMap />} />
-              
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
+        <CartProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/discover" element={<Discover />} />
+                <Route path="/map" element={<MapView />} />
+                <Route path="/bookings" element={<Bookings />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/favorites" element={<Favorites />} />
+                <Route path="/search" element={<Search />} />
+                <Route path="/notifications" element={<Notifications />} />
+                <Route path="/history" element={<ViewHistory />} />
+                <Route path="/cart" element={<Cart />} />
+                
+                {/* Beauty & Spa Mini-App Routes */}
+                <Route path="/beauty" element={<BeautySpaIndex />} />
+                <Route path="/beauty/salon/:id" element={<SalonDetail />} />
+                <Route path="/beauty/booking/:id" element={<BeautyBooking />} />
+                <Route path="/beauty/services" element={<BeautyServices />} />
+                <Route path="/beauty/map" element={<BeautyMap />} />
+                
+                {/* Property Mini-App Routes */}
+                <Route path="/property" element={<PropertyIndex />} />
+                <Route path="/property/:id" element={<PropertyDetail />} />
+                <Route path="/property/inquiry/:id" element={<PropertyInquiry />} />
+                <Route path="/property/map" element={<PropertyMap />} />
+                
+                {/* Food & Delivery Mini-App Routes */}
+                <Route path="/food" element={<FoodIndex />} />
+                <Route path="/food/restaurant/:id" element={<RestaurantDetail />} />
+                <Route path="/food/checkout" element={<FoodCheckout />} />
+                
+                {/* Transport Mini-App Routes */}
+                <Route path="/transport" element={<TransportIndex />} />
+                <Route path="/transport/vehicle/:id" element={<VehicleDetail />} />
+                <Route path="/transport/booking/:id" element={<TransportBooking />} />
+                
+                {/* Fitness Mini-App Routes */}
+                <Route path="/fitness" element={<FitnessIndex />} />
+                <Route path="/fitness/gym/:id" element={<GymDetail />} />
+                <Route path="/fitness/booking/:id" element={<FitnessBooking />} />
+                
+                {/* Medical Mini-App Routes */}
+                <Route path="/medical" element={<MedicalIndex />} />
+                <Route path="/medical/clinic/:id" element={<ClinicDetail />} />
+                <Route path="/medical/appointment/:id" element={<MedicalAppointment />} />
+                
+                {/* Events Mini-App Routes */}
+                <Route path="/events" element={<EventsIndex />} />
+                <Route path="/events/:id" element={<EventDetail />} />
+                <Route path="/events/booking/:id" element={<EventBooking />} />
+                
+                {/* Education Mini-App Routes */}
+                <Route path="/education" element={<EducationIndex />} />
+                <Route path="/education/course/:id" element={<CourseDetail />} />
+                <Route path="/education/tutor/:id" element={<TutorDetail />} />
+                <Route path="/education/booking/:id" element={<EducationBooking />} />
+                
+                {/* Flowers Mini-App Routes */}
+                <Route path="/flowers" element={<FlowersIndex />} />
+                <Route path="/flowers/shop/:id" element={<FlowerShopDetail />} />
+                <Route path="/flowers/order/:id" element={<FlowersOrder />} />
+                
+                {/* Home Services Mini-App Routes */}
+                <Route path="/services" element={<ServicesIndex />} />
+                <Route path="/services/provider/:id" element={<ServiceProviderDetail />} />
+                <Route path="/services/booking/:id" element={<ServiceBooking />} />
+                <Route path="/services/map" element={<ServicesMap />} />
+                
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </CartProvider>
       </AuthProvider>
     </LanguageProvider>
   </QueryClientProvider>
