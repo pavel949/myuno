@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight, Gift } from 'lucide-react';
 import { z } from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
@@ -139,9 +139,9 @@ export default function Auth() {
       
       {/* Header */}
       <header className="relative z-10 p-4 flex justify-between items-center">
-        <div className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center shadow-gold">
+        <Link to="/" className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center shadow-gold hover:scale-105 transition-transform">
           <span className="text-xl font-bold text-primary-foreground">U</span>
-        </div>
+        </Link>
         <div className="flex items-center gap-2">
           <ThemeSwitcher variant="buttons" className="scale-90" />
           <LanguageSwitcher size="sm" />
