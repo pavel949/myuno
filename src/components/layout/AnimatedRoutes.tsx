@@ -89,6 +89,14 @@ import Cart from '@/pages/Cart';
 import Wallet from '@/pages/Wallet';
 import SOS from '@/pages/SOS';
 
+// Info pages
+import AboutPage from '@/pages/info/AboutPage';
+import HowItWorksPage from '@/pages/info/HowItWorksPage';
+import FAQPage from '@/pages/info/FAQPage';
+import PartnersPage from '@/pages/info/PartnersPage';
+import PrivacyPage from '@/pages/info/PrivacyPage';
+import TermsPage from '@/pages/info/TermsPage';
+
 export const AnimatedRoutes: React.FC = () => {
   const location = useLocation();
 
@@ -177,6 +185,15 @@ export const AnimatedRoutes: React.FC = () => {
         {/* Pharmacy Mini-App Routes */}
         <Route path="/pharmacy" element={<PageTransition><PharmacyIndex /></PageTransition>} />
         <Route path="/pharmacy/:id" element={<PageTransition><PharmacyDetail /></PageTransition>} />
+        
+        {/* Info Pages */}
+        <Route path="/about" element={<PageTransition><AboutPage /></PageTransition>} />
+        <Route path="/how-it-works" element={<PageTransition><HowItWorksPage /></PageTransition>} />
+        <Route path="/faq" element={<PageTransition><FAQPage /></PageTransition>} />
+        <Route path="/partners" element={<PageTransition><PartnersPage /></PageTransition>} />
+        <Route path="/privacy" element={<PageTransition><PrivacyPage /></PageTransition>} />
+        <Route path="/terms" element={<PageTransition><TermsPage /></PageTransition>} />
+        <Route path="/view-history" element={<PageTransition><ViewHistory /></PageTransition>} />
         
         {/* Catch-all */}
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
