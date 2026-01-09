@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter, Sparkles, Star, MapPin, Clock, ArrowRight } from 'lucide-react';
+import { Search, Filter, Sparkles, Star, MapPin, Clock, ArrowRight, Map } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { UnifiedCard } from '@/components/uno/UnifiedCard';
 import { FilterChip } from '@/components/uno/FilterChip';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 // Demo salon data
@@ -181,10 +182,19 @@ export default function BeautySpaIndex() {
             <h2 className="text-lg font-semibold">
               {language === 'ru' ? 'Салоны рядом' : 'Nearby Salons'}
             </h2>
-            <span className="text-sm text-muted-foreground">
-              {filteredSalons.length} {language === 'ru' ? 'найдено' : 'found'}
-            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/beauty/map')}
+              className="flex items-center gap-2"
+            >
+              <Map className="w-4 h-4" />
+              {language === 'ru' ? 'На карте' : 'Map View'}
+            </Button>
           </div>
+          <p className="text-sm text-muted-foreground mb-4">
+            {filteredSalons.length} {language === 'ru' ? 'найдено' : 'found'}
+          </p>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {filteredSalons.map((salon) => (
