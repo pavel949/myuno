@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PremiumButton } from '@/components/uno/PremiumButton';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
+import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -141,7 +142,10 @@ export default function Auth() {
         <div className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center shadow-gold">
           <span className="text-xl font-bold text-primary-foreground">U</span>
         </div>
-        <LanguageSwitcher size="sm" />
+        <div className="flex items-center gap-2">
+          <ThemeSwitcher variant="buttons" className="scale-90" />
+          <LanguageSwitcher size="sm" />
+        </div>
       </header>
 
       {/* Main content */}

@@ -4,6 +4,7 @@ import { Bell, Menu, ShoppingBag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
+import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { PremiumButton } from '@/components/uno/PremiumButton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -77,6 +78,7 @@ export function AppHeader({ title, showBack, onMenuClick, className }: AppHeader
             )}
           </button>
 
+          <ThemeSwitcher variant="buttons" className="hidden sm:flex scale-90" />
           <LanguageSwitcher size="sm" />
           
           {user ? (
