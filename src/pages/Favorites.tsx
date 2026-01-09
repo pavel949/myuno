@@ -12,6 +12,7 @@ import { PageHeader } from '@/components/uno/PageHeader';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { SectionCard } from '@/components/uno/SectionCard';
+import { AnimatedList, AnimatedItem } from '@/components/layout/AnimatedList';
 
 type FilterType = 'all' | 'course' | 'tutor' | 'event' | 'property' | 'vehicle' | 'clinic' | 'gym';
 
@@ -118,7 +119,7 @@ export default function Favorites() {
 
           {/* Favorites list */}
           {!loading && filteredFavorites.length > 0 && (
-            <div className="space-y-3">
+            <AnimatedList className="space-y-3">
               {filteredFavorites.map((item) => {
                 const data = item.item_data || {};
                 const title = language === 'ru' 
@@ -129,48 +130,49 @@ export default function Favorites() {
                   : (data.specialty_en || data.category || '');
 
                 return (
-                  <SectionCard 
-                    key={item.id} 
-                    noPadding 
-                    className="overflow-hidden flex"
-                  >
-                    <button
-                      className="flex-1 flex items-center gap-3 p-4"
-                      onClick={() => handleNavigate(item)}
+                  <AnimatedItem key={item.id}>
+                    <SectionCard 
+                      noPadding 
+                      className="overflow-hidden flex"
                     >
-                      <img
-                        src={data.image || data.images?.[0] || '/placeholder.svg'}
-                        alt={title}
-                        className="w-16 h-16 rounded-xl object-cover flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0 text-left">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Badge variant="secondary" className="text-xs">
-                            {getTypeLabel(item.item_type)}
-                          </Badge>
+                      <button
+                        className="flex-1 flex items-center gap-3 p-4"
+                        onClick={() => handleNavigate(item)}
+                      >
+                        <img
+                          src={data.image || data.images?.[0] || '/placeholder.svg'}
+                          alt={title}
+                          className="w-16 h-16 rounded-xl object-cover flex-shrink-0"
+                        />
+                        <div className="flex-1 min-w-0 text-left">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge variant="secondary" className="text-xs">
+                              {getTypeLabel(item.item_type)}
+                            </Badge>
+                          </div>
+                          <h3 className="font-semibold truncate">{title}</h3>
+                          {subtitle && (
+                            <p className="text-sm text-muted-foreground truncate">{subtitle}</p>
+                          )}
+                          {data.price && (
+                            <p className="text-sm font-medium text-primary mt-1">
+                              {data.currency || '฿'}{data.price}
+                              {item.item_type === 'tutor' && (language === 'ru' ? '/час' : '/hour')}
+                            </p>
+                          )}
                         </div>
-                        <h3 className="font-semibold truncate">{title}</h3>
-                        {subtitle && (
-                          <p className="text-sm text-muted-foreground truncate">{subtitle}</p>
-                        )}
-                        {data.price && (
-                          <p className="text-sm font-medium text-primary mt-1">
-                            {data.currency || '฿'}{data.price}
-                            {item.item_type === 'tutor' && (language === 'ru' ? '/час' : '/hour')}
-                          </p>
-                        )}
-                      </div>
-                    </button>
-                    <button
-                      onClick={() => handleRemove(item)}
-                      className="px-4 flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </button>
-                  </SectionCard>
+                      </button>
+                      <button
+                        onClick={() => handleRemove(item)}
+                        className="px-4 flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    </SectionCard>
+                  </AnimatedItem>
                 );
               })}
-            </div>
+            </AnimatedList>
           )}
         </PageContainer>
       </PullToRefresh>
