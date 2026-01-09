@@ -19,19 +19,24 @@ import { Badge } from '@/components/ui/badge';
 import { useTours } from '@/hooks/useTours';
 import { useWaterActivities } from '@/hooks/useWaterActivities';
 
-const categories = [
-  { id: 'beauty-spa', icon: Sparkles, path: '/beauty', color: 'from-pink-500 to-purple-500' },
+// Top categories - most popular for tourists in Phuket
+const topCategories = [
+  { id: 'real-estate', icon: Home, path: '/property', color: 'from-teal-500 to-emerald-500' },
+  { id: 'transport', icon: Car, path: '/transport', color: 'from-indigo-500 to-blue-500' },
   { id: 'restaurants', icon: UtensilsCrossed, path: '/food', color: 'from-orange-500 to-red-500' },
   { id: 'tours', icon: Compass, path: '/tours', color: 'from-amber-500 to-orange-500' },
+];
+
+// Other categories
+const otherCategories = [
   { id: 'water', icon: Waves, path: '/water', color: 'from-cyan-500 to-blue-500' },
   { id: 'pharmacy', icon: Pill, path: '/pharmacy', color: 'from-green-500 to-emerald-500' },
   { id: 'flowers', icon: Flower2, path: '/flowers', color: 'from-rose-500 to-pink-500' },
-  { id: 'services', icon: Wrench, path: '/services', color: 'from-slate-500 to-zinc-600' },
-  { id: 'fitness', icon: Dumbbell, path: '/fitness', color: 'from-blue-500 to-cyan-500' },
   { id: 'medical', icon: Stethoscope, path: '/medical', color: 'from-emerald-500 to-green-500' },
+  { id: 'beauty-spa', icon: Sparkles, path: '/beauty', color: 'from-pink-500 to-purple-500' },
+  { id: 'fitness', icon: Dumbbell, path: '/fitness', color: 'from-blue-500 to-cyan-500' },
+  { id: 'services', icon: Wrench, path: '/services', color: 'from-slate-500 to-zinc-600' },
   { id: 'kids-education', icon: GraduationCap, path: '/education', color: 'from-yellow-500 to-orange-500' },
-  { id: 'real-estate', icon: Home, path: '/property', color: 'from-teal-500 to-emerald-500' },
-  { id: 'transport', icon: Car, path: '/transport', color: 'from-indigo-500 to-blue-500' },
   { id: 'events', icon: Ticket, path: '/events', color: 'from-purple-500 to-pink-500' },
 ];
 
@@ -138,38 +143,75 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Categories Grid */}
+        {/* Top Categories - Large Cards */}
         <FadeInUp delay={0.1}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">{t('home.categories')}</h2>
+            <h2 className="text-lg font-semibold">{language === 'ru' ? 'Популярное' : 'Popular'}</h2>
           </div>
-          <AnimatedGrid className="grid grid-cols-4 gap-3" staggerDelay={0.03}>
-            {categories.slice(0, 12).map((cat) => {
+          <div className="grid grid-cols-2 gap-3">
+            {topCategories.map((cat) => {
               const Icon = cat.icon;
               return (
-                <AnimatedCard key={cat.id}>
-                  <button
-                    onClick={(e) => {
-                      triggerRipple(e);
-                      navigate(cat.path);
-                    }}
-                    className="w-full relative overflow-hidden flex flex-col items-center p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all group active:scale-95"
-                  >
-                    <div className={cn(
-                      "w-10 h-10 rounded-xl flex items-center justify-center mb-2 bg-gradient-to-br",
-                      cat.color,
-                      "group-hover:scale-110 transition-transform"
-                    )}>
-                      <Icon className="w-5 h-5 text-white" />
-                    </div>
-                    <span className="text-xs font-medium text-center leading-tight truncate w-full">
+                <button
+                  key={cat.id}
+                  onClick={(e) => {
+                    triggerRipple(e);
+                    navigate(cat.path);
+                  }}
+                  className="relative overflow-hidden flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all group active:scale-[0.98]"
+                >
+                  <div className={cn(
+                    "w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br flex-shrink-0",
+                    cat.color,
+                    "group-hover:scale-110 transition-transform"
+                  )}>
+                    <Icon className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="text-left min-w-0">
+                    <span className="text-sm font-semibold block truncate">
                       {t(`category.${cat.id}`)}
                     </span>
-                  </button>
-                </AnimatedCard>
+                    <span className="text-xs text-muted-foreground">
+                      {language === 'ru' ? 'Открыть' : 'Explore'}
+                    </span>
+                  </div>
+                </button>
               );
             })}
-          </AnimatedGrid>
+          </div>
+        </FadeInUp>
+
+        {/* Other Categories - Compact Grid */}
+        <FadeInUp delay={0.15}>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-base font-medium text-muted-foreground">{language === 'ru' ? 'Все сервисы' : 'All Services'}</h2>
+          </div>
+          <div className="grid grid-cols-5 gap-2">
+            {otherCategories.map((cat) => {
+              const Icon = cat.icon;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={(e) => {
+                    triggerRipple(e);
+                    navigate(cat.path);
+                  }}
+                  className="flex flex-col items-center p-2 rounded-xl hover:bg-card/50 transition-all group active:scale-95"
+                >
+                  <div className={cn(
+                    "w-10 h-10 rounded-xl flex items-center justify-center mb-1.5 bg-gradient-to-br",
+                    cat.color,
+                    "group-hover:scale-110 transition-transform"
+                  )}>
+                    <Icon className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-[10px] font-medium text-center leading-tight text-muted-foreground group-hover:text-foreground transition-colors line-clamp-2">
+                    {t(`category.${cat.id}`)}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </FadeInUp>
 
         {/* Featured Services */}
