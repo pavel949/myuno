@@ -66,6 +66,7 @@ import FlowerShopDetail from "./pages/flowers/FlowerShopDetail";
 import ServicesIndex from "./pages/services/ServicesIndex";
 import ServiceProviderDetail from "./pages/services/ServiceProviderDetail";
 import ServiceBooking from "./pages/services/ServiceBooking";
+import ServicesMap from "./pages/services/ServicesMap";
 import FlowersOrder from "./pages/flowers/FlowersOrder";
 
 // Favorites
@@ -153,6 +154,7 @@ const App = () => (
               <Route path="/services" element={<ServicesIndex />} />
               <Route path="/services/provider/:id" element={<ServiceProviderDetail />} />
               <Route path="/services/booking/:id" element={<ServiceBooking />} />
+              <Route path="/services/map" element={<ServicesMap />} />
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
