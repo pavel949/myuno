@@ -63,16 +63,15 @@ export default function PharmacyDetail() {
   const handleAddToCart = (product: any) => {
     addItem({
       id: product.id,
-      item_id: product.id,
-      item_type: 'pharmacy_product',
+      type: 'product',
       name: language === 'ru' ? product.name_ru : product.name_en,
-      name_ru: product.name_ru,
+      nameRu: product.name_ru,
       price: product.price,
       currency: '฿',
       image: product.image,
-      provider_id: pharmacy.id,
-      provider_name: language === 'ru' ? pharmacy.name_ru : pharmacy.name_en,
-      provider_name_ru: pharmacy.name_ru,
+      providerId: pharmacy.id,
+      providerName: language === 'ru' ? pharmacy.name_ru : pharmacy.name_en,
+      providerNameRu: pharmacy.name_ru,
     });
     toast.success(language === 'ru' ? 'Добавлено в корзину' : 'Added to cart');
   };
