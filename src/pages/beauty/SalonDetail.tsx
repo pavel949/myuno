@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Star, MapPin, Clock, Phone, Globe, 
@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PremiumButton } from '@/components/uno/PremiumButton';
+import { useViewHistory } from '@/hooks/useViewHistory';
 import { cn } from '@/lib/utils';
 
 // Demo salon details
@@ -71,10 +72,25 @@ export default function SalonDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t, language } = useLanguage();
+  const { trackView } = useViewHistory();
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [isFavorite, setIsFavorite] = useState(false);
 
   const salon = salonDetails[id as keyof typeof salonDetails] || defaultSalon;
+
+  // Track view when page loads
+  useEffect(() => {
+    if (id) {
+      trackView(id, 'salon', {
+        name: salon.name,
+        name_en: salon.name,
+        name_ru: salon.nameRu,
+        image: salon.image,
+        rating: salon.rating,
+        location: salon.location,
+      });
+    }
+  }, [id]);
 
   const toggleService = (serviceId: string) => {
     setSelectedServices(prev => 

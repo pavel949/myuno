@@ -925,6 +925,36 @@ export type Database = {
         }
         Relationships: []
       }
+      view_history: {
+        Row: {
+          id: string
+          item_data: Json | null
+          item_id: string
+          item_type: string
+          user_id: string
+          view_count: number
+          viewed_at: string
+        }
+        Insert: {
+          id?: string
+          item_data?: Json | null
+          item_id: string
+          item_type: string
+          user_id: string
+          view_count?: number
+          viewed_at?: string
+        }
+        Update: {
+          id?: string
+          item_data?: Json | null
+          item_id?: string
+          item_type?: string
+          user_id?: string
+          view_count?: number
+          viewed_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

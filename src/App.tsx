@@ -67,6 +67,9 @@ import Search from "./pages/Search";
 // Notifications
 import Notifications from "./pages/Notifications";
 
+// View History
+import ViewHistory from "./pages/ViewHistory";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -87,6 +90,7 @@ const App = () => (
               <Route path="/favorites" element={<Favorites />} />
               <Route path="/search" element={<Search />} />
               <Route path="/notifications" element={<Notifications />} />
+              <Route path="/history" element={<ViewHistory />} />
               {/* Beauty & Spa Mini-App Routes */}
               <Route path="/beauty" element={<BeautySpaIndex />} />
               <Route path="/beauty/salon/:id" element={<SalonDetail />} />
