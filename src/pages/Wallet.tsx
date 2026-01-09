@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -7,6 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Wallet as WalletIcon,
@@ -19,9 +27,13 @@ import {
   Clock,
   CreditCard,
   TrendingUp,
+  Loader2,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ru, enUS } from "date-fns/locale";
+import { toast } from "sonner";
 
 interface WalletData {
   id: string;
@@ -41,13 +53,43 @@ interface Transaction {
   created_at: string;
 }
 
+const QUICK_AMOUNTS = [500, 1000, 2000, 5000];
+
 const Wallet = () => {
   const { language } = useLanguage();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isTopUpOpen, setIsTopUpOpen] = useState(false);
+  const [topUpAmount, setTopUpAmount] = useState<number>(1000);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Handle success/cancel from Stripe redirect
+  useEffect(() => {
+    const success = searchParams.get('success');
+    const canceled = searchParams.get('canceled');
+    const amount = searchParams.get('amount');
+
+    if (success === 'true') {
+      toast.success(
+        language === 'ru' 
+          ? `Кошелёк успешно пополнен на ${amount} ₽` 
+          : `Wallet topped up with ${amount} ₽`
+      );
+      // Remove query params from URL
+      navigate('/wallet', { replace: true });
+    } else if (canceled === 'true') {
+      toast.error(
+        language === 'ru' 
+          ? 'Оплата отменена' 
+          : 'Payment canceled'
+      );
+      navigate('/wallet', { replace: true });
+    }
+  }, [searchParams, navigate, language]);
 
   useEffect(() => {
     if (!user) {
@@ -91,6 +133,41 @@ const Wallet = () => {
 
     loadWalletData();
   }, [user, navigate]);
+
+  const handleTopUp = async () => {
+    if (!user || topUpAmount < 100) {
+      toast.error(language === 'ru' ? 'Минимальная сумма 100 ₽' : 'Minimum amount is 100 ₽');
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      
+      const response = await supabase.functions.invoke('create-checkout-session', {
+        body: { 
+          amount: topUpAmount,
+          currency: 'rub',
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      if (response.data?.url) {
+        // Redirect to Stripe Checkout
+        window.location.href = response.data.url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      toast.error(language === 'ru' ? 'Ошибка при создании платежа' : 'Error creating payment');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   const getTransactionIcon = (type: Transaction['type']) => {
     switch (type) {
@@ -141,7 +218,7 @@ const Wallet = () => {
       icon: Plus, 
       label: language === 'ru' ? 'Пополнить' : 'Top Up',
       color: 'bg-green-500',
-      onClick: () => {} // TODO: Implement top up
+      onClick: () => setIsTopUpOpen(true)
     },
     { 
       icon: CreditCard, 
@@ -241,6 +318,13 @@ const Wallet = () => {
                     ? 'История операций пуста' 
                     : 'No transactions yet'}
                 </p>
+                <Button 
+                  variant="link" 
+                  className="mt-2"
+                  onClick={() => setIsTopUpOpen(true)}
+                >
+                  {language === 'ru' ? 'Пополнить кошелёк' : 'Top up wallet'}
+                </Button>
               </div>
             ) : (
               <div className="divide-y divide-border">
@@ -299,6 +383,86 @@ const Wallet = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Top Up Dialog */}
+      <Dialog open={isTopUpOpen} onOpenChange={setIsTopUpOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {language === 'ru' ? 'Пополнить кошелёк' : 'Top Up Wallet'}
+            </DialogTitle>
+            <DialogDescription>
+              {language === 'ru' 
+                ? 'Выберите сумму для пополнения' 
+                : 'Choose amount to top up'}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            {/* Quick amount buttons */}
+            <div className="grid grid-cols-4 gap-2">
+              {QUICK_AMOUNTS.map((amount) => (
+                <Button
+                  key={amount}
+                  variant={topUpAmount === amount ? "default" : "outline"}
+                  onClick={() => setTopUpAmount(amount)}
+                  className="h-12"
+                >
+                  {amount} ₽
+                </Button>
+              ))}
+            </div>
+
+            {/* Custom amount input */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                {language === 'ru' ? 'Или введите сумму' : 'Or enter amount'}
+              </label>
+              <div className="relative">
+                <Input
+                  type="number"
+                  value={topUpAmount}
+                  onChange={(e) => setTopUpAmount(Number(e.target.value))}
+                  min={100}
+                  step={100}
+                  className="pr-12 h-12 text-lg"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  ₽
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {language === 'ru' ? 'Минимум 100 ₽' : 'Minimum 100 ₽'}
+              </p>
+            </div>
+
+            {/* Payment button */}
+            <Button 
+              onClick={handleTopUp}
+              disabled={isProcessing || topUpAmount < 100}
+              className="w-full h-14 text-lg font-semibold gap-2"
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  {language === 'ru' ? 'Обработка...' : 'Processing...'}
+                </>
+              ) : (
+                <>
+                  <CreditCard className="w-5 h-5" />
+                  {language === 'ru' ? `Оплатить ${topUpAmount} ₽` : `Pay ${topUpAmount} ₽`}
+                </>
+              )}
+            </Button>
+
+            <p className="text-xs text-center text-muted-foreground">
+              {language === 'ru' 
+                ? 'Безопасная оплата через Stripe' 
+                : 'Secure payment via Stripe'}
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 };
