@@ -445,6 +445,69 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_preferences: {
+        Row: {
+          booking_reminders: boolean
+          created_at: string
+          id: string
+          promotions: boolean
+          status_updates: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          booking_reminders?: boolean
+          created_at?: string
+          id?: string
+          promotions?: boolean
+          status_updates?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          booking_reminders?: boolean
+          created_at?: string
+          id?: string
+          promotions?: boolean
+          status_updates?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          data: Json | null
+          id: string
+          is_read: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          data?: Json | null
+          id?: string
+          is_read?: boolean
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          data?: Json | null
+          id?: string
+          is_read?: boolean
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -708,6 +771,33 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
           website?: string | null
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          created_at: string
+          endpoint: string
+          id: string
+          keys: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          endpoint: string
+          id?: string
+          keys: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          endpoint?: string
+          id?: string
+          keys?: Json
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

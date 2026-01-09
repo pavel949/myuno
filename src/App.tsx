@@ -64,6 +64,9 @@ import Favorites from "./pages/Favorites";
 // Search
 import Search from "./pages/Search";
 
+// Notifications
+import Notifications from "./pages/Notifications";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -83,6 +86,7 @@ const App = () => (
               <Route path="/profile" element={<Profile />} />
               <Route path="/favorites" element={<Favorites />} />
               <Route path="/search" element={<Search />} />
+              <Route path="/notifications" element={<Notifications />} />
               {/* Beauty & Spa Mini-App Routes */}
               <Route path="/beauty" element={<BeautySpaIndex />} />
               <Route path="/beauty/salon/:id" element={<SalonDetail />} />

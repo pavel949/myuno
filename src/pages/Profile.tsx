@@ -41,7 +41,7 @@ export default function Profile() {
   const menuItems = [
     { icon: User, label: language === 'ru' ? 'Редактировать профиль' : 'Edit Profile', onClick: () => {} },
     { icon: Heart, label: language === 'ru' ? 'Избранное' : 'Favorites', onClick: () => navigate('/favorites') },
-    { icon: Bell, label: language === 'ru' ? 'Уведомления' : 'Notifications', onClick: () => {} },
+    { icon: Bell, label: language === 'ru' ? 'Уведомления' : 'Notifications', onClick: () => navigate('/notifications') },
     { icon: CreditCard, label: language === 'ru' ? 'Способы оплаты' : 'Payment Methods', onClick: () => {} },
     { icon: Shield, label: language === 'ru' ? 'Конфиденциальность' : 'Privacy & Security', onClick: () => {} },
     { icon: Settings, label: language === 'ru' ? 'Настройки' : 'Settings', onClick: () => {} },

@@ -1,11 +1,12 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Bell, Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { PremiumButton } from '@/components/uno/PremiumButton';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useNotifications } from '@/hooks/useNotifications';
 
 interface AppHeaderProps {
   title?: string;
@@ -17,6 +18,8 @@ interface AppHeaderProps {
 export function AppHeader({ title, showBack, onMenuClick, className }: AppHeaderProps) {
   const { user } = useAuth();
   const { t } = useLanguage();
+  const { unreadCount } = useNotifications();
+  const navigate = useNavigate();
 
   return (
     <header
@@ -60,10 +63,18 @@ export function AppHeader({ title, showBack, onMenuClick, className }: AppHeader
           
           {user ? (
             <>
-              <button className="relative flex items-center justify-center w-9 h-9 rounded-lg hover:bg-secondary transition-colors">
+              <button 
+                onClick={() => navigate('/notifications')}
+                className="relative flex items-center justify-center w-9 h-9 rounded-lg hover:bg-secondary transition-colors"
+              >
                 <Bell className="w-5 h-5" />
-                {/* Notification dot */}
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-primary rounded-full flex items-center justify-center">
+                    <span className="text-[10px] font-bold text-primary-foreground">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  </span>
+                )}
               </button>
               
               <Link to="/profile">
