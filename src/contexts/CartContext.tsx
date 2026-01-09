@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from './AuthContext';
 
 export interface CartItem {
   id: string;
@@ -27,6 +29,7 @@ interface CartContextType {
   getTotal: () => number;
   getItemsByType: (type: CartItem['type']) => CartItem[];
   getItemsByProvider: (providerId: string) => CartItem[];
+  isLoading: boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -34,21 +37,162 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 const CART_STORAGE_KEY = 'superapp_cart';
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>(() => {
+  const { user } = useAuth();
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  // Load cart from localStorage for guests
+  const loadLocalCart = useCallback(() => {
     try {
       const stored = localStorage.getItem(CART_STORAGE_KEY);
       return stored ? JSON.parse(stored) : [];
     } catch {
       return [];
     }
-  });
+  }, []);
 
-  // Persist to localStorage
+  // Save cart to localStorage for guests
+  const saveLocalCart = useCallback((cartItems: CartItem[]) => {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+  }, []);
+
+  // Load cart from database for authenticated users
+  const loadDatabaseCart = useCallback(async () => {
+    if (!user) return [];
+    
+    try {
+      const { data, error } = await supabase
+        .from('cart_items')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+
+      return (data || []).map((item): CartItem => ({
+        id: item.item_id,
+        type: item.item_type as CartItem['type'],
+        name: item.name,
+        nameRu: item.name_ru || undefined,
+        price: Number(item.price),
+        currency: item.currency,
+        quantity: item.quantity,
+        image: item.image || undefined,
+        providerId: item.provider_id || undefined,
+        providerName: item.provider_name || undefined,
+        providerNameRu: item.provider_name_ru || undefined,
+        options: item.options as Record<string, string> | undefined,
+      }));
+    } catch (error) {
+      console.error('Error loading cart from database:', error);
+      return [];
+    }
+  }, [user]);
+
+  // Sync local cart to database when user logs in
+  const syncLocalCartToDatabase = useCallback(async (localItems: CartItem[]) => {
+    if (!user || localItems.length === 0) return;
+
+    try {
+      for (const item of localItems) {
+        await supabase.from('cart_items').upsert({
+          user_id: user.id,
+          item_id: item.id,
+          item_type: item.type,
+          name: item.name,
+          name_ru: item.nameRu,
+          price: item.price,
+          currency: item.currency,
+          quantity: item.quantity,
+          image: item.image,
+          provider_id: item.providerId,
+          provider_name: item.providerName,
+          provider_name_ru: item.providerNameRu,
+          options: item.options,
+        }, {
+          onConflict: 'user_id,item_id',
+        });
+      }
+      // Clear local storage after sync
+      localStorage.removeItem(CART_STORAGE_KEY);
+    } catch (error) {
+      console.error('Error syncing cart to database:', error);
+    }
+  }, [user]);
+
+  // Initialize cart based on auth state
   useEffect(() => {
-    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
-  }, [items]);
+    const initializeCart = async () => {
+      setIsLoading(true);
+      
+      if (user) {
+        // User is logged in - load from database
+        const localItems = loadLocalCart();
+        const dbItems = await loadDatabaseCart();
+        
+        // If there are local items, sync them to database
+        if (localItems.length > 0) {
+          setIsSyncing(true);
+          await syncLocalCartToDatabase(localItems);
+          // Reload from database after sync
+          const updatedItems = await loadDatabaseCart();
+          setItems(updatedItems);
+          setIsSyncing(false);
+        } else {
+          setItems(dbItems);
+        }
+      } else {
+        // Guest user - load from localStorage
+        setItems(loadLocalCart());
+      }
+      
+      setIsLoading(false);
+    };
 
-  const addItem = (newItem: Omit<CartItem, 'quantity'>) => {
+    initializeCart();
+  }, [user, loadLocalCart, loadDatabaseCart, syncLocalCartToDatabase]);
+
+  // Save to localStorage for guests when items change
+  useEffect(() => {
+    if (!user && !isLoading) {
+      saveLocalCart(items);
+    }
+  }, [items, user, isLoading, saveLocalCart]);
+
+  const addItem = async (newItem: Omit<CartItem, 'quantity'>) => {
+    const existingItem = items.find(item => item.id === newItem.id);
+    
+    if (user) {
+      try {
+        if (existingItem) {
+          await supabase
+            .from('cart_items')
+            .update({ quantity: existingItem.quantity + 1 })
+            .eq('user_id', user.id)
+            .eq('item_id', newItem.id);
+        } else {
+          await supabase.from('cart_items').insert({
+            user_id: user.id,
+            item_id: newItem.id,
+            item_type: newItem.type,
+            name: newItem.name,
+            name_ru: newItem.nameRu,
+            price: newItem.price,
+            currency: newItem.currency,
+            quantity: 1,
+            image: newItem.image,
+            provider_id: newItem.providerId,
+            provider_name: newItem.providerName,
+            provider_name_ru: newItem.providerNameRu,
+            options: newItem.options,
+          });
+        }
+      } catch (error) {
+        console.error('Error adding item to cart:', error);
+      }
+    }
+
     setItems(prev => {
       const existingIndex = prev.findIndex(item => item.id === newItem.id);
       if (existingIndex >= 0) {
@@ -60,29 +204,89 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const removeItem = (id: string) => {
+  const removeItem = async (id: string) => {
+    if (user) {
+      try {
+        await supabase
+          .from('cart_items')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('item_id', id);
+      } catch (error) {
+        console.error('Error removing item from cart:', error);
+      }
+    }
+
     setItems(prev => prev.filter(item => item.id !== id));
   };
 
-  const updateQuantity = (id: string, quantity: number) => {
+  const updateQuantity = async (id: string, quantity: number) => {
     if (quantity <= 0) {
       removeItem(id);
       return;
     }
+
+    if (user) {
+      try {
+        await supabase
+          .from('cart_items')
+          .update({ quantity })
+          .eq('user_id', user.id)
+          .eq('item_id', id);
+      } catch (error) {
+        console.error('Error updating item quantity:', error);
+      }
+    }
+
     setItems(prev => prev.map(item => 
       item.id === id ? { ...item, quantity } : item
     ));
   };
 
-  const clearCart = () => {
+  const clearCart = async () => {
+    if (user) {
+      try {
+        await supabase
+          .from('cart_items')
+          .delete()
+          .eq('user_id', user.id);
+      } catch (error) {
+        console.error('Error clearing cart:', error);
+      }
+    }
+
     setItems([]);
   };
 
-  const clearByType = (type: CartItem['type']) => {
+  const clearByType = async (type: CartItem['type']) => {
+    if (user) {
+      try {
+        await supabase
+          .from('cart_items')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('item_type', type);
+      } catch (error) {
+        console.error('Error clearing cart by type:', error);
+      }
+    }
+
     setItems(prev => prev.filter(item => item.type !== type));
   };
 
-  const clearByProvider = (providerId: string) => {
+  const clearByProvider = async (providerId: string) => {
+    if (user) {
+      try {
+        await supabase
+          .from('cart_items')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('provider_id', providerId);
+      } catch (error) {
+        console.error('Error clearing cart by provider:', error);
+      }
+    }
+
     setItems(prev => prev.filter(item => item.providerId !== providerId));
   };
 
@@ -94,13 +298,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   };
 
-  const getItemsByType = (type: CartItem['type']) => {
+  const getItemsByType = useCallback((type: CartItem['type']) => {
     return items.filter(item => item.type === type);
-  };
+  }, [items]);
 
-  const getItemsByProvider = (providerId: string) => {
+  const getItemsByProvider = useCallback((providerId: string) => {
     return items.filter(item => item.providerId === providerId);
-  };
+  }, [items]);
 
   return (
     <CartContext.Provider value={{
@@ -115,6 +319,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       getTotal,
       getItemsByType,
       getItemsByProvider,
+      isLoading,
     }}>
       {children}
     </CartContext.Provider>
