@@ -2,12 +2,14 @@ import React, { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { AppHeader } from './AppHeader';
 import { BottomNav } from './BottomNav';
+import { SupportFAB } from '@/components/chat/SupportFAB';
 
 interface AppLayoutProps {
   children: ReactNode;
   title?: string;
   showHeader?: boolean;
   showBottomNav?: boolean;
+  showSupportFAB?: boolean;
   className?: string;
   contentClassName?: string;
 }
@@ -17,6 +19,7 @@ export function AppLayout({
   title,
   showHeader = true,
   showBottomNav = true,
+  showSupportFAB = true,
   className,
   contentClassName,
 }: AppLayoutProps) {
@@ -34,6 +37,7 @@ export function AppLayout({
         {children}
       </main>
       
+      {showSupportFAB && <SupportFAB />}
       {showBottomNav && <BottomNav />}
     </div>
   );
