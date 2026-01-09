@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Star, MapPin, Users, Fuel, Settings2, Calendar,
@@ -9,6 +9,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
+import { useViewHistory } from '@/hooks/useViewHistory';
 
 // Demo vehicle data
 const demoVehicle = {
@@ -61,8 +62,19 @@ export default function VehicleDetail() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const [activeImage, setActiveImage] = useState(0);
+  const { trackView } = useViewHistory();
 
   const vehicle = demoVehicle;
+
+  useEffect(() => {
+    trackView(id || vehicle.id, 'vehicle', {
+      name_en: vehicle.nameEn,
+      name_ru: vehicle.nameRu,
+      image: vehicle.images[0],
+      price: vehicle.pricePerDay,
+      location: vehicle.location,
+    });
+  }, [id]);
 
   return (
     <AppLayout showBottomNav={false}>

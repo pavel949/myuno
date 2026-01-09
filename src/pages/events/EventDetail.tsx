@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Star, MapPin, Clock, Calendar, Users,
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
+import { useViewHistory } from '@/hooks/useViewHistory';
 
 const eventData = {
   id: 'event-2',
@@ -69,6 +70,17 @@ const EventDetail = () => {
   const { language } = useLanguage();
   const [selectedImage, setSelectedImage] = useState(0);
   const [tickets, setTickets] = useState(1);
+  const { trackView } = useViewHistory();
+
+  useEffect(() => {
+    trackView(id || eventData.id, 'event', {
+      name_en: eventData.name,
+      name_ru: eventData.nameRu,
+      image: eventData.images[0],
+      price: eventData.price,
+      location: eventData.location,
+    });
+  }, [id]);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
