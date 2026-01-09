@@ -14,7 +14,7 @@ import {
 export default function WaterActivityDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const { activity, isLoading } = useWaterActivity(id);
 
   if (isLoading) {
@@ -34,9 +34,9 @@ export default function WaterActivityDetail() {
       <AppLayout>
         <PageContainer>
           <div className="text-center py-12">
-            <p>{language === 'ru' ? 'Активность не найдена' : 'Activity not found'}</p>
+            <p>{t('water.notFound')}</p>
             <Button onClick={() => navigate('/water')} className="mt-4">
-              {language === 'ru' ? 'Назад' : 'Go Back'}
+              {t('water.goBack')}
             </Button>
           </div>
         </PageContainer>
@@ -45,13 +45,13 @@ export default function WaterActivityDetail() {
   }
 
   const getDifficultyLabel = (difficulty: string) => {
-    const labels: Record<string, { en: string; ru: string }> = {
-      easy: { en: 'Easy', ru: 'Легкий' },
-      moderate: { en: 'Moderate', ru: 'Средний' },
-      challenging: { en: 'Challenging', ru: 'Сложный' },
-      expert: { en: 'Expert', ru: 'Эксперт' },
+    const labels: Record<string, string> = {
+      easy: t('water.difficulty.easy'),
+      moderate: t('water.difficulty.moderate'),
+      challenging: t('water.difficulty.challenging'),
+      expert: t('water.difficulty.expert'),
     };
-    return labels[difficulty]?.[language] || difficulty;
+    return labels[difficulty] || difficulty;
   };
 
   return (
@@ -76,7 +76,7 @@ export default function WaterActivityDetail() {
           {activity.is_certified && (
             <Badge className="absolute top-4 right-4 bg-primary text-primary-foreground">
               <Shield className="w-4 h-4 mr-1" />
-              {language === 'ru' ? 'Сертифицировано' : 'Certified'}
+              {t('water.certified')}
             </Badge>
           )}
         </div>
@@ -99,7 +99,7 @@ export default function WaterActivityDetail() {
               </span>
               <span className="flex items-center gap-1">
                 <Users className="w-4 h-4" />
-                {language === 'ru' ? `до ${activity.max_participants}` : `max ${activity.max_participants}`}
+                {t('water.max')} {activity.max_participants}
               </span>
             </div>
 
@@ -111,7 +111,7 @@ export default function WaterActivityDetail() {
             <div className="flex items-center justify-between pt-4 border-t">
               <div>
                 <p className="text-xs text-muted-foreground">
-                  {language === 'ru' ? 'Цена за' : 'Price per'} {activity.price_per}
+                  {t('water.pricePer')} {activity.price_per}
                 </p>
                 <p className="text-2xl font-bold text-primary">
                   ฿{activity.price?.toLocaleString()}
@@ -124,7 +124,7 @@ export default function WaterActivityDetail() {
           {/* Description */}
           <div className="bg-card rounded-2xl p-4 border">
             <h2 className="font-semibold mb-3">
-              {language === 'ru' ? 'Описание' : 'Description'}
+              {t('water.description')}
             </h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
               {language === 'ru' ? activity.description_ru : activity.description_en}
@@ -135,7 +135,7 @@ export default function WaterActivityDetail() {
           {activity.includes.length > 0 && (
             <div className="bg-card rounded-2xl p-4 border">
               <h2 className="font-semibold mb-3">
-                {language === 'ru' ? 'Что включено' : "What's Included"}
+                {t('water.whatsIncluded')}
               </h2>
               <div className="space-y-2">
                 {activity.includes.map((item, index) => (
@@ -152,7 +152,7 @@ export default function WaterActivityDetail() {
           {activity.requirements.length > 0 && (
             <div className="bg-card rounded-2xl p-4 border">
               <h2 className="font-semibold mb-3">
-                {language === 'ru' ? 'Требования' : 'Requirements'}
+                {t('water.requirements')}
               </h2>
               <div className="space-y-2">
                 {activity.requirements.map((item, index) => (
@@ -171,13 +171,11 @@ export default function WaterActivityDetail() {
               <div className="flex items-center gap-2 mb-2">
                 <Shield className="w-5 h-5 text-yellow-600" />
                 <h2 className="font-semibold text-yellow-600">
-                  {language === 'ru' ? 'Безопасность' : 'Safety'}
+                  {t('water.safety')}
                 </h2>
               </div>
               <p className="text-sm text-muted-foreground">
-                {language === 'ru' 
-                  ? `Обязательный инструктаж по безопасности. Минимальный возраст: ${activity.age_restriction} лет.`
-                  : `Safety briefing required. Minimum age: ${activity.age_restriction} years.`}
+                {t('water.safetyRequired')}. {t('water.minAge')}: {activity.age_restriction} {t('water.years')}.
               </p>
             </div>
           )}
@@ -185,7 +183,7 @@ export default function WaterActivityDetail() {
           {/* Meeting Point */}
           <div className="bg-card rounded-2xl p-4 border">
             <h2 className="font-semibold mb-3">
-              {language === 'ru' ? 'Место встречи' : 'Meeting Point'}
+              {t('water.meetingPoint')}
             </h2>
             <div className="flex items-start gap-3">
               <MapPin className="w-5 h-5 text-primary mt-0.5" />
@@ -199,7 +197,7 @@ export default function WaterActivityDetail() {
           {/* Available Times */}
           <div className="bg-card rounded-2xl p-4 border">
             <h2 className="font-semibold mb-3">
-              {language === 'ru' ? 'Доступное время' : 'Available Times'}
+              {t('water.availableTimes')}
             </h2>
             <div className="flex flex-wrap gap-2">
               {activity.available_times.map((time, index) => (
@@ -218,7 +216,7 @@ export default function WaterActivityDetail() {
             className="w-full h-12 text-base font-semibold" 
             onClick={() => navigate(`/water/${id}/book`)}
           >
-            {language === 'ru' ? 'Забронировать' : 'Book Now'}
+            {t('water.bookNow')}
             <ChevronRight className="w-5 h-5 ml-2" />
           </Button>
         </div>
