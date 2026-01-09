@@ -3,6 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { Home, Compass, Map, Calendar, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { triggerHaptic } from '@/hooks/useHapticFeedback';
 
 const navItems = [
   { path: '/', icon: Home, labelKey: 'nav.home' },
@@ -15,6 +16,10 @@ const navItems = [
 export function BottomNav() {
   const { t } = useLanguage();
   const location = useLocation();
+
+  const handleNavClick = () => {
+    triggerHaptic('light');
+  };
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
@@ -30,8 +35,9 @@ export function BottomNav() {
             <NavLink
               key={path}
               to={path}
+              onClick={handleNavClick}
               className={cn(
-                "flex flex-col items-center justify-center flex-1 h-full gap-0.5 transition-colors",
+                "flex flex-col items-center justify-center flex-1 h-full gap-0.5 transition-colors active:scale-95",
                 isActive ? "text-primary" : "text-muted-foreground"
               )}
             >
