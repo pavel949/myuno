@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Mail, Lock, User, Eye, EyeOff, ArrowRight, Gift } from 'lucide-react';
 import { z } from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -8,21 +8,24 @@ import { PremiumButton } from '@/components/uno/PremiumButton';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const emailSchema = z.string().email('Invalid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
 
 export default function Auth() {
-  const [isLogin, setIsLogin] = useState(true);
+  const [searchParams] = useSearchParams();
+  const [isLogin, setIsLogin] = useState(!searchParams.get('ref'));
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [referralCode, setReferralCode] = useState(searchParams.get('ref') || '');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; fullName?: string }>({});
 
   const { user, signIn, signUp } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -86,7 +89,7 @@ export default function Auth() {
           navigate('/');
         }
       } else {
-        const { error } = await signUp(email, password, fullName);
+        const { error, data } = await signUp(email, password, fullName);
         if (error) {
           toast({
             title: 'Error',
@@ -96,9 +99,23 @@ export default function Auth() {
             variant: 'destructive',
           });
         } else {
+          // Apply referral code if provided
+          if (referralCode && data?.user) {
+            try {
+              await supabase.rpc('apply_referral_code', {
+                p_referred_id: data.user.id,
+                p_code: referralCode.toUpperCase(),
+              });
+            } catch (refError) {
+              console.error('Error applying referral code:', refError);
+            }
+          }
+          
           toast({
             title: t('message.success'),
-            description: 'Account created successfully!',
+            description: language === 'ru' 
+              ? 'Аккаунт успешно создан!' 
+              : 'Account created successfully!',
           });
           navigate('/');
         }
@@ -144,6 +161,24 @@ export default function Auth() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Referral code banner (signup only) */}
+            {!isLogin && referralCode && (
+              <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 flex items-center gap-3">
+                <Gift className="w-5 h-5 text-primary" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium">
+                    {language === 'ru' ? 'Реферальный код активен!' : 'Referral code active!'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {language === 'ru' 
+                      ? 'Получите бонус после первого бронирования' 
+                      : 'Get bonus after your first booking'}
+                  </p>
+                </div>
+                <span className="font-mono font-bold text-primary">{referralCode.toUpperCase()}</span>
+              </div>
+            )}
+
             {/* Name field (signup only) */}
             {!isLogin && (
               <div className="space-y-2">
@@ -224,6 +259,29 @@ export default function Auth() {
                 <p className="text-sm text-destructive">{errors.password}</p>
               )}
             </div>
+
+            {/* Referral code field (signup only, if not from link) */}
+            {!isLogin && !searchParams.get('ref') && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">
+                  {language === 'ru' ? 'Реферальный код (если есть)' : 'Referral code (optional)'}
+                </label>
+                <div className="relative">
+                  <Gift className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={referralCode}
+                    onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                    placeholder="ABC123"
+                    maxLength={6}
+                    className={cn(
+                      "w-full h-12 pl-10 pr-4 rounded-xl bg-secondary border transition-colors font-mono uppercase",
+                      "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary border-border"
+                    )}
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Forgot password */}
             {isLogin && (
