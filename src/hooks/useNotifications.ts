@@ -324,6 +324,34 @@ export function useNotifications() {
     }
   };
 
+  // Send promotion notification to all subscribed users
+  const sendPromotion = async (promotion: {
+    title: string;
+    title_ru: string;
+    body: string;
+    body_ru: string;
+    promo_code?: string;
+    discount?: number;
+    valid_until?: string;
+    category?: string;
+  }) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('send-promotions', {
+        body: promotion,
+      });
+      
+      if (error) throw error;
+      
+      toast.success(`Акция отправлена ${data?.sent || 0} пользователям`);
+      await fetchNotifications();
+      return data;
+    } catch (error) {
+      console.error('Error sending promotion:', error);
+      toast.error('Не удалось отправить акцию');
+      return null;
+    }
+  };
+
   return {
     notifications,
     preferences,
@@ -339,6 +367,7 @@ export function useNotifications() {
     deleteNotification,
     createDemoNotification,
     triggerBookingReminders,
+    sendPromotion,
     refresh: fetchNotifications,
   };
 }

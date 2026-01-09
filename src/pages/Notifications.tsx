@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Bell, 
@@ -11,11 +11,16 @@ import {
   Info,
   Settings,
   Sparkles,
-  RefreshCw
+  RefreshCw,
+  Gift,
+  Percent,
+  Send
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -48,7 +53,33 @@ export default function Notifications() {
     deleteNotification,
     createDemoNotification,
     triggerBookingReminders,
+    sendPromotion,
   } = useNotifications();
+
+  const [showPromoForm, setShowPromoForm] = useState(false);
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoForm, setPromoForm] = useState({
+    title: '',
+    title_ru: '',
+    body: '',
+    body_ru: '',
+    promo_code: '',
+    discount: '',
+  });
+
+  const handleSendPromo = async () => {
+    if (!promoForm.title_ru || !promoForm.body_ru) {
+      return;
+    }
+    setPromoLoading(true);
+    await sendPromotion({
+      ...promoForm,
+      discount: promoForm.discount ? parseInt(promoForm.discount) : undefined,
+    });
+    setPromoLoading(false);
+    setShowPromoForm(false);
+    setPromoForm({ title: '', title_ru: '', body: '', body_ru: '', promo_code: '', discount: '' });
+  };
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
@@ -331,6 +362,86 @@ export default function Notifications() {
                   <Calendar className="w-4 h-4 mr-2" />
                   {language === 'ru' ? 'Запустить проверку' : 'Trigger Check'}
                 </Button>
+              </CardContent>
+            </Card>
+
+            {/* Send Promotion */}
+            <Card className="border-success/30 bg-success/5">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Gift className="w-5 h-5 text-success" />
+                  {language === 'ru' ? 'Отправить акцию' : 'Send Promotion'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  {language === 'ru' 
+                    ? 'Отправить уведомление об акции всем подписанным пользователям' 
+                    : 'Send a promotion notification to all subscribed users'}
+                </p>
+                
+                {!showPromoForm ? (
+                  <Button 
+                    variant="default"
+                    className="w-full bg-success hover:bg-success/90"
+                    onClick={() => setShowPromoForm(true)}
+                  >
+                    <Send className="w-4 h-4 mr-2" />
+                    {language === 'ru' ? 'Создать акцию' : 'Create Promotion'}
+                  </Button>
+                ) : (
+                  <div className="space-y-3">
+                    <Input
+                      placeholder={language === 'ru' ? 'Заголовок (рус)' : 'Title (Russian)'}
+                      value={promoForm.title_ru}
+                      onChange={(e) => setPromoForm(p => ({ ...p, title_ru: e.target.value }))}
+                    />
+                    <Textarea
+                      placeholder={language === 'ru' ? 'Текст акции (рус)' : 'Promotion text (Russian)'}
+                      value={promoForm.body_ru}
+                      onChange={(e) => setPromoForm(p => ({ ...p, body_ru: e.target.value }))}
+                      rows={3}
+                    />
+                    <div className="grid grid-cols-2 gap-2">
+                      <Input
+                        placeholder={language === 'ru' ? 'Промокод' : 'Promo code'}
+                        value={promoForm.promo_code}
+                        onChange={(e) => setPromoForm(p => ({ ...p, promo_code: e.target.value.toUpperCase() }))}
+                      />
+                      <div className="relative">
+                        <Percent className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          type="number"
+                          placeholder={language === 'ru' ? 'Скидка' : 'Discount'}
+                          className="pl-9"
+                          value={promoForm.discount}
+                          onChange={(e) => setPromoForm(p => ({ ...p, discount: e.target.value }))}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        className="flex-1"
+                        onClick={() => setShowPromoForm(false)}
+                      >
+                        {language === 'ru' ? 'Отмена' : 'Cancel'}
+                      </Button>
+                      <Button 
+                        className="flex-1 bg-success hover:bg-success/90"
+                        onClick={handleSendPromo}
+                        disabled={promoLoading || !promoForm.title_ru || !promoForm.body_ru}
+                      >
+                        {promoLoading ? (
+                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <Send className="w-4 h-4 mr-2" />
+                        )}
+                        {language === 'ru' ? 'Отправить' : 'Send'}
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
