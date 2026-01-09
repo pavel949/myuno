@@ -97,6 +97,7 @@ import FAQPage from '@/pages/info/FAQPage';
 import PartnersPage from '@/pages/info/PartnersPage';
 import PrivacyPage from '@/pages/info/PrivacyPage';
 import TermsPage from '@/pages/info/TermsPage';
+import BecomePartnerPage from '@/pages/info/BecomePartnerPage';
 
 export const AnimatedRoutes: React.FC = () => {
   const location = useLocation();
@@ -195,6 +196,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/partners" element={<PageTransition><PartnersPage /></PageTransition>} />
         <Route path="/privacy" element={<PageTransition><PrivacyPage /></PageTransition>} />
         <Route path="/terms" element={<PageTransition><TermsPage /></PageTransition>} />
+        <Route path="/become-partner" element={<PageTransition><BecomePartnerPage /></PageTransition>} />
         <Route path="/view-history" element={<PageTransition><ViewHistory /></PageTransition>} />
         
         {/* Catch-all */}
