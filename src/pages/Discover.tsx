@@ -369,22 +369,67 @@ export default function Discover() {
           ) : (
             <FadeInUp>
               <AnimatedGrid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" staggerDelay={0.05}>
-                {services.map((service) => (
-                  <AnimatedCard key={service.id}>
-                    <UnifiedCard
-                      id={service.id}
-                      image={service.images?.[0] || 'https://images.unsplash.com/photo-1540555700478-4be289fbec6c?w=600'}
-                      title={language === 'ru' ? service.name_ru : service.name_en}
-                      subtitle={service.provider?.name}
-                      price={service.price || 0}
-                      priceLabel={t('label.from')}
-                      duration={service.duration_minutes ? `${service.duration_minutes} ${language === 'ru' ? 'мин' : 'min'}` : undefined}
-                      location={service.category?.[language === 'ru' ? 'name_ru' : 'name_en']}
-                      isVerified={service.provider?.is_verified}
-                      onClick={() => handleServiceClick(service)}
-                    />
-                  </AnimatedCard>
-                ))}
+                {services.map((service) => {
+                  // Get fallback image based on category - using direct Unsplash URLs
+                  const getCategoryImage = (slug: string, idx: number): string => {
+                    const imagesByCategory: Record<string, string[]> = {
+                      'beauty-spa': [
+                        'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600&q=80',
+                        'https://images.unsplash.com/photo-1540555700478-4be289fbec6c?w=600&q=80',
+                        'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?w=600&q=80',
+                      ],
+                      'fitness': [
+                        'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80',
+                        'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&q=80',
+                        'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&q=80',
+                      ],
+                      'restaurants': [
+                        'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&q=80',
+                        'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=600&q=80',
+                      ],
+                      'medical': [
+                        'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=600&q=80',
+                        'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=600&q=80',
+                      ],
+                      'transport': [
+                        'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80',
+                        'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=600&q=80',
+                      ],
+                      'services': [
+                        'https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=600&q=80',
+                        'https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=600&q=80',
+                      ],
+                      'events': [
+                        'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&q=80',
+                      ],
+                    };
+                    const categoryImages = imagesByCategory[slug] || imagesByCategory['services']!;
+                    return categoryImages[idx % categoryImages.length]!;
+                  };
+                  
+                  const categorySlug = service.category?.slug || 'services';
+                  const serviceIndex = services.indexOf(service);
+                  const imageUrl = (service.images && service.images.length > 0 && service.images[0]) 
+                    ? service.images[0] 
+                    : getCategoryImage(categorySlug, serviceIndex);
+                  
+                  return (
+                    <AnimatedCard key={service.id}>
+                      <UnifiedCard
+                        id={service.id}
+                        image={imageUrl}
+                        title={language === 'ru' ? service.name_ru : service.name_en}
+                        subtitle={service.provider?.name}
+                        price={service.price || 0}
+                        priceLabel={t('label.from')}
+                        duration={service.duration_minutes ? `${service.duration_minutes} ${language === 'ru' ? 'мин' : 'min'}` : undefined}
+                        location={service.category?.[language === 'ru' ? 'name_ru' : 'name_en']}
+                        isVerified={service.provider?.is_verified}
+                        onClick={() => handleServiceClick(service)}
+                      />
+                    </AnimatedCard>
+                  );
+                })}
               </AnimatedGrid>
             </FadeInUp>
           )}

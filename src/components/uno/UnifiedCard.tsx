@@ -62,10 +62,14 @@ export function UnifiedCard({
     >
       {/* Image */}
       <div className="relative aspect-[4/3] overflow-hidden">
-        {image ? (
+        {image && image.trim() !== '' ? (
           <img
             src={image}
             alt={title}
+            loading="lazy"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1540555700478-4be289fbec6c?w=600';
+            }}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
         ) : (
