@@ -27,6 +27,16 @@ import PropertyDetail from "./pages/property/PropertyDetail";
 import PropertyInquiry from "./pages/property/PropertyInquiry";
 import PropertyMap from "./pages/property/PropertyMap";
 
+// Food & Delivery Mini-App
+import FoodIndex from "./pages/food/FoodIndex";
+import RestaurantDetail from "./pages/food/RestaurantDetail";
+import FoodCheckout from "./pages/food/FoodCheckout";
+
+// Transport Mini-App
+import TransportIndex from "./pages/transport/TransportIndex";
+import VehicleDetail from "./pages/transport/VehicleDetail";
+import TransportBooking from "./pages/transport/TransportBooking";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -57,6 +67,16 @@ const App = () => (
               <Route path="/property/:id" element={<PropertyDetail />} />
               <Route path="/property/inquiry/:id" element={<PropertyInquiry />} />
               <Route path="/property/map" element={<PropertyMap />} />
+              
+              {/* Food & Delivery Mini-App Routes */}
+              <Route path="/food" element={<FoodIndex />} />
+              <Route path="/food/restaurant/:id" element={<RestaurantDetail />} />
+              <Route path="/food/checkout" element={<FoodCheckout />} />
+              
+              {/* Transport Mini-App Routes */}
+              <Route path="/transport" element={<TransportIndex />} />
+              <Route path="/transport/vehicle/:id" element={<VehicleDetail />} />
+              <Route path="/transport/booking/:id" element={<TransportBooking />} />
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
