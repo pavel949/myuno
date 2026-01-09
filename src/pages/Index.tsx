@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Sparkles, UtensilsCrossed, Dumbbell, Stethoscope, 
@@ -10,6 +10,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { UnifiedCard } from '@/components/uno/UnifiedCard';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
+import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 
 const categories = [
   { id: 'beauty-spa', icon: Sparkles, path: '/beauty', color: 'from-pink-500 to-purple-500' },
@@ -67,10 +68,17 @@ const featuredServices = [
 const Index = () => {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleRefresh = useCallback(async () => {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setRefreshKey(prev => prev + 1);
+  }, []);
 
   return (
     <AppLayout>
-      <div className="px-4 py-6 space-y-8">
+      <PullToRefresh onRefresh={handleRefresh} className="h-[calc(100vh-8rem)]">
+        <div className="px-4 py-6 space-y-8" key={refreshKey}>
         {/* Search Bar */}
         <div 
           onClick={() => navigate('/search')}
@@ -266,7 +274,8 @@ const Index = () => {
             </div>
           </div>
         </div>
-      </div>
+        </div>
+      </PullToRefresh>
     </AppLayout>
   );
 };
