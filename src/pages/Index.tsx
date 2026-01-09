@@ -31,7 +31,7 @@ const categories = [
 const featuredServices = [
   {
     id: 'featured-1',
-    image: 'https://images.unsplash.com/photo-1540555700478-4be289fbec6c?w=600',
+    image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600&q=80',
     title: 'Orchid Spa & Wellness',
     titleRu: 'Орхидея СПА и Велнес',
     rating: 4.9,
@@ -45,7 +45,7 @@ const featuredServices = [
   },
   {
     id: 'featured-2',
-    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600',
+    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&q=80',
     title: 'Ocean View Restaurant',
     titleRu: 'Ресторан с видом на океан',
     rating: 4.7,
@@ -58,7 +58,7 @@ const featuredServices = [
   },
   {
     id: 'featured-3',
-    image: 'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=600',
+    image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80',
     title: 'Fitness First Phuket',
     titleRu: 'Фитнес Ферст Пхукет',
     rating: 4.8,
