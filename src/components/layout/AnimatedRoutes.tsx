@@ -1,0 +1,156 @@
+import React from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
+import { PageTransition } from './PageTransition';
+
+import Index from '@/pages/Index';
+import Auth from '@/pages/Auth';
+import Discover from '@/pages/Discover';
+import MapView from '@/pages/MapView';
+import Bookings from '@/pages/Bookings';
+import Profile from '@/pages/Profile';
+import NotFound from '@/pages/NotFound';
+
+// Beauty & Spa Mini-App
+import BeautySpaIndex from '@/pages/beauty/BeautySpaIndex';
+import SalonDetail from '@/pages/beauty/SalonDetail';
+import BeautyBooking from '@/pages/beauty/BeautyBooking';
+import BeautyServices from '@/pages/beauty/BeautyServices';
+import BeautyMap from '@/pages/beauty/BeautyMap';
+
+// Property Mini-App
+import PropertyIndex from '@/pages/property/PropertyIndex';
+import PropertyDetail from '@/pages/property/PropertyDetail';
+import PropertyInquiry from '@/pages/property/PropertyInquiry';
+import PropertyMap from '@/pages/property/PropertyMap';
+
+// Food & Delivery Mini-App
+import FoodIndex from '@/pages/food/FoodIndex';
+import RestaurantDetail from '@/pages/food/RestaurantDetail';
+import FoodCheckout from '@/pages/food/FoodCheckout';
+
+// Transport Mini-App
+import TransportIndex from '@/pages/transport/TransportIndex';
+import VehicleDetail from '@/pages/transport/VehicleDetail';
+import TransportBooking from '@/pages/transport/TransportBooking';
+
+// Fitness Mini-App
+import FitnessIndex from '@/pages/fitness/FitnessIndex';
+import GymDetail from '@/pages/fitness/GymDetail';
+import FitnessBooking from '@/pages/fitness/FitnessBooking';
+
+// Medical Mini-App
+import MedicalIndex from '@/pages/medical/MedicalIndex';
+import ClinicDetail from '@/pages/medical/ClinicDetail';
+import MedicalAppointment from '@/pages/medical/MedicalAppointment';
+
+// Events Mini-App
+import EventsIndex from '@/pages/events/EventsIndex';
+import EventDetail from '@/pages/events/EventDetail';
+import EventBooking from '@/pages/events/EventBooking';
+
+// Education Mini-App
+import EducationIndex from '@/pages/education/EducationIndex';
+import CourseDetail from '@/pages/education/CourseDetail';
+import TutorDetail from '@/pages/education/TutorDetail';
+import EducationBooking from '@/pages/education/EducationBooking';
+
+// Flowers Mini-App
+import FlowersIndex from '@/pages/flowers/FlowersIndex';
+import FlowerShopDetail from '@/pages/flowers/FlowerShopDetail';
+import FlowersOrder from '@/pages/flowers/FlowersOrder';
+
+// Home Services Mini-App
+import ServicesIndex from '@/pages/services/ServicesIndex';
+import ServiceProviderDetail from '@/pages/services/ServiceProviderDetail';
+import ServiceBooking from '@/pages/services/ServiceBooking';
+import ServicesMap from '@/pages/services/ServicesMap';
+
+// Other pages
+import Favorites from '@/pages/Favorites';
+import Search from '@/pages/Search';
+import Notifications from '@/pages/Notifications';
+import ViewHistory from '@/pages/ViewHistory';
+import Cart from '@/pages/Cart';
+import Wallet from '@/pages/Wallet';
+
+export const AnimatedRoutes: React.FC = () => {
+  const location = useLocation();
+
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<PageTransition><Index /></PageTransition>} />
+        <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
+        <Route path="/discover" element={<PageTransition><Discover /></PageTransition>} />
+        <Route path="/map" element={<PageTransition><MapView /></PageTransition>} />
+        <Route path="/bookings" element={<PageTransition><Bookings /></PageTransition>} />
+        <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
+        <Route path="/favorites" element={<PageTransition><Favorites /></PageTransition>} />
+        <Route path="/search" element={<PageTransition><Search /></PageTransition>} />
+        <Route path="/notifications" element={<PageTransition><Notifications /></PageTransition>} />
+        <Route path="/history" element={<PageTransition><ViewHistory /></PageTransition>} />
+        <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
+        <Route path="/wallet" element={<PageTransition><Wallet /></PageTransition>} />
+        
+        {/* Beauty & Spa Mini-App Routes */}
+        <Route path="/beauty" element={<PageTransition><BeautySpaIndex /></PageTransition>} />
+        <Route path="/beauty/salon/:id" element={<PageTransition><SalonDetail /></PageTransition>} />
+        <Route path="/beauty/booking/:id" element={<PageTransition><BeautyBooking /></PageTransition>} />
+        <Route path="/beauty/services" element={<PageTransition><BeautyServices /></PageTransition>} />
+        <Route path="/beauty/map" element={<PageTransition><BeautyMap /></PageTransition>} />
+        
+        {/* Property Mini-App Routes */}
+        <Route path="/property" element={<PageTransition><PropertyIndex /></PageTransition>} />
+        <Route path="/property/:id" element={<PageTransition><PropertyDetail /></PageTransition>} />
+        <Route path="/property/inquiry/:id" element={<PageTransition><PropertyInquiry /></PageTransition>} />
+        <Route path="/property/map" element={<PageTransition><PropertyMap /></PageTransition>} />
+        
+        {/* Food & Delivery Mini-App Routes */}
+        <Route path="/food" element={<PageTransition><FoodIndex /></PageTransition>} />
+        <Route path="/food/restaurant/:id" element={<PageTransition><RestaurantDetail /></PageTransition>} />
+        <Route path="/food/checkout" element={<PageTransition><FoodCheckout /></PageTransition>} />
+        
+        {/* Transport Mini-App Routes */}
+        <Route path="/transport" element={<PageTransition><TransportIndex /></PageTransition>} />
+        <Route path="/transport/vehicle/:id" element={<PageTransition><VehicleDetail /></PageTransition>} />
+        <Route path="/transport/booking/:id" element={<PageTransition><TransportBooking /></PageTransition>} />
+        
+        {/* Fitness Mini-App Routes */}
+        <Route path="/fitness" element={<PageTransition><FitnessIndex /></PageTransition>} />
+        <Route path="/fitness/gym/:id" element={<PageTransition><GymDetail /></PageTransition>} />
+        <Route path="/fitness/booking/:id" element={<PageTransition><FitnessBooking /></PageTransition>} />
+        
+        {/* Medical Mini-App Routes */}
+        <Route path="/medical" element={<PageTransition><MedicalIndex /></PageTransition>} />
+        <Route path="/medical/clinic/:id" element={<PageTransition><ClinicDetail /></PageTransition>} />
+        <Route path="/medical/appointment/:id" element={<PageTransition><MedicalAppointment /></PageTransition>} />
+        
+        {/* Events Mini-App Routes */}
+        <Route path="/events" element={<PageTransition><EventsIndex /></PageTransition>} />
+        <Route path="/events/:id" element={<PageTransition><EventDetail /></PageTransition>} />
+        <Route path="/events/booking/:id" element={<PageTransition><EventBooking /></PageTransition>} />
+        
+        {/* Education Mini-App Routes */}
+        <Route path="/education" element={<PageTransition><EducationIndex /></PageTransition>} />
+        <Route path="/education/course/:id" element={<PageTransition><CourseDetail /></PageTransition>} />
+        <Route path="/education/tutor/:id" element={<PageTransition><TutorDetail /></PageTransition>} />
+        <Route path="/education/booking/:id" element={<PageTransition><EducationBooking /></PageTransition>} />
+        
+        {/* Flowers Mini-App Routes */}
+        <Route path="/flowers" element={<PageTransition><FlowersIndex /></PageTransition>} />
+        <Route path="/flowers/shop/:id" element={<PageTransition><FlowerShopDetail /></PageTransition>} />
+        <Route path="/flowers/order/:id" element={<PageTransition><FlowersOrder /></PageTransition>} />
+        
+        {/* Home Services Mini-App Routes */}
+        <Route path="/services" element={<PageTransition><ServicesIndex /></PageTransition>} />
+        <Route path="/services/provider/:id" element={<PageTransition><ServiceProviderDetail /></PageTransition>} />
+        <Route path="/services/booking/:id" element={<PageTransition><ServiceBooking /></PageTransition>} />
+        <Route path="/services/map" element={<PageTransition><ServicesMap /></PageTransition>} />
+        
+        {/* Catch-all */}
+        <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
+      </Routes>
+    </AnimatePresence>
+  );
+};
