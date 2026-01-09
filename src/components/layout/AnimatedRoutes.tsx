@@ -88,6 +88,7 @@ import ViewHistory from '@/pages/ViewHistory';
 import Cart from '@/pages/Cart';
 import Wallet from '@/pages/Wallet';
 import SOS from '@/pages/SOS';
+import Support from '@/pages/Support';
 
 // Info pages
 import AboutPage from '@/pages/info/AboutPage';
@@ -116,6 +117,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
         <Route path="/wallet" element={<PageTransition><Wallet /></PageTransition>} />
         <Route path="/sos" element={<PageTransition><SOS /></PageTransition>} />
+        <Route path="/support" element={<PageTransition><Support /></PageTransition>} />
         
         {/* Beauty & Spa Mini-App Routes */}
         <Route path="/beauty" element={<PageTransition><BeautySpaIndex /></PageTransition>} />
