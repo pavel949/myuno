@@ -99,6 +99,9 @@ import PrivacyPage from '@/pages/info/PrivacyPage';
 import TermsPage from '@/pages/info/TermsPage';
 import BecomePartnerPage from '@/pages/info/BecomePartnerPage';
 
+// Admin pages
+import PartnerApplicationsAdmin from '@/pages/admin/PartnerApplicationsAdmin';
+
 export const AnimatedRoutes: React.FC = () => {
   const location = useLocation();
 
@@ -198,6 +201,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/terms" element={<PageTransition><TermsPage /></PageTransition>} />
         <Route path="/become-partner" element={<PageTransition><BecomePartnerPage /></PageTransition>} />
         <Route path="/view-history" element={<PageTransition><ViewHistory /></PageTransition>} />
+        
+        {/* Admin Routes */}
+        <Route path="/admin/partner-applications" element={<PageTransition><PartnerApplicationsAdmin /></PageTransition>} />
         
         {/* Catch-all */}
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
