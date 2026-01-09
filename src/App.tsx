@@ -61,6 +61,9 @@ import EducationBooking from "./pages/education/EducationBooking";
 // Favorites
 import Favorites from "./pages/Favorites";
 
+// Search
+import Search from "./pages/Search";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -79,7 +82,7 @@ const App = () => (
               <Route path="/bookings" element={<Bookings />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/favorites" element={<Favorites />} />
-              
+              <Route path="/search" element={<Search />} />
               {/* Beauty & Spa Mini-App Routes */}
               <Route path="/beauty" element={<BeautySpaIndex />} />
               <Route path="/beauty/salon/:id" element={<SalonDetail />} />
