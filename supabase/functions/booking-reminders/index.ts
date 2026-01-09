@@ -19,10 +19,11 @@ Deno.serve(async (req) => {
 
     console.log('Starting booking reminders check...')
 
-    // Get bookings scheduled in the next 24 hours that haven't been reminded
     const now = new Date()
+    const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000)
     const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000)
     
+    // Get all bookings scheduled in the next 24 hours
     const { data: upcomingBookings, error: bookingsError } = await supabase
       .from('bookings')
       .select('id, user_id, scheduled_at, notes, total_amount, currency, booking_type')
@@ -39,7 +40,7 @@ Deno.serve(async (req) => {
 
     if (!upcomingBookings || upcomingBookings.length === 0) {
       return new Response(
-        JSON.stringify({ message: 'No upcoming bookings found', processed: 0 }),
+        JSON.stringify({ message: 'No upcoming bookings found', processed: 0, sent: 0 }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -47,6 +48,20 @@ Deno.serve(async (req) => {
     let notificationsSent = 0
 
     for (const booking of upcomingBookings) {
+      const scheduledDate = new Date(booking.scheduled_at)
+      const timeUntilBooking = scheduledDate.getTime() - now.getTime()
+      const hoursUntil = timeUntilBooking / (60 * 60 * 1000)
+      
+      // Determine reminder type: 1-hour or 24-hour
+      let reminderType: '1hour' | '24hour' | null = null
+      if (hoursUntil <= 1) {
+        reminderType = '1hour'
+      } else if (hoursUntil <= 24) {
+        reminderType = '24hour'
+      }
+      
+      if (!reminderType) continue
+
       // Check if user wants booking reminders
       const { data: preferences } = await supabase
         .from('notification_preferences')
@@ -54,28 +69,26 @@ Deno.serve(async (req) => {
         .eq('user_id', booking.user_id)
         .single()
 
-      // Skip if user disabled booking reminders
       if (preferences && preferences.booking_reminders === false) {
         console.log(`User ${booking.user_id} has disabled booking reminders`)
         continue
       }
 
-      // Check if we already sent a reminder for this booking
+      // Check if we already sent this type of reminder for this booking
       const { data: existingNotification } = await supabase
         .from('notifications')
         .select('id')
         .eq('user_id', booking.user_id)
-        .eq('type', 'booking_reminder')
+        .eq('type', `booking_reminder_${reminderType}`)
         .like('body', `%${booking.id}%`)
         .single()
 
       if (existingNotification) {
-        console.log(`Reminder already sent for booking ${booking.id}`)
+        console.log(`${reminderType} reminder already sent for booking ${booking.id}`)
         continue
       }
 
-      // Format the scheduled time
-      const scheduledDate = new Date(booking.scheduled_at)
+      // Format the scheduled time (reuse scheduledDate from above)
       const timeStr = scheduledDate.toLocaleTimeString('ru-RU', { 
         hour: '2-digit', 
         minute: '2-digit' 
@@ -96,28 +109,38 @@ Deno.serve(async (req) => {
       }
       const typeLabel = typeLabels[booking.booking_type] || 'Бронирование'
 
+      // Create notification with appropriate urgency
+      const isUrgent = reminderType === '1hour'
+      const title = isUrgent 
+        ? `⏰ Скоро: ${typeLabel}` 
+        : `Напоминание: ${typeLabel}`
+      const timeInfo = isUrgent 
+        ? `через 1 час (${timeStr})` 
+        : `${dateStr} в ${timeStr}`
+
       // Create notification
       const { error: notifError } = await supabase
         .from('notifications')
         .insert({
           user_id: booking.user_id,
-          title: `Напоминание: ${typeLabel}`,
-          body: `Ваше бронирование запланировано на ${dateStr} в ${timeStr}. ID: ${booking.id}`,
-          type: 'booking_reminder',
+          title: title,
+          body: `Ваше бронирование запланировано ${timeInfo}. ID: ${booking.id}`,
+          type: `booking_reminder_${reminderType}`,
           data: {
             booking_id: booking.id,
             scheduled_at: booking.scheduled_at,
             booking_type: booking.booking_type,
             amount: booking.total_amount,
-            currency: booking.currency
+            currency: booking.currency,
+            reminder_type: reminderType
           }
         })
 
       if (notifError) {
-        console.error(`Error creating notification for booking ${booking.id}:`, notifError)
+        console.error(`Error creating ${reminderType} notification for booking ${booking.id}:`, notifError)
       } else {
         notificationsSent++
-        console.log(`Reminder sent for booking ${booking.id}`)
+        console.log(`${reminderType} reminder sent for booking ${booking.id}`)
       }
     }
 
