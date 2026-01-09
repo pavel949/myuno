@@ -2,6 +2,7 @@ import React from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
+import { triggerRipple } from '@/hooks/useRipple';
 
 interface FilterChipProps {
   label: string;
@@ -30,7 +31,8 @@ export function FilterChip({
 
   return (
     <button
-      onClick={() => {
+      onClick={(e) => {
+        triggerRipple(e);
         triggerHaptic('light');
         onToggle?.();
       }}

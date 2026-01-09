@@ -176,6 +176,23 @@
     }
   }
 
+  /* Material Design Ripple Effect */
+  @keyframes ripple-animation {
+    0% {
+      transform: scale(0);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(2.5);
+      opacity: 0;
+    }
+  }
+
+  .ripple-container {
+    position: relative;
+    overflow: hidden;
+  }
+
   /* Status colors */
   .status-draft { @apply bg-muted text-muted-foreground; }
   .status-submitted { @apply bg-info/20 text-info; }
