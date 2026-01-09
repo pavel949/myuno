@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useCart } from "@/contexts/CartContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,10 @@ import {
   Phone,
   Home,
   MessageSquare,
+  ShoppingBag,
+  Plus,
+  Minus,
+  Trash2,
 } from "lucide-react";
 import { triggerRipple } from "@/hooks/useRipple";
 import { toast } from "sonner";
@@ -25,10 +30,11 @@ const ServiceBooking = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const { id } = useParams();
+  const { items, getItemsByProvider, addItem, removeItem, clearByProvider } = useCart();
   
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [selectedService, setSelectedService] = useState<string | null>("s1");
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<string>("cash");
   const [formData, setFormData] = useState({
     name: "",
@@ -38,16 +44,27 @@ const ServiceBooking = () => {
   });
 
   const provider = {
+    id: id,
     name: language === "ru" ? "Алексей Мастеров" : "Alex Masters",
     image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop",
   };
 
   const services = [
-    { id: "s1", name: language === "ru" ? "Установка смесителя" : "Faucet installation", price: 1500 },
-    { id: "s2", name: language === "ru" ? "Замена труб" : "Pipe replacement", price: 3000 },
-    { id: "s3", name: language === "ru" ? "Прочистка канализации" : "Drain cleaning", price: 2000 },
-    { id: "s4", name: language === "ru" ? "Установка унитаза" : "Toilet installation", price: 2500 },
+    { id: "s1", name: language === "ru" ? "Установка смесителя" : "Faucet installation", price: 1500, duration: "1 час" },
+    { id: "s2", name: language === "ru" ? "Замена труб" : "Pipe replacement", price: 3000, duration: "2-4 часа" },
+    { id: "s3", name: language === "ru" ? "Прочистка канализации" : "Drain cleaning", price: 2000, duration: "1-2 часа" },
+    { id: "s4", name: language === "ru" ? "Установка унитаза" : "Toilet installation", price: 2500, duration: "2 часа" },
   ];
+
+  // Load services from cart on mount
+  useEffect(() => {
+    if (id) {
+      const cartServices = getItemsByProvider(id);
+      if (cartServices.length > 0) {
+        setSelectedServices(cartServices.map(item => item.id));
+      }
+    }
+  }, [id, getItemsByProvider]);
 
   const timeSlots = [
     "09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00", "18:00"
@@ -58,18 +75,32 @@ const ServiceBooking = () => {
     { id: "card", icon: CreditCard, name: language === "ru" ? "Картой" : "Card" },
   ];
 
-  const selectedServiceData = services.find(s => s.id === selectedService);
+  const toggleService = (serviceId: string) => {
+    setSelectedServices(prev => 
+      prev.includes(serviceId) 
+        ? prev.filter(id => id !== serviceId)
+        : [...prev, serviceId]
+    );
+  };
+
+  const selectedServicesData = services.filter(s => selectedServices.includes(s.id));
+  const servicesTotal = selectedServicesData.reduce((sum, s) => sum + s.price, 0);
   const serviceFee = 100;
-  const totalPrice = selectedServiceData ? selectedServiceData.price + serviceFee : 0;
+  const totalPrice = servicesTotal + serviceFee;
 
   const handleBooking = () => {
-    if (!selectedDate || !selectedTime || !selectedService) {
-      toast.error(language === "ru" ? "Выберите дату и время" : "Select date and time");
+    if (!selectedDate || !selectedTime || selectedServices.length === 0) {
+      toast.error(language === "ru" ? "Выберите услуги, дату и время" : "Select services, date and time");
       return;
     }
     if (!formData.name || !formData.phone || !formData.address) {
       toast.error(language === "ru" ? "Заполните контактные данные" : "Fill in contact details");
       return;
+    }
+
+    // Clear services from cart after booking
+    if (id) {
+      clearByProvider(id);
     }
 
     toast.success(language === "ru" ? "Заявка отправлена!" : "Booking submitted!");
@@ -94,38 +125,54 @@ const ServiceBooking = () => {
           </div>
         </div>
 
-        {/* Select Service */}
+        {/* Select Services */}
         <div>
-          <h2 className="text-lg font-semibold mb-3">
-            {language === "ru" ? "Выберите услугу" : "Select Service"}
-          </h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-semibold">
+              {language === "ru" ? "Выберите услуги" : "Select Services"}
+            </h2>
+            {selectedServices.length > 0 && (
+              <Badge variant="secondary">
+                {selectedServices.length} {language === "ru" ? "выбрано" : "selected"}
+              </Badge>
+            )}
+          </div>
           <div className="space-y-2">
-            {services.map((service) => (
-              <div
-                key={service.id}
-                onClick={(e) => {
-                  triggerRipple(e);
-                  setSelectedService(service.id);
-                }}
-                className={`relative overflow-hidden flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all active:scale-[0.98] ${
-                  selectedService === service.id
-                    ? "border-primary bg-primary/5"
-                    : "border-border bg-card hover:border-primary/50"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                    selectedService === service.id ? "border-primary" : "border-muted-foreground"
-                  }`}>
-                    {selectedService === service.id && (
-                      <div className="w-3 h-3 rounded-full bg-primary" />
-                    )}
+            {services.map((service) => {
+              const isSelected = selectedServices.includes(service.id);
+              return (
+                <div
+                  key={service.id}
+                  onClick={(e) => {
+                    triggerRipple(e);
+                    toggleService(service.id);
+                  }}
+                  className={`relative overflow-hidden flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all active:scale-[0.98] ${
+                    isSelected
+                      ? "border-primary bg-primary/5"
+                      : "border-border bg-card hover:border-primary/50"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                      isSelected ? "border-primary bg-primary" : "border-muted-foreground"
+                    }`}>
+                      {isSelected && (
+                        <CheckCircle2 className="w-3 h-3 text-primary-foreground" />
+                      )}
+                    </div>
+                    <div>
+                      <span className="font-medium">{service.name}</span>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
+                        <Clock className="w-3 h-3" />
+                        <span>{service.duration}</span>
+                      </div>
+                    </div>
                   </div>
-                  <span className="font-medium">{service.name}</span>
+                  <span className="font-bold text-primary">₽{service.price}</span>
                 </div>
-                <span className="font-bold text-primary">₽{service.price}</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -249,24 +296,36 @@ const ServiceBooking = () => {
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border space-y-4">
         {/* Price Summary */}
         <div className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">{selectedServiceData?.name}</span>
-            <span>₽{selectedServiceData?.price || 0}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">
-              {language === "ru" ? "Сервисный сбор" : "Service fee"}
-            </span>
-            <span>₽{serviceFee}</span>
-          </div>
-          <div className="flex justify-between text-lg font-bold pt-2 border-t border-border">
-            <span>{language === "ru" ? "Итого" : "Total"}</span>
-            <span className="text-primary">₽{totalPrice}</span>
-          </div>
+          {selectedServicesData.map(service => (
+            <div key={service.id} className="flex justify-between">
+              <span className="text-muted-foreground">{service.name}</span>
+              <span>₽{service.price}</span>
+            </div>
+          ))}
+          {selectedServices.length === 0 && (
+            <div className="text-center text-muted-foreground py-2">
+              {language === "ru" ? "Выберите хотя бы одну услугу" : "Select at least one service"}
+            </div>
+          )}
+          {selectedServices.length > 0 && (
+            <>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">
+                  {language === "ru" ? "Сервисный сбор" : "Service fee"}
+                </span>
+                <span>₽{serviceFee}</span>
+              </div>
+              <div className="flex justify-between text-lg font-bold pt-2 border-t border-border">
+                <span>{language === "ru" ? "Итого" : "Total"}</span>
+                <span className="text-primary">₽{totalPrice}</span>
+              </div>
+            </>
+          )}
         </div>
 
         <Button
           onClick={handleBooking}
+          disabled={selectedServices.length === 0}
           className="w-full h-14 text-lg font-semibold gap-2"
         >
           <CheckCircle2 className="w-5 h-5" />
