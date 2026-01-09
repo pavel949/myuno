@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Star, Clock, MapPin, Phone, Bike, Plus, Minus, 
@@ -9,6 +9,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { useViewHistory } from '@/hooks/useViewHistory';
 
 // Demo restaurant data
 const demoRestaurant = {
@@ -126,8 +127,19 @@ export default function RestaurantDetail() {
   const { language } = useLanguage();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isFavorite, setIsFavorite] = useState(false);
+  const { trackView } = useViewHistory();
 
   const restaurant = demoRestaurant;
+
+  useEffect(() => {
+    trackView(id || restaurant.id, 'restaurant', {
+      name_en: restaurant.nameEn,
+      name_ru: restaurant.nameRu,
+      image: restaurant.image,
+      rating: restaurant.rating,
+      location: restaurant.location,
+    });
+  }, [id]);
 
   const addToCart = (item: any) => {
     const existing = cart.find(c => c.id === item.id);

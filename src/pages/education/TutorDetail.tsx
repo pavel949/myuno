@@ -1,9 +1,11 @@
+import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Star, MapPin, MessageCircle, Award, BookOpen, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { FavoriteButton } from "@/components/uno/FavoriteButton";
+import { useViewHistory } from "@/hooks/useViewHistory";
 
 const tutors: Record<string, any> = {
   "t1": {
@@ -124,8 +126,19 @@ export default function TutorDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { trackView } = useViewHistory();
 
   const tutor = tutors[id || "t1"] || tutors["t1"];
+
+  useEffect(() => {
+    trackView(tutor.id, 'tutor', {
+      name: tutor.name,
+      image: tutor.image,
+      rating: tutor.rating,
+      price: tutor.price,
+      location: tutor.location,
+    });
+  }, [tutor.id]);
 
   return (
     <div className="min-h-screen bg-background pb-24">

@@ -1,9 +1,11 @@
+import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Star, Clock, MapPin, Calendar, Users, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { FavoriteButton } from "@/components/uno/FavoriteButton";
+import { useViewHistory } from "@/hooks/useViewHistory";
 
 const courses: Record<string, any> = {
   "1": {
@@ -93,8 +95,20 @@ export default function CourseDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { trackView } = useViewHistory();
 
   const course = courses[id || "1"] || courses["1"];
+
+  useEffect(() => {
+    trackView(course.id, 'course', {
+      name_en: course.title_en,
+      name_ru: course.title_ru,
+      image: course.images[0],
+      rating: course.rating,
+      price: course.price,
+      location: course.location,
+    });
+  }, [course.id]);
 
   return (
     <div className="min-h-screen bg-background pb-24">
