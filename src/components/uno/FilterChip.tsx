@@ -1,6 +1,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { triggerHaptic } from '@/hooks/useHapticFeedback';
 
 interface FilterChipProps {
   label: string;
@@ -29,10 +30,14 @@ export function FilterChip({
 
   return (
     <button
-      onClick={onToggle}
+      onClick={() => {
+        triggerHaptic('light');
+        onToggle?.();
+      }}
       className={cn(
         "inline-flex items-center rounded-full font-medium transition-all duration-200",
         "border focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background",
+        "active:scale-95 active:opacity-90",
         sizeClasses[size],
         isActive
           ? "bg-primary text-primary-foreground border-primary"
