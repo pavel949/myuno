@@ -1,1 +1,7 @@
 project_id = "kakkwibljrjsawxgnupk"
+
+[functions.get-mapbox-token]
+verify_jwt = false
+
+[functions.booking-reminders]
+verify_jwt = false

@@ -307,6 +307,23 @@ export function useNotifications() {
     return true;
   };
 
+  // Trigger booking reminders check via edge function
+  const triggerBookingReminders = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('booking-reminders');
+      
+      if (error) throw error;
+      
+      toast.success(`Проверка завершена: отправлено ${data?.sent || 0} напоминаний`);
+      await fetchNotifications();
+      return true;
+    } catch (error) {
+      console.error('Error triggering reminders:', error);
+      toast.error('Не удалось запустить проверку напоминаний');
+      return false;
+    }
+  };
+
   return {
     notifications,
     preferences,
@@ -321,6 +338,7 @@ export function useNotifications() {
     markAllAsRead,
     deleteNotification,
     createDemoNotification,
+    triggerBookingReminders,
     refresh: fetchNotifications,
   };
 }
