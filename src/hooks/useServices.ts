@@ -34,11 +34,14 @@ export interface Category {
   mini_app_type: string | null;
 }
 
+export type SortOption = 'popular' | 'price_asc' | 'price_desc' | 'rating' | 'newest';
+
 interface UseServicesOptions {
   categoryId?: string;
   searchQuery?: string;
   priceMin?: number;
   priceMax?: number;
+  sortBy?: SortOption;
   limit?: number;
 }
 
@@ -171,6 +174,25 @@ export const useServices = (options: UseServicesOptions = {}) => {
         query = query.lte('price', options.priceMax);
       }
 
+      // Apply sorting
+      switch (options.sortBy) {
+        case 'price_asc':
+          query = query.order('price', { ascending: true, nullsFirst: false });
+          break;
+        case 'price_desc':
+          query = query.order('price', { ascending: false, nullsFirst: false });
+          break;
+        case 'newest':
+          query = query.order('created_at', { ascending: false });
+          break;
+        case 'rating':
+        case 'popular':
+        default:
+          // Default: sort by provider trust_score (popularity proxy)
+          query = query.order('created_at', { ascending: false });
+          break;
+      }
+
       query = query.limit(options.limit || 50);
 
       const { data, error: queryError } = await query;
@@ -197,6 +219,12 @@ export const useServices = (options: UseServicesOptions = {}) => {
           filteredDemo = filteredDemo.filter(s => (s.price || 0) <= options.priceMax!);
         }
 
+        // Apply sorting to demo data
+        if (options.sortBy === 'price_asc') {
+          filteredDemo.sort((a, b) => (a.price || 0) - (b.price || 0));
+        } else if (options.sortBy === 'price_desc') {
+          filteredDemo.sort((a, b) => (b.price || 0) - (a.price || 0));
+        }
         setServices(filteredDemo);
       } else {
         setServices(data as Service[]);
@@ -209,7 +237,7 @@ export const useServices = (options: UseServicesOptions = {}) => {
     } finally {
       setIsLoading(false);
     }
-  }, [options.categoryId, options.searchQuery, options.priceMin, options.priceMax, options.limit]);
+  }, [options.categoryId, options.searchQuery, options.priceMin, options.priceMax, options.sortBy, options.limit]);
 
   useEffect(() => {
     loadServices();
