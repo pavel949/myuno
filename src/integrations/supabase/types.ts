@@ -311,6 +311,63 @@ export type Database = {
           },
         ]
       }
+      cart_items: {
+        Row: {
+          created_at: string
+          currency: string
+          id: string
+          image: string | null
+          item_id: string
+          item_type: string
+          name: string
+          name_ru: string | null
+          options: Json | null
+          price: number
+          provider_id: string | null
+          provider_name: string | null
+          provider_name_ru: string | null
+          quantity: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          id?: string
+          image?: string | null
+          item_id: string
+          item_type: string
+          name: string
+          name_ru?: string | null
+          options?: Json | null
+          price: number
+          provider_id?: string | null
+          provider_name?: string | null
+          provider_name_ru?: string | null
+          quantity?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          id?: string
+          image?: string | null
+          item_id?: string
+          item_type?: string
+          name?: string
+          name_ru?: string | null
+          options?: Json | null
+          price?: number
+          provider_id?: string | null
+          provider_name?: string | null
+          provider_name_ru?: string | null
+          quantity?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
