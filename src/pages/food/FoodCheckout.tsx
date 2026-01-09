@@ -1,0 +1,293 @@
+import React, { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { ArrowLeft, MapPin, Clock, CreditCard, Banknote, Check } from 'lucide-react';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
+// Demo cart items
+const demoCartItems = [
+  { id: 'dish-1', name: 'Pad Thai', nameRu: 'Пад Тай', price: 180, quantity: 2 },
+  { id: 'dish-2', name: 'Tom Yum Goong', nameRu: 'Том Ям Кунг', price: 220, quantity: 1 },
+];
+
+export default function FoodCheckout() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { language } = useLanguage();
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('cash');
+  const [formData, setFormData] = useState({
+    address: '',
+    phone: '',
+    notes: '',
+  });
+
+  const cartItems = demoCartItems;
+  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const deliveryFee = 40;
+  const total = subtotal + deliveryFee;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!user) {
+      toast({
+        title: language === 'ru' ? 'Требуется авторизация' : 'Login Required',
+        description: language === 'ru' 
+          ? 'Пожалуйста, войдите для оформления заказа' 
+          : 'Please login to place an order',
+        variant: 'destructive',
+      });
+      navigate('/auth');
+      return;
+    }
+
+    if (!formData.address || !formData.phone) {
+      toast({
+        title: language === 'ru' ? 'Заполните поля' : 'Fill Required Fields',
+        description: language === 'ru' 
+          ? 'Укажите адрес и телефон' 
+          : 'Please provide address and phone',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Create booking
+      const { data: booking, error: bookingError } = await supabase
+        .from('bookings')
+        .insert({
+          user_id: user.id,
+          booking_type: 'food',
+          status: 'submitted',
+          total_amount: total,
+          notes: `Payment: ${paymentMethod}. ${formData.notes}`,
+        })
+        .select()
+        .single();
+
+      if (bookingError) throw bookingError;
+
+      // Add booking items
+      const bookingItems = cartItems.map(item => ({
+        booking_id: booking.id,
+        item_type: 'food',
+        item_name: language === 'ru' ? item.nameRu : item.name,
+        quantity: item.quantity,
+        unit_price: item.price,
+        subtotal: item.price * item.quantity,
+      }));
+
+      await supabase.from('booking_items').insert(bookingItems);
+
+      // Add delivery address
+      await supabase.from('booking_addresses').insert({
+        booking_id: booking.id,
+        address_type: 'delivery',
+        address: formData.address,
+        notes: formData.notes,
+      });
+
+      // Add contact
+      await supabase.from('booking_participants').insert({
+        booking_id: booking.id,
+        name: user.email || 'Customer',
+        phone: formData.phone,
+        is_primary: true,
+      });
+
+      setIsSuccess(true);
+      toast({
+        title: language === 'ru' ? 'Заказ оформлен!' : 'Order Placed!',
+        description: language === 'ru' 
+          ? 'Ваш заказ принят и готовится' 
+          : 'Your order has been received',
+      });
+    } catch (error) {
+      console.error('Error placing order:', error);
+      toast({
+        title: language === 'ru' ? 'Ошибка' : 'Error',
+        description: language === 'ru' 
+          ? 'Не удалось оформить заказ' 
+          : 'Failed to place order',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isSuccess) {
+    return (
+      <AppLayout showBottomNav={false}>
+        <div className="flex-1 flex flex-col items-center justify-center p-8 min-h-[80vh]">
+          <div className="w-20 h-20 rounded-full bg-success/20 flex items-center justify-center mb-6">
+            <Check className="w-10 h-10 text-success" />
+          </div>
+          <h2 className="text-2xl font-display font-bold mb-2 text-center">
+            {language === 'ru' ? 'Заказ оформлен!' : 'Order Placed!'}
+          </h2>
+          <p className="text-muted-foreground text-center max-w-sm mb-4">
+            {language === 'ru' 
+              ? 'Ваш заказ принят. Ожидайте доставку через 25-35 минут.'
+              : 'Your order has been received. Expected delivery in 25-35 minutes.'}
+          </p>
+          <div className="flex items-center gap-2 text-primary mb-8">
+            <Clock className="w-5 h-5" />
+            <span className="font-medium">25-35 min</span>
+          </div>
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={() => navigate('/food')}>
+              {language === 'ru' ? 'К ресторанам' : 'Browse More'}
+            </Button>
+            <Button onClick={() => navigate('/bookings')}>
+              {language === 'ru' ? 'Мои заказы' : 'My Orders'}
+            </Button>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  return (
+    <AppLayout showBottomNav={false}>
+      <div className="px-4 py-6">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-6">
+          <button
+            onClick={() => navigate(-1)}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <h1 className="text-xl font-display font-bold">
+            {language === 'ru' ? 'Оформление заказа' : 'Checkout'}
+          </h1>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Order Summary */}
+          <div className="p-4 rounded-xl bg-card border border-border/50">
+            <h2 className="font-semibold mb-3">
+              {language === 'ru' ? 'Ваш заказ' : 'Your Order'}
+            </h2>
+            <div className="space-y-2">
+              {cartItems.map(item => (
+                <div key={item.id} className="flex justify-between text-sm">
+                  <span>{item.quantity}x {language === 'ru' ? item.nameRu : item.name}</span>
+                  <span>฿{item.price * item.quantity}</span>
+                </div>
+              ))}
+              <div className="border-t border-border/50 pt-2 mt-2">
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <span>{language === 'ru' ? 'Доставка' : 'Delivery'}</span>
+                  <span>฿{deliveryFee}</span>
+                </div>
+                <div className="flex justify-between font-bold mt-1">
+                  <span>{language === 'ru' ? 'Итого' : 'Total'}</span>
+                  <span className="text-primary">฿{total}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Delivery Address */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-primary" />
+              <Label className="font-semibold">
+                {language === 'ru' ? 'Адрес доставки' : 'Delivery Address'}
+              </Label>
+            </div>
+            <Textarea
+              value={formData.address}
+              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              placeholder={language === 'ru' 
+                ? 'Улица, дом, квартира...' 
+                : 'Street, building, apartment...'}
+              required
+            />
+          </div>
+
+          {/* Phone */}
+          <div className="space-y-3">
+            <Label htmlFor="phone">
+              {language === 'ru' ? 'Телефон' : 'Phone'} *
+            </Label>
+            <Input
+              id="phone"
+              type="tel"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              placeholder="+66 XX XXX XXXX"
+              required
+            />
+          </div>
+
+          {/* Payment Method */}
+          <div className="space-y-3">
+            <Label className="font-semibold">
+              {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
+            </Label>
+            <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
+              <div className="flex items-center space-x-3 p-3 rounded-lg bg-card border border-border/50">
+                <RadioGroupItem value="cash" id="cash" />
+                <Label htmlFor="cash" className="flex items-center gap-2 cursor-pointer">
+                  <Banknote className="w-5 h-5 text-success" />
+                  {language === 'ru' ? 'Наличными' : 'Cash on Delivery'}
+                </Label>
+              </div>
+              <div className="flex items-center space-x-3 p-3 rounded-lg bg-card border border-border/50">
+                <RadioGroupItem value="card" id="card" />
+                <Label htmlFor="card" className="flex items-center gap-2 cursor-pointer">
+                  <CreditCard className="w-5 h-5 text-primary" />
+                  {language === 'ru' ? 'Картой' : 'Card Payment'}
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          {/* Notes */}
+          <div className="space-y-3">
+            <Label htmlFor="notes">
+              {language === 'ru' ? 'Комментарий к заказу' : 'Order Notes'}
+            </Label>
+            <Textarea
+              id="notes"
+              value={formData.notes}
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              placeholder={language === 'ru' 
+                ? 'Особые пожелания...' 
+                : 'Special requests...'}
+            />
+          </div>
+
+          <Button
+            type="submit"
+            className="w-full h-14 text-lg"
+            disabled={isSubmitting}
+          >
+            {isSubmitting 
+              ? (language === 'ru' ? 'Оформление...' : 'Placing Order...') 
+              : (language === 'ru' ? `Заказать за ฿${total}` : `Order for ฿${total}`)}
+          </Button>
+        </form>
+      </div>
+    </AppLayout>
+  );
+}
