@@ -249,6 +249,64 @@ export function useNotifications() {
     }
   };
 
+  // Create demo notification
+  const createDemoNotification = async (type: 'booking' | 'promotion' | 'status') => {
+    if (!user) {
+      toast.error('Войдите в систему');
+      return false;
+    }
+
+    const demoNotifications = {
+      booking: {
+        title: 'Напоминание о бронировании',
+        body: 'Ваша запись в салон красоты "Glamour" завтра в 14:00. Не забудьте!',
+        type: 'booking',
+        data: { booking_id: 'demo-123', service: 'Стрижка' },
+      },
+      promotion: {
+        title: '🎉 Специальное предложение!',
+        body: 'Скидка 20% на все услуги спа в эти выходные. Используйте код: SPA20',
+        type: 'promotion',
+        data: { promo_code: 'SPA20', discount: 20 },
+      },
+      status: {
+        title: 'Статус бронирования изменен',
+        body: 'Ваше бронирование #12345 подтверждено провайдером.',
+        type: 'status',
+        data: { booking_id: '12345', new_status: 'confirmed' },
+      },
+    };
+
+    const notification = demoNotifications[type];
+
+    const { error } = await supabase.from('notifications').insert({
+      user_id: user.id,
+      title: notification.title,
+      body: notification.body,
+      type: notification.type,
+      data: notification.data as Json,
+      is_read: false,
+    });
+
+    if (error) {
+      toast.error('Не удалось создать уведомление');
+      return false;
+    }
+
+    await fetchNotifications();
+    toast.success('Демо-уведомление создано');
+    
+    // Also show browser notification if subscribed
+    if (isSubscribed && 'Notification' in window && Notification.permission === 'granted') {
+      new Notification(notification.title, {
+        body: notification.body,
+        icon: '/icons/icon-192x192.png',
+      });
+    }
+
+    return true;
+  };
+
   return {
     notifications,
     preferences,
@@ -262,6 +320,7 @@ export function useNotifications() {
     markAsRead,
     markAllAsRead,
     deleteNotification,
+    createDemoNotification,
     refresh: fetchNotifications,
   };
 }

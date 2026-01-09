@@ -10,7 +10,9 @@ import {
   Tag, 
   Info,
   ChevronLeft,
-  Settings
+  Settings,
+  Plus,
+  Sparkles
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -41,6 +43,7 @@ export default function Notifications() {
     markAsRead,
     markAllAsRead,
     deleteNotification,
+    createDemoNotification,
   } = useNotifications();
 
   const getNotificationIcon = (type: string) => {
@@ -314,6 +317,49 @@ export default function Notifications() {
                     checked={preferences.status_updates}
                     onCheckedChange={(checked) => updatePreferences({ status_updates: checked })}
                   />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Demo Notifications */}
+            <Card className="border-dashed border-primary/50">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                  {language === 'ru' ? 'Тестовые уведомления' : 'Demo Notifications'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-sm text-muted-foreground mb-4">
+                  {language === 'ru' 
+                    ? 'Создайте тестовые уведомления для проверки системы' 
+                    : 'Create test notifications to check the system'}
+                </p>
+                <div className="grid gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="justify-start"
+                    onClick={() => createDemoNotification('booking')}
+                  >
+                    <Calendar className="w-4 h-4 mr-2 text-primary" />
+                    {language === 'ru' ? 'Напоминание о бронировании' : 'Booking Reminder'}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="justify-start"
+                    onClick={() => createDemoNotification('promotion')}
+                  >
+                    <Tag className="w-4 h-4 mr-2 text-green-500" />
+                    {language === 'ru' ? 'Акция / Скидка' : 'Promotion / Discount'}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="justify-start"
+                    onClick={() => createDemoNotification('status')}
+                  >
+                    <Info className="w-4 h-4 mr-2 text-blue-500" />
+                    {language === 'ru' ? 'Обновление статуса' : 'Status Update'}
+                  </Button>
                 </div>
               </CardContent>
             </Card>
