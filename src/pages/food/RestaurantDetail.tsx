@@ -6,10 +6,12 @@ import {
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useViewHistory } from '@/hooks/useViewHistory';
+import { toast } from 'sonner';
 
 // Demo restaurant data
 const demoRestaurant = {
@@ -114,22 +116,17 @@ const demoRestaurant = {
   ],
 };
 
-interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-}
-
 export default function RestaurantDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const { addItem, removeItem, updateQuantity, items, getItemsByProvider } = useCart();
   const [isFavorite, setIsFavorite] = useState(false);
   const { trackView } = useViewHistory();
 
   const restaurant = demoRestaurant;
+  const providerId = id || restaurant.id;
+  const cartItems = getItemsByProvider(providerId);
 
   useEffect(() => {
     trackView(id || restaurant.id, 'restaurant', {
@@ -142,38 +139,38 @@ export default function RestaurantDetail() {
   }, [id]);
 
   const addToCart = (item: any) => {
-    const existing = cart.find(c => c.id === item.id);
-    if (existing) {
-      setCart(cart.map(c => 
-        c.id === item.id ? { ...c, quantity: c.quantity + 1 } : c
-      ));
-    } else {
-      setCart([...cart, {
-        id: item.id,
-        name: language === 'ru' ? item.nameRu : item.nameEn,
-        price: item.price,
-        quantity: 1,
-      }]);
-    }
+    addItem({
+      id: `food-${providerId}-${item.id}`,
+      type: 'food',
+      name: item.nameEn,
+      nameRu: item.nameRu,
+      price: item.price,
+      currency: '฿',
+      image: item.image,
+      providerId: providerId,
+      providerName: restaurant.nameEn,
+      providerNameRu: restaurant.nameRu,
+    });
+    toast.success(language === 'ru' ? 'Добавлено в корзину' : 'Added to cart');
   };
 
   const removeFromCart = (itemId: string) => {
-    const existing = cart.find(c => c.id === itemId);
-    if (existing && existing.quantity > 1) {
-      setCart(cart.map(c => 
-        c.id === itemId ? { ...c, quantity: c.quantity - 1 } : c
-      ));
+    const cartItemId = `food-${providerId}-${itemId}`;
+    const cartItem = items.find(i => i.id === cartItemId);
+    if (cartItem && cartItem.quantity > 1) {
+      updateQuantity(cartItemId, cartItem.quantity - 1);
     } else {
-      setCart(cart.filter(c => c.id !== itemId));
+      removeItem(cartItemId);
     }
   };
 
   const getItemQuantity = (itemId: string) => {
-    return cart.find(c => c.id === itemId)?.quantity || 0;
+    const cartItemId = `food-${providerId}-${itemId}`;
+    return items.find(i => i.id === cartItemId)?.quantity || 0;
   };
 
-  const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const cartTotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <AppLayout showBottomNav={false}>
@@ -341,7 +338,7 @@ export default function RestaurantDetail() {
           <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border/50">
             <Button
               className="w-full h-14 text-lg"
-              onClick={() => navigate(`/food/checkout/${id}`)}
+              onClick={() => navigate('/cart')}
             >
               <ShoppingCart className="w-5 h-5 mr-2" />
               {language === 'ru' ? 'Корзина' : 'View Cart'} ({cartCount})

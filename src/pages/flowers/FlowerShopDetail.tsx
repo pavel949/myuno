@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Star, MapPin, Clock, Phone, Globe, Heart, Share2, ShoppingCart, Plus, Minus, Check } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { triggerRipple } from '@/hooks/useRipple';
@@ -104,39 +105,50 @@ const FlowerShopDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { language } = useLanguage();
-  const [cart, setCart] = useState<Record<string, number>>({});
+  const { addItem, removeItem, updateQuantity, items, getItemsByProvider } = useCart();
   const [isFavorite, setIsFavorite] = useState(false);
 
   const shop = shopData[id as keyof typeof shopData] || shopData['shop-1'];
+  const providerId = id || 'shop-1';
+  const cartItems = getItemsByProvider(providerId);
 
-  const addToCart = (productId: string) => {
-    setCart((prev) => ({
-      ...prev,
-      [productId]: (prev[productId] || 0) + 1,
-    }));
+  const addToCart = (product: typeof products[0]) => {
+    addItem({
+      id: `flowers-${providerId}-${product.id}`,
+      type: 'flowers',
+      name: product.name,
+      nameRu: product.nameRu,
+      price: product.price,
+      currency: '฿',
+      image: product.image,
+      providerId: providerId,
+      providerName: shop.name,
+      providerNameRu: shop.nameRu,
+    });
     toast.success(language === 'ru' ? 'Добавлено в корзину' : 'Added to cart');
   };
 
   const removeFromCart = (productId: string) => {
-    setCart((prev) => {
-      const newCart = { ...prev };
-      if (newCart[productId] > 1) {
-        newCart[productId]--;
-      } else {
-        delete newCart[productId];
-      }
-      return newCart;
-    });
+    const cartItemId = `flowers-${providerId}-${productId}`;
+    const cartItem = items.find(i => i.id === cartItemId);
+    if (cartItem && cartItem.quantity > 1) {
+      updateQuantity(cartItemId, cartItem.quantity - 1);
+    } else {
+      removeItem(cartItemId);
+    }
   };
 
-  const totalItems = Object.values(cart).reduce((sum, count) => sum + count, 0);
-  const totalPrice = products.reduce((sum, product) => {
-    return sum + (cart[product.id] || 0) * product.price;
-  }, 0);
+  const getQuantity = (productId: string) => {
+    const cartItemId = `flowers-${providerId}-${productId}`;
+    return items.find(i => i.id === cartItemId)?.quantity || 0;
+  };
+
+  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const handleCheckout = () => {
     if (totalItems > 0) {
-      navigate(`/flowers/order/${id}`, { state: { cart, totalPrice } });
+      navigate('/cart');
     }
   };
 
@@ -226,7 +238,7 @@ const FlowerShopDetail = () => {
           </h2>
           <div className="grid grid-cols-2 gap-4">
             {products.map((product) => {
-              const quantity = cart[product.id] || 0;
+              const quantity = getQuantity(product.id);
               return (
                 <div
                   key={product.id}
@@ -256,7 +268,7 @@ const FlowerShopDetail = () => {
                           variant="outline"
                           onClick={(e) => {
                             triggerRipple(e);
-                            addToCart(product.id);
+                            addToCart(product);
                           }}
                           className="relative overflow-hidden h-8 px-3 active:scale-95"
                         >
@@ -281,7 +293,7 @@ const FlowerShopDetail = () => {
                             variant="outline"
                             onClick={(e) => {
                               triggerRipple(e);
-                              addToCart(product.id);
+                              addToCart(product);
                             }}
                             className="relative overflow-hidden h-7 w-7 active:scale-95"
                           >
