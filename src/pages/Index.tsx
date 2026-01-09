@@ -112,28 +112,43 @@ const Index = () => {
           />
         </div>
 
-        {/* Hero Section with SOS Button */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-background p-6 border border-primary/20">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-3xl" />
+        {/* Hero Section - Trust & Infrastructure */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-card to-card p-6 border border-border">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-primary/5 rounded-full blur-2xl" />
           <div className="relative z-10">
-            <div className="flex items-start justify-between">
+            <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
-                <h1 className="text-3xl font-display font-bold text-foreground mb-2">
-                  {t('home.welcome')}
+                {/* Trust Badge */}
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 mb-3">
+                  <Shield className="w-3.5 h-3.5 text-primary" />
+                  <span className="text-xs font-medium text-primary">
+                    {language === 'ru' ? 'Проверено' : 'Verified'}
+                  </span>
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-display font-bold text-foreground mb-2 leading-tight">
+                  {language === 'ru' ? 'Инфраструктура для жизни' : 'Infrastructure for Living'}
                 </h1>
-                <p className="text-muted-foreground">
-                  {t('home.subtitle')}
+                <p className="text-sm text-muted-foreground">
+                  {language === 'ru' ? 'Жильё, транспорт, еда и сервисы — всё проверено' : 'Housing, transport, food & services — all verified'}
                 </p>
-                <div className="flex items-center gap-2 mt-4 text-sm">
-                  <MapPin className="w-4 h-4 text-primary" />
-                  <span>Phuket, Thailand</span>
+                <div className="flex items-center gap-3 mt-4">
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <MapPin className="w-3.5 h-3.5 text-primary" />
+                    <span>Phuket</span>
+                  </div>
+                  <div className="w-px h-3 bg-border" />
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Star className="w-3.5 h-3.5 text-amber-500" />
+                    <span>500+ {language === 'ru' ? 'партнёров' : 'partners'}</span>
+                  </div>
                 </div>
               </div>
               {/* SOS Button */}
               <Button
                 variant="destructive"
                 size="sm"
-                className="flex-shrink-0 gap-1.5 font-bold animate-pulse"
+                className="flex-shrink-0 gap-1.5 font-bold"
                 onClick={() => navigate('/sos')}
               >
                 <AlertTriangle className="w-4 h-4" />
@@ -358,108 +373,19 @@ const Index = () => {
           </FadeInUp>
         )}
 
-        {/* Quick Access Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Tours Card */}
-          <div 
-            onClick={() => navigate('/tours')}
-            className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-primary/20 p-6 border border-primary/20 cursor-pointer hover:border-primary/40 transition-all group"
-          >
-            <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800')] bg-cover bg-center opacity-10 group-hover:opacity-20 transition-opacity" />
-            <div className="relative z-10 flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Compass className="w-5 h-5 text-amber-500" />
-                  <span className="text-sm font-medium text-amber-500">
-                    {language === 'ru' ? 'Туры' : 'Tours'}
-                  </span>
-                </div>
-                <h3 className="text-lg font-display font-bold mb-1">
-                  {language === 'ru' ? 'Экскурсии и туры' : 'Tours & Excursions'}
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  {language === 'ru' ? 'Острова, храмы, природа' : 'Islands, temples, nature'}
-                </p>
-              </div>
-              <ArrowRight className="w-6 h-6 text-amber-500 group-hover:translate-x-1 transition-transform" />
+        {/* Trust Footer */}
+        <FadeInUp delay={0.4}>
+          <div className="flex items-center justify-center gap-6 py-4 border-t border-border/50">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Shield className="w-4 h-4 text-primary" />
+              <span>{language === 'ru' ? 'Проверенные партнёры' : 'Verified partners'}</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Star className="w-4 h-4 text-amber-500" />
+              <span>{language === 'ru' ? 'Реальные отзывы' : 'Real reviews'}</span>
             </div>
           </div>
-
-          {/* Water Activities Card */}
-          <div 
-            onClick={() => navigate('/water')}
-            className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-primary/20 p-6 border border-primary/20 cursor-pointer hover:border-primary/40 transition-all group"
-          >
-            <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800')] bg-cover bg-center opacity-10 group-hover:opacity-20 transition-opacity" />
-            <div className="relative z-10 flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Waves className="w-5 h-5 text-cyan-500" />
-                  <span className="text-sm font-medium text-cyan-500">
-                    {language === 'ru' ? 'Вода' : 'Water'}
-                  </span>
-                </div>
-                <h3 className="text-lg font-display font-bold mb-1">
-                  {language === 'ru' ? 'Водные активности' : 'Water Activities'}
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  {language === 'ru' ? 'Дайвинг, яхты, серфинг' : 'Diving, yachts, surfing'}
-                </p>
-              </div>
-              <ArrowRight className="w-6 h-6 text-cyan-500 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </div>
-
-          {/* Pharmacy Card */}
-          <div 
-            onClick={() => navigate('/pharmacy')}
-            className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-green-500/20 via-emerald-500/20 to-primary/20 p-6 border border-primary/20 cursor-pointer hover:border-primary/40 transition-all group"
-          >
-            <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1576602976047-174e57a47881?w=800')] bg-cover bg-center opacity-10 group-hover:opacity-20 transition-opacity" />
-            <div className="relative z-10 flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Pill className="w-5 h-5 text-green-500" />
-                  <span className="text-sm font-medium text-green-500">
-                    {language === 'ru' ? 'Аптека' : 'Pharmacy'}
-                  </span>
-                </div>
-                <h3 className="text-lg font-display font-bold mb-1">
-                  {language === 'ru' ? 'Аптеки 24/7' : 'Pharmacies 24/7'}
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  {language === 'ru' ? 'Лекарства с доставкой' : 'Medicine with delivery'}
-                </p>
-              </div>
-              <ArrowRight className="w-6 h-6 text-green-500 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </div>
-
-          {/* Food & Delivery Card */}
-          <div 
-            onClick={() => navigate('/food')}
-            className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-orange-500/20 via-red-500/20 to-primary/20 p-6 border border-primary/20 cursor-pointer hover:border-primary/40 transition-all group"
-          >
-            <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800')] bg-cover bg-center opacity-10 group-hover:opacity-20 transition-opacity" />
-            <div className="relative z-10 flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <UtensilsCrossed className="w-5 h-5 text-primary" />
-                  <span className="text-sm font-medium text-primary">
-                    {t('category.restaurants')}
-                  </span>
-                </div>
-                <h3 className="text-lg font-display font-bold mb-1">
-                  {language === 'ru' ? 'Еда и Доставка' : 'Food & Delivery'}
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  {language === 'ru' ? 'Рестораны, кафе, доставка' : 'Restaurants, cafes, delivery'}
-                </p>
-              </div>
-              <ArrowRight className="w-6 h-6 text-primary group-hover:translate-x-1 transition-transform" />
-            </div>
-          </div>
-        </div>
+        </FadeInUp>
         </div>
       </PullToRefresh>
     </AppLayout>

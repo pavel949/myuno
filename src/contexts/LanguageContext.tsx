@@ -60,20 +60,25 @@ const translations: Record<Language, Record<string, string>> = {
     'status.expired': 'Истекло',
     
     // Categories
-    'category.beauty-spa': 'Красота и СПА',
-    'category.restaurants': 'Рестораны',
+    'category.beauty-spa': 'Красота',
+    'category.restaurants': 'Еда',
     'category.flowers': 'Цветы',
     'category.fitness': 'Фитнес',
     'category.medical': 'Медицина',
-    'category.kids-education': 'Дети и Образование',
-    'category.real-estate': 'Недвижимость',
+    'category.kids-education': 'Обучение',
+    'category.real-estate': 'Жильё',
     'category.transport': 'Транспорт',
-    'category.events': 'Мероприятия',
+    'category.events': 'События',
     'category.shopping': 'Покупки',
     'category.services': 'Услуги',
-    'category.tours': 'Экскурсии',
-    'category.water': 'Водные активности',
+    'category.tours': 'Туры',
+    'category.water': 'Вода',
     'category.pharmacy': 'Аптеки',
+    
+    // Hero section
+    'home.heroTitle': 'Инфраструктура для жизни',
+    'home.heroSubtitle': 'Проверенные сервисы Пхукета в одном приложении',
+    'home.trustBadge': 'Проверено',
     
     // Tours
     'tours.title': 'Экскурсии и туры',
@@ -268,21 +273,26 @@ const translations: Record<Language, Record<string, string>> = {
     'status.cancelled_by_provider': 'Cancelled by Provider',
     'status.expired': 'Expired',
     
-    // Categories
-    'category.beauty-spa': 'Beauty & Spa',
-    'category.restaurants': 'Restaurants',
+    // Categories (short names)
+    'category.beauty-spa': 'Beauty',
+    'category.restaurants': 'Food',
     'category.flowers': 'Flowers',
     'category.fitness': 'Fitness',
     'category.medical': 'Medical',
-    'category.kids-education': 'Kids & Education',
-    'category.real-estate': 'Real Estate',
+    'category.kids-education': 'Education',
+    'category.real-estate': 'Housing',
     'category.transport': 'Transport',
-    'category.events': 'Events & Tickets',
+    'category.events': 'Events',
     'category.shopping': 'Shopping',
     'category.services': 'Services',
     'category.tours': 'Tours',
-    'category.water': 'Water Activities',
+    'category.water': 'Water',
     'category.pharmacy': 'Pharmacy',
+    
+    // Hero section
+    'home.heroTitle': 'Infrastructure for Living',
+    'home.heroSubtitle': 'Verified Phuket services in one app',
+    'home.trustBadge': 'Verified',
     
     // Tours
     'tours.title': 'Tours & Excursions',
