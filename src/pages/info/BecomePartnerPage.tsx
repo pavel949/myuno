@@ -80,18 +80,17 @@ export default function BecomePartnerPage() {
     setIsSubmitting(true);
 
     try {
-      // For now, we'll create a notification for admins
-      // In a full implementation, this would go to a partner_applications table
-      const { error } = await supabase.from('notifications').insert({
-        user_id: user?.id || '00000000-0000-0000-0000-000000000000',
-        title: `New Partner Application: ${formData.businessName}`,
-        body: `Category: ${selectedCategory}\nContact: ${formData.contactName}\nEmail: ${formData.email}\nPhone: ${formData.phone}`,
-        type: 'partner_application',
-        data: {
-          ...formData,
-          category: selectedCategory,
-          submitted_at: new Date().toISOString(),
-        },
+      // Insert into partner_applications table
+      const { error } = await supabase.from('partner_applications').insert({
+        user_id: user?.id || null,
+        business_name: formData.businessName,
+        business_category: selectedCategory,
+        business_description: formData.description,
+        contact_name: formData.contactName,
+        contact_email: formData.email,
+        contact_phone: formData.phone,
+        website: formData.website || null,
+        status: 'pending',
       });
 
       if (error) throw error;

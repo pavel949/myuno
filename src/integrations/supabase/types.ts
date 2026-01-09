@@ -598,6 +598,81 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_applications: {
+        Row: {
+          address: string | null
+          business_category: string
+          business_description: string | null
+          business_name: string
+          city: string | null
+          contact_email: string
+          contact_name: string
+          contact_phone: string | null
+          created_at: string
+          documents: Json | null
+          id: string
+          license_number: string | null
+          metadata: Json | null
+          notes: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          tax_id: string | null
+          updated_at: string
+          user_id: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          business_category: string
+          business_description?: string | null
+          business_name: string
+          city?: string | null
+          contact_email: string
+          contact_name: string
+          contact_phone?: string | null
+          created_at?: string
+          documents?: Json | null
+          id?: string
+          license_number?: string | null
+          metadata?: Json | null
+          notes?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          tax_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          business_category?: string
+          business_description?: string | null
+          business_name?: string
+          city?: string | null
+          contact_email?: string
+          contact_name?: string
+          contact_phone?: string | null
+          created_at?: string
+          documents?: Json | null
+          id?: string
+          license_number?: string | null
+          metadata?: Json | null
+          notes?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          tax_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
       pharmacies: {
         Row: {
           address: string | null
