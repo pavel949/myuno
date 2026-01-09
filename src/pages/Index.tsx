@@ -96,7 +96,7 @@ const Index = () => {
   }, []);
 
   return (
-    <AppLayout>
+    <AppLayout showFooter>
       <PullToRefresh onRefresh={handleRefresh} className="h-[calc(100vh-8rem)]">
         <div className="px-4 py-6 space-y-8" key={refreshKey}>
         {/* Search Bar */}
