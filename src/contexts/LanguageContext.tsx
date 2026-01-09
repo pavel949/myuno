@@ -14,7 +14,8 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.home': 'Главная',
     'nav.discover': 'Каталог',
     'nav.map': 'Карта',
-    'nav.bookings': 'Бронирования',
+    'nav.support': 'Чат',
+    'nav.bookings': 'Брони',
     'nav.profile': 'Профиль',
     
     // Auth
@@ -228,6 +229,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.home': 'Home',
     'nav.discover': 'Discover',
     'nav.map': 'Map',
+    'nav.support': 'Chat',
     'nav.bookings': 'Bookings',
     'nav.profile': 'Profile',
     
