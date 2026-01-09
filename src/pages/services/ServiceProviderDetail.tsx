@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useCart } from "@/contexts/CartContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,14 +17,44 @@ import {
   Award,
   Calendar,
   ChevronRight,
+  ShoppingBag,
+  Plus,
+  Minus,
 } from "lucide-react";
 import { triggerRipple } from "@/hooks/useRipple";
+import { toast } from "sonner";
 
 const ServiceProviderDetail = () => {
   const { language } = useLanguage();
+  const { addItem, removeItem, items } = useCart();
   const navigate = useNavigate();
   const { id } = useParams();
   const [selectedService, setSelectedService] = useState<string | null>(null);
+
+  const getServiceInCart = (serviceId: string) => {
+    return items.find(item => item.id === serviceId && item.type === 'service');
+  };
+
+  const handleAddToCart = (service: { id: string; name: string; price: number; duration: string }) => {
+    addItem({
+      id: service.id,
+      type: 'service',
+      name: service.name,
+      nameRu: service.name,
+      price: service.price,
+      currency: '₽',
+      providerId: id,
+      providerName: language === "ru" ? "Алексей Мастеров" : "Alex Masters",
+      options: { duration: service.duration }
+    });
+    toast.success(language === "ru" ? "Услуга добавлена в корзину" : "Service added to cart");
+  };
+
+  const handleRemoveFromCart = (serviceId: string) => {
+    removeItem(serviceId);
+  };
+
+  const servicesInCart = items.filter(item => item.type === 'service' && item.providerId === id);
 
   // Mock provider data
   const provider = {
@@ -198,36 +229,51 @@ const ServiceProviderDetail = () => {
 
           <TabsContent value="services" className="mt-0 px-4 py-4">
             <div className="space-y-3">
-              {provider.servicesList.map((service) => (
-                <div
-                  key={service.id}
-                  onClick={(e) => {
-                    triggerRipple(e);
-                    setSelectedService(selectedService === service.id ? null : service.id);
-                  }}
-                  className={`relative overflow-hidden p-4 rounded-xl border cursor-pointer transition-all active:scale-[0.98] ${
-                    selectedService === service.id
-                      ? "border-primary bg-primary/5"
-                      : "border-border bg-card hover:border-primary/50"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium">{service.name}</h3>
-                      <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-                        <Clock className="w-3 h-3" />
-                        <span>{service.duration}</span>
+              {provider.servicesList.map((service) => {
+                const inCart = getServiceInCart(service.id);
+                return (
+                  <div
+                    key={service.id}
+                    className={`relative overflow-hidden p-4 rounded-xl border transition-all ${
+                      inCart
+                        ? "border-primary bg-primary/5"
+                        : "border-border bg-card"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <h3 className="font-medium">{service.name}</h3>
+                        <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                          <Clock className="w-3 h-3" />
+                          <span>{service.duration}</span>
+                        </div>
+                        <p className="font-bold text-primary mt-1">₽{service.price}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {inCart ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleRemoveFromCart(service.id)}
+                            className="h-10 px-3 border-destructive text-destructive hover:bg-destructive/10"
+                          >
+                            <Minus className="w-4 h-4" />
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            onClick={() => handleAddToCart(service)}
+                            className="h-10 px-3"
+                          >
+                            <Plus className="w-4 h-4 mr-1" />
+                            {language === "ru" ? "В корзину" : "Add"}
+                          </Button>
+                        )}
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold text-primary">₽{service.price}</p>
-                      <ChevronRight className={`w-5 h-5 text-muted-foreground ml-auto transition-transform ${
-                        selectedService === service.id ? "rotate-90" : ""
-                      }`} />
-                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </TabsContent>
 
@@ -289,14 +335,36 @@ const ServiceProviderDetail = () => {
       </div>
 
       {/* Bottom CTA */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border">
-        <Button
-          onClick={() => navigate(`/services/booking/${id}`)}
-          className="w-full h-14 text-lg font-semibold gap-2"
-        >
-          <Calendar className="w-5 h-5" />
-          {language === "ru" ? "Забронировать" : "Book Now"}
-        </Button>
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border space-y-2">
+        {servicesInCart.length > 0 && (
+          <div className="flex items-center justify-between text-sm mb-2">
+            <span className="text-muted-foreground">
+              {language === "ru" ? `Услуг в корзине: ${servicesInCart.length}` : `Services in cart: ${servicesInCart.length}`}
+            </span>
+            <span className="font-bold text-primary">
+              ₽{servicesInCart.reduce((sum, item) => sum + item.price * item.quantity, 0)}
+            </span>
+          </div>
+        )}
+        <div className="flex gap-2">
+          {servicesInCart.length > 0 && (
+            <Button
+              variant="outline"
+              onClick={() => navigate("/cart")}
+              className="flex-1 h-14 text-lg font-semibold gap-2"
+            >
+              <ShoppingBag className="w-5 h-5" />
+              {language === "ru" ? "Корзина" : "Cart"}
+            </Button>
+          )}
+          <Button
+            onClick={() => navigate(`/services/booking/${id}`)}
+            className={`h-14 text-lg font-semibold gap-2 ${servicesInCart.length > 0 ? 'flex-1' : 'w-full'}`}
+          >
+            <Calendar className="w-5 h-5" />
+            {language === "ru" ? "Забронировать" : "Book Now"}
+          </Button>
+        </div>
       </div>
     </AppLayout>
   );
