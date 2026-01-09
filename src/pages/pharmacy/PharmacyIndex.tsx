@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Pill, Clock, MapPin, Star, Truck, Shield, Phone } from "lucide-react";
 
 export default function PharmacyIndex() {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const navigate = useNavigate();
   const { pharmacies, isLoading } = usePharmacies();
 
@@ -17,7 +17,7 @@ export default function PharmacyIndex() {
     <AppLayout>
       <PageContainer>
         <PageHeader 
-          title={language === 'ru' ? 'Аптеки' : 'Pharmacies'} 
+          title={t('pharmacy.title')} 
         />
 
         {/* Quick Actions */}
@@ -25,19 +25,19 @@ export default function PharmacyIndex() {
           <div className="bg-green-500/10 rounded-2xl p-4 border border-green-500/20">
             <Clock className="w-6 h-6 text-green-600 mb-2" />
             <h3 className="font-semibold text-sm">
-              {language === 'ru' ? '24/7 Аптеки' : '24/7 Pharmacies'}
+              {t('pharmacy.open24h')}
             </h3>
             <p className="text-xs text-muted-foreground">
-              {language === 'ru' ? 'Работаем круглосуточно' : 'Open around the clock'}
+              {t('pharmacy.openAroundClock')}
             </p>
           </div>
           <div className="bg-blue-500/10 rounded-2xl p-4 border border-blue-500/20">
             <Truck className="w-6 h-6 text-blue-600 mb-2" />
             <h3 className="font-semibold text-sm">
-              {language === 'ru' ? 'Быстрая доставка' : 'Fast Delivery'}
+              {t('pharmacy.fastDelivery')}
             </h3>
             <p className="text-xs text-muted-foreground">
-              {language === 'ru' ? 'От 30 минут' : 'From 30 min'}
+              {t('pharmacy.from30min')}
             </p>
           </div>
         </div>
@@ -47,7 +47,7 @@ export default function PharmacyIndex() {
         ) : pharmacies.length === 0 ? (
           <div className="text-center py-12">
             <Pill className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-            <p>{language === 'ru' ? 'Аптеки не найдены' : 'No pharmacies found'}</p>
+            <p>{t('pharmacy.noPharmaciesFound')}</p>
           </div>
         ) : (
           <div className="grid gap-4">
@@ -99,12 +99,12 @@ export default function PharmacyIndex() {
                         {pharmacy.delivery_available && (
                           <Badge variant="outline" className="text-[10px] px-1.5">
                             <Truck className="w-3 h-3 mr-0.5" />
-                            {language === 'ru' ? 'Доставка' : 'Delivery'}
+                            {t('pharmacy.delivery')}
                           </Badge>
                         )}
                         {pharmacy.has_pharmacist && (
                           <Badge variant="outline" className="text-[10px] px-1.5">
-                            {language === 'ru' ? 'Консультация' : 'Consult'}
+                            {t('pharmacy.consultation')}
                           </Badge>
                         )}
                       </div>
