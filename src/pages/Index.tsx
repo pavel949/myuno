@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Sparkles, UtensilsCrossed, Dumbbell, Stethoscope, 
   GraduationCap, Home, Car, Ticket, Flower2,
-  ArrowRight, MapPin, Search
+  ArrowRight, MapPin, Search, Wrench
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { triggerRipple } from '@/hooks/useRipple';
-import { Wrench } from 'lucide-react';
+import { AnimatedGrid, AnimatedCard, FadeInUp } from '@/components/layout/AnimatedList';
 
 const categories = [
   { id: 'beauty-spa', icon: Sparkles, path: '/beauty', color: 'from-pink-500 to-purple-500' },
@@ -114,40 +114,41 @@ const Index = () => {
         </div>
 
         {/* Categories Grid */}
-        <div>
+        <FadeInUp delay={0.1}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">{t('home.categories')}</h2>
           </div>
-          <div className="grid grid-cols-4 gap-3">
+          <AnimatedGrid className="grid grid-cols-4 gap-3" staggerDelay={0.05}>
             {categories.map((cat) => {
               const Icon = cat.icon;
               return (
-                <button
-                  key={cat.id}
-                  onClick={(e) => {
-                    triggerRipple(e);
-                    navigate(cat.path);
-                  }}
-                  className="relative overflow-hidden flex flex-col items-center p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all group active:scale-95"
-                >
-                  <div className={cn(
-                    "w-10 h-10 rounded-xl flex items-center justify-center mb-2 bg-gradient-to-br",
-                    cat.color,
-                    "group-hover:scale-110 transition-transform"
-                  )}>
-                    <Icon className="w-5 h-5 text-white" />
-                  </div>
-                  <span className="text-xs font-medium text-center leading-tight truncate w-full">
-                    {t(`category.${cat.id}`)}
-                  </span>
-                </button>
+                <AnimatedCard key={cat.id}>
+                  <button
+                    onClick={(e) => {
+                      triggerRipple(e);
+                      navigate(cat.path);
+                    }}
+                    className="w-full relative overflow-hidden flex flex-col items-center p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all group active:scale-95"
+                  >
+                    <div className={cn(
+                      "w-10 h-10 rounded-xl flex items-center justify-center mb-2 bg-gradient-to-br",
+                      cat.color,
+                      "group-hover:scale-110 transition-transform"
+                    )}>
+                      <Icon className="w-5 h-5 text-white" />
+                    </div>
+                    <span className="text-xs font-medium text-center leading-tight truncate w-full">
+                      {t(`category.${cat.id}`)}
+                    </span>
+                  </button>
+                </AnimatedCard>
               );
             })}
-          </div>
-        </div>
+          </AnimatedGrid>
+        </FadeInUp>
 
         {/* Featured Services */}
-        <div>
+        <FadeInUp delay={0.2}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">{t('home.featuredServices')}</h2>
             <button 
@@ -158,26 +159,27 @@ const Index = () => {
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <AnimatedGrid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" staggerDelay={0.1}>
             {featuredServices.map((service) => (
-              <UnifiedCard
-                key={service.id}
-                id={service.id}
-                image={service.image}
-                title={language === 'ru' ? service.titleRu : service.title}
-                rating={service.rating}
-                reviewCount={service.reviewCount}
-                price={service.price}
-                priceLabel={t('label.from')}
-                location={language === 'ru' ? service.locationRu : service.location}
-                isVerified={service.isVerified}
-                isNew={service.isNew}
-                isFeatured={service.isFeatured}
-                onClick={() => navigate(service.path)}
-              />
+              <AnimatedCard key={service.id}>
+                <UnifiedCard
+                  id={service.id}
+                  image={service.image}
+                  title={language === 'ru' ? service.titleRu : service.title}
+                  rating={service.rating}
+                  reviewCount={service.reviewCount}
+                  price={service.price}
+                  priceLabel={t('label.from')}
+                  location={language === 'ru' ? service.locationRu : service.location}
+                  isVerified={service.isVerified}
+                  isNew={service.isNew}
+                  isFeatured={service.isFeatured}
+                  onClick={() => navigate(service.path)}
+                />
+              </AnimatedCard>
             ))}
-          </div>
-        </div>
+          </AnimatedGrid>
+        </FadeInUp>
 
         {/* Quick Access Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
