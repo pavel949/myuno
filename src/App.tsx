@@ -19,6 +19,7 @@ import BeautySpaIndex from "./pages/beauty/BeautySpaIndex";
 import SalonDetail from "./pages/beauty/SalonDetail";
 import BeautyBooking from "./pages/beauty/BeautyBooking";
 import BeautyServices from "./pages/beauty/BeautyServices";
+import BeautyMap from "./pages/beauty/BeautyMap";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ const App = () => (
               <Route path="/beauty/salon/:id" element={<SalonDetail />} />
               <Route path="/beauty/booking/:id" element={<BeautyBooking />} />
               <Route path="/beauty/services" element={<BeautyServices />} />
+              <Route path="/beauty/map" element={<BeautyMap />} />
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
