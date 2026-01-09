@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Sparkles, UtensilsCrossed, Dumbbell, Stethoscope, 
   GraduationCap, Home, Car, Ticket, ShoppingBag, Wrench,
-  ArrowRight, MapPin
+  ArrowRight, MapPin, Search
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { UnifiedCard } from '@/components/uno/UnifiedCard';
 import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
 
 const categories = [
   { id: 'beauty-spa', icon: Sparkles, path: '/beauty', color: 'from-pink-500 to-purple-500' },
@@ -70,6 +71,19 @@ const Index = () => {
   return (
     <AppLayout>
       <div className="px-4 py-6 space-y-8">
+        {/* Search Bar */}
+        <div 
+          onClick={() => navigate('/search')}
+          className="relative cursor-pointer"
+        >
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          <Input
+            placeholder={language === 'ru' ? 'Поиск услуг, мест, событий...' : 'Search services, places, events...'}
+            className="pl-10 cursor-pointer"
+            readOnly
+          />
+        </div>
+
         {/* Hero Section */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-background p-6 border border-primary/20">
           <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-3xl" />
