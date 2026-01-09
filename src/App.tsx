@@ -47,6 +47,11 @@ import MedicalIndex from "./pages/medical/MedicalIndex";
 import ClinicDetail from "./pages/medical/ClinicDetail";
 import MedicalAppointment from "./pages/medical/MedicalAppointment";
 
+// Events Mini-App
+import EventsIndex from "./pages/events/EventsIndex";
+import EventDetail from "./pages/events/EventDetail";
+import EventBooking from "./pages/events/EventBooking";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -97,6 +102,10 @@ const App = () => (
               <Route path="/medical" element={<MedicalIndex />} />
               <Route path="/medical/clinic/:id" element={<ClinicDetail />} />
               <Route path="/medical/appointment/:id" element={<MedicalAppointment />} />
+              {/* Events Mini-App Routes */}
+              <Route path="/events" element={<EventsIndex />} />
+              <Route path="/events/:id" element={<EventDetail />} />
+              <Route path="/events/booking/:id" element={<EventBooking />} />
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
