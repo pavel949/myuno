@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Settings, HelpCircle, LogOut, ChevronRight, Shield, Bell, CreditCard, Heart, Clock, Wallet, Palette } from 'lucide-react';
+import { User, Settings, HelpCircle, LogOut, ChevronRight, Shield, Bell, CreditCard, Heart, Clock, Wallet, Palette, Gift } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,6 +10,7 @@ import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { SectionCard, SectionTitle } from '@/components/uno/SectionCard';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
+import { ReferralCard } from '@/components/uno/ReferralCard';
 
 export default function Profile() {
   const { t, language } = useLanguage();
@@ -90,6 +91,9 @@ export default function Profile() {
           </span>
           <LanguageSwitcher variant="toggle" size="sm" />
         </SectionCard>
+
+        {/* Referral program */}
+        <ReferralCard variant="compact" />
 
         {/* Menu items */}
         <SectionCard noPadding className="overflow-hidden divide-y divide-border">

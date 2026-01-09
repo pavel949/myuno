@@ -891,6 +891,93 @@ export type Database = {
         }
         Relationships: []
       }
+      referral_codes: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
+      referral_settings: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          min_booking_amount: number | null
+          referred_bonus: number
+          referrer_bonus: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          min_booking_amount?: number | null
+          referred_bonus?: number
+          referrer_bonus?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          min_booking_amount?: number | null
+          referred_bonus?: number
+          referrer_bonus?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          bonus_paid_at: string | null
+          created_at: string
+          id: string
+          referred_bonus: number
+          referred_id: string
+          referrer_bonus: number
+          referrer_id: string
+          status: string
+        }
+        Insert: {
+          bonus_paid_at?: string | null
+          created_at?: string
+          id?: string
+          referred_bonus?: number
+          referred_id: string
+          referrer_bonus?: number
+          referrer_id: string
+          status?: string
+        }
+        Update: {
+          bonus_paid_at?: string | null
+          created_at?: string
+          id?: string
+          referred_bonus?: number
+          referred_id?: string
+          referrer_bonus?: number
+          referrer_id?: string
+          status?: string
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           category_id: string | null
@@ -1130,6 +1217,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_referral_code: {
+        Args: { p_code: string; p_referred_id: string }
+        Returns: boolean
+      }
+      generate_referral_code: { Args: { p_user_id: string }; Returns: string }
       get_or_create_wallet: {
         Args: { p_user_id: string }
         Returns: {
