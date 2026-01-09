@@ -9,9 +9,7 @@ import {
   Calendar, 
   Tag, 
   Info,
-  ChevronLeft,
   Settings,
-  Plus,
   Sparkles,
   RefreshCw
 } from 'lucide-react';
@@ -19,11 +17,14 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useAuth } from '@/contexts/AuthContext';
+import { PageContainer } from '@/components/uno/PageContainer';
+import { PageHeader } from '@/components/uno/PageHeader';
+import { SectionCard } from '@/components/uno/SectionCard';
+import { EmptyState } from '@/components/uno/EmptyState';
 import { formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 
@@ -53,7 +54,7 @@ export default function Notifications() {
       case 'booking':
         return <Calendar className="w-5 h-5 text-primary" />;
       case 'promotion':
-        return <Tag className="w-5 h-5 text-green-500" />;
+        return <Tag className="w-5 h-5 text-success" />;
       default:
         return <Info className="w-5 h-5 text-muted-foreground" />;
     }
@@ -69,58 +70,46 @@ export default function Notifications() {
   if (!user) {
     return (
       <AppLayout>
-        <div className="p-4">
-          <div className="flex items-center gap-3 mb-6">
-            <button onClick={() => navigate(-1)} className="p-2 hover:bg-secondary rounded-lg">
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <h1 className="text-xl font-semibold">
-              {language === 'ru' ? 'Уведомления' : 'Notifications'}
-            </h1>
-          </div>
-          <Card>
-            <CardContent className="p-8 text-center">
-              <Bell className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">
-                {language === 'ru' 
-                  ? 'Войдите, чтобы управлять уведомлениями' 
-                  : 'Sign in to manage notifications'}
-              </p>
-              <Button className="mt-4" onClick={() => navigate('/auth')}>
+        <PageContainer>
+          <PageHeader 
+            title={language === 'ru' ? 'Уведомления' : 'Notifications'} 
+            showBack 
+          />
+          <EmptyState
+            icon={Bell}
+            title={language === 'ru' ? 'Войдите в аккаунт' : 'Sign in required'}
+            description={language === 'ru' 
+              ? 'Войдите, чтобы управлять уведомлениями' 
+              : 'Sign in to manage notifications'}
+            action={
+              <Button onClick={() => navigate('/auth')}>
                 {t('auth.login')}
               </Button>
-            </CardContent>
-          </Card>
-        </div>
+            }
+          />
+        </PageContainer>
       </AppLayout>
     );
   }
 
   return (
     <AppLayout>
-      <div className="p-4 pb-24">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <button onClick={() => navigate(-1)} className="p-2 hover:bg-secondary rounded-lg">
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <h1 className="text-xl font-semibold">
-              {language === 'ru' ? 'Уведомления' : 'Notifications'}
-            </h1>
-            {unreadCount > 0 && (
-              <Badge variant="secondary">{unreadCount}</Badge>
-            )}
-          </div>
-          {notifications.length > 0 && unreadCount > 0 && (
-            <Button variant="ghost" size="sm" onClick={markAllAsRead}>
-              <CheckCheck className="w-4 h-4 mr-2" />
-              {language === 'ru' ? 'Прочитать все' : 'Mark all read'}
-            </Button>
-          )}
-        </div>
+      <PageContainer>
+        <PageHeader
+          title={language === 'ru' ? 'Уведомления' : 'Notifications'}
+          showBack
+          badge={unreadCount}
+          actions={
+            notifications.length > 0 && unreadCount > 0 && (
+              <Button variant="ghost" size="sm" onClick={markAllAsRead}>
+                <CheckCheck className="w-4 h-4 mr-2" />
+                {language === 'ru' ? 'Прочитать все' : 'Mark all read'}
+              </Button>
+            )
+          }
+        />
 
-        <Tabs defaultValue="notifications">
+        <Tabs defaultValue="notifications" className="w-full">
           <TabsList className="w-full mb-4">
             <TabsTrigger value="notifications" className="flex-1">
               <Bell className="w-4 h-4 mr-2" />
@@ -133,84 +122,77 @@ export default function Notifications() {
           </TabsList>
 
           {/* Notifications List */}
-          <TabsContent value="notifications" className="space-y-3">
+          <TabsContent value="notifications" className="space-y-3 mt-0">
             {isLoading ? (
               <div className="space-y-3">
                 {[1, 2, 3].map(i => (
-                  <Card key={i} className="animate-pulse">
-                    <CardContent className="p-4">
-                      <div className="h-4 bg-secondary rounded w-3/4 mb-2" />
-                      <div className="h-3 bg-secondary rounded w-1/2" />
-                    </CardContent>
-                  </Card>
+                  <SectionCard key={i} className="animate-pulse">
+                    <div className="h-4 bg-muted rounded w-3/4 mb-2" />
+                    <div className="h-3 bg-muted rounded w-1/2" />
+                  </SectionCard>
                 ))}
               </div>
             ) : notifications.length === 0 ? (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <Bell className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">
-                    {language === 'ru' 
-                      ? 'Нет уведомлений' 
-                      : 'No notifications'}
-                  </p>
-                </CardContent>
-              </Card>
+              <EmptyState
+                icon={Bell}
+                title={language === 'ru' ? 'Нет уведомлений' : 'No notifications'}
+                description={language === 'ru' 
+                  ? 'Здесь появятся ваши уведомления' 
+                  : 'Your notifications will appear here'}
+              />
             ) : (
               notifications.map(notification => (
-                <Card 
+                <SectionCard 
                   key={notification.id}
                   className={`transition-colors ${!notification.is_read ? 'bg-primary/5 border-primary/20' : ''}`}
                 >
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="p-2 bg-secondary rounded-lg">
-                        {getNotificationIcon(notification.type)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <h3 className="font-medium line-clamp-1">{notification.title}</h3>
-                          {!notification.is_read && (
-                            <span className="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-2" />
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                          {notification.body}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-2">
-                          {formatTime(notification.created_at)}
-                        </p>
-                      </div>
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-secondary rounded-xl">
+                      {getNotificationIcon(notification.type)}
                     </div>
-                    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
-                      {!notification.is_read && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => markAsRead(notification.id)}
-                        >
-                          <Check className="w-4 h-4 mr-2" />
-                          {language === 'ru' ? 'Прочитано' : 'Mark read'}
-                        </Button>
-                      )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="font-medium line-clamp-1">{notification.title}</h3>
+                        {!notification.is_read && (
+                          <span className="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-2" />
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                        {notification.body}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {formatTime(notification.created_at)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
+                    {!notification.is_read && (
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        className="text-destructive hover:text-destructive"
-                        onClick={() => deleteNotification(notification.id)}
+                        onClick={() => markAsRead(notification.id)}
                       >
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        {language === 'ru' ? 'Удалить' : 'Delete'}
+                        <Check className="w-4 h-4 mr-2" />
+                        {language === 'ru' ? 'Прочитано' : 'Mark read'}
                       </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+                    )}
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => deleteNotification(notification.id)}
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      {language === 'ru' ? 'Удалить' : 'Delete'}
+                    </Button>
+                  </div>
+                </SectionCard>
               ))
             )}
           </TabsContent>
 
           {/* Settings */}
-          <TabsContent value="settings" className="space-y-4">
+          <TabsContent value="settings" className="space-y-4 mt-0">
             {/* Push Notifications Toggle */}
             <Card>
               <CardHeader className="pb-3">
@@ -283,7 +265,7 @@ export default function Notifications() {
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <Tag className="w-5 h-5 text-green-500" />
+                    <Tag className="w-5 h-5 text-success" />
                     <div>
                       <p className="text-sm font-medium">
                         {language === 'ru' ? 'Акции и скидки' : 'Promotions & deals'}
@@ -303,7 +285,7 @@ export default function Notifications() {
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <Info className="w-5 h-5 text-blue-500" />
+                    <Info className="w-5 h-5 text-info" />
                     <div>
                       <p className="text-sm font-medium">
                         {language === 'ru' ? 'Обновления статуса' : 'Status updates'}
@@ -334,8 +316,8 @@ export default function Notifications() {
               <CardContent className="space-y-3">
                 <p className="text-sm text-muted-foreground">
                   {language === 'ru' 
-                    ? 'Проверить предстоящие бронирования и отправить напоминания пользователям' 
-                    : 'Check upcoming bookings and send reminders to users'}
+                    ? 'Проверить предстоящие бронирования и отправить напоминания' 
+                    : 'Check upcoming bookings and send reminders'}
                 </p>
                 <Button 
                   variant="default"
@@ -343,18 +325,13 @@ export default function Notifications() {
                   onClick={triggerBookingReminders}
                 >
                   <Calendar className="w-4 h-4 mr-2" />
-                  {language === 'ru' ? 'Запустить проверку напоминаний' : 'Trigger Reminder Check'}
+                  {language === 'ru' ? 'Запустить проверку' : 'Trigger Check'}
                 </Button>
-                <p className="text-xs text-muted-foreground">
-                  {language === 'ru' 
-                    ? 'Напоминания отправляются автоматически каждый час' 
-                    : 'Reminders are sent automatically every hour'}
-                </p>
               </CardContent>
             </Card>
 
             {/* Demo Notifications */}
-            <Card className="border-dashed border-muted-foreground/50">
+            <Card className="border-dashed border-muted-foreground/30">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-primary" />
@@ -362,9 +339,9 @@ export default function Notifications() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <p className="text-sm text-muted-foreground mb-4">
+                <p className="text-sm text-muted-foreground">
                   {language === 'ru' 
-                    ? 'Создайте тестовые уведомления для проверки системы' 
+                    ? 'Создайте тестовые уведомления для проверки' 
                     : 'Create test notifications to check the system'}
                 </p>
                 <div className="grid gap-2">
@@ -381,7 +358,7 @@ export default function Notifications() {
                     className="justify-start"
                     onClick={() => createDemoNotification('promotion')}
                   >
-                    <Tag className="w-4 h-4 mr-2 text-green-500" />
+                    <Tag className="w-4 h-4 mr-2 text-success" />
                     {language === 'ru' ? 'Акция / Скидка' : 'Promotion / Discount'}
                   </Button>
                   <Button 
@@ -389,7 +366,7 @@ export default function Notifications() {
                     className="justify-start"
                     onClick={() => createDemoNotification('status')}
                   >
-                    <Info className="w-4 h-4 mr-2 text-blue-500" />
+                    <Info className="w-4 h-4 mr-2 text-info" />
                     {language === 'ru' ? 'Обновление статуса' : 'Status Update'}
                   </Button>
                 </div>
@@ -397,7 +374,7 @@ export default function Notifications() {
             </Card>
           </TabsContent>
         </Tabs>
-      </div>
+      </PageContainer>
     </AppLayout>
   );
 }
