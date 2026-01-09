@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Star, MapPin, Clock, Phone, Globe, 
@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
+import { useViewHistory } from '@/hooks/useViewHistory';
 
 const gymData = {
   id: 'gym-1',
@@ -62,8 +63,24 @@ const GymDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { trackView } = useViewHistory();
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedPrice, setSelectedPrice] = useState(gymData.prices[0]);
+
+  // Track view when page loads
+  useEffect(() => {
+    if (id) {
+      trackView(id, 'gym', {
+        name: gymData.name,
+        name_en: gymData.name,
+        name_ru: gymData.nameRu,
+        image: gymData.images[0],
+        rating: gymData.rating,
+        price: gymData.prices[0].price,
+        location: gymData.location,
+      });
+    }
+  }, [id]);
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
