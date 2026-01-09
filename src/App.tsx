@@ -85,6 +85,9 @@ import ViewHistory from "./pages/ViewHistory";
 // Cart
 import Cart from "./pages/Cart";
 
+// Wallet
+import Wallet from "./pages/Wallet";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -108,6 +111,7 @@ const App = () => (
                 <Route path="/notifications" element={<Notifications />} />
                 <Route path="/history" element={<ViewHistory />} />
                 <Route path="/cart" element={<Cart />} />
+                <Route path="/wallet" element={<Wallet />} />
                 
                 {/* Beauty & Spa Mini-App Routes */}
                 <Route path="/beauty" element={<BeautySpaIndex />} />
