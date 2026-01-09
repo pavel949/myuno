@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { triggerRipple } from "@/hooks/useRipple";
 
 const courses = [
   {
@@ -301,8 +302,11 @@ export default function EducationIndex() {
             {filteredCourses.map(course => (
               <div
                 key={course.id}
-                onClick={() => navigate(`/education/course/${course.id}`)}
-                className="bg-card rounded-xl shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+                onClick={(e) => {
+                  triggerRipple(e);
+                  navigate(`/education/course/${course.id}`);
+                }}
+                className="relative overflow-hidden bg-card rounded-xl shadow-sm cursor-pointer hover:shadow-md transition-shadow active:scale-[0.98]"
               >
                 <div className="flex">
                   <img
@@ -352,8 +356,11 @@ export default function EducationIndex() {
             {filteredTutors.map(tutor => (
               <div
                 key={tutor.id}
-                onClick={() => navigate(`/education/tutor/${tutor.id}`)}
-                className="bg-card rounded-xl shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+                onClick={(e) => {
+                  triggerRipple(e);
+                  navigate(`/education/tutor/${tutor.id}`);
+                }}
+                className="relative overflow-hidden bg-card rounded-xl shadow-sm cursor-pointer hover:shadow-md transition-shadow active:scale-[0.98]"
               >
                 <div className="flex">
                   <img

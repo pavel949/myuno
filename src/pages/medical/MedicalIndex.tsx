@@ -9,6 +9,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { triggerRipple } from '@/hooks/useRipple';
 
 const specialties = [
   { id: 'all', labelEn: 'All', labelRu: 'Все', icon: Stethoscope },
@@ -192,8 +193,11 @@ const MedicalIndex = () => {
           {filteredClinics.map(clinic => (
             <div
               key={clinic.id}
-              onClick={() => navigate(`/medical/clinic/${clinic.id}`)}
-              className="bg-card rounded-xl border border-border overflow-hidden cursor-pointer hover:border-primary/30 transition-all"
+              onClick={(e) => {
+                triggerRipple(e);
+                navigate(`/medical/clinic/${clinic.id}`);
+              }}
+              className="relative overflow-hidden bg-card rounded-xl border border-border cursor-pointer hover:border-primary/30 transition-all active:scale-[0.98]"
             >
               <div className="flex">
                 <div className="w-28 h-28 shrink-0">

@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { triggerRipple } from '@/hooks/useRipple';
 
 const gymTypes = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -198,8 +199,11 @@ const FitnessIndex = () => {
           {filteredGyms.map(gym => (
             <div
               key={gym.id}
-              onClick={() => navigate(`/fitness/gym/${gym.id}`)}
-              className="bg-card rounded-xl border border-border overflow-hidden cursor-pointer hover:border-primary/30 transition-all"
+              onClick={(e) => {
+                triggerRipple(e);
+                navigate(`/fitness/gym/${gym.id}`);
+              }}
+              className="relative overflow-hidden bg-card rounded-xl border border-border cursor-pointer hover:border-primary/30 transition-all active:scale-[0.98]"
             >
               <div className="relative h-40">
                 <img

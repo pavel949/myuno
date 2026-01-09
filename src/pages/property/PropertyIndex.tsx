@@ -8,6 +8,7 @@ import { FilterChip } from '@/components/uno/FilterChip';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { triggerRipple } from '@/hooks/useRipple';
 
 // Demo properties data
 const demoProperties = [
@@ -266,8 +267,11 @@ export default function PropertyIndex() {
             {filteredProperties.map((property) => (
               <div
                 key={property.id}
-                onClick={() => navigate(`/property/${property.id}`)}
-                className="group cursor-pointer rounded-xl overflow-hidden bg-card border border-border/50 hover:border-primary/30 transition-all hover:shadow-lg"
+                onClick={(e) => {
+                  triggerRipple(e);
+                  navigate(`/property/${property.id}`);
+                }}
+                className="relative overflow-hidden group cursor-pointer rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all hover:shadow-lg active:scale-[0.98]"
               >
                 {/* Image */}
                 <div className="relative aspect-[16/10] overflow-hidden">

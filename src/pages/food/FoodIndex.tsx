@@ -6,6 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { FilterChip } from '@/components/uno/FilterChip';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { triggerRipple } from '@/hooks/useRipple';
 
 // Demo restaurants data
 const demoRestaurants = [
@@ -195,10 +196,11 @@ export default function FoodIndex() {
           ].map((cat, i) => (
             <button
               key={i}
-              className="flex flex-col items-center p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all"
+              onClick={(e) => triggerRipple(e)}
+              className="relative overflow-hidden flex flex-col items-center p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all active:scale-95"
             >
               <span className="text-2xl mb-1">{cat.icon}</span>
-              <span className="text-xs font-medium text-center">{cat.label}</span>
+              <span className="text-xs font-medium text-center truncate w-full">{cat.label}</span>
             </button>
           ))}
         </div>
@@ -236,8 +238,11 @@ export default function FoodIndex() {
             {openRestaurants.map((restaurant) => (
               <div
                 key={restaurant.id}
-                onClick={() => navigate(`/food/restaurant/${restaurant.id}`)}
-                className="flex gap-4 p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all cursor-pointer group"
+                onClick={(e) => {
+                  triggerRipple(e);
+                  navigate(`/food/restaurant/${restaurant.id}`);
+                }}
+                className="relative overflow-hidden flex gap-4 p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all cursor-pointer group active:scale-[0.98]"
               >
                 {/* Image */}
                 <div className="relative w-24 h-24 rounded-xl overflow-hidden flex-shrink-0">

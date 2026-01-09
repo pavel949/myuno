@@ -8,6 +8,7 @@ import { FilterChip } from '@/components/uno/FilterChip';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { triggerRipple } from '@/hooks/useRipple';
 
 // Demo salon data
 const demoSalons = [
@@ -165,11 +166,14 @@ export default function BeautySpaIndex() {
             ].map((service, i) => (
               <button
                 key={i}
-                onClick={() => navigate('/beauty/services')}
-                className="flex flex-col items-center p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all"
+                onClick={(e) => {
+                  triggerRipple(e);
+                  navigate('/beauty/services');
+                }}
+                className="relative overflow-hidden flex flex-col items-center p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all active:scale-95"
               >
                 <span className="text-2xl mb-1">{service.icon}</span>
-                <span className="text-xs font-medium text-center">{service.label}</span>
+                <span className="text-xs font-medium text-center truncate w-full">{service.label}</span>
                 <span className="text-xs text-primary mt-1">{service.price}</span>
               </button>
             ))}
