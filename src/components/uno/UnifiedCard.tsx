@@ -2,6 +2,7 @@ import React from 'react';
 import { Star, MapPin, Clock, BadgeCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { triggerRipple } from '@/hooks/useRipple';
 
 interface UnifiedCardProps {
   id: string;
@@ -43,9 +44,14 @@ export function UnifiedCard({
 }: UnifiedCardProps) {
   const { t } = useLanguage();
 
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    triggerRipple(e);
+    onClick?.();
+  };
+
   return (
     <div
-      onClick={onClick}
+      onClick={handleClick}
       className={cn(
         "group relative overflow-hidden rounded-xl bg-card border border-border/50",
         "transition-all duration-300 ease-out cursor-pointer",
