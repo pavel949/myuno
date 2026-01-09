@@ -1,13 +1,14 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Settings, HelpCircle, LogOut, ChevronRight, Shield, Bell, CreditCard, Heart, Clock, Wallet } from 'lucide-react';
+import { User, Settings, HelpCircle, LogOut, ChevronRight, Shield, Bell, CreditCard, Heart, Clock, Wallet, Palette } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { PremiumButton } from '@/components/uno/PremiumButton';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
+import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { PageContainer } from '@/components/uno/PageContainer';
-import { SectionCard } from '@/components/uno/SectionCard';
+import { SectionCard, SectionTitle } from '@/components/uno/SectionCard';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 
 export default function Profile() {
@@ -69,6 +70,17 @@ export default function Profile() {
           <PremiumButton variant="outline" size="sm">
             {t('action.edit')}
           </PremiumButton>
+        </SectionCard>
+
+        {/* Theme switcher */}
+        <SectionCard>
+          <div className="flex items-center gap-2 mb-3">
+            <Palette className="w-5 h-5 text-muted-foreground" />
+            <span className="font-medium">
+              {language === 'ru' ? 'Тема оформления' : 'Theme'}
+            </span>
+          </div>
+          <ThemeSwitcher variant="select" />
         </SectionCard>
 
         {/* Language switcher */}
