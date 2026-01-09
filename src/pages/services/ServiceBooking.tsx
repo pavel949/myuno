@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
+import { useWallet } from "@/hooks/useWallet";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +23,8 @@ import {
   Plus,
   Minus,
   Trash2,
+  Banknote,
+  Loader2,
 } from "lucide-react";
 import { triggerRipple } from "@/hooks/useRipple";
 import { toast } from "sonner";
@@ -31,11 +34,13 @@ const ServiceBooking = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { items, getItemsByProvider, addItem, removeItem, clearByProvider } = useCart();
+  const { balance, payFromWallet, hasEnoughBalance, isLoading: isWalletLoading } = useWallet();
   
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<string>("cash");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -70,11 +75,6 @@ const ServiceBooking = () => {
     "09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00", "18:00"
   ];
 
-  const paymentMethods = [
-    { id: "cash", icon: Wallet, name: language === "ru" ? "Наличными" : "Cash" },
-    { id: "card", icon: CreditCard, name: language === "ru" ? "Картой" : "Card" },
-  ];
-
   const toggleService = (serviceId: string) => {
     setSelectedServices(prev => 
       prev.includes(serviceId) 
@@ -87,8 +87,24 @@ const ServiceBooking = () => {
   const servicesTotal = selectedServicesData.reduce((sum, s) => sum + s.price, 0);
   const serviceFee = 100;
   const totalPrice = servicesTotal + serviceFee;
+  
+  const canPayWithWallet = hasEnoughBalance(totalPrice);
 
-  const handleBooking = () => {
+  const paymentMethods = [
+    { 
+      id: "wallet", 
+      icon: Wallet, 
+      name: language === "ru" ? "Кошелёк" : "Wallet",
+      subtitle: isWalletLoading 
+        ? (language === "ru" ? "Загрузка..." : "Loading...")
+        : `₽${balance.toLocaleString()}`,
+      disabled: !canPayWithWallet,
+    },
+    { id: "cash", icon: Banknote, name: language === "ru" ? "Наличными" : "Cash" },
+    { id: "card", icon: CreditCard, name: language === "ru" ? "Картой" : "Card" },
+  ];
+
+  const handleBooking = async () => {
     if (!selectedDate || !selectedTime || selectedServices.length === 0) {
       toast.error(language === "ru" ? "Выберите услуги, дату и время" : "Select services, date and time");
       return;
@@ -98,13 +114,41 @@ const ServiceBooking = () => {
       return;
     }
 
-    // Clear services from cart after booking
-    if (id) {
-      clearByProvider(id);
-    }
+    setIsSubmitting(true);
 
-    toast.success(language === "ru" ? "Заявка отправлена!" : "Booking submitted!");
-    navigate("/bookings");
+    try {
+      // If paying with wallet, deduct balance first
+      if (paymentMethod === 'wallet') {
+        const result = await payFromWallet(
+          totalPrice,
+          `Service booking`,
+          `Бронирование услуги`,
+          'service_booking'
+        );
+        
+        if (!result.success) {
+          toast.error(language === "ru" ? "Недостаточно средств на кошельке" : "Insufficient wallet balance");
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      // Clear services from cart after booking
+      if (id) {
+        clearByProvider(id);
+      }
+
+      toast.success(
+        paymentMethod === 'wallet'
+          ? (language === "ru" ? "Заявка оплачена из кошелька!" : "Booking paid from wallet!")
+          : (language === "ru" ? "Заявка отправлена!" : "Booking submitted!")
+      );
+      navigate("/bookings");
+    } catch (error) {
+      toast.error(language === "ru" ? "Ошибка при бронировании" : "Booking failed");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -267,24 +311,36 @@ const ServiceBooking = () => {
           <h2 className="text-lg font-semibold mb-3">
             {language === "ru" ? "Способ оплаты" : "Payment Method"}
           </h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-2">
             {paymentMethods.map((method) => {
               const Icon = method.icon;
+              const isDisabled = method.disabled;
               return (
                 <button
                   key={method.id}
                   onClick={(e) => {
+                    if (isDisabled) return;
                     triggerRipple(e);
                     setPaymentMethod(method.id);
                   }}
-                  className={`relative overflow-hidden flex items-center justify-center gap-2 p-4 rounded-xl border transition-all active:scale-95 ${
-                    paymentMethod === method.id
-                      ? "border-primary bg-primary/10"
-                      : "border-border bg-card hover:border-primary/50"
+                  disabled={isDisabled}
+                  className={`relative overflow-hidden flex flex-col items-center justify-center gap-1 p-3 rounded-xl border transition-all active:scale-95 ${
+                    isDisabled
+                      ? "opacity-50 cursor-not-allowed border-border/50 bg-muted/50"
+                      : paymentMethod === method.id
+                        ? "border-primary bg-primary/10"
+                        : "border-border bg-card hover:border-primary/50"
                   }`}
                 >
-                  <Icon className="w-5 h-5" />
-                  <span className="font-medium">{method.name}</span>
+                  {isWalletLoading && method.id === 'wallet' ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <Icon className="w-5 h-5" />
+                  )}
+                  <span className="font-medium text-sm">{method.name}</span>
+                  {method.subtitle && (
+                    <span className="text-xs text-muted-foreground">{method.subtitle}</span>
+                  )}
                 </button>
               );
             })}
@@ -325,11 +381,17 @@ const ServiceBooking = () => {
 
         <Button
           onClick={handleBooking}
-          disabled={selectedServices.length === 0}
+          disabled={selectedServices.length === 0 || isSubmitting}
           className="w-full h-14 text-lg font-semibold gap-2"
         >
-          <CheckCircle2 className="w-5 h-5" />
-          {language === "ru" ? "Подтвердить бронирование" : "Confirm Booking"}
+          {isSubmitting ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            <CheckCircle2 className="w-5 h-5" />
+          )}
+          {isSubmitting 
+            ? (language === "ru" ? "Обработка..." : "Processing...")
+            : (language === "ru" ? "Подтвердить бронирование" : "Confirm Booking")}
         </Button>
       </div>
     </AppLayout>
