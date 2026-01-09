@@ -1081,6 +1081,172 @@ export type Database = {
         }
         Relationships: []
       }
+      tour_bookings: {
+        Row: {
+          booking_date: string
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          currency: string | null
+          id: string
+          notes: string | null
+          participants: number
+          start_time: string
+          status: string | null
+          total_amount: number
+          tour_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          booking_date: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          notes?: string | null
+          participants?: number
+          start_time: string
+          status?: string | null
+          total_amount: number
+          tour_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          booking_date?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          notes?: string | null
+          participants?: number
+          start_time?: string
+          status?: string | null
+          total_amount?: number
+          tour_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tour_bookings_tour_id_fkey"
+            columns: ["tour_id"]
+            isOneToOne: false
+            referencedRelation: "tours"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tours: {
+        Row: {
+          available_days: string[] | null
+          category: string | null
+          cover_image: string | null
+          created_at: string
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          difficulty: string | null
+          duration_hours: number | null
+          excludes: string[] | null
+          highlights: string[] | null
+          id: string
+          images: string[] | null
+          includes: string[] | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          itinerary: Json | null
+          max_participants: number | null
+          meeting_point: string | null
+          meeting_point_lat: number | null
+          meeting_point_lng: number | null
+          price: number | null
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          start_times: string[] | null
+          title_en: string
+          title_ru: string
+          updated_at: string
+        }
+        Insert: {
+          available_days?: string[] | null
+          category?: string | null
+          cover_image?: string | null
+          created_at?: string
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          difficulty?: string | null
+          duration_hours?: number | null
+          excludes?: string[] | null
+          highlights?: string[] | null
+          id?: string
+          images?: string[] | null
+          includes?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          itinerary?: Json | null
+          max_participants?: number | null
+          meeting_point?: string | null
+          meeting_point_lat?: number | null
+          meeting_point_lng?: number | null
+          price?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          start_times?: string[] | null
+          title_en: string
+          title_ru: string
+          updated_at?: string
+        }
+        Update: {
+          available_days?: string[] | null
+          category?: string | null
+          cover_image?: string | null
+          created_at?: string
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          difficulty?: string | null
+          duration_hours?: number | null
+          excludes?: string[] | null
+          highlights?: string[] | null
+          id?: string
+          images?: string[] | null
+          includes?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          itinerary?: Json | null
+          max_participants?: number | null
+          meeting_point?: string | null
+          meeting_point_lat?: number | null
+          meeting_point_lng?: number | null
+          price?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          start_times?: string[] | null
+          title_en?: string
+          title_ru?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tours_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string

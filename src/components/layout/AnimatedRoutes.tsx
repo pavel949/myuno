@@ -150,6 +150,11 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/services/booking/:id" element={<PageTransition><ServiceBooking /></PageTransition>} />
         <Route path="/services/map" element={<PageTransition><ServicesMap /></PageTransition>} />
         
+        {/* Tours Mini-App Routes */}
+        <Route path="/tours" element={<PageTransition><ToursIndex /></PageTransition>} />
+        <Route path="/tours/:id" element={<PageTransition><TourDetail /></PageTransition>} />
+        <Route path="/tours/:id/book" element={<PageTransition><TourBooking /></PageTransition>} />
+        
         {/* Catch-all */}
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
       </Routes>
