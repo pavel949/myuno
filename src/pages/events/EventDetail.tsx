@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Star, MapPin, Clock, Calendar, Users,
-  Heart, Share2, CheckCircle, Info, AlertCircle
+  Share2, CheckCircle, Info, AlertCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { FavoriteButton } from '@/components/uno/FavoriteButton';
 
 const eventData = {
   id: 'event-2',
@@ -99,9 +100,18 @@ const EventDetail = () => {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex gap-2">
-            <Button variant="secondary" size="icon">
-              <Heart className="w-5 h-5" />
-            </Button>
+            <FavoriteButton
+              itemType="event"
+              itemId={id || 'event-2'}
+              itemData={{
+                title_en: eventData.name,
+                title_ru: eventData.nameRu,
+                image: eventData.images[0],
+                price: eventData.price,
+                category: eventData.category,
+              }}
+              variant="secondary"
+            />
             <Button variant="secondary" size="icon">
               <Share2 className="w-5 h-5" />
             </Button>

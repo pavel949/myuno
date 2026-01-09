@@ -1,15 +1,28 @@
 import { Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useFavorites } from '@/hooks/useFavorites';
 
 interface FavoriteButtonProps {
-  isFavorite: boolean;
-  onClick: () => void;
+  itemType: string;
+  itemId: string;
+  itemData?: any;
   size?: 'sm' | 'default' | 'lg';
+  variant?: 'ghost' | 'secondary' | 'outline';
   className?: string;
 }
 
-export function FavoriteButton({ isFavorite, onClick, size = 'default', className }: FavoriteButtonProps) {
+export function FavoriteButton({ 
+  itemType, 
+  itemId, 
+  itemData, 
+  size = 'default', 
+  variant = 'ghost',
+  className 
+}: FavoriteButtonProps) {
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const isActive = isFavorite(itemType, itemId);
+
   const sizeClasses = {
     sm: 'w-8 h-8',
     default: 'w-10 h-10',
@@ -22,19 +35,19 @@ export function FavoriteButton({ isFavorite, onClick, size = 'default', classNam
     lg: 'h-6 w-6'
   };
 
+  const handleClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    await toggleFavorite(itemType, itemId, itemData);
+  };
+
   return (
     <Button
-      variant="ghost"
+      variant={variant}
       size="icon"
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        onClick();
-      }}
+      onClick={handleClick}
       className={cn(
         sizeClasses[size],
-        'rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-all',
-        isFavorite && 'bg-red-500/20 hover:bg-red-500/30',
         className
       )}
     >
@@ -42,7 +55,7 @@ export function FavoriteButton({ isFavorite, onClick, size = 'default', classNam
         className={cn(
           iconSizes[size],
           'transition-all',
-          isFavorite ? 'fill-red-500 text-red-500' : 'text-white'
+          isActive ? 'fill-red-500 text-red-500' : ''
         )}
       />
     </Button>

@@ -1,17 +1,16 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Heart, GraduationCap, User, Trash2 } from 'lucide-react';
+import { Heart, GraduationCap, User, Trash2, Ticket, Home, Car, Stethoscope, Dumbbell } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useFavorites } from '@/hooks/useFavorites';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
 
-type FilterType = 'all' | 'course' | 'tutor';
+type FilterType = 'all' | 'course' | 'tutor' | 'event' | 'property' | 'vehicle' | 'clinic' | 'gym';
 
 export default function Favorites() {
-  const { t, language } = useLanguage();
+  const { language } = useLanguage();
   const navigate = useNavigate();
   const { favorites, loading, toggleFavorite } = useFavorites();
   const [filter, setFilter] = useState<FilterType>('all');
@@ -20,6 +19,11 @@ export default function Favorites() {
     { value: 'all', label: language === 'ru' ? 'Все' : 'All', icon: Heart },
     { value: 'course', label: language === 'ru' ? 'Курсы' : 'Courses', icon: GraduationCap },
     { value: 'tutor', label: language === 'ru' ? 'Репетиторы' : 'Tutors', icon: User },
+    { value: 'event', label: language === 'ru' ? 'События' : 'Events', icon: Ticket },
+    { value: 'property', label: language === 'ru' ? 'Недвижимость' : 'Property', icon: Home },
+    { value: 'vehicle', label: language === 'ru' ? 'Транспорт' : 'Transport', icon: Car },
+    { value: 'clinic', label: language === 'ru' ? 'Клиники' : 'Clinics', icon: Stethoscope },
+    { value: 'gym', label: language === 'ru' ? 'Фитнес' : 'Fitness', icon: Dumbbell },
   ];
 
   const filteredFavorites = filter === 'all' 
@@ -27,11 +31,30 @@ export default function Favorites() {
     : favorites.filter(f => f.item_type === filter);
 
   const handleNavigate = (item: any) => {
-    if (item.item_type === 'course') {
-      navigate(`/education/course/${item.item_id}`);
-    } else if (item.item_type === 'tutor') {
-      navigate(`/education/tutor/${item.item_id}`);
-    }
+    const routes: Record<string, string> = {
+      course: `/education/course/${item.item_id}`,
+      tutor: `/education/tutor/${item.item_id}`,
+      event: `/events/${item.item_id}`,
+      property: `/property/${item.item_id}`,
+      vehicle: `/transport/${item.item_id}`,
+      clinic: `/medical/clinic/${item.item_id}`,
+      gym: `/fitness/${item.item_id}`,
+    };
+    const route = routes[item.item_type];
+    if (route) navigate(route);
+  };
+
+  const getTypeLabel = (type: string) => {
+    const labels: Record<string, { en: string; ru: string }> = {
+      course: { en: 'Course', ru: 'Курс' },
+      tutor: { en: 'Tutor', ru: 'Репетитор' },
+      event: { en: 'Event', ru: 'Событие' },
+      property: { en: 'Property', ru: 'Недвижимость' },
+      vehicle: { en: 'Vehicle', ru: 'Транспорт' },
+      clinic: { en: 'Clinic', ru: 'Клиника' },
+      gym: { en: 'Gym', ru: 'Фитнес' },
+    };
+    return labels[type]?.[language] || type;
   };
 
   const handleRemove = async (item: any) => {
@@ -117,9 +140,7 @@ export default function Favorites() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <Badge variant="secondary" className="text-xs">
-                        {item.item_type === 'course' 
-                          ? (language === 'ru' ? 'Курс' : 'Course')
-                          : (language === 'ru' ? 'Репетитор' : 'Tutor')}
+                        {getTypeLabel(item.item_type)}
                       </Badge>
                     </div>
                     <h3 className="font-semibold text-foreground truncate">{title}</h3>

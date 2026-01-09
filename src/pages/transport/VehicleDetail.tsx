@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Star, MapPin, Users, Fuel, Settings2, Calendar,
-  Shield, Check, Heart, Share2, Phone, MessageCircle
+  Shield, Check, Share2, Phone, MessageCircle
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { FavoriteButton } from '@/components/uno/FavoriteButton';
 
 // Demo vehicle data
 const demoVehicle = {
@@ -60,7 +61,6 @@ export default function VehicleDetail() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const [activeImage, setActiveImage] = useState(0);
-  const [isFavorite, setIsFavorite] = useState(false);
 
   const vehicle = demoVehicle;
 
@@ -77,13 +77,18 @@ export default function VehicleDetail() {
           </button>
           
           <div className="flex items-center gap-2">
-            <Button
+            <FavoriteButton
+              itemType="vehicle"
+              itemId={id || 'car-1'}
+              itemData={{
+                title_en: vehicle.nameEn,
+                title_ru: vehicle.nameRu,
+                image: vehicle.images[0],
+                price: vehicle.pricePerDay,
+                location: vehicle.location,
+              }}
               variant="ghost"
-              size="icon"
-              onClick={() => setIsFavorite(!isFavorite)}
-            >
-              <Heart className={cn("w-5 h-5", isFavorite && "fill-red-500 text-red-500")} />
-            </Button>
+            />
             <Button variant="ghost" size="icon">
               <Share2 className="w-5 h-5" />
             </Button>
