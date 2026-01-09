@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Settings, HelpCircle, LogOut, ChevronRight, Shield, Bell, CreditCard, Heart, Clock, Wallet, Palette, Gift } from 'lucide-react';
+import { User, Settings, HelpCircle, LogOut, ChevronRight, Shield, Bell, CreditCard, Heart, Clock, Wallet, Palette, Gift, Info, FileText, Handshake } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -47,9 +47,15 @@ export default function Profile() {
     { icon: Clock, label: language === 'ru' ? 'История просмотров' : 'View History', onClick: () => navigate('/view-history') },
     { icon: Bell, label: language === 'ru' ? 'Уведомления' : 'Notifications', onClick: () => navigate('/notifications') },
     { icon: CreditCard, label: language === 'ru' ? 'Способы оплаты' : 'Payment Methods', onClick: () => {} },
-    { icon: Shield, label: language === 'ru' ? 'Конфиденциальность' : 'Privacy & Security', onClick: () => {} },
-    { icon: Settings, label: language === 'ru' ? 'Настройки' : 'Settings', onClick: () => {} },
-    { icon: HelpCircle, label: language === 'ru' ? 'Помощь' : 'Help & Support', onClick: () => {} },
+  ];
+
+  const infoItems = [
+    { icon: Info, label: language === 'ru' ? 'О нас' : 'About Us', onClick: () => navigate('/about') },
+    { icon: HelpCircle, label: language === 'ru' ? 'Как это работает' : 'How It Works', onClick: () => navigate('/how-it-works') },
+    { icon: HelpCircle, label: language === 'ru' ? 'Частые вопросы' : 'FAQ', onClick: () => navigate('/faq') },
+    { icon: Handshake, label: language === 'ru' ? 'Для партнёров' : 'For Partners', onClick: () => navigate('/partners') },
+    { icon: Shield, label: language === 'ru' ? 'Конфиденциальность' : 'Privacy Policy', onClick: () => navigate('/privacy') },
+    { icon: FileText, label: language === 'ru' ? 'Условия использования' : 'Terms of Use', onClick: () => navigate('/terms') },
   ];
 
   return (
@@ -95,7 +101,7 @@ export default function Profile() {
         {/* Referral program */}
         <ReferralCard variant="compact" />
 
-        {/* Menu items */}
+        {/* Account Menu items */}
         <SectionCard noPadding className="overflow-hidden divide-y divide-border">
           {menuItems.map((item, index) => (
             <button
@@ -105,6 +111,24 @@ export default function Profile() {
             >
               <item.icon className="w-5 h-5 text-muted-foreground" />
               <span className="flex-1 text-left">{item.label}</span>
+              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            </button>
+          ))}
+        </SectionCard>
+
+        {/* Info & Support */}
+        <div className="text-xs font-medium text-muted-foreground mb-2 mt-4">
+          {language === 'ru' ? 'Информация' : 'Information'}
+        </div>
+        <SectionCard noPadding className="overflow-hidden divide-y divide-border">
+          {infoItems.map((item, index) => (
+            <button
+              key={index}
+              onClick={item.onClick}
+              className="w-full flex items-center gap-3 p-4 hover:bg-secondary/50 transition-colors"
+            >
+              <item.icon className="w-5 h-5 text-muted-foreground" />
+              <span className="flex-1 text-left text-sm">{item.label}</span>
               <ChevronRight className="w-5 h-5 text-muted-foreground" />
             </button>
           ))}
