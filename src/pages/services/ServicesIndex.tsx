@@ -4,6 +4,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { 
   Search, 
   Wrench, 
@@ -18,7 +19,8 @@ import {
   Star,
   Clock,
   MapPin,
-  CheckCircle2
+  CheckCircle2,
+  Map
 } from "lucide-react";
 import { triggerRipple } from "@/hooks/useRipple";
 
@@ -160,15 +162,25 @@ const ServicesIndex = () => {
   return (
     <AppLayout title={language === "ru" ? "Домашние услуги" : "Home Services"} showBottomNav={false}>
       <div className="p-4 space-y-6 pb-24">
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
-          <Input
-            placeholder={language === "ru" ? "Найти услугу или мастера..." : "Find service or professional..."}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 h-12 rounded-xl bg-card border-border"
-          />
+        {/* Search + Map Button */}
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+            <Input
+              placeholder={language === "ru" ? "Найти услугу или мастера..." : "Find service or professional..."}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 h-12 rounded-xl bg-card border-border"
+            />
+          </div>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-12 w-12 rounded-xl"
+            onClick={() => navigate("/services/map")}
+          >
+            <Map className="w-5 h-5" />
+          </Button>
         </div>
 
         {/* Categories */}
