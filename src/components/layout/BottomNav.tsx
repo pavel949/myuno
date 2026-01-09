@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Compass, Map, Calendar, User } from 'lucide-react';
+import { Home, Compass, MessageCircle, Calendar, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
@@ -9,7 +9,7 @@ import { triggerRipple } from '@/hooks/useRipple';
 const navItems = [
   { path: '/', icon: Home, labelKey: 'nav.home' },
   { path: '/discover', icon: Compass, labelKey: 'nav.discover' },
-  { path: '/map', icon: Map, labelKey: 'nav.map' },
+  { path: '/support', icon: MessageCircle, labelKey: 'nav.support' },
   { path: '/bookings', icon: Calendar, labelKey: 'nav.bookings' },
   { path: '/profile', icon: User, labelKey: 'nav.profile' },
 ];
