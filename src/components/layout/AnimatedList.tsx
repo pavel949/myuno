@@ -14,12 +14,12 @@ interface AnimatedItemProps {
 }
 
 const containerVariants = {
-  hidden: { opacity: 0 },
+  hidden: { opacity: 1 }, // Keep visible to prevent flash
   visible: {
     opacity: 1,
     transition: {
       staggerChildren: 0.08,
-      delayChildren: 0.1,
+      delayChildren: 0.05,
     },
   },
 };
@@ -27,8 +27,8 @@ const containerVariants = {
 const itemVariants = {
   hidden: { 
     opacity: 0, 
-    y: 20,
-    scale: 0.95,
+    y: 12,
+    scale: 0.98,
   },
   visible: { 
     opacity: 1, 
@@ -36,8 +36,8 @@ const itemVariants = {
     scale: 1,
     transition: {
       type: 'spring' as const,
-      stiffness: 300,
-      damping: 24,
+      stiffness: 400,
+      damping: 25,
     },
   },
 };
@@ -91,7 +91,7 @@ export const AnimatedGrid: React.FC<AnimatedListProps> = ({
   staggerDelay = 0.06,
 }) => {
   const gridVariants = {
-    hidden: { opacity: 0 },
+    hidden: { opacity: 1 }, // Changed from 0 to 1 to prevent flash
     visible: {
       opacity: 1,
       transition: {
@@ -117,8 +117,8 @@ export const AnimatedGrid: React.FC<AnimatedListProps> = ({
 const cardVariants = {
   hidden: { 
     opacity: 0, 
-    y: 16,
-    scale: 0.92,
+    y: 8,
+    scale: 0.98,
   },
   visible: { 
     opacity: 1, 
@@ -126,8 +126,8 @@ const cardVariants = {
     scale: 1,
     transition: {
       type: 'spring' as const,
-      stiffness: 260,
-      damping: 20,
+      stiffness: 400,
+      damping: 25,
     },
   },
 };
@@ -139,6 +139,8 @@ export const AnimatedCard: React.FC<AnimatedItemProps> = ({
   return (
     <motion.div
       variants={cardVariants}
+      initial="visible" // Start visible to prevent flash
+      animate="visible"
       className={className}
     >
       {children}
