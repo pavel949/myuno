@@ -73,6 +73,7 @@ import Notifications from '@/pages/Notifications';
 import ViewHistory from '@/pages/ViewHistory';
 import Cart from '@/pages/Cart';
 import Wallet from '@/pages/Wallet';
+import SOS from '@/pages/SOS';
 
 export const AnimatedRoutes: React.FC = () => {
   const location = useLocation();
@@ -92,6 +93,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/history" element={<PageTransition><ViewHistory /></PageTransition>} />
         <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
         <Route path="/wallet" element={<PageTransition><Wallet /></PageTransition>} />
+        <Route path="/sos" element={<PageTransition><SOS /></PageTransition>} />
         
         {/* Beauty & Spa Mini-App Routes */}
         <Route path="/beauty" element={<PageTransition><BeautySpaIndex /></PageTransition>} />

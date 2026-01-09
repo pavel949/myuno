@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Sparkles, UtensilsCrossed, Dumbbell, Stethoscope, 
   GraduationCap, Home, Car, Ticket, Flower2,
-  ArrowRight, MapPin, Search, Wrench
+  ArrowRight, MapPin, Search, Wrench, AlertTriangle
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { triggerRipple } from '@/hooks/useRipple';
 import { AnimatedGrid, AnimatedCard, FadeInUp } from '@/components/layout/AnimatedList';
+import { Button } from '@/components/ui/button';
 
 const categories = [
   { id: 'beauty-spa', icon: Sparkles, path: '/beauty', color: 'from-pink-500 to-purple-500' },
@@ -96,19 +97,33 @@ const Index = () => {
           />
         </div>
 
-        {/* Hero Section */}
+        {/* Hero Section with SOS Button */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-background p-6 border border-primary/20">
           <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-3xl" />
           <div className="relative z-10">
-            <h1 className="text-3xl font-display font-bold text-foreground mb-2">
-              {t('home.welcome')}
-            </h1>
-            <p className="text-muted-foreground">
-              {t('home.subtitle')}
-            </p>
-            <div className="flex items-center gap-2 mt-4 text-sm">
-              <MapPin className="w-4 h-4 text-primary" />
-              <span>Phuket, Thailand</span>
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h1 className="text-3xl font-display font-bold text-foreground mb-2">
+                  {t('home.welcome')}
+                </h1>
+                <p className="text-muted-foreground">
+                  {t('home.subtitle')}
+                </p>
+                <div className="flex items-center gap-2 mt-4 text-sm">
+                  <MapPin className="w-4 h-4 text-primary" />
+                  <span>Phuket, Thailand</span>
+                </div>
+              </div>
+              {/* SOS Button */}
+              <Button
+                variant="destructive"
+                size="sm"
+                className="flex-shrink-0 gap-1.5 font-bold animate-pulse"
+                onClick={() => navigate('/sos')}
+              >
+                <AlertTriangle className="w-4 h-4" />
+                SOS
+              </Button>
             </div>
           </div>
         </div>
