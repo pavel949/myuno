@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Search, SlidersHorizontal, X, Sparkles, UtensilsCrossed, 
   Dumbbell, Stethoscope, GraduationCap, Building, Car, 
-  Ticket, ShoppingBag, Wrench, Clock, MapPin, Star, Check
+  Ticket, ShoppingBag, Wrench, Clock, MapPin, Star, Check,
+  ArrowUpDown, TrendingUp, ArrowDown, ArrowUp
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -13,7 +14,7 @@ import { FilterChip } from '@/components/uno/FilterChip';
 import { SkeletonGrid } from '@/components/uno/SkeletonCard';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { AnimatedGrid, AnimatedCard, FadeInUp } from '@/components/layout/AnimatedList';
-import { useServices, useCategories, Service } from '@/hooks/useServices';
+import { useServices, useCategories, Service, SortOption } from '@/hooks/useServices';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -41,6 +42,14 @@ const PRICE_RANGES = [
   { label: '> 5000 ฿', labelRu: '> 5000 ฿', min: 5000, max: Infinity },
 ];
 
+const SORT_OPTIONS: { value: SortOption; label: string; labelRu: string; icon: React.ElementType }[] = [
+  { value: 'popular', label: 'Popular', labelRu: 'Популярные', icon: TrendingUp },
+  { value: 'price_asc', label: 'Price: Low to High', labelRu: 'Цена: по возрастанию', icon: ArrowUp },
+  { value: 'price_desc', label: 'Price: High to Low', labelRu: 'Цена: по убыванию', icon: ArrowDown },
+  { value: 'rating', label: 'Rating', labelRu: 'По рейтингу', icon: Star },
+  { value: 'newest', label: 'Newest', labelRu: 'Новые', icon: Clock },
+];
+
 export default function Discover() {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
@@ -49,6 +58,7 @@ export default function Discover() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [priceRange, setPriceRange] = useState<{ min: number; max: number } | null>(null);
+  const [sortBy, setSortBy] = useState<SortOption>('popular');
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -58,6 +68,7 @@ export default function Discover() {
     searchQuery: debouncedSearch || undefined,
     priceMin: priceRange?.min,
     priceMax: priceRange?.max === Infinity ? undefined : priceRange?.max,
+    sortBy,
   });
 
   // Debounce search
@@ -104,9 +115,12 @@ export default function Discover() {
   const clearFilters = useCallback(() => {
     setSelectedCategory(null);
     setPriceRange(null);
+    setSortBy('popular');
     setSearchQuery('');
     setDebouncedSearch('');
   }, []);
+
+  const currentSort = SORT_OPTIONS.find(s => s.value === sortBy) || SORT_OPTIONS[0];
 
   const isLoading = categoriesLoading || servicesLoading;
 
@@ -152,6 +166,36 @@ export default function Discover() {
                   </SheetTitle>
                 </SheetHeader>
                 <div className="py-6 space-y-6">
+                  {/* Sort options */}
+                  <div>
+                    <h4 className="font-medium mb-3">
+                      {language === 'ru' ? 'Сортировка' : 'Sort by'}
+                    </h4>
+                    <div className="space-y-2">
+                      {SORT_OPTIONS.map((option) => {
+                        const Icon = option.icon;
+                        return (
+                          <button
+                            key={option.value}
+                            onClick={() => setSortBy(option.value)}
+                            className={cn(
+                              "w-full flex items-center gap-3 p-3 rounded-lg border transition-colors",
+                              sortBy === option.value
+                                ? "bg-primary text-primary-foreground border-primary"
+                                : "bg-secondary border-border hover:border-primary/50"
+                            )}
+                          >
+                            <Icon className="w-5 h-5" />
+                            <span className="flex-1 text-left">
+                              {language === 'ru' ? option.labelRu : option.label}
+                            </span>
+                            {sortBy === option.value && <Check className="w-4 h-4" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
                   {/* Price filter */}
                   <div>
                     <h4 className="font-medium mb-3">
@@ -227,8 +271,22 @@ export default function Discover() {
             </Sheet>
           </div>
 
-          {/* Category chips (horizontal scroll) */}
+          {/* Sort & Category chips (horizontal scroll) */}
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
+            {/* Sort button */}
+            <button
+              onClick={() => setIsFiltersOpen(true)}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors border",
+                "bg-secondary border-border hover:border-primary/50"
+              )}
+            >
+              <currentSort.icon className="w-4 h-4" />
+              {language === 'ru' ? currentSort.labelRu : currentSort.label}
+            </button>
+            
+            <div className="w-px h-6 bg-border self-center" />
+            
             <FilterChip
               label={language === 'ru' ? 'Все' : 'All'}
               isActive={!selectedCategory}
