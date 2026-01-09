@@ -18,7 +18,7 @@ const TOUR_CATEGORIES = [
 ];
 
 export default function ToursIndex() {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const { tours, isLoading } = useTours({
@@ -28,7 +28,7 @@ export default function ToursIndex() {
   return (
     <AppLayout>
       <PageContainer>
-        <PageHeader title={language === 'ru' ? 'Экскурсии и туры' : 'Tours & Excursions'} />
+        <PageHeader title={t('tours.title')} />
 
         <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide mt-4">
           {TOUR_CATEGORIES.map(cat => (
@@ -46,7 +46,7 @@ export default function ToursIndex() {
         ) : tours.length === 0 ? (
           <div className="text-center py-12">
             <Compass className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-            <p>{language === 'ru' ? 'Туры не найдены' : 'No tours found'}</p>
+            <p>{t('tours.noToursFound')}</p>
           </div>
         ) : (
           <div className="grid gap-4">

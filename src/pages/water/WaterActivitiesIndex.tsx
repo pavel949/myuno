@@ -23,7 +23,7 @@ const CATEGORIES = [
 ];
 
 export default function WaterActivitiesIndex() {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const { activities, isLoading } = useWaterActivities({
@@ -44,7 +44,7 @@ export default function WaterActivitiesIndex() {
     <AppLayout>
       <PageContainer>
         <PageHeader 
-          title={language === 'ru' ? 'Водные активности' : 'Water Activities'} 
+          title={t('water.title')} 
         />
 
         <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide mt-4">
@@ -63,7 +63,7 @@ export default function WaterActivitiesIndex() {
         ) : activities.length === 0 ? (
           <div className="text-center py-12">
             <Waves className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-            <p>{language === 'ru' ? 'Активности не найдены' : 'No activities found'}</p>
+            <p>{t('water.noActivitiesFound')}</p>
           </div>
         ) : (
           <div className="grid gap-4">
@@ -84,7 +84,7 @@ export default function WaterActivitiesIndex() {
                       <div className="absolute top-2 left-2">
                         <Badge variant="secondary" className="bg-primary/90 text-primary-foreground text-[10px] px-1.5">
                           <Shield className="w-3 h-3 mr-0.5" />
-                          {language === 'ru' ? 'Серт.' : 'Cert.'}
+                          {t('water.certified')}
                         </Badge>
                       </div>
                     )}
@@ -122,7 +122,7 @@ export default function WaterActivitiesIndex() {
                       <div className="flex gap-1 flex-wrap">
                         {activity.equipment_included && (
                           <Badge variant="outline" className="text-[10px] px-1.5">
-                            {language === 'ru' ? 'Снаряжение вкл.' : 'Equipment incl.'}
+                            {t('water.equipmentIncluded')}
                           </Badge>
                         )}
                       </div>
