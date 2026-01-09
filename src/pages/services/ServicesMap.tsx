@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Sliders } from 'lucide-react';
+import { ArrowLeft, MapPin, Sliders, Droplets, Zap, Sparkles, Hammer, PaintBucket, Wind, Key, Truck } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import SalonMap, { SalonMarker } from '@/components/map/SalonMap';
@@ -14,8 +14,12 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 
-// Demo service providers data with coordinates
-const demoProviders: SalonMarker[] = [
+interface ServiceProvider extends SalonMarker {
+  category: string;
+}
+
+// Demo service providers data with coordinates and categories
+const demoProviders: ServiceProvider[] = [
   {
     id: 'srv-1',
     name: 'Alex Masters - Plumber',
@@ -24,6 +28,7 @@ const demoProviders: SalonMarker[] = [
     lng: 98.3152,
     rating: 4.9,
     priceFrom: 1500,
+    category: 'plumbing',
   },
   {
     id: 'srv-2',
@@ -33,6 +38,7 @@ const demoProviders: SalonMarker[] = [
     lng: 98.2870,
     rating: 4.8,
     priceFrom: 2000,
+    category: 'electrical',
   },
   {
     id: 'srv-3',
@@ -42,6 +48,7 @@ const demoProviders: SalonMarker[] = [
     lng: 98.2915,
     rating: 4.7,
     priceFrom: 3000,
+    category: 'cleaning',
   },
   {
     id: 'srv-4',
@@ -51,6 +58,7 @@ const demoProviders: SalonMarker[] = [
     lng: 98.3241,
     rating: 4.6,
     priceFrom: 1800,
+    category: 'repair',
   },
   {
     id: 'srv-5',
@@ -60,6 +68,7 @@ const demoProviders: SalonMarker[] = [
     lng: 98.3602,
     rating: 4.9,
     priceFrom: 500,
+    category: 'painting',
   },
   {
     id: 'srv-6',
@@ -69,7 +78,20 @@ const demoProviders: SalonMarker[] = [
     lng: 98.3402,
     rating: 4.8,
     priceFrom: 3500,
+    category: 'hvac',
   },
+];
+
+const categories = [
+  { id: 'all', icon: null, labelEn: 'All', labelRu: 'Все' },
+  { id: 'plumbing', icon: Droplets, labelEn: 'Plumbing', labelRu: 'Сантехник' },
+  { id: 'electrical', icon: Zap, labelEn: 'Electrical', labelRu: 'Электрик' },
+  { id: 'cleaning', icon: Sparkles, labelEn: 'Cleaning', labelRu: 'Уборка' },
+  { id: 'repair', icon: Hammer, labelEn: 'Repair', labelRu: 'Ремонт' },
+  { id: 'painting', icon: PaintBucket, labelEn: 'Painting', labelRu: 'Покраска' },
+  { id: 'hvac', icon: Wind, labelEn: 'HVAC', labelRu: 'Кондиционеры' },
+  { id: 'locksmith', icon: Key, labelEn: 'Locksmith', labelRu: 'Замки' },
+  { id: 'moving', icon: Truck, labelEn: 'Moving', labelRu: 'Переезд' },
 ];
 
 const distanceOptions = [
@@ -85,6 +107,7 @@ export default function ServicesMap() {
   const navigate = useNavigate();
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [distanceFilter, setDistanceFilter] = useState<number>(50);
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // Get user location
@@ -105,6 +128,11 @@ export default function ServicesMap() {
       );
     }
   }, []);
+
+  // Filter providers by category
+  const filteredProviders = demoProviders.filter(provider => 
+    categoryFilter === 'all' || provider.category === categoryFilter
+  );
 
   const handleProviderSelect = (providerId: string) => {
     navigate(`/services/provider/${providerId}`);
@@ -143,6 +171,23 @@ export default function ServicesMap() {
               </SheetHeader>
               
               <div className="mt-6 space-y-6">
+                {/* Category filter */}
+                <div>
+                  <label className="text-sm font-medium mb-3 block">
+                    {language === 'ru' ? 'Категория' : 'Category'}
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {categories.map((cat) => (
+                      <FilterChip
+                        key={cat.id}
+                        label={language === 'ru' ? cat.labelRu : cat.labelEn}
+                        isActive={categoryFilter === cat.id}
+                        onToggle={() => setCategoryFilter(cat.id)}
+                      />
+                    ))}
+                  </div>
+                </div>
+
                 {/* Distance filter */}
                 <div>
                   <label className="text-sm font-medium mb-3 block">
@@ -188,21 +233,30 @@ export default function ServicesMap() {
           </Sheet>
         </div>
 
-        {/* Distance pills */}
+        {/* Category pills */}
         <div className="flex gap-2 p-3 overflow-x-auto bg-background/50 backdrop-blur-sm border-b border-border/30">
-          {distanceOptions.map((opt) => (
-            <FilterChip
-              key={opt.value}
-              label={language === 'ru' ? opt.labelRu : opt.labelEn}
-              isActive={distanceFilter === opt.value}
-              onToggle={() => setDistanceFilter(opt.value)}
-            />
-          ))}
+          {categories.map((cat) => {
+            const Icon = cat.icon;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setCategoryFilter(cat.id)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                  categoryFilter === cat.id
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                }`}
+              >
+                {Icon && <Icon className="w-4 h-4" />}
+                {language === 'ru' ? cat.labelRu : cat.labelEn}
+              </button>
+            );
+          })}
         </div>
 
         {/* Map */}
         <SalonMap
-          salons={demoProviders}
+          salons={filteredProviders}
           onSalonSelect={handleProviderSelect}
           userLocation={userLocation}
           distanceFilter={distanceFilter}
