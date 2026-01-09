@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { ArrowLeft, MapPin, Calendar, Clock, CreditCard, Truck, Gift, Check } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, CreditCard, Truck, Gift, Check, Wallet, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useWallet } from '@/hooks/useWallet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -23,6 +24,7 @@ const FlowersOrder = () => {
   const { id } = useParams();
   const location = useLocation();
   const { language } = useLanguage();
+  const { balance, payFromWallet, hasEnoughBalance, isLoading: isWalletLoading } = useWallet();
   
   const { cart = {}, totalPrice = 0 } = (location.state as { cart: Record<string, number>; totalPrice: number }) || {};
 
@@ -42,6 +44,7 @@ const FlowersOrder = () => {
   const deliveryFee = 100;
   const giftWrapFee = formData.giftWrap ? 150 : 0;
   const finalTotal = totalPrice + deliveryFee + giftWrapFee;
+  const canPayWithWallet = hasEnoughBalance(finalTotal);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,16 +56,38 @@ const FlowersOrder = () => {
 
     setIsSubmitting(true);
     
-    // Simulate order submission
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    
-    toast.success(
-      language === 'ru' 
-        ? 'Заказ успешно оформлен! Мы свяжемся с вами для подтверждения.' 
-        : 'Order placed successfully! We will contact you for confirmation.'
-    );
-    
-    navigate('/bookings');
+    try {
+      // If paying with wallet, deduct balance first
+      if (formData.paymentMethod === 'wallet') {
+        const result = await payFromWallet(
+          finalTotal,
+          `Flower order`,
+          `Заказ цветов`,
+          'flower_order'
+        );
+        
+        if (!result.success) {
+          toast.error(language === 'ru' ? 'Недостаточно средств на кошельке' : 'Insufficient wallet balance');
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      // Simulate order submission
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      
+      toast.success(
+        formData.paymentMethod === 'wallet'
+          ? (language === 'ru' ? 'Заказ оплачен из кошелька!' : 'Order paid from wallet!')
+          : (language === 'ru' ? 'Заказ успешно оформлен!' : 'Order placed successfully!')
+      );
+      
+      navigate('/bookings');
+    } catch (error) {
+      toast.error(language === 'ru' ? 'Ошибка при оформлении заказа' : 'Failed to place order');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -242,6 +267,39 @@ const FlowersOrder = () => {
               onValueChange={(value) => setFormData({ ...formData, paymentMethod: value })}
               className="space-y-2"
             >
+              {/* Wallet Option */}
+              <label className={cn(
+                "flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all",
+                canPayWithWallet 
+                  ? "border-border hover:border-primary/30" 
+                  : "border-border/30 opacity-60 cursor-not-allowed"
+              )}>
+                <RadioGroupItem value="wallet" id="wallet" disabled={!canPayWithWallet} />
+                <Wallet className="w-5 h-5 text-primary" />
+                <div className="flex-1">
+                  <div className="font-medium">
+                    {language === 'ru' ? 'Из кошелька' : 'From Wallet'}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {isWalletLoading ? (
+                      <span className="flex items-center gap-1">
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        {language === 'ru' ? 'Загрузка...' : 'Loading...'}
+                      </span>
+                    ) : (
+                      <>
+                        {language === 'ru' ? 'Баланс:' : 'Balance:'} ₽{balance.toLocaleString()}
+                        {!canPayWithWallet && (
+                          <span className="text-destructive ml-1">
+                            ({language === 'ru' ? 'недостаточно' : 'insufficient'})
+                          </span>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+              </label>
+
               <label className="flex items-center gap-3 p-4 rounded-xl border border-border cursor-pointer hover:border-primary/30 transition-all">
                 <RadioGroupItem value="card" id="card" />
                 <div className="flex-1">

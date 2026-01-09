@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Clock, CreditCard, Banknote, Check } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, CreditCard, Banknote, Check, Wallet, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useWallet } from '@/hooks/useWallet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -24,6 +25,7 @@ export default function FoodCheckout() {
   const { language } = useLanguage();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { balance, payFromWallet, hasEnoughBalance, isLoading: isWalletLoading } = useWallet();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -38,6 +40,7 @@ export default function FoodCheckout() {
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const deliveryFee = 40;
   const total = subtotal + deliveryFee;
+  const canPayWithWallet = hasEnoughBalance(total);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,13 +71,35 @@ export default function FoodCheckout() {
     setIsSubmitting(true);
 
     try {
+      // If paying with wallet, deduct balance first
+      if (paymentMethod === 'wallet') {
+        const result = await payFromWallet(
+          total,
+          `Food order`,
+          `Заказ еды`,
+          'food_order'
+        );
+        
+        if (!result.success) {
+          toast({
+            title: language === 'ru' ? 'Ошибка оплаты' : 'Payment Error',
+            description: language === 'ru' 
+              ? 'Недостаточно средств на кошельке' 
+              : 'Insufficient wallet balance',
+            variant: 'destructive',
+          });
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
       // Create booking
       const { data: booking, error: bookingError } = await supabase
         .from('bookings')
         .insert({
           user_id: user.id,
           booking_type: 'food',
-          status: 'submitted',
+          status: paymentMethod === 'wallet' ? 'confirmed' : 'submitted',
           total_amount: total,
           notes: `Payment: ${paymentMethod}. ${formData.notes}`,
         })
@@ -114,9 +139,9 @@ export default function FoodCheckout() {
       setIsSuccess(true);
       toast({
         title: language === 'ru' ? 'Заказ оформлен!' : 'Order Placed!',
-        description: language === 'ru' 
-          ? 'Ваш заказ принят и готовится' 
-          : 'Your order has been received',
+        description: paymentMethod === 'wallet'
+          ? (language === 'ru' ? 'Оплачено из кошелька' : 'Paid from wallet')
+          : (language === 'ru' ? 'Ваш заказ принят и готовится' : 'Your order has been received'),
       });
     } catch (error) {
       console.error('Error placing order:', error);
@@ -245,6 +270,37 @@ export default function FoodCheckout() {
               {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
             </Label>
             <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
+              {/* Wallet Option */}
+              <div className={`flex items-center space-x-3 p-3 rounded-lg border ${
+                canPayWithWallet 
+                  ? 'bg-card border-border/50' 
+                  : 'bg-muted/50 border-border/30 opacity-60'
+              }`}>
+                <RadioGroupItem value="wallet" id="wallet" disabled={!canPayWithWallet} />
+                <Label htmlFor="wallet" className="flex items-center gap-2 cursor-pointer flex-1">
+                  <Wallet className="w-5 h-5 text-primary" />
+                  <div className="flex-1">
+                    <span>{language === 'ru' ? 'Из кошелька' : 'From Wallet'}</span>
+                    <div className="text-xs text-muted-foreground">
+                      {isWalletLoading ? (
+                        <span className="flex items-center gap-1">
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                          {language === 'ru' ? 'Загрузка...' : 'Loading...'}
+                        </span>
+                      ) : (
+                        <>
+                          {language === 'ru' ? 'Баланс:' : 'Balance:'} ₽{balance.toLocaleString()}
+                          {!canPayWithWallet && (
+                            <span className="text-destructive ml-2">
+                              ({language === 'ru' ? 'недостаточно средств' : 'insufficient funds'})
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </Label>
+              </div>
               <div className="flex items-center space-x-3 p-3 rounded-lg bg-card border border-border/50">
                 <RadioGroupItem value="cash" id="cash" />
                 <Label htmlFor="cash" className="flex items-center gap-2 cursor-pointer">
