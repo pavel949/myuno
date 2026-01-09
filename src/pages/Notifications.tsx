@@ -12,7 +12,8 @@ import {
   ChevronLeft,
   Settings,
   Plus,
-  Sparkles
+  Sparkles,
+  RefreshCw
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -44,6 +45,7 @@ export default function Notifications() {
     markAllAsRead,
     deleteNotification,
     createDemoNotification,
+    triggerBookingReminders,
   } = useNotifications();
 
   const getNotificationIcon = (type: string) => {
@@ -321,8 +323,38 @@ export default function Notifications() {
               </CardContent>
             </Card>
 
+            {/* Auto Reminders */}
+            <Card className="border-primary/30 bg-primary/5">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <RefreshCw className="w-5 h-5 text-primary" />
+                  {language === 'ru' ? 'Автоматические напоминания' : 'Automatic Reminders'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  {language === 'ru' 
+                    ? 'Проверить предстоящие бронирования и отправить напоминания пользователям' 
+                    : 'Check upcoming bookings and send reminders to users'}
+                </p>
+                <Button 
+                  variant="default"
+                  className="w-full"
+                  onClick={triggerBookingReminders}
+                >
+                  <Calendar className="w-4 h-4 mr-2" />
+                  {language === 'ru' ? 'Запустить проверку напоминаний' : 'Trigger Reminder Check'}
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  {language === 'ru' 
+                    ? 'Напоминания отправляются автоматически каждый час' 
+                    : 'Reminders are sent automatically every hour'}
+                </p>
+              </CardContent>
+            </Card>
+
             {/* Demo Notifications */}
-            <Card className="border-dashed border-primary/50">
+            <Card className="border-dashed border-muted-foreground/50">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-primary" />
