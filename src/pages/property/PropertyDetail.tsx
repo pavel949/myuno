@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, MapPin, Star, BedDouble, Bath, Users, Maximize, 
-  Check, Heart, Share2, Calendar, Phone, MessageCircle, Shield
+  Check, Share2, Calendar, Phone, MessageCircle, Shield
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { FavoriteButton } from '@/components/uno/FavoriteButton';
 
 // Demo property data
 const demoProperty = {
@@ -62,7 +63,6 @@ export default function PropertyDetail() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const [activeImage, setActiveImage] = useState(0);
-  const [isFavorite, setIsFavorite] = useState(false);
 
   const property = demoProperty;
 
@@ -90,13 +90,18 @@ export default function PropertyDetail() {
           </button>
           
           <div className="flex items-center gap-2">
-            <Button
+            <FavoriteButton
+              itemType="property"
+              itemId={id || 'prop-1'}
+              itemData={{
+                title_en: property.titleEn,
+                title_ru: property.titleRu,
+                image: property.images[0],
+                price: property.price,
+                location: property.location,
+              }}
               variant="ghost"
-              size="icon"
-              onClick={() => setIsFavorite(!isFavorite)}
-            >
-              <Heart className={cn("w-5 h-5", isFavorite && "fill-red-500 text-red-500")} />
-            </Button>
+            />
             <Button variant="ghost" size="icon">
               <Share2 className="w-5 h-5" />
             </Button>

@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Star, MapPin, Clock, Phone, Globe, 
-  Heart, Share2, CheckCircle, Calendar, User
+  Share2, CheckCircle, Calendar, User
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { FavoriteButton } from '@/components/uno/FavoriteButton';
 
 const clinicData = {
   id: 'clinic-1',
@@ -101,9 +102,18 @@ const ClinicDetail = () => {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex gap-2">
-            <Button variant="secondary" size="icon">
-              <Heart className="w-5 h-5" />
-            </Button>
+            <FavoriteButton
+              itemType="clinic"
+              itemId={id || 'clinic-1'}
+              itemData={{
+                title_en: clinicData.name,
+                title_ru: clinicData.nameRu,
+                image: clinicData.images[0],
+                location: clinicData.location,
+                rating: clinicData.rating,
+              }}
+              variant="secondary"
+            />
             <Button variant="secondary" size="icon">
               <Share2 className="w-5 h-5" />
             </Button>
