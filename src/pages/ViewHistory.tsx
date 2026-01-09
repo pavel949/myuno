@@ -12,6 +12,7 @@ import { PageHeader } from '@/components/uno/PageHeader';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { SectionCard } from '@/components/uno/SectionCard';
+import { AnimatedList, AnimatedItem } from '@/components/layout/AnimatedList';
 import { formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 
@@ -132,7 +133,7 @@ export default function ViewHistory() {
                 : 'Viewed salons and services will appear here'}
             />
           ) : (
-            <div className="space-y-3">
+            <AnimatedList className="space-y-3">
               {history.map((item) => {
                 const Icon = typeIcons[item.item_type] || Clock;
                 const typeLabel = typeLabels[item.item_type];
@@ -141,56 +142,58 @@ export default function ViewHistory() {
                   || `${typeLabel?.[language] || item.item_type} #${item.item_id.slice(0, 6)}`;
 
                 return (
-                  <SectionCard key={item.id} className="flex items-center gap-3">
-                    <button
-                      onClick={() => handleItemClick(item.item_type, item.item_id)}
-                      className="relative w-16 h-16 rounded-xl overflow-hidden bg-muted flex-shrink-0"
-                    >
-                      {item.item_data?.image ? (
-                        <img
-                          src={item.item_data.image}
-                          alt={itemName}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Icon className="w-6 h-6 text-muted-foreground" />
-                        </div>
-                      )}
-                    </button>
-
-                    <button
-                      onClick={() => handleItemClick(item.item_type, item.item_id)}
-                      className="flex-1 min-w-0 text-left"
-                    >
-                      <h3 className="font-medium truncate">{itemName}</h3>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-                        <span className="flex items-center gap-1">
-                          <Icon className="w-3 h-3" />
-                          {typeLabel?.[language] || item.item_type}
-                        </span>
-                        {item.view_count > 1 && (
-                          <span>• {item.view_count}x</span>
+                  <AnimatedItem key={item.id}>
+                    <SectionCard className="flex items-center gap-3">
+                      <button
+                        onClick={() => handleItemClick(item.item_type, item.item_id)}
+                        className="relative w-16 h-16 rounded-xl overflow-hidden bg-muted flex-shrink-0"
+                      >
+                        {item.item_data?.image ? (
+                          <img
+                            src={item.item_data.image}
+                            alt={itemName}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Icon className="w-6 h-6 text-muted-foreground" />
+                          </div>
                         )}
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {formatDistanceToNow(new Date(item.viewed_at), {
-                          addSuffix: true,
-                          locale: language === 'ru' ? ru : enUS
-                        })}
-                      </p>
-                    </button>
+                      </button>
 
-                    <button
-                      onClick={() => removeFromHistory(item.id)}
-                      className="p-2 hover:bg-secondary rounded-xl transition-colors"
-                    >
-                      <X className="w-4 h-4 text-muted-foreground" />
-                    </button>
-                  </SectionCard>
+                      <button
+                        onClick={() => handleItemClick(item.item_type, item.item_id)}
+                        className="flex-1 min-w-0 text-left"
+                      >
+                        <h3 className="font-medium truncate">{itemName}</h3>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                          <span className="flex items-center gap-1">
+                            <Icon className="w-3 h-3" />
+                            {typeLabel?.[language] || item.item_type}
+                          </span>
+                          {item.view_count > 1 && (
+                            <span>• {item.view_count}x</span>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {formatDistanceToNow(new Date(item.viewed_at), {
+                            addSuffix: true,
+                            locale: language === 'ru' ? ru : enUS
+                          })}
+                        </p>
+                      </button>
+
+                      <button
+                        onClick={() => removeFromHistory(item.id)}
+                        className="p-2 hover:bg-secondary rounded-xl transition-colors"
+                      >
+                        <X className="w-4 h-4 text-muted-foreground" />
+                      </button>
+                    </SectionCard>
+                  </AnimatedItem>
                 );
               })}
-            </div>
+            </AnimatedList>
           )}
         </PageContainer>
       </PullToRefresh>

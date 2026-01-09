@@ -25,6 +25,7 @@ import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { SectionCard } from '@/components/uno/SectionCard';
 import { EmptyState } from '@/components/uno/EmptyState';
+import { AnimatedList, AnimatedItem } from '@/components/layout/AnimatedList';
 import { formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 
@@ -141,53 +142,56 @@ export default function Notifications() {
                   : 'Your notifications will appear here'}
               />
             ) : (
-              notifications.map(notification => (
-                <SectionCard 
-                  key={notification.id}
-                  className={`transition-colors ${!notification.is_read ? 'bg-primary/5 border-primary/20' : ''}`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 bg-secondary rounded-xl">
-                      {getNotificationIcon(notification.type)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <h3 className="font-medium line-clamp-1">{notification.title}</h3>
-                        {!notification.is_read && (
-                          <span className="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-2" />
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                        {notification.body}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        {formatTime(notification.created_at)}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
-                    {!notification.is_read && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => markAsRead(notification.id)}
-                      >
-                        <Check className="w-4 h-4 mr-2" />
-                        {language === 'ru' ? 'Прочитано' : 'Mark read'}
-                      </Button>
-                    )}
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      className="text-destructive hover:text-destructive"
-                      onClick={() => deleteNotification(notification.id)}
+              <AnimatedList className="space-y-3">
+                {notifications.map(notification => (
+                  <AnimatedItem key={notification.id}>
+                    <SectionCard 
+                      className={`transition-colors ${!notification.is_read ? 'bg-primary/5 border-primary/20' : ''}`}
                     >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      {language === 'ru' ? 'Удалить' : 'Delete'}
-                    </Button>
-                  </div>
-                </SectionCard>
-              ))
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 bg-secondary rounded-xl">
+                          {getNotificationIcon(notification.type)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <h3 className="font-medium line-clamp-1">{notification.title}</h3>
+                            {!notification.is_read && (
+                              <span className="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-2" />
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                            {notification.body}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            {formatTime(notification.created_at)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
+                        {!notification.is_read && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => markAsRead(notification.id)}
+                          >
+                            <Check className="w-4 h-4 mr-2" />
+                            {language === 'ru' ? 'Прочитано' : 'Mark read'}
+                          </Button>
+                        )}
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => deleteNotification(notification.id)}
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          {language === 'ru' ? 'Удалить' : 'Delete'}
+                        </Button>
+                      </div>
+                    </SectionCard>
+                  </AnimatedItem>
+                ))}
+              </AnimatedList>
             )}
           </TabsContent>
 
