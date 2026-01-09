@@ -368,6 +368,39 @@ export type Database = {
         }
         Relationships: []
       }
+      cashback_settings: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          is_active: boolean
+          max_cashback_amount: number | null
+          min_order_amount: number | null
+          percentage: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_cashback_amount?: number | null
+          min_order_amount?: number | null
+          percentage?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_cashback_amount?: number | null
+          min_order_amount?: number | null
+          percentage?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string

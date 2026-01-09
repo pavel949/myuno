@@ -34,6 +34,7 @@ import {
 import { format } from "date-fns";
 import { ru, enUS } from "date-fns/locale";
 import { toast } from "sonner";
+import { CashbackRatesCard } from "@/components/uno/CashbackBadge";
 
 interface WalletData {
   id: string;
@@ -364,6 +365,9 @@ const Wallet = () => {
           </CardContent>
         </Card>
 
+        {/* Cashback Rates */}
+        <CashbackRatesCard />
+
         {/* Promo Banner */}
         <Card className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-amber-500/20">
           <CardContent className="p-4 flex items-center gap-4">
@@ -376,8 +380,8 @@ const Wallet = () => {
               </h3>
               <p className="text-sm text-muted-foreground">
                 {language === 'ru' 
-                  ? 'До 10% кэшбэк за каждую покупку' 
-                  : 'Up to 10% cashback on every purchase'}
+                  ? 'Кэшбэк начисляется автоматически после завершения бронирования' 
+                  : 'Cashback is credited automatically after booking completion'}
               </p>
             </div>
           </CardContent>
