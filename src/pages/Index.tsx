@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Sparkles, UtensilsCrossed, Dumbbell, Stethoscope, 
-  GraduationCap, Home, Car, Ticket, ShoppingBag, Wrench,
+  GraduationCap, Home, Car, Ticket, Flower2,
   ArrowRight, MapPin, Search
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -15,6 +15,7 @@ import { triggerRipple } from '@/hooks/useRipple';
 const categories = [
   { id: 'beauty-spa', icon: Sparkles, path: '/beauty', color: 'from-pink-500 to-purple-500' },
   { id: 'restaurants', icon: UtensilsCrossed, path: '/food', color: 'from-orange-500 to-red-500' },
+  { id: 'flowers', icon: Flower2, path: '/flowers', color: 'from-rose-500 to-pink-500' },
   { id: 'fitness', icon: Dumbbell, path: '/fitness', color: 'from-blue-500 to-cyan-500' },
   { id: 'medical', icon: Stethoscope, path: '/medical', color: 'from-emerald-500 to-green-500' },
   { id: 'kids-education', icon: GraduationCap, path: '/education', color: 'from-yellow-500 to-orange-500' },

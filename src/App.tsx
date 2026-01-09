@@ -58,6 +58,11 @@ import CourseDetail from "./pages/education/CourseDetail";
 import TutorDetail from "./pages/education/TutorDetail";
 import EducationBooking from "./pages/education/EducationBooking";
 
+// Flowers Mini-App
+import FlowersIndex from "./pages/flowers/FlowersIndex";
+import FlowerShopDetail from "./pages/flowers/FlowerShopDetail";
+import FlowersOrder from "./pages/flowers/FlowersOrder";
+
 // Favorites
 import Favorites from "./pages/Favorites";
 
@@ -133,6 +138,11 @@ const App = () => (
               <Route path="/education/course/:id" element={<CourseDetail />} />
               <Route path="/education/tutor/:id" element={<TutorDetail />} />
               <Route path="/education/booking/:id" element={<EducationBooking />} />
+              
+              {/* Flowers Mini-App Routes */}
+              <Route path="/flowers" element={<FlowersIndex />} />
+              <Route path="/flowers/shop/:id" element={<FlowerShopDetail />} />
+              <Route path="/flowers/order/:id" element={<FlowersOrder />} />
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

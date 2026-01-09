@@ -62,6 +62,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Categories
     'category.beauty-spa': 'Красота и СПА',
     'category.restaurants': 'Рестораны',
+    'category.flowers': 'Цветы',
     'category.fitness': 'Фитнес',
     'category.medical': 'Медицина',
     'category.kids-education': 'Дети и Образование',
@@ -175,6 +176,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Categories
     'category.beauty-spa': 'Beauty & Spa',
     'category.restaurants': 'Restaurants',
+    'category.flowers': 'Flowers',
     'category.fitness': 'Fitness',
     'category.medical': 'Medical',
     'category.kids-education': 'Kids & Education',
