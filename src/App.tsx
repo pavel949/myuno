@@ -58,6 +58,9 @@ import CourseDetail from "./pages/education/CourseDetail";
 import TutorDetail from "./pages/education/TutorDetail";
 import EducationBooking from "./pages/education/EducationBooking";
 
+// Favorites
+import Favorites from "./pages/Favorites";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -75,6 +78,7 @@ const App = () => (
               <Route path="/map" element={<MapView />} />
               <Route path="/bookings" element={<Bookings />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/favorites" element={<Favorites />} />
               
               {/* Beauty & Spa Mini-App Routes */}
               <Route path="/beauty" element={<BeautySpaIndex />} />

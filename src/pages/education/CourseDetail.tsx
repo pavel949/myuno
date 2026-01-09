@@ -3,6 +3,8 @@ import { ArrowLeft, Star, Clock, MapPin, Calendar, Users, CheckCircle } from "lu
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useFavorites } from "@/hooks/useFavorites";
+import { FavoriteButton } from "@/components/uno/FavoriteButton";
 
 const courses: Record<string, any> = {
   "1": {
@@ -92,8 +94,21 @@ export default function CourseDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   const course = courses[id || "1"] || courses["1"];
+
+  const handleToggleFavorite = () => {
+    toggleFavorite('course', course.id, {
+      title_en: course.title_en,
+      title_ru: course.title_ru,
+      images: course.images,
+      price: course.price,
+      currency: course.currency,
+      category: course.category,
+      rating: course.rating
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -113,11 +128,17 @@ export default function CourseDetail() {
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <Badge className={`absolute top-4 right-4 ${course.age_group === "kids" ? "bg-pink-500" : "bg-blue-500"}`}>
-          {course.age_group === "kids" 
-            ? (language === "ru" ? "Для детей" : "For Kids")
-            : (language === "ru" ? "Для взрослых" : "For Adults")}
-        </Badge>
+        <div className="absolute top-4 right-4 flex gap-2">
+          <FavoriteButton
+            isFavorite={isFavorite('course', course.id)}
+            onClick={handleToggleFavorite}
+          />
+          <Badge className={`${course.age_group === "kids" ? "bg-pink-500" : "bg-blue-500"}`}>
+            {course.age_group === "kids" 
+              ? (language === "ru" ? "Для детей" : "For Kids")
+              : (language === "ru" ? "Для взрослых" : "For Adults")}
+          </Badge>
+        </div>
       </div>
 
       {/* Content */}

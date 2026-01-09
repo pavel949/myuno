@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Settings, HelpCircle, LogOut, ChevronRight, Shield, Bell, CreditCard } from 'lucide-react';
+import { User, Settings, HelpCircle, LogOut, ChevronRight, Shield, Bell, CreditCard, Heart } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -9,7 +9,7 @@ import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { cn } from '@/lib/utils';
 
 export default function Profile() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { user, isLoading, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -39,12 +39,13 @@ export default function Profile() {
   };
 
   const menuItems = [
-    { icon: User, label: 'Edit Profile', onClick: () => {} },
-    { icon: Bell, label: 'Notifications', onClick: () => {} },
-    { icon: CreditCard, label: 'Payment Methods', onClick: () => {} },
-    { icon: Shield, label: 'Privacy & Security', onClick: () => {} },
-    { icon: Settings, label: 'Settings', onClick: () => {} },
-    { icon: HelpCircle, label: 'Help & Support', onClick: () => {} },
+    { icon: User, label: language === 'ru' ? 'Редактировать профиль' : 'Edit Profile', onClick: () => {} },
+    { icon: Heart, label: language === 'ru' ? 'Избранное' : 'Favorites', onClick: () => navigate('/favorites') },
+    { icon: Bell, label: language === 'ru' ? 'Уведомления' : 'Notifications', onClick: () => {} },
+    { icon: CreditCard, label: language === 'ru' ? 'Способы оплаты' : 'Payment Methods', onClick: () => {} },
+    { icon: Shield, label: language === 'ru' ? 'Конфиденциальность' : 'Privacy & Security', onClick: () => {} },
+    { icon: Settings, label: language === 'ru' ? 'Настройки' : 'Settings', onClick: () => {} },
+    { icon: HelpCircle, label: language === 'ru' ? 'Помощь' : 'Help & Support', onClick: () => {} },
   ];
 
   return (
