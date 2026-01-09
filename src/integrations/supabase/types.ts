@@ -598,6 +598,249 @@ export type Database = {
         }
         Relationships: []
       }
+      pharmacies: {
+        Row: {
+          address: string | null
+          cover_image: string | null
+          created_at: string
+          delivery_available: boolean | null
+          delivery_fee: number | null
+          delivery_radius_km: number | null
+          description_en: string | null
+          description_ru: string | null
+          email: string | null
+          has_pharmacist: boolean | null
+          id: string
+          images: string[] | null
+          is_24h: boolean | null
+          is_active: boolean | null
+          is_verified: boolean | null
+          lat: number | null
+          license_number: string | null
+          lng: number | null
+          min_order_amount: number | null
+          name_en: string
+          name_ru: string
+          phone: string | null
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          updated_at: string
+          website: string | null
+          working_hours: Json | null
+        }
+        Insert: {
+          address?: string | null
+          cover_image?: string | null
+          created_at?: string
+          delivery_available?: boolean | null
+          delivery_fee?: number | null
+          delivery_radius_km?: number | null
+          description_en?: string | null
+          description_ru?: string | null
+          email?: string | null
+          has_pharmacist?: boolean | null
+          id?: string
+          images?: string[] | null
+          is_24h?: boolean | null
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          license_number?: string | null
+          lng?: number | null
+          min_order_amount?: number | null
+          name_en: string
+          name_ru: string
+          phone?: string | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Update: {
+          address?: string | null
+          cover_image?: string | null
+          created_at?: string
+          delivery_available?: boolean | null
+          delivery_fee?: number | null
+          delivery_radius_km?: number | null
+          description_en?: string | null
+          description_ru?: string | null
+          email?: string | null
+          has_pharmacist?: boolean | null
+          id?: string
+          images?: string[] | null
+          is_24h?: boolean | null
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          license_number?: string | null
+          lng?: number | null
+          min_order_amount?: number | null
+          name_en?: string
+          name_ru?: string
+          phone?: string | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pharmacies_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pharmacy_orders: {
+        Row: {
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          currency: string | null
+          delivery_address: string | null
+          delivery_fee: number | null
+          delivery_lat: number | null
+          delivery_lng: number | null
+          estimated_delivery: string | null
+          id: string
+          items: Json
+          notes: string | null
+          pharmacy_id: string
+          prescription_images: string[] | null
+          status: string | null
+          subtotal: number
+          total_amount: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          currency?: string | null
+          delivery_address?: string | null
+          delivery_fee?: number | null
+          delivery_lat?: number | null
+          delivery_lng?: number | null
+          estimated_delivery?: string | null
+          id?: string
+          items?: Json
+          notes?: string | null
+          pharmacy_id: string
+          prescription_images?: string[] | null
+          status?: string | null
+          subtotal: number
+          total_amount: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          currency?: string | null
+          delivery_address?: string | null
+          delivery_fee?: number | null
+          delivery_lat?: number | null
+          delivery_lng?: number | null
+          estimated_delivery?: string | null
+          id?: string
+          items?: Json
+          notes?: string | null
+          pharmacy_id?: string
+          prescription_images?: string[] | null
+          status?: string | null
+          subtotal?: number
+          total_amount?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pharmacy_orders_pharmacy_id_fkey"
+            columns: ["pharmacy_id"]
+            isOneToOne: false
+            referencedRelation: "pharmacies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pharmacy_products: {
+        Row: {
+          active_ingredients: string | null
+          category: string
+          created_at: string
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          dosage: string | null
+          id: string
+          image: string | null
+          is_active: boolean | null
+          manufacturer: string | null
+          name_en: string
+          name_ru: string
+          pharmacy_id: string
+          price: number
+          requires_prescription: boolean | null
+          stock_quantity: number | null
+        }
+        Insert: {
+          active_ingredients?: string | null
+          category?: string
+          created_at?: string
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          dosage?: string | null
+          id?: string
+          image?: string | null
+          is_active?: boolean | null
+          manufacturer?: string | null
+          name_en: string
+          name_ru: string
+          pharmacy_id: string
+          price: number
+          requires_prescription?: boolean | null
+          stock_quantity?: number | null
+        }
+        Update: {
+          active_ingredients?: string | null
+          category?: string
+          created_at?: string
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          dosage?: string | null
+          id?: string
+          image?: string | null
+          is_active?: boolean | null
+          manufacturer?: string | null
+          name_en?: string
+          name_ru?: string
+          pharmacy_id?: string
+          price?: number
+          requires_prescription?: boolean | null
+          stock_quantity?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pharmacy_products_pharmacy_id_fkey"
+            columns: ["pharmacy_id"]
+            isOneToOne: false
+            referencedRelation: "pharmacies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -810,6 +1053,51 @@ export type Database = {
           },
         ]
       }
+      provider_badges: {
+        Row: {
+          awarded_at: string
+          awarded_by: string | null
+          badge_id: string
+          expires_at: string | null
+          id: string
+          notes: string | null
+          provider_id: string
+        }
+        Insert: {
+          awarded_at?: string
+          awarded_by?: string | null
+          badge_id: string
+          expires_at?: string | null
+          id?: string
+          notes?: string | null
+          provider_id: string
+        }
+        Update: {
+          awarded_at?: string
+          awarded_by?: string | null
+          badge_id?: string
+          expires_at?: string | null
+          id?: string
+          notes?: string | null
+          provider_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "trust_badges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_badges_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       providers: {
         Row: {
           cover_image: string | null
@@ -975,6 +1263,104 @@ export type Database = {
           referrer_bonus?: number
           referrer_id?: string
           status?: string
+        }
+        Relationships: []
+      }
+      review_helpful: {
+        Row: {
+          created_at: string
+          id: string
+          is_helpful: boolean
+          review_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_helpful: boolean
+          review_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_helpful?: boolean
+          review_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_helpful_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          cons: string | null
+          content: string | null
+          created_at: string
+          helpful_count: number | null
+          id: string
+          images: string[] | null
+          is_approved: boolean | null
+          is_featured: boolean | null
+          is_verified_purchase: boolean | null
+          item_id: string
+          item_type: string
+          pros: string | null
+          rating: number
+          response: string | null
+          response_at: string | null
+          title: string | null
+          updated_at: string
+          user_id: string
+          visit_date: string | null
+        }
+        Insert: {
+          cons?: string | null
+          content?: string | null
+          created_at?: string
+          helpful_count?: number | null
+          id?: string
+          images?: string[] | null
+          is_approved?: boolean | null
+          is_featured?: boolean | null
+          is_verified_purchase?: boolean | null
+          item_id: string
+          item_type: string
+          pros?: string | null
+          rating: number
+          response?: string | null
+          response_at?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id: string
+          visit_date?: string | null
+        }
+        Update: {
+          cons?: string | null
+          content?: string | null
+          created_at?: string
+          helpful_count?: number | null
+          id?: string
+          images?: string[] | null
+          is_approved?: boolean | null
+          is_featured?: boolean | null
+          is_verified_purchase?: boolean | null
+          item_id?: string
+          item_type?: string
+          pros?: string | null
+          rating?: number
+          response?: string | null
+          response_at?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+          visit_date?: string | null
         }
         Relationships: []
       }
@@ -1247,6 +1633,48 @@ export type Database = {
           },
         ]
       }
+      trust_badges: {
+        Row: {
+          color: string | null
+          created_at: string
+          criteria: Json | null
+          description_en: string | null
+          description_ru: string | null
+          icon: string
+          id: string
+          is_active: boolean | null
+          name_en: string
+          name_ru: string
+          sort_order: number | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          criteria?: Json | null
+          description_en?: string | null
+          description_ru?: string | null
+          icon: string
+          id?: string
+          is_active?: boolean | null
+          name_en: string
+          name_ru: string
+          sort_order?: number | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          criteria?: Json | null
+          description_en?: string | null
+          description_ru?: string | null
+          icon?: string
+          id?: string
+          is_active?: boolean | null
+          name_en?: string
+          name_ru?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1377,6 +1805,193 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      water_activities: {
+        Row: {
+          age_restriction: number | null
+          available_days: string[] | null
+          available_times: string[] | null
+          category: string
+          certification_details: string | null
+          cover_image: string | null
+          created_at: string
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          difficulty: string | null
+          duration_minutes: number | null
+          equipment_included: boolean | null
+          id: string
+          images: string[] | null
+          includes: string[] | null
+          is_active: boolean | null
+          is_certified: boolean | null
+          is_featured: boolean | null
+          location_name: string | null
+          max_participants: number | null
+          meeting_point: string | null
+          meeting_point_lat: number | null
+          meeting_point_lng: number | null
+          min_participants: number | null
+          price: number | null
+          price_per: string | null
+          provider_id: string | null
+          rating: number | null
+          requirements: string[] | null
+          review_count: number | null
+          safety_briefing_required: boolean | null
+          title_en: string
+          title_ru: string
+          updated_at: string
+        }
+        Insert: {
+          age_restriction?: number | null
+          available_days?: string[] | null
+          available_times?: string[] | null
+          category?: string
+          certification_details?: string | null
+          cover_image?: string | null
+          created_at?: string
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          difficulty?: string | null
+          duration_minutes?: number | null
+          equipment_included?: boolean | null
+          id?: string
+          images?: string[] | null
+          includes?: string[] | null
+          is_active?: boolean | null
+          is_certified?: boolean | null
+          is_featured?: boolean | null
+          location_name?: string | null
+          max_participants?: number | null
+          meeting_point?: string | null
+          meeting_point_lat?: number | null
+          meeting_point_lng?: number | null
+          min_participants?: number | null
+          price?: number | null
+          price_per?: string | null
+          provider_id?: string | null
+          rating?: number | null
+          requirements?: string[] | null
+          review_count?: number | null
+          safety_briefing_required?: boolean | null
+          title_en: string
+          title_ru: string
+          updated_at?: string
+        }
+        Update: {
+          age_restriction?: number | null
+          available_days?: string[] | null
+          available_times?: string[] | null
+          category?: string
+          certification_details?: string | null
+          cover_image?: string | null
+          created_at?: string
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          difficulty?: string | null
+          duration_minutes?: number | null
+          equipment_included?: boolean | null
+          id?: string
+          images?: string[] | null
+          includes?: string[] | null
+          is_active?: boolean | null
+          is_certified?: boolean | null
+          is_featured?: boolean | null
+          location_name?: string | null
+          max_participants?: number | null
+          meeting_point?: string | null
+          meeting_point_lat?: number | null
+          meeting_point_lng?: number | null
+          min_participants?: number | null
+          price?: number | null
+          price_per?: string | null
+          provider_id?: string | null
+          rating?: number | null
+          requirements?: string[] | null
+          review_count?: number | null
+          safety_briefing_required?: boolean | null
+          title_en?: string
+          title_ru?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "water_activities_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      water_activity_bookings: {
+        Row: {
+          activity_id: string
+          booking_date: string
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          currency: string | null
+          equipment_rental: Json | null
+          id: string
+          notes: string | null
+          participants: number
+          start_time: string
+          status: string | null
+          total_amount: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activity_id: string
+          booking_date: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          currency?: string | null
+          equipment_rental?: Json | null
+          id?: string
+          notes?: string | null
+          participants?: number
+          start_time: string
+          status?: string | null
+          total_amount: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activity_id?: string
+          booking_date?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          currency?: string | null
+          equipment_rental?: Json | null
+          id?: string
+          notes?: string | null
+          participants?: number
+          start_time?: string
+          status?: string | null
+          total_amount?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "water_activity_bookings_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "water_activities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

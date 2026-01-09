@@ -66,6 +66,20 @@ import ServiceProviderDetail from '@/pages/services/ServiceProviderDetail';
 import ServiceBooking from '@/pages/services/ServiceBooking';
 import ServicesMap from '@/pages/services/ServicesMap';
 
+// Tours Mini-App
+import ToursIndex from '@/pages/tours/ToursIndex';
+import TourDetail from '@/pages/tours/TourDetail';
+import TourBooking from '@/pages/tours/TourBooking';
+
+// Water Activities Mini-App
+import WaterActivitiesIndex from '@/pages/water/WaterActivitiesIndex';
+import WaterActivityDetail from '@/pages/water/WaterActivityDetail';
+import WaterActivityBooking from '@/pages/water/WaterActivityBooking';
+
+// Pharmacy Mini-App
+import PharmacyIndex from '@/pages/pharmacy/PharmacyIndex';
+import PharmacyDetail from '@/pages/pharmacy/PharmacyDetail';
+
 // Other pages
 import Favorites from '@/pages/Favorites';
 import Search from '@/pages/Search';
@@ -154,6 +168,15 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/tours" element={<PageTransition><ToursIndex /></PageTransition>} />
         <Route path="/tours/:id" element={<PageTransition><TourDetail /></PageTransition>} />
         <Route path="/tours/:id/book" element={<PageTransition><TourBooking /></PageTransition>} />
+        
+        {/* Water Activities Mini-App Routes */}
+        <Route path="/water" element={<PageTransition><WaterActivitiesIndex /></PageTransition>} />
+        <Route path="/water/:id" element={<PageTransition><WaterActivityDetail /></PageTransition>} />
+        <Route path="/water/:id/book" element={<PageTransition><WaterActivityBooking /></PageTransition>} />
+        
+        {/* Pharmacy Mini-App Routes */}
+        <Route path="/pharmacy" element={<PageTransition><PharmacyIndex /></PageTransition>} />
+        <Route path="/pharmacy/:id" element={<PageTransition><PharmacyDetail /></PageTransition>} />
         
         {/* Catch-all */}
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
