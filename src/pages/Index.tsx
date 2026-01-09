@@ -11,7 +11,7 @@ import { UnifiedCard } from '@/components/uno/UnifiedCard';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
-
+import { triggerRipple } from '@/hooks/useRipple';
 const categories = [
   { id: 'beauty-spa', icon: Sparkles, path: '/beauty', color: 'from-pink-500 to-purple-500' },
   { id: 'restaurants', icon: UtensilsCrossed, path: '/food', color: 'from-orange-500 to-red-500' },
@@ -120,8 +120,11 @@ const Index = () => {
               return (
                 <button
                   key={cat.id}
-                  onClick={() => navigate(cat.path)}
-                  className="flex flex-col items-center p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all group"
+                  onClick={(e) => {
+                    triggerRipple(e);
+                    navigate(cat.path);
+                  }}
+                  className="relative overflow-hidden flex flex-col items-center p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all group active:scale-95"
                 >
                   <div className={cn(
                     "w-10 h-10 rounded-xl flex items-center justify-center mb-2 bg-gradient-to-br",
@@ -130,7 +133,7 @@ const Index = () => {
                   )}>
                     <Icon className="w-5 h-5 text-white" />
                   </div>
-                  <span className="text-xs font-medium text-center leading-tight">
+                  <span className="text-xs font-medium text-center leading-tight truncate w-full">
                     {t(`category.${cat.id}`)}
                   </span>
                 </button>

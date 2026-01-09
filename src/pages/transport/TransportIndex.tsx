@@ -6,7 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { FilterChip } from '@/components/uno/FilterChip';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-
+import { triggerRipple } from '@/hooks/useRipple';
 // Demo transport options
 const demoVehicles = [
   {
@@ -172,10 +172,11 @@ export default function TransportIndex() {
           ].map((service, i) => (
             <button
               key={i}
-              className="flex flex-col items-center p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all"
+              onClick={(e) => triggerRipple(e)}
+              className="relative overflow-hidden flex flex-col items-center p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all active:scale-95"
             >
               <span className="text-2xl mb-1">{service.icon}</span>
-              <span className="text-xs font-medium text-center">{service.label}</span>
+              <span className="text-xs font-medium text-center truncate w-full">{service.label}</span>
             </button>
           ))}
         </div>
