@@ -1,8 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Star, MapPin, Clock, MessageCircle, Award, BookOpen, Users } from "lucide-react";
+import { ArrowLeft, Star, MapPin, MessageCircle, Award, BookOpen, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useFavorites } from "@/hooks/useFavorites";
+import { FavoriteButton } from "@/components/uno/FavoriteButton";
 
 const tutors: Record<string, any> = {
   "t1": {
@@ -123,8 +125,21 @@ export default function TutorDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   const tutor = tutors[id || "t1"] || tutors["t1"];
+
+  const handleToggleFavorite = () => {
+    toggleFavorite('tutor', tutor.id, {
+      name: tutor.name,
+      specialty_en: tutor.specialty_en,
+      specialty_ru: tutor.specialty_ru,
+      image: tutor.image,
+      price: tutor.price,
+      currency: tutor.currency,
+      rating: tutor.rating
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -138,6 +153,11 @@ export default function TutorDetail() {
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
+        <FavoriteButton
+          isFavorite={isFavorite('tutor', tutor.id)}
+          onClick={handleToggleFavorite}
+          className="absolute top-4 right-4"
+        />
       </div>
 
       {/* Profile Card */}
