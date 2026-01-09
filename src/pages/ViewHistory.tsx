@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Clock, Trash2, X, Scissors, Home, Utensils, Car, Dumbbell, Stethoscope, Calendar, GraduationCap } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -6,6 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useViewHistory } from '@/hooks/useViewHistory';
 import { PremiumButton } from '@/components/uno/PremiumButton';
+import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 
@@ -45,8 +46,12 @@ const typeRoutes: Record<string, string> = {
 export default function ViewHistory() {
   const { language } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
-  const { history, isLoading, clearHistory, removeFromHistory } = useViewHistory();
+  const { history, isLoading, clearHistory, removeFromHistory, refetch } = useViewHistory();
   const navigate = useNavigate();
+
+  const handleRefresh = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
 
   if (authLoading) {
     return (
@@ -86,8 +91,9 @@ export default function ViewHistory() {
 
   return (
     <AppLayout>
-      <div className="p-4 space-y-4">
-        {/* Header */}
+      <PullToRefresh onRefresh={handleRefresh} className="h-[calc(100vh-8rem)]">
+        <div className="p-4 space-y-4">
+          {/* Header */}
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">
             {language === 'ru' ? 'История просмотров' : 'View History'}
@@ -197,7 +203,8 @@ export default function ViewHistory() {
             })}
           </div>
         )}
-      </div>
+        </div>
+      </PullToRefresh>
     </AppLayout>
   );
 }
