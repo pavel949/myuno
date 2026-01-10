@@ -163,6 +163,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/transport/vehicle/:id" element={<PageTransition><VehicleDetail /></PageTransition>} />
         <Route path="/transport/booking/:id" element={<PageTransition><TransportBooking /></PageTransition>} />
         <Route path="/transport/airport-transfer" element={<PageTransition><AirportTransferBooking /></PageTransition>} />
+        <Route path="/transport/airport" element={<Navigate to="/transport/airport-transfer" replace />} />
         <Route path="/airport-transfer" element={<Navigate to="/transport/airport-transfer" replace />} />
         <Route path="/transport/taxi" element={<PageTransition><TaxiBooking /></PageTransition>} />
         
