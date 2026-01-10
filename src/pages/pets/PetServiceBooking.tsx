@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { PawPrint, Calendar, Clock, User, Phone, Mail, FileText, Dog, Cat } from 'lucide-react';
+import { PawPrint, Calendar, Dog, Cat } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { Button } from '@/components/ui/button';
@@ -66,11 +66,11 @@ export default function PetServiceBooking() {
 
     try {
       const result = await createBooking({
-        bookingType: 'service',
-        providerId: id,
-        scheduledAt: scheduledAt.toISOString(),
-        totalAmount: service.price,
+        booking_type: 'service',
+        scheduled_at: scheduledAt.toISOString(),
+        total_amount: service.price,
         currency: 'THB',
+        provider_id: id,
         notes: `Pet: ${petName} (${petType}, ${petBreed}). ${notes}`,
         items: [{
           item_type: 'pet-service',
@@ -88,7 +88,9 @@ export default function PetServiceBooking() {
         }],
         addresses: [],
       });
-      setBookingResult({ bookingId: result.bookingId });
+      if (result.booking_id) {
+        setBookingResult({ bookingId: result.booking_id });
+      }
     } catch (error) {
       console.error('Booking failed:', error);
     }
@@ -98,12 +100,14 @@ export default function PetServiceBooking() {
     return (
       <BookingConfirmation
         bookingId={bookingResult.bookingId}
-        serviceName={language === 'ru' ? service.nameRu : service.name}
-        date={date ? format(date, 'PPP') : ''}
+        title={language === 'ru' ? service.nameRu : service.name}
+        date={date ? format(date, 'PPP') : undefined}
         time={time}
-        totalAmount={service.price}
+        total={service.price}
+        currency="THB"
         onViewBookings={() => navigate('/bookings')}
-        onBackToHome={() => navigate(`/pets/${id}`)}
+        continuePath={`/pets/${id}`}
+        continueLabel={language === 'ru' ? 'К услуге' : 'Back to Service'}
       />
     );
   }

@@ -6,10 +6,9 @@ import {
   Flower2, 
   Pill, 
   Shirt, 
-  Wrench,
-  Sparkles,
   Zap,
-  UtensilsCrossed
+  UtensilsCrossed,
+  PawPrint
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
@@ -37,6 +36,17 @@ const quickServices: QuickService[] = [
     descriptionRu: 'Бронь и доставка',
     path: '/restaurants',
     color: 'from-orange-500 to-red-500',
+    popular: true,
+  },
+  {
+    id: 'pets',
+    icon: PawPrint,
+    label: 'Pets',
+    labelRu: 'Питомцы',
+    description: 'Full care',
+    descriptionRu: 'Полный уход',
+    path: '/pets',
+    color: 'from-amber-500 to-orange-500',
     popular: true,
   },
   {
