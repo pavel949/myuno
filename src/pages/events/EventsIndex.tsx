@@ -3,121 +3,24 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Search, MapPin, Star, Calendar, Clock, Users, 
   Ticket, Music, Compass, PartyPopper, Ship, Mountain,
-  ArrowLeft, Filter
+  ArrowLeft
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useEvents } from '@/hooks/useEvents';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
 import { triggerRipple } from '@/hooks/useRipple';
 
 const eventCategories = [
   { id: 'all', labelEn: 'All', labelRu: 'Все', icon: Ticket },
-  { id: 'concerts', labelEn: 'Concerts', labelRu: 'Концерты', icon: Music },
+  { id: 'concerts', labelEn: 'Shows', labelRu: 'Шоу', icon: Music },
   { id: 'tours', labelEn: 'Tours', labelRu: 'Экскурсии', icon: Compass },
   { id: 'parties', labelEn: 'Parties', labelRu: 'Вечеринки', icon: PartyPopper },
   { id: 'boats', labelEn: 'Boat Trips', labelRu: 'Морские прогулки', icon: Ship },
   { id: 'adventures', labelEn: 'Adventures', labelRu: 'Приключения', icon: Mountain },
-];
-
-const events = [
-  {
-    id: 'event-1',
-    name: 'Full Moon Party',
-    nameRu: 'Вечеринка Полнолуния',
-    category: 'parties',
-    image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600',
-    date: '2026-01-15',
-    time: '20:00',
-    location: 'Patong Beach',
-    locationRu: 'Пляж Патонг',
-    price: 1500,
-    originalPrice: 2000,
-    rating: 4.8,
-    reviewCount: 234,
-    spotsLeft: 45,
-    isFeatured: true,
-    isHot: true,
-  },
-  {
-    id: 'event-2',
-    name: 'Phi Phi Islands Tour',
-    nameRu: 'Тур на острова Пхи-Пхи',
-    category: 'tours',
-    image: 'https://images.unsplash.com/photo-1537956965359-7573183d1f57?w=600',
-    date: '2026-01-12',
-    time: '08:00',
-    location: 'Rassada Pier',
-    locationRu: 'Пирс Рассада',
-    price: 2500,
-    rating: 4.9,
-    reviewCount: 567,
-    spotsLeft: 12,
-    isFeatured: true,
-  },
-  {
-    id: 'event-3',
-    name: 'Thai Boxing Night',
-    nameRu: 'Тайский бокс - Вечер',
-    category: 'concerts',
-    image: 'https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?w=600',
-    date: '2026-01-14',
-    time: '19:00',
-    location: 'Bangla Boxing Stadium',
-    locationRu: 'Стадион Бангла',
-    price: 1800,
-    rating: 4.7,
-    reviewCount: 189,
-    spotsLeft: 78,
-  },
-  {
-    id: 'event-4',
-    name: 'Sunset Yacht Cruise',
-    nameRu: 'Закатный круиз на яхте',
-    category: 'boats',
-    image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600',
-    date: '2026-01-13',
-    time: '16:30',
-    location: 'Royal Phuket Marina',
-    locationRu: 'Роял Пхукет Марина',
-    price: 4500,
-    rating: 4.9,
-    reviewCount: 145,
-    spotsLeft: 8,
-    isHot: true,
-  },
-  {
-    id: 'event-5',
-    name: 'ATV Jungle Adventure',
-    nameRu: 'ATV Приключение в джунглях',
-    category: 'adventures',
-    image: 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=600',
-    date: '2026-01-11',
-    time: '09:00',
-    location: 'Chalong',
-    locationRu: 'Чалонг',
-    price: 2200,
-    rating: 4.6,
-    reviewCount: 98,
-    spotsLeft: 20,
-  },
-  {
-    id: 'event-6',
-    name: 'Simon Cabaret Show',
-    nameRu: 'Шоу Саймон Кабаре',
-    category: 'concerts',
-    image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600',
-    date: '2026-01-10',
-    time: '21:00',
-    location: 'Patong',
-    locationRu: 'Патонг',
-    price: 1200,
-    rating: 4.5,
-    reviewCount: 456,
-    spotsLeft: 100,
-  },
 ];
 
 const EventsIndex = () => {
@@ -125,15 +28,19 @@ const EventsIndex = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  
+  const { events, isLoading } = useEvents({ category: selectedCategory !== 'all' ? selectedCategory : undefined });
 
   const filteredEvents = events.filter(event => {
-    const matchesSearch = event.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         event.nameRu.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || event.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesSearch = event.title_en.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         event.title_ru.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesSearch;
   });
 
-  const formatDate = (dateStr: string) => {
+  const featuredEvent = events.find(e => e.is_featured);
+
+  const formatDate = (dateStr: string | null) => {
+    if (!dateStr) return '';
     const date = new Date(dateStr);
     const options: Intl.DateTimeFormatOptions = { 
       day: 'numeric', 
@@ -195,16 +102,25 @@ const EventsIndex = () => {
           </div>
         </div>
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="px-4 py-4 space-y-4">
+            <Skeleton className="h-48 w-full rounded-2xl" />
+            <Skeleton className="h-28 w-full rounded-xl" />
+            <Skeleton className="h-28 w-full rounded-xl" />
+          </div>
+        )}
+
         {/* Featured Banner */}
-        {selectedCategory === 'all' && (
+        {!isLoading && selectedCategory === 'all' && featuredEvent && (
           <div className="px-4 py-4">
             <div 
-              onClick={() => navigate(`/events/${events[0].id}`)}
+              onClick={() => navigate(`/events/${featuredEvent.id}`)}
               className="relative h-48 rounded-2xl overflow-hidden cursor-pointer group"
             >
               <img
-                src={events[0].image}
-                alt={events[0].name}
+                src={featuredEvent.cover_image || ''}
+                alt={featuredEvent.title_en}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
@@ -213,22 +129,22 @@ const EventsIndex = () => {
                   {language === 'ru' ? 'Популярное' : 'Featured'}
                 </Badge>
                 <h3 className="text-xl font-bold text-white mb-1">
-                  {language === 'ru' ? events[0].nameRu : events[0].name}
+                  {language === 'ru' ? featuredEvent.title_ru : featuredEvent.title_en}
                 </h3>
                 <div className="flex items-center gap-3 text-white/80 text-sm">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
-                    {formatDate(events[0].date)}
+                    {formatDate(featuredEvent.event_date)}
                   </span>
                   <span className="flex items-center gap-1">
                     <Clock className="w-3 h-3" />
-                    {events[0].time}
+                    {featuredEvent.event_time}
                   </span>
                 </div>
               </div>
               <div className="absolute top-4 right-4">
                 <Badge variant="secondary" className="bg-white/90 text-black">
-                  ฿{events[0].price}
+                  ฿{featuredEvent.price?.toLocaleString()}
                 </Badge>
               </div>
             </div>
@@ -236,79 +152,87 @@ const EventsIndex = () => {
         )}
 
         {/* Events List */}
-        <div className="flex-1 px-4 pb-24 space-y-4">
-          <h2 className="font-semibold">
-            {language === 'ru' ? 'Все события' : 'All Events'} ({filteredEvents.length})
-          </h2>
-          
-          {filteredEvents.map(event => (
-            <div
-              key={event.id}
-              onClick={(e) => {
-                triggerRipple(e);
-                navigate(`/events/${event.id}`);
-              }}
-              className="relative overflow-hidden bg-card rounded-xl border border-border cursor-pointer hover:border-primary/30 transition-all active:scale-[0.98]"
-            >
-              <div className="flex">
-                <div className="w-28 h-28 shrink-0 relative">
-                  <img
-                    src={event.image}
-                    alt={event.name}
-                    className="w-full h-full object-cover"
-                  />
-                  {event.isHot && (
-                    <Badge className="absolute top-1 left-1 bg-red-500 text-xs px-1.5">
-                      🔥 Hot
-                    </Badge>
-                  )}
-                </div>
-                <div className="flex-1 p-3">
-                  <div className="flex items-start justify-between mb-1">
-                    <h3 className="font-semibold text-sm line-clamp-1">
-                      {language === 'ru' ? event.nameRu : event.name}
-                    </h3>
-                    <div className="flex items-center gap-1 text-xs shrink-0">
-                      <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                      <span>{event.rating}</span>
+        {!isLoading && (
+          <div className="flex-1 px-4 pb-24 space-y-4">
+            <h2 className="font-semibold">
+              {language === 'ru' ? 'Все события' : 'All Events'} ({filteredEvents.length})
+            </h2>
+            
+            {filteredEvents.map(event => (
+              <div
+                key={event.id}
+                onClick={(e) => {
+                  triggerRipple(e);
+                  navigate(`/events/${event.id}`);
+                }}
+                className="relative overflow-hidden bg-card rounded-xl border border-border cursor-pointer hover:border-primary/30 transition-all active:scale-[0.98]"
+              >
+                <div className="flex">
+                  <div className="w-28 h-28 shrink-0 relative">
+                    <img
+                      src={event.cover_image || ''}
+                      alt={event.title_en}
+                      className="w-full h-full object-cover"
+                    />
+                    {event.is_hot && (
+                      <Badge className="absolute top-1 left-1 bg-red-500 text-xs px-1.5">
+                        🔥 Hot
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex-1 p-3">
+                    <div className="flex items-start justify-between mb-1">
+                      <h3 className="font-semibold text-sm line-clamp-1">
+                        {language === 'ru' ? event.title_ru : event.title_en}
+                      </h3>
+                      <div className="flex items-center gap-1 text-xs shrink-0">
+                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                        <span>{event.rating}</span>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      {formatDate(event.date)}
-                    </span>
-                    <span>•</span>
-                    <span>{event.time}</span>
-                  </div>
-
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
-                    <MapPin className="w-3 h-3" />
-                    <span>{language === 'ru' ? event.locationRu : event.location}</span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1 text-xs text-orange-500">
-                      <Users className="w-3 h-3" />
-                      <span>
-                        {event.spotsLeft} {language === 'ru' ? 'мест' : 'spots left'}
+                    
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {formatDate(event.event_date)}
                       </span>
+                      <span>•</span>
+                      <span>{event.event_time}</span>
                     </div>
-                    <div className="text-right">
-                      {event.originalPrice && (
-                        <span className="text-xs text-muted-foreground line-through mr-1">
-                          ฿{event.originalPrice}
+
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
+                      <MapPin className="w-3 h-3" />
+                      <span>{language === 'ru' ? event.location_ru : event.location_name}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1 text-xs text-orange-500">
+                        <Users className="w-3 h-3" />
+                        <span>
+                          {event.spots_left} {language === 'ru' ? 'мест' : 'spots left'}
                         </span>
-                      )}
-                      <span className="font-bold text-primary">฿{event.price}</span>
+                      </div>
+                      <div className="text-right">
+                        {event.original_price && (
+                          <span className="text-xs text-muted-foreground line-through mr-1">
+                            ฿{event.original_price.toLocaleString()}
+                          </span>
+                        )}
+                        <span className="font-bold text-primary">฿{event.price?.toLocaleString()}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+
+            {filteredEvents.length === 0 && (
+              <div className="text-center py-12 text-muted-foreground">
+                {language === 'ru' ? 'События не найдены' : 'No events found'}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </AppLayout>
   );

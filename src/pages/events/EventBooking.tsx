@@ -5,18 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useEvent } from '@/hooks/useEvents';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
-const eventInfo = {
-  name: 'Phi Phi Islands Tour',
-  nameRu: 'Тур на острова Пхи-Пхи',
-  date: '2026-01-12',
-  time: '08:00',
-  price: 2500,
-};
 
 const EventBooking = () => {
   const { id } = useParams();
@@ -24,9 +18,10 @@ const EventBooking = () => {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { user } = useAuth();
+  const { event, isLoading } = useEvent(id);
 
   const ticketCount = parseInt(searchParams.get('tickets') || '1');
-  const totalPrice = eventInfo.price * ticketCount;
+  const totalPrice = (event?.price || 0) * ticketCount;
 
   const [formData, setFormData] = useState({
     name: '',
@@ -39,7 +34,8 @@ const EventBooking = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr: string | null) => {
+    if (!dateStr) return '';
     const date = new Date(dateStr);
     return date.toLocaleDateString(language === 'ru' ? 'ru-RU' : 'en-US', {
       day: 'numeric',
@@ -57,58 +53,30 @@ const EventBooking = () => {
       return;
     }
 
+    if (!event) return;
+
     setIsSubmitting(true);
 
     try {
-      const { data: booking, error: bookingError } = await supabase
-        .from('bookings')
+      // Use the dedicated event_bookings table
+      const { error: bookingError } = await supabase
+        .from('event_bookings')
         .insert({
+          event_id: event.id,
           user_id: user.id,
-          booking_type: 'event',
-          status: 'submitted',
+          tickets: ticketCount,
           total_amount: totalPrice,
-          currency: 'THB',
-          scheduled_at: new Date(`${eventInfo.date}T${eventInfo.time}:00`).toISOString(),
-          notes: `Event: ${eventInfo.name}. Tickets: ${ticketCount}. Hotel: ${formData.hotelName}, Room: ${formData.roomNumber}. ${formData.notes}`,
-        })
-        .select()
-        .single();
+          currency: event.currency,
+          contact_name: formData.name,
+          contact_phone: formData.phone,
+          contact_email: formData.email || null,
+          pickup_hotel: formData.hotelName || null,
+          pickup_room: formData.roomNumber || null,
+          notes: formData.notes || null,
+          status: 'pending',
+        });
 
       if (bookingError) throw bookingError;
-
-      // Add participant
-      await supabase
-        .from('booking_participants')
-        .insert({
-          booking_id: booking.id,
-          name: formData.name,
-          phone: formData.phone,
-          email: formData.email,
-          is_primary: true,
-        });
-
-      // Add booking items
-      await supabase
-        .from('booking_items')
-        .insert({
-          booking_id: booking.id,
-          item_type: 'ticket',
-          item_name: language === 'ru' ? eventInfo.nameRu : eventInfo.name,
-          quantity: ticketCount,
-          unit_price: eventInfo.price,
-          subtotal: totalPrice,
-        });
-
-      // Add pickup address
-      if (formData.hotelName) {
-        await supabase
-          .from('booking_addresses')
-          .insert({
-            booking_id: booking.id,
-            address_type: 'pickup',
-            address: `${formData.hotelName}, Room ${formData.roomNumber}`,
-          });
-      }
 
       setIsSuccess(true);
     } catch (error) {
@@ -118,6 +86,26 @@ const EventBooking = () => {
       setIsSubmitting(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background p-4">
+        <Skeleton className="h-10 w-32 mb-4" />
+        <Skeleton className="h-32 w-full mb-4" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
+
+  if (!event) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <p className="text-muted-foreground">
+          {language === 'ru' ? 'Событие не найдено' : 'Event not found'}
+        </p>
+      </div>
+    );
+  }
 
   if (isSuccess) {
     return (
@@ -130,10 +118,10 @@ const EventBooking = () => {
             {language === 'ru' ? 'Бронирование подтверждено!' : 'Booking Confirmed!'}
           </h1>
           <p className="text-muted-foreground mb-2">
-            {language === 'ru' ? eventInfo.nameRu : eventInfo.name}
+            {language === 'ru' ? event.title_ru : event.title_en}
           </p>
           <p className="text-sm text-muted-foreground mb-1">
-            {formatDate(eventInfo.date)} • {eventInfo.time}
+            {formatDate(event.event_date)} • {event.event_time}
           </p>
           <p className="text-sm text-muted-foreground mb-6">
             {ticketCount} {language === 'ru' ? 'билет(ов)' : 'ticket(s)'} • ฿{totalPrice.toLocaleString()}
@@ -173,12 +161,12 @@ const EventBooking = () => {
           </h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span>{language === 'ru' ? eventInfo.nameRu : eventInfo.name}</span>
+              <span>{language === 'ru' ? event.title_ru : event.title_en}</span>
             </div>
             <div className="flex justify-between text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
-                {formatDate(eventInfo.date)} • {eventInfo.time}
+                {formatDate(event.event_date)} • {event.event_time}
               </span>
             </div>
             <div className="flex justify-between text-muted-foreground">
@@ -186,7 +174,7 @@ const EventBooking = () => {
                 <Users className="w-3 h-3" />
                 {ticketCount} {language === 'ru' ? 'билет(ов)' : 'ticket(s)'}
               </span>
-              <span>฿{eventInfo.price} × {ticketCount}</span>
+              <span>฿{event.price?.toLocaleString()} × {ticketCount}</span>
             </div>
             <div className="pt-2 border-t border-border flex justify-between font-semibold">
               <span>{language === 'ru' ? 'Итого' : 'Total'}</span>
@@ -202,7 +190,7 @@ const EventBooking = () => {
           </h3>
           
           <div className="space-y-2">
-            <Label htmlFor="name">{language === 'ru' ? 'Имя' : 'Full Name'}</Label>
+            <Label htmlFor="name">{language === 'ru' ? 'Имя' : 'Full Name'} *</Label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -216,7 +204,7 @@ const EventBooking = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone">{language === 'ru' ? 'Телефон' : 'Phone'}</Label>
+            <Label htmlFor="phone">{language === 'ru' ? 'Телефон' : 'Phone'} *</Label>
             <div className="relative">
               <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -231,7 +219,7 @@ const EventBooking = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">{language === 'ru' ? 'Email' : 'Email'}</Label>
+            <Label htmlFor="email">Email</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -260,7 +248,6 @@ const EventBooking = () => {
               value={formData.hotelName}
               onChange={(e) => setFormData({ ...formData, hotelName: e.target.value })}
               placeholder={language === 'ru' ? 'Где вас забрать?' : 'Where should we pick you up?'}
-              required
             />
           </div>
 
@@ -277,7 +264,7 @@ const EventBooking = () => {
 
           <div className="space-y-2">
             <Label htmlFor="notes">
-              {language === 'ru' ? 'Комментарий' : 'Notes'} ({language === 'ru' ? 'необязательно' : 'optional'})
+              {language === 'ru' ? 'Комментарий' : 'Notes'}
             </Label>
             <Textarea
               id="notes"
