@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Car, Bike, Plane, Ship, Clock, Star, MapPin, Users, Fuel, Settings2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { PageContainer } from '@/components/uno/PageContainer';
+import { PageHeader } from '@/components/uno/PageHeader';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { FilterChip } from '@/components/uno/FilterChip';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { triggerRipple } from '@/hooks/useRipple';
-// Demo transport options
 const demoVehicles = [
   {
     id: 'car-1',
@@ -152,26 +153,28 @@ export default function TransportIndex() {
 
   return (
     <AppLayout>
-      <div className="px-4 py-6 space-y-6">
+      <PageContainer>
+        <PageHeader
+          title={language === 'ru' ? 'Транспорт' : 'Transport'}
+          showBack
+          fallbackPath="/"
+          subtitle={language === 'ru' ? 'Аренда и трансферы' : 'Rentals & Transfers'}
+        />
+
         {/* Hero Section */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-500/20 via-blue-500/20 to-primary/20 p-6">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-500/20 via-blue-500/20 to-primary/20 p-6 mt-4 mb-6">
           <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800')] bg-cover bg-center opacity-10" />
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-2">
               <Car className="w-6 h-6 text-primary" />
               <span className="text-sm font-medium text-primary">
-                {language === 'ru' ? 'Транспорт' : 'Transport'}
+                {language === 'ru' ? 'Авто, мотобайки и трансферы' : 'Cars, bikes and transfers'}
               </span>
             </div>
-            <h1 className="text-2xl font-display font-bold text-foreground mb-2">
-              {language === 'ru' 
-                ? 'Аренда и трансферы' 
-                : 'Rentals & Transfers'}
-            </h1>
             <p className="text-muted-foreground text-sm">
               {language === 'ru'
-                ? 'Авто, мотобайки и трансферы по острову'
-                : 'Cars, bikes and island transfers'}
+                ? `${availableVehicles.length} машин доступно`
+                : `${availableVehicles.length} vehicles available`}
             </p>
           </div>
         </div>
@@ -346,7 +349,7 @@ export default function TransportIndex() {
             ))}
           </div>
         </div>
-      </div>
+      </PageContainer>
     </AppLayout>
   );
 }

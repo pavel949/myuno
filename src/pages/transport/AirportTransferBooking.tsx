@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Plane, MapPin, Clock, Users, Check, ArrowRight, Briefcase, Car, Shield, Star, Phone, MessageCircle } from 'lucide-react';
+import { Plane, MapPin, Clock, Users, Check, ArrowRight, Briefcase, Car, Shield, Star, Phone, MessageCircle, ChevronLeft } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { PageContainer } from '@/components/uno/PageContainer';
+import { BackButton } from '@/components/uno/BackButton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -215,7 +217,7 @@ export default function AirportTransferBooking() {
               onClick={() => step > 1 ? setStep(step - 1) : navigate(-1)} 
               className="w-10 h-10 flex items-center justify-center rounded-full bg-background/80 backdrop-blur-sm border border-border/50 text-foreground hover:bg-background transition-colors"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ChevronLeft className="w-5 h-5" />
             </button>
             <div className="flex-1">
               <h1 className="text-xl font-display font-bold">
@@ -638,7 +640,7 @@ export default function AirportTransferBooking() {
                   className="flex-1 h-14 rounded-xl"
                   onClick={() => setStep(1)}
                 >
-                  <ArrowLeft className="w-5 h-5 mr-2" />
+                  <ChevronLeft className="w-5 h-5 mr-2" />
                   {language === 'ru' ? 'Назад' : 'Back'}
                 </Button>
                 <Button
@@ -790,7 +792,7 @@ export default function AirportTransferBooking() {
                   className="flex-1 h-14 rounded-xl"
                   onClick={() => setStep(2)}
                 >
-                  <ArrowLeft className="w-5 h-5 mr-2" />
+                  <ChevronLeft className="w-5 h-5 mr-2" />
                   {language === 'ru' ? 'Назад' : 'Back'}
                 </Button>
                 <Button

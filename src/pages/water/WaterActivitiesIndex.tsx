@@ -44,7 +44,10 @@ export default function WaterActivitiesIndex() {
     <AppLayout>
       <PageContainer>
         <PageHeader 
-          title={t('water.title')} 
+          title={t('water.title')}
+          showBack
+          fallbackPath="/"
+          subtitle={language === 'ru' ? `${activities.length} активностей` : `${activities.length} activities`}
         />
 
         <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide mt-4">

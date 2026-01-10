@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Filter, Sparkles, Star, MapPin, Clock, ArrowRight, Map } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { PageContainer } from '@/components/uno/PageContainer';
+import { PageHeader } from '@/components/uno/PageHeader';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { UnifiedCard } from '@/components/uno/UnifiedCard';
 import { FilterChip } from '@/components/uno/FilterChip';
@@ -96,22 +98,24 @@ export default function BeautySpaIndex() {
 
   return (
     <AppLayout>
-      <div className="px-4 py-6 space-y-6">
+      <PageContainer>
+        <PageHeader
+          title={language === 'ru' ? 'Красота и СПА' : 'Beauty & Spa'}
+          showBack
+          fallbackPath="/"
+          subtitle={language === 'ru' ? `${filteredSalons.length} салонов` : `${filteredSalons.length} salons`}
+        />
+
         {/* Hero Section */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-pink-500/20 via-purple-500/20 to-primary/20 p-6">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-pink-500/20 via-purple-500/20 to-primary/20 p-6 mt-4 mb-6">
           <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800')] bg-cover bg-center opacity-10" />
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles className="w-6 h-6 text-primary" />
               <span className="text-sm font-medium text-primary">
-                {language === 'ru' ? 'Красота и СПА' : 'Beauty & Spa'}
+                {language === 'ru' ? 'Найдите идеальный салон' : 'Find Your Perfect Salon'}
               </span>
             </div>
-            <h1 className="text-2xl font-display font-bold text-foreground mb-2">
-              {language === 'ru' 
-                ? 'Найдите идеальный салон' 
-                : 'Find Your Perfect Salon'}
-            </h1>
             <p className="text-muted-foreground text-sm">
               {language === 'ru'
                 ? 'Лучшие СПА и салоны красоты на Пхукете'
@@ -132,7 +136,7 @@ export default function BeautySpaIndex() {
         </div>
 
         {/* Category filters */}
-        <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
           {serviceCategories.map((cat) => (
             <FilterChip
               key={cat.id}
@@ -196,9 +200,6 @@ export default function BeautySpaIndex() {
               {language === 'ru' ? 'На карте' : 'Map View'}
             </Button>
           </div>
-          <p className="text-sm text-muted-foreground mb-4">
-            {filteredSalons.length} {language === 'ru' ? 'найдено' : 'found'}
-          </p>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {filteredSalons.map((salon) => (
@@ -220,7 +221,7 @@ export default function BeautySpaIndex() {
             ))}
           </div>
         </div>
-      </div>
+      </PageContainer>
     </AppLayout>
   );
 }

@@ -1,57 +1,82 @@
 import React, { ReactNode } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 
 interface PageHeaderProps {
   title: string;
+  subtitle?: string;
   showBack?: boolean;
+  fallbackPath?: string;
   badge?: string | number;
   actions?: ReactNode;
   className?: string;
+  variant?: 'default' | 'sticky' | 'transparent';
 }
 
 export function PageHeader({ 
   title, 
+  subtitle,
   showBack = false, 
+  fallbackPath = '/',
   badge, 
   actions,
-  className 
+  className,
+  variant = 'default'
 }: PageHeaderProps) {
   const navigate = useNavigate();
-  const location = useLocation();
 
   const handleBack = () => {
-    // Check if we came from within the app (referrer exists and is same origin)
     const referrer = document.referrer;
     const isSameOrigin = referrer && referrer.includes(window.location.origin);
     
     if (isSameOrigin && window.history.length > 2) {
       navigate(-1);
     } else {
-      navigate('/');
+      navigate(fallbackPath);
     }
   };
 
+  const variantClasses = {
+    default: '',
+    sticky: 'sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b py-3 -mx-4 px-4',
+    transparent: 'absolute top-0 left-0 right-0 z-10 bg-transparent',
+  };
+
   return (
-    <div className={cn("flex items-center justify-between", className)}>
-      <div className="flex items-center gap-3">
+    <div className={cn("flex items-center justify-between", variantClasses[variant], className)}>
+      <div className="flex items-center gap-3 min-w-0">
         {showBack && (
           <button 
             onClick={handleBack} 
-            className="p-2 -ml-2 hover:bg-secondary rounded-xl transition-colors"
+            aria-label="Go back"
+            className={cn(
+              "flex items-center justify-center w-10 h-10 rounded-full transition-all",
+              "hover:bg-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+              "active:scale-95 touch-manipulation flex-shrink-0",
+              variant === 'transparent' 
+                ? "bg-black/50 text-white hover:bg-black/70 backdrop-blur-sm" 
+                : "bg-secondary/80 text-foreground"
+            )}
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
         )}
-        <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-        {badge !== undefined && badge !== 0 && (
-          <Badge variant="secondary">{badge}</Badge>
-        )}
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-bold tracking-tight truncate">{title}</h1>
+            {badge !== undefined && badge !== 0 && (
+              <Badge variant="secondary" className="flex-shrink-0">{badge}</Badge>
+            )}
+          </div>
+          {subtitle && (
+            <p className="text-sm text-muted-foreground truncate">{subtitle}</p>
+          )}
+        </div>
       </div>
       {actions && (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           {actions}
         </div>
       )}

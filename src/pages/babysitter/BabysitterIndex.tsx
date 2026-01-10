@@ -5,6 +5,8 @@ import {
   Languages, GraduationCap, CheckCircle2, Calendar
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { PageContainer } from '@/components/uno/PageContainer';
+import { PageHeader } from '@/components/uno/PageHeader';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { FilterChip } from '@/components/uno/FilterChip';
 import { Badge } from '@/components/ui/badge';
@@ -115,19 +117,23 @@ export default function BabysitterIndex() {
 
   return (
     <AppLayout>
-      <div className="px-4 py-6 space-y-6">
+      <PageContainer>
+        <PageHeader
+          title={language === 'ru' ? 'Няни' : 'Babysitters'}
+          showBack
+          fallbackPath="/"
+          subtitle={language === 'ru' ? `${filteredBabysitters.length} нянь` : `${filteredBabysitters.length} babysitters`}
+        />
+
         {/* Hero */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-pink-500/20 via-rose-500/20 to-primary/20 p-6">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-pink-500/20 via-rose-500/20 to-primary/20 p-6 mt-4 mb-6">
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-2">
               <Baby className="w-6 h-6 text-pink-500" />
               <span className="text-sm font-medium text-pink-600">
-                {language === 'ru' ? 'Няни и уход за детьми' : 'Babysitters & Childcare'}
+                {language === 'ru' ? 'Проверенные няни' : 'Trusted Babysitters'}
               </span>
             </div>
-            <h1 className="text-2xl font-display font-bold text-foreground mb-2">
-              {language === 'ru' ? 'Проверенные няни' : 'Trusted Babysitters'}
-            </h1>
             <p className="text-muted-foreground text-sm">
               {language === 'ru'
                 ? 'Все няни прошли проверку и имеют сертификаты'
@@ -257,7 +263,7 @@ export default function BabysitterIndex() {
             </div>
           ))}
         </div>
-      </div>
+      </PageContainer>
     </AppLayout>
   );
 }
