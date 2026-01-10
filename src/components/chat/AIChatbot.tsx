@@ -160,8 +160,13 @@ export const AIChatbot: React.FC = () => {
               </p>
             </div>
           </div>
-          <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
-            <X className="w-5 h-5" />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => setIsOpen(false)}
+            className="h-10 w-10 rounded-full hover:bg-destructive/10"
+          >
+            <X className="w-6 h-6" />
           </Button>
         </div>
 
