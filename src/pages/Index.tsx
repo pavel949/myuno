@@ -20,6 +20,9 @@ import { useTours } from '@/hooks/useTours';
 import { useWaterActivities } from '@/hooks/useWaterActivities';
 import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
 import { GlobalSearchModal } from '@/components/search/GlobalSearchModal';
+import { ForYouSection } from '@/components/recommendations/ForYouSection';
+import { RecentlyViewedSection } from '@/components/recommendations/RecentlyViewedSection';
+import { PersonalizedOffersSection } from '@/components/notifications/PersonalizedOffersSection';
 
 // Top categories - most popular for tourists in Phuket
 const topCategories = [
@@ -248,8 +251,23 @@ const Index = () => {
           </div>
         </FadeInUp>
 
-        {/* Featured Services */}
+        {/* Personalized Offers */}
         <FadeInUp delay={0.2}>
+          <PersonalizedOffersSection />
+        </FadeInUp>
+
+        {/* For You Section - Recommendations */}
+        <FadeInUp delay={0.22}>
+          <ForYouSection />
+        </FadeInUp>
+
+        {/* Recently Viewed */}
+        <FadeInUp delay={0.24}>
+          <RecentlyViewedSection />
+        </FadeInUp>
+
+        {/* Featured Services */}
+        <FadeInUp delay={0.26}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">{t('home.featuredServices')}</h2>
             <button 
