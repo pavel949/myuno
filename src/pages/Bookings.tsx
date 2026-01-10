@@ -265,6 +265,7 @@ export default function Bookings() {
                 return (
                   <div
                     key={`${booking.type}-${booking.id}`}
+                    onClick={() => booking.type === 'booking' && navigate(`/bookings/${booking.id}`)}
                     className="bg-card border border-border rounded-xl p-4 hover:border-primary/30 transition-all cursor-pointer"
                   >
                     <div className="flex gap-3">

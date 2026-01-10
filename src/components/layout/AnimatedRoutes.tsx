@@ -8,6 +8,7 @@ import Auth from '@/pages/Auth';
 import Discover from '@/pages/Discover';
 import MapView from '@/pages/MapView';
 import Bookings from '@/pages/Bookings';
+import BookingDetail from '@/pages/BookingDetail';
 import Profile from '@/pages/Profile';
 import NotFound from '@/pages/NotFound';
 
@@ -133,6 +134,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/discover" element={<PageTransition><Discover /></PageTransition>} />
         <Route path="/map" element={<PageTransition><MapView /></PageTransition>} />
         <Route path="/bookings" element={<PageTransition><Bookings /></PageTransition>} />
+        <Route path="/bookings/:id" element={<PageTransition><BookingDetail /></PageTransition>} />
         <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
         <Route path="/favorites" element={<PageTransition><Favorites /></PageTransition>} />
         <Route path="/search" element={<PageTransition><Search /></PageTransition>} />
