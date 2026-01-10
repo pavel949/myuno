@@ -33,8 +33,8 @@ import { useOfflineStatus } from '@/hooks/useOfflineStatus';
 import { toast } from 'sonner';
 
 // UNO Emergency Contact
-const UNO_EMERGENCY_PHONE = '+66-XX-XXX-XXXX';
-const UNO_WHATSAPP = 'https://wa.me/66XXXXXXXXX';
+const UNO_EMERGENCY_PHONE = '+66922407355';
+const UNO_WHATSAPP = 'https://wa.me/66922407355';
 
 // Quick action buttons for most critical services
 const quickActions = [
