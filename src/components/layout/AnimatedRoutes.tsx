@@ -61,6 +61,7 @@ import EducationBooking from '@/pages/education/EducationBooking';
 import FlowersIndex from '@/pages/flowers/FlowersIndex';
 import FlowerShopDetail from '@/pages/flowers/FlowerShopDetail';
 import FlowersOrder from '@/pages/flowers/FlowersOrder';
+import BouquetDetail from '@/pages/flowers/BouquetDetail';
 
 // Home Services Mini-App
 import ServicesIndex from '@/pages/services/ServicesIndex';
@@ -193,6 +194,7 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* Flowers Mini-App Routes */}
         <Route path="/flowers" element={<PageTransition><FlowersIndex /></PageTransition>} />
+        <Route path="/flowers/bouquet/:id" element={<PageTransition><BouquetDetail /></PageTransition>} />
         <Route path="/flowers/shop/:id" element={<PageTransition><FlowerShopDetail /></PageTransition>} />
         <Route path="/flowers/order/:id" element={<PageTransition><FlowersOrder /></PageTransition>} />
         
