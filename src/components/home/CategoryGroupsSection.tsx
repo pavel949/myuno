@@ -77,9 +77,9 @@ const categoryGroups: CategoryGroup[] = [
     categories: [
       { id: 'property', icon: Home, label: 'Property', labelRu: 'Недвижимость', path: '/property', color: 'from-teal-500 to-emerald-500' },
       { id: 'services', icon: Wrench, label: 'Home Services', labelRu: 'Домашние услуги', path: '/services', color: 'from-slate-500 to-zinc-600' },
-      { id: 'cleaning', icon: Brush, label: 'Cleaning', labelRu: 'Уборка', path: '/services?category=cleaning', color: 'from-cyan-500 to-blue-500' },
-      { id: 'babysitting', icon: Baby, label: 'Babysitting', labelRu: 'Няни', path: '/services?category=babysitting', color: 'from-pink-500 to-rose-500', isNew: true },
-      { id: 'delivery', icon: Package, label: 'Delivery', labelRu: 'Доставка', path: '/services?category=delivery', color: 'from-orange-500 to-amber-500' },
+      { id: 'cleaning', icon: Brush, label: 'Cleaning', labelRu: 'Уборка', path: '/cleaning', color: 'from-cyan-500 to-blue-500' },
+      { id: 'babysitting', icon: Baby, label: 'Babysitting', labelRu: 'Няни', path: '/babysitter', color: 'from-pink-500 to-rose-500', isNew: true },
+      { id: 'delivery', icon: Package, label: 'Delivery', labelRu: 'Доставка', path: '/delivery', color: 'from-orange-500 to-amber-500' },
     ],
   },
   {
