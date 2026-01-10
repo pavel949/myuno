@@ -81,7 +81,12 @@ export default function TourBooking() {
           <div>
             <Label className="text-base font-semibold mb-3 block">{t('label.date')}</Label>
             <div className="bg-card rounded-xl border p-4 flex justify-center">
-              <Calendar mode="single" selected={date} onSelect={setDate} disabled={(d) => d < new Date()} />
+              <Calendar 
+                mode="single" 
+                selected={date} 
+                onSelect={setDate} 
+                disabled={(d) => d < new Date()} 
+              />
             </div>
           </div>
 

@@ -225,13 +225,12 @@ const ServiceBooking = () => {
           <h2 className="text-lg font-semibold mb-3">
             {language === "ru" ? "Выберите дату" : "Select Date"}
           </h2>
-          <div className="bg-card rounded-xl border border-border p-4">
+          <div className="bg-card rounded-xl border border-border p-4 flex justify-center">
             <Calendar
               mode="single"
               selected={selectedDate}
               onSelect={setSelectedDate}
               disabled={(date) => date < new Date()}
-              className="rounded-md"
             />
           </div>
         </div>
