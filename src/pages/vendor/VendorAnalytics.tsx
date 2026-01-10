@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVendorProfile, useVendorAnalytics } from '@/hooks/useVendor';
-import AppLayout from '@/components/layout/AppLayout';
-import PageContainer from '@/components/uno/PageContainer';
-import PageHeader from '@/components/uno/PageHeader';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { PageContainer } from '@/components/uno/PageContainer';
+import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -145,7 +145,6 @@ const VendorAnalytics = () => {
         <PageHeader 
           title={isRussian ? 'Аналитика' : 'Analytics'}
           showBack
-          backPath="/vendor"
         />
 
         {/* Period Selector */}
