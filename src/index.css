@@ -110,11 +110,38 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1 {
+    font-family: 'Playfair Display', serif;
+    @apply text-2xl sm:text-3xl font-bold tracking-tight;
+  }
+  
+  h2 {
+    font-family: 'Playfair Display', serif;
+    @apply text-xl sm:text-2xl font-semibold tracking-tight;
+  }
+  
+  h3 {
+    font-family: 'Playfair Display', serif;
+    @apply text-lg sm:text-xl font-semibold tracking-tight;
+  }
+  
+  h4, h5, h6 {
     font-family: 'Playfair Display', serif;
     @apply font-semibold tracking-tight;
+  }
+
+  p {
+    @apply text-sm sm:text-base leading-relaxed;
+  }
+
+  small {
+    @apply text-xs;
   }
 }
 
