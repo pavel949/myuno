@@ -40,9 +40,9 @@ import {
   Bath,
   Ruler,
   MapPin,
-  Loader2,
-  Image as ImageIcon
+  Loader2
 } from 'lucide-react';
+import { ImageUpload } from '@/components/upload/ImageUpload';
 
 const propertyTypes = [
   { id: 'villa', label: 'Villa', labelRu: 'Вилла' },
@@ -75,7 +75,6 @@ const VendorProperties = () => {
   const [editingProperty, setEditingProperty] = useState<VendorProperty | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-  const [imageUrl, setImageUrl] = useState('');
 
   const [formData, setFormData] = useState({
     title_en: '',
@@ -132,7 +131,6 @@ const VendorProperties = () => {
       is_active: true,
     });
     setEditingProperty(null);
-    setImageUrl('');
   };
 
   const openEditDialog = (property: VendorProperty) => {
@@ -156,7 +154,6 @@ const VendorProperties = () => {
       cover_image: property.cover_image || '',
       is_active: property.is_active ?? true,
     });
-    setImageUrl(property.cover_image || '');
     setIsDialogOpen(true);
   };
 
@@ -553,31 +550,13 @@ const VendorProperties = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="cover_image">{isRussian ? 'URL фото обложки' : 'Cover Image URL'}</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="cover_image"
-                    value={formData.cover_image}
-                    onChange={(e) => setFormData(prev => ({ ...prev, cover_image: e.target.value }))}
-                    placeholder="https://..."
-                  />
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    size="icon"
-                    onClick={() => setImageUrl(formData.cover_image)}
-                  >
-                    <ImageIcon className="h-4 w-4" />
-                  </Button>
-                </div>
-                {formData.cover_image && (
-                  <img 
-                    src={formData.cover_image} 
-                    alt="Preview" 
-                    className="w-full h-32 object-cover rounded-lg mt-2"
-                    onError={(e) => (e.currentTarget.style.display = 'none')}
-                  />
-                )}
+                <Label>{isRussian ? 'Фото обложки' : 'Cover Image'}</Label>
+                <ImageUpload
+                  value={formData.cover_image}
+                  onChange={(url) => setFormData(prev => ({ ...prev, cover_image: url }))}
+                  folder="properties"
+                  placeholder={isRussian ? 'Загрузить фото' : 'Upload photo'}
+                />
               </div>
 
               <div className="flex items-center justify-between">
