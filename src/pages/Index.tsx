@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Sparkles, UtensilsCrossed, Dumbbell, Stethoscope, 
@@ -18,6 +18,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTours } from '@/hooks/useTours';
 import { useWaterActivities } from '@/hooks/useWaterActivities';
+import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
+import { GlobalSearchModal } from '@/components/search/GlobalSearchModal';
 
 // Top categories - most popular for tourists in Phuket
 const topCategories = [
@@ -87,6 +89,10 @@ const Index = () => {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [refreshKey, setRefreshKey] = useState(0);
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    return !localStorage.getItem('uno-onboarding-complete');
+  });
+  const [showSearch, setShowSearch] = useState(false);
   
   const { tours, isLoading: toursLoading } = useTours({ featured: true, limit: 3 });
   const { activities, isLoading: activitiesLoading } = useWaterActivities({ featured: true, limit: 3 });
@@ -98,11 +104,23 @@ const Index = () => {
 
   return (
     <AppLayout showFooter>
+      {/* Onboarding Modal */}
+      <OnboardingModal 
+        open={showOnboarding} 
+        onComplete={() => setShowOnboarding(false)} 
+      />
+      
+      {/* Global Search Modal */}
+      <GlobalSearchModal 
+        open={showSearch} 
+        onOpenChange={setShowSearch} 
+      />
+
       <PullToRefresh onRefresh={handleRefresh} className="h-[calc(100vh-8rem)]">
         <div className="px-4 py-6 space-y-8" key={refreshKey}>
         {/* Search Bar */}
         <div 
-          onClick={() => navigate('/search')}
+          onClick={() => setShowSearch(true)}
           className="relative cursor-pointer"
         >
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
