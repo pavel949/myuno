@@ -14,8 +14,7 @@ import {
   Star,
   MapPin,
   Clock,
-  Truck,
-  ArrowLeft
+  Truck
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -23,6 +22,7 @@ import { useCart } from '@/contexts/CartContext';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/uno/BackButton';
 import { cn } from '@/lib/utils';
 import { triggerRipple } from '@/hooks/useRipple';
 
@@ -207,9 +207,10 @@ const MarketIndex = () => {
       {/* Header */}
       <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b">
         <div className="flex items-center justify-between p-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+          <BackButton fallbackPath="/" />
+          <h1 className="text-lg font-semibold">
+            {language === 'ru' ? 'Магазин' : 'Market'}
+          </h1>
           <h1 className="text-lg font-semibold">
             {language === 'ru' ? 'Магазин' : 'Market'}
           </h1>

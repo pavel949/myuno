@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Navigation, Clock, Users, Check, Minus, Plus } from 'lucide-react';
+import { MapPin, Navigation, Clock, Users, Check, Minus, Plus } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import LocationPickerMap from '@/components/transport/LocationPickerMap';
+import { BackButton } from '@/components/uno/BackButton';
 
 // Vehicle options with pricing
 const vehicleOptions = [
@@ -272,9 +273,7 @@ export default function TaxiBooking() {
       <div className="px-4 py-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
-          <button onClick={() => navigate(-1)} className="text-muted-foreground">
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+          <BackButton fallbackPath="/transport" variant="ghost" />
           <div className="flex-1">
             <h1 className="text-xl font-display font-bold">
               {language === 'ru' ? 'Вызов такси' : 'Order Taxi'}

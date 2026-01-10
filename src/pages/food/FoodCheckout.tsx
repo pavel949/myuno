@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Clock, CreditCard, Banknote, Check, Wallet, Loader2 } from 'lucide-react';
+import { MapPin, Clock, CreditCard, Banknote, Check, Wallet, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { BackButton } from '@/components/uno/BackButton';
 
 // Demo cart items
 const demoCartItems = [
@@ -194,12 +195,7 @@ export default function FoodCheckout() {
       <div className="px-4 py-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
-          <button
-            onClick={() => navigate(-1)}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+          <BackButton fallbackPath="/food" variant="ghost" />
           <h1 className="text-xl font-display font-bold">
             {language === 'ru' ? 'Оформление заказа' : 'Checkout'}
           </h1>
