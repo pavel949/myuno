@@ -189,80 +189,93 @@ export default function RestaurantsIndex() {
             {openRestaurants.map((restaurant) => (
               <div
                 key={restaurant.id}
-                onClick={(e) => {
-                  triggerRipple(e);
-                  handleRestaurantClick(restaurant.id);
-                }}
-                className="relative overflow-hidden flex gap-4 p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all cursor-pointer group active:scale-[0.98]"
+                className="relative overflow-hidden rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all group"
               >
-                {/* Image */}
-                <div className="relative w-24 h-24 rounded-xl overflow-hidden flex-shrink-0">
-                  <img
-                    src={restaurant.image}
-                    alt={language === 'ru' ? restaurant.nameRu : restaurant.nameEn}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                  />
-                  {restaurant.isFeatured && (
-                    <div className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-gold/90 text-black text-[10px] font-medium">
-                      ⭐
-                    </div>
-                  )}
-                  {restaurant.isNew && (
-                    <div className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-success/90 text-white text-[10px] font-medium">
-                      NEW
-                    </div>
-                  )}
-                  {restaurant.hasSetMenus && mode === 'reservation' && (
-                    <div className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-primary/90 text-white text-[10px] font-medium">
-                      🥂 Sets
-                    </div>
-                  )}
-                </div>
-                
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-foreground truncate">
-                    {language === 'ru' ? restaurant.nameRu : restaurant.nameEn}
-                  </h3>
+                {/* Main clickable area */}
+                <div 
+                  onClick={(e) => {
+                    triggerRipple(e);
+                    handleRestaurantClick(restaurant.id);
+                  }}
+                  className="flex gap-4 p-3 cursor-pointer active:scale-[0.98]"
+                >
+                  {/* Image */}
+                  <div className="relative w-24 h-24 rounded-xl overflow-hidden flex-shrink-0">
+                    <img
+                      src={restaurant.image}
+                      alt={language === 'ru' ? restaurant.nameRu : restaurant.nameEn}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                    />
+                    {restaurant.isFeatured && (
+                      <div className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-gold/90 text-black text-[10px] font-medium">
+                        ⭐
+                      </div>
+                    )}
+                    {restaurant.isNew && (
+                      <div className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-success/90 text-white text-[10px] font-medium">
+                        NEW
+                      </div>
+                    )}
+                  </div>
                   
-                  <p className="text-sm text-muted-foreground">
-                    {language === 'ru' ? restaurant.cuisineRu : restaurant.cuisine} • {'฿'.repeat(restaurant.priceLevel)}
-                  </p>
-                  
-                  <div className="flex items-center gap-3 mt-2 text-sm">
-                    <div className="flex items-center gap-1">
-                      <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                      <span className="font-medium">{restaurant.rating}</span>
-                    </div>
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-foreground truncate">
+                      {language === 'ru' ? restaurant.nameRu : restaurant.nameEn}
+                    </h3>
                     
-                    {mode === 'delivery' ? (
-                      <>
+                    <p className="text-sm text-muted-foreground">
+                      {language === 'ru' ? restaurant.cuisineRu : restaurant.cuisine} • {'฿'.repeat(restaurant.priceLevel)}
+                    </p>
+                    
+                    <div className="flex items-center gap-3 mt-2 text-sm">
+                      <div className="flex items-center gap-1">
+                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                        <span className="font-medium">{restaurant.rating}</span>
+                      </div>
+                      
+                      {restaurant.acceptsDelivery && (
                         <div className="flex items-center gap-1 text-muted-foreground">
                           <Clock className="w-4 h-4" />
                           <span>{restaurant.deliveryTime} min</span>
                         </div>
-                        <div className="flex items-center gap-1 text-muted-foreground">
-                          <Bike className="w-4 h-4" />
-                          <span>฿{restaurant.deliveryFee}</span>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="flex items-center gap-1 text-muted-foreground">
-                          <MapPin className="w-4 h-4" />
-                          <span>{language === 'ru' ? restaurant.locationRu : restaurant.location}</span>
-                        </div>
-                        <div className="flex items-center gap-1 text-muted-foreground">
-                          <span className="text-xs">👥 до {restaurant.maxPartySize}</span>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                  
-                  {mode === 'reservation' && restaurant.depositRequired && (
-                    <div className="mt-1 text-xs text-amber-600 dark:text-amber-400">
-                      {language === 'ru' ? `Депозит: ฿${restaurant.depositAmount}` : `Deposit: ฿${restaurant.depositAmount}`}
+                      )}
+                      
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <MapPin className="w-4 h-4" />
+                        <span className="truncate max-w-[80px]">{language === 'ru' ? restaurant.locationRu : restaurant.location}</span>
+                      </div>
                     </div>
+                  </div>
+                </div>
+                
+                {/* Action Buttons - Two buttons on card */}
+                <div className="flex gap-2 px-3 pb-3">
+                  {restaurant.acceptsDelivery && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        triggerRipple(e);
+                        navigate(`/restaurants/${restaurant.id}?mode=delivery`);
+                      }}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 active:scale-[0.98] transition-all"
+                    >
+                      <Bike className="w-4 h-4" />
+                      {language === 'ru' ? 'Заказать' : 'Order'}
+                    </button>
+                  )}
+                  {restaurant.acceptsReservations && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        triggerRipple(e);
+                        navigate(`/restaurants/${restaurant.id}/reserve`);
+                      }}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-secondary text-secondary-foreground text-sm font-medium hover:bg-secondary/80 active:scale-[0.98] transition-all"
+                    >
+                      <CalendarDays className="w-4 h-4" />
+                      {language === 'ru' ? 'Столик' : 'Book'}
+                    </button>
                   )}
                 </div>
               </div>
