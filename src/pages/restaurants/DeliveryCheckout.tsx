@@ -23,7 +23,7 @@ export default function DeliveryCheckout() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { user } = useAuth();
-  const { items, getItemsByProvider, clearCart } = useCart();
+  const { getItemsByProvider, clearByProvider } = useCart();
   const { createBooking, isSubmitting } = useBooking();
 
   const restaurant = getRestaurantById(id || '');
@@ -96,7 +96,7 @@ export default function DeliveryCheckout() {
 
     if (result.success && result.booking_id) {
       setBookingId(result.booking_id);
-      clearCart();
+      clearByProvider(id || '');
       setIsSuccess(true);
     }
   };

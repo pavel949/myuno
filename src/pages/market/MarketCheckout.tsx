@@ -1,103 +1,156 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { MapPin, Clock, CreditCard, Wallet, Banknote, Truck, Tag, CheckCircle2 } from 'lucide-react';
+import { MapPin, Truck, ShoppingBag } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { PageContainer } from '@/components/uno/PageContainer';
+import { PageHeader } from '@/components/uno/PageHeader';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBooking } from '@/hooks/useBooking';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
-import { BackButton } from '@/components/uno/BackButton';
-
-const paymentMethods = [
-  { id: 'card', icon: CreditCard, labelEn: 'Credit Card', labelRu: 'Банковская карта' },
-  { id: 'cash', icon: Banknote, labelEn: 'Cash on Delivery', labelRu: 'Наличными курьеру' },
-  { id: 'wallet', icon: Wallet, labelEn: 'UNO Wallet', labelRu: 'Кошелёк UNO' },
-];
+import { 
+  BookingPaymentSelect,
+  BookingBottomBar,
+  BookingConfirmation,
+  type PaymentMethod 
+} from '@/components/booking';
+import { EmptyState } from '@/components/uno/EmptyState';
 
 const MarketCheckout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { language } = useLanguage();
-  const { getItemsByType, clearCart } = useCart();
-  const { user } = useAuth();
+  const { getItemsByType, clearByType } = useCart();
+  const { user, isLoading: authLoading } = useAuth();
+  const { createBooking, isSubmitting } = useBooking();
   
   const storeInfo = location.state as { storeId: string; storeName: string; storeNameRu: string; deliveryFee: number; minOrder: number } | undefined;
   const cartItems = getItemsByType('product').filter(item => storeInfo ? item.providerId === storeInfo.storeId : true);
 
-  const [formData, setFormData] = useState({ name: '', phone: '', address: '', apartment: '', notes: '' });
-  const [paymentMethod, setPaymentMethod] = useState('card');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({ name: '', phone: '', address: '', notes: '' });
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
+  const [bookingResult, setBookingResult] = useState<{ success: boolean; bookingId?: string } | null>(null);
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const deliveryFee = storeInfo?.deliveryFee || 50;
   const total = subtotal + deliveryFee;
 
+  // Auth redirect
+  if (!authLoading && !user) {
+    navigate('/auth', { state: { from: '/market/checkout' } });
+    return null;
+  }
+
+  // Success state
+  if (bookingResult?.success && bookingResult.bookingId) {
+    return (
+      <AppLayout showBottomNav={false}>
+        <BookingConfirmation
+          bookingId={bookingResult.bookingId}
+          title={language === 'ru' 
+            ? (storeInfo?.storeNameRu || 'Заказ из маркета') 
+            : (storeInfo?.storeName || 'Market Order')}
+          total={total}
+          currency="THB"
+          continuePath="/market"
+          continueLabel={language === 'ru' ? 'К магазинам' : 'Browse Stores'}
+        />
+      </AppLayout>
+    );
+  }
+
   const handleSubmit = async () => {
-    if (!formData.name || !formData.phone || !formData.address) {
-      toast.error(language === 'ru' ? 'Заполните все обязательные поля' : 'Please fill all required fields');
-      return;
-    }
-    if (!user) {
-      toast.error(language === 'ru' ? 'Войдите для оформления заказа' : 'Please sign in to place order');
-      navigate('/auth');
-      return;
-    }
-    setIsSubmitting(true);
-    try {
-      const { data: booking, error } = await supabase.from('bookings').insert([{
-        user_id: user.id,
-        booking_type: 'product' as const,
-        status: 'submitted' as const,
-        scheduled_at: new Date().toISOString(),
-        total_amount: total,
-        currency: 'THB',
-        notes: `Store: ${storeInfo?.storeName || 'Market'}\nDelivery: ${formData.address}`,
-      }]).select().single();
-      if (error) throw error;
-      clearCart();
-      toast.success(language === 'ru' ? 'Заказ оформлен!' : 'Order placed!');
-      navigate('/bookings');
-    } catch (error) {
-      toast.error(language === 'ru' ? 'Ошибка оформления заказа' : 'Failed to place order');
-    } finally {
-      setIsSubmitting(false);
+    if (!formData.name || !formData.phone || !formData.address) return;
+
+    const items = cartItems.map(item => ({
+      item_type: 'product',
+      item_id: item.id,
+      item_name: language === 'ru' ? (item.nameRu || item.name) : item.name,
+      quantity: item.quantity,
+      unit_price: item.price,
+      subtotal: item.price * item.quantity,
+    }));
+
+    // Add delivery fee
+    items.push({
+      item_type: 'fee',
+      item_id: 'delivery_fee',
+      item_name: language === 'ru' ? 'Доставка' : 'Delivery',
+      quantity: 1,
+      unit_price: deliveryFee,
+      subtotal: deliveryFee,
+    });
+
+    const result = await createBooking({
+      booking_type: 'product',
+      scheduled_at: new Date(),
+      total_amount: total,
+      currency: 'THB',
+      notes: `Store: ${storeInfo?.storeName || 'Market'}`,
+      items,
+      participants: [{
+        name: formData.name,
+        phone: formData.phone,
+        is_primary: true,
+      }],
+      addresses: [{
+        address_type: 'delivery',
+        address: formData.address,
+        notes: formData.notes,
+      }],
+      payment: {
+        amount: total,
+        payment_method: paymentMethod,
+      },
+    });
+
+    if (result.success) {
+      clearByType('product');
+      setBookingResult({ success: true, bookingId: result.booking_id });
     }
   };
 
   if (cartItems.length === 0) {
     return (
       <AppLayout>
-        <div className="p-4 text-center py-12">
-          <p className="text-muted-foreground">{language === 'ru' ? 'Корзина пуста' : 'Cart is empty'}</p>
-          <Button className="mt-4" onClick={() => navigate('/market')}>{language === 'ru' ? 'Перейти в магазин' : 'Go to market'}</Button>
-        </div>
+        <PageContainer>
+          <PageHeader title={language === 'ru' ? 'Оформление заказа' : 'Checkout'} showBack />
+          <EmptyState
+            icon={ShoppingBag}
+            title={language === 'ru' ? 'Корзина пуста' : 'Cart is empty'}
+            description={language === 'ru' ? 'Добавьте товары в корзину' : 'Add items to your cart'}
+            action={
+              <Button onClick={() => navigate('/market')}>
+                {language === 'ru' ? 'Перейти в магазин' : 'Go to market'}
+              </Button>
+            }
+          />
+        </PageContainer>
       </AppLayout>
     );
   }
 
   return (
-    <AppLayout>
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b">
-        <div className="flex items-center gap-3 p-4">
-          <BackButton fallbackPath="/market" />
-          <h1 className="text-lg font-semibold">{language === 'ru' ? 'Оформление заказа' : 'Checkout'}</h1>
-        </div>
-      </div>
+    <AppLayout showBottomNav={false}>
+      <PageContainer className="pb-32">
+        <PageHeader 
+          title={language === 'ru' ? 'Оформление заказа' : 'Checkout'} 
+          showBack 
+        />
 
-      <div className="p-4 space-y-4 pb-40">
+        {/* Store Info */}
         {storeInfo && (
-          <Card>
+          <Card className="mt-4 mb-4">
             <CardContent className="p-4 flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center"><Truck className="w-6 h-6 text-primary" /></div>
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Truck className="w-6 h-6 text-primary" />
+              </div>
               <div>
                 <h3 className="font-semibold">{language === 'ru' ? storeInfo.storeNameRu : storeInfo.storeName}</h3>
                 <p className="text-sm text-muted-foreground">{cartItems.length} {language === 'ru' ? 'товаров' : 'items'}</p>
@@ -106,54 +159,95 @@ const MarketCheckout = () => {
           </Card>
         )}
 
-        <Card>
-          <CardContent className="p-4 space-y-4">
-            <div className="flex items-center gap-2"><MapPin className="w-5 h-5 text-primary" /><h3 className="font-semibold">{language === 'ru' ? 'Адрес доставки' : 'Delivery Address'}</h3></div>
-            <div className="space-y-3">
-              <div><Label>{language === 'ru' ? 'Имя' : 'Name'} *</Label><Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} /></div>
-              <div><Label>{language === 'ru' ? 'Телефон' : 'Phone'} *</Label><Input value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} placeholder="+66" /></div>
-              <div><Label>{language === 'ru' ? 'Адрес' : 'Address'} *</Label><Input value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} /></div>
-              <div><Label>{language === 'ru' ? 'Комментарий' : 'Notes'}</Label><Textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} rows={2} /></div>
+        {/* Delivery Address */}
+        <div className="bg-card rounded-2xl border p-5 mb-4">
+          <div className="flex items-center gap-2 mb-4">
+            <MapPin className="w-5 h-5 text-primary" />
+            <h3 className="font-semibold">{language === 'ru' ? 'Адрес доставки' : 'Delivery Address'}</h3>
+          </div>
+          <div className="space-y-3">
+            <div>
+              <Label>{language === 'ru' ? 'Имя' : 'Name'} *</Label>
+              <Input 
+                value={formData.name} 
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
+                className="mt-1"
+              />
             </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4 space-y-3">
-            <div className="flex items-center gap-2"><CreditCard className="w-5 h-5 text-primary" /><h3 className="font-semibold">{language === 'ru' ? 'Способ оплаты' : 'Payment Method'}</h3></div>
-            <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
-              {paymentMethods.map((method) => {
-                const Icon = method.icon;
-                return (
-                  <div key={method.id} className={cn("flex items-center gap-3 p-3 rounded-xl border transition-all", paymentMethod === method.id ? "border-primary bg-primary/5" : "border-border")}>
-                    <RadioGroupItem value={method.id} id={method.id} />
-                    <Icon className="w-5 h-5 text-muted-foreground" />
-                    <Label htmlFor={method.id} className="flex-1 cursor-pointer">{language === 'ru' ? method.labelRu : method.labelEn}</Label>
-                  </div>
-                );
-              })}
-            </RadioGroup>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4 space-y-3">
-            <h3 className="font-semibold">{language === 'ru' ? 'Итого' : 'Order Summary'}</h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between"><span className="text-muted-foreground">{language === 'ru' ? 'Товары' : 'Subtotal'}</span><span>฿{subtotal.toLocaleString()}</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">{language === 'ru' ? 'Доставка' : 'Delivery'}</span><span>฿{deliveryFee}</span></div>
-              <Separator />
-              <div className="flex justify-between font-semibold text-base"><span>{language === 'ru' ? 'Итого' : 'Total'}</span><span>฿{total.toLocaleString()}</span></div>
+            <div>
+              <Label>{language === 'ru' ? 'Телефон' : 'Phone'} *</Label>
+              <Input 
+                value={formData.phone} 
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })} 
+                placeholder="+66" 
+                className="mt-1"
+              />
             </div>
-          </CardContent>
-        </Card>
-      </div>
+            <div>
+              <Label>{language === 'ru' ? 'Адрес' : 'Address'} *</Label>
+              <Input 
+                value={formData.address} 
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })} 
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>{language === 'ru' ? 'Комментарий' : 'Notes'}</Label>
+              <Textarea 
+                value={formData.notes} 
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })} 
+                rows={2} 
+                className="mt-1"
+              />
+            </div>
+          </div>
+        </div>
 
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t safe-area-bottom">
-        <Button className="w-full h-12 text-base font-semibold" onClick={handleSubmit} disabled={isSubmitting}>
-          {isSubmitting ? <span>{language === 'ru' ? 'Оформление...' : 'Processing...'}</span> : <><CheckCircle2 className="w-5 h-5 mr-2" />{language === 'ru' ? 'Оформить заказ' : 'Place Order'}<span className="ml-auto">฿{total.toLocaleString()}</span></>}
-        </Button>
-      </div>
+        {/* Payment Method */}
+        <div className="bg-card rounded-2xl border p-5 mb-4">
+          <h3 className="font-semibold mb-4">
+            {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
+          </h3>
+          <BookingPaymentSelect
+            selected={paymentMethod}
+            onSelect={setPaymentMethod}
+            amount={total}
+            currency="THB"
+            showWallet
+            showCash
+          />
+        </div>
+
+        {/* Order Summary */}
+        <div className="bg-card rounded-2xl border p-5 mb-4">
+          <h3 className="font-semibold mb-4">{language === 'ru' ? 'Итого' : 'Order Summary'}</h3>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">{language === 'ru' ? 'Товары' : 'Subtotal'}</span>
+              <span>฿{subtotal.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">{language === 'ru' ? 'Доставка' : 'Delivery'}</span>
+              <span>฿{deliveryFee}</span>
+            </div>
+            <Separator />
+            <div className="flex justify-between font-semibold text-base">
+              <span>{language === 'ru' ? 'Итого' : 'Total'}</span>
+              <span className="text-primary">฿{total.toLocaleString()}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Bar */}
+        <BookingBottomBar
+          total={total}
+          currency="THB"
+          onSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
+          disabled={!formData.name || !formData.phone || !formData.address}
+          submitLabel={language === 'ru' ? 'Оформить заказ' : 'Place Order'}
+        />
+      </PageContainer>
     </AppLayout>
   );
 };
