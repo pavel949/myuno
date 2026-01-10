@@ -23,6 +23,7 @@ import { GlobalSearchModal } from '@/components/search/GlobalSearchModal';
 import { ForYouSection } from '@/components/recommendations/ForYouSection';
 import { RecentlyViewedSection } from '@/components/recommendations/RecentlyViewedSection';
 import { PersonalizedOffersSection } from '@/components/notifications/PersonalizedOffersSection';
+import { QuickServicesSection } from '@/components/home/QuickServicesSection';
 
 // Top categories - most popular for tourists in Phuket
 const topCategories = [
@@ -179,6 +180,11 @@ const Index = () => {
             </div>
           </div>
         </div>
+
+        {/* Quick Services */}
+        <FadeInUp delay={0.08}>
+          <QuickServicesSection />
+        </FadeInUp>
 
         {/* Top Categories - Large Cards */}
         <FadeInUp delay={0.1}>
