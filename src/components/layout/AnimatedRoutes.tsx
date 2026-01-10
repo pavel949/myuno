@@ -109,8 +109,12 @@ import YachtBooking from '@/pages/yachts/YachtBooking';
 
 // Cleaning Mini-App
 import CleaningIndex from '@/pages/cleaning/CleaningIndex';
+import CleaningDetail from '@/pages/cleaning/CleaningDetail';
+import CleaningBooking from '@/pages/cleaning/CleaningBooking';
 
 // Babysitter Mini-App
+import BabysitterDetail from '@/pages/babysitter/BabysitterDetail';
+import BabysitterBooking from '@/pages/babysitter/BabysitterBooking';
 import BabysitterIndex from '@/pages/babysitter/BabysitterIndex';
 
 // Delivery Mini-App
@@ -272,9 +276,13 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* Cleaning Mini-App Routes */}
         <Route path="/cleaning" element={<PageTransition><CleaningIndex /></PageTransition>} />
+        <Route path="/cleaning/:id" element={<PageTransition><CleaningDetail /></PageTransition>} />
+        <Route path="/cleaning/:id/book" element={<PageTransition><CleaningBooking /></PageTransition>} />
         
         {/* Babysitter Mini-App Routes */}
         <Route path="/babysitter" element={<PageTransition><BabysitterIndex /></PageTransition>} />
+        <Route path="/babysitter/:id" element={<PageTransition><BabysitterDetail /></PageTransition>} />
+        <Route path="/babysitter/:id/book" element={<PageTransition><BabysitterBooking /></PageTransition>} />
         
         {/* Delivery Mini-App Routes */}
         <Route path="/delivery" element={<PageTransition><DeliveryIndex /></PageTransition>} />
