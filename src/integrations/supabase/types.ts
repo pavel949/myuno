@@ -469,6 +469,181 @@ export type Database = {
         }
         Relationships: []
       }
+      event_bookings: {
+        Row: {
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          currency: string | null
+          event_id: string
+          id: string
+          notes: string | null
+          pickup_hotel: string | null
+          pickup_room: string | null
+          status: string | null
+          tickets: number
+          total_amount: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          currency?: string | null
+          event_id: string
+          id?: string
+          notes?: string | null
+          pickup_hotel?: string | null
+          pickup_room?: string | null
+          status?: string | null
+          tickets?: number
+          total_amount: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          currency?: string | null
+          event_id?: string
+          id?: string
+          notes?: string | null
+          pickup_hotel?: string | null
+          pickup_room?: string | null
+          status?: string | null
+          tickets?: number
+          total_amount?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_bookings_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          address: string | null
+          category: string
+          cover_image: string | null
+          created_at: string
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          duration_hours: number | null
+          event_date: string | null
+          event_time: string | null
+          excludes: Json | null
+          id: string
+          images: string[] | null
+          includes: Json | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_hot: boolean | null
+          itinerary: Json | null
+          lat: number | null
+          lng: number | null
+          location_name: string | null
+          location_ru: string | null
+          max_spots: number | null
+          original_price: number | null
+          price: number | null
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          spots_left: number | null
+          title_en: string
+          title_ru: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          category?: string
+          cover_image?: string | null
+          created_at?: string
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          duration_hours?: number | null
+          event_date?: string | null
+          event_time?: string | null
+          excludes?: Json | null
+          id?: string
+          images?: string[] | null
+          includes?: Json | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_hot?: boolean | null
+          itinerary?: Json | null
+          lat?: number | null
+          lng?: number | null
+          location_name?: string | null
+          location_ru?: string | null
+          max_spots?: number | null
+          original_price?: number | null
+          price?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          spots_left?: number | null
+          title_en: string
+          title_ru: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          category?: string
+          cover_image?: string | null
+          created_at?: string
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          duration_hours?: number | null
+          event_date?: string | null
+          event_time?: string | null
+          excludes?: Json | null
+          id?: string
+          images?: string[] | null
+          includes?: Json | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_hot?: boolean | null
+          itinerary?: Json | null
+          lat?: number | null
+          lng?: number | null
+          location_name?: string | null
+          location_ru?: string | null
+          max_spots?: number | null
+          original_price?: number | null
+          price?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          spots_left?: number | null
+          title_en?: string
+          title_ru?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       favorites: {
         Row: {
           created_at: string
