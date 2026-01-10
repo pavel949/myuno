@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, UtensilsCrossed, Clock, Star, MapPin, Bike, ArrowRight, Flame, CalendarDays, Banknote } from 'lucide-react';
+import { UtensilsCrossed, Clock, Star, MapPin, Bike, ArrowRight, Flame, CalendarDays, Banknote } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { PageContainer } from '@/components/uno/PageContainer';
+import { PageHeader } from '@/components/uno/PageHeader';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { FilterChip } from '@/components/uno/FilterChip';
-import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { cn } from '@/lib/utils';
 import { triggerRipple } from '@/hooks/useRipple';
 import { demoRestaurants, cuisineCategories } from './restaurantsData';
+import { MiniAppHero, MiniAppSearch, MiniAppQuickActions } from '@/components/miniapp';
 
 type Mode = 'delivery' | 'reservation';
 
@@ -33,7 +34,6 @@ export default function RestaurantsIndex() {
     const matchesCuisine = selectedCuisine === 'all' || 
       rest.cuisine.toLowerCase() === selectedCuisine.toLowerCase();
     
-    // Filter by capability based on mode
     if (mode === 'delivery' && !rest.acceptsDelivery) return false;
     if (mode === 'reservation' && !rest.acceptsReservations) return false;
     
@@ -47,36 +47,47 @@ export default function RestaurantsIndex() {
     navigate(`/restaurants/${restaurantId}?mode=${mode}`);
   };
 
+  const deliveryQuickActions = [
+    { icon: '🔥', label: language === 'ru' ? 'Популярное' : 'Popular' },
+    { icon: '⚡', label: language === 'ru' ? 'Быстро' : 'Fast' },
+    { icon: '🆓', label: language === 'ru' ? 'Бесплатно' : 'Free Del.' },
+    { icon: '🌱', label: language === 'ru' ? 'Веган' : 'Vegan' },
+  ];
+
+  const reservationQuickActions = [
+    { icon: '🥂', label: language === 'ru' ? 'Романтика' : 'Romantic' },
+    { icon: '🎂', label: language === 'ru' ? 'Праздник' : 'Birthday' },
+    { icon: '💼', label: language === 'ru' ? 'Бизнес' : 'Business' },
+  ];
+
   return (
     <AppLayout>
-      <div className="px-4 py-6 space-y-6">
+      <PageContainer>
+        <PageHeader
+          title={language === 'ru' ? 'Рестораны' : 'Restaurants'}
+          showBack
+          fallbackPath="/"
+          subtitle={language === 'ru' ? `${filteredRestaurants.length} мест` : `${filteredRestaurants.length} places`}
+        />
+
         {/* Hero Section */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500/20 via-red-500/20 to-primary/20 p-6">
-          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800')] bg-cover bg-center opacity-10" />
-          <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-2">
-              <UtensilsCrossed className="w-6 h-6 text-primary" />
-              <span className="text-sm font-medium text-primary">
-                {language === 'ru' ? 'Рестораны' : 'Restaurants'}
-              </span>
-            </div>
-            <h1 className="text-2xl font-display font-bold text-foreground mb-2">
-              {mode === 'delivery' 
-                ? (language === 'ru' ? 'Заказать доставку' : 'Order Delivery')
-                : (language === 'ru' ? 'Забронировать столик' : 'Reserve a Table')
-              }
-            </h1>
-            <p className="text-muted-foreground text-sm">
-              {mode === 'delivery'
-                ? (language === 'ru' ? 'Лучшие рестораны и быстрая доставка' : 'Best restaurants with fast delivery')
-                : (language === 'ru' ? 'Выберите ресторан и забронируйте место' : 'Choose a restaurant and book your table')
-              }
-            </p>
-          </div>
-        </div>
+        <MiniAppHero
+          icon={UtensilsCrossed}
+          title={mode === 'delivery' 
+            ? (language === 'ru' ? 'Заказать доставку' : 'Order Delivery')
+            : (language === 'ru' ? 'Забронировать столик' : 'Reserve a Table')}
+          subtitle={mode === 'delivery'
+            ? (language === 'ru' ? 'Лучшие рестораны и быстрая доставка' : 'Best restaurants with fast delivery')
+            : (language === 'ru' ? 'Выберите ресторан и забронируйте место' : 'Choose a restaurant and book your table')}
+          backgroundImage="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800"
+          gradientFrom="from-orange-500/20"
+          gradientVia="via-red-500/20"
+          gradientTo="to-primary/20"
+          className="mt-4 mb-4"
+        />
 
         {/* Mode Tabs */}
-        <Tabs value={mode} onValueChange={(v) => handleModeChange(v as Mode)} className="w-full">
+        <Tabs value={mode} onValueChange={(v) => handleModeChange(v as Mode)} className="w-full mb-4">
           <TabsList className="w-full grid grid-cols-2 h-12">
             <TabsTrigger value="delivery" className="h-10 text-sm gap-2">
               <Bike className="w-4 h-4" />
@@ -90,18 +101,15 @@ export default function RestaurantsIndex() {
         </Tabs>
 
         {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-          <Input
-            placeholder={language === 'ru' ? 'Поиск ресторанов...' : 'Search restaurants...'}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 h-12 bg-card border-border/50"
-          />
-        </div>
+        <MiniAppSearch
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder={language === 'ru' ? 'Поиск ресторанов...' : 'Search restaurants...'}
+          className="mb-4"
+        />
 
         {/* Cuisine filters */}
-        <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+        <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide mb-4">
           {cuisineCategories.map((cat) => (
             <FilterChip
               key={cat.id}
@@ -112,50 +120,16 @@ export default function RestaurantsIndex() {
           ))}
         </div>
 
-        {/* Quick Categories - only show for delivery mode */}
-        {mode === 'delivery' && (
-          <div className="grid grid-cols-4 gap-3">
-            {[
-              { icon: '🔥', label: language === 'ru' ? 'Популярное' : 'Popular' },
-              { icon: '⚡', label: language === 'ru' ? 'Быстро' : 'Fast' },
-              { icon: '🆓', label: language === 'ru' ? 'Бесплатно' : 'Free Del.' },
-              { icon: '🌱', label: language === 'ru' ? 'Веган' : 'Vegan' },
-            ].map((cat, i) => (
-              <button
-                key={i}
-                onClick={(e) => triggerRipple(e)}
-                className="relative overflow-hidden flex flex-col items-center p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all active:scale-95"
-              >
-                <span className="text-2xl mb-1">{cat.icon}</span>
-                <span className="text-xs font-medium text-center truncate w-full">{cat.label}</span>
-              </button>
-            ))}
-          </div>
-        )}
+        {/* Quick Actions */}
+        <MiniAppQuickActions
+          actions={mode === 'delivery' ? deliveryQuickActions : reservationQuickActions}
+          columns={mode === 'delivery' ? 4 : 3}
+          className="mb-6"
+        />
 
-        {/* Reservation Quick Options */}
-        {mode === 'reservation' && (
-          <div className="grid grid-cols-3 gap-3">
-            {[
-              { icon: '🥂', label: language === 'ru' ? 'Романтика' : 'Romantic' },
-              { icon: '🎂', label: language === 'ru' ? 'Праздник' : 'Birthday' },
-              { icon: '💼', label: language === 'ru' ? 'Бизнес' : 'Business' },
-            ].map((cat, i) => (
-              <button
-                key={i}
-                onClick={(e) => triggerRipple(e)}
-                className="relative overflow-hidden flex flex-col items-center p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all active:scale-95"
-              >
-                <span className="text-2xl mb-1">{cat.icon}</span>
-                <span className="text-xs font-medium text-center truncate w-full">{cat.label}</span>
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Featured Banner */}
+        {/* Featured Banner - only for delivery */}
         {mode === 'delivery' && demoRestaurants.filter(r => r.isFeatured).length > 0 && (
-          <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-orange-500 to-red-500 p-4">
+          <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-orange-500 to-red-500 p-4 mb-6">
             <div className="flex items-center gap-3">
               <Flame className="w-8 h-8 text-white" />
               <div className="flex-1">
@@ -172,13 +146,12 @@ export default function RestaurantsIndex() {
         )}
 
         {/* Open Restaurants */}
-        <div>
+        <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">
               {mode === 'reservation' 
                 ? (language === 'ru' ? 'Доступно для брони' : 'Available for Booking')
-                : (language === 'ru' ? 'Открыто сейчас' : 'Open Now')
-              }
+                : (language === 'ru' ? 'Открыто сейчас' : 'Open Now')}
             </h2>
             <span className="text-sm text-muted-foreground">
               {openRestaurants.length} {language === 'ru' ? 'ресторанов' : 'restaurants'}
@@ -191,7 +164,6 @@ export default function RestaurantsIndex() {
                 key={restaurant.id}
                 className="relative overflow-hidden rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all group"
               >
-                {/* Main clickable area */}
                 <div 
                   onClick={(e) => {
                     triggerRipple(e);
@@ -199,7 +171,6 @@ export default function RestaurantsIndex() {
                   }}
                   className="flex gap-4 p-3 cursor-pointer active:scale-[0.98]"
                 >
-                  {/* Image */}
                   <div className="relative w-24 h-24 rounded-xl overflow-hidden flex-shrink-0">
                     <img
                       src={restaurant.image}
@@ -218,7 +189,6 @@ export default function RestaurantsIndex() {
                     )}
                   </div>
                   
-                  {/* Content */}
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-foreground truncate">
                       {language === 'ru' ? restaurant.nameRu : restaurant.nameEn}
@@ -249,7 +219,6 @@ export default function RestaurantsIndex() {
                   </div>
                 </div>
                 
-                {/* Action Buttons - Two buttons on card */}
                 <div className="flex gap-2 px-3 pb-3">
                   {restaurant.acceptsDelivery && (
                     <button
@@ -279,7 +248,6 @@ export default function RestaurantsIndex() {
                   )}
                 </div>
                 
-                {/* Deposit badge for reservations */}
                 {restaurant.acceptsReservations && restaurant.depositRequired && (
                   <div className="flex items-center gap-1.5 px-3 pb-3">
                     <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-amber-500/10 border border-amber-500/20">
@@ -338,7 +306,7 @@ export default function RestaurantsIndex() {
             </div>
           </div>
         )}
-      </div>
+      </PageContainer>
     </AppLayout>
   );
 }
