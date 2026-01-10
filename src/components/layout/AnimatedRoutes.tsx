@@ -34,6 +34,7 @@ import TransportIndex from '@/pages/transport/TransportIndex';
 import VehicleDetail from '@/pages/transport/VehicleDetail';
 import TransportBooking from '@/pages/transport/TransportBooking';
 import AirportTransferBooking from '@/pages/transport/AirportTransferBooking';
+import TaxiBooking from '@/pages/transport/TaxiBooking';
 
 // Fitness Mini-App
 import FitnessIndex from '@/pages/fitness/FitnessIndex';
@@ -155,6 +156,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/transport/vehicle/:id" element={<PageTransition><VehicleDetail /></PageTransition>} />
         <Route path="/transport/booking/:id" element={<PageTransition><TransportBooking /></PageTransition>} />
         <Route path="/transport/airport-transfer" element={<PageTransition><AirportTransferBooking /></PageTransition>} />
+        <Route path="/transport/taxi" element={<PageTransition><TaxiBooking /></PageTransition>} />
         
         {/* Fitness Mini-App Routes */}
         <Route path="/fitness" element={<PageTransition><FitnessIndex /></PageTransition>} />
