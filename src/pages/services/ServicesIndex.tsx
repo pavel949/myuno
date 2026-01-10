@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Input } from "@/components/ui/input";
@@ -27,30 +27,70 @@ import { triggerRipple } from "@/hooks/useRipple";
 const ServicesIndex = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
+  // Read category from URL params on mount
+  useEffect(() => {
+    const categoryParam = searchParams.get('category');
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+  }, [searchParams]);
+
   const categories = [
-    { id: "plumbing", icon: Droplets, name: language === "ru" ? "Сантехник" : "Plumbing", color: "from-blue-500 to-cyan-500" },
+    { id: "water-delivery", icon: Droplets, name: language === "ru" ? "Доставка воды" : "Water Delivery", color: "from-cyan-500 to-blue-500" },
+    { id: "plumbing", icon: Wrench, name: language === "ru" ? "Сантехник" : "Plumbing", color: "from-blue-500 to-indigo-500" },
     { id: "electrical", icon: Zap, name: language === "ru" ? "Электрик" : "Electrical", color: "from-yellow-500 to-orange-500" },
     { id: "cleaning", icon: Sparkles, name: language === "ru" ? "Уборка" : "Cleaning", color: "from-green-500 to-emerald-500" },
     { id: "repair", icon: Hammer, name: language === "ru" ? "Ремонт" : "Repair", color: "from-stone-500 to-zinc-600" },
     { id: "painting", icon: PaintBucket, name: language === "ru" ? "Покраска" : "Painting", color: "from-purple-500 to-violet-500" },
     { id: "hvac", icon: Wind, name: language === "ru" ? "Кондиционеры" : "HVAC", color: "from-sky-500 to-blue-500" },
-    { id: "locksmith", icon: Key, name: language === "ru" ? "Замки" : "Locksmith", color: "from-amber-500 to-yellow-600" },
     { id: "moving", icon: Truck, name: language === "ru" ? "Переезд" : "Moving", color: "from-rose-500 to-red-500" },
   ];
 
   const providers = [
     {
+      id: "srv-water-1",
+      name: language === "ru" ? "Аква Доставка" : "Aqua Delivery",
+      category: "water-delivery",
+      rating: 4.9,
+      reviews: 234,
+      experience: language === "ru" ? "5 лет на рынке" : "5 years in business",
+      price: 150,
+      currency: "฿",
+      priceUnit: language === "ru" ? "/бутыль" : "/bottle",
+      location: language === "ru" ? "Весь Пхукет" : "All Phuket",
+      available: true,
+      verified: true,
+      image: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=200&h=200&fit=crop",
+      services: language === "ru" 
+        ? ["Питьевая вода 19л", "Доставка в день заказа", "Аренда кулера"]
+        : ["19L drinking water", "Same day delivery", "Cooler rental"],
+    },
+    {
+      id: "srv-water-2",
+      name: language === "ru" ? "Чистая Вода" : "Pure Water",
+      category: "water-delivery",
+      rating: 4.8,
+      reviews: 189,
+      experience: language === "ru" ? "Бесплатная доставка" : "Free delivery",
+      price: 120,
+      currency: "฿",
+      priceUnit: language === "ru" ? "/бутыль" : "/bottle",
+      location: language === "ru" ? "Патонг, Карон, Ката" : "Patong, Karon, Kata",
+      available: true,
+      verified: true,
+      image: "https://images.unsplash.com/photo-1559839914-17aae19cec71?w=200&h=200&fit=crop",
+      services: language === "ru"
+        ? ["Артезианская вода", "Минеральная вода", "Подписка со скидкой"]
+        : ["Artesian water", "Mineral water", "Subscription discount"],
+    },
+    {
       id: "srv-1",
       name: language === "ru" ? "Алексей Мастеров" : "Alex Masters",
       category: "plumbing",
-      rating: 4.9,
-      reviews: 156,
-      experience: language === "ru" ? "10 лет опыта" : "10 years exp.",
-      price: 1500,
-      currency: "₽",
       priceUnit: language === "ru" ? "/час" : "/hour",
       location: language === "ru" ? "Центр" : "Downtown",
       available: true,
