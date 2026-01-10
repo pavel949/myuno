@@ -1,12 +1,24 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Check, ChevronDown } from 'lucide-react';
 
 interface LanguageSwitcherProps {
   variant?: 'toggle' | 'dropdown' | 'buttons';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
+
+const languages = [
+  { code: 'ru' as const, flag: '🇷🇺', name: 'Русский', shortName: 'RU' },
+  { code: 'en' as const, flag: '🇬🇧', name: 'English', shortName: 'EN' },
+];
 
 export function LanguageSwitcher({
   variant = 'toggle',
@@ -15,92 +27,68 @@ export function LanguageSwitcher({
 }: LanguageSwitcherProps) {
   const { language, setLanguage } = useLanguage();
 
-  const sizeClasses = {
-    sm: 'h-7 text-xs',
-    md: 'h-9 text-sm',
-    lg: 'h-11 text-base',
-  };
+  const currentLang = languages.find(l => l.code === language) || languages[0];
 
-  if (variant === 'toggle') {
+  // Default dropdown style (consistent with other switchers)
+  if (variant === 'dropdown' || variant === 'toggle') {
     return (
-      <div
-        className={cn(
-          "inline-flex rounded-lg bg-secondary p-1",
-          className
-        )}
-      >
-        <button
-          onClick={() => setLanguage('ru')}
-          className={cn(
-            "px-3 rounded-md font-medium transition-all duration-200",
-            sizeClasses[size],
-            language === 'ru'
-              ? "bg-primary text-primary-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          🇷🇺 RU
-        </button>
-        <button
-          onClick={() => setLanguage('en')}
-          className={cn(
-            "px-3 rounded-md font-medium transition-all duration-200",
-            sizeClasses[size],
-            language === 'en'
-              ? "bg-primary text-primary-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          🇬🇧 EN
-        </button>
-      </div>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            className={cn(
+              "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg",
+              "bg-secondary/50 hover:bg-secondary text-foreground",
+              "text-xs font-medium transition-colors",
+              "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
+              size === 'sm' && "px-2 py-1 text-[11px]",
+              className
+            )}
+          >
+            <span>{currentLang.flag}</span>
+            <span className="hidden sm:inline">{currentLang.shortName}</span>
+            <ChevronDown className="w-3 h-3 opacity-50" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="min-w-[140px] bg-popover border border-border">
+          {languages.map((lang) => (
+            <DropdownMenuItem
+              key={lang.code}
+              onClick={() => setLanguage(lang.code)}
+              className="flex items-center justify-between cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-base">{lang.flag}</span>
+                <span className="text-sm font-medium">{lang.name}</span>
+              </div>
+              {language === lang.code && (
+                <Check className="w-4 h-4 text-primary" />
+              )}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
     );
   }
 
-  if (variant === 'buttons') {
-    return (
-      <div className={cn("flex gap-2", className)}>
-        <button
-          onClick={() => setLanguage('ru')}
-          className={cn(
-            "px-4 rounded-lg font-medium transition-all duration-200 border",
-            sizeClasses[size],
-            language === 'ru'
-              ? "bg-primary text-primary-foreground border-primary"
-              : "bg-transparent text-muted-foreground border-border hover:border-primary/50 hover:text-foreground"
-          )}
-        >
-          Русский
-        </button>
-        <button
-          onClick={() => setLanguage('en')}
-          className={cn(
-            "px-4 rounded-lg font-medium transition-all duration-200 border",
-            sizeClasses[size],
-            language === 'en'
-              ? "bg-primary text-primary-foreground border-primary"
-              : "bg-transparent text-muted-foreground border-border hover:border-primary/50 hover:text-foreground"
-          )}
-        >
-          English
-        </button>
-      </div>
-    );
-  }
-
-  // Dropdown variant
+  // Buttons variant for settings pages
   return (
-    <button
-      onClick={() => setLanguage(language === 'ru' ? 'en' : 'ru')}
-      className={cn(
-        "inline-flex items-center gap-2 px-3 rounded-lg font-medium",
-        "bg-secondary text-foreground hover:bg-secondary/80 transition-colors",
-        sizeClasses[size],
-        className
-      )}
-    >
-      <span>{language === 'ru' ? '🇷🇺' : '🇬🇧'}</span>
-      <span>{language.toUpperCase()}</span>
-    </button>
+    <div className={cn("flex gap-2", className)}>
+      {languages.map((lang) => (
+        <button
+          key={lang.code}
+          onClick={() => setLanguage(lang.code)}
+          className={cn(
+            "flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl",
+            "font-medium transition-all duration-200 border",
+            language === lang.code
+              ? "bg-primary/10 border-primary text-primary"
+              : "bg-secondary/50 border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary"
+          )}
+        >
+          <span>{lang.flag}</span>
+          <span>{lang.name}</span>
+        </button>
+      ))}
+    </div>
   );
 }
