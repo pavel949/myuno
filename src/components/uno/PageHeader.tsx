@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -20,9 +20,14 @@ export function PageHeader({
   className 
 }: PageHeaderProps) {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleBack = () => {
-    if (window.history.length > 1) {
+    // Check if we came from within the app (referrer exists and is same origin)
+    const referrer = document.referrer;
+    const isSameOrigin = referrer && referrer.includes(window.location.origin);
+    
+    if (isSameOrigin && window.history.length > 2) {
       navigate(-1);
     } else {
       navigate('/');
