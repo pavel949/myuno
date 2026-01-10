@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { PageTransition } from './PageTransition';
 
@@ -161,6 +161,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/transport/vehicle/:id" element={<PageTransition><VehicleDetail /></PageTransition>} />
         <Route path="/transport/booking/:id" element={<PageTransition><TransportBooking /></PageTransition>} />
         <Route path="/transport/airport-transfer" element={<PageTransition><AirportTransferBooking /></PageTransition>} />
+        <Route path="/airport-transfer" element={<Navigate to="/transport/airport-transfer" replace />} />
         <Route path="/transport/taxi" element={<PageTransition><TaxiBooking /></PageTransition>} />
         
         {/* Fitness Mini-App Routes */}
