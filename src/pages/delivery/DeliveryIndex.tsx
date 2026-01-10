@@ -5,6 +5,8 @@ import {
   Zap, ArrowRight, Box, ShoppingBag, FileText
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { PageContainer } from '@/components/uno/PageContainer';
+import { PageHeader } from '@/components/uno/PageHeader';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -113,23 +115,27 @@ export default function DeliveryIndex() {
 
   return (
     <AppLayout>
-      <div className="px-4 py-6 space-y-6">
+      <PageContainer>
+        <PageHeader
+          title={language === 'ru' ? 'Доставка' : 'Delivery'}
+          showBack
+          fallbackPath="/"
+          subtitle={language === 'ru' ? 'Быстрая доставка по Пхукету' : 'Fast delivery across Phuket'}
+        />
+
         {/* Hero */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500/20 via-amber-500/20 to-primary/20 p-6">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500/20 via-amber-500/20 to-primary/20 p-6 mt-4 mb-6">
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-2">
               <Truck className="w-6 h-6 text-orange-500" />
               <span className="text-sm font-medium text-orange-600">
-                {language === 'ru' ? 'Доставка' : 'Delivery'}
+                {language === 'ru' ? 'Доставим что угодно' : 'We deliver anything'}
               </span>
             </div>
-            <h1 className="text-2xl font-display font-bold text-foreground mb-2">
-              {language === 'ru' ? 'Быстрая доставка' : 'Fast Delivery'}
-            </h1>
             <p className="text-muted-foreground text-sm">
               {language === 'ru'
-                ? 'Доставим что угодно по всему Пхукету'
-                : 'We deliver anything across Phuket'}
+                ? 'От документов до крупногабаритных грузов'
+                : 'From documents to large items'}
             </p>
           </div>
         </div>
@@ -291,7 +297,7 @@ export default function DeliveryIndex() {
             </p>
           </div>
         </div>
-      </div>
+      </PageContainer>
     </AppLayout>
   );
 }

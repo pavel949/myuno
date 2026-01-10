@@ -28,7 +28,12 @@ export default function ToursIndex() {
   return (
     <AppLayout>
       <PageContainer>
-        <PageHeader title={t('tours.title')} />
+        <PageHeader 
+          title={t('tours.title')} 
+          showBack 
+          fallbackPath="/"
+          subtitle={language === 'ru' ? `${tours.length} туров` : `${tours.length} tours`}
+        />
 
         <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide mt-4">
           {TOUR_CATEGORIES.map(cat => (

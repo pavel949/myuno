@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Anchor, Star, Users, Clock, MapPin, Waves, Shield, ChevronRight } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
+import { PageHeader } from '@/components/uno/PageHeader';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { FilterChip } from '@/components/uno/FilterChip';
 import { Badge } from '@/components/ui/badge';
@@ -148,25 +149,27 @@ export default function YachtsIndex() {
   return (
     <AppLayout>
       <PageContainer>
+        <PageHeader
+          title={language === 'ru' ? 'Яхты и лодки' : 'Yachts & Boats'}
+          showBack
+          fallbackPath="/"
+          subtitle={language === 'ru' ? `${filteredYachts.length} вариантов` : `${filteredYachts.length} options`}
+        />
+
         {/* Hero */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-sky-500/20 via-blue-500/20 to-indigo-500/20 p-6 mb-6">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-sky-500/20 via-blue-500/20 to-indigo-500/20 p-6 mb-6 mt-4">
           <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?w=800')] bg-cover bg-center opacity-10" />
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-2">
               <Anchor className="w-6 h-6 text-primary" />
               <span className="text-sm font-medium text-primary">
-                {language === 'ru' ? 'Яхты и лодки' : 'Yachts & Boats'}
+                {language === 'ru' ? 'Лучшие яхты Пхукета' : 'Best yachts in Phuket'}
               </span>
             </div>
-            <h1 className="text-2xl font-display font-bold mb-2">
-              {language === 'ru' 
-                ? 'Аренда яхт и катеров' 
-                : 'Yacht & Boat Rental'}
-            </h1>
             <p className="text-sm text-muted-foreground">
               {language === 'ru'
-                ? 'Лучшие яхты Пхукета для незабываемых приключений'
-                : 'Best yachts in Phuket for unforgettable adventures'}
+                ? 'Для незабываемых приключений на воде'
+                : 'For unforgettable adventures on the water'}
             </p>
           </div>
         </div>

@@ -5,6 +5,8 @@ import {
   Star, Clock, MapPin, Check, Shield, Calendar
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { PageContainer } from '@/components/uno/PageContainer';
+import { PageHeader } from '@/components/uno/PageHeader';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { FilterChip } from '@/components/uno/FilterChip';
 import { Badge } from '@/components/ui/badge';
@@ -119,20 +121,24 @@ export default function CleaningIndex() {
 
   return (
     <AppLayout>
-      <div className="px-4 py-6 space-y-6">
+      <PageContainer>
+        <PageHeader
+          title={language === 'ru' ? 'Уборка и прачечная' : 'Cleaning & Laundry'}
+          showBack
+          fallbackPath="/"
+          subtitle={language === 'ru' ? `${filteredServices.length} услуг` : `${filteredServices.length} services`}
+        />
+
         {/* Hero */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500/20 via-green-500/20 to-primary/20 p-6">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500/20 via-green-500/20 to-primary/20 p-6 mt-4 mb-6">
           <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800')] bg-cover bg-center opacity-10" />
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles className="w-6 h-6 text-emerald-500" />
               <span className="text-sm font-medium text-emerald-600">
-                {language === 'ru' ? 'Уборка и прачечная' : 'Cleaning & Laundry'}
+                {language === 'ru' ? 'Чистота и свежесть' : 'Clean & Fresh'}
               </span>
             </div>
-            <h1 className="text-2xl font-display font-bold text-foreground mb-2">
-              {language === 'ru' ? 'Чистота и свежесть' : 'Clean & Fresh'}
-            </h1>
             <p className="text-muted-foreground text-sm">
               {language === 'ru'
                 ? 'Профессиональная уборка и услуги прачечной'
@@ -235,7 +241,7 @@ export default function CleaningIndex() {
             </div>
           ))}
         </div>
-      </div>
+      </PageContainer>
     </AppLayout>
   );
 }
