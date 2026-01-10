@@ -1,0 +1,154 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { 
+  Droplets, 
+  Car, 
+  Flower2, 
+  Pill, 
+  Shirt, 
+  Wrench,
+  Sparkles,
+  Zap
+} from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
+
+interface QuickService {
+  id: string;
+  icon: React.ElementType;
+  label: string;
+  labelRu: string;
+  description: string;
+  descriptionRu: string;
+  path: string;
+  color: string;
+  popular?: boolean;
+}
+
+const quickServices: QuickService[] = [
+  {
+    id: 'water-delivery',
+    icon: Droplets,
+    label: 'Water Delivery',
+    labelRu: 'Доставка воды',
+    description: 'Same day',
+    descriptionRu: 'В тот же день',
+    path: '/services?category=water-delivery',
+    color: 'from-cyan-500 to-blue-500',
+    popular: true,
+  },
+  {
+    id: 'airport-transfer',
+    icon: Car,
+    label: 'Airport Transfer',
+    labelRu: 'Трансфер',
+    description: 'Book now',
+    descriptionRu: 'Забронировать',
+    path: '/transport/airport',
+    color: 'from-indigo-500 to-purple-500',
+    popular: true,
+  },
+  {
+    id: 'flowers',
+    icon: Flower2,
+    label: 'Flowers',
+    labelRu: 'Цветы',
+    description: 'Express delivery',
+    descriptionRu: 'Быстрая доставка',
+    path: '/flowers',
+    color: 'from-rose-500 to-pink-500',
+  },
+  {
+    id: 'pharmacy',
+    icon: Pill,
+    label: 'Pharmacy',
+    labelRu: 'Аптека',
+    description: '24/7 delivery',
+    descriptionRu: 'Доставка 24/7',
+    path: '/pharmacy',
+    color: 'from-emerald-500 to-green-500',
+  },
+  {
+    id: 'laundry',
+    icon: Shirt,
+    label: 'Laundry',
+    labelRu: 'Прачечная',
+    description: 'Pickup today',
+    descriptionRu: 'Заберём сегодня',
+    path: '/services?category=laundry',
+    color: 'from-sky-500 to-cyan-500',
+  },
+  {
+    id: 'repairs',
+    icon: Wrench,
+    label: 'Home Repair',
+    labelRu: 'Ремонт',
+    description: 'Fast response',
+    descriptionRu: 'Быстрый выезд',
+    path: '/services?category=repairs',
+    color: 'from-orange-500 to-amber-500',
+  },
+];
+
+export function QuickServicesSection() {
+  const { language } = useLanguage();
+  const navigate = useNavigate();
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <div className="p-1.5 bg-gradient-to-br from-amber-400/20 to-orange-500/10 rounded-lg">
+          <Zap className="w-5 h-5 text-amber-500" />
+        </div>
+        <h2 className="text-lg font-semibold">
+          {language === 'ru' ? 'Быстрые услуги' : 'Quick Services'}
+        </h2>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2">
+        {quickServices.map((service) => {
+          const Icon = service.icon;
+          
+          return (
+            <button
+              key={service.id}
+              onClick={() => navigate(service.path)}
+              className={cn(
+                "relative flex flex-col items-center p-3 rounded-2xl",
+                "bg-card border border-border/50",
+                "hover:border-primary/30 hover:shadow-md",
+                "transition-all active:scale-[0.97] group"
+              )}
+            >
+              {service.popular && (
+                <Badge 
+                  className="absolute -top-1.5 -right-1.5 text-[8px] px-1.5 py-0.5 bg-amber-500 text-white border-0"
+                >
+                  {language === 'ru' ? 'ТОП' : 'HOT'}
+                </Badge>
+              )}
+              
+              <div className={cn(
+                "w-12 h-12 rounded-xl flex items-center justify-center mb-2",
+                "bg-gradient-to-br shadow-sm",
+                service.color,
+                "group-hover:scale-110 transition-transform"
+              )}>
+                <Icon className="w-6 h-6 text-white" />
+              </div>
+              
+              <span className="text-xs font-medium text-center leading-tight line-clamp-1">
+                {language === 'ru' ? service.labelRu : service.label}
+              </span>
+              
+              <span className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">
+                {language === 'ru' ? service.descriptionRu : service.description}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
