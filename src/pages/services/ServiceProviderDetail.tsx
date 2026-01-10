@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -24,11 +24,58 @@ import {
 import { triggerRipple } from "@/hooks/useRipple";
 import { toast } from "sonner";
 
+// Services data by category
+const getServicesByCategory = (category: string, language: string) => {
+  const servicesData: Record<string, Array<{ id: string; name: string; price: number; duration: string }>> = {
+    "plumbing": [
+      { id: "s1", name: language === "ru" ? "Установка смесителя" : "Faucet installation", price: 1500, duration: language === "ru" ? "1 час" : "1 hour" },
+      { id: "s2", name: language === "ru" ? "Замена труб" : "Pipe replacement", price: 3000, duration: language === "ru" ? "2-4 часа" : "2-4 hours" },
+      { id: "s3", name: language === "ru" ? "Прочистка канализации" : "Drain cleaning", price: 2000, duration: language === "ru" ? "1-2 часа" : "1-2 hours" },
+      { id: "s4", name: language === "ru" ? "Установка унитаза" : "Toilet installation", price: 2500, duration: language === "ru" ? "2 часа" : "2 hours" },
+    ],
+    "electrical": [
+      { id: "s1", name: language === "ru" ? "Замена розетки" : "Socket replacement", price: 500, duration: language === "ru" ? "30 мин" : "30 min" },
+      { id: "s2", name: language === "ru" ? "Установка люстры" : "Chandelier installation", price: 1000, duration: language === "ru" ? "1 час" : "1 hour" },
+      { id: "s3", name: language === "ru" ? "Прокладка проводки" : "Wiring", price: 3000, duration: language === "ru" ? "2-4 часа" : "2-4 hours" },
+      { id: "s4", name: language === "ru" ? "Установка автоматов" : "Circuit breaker installation", price: 1500, duration: language === "ru" ? "1 час" : "1 hour" },
+    ],
+    "road-assistance": [
+      { id: "s1", name: language === "ru" ? "Эвакуатор" : "Tow truck", price: 2000, duration: language === "ru" ? "30-60 мин" : "30-60 min" },
+      { id: "s2", name: language === "ru" ? "Запуск аккумулятора" : "Jump start", price: 500, duration: language === "ru" ? "15-30 мин" : "15-30 min" },
+      { id: "s3", name: language === "ru" ? "Замена колеса" : "Tire change", price: 400, duration: language === "ru" ? "20 мин" : "20 min" },
+      { id: "s4", name: language === "ru" ? "Подвоз топлива" : "Fuel delivery", price: 300, duration: language === "ru" ? "30 мин" : "30 min" },
+      { id: "s5", name: language === "ru" ? "Вскрытие замков" : "Lockout service", price: 800, duration: language === "ru" ? "15-30 мин" : "15-30 min" },
+      { id: "s6", name: language === "ru" ? "Буксировка" : "Towing", price: 1500, duration: language === "ru" ? "зависит от расстояния" : "depends on distance" },
+    ],
+    "ac": [
+      { id: "s1", name: language === "ru" ? "Установка кондиционера" : "AC installation", price: 3500, duration: language === "ru" ? "3-4 часа" : "3-4 hours" },
+      { id: "s2", name: language === "ru" ? "Чистка кондиционера" : "AC cleaning", price: 1000, duration: language === "ru" ? "1 час" : "1 hour" },
+      { id: "s3", name: language === "ru" ? "Заправка фреоном" : "Freon refill", price: 1500, duration: language === "ru" ? "30 мин" : "30 min" },
+      { id: "s4", name: language === "ru" ? "Ремонт кондиционера" : "AC repair", price: 2000, duration: language === "ru" ? "1-2 часа" : "1-2 hours" },
+    ],
+  };
+  
+  return servicesData[category] || servicesData["plumbing"];
+};
+
+const getCategoryName = (category: string, language: string) => {
+  const names: Record<string, { ru: string; en: string }> = {
+    "plumbing": { ru: "Сантехник", en: "Plumber" },
+    "electrical": { ru: "Электрик", en: "Electrician" },
+    "road-assistance": { ru: "Помощь на дороге", en: "Road Assistance" },
+    "ac": { ru: "Кондиционеры", en: "AC Services" },
+  };
+  return language === "ru" ? names[category]?.ru || category : names[category]?.en || category;
+};
+
 const ServiceProviderDetail = () => {
   const { language } = useLanguage();
   const { addItem, removeItem, items } = useCart();
   const navigate = useNavigate();
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const category = searchParams.get("category") || "plumbing";
+  const providerName = searchParams.get("name") || (language === "ru" ? "Специалист" : "Specialist");
   const [selectedService, setSelectedService] = useState<string | null>(null);
 
   const getServiceInCart = (serviceId: string) => {
@@ -42,9 +89,9 @@ const ServiceProviderDetail = () => {
       name: service.name,
       nameRu: service.name,
       price: service.price,
-      currency: '₽',
+      currency: '฿',
       providerId: id,
-      providerName: language === "ru" ? "Алексей Мастеров" : "Alex Masters",
+      providerName: providerName,
       options: { duration: service.duration }
     });
     toast.success(language === "ru" ? "Услуга добавлена в корзину" : "Service added to cart");
@@ -56,56 +103,49 @@ const ServiceProviderDetail = () => {
 
   const servicesInCart = items.filter(item => item.type === 'service' && item.providerId === id);
 
-  // Mock provider data
+  // Dynamic provider data based on category
   const provider = {
     id: id,
-    name: language === "ru" ? "Алексей Мастеров" : "Alex Masters",
-    category: "plumbing",
-    categoryName: language === "ru" ? "Сантехник" : "Plumber",
+    name: providerName,
+    category: category,
+    categoryName: getCategoryName(category, language),
     rating: 4.9,
     reviews: 156,
-    experience: language === "ru" ? "10 лет опыта" : "10 years experience",
+    experience: language === "ru" ? "Опытный специалист" : "Experienced specialist",
     completedJobs: 1250,
-    location: language === "ru" ? "Центр города, выезд по всему городу" : "Downtown, city-wide service",
+    location: language === "ru" ? "Весь Пхукет" : "All Phuket",
     available: true,
     verified: true,
     responseTime: language === "ru" ? "Отвечает за 15 мин" : "Responds in 15 min",
     image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop",
     about: language === "ru"
-      ? "Профессиональный сантехник с 10-летним опытом работы. Выполняю все виды сантехнических работ: установка, ремонт, замена. Работаю быстро и качественно. Гарантия на все работы."
-      : "Professional plumber with 10 years of experience. I perform all types of plumbing work: installation, repair, replacement. Fast and quality work. Warranty on all services.",
-    servicesList: [
-      { id: "s1", name: language === "ru" ? "Установка смесителя" : "Faucet installation", price: 1500, duration: "1 час" },
-      { id: "s2", name: language === "ru" ? "Замена труб" : "Pipe replacement", price: 3000, duration: "2-4 часа" },
-      { id: "s3", name: language === "ru" ? "Прочистка канализации" : "Drain cleaning", price: 2000, duration: "1-2 часа" },
-      { id: "s4", name: language === "ru" ? "Установка унитаза" : "Toilet installation", price: 2500, duration: "2 часа" },
-      { id: "s5", name: language === "ru" ? "Ремонт протечек" : "Leak repair", price: 1000, duration: "30 мин - 1 час" },
-      { id: "s6", name: language === "ru" ? "Установка водонагревателя" : "Water heater installation", price: 4000, duration: "3 часа" },
-    ],
+      ? "Профессионал с многолетним опытом работы. Выполняю все виды работ в своей сфере. Работаю быстро и качественно. Гарантия на все услуги."
+      : "Professional with years of experience. I perform all types of work in my field. Fast and quality work. Warranty on all services.",
+    servicesList: getServicesByCategory(category, language),
     reviewsList: [
       {
         id: "r1",
         author: language === "ru" ? "Мария К." : "Maria K.",
         rating: 5,
-        date: "2 дня назад",
+        date: language === "ru" ? "2 дня назад" : "2 days ago",
         text: language === "ru" 
-          ? "Отличный мастер! Приехал вовремя, всё сделал быстро и качественно. Рекомендую!"
+          ? "Отличный специалист! Приехал вовремя, всё сделал быстро и качественно. Рекомендую!"
           : "Excellent professional! Arrived on time, did everything quickly and efficiently. Recommended!",
       },
       {
         id: "r2",
         author: language === "ru" ? "Андрей П." : "Andrew P.",
         rating: 5,
-        date: "1 неделю назад",
+        date: language === "ru" ? "1 неделю назад" : "1 week ago",
         text: language === "ru"
-          ? "Заменил старые трубы на новые. Работа выполнена аккуратно, мусор убрал за собой."
-          : "Replaced old pipes with new ones. Work done neatly, cleaned up after himself.",
+          ? "Быстро приехал и решил проблему. Очень доволен работой."
+          : "Arrived quickly and solved the problem. Very satisfied with the work.",
       },
       {
         id: "r3",
         author: language === "ru" ? "Елена С." : "Elena S.",
         rating: 4,
-        date: "2 недели назад",
+        date: language === "ru" ? "2 недели назад" : "2 weeks ago",
         text: language === "ru"
           ? "Хороший специалист, но немного задержался. В остальном всё отлично."
           : "Good specialist, but was a bit late. Otherwise everything is great.",

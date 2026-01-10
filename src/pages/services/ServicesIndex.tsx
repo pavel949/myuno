@@ -328,7 +328,7 @@ const ServicesIndex = () => {
                 key={provider.id}
                 onClick={(e) => {
                   triggerRipple(e);
-                  navigate(`/services/provider/${provider.id}`);
+                  navigate(`/services/provider/${provider.id}?category=${provider.category}&name=${encodeURIComponent(provider.name)}`);
                 }}
                 className="relative overflow-hidden bg-card border border-border rounded-xl p-4 cursor-pointer hover:border-primary/50 transition-all active:scale-[0.98]"
               >
