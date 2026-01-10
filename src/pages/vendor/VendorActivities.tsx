@@ -43,6 +43,7 @@ import {
   Star,
   Shield
 } from 'lucide-react';
+import { ImageUpload } from '@/components/upload/ImageUpload';
 
 const activityCategories = [
   { id: 'diving', label: 'Diving', labelRu: 'Дайвинг' },
@@ -521,21 +522,13 @@ const VendorActivities = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="cover_image">{isRussian ? 'URL фото обложки' : 'Cover Image URL'}</Label>
-                <Input
-                  id="cover_image"
+                <Label>{isRussian ? 'Фото обложки' : 'Cover Image'}</Label>
+                <ImageUpload
                   value={formData.cover_image}
-                  onChange={(e) => setFormData(prev => ({ ...prev, cover_image: e.target.value }))}
-                  placeholder="https://..."
+                  onChange={(url) => setFormData(prev => ({ ...prev, cover_image: url }))}
+                  folder="activities"
+                  placeholder={isRussian ? 'Загрузить фото' : 'Upload photo'}
                 />
-                {formData.cover_image && (
-                  <img 
-                    src={formData.cover_image} 
-                    alt="Preview" 
-                    className="w-full h-32 object-cover rounded-lg mt-2"
-                    onError={(e) => (e.currentTarget.style.display = 'none')}
-                  />
-                )}
               </div>
 
               <div className="space-y-3">
