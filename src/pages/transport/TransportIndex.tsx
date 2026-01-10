@@ -95,15 +95,28 @@ const demoVehicles = [
 
 const demoTransfers = [
   {
-    id: 'transfer-1',
-    type: 'transfer',
+    id: 'airport-from',
+    type: 'airport',
     nameEn: 'Airport Pickup',
-    nameRu: 'Трансфер из аэропорта',
-    descEn: 'Private car from Phuket Airport',
-    descRu: 'Частный автомобиль из аэропорта Пхукета',
+    nameRu: 'Встреча в аэропорту',
+    descEn: 'Meet & greet at arrivals',
+    descRu: 'Встретим с табличкой в зоне прилёта',
     price: 800,
     duration: '45 min',
     image: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=600',
+    path: '/transport/airport-transfer?direction=from-airport',
+  },
+  {
+    id: 'airport-to',
+    type: 'airport',
+    nameEn: 'To Airport',
+    nameRu: 'В аэропорт',
+    descEn: 'On-time departure pickup',
+    descRu: 'Заберём вовремя к вашему рейсу',
+    price: 800,
+    duration: '45 min',
+    image: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=600',
+    path: '/transport/airport-transfer?direction=to-airport',
   },
   {
     id: 'transfer-2',
@@ -115,6 +128,7 @@ const demoTransfers = [
     price: 1500,
     duration: '2 hours',
     image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600',
+    path: '/transport/transfer/transfer-2',
   },
 ];
 
@@ -165,14 +179,19 @@ export default function TransportIndex() {
         {/* Quick Services */}
         <div className="grid grid-cols-4 gap-3">
           {[
-            { icon: '🚗', label: language === 'ru' ? 'Аренда' : 'Rental', path: '#' },
+            { icon: '🚗', label: language === 'ru' ? 'Аренда' : 'Rental', path: '#vehicles' },
             { icon: '🚕', label: language === 'ru' ? 'Такси' : 'Taxi', path: '#' },
-            { icon: '✈️', label: language === 'ru' ? 'Аэропорт' : 'Airport', path: '#' },
+            { icon: '✈️', label: language === 'ru' ? 'Аэропорт' : 'Airport', path: '/transport/airport-transfer' },
             { icon: '🚤', label: language === 'ru' ? 'Катера' : 'Boats', path: '#' },
           ].map((service, i) => (
             <button
               key={i}
-              onClick={(e) => triggerRipple(e)}
+              onClick={(e) => {
+                triggerRipple(e);
+                if (service.path.startsWith('/')) {
+                  navigate(service.path);
+                }
+              }}
               className="relative overflow-hidden flex flex-col items-center p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all active:scale-95"
             >
               <span className="text-2xl mb-1">{service.icon}</span>
@@ -190,7 +209,7 @@ export default function TransportIndex() {
             {demoTransfers.map((transfer) => (
               <div
                 key={transfer.id}
-                onClick={() => navigate(`/transport/transfer/${transfer.id}`)}
+                onClick={() => navigate(transfer.path)}
                 className="flex-shrink-0 w-64 rounded-xl overflow-hidden bg-card border border-border/50 cursor-pointer hover:border-primary/30 transition-all"
               >
                 <div className="relative h-32">
