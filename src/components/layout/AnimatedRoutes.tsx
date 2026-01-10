@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { PageTransition } from './PageTransition';
@@ -101,6 +101,11 @@ import PetsIndex from '@/pages/pets/PetsIndex';
 import PetServiceDetail from '@/pages/pets/PetServiceDetail';
 import PetServiceBooking from '@/pages/pets/PetServiceBooking';
 import PetTransport from '@/pages/pets/PetTransport';
+
+// Yachts Mini-App
+import YachtsIndex from '@/pages/yachts/YachtsIndex';
+import YachtDetail from '@/pages/yachts/YachtDetail';
+import YachtBooking from '@/pages/yachts/YachtBooking';
 
 // Other pages
 import Favorites from '@/pages/Favorites';
@@ -251,6 +256,10 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/pets/:id/booking" element={<PageTransition><PetServiceBooking /></PageTransition>} />
         <Route path="/pharmacy/:id" element={<PageTransition><PharmacyDetail /></PageTransition>} />
         
+        {/* Yachts Mini-App Routes */}
+        <Route path="/yachts" element={<PageTransition><YachtsIndex /></PageTransition>} />
+        <Route path="/yachts/:id" element={<PageTransition><YachtDetail /></PageTransition>} />
+        <Route path="/yachts/:id/booking" element={<PageTransition><YachtBooking /></PageTransition>} />
         {/* Info Pages */}
         <Route path="/about" element={<PageTransition><AboutPage /></PageTransition>} />
         <Route path="/how-it-works" element={<PageTransition><HowItWorksPage /></PageTransition>} />
