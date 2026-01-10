@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Sparkles, UtensilsCrossed, Dumbbell, Stethoscope, 
@@ -13,17 +13,18 @@ import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { triggerRipple } from '@/hooks/useRipple';
-import { AnimatedGrid, AnimatedCard, FadeInUp } from '@/components/layout/AnimatedList';
+import { FadeInUp } from '@/components/layout/AnimatedList';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { useTours } from '@/hooks/useTours';
-import { useWaterActivities } from '@/hooks/useWaterActivities';
-import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
-import { GlobalSearchModal } from '@/components/search/GlobalSearchModal';
-import { ForYouSection } from '@/components/recommendations/ForYouSection';
-import { RecentlyViewedSection } from '@/components/recommendations/RecentlyViewedSection';
-import { PersonalizedOffersSection } from '@/components/notifications/PersonalizedOffersSection';
 import { QuickServicesSection } from '@/components/home/QuickServicesSection';
+
+// Lazy load heavy components for faster initial load
+const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
+const GlobalSearchModal = lazy(() => import('@/components/search/GlobalSearchModal').then(m => ({ default: m.GlobalSearchModal })));
+const ForYouSection = lazy(() => import('@/components/recommendations/ForYouSection').then(m => ({ default: m.ForYouSection })));
+const RecentlyViewedSection = lazy(() => import('@/components/recommendations/RecentlyViewedSection').then(m => ({ default: m.RecentlyViewedSection })));
+const PersonalizedOffersSection = lazy(() => import('@/components/notifications/PersonalizedOffersSection').then(m => ({ default: m.PersonalizedOffersSection })));
+const ToursSection = lazy(() => import('@/components/home/ToursSection').then(m => ({ default: m.ToursSection })));
+const WaterSection = lazy(() => import('@/components/home/WaterSection').then(m => ({ default: m.WaterSection })));
 
 // Top categories - most popular for tourists in Phuket
 const topCategories = [
@@ -97,9 +98,6 @@ const Index = () => {
     return !localStorage.getItem('uno-onboarding-complete');
   });
   const [showSearch, setShowSearch] = useState(false);
-  
-  const { tours, isLoading: toursLoading } = useTours({ featured: true, limit: 3 });
-  const { activities, isLoading: activitiesLoading } = useWaterActivities({ featured: true, limit: 3 });
 
   const handleRefresh = useCallback(async () => {
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -108,17 +106,17 @@ const Index = () => {
 
   return (
     <AppLayout showFooter>
-      {/* Onboarding Modal */}
-      <OnboardingModal 
-        open={showOnboarding} 
-        onComplete={() => setShowOnboarding(false)} 
-      />
-      
-      {/* Global Search Modal */}
-      <GlobalSearchModal 
-        open={showSearch} 
-        onOpenChange={setShowSearch} 
-      />
+      {/* Lazy Modals */}
+      <Suspense fallback={null}>
+        <OnboardingModal 
+          open={showOnboarding} 
+          onComplete={() => setShowOnboarding(false)} 
+        />
+        <GlobalSearchModal 
+          open={showSearch} 
+          onOpenChange={setShowSearch} 
+        />
+      </Suspense>
 
       <PullToRefresh onRefresh={handleRefresh} className="h-[calc(100vh-8rem)]">
         <div className="px-4 py-6 space-y-8" key={refreshKey}>
@@ -142,7 +140,6 @@ const Index = () => {
           <div className="relative z-10">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
-                {/* Trust Badge */}
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 mb-3">
                   <Shield className="w-3.5 h-3.5 text-primary" />
                   <span className="text-xs font-medium text-primary">
@@ -167,7 +164,6 @@ const Index = () => {
                   </div>
                 </div>
               </div>
-              {/* SOS Button */}
               <Button
                 variant="destructive"
                 size="sm"
@@ -257,20 +253,24 @@ const Index = () => {
           </div>
         </FadeInUp>
 
-        {/* Personalized Offers */}
-        <FadeInUp delay={0.2}>
-          <PersonalizedOffersSection />
-        </FadeInUp>
+        {/* Lazy-loaded sections */}
+        <Suspense fallback={<div className="h-24 animate-pulse bg-muted rounded-lg" />}>
+          <FadeInUp delay={0.2}>
+            <PersonalizedOffersSection />
+          </FadeInUp>
+        </Suspense>
 
-        {/* For You Section - Recommendations */}
-        <FadeInUp delay={0.22}>
-          <ForYouSection />
-        </FadeInUp>
+        <Suspense fallback={<div className="h-24 animate-pulse bg-muted rounded-lg" />}>
+          <FadeInUp delay={0.22}>
+            <ForYouSection />
+          </FadeInUp>
+        </Suspense>
 
-        {/* Recently Viewed */}
-        <FadeInUp delay={0.24}>
-          <RecentlyViewedSection />
-        </FadeInUp>
+        <Suspense fallback={<div className="h-24 animate-pulse bg-muted rounded-lg" />}>
+          <FadeInUp delay={0.24}>
+            <RecentlyViewedSection />
+          </FadeInUp>
+        </Suspense>
 
         {/* Featured Services */}
         <FadeInUp delay={0.26}>
@@ -284,140 +284,43 @@ const Index = () => {
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
-          <AnimatedGrid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" staggerDelay={0.1}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {featuredServices.map((service) => (
-              <AnimatedCard key={service.id}>
-                <UnifiedCard
-                  id={service.id}
-                  image={service.image}
-                  title={language === 'ru' ? service.titleRu : service.title}
-                  rating={service.rating}
-                  reviewCount={service.reviewCount}
-                  price={service.price}
-                  priceLabel={t('label.from')}
-                  location={language === 'ru' ? service.locationRu : service.location}
-                  isVerified={service.isVerified}
-                  isNew={service.isNew}
-                  isFeatured={service.isFeatured}
-                  onClick={() => navigate(service.path)}
-                />
-              </AnimatedCard>
+              <UnifiedCard
+                key={service.id}
+                id={service.id}
+                image={service.image}
+                title={language === 'ru' ? service.titleRu : service.title}
+                rating={service.rating}
+                reviewCount={service.reviewCount}
+                price={service.price}
+                priceLabel={t('label.from')}
+                location={language === 'ru' ? service.locationRu : service.location}
+                isVerified={service.isVerified}
+                isNew={service.isNew}
+                isFeatured={service.isFeatured}
+                onClick={() => navigate(service.path)}
+              />
             ))}
-          </AnimatedGrid>
+          </div>
         </FadeInUp>
 
-        {/* Tours Section */}
-        {!toursLoading && tours.length > 0 && (
-          <FadeInUp delay={0.25}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Compass className="w-5 h-5 text-amber-500" />
-                <h2 className="text-lg font-semibold">{language === 'ru' ? 'Экскурсии и туры' : 'Tours & Excursions'}</h2>
-              </div>
-              <button 
-                onClick={() => navigate('/tours')}
-                className="text-sm text-primary flex items-center gap-1"
-              >
-                {t('action.viewAll')}
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
-              {tours.map((tour) => (
-                <div 
-                  key={tour.id}
-                  onClick={() => navigate(`/tours/${tour.id}`)}
-                  className="flex-shrink-0 w-64 bg-card rounded-2xl overflow-hidden border hover:shadow-lg transition-all cursor-pointer group"
-                >
-                  <div className="relative h-36">
-                    <img 
-                      src={tour.cover_image || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'} 
-                      alt="" 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                    />
-                    {tour.is_featured && (
-                      <Badge className="absolute top-2 left-2 bg-amber-500 text-white text-[10px]">
-                        <Star className="w-3 h-3 mr-0.5" /> Featured
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="p-3">
-                    <h3 className="font-semibold text-sm line-clamp-1">
-                      {language === 'ru' ? tour.title_ru : tour.title_en}
-                    </h3>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-                      <span className="flex items-center gap-0.5">
-                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                        {tour.rating}
-                      </span>
-                      <span>•</span>
-                      <span>{tour.duration_hours}h</span>
-                    </div>
-                    <p className="text-primary font-bold mt-2">฿{tour.price?.toLocaleString()}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+        {/* Tours Section - Lazy */}
+        <Suspense fallback={<div className="h-48 animate-pulse bg-muted rounded-lg" />}>
+          <FadeInUp delay={0.28}>
+            <ToursSection />
           </FadeInUp>
-        )}
+        </Suspense>
 
-        {/* Water Activities Section */}
-        {!activitiesLoading && activities.length > 0 && (
+        {/* Water Activities Section - Lazy */}
+        <Suspense fallback={<div className="h-48 animate-pulse bg-muted rounded-lg" />}>
           <FadeInUp delay={0.3}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Waves className="w-5 h-5 text-cyan-500" />
-                <h2 className="text-lg font-semibold">{language === 'ru' ? 'Водные активности' : 'Water Activities'}</h2>
-              </div>
-              <button 
-                onClick={() => navigate('/water')}
-                className="text-sm text-primary flex items-center gap-1"
-              >
-                {t('action.viewAll')}
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
-              {activities.map((activity) => (
-                <div 
-                  key={activity.id}
-                  onClick={() => navigate(`/water/${activity.id}`)}
-                  className="flex-shrink-0 w-64 bg-card rounded-2xl overflow-hidden border hover:shadow-lg transition-all cursor-pointer group"
-                >
-                  <div className="relative h-36">
-                    <img 
-                      src={activity.cover_image || 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400'} 
-                      alt="" 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                    />
-                    {activity.is_certified && (
-                      <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground text-[10px]">
-                        <Shield className="w-3 h-3 mr-0.5" /> Certified
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="p-3">
-                    <h3 className="font-semibold text-sm line-clamp-1">
-                      {language === 'ru' ? activity.title_ru : activity.title_en}
-                    </h3>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-                      <span className="flex items-center gap-0.5">
-                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                        {activity.rating}
-                      </span>
-                      <span>•</span>
-                      <span>{activity.duration_minutes ? `${Math.round(activity.duration_minutes / 60)}h` : '-'}</span>
-                    </div>
-                    <p className="text-primary font-bold mt-2">฿{activity.price?.toLocaleString()}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <WaterSection />
           </FadeInUp>
-        )}
+        </Suspense>
 
         {/* Trust Footer */}
-        <FadeInUp delay={0.4}>
+        <FadeInUp delay={0.32}>
           <div className="flex items-center justify-center gap-6 py-4 border-t border-border/50">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Shield className="w-4 h-4 text-primary" />
