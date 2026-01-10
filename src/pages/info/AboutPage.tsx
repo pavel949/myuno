@@ -92,12 +92,12 @@ export default function AboutPage() {
             <Target className="w-8 h-8 text-primary-foreground" />
           </div>
           <h1 className="text-2xl font-display font-bold mb-3">
-            {isRu ? 'UNO — Инфраструктура для жизни' : 'UNO — Infrastructure for Living'}
+            {isRu ? 'UNO — Дом там, где UNO' : 'UNO — Home is where UNO is'}
           </h1>
           <p className="text-muted-foreground">
             {isRu 
-              ? 'Мы создаём единую платформу, которая объединяет все необходимые сервисы для комфортной жизни на Пхукете: от аренды жилья до медицинской помощи.'
-              : 'We create a unified platform that brings together all essential services for comfortable living in Phuket: from housing rental to medical care.'}
+              ? 'Твоя жизнь за рубежом — проще. Мы создаём единую платформу, которая объединяет все необходимые сервисы для комфортной жизни: от аренды жилья до медицинской помощи.'
+              : 'Your life abroad, simplified. We create a unified platform that brings together all essential services for comfortable living: from housing rental to medical care.'}
           </p>
         </SectionCard>
 

@@ -147,10 +147,10 @@ const Index = () => {
                   </span>
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-display font-bold text-foreground mb-2 leading-tight">
-                  {language === 'ru' ? 'Инфраструктура для счастливой жизни за границей' : 'Infrastructure for Happy Living Abroad'}
+                  {language === 'ru' ? 'Дом там, где UNO' : 'Home is where UNO is'}
                 </h1>
                 <p className="text-sm text-muted-foreground">
-                  {language === 'ru' ? 'Жильё, транспорт, еда и сервисы — всё проверено' : 'Housing, transport, food & services — all verified'}
+                  {language === 'ru' ? 'Твоя жизнь за рубежом — проще' : 'Your life abroad, simplified'}
                 </p>
                 <div className="flex items-center gap-3 mt-4">
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">

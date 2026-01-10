@@ -78,8 +78,8 @@ const translations: Record<Language, Record<string, string>> = {
     'category.pharmacy': 'Аптеки',
     
     // Hero section
-    'home.heroTitle': 'Инфраструктура для жизни',
-    'home.heroSubtitle': 'Проверенные сервисы Пхукета в одном приложении',
+    'home.heroTitle': 'Дом там, где UNO',
+    'home.heroSubtitle': 'Твоя жизнь за рубежом — проще',
     'home.trustBadge': 'Проверено',
     
     // Tours
@@ -294,8 +294,8 @@ const translations: Record<Language, Record<string, string>> = {
     'category.pharmacy': 'Pharmacy',
     
     // Hero section
-    'home.heroTitle': 'Infrastructure for Living',
-    'home.heroSubtitle': 'Verified Phuket services in one app',
+    'home.heroTitle': 'Home is where UNO is',
+    'home.heroSubtitle': 'Your life abroad, simplified',
     'home.trustBadge': 'Verified',
     
     // Tours

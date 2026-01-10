@@ -17,10 +17,10 @@ interface OnboardingModalProps {
 const steps = [
   {
     id: 'welcome',
-    titleEn: 'Welcome to UNO',
-    titleRu: 'Добро пожаловать в UNO',
-    subtitleEn: 'Your all-in-one app for living abroad',
-    subtitleRu: 'Всё для комфортной жизни за границей',
+    titleEn: 'Home is where UNO is',
+    titleRu: 'Дом там, где UNO',
+    subtitleEn: 'Your life abroad, simplified',
+    subtitleRu: 'Твоя жизнь за рубежом — проще',
     icon: Sparkles,
   },
   {
