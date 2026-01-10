@@ -116,7 +116,7 @@ export function useVendorProfile() {
         .maybeSingle();
 
       if (error) throw error;
-      setProfile(data as VendorProfile | null);
+      setProfile(data as unknown as VendorProfile | null);
     } catch (err) {
       setError(err as Error);
     } finally {
@@ -139,7 +139,7 @@ export function useVendorProfile() {
       .single();
 
     if (!error && data) {
-      setProfile(data as VendorProfile);
+      setProfile(data as unknown as VendorProfile);
     }
     return { data, error };
   };
@@ -157,7 +157,7 @@ export function useVendorProfile() {
       .single();
 
     if (!error && data) {
-      setProfile(data as VendorProfile);
+      setProfile(data as unknown as VendorProfile);
     }
     return { data, error };
   };
@@ -185,7 +185,7 @@ export function useVendorServices(vendorId?: string) {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setServices((data || []) as VendorService[]);
+      setServices((data || []) as unknown as VendorService[]);
     } catch (err) {
       console.error('Error fetching services:', err);
     } finally {
@@ -263,7 +263,7 @@ export function useVendorBookings(vendorId?: string, options?: { status?: string
 
       const { data, error } = await query;
       if (error) throw error;
-      setBookings((data || []) as VendorBooking[]);
+      setBookings((data || []) as unknown as VendorBooking[]);
     } catch (err) {
       console.error('Error fetching bookings:', err);
     } finally {
@@ -322,7 +322,7 @@ export function useVendorAnalytics(vendorId?: string, days: number = 30) {
         .order('date', { ascending: true });
 
       if (error) throw error;
-      const analyticsData = (data || []) as VendorAnalytics[];
+      const analyticsData = (data || []) as unknown as VendorAnalytics[];
       setAnalytics(analyticsData);
 
       const totals = analyticsData.reduce(
@@ -379,7 +379,7 @@ export function useVendorPayouts(vendorId?: string) {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setPayouts((data || []) as VendorPayout[]);
+      setPayouts((data || []) as unknown as VendorPayout[]);
     } catch (err) {
       console.error('Error fetching payouts:', err);
     } finally {
