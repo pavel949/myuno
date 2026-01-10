@@ -4,7 +4,7 @@ import {
   Sparkles, UtensilsCrossed, Dumbbell, Stethoscope, 
   GraduationCap, Home, Car, Ticket, Flower2,
   ArrowRight, MapPin, Search, Wrench, AlertTriangle,
-  Compass, Waves, Pill, Star, Shield
+  Compass, Waves, Pill, Star, Shield, Scale
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -35,6 +35,7 @@ const otherCategories = [
   { id: 'medical', icon: Stethoscope, path: '/medical', color: 'from-emerald-500 to-green-500' },
   { id: 'beauty-spa', icon: Sparkles, path: '/beauty', color: 'from-pink-500 to-purple-500' },
   { id: 'fitness', icon: Dumbbell, path: '/fitness', color: 'from-blue-500 to-cyan-500' },
+  { id: 'legal', icon: Scale, path: '/legal', color: 'from-indigo-500 to-blue-600' },
   { id: 'services', icon: Wrench, path: '/services', color: 'from-slate-500 to-zinc-600' },
   { id: 'kids-education', icon: GraduationCap, path: '/education', color: 'from-yellow-500 to-orange-500' },
   { id: 'events', icon: Ticket, path: '/events', color: 'from-purple-500 to-pink-500' },

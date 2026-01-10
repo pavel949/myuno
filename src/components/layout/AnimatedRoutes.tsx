@@ -68,6 +68,11 @@ import ServiceProviderDetail from '@/pages/services/ServiceProviderDetail';
 import ServiceBooking from '@/pages/services/ServiceBooking';
 import ServicesMap from '@/pages/services/ServicesMap';
 
+// Legal & Business Services Mini-App
+import LegalServicesIndex from '@/pages/legal/LegalServicesIndex';
+import LegalProviderDetail from '@/pages/legal/LegalProviderDetail';
+import LegalBooking from '@/pages/legal/LegalBooking';
+
 // Tours Mini-App
 import ToursIndex from '@/pages/tours/ToursIndex';
 import TourDetail from '@/pages/tours/TourDetail';
@@ -189,6 +194,11 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/services/provider/:id" element={<PageTransition><ServiceProviderDetail /></PageTransition>} />
         <Route path="/services/booking/:id" element={<PageTransition><ServiceBooking /></PageTransition>} />
         <Route path="/services/map" element={<PageTransition><ServicesMap /></PageTransition>} />
+        
+        {/* Legal & Business Services Mini-App Routes */}
+        <Route path="/legal" element={<PageTransition><LegalServicesIndex /></PageTransition>} />
+        <Route path="/legal/provider/:id" element={<PageTransition><LegalProviderDetail /></PageTransition>} />
+        <Route path="/legal/booking/:id" element={<PageTransition><LegalBooking /></PageTransition>} />
         
         {/* Tours Mini-App Routes */}
         <Route path="/tours" element={<PageTransition><ToursIndex /></PageTransition>} />
