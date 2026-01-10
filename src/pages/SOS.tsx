@@ -15,7 +15,12 @@ import {
   Plane,
   HelpCircle,
   ExternalLink,
-  MessageCircle
+  MessageCircle,
+  Star,
+  Sparkles,
+  Crown,
+  ChefHat,
+  Navigation
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -25,6 +30,10 @@ import { SectionCard } from '@/components/uno/SectionCard';
 import { Button } from '@/components/ui/button';
 import { AnimatedList, AnimatedItem, FadeInUp } from '@/components/layout/AnimatedList';
 import { cn } from '@/lib/utils';
+
+// UNO Emergency Contact
+const UNO_EMERGENCY_PHONE = '+66-XX-XXX-XXXX'; // Replace with actual number
+const UNO_WHATSAPP = 'https://wa.me/66XXXXXXXXX'; // Replace with actual WhatsApp
 
 interface EmergencyContact {
   id: string;
@@ -214,8 +223,108 @@ export default function SOS() {
           showBack
         />
 
-        {/* Emergency Warning */}
+        {/* UNO ALERT - Premium Emergency Services */}
         <FadeInUp>
+          <div className="mb-6 p-5 rounded-3xl bg-gradient-to-br from-amber-500/20 via-orange-500/15 to-red-500/20 border-2 border-amber-500/40 shadow-lg">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-2 rounded-full bg-gradient-to-r from-amber-500 to-orange-500">
+                <Star className="w-5 h-5 text-white" fill="white" />
+              </div>
+              <h2 className="font-bold text-xl bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                UNO ALERT
+              </h2>
+              <Crown className="w-5 h-5 text-amber-500" />
+            </div>
+            
+            <p className="text-sm text-foreground/80 mb-4 leading-relaxed">
+              {language === 'ru' 
+                ? 'Премиальная служба безопасности UNO. Мы оказываем услуги личной безопасности, помощь в экстремальных и SOS ситуациях. Круглосуточная поддержка на русском и английском языках.' 
+                : 'UNO Premium Security Service. We provide personal security, assistance in extreme situations and SOS emergencies. 24/7 support in Russian and English.'}
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                size="lg"
+                className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold shadow-lg"
+                onClick={() => window.location.href = `tel:${UNO_EMERGENCY_PHONE}`}
+              >
+                <Phone className="w-5 h-5 mr-2" />
+                {language === 'ru' ? 'Позвонить в UNO' : 'Call UNO'}
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="flex-1 border-amber-500/50 text-amber-600 hover:bg-amber-500/10"
+                onClick={() => window.open(UNO_WHATSAPP, '_blank')}
+              >
+                <MessageCircle className="w-5 h-5 mr-2" />
+                WhatsApp
+              </Button>
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-amber-500/20">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Shield className="w-4 h-4 text-amber-500" />
+                <span>
+                  {language === 'ru' 
+                    ? 'Личная безопасность • Экстренная помощь • Круглосуточно' 
+                    : 'Personal Security • Emergency Help • 24/7'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </FadeInUp>
+
+        {/* VIP Concierge Section */}
+        <FadeInUp delay={0.05}>
+          <div className="mb-6 p-5 rounded-3xl bg-gradient-to-br from-violet-500/15 via-purple-500/10 to-fuchsia-500/15 border border-purple-500/30">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-2 rounded-full bg-gradient-to-r from-violet-500 to-purple-500">
+                <Crown className="w-5 h-5 text-white" />
+              </div>
+              <h2 className="font-bold text-lg bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+                {language === 'ru' ? 'VIP Консьерж' : 'VIP Concierge'}
+              </h2>
+              <Sparkles className="w-4 h-4 text-purple-500" />
+            </div>
+            
+            <p className="text-sm text-foreground/80 mb-4">
+              {language === 'ru' 
+                ? 'Эксклюзивные услуги премиум-класса: вертолёты, частные самолёты, персональные повара, горничные и полный спектр люкс-консьерж сервиса.' 
+                : 'Exclusive premium services: helicopters, private jets, personal chefs, housekeeping and full luxury concierge service.'}
+            </p>
+
+            <div className="grid grid-cols-4 gap-3 mb-4">
+              <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-background/50">
+                <Navigation className="w-5 h-5 text-purple-500" />
+                <span className="text-xs text-center">{language === 'ru' ? 'Вертолёты' : 'Helicopters'}</span>
+              </div>
+              <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-background/50">
+                <Plane className="w-5 h-5 text-purple-500" />
+                <span className="text-xs text-center">{language === 'ru' ? 'Самолёты' : 'Jets'}</span>
+              </div>
+              <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-background/50">
+                <ChefHat className="w-5 h-5 text-purple-500" />
+                <span className="text-xs text-center">{language === 'ru' ? 'Повара' : 'Chefs'}</span>
+              </div>
+              <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-background/50">
+                <Sparkles className="w-5 h-5 text-purple-500" />
+                <span className="text-xs text-center">{language === 'ru' ? 'Люкс' : 'Luxury'}</span>
+              </div>
+            </div>
+
+            <Button
+              className="w-full bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600 text-white"
+              onClick={() => window.open(UNO_WHATSAPP, '_blank')}
+            >
+              <Crown className="w-4 h-4 mr-2" />
+              {language === 'ru' ? 'Запросить VIP услугу' : 'Request VIP Service'}
+            </Button>
+          </div>
+        </FadeInUp>
+
+        {/* Emergency Warning */}
+        <FadeInUp delay={0.1}>
           <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/30">
             <div className="flex items-start gap-3">
               <AlertTriangle className="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" />
@@ -234,7 +343,7 @@ export default function SOS() {
         </FadeInUp>
 
         {/* High Priority - Large Buttons */}
-        <FadeInUp delay={0.1}>
+        <FadeInUp delay={0.15}>
           <h3 className="font-semibold mb-3 flex items-center gap-2">
             <Phone className="w-5 h-5 text-red-500" />
             {language === 'ru' ? 'Срочные службы' : 'Emergency Services'}
@@ -272,7 +381,7 @@ export default function SOS() {
         </FadeInUp>
 
         {/* All Emergency Contacts */}
-        <FadeInUp delay={0.2}>
+        <FadeInUp delay={0.25}>
           <h3 className="font-semibold mb-3 flex items-center gap-2">
             <HelpCircle className="w-5 h-5 text-primary" />
             {language === 'ru' ? 'Все экстренные контакты' : 'All Emergency Contacts'}
@@ -336,7 +445,7 @@ export default function SOS() {
         </FadeInUp>
 
         {/* Useful Numbers */}
-        <FadeInUp delay={0.3}>
+        <FadeInUp delay={0.35}>
           <h3 className="font-semibold mb-3 flex items-center gap-2">
             <MessageCircle className="w-5 h-5 text-primary" />
             {language === 'ru' ? 'Полезные номера' : 'Useful Numbers'}
@@ -390,6 +499,11 @@ export default function SOS() {
                 {language === 'ru' 
                   ? '• Сфотографируйте документы и храните копии в облаке'
                   : '• Photograph documents and keep copies in the cloud'}
+              </li>
+              <li>
+                {language === 'ru' 
+                  ? '• UNO ALERT — ваша личная служба безопасности 24/7'
+                  : '• UNO ALERT — your personal security service 24/7'}
               </li>
             </ul>
           </div>
