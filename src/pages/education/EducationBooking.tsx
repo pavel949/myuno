@@ -1,14 +1,19 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Calendar, Clock, User, Phone, Mail, MessageSquare, CheckCircle } from "lucide-react";
+import { ArrowLeft, CalendarIcon, Clock, User, Phone, Mail, MessageSquare, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { format } from "date-fns";
+import { ru } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 const courseData: Record<string, any> = {
   "course-1": { title_ru: "Английский для детей", title_en: "English for Kids", price: 150, currency: "฿" },
@@ -31,12 +36,12 @@ export default function EducationBooking() {
   const isTutor = id?.startsWith("tutor-");
   const data = isTutor ? tutorData[id || ""] : courseData[id || ""];
 
+  const [selectedDate, setSelectedDate] = useState<Date>();
+  const [selectedTime, setSelectedTime] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
     email: "",
-    date: "",
-    time: "",
     studentAge: "",
     message: ""
   });
@@ -46,7 +51,7 @@ export default function EducationBooking() {
   const timeSlots = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"];
 
   const handleSubmit = async () => {
-    if (!formData.name || !formData.phone || !formData.date || !formData.time) {
+    if (!formData.name || !formData.phone || !selectedDate || !selectedTime) {
       toast.error(language === "ru" ? "Заполните все обязательные поля" : "Please fill all required fields");
       return;
     }
@@ -60,7 +65,8 @@ export default function EducationBooking() {
     setIsSubmitting(true);
 
     try {
-      const scheduledAt = new Date(`${formData.date}T${formData.time}`);
+      const dateStr = format(selectedDate, 'yyyy-MM-dd');
+      const scheduledAt = new Date(`${dateStr}T${selectedTime}`);
       const price = data?.price || 0;
 
       const { data: booking, error } = await supabase
@@ -165,12 +171,31 @@ export default function EducationBooking() {
           
           <div>
             <Label>{language === "ru" ? "Дата" : "Date"} *</Label>
-            <Input
-              type="date"
-              value={formData.date}
-              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              min={new Date().toISOString().split("T")[0]}
-            />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal mt-2",
+                    !selectedDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {selectedDate 
+                    ? format(selectedDate, "PPP", { locale: language === 'ru' ? ru : undefined }) 
+                    : (language === "ru" ? "Выберите дату" : "Pick a date")}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 bg-popover z-50" align="start">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  disabled={(date) => date < new Date()}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div>
@@ -179,9 +204,9 @@ export default function EducationBooking() {
               {timeSlots.map(slot => (
                 <Button
                   key={slot}
-                  variant={formData.time === slot ? "default" : "outline"}
+                  variant={selectedTime === slot ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setFormData({ ...formData, time: slot })}
+                  onClick={() => setSelectedTime(slot)}
                 >
                   {slot}
                 </Button>

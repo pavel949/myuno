@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Calendar, Clock, User, Phone, CheckCircle } from 'lucide-react';
+import { ArrowLeft, CalendarIcon, Clock, User, Phone, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
+import { ru } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
 const membershipTypes = {
   day: { price: 800, labelEn: 'Day Pass', labelRu: 'Дневной абонемент' },
@@ -26,10 +31,10 @@ const FitnessBooking = () => {
   const membershipType = searchParams.get('type') || 'day';
   const membership = membershipTypes[membershipType as keyof typeof membershipTypes] || membershipTypes.day;
 
+  const [selectedDate, setSelectedDate] = useState<Date>();
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
-    startDate: '',
     notes: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,7 +60,7 @@ const FitnessBooking = () => {
           status: 'submitted',
           total_amount: membership.price,
           currency: 'THB',
-          scheduled_at: formData.startDate || null,
+          scheduled_at: selectedDate ? format(selectedDate, 'yyyy-MM-dd') : null,
           notes: `Fitness Membership: ${membershipType}. ${formData.notes}`,
         })
         .select()
@@ -170,20 +175,34 @@ const FitnessBooking = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="startDate">
+            <Label>
               {language === 'ru' ? 'Дата начала' : 'Start Date'}
             </Label>
-            <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                id="startDate"
-                type="date"
-                value={formData.startDate}
-                onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                className="pl-10"
-                required
-              />
-            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !selectedDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {selectedDate 
+                    ? format(selectedDate, "PPP", { locale: language === 'ru' ? ru : undefined }) 
+                    : (language === 'ru' ? 'Выберите дату' : 'Pick a date')}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 bg-popover z-50" align="start">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  disabled={(date) => date < new Date()}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div className="space-y-2">
