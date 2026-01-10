@@ -53,10 +53,8 @@ export function AppHeader({ title, showBack, onMenuClick, className }: AppHeader
 
         {/* Right side - Actions */}
         <div className="flex items-center gap-0.5">
-          {/* Theme Switcher - desktop only */}
-          <div className="hidden md:block">
-            <ThemeSwitcher variant="buttons" className="scale-75" />
-          </div>
+          {/* Theme Switcher */}
+          <ThemeSwitcher variant="dropdown" size="sm" />
           
           {/* Currency Switcher */}
           <CurrencySwitcher size="sm" />
