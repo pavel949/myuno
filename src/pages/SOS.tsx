@@ -275,51 +275,31 @@ export default function SOS() {
           </div>
         </FadeInUp>
 
-        {/* VIP Concierge Section */}
+        {/* VIP Concierge Link */}
         <FadeInUp delay={0.05}>
-          <div className="mb-6 p-5 rounded-3xl bg-gradient-to-br from-violet-500/15 via-purple-500/10 to-fuchsia-500/15 border border-purple-500/30">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="p-2 rounded-full bg-gradient-to-r from-violet-500 to-purple-500">
-                <Crown className="w-5 h-5 text-white" />
+          <div 
+            className="mb-6 p-5 rounded-3xl bg-gradient-to-br from-violet-500/15 via-purple-500/10 to-fuchsia-500/15 border border-purple-500/30 cursor-pointer hover:border-purple-500/50 transition-colors"
+            onClick={() => navigate('/vip-concierge')}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-full bg-gradient-to-r from-violet-500 to-purple-500">
+                  <Crown className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="font-bold text-lg bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-2">
+                    {language === 'ru' ? 'VIP Консьерж' : 'VIP Concierge'}
+                    <Sparkles className="w-4 h-4 text-purple-500" />
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    {language === 'ru' 
+                      ? 'Вертолёты, самолёты, повара, яхты...' 
+                      : 'Helicopters, jets, chefs, yachts...'}
+                  </p>
+                </div>
               </div>
-              <h2 className="font-bold text-lg bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
-                {language === 'ru' ? 'VIP Консьерж' : 'VIP Concierge'}
-              </h2>
-              <Sparkles className="w-4 h-4 text-purple-500" />
+              <div className="text-purple-500">→</div>
             </div>
-            
-            <p className="text-sm text-foreground/80 mb-4">
-              {language === 'ru' 
-                ? 'Эксклюзивные услуги премиум-класса: вертолёты, частные самолёты, персональные повара, горничные и полный спектр люкс-консьерж сервиса.' 
-                : 'Exclusive premium services: helicopters, private jets, personal chefs, housekeeping and full luxury concierge service.'}
-            </p>
-
-            <div className="grid grid-cols-4 gap-3 mb-4">
-              <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-background/50">
-                <Navigation className="w-5 h-5 text-purple-500" />
-                <span className="text-xs text-center">{language === 'ru' ? 'Вертолёты' : 'Helicopters'}</span>
-              </div>
-              <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-background/50">
-                <Plane className="w-5 h-5 text-purple-500" />
-                <span className="text-xs text-center">{language === 'ru' ? 'Самолёты' : 'Jets'}</span>
-              </div>
-              <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-background/50">
-                <ChefHat className="w-5 h-5 text-purple-500" />
-                <span className="text-xs text-center">{language === 'ru' ? 'Повара' : 'Chefs'}</span>
-              </div>
-              <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-background/50">
-                <Sparkles className="w-5 h-5 text-purple-500" />
-                <span className="text-xs text-center">{language === 'ru' ? 'Люкс' : 'Luxury'}</span>
-              </div>
-            </div>
-
-            <Button
-              className="w-full bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600 text-white"
-              onClick={() => window.open(UNO_WHATSAPP, '_blank')}
-            >
-              <Crown className="w-4 h-4 mr-2" />
-              {language === 'ru' ? 'Запросить VIP услугу' : 'Request VIP Service'}
-            </Button>
           </div>
         </FadeInUp>
 
