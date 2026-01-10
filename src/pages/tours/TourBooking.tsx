@@ -3,19 +3,24 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTour } from "@/hooks/useTours";
-import { supabase } from "@/integrations/supabase/client";
+import { useBooking } from "@/hooks/useBooking";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageContainer } from "@/components/uno/PageContainer";
 import { PageHeader } from "@/components/uno/PageHeader";
 import { LoadingSpinner } from "@/components/uno/LoadingSpinner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Calendar } from "@/components/ui/calendar";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Users, Clock } from "lucide-react";
-import { format, addDays } from "date-fns";
+import { 
+  BookingSummary, 
+  BookingDateTimeSelect, 
+  BookingParticipants, 
+  BookingContactForm, 
+  BookingPaymentSelect,
+  BookingBottomBar,
+  BookingConfirmation,
+  type ContactFormData,
+  type PaymentMethod 
+} from "@/components/booking";
+import { addDays, format } from "date-fns";
+import { ru } from "date-fns/locale";
 
 export default function TourBooking() {
   const { id } = useParams<{ id: string }>();
@@ -23,104 +28,199 @@ export default function TourBooking() {
   const { language, t } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
   const { tour, isLoading } = useTour(id);
-  const { toast } = useToast();
+  const { createBooking, isSubmitting } = useBooking();
 
+  // Form state
   const [date, setDate] = useState<Date | undefined>(addDays(new Date(), 1));
-  const [startTime, setStartTime] = useState<string>("");
+  const [time, setTime] = useState<string>("");
   const [participants, setParticipants] = useState(1);
-  const [contactName, setContactName] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [contactData, setContactData] = useState<ContactFormData>({ name: "", phone: "" });
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
+  const [bookingResult, setBookingResult] = useState<{ success: boolean; bookingId?: string } | null>(null);
 
-  if (!authLoading && !user) { navigate('/auth', { state: { from: `/tours/${id}/book` } }); return null; }
-  if (isLoading || authLoading) return <AppLayout showBottomNav={false}><div className="flex items-center justify-center min-h-screen"><LoadingSpinner size="lg" /></div></AppLayout>;
-  if (!tour) return <AppLayout><PageContainer><div className="text-center py-12"><p>{t('tours.notFound')}</p></div></PageContainer></AppLayout>;
+  // Auth redirect
+  if (!authLoading && !user) {
+    navigate('/auth', { state: { from: `/tours/${id}/book` } });
+    return null;
+  }
+
+  // Loading state
+  if (isLoading || authLoading) {
+    return (
+      <AppLayout showBottomNav={false}>
+        <div className="flex items-center justify-center min-h-screen">
+          <LoadingSpinner size="lg" />
+        </div>
+      </AppLayout>
+    );
+  }
+
+  // Not found
+  if (!tour) {
+    return (
+      <AppLayout>
+        <PageContainer>
+          <div className="text-center py-12">
+            <p>{t('tours.notFound')}</p>
+          </div>
+        </PageContainer>
+      </AppLayout>
+    );
+  }
 
   const totalAmount = (tour.price || 0) * participants;
+  const tourTitle = language === 'ru' ? tour.title_ru : tour.title_en;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!date || !startTime || !contactName || !contactPhone) {
-      toast({ title: t('message.error'), description: t('tours.fillAllFields'), variant: 'destructive' });
+  // Success state
+  if (bookingResult?.success && bookingResult.bookingId) {
+    return (
+      <AppLayout showBottomNav={false}>
+        <BookingConfirmation
+          bookingId={bookingResult.bookingId}
+          title={tourTitle}
+          date={date ? format(date, 'PPP', { locale: language === 'ru' ? ru : undefined }) : undefined}
+          time={time}
+          location={tour.meeting_point || undefined}
+          total={totalAmount}
+          currency={tour.currency || 'THB'}
+          continuePath="/tours"
+          continueLabel={language === 'ru' ? 'Другие туры' : 'Browse Tours'}
+        />
+      </AppLayout>
+    );
+  }
+
+  const handleSubmit = async () => {
+    if (!date || !time) {
       return;
     }
-    setIsSubmitting(true);
-    try {
-      const { error } = await supabase.from('tour_bookings').insert({
-        tour_id: tour.id, user_id: user!.id, booking_date: format(date, 'yyyy-MM-dd'), start_time: startTime,
-        participants, total_amount: totalAmount, currency: tour.currency, contact_name: contactName, contact_phone: contactPhone, status: 'pending',
-      });
-      if (error) throw error;
-      toast({ title: t('message.success'), description: t('tours.bookingSent') });
-      navigate('/bookings');
-    } catch (error) {
-      toast({ title: t('message.error'), description: t('tours.bookingFailed'), variant: 'destructive' });
-    } finally { setIsSubmitting(false); }
+    if (!contactData.name || !contactData.phone) {
+      return;
+    }
+
+    const scheduledAt = new Date(date);
+    const [hours, minutes] = time.split(':').map(Number);
+    scheduledAt.setHours(hours, minutes, 0, 0);
+
+    const result = await createBooking({
+      booking_type: 'event',
+      scheduled_at: scheduledAt,
+      total_amount: totalAmount,
+      currency: tour.currency || 'THB',
+      notes: `Tour: ${tourTitle}. Participants: ${participants}`,
+      items: [{
+        item_type: 'tour',
+        item_id: tour.id,
+        item_name: tourTitle,
+        quantity: participants,
+        unit_price: tour.price || 0,
+        subtotal: totalAmount,
+      }],
+      participants: [{
+        name: contactData.name,
+        phone: contactData.phone,
+        email: contactData.email,
+        is_primary: true,
+      }],
+      payment: {
+        amount: totalAmount,
+        payment_method: paymentMethod,
+      },
+    });
+
+    if (result.success) {
+      setBookingResult({ success: true, bookingId: result.booking_id });
+    }
   };
 
   return (
     <AppLayout showBottomNav={false}>
-      <PageContainer>
-        <div className="flex items-center gap-4 mb-6">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}><ArrowLeft className="w-5 h-5" /></Button>
-          <PageHeader title={t('tours.booking')} />
+      <PageContainer className="pb-32">
+        <PageHeader 
+          title={language === 'ru' ? 'Бронирование тура' : 'Book Tour'} 
+          showBack 
+        />
+
+        {/* Summary Card */}
+        <div className="mt-4 mb-6">
+          <BookingSummary
+            image={tour.cover_image || undefined}
+            title={tourTitle}
+            duration={tour.duration_hours ? `${tour.duration_hours}h` : undefined}
+            maxParticipants={tour.max_participants || undefined}
+            location={tour.meeting_point || undefined}
+            date={date}
+            time={time}
+            participants={participants}
+            price={tour.price || 0}
+            currency={tour.currency || 'THB'}
+          />
         </div>
 
-        <div className="bg-card rounded-xl p-4 mb-6 border flex gap-4">
-          <img src={tour.cover_image || ''} alt="" className="w-20 h-20 rounded-lg object-cover" />
-          <div>
-            <h3 className="font-semibold">{language === 'ru' ? tour.title_ru : tour.title_en}</h3>
-            <div className="flex gap-3 mt-2 text-sm text-muted-foreground">
-              <span className="flex items-center gap-1"><Clock className="w-4 h-4" />{tour.duration_hours}h</span>
-              <span className="flex items-center gap-1"><Users className="w-4 h-4" />{t('water.max')} {tour.max_participants}</span>
-            </div>
-          </div>
+        {/* Date & Time */}
+        <div className="bg-card rounded-2xl border p-5 mb-4">
+          <h3 className="font-semibold mb-4">
+            {language === 'ru' ? 'Дата и время' : 'Date & Time'}
+          </h3>
+          <BookingDateTimeSelect
+            date={date}
+            time={time}
+            onDateChange={setDate}
+            onTimeChange={setTime}
+            availableTimes={tour.start_times || ['09:00', '14:00']}
+            showQuickDates
+          />
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <Label className="text-base font-semibold mb-3 block">{t('label.date')}</Label>
-            <div className="bg-card rounded-xl border p-4 flex justify-center">
-              <Calendar 
-                mode="single" 
-                selected={date} 
-                onSelect={setDate} 
-                disabled={(d) => d < new Date()} 
-              />
-            </div>
-          </div>
+        {/* Participants */}
+        <div className="bg-card rounded-2xl border p-5 mb-4">
+          <BookingParticipants
+            count={participants}
+            onChange={setParticipants}
+            min={1}
+            max={tour.max_participants || 10}
+            pricePerPerson={tour.price || 0}
+            currency={tour.currency || 'THB'}
+          />
+        </div>
 
-          <div>
-            <Label>{t('label.time')}</Label>
-            <Select value={startTime} onValueChange={setStartTime}>
-              <SelectTrigger><SelectValue placeholder={t('tours.selectTime')} /></SelectTrigger>
-              <SelectContent>{tour.start_times.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
-            </Select>
-          </div>
+        {/* Contact Info */}
+        <div className="bg-card rounded-2xl border p-5 mb-4">
+          <h3 className="font-semibold mb-4">
+            {language === 'ru' ? 'Контактные данные' : 'Contact Information'}
+          </h3>
+          <BookingContactForm
+            data={contactData}
+            onChange={setContactData}
+            showEmail
+            showNotes={false}
+          />
+        </div>
 
-          <div>
-            <Label>{t('tours.participants')}</Label>
-            <div className="flex items-center gap-4 mt-2">
-              <Button type="button" variant="outline" size="icon" onClick={() => setParticipants(Math.max(1, participants - 1))}>-</Button>
-              <span className="text-xl font-semibold w-12 text-center">{participants}</span>
-              <Button type="button" variant="outline" size="icon" onClick={() => setParticipants(Math.min(tour.max_participants, participants + 1))}>+</Button>
-            </div>
-          </div>
+        {/* Payment Method */}
+        <div className="bg-card rounded-2xl border p-5 mb-4">
+          <h3 className="font-semibold mb-4">
+            {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
+          </h3>
+          <BookingPaymentSelect
+            selected={paymentMethod}
+            onSelect={setPaymentMethod}
+            amount={totalAmount}
+            currency={tour.currency || 'THB'}
+            showWallet
+            showCash
+          />
+        </div>
 
-          <div className="space-y-4">
-            <div><Label>{t('tours.name')} *</Label><Input value={contactName} onChange={(e) => setContactName(e.target.value)} required /></div>
-            <div><Label>{t('tours.phone')} *</Label><Input type="tel" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} required /></div>
-          </div>
-
-          <div className="bg-muted/50 rounded-xl p-4">
-            <div className="flex justify-between font-semibold text-lg"><span>{t('tours.total')}</span><span className="text-primary">฿{totalAmount.toLocaleString()}</span></div>
-          </div>
-
-          <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
-            {isSubmitting && <LoadingSpinner size="sm" className="mr-2" />}
-            {t('tours.confirmBooking')}
-          </Button>
-        </form>
+        {/* Bottom Bar */}
+        <BookingBottomBar
+          total={totalAmount}
+          currency={tour.currency || 'THB'}
+          onSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
+          disabled={!date || !time || !contactData.name || !contactData.phone}
+          submitLabel={language === 'ru' ? 'Подтвердить бронирование' : 'Confirm Booking'}
+        />
       </PageContainer>
     </AppLayout>
   );
