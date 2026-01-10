@@ -177,7 +177,7 @@ export default function FoodCheckout() {
             <span className="font-medium">25-35 min</span>
           </div>
           <div className="flex gap-3">
-            <Button variant="outline" onClick={() => navigate('/food')}>
+            <Button variant="outline" onClick={() => navigate('/restaurants')}>
               {language === 'ru' ? 'К ресторанам' : 'Browse More'}
             </Button>
             <Button onClick={() => navigate('/bookings')}>

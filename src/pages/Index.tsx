@@ -29,7 +29,7 @@ import { QuickServicesSection } from '@/components/home/QuickServicesSection';
 const topCategories = [
   { id: 'real-estate', icon: Home, path: '/property', color: 'from-teal-500 to-emerald-500' },
   { id: 'transport', icon: Car, path: '/transport', color: 'from-indigo-500 to-blue-500' },
-  { id: 'restaurants', icon: UtensilsCrossed, path: '/food', color: 'from-orange-500 to-red-500' },
+  { id: 'restaurants', icon: UtensilsCrossed, path: '/restaurants', color: 'from-orange-500 to-red-500' },
   { id: 'tours', icon: Compass, path: '/tours', color: 'from-amber-500 to-orange-500' },
 ];
 
