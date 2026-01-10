@@ -2277,6 +2277,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_helpful_count: {
+        Args: { review_id_param: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role:
