@@ -403,10 +403,14 @@ export type Database = {
       }
       categories: {
         Row: {
+          color: string | null
           created_at: string
+          group_id: string | null
           icon: string | null
           id: string
           is_active: boolean | null
+          is_hot: boolean | null
+          is_new: boolean | null
           mini_app_type: string | null
           name_en: string
           name_ru: string
@@ -415,10 +419,14 @@ export type Database = {
           sort_order: number | null
         }
         Insert: {
+          color?: string | null
           created_at?: string
+          group_id?: string | null
           icon?: string | null
           id?: string
           is_active?: boolean | null
+          is_hot?: boolean | null
+          is_new?: boolean | null
           mini_app_type?: string | null
           name_en: string
           name_ru: string
@@ -427,10 +435,14 @@ export type Database = {
           sort_order?: number | null
         }
         Update: {
+          color?: string | null
           created_at?: string
+          group_id?: string | null
           icon?: string | null
           id?: string
           is_active?: boolean | null
+          is_hot?: boolean | null
+          is_new?: boolean | null
           mini_app_type?: string | null
           name_en?: string
           name_ru?: string
@@ -440,6 +452,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "categories_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "category_groups"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "categories_parent_id_fkey"
             columns: ["parent_id"]
             isOneToOne: false
@@ -447,6 +466,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      category_groups: {
+        Row: {
+          created_at: string
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name_en: string
+          name_ru: string
+          slug: string
+          sort_order: number | null
+        }
+        Insert: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name_en: string
+          name_ru: string
+          slug: string
+          sort_order?: number | null
+        }
+        Update: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name_en?: string
+          name_ru?: string
+          slug?: string
+          sort_order?: number | null
+        }
+        Relationships: []
       }
       currencies: {
         Row: {
