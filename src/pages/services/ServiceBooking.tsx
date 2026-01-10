@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
 import { useWallet } from "@/hooks/useWallet";
+import { useAuth } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +12,6 @@ import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import {
   Clock,
-  MapPin,
   CreditCard,
   Wallet,
   CheckCircle2,
@@ -19,21 +19,19 @@ import {
   Phone,
   Home,
   MessageSquare,
-  ShoppingBag,
-  Plus,
-  Minus,
-  Trash2,
   Banknote,
   Loader2,
 } from "lucide-react";
 import { triggerRipple } from "@/hooks/useRipple";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const ServiceBooking = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const { id } = useParams();
-  const { items, getItemsByProvider, addItem, removeItem, clearByProvider } = useCart();
+  const { user } = useAuth();
+  const { getItemsByProvider, clearByProvider } = useCart();
   const { balance, payFromWallet, hasEnoughBalance, isLoading: isWalletLoading } = useWallet();
   
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -55,10 +53,10 @@ const ServiceBooking = () => {
   };
 
   const services = [
-    { id: "s1", name: language === "ru" ? "Установка смесителя" : "Faucet installation", price: 1500, duration: "1 час" },
-    { id: "s2", name: language === "ru" ? "Замена труб" : "Pipe replacement", price: 3000, duration: "2-4 часа" },
-    { id: "s3", name: language === "ru" ? "Прочистка канализации" : "Drain cleaning", price: 2000, duration: "1-2 часа" },
-    { id: "s4", name: language === "ru" ? "Установка унитаза" : "Toilet installation", price: 2500, duration: "2 часа" },
+    { id: "s1", name: language === "ru" ? "Установка смесителя" : "Faucet installation", nameEn: "Faucet installation", nameRu: "Установка смесителя", price: 1500, duration: "1 час" },
+    { id: "s2", name: language === "ru" ? "Замена труб" : "Pipe replacement", nameEn: "Pipe replacement", nameRu: "Замена труб", price: 3000, duration: "2-4 часа" },
+    { id: "s3", name: language === "ru" ? "Прочистка канализации" : "Drain cleaning", nameEn: "Drain cleaning", nameRu: "Прочистка канализации", price: 2000, duration: "1-2 часа" },
+    { id: "s4", name: language === "ru" ? "Установка унитаза" : "Toilet installation", nameEn: "Toilet installation", nameRu: "Установка унитаза", price: 2500, duration: "2 часа" },
   ];
 
   // Load services from cart on mount
@@ -97,7 +95,7 @@ const ServiceBooking = () => {
       name: language === "ru" ? "Кошелёк" : "Wallet",
       subtitle: isWalletLoading 
         ? (language === "ru" ? "Загрузка..." : "Loading...")
-        : `₽${balance.toLocaleString()}`,
+        : `฿${balance.toLocaleString()}`,
       disabled: !canPayWithWallet,
     },
     { id: "cash", icon: Banknote, name: language === "ru" ? "Наличными" : "Cash" },
@@ -111,6 +109,12 @@ const ServiceBooking = () => {
     }
     if (!formData.name || !formData.phone || !formData.address) {
       toast.error(language === "ru" ? "Заполните контактные данные" : "Fill in contact details");
+      return;
+    }
+
+    if (!user) {
+      toast.error(language === "ru" ? "Войдите в аккаунт" : "Please sign in");
+      navigate('/auth');
       return;
     }
 
@@ -133,6 +137,80 @@ const ServiceBooking = () => {
         }
       }
 
+      // Create scheduled_at date
+      const scheduledAt = new Date(selectedDate);
+      const [hours, minutes] = selectedTime.split(':').map(Number);
+      scheduledAt.setHours(hours, minutes, 0);
+
+      // Create booking in database
+      const { data: booking, error: bookingError } = await supabase
+        .from('bookings')
+        .insert([{
+          user_id: user.id,
+          booking_type: 'service' as const,
+          status: 'submitted' as const,
+          scheduled_at: scheduledAt.toISOString(),
+          provider_id: id || null,
+          total_amount: totalPrice,
+          currency: 'THB',
+          notes: formData.notes || null,
+        }])
+        .select()
+        .single();
+
+      if (bookingError) throw bookingError;
+
+      // Add booking items
+      const items = selectedServicesData.map(service => ({
+        booking_id: booking.id,
+        item_type: 'service',
+        item_id: service.id,
+        item_name: language === 'ru' ? service.nameRu : service.nameEn,
+        quantity: 1,
+        unit_price: service.price,
+        subtotal: service.price,
+      }));
+
+      // Add service fee
+      items.push({
+        booking_id: booking.id,
+        item_type: 'fee',
+        item_id: null,
+        item_name: language === 'ru' ? 'Сервисный сбор' : 'Service fee',
+        quantity: 1,
+        unit_price: serviceFee,
+        subtotal: serviceFee,
+      });
+
+      const { error: itemsError } = await supabase
+        .from('booking_items')
+        .insert(items);
+
+      if (itemsError) throw itemsError;
+
+      // Add participant info
+      const { error: participantError } = await supabase
+        .from('booking_participants')
+        .insert({
+          booking_id: booking.id,
+          name: formData.name,
+          phone: formData.phone,
+          is_primary: true,
+        });
+
+      if (participantError) throw participantError;
+
+      // Add address
+      const { error: addressError } = await supabase
+        .from('booking_addresses')
+        .insert({
+          booking_id: booking.id,
+          address_type: 'service',
+          address: formData.address,
+        });
+
+      if (addressError) throw addressError;
+
       // Clear services from cart after booking
       if (id) {
         clearByProvider(id);
@@ -145,6 +223,7 @@ const ServiceBooking = () => {
       );
       navigate("/bookings");
     } catch (error) {
+      console.error('Error creating booking:', error);
       toast.error(language === "ru" ? "Ошибка при бронировании" : "Booking failed");
     } finally {
       setIsSubmitting(false);
@@ -213,7 +292,7 @@ const ServiceBooking = () => {
                       </div>
                     </div>
                   </div>
-                  <span className="font-bold text-primary">₽{service.price}</span>
+                  <span className="font-bold text-primary">฿{service.price}</span>
                 </div>
               );
             })}
@@ -354,7 +433,7 @@ const ServiceBooking = () => {
           {selectedServicesData.map(service => (
             <div key={service.id} className="flex justify-between">
               <span className="text-muted-foreground">{service.name}</span>
-              <span>₽{service.price}</span>
+              <span>฿{service.price}</span>
             </div>
           ))}
           {selectedServices.length === 0 && (
@@ -368,11 +447,11 @@ const ServiceBooking = () => {
                 <span className="text-muted-foreground">
                   {language === "ru" ? "Сервисный сбор" : "Service fee"}
                 </span>
-                <span>₽{serviceFee}</span>
+                <span>฿{serviceFee}</span>
               </div>
               <div className="flex justify-between text-lg font-bold pt-2 border-t border-border">
                 <span>{language === "ru" ? "Итого" : "Total"}</span>
-                <span className="text-primary">₽{totalPrice}</span>
+                <span className="text-primary">฿{totalPrice}</span>
               </div>
             </>
           )}

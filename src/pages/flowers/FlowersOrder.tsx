@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { ArrowLeft, MapPin, Calendar, Clock, CreditCard, Truck, Gift, Check, Wallet, Loader2 } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { ArrowLeft, Calendar, Clock, CreditCard, Truck, Gift, Check, Wallet, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useWallet } from '@/hooks/useWallet';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,6 +13,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { triggerRipple } from '@/hooks/useRipple';
+import { supabase } from '@/integrations/supabase/client';
 
 const deliverySlots = [
   { id: 'morning', timeEn: '9:00 - 12:00', timeRu: '9:00 - 12:00', labelEn: 'Morning', labelRu: 'Утро' },
@@ -21,12 +23,16 @@ const deliverySlots = [
 
 const FlowersOrder = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
   const location = useLocation();
   const { language } = useLanguage();
+  const { user } = useAuth();
   const { balance, payFromWallet, hasEnoughBalance, isLoading: isWalletLoading } = useWallet();
   
-  const { cart = {}, totalPrice = 0 } = (location.state as { cart: Record<string, number>; totalPrice: number }) || {};
+  const { cart = {}, cartItems = [], totalPrice = 0 } = (location.state as { 
+    cart: Record<string, number>; 
+    cartItems: Array<{ id: string; name: string; nameRu: string; price: number; quantity: number }>;
+    totalPrice: number 
+  }) || {};
 
   const [formData, setFormData] = useState({
     recipientName: '',
@@ -54,6 +60,12 @@ const FlowersOrder = () => {
       return;
     }
 
+    if (!user) {
+      toast.error(language === 'ru' ? 'Войдите в аккаунт' : 'Please sign in');
+      navigate('/auth');
+      return;
+    }
+
     setIsSubmitting(true);
     
     try {
@@ -73,8 +85,94 @@ const FlowersOrder = () => {
         }
       }
 
-      // Simulate order submission
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Create scheduled_at date
+      const scheduledAt = new Date(formData.deliveryDate);
+      const slot = deliverySlots.find(s => s.id === formData.deliverySlot);
+      if (slot) {
+        const startTime = slot.timeEn.split(' - ')[0];
+        const [hours] = startTime.split(':');
+        scheduledAt.setHours(parseInt(hours), 0, 0);
+      }
+
+      // Create booking in database
+      const { data: booking, error: bookingError } = await supabase
+        .from('bookings')
+        .insert([{
+          user_id: user.id,
+          booking_type: 'product' as const,
+          status: 'submitted' as const,
+          scheduled_at: scheduledAt.toISOString(),
+          total_amount: finalTotal,
+          currency: 'THB',
+          notes: formData.message || null,
+        }])
+        .select()
+        .single();
+
+      if (bookingError) throw bookingError;
+
+      // Add booking items
+      const items = cartItems.map(item => ({
+        booking_id: booking.id,
+        item_type: 'flower',
+        item_id: item.id,
+        item_name: language === 'ru' ? item.nameRu : item.name,
+        quantity: item.quantity,
+        unit_price: item.price,
+        subtotal: item.price * item.quantity,
+      }));
+
+      // Add delivery fee and gift wrap as items
+      items.push({
+        booking_id: booking.id,
+        item_type: 'delivery',
+        item_id: null,
+        item_name: language === 'ru' ? 'Доставка' : 'Delivery',
+        quantity: 1,
+        unit_price: deliveryFee,
+        subtotal: deliveryFee,
+      });
+
+      if (formData.giftWrap) {
+        items.push({
+          booking_id: booking.id,
+          item_type: 'gift_wrap',
+          item_id: null,
+          item_name: language === 'ru' ? 'Праздничная упаковка' : 'Gift Wrap',
+          quantity: 1,
+          unit_price: giftWrapFee,
+          subtotal: giftWrapFee,
+        });
+      }
+
+      const { error: itemsError } = await supabase
+        .from('booking_items')
+        .insert(items);
+
+      if (itemsError) throw itemsError;
+
+      // Add participant/recipient info
+      const { error: participantError } = await supabase
+        .from('booking_participants')
+        .insert({
+          booking_id: booking.id,
+          name: formData.recipientName,
+          phone: formData.recipientPhone,
+          is_primary: true,
+        });
+
+      if (participantError) throw participantError;
+
+      // Add delivery address
+      const { error: addressError } = await supabase
+        .from('booking_addresses')
+        .insert({
+          booking_id: booking.id,
+          address_type: 'delivery',
+          address: formData.address,
+        });
+
+      if (addressError) throw addressError;
       
       toast.success(
         formData.paymentMethod === 'wallet'
@@ -84,6 +182,7 @@ const FlowersOrder = () => {
       
       navigate('/bookings');
     } catch (error) {
+      console.error('Error creating order:', error);
       toast.error(language === 'ru' ? 'Ошибка при оформлении заказа' : 'Failed to place order');
     } finally {
       setIsSubmitting(false);
@@ -288,7 +387,7 @@ const FlowersOrder = () => {
                       </span>
                     ) : (
                       <>
-                        {language === 'ru' ? 'Баланс:' : 'Balance:'} ₽{balance.toLocaleString()}
+                        {language === 'ru' ? 'Баланс:' : 'Balance:'} ฿{balance.toLocaleString()}
                         {!canPayWithWallet && (
                           <span className="text-destructive ml-1">
                             ({language === 'ru' ? 'недостаточно' : 'insufficient'})
