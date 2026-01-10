@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, BabyIcon, AlertCircle, Utensils } from 'lucide-react';
+import { ArrowLeft, BabyIcon, Utensils } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,7 +10,6 @@ import {
   BookingDateTimeSelect, 
   BookingParticipants,
   BookingContactForm,
-  BookingPaymentSelect,
   BookingBottomBar,
   BookingConfirmation 
 } from '@/components/booking';
@@ -35,7 +34,6 @@ export default function TableReservation() {
   const [specialRequests, setSpecialRequests] = useState('');
   const [needHighChair, setNeedHighChair] = useState(false);
   const [isOutdoor, setIsOutdoor] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'wallet' | 'online'>('card');
   const [isSuccess, setIsSuccess] = useState(false);
   const [bookingId, setBookingId] = useState('');
   
@@ -58,7 +56,7 @@ export default function TableReservation() {
     );
   }
 
-  const depositAmount = restaurant.depositRequired ? restaurant.depositAmount : 0;
+  // No deposit required - free reservation
   const isFormValid = selectedDate && selectedTime && contactData.name && contactData.phone;
 
   const handleSubmit = async () => {
@@ -80,10 +78,9 @@ export default function TableReservation() {
       provider_id: restaurant.id,
       service_id: 'table-reservation',
       scheduled_at: scheduledAt.toISOString(),
-      total_amount: depositAmount,
+      total_amount: 0, // Free reservation - no payment
       currency: 'THB',
       notes,
-      payment: depositAmount > 0 ? { amount: depositAmount, payment_method: paymentMethod } : undefined,
       participants: [{
         name: contactData.name,
         phone: contactData.phone,
@@ -113,7 +110,7 @@ export default function TableReservation() {
         date={format(selectedDate, 'dd.MM.yyyy')}
         time={selectedTime}
         location={restaurant.address}
-        total={depositAmount}
+        total={0}
         currency="THB"
         onViewBookings={() => navigate('/bookings')}
         onContinue={() => navigate('/restaurants')}
@@ -235,47 +232,30 @@ export default function TableReservation() {
             showEmail
           />
 
-          {/* Deposit Notice */}
-          {restaurant.depositRequired && (
-            <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
-              <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-medium text-amber-700 dark:text-amber-400">
-                  {language === 'ru' ? 'Требуется депозит' : 'Deposit Required'}
-                </p>
-                <p className="text-sm text-amber-600 dark:text-amber-500 mt-1">
-                  {language === 'ru' 
-                    ? `Депозит ฿${depositAmount} будет учтён в счёте`
-                    : `฿${depositAmount} deposit will be applied to your bill`}
-                </p>
-              </div>
+          {/* Free Reservation Notice */}
+          <div className="flex items-start gap-3 p-4 rounded-xl bg-green-500/10 border border-green-500/30">
+            <div className="w-5 h-5 rounded-full bg-green-500 text-white flex items-center justify-center text-xs flex-shrink-0">✓</div>
+            <div>
+              <p className="font-medium text-green-700 dark:text-green-400">
+                {language === 'ru' ? 'Бесплатное бронирование' : 'Free Reservation'}
+              </p>
+              <p className="text-sm text-green-600 dark:text-green-500 mt-1">
+                {language === 'ru' 
+                  ? 'Оплата не требуется. Просто приходите в назначенное время.'
+                  : 'No payment required. Just show up at your reserved time.'}
+              </p>
             </div>
-          )}
-
-          {/* Payment Method - only if deposit required */}
-          {restaurant.depositRequired && (
-            <BookingPaymentSelect
-              selected={paymentMethod}
-              onSelect={setPaymentMethod}
-              amount={depositAmount}
-              currency="฿"
-              showWallet
-              showCash={false}
-            />
-          )}
+          </div>
         </div>
 
         {/* Bottom Bar */}
         <BookingBottomBar
-          total={depositAmount}
+          total={0}
           currency="฿"
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
           disabled={!isFormValid}
-          submitLabel={depositAmount > 0 
-            ? (language === 'ru' ? `Оплатить депозит ฿${depositAmount}` : `Pay Deposit ฿${depositAmount}`)
-            : (language === 'ru' ? 'Забронировать' : 'Reserve Table')
-          }
+          submitLabel={language === 'ru' ? 'Забронировать столик' : 'Reserve Table'}
         />
       </div>
     </AppLayout>
