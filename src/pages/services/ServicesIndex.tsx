@@ -43,11 +43,13 @@ const ServicesIndex = () => {
     { id: "water-delivery", icon: Droplets, name: language === "ru" ? "Доставка воды" : "Water Delivery", color: "from-cyan-500 to-blue-500" },
     { id: "plumbing", icon: Wrench, name: language === "ru" ? "Сантехник" : "Plumbing", color: "from-blue-500 to-indigo-500" },
     { id: "electrical", icon: Zap, name: language === "ru" ? "Электрик" : "Electrical", color: "from-yellow-500 to-orange-500" },
-    { id: "cleaning", icon: Sparkles, name: language === "ru" ? "Уборка" : "Cleaning", color: "from-green-500 to-emerald-500" },
+    { id: "cleaning", icon: Sparkles, name: language === "ru" ? "Уборка / Прачечная" : "Cleaning / Laundry", color: "from-green-500 to-emerald-500" },
     { id: "repair", icon: Hammer, name: language === "ru" ? "Ремонт" : "Repair", color: "from-stone-500 to-zinc-600" },
     { id: "painting", icon: PaintBucket, name: language === "ru" ? "Покраска" : "Painting", color: "from-purple-500 to-violet-500" },
     { id: "hvac", icon: Wind, name: language === "ru" ? "Кондиционеры" : "HVAC", color: "from-sky-500 to-blue-500" },
     { id: "moving", icon: Truck, name: language === "ru" ? "Переезд" : "Moving", color: "from-rose-500 to-red-500" },
+    { id: "locksmith", icon: Key, name: language === "ru" ? "Слесарь" : "Locksmith", color: "from-slate-500 to-zinc-600" },
+    { id: "road-assistance", icon: Truck, name: language === "ru" ? "Помощь на дороге" : "Road Assistance", color: "from-amber-500 to-orange-500" },
   ];
 
   const providers = [
