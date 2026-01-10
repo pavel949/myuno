@@ -120,6 +120,11 @@ import BabysitterIndex from '@/pages/babysitter/BabysitterIndex';
 // Delivery Mini-App
 import DeliveryIndex from '@/pages/delivery/DeliveryIndex';
 
+// Market Mini-App
+import MarketIndex from '@/pages/market/MarketIndex';
+import StoreDetail from '@/pages/market/StoreDetail';
+import MarketCheckout from '@/pages/market/MarketCheckout';
+
 // Other pages
 import Favorites from '@/pages/Favorites';
 import Search from '@/pages/Search';
@@ -286,6 +291,11 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* Delivery Mini-App Routes */}
         <Route path="/delivery" element={<PageTransition><DeliveryIndex /></PageTransition>} />
+        
+        {/* Market Mini-App Routes */}
+        <Route path="/market" element={<PageTransition><MarketIndex /></PageTransition>} />
+        <Route path="/market/store/:id" element={<PageTransition><StoreDetail /></PageTransition>} />
+        <Route path="/market/checkout" element={<PageTransition><MarketCheckout /></PageTransition>} />
         
         {/* Info Pages */}
         <Route path="/about" element={<PageTransition><AboutPage /></PageTransition>} />

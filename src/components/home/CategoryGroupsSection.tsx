@@ -80,6 +80,7 @@ const categoryGroups: CategoryGroup[] = [
       { id: 'cleaning', icon: Brush, label: 'Cleaning', labelRu: 'Уборка', path: '/cleaning', color: 'from-cyan-500 to-blue-500' },
       { id: 'babysitting', icon: Baby, label: 'Babysitting', labelRu: 'Няни', path: '/babysitter', color: 'from-pink-500 to-rose-500', isNew: true },
       { id: 'delivery', icon: Package, label: 'Delivery', labelRu: 'Доставка', path: '/delivery', color: 'from-orange-500 to-amber-500' },
+      { id: 'market', icon: Package, label: 'Market', labelRu: 'Магазин', path: '/market', color: 'from-emerald-500 to-teal-500', isNew: true },
     ],
   },
   {
