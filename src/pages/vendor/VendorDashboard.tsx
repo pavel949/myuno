@@ -73,7 +73,7 @@ const VendorDashboard = () => {
   const stats = [
     {
       label: isRussian ? 'Доход за месяц' : 'Monthly Revenue',
-      value: `${summary.totalRevenue.toLocaleString()} ₽`,
+      value: `฿${summary.totalRevenue.toLocaleString()}`,
       icon: DollarSign,
       color: 'text-green-500',
       bgColor: 'bg-green-500/10',
@@ -94,7 +94,7 @@ const VendorDashboard = () => {
     },
     {
       label: isRussian ? 'К выплате' : 'Pending Payout',
-      value: `${profile.pending_payout.toLocaleString()} ₽`,
+      value: `฿${profile.pending_payout.toLocaleString()}`,
       icon: CreditCard,
       color: 'text-orange-500',
       bgColor: 'bg-orange-500/10',
@@ -244,7 +244,7 @@ const VendorDashboard = () => {
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium text-sm">{booking.amount.toLocaleString()} ₽</p>
+                      <p className="font-medium text-sm">฿{booking.amount.toLocaleString()}</p>
                       {getStatusBadge(booking.status)}
                     </div>
                   </div>
