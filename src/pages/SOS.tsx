@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Phone, 
@@ -7,13 +7,7 @@ import {
   Car, 
   AlertTriangle,
   FileQuestion,
-  Wallet,
   Heart,
-  Bug,
-  Users,
-  Building2,
-  Plane,
-  HelpCircle,
   MessageCircle,
   Star,
   Sparkles,
@@ -22,7 +16,10 @@ import {
   Wrench,
   Key,
   ChevronRight,
-  Lightbulb
+  Lightbulb,
+  WifiOff,
+  Download,
+  CheckCircle2
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -32,6 +29,8 @@ import { SectionCard, SectionTitle } from '@/components/uno/SectionCard';
 import { Button } from '@/components/ui/button';
 import { FadeInUp } from '@/components/layout/AnimatedList';
 import { cn } from '@/lib/utils';
+import { useOfflineStatus } from '@/hooks/useOfflineStatus';
+import { toast } from 'sonner';
 
 // UNO Emergency Contact
 const UNO_EMERGENCY_PHONE = '+66-XX-XXX-XXXX';
@@ -134,15 +133,50 @@ const tips = [
 export default function SOS() {
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const { isOffline, isSOSCached, cacheSOS } = useOfflineStatus();
+  const [isCaching, setIsCaching] = useState(false);
 
   const handleCall = (phone: string) => {
     window.location.href = `tel:${phone}`;
+  };
+
+  const handleSaveOffline = async () => {
+    setIsCaching(true);
+    try {
+      const success = await cacheSOS();
+      if (success) {
+        toast.success(
+          language === 'ru' 
+            ? 'Страница SOS сохранена для офлайн-доступа' 
+            : 'SOS page saved for offline access'
+        );
+      } else {
+        toast.error(
+          language === 'ru' 
+            ? 'Не удалось сохранить. Попробуйте обновить страницу.' 
+            : 'Could not save. Try refreshing the page.'
+        );
+      }
+    } catch {
+      toast.error(language === 'ru' ? 'Ошибка сохранения' : 'Save failed');
+    }
+    setIsCaching(false);
   };
 
   return (
     <AppLayout>
       <PageContainer>
         <PageHeader title="SOS" showBack />
+
+        {/* Offline indicator */}
+        {isOffline && (
+          <div className="mb-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-2">
+            <WifiOff className="w-5 h-5 text-amber-500" />
+            <span className="text-sm text-amber-600 dark:text-amber-400 font-medium">
+              {language === 'ru' ? 'Вы офлайн — данные из кеша' : 'You are offline — using cached data'}
+            </span>
+          </div>
+        )}
 
         {/* UNO ALERT */}
         <FadeInUp>
@@ -326,6 +360,30 @@ export default function SOS() {
               ))}
             </ul>
           </SectionCard>
+        </FadeInUp>
+
+        {/* Save Offline Button */}
+        <FadeInUp delay={0.5}>
+          <Button
+            variant="outline"
+            className="w-full mt-4 gap-2"
+            onClick={handleSaveOffline}
+            disabled={isCaching}
+          >
+            {isSOSCached ? (
+              <>
+                <CheckCircle2 className="w-4 h-4 text-green-500" />
+                {language === 'ru' ? 'Сохранено для офлайн' : 'Saved for offline'}
+              </>
+            ) : (
+              <>
+                <Download className="w-4 h-4" />
+                {isCaching 
+                  ? (language === 'ru' ? 'Сохранение...' : 'Saving...') 
+                  : (language === 'ru' ? 'Сохранить для офлайн' : 'Save for offline')}
+              </>
+            )}
+          </Button>
         </FadeInUp>
 
         <div className="h-8" />
