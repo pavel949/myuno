@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Navigation, Clock, Users, Check, Car, Zap } from 'lucide-react';
+import { ArrowLeft, MapPin, Navigation, Clock, Users, Check, Minus, Plus } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,18 +11,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
-
-// Popular locations for quick selection
-const popularLocations = [
-  { id: 'patong', nameEn: 'Patong Beach', nameRu: 'Пляж Патонг' },
-  { id: 'kata', nameEn: 'Kata Beach', nameRu: 'Пляж Ката' },
-  { id: 'karon', nameEn: 'Karon Beach', nameRu: 'Пляж Карон' },
-  { id: 'rawai', nameEn: 'Rawai', nameRu: 'Равай' },
-  { id: 'phuket-town', nameEn: 'Phuket Town', nameRu: 'Пхукет Таун' },
-  { id: 'airport', nameEn: 'Phuket Airport', nameRu: 'Аэропорт Пхукета' },
-  { id: 'central', nameEn: 'Central Festival', nameRu: 'Централ Фестиваль' },
-  { id: 'jungceylon', nameEn: 'Jungceylon', nameRu: 'Джангцейлон' },
-];
+import LocationPickerMap from '@/components/transport/LocationPickerMap';
 
 // Vehicle options with pricing
 const vehicleOptions = [
@@ -76,12 +65,51 @@ const vehicleOptions = [
   },
 ];
 
-// Simulated distance calculation (in a real app, this would use a maps API)
-const getEstimatedDistance = (from: string, to: string): number => {
-  // Simple mock - returns random distance between 5-25km
-  const hash = (from + to).split('').reduce((a, b) => a + b.charCodeAt(0), 0);
-  return 5 + (hash % 20);
+// Time options
+const getTimeOptions = (language: string) => {
+  const now = new Date();
+  const options = [
+    { id: 'now', label: language === 'ru' ? 'Сейчас' : 'Now', value: '' },
+  ];
+  
+  // Add time slots for next 4 hours
+  for (let i = 0; i < 8; i++) {
+    const time = new Date(now.getTime() + (15 + i * 30) * 60 * 1000);
+    const hours = time.getHours().toString().padStart(2, '0');
+    const minutes = Math.round(time.getMinutes() / 15) * 15;
+    const formattedMinutes = (minutes % 60).toString().padStart(2, '0');
+    const adjustedHours = minutes >= 60 ? (parseInt(hours) + 1).toString().padStart(2, '0') : hours;
+    const timeStr = `${adjustedHours}:${formattedMinutes}`;
+    
+    options.push({
+      id: `time-${i}`,
+      label: timeStr,
+      value: time.toISOString(),
+    });
+  }
+  
+  return options;
 };
+
+// Simulated distance calculation
+const getEstimatedDistance = (from: { lat: number; lng: number }, to: { lat: number; lng: number }): number => {
+  const R = 6371; // Earth's radius in km
+  const dLat = (to.lat - from.lat) * Math.PI / 180;
+  const dLng = (to.lng - from.lng) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(from.lat * Math.PI / 180) * Math.cos(to.lat * Math.PI / 180) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c;
+  // Add 20% for road distance vs straight line
+  return Math.round(distance * 1.2 * 10) / 10;
+};
+
+interface LocationData {
+  address: string;
+  lat: number;
+  lng: number;
+}
 
 export default function TaxiBooking() {
   const navigate = useNavigate();
@@ -91,34 +119,42 @@ export default function TaxiBooking() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [showLocationPicker, setShowLocationPicker] = useState<'pickup' | 'destination' | null>(null);
+  const [locationPickerType, setLocationPickerType] = useState<'pickup' | 'destination' | null>(null);
+  
+  const [pickupLocation, setPickupLocation] = useState<LocationData | null>(null);
+  const [destinationLocation, setDestinationLocation] = useState<LocationData | null>(null);
   
   const [formData, setFormData] = useState({
-    pickupLocation: '',
-    destination: '',
     vehicleType: 'standard',
-    passengers: '1',
-    scheduledTime: '', // Empty for "now", or a datetime
-    name: '',
+    passengers: 1,
+    scheduledTime: '', // Empty for "now"
     phone: '',
     notes: '',
   });
 
   const selectedVehicle = vehicleOptions.find(v => v.id === formData.vehicleType);
-  const estimatedDistance = formData.pickupLocation && formData.destination 
-    ? getEstimatedDistance(formData.pickupLocation, formData.destination)
+  const estimatedDistance = pickupLocation && destinationLocation 
+    ? getEstimatedDistance(pickupLocation, destinationLocation)
     : 0;
   const estimatedPrice = selectedVehicle 
     ? selectedVehicle.basePrice + (estimatedDistance * selectedVehicle.pricePerKm)
     : 0;
 
-  const handleLocationSelect = (location: typeof popularLocations[0]) => {
-    if (showLocationPicker === 'pickup') {
-      setFormData({ ...formData, pickupLocation: language === 'ru' ? location.nameRu : location.nameEn });
-    } else if (showLocationPicker === 'destination') {
-      setFormData({ ...formData, destination: language === 'ru' ? location.nameRu : location.nameEn });
+  const timeOptions = getTimeOptions(language);
+
+  const handleLocationSelect = (location: LocationData) => {
+    if (locationPickerType === 'pickup') {
+      setPickupLocation(location);
+    } else if (locationPickerType === 'destination') {
+      setDestinationLocation(location);
     }
-    setShowLocationPicker(null);
+    setLocationPickerType(null);
+  };
+
+  const handlePassengerChange = (delta: number) => {
+    const maxPassengers = selectedVehicle?.maxPassengers || 4;
+    const newValue = Math.max(1, Math.min(maxPassengers, formData.passengers + delta));
+    setFormData({ ...formData, passengers: newValue });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -133,10 +169,10 @@ export default function TaxiBooking() {
       return;
     }
 
-    if (!formData.pickupLocation || !formData.destination) {
+    if (!pickupLocation || !destinationLocation) {
       toast({
         title: language === 'ru' ? 'Укажите маршрут' : 'Enter route',
-        description: language === 'ru' ? 'Выберите точку отправления и назначения' : 'Select pickup and destination',
+        description: language === 'ru' ? 'Выберите точку подачи и назначения' : 'Select pickup and destination',
         variant: 'destructive',
       });
       return;
@@ -152,8 +188,8 @@ export default function TaxiBooking() {
           booking_type: 'transport',
           status: 'submitted',
           scheduled_at: formData.scheduledTime || new Date().toISOString(),
-          total_amount: estimatedPrice,
-          notes: `Taxi booking\nVehicle: ${formData.vehicleType}\nPassengers: ${formData.passengers}\n${formData.notes}`,
+          total_amount: Math.round(estimatedPrice),
+          notes: `Taxi booking\nVehicle: ${formData.vehicleType}\nPassengers: ${formData.passengers}\nScheduled: ${formData.scheduledTime ? new Date(formData.scheduledTime).toLocaleString() : 'Now'}\n${formData.notes}`,
         })
         .select()
         .single();
@@ -164,20 +200,24 @@ export default function TaxiBooking() {
       await supabase.from('booking_addresses').insert({
         booking_id: booking.id,
         address_type: 'pickup',
-        address: formData.pickupLocation,
+        address: pickupLocation.address,
+        lat: pickupLocation.lat,
+        lng: pickupLocation.lng,
       });
 
       // Add destination address
       await supabase.from('booking_addresses').insert({
         booking_id: booking.id,
         address_type: 'dropoff',
-        address: formData.destination,
+        address: destinationLocation.address,
+        lat: destinationLocation.lat,
+        lng: destinationLocation.lng,
       });
 
       // Add participant
       await supabase.from('booking_participants').insert({
         booking_id: booking.id,
-        name: formData.name || user.email?.split('@')[0] || 'Guest',
+        name: user.email?.split('@')[0] || 'Guest',
         phone: formData.phone,
         is_primary: true,
       });
@@ -242,58 +282,18 @@ export default function TaxiBooking() {
           </div>
         </div>
 
-        {/* Location Picker Modal */}
-        {showLocationPicker && (
-          <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm">
-            <div className="px-4 py-6">
-              <div className="flex items-center gap-4 mb-6">
-                <button onClick={() => setShowLocationPicker(null)} className="text-muted-foreground">
-                  <ArrowLeft className="w-5 h-5" />
-                </button>
-                <h2 className="text-lg font-semibold">
-                  {showLocationPicker === 'pickup' 
-                    ? (language === 'ru' ? 'Откуда забрать?' : 'Pickup location')
-                    : (language === 'ru' ? 'Куда едем?' : 'Where to?')}
-                </h2>
-              </div>
-              
-              <Input
-                placeholder={language === 'ru' ? 'Введите адрес...' : 'Enter address...'}
-                className="mb-4"
-                autoFocus
-                onChange={(e) => {
-                  if (showLocationPicker === 'pickup') {
-                    setFormData({ ...formData, pickupLocation: e.target.value });
-                  } else {
-                    setFormData({ ...formData, destination: e.target.value });
-                  }
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    setShowLocationPicker(null);
-                  }
-                }}
-              />
-              
-              <p className="text-sm text-muted-foreground mb-3">
-                {language === 'ru' ? 'Популярные места' : 'Popular locations'}
-              </p>
-              
-              <div className="space-y-2">
-                {popularLocations.map((location) => (
-                  <button
-                    key={location.id}
-                    onClick={() => handleLocationSelect(location)}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all text-left"
-                  >
-                    <MapPin className="w-5 h-5 text-muted-foreground" />
-                    <span>{language === 'ru' ? location.nameRu : location.nameEn}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Location Picker Map Modal */}
+        <LocationPickerMap
+          isOpen={locationPickerType !== null}
+          onClose={() => setLocationPickerType(null)}
+          onLocationSelect={handleLocationSelect}
+          type={locationPickerType || 'pickup'}
+          initialLocation={
+            locationPickerType === 'pickup' 
+              ? pickupLocation 
+              : destinationLocation
+          }
+        />
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Route Selection */}
@@ -301,23 +301,24 @@ export default function TaxiBooking() {
             {/* Pickup */}
             <button
               type="button"
-              onClick={() => setShowLocationPicker('pickup')}
+              onClick={() => setLocationPickerType('pickup')}
               className="w-full flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors text-left"
             >
-              <div className="w-8 h-8 rounded-full bg-success/20 flex items-center justify-center">
-                <Navigation className="w-4 h-4 text-success" />
+              <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
+                <Navigation className="w-4 h-4 text-green-500" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-muted-foreground">
                   {language === 'ru' ? 'Откуда' : 'From'}
                 </p>
                 <p className={cn(
-                  "truncate",
-                  formData.pickupLocation ? "text-foreground" : "text-muted-foreground"
+                  "truncate text-sm",
+                  pickupLocation ? "text-foreground" : "text-muted-foreground"
                 )}>
-                  {formData.pickupLocation || (language === 'ru' ? 'Выберите адрес' : 'Select location')}
+                  {pickupLocation?.address || (language === 'ru' ? 'Выберите на карте' : 'Select on map')}
                 </p>
               </div>
+              <MapPin className="w-5 h-5 text-muted-foreground" />
             </button>
 
             {/* Divider with dots */}
@@ -330,7 +331,7 @@ export default function TaxiBooking() {
             {/* Destination */}
             <button
               type="button"
-              onClick={() => setShowLocationPicker('destination')}
+              onClick={() => setLocationPickerType('destination')}
               className="w-full flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors text-left"
             >
               <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
@@ -341,13 +342,73 @@ export default function TaxiBooking() {
                   {language === 'ru' ? 'Куда' : 'To'}
                 </p>
                 <p className={cn(
-                  "truncate",
-                  formData.destination ? "text-foreground" : "text-muted-foreground"
+                  "truncate text-sm",
+                  destinationLocation ? "text-foreground" : "text-muted-foreground"
                 )}>
-                  {formData.destination || (language === 'ru' ? 'Выберите адрес' : 'Select destination')}
+                  {destinationLocation?.address || (language === 'ru' ? 'Выберите на карте' : 'Select on map')}
                 </p>
               </div>
+              <MapPin className="w-5 h-5 text-muted-foreground" />
             </button>
+          </div>
+
+          {/* Time Selection */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold flex items-center gap-2">
+              <Clock className="w-4 h-4" />
+              {language === 'ru' ? 'Время подачи' : 'Pickup Time'}
+            </Label>
+            <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4">
+              {timeOptions.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => setFormData({ ...formData, scheduledTime: option.value })}
+                  className={cn(
+                    "flex-shrink-0 px-4 py-2 rounded-full border-2 transition-all text-sm font-medium",
+                    formData.scheduledTime === option.value
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-card hover:border-primary/30"
+                  )}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Passengers */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              {language === 'ru' ? 'Пассажиры' : 'Passengers'}
+            </Label>
+            <div className="flex items-center gap-4 p-4 rounded-xl bg-card border border-border/50">
+              <button
+                type="button"
+                onClick={() => handlePassengerChange(-1)}
+                disabled={formData.passengers <= 1}
+                className="w-10 h-10 rounded-full bg-muted flex items-center justify-center disabled:opacity-50 hover:bg-muted/80 transition-colors"
+              >
+                <Minus className="w-4 h-4" />
+              </button>
+              <div className="flex-1 text-center">
+                <span className="text-2xl font-bold">{formData.passengers}</span>
+                <p className="text-xs text-muted-foreground">
+                  {language === 'ru' 
+                    ? `макс. ${selectedVehicle?.maxPassengers || 4}` 
+                    : `max ${selectedVehicle?.maxPassengers || 4}`}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handlePassengerChange(1)}
+                disabled={formData.passengers >= (selectedVehicle?.maxPassengers || 4)}
+                className="w-10 h-10 rounded-full bg-muted flex items-center justify-center disabled:opacity-50 hover:bg-muted/80 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           {/* Vehicle Selection */}
@@ -356,7 +417,7 @@ export default function TaxiBooking() {
               {language === 'ru' ? 'Тип автомобиля' : 'Vehicle Type'}
             </Label>
             <div className="space-y-2">
-              {vehicleOptions.map((vehicle) => {
+              {vehicleOptions.filter(v => v.maxPassengers >= formData.passengers).map((vehicle) => {
                 const price = vehicle.basePrice + (estimatedDistance * vehicle.pricePerKm);
                 
                 return (
@@ -414,6 +475,23 @@ export default function TaxiBooking() {
                 </span>
                 <span className="font-medium">~{estimatedDistance} km</span>
               </div>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm text-muted-foreground">
+                  {language === 'ru' ? 'Пассажиры' : 'Passengers'}
+                </span>
+                <span className="font-medium">{formData.passengers}</span>
+              </div>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm text-muted-foreground">
+                  {language === 'ru' ? 'Время подачи' : 'Pickup time'}
+                </span>
+                <span className="font-medium">
+                  {formData.scheduledTime 
+                    ? new Date(formData.scheduledTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    : (language === 'ru' ? 'Сейчас' : 'Now')}
+                </span>
+              </div>
+              <div className="h-px bg-border my-2" />
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">
                   {language === 'ru' ? 'Примерная стоимость' : 'Estimated price'}
@@ -423,13 +501,11 @@ export default function TaxiBooking() {
             </div>
           )}
 
-          {/* Contact (optional for quick booking) */}
+          {/* Contact */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold">
-                {language === 'ru' ? 'Контакт (опционально)' : 'Contact (optional)'}
-              </h3>
-            </div>
+            <h3 className="font-semibold">
+              {language === 'ru' ? 'Контакт (опционально)' : 'Contact (optional)'}
+            </h3>
             <div>
               <Label>{language === 'ru' ? 'Телефон' : 'Phone'}</Label>
               <Input
@@ -445,27 +521,32 @@ export default function TaxiBooking() {
               <Textarea
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                placeholder={language === 'ru' 
-                  ? 'Подъезд, особые пожелания...' 
-                  : 'Building entrance, special requests...'}
+                placeholder={language === 'ru' ? 'Детские кресла, багаж и т.д.' : 'Child seats, luggage, etc.'}
                 className="mt-1"
                 rows={2}
               />
             </div>
           </div>
 
-          <Button
-            type="submit"
-            className="w-full h-14 text-base"
-            disabled={isSubmitting || !formData.pickupLocation || !formData.destination}
-          >
-            <Zap className="w-5 h-5 mr-2" />
-            {isSubmitting 
-              ? (language === 'ru' ? 'Вызываем...' : 'Ordering...') 
-              : estimatedPrice > 0
-                ? (language === 'ru' ? `Вызвать такси ~฿${Math.round(estimatedPrice)}` : `Order Taxi ~฿${Math.round(estimatedPrice)}`)
-                : (language === 'ru' ? 'Вызвать такси' : 'Order Taxi')}
-          </Button>
+          {/* Submit Button */}
+          <div className="sticky bottom-4 pt-4">
+            <Button
+              type="submit"
+              disabled={isSubmitting || !pickupLocation || !destinationLocation}
+              className="w-full h-14 text-lg font-semibold"
+              size="lg"
+            >
+              {isSubmitting ? (
+                language === 'ru' ? 'Оформление...' : 'Processing...'
+              ) : estimatedDistance > 0 ? (
+                language === 'ru' 
+                  ? `Вызвать за ฿${Math.round(estimatedPrice)}` 
+                  : `Order for ฿${Math.round(estimatedPrice)}`
+              ) : (
+                language === 'ru' ? 'Выберите маршрут' : 'Select route'
+              )}
+            </Button>
+          </div>
         </form>
       </div>
     </AppLayout>
