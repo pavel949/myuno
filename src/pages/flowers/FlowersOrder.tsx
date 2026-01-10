@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { Calendar, Clock, CreditCard, Truck, Gift, Check, Wallet, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Calendar, CreditCard, Truck, Gift, Check, Wallet, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useWallet } from '@/hooks/useWallet';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -24,16 +25,21 @@ const deliverySlots = [
 
 const FlowersOrder = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { language } = useLanguage();
   const { user } = useAuth();
   const { balance, payFromWallet, hasEnoughBalance, isLoading: isWalletLoading } = useWallet();
+  const { getItemsByType, clearByType } = useCart();
   
-  const { cart = {}, cartItems = [], totalPrice = 0 } = (location.state as { 
-    cart: Record<string, number>; 
-    cartItems: Array<{ id: string; name: string; nameRu: string; price: number; quantity: number }>;
-    totalPrice: number 
-  }) || {};
+  // Get flowers from global cart
+  const flowersInCart = getItemsByType('flowers');
+  const cartItems = flowersInCart.map(item => ({
+    id: item.id,
+    name: item.name,
+    nameRu: item.nameRu || item.name,
+    price: item.price,
+    quantity: item.quantity,
+  }));
+  const totalPrice = flowersInCart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const [formData, setFormData] = useState({
     recipientName: '',
@@ -175,6 +181,9 @@ const FlowersOrder = () => {
 
       if (addressError) throw addressError;
       
+      // Clear flowers from cart after successful order
+      clearByType('flowers');
+      
       toast.success(
         formData.paymentMethod === 'wallet'
           ? (language === 'ru' ? 'Заказ оплачен из кошелька!' : 'Order paid from wallet!')
@@ -189,6 +198,38 @@ const FlowersOrder = () => {
       setIsSubmitting(false);
     }
   };
+
+  // If cart is empty, show empty state
+  if (flowersInCart.length === 0) {
+    return (
+      <AppLayout showBottomNav={false}>
+        <div className="min-h-screen bg-background">
+          <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border">
+            <div className="flex items-center gap-3 p-4">
+              <BackButton fallbackPath="/flowers" />
+              <div className="flex-1">
+                <h1 className="text-xl font-display font-bold">
+                  {language === 'ru' ? 'Оформление заказа' : 'Checkout'}
+                </h1>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+            <Gift className="w-16 h-16 text-muted-foreground mb-4" />
+            <h2 className="text-xl font-semibold mb-2">
+              {language === 'ru' ? 'Корзина пуста' : 'Cart is empty'}
+            </h2>
+            <p className="text-muted-foreground text-center mb-6">
+              {language === 'ru' ? 'Добавьте цветы для оформления заказа' : 'Add flowers to place an order'}
+            </p>
+            <Button onClick={() => navigate('/flowers')}>
+              {language === 'ru' ? 'Выбрать цветы' : 'Browse Flowers'}
+            </Button>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout showBottomNav={false}>

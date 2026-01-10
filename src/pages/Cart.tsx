@@ -66,12 +66,8 @@ const Cart = () => {
         }
         break;
       case 'flowers':
-        // Flowers order - use provider ID if available
-        if (firstItem.providerId) {
-          navigate(`/flowers/order/${firstItem.providerId}`);
-        } else {
-          navigate('/flowers');
-        }
+        // Flowers order - always go to /flowers/order, cart is read from context
+        navigate('/flowers/order');
         break;
       case 'service':
         // Service booking - use provider ID if available
