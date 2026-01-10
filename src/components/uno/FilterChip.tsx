@@ -16,9 +16,9 @@ interface FilterChipProps extends React.ButtonHTMLAttributes<HTMLButtonElement> 
 export const FilterChip = forwardRef<HTMLButtonElement, FilterChipProps>(
   ({ label, isActive = false, icon, onToggle, onRemove, size = 'md', className, ...props }, ref) => {
     const sizeClasses = {
-      sm: 'h-7 px-2.5 text-xs gap-1',
-      md: 'h-8 px-3 text-sm gap-1.5',
-      lg: 'h-10 px-4 text-sm gap-2',
+      sm: 'h-6 px-2 text-[11px] gap-0.5',
+      md: 'h-7 px-2.5 text-xs gap-1',
+      lg: 'h-8 px-3 text-sm gap-1.5',
     };
 
     return (

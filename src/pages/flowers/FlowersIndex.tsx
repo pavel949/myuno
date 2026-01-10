@@ -1,97 +1,259 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, Star, MapPin, Clock, Flower2, Heart, Gift, Sparkles } from 'lucide-react';
+import { ArrowLeft, Search, Star, Heart, ShoppingCart } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { FilterChip, FilterChipGroup } from '@/components/uno/FilterChip';
 import { cn } from '@/lib/utils';
 import { triggerRipple } from '@/hooks/useRipple';
 
 const categories = [
-  { id: 'bouquets', icon: Flower2, labelEn: 'Bouquets', labelRu: 'Букеты' },
-  { id: 'roses', icon: Heart, labelEn: 'Roses', labelRu: 'Розы' },
-  { id: 'gifts', icon: Gift, labelEn: 'Gift Sets', labelRu: 'Подарки' },
-  { id: 'wedding', icon: Sparkles, labelEn: 'Wedding', labelRu: 'Свадебные' },
+  { id: 'all', labelEn: 'All', labelRu: 'Все' },
+  { id: 'roses', labelEn: 'Roses', labelRu: 'Розы' },
+  { id: 'mixed', labelEn: 'Mixed', labelRu: 'Микс' },
+  { id: 'tulips', labelEn: 'Tulips', labelRu: 'Тюльпаны' },
+  { id: 'peonies', labelEn: 'Peonies', labelRu: 'Пионы' },
+  { id: 'orchids', labelEn: 'Orchids', labelRu: 'Орхидеи' },
+  { id: 'premium', labelEn: 'Premium', labelRu: 'Премиум' },
 ];
 
-const flowerShops = [
+const priceFilters = [
+  { id: 'all', labelEn: 'Any price', labelRu: 'Любая цена' },
+  { id: 'budget', labelEn: 'Up to ฿1,500', labelRu: 'До ฿1,500', max: 1500 },
+  { id: 'mid', labelEn: '฿1,500 - ฿3,000', labelRu: '฿1,500 - ฿3,000', min: 1500, max: 3000 },
+  { id: 'premium', labelEn: '฿3,000+', labelRu: '฿3,000+', min: 3000 },
+];
+
+// Seed data: 15 bouquets
+const bouquets = [
   {
-    id: 'shop-1',
-    name: 'Phuket Flowers',
-    nameRu: 'Цветы Пхукета',
-    image: 'https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=600',
+    id: 'bouquet-1',
+    name: 'Romantic Red Roses',
+    nameRu: 'Романтические красные розы',
+    image: 'https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?w=600',
+    price: 1800,
+    originalPrice: 2200,
     rating: 4.9,
-    reviewCount: 234,
-    location: 'Patong Beach',
-    locationRu: 'Патонг Бич',
-    priceFrom: 500,
-    deliveryTime: '1-2 hours',
-    deliveryTimeRu: '1-2 часа',
-    isVerified: true,
-    tags: ['Delivery', 'Fresh Flowers', 'Gift Wrap'],
-    tagsRu: ['Доставка', 'Свежие цветы', 'Упаковка'],
-  },
-  {
-    id: 'shop-2',
-    name: 'Orchid Paradise',
-    nameRu: 'Орхидея Рай',
-    image: 'https://images.unsplash.com/photo-1563241527-3004b7be0ffd?w=600',
-    rating: 4.8,
-    reviewCount: 189,
-    location: 'Kata Beach',
-    locationRu: 'Ката Бич',
-    priceFrom: 800,
-    deliveryTime: '2-3 hours',
-    deliveryTimeRu: '2-3 часа',
-    isVerified: true,
-    isNew: true,
-    tags: ['Exotic', 'Orchids', 'Premium'],
-    tagsRu: ['Экзотика', 'Орхидеи', 'Премиум'],
-  },
-  {
-    id: 'shop-3',
-    name: 'Rose Garden Studio',
-    nameRu: 'Студия Розовый Сад',
-    image: 'https://images.unsplash.com/photo-1455659817273-f96807779a8a?w=600',
-    rating: 4.7,
     reviewCount: 156,
-    location: 'Rawai',
-    locationRu: 'Равай',
-    priceFrom: 600,
-    deliveryTime: '1-3 hours',
-    deliveryTimeRu: '1-3 часа',
-    isVerified: false,
-    tags: ['Roses', 'Wedding', 'Events'],
-    tagsRu: ['Розы', 'Свадьбы', 'Мероприятия'],
+    category: 'roses',
+    tags: ['Bestseller', 'Romantic'],
+    tagsRu: ['Хит продаж', 'Романтика'],
+    flowersCount: 25,
   },
   {
-    id: 'shop-4',
-    name: 'Tropical Blooms',
-    nameRu: 'Тропические Цветы',
-    image: 'https://images.unsplash.com/photo-1508610048659-a06b669e3321?w=600',
-    rating: 4.6,
+    id: 'bouquet-2',
+    name: 'Gentle Pink Peonies',
+    nameRu: 'Нежные розовые пионы',
+    image: 'https://images.unsplash.com/photo-1562690868-60bbe7293e94?w=600',
+    price: 2500,
+    rating: 4.8,
     reviewCount: 98,
-    location: 'Phuket Town',
-    locationRu: 'Пхукет Таун',
-    priceFrom: 450,
-    deliveryTime: '2-4 hours',
-    deliveryTimeRu: '2-4 часа',
-    isVerified: true,
-    tags: ['Budget', 'Local', 'Fast Delivery'],
-    tagsRu: ['Бюджетно', 'Местное', 'Быстрая доставка'],
+    category: 'peonies',
+    tags: ['Seasonal', 'Premium'],
+    tagsRu: ['Сезонные', 'Премиум'],
+    flowersCount: 15,
+  },
+  {
+    id: 'bouquet-3',
+    name: 'Spring Mix',
+    nameRu: 'Весенний микс',
+    image: 'https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=600',
+    price: 1200,
+    rating: 4.7,
+    reviewCount: 234,
+    category: 'mixed',
+    tags: ['Popular', 'Colorful'],
+    tagsRu: ['Популярный', 'Яркий'],
+    flowersCount: 30,
+  },
+  {
+    id: 'bouquet-4',
+    name: 'White Orchid Elegance',
+    nameRu: 'Белые орхидеи элегант',
+    image: 'https://images.unsplash.com/photo-1563241527-3004b7be0ffd?w=600',
+    price: 3500,
+    rating: 4.9,
+    reviewCount: 67,
+    category: 'orchids',
+    tags: ['Premium', 'Exotic'],
+    tagsRu: ['Премиум', 'Экзотика'],
+    flowersCount: 7,
+  },
+  {
+    id: 'bouquet-5',
+    name: 'Sunny Tulips',
+    nameRu: 'Солнечные тюльпаны',
+    image: 'https://images.unsplash.com/photo-1520763185298-1b434c919102?w=600',
+    price: 950,
+    rating: 4.6,
+    reviewCount: 189,
+    category: 'tulips',
+    tags: ['Budget', 'Fresh'],
+    tagsRu: ['Бюджетный', 'Свежие'],
+    flowersCount: 21,
+  },
+  {
+    id: 'bouquet-6',
+    name: 'Luxury Rose Box',
+    nameRu: 'Люкс розы в коробке',
+    image: 'https://images.unsplash.com/photo-1455659817273-f96807779a8a?w=600',
+    price: 4500,
+    originalPrice: 5000,
+    rating: 5.0,
+    reviewCount: 45,
+    category: 'premium',
+    tags: ['Gift Box', 'VIP'],
+    tagsRu: ['Подарочная коробка', 'VIP'],
+    flowersCount: 51,
+  },
+  {
+    id: 'bouquet-7',
+    name: 'Pastel Dreams',
+    nameRu: 'Пастельные мечты',
+    image: 'https://images.unsplash.com/photo-1508610048659-a06b669e3321?w=600',
+    price: 1650,
+    rating: 4.7,
+    reviewCount: 123,
+    category: 'mixed',
+    tags: ['Tender', 'Elegant'],
+    tagsRu: ['Нежный', 'Элегантный'],
+    flowersCount: 25,
+  },
+  {
+    id: 'bouquet-8',
+    name: 'Red & White Classic',
+    nameRu: 'Красно-белая классика',
+    image: 'https://images.unsplash.com/photo-1522057384400-681b421cfebc?w=600',
+    price: 2100,
+    rating: 4.8,
+    reviewCount: 87,
+    category: 'roses',
+    tags: ['Classic', 'Wedding'],
+    tagsRu: ['Классика', 'Свадебный'],
+    flowersCount: 35,
+  },
+  {
+    id: 'bouquet-9',
+    name: 'Purple Tulip Garden',
+    nameRu: 'Сад фиолетовых тюльпанов',
+    image: 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=600',
+    price: 1100,
+    rating: 4.5,
+    reviewCount: 145,
+    category: 'tulips',
+    tags: ['Bright', 'Spring'],
+    tagsRu: ['Яркий', 'Весенний'],
+    flowersCount: 19,
+  },
+  {
+    id: 'bouquet-10',
+    name: 'Tropical Paradise',
+    nameRu: 'Тропический рай',
+    image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=600',
+    price: 2800,
+    rating: 4.8,
+    reviewCount: 56,
+    category: 'mixed',
+    tags: ['Exotic', 'Unique'],
+    tagsRu: ['Экзотика', 'Уникальный'],
+    flowersCount: 20,
+  },
+  {
+    id: 'bouquet-11',
+    name: 'Single Stem Rose',
+    nameRu: 'Роза одна штука',
+    image: 'https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?w=600',
+    price: 350,
+    rating: 4.4,
+    reviewCount: 312,
+    category: 'roses',
+    tags: ['Budget', 'Express'],
+    tagsRu: ['Бюджетный', 'Экспресс'],
+    flowersCount: 1,
+  },
+  {
+    id: 'bouquet-12',
+    name: 'Royal Peony Collection',
+    nameRu: 'Королевская коллекция пионов',
+    image: 'https://images.unsplash.com/photo-1562690868-60bbe7293e94?w=600',
+    price: 5500,
+    rating: 5.0,
+    reviewCount: 28,
+    category: 'premium',
+    tags: ['Exclusive', 'Limited'],
+    tagsRu: ['Эксклюзив', 'Лимитированный'],
+    flowersCount: 25,
+  },
+  {
+    id: 'bouquet-13',
+    name: 'Garden Fresh Mix',
+    nameRu: 'Свежий садовый микс',
+    image: 'https://images.unsplash.com/photo-1567696911980-2eed69a46042?w=600',
+    price: 1400,
+    rating: 4.6,
+    reviewCount: 178,
+    category: 'mixed',
+    tags: ['Natural', 'Rustic'],
+    tagsRu: ['Натуральный', 'Рустик'],
+    flowersCount: 28,
+  },
+  {
+    id: 'bouquet-14',
+    name: 'Champagne Roses',
+    nameRu: 'Шампанские розы',
+    image: 'https://images.unsplash.com/photo-1455659817273-f96807779a8a?w=600',
+    price: 2300,
+    rating: 4.9,
+    reviewCount: 92,
+    category: 'roses',
+    tags: ['Elegant', 'Wedding'],
+    tagsRu: ['Элегантный', 'Свадебный'],
+    flowersCount: 31,
+  },
+  {
+    id: 'bouquet-15',
+    name: 'Mini Orchid Pot',
+    nameRu: 'Мини орхидея в горшке',
+    image: 'https://images.unsplash.com/photo-1563241527-3004b7be0ffd?w=600',
+    price: 1900,
+    rating: 4.7,
+    reviewCount: 134,
+    category: 'orchids',
+    tags: ['Long-lasting', 'Gift'],
+    tagsRu: ['Долговечный', 'Подарок'],
+    flowersCount: 3,
   },
 ];
 
 const FlowersIndex = () => {
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = React.useState('all');
+  const [selectedPrice, setSelectedPrice] = React.useState('all');
   const [searchQuery, setSearchQuery] = React.useState('');
 
-  const filteredShops = flowerShops.filter((shop) => {
-    const name = language === 'ru' ? shop.nameRu : shop.name;
-    return name.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredBouquets = bouquets.filter((bouquet) => {
+    // Category filter
+    if (selectedCategory !== 'all' && bouquet.category !== selectedCategory) {
+      return false;
+    }
+    
+    // Price filter
+    const priceFilter = priceFilters.find(p => p.id === selectedPrice);
+    if (priceFilter) {
+      if (priceFilter.min && bouquet.price < priceFilter.min) return false;
+      if (priceFilter.max && bouquet.price > priceFilter.max) return false;
+    }
+    
+    // Search filter
+    if (searchQuery) {
+      const name = language === 'ru' ? bouquet.nameRu : bouquet.name;
+      if (!name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    }
+    
+    return true;
   });
 
   return (
@@ -110,131 +272,137 @@ const FlowersIndex = () => {
             </Button>
             <div className="flex-1">
               <h1 className="text-xl font-display font-bold">
-                {language === 'ru' ? 'Цветы' : 'Flowers'}
+                {language === 'ru' ? 'Букеты' : 'Bouquets'}
               </h1>
               <p className="text-sm text-muted-foreground">
-                {language === 'ru' ? 'Букеты и доставка' : 'Bouquets & Delivery'}
+                {language === 'ru' ? `${bouquets.length} вариантов` : `${bouquets.length} options`}
               </p>
             </div>
+            <Button variant="ghost" size="icon">
+              <ShoppingCart className="w-5 h-5" />
+            </Button>
           </div>
         </div>
 
-        <div className="p-4 space-y-6">
+        <div className="p-4 space-y-4">
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder={language === 'ru' ? 'Поиск цветочных магазинов...' : 'Search flower shops...'}
+              placeholder={language === 'ru' ? 'Поиск букетов...' : 'Search bouquets...'}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-9 h-9"
             />
           </div>
 
-          {/* Categories */}
-          <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-            {categories.map((cat) => {
-              const Icon = cat.icon;
-              const isSelected = selectedCategory === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  onClick={(e) => {
-                    triggerRipple(e);
-                    setSelectedCategory(isSelected ? null : cat.id);
-                  }}
-                  className={cn(
-                    "relative overflow-hidden flex items-center gap-2 px-4 py-2 rounded-full border whitespace-nowrap transition-all active:scale-95",
-                    isSelected
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-card border-border hover:border-primary/30"
-                  )}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span className="text-sm font-medium">
-                    {language === 'ru' ? cat.labelRu : cat.labelEn}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          {/* Category Filters */}
+          <FilterChipGroup scrollable>
+            {categories.map((cat) => (
+              <FilterChip
+                key={cat.id}
+                label={language === 'ru' ? cat.labelRu : cat.labelEn}
+                isActive={selectedCategory === cat.id}
+                size="sm"
+                onToggle={() => setSelectedCategory(cat.id)}
+              />
+            ))}
+          </FilterChipGroup>
 
-          {/* Flower Shops */}
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold">
-              {language === 'ru' ? 'Цветочные магазины' : 'Flower Shops'}
-            </h2>
-            <div className="grid grid-cols-1 gap-4">
-              {filteredShops.map((shop) => (
-                <div
-                  key={shop.id}
-                  onClick={(e) => {
-                    triggerRipple(e);
-                    navigate(`/flowers/shop/${shop.id}`);
-                  }}
-                  className="relative overflow-hidden flex gap-4 p-4 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all cursor-pointer active:scale-[0.98]"
-                >
-                  {/* Image */}
-                  <div className="relative w-24 h-24 rounded-lg overflow-hidden shrink-0">
-                    <img
-                      src={shop.image}
-                      alt={language === 'ru' ? shop.nameRu : shop.name}
-                      className="w-full h-full object-cover"
-                    />
-                    {shop.isNew && (
-                      <span className="absolute top-1 left-1 px-1.5 py-0.5 text-[10px] font-medium rounded bg-primary text-primary-foreground">
-                        {language === 'ru' ? 'Новый' : 'New'}
+          {/* Price Filters */}
+          <FilterChipGroup scrollable>
+            {priceFilters.map((price) => (
+              <FilterChip
+                key={price.id}
+                label={language === 'ru' ? price.labelRu : price.labelEn}
+                isActive={selectedPrice === price.id}
+                size="sm"
+                onToggle={() => setSelectedPrice(price.id)}
+              />
+            ))}
+          </FilterChipGroup>
+
+          {/* Results count */}
+          <p className="text-sm text-muted-foreground">
+            {language === 'ru' 
+              ? `Найдено: ${filteredBouquets.length}` 
+              : `Found: ${filteredBouquets.length}`}
+          </p>
+
+          {/* Bouquets Grid */}
+          <div className="grid grid-cols-2 gap-3">
+            {filteredBouquets.map((bouquet) => (
+              <div
+                key={bouquet.id}
+                onClick={(e) => {
+                  triggerRipple(e);
+                  navigate(`/flowers/bouquet/${bouquet.id}`);
+                }}
+                className="relative overflow-hidden rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all cursor-pointer active:scale-[0.98]"
+              >
+                {/* Image */}
+                <div className="relative aspect-square overflow-hidden">
+                  <img
+                    src={bouquet.image}
+                    alt={language === 'ru' ? bouquet.nameRu : bouquet.name}
+                    className="w-full h-full object-cover"
+                  />
+                  
+                  {/* Discount badge */}
+                  {bouquet.originalPrice && (
+                    <span className="absolute top-2 left-2 px-1.5 py-0.5 text-[10px] font-bold rounded bg-destructive text-destructive-foreground">
+                      -{Math.round((1 - bouquet.price / bouquet.originalPrice) * 100)}%
+                    </span>
+                  )}
+                  
+                  {/* Favorite button */}
+                  <button 
+                    className="absolute top-2 right-2 w-7 h-7 rounded-full bg-background/80 backdrop-blur flex items-center justify-center"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Toggle favorite
+                    }}
+                  >
+                    <Heart className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Content */}
+                <div className="p-2.5">
+                  <h3 className="font-medium text-sm line-clamp-2 min-h-[2.5rem]">
+                    {language === 'ru' ? bouquet.nameRu : bouquet.name}
+                  </h3>
+                  
+                  <div className="flex items-center gap-1 mt-1">
+                    <Star className="w-3 h-3 fill-primary text-primary" />
+                    <span className="text-xs font-medium">{bouquet.rating}</span>
+                    <span className="text-[10px] text-muted-foreground">({bouquet.reviewCount})</span>
+                  </div>
+
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="text-base font-bold text-primary">
+                      ฿{bouquet.price.toLocaleString()}
+                    </span>
+                    {bouquet.originalPrice && (
+                      <span className="text-xs text-muted-foreground line-through">
+                        ฿{bouquet.originalPrice.toLocaleString()}
                       </span>
                     )}
                   </div>
 
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-semibold truncate">
-                        {language === 'ru' ? shop.nameRu : shop.name}
-                      </h3>
-                      <div className="flex items-center gap-1 shrink-0">
-                        <Star className="w-4 h-4 fill-primary text-primary" />
-                        <span className="text-sm font-medium">{shop.rating}</span>
-                        <span className="text-xs text-muted-foreground">({shop.reviewCount})</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5" />
-                        <span className="truncate">{language === 'ru' ? shop.locationRu : shop.location}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5" />
-                        <span>{language === 'ru' ? shop.deliveryTimeRu : shop.deliveryTime}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="text-primary font-semibold">
-                        ฿{shop.priceFrom.toLocaleString()}+
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {(language === 'ru' ? bouquet.tagsRu : bouquet.tags).slice(0, 2).map((tag, index) => (
+                      <span
+                        key={index}
+                        className="px-1.5 py-0.5 text-[10px] rounded-full bg-secondary text-secondary-foreground"
+                      >
+                        {tag}
                       </span>
-                      <span className="text-xs text-muted-foreground">
-                        {language === 'ru' ? 'от' : 'from'}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {(language === 'ru' ? shop.tagsRu : shop.tags).slice(0, 3).map((tag, index) => (
-                        <span
-                          key={index}
-                          className="px-2 py-0.5 text-xs rounded-full bg-secondary text-secondary-foreground"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
+                    ))}
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
