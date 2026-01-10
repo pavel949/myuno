@@ -28,13 +28,13 @@ interface QuickService {
 
 const quickServices: QuickService[] = [
   {
-    id: 'water-activities',
+    id: 'water-delivery',
     icon: Droplets,
-    label: 'Water Activities',
-    labelRu: 'Водные развлечения',
-    description: 'Surfing, diving',
-    descriptionRu: 'Сёрфинг, дайвинг',
-    path: '/water',
+    label: 'Water Delivery',
+    labelRu: 'Доставка воды',
+    description: 'Same day',
+    descriptionRu: 'В тот же день',
+    path: '/services?category=water-delivery',
     color: 'from-cyan-500 to-blue-500',
     popular: true,
   },
