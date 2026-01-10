@@ -25,10 +25,17 @@ import PropertyDetail from '@/pages/property/PropertyDetail';
 import PropertyInquiry from '@/pages/property/PropertyInquiry';
 import PropertyMap from '@/pages/property/PropertyMap';
 
-// Food & Delivery Mini-App
+// Food & Delivery Mini-App (legacy)
 import FoodIndex from '@/pages/food/FoodIndex';
-import RestaurantDetail from '@/pages/food/RestaurantDetail';
+import FoodRestaurantDetail from '@/pages/food/RestaurantDetail';
 import FoodCheckout from '@/pages/food/FoodCheckout';
+
+// Restaurants Mini-App
+import RestaurantsIndex from '@/pages/restaurants/RestaurantsIndex';
+import RestaurantDetail from '@/pages/restaurants/RestaurantDetail';
+import TableReservation from '@/pages/restaurants/TableReservation';
+import DeliveryCheckout from '@/pages/restaurants/DeliveryCheckout';
+import SetMenuBooking from '@/pages/restaurants/SetMenuBooking';
 
 // Transport Mini-App
 import TransportIndex from '@/pages/transport/TransportIndex';
@@ -159,10 +166,17 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/property/inquiry/:id" element={<PageTransition><PropertyInquiry /></PageTransition>} />
         <Route path="/property/map" element={<PageTransition><PropertyMap /></PageTransition>} />
         
-        {/* Food & Delivery Mini-App Routes */}
-        <Route path="/food" element={<PageTransition><FoodIndex /></PageTransition>} />
-        <Route path="/food/restaurant/:id" element={<PageTransition><RestaurantDetail /></PageTransition>} />
+        {/* Food & Delivery Mini-App Routes (legacy - redirects) */}
+        <Route path="/food" element={<Navigate to="/restaurants" replace />} />
+        <Route path="/food/restaurant/:id" element={<PageTransition><FoodRestaurantDetail /></PageTransition>} />
         <Route path="/food/checkout" element={<PageTransition><FoodCheckout /></PageTransition>} />
+        
+        {/* Restaurants Mini-App Routes */}
+        <Route path="/restaurants" element={<PageTransition><RestaurantsIndex /></PageTransition>} />
+        <Route path="/restaurants/:id" element={<PageTransition><RestaurantDetail /></PageTransition>} />
+        <Route path="/restaurants/:id/reserve" element={<PageTransition><TableReservation /></PageTransition>} />
+        <Route path="/restaurants/:id/delivery" element={<PageTransition><DeliveryCheckout /></PageTransition>} />
+        <Route path="/restaurants/:id/experience/:setId" element={<PageTransition><SetMenuBooking /></PageTransition>} />
         
         {/* Transport Mini-App Routes */}
         <Route path="/transport" element={<PageTransition><TransportIndex /></PageTransition>} />

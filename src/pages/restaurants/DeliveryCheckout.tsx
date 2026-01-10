@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Clock, Check } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,6 +12,7 @@ import {
   BookingBottomBar,
   BookingConfirmation 
 } from '@/components/booking';
+import { type ContactFormData } from '@/components/booking/BookingContactForm';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { getRestaurantById } from './restaurantsData';
@@ -31,7 +32,7 @@ export default function DeliveryCheckout() {
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'wallet' | 'online'>('cash');
   const [isSuccess, setIsSuccess] = useState(false);
   
-  const [contactData, setContactData] = useState({
+  const [contactData, setContactData] = useState<ContactFormData>({
     name: '',
     phone: '',
     notes: '',
@@ -55,31 +56,33 @@ export default function DeliveryCheckout() {
 
   const isFormValid = address && contactData.name && contactData.phone && cartItems.length > 0;
 
+  const [bookingId, setBookingId] = useState('');
+
   const handleSubmit = async () => {
     if (!user || !isFormValid) return;
 
     const result = await createBooking({
-      bookingType: 'food_delivery',
-      providerId: restaurant.id,
-      serviceId: 'food-delivery',
-      totalAmount: total,
+      booking_type: 'food',
+      provider_id: restaurant.id,
+      service_id: 'food-delivery',
+      total_amount: total,
       currency: 'THB',
-      notes: `Payment: ${paymentMethod}. ${contactData.notes}`,
-      paymentMethod,
+      notes: `Payment: ${paymentMethod}. ${contactData.notes || ''}`,
+      payment: { amount: total, payment_method: paymentMethod },
       items: cartItems.map(item => ({
-        itemType: 'food',
-        itemName: language === 'ru' ? (item.nameRu || item.name) : item.name,
+        item_type: 'food',
+        item_name: language === 'ru' ? (item.nameRu || item.name) : item.name,
         quantity: item.quantity,
-        unitPrice: item.price,
+        unit_price: item.price,
         subtotal: item.price * item.quantity,
       })),
       participants: [{
         name: contactData.name,
         phone: contactData.phone,
-        isPrimary: true,
+        is_primary: true,
       }],
       addresses: [{
-        addressType: 'delivery',
+        address_type: 'delivery',
         address: address,
         notes: contactData.notes,
       }],
@@ -90,7 +93,8 @@ export default function DeliveryCheckout() {
       },
     });
 
-    if (result.success) {
+    if (result.success && result.booking_id) {
+      setBookingId(result.booking_id);
       clearCart();
       setIsSuccess(true);
     }
@@ -99,10 +103,11 @@ export default function DeliveryCheckout() {
   if (isSuccess) {
     return (
       <BookingConfirmation
+        bookingId={bookingId}
         title={language === 'ru' ? `Заказ из ${restaurant.nameRu}` : `Order from ${restaurant.nameEn}`}
         location={address}
-        totalAmount={total}
-        currency="฿"
+        total={total}
+        currency="THB"
         onViewBookings={() => navigate('/bookings')}
         onContinue={() => navigate('/restaurants')}
       />

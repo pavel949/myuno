@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Clock, Users, Check } from 'lucide-react';
+import { ArrowLeft, Check } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBooking } from '@/hooks/useBooking';
+import { format } from 'date-fns';
 import { 
   BookingSummary,
   BookingDateTimeSelect, 
@@ -14,6 +15,7 @@ import {
   BookingBottomBar,
   BookingConfirmation 
 } from '@/components/booking';
+import { type ContactFormData } from '@/components/booking/BookingContactForm';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { getRestaurantById } from './restaurantsData';
@@ -34,8 +36,9 @@ export default function SetMenuBooking() {
   const [specialRequests, setSpecialRequests] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'wallet' | 'online'>('card');
   const [isSuccess, setIsSuccess] = useState(false);
+  const [bookingId, setBookingId] = useState('');
   
-  const [contactData, setContactData] = useState({
+  const [contactData, setContactData] = useState<ContactFormData>({
     name: '',
     phone: '',
     email: '',
@@ -64,27 +67,27 @@ export default function SetMenuBooking() {
     scheduledAt.setHours(parseInt(hours), parseInt(minutes));
 
     const result = await createBooking({
-      bookingType: 'restaurant_experience',
-      providerId: restaurant.id,
-      serviceId: setMenu.id,
-      scheduledAt: scheduledAt.toISOString(),
-      totalAmount: totalPrice,
+      booking_type: 'food',
+      provider_id: restaurant.id,
+      service_id: setMenu.id,
+      scheduled_at: scheduledAt.toISOString(),
+      total_amount: totalPrice,
       currency: 'THB',
       notes: specialRequests,
-      paymentMethod,
+      payment: { amount: totalPrice, payment_method: paymentMethod },
       items: [{
-        itemType: 'set_menu',
-        itemId: setMenu.id,
-        itemName: language === 'ru' ? setMenu.nameRu : setMenu.nameEn,
+        item_type: 'set_menu',
+        item_id: setMenu.id,
+        item_name: language === 'ru' ? setMenu.nameRu : setMenu.nameEn,
         quantity: guests,
-        unitPrice: setMenu.price,
+        unit_price: setMenu.price,
         subtotal: totalPrice,
       }],
       participants: [{
         name: contactData.name,
         phone: contactData.phone,
         email: contactData.email,
-        isPrimary: true,
+        is_primary: true,
       }],
       metadata: {
         restaurantName: restaurant.nameEn,
@@ -93,23 +96,26 @@ export default function SetMenuBooking() {
         setMenuNameRu: setMenu.nameRu,
         duration: setMenu.duration,
         guests,
+        bookingType: 'restaurant_experience',
       },
     });
 
-    if (result.success) {
+    if (result.success && result.booking_id) {
+      setBookingId(result.booking_id);
       setIsSuccess(true);
     }
   };
 
-  if (isSuccess) {
+  if (isSuccess && selectedDate) {
     return (
       <BookingConfirmation
+        bookingId={bookingId}
         title={language === 'ru' ? setMenu.nameRu : setMenu.nameEn}
-        date={selectedDate}
+        date={format(selectedDate, 'dd.MM.yyyy')}
         time={selectedTime}
         location={restaurant.address}
-        totalAmount={totalPrice}
-        currency="฿"
+        total={totalPrice}
+        currency="THB"
         onViewBookings={() => navigate('/bookings')}
         onContinue={() => navigate('/restaurants')}
       />
