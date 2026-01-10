@@ -2,57 +2,51 @@ import { useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useBooking } from "@/hooks/useBooking";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Calendar } from "@/components/ui/calendar";
-import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { PageContainer } from "@/components/uno/PageContainer";
+import { PageHeader } from "@/components/uno/PageHeader";
 import { 
-  CalendarIcon, 
-  Clock, 
-  User, 
-  Mail, 
-  Phone as PhoneIcon,
-  FileText,
-  CheckCircle2,
-  Building2,
-  Video,
-  MapPin
-} from "lucide-react";
-import { format } from "date-fns";
-import { ru, enUS } from "date-fns/locale";
+  BookingSummary, 
+  BookingDateTimeSelect, 
+  BookingContactForm, 
+  BookingPaymentSelect,
+  BookingBottomBar,
+  BookingConfirmation,
+  type ContactFormData,
+  type PaymentMethod 
+} from "@/components/booking";
+import { addDays, format } from "date-fns";
+import { ru } from "date-fns/locale";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { MapPin, Video, CheckCircle2 } from "lucide-react";
 
-const LegalBooking = () => {
-  const { id } = useParams();
+export default function LegalBooking() {
+  const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const preSelectedService = searchParams.get("service");
-  const { language } = useLanguage();
-  const { user } = useAuth();
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const { user, isLoading: authLoading } = useAuth();
+  const { createBooking, isSubmitting } = useBooking();
 
+  // Form state
   const [step, setStep] = useState(1);
-  const [selectedDate, setSelectedDate] = useState<Date>();
-  const [selectedTime, setSelectedTime] = useState<string>();
+  const [date, setDate] = useState<Date | undefined>(addDays(new Date(), 1));
+  const [time, setTime] = useState<string>("");
   const [consultationType, setConsultationType] = useState<"office" | "online">("office");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    company: "",
-    service: preSelectedService || "",
-    description: "",
-  });
+  const [selectedService, setSelectedService] = useState<string>(preSelectedService || "");
+  const [description, setDescription] = useState<string>("");
+  const [company, setCompany] = useState<string>("");
+  const [contactData, setContactData] = useState<ContactFormData>({ name: "", phone: "" });
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
+  const [bookingResult, setBookingResult] = useState<{ success: boolean; bookingId?: string } | null>(null);
 
-  const timeSlots = [
-    "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
-    "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00"
-  ];
+  const consultationPrice = 2000;
 
   const services = [
     language === "ru" ? "Регистрация компании" : "Company Registration",
@@ -61,79 +55,93 @@ const LegalBooking = () => {
     language === "ru" ? "Трудовое право" : "Employment Law",
     language === "ru" ? "Due Diligence" : "Due Diligence",
     language === "ru" ? "Налоговое планирование" : "Tax Planning",
-    language === "ru" ? "Бухгалтерские услуги" : "Accounting Services",
     language === "ru" ? "Другое" : "Other",
   ];
 
+  const availableTimes = [
+    "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
+    "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00"
+  ];
+
+  // Auth redirect
+  if (!authLoading && !user) {
+    navigate('/auth', { state: { from: `/legal/${id}/book` } });
+    return null;
+  }
+
+  // Success state
+  if (bookingResult?.success && bookingResult.bookingId) {
+    return (
+      <AppLayout showBottomNav={false}>
+        <BookingConfirmation
+          bookingId={bookingResult.bookingId}
+          title={language === 'ru' ? 'Юридическая консультация' : 'Legal Consultation'}
+          date={date ? format(date, 'PPP', { locale: language === 'ru' ? ru : undefined }) : undefined}
+          time={time}
+          total={consultationPrice}
+          currency="THB"
+          continuePath="/legal"
+          continueLabel={language === 'ru' ? 'К юристам' : 'Browse Legal Services'}
+        />
+      </AppLayout>
+    );
+  }
+
   const handleSubmit = async () => {
-    if (!user) {
-      toast.error(language === "ru" ? "Пожалуйста, войдите в аккаунт" : "Please sign in to book");
-      navigate("/auth");
-      return;
-    }
+    if (!date || !time) return;
+    if (!contactData.name || !contactData.phone) return;
 
-    if (!selectedDate || !selectedTime || !formData.name || !formData.phone) {
-      toast.error(language === "ru" ? "Заполните все обязательные поля" : "Please fill all required fields");
-      return;
-    }
+    const scheduledAt = new Date(date);
+    const [hours, minutes] = time.split(':').map(Number);
+    scheduledAt.setHours(hours, minutes, 0, 0);
 
-    setIsSubmitting(true);
-
-    try {
-      const scheduledAt = new Date(selectedDate);
-      const [hours, minutes] = selectedTime.split(":").map(Number);
-      scheduledAt.setHours(hours, minutes, 0, 0);
-
-      // Create booking
-      const { data: booking, error: bookingError } = await supabase
-        .from("bookings")
-        .insert({
-          user_id: user.id,
-          booking_type: "service",
-          status: "submitted",
-          scheduled_at: scheduledAt.toISOString(),
-          notes: JSON.stringify({
-            provider_id: id,
-            provider_name: "Phuket Legal Partners",
-            service: formData.service,
-            consultation_type: consultationType,
-            description: formData.description,
-            company: formData.company,
-          }),
-        })
-        .select()
-        .single();
-
-      if (bookingError) throw bookingError;
-
-      // Add participant info
-      await supabase.from("booking_participants").insert({
-        booking_id: booking.id,
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
+    const result = await createBooking({
+      booking_type: 'service',
+      scheduled_at: scheduledAt,
+      total_amount: consultationPrice,
+      currency: 'THB',
+      notes: JSON.stringify({
+        provider_id: id,
+        service: selectedService,
+        consultation_type: consultationType,
+        description,
+        company,
+      }),
+      items: [{
+        item_type: 'legal_consultation',
+        item_id: id || 'consultation',
+        item_name: selectedService || (language === 'ru' ? 'Консультация' : 'Consultation'),
+        quantity: 1,
+        unit_price: consultationPrice,
+        subtotal: consultationPrice,
+      }],
+      participants: [{
+        name: contactData.name,
+        phone: contactData.phone,
+        email: contactData.email,
         is_primary: true,
-      });
+      }],
+      payment: {
+        amount: consultationPrice,
+        payment_method: paymentMethod,
+      },
+    });
 
-      toast.success(
-        language === "ru" 
-          ? "Заявка отправлена! Мы свяжемся с вами для подтверждения." 
-          : "Request submitted! We will contact you to confirm."
-      );
-      navigate("/bookings");
-    } catch (error) {
-      console.error("Booking error:", error);
-      toast.error(language === "ru" ? "Ошибка при бронировании" : "Booking failed");
-    } finally {
-      setIsSubmitting(false);
+    if (result.success) {
+      setBookingResult({ success: true, bookingId: result.booking_id });
     }
   };
 
   return (
-    <AppLayout title={language === "ru" ? "Запись на консультацию" : "Book Consultation"} showBottomNav={false}>
-      <div className="p-4 pb-24 space-y-6">
+    <AppLayout showBottomNav={false}>
+      <PageContainer className="pb-32">
+        <PageHeader 
+          title={language === 'ru' ? 'Запись на консультацию' : 'Book Consultation'} 
+          showBack 
+        />
+
         {/* Progress Steps */}
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center justify-center gap-2 mt-4 mb-6">
           {[1, 2, 3].map((s) => (
             <div key={s} className="flex items-center gap-2">
               <div
@@ -153,19 +161,12 @@ const LegalBooking = () => {
         {/* Step 1: Date & Time */}
         {step === 1 && (
           <div className="space-y-6">
-            <div className="text-center">
-              <h2 className="text-xl font-bold">
-                {language === "ru" ? "Выберите дату и время" : "Select Date & Time"}
-              </h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                {language === "ru" ? "Шаг 1 из 3" : "Step 1 of 3"}
-              </p>
-            </div>
-
             {/* Consultation Type */}
-            <div className="space-y-3">
-              <Label>{language === "ru" ? "Формат консультации" : "Consultation Format"}</Label>
-              <div className="grid grid-cols-2 gap-3">
+            <div className="bg-card rounded-2xl border p-5">
+              <Label className="font-semibold mb-4 block">
+                {language === 'ru' ? 'Формат консультации' : 'Consultation Format'}
+              </Label>
+              <div className="grid grid-cols-2 gap-3 mt-3">
                 <button
                   onClick={() => setConsultationType("office")}
                   className={`p-4 rounded-xl border-2 transition-all ${
@@ -191,91 +192,58 @@ const LegalBooking = () => {
               </div>
             </div>
 
-            {/* Calendar */}
-            <div className="bg-card border border-border rounded-xl p-4">
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={setSelectedDate}
-                locale={language === "ru" ? ru : enUS}
-                disabled={(date) => date < new Date() || date.getDay() === 0}
-                className="mx-auto"
+            {/* Date & Time */}
+            <div className="bg-card rounded-2xl border p-5">
+              <h3 className="font-semibold mb-4">
+                {language === 'ru' ? 'Дата и время' : 'Date & Time'}
+              </h3>
+              <BookingDateTimeSelect
+                date={date}
+                time={time}
+                onDateChange={setDate}
+                onTimeChange={setTime}
+                availableTimes={availableTimes}
               />
             </div>
 
-            {/* Time Slots */}
-            {selectedDate && (
-              <div className="space-y-3">
-                <Label className="flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
-                  {language === "ru" ? "Доступное время" : "Available Time"}
-                </Label>
-                <div className="grid grid-cols-4 gap-2">
-                  {timeSlots.map((time) => (
-                    <button
-                      key={time}
-                      onClick={() => setSelectedTime(time)}
-                      className={`py-2 px-3 rounded-lg text-sm font-medium transition-all ${
-                        selectedTime === time
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted hover:bg-muted/80"
-                      }`}
-                    >
-                      {time}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
             <Button
               className="w-full"
-              disabled={!selectedDate || !selectedTime}
+              disabled={!date || !time}
               onClick={() => setStep(2)}
             >
-              {language === "ru" ? "Продолжить" : "Continue"}
+              {language === 'ru' ? 'Продолжить' : 'Continue'}
             </Button>
           </div>
         )}
 
-        {/* Step 2: Service & Details */}
+        {/* Step 2: Service Selection */}
         {step === 2 && (
           <div className="space-y-6">
-            <div className="text-center">
-              <h2 className="text-xl font-bold">
-                {language === "ru" ? "Выберите услугу" : "Select Service"}
-              </h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                {language === "ru" ? "Шаг 2 из 3" : "Step 2 of 3"}
-              </p>
-            </div>
-
-            {/* Selected Date Summary */}
-            <div className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
-              <CalendarIcon className="w-5 h-5 text-primary" />
-              <div>
-                <p className="font-medium">
-                  {selectedDate && format(selectedDate, "d MMMM yyyy", { locale: language === "ru" ? ru : enUS })}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {selectedTime} • {consultationType === "office" 
-                    ? (language === "ru" ? "В офисе" : "In Office")
-                    : (language === "ru" ? "Онлайн" : "Online")
-                  }
-                </p>
-              </div>
-            </div>
+            {/* Summary */}
+            <BookingSummary
+              title={language === 'ru' ? 'Консультация' : 'Consultation'}
+              date={date}
+              time={time}
+              subtitle={consultationType === 'office' 
+                ? (language === 'ru' ? 'В офисе' : 'In Office')
+                : (language === 'ru' ? 'Онлайн' : 'Online')
+              }
+              price={consultationPrice}
+              currency="THB"
+            />
 
             {/* Service Selection */}
-            <div className="space-y-3">
-              <Label>{language === "ru" ? "Тип услуги" : "Service Type"}</Label>
-              <div className="flex flex-wrap gap-2">
+            <div className="bg-card rounded-2xl border p-5">
+              <Label className="font-semibold mb-4 block">
+                {language === 'ru' ? 'Тип услуги' : 'Service Type'}
+              </Label>
+              <div className="flex flex-wrap gap-2 mt-3">
                 {services.map((service) => (
                   <Badge
                     key={service}
-                    variant={formData.service === service ? "default" : "outline"}
+                    variant={selectedService === service ? "default" : "outline"}
                     className="cursor-pointer py-2 px-3"
-                    onClick={() => setFormData({ ...formData, service })}
+                    onClick={() => setSelectedService(service)}
                   >
                     {service}
                   </Badge>
@@ -284,149 +252,102 @@ const LegalBooking = () => {
             </div>
 
             {/* Description */}
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <FileText className="w-4 h-4" />
-                {language === "ru" ? "Опишите ваш вопрос" : "Describe Your Question"}
+            <div className="bg-card rounded-2xl border p-5">
+              <Label className="font-semibold mb-4 block">
+                {language === 'ru' ? 'Опишите ваш вопрос' : 'Describe Your Question'}
               </Label>
               <Textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder={language === "ru" 
-                  ? "Кратко опишите, с чем вам нужна помощь..."
-                  : "Briefly describe what you need help with..."
-                }
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder={language === 'ru' 
+                  ? 'Кратко опишите, с чем вам нужна помощь...'
+                  : 'Briefly describe what you need help with...'}
                 rows={4}
+                className="mt-2"
               />
             </div>
 
             <div className="flex gap-3">
               <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
-                {language === "ru" ? "Назад" : "Back"}
+                {language === 'ru' ? 'Назад' : 'Back'}
               </Button>
               <Button
                 className="flex-1"
-                disabled={!formData.service}
+                disabled={!selectedService}
                 onClick={() => setStep(3)}
               >
-                {language === "ru" ? "Продолжить" : "Continue"}
+                {language === 'ru' ? 'Продолжить' : 'Continue'}
               </Button>
             </div>
           </div>
         )}
 
-        {/* Step 3: Contact Info */}
+        {/* Step 3: Contact & Payment */}
         {step === 3 && (
           <div className="space-y-6">
-            <div className="text-center">
-              <h2 className="text-xl font-bold">
-                {language === "ru" ? "Контактные данные" : "Contact Details"}
-              </h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                {language === "ru" ? "Шаг 3 из 3" : "Step 3 of 3"}
-              </p>
-            </div>
-
             {/* Summary */}
-            <div className="bg-card border border-border rounded-xl p-4 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{language === "ru" ? "Дата" : "Date"}</span>
-                <span className="font-medium">
-                  {selectedDate && format(selectedDate, "d MMMM yyyy", { locale: language === "ru" ? ru : enUS })}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{language === "ru" ? "Время" : "Time"}</span>
-                <span className="font-medium">{selectedTime}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{language === "ru" ? "Формат" : "Format"}</span>
-                <span className="font-medium">
-                  {consultationType === "office" 
-                    ? (language === "ru" ? "В офисе" : "In Office")
-                    : (language === "ru" ? "Онлайн" : "Online")
-                  }
-                </span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{language === "ru" ? "Услуга" : "Service"}</span>
-                <span className="font-medium">{formData.service}</span>
+            <BookingSummary
+              title={selectedService}
+              date={date}
+              time={time}
+              price={consultationPrice}
+              currency="THB"
+            />
+
+            {/* Contact Info */}
+            <div className="bg-card rounded-2xl border p-5">
+              <h3 className="font-semibold mb-4">
+                {language === 'ru' ? 'Контактные данные' : 'Contact Information'}
+              </h3>
+              <BookingContactForm
+                data={contactData}
+                onChange={setContactData}
+                showEmail
+              />
+              <div className="mt-4">
+                <Label>{language === 'ru' ? 'Компания (если есть)' : 'Company (if any)'}</Label>
+                <Input
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                  placeholder={language === 'ru' ? 'Название компании' : 'Company name'}
+                  className="mt-1"
+                />
               </div>
             </div>
 
-            {/* Contact Form */}
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <User className="w-4 h-4" />
-                  {language === "ru" ? "Ваше имя *" : "Your Name *"}
-                </Label>
-                <Input
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder={language === "ru" ? "Иван Иванов" : "John Smith"}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <PhoneIcon className="w-4 h-4" />
-                  {language === "ru" ? "Телефон *" : "Phone *"}
-                </Label>
-                <Input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder="+66..."
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <Mail className="w-4 h-4" />
-                  Email
-                </Label>
-                <Input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="email@example.com"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <Building2 className="w-4 h-4" />
-                  {language === "ru" ? "Компания (если есть)" : "Company (if any)"}
-                </Label>
-                <Input
-                  value={formData.company}
-                  onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                  placeholder={language === "ru" ? "Название компании" : "Company name"}
-                />
-              </div>
+            {/* Payment Method */}
+            <div className="bg-card rounded-2xl border p-5">
+              <h3 className="font-semibold mb-4">
+                {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
+              </h3>
+              <BookingPaymentSelect
+                selected={paymentMethod}
+                onSelect={setPaymentMethod}
+                amount={consultationPrice}
+                currency="THB"
+                showWallet
+                showCash
+              />
             </div>
 
             <div className="flex gap-3">
               <Button variant="outline" onClick={() => setStep(2)} className="flex-1">
-                {language === "ru" ? "Назад" : "Back"}
-              </Button>
-              <Button
-                className="flex-1"
-                disabled={!formData.name || !formData.phone || isSubmitting}
-                onClick={handleSubmit}
-              >
-                {isSubmitting 
-                  ? (language === "ru" ? "Отправка..." : "Submitting...")
-                  : (language === "ru" ? "Отправить заявку" : "Submit Request")
-                }
+                {language === 'ru' ? 'Назад' : 'Back'}
               </Button>
             </div>
+
+            {/* Bottom Bar */}
+            <BookingBottomBar
+              total={consultationPrice}
+              currency="THB"
+              onSubmit={handleSubmit}
+              isSubmitting={isSubmitting}
+              disabled={!contactData.name || !contactData.phone}
+              submitLabel={language === 'ru' ? 'Отправить заявку' : 'Submit Request'}
+            />
           </div>
         )}
-      </div>
+      </PageContainer>
     </AppLayout>
   );
-};
-
-export default LegalBooking;
+}
