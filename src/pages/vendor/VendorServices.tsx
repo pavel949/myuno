@@ -118,7 +118,7 @@ const VendorServices = () => {
         description: formData.description || undefined,
         description_ru: formData.description_ru || undefined,
         price: parseFloat(formData.price),
-        currency: 'RUB',
+        currency: 'THB',
         duration_minutes: formData.duration_minutes ? parseInt(formData.duration_minutes) : undefined,
         max_capacity: parseInt(formData.max_capacity) || 1,
         is_active: formData.is_active,
@@ -234,7 +234,7 @@ const VendorServices = () => {
                       )}
                       <div className="flex items-center gap-4 text-sm">
                         <span className="font-bold text-primary">
-                          {service.price.toLocaleString()} ₽
+                          ฿{service.price.toLocaleString()}
                         </span>
                         {service.duration_minutes && (
                           <span className="flex items-center gap-1 text-muted-foreground">
@@ -315,7 +315,7 @@ const VendorServices = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="price">{isRussian ? 'Цена (₽) *' : 'Price (₽) *'}</Label>
+                  <Label htmlFor="price">{isRussian ? 'Цена (฿) *' : 'Price (฿) *'}</Label>
                   <Input
                     id="price"
                     type="number"

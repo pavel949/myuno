@@ -117,6 +117,9 @@ import VendorBookings from '@/pages/vendor/VendorBookings';
 import VendorServices from '@/pages/vendor/VendorServices';
 import VendorAnalytics from '@/pages/vendor/VendorAnalytics';
 import VendorPayouts from '@/pages/vendor/VendorPayouts';
+import VendorProperties from '@/pages/vendor/VendorProperties';
+import VendorTours from '@/pages/vendor/VendorTours';
+import VendorActivities from '@/pages/vendor/VendorActivities';
 
 export const AnimatedRoutes: React.FC = () => {
   const location = useLocation();
@@ -238,6 +241,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/vendor/services" element={<PageTransition><VendorServices /></PageTransition>} />
         <Route path="/vendor/analytics" element={<PageTransition><VendorAnalytics /></PageTransition>} />
         <Route path="/vendor/payouts" element={<PageTransition><VendorPayouts /></PageTransition>} />
+        <Route path="/vendor/properties" element={<PageTransition><VendorProperties /></PageTransition>} />
+        <Route path="/vendor/tours" element={<PageTransition><VendorTours /></PageTransition>} />
+        <Route path="/vendor/activities" element={<PageTransition><VendorActivities /></PageTransition>} />
         
         {/* Catch-all */}
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
