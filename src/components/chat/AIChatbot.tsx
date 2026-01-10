@@ -171,7 +171,7 @@ export const AIChatbot: React.FC = () => {
         </div>
 
         {/* Messages */}
-        <ScrollArea className="h-[350px] p-4" ref={scrollRef}>
+        <div className="h-[350px] overflow-y-auto p-4" ref={scrollRef}>
           {messages.length === 0 ? (
             <div className="space-y-4">
               <div className="text-center py-6">
@@ -244,7 +244,7 @@ export const AIChatbot: React.FC = () => {
               )}
             </div>
           )}
-        </ScrollArea>
+        </div>
 
         {/* Input */}
         <div className="p-4 border-t">
