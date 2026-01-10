@@ -51,20 +51,42 @@ const Cart = () => {
   }, {} as Record<CartItem['type'], CartItem[]>);
 
   const handleCheckout = () => {
-    // Navigate to appropriate checkout based on items
     if (items.length === 0) return;
     
-    // For now, navigate to a general checkout or first type's checkout
-    const firstType = Object.keys(groupedItems)[0] as CartItem['type'];
+    const firstItem = items[0];
+    const firstType = firstItem.type;
+    
     switch (firstType) {
       case 'food':
-        navigate('/food/checkout');
+        // Food checkout - use provider ID if available
+        if (firstItem.providerId) {
+          navigate(`/restaurants/${firstItem.providerId}/delivery`);
+        } else {
+          navigate('/food/checkout');
+        }
         break;
       case 'flowers':
-        navigate('/flowers/order/cart');
+        // Flowers order - use provider ID if available
+        if (firstItem.providerId) {
+          navigate(`/flowers/order/${firstItem.providerId}`);
+        } else {
+          navigate('/flowers');
+        }
+        break;
+      case 'service':
+        // Service booking - use provider ID if available
+        if (firstItem.providerId) {
+          navigate(`/services/booking/${firstItem.providerId}`);
+        } else {
+          navigate('/services');
+        }
+        break;
+      case 'product':
+        // Product/Market checkout
+        navigate('/market/checkout');
         break;
       default:
-        navigate('/bookings');
+        navigate('/');
     }
   };
 
