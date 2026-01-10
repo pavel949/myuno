@@ -48,7 +48,7 @@ export function AppHeader({ title, showBack, onMenuClick, className }: AppHeader
         </Link>
         
         {title && (
-          <h1 className="text-base font-semibold truncate absolute left-1/2 -translate-x-1/2">{title}</h1>
+          <h1 className="text-base font-semibold truncate flex-1 text-center mx-2 max-w-[40%]">{title}</h1>
         )}
 
         {/* Right side - Actions */}
