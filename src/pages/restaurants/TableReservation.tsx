@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, BabyIcon, Utensils } from 'lucide-react';
+import { ArrowLeft, BabyIcon, Utensils, Banknote } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -56,7 +56,10 @@ export default function TableReservation() {
     );
   }
 
-  // No deposit required - free reservation
+  // Check if deposit is required for this restaurant
+  const depositRequired = restaurant.depositRequired;
+  const depositAmount = restaurant.depositAmount || 0;
+
   const isFormValid = selectedDate && selectedTime && contactData.name && contactData.phone;
 
   const handleSubmit = async () => {
@@ -78,7 +81,7 @@ export default function TableReservation() {
       provider_id: restaurant.id,
       service_id: 'table-reservation',
       scheduled_at: scheduledAt.toISOString(),
-      total_amount: 0, // Free reservation - no payment
+      total_amount: depositRequired ? depositAmount : 0,
       currency: 'THB',
       notes,
       participants: [{
@@ -93,6 +96,8 @@ export default function TableReservation() {
         guests,
         time: selectedTime,
         bookingType: 'table_reservation',
+        depositRequired,
+        depositAmount: depositRequired ? depositAmount : 0,
       },
     });
 
@@ -110,7 +115,7 @@ export default function TableReservation() {
         date={format(selectedDate, 'dd.MM.yyyy')}
         time={selectedTime}
         location={restaurant.address}
-        total={0}
+        total={depositRequired ? depositAmount : 0}
         currency="THB"
         onViewBookings={() => navigate('/bookings')}
         onContinue={() => navigate('/restaurants')}
@@ -232,30 +237,49 @@ export default function TableReservation() {
             showEmail
           />
 
-          {/* Free Reservation Notice */}
-          <div className="flex items-start gap-3 p-4 rounded-xl bg-green-500/10 border border-green-500/30">
-            <div className="w-5 h-5 rounded-full bg-green-500 text-white flex items-center justify-center text-xs flex-shrink-0">✓</div>
-            <div>
-              <p className="font-medium text-green-700 dark:text-green-400">
-                {language === 'ru' ? 'Бесплатное бронирование' : 'Free Reservation'}
-              </p>
-              <p className="text-sm text-green-600 dark:text-green-500 mt-1">
-                {language === 'ru' 
-                  ? 'Оплата не требуется. Просто приходите в назначенное время.'
-                  : 'No payment required. Just show up at your reserved time.'}
-              </p>
+          {/* Reservation Notice - Conditional based on deposit */}
+          {depositRequired ? (
+            <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
+              <Banknote className="w-5 h-5 text-amber-600 flex-shrink-0" />
+              <div>
+                <p className="font-medium text-amber-700 dark:text-amber-400">
+                  {language === 'ru' ? `Депозит: ${depositAmount}฿` : `Deposit: ${depositAmount}฿`}
+                </p>
+                <p className="text-sm text-amber-600 dark:text-amber-500 mt-1">
+                  {language === 'ru' 
+                    ? 'Депозит будет зачтён в счёт заказа. Возвращается при отмене за 24 часа.'
+                    : 'Deposit will be applied to your bill. Refundable if cancelled 24h in advance.'}
+                </p>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex items-start gap-3 p-4 rounded-xl bg-green-500/10 border border-green-500/30">
+              <div className="w-5 h-5 rounded-full bg-green-500 text-white flex items-center justify-center text-xs flex-shrink-0">✓</div>
+              <div>
+                <p className="font-medium text-green-700 dark:text-green-400">
+                  {language === 'ru' ? 'Бесплатное бронирование' : 'Free Reservation'}
+                </p>
+                <p className="text-sm text-green-600 dark:text-green-500 mt-1">
+                  {language === 'ru' 
+                    ? 'Оплата не требуется. Просто приходите в назначенное время.'
+                    : 'No payment required. Just show up at your reserved time.'}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Bottom Bar */}
         <BookingBottomBar
-          total={0}
+          total={depositRequired ? depositAmount : 0}
           currency="฿"
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
           disabled={!isFormValid}
-          submitLabel={language === 'ru' ? 'Забронировать столик' : 'Reserve Table'}
+          submitLabel={depositRequired 
+            ? (language === 'ru' ? `Забронировать (${depositAmount}฿)` : `Reserve (${depositAmount}฿)`)
+            : (language === 'ru' ? 'Забронировать столик' : 'Reserve Table')
+          }
         />
       </div>
     </AppLayout>
