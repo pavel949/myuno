@@ -74,7 +74,7 @@ export default function ServiceBooking() {
 
   // Auth redirect
   if (!authLoading && !user) {
-    navigate('/auth', { state: { from: `/services/${id}/book` } });
+    navigate('/auth', { state: { from: `/services/booking/${id}` } });
     return null;
   }
 

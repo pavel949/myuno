@@ -65,7 +65,7 @@ export default function LegalBooking() {
 
   // Auth redirect
   if (!authLoading && !user) {
-    navigate('/auth', { state: { from: `/legal/${id}/book` } });
+    navigate('/auth', { state: { from: `/legal/booking/${id}` } });
     return null;
   }
 
