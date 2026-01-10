@@ -76,7 +76,7 @@ const quickServices: QuickService[] = [
     labelRu: 'Прачечная',
     description: 'Pickup today',
     descriptionRu: 'Заберём сегодня',
-    path: '/services?category=laundry',
+    path: '/services?category=cleaning',
     color: 'from-sky-500 to-cyan-500',
   },
   {
@@ -86,7 +86,7 @@ const quickServices: QuickService[] = [
     labelRu: 'Ремонт',
     description: 'Fast response',
     descriptionRu: 'Быстрый выезд',
-    path: '/services?category=repairs',
+    path: '/services?category=repair',
     color: 'from-orange-500 to-amber-500',
   },
 ];

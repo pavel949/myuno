@@ -29,6 +29,12 @@ const typeRoutes: Record<string, string> = {
   clinic: '/medical',
   gym: '/fitness',
   course: '/education',
+  service: '/services/provider',
+  salon: '/beauty/salon',
+  restaurant: '/food/restaurant',
+  pharmacy: '/pharmacy',
+  legal: '/legal/provider',
+  flower_shop: '/flowers/shop',
 };
 
 export function ForYouSection() {
