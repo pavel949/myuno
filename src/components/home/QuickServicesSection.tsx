@@ -8,7 +8,8 @@ import {
   Shirt, 
   Wrench,
   Sparkles,
-  Zap
+  Zap,
+  UtensilsCrossed
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
@@ -28,6 +29,17 @@ interface QuickService {
 
 const quickServices: QuickService[] = [
   {
+    id: 'restaurants',
+    icon: UtensilsCrossed,
+    label: 'Restaurants',
+    labelRu: 'Рестораны',
+    description: 'Book & Order',
+    descriptionRu: 'Бронь и доставка',
+    path: '/restaurants',
+    color: 'from-orange-500 to-red-500',
+    popular: true,
+  },
+  {
     id: 'water-delivery',
     icon: Droplets,
     label: 'Water Delivery',
@@ -36,7 +48,6 @@ const quickServices: QuickService[] = [
     descriptionRu: 'В тот же день',
     path: '/services?category=water-delivery',
     color: 'from-cyan-500 to-blue-500',
-    popular: true,
   },
   {
     id: 'airport-transfer',
@@ -78,16 +89,6 @@ const quickServices: QuickService[] = [
     descriptionRu: 'Заберём сегодня',
     path: '/services?category=cleaning',
     color: 'from-sky-500 to-cyan-500',
-  },
-  {
-    id: 'repairs',
-    icon: Wrench,
-    label: 'Home Repair',
-    labelRu: 'Ремонт',
-    description: 'Fast response',
-    descriptionRu: 'Быстрый выезд',
-    path: '/services?category=repair',
-    color: 'from-orange-500 to-amber-500',
   },
 ];
 

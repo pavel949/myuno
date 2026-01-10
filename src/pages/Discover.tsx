@@ -93,7 +93,7 @@ export default function Discover() {
     const slug = service.category?.slug || 'services';
     const pathMap: Record<string, string> = {
       'beauty-spa': '/beauty',
-      'restaurants': '/food',
+      'restaurants': '/restaurants',
       'fitness': '/fitness',
       'medical': '/medical',
       'kids-education': '/education',
