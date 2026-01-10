@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Settings, HelpCircle, LogOut, ChevronRight, Shield, Bell, CreditCard, Heart, Clock, Wallet, Palette, Gift, Info, FileText, Handshake, MessageCircle, ShieldCheck } from 'lucide-react';
+import { User, Settings, HelpCircle, LogOut, ChevronRight, Shield, Bell, CreditCard, Heart, Clock, Wallet, Palette, Gift, Info, FileText, Handshake, MessageCircle, ShieldCheck, MapPin } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,6 +11,7 @@ import { PageContainer } from '@/components/uno/PageContainer';
 import { SectionCard, SectionTitle } from '@/components/uno/SectionCard';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { ReferralCard } from '@/components/uno/ReferralCard';
+import { UserPreferences } from '@/components/profile/UserPreferences';
 import { supabase } from '@/integrations/supabase/client';
 
 export default function Profile() {
@@ -121,6 +122,13 @@ export default function Profile() {
           </span>
           <LanguageSwitcher variant="toggle" size="sm" />
         </SectionCard>
+
+        {/* User Preferences */}
+        <div className="text-xs font-medium text-muted-foreground mb-2 mt-4 flex items-center gap-1">
+          <MapPin className="w-3 h-3" />
+          {language === 'ru' ? 'Настройки' : 'Preferences'}
+        </div>
+        <UserPreferences />
 
         {/* Referral program */}
         <ReferralCard variant="compact" />
