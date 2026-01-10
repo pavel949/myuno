@@ -107,6 +107,15 @@ import YachtsIndex from '@/pages/yachts/YachtsIndex';
 import YachtDetail from '@/pages/yachts/YachtDetail';
 import YachtBooking from '@/pages/yachts/YachtBooking';
 
+// Cleaning Mini-App
+import CleaningIndex from '@/pages/cleaning/CleaningIndex';
+
+// Babysitter Mini-App
+import BabysitterIndex from '@/pages/babysitter/BabysitterIndex';
+
+// Delivery Mini-App
+import DeliveryIndex from '@/pages/delivery/DeliveryIndex';
+
 // Other pages
 import Favorites from '@/pages/Favorites';
 import Search from '@/pages/Search';
@@ -260,6 +269,16 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/yachts" element={<PageTransition><YachtsIndex /></PageTransition>} />
         <Route path="/yachts/:id" element={<PageTransition><YachtDetail /></PageTransition>} />
         <Route path="/yachts/:id/booking" element={<PageTransition><YachtBooking /></PageTransition>} />
+        
+        {/* Cleaning Mini-App Routes */}
+        <Route path="/cleaning" element={<PageTransition><CleaningIndex /></PageTransition>} />
+        
+        {/* Babysitter Mini-App Routes */}
+        <Route path="/babysitter" element={<PageTransition><BabysitterIndex /></PageTransition>} />
+        
+        {/* Delivery Mini-App Routes */}
+        <Route path="/delivery" element={<PageTransition><DeliveryIndex /></PageTransition>} />
+        
         {/* Info Pages */}
         <Route path="/about" element={<PageTransition><AboutPage /></PageTransition>} />
         <Route path="/how-it-works" element={<PageTransition><HowItWorksPage /></PageTransition>} />
