@@ -112,7 +112,7 @@ export default function Profile() {
               {language === 'ru' ? 'Тема оформления' : 'Theme'}
             </span>
           </div>
-          <ThemeSwitcher variant="select" />
+          <ThemeSwitcher variant="cards" />
         </SectionCard>
 
         {/* Language switcher */}

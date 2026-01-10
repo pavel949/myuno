@@ -1,13 +1,12 @@
 import React from 'react';
-import { useCurrency, currencies, Currency } from '@/contexts/CurrencyContext';
+import { useCurrency, currencies } from '@/contexts/CurrencyContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { Check } from 'lucide-react';
+import { Check, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -25,20 +24,22 @@ export function CurrencySwitcher({ size = 'default', className }: CurrencySwitch
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="sm"
+        <button
           className={cn(
-            "h-8 px-2 gap-1 font-medium text-xs",
-            size === 'sm' && "h-7 px-1.5 text-xs",
+            "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg",
+            "bg-secondary/50 hover:bg-secondary text-foreground",
+            "text-xs font-medium transition-colors",
+            "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
+            size === 'sm' && "px-2 py-1 text-[11px]",
             className
           )}
         >
-          <span className="text-sm">{currencyInfo.symbol}</span>
+          <span>{currencyInfo.symbol}</span>
           <span className="hidden sm:inline">{currency}</span>
-        </Button>
+          <ChevronDown className="w-3 h-3 opacity-50" />
+        </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-[140px]">
+      <DropdownMenuContent align="end" className="min-w-[160px] bg-popover border border-border">
         {currencyList.map((curr) => (
           <DropdownMenuItem
             key={curr.code}
