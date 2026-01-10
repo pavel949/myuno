@@ -102,6 +102,14 @@ import BecomePartnerPage from '@/pages/info/BecomePartnerPage';
 // Admin pages
 import PartnerApplicationsAdmin from '@/pages/admin/PartnerApplicationsAdmin';
 
+// Vendor pages
+import VendorDashboard from '@/pages/vendor/VendorDashboard';
+import VendorOnboarding from '@/pages/vendor/VendorOnboarding';
+import VendorBookings from '@/pages/vendor/VendorBookings';
+import VendorServices from '@/pages/vendor/VendorServices';
+import VendorAnalytics from '@/pages/vendor/VendorAnalytics';
+import VendorPayouts from '@/pages/vendor/VendorPayouts';
+
 export const AnimatedRoutes: React.FC = () => {
   const location = useLocation();
 
@@ -204,6 +212,14 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* Admin Routes */}
         <Route path="/admin/partner-applications" element={<PageTransition><PartnerApplicationsAdmin /></PageTransition>} />
+        
+        {/* Vendor Routes */}
+        <Route path="/vendor" element={<PageTransition><VendorDashboard /></PageTransition>} />
+        <Route path="/vendor/onboarding" element={<PageTransition><VendorOnboarding /></PageTransition>} />
+        <Route path="/vendor/bookings" element={<PageTransition><VendorBookings /></PageTransition>} />
+        <Route path="/vendor/services" element={<PageTransition><VendorServices /></PageTransition>} />
+        <Route path="/vendor/analytics" element={<PageTransition><VendorAnalytics /></PageTransition>} />
+        <Route path="/vendor/payouts" element={<PageTransition><VendorPayouts /></PageTransition>} />
         
         {/* Catch-all */}
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />

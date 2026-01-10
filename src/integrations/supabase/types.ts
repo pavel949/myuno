@@ -2289,6 +2289,7 @@ export type Database = {
         | "staff"
         | "admin"
         | "ombudsman"
+        | "vendor"
       booking_status:
         | "draft"
         | "submitted"
@@ -2450,6 +2451,7 @@ export const Constants = {
         "staff",
         "admin",
         "ombudsman",
+        "vendor",
       ],
       booking_status: [
         "draft",
