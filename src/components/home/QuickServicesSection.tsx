@@ -1,14 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Droplets, 
   Car, 
   Flower2, 
   Pill, 
   Shirt, 
   Zap,
   UtensilsCrossed,
-  PawPrint
+  Ship
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
@@ -39,27 +38,6 @@ const quickServices: QuickService[] = [
     popular: true,
   },
   {
-    id: 'pets',
-    icon: PawPrint,
-    label: 'Pets',
-    labelRu: 'Питомцы',
-    description: 'Full care',
-    descriptionRu: 'Полный уход',
-    path: '/pets',
-    color: 'from-amber-500 to-orange-500',
-    popular: true,
-  },
-  {
-    id: 'water-delivery',
-    icon: Droplets,
-    label: 'Water Delivery',
-    labelRu: 'Доставка воды',
-    description: 'Same day',
-    descriptionRu: 'В тот же день',
-    path: '/services?category=water-delivery',
-    color: 'from-cyan-500 to-blue-500',
-  },
-  {
     id: 'airport-transfer',
     icon: Car,
     label: 'Airport Transfer',
@@ -71,14 +49,25 @@ const quickServices: QuickService[] = [
     popular: true,
   },
   {
-    id: 'flowers',
-    icon: Flower2,
-    label: 'Flowers',
-    labelRu: 'Цветы',
-    description: 'Express delivery',
-    descriptionRu: 'Быстрая доставка',
-    path: '/flowers',
-    color: 'from-rose-500 to-pink-500',
+    id: 'yachts',
+    icon: Ship,
+    label: 'Yachts',
+    labelRu: 'Яхты',
+    description: 'Luxury boats',
+    descriptionRu: 'Люкс лодки',
+    path: '/yachts',
+    color: 'from-cyan-500 to-blue-500',
+    popular: true,
+  },
+  {
+    id: 'cleaning',
+    icon: Shirt,
+    label: 'Cleaning',
+    labelRu: 'Уборка',
+    description: 'Home & Laundry',
+    descriptionRu: 'Дом и прачечная',
+    path: '/cleaning',
+    color: 'from-emerald-500 to-green-500',
   },
   {
     id: 'pharmacy',
@@ -88,17 +77,17 @@ const quickServices: QuickService[] = [
     description: '24/7 delivery',
     descriptionRu: 'Доставка 24/7',
     path: '/pharmacy',
-    color: 'from-emerald-500 to-green-500',
+    color: 'from-green-500 to-emerald-500',
   },
   {
-    id: 'laundry',
-    icon: Shirt,
-    label: 'Laundry',
-    labelRu: 'Прачечная',
-    description: 'Pickup today',
-    descriptionRu: 'Заберём сегодня',
-    path: '/services?category=cleaning',
-    color: 'from-sky-500 to-cyan-500',
+    id: 'flowers',
+    icon: Flower2,
+    label: 'Flowers',
+    labelRu: 'Цветы',
+    description: 'Express delivery',
+    descriptionRu: 'Быстрая доставка',
+    path: '/flowers',
+    color: 'from-rose-500 to-pink-500',
   },
 ];
 
