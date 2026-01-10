@@ -257,7 +257,7 @@ const LegalProviderDetail = () => {
                   onClick={() => navigate(`/legal/booking/${id}?service=${encodeURIComponent(service.name)}`)}
                 >
                   <Calendar className="w-4 h-4 mr-2" />
-                  {language === "ru" ? "Записаться" : "Book Consultation"}
+                  {language === "ru" ? "Записаться на консультацию" : "Book Consultation"}
                 </Button>
               </div>
             ))}
