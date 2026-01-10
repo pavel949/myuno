@@ -96,6 +96,12 @@ import WaterActivityBooking from '@/pages/water/WaterActivityBooking';
 import PharmacyIndex from '@/pages/pharmacy/PharmacyIndex';
 import PharmacyDetail from '@/pages/pharmacy/PharmacyDetail';
 
+// Pets Mini-App
+import PetsIndex from '@/pages/pets/PetsIndex';
+import PetServiceDetail from '@/pages/pets/PetServiceDetail';
+import PetServiceBooking from '@/pages/pets/PetServiceBooking';
+import PetTransport from '@/pages/pets/PetTransport';
+
 // Other pages
 import Favorites from '@/pages/Favorites';
 import Search from '@/pages/Search';
@@ -237,6 +243,12 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* Pharmacy Mini-App Routes */}
         <Route path="/pharmacy" element={<PageTransition><PharmacyIndex /></PageTransition>} />
+        
+        {/* Pets Mini-App Routes */}
+        <Route path="/pets" element={<PageTransition><PetsIndex /></PageTransition>} />
+        <Route path="/pets/transport" element={<PageTransition><PetTransport /></PageTransition>} />
+        <Route path="/pets/:id" element={<PageTransition><PetServiceDetail /></PageTransition>} />
+        <Route path="/pets/:id/booking" element={<PageTransition><PetServiceBooking /></PageTransition>} />
         <Route path="/pharmacy/:id" element={<PageTransition><PharmacyDetail /></PageTransition>} />
         
         {/* Info Pages */}
