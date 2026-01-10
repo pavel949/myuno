@@ -21,12 +21,20 @@ export function PageHeader({
 }: PageHeaderProps) {
   const navigate = useNavigate();
 
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
+  };
+
   return (
     <div className={cn("flex items-center justify-between", className)}>
       <div className="flex items-center gap-3">
         {showBack && (
           <button 
-            onClick={() => navigate(-1)} 
+            onClick={handleBack} 
             className="p-2 -ml-2 hover:bg-secondary rounded-xl transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
