@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, Clock, CalendarDays, Utensils, BabyIcon, AlertCircle } from 'lucide-react';
+import { ArrowLeft, BabyIcon, AlertCircle, Utensils } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBooking } from '@/hooks/useBooking';
+import { format } from 'date-fns';
 import { 
-  BookingSummary, 
   BookingDateTimeSelect, 
   BookingParticipants,
   BookingContactForm,
@@ -14,6 +14,7 @@ import {
   BookingBottomBar,
   BookingConfirmation 
 } from '@/components/booking';
+import { type ContactFormData } from '@/components/booking/BookingContactForm';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -36,8 +37,9 @@ export default function TableReservation() {
   const [isOutdoor, setIsOutdoor] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'wallet' | 'online'>('card');
   const [isSuccess, setIsSuccess] = useState(false);
+  const [bookingId, setBookingId] = useState('');
   
-  const [contactData, setContactData] = useState({
+  const [contactData, setContactData] = useState<ContactFormData>({
     name: '',
     phone: '',
     email: '',
@@ -74,42 +76,45 @@ export default function TableReservation() {
     ].filter(Boolean).join('. ');
 
     const result = await createBooking({
-      bookingType: 'table_reservation',
-      providerId: restaurant.id,
-      serviceId: 'table-reservation',
-      scheduledAt: scheduledAt.toISOString(),
-      totalAmount: depositAmount,
+      booking_type: 'service',
+      provider_id: restaurant.id,
+      service_id: 'table-reservation',
+      scheduled_at: scheduledAt.toISOString(),
+      total_amount: depositAmount,
       currency: 'THB',
       notes,
-      paymentMethod,
+      payment: depositAmount > 0 ? { amount: depositAmount, payment_method: paymentMethod } : undefined,
       participants: [{
         name: contactData.name,
         phone: contactData.phone,
         email: contactData.email,
-        isPrimary: true,
+        is_primary: true,
       }],
       metadata: {
         restaurantName: restaurant.nameEn,
         restaurantNameRu: restaurant.nameRu,
         guests,
         time: selectedTime,
+        bookingType: 'table_reservation',
       },
     });
 
-    if (result.success) {
+    if (result.success && result.booking_id) {
+      setBookingId(result.booking_id);
       setIsSuccess(true);
     }
   };
 
-  if (isSuccess) {
+  if (isSuccess && selectedDate) {
     return (
       <BookingConfirmation
+        bookingId={bookingId}
         title={language === 'ru' ? restaurant.nameRu : restaurant.nameEn}
-        date={selectedDate}
+        date={format(selectedDate, 'dd.MM.yyyy')}
         time={selectedTime}
         location={restaurant.address}
-        totalAmount={depositAmount}
-        currency="฿"
+        total={depositAmount}
+        currency="THB"
         onViewBookings={() => navigate('/bookings')}
         onContinue={() => navigate('/restaurants')}
       />
