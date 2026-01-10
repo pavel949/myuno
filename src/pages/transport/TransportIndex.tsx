@@ -180,7 +180,7 @@ export default function TransportIndex() {
         <div className="grid grid-cols-4 gap-3">
           {[
             { icon: '🚗', label: language === 'ru' ? 'Аренда' : 'Rental', path: '#vehicles' },
-            { icon: '🚕', label: language === 'ru' ? 'Такси' : 'Taxi', path: '#' },
+            { icon: '🚕', label: language === 'ru' ? 'Такси' : 'Taxi', path: '/transport/taxi' },
             { icon: '✈️', label: language === 'ru' ? 'Аэропорт' : 'Airport', path: '/transport/airport-transfer' },
             { icon: '🚤', label: language === 'ru' ? 'Катера' : 'Boats', path: '#' },
           ].map((service, i) => (
