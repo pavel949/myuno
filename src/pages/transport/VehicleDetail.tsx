@@ -288,7 +288,16 @@ export default function VehicleDetail() {
             </Button>
             <Button
               className="flex-1"
-              onClick={() => navigate(`/transport/booking/${id}`)}
+              onClick={() => navigate(`/transport/booking/${id}`, { 
+                state: { 
+                  vehicle: {
+                    nameEn: vehicle.nameEn,
+                    nameRu: vehicle.nameRu,
+                    pricePerDay: vehicle.pricePerDay,
+                    image: vehicle.images[0],
+                  }
+                } 
+              })}
             >
               <Calendar className="w-4 h-4 mr-2" />
               {language === 'ru' ? 'Забронировать' : 'Book Now'}

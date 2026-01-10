@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useState, useMemo } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBooking } from "@/hooks/useBooking";
@@ -21,12 +21,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar, MapPin } from "lucide-react";
 
+// Demo vehicle data (fallback)
+const demoVehicles: Record<string, { nameEn: string; nameRu: string; pricePerDay: number; image: string }> = {
+  'car-1': { nameEn: 'Toyota Camry', nameRu: 'Тойота Камри', pricePerDay: 1500, image: 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=600' },
+  'car-2': { nameEn: 'Honda City', nameRu: 'Хонда Сити', pricePerDay: 1200, image: 'https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=600' },
+  'bike-1': { nameEn: 'Honda PCX 160', nameRu: 'Хонда PCX 160', pricePerDay: 300, image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600' },
+  'car-3': { nameEn: 'Toyota Fortuner', nameRu: 'Тойота Фортунер', pricePerDay: 2500, image: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=600' },
+  'bike-2': { nameEn: 'Yamaha NMAX', nameRu: 'Ямаха NMAX', pricePerDay: 350, image: 'https://images.unsplash.com/photo-1449426468159-d96dbf08f19f?w=600' },
+};
+
 export default function TransportBooking() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { language } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
   const { createBooking, isSubmitting } = useBooking();
+
+  // Get vehicle data from location state or fallback to demo
+  const vehicleFromState = location.state?.vehicle;
+  const vehicle = useMemo(() => {
+    if (vehicleFromState) return vehicleFromState;
+    if (id && demoVehicles[id]) return demoVehicles[id];
+    return { nameEn: 'Vehicle Rental', nameRu: 'Аренда транспорта', pricePerDay: 1500, image: '' };
+  }, [vehicleFromState, id]);
 
   // Form state
   const [pickupDate, setPickupDate] = useState<string>("");
@@ -38,15 +56,17 @@ export default function TransportBooking() {
 
   // Auth redirect
   if (!authLoading && !user) {
-    navigate('/auth', { state: { from: `/transport/${id}/book` } });
+    navigate('/auth', { state: { from: `/transport/booking/${id}` } });
     return null;
   }
 
-  const pricePerDay = 1500;
+  const pricePerDay = vehicle.pricePerDay;
   const days = pickupDate && returnDate
     ? Math.max(1, differenceInDays(new Date(returnDate), new Date(pickupDate)))
     : 1;
   const totalAmount = pricePerDay * days;
+
+  const vehicleName = language === 'ru' ? vehicle.nameRu : vehicle.nameEn;
 
   // Success state
   if (bookingResult?.success && bookingResult.bookingId) {
@@ -54,7 +74,7 @@ export default function TransportBooking() {
       <AppLayout showBottomNav={false}>
         <BookingConfirmation
           bookingId={bookingResult.bookingId}
-          title={language === 'ru' ? 'Аренда транспорта' : 'Vehicle Rental'}
+          title={vehicleName}
           date={pickupDate ? format(new Date(pickupDate), 'PPP', { locale: language === 'ru' ? ru : undefined }) : undefined}
           location={pickupLocation}
           total={totalAmount}
@@ -81,7 +101,7 @@ export default function TransportBooking() {
       items: [{
         item_type: 'vehicle_rental',
         item_id: id || 'vehicle',
-        item_name: language === 'ru' ? 'Аренда транспорта' : 'Vehicle Rental',
+        item_name: vehicleName,
         quantity: days,
         unit_price: pricePerDay,
         subtotal: totalAmount,
@@ -118,10 +138,11 @@ export default function TransportBooking() {
         {/* Summary Card */}
         <div className="mt-4 mb-6">
           <BookingSummary
-            title={language === 'ru' ? 'Аренда транспорта' : 'Vehicle Rental'}
+            title={vehicleName}
             subtitle={`${days} ${language === 'ru' ? 'дней' : 'days'} × ฿${pricePerDay.toLocaleString()}`}
             price={totalAmount}
             currency="THB"
+            image={vehicle.image}
           />
         </div>
 
