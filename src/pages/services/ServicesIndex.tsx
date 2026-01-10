@@ -182,15 +182,69 @@ const ServicesIndex = () => {
       reviews: 145,
       experience: language === "ru" ? "6 лет опыта" : "6 years exp.",
       price: 3500,
-      currency: "₽",
+      currency: "฿",
       priceUnit: language === "ru" ? "/установка" : "/installation",
-      location: language === "ru" ? "Весь город" : "City-wide",
+      location: language === "ru" ? "Весь Пхукет" : "All Phuket",
       available: true,
       verified: true,
       image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=200&h=200&fit=crop",
       services: language === "ru"
         ? ["Установка кондиционеров", "Чистка и заправка", "Ремонт"]
         : ["AC installation", "Cleaning & refill", "Repair"],
+    },
+    {
+      id: "srv-road-1",
+      name: language === "ru" ? "Phuket Road Help" : "Phuket Road Help",
+      category: "road-assistance",
+      rating: 4.9,
+      reviews: 312,
+      experience: language === "ru" ? "24/7 сервис" : "24/7 service",
+      price: 500,
+      currency: "฿",
+      priceUnit: language === "ru" ? "/вызов" : "/call",
+      location: language === "ru" ? "Весь Пхукет" : "All Phuket",
+      available: true,
+      verified: true,
+      image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=200&fit=crop",
+      services: language === "ru"
+        ? ["Эвакуатор", "Запуск аккумулятора", "Замена колеса"]
+        : ["Tow truck", "Jump start", "Tire change"],
+    },
+    {
+      id: "srv-road-2",
+      name: language === "ru" ? "Быстрая Помощь" : "Quick Assist",
+      category: "road-assistance",
+      rating: 4.7,
+      reviews: 189,
+      experience: language === "ru" ? "Приедем за 30 мин" : "30 min response",
+      price: 400,
+      currency: "฿",
+      priceUnit: language === "ru" ? "/вызов" : "/call",
+      location: language === "ru" ? "Патонг, Карон, Ката" : "Patong, Karon, Kata",
+      available: true,
+      verified: true,
+      image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=200&h=200&fit=crop",
+      services: language === "ru"
+        ? ["Подвоз топлива", "Вскрытие замков", "Буксировка"]
+        : ["Fuel delivery", "Lockout service", "Towing"],
+    },
+    {
+      id: "srv-road-3",
+      name: language === "ru" ? "АвтоСпас Пхукет" : "Auto Rescue Phuket",
+      category: "road-assistance",
+      rating: 4.8,
+      reviews: 156,
+      experience: language === "ru" ? "10 лет опыта" : "10 years exp.",
+      price: 600,
+      currency: "฿",
+      priceUnit: language === "ru" ? "/вызов" : "/call",
+      location: language === "ru" ? "Весь Пхукет" : "All Phuket",
+      available: false,
+      verified: true,
+      image: "https://images.unsplash.com/photo-1486006920555-c77dcf18193c?w=200&h=200&fit=crop",
+      services: language === "ru"
+        ? ["Эвакуация мотоциклов", "Ремонт на месте", "Техпомощь"]
+        : ["Motorcycle towing", "On-site repair", "Technical help"],
     },
   ];
 
