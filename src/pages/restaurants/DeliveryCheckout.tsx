@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Clock } from 'lucide-react';
+import { MapPin, Clock } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,6 +16,7 @@ import { type ContactFormData } from '@/components/booking/BookingContactForm';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { getRestaurantById } from './restaurantsData';
+import { BackButton } from '@/components/uno/BackButton';
 
 export default function DeliveryCheckout() {
   const { id } = useParams();
@@ -120,9 +121,7 @@ export default function DeliveryCheckout() {
         {/* Header */}
         <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border/50">
           <div className="flex items-center gap-4 px-4 py-3">
-            <button onClick={() => navigate(-1)}>
-              <ArrowLeft className="w-5 h-5" />
-            </button>
+            <BackButton fallbackPath="/restaurants" variant="ghost" />
             <div>
               <h1 className="font-semibold">
                 {language === 'ru' ? 'Оформление заказа' : 'Checkout'}

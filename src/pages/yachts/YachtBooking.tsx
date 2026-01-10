@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { format } from 'date-fns';
-import { Anchor, Users, Clock, ChevronLeft } from 'lucide-react';
+import { Anchor, Users, Clock } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -13,6 +13,7 @@ import { BookingPaymentSelect, PaymentMethod } from '@/components/booking/Bookin
 import { BookingSummary } from '@/components/booking/BookingSummary';
 import { BookingBottomBar } from '@/components/booking/BookingBottomBar';
 import { BookingConfirmation } from '@/components/booking/BookingConfirmation';
+import { BackButton } from '@/components/uno/BackButton';
 
 // Demo yacht data
 const getYacht = (id: string) => ({
@@ -120,12 +121,7 @@ export default function YachtBooking() {
       <PageContainer className="pb-32">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <button 
-            onClick={() => navigate(-1)} 
-            className="p-2 -ml-2 hover:bg-secondary rounded-xl transition-colors"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
+          <BackButton fallbackPath="/yachts" variant="ghost" />
           <h1 className="text-2xl font-bold tracking-tight">
             {language === 'ru' ? 'Бронирование яхты' : 'Book Yacht'}
           </h1>

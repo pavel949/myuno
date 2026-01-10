@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Calendar, Clock, CreditCard, Truck, Gift, Check, Wallet, Loader2 } from 'lucide-react';
+import { Calendar, Clock, CreditCard, Truck, Gift, Check, Wallet, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useWallet } from '@/hooks/useWallet';
@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { triggerRipple } from '@/hooks/useRipple';
 import { supabase } from '@/integrations/supabase/client';
+import { BackButton } from '@/components/uno/BackButton';
 
 const deliverySlots = [
   { id: 'morning', timeEn: '9:00 - 12:00', timeRu: '9:00 - 12:00', labelEn: 'Morning', labelRu: 'Утро' },
@@ -195,14 +196,7 @@ const FlowersOrder = () => {
         {/* Header */}
         <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border">
           <div className="flex items-center gap-3 p-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate(-1)}
-              className="shrink-0"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
+            <BackButton fallbackPath="/flowers" />
             <div className="flex-1">
               <h1 className="text-xl font-display font-bold">
                 {language === 'ru' ? 'Оформление заказа' : 'Checkout'}

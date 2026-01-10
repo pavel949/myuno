@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, Star, Heart, ShoppingCart, Plus, Minus } from 'lucide-react';
+import { Search, Star, Heart, ShoppingCart, Plus, Minus } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
@@ -10,6 +10,7 @@ import { FilterChip, FilterChipGroup } from '@/components/uno/FilterChip';
 import { cn } from '@/lib/utils';
 import { triggerRipple } from '@/hooks/useRipple';
 import { toast } from 'sonner';
+import { BackButton } from '@/components/uno/BackButton';
 
 const categories = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -327,14 +328,7 @@ const FlowersIndex = () => {
         {/* Header */}
         <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border">
           <div className="flex items-center gap-3 p-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate(-1)}
-              className="shrink-0"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
+            <BackButton fallbackPath="/" />
             <div className="flex-1">
               <h1 className="text-xl font-display font-bold">
                 {language === 'ru' ? 'Букеты' : 'Bouquets'}

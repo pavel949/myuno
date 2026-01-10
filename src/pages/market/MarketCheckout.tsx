@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { MapPin, Clock, CreditCard, Wallet, Banknote, Truck, Tag, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { MapPin, Clock, CreditCard, Wallet, Banknote, Truck, Tag, CheckCircle2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
@@ -15,6 +15,7 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { BackButton } from '@/components/uno/BackButton';
 
 const paymentMethods = [
   { id: 'card', icon: CreditCard, labelEn: 'Credit Card', labelRu: 'Банковская карта' },
@@ -87,7 +88,7 @@ const MarketCheckout = () => {
     <AppLayout>
       <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b">
         <div className="flex items-center gap-3 p-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}><ArrowLeft className="h-5 w-5" /></Button>
+          <BackButton fallbackPath="/market" />
           <h1 className="text-lg font-semibold">{language === 'ru' ? 'Оформление заказа' : 'Checkout'}</h1>
         </div>
       </div>
