@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Calendar, Clock, User, Phone, Mail, CheckCircle } from 'lucide-react';
+import { ArrowLeft, CalendarIcon, Clock, User, Phone, Mail, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
+import { ru } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
 const timeSlots = [
   '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
@@ -22,12 +27,12 @@ const MedicalAppointment = () => {
   const { language } = useLanguage();
   const { user } = useAuth();
 
+  const [selectedDate, setSelectedDate] = useState<Date>();
+  const [selectedTime, setSelectedTime] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     email: '',
-    date: '',
-    time: '',
     symptoms: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -42,17 +47,16 @@ const MedicalAppointment = () => {
       return;
     }
 
-    if (!formData.time) {
-      toast.error(language === 'ru' ? 'Выберите время' : 'Please select a time');
+    if (!selectedDate || !selectedTime) {
+      toast.error(language === 'ru' ? 'Выберите дату и время' : 'Please select date and time');
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      const scheduledAt = formData.date && formData.time 
-        ? new Date(`${formData.date}T${formData.time}:00`).toISOString()
-        : null;
+      const dateStr = format(selectedDate, 'yyyy-MM-dd');
+      const scheduledAt = new Date(`${dateStr}T${selectedTime}:00`).toISOString();
 
       const { data: booking, error: bookingError } = await supabase
         .from('bookings')
@@ -100,7 +104,7 @@ const MedicalAppointment = () => {
             {language === 'ru' ? 'Запись подтверждена!' : 'Appointment Confirmed!'}
           </h1>
           <p className="text-muted-foreground mb-2">
-            {formData.date} {language === 'ru' ? 'в' : 'at'} {formData.time}
+            {selectedDate && format(selectedDate, 'PPP', { locale: language === 'ru' ? ru : undefined })} {language === 'ru' ? 'в' : 'at'} {selectedTime}
           </p>
           <p className="text-sm text-muted-foreground mb-6">
             {language === 'ru' 
@@ -137,18 +141,32 @@ const MedicalAppointment = () => {
           </h3>
           
           <div className="space-y-2">
-            <Label htmlFor="date">{language === 'ru' ? 'Дата' : 'Date'}</Label>
-            <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                id="date"
-                type="date"
-                value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className="pl-10"
-                required
-              />
-            </div>
+            <Label>{language === 'ru' ? 'Дата' : 'Date'}</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !selectedDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {selectedDate 
+                    ? format(selectedDate, "PPP", { locale: language === 'ru' ? ru : undefined }) 
+                    : (language === 'ru' ? 'Выберите дату' : 'Pick a date')}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 bg-popover z-50" align="start">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  disabled={(date) => date < new Date()}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div className="space-y-2">
@@ -158,9 +176,9 @@ const MedicalAppointment = () => {
                 <Button
                   key={slot}
                   type="button"
-                  variant={formData.time === slot ? 'default' : 'outline'}
+                  variant={selectedTime === slot ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setFormData({ ...formData, time: slot })}
+                  onClick={() => setSelectedTime(slot)}
                 >
                   {slot}
                 </Button>
