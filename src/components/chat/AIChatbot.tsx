@@ -144,7 +144,7 @@ export const AIChatbot: React.FC = () => {
     <>
       {/* Chat Window */}
       <div className={cn(
-        'fixed bottom-20 right-4 z-50 w-[calc(100vw-2rem)] max-w-[380px] bg-background border rounded-2xl shadow-2xl transition-all duration-300 md:bottom-6',
+        'fixed bottom-24 right-4 z-[60] w-[calc(100vw-2rem)] max-w-[380px] bg-background border rounded-2xl shadow-2xl transition-all duration-300 md:bottom-6',
         isOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'
       )}>
         {/* Header */}
@@ -268,7 +268,7 @@ export const AIChatbot: React.FC = () => {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'fixed bottom-20 right-4 z-40 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all md:bottom-6',
+          'fixed bottom-[4.5rem] right-4 z-[55] w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all md:bottom-6',
           isOpen 
             ? 'bg-muted text-foreground scale-90' 
             : 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground hover:scale-105'
