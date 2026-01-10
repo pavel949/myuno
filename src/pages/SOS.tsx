@@ -14,194 +14,121 @@ import {
   Building2,
   Plane,
   HelpCircle,
-  ExternalLink,
   MessageCircle,
   Star,
   Sparkles,
   Crown,
-  ChefHat,
-  Navigation
+  Stethoscope,
+  Wrench,
+  Key,
+  ChevronRight,
+  Lightbulb
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
-import { SectionCard } from '@/components/uno/SectionCard';
+import { SectionCard, SectionTitle } from '@/components/uno/SectionCard';
 import { Button } from '@/components/ui/button';
-import { AnimatedList, AnimatedItem, FadeInUp } from '@/components/layout/AnimatedList';
+import { FadeInUp } from '@/components/layout/AnimatedList';
 import { cn } from '@/lib/utils';
 
 // UNO Emergency Contact
-const UNO_EMERGENCY_PHONE = '+66-XX-XXX-XXXX'; // Replace with actual number
-const UNO_WHATSAPP = 'https://wa.me/66XXXXXXXXX'; // Replace with actual WhatsApp
+const UNO_EMERGENCY_PHONE = '+66-XX-XXX-XXXX';
+const UNO_WHATSAPP = 'https://wa.me/66XXXXXXXXX';
 
-interface EmergencyContact {
-  id: string;
-  icon: React.ElementType;
-  title: string;
-  titleRu: string;
-  description: string;
-  descriptionRu: string;
-  phone?: string;
-  phones?: { label: string; labelRu: string; number: string }[];
-  color: string;
-  bgColor: string;
-  priority?: 'high' | 'medium' | 'low';
-}
+// Quick action buttons for most critical services
+const quickActions = [
+  { id: 'police', icon: Shield, phone: '1155', label: 'Police', labelRu: 'Полиция', color: 'text-blue-500', bg: 'bg-blue-500/10' },
+  { id: 'ambulance', icon: Heart, phone: '1669', label: 'Ambulance', labelRu: 'Скорая', color: 'text-rose-500', bg: 'bg-rose-500/10' },
+  { id: 'fire', icon: Flame, phone: '199', label: 'Fire', labelRu: 'Пожарные', color: 'text-orange-500', bg: 'bg-orange-500/10' },
+  { id: 'emergency', icon: AlertTriangle, phone: '191', label: 'Emergency', labelRu: 'SOS', color: 'text-red-500', bg: 'bg-red-500/10' },
+];
 
-const emergencyContacts: EmergencyContact[] = [
+// Organized by category
+const emergencyCategories = [
+  {
+    id: 'medical',
+    icon: Stethoscope,
+    title: 'Medical',
+    titleRu: 'Медицина',
+    color: 'text-rose-500',
+    contacts: [
+      { name: 'Ambulance', nameRu: 'Скорая помощь', phone: '1669', desc: 'Medical emergencies', descRu: 'Медицинские экстренные случаи' },
+      { name: 'Phuket International Hospital', nameRu: 'Пхукет Интернешнл', phone: '076-249-400' },
+      { name: 'Bangkok Hospital Phuket', nameRu: 'Бангкок Госпиталь', phone: '076-254-425' },
+      { name: 'Dibuk Hospital', nameRu: 'Госпиталь Дибук', phone: '076-254-421' },
+    ]
+  },
   {
     id: 'police',
     icon: Shield,
-    title: 'Tourist Police',
-    titleRu: 'Туристическая полиция',
-    description: '24/7 English-speaking officers for tourists',
-    descriptionRu: 'Круглосуточно, говорят по-английски',
-    phone: '1155',
+    title: 'Police & Safety',
+    titleRu: 'Полиция и безопасность',
     color: 'text-blue-500',
-    bgColor: 'bg-blue-500/10',
-    priority: 'high',
-  },
-  {
-    id: 'emergency',
-    icon: AlertTriangle,
-    title: 'Emergency Services',
-    titleRu: 'Экстренные службы',
-    description: 'Fire, ambulance, rescue',
-    descriptionRu: 'Пожарные, скорая, спасатели',
-    phone: '191',
-    color: 'text-red-500',
-    bgColor: 'bg-red-500/10',
-    priority: 'high',
-  },
-  {
-    id: 'ambulance',
-    icon: Heart,
-    title: 'Ambulance',
-    titleRu: 'Скорая помощь',
-    description: 'Medical emergencies',
-    descriptionRu: 'Медицинские экстренные случаи',
-    phone: '1669',
-    color: 'text-rose-500',
-    bgColor: 'bg-rose-500/10',
-    priority: 'high',
-  },
-  {
-    id: 'fire',
-    icon: Flame,
-    title: 'Fire Department',
-    titleRu: 'Пожарная служба',
-    description: 'Fire emergencies',
-    descriptionRu: 'Пожарные экстренные случаи',
-    phone: '199',
-    color: 'text-orange-500',
-    bgColor: 'bg-orange-500/10',
-    priority: 'high',
-  },
-  {
-    id: 'accident',
-    icon: Car,
-    title: 'Traffic Accident',
-    titleRu: 'ДТП',
-    description: 'Road accidents and highway police',
-    descriptionRu: 'Дорожные происшествия',
-    phone: '1193',
-    color: 'text-amber-500',
-    bgColor: 'bg-amber-500/10',
-    priority: 'medium',
-  },
-  {
-    id: 'snake',
-    icon: Bug,
-    title: 'Snake Bite / Animal Attack',
-    titleRu: 'Укус змеи / Нападение животного',
-    description: 'Call ambulance immediately, go to hospital',
-    descriptionRu: 'Вызовите скорую, езжайте в больницу',
-    phones: [
-      { label: 'Ambulance', labelRu: 'Скорая', number: '1669' },
-      { label: 'Phuket Hospital', labelRu: 'Госпиталь Пхукета', number: '076-249400' },
-    ],
-    color: 'text-green-600',
-    bgColor: 'bg-green-500/10',
-    priority: 'high',
+    contacts: [
+      { name: 'Tourist Police', nameRu: 'Туристическая полиция', phone: '1155', desc: '24/7 English-speaking', descRu: 'Круглосуточно, на английском' },
+      { name: 'Emergency Services', nameRu: 'Экстренные службы', phone: '191', desc: 'Fire, ambulance, rescue', descRu: 'Пожарные, скорая, спасатели' },
+      { name: 'Traffic Accident', nameRu: 'ДТП', phone: '1193', desc: 'Road accidents', descRu: 'Дорожные происшествия' },
+    ]
   },
   {
     id: 'documents',
     icon: FileQuestion,
-    title: 'Lost Documents',
-    titleRu: 'Потеря документов',
-    description: 'Report to tourist police, contact your embassy',
-    descriptionRu: 'Обратитесь в турполицию и посольство',
-    phones: [
-      { label: 'Tourist Police', labelRu: 'Турполиция', number: '1155' },
-      { label: 'Immigration Office', labelRu: 'Иммиграция', number: '1178' },
-    ],
+    title: 'Documents & Money',
+    titleRu: 'Документы и деньги',
     color: 'text-purple-500',
-    bgColor: 'bg-purple-500/10',
-    priority: 'medium',
+    contacts: [
+      { name: 'Immigration Phuket', nameRu: 'Иммиграция Пхукет', phone: '076-221-905' },
+      { name: 'Immigration Hotline', nameRu: 'Горячая линия иммиграции', phone: '1178' },
+      { name: 'Russian Embassy Bangkok', nameRu: 'Посольство РФ Бангкок', phone: '02-234-9824' },
+      { name: 'Russian Consulate Phuket', nameRu: 'Консульство РФ Пхукет', phone: '076-510-392' },
+    ]
   },
   {
-    id: 'money',
-    icon: Wallet,
-    title: 'Lost Money / No Funds',
-    titleRu: 'Остались без денег',
-    description: 'Contact your embassy for emergency assistance',
-    descriptionRu: 'Обратитесь в посольство за помощью',
-    phones: [
-      { label: 'Russian Embassy', labelRu: 'Посольство РФ', number: '02-234-9824' },
-      { label: 'Tourist Police', labelRu: 'Турполиция', number: '1155' },
-    ],
-    color: 'text-emerald-500',
-    bgColor: 'bg-emerald-500/10',
-    priority: 'medium',
-  },
-  {
-    id: 'conflict',
-    icon: Users,
-    title: 'Conflict Situation',
-    titleRu: 'Конфликтная ситуация',
-    description: 'Call tourist police, do not escalate',
-    descriptionRu: 'Позвоните в турполицию, не обостряйте',
-    phone: '1155',
-    color: 'text-yellow-500',
-    bgColor: 'bg-yellow-500/10',
-    priority: 'medium',
-  },
-  {
-    id: 'embassy-ru',
-    icon: Building2,
-    title: 'Russian Embassy',
-    titleRu: 'Посольство России',
-    description: 'Consular assistance for Russian citizens',
-    descriptionRu: 'Консульская помощь для граждан РФ',
-    phones: [
-      { label: 'Embassy Bangkok', labelRu: 'Посольство Бангкок', number: '02-234-9824' },
-      { label: 'Consulate Phuket', labelRu: 'Консульство Пхукет', number: '076-510-392' },
-    ],
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-500/10',
-    priority: 'low',
-  },
-  {
-    id: 'airport',
-    icon: Plane,
-    title: 'Airport Assistance',
-    titleRu: 'Помощь в аэропорту',
-    description: 'Lost luggage, flight issues',
-    descriptionRu: 'Потерянный багаж, проблемы с рейсом',
-    phone: '076-351-122',
-    color: 'text-sky-500',
-    bgColor: 'bg-sky-500/10',
-    priority: 'low',
+    id: 'transport',
+    icon: Car,
+    title: 'Transport',
+    titleRu: 'Транспорт',
+    color: 'text-amber-500',
+    contacts: [
+      { name: 'Taxi Call Center', nameRu: 'Такси', phone: '1681' },
+      { name: 'Phuket Airport', nameRu: 'Аэропорт Пхукета', phone: '076-351-122' },
+    ]
   },
 ];
 
-const usefulNumbers = [
-  { label: 'Phuket International Hospital', labelRu: 'Пхукет Интернешнл Госпиталь', number: '076-249-400' },
-  { label: 'Bangkok Hospital Phuket', labelRu: 'Бангкок Госпиталь Пхукет', number: '076-254-425' },
-  { label: 'Dibuk Hospital', labelRu: 'Госпиталь Дибук', number: '076-254-421' },
-  { label: 'Immigration Phuket', labelRu: 'Иммиграция Пхукет', number: '076-221-905' },
-  { label: 'Taxi Call Center', labelRu: 'Такси', number: '1681' },
+// Service links
+const serviceLinks = [
+  { 
+    id: 'road', 
+    icon: Wrench, 
+    title: 'Road Assistance', 
+    titleRu: 'Помощь на дороге',
+    desc: 'Tow, fuel, battery, tires',
+    descRu: 'Эвакуатор, топливо, аккумулятор',
+    path: '/services?category=road-assistance',
+    color: 'text-amber-500',
+    bg: 'bg-amber-500/10'
+  },
+  { 
+    id: 'locksmith', 
+    icon: Key, 
+    title: 'Locksmith', 
+    titleRu: 'Слесарь',
+    desc: 'Keys, locks, safes',
+    descRu: 'Ключи, замки, сейфы',
+    path: '/services?category=locksmith',
+    color: 'text-slate-500',
+    bg: 'bg-slate-500/10'
+  },
+];
+
+const tips = [
+  { en: 'UNO ALERT provides personal security and emergency help 24/7', ru: 'UNO ALERT — личная безопасность и экстренная помощь 24/7' },
+  { en: 'Tourist Police (1155) speaks English and helps tourists', ru: 'Турполиция (1155) говорит по-английски и помогает туристам' },
+  { en: 'Save this page offline for emergencies', ru: 'Сохраните эту страницу для офлайн-доступа' },
+  { en: 'For snake bites, call 1669 and go to hospital immediately', ru: 'При укусе змеи звоните 1669 и езжайте в больницу' },
 ];
 
 export default function SOS() {
@@ -212,146 +139,122 @@ export default function SOS() {
     window.location.href = `tel:${phone}`;
   };
 
-  const highPriority = emergencyContacts.filter(c => c.priority === 'high');
-  const otherContacts = emergencyContacts.filter(c => c.priority !== 'high');
-
   return (
     <AppLayout>
       <PageContainer>
-        <PageHeader
-          title="SOS"
-          showBack
-        />
+        <PageHeader title="SOS" showBack />
 
-        {/* UNO ALERT - Premium Emergency Services */}
+        {/* UNO ALERT */}
         <FadeInUp>
-          <div className="mb-6 p-5 rounded-3xl bg-gradient-to-br from-amber-500/20 via-orange-500/15 to-red-500/20 border-2 border-amber-500/40 shadow-lg">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="p-2 rounded-full bg-gradient-to-r from-amber-500 to-orange-500">
-                <Star className="w-5 h-5 text-white" fill="white" />
+          <div className="mb-5 p-4 rounded-2xl bg-gradient-to-br from-amber-500/20 via-orange-500/15 to-red-500/20 border-2 border-amber-500/40">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500">
+                <Star className="w-4 h-4 text-white" fill="white" />
               </div>
-              <h2 className="font-bold text-xl bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+              <h2 className="font-bold text-lg bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
                 UNO ALERT
               </h2>
-              <Crown className="w-5 h-5 text-amber-500" />
+              <Crown className="w-4 h-4 text-amber-500" />
             </div>
             
-            <p className="text-sm text-foreground/80 mb-4 leading-relaxed">
+            <p className="text-sm text-foreground/80 mb-3">
               {language === 'ru' 
-                ? 'Премиальная служба безопасности UNO. Мы оказываем услуги личной безопасности, помощь в экстремальных и SOS ситуациях. Круглосуточная поддержка на русском и английском языках.' 
-                : 'UNO Premium Security Service. We provide personal security, assistance in extreme situations and SOS emergencies. 24/7 support in Russian and English.'}
+                ? 'Личная безопасность и помощь в экстремальных ситуациях. 24/7.' 
+                : 'Personal security & emergency assistance. 24/7.'}
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex gap-2">
               <Button
-                size="lg"
-                className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold shadow-lg"
+                size="sm"
+                className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
                 onClick={() => window.location.href = `tel:${UNO_EMERGENCY_PHONE}`}
               >
-                <Phone className="w-5 h-5 mr-2" />
-                {language === 'ru' ? 'Позвонить в UNO' : 'Call UNO'}
+                <Phone className="w-4 h-4 mr-1.5" />
+                {language === 'ru' ? 'Позвонить' : 'Call'}
               </Button>
               <Button
-                size="lg"
+                size="sm"
                 variant="outline"
                 className="flex-1 border-amber-500/50 text-amber-600 hover:bg-amber-500/10"
                 onClick={() => window.open(UNO_WHATSAPP, '_blank')}
               >
-                <MessageCircle className="w-5 h-5 mr-2" />
+                <MessageCircle className="w-4 h-4 mr-1.5" />
                 WhatsApp
               </Button>
             </div>
+          </div>
+        </FadeInUp>
 
-            <div className="mt-4 pt-4 border-t border-amber-500/20">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Shield className="w-4 h-4 text-amber-500" />
-                <span>
-                  {language === 'ru' 
-                    ? 'Личная безопасность • Экстренная помощь • Круглосуточно' 
-                    : 'Personal Security • Emergency Help • 24/7'}
-                </span>
-              </div>
-            </div>
+        {/* Quick Actions - 4 big buttons */}
+        <FadeInUp delay={0.05}>
+          <div className="grid grid-cols-4 gap-2 mb-5">
+            {quickActions.map((action) => {
+              const Icon = action.icon;
+              return (
+                <button
+                  key={action.id}
+                  onClick={() => handleCall(action.phone)}
+                  className={cn(
+                    "flex flex-col items-center p-3 rounded-xl border transition-all active:scale-95",
+                    action.bg, "border-transparent hover:border-current/20"
+                  )}
+                >
+                  <Icon className={cn("w-6 h-6 mb-1", action.color)} />
+                  <span className="font-bold text-lg">{action.phone}</span>
+                  <span className="text-[10px] text-muted-foreground">
+                    {language === 'ru' ? action.labelRu : action.label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </FadeInUp>
 
         {/* VIP Concierge Link */}
-        <FadeInUp delay={0.05}>
-          <div 
-            className="mb-6 p-5 rounded-3xl bg-gradient-to-br from-violet-500/15 via-purple-500/10 to-fuchsia-500/15 border border-purple-500/30 cursor-pointer hover:border-purple-500/50 transition-colors"
+        <FadeInUp delay={0.1}>
+          <button 
+            className="w-full mb-5 p-3 rounded-xl bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-purple-500/30 flex items-center justify-between hover:border-purple-500/50 transition-colors"
             onClick={() => navigate('/vip-concierge')}
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-full bg-gradient-to-r from-violet-500 to-purple-500">
-                  <Crown className="w-6 h-6 text-white" />
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-full bg-gradient-to-r from-violet-500 to-purple-500">
+                <Crown className="w-5 h-5 text-white" />
+              </div>
+              <div className="text-left">
+                <div className="font-semibold text-sm flex items-center gap-1">
+                  {language === 'ru' ? 'VIP Консьерж' : 'VIP Concierge'}
+                  <Sparkles className="w-3 h-3 text-purple-500" />
                 </div>
-                <div>
-                  <h2 className="font-bold text-lg bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-2">
-                    {language === 'ru' ? 'VIP Консьерж' : 'VIP Concierge'}
-                    <Sparkles className="w-4 h-4 text-purple-500" />
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    {language === 'ru' 
-                      ? 'Вертолёты, самолёты, повара, яхты...' 
-                      : 'Helicopters, jets, chefs, yachts...'}
-                  </p>
+                <div className="text-xs text-muted-foreground">
+                  {language === 'ru' ? 'Вертолёты, яхты, повара...' : 'Helicopters, yachts, chefs...'}
                 </div>
               </div>
-              <div className="text-purple-500">→</div>
             </div>
-          </div>
+            <ChevronRight className="w-5 h-5 text-purple-500" />
+          </button>
         </FadeInUp>
 
-        {/* Emergency Warning */}
-        <FadeInUp delay={0.1}>
-          <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/30">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" />
-              <div>
-                <h2 className="font-semibold text-red-500 mb-1">
-                  {language === 'ru' ? 'Экстренные ситуации' : 'Emergency Situations'}
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  {language === 'ru' 
-                    ? 'Сохраните эту страницу! В экстренной ситуации позвоните по указанным номерам.' 
-                    : 'Save this page! In an emergency, call the numbers listed below.'}
-                </p>
-              </div>
-            </div>
-          </div>
-        </FadeInUp>
-
-        {/* High Priority - Large Buttons */}
+        {/* Service Links */}
         <FadeInUp delay={0.15}>
-          <h3 className="font-semibold mb-3 flex items-center gap-2">
-            <Phone className="w-5 h-5 text-red-500" />
-            {language === 'ru' ? 'Срочные службы' : 'Emergency Services'}
-          </h3>
-          <div className="grid grid-cols-2 gap-3 mb-6">
-            {highPriority.slice(0, 4).map((contact) => {
-              const Icon = contact.icon;
+          <div className="grid grid-cols-2 gap-3 mb-5">
+            {serviceLinks.map((service) => {
+              const Icon = service.icon;
               return (
                 <button
-                  key={contact.id}
-                  onClick={() => contact.phone && handleCall(contact.phone)}
+                  key={service.id}
+                  onClick={() => navigate(service.path)}
                   className={cn(
-                    "relative overflow-hidden p-4 rounded-2xl border-2 transition-all active:scale-95",
-                    contact.bgColor,
-                    "border-current/20 hover:border-current/40"
+                    "flex items-center gap-3 p-3 rounded-xl border transition-all text-left",
+                    service.bg, "border-transparent hover:border-current/20"
                   )}
                 >
-                  <div className="flex flex-col items-center text-center gap-2">
-                    <div className={cn("p-3 rounded-full", contact.bgColor)}>
-                      <Icon className={cn("w-8 h-8", contact.color)} />
+                  <Icon className={cn("w-5 h-5", service.color)} />
+                  <div>
+                    <div className="font-medium text-sm">
+                      {language === 'ru' ? service.titleRu : service.title}
                     </div>
-                    <div>
-                      <div className="font-bold text-2xl">
-                        {contact.phone}
-                      </div>
-                      <div className="text-sm font-medium">
-                        {language === 'ru' ? contact.titleRu : contact.title}
-                      </div>
+                    <div className="text-[10px] text-muted-foreground">
+                      {language === 'ru' ? service.descRu : service.desc}
                     </div>
                   </div>
                 </button>
@@ -360,134 +263,72 @@ export default function SOS() {
           </div>
         </FadeInUp>
 
-        {/* All Emergency Contacts */}
-        <FadeInUp delay={0.25}>
-          <h3 className="font-semibold mb-3 flex items-center gap-2">
-            <HelpCircle className="w-5 h-5 text-primary" />
-            {language === 'ru' ? 'Все экстренные контакты' : 'All Emergency Contacts'}
-          </h3>
-          <AnimatedList className="space-y-3 mb-6">
-            {emergencyContacts.map((contact) => {
-              const Icon = contact.icon;
-              return (
-                <AnimatedItem key={contact.id}>
-                  <SectionCard className="p-4">
-                    <div className="flex items-start gap-3">
-                      <div className={cn("p-2.5 rounded-xl", contact.bgColor)}>
-                        <Icon className={cn("w-5 h-5", contact.color)} />
-                      </div>
+        {/* Emergency Categories */}
+        {emergencyCategories.map((category, catIdx) => {
+          const CatIcon = category.icon;
+          return (
+            <FadeInUp key={category.id} delay={0.2 + catIdx * 0.05}>
+              <SectionCard className="mb-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <CatIcon className={cn("w-5 h-5", category.color)} />
+                  <SectionTitle className="mb-0">
+                    {language === 'ru' ? category.titleRu : category.title}
+                  </SectionTitle>
+                </div>
+                <div className="space-y-2">
+                  {category.contacts.map((contact, idx) => (
+                    <div 
+                      key={idx}
+                      className="flex items-center justify-between py-2 border-b border-border/50 last:border-0 last:pb-0"
+                    >
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium">
-                          {language === 'ru' ? contact.titleRu : contact.title}
-                        </h4>
-                        <p className="text-sm text-muted-foreground mt-0.5">
-                          {language === 'ru' ? contact.descriptionRu : contact.description}
-                        </p>
-                        
-                        {/* Single phone */}
-                        {contact.phone && (
-                          <Button
-                            variant="default"
-                            size="sm"
-                            className="mt-3"
-                            onClick={() => handleCall(contact.phone!)}
-                          >
-                            <Phone className="w-4 h-4 mr-2" />
-                            {contact.phone}
-                          </Button>
-                        )}
-                        
-                        {/* Multiple phones */}
-                        {contact.phones && (
-                          <div className="flex flex-wrap gap-2 mt-3">
-                            {contact.phones.map((p, idx) => (
-                              <Button
-                                key={idx}
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleCall(p.number)}
-                              >
-                                <Phone className="w-3 h-3 mr-1.5" />
-                                <span className="text-xs">
-                                  {language === 'ru' ? p.labelRu : p.label}: {p.number}
-                                </span>
-                              </Button>
-                            ))}
+                        <div className="font-medium text-sm">
+                          {language === 'ru' ? contact.nameRu : contact.name}
+                        </div>
+                        {contact.desc && (
+                          <div className="text-xs text-muted-foreground">
+                            {language === 'ru' ? contact.descRu : contact.desc}
                           </div>
                         )}
                       </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 px-3 text-primary"
+                        onClick={() => handleCall(contact.phone)}
+                      >
+                        <Phone className="w-3.5 h-3.5 mr-1.5" />
+                        {contact.phone}
+                      </Button>
                     </div>
-                  </SectionCard>
-                </AnimatedItem>
-              );
-            })}
-          </AnimatedList>
-        </FadeInUp>
+                  ))}
+                </div>
+              </SectionCard>
+            </FadeInUp>
+          );
+        })}
 
-        {/* Useful Numbers */}
-        <FadeInUp delay={0.35}>
-          <h3 className="font-semibold mb-3 flex items-center gap-2">
-            <MessageCircle className="w-5 h-5 text-primary" />
-            {language === 'ru' ? 'Полезные номера' : 'Useful Numbers'}
-          </h3>
-          <SectionCard className="divide-y divide-border">
-            {usefulNumbers.map((item, idx) => (
-              <div 
-                key={idx}
-                className="flex items-center justify-between py-3 px-1 first:pt-0 last:pb-0"
-              >
-                <span className="text-sm">
-                  {language === 'ru' ? item.labelRu : item.label}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleCall(item.number)}
-                  className="text-primary"
-                >
-                  <Phone className="w-4 h-4 mr-1" />
-                  {item.number}
-                </Button>
-              </div>
-            ))}
+        {/* Tips */}
+        <FadeInUp delay={0.45}>
+          <SectionCard className="bg-muted/30">
+            <div className="flex items-center gap-2 mb-3">
+              <Lightbulb className="w-5 h-5 text-amber-500" />
+              <SectionTitle className="mb-0">
+                {language === 'ru' ? 'Советы' : 'Tips'}
+              </SectionTitle>
+            </div>
+            <ul className="space-y-2">
+              {tips.map((tip, idx) => (
+                <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
+                  <span className="text-primary mt-1">•</span>
+                  {language === 'ru' ? tip.ru : tip.en}
+                </li>
+              ))}
+            </ul>
           </SectionCard>
         </FadeInUp>
 
-        {/* Tips Section */}
-        <FadeInUp delay={0.4}>
-          <div className="mt-6 p-4 rounded-2xl bg-muted/50 border border-border">
-            <h4 className="font-medium mb-2">
-              {language === 'ru' ? '💡 Полезные советы' : '💡 Useful Tips'}
-            </h4>
-            <ul className="text-sm text-muted-foreground space-y-2">
-              <li>
-                {language === 'ru' 
-                  ? '• Сохраните эту страницу в закладки для быстрого доступа'
-                  : '• Bookmark this page for quick access'}
-              </li>
-              <li>
-                {language === 'ru' 
-                  ? '• Туристическая полиция (1155) говорит по-английски'
-                  : '• Tourist Police (1155) speaks English'}
-              </li>
-              <li>
-                {language === 'ru' 
-                  ? '• При укусе змеи — НЕ ПАНИКУЙТЕ, вызовите скорую'
-                  : "• For snake bites — DON'T PANIC, call ambulance"}
-              </li>
-              <li>
-                {language === 'ru' 
-                  ? '• Сфотографируйте документы и храните копии в облаке'
-                  : '• Photograph documents and keep copies in the cloud'}
-              </li>
-              <li>
-                {language === 'ru' 
-                  ? '• UNO ALERT — ваша личная служба безопасности 24/7'
-                  : '• UNO ALERT — your personal security service 24/7'}
-              </li>
-            </ul>
-          </div>
-        </FadeInUp>
+        <div className="h-8" />
       </PageContainer>
     </AppLayout>
   );
