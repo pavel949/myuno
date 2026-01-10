@@ -1,19 +1,23 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, CalendarIcon, Clock, User, Phone, CheckCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { format } from 'date-fns';
-import { ru } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
+import { useState } from "react";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { useBooking } from "@/hooks/useBooking";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { PageContainer } from "@/components/uno/PageContainer";
+import { PageHeader } from "@/components/uno/PageHeader";
+import { 
+  BookingSummary, 
+  BookingDateTimeSelect, 
+  BookingContactForm, 
+  BookingPaymentSelect,
+  BookingBottomBar,
+  BookingConfirmation,
+  type ContactFormData,
+  type PaymentMethod 
+} from "@/components/booking";
+import { addDays, format } from "date-fns";
+import { ru } from "date-fns/locale";
 
 const membershipTypes = {
   day: { price: 800, labelEn: 'Day Pass', labelRu: 'Дневной абонемент' },
@@ -21,213 +25,151 @@ const membershipTypes = {
   month: { price: 15000, labelEn: 'Monthly Pass', labelRu: 'Месячный абонемент' },
 };
 
-const FitnessBooking = () => {
-  const { id } = useParams();
+export default function FitnessBooking() {
+  const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
+  const { createBooking, isSubmitting } = useBooking();
 
   const membershipType = searchParams.get('type') || 'day';
   const membership = membershipTypes[membershipType as keyof typeof membershipTypes] || membershipTypes.day;
 
-  const [selectedDate, setSelectedDate] = useState<Date>();
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    notes: '',
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  // Form state
+  const [date, setDate] = useState<Date | undefined>(addDays(new Date(), 1));
+  const [contactData, setContactData] = useState<ContactFormData>({ name: "", phone: "" });
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
+  const [bookingResult, setBookingResult] = useState<{ success: boolean; bookingId?: string } | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!user) {
-      toast.error(language === 'ru' ? 'Войдите в аккаунт' : 'Please login first');
-      navigate('/auth');
-      return;
-    }
+  // Auth redirect
+  if (!authLoading && !user) {
+    navigate('/auth', { state: { from: `/fitness/${id}/book` } });
+    return null;
+  }
 
-    setIsSubmitting(true);
-
-    try {
-      const { data: booking, error: bookingError } = await supabase
-        .from('bookings')
-        .insert({
-          user_id: user.id,
-          booking_type: 'service',
-          status: 'submitted',
-          total_amount: membership.price,
-          currency: 'THB',
-          scheduled_at: selectedDate ? format(selectedDate, 'yyyy-MM-dd') : null,
-          notes: `Fitness Membership: ${membershipType}. ${formData.notes}`,
-        })
-        .select()
-        .single();
-
-      if (bookingError) throw bookingError;
-
-      await supabase
-        .from('booking_participants')
-        .insert({
-          booking_id: booking.id,
-          name: formData.name,
-          phone: formData.phone,
-          is_primary: true,
-        });
-
-      setIsSuccess(true);
-    } catch (error) {
-      console.error('Booking error:', error);
-      toast.error(language === 'ru' ? 'Ошибка бронирования' : 'Booking failed');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  if (isSuccess) {
+  // Success state
+  if (bookingResult?.success && bookingResult.bookingId) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="text-center">
-          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-green-500/20 flex items-center justify-center">
-            <CheckCircle className="w-10 h-10 text-green-500" />
-          </div>
-          <h1 className="text-2xl font-display font-bold mb-2">
-            {language === 'ru' ? 'Запись подтверждена!' : 'Booking Confirmed!'}
-          </h1>
-          <p className="text-muted-foreground mb-6">
-            {language === 'ru' 
-              ? 'Мы свяжемся с вами для подтверждения'
-              : 'We will contact you to confirm your booking'}
-          </p>
-          <Button onClick={() => navigate('/fitness')}>
-            {language === 'ru' ? 'Вернуться к залам' : 'Back to Gyms'}
-          </Button>
-        </div>
-      </div>
+      <AppLayout showBottomNav={false}>
+        <BookingConfirmation
+          bookingId={bookingResult.bookingId}
+          title={language === 'ru' ? membership.labelRu : membership.labelEn}
+          date={date ? format(date, 'PPP', { locale: language === 'ru' ? ru : undefined }) : undefined}
+          total={membership.price}
+          currency="THB"
+          continuePath="/fitness"
+          continueLabel={language === 'ru' ? 'К залам' : 'Browse Gyms'}
+        />
+      </AppLayout>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="px-4 py-3 flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h1 className="text-lg font-semibold">
-            {language === 'ru' ? 'Оформление записи' : 'Book Membership'}
-          </h1>
-        </div>
-      </div>
+  const handleSubmit = async () => {
+    if (!contactData.name || !contactData.phone) return;
 
-      <form onSubmit={handleSubmit} className="p-4 space-y-6">
-        {/* Membership Summary */}
-        <div className="bg-card rounded-xl p-4 border border-border">
-          <h3 className="font-semibold mb-2">
-            {language === 'ru' ? 'Выбранный абонемент' : 'Selected Membership'}
+    const scheduledAt = date || new Date();
+
+    const result = await createBooking({
+      booking_type: 'service',
+      scheduled_at: scheduledAt,
+      total_amount: membership.price,
+      currency: 'THB',
+      notes: `Fitness Membership: ${membershipType}`,
+      items: [{
+        item_type: 'fitness_membership',
+        item_id: id || membershipType,
+        item_name: language === 'ru' ? membership.labelRu : membership.labelEn,
+        quantity: 1,
+        unit_price: membership.price,
+        subtotal: membership.price,
+      }],
+      participants: [{
+        name: contactData.name,
+        phone: contactData.phone,
+        email: contactData.email,
+        is_primary: true,
+      }],
+      payment: {
+        amount: membership.price,
+        payment_method: paymentMethod,
+      },
+    });
+
+    if (result.success) {
+      setBookingResult({ success: true, bookingId: result.booking_id });
+    }
+  };
+
+  return (
+    <AppLayout showBottomNav={false}>
+      <PageContainer className="pb-32">
+        <PageHeader 
+          title={language === 'ru' ? 'Оформление записи' : 'Book Membership'} 
+          showBack 
+        />
+
+        {/* Summary Card */}
+        <div className="mt-4 mb-6">
+          <BookingSummary
+            title={language === 'ru' ? membership.labelRu : membership.labelEn}
+            date={date}
+            price={membership.price}
+            currency="THB"
+          />
+        </div>
+
+        {/* Start Date */}
+        <div className="bg-card rounded-2xl border p-5 mb-4">
+          <h3 className="font-semibold mb-4">
+            {language === 'ru' ? 'Дата начала' : 'Start Date'}
           </h3>
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">
-              {language === 'ru' ? membership.labelRu : membership.labelEn}
-            </span>
-            <span className="text-lg font-bold text-primary">
-              ฿{membership.price.toLocaleString()}
-            </span>
-          </div>
+          <BookingDateTimeSelect
+            time=""
+            onTimeChange={() => {}}
+            date={date}
+            onDateChange={setDate}
+            showQuickDates
+          />
         </div>
 
         {/* Contact Info */}
-        <div className="space-y-4">
-          <h3 className="font-semibold">
+        <div className="bg-card rounded-2xl border p-5 mb-4">
+          <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Контактные данные' : 'Contact Information'}
           </h3>
-          
-          <div className="space-y-2">
-            <Label htmlFor="name">{language === 'ru' ? 'Имя' : 'Name'}</Label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="pl-10"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="phone">{language === 'ru' ? 'Телефон' : 'Phone'}</Label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                id="phone"
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="pl-10"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>
-              {language === 'ru' ? 'Дата начала' : 'Start Date'}
-            </Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !selectedDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {selectedDate 
-                    ? format(selectedDate, "PPP", { locale: language === 'ru' ? ru : undefined }) 
-                    : (language === 'ru' ? 'Выберите дату' : 'Pick a date')}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-popover z-50" align="start">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={setSelectedDate}
-                  disabled={(date) => date < new Date()}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="notes">
-              {language === 'ru' ? 'Комментарий' : 'Notes'} ({language === 'ru' ? 'необязательно' : 'optional'})
-            </Label>
-            <Textarea
-              id="notes"
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              placeholder={language === 'ru' ? 'Дополнительные пожелания...' : 'Any special requests...'}
-            />
-          </div>
+          <BookingContactForm
+            data={contactData}
+            onChange={setContactData}
+            showNotes
+          />
         </div>
 
-        {/* Submit */}
-        <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
-          {isSubmitting 
-            ? (language === 'ru' ? 'Оформление...' : 'Processing...')
-            : (language === 'ru' ? 'Подтвердить запись' : 'Confirm Booking')
-          }
-        </Button>
-      </form>
-    </div>
-  );
-};
+        {/* Payment Method */}
+        <div className="bg-card rounded-2xl border p-5 mb-4">
+          <h3 className="font-semibold mb-4">
+            {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
+          </h3>
+          <BookingPaymentSelect
+            selected={paymentMethod}
+            onSelect={setPaymentMethod}
+            amount={membership.price}
+            currency="THB"
+            showWallet
+            showCash
+          />
+        </div>
 
-export default FitnessBooking;
+        {/* Bottom Bar */}
+        <BookingBottomBar
+          total={membership.price}
+          currency="THB"
+          onSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
+          disabled={!contactData.name || !contactData.phone}
+          submitLabel={language === 'ru' ? 'Подтвердить' : 'Confirm'}
+        />
+      </PageContainer>
+    </AppLayout>
+  );
+}

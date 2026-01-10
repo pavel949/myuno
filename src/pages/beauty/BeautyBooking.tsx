@@ -1,67 +1,49 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Calendar, Clock, User, Phone, MessageSquare, Check } from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { PremiumButton } from '@/components/uno/PremiumButton';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { cn } from '@/lib/utils';
-
-// Time slots
-const timeSlots = [
-  '10:00', '11:00', '12:00', '13:00', '14:00', 
-  '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'
-];
-
-// Generate next 7 days
-const getNextDays = () => {
-  const days = [];
-  const today = new Date();
-  for (let i = 0; i < 7; i++) {
-    const date = new Date(today);
-    date.setDate(today.getDate() + i);
-    days.push(date);
-  }
-  return days;
-};
+import { useState } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { useBooking } from "@/hooks/useBooking";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { PageContainer } from "@/components/uno/PageContainer";
+import { PageHeader } from "@/components/uno/PageHeader";
+import { 
+  BookingSummary, 
+  BookingDateTimeSelect, 
+  BookingContactForm, 
+  BookingPaymentSelect,
+  BookingBottomBar,
+  BookingConfirmation,
+  type ContactFormData,
+  type PaymentMethod 
+} from "@/components/booking";
+import { addDays, format } from "date-fns";
+import { ru } from "date-fns/locale";
 
 export default function BeautyBooking() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const { t, language } = useLanguage();
-  const { user } = useAuth();
-  const { toast } = useToast();
+  const { language, t } = useLanguage();
+  const { user, isLoading: authLoading } = useAuth();
+  const { createBooking, isSubmitting } = useBooking();
 
   const { selectedServices = [], salon } = (location.state || {}) as {
     selectedServices?: string[];
     salon?: any;
   };
 
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [contactName, setContactName] = useState('');
-  const [contactPhone, setContactPhone] = useState('');
-  const [notes, setNotes] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  // Form state
+  const [date, setDate] = useState<Date | undefined>(addDays(new Date(), 1));
+  const [time, setTime] = useState<string>("");
+  const [contactData, setContactData] = useState<ContactFormData>({ name: "", phone: "" });
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
+  const [bookingResult, setBookingResult] = useState<{ success: boolean; bookingId?: string } | null>(null);
 
-  const days = getNextDays();
-
-  const formatDate = (date: Date) => {
-    const options: Intl.DateTimeFormatOptions = { weekday: 'short', day: 'numeric' };
-    return date.toLocaleDateString(language === 'ru' ? 'ru-RU' : 'en-US', options);
-  };
-
-  const formatMonthDay = (date: Date) => {
-    return date.toLocaleDateString(language === 'ru' ? 'ru-RU' : 'en-US', { 
-      month: 'long', 
-      day: 'numeric' 
-    });
-  };
+  // Auth redirect
+  if (!authLoading && !user) {
+    navigate('/auth', { state: { from: `/beauty/${id}/book` } });
+    return null;
+  }
 
   // Calculate totals
   const selectedServiceDetails = salon?.services?.filter((s: any) => 
@@ -71,282 +53,144 @@ export default function BeautyBooking() {
   const totalPrice = selectedServiceDetails.reduce((sum: number, s: any) => sum + s.price, 0);
   const totalDuration = selectedServiceDetails.reduce((sum: number, s: any) => sum + s.duration, 0);
 
+  // Success state
+  if (bookingResult?.success && bookingResult.bookingId) {
+    return (
+      <AppLayout showBottomNav={false}>
+        <BookingConfirmation
+          bookingId={bookingResult.bookingId}
+          title={salon?.name || (language === 'ru' ? 'Салон красоты' : 'Beauty Salon')}
+          date={date ? format(date, 'PPP', { locale: language === 'ru' ? ru : undefined }) : undefined}
+          time={time}
+          total={totalPrice}
+          currency="THB"
+          continuePath="/beauty"
+          continueLabel={language === 'ru' ? 'К салонам' : 'Browse Salons'}
+        />
+      </AppLayout>
+    );
+  }
+
   const handleSubmit = async () => {
-    if (!user) {
-      toast({
-        title: language === 'ru' ? 'Требуется авторизация' : 'Login Required',
-        description: language === 'ru' 
-          ? 'Войдите в аккаунт для бронирования' 
-          : 'Please login to make a booking',
-        variant: 'destructive',
-      });
-      navigate('/auth', { state: { returnTo: location.pathname } });
-      return;
-    }
+    if (!date || !time) return;
+    if (!contactData.name || !contactData.phone) return;
 
-    if (!selectedDate || !selectedTime) {
-      toast({
-        title: language === 'ru' ? 'Выберите дату и время' : 'Select Date & Time',
-        variant: 'destructive',
-      });
-      return;
-    }
+    const scheduledAt = new Date(date);
+    const [hours, minutes] = time.split(':').map(Number);
+    scheduledAt.setHours(hours, minutes, 0, 0);
 
-    setIsSubmitting(true);
-
-    try {
-      // Create booking
-      const scheduledAt = new Date(selectedDate);
-      const [hours, minutes] = selectedTime.split(':');
-      scheduledAt.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-
-      const { data: booking, error: bookingError } = await supabase
-        .from('bookings')
-        .insert({
-          user_id: user.id,
-          booking_type: 'service',
-          status: 'submitted',
-          total_amount: totalPrice,
-          currency: 'THB',
-          scheduled_at: scheduledAt.toISOString(),
-          notes: notes || null,
-        })
-        .select()
-        .single();
-
-      if (bookingError) throw bookingError;
-
-      // Add booking items
-      const bookingItems = selectedServiceDetails.map((service: any) => ({
-        booking_id: booking.id,
+    const result = await createBooking({
+      booking_type: 'service',
+      scheduled_at: scheduledAt,
+      total_amount: totalPrice,
+      currency: 'THB',
+      notes: `Salon: ${salon?.name || 'Beauty Salon'}. Duration: ${totalDuration} min`,
+      items: selectedServiceDetails.map((service: any) => ({
         item_type: 'service',
+        item_id: service.id,
         item_name: language === 'ru' ? service.nameRu : service.name,
         quantity: 1,
         unit_price: service.price,
         subtotal: service.price,
-      }));
+      })),
+      participants: [{
+        name: contactData.name,
+        phone: contactData.phone,
+        email: contactData.email,
+        is_primary: true,
+      }],
+      payment: {
+        amount: totalPrice,
+        payment_method: paymentMethod,
+      },
+    });
 
-      const { error: itemsError } = await supabase
-        .from('booking_items')
-        .insert(bookingItems);
-
-      if (itemsError) throw itemsError;
-
-      // Add participant if provided
-      if (contactName || contactPhone) {
-        const { error: participantError } = await supabase
-          .from('booking_participants')
-          .insert({
-            booking_id: booking.id,
-            name: contactName || user.email?.split('@')[0] || 'Guest',
-            phone: contactPhone || null,
-            is_primary: true,
-          });
-
-        if (participantError) throw participantError;
-      }
-
-      setIsSuccess(true);
-      
-      setTimeout(() => {
-        navigate('/bookings');
-      }, 2000);
-
-    } catch (error: any) {
-      console.error('Booking error:', error);
-      toast({
-        title: language === 'ru' ? 'Ошибка бронирования' : 'Booking Error',
-        description: error.message,
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSubmitting(false);
+    if (result.success) {
+      setBookingResult({ success: true, bookingId: result.booking_id });
     }
   };
 
-  if (isSuccess) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="text-center">
-          <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-4">
-            <Check className="w-10 h-10 text-green-500" />
-          </div>
-          <h1 className="text-2xl font-display font-bold mb-2">
-            {language === 'ru' ? 'Бронирование создано!' : 'Booking Confirmed!'}
-          </h1>
-          <p className="text-muted-foreground">
-            {language === 'ru' 
-              ? 'Переходим к вашим бронированиям...' 
-              : 'Redirecting to your bookings...'}
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const availableTimes = [
+    '10:00', '11:00', '12:00', '13:00', '14:00', 
+    '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'
+  ];
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
-        <div className="flex items-center gap-4 p-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-full bg-card border border-border/50 flex items-center justify-center"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <div>
-            <h1 className="font-semibold">
-              {language === 'ru' ? 'Бронирование' : 'Book Appointment'}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {salon?.name || (language === 'ru' ? 'Салон' : 'Salon')}
-            </p>
-          </div>
-        </div>
-      </div>
+    <AppLayout showBottomNav={false}>
+      <PageContainer className="pb-32">
+        <PageHeader 
+          title={language === 'ru' ? 'Бронирование' : 'Book Appointment'} 
+          showBack 
+        />
 
-      <div className="p-4 space-y-6 pb-32">
-        {/* Selected Services Summary */}
-        <div className="bg-card rounded-xl p-4 border border-border/50">
-          <h2 className="font-medium mb-3">
-            {language === 'ru' ? 'Выбранные услуги' : 'Selected Services'}
-          </h2>
-          <div className="space-y-2">
-            {selectedServiceDetails.map((service: any) => (
-              <div key={service.id} className="flex justify-between text-sm">
-                <span>{language === 'ru' ? service.nameRu : service.name}</span>
-                <span className="text-primary">฿{service.price.toLocaleString()}</span>
-              </div>
-            ))}
-          </div>
-          <div className="flex justify-between mt-3 pt-3 border-t border-border/50">
-            <span className="font-medium">
-              {language === 'ru' ? 'Итого' : 'Total'} ({totalDuration} {language === 'ru' ? 'мин' : 'min'})
-            </span>
-            <span className="font-bold text-primary">฿{totalPrice.toLocaleString()}</span>
-          </div>
+        {/* Summary Card */}
+        <div className="mt-4 mb-6">
+          <BookingSummary
+            title={salon?.name || (language === 'ru' ? 'Салон красоты' : 'Beauty Salon')}
+            subtitle={selectedServiceDetails.map((s: any) => 
+              language === 'ru' ? s.nameRu : s.name
+            ).join(', ')}
+            duration={totalDuration ? `${totalDuration} min` : undefined}
+            date={date}
+            time={time}
+            price={totalPrice}
+            currency="THB"
+          />
         </div>
 
-        {/* Date Selection */}
-        <div>
-          <h2 className="font-medium mb-3 flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-primary" />
-            {language === 'ru' ? 'Выберите дату' : 'Select Date'}
-          </h2>
-          <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4">
-            {days.map((date, index) => {
-              const isSelected = selectedDate?.toDateString() === date.toDateString();
-              const isToday = index === 0;
-              return (
-                <button
-                  key={index}
-                  onClick={() => setSelectedDate(date)}
-                  className={cn(
-                    "flex-shrink-0 w-16 py-3 rounded-xl border transition-all text-center",
-                    isSelected 
-                      ? "bg-primary text-primary-foreground border-primary" 
-                      : "bg-card border-border/50 hover:border-primary/30"
-                  )}
-                >
-                  <div className="text-xs opacity-70">
-                    {isToday 
-                      ? (language === 'ru' ? 'Сегодня' : 'Today')
-                      : formatDate(date).split(' ')[0]
-                    }
-                  </div>
-                  <div className="text-lg font-semibold">{date.getDate()}</div>
-                </button>
-              );
-            })}
-          </div>
-          {selectedDate && (
-            <p className="text-sm text-muted-foreground mt-2">
-              {formatMonthDay(selectedDate)}
-            </p>
-          )}
-        </div>
-
-        {/* Time Selection */}
-        <div>
-          <h2 className="font-medium mb-3 flex items-center gap-2">
-            <Clock className="w-5 h-5 text-primary" />
-            {language === 'ru' ? 'Выберите время' : 'Select Time'}
-          </h2>
-          <div className="grid grid-cols-4 gap-2">
-            {timeSlots.map((time) => {
-              const isSelected = selectedTime === time;
-              return (
-                <button
-                  key={time}
-                  onClick={() => setSelectedTime(time)}
-                  className={cn(
-                    "py-2 rounded-lg border transition-all text-sm font-medium",
-                    isSelected 
-                      ? "bg-primary text-primary-foreground border-primary" 
-                      : "bg-card border-border/50 hover:border-primary/30"
-                  )}
-                >
-                  {time}
-                </button>
-              );
-            })}
-          </div>
+        {/* Date & Time */}
+        <div className="bg-card rounded-2xl border p-5 mb-4">
+          <h3 className="font-semibold mb-4">
+            {language === 'ru' ? 'Дата и время' : 'Date & Time'}
+          </h3>
+          <BookingDateTimeSelect
+            date={date}
+            time={time}
+            onDateChange={setDate}
+            onTimeChange={setTime}
+            availableTimes={availableTimes}
+            showQuickDates
+          />
         </div>
 
         {/* Contact Info */}
-        <div>
-          <h2 className="font-medium mb-3 flex items-center gap-2">
-            <User className="w-5 h-5 text-primary" />
-            {language === 'ru' ? 'Контактная информация' : 'Contact Information'}
-          </h2>
-          <div className="space-y-3">
-            <Input
-              placeholder={language === 'ru' ? 'Ваше имя' : 'Your name'}
-              value={contactName}
-              onChange={(e) => setContactName(e.target.value)}
-              className="bg-card"
-            />
-            <Input
-              placeholder={language === 'ru' ? 'Телефон' : 'Phone number'}
-              value={contactPhone}
-              onChange={(e) => setContactPhone(e.target.value)}
-              className="bg-card"
-            />
-          </div>
-        </div>
-
-        {/* Notes */}
-        <div>
-          <h2 className="font-medium mb-3 flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-primary" />
-            {language === 'ru' ? 'Примечания' : 'Notes'}
-          </h2>
-          <Textarea
-            placeholder={language === 'ru' 
-              ? 'Особые пожелания или комментарии...' 
-              : 'Special requests or comments...'}
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            className="bg-card min-h-[100px]"
+        <div className="bg-card rounded-2xl border p-5 mb-4">
+          <h3 className="font-semibold mb-4">
+            {language === 'ru' ? 'Контактные данные' : 'Contact Information'}
+          </h3>
+          <BookingContactForm
+            data={contactData}
+            onChange={setContactData}
+            showEmail
+            showNotes
           />
         </div>
-      </div>
 
-      {/* Bottom Submit Bar */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-xl border-t border-border/50 z-50">
-        <div className="max-w-lg mx-auto">
-          <PremiumButton
-            onClick={handleSubmit}
-            disabled={!selectedDate || !selectedTime || isSubmitting}
-            isLoading={isSubmitting}
-            className="w-full"
-            size="lg"
-          >
-            {language === 'ru' ? 'Подтвердить бронирование' : 'Confirm Booking'} • ฿{totalPrice.toLocaleString()}
-          </PremiumButton>
+        {/* Payment Method */}
+        <div className="bg-card rounded-2xl border p-5 mb-4">
+          <h3 className="font-semibold mb-4">
+            {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
+          </h3>
+          <BookingPaymentSelect
+            selected={paymentMethod}
+            onSelect={setPaymentMethod}
+            amount={totalPrice}
+            currency="THB"
+            showWallet
+            showCash
+          />
         </div>
-      </div>
-    </div>
+
+        {/* Bottom Bar */}
+        <BookingBottomBar
+          total={totalPrice}
+          currency="THB"
+          onSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
+          disabled={!date || !time || !contactData.name || !contactData.phone}
+          submitLabel={language === 'ru' ? 'Подтвердить бронирование' : 'Confirm Booking'}
+        />
+      </PageContainer>
+    </AppLayout>
   );
 }

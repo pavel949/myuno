@@ -1,290 +1,240 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Calendar, User, Phone, Mail, Users, CheckCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { useEvent } from '@/hooks/useEvents';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { useState } from "react";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEvent } from "@/hooks/useEvents";
+import { useBooking } from "@/hooks/useBooking";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { PageContainer } from "@/components/uno/PageContainer";
+import { PageHeader } from "@/components/uno/PageHeader";
+import { LoadingSpinner } from "@/components/uno/LoadingSpinner";
+import { 
+  BookingSummary, 
+  BookingParticipants,
+  BookingContactForm, 
+  BookingPaymentSelect,
+  BookingBottomBar,
+  BookingConfirmation,
+  type ContactFormData,
+  type PaymentMethod 
+} from "@/components/booking";
+import { format } from "date-fns";
+import { ru } from "date-fns/locale";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-const EventBooking = () => {
-  const { id } = useParams();
+export default function EventBooking() {
+  const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { event, isLoading } = useEvent(id);
+  const { createBooking, isSubmitting } = useBooking();
 
   const ticketCount = parseInt(searchParams.get('tickets') || '1');
-  const totalPrice = (event?.price || 0) * ticketCount;
 
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    hotelName: '',
-    roomNumber: '',
-    notes: '',
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  // Form state
+  const [participants, setParticipants] = useState(ticketCount);
+  const [contactData, setContactData] = useState<ContactFormData>({ name: "", phone: "" });
+  const [pickupInfo, setPickupInfo] = useState({ hotelName: "", roomNumber: "" });
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
+  const [bookingResult, setBookingResult] = useState<{ success: boolean; bookingId?: string } | null>(null);
 
-  const formatDate = (dateStr: string | null) => {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString(language === 'ru' ? 'ru-RU' : 'en-US', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
-  };
+  // Auth redirect
+  if (!authLoading && !user) {
+    navigate('/auth', { state: { from: `/events/${id}/book` } });
+    return null;
+  }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!user) {
-      toast.error(language === 'ru' ? 'Войдите в аккаунт' : 'Please login first');
-      navigate('/auth');
-      return;
-    }
-
-    if (!event) return;
-
-    setIsSubmitting(true);
-
-    try {
-      // Use the dedicated event_bookings table
-      const { error: bookingError } = await supabase
-        .from('event_bookings')
-        .insert({
-          event_id: event.id,
-          user_id: user.id,
-          tickets: ticketCount,
-          total_amount: totalPrice,
-          currency: event.currency,
-          contact_name: formData.name,
-          contact_phone: formData.phone,
-          contact_email: formData.email || null,
-          pickup_hotel: formData.hotelName || null,
-          pickup_room: formData.roomNumber || null,
-          notes: formData.notes || null,
-          status: 'pending',
-        });
-
-      if (bookingError) throw bookingError;
-
-      setIsSuccess(true);
-    } catch (error) {
-      console.error('Booking error:', error);
-      toast.error(language === 'ru' ? 'Ошибка бронирования' : 'Booking failed');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  if (isLoading) {
+  // Loading state
+  if (isLoading || authLoading) {
     return (
-      <div className="min-h-screen bg-background p-4">
-        <Skeleton className="h-10 w-32 mb-4" />
-        <Skeleton className="h-32 w-full mb-4" />
-        <Skeleton className="h-64 w-full" />
-      </div>
+      <AppLayout showBottomNav={false}>
+        <div className="flex items-center justify-center min-h-screen">
+          <LoadingSpinner size="lg" />
+        </div>
+      </AppLayout>
     );
   }
 
+  // Not found
   if (!event) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <p className="text-muted-foreground">
-          {language === 'ru' ? 'Событие не найдено' : 'Event not found'}
-        </p>
-      </div>
+      <AppLayout>
+        <PageContainer>
+          <div className="text-center py-12">
+            <p>{language === 'ru' ? 'Событие не найдено' : 'Event not found'}</p>
+          </div>
+        </PageContainer>
+      </AppLayout>
     );
   }
 
-  if (isSuccess) {
+  const totalAmount = (event.price || 0) * participants;
+  const eventTitle = language === 'ru' ? event.title_ru : event.title_en;
+  const eventDate = event.event_date 
+    ? format(new Date(event.event_date), 'PPP', { locale: language === 'ru' ? ru : undefined })
+    : undefined;
+
+  // Success state
+  if (bookingResult?.success && bookingResult.bookingId) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="text-center">
-          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-green-500/20 flex items-center justify-center">
-            <CheckCircle className="w-10 h-10 text-green-500" />
-          </div>
-          <h1 className="text-2xl font-display font-bold mb-2">
-            {language === 'ru' ? 'Бронирование подтверждено!' : 'Booking Confirmed!'}
-          </h1>
-          <p className="text-muted-foreground mb-2">
-            {language === 'ru' ? event.title_ru : event.title_en}
-          </p>
-          <p className="text-sm text-muted-foreground mb-1">
-            {formatDate(event.event_date)} • {event.event_time}
-          </p>
-          <p className="text-sm text-muted-foreground mb-6">
-            {ticketCount} {language === 'ru' ? 'билет(ов)' : 'ticket(s)'} • ฿{totalPrice.toLocaleString()}
-          </p>
-          <p className="text-xs text-muted-foreground mb-6">
-            {language === 'ru' 
-              ? 'Мы свяжемся с вами для подтверждения деталей'
-              : 'We will contact you to confirm the details'}
-          </p>
-          <Button onClick={() => navigate('/events')}>
-            {language === 'ru' ? 'Вернуться к событиям' : 'Back to Events'}
-          </Button>
-        </div>
-      </div>
+      <AppLayout showBottomNav={false}>
+        <BookingConfirmation
+          bookingId={bookingResult.bookingId}
+          title={eventTitle}
+          date={eventDate}
+          time={event.event_time || undefined}
+          total={totalAmount}
+          currency={event.currency || 'THB'}
+          continuePath="/events"
+          continueLabel={language === 'ru' ? 'К событиям' : 'Browse Events'}
+        />
+      </AppLayout>
     );
   }
+
+  const handleSubmit = async () => {
+    if (!contactData.name || !contactData.phone) return;
+
+    const scheduledAt = event.event_date ? new Date(event.event_date) : new Date();
+    if (event.event_time) {
+      const [hours, minutes] = event.event_time.split(':').map(Number);
+      scheduledAt.setHours(hours, minutes, 0, 0);
+    }
+
+    const result = await createBooking({
+      booking_type: 'event',
+      scheduled_at: scheduledAt,
+      total_amount: totalAmount,
+      currency: event.currency || 'THB',
+      notes: `Event: ${eventTitle}. Tickets: ${participants}. Pickup: ${pickupInfo.hotelName} ${pickupInfo.roomNumber}`.trim(),
+      items: [{
+        item_type: 'event_ticket',
+        item_id: event.id,
+        item_name: eventTitle,
+        quantity: participants,
+        unit_price: event.price || 0,
+        subtotal: totalAmount,
+      }],
+      participants: [{
+        name: contactData.name,
+        phone: contactData.phone,
+        email: contactData.email,
+        is_primary: true,
+      }],
+      payment: {
+        amount: totalAmount,
+        payment_method: paymentMethod,
+      },
+    });
+
+    if (result.success) {
+      setBookingResult({ success: true, bookingId: result.booking_id });
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="px-4 py-3 flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h1 className="text-lg font-semibold">
-            {language === 'ru' ? 'Оформление билетов' : 'Book Tickets'}
-          </h1>
-        </div>
-      </div>
+    <AppLayout showBottomNav={false}>
+      <PageContainer className="pb-32">
+        <PageHeader 
+          title={language === 'ru' ? 'Оформление билетов' : 'Book Tickets'} 
+          showBack 
+        />
 
-      <form onSubmit={handleSubmit} className="p-4 space-y-6">
-        {/* Order Summary */}
-        <div className="bg-card rounded-xl p-4 border border-border">
-          <h3 className="font-semibold mb-3">
-            {language === 'ru' ? 'Ваш заказ' : 'Your Order'}
-          </h3>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span>{language === 'ru' ? event.title_ru : event.title_en}</span>
-            </div>
-            <div className="flex justify-between text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Calendar className="w-3 h-3" />
-                {formatDate(event.event_date)} • {event.event_time}
-              </span>
-            </div>
-            <div className="flex justify-between text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Users className="w-3 h-3" />
-                {ticketCount} {language === 'ru' ? 'билет(ов)' : 'ticket(s)'}
-              </span>
-              <span>฿{event.price?.toLocaleString()} × {ticketCount}</span>
-            </div>
-            <div className="pt-2 border-t border-border flex justify-between font-semibold">
-              <span>{language === 'ru' ? 'Итого' : 'Total'}</span>
-              <span className="text-primary">฿{totalPrice.toLocaleString()}</span>
-            </div>
-          </div>
+        {/* Summary Card */}
+        <div className="mt-4 mb-6">
+          <BookingSummary
+            image={event.cover_image || undefined}
+            title={eventTitle}
+            subtitle={eventDate}
+            duration={event.duration_hours ? `${event.duration_hours}h` : undefined}
+            location={language === 'ru' ? event.location_ru : event.location_name || undefined}
+            date={event.event_date ? new Date(event.event_date) : undefined}
+            time={event.event_time || undefined}
+            participants={participants}
+            price={event.price || 0}
+            currency={event.currency || 'THB'}
+          />
+        </div>
+
+        {/* Participants */}
+        <div className="bg-card rounded-2xl border p-5 mb-4">
+          <BookingParticipants
+            count={participants}
+            onChange={setParticipants}
+            min={1}
+            max={event.max_spots || 10}
+            pricePerPerson={event.price || 0}
+            currency={event.currency || 'THB'}
+            label={language === 'ru' ? 'Билетов' : 'Tickets'}
+          />
         </div>
 
         {/* Contact Info */}
-        <div className="space-y-4">
-          <h3 className="font-semibold">
+        <div className="bg-card rounded-2xl border p-5 mb-4">
+          <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Контактные данные' : 'Contact Information'}
           </h3>
-          
-          <div className="space-y-2">
-            <Label htmlFor="name">{language === 'ru' ? 'Имя' : 'Full Name'} *</Label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="pl-10"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="phone">{language === 'ru' ? 'Телефон' : 'Phone'} *</Label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                id="phone"
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="pl-10"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="pl-10"
-              />
-            </div>
-          </div>
+          <BookingContactForm
+            data={contactData}
+            onChange={setContactData}
+            showEmail
+          />
         </div>
 
         {/* Pickup Info */}
-        <div className="space-y-4">
-          <h3 className="font-semibold">
+        <div className="bg-card rounded-2xl border p-5 mb-4">
+          <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Место забора' : 'Pickup Location'}
           </h3>
-          
-          <div className="space-y-2">
-            <Label htmlFor="hotelName">
-              {language === 'ru' ? 'Название отеля' : 'Hotel Name'}
-            </Label>
-            <Input
-              id="hotelName"
-              value={formData.hotelName}
-              onChange={(e) => setFormData({ ...formData, hotelName: e.target.value })}
-              placeholder={language === 'ru' ? 'Где вас забрать?' : 'Where should we pick you up?'}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="roomNumber">
-              {language === 'ru' ? 'Номер комнаты' : 'Room Number'}
-            </Label>
-            <Input
-              id="roomNumber"
-              value={formData.roomNumber}
-              onChange={(e) => setFormData({ ...formData, roomNumber: e.target.value })}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="notes">
-              {language === 'ru' ? 'Комментарий' : 'Notes'}
-            </Label>
-            <Textarea
-              id="notes"
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              placeholder={language === 'ru' ? 'Особые пожелания...' : 'Special requests...'}
-            />
+          <div className="space-y-4">
+            <div>
+              <Label>{language === 'ru' ? 'Название отеля' : 'Hotel Name'}</Label>
+              <Input
+                value={pickupInfo.hotelName}
+                onChange={(e) => setPickupInfo({ ...pickupInfo, hotelName: e.target.value })}
+                placeholder={language === 'ru' ? 'Где вас забрать?' : 'Where should we pick you up?'}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>{language === 'ru' ? 'Номер комнаты' : 'Room Number'}</Label>
+              <Input
+                value={pickupInfo.roomNumber}
+                onChange={(e) => setPickupInfo({ ...pickupInfo, roomNumber: e.target.value })}
+                className="mt-1"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Submit */}
-        <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
-          {isSubmitting 
-            ? (language === 'ru' ? 'Оформление...' : 'Processing...')
-            : (language === 'ru' ? `Оплатить ฿${totalPrice.toLocaleString()}` : `Pay ฿${totalPrice.toLocaleString()}`)
-          }
-        </Button>
-      </form>
-    </div>
-  );
-};
+        {/* Payment Method */}
+        <div className="bg-card rounded-2xl border p-5 mb-4">
+          <h3 className="font-semibold mb-4">
+            {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
+          </h3>
+          <BookingPaymentSelect
+            selected={paymentMethod}
+            onSelect={setPaymentMethod}
+            amount={totalAmount}
+            currency={event.currency || 'THB'}
+            showWallet
+            showCash
+          />
+        </div>
 
-export default EventBooking;
+        {/* Bottom Bar */}
+        <BookingBottomBar
+          total={totalAmount}
+          currency={event.currency || 'THB'}
+          onSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
+          disabled={!contactData.name || !contactData.phone}
+          submitLabel={language === 'ru' ? 'Купить билеты' : 'Buy Tickets'}
+        />
+      </PageContainer>
+    </AppLayout>
+  );
+}
