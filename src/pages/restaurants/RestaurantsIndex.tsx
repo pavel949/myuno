@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, UtensilsCrossed, Clock, Star, MapPin, Bike, ArrowRight, Flame, CalendarDays } from 'lucide-react';
+import { Search, UtensilsCrossed, Clock, Star, MapPin, Bike, ArrowRight, Flame, CalendarDays, Banknote } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { FilterChip } from '@/components/uno/FilterChip';
@@ -278,6 +278,18 @@ export default function RestaurantsIndex() {
                     </button>
                   )}
                 </div>
+                
+                {/* Deposit badge for reservations */}
+                {restaurant.acceptsReservations && restaurant.depositRequired && (
+                  <div className="flex items-center gap-1.5 px-3 pb-3">
+                    <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-amber-500/10 border border-amber-500/20">
+                      <Banknote className="w-3.5 h-3.5 text-amber-600" />
+                      <span className="text-xs font-medium text-amber-700 dark:text-amber-500">
+                        {language === 'ru' ? `Депозит ${restaurant.depositAmount}฿` : `Deposit ${restaurant.depositAmount}฿`}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
