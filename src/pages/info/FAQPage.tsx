@@ -23,8 +23,8 @@ export default function FAQPage() {
         {
           q: isRu ? 'Что такое UNO?' : 'What is UNO?',
           a: isRu 
-            ? 'UNO — это платформа, объединяющая все необходимые сервисы для жизни на Пхукете: аренда жилья, транспорт, туры, медицина, рестораны и многое другое. Все партнёры проходят проверку качества.'
-            : 'UNO is a platform that brings together all essential services for living in Phuket: housing rental, transport, tours, medical care, restaurants and more. All partners are quality verified.',
+            ? 'UNO — это ваш дом вдали от дома. Платформа, объединяющая все необходимые сервисы для комфортной жизни за рубежом: аренда жилья, транспорт, туры, медицина, рестораны и многое другое. Все партнёры проходят проверку качества.'
+            : 'UNO is your home away from home. A platform that brings together all essential services for comfortable living abroad: housing rental, transport, tours, medical care, restaurants and more. All partners are quality verified.',
         },
         {
           q: isRu ? 'Приложение бесплатное?' : 'Is the app free?',
