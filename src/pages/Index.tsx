@@ -4,7 +4,7 @@ import {
   Sparkles, UtensilsCrossed, Dumbbell, Stethoscope, 
   GraduationCap, Home, Car, Ticket, Flower2,
   ArrowRight, MapPin, Search, Wrench, AlertTriangle,
-  Compass, Waves, Pill, Star, Shield, Scale
+  Compass, Waves, Pill, Star, Shield, Scale, Building2, Calendar, BarChart3, Key
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -176,6 +176,46 @@ const Index = () => {
             </div>
           </div>
         </div>
+
+        {/* Property Owner Section */}
+        <FadeInUp delay={0.05}>
+          <div 
+            onClick={() => navigate('/owner')}
+            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-500/10 via-card to-emerald-500/5 p-5 border border-teal-500/20 cursor-pointer hover:border-teal-500/40 transition-all group"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/10 rounded-full blur-3xl" />
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                <Building2 className="w-7 h-7 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-foreground mb-0.5">
+                  {language === 'ru' ? 'Владелец недвижимости?' : 'Property Owner?'}
+                </h3>
+                <p className="text-xs text-muted-foreground line-clamp-2">
+                  {language === 'ru' 
+                    ? 'Управляйте арендой, бронированиями и обслуживанием в одном месте' 
+                    : 'Manage rentals, bookings & maintenance in one place'}
+                </p>
+              </div>
+              <ArrowRight className="w-5 h-5 text-teal-500 flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+            </div>
+            <div className="flex items-center gap-4 mt-4 pt-3 border-t border-border/50">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Calendar className="w-3.5 h-3.5 text-teal-500" />
+                <span>{language === 'ru' ? 'Календарь' : 'Calendar'}</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Key className="w-3.5 h-3.5 text-teal-500" />
+                <span>{language === 'ru' ? 'Check-in' : 'Check-in'}</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <BarChart3 className="w-3.5 h-3.5 text-teal-500" />
+                <span>{language === 'ru' ? 'Аналитика' : 'Analytics'}</span>
+              </div>
+            </div>
+          </div>
+        </FadeInUp>
 
         {/* Quick Services */}
         <FadeInUp delay={0.08}>
