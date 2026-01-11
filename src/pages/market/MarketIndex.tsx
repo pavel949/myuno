@@ -1,44 +1,25 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Search, 
-  ShoppingBag, 
-  Apple, 
-  Gem, 
-  Palette, 
-  Gift, 
-  Shirt,
-  Sparkles,
-  Wine,
-  Cookie,
-  Star,
-  MapPin,
-  Clock,
-  Truck,
-  Filter
+  ShoppingBag, Apple, Gem, Palette, Gift, Shirt, Sparkles, Wine, Cookie,
+  Star, MapPin, Clock, Truck, SlidersHorizontal
 } from 'lucide-react';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { BackButton } from '@/components/uno/BackButton';
-import { cn } from '@/lib/utils';
-import { triggerRipple } from '@/hooks/useRipple';
+import { MiniAppLayout, ItemCard, type MiniAppCategory } from '@/components/miniapp';
 import { UniversalFilter, ActiveFilters, FilterValues } from '@/components/filters/UniversalFilter';
 import { marketFilterConfig } from '@/components/filters/MarketFilters';
 
-const categories = [
-  { id: 'all', icon: ShoppingBag, labelEn: 'All', labelRu: 'Все' },
-  { id: 'grocery', icon: Apple, labelEn: 'Grocery', labelRu: 'Продукты' },
-  { id: 'souvenirs', icon: Gift, labelEn: 'Souvenirs', labelRu: 'Сувениры' },
-  { id: 'cosmetics', icon: Sparkles, labelEn: 'Cosmetics', labelRu: 'Косметика' },
-  { id: 'jewelry', icon: Gem, labelEn: 'Jewelry', labelRu: 'Украшения' },
-  { id: 'decor', icon: Palette, labelEn: 'Decor', labelRu: 'Декор' },
-  { id: 'clothing', icon: Shirt, labelEn: 'Clothing', labelRu: 'Одежда' },
-  { id: 'alcohol', icon: Wine, labelEn: 'Alcohol', labelRu: 'Алкоголь' },
-  { id: 'sweets', icon: Cookie, labelEn: 'Sweets', labelRu: 'Сладости' },
+const MARKET_CATEGORIES: MiniAppCategory[] = [
+  { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '🛒' },
+  { id: 'grocery', labelEn: 'Grocery', labelRu: 'Продукты', icon: '🍎' },
+  { id: 'souvenirs', labelEn: 'Souvenirs', labelRu: 'Сувениры', icon: '🎁' },
+  { id: 'cosmetics', labelEn: 'Cosmetics', labelRu: 'Косметика', icon: '✨' },
+  { id: 'jewelry', labelEn: 'Jewelry', labelRu: 'Украшения', icon: '💎' },
+  { id: 'decor', labelEn: 'Decor', labelRu: 'Декор', icon: '🎨' },
+  { id: 'clothing', labelEn: 'Clothing', labelRu: 'Одежда', icon: '👔' },
 ];
 
 export const stores = [
@@ -57,6 +38,7 @@ export const stores = [
     minOrder: 300,
     isOpen: true,
     tags: ['imported', 'organic', 'premium'],
+    tagsRu: ['импорт', 'органик', 'премиум'],
   },
   {
     id: 'makro',
@@ -73,6 +55,7 @@ export const stores = [
     minOrder: 500,
     isOpen: true,
     tags: ['wholesale', 'bulk'],
+    tagsRu: ['оптом', 'большие объемы'],
   },
   {
     id: 'thai-souvenirs',
@@ -89,6 +72,7 @@ export const stores = [
     minOrder: 200,
     isOpen: true,
     tags: ['handmade', 'authentic'],
+    tagsRu: ['ручная работа', 'аутентичный'],
   },
   {
     id: 'pearl-gallery',
@@ -105,6 +89,8 @@ export const stores = [
     minOrder: 1000,
     isOpen: true,
     tags: ['luxury', 'certified'],
+    tagsRu: ['люкс', 'сертифицировано'],
+    isFeatured: true,
   },
   {
     id: 'thai-cosmetics',
@@ -121,6 +107,7 @@ export const stores = [
     minOrder: 300,
     isOpen: true,
     tags: ['natural', 'thai-herbs'],
+    tagsRu: ['натуральное', 'тайские травы'],
   },
   {
     id: 'home-decor',
@@ -137,6 +124,7 @@ export const stores = [
     minOrder: 500,
     isOpen: true,
     tags: ['handcrafted', 'unique'],
+    tagsRu: ['ручная работа', 'уникальный'],
   },
   {
     id: 'thai-silk',
@@ -153,38 +141,7 @@ export const stores = [
     minOrder: 400,
     isOpen: true,
     tags: ['premium', 'authentic'],
-  },
-  {
-    id: 'wine-cellar',
-    nameEn: 'Wine Connection',
-    nameRu: 'Вайн Коннекшн',
-    category: 'alcohol',
-    image: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=800',
-    rating: 4.6,
-    reviewCount: 345,
-    address: 'Boat Avenue',
-    addressRu: 'Боат Авеню',
-    deliveryTime: '45-60',
-    deliveryFee: 0,
-    minOrder: 1000,
-    isOpen: true,
-    tags: ['imported', 'premium'],
-  },
-  {
-    id: 'thai-sweets',
-    nameEn: 'Sweet Thai',
-    nameRu: 'Свит Тай',
-    category: 'sweets',
-    image: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=800',
-    rating: 4.7,
-    reviewCount: 234,
-    address: 'Central Floresta',
-    addressRu: 'Сентрал Флореста',
-    deliveryTime: '30-45',
-    deliveryFee: 40,
-    minOrder: 150,
-    isOpen: true,
-    tags: ['traditional', 'fresh'],
+    tagsRu: ['премиум', 'аутентичный'],
   },
 ];
 
@@ -221,14 +178,13 @@ const MarketIndex = () => {
     });
   };
 
-  const handleClearAllFilters = () => setFilterValues({});
-
   const filteredStores = useMemo(() => {
     return stores.filter(store => {
       const matchesCategory = selectedCategory === 'all' || store.category === selectedCategory;
+      
+      const name = language === 'ru' ? store.nameRu : store.nameEn;
       const matchesSearch = searchQuery === '' || 
-        store.nameEn.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        store.nameRu.toLowerCase().includes(searchQuery.toLowerCase());
+        name.toLowerCase().includes(searchQuery.toLowerCase());
       
       // Delivery filter
       const deliveryFilters = filterValues.delivery as string[] || [];
@@ -241,172 +197,96 @@ const MarketIndex = () => {
       
       return matchesCategory && matchesSearch;
     });
-  }, [stores, selectedCategory, searchQuery, filterValues]);
+  }, [stores, selectedCategory, searchQuery, filterValues, language]);
 
   return (
-    <AppLayout>
-      {/* Header */}
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b">
-        <div className="flex items-center justify-between p-4">
-          <BackButton fallbackPath="/" />
-          <h1 className="text-lg font-semibold">
-            {language === 'ru' ? 'Магазин' : 'Market'}
-          </h1>
-          <div className="flex items-center gap-2">
-          <UniversalFilter
-              config={marketFilterConfig}
-              values={filterValues}
-              onChange={setFilterValues}
-            >
-              <Button variant="ghost" size="icon" className="relative">
-                <Filter className="h-5 w-5" />
-                {activeFilterCount > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
-                    {activeFilterCount}
-                  </Badge>
-                )}
-              </Button>
-            </UniversalFilter>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative"
-              onClick={() => navigate('/cart')}
-            >
-              <ShoppingBag className="h-5 w-5" />
-              {cartItemCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
-                  {cartItemCount}
-                </span>
-              )}
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      <div className="p-4 space-y-4 pb-24">
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder={language === 'ru' ? 'Поиск магазинов...' : 'Search stores...'}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-
-        {/* Active Filters */}
-        <ActiveFilters
+    <MiniAppLayout
+      title={language === 'ru' ? 'Магазин' : 'Market'}
+      subtitle={language === 'ru' ? `${filteredStores.length} магазинов` : `${filteredStores.length} stores`}
+      fallbackPath="/"
+      
+      heroIcon={ShoppingBag}
+      heroTitle={language === 'ru' ? 'Магазины Пхукета' : 'Phuket Stores'}
+      heroSubtitle={language === 'ru' ? 'Доставка продуктов, сувениров и подарков' : 'Groceries, souvenirs and gifts delivery'}
+      heroBackgroundImage="https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=800"
+      heroGradientFrom="from-emerald-500/20"
+      heroGradientVia="via-green-500/20"
+      heroGradientTo="to-primary/20"
+      
+      searchValue={searchQuery}
+      onSearchChange={setSearchQuery}
+      searchPlaceholder={language === 'ru' ? 'Поиск магазинов...' : 'Search stores...'}
+      
+      categories={MARKET_CATEGORIES}
+      selectedCategory={selectedCategory}
+      onCategoryChange={setSelectedCategory}
+      
+      showCartButton
+      cartItemCount={cartItemCount}
+      
+      filterButton={
+        <UniversalFilter
           config={marketFilterConfig}
           values={filterValues}
-          onRemove={handleRemoveFilter}
-          onClearAll={handleClearAllFilters}
-        />
+          onChange={setFilterValues}
+        >
+          <Button variant="outline" size="icon" className="relative shrink-0 h-10 w-10">
+            <SlidersHorizontal className="w-4 h-4" />
+            {activeFilterCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
+                {activeFilterCount}
+              </span>
+            )}
+          </Button>
+        </UniversalFilter>
+      }
+      
+      resultsCount={filteredStores.length}
+      resultsLabel={language === 'ru' ? 'Магазины' : 'Stores'}
+    >
+      {/* Active Filters */}
+      <ActiveFilters
+        config={marketFilterConfig}
+        values={filterValues}
+        onRemove={handleRemoveFilter}
+        onClearAll={() => setFilterValues({})}
+        className="mb-4"
+      />
 
-        {/* Categories */}
-        <div className="overflow-x-auto -mx-4 px-4 scrollbar-hide">
-          <div className="flex gap-2 pb-2">
-            {categories.map((cat) => {
-              const Icon = cat.icon;
-              const isSelected = selectedCategory === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  onClick={(e) => {
-                    triggerRipple(e);
-                    setSelectedCategory(cat.id);
-                  }}
-                  className={cn(
-                    "flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all",
-                    "border text-sm font-medium",
-                    isSelected
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-card border-border hover:border-primary/50"
-                  )}
-                >
-                  <Icon className="w-4 h-4" />
-                  {language === 'ru' ? cat.labelRu : cat.labelEn}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Stores Grid */}
-        <div className="space-y-3">
-          {filteredStores.map((store) => (
-            <button
-              key={store.id}
-              onClick={(e) => {
-                triggerRipple(e);
-                navigate(`/market/store/${store.id}`);
-              }}
-              className="w-full bg-card rounded-2xl border border-border overflow-hidden hover:border-primary/30 transition-all text-left"
-            >
-              <div className="flex">
-                <div className="w-28 h-28 flex-shrink-0">
-                  <img
-                    src={store.image}
-                    alt={language === 'ru' ? store.nameRu : store.nameEn}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="flex-1 p-3 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-semibold line-clamp-1">
-                        {language === 'ru' ? store.nameRu : store.nameEn}
-                      </h3>
-                      <div className="flex items-center gap-1 text-amber-500">
-                        <Star className="w-3.5 h-3.5 fill-current" />
-                        <span className="text-xs font-medium">{store.rating}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                      <MapPin className="w-3 h-3" />
-                      <span className="line-clamp-1">
-                        {language === 'ru' ? store.addressRu : store.address}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 mt-2">
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Clock className="w-3 h-3" />
-                      <span>{store.deliveryTime} {language === 'ru' ? 'мин' : 'min'}</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs">
-                      <Truck className="w-3 h-3 text-muted-foreground" />
-                      <span className={store.deliveryFee === 0 ? 'text-green-600 font-medium' : 'text-muted-foreground'}>
-                        {store.deliveryFee === 0 
-                          ? (language === 'ru' ? 'Бесплатно' : 'Free') 
-                          : `฿${store.deliveryFee}`}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex gap-1 mt-2 flex-wrap">
-                    {store.tags.slice(0, 2).map((tag) => (
-                      <Badge key={tag} variant="secondary" className="text-[10px] px-1.5 py-0">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-
-        {filteredStores.length === 0 && (
-          <div className="text-center py-12">
-            <ShoppingBag className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
-            <p className="text-muted-foreground">
-              {language === 'ru' ? 'Магазины не найдены' : 'No stores found'}
-            </p>
-          </div>
-        )}
+      {/* Stores Grid */}
+      <div className="space-y-3">
+        {filteredStores.map((store) => (
+          <ItemCard
+            key={store.id}
+            id={store.id}
+            title={language === 'ru' ? store.nameRu : store.nameEn}
+            image={store.image}
+            rating={store.rating}
+            reviewCount={store.reviewCount}
+            location={language === 'ru' ? store.addressRu : store.address}
+            meta={[
+              { icon: Clock, value: `${store.deliveryTime} ${language === 'ru' ? 'мин' : 'min'}` },
+              { icon: Truck, value: store.deliveryFee === 0 
+                ? (language === 'ru' ? 'Бесплатно' : 'Free') 
+                : `฿${store.deliveryFee}` },
+            ]}
+            tags={language === 'ru' ? store.tagsRu : store.tags}
+            isFeatured={store.isFeatured}
+            isAvailable={store.isOpen}
+            onClick={() => navigate(`/market/store/${store.id}`)}
+          />
+        ))}
       </div>
-    </AppLayout>
+
+      {filteredStores.length === 0 && (
+        <div className="text-center py-12">
+          <ShoppingBag className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
+          <p className="text-muted-foreground">
+            {language === 'ru' ? 'Магазины не найдены' : 'No stores found'}
+          </p>
+        </div>
+      )}
+    </MiniAppLayout>
   );
 };
 
