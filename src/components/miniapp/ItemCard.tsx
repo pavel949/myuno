@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { triggerRipple } from '@/hooks/useRipple';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { iconSizes } from '@/lib/iconMap';
 
 export interface ItemCardMeta {
   icon: LucideIcon;
@@ -102,8 +103,8 @@ export function ItemCard({
               </span>
             )}
             {isFeatured && (
-              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-gold text-black">
-                ⭐
+              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-gold text-black flex items-center gap-0.5">
+                <Star className={cn(iconSizes.xs, "fill-current")} />
               </span>
             )}
             {badge && (
@@ -129,7 +130,7 @@ export function ItemCard({
           {/* Rating */}
           {rating !== undefined && (
             <div className="flex items-center gap-1 mt-1">
-              <Star className="w-3 h-3 fill-primary text-primary" />
+              <Star className={cn(iconSizes.xs, "fill-primary text-primary")} />
               <span className="text-xs font-medium">{rating}</span>
               {reviewCount !== undefined && (
                 <span className="text-[10px] text-muted-foreground">({reviewCount})</span>
@@ -184,8 +185,8 @@ export function ItemCard({
               </span>
             )}
             {isFeatured && (
-              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-gold text-black">
-                ⭐
+              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-gold text-black flex items-center gap-0.5">
+                <Star className={cn(iconSizes.xs, "fill-current")} />
               </span>
             )}
             {badge && (
@@ -211,14 +212,14 @@ export function ItemCard({
             <h3 className="font-semibold line-clamp-2 flex items-center gap-1">
               {title}
               {isVerified && (
-                <BadgeCheck className="w-4 h-4 text-primary flex-shrink-0" />
+                <BadgeCheck className={cn(iconSizes.md, "text-primary flex-shrink-0")} />
               )}
             </h3>
 
             {/* Location */}
             {location && (
               <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                <MapPin className="w-3 h-3" />
+                <MapPin className={iconSizes.xs} />
                 <span className="line-clamp-1">{location}</span>
               </div>
             )}
@@ -227,13 +228,13 @@ export function ItemCard({
             <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-2">
               {meta.map((item, i) => (
                 <span key={i} className="flex items-center gap-1">
-                  <item.icon className="w-3.5 h-3.5" />
+                  <item.icon className={iconSizes.sm} />
                   {item.value || item.label}
                 </span>
               ))}
               {rating !== undefined && (
                 <span className="flex items-center gap-1">
-                  <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+                  <Star className={cn(iconSizes.sm, "fill-yellow-400 text-yellow-400")} />
                   {rating}
                   {reviewCount !== undefined && (
                     <span className="text-muted-foreground">({reviewCount})</span>
