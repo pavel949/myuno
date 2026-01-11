@@ -1,95 +1,11 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Stethoscope, Heart, Pill, Baby, Bone, Eye, MapPin, Clock, Phone } from 'lucide-react';
+import { Stethoscope, Phone } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from '@/components/miniapp';
 import { medicalFilterConfig, FilterValues } from '@/components/filters';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-
-const clinics = [
-  {
-    id: 'clinic-1',
-    name: 'Bangkok Hospital Phuket',
-    nameRu: 'Бангкок Госпиталь Пхукет',
-    type: 'hospital',
-    specialty: 'general',
-    image: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=600',
-    rating: 4.9,
-    reviewCount: 892,
-    location: 'Phuket Town',
-    locationRu: 'Пхукет Таун',
-    price: 1500,
-    isVerified: true,
-    isFeatured: true,
-    isOpen: true,
-    languages: ['EN', 'TH', 'RU', 'CN'],
-  },
-  {
-    id: 'clinic-2',
-    name: 'Phuket Dental Signature',
-    nameRu: 'Пхукет Дентал Сигнатюр',
-    type: 'clinic',
-    specialty: 'dental',
-    image: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=600',
-    rating: 4.8,
-    reviewCount: 234,
-    location: 'Patong',
-    locationRu: 'Патонг',
-    price: 800,
-    isVerified: true,
-    isOpen: true,
-    languages: ['EN', 'TH', 'RU'],
-  },
-  {
-    id: 'clinic-3',
-    name: 'Heart Center Phuket',
-    nameRu: 'Кардиоцентр Пхукет',
-    type: 'clinic',
-    specialty: 'cardio',
-    image: 'https://images.unsplash.com/photo-1551076805-e1869033e561?w=600',
-    rating: 4.9,
-    reviewCount: 156,
-    location: 'Kata',
-    locationRu: 'Ката',
-    price: 2500,
-    isVerified: true,
-    isOpen: true,
-    languages: ['EN', 'TH'],
-  },
-  {
-    id: 'clinic-4',
-    name: 'Kids Health Clinic',
-    nameRu: 'Детская Клиника',
-    type: 'clinic',
-    specialty: 'pediatric',
-    image: 'https://images.unsplash.com/photo-1581594693702-fbdc51b2763b?w=600',
-    rating: 4.7,
-    reviewCount: 189,
-    location: 'Rawai',
-    locationRu: 'Равай',
-    price: 1200,
-    isVerified: true,
-    isOpen: false,
-    languages: ['EN', 'TH', 'RU'],
-  },
-  {
-    id: 'clinic-5',
-    name: 'Phuket Eye Center',
-    nameRu: 'Глазной Центр Пхукет',
-    type: 'clinic',
-    specialty: 'eye',
-    image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=600',
-    rating: 4.8,
-    reviewCount: 145,
-    location: 'Phuket Town',
-    locationRu: 'Пхукет Таун',
-    price: 1000,
-    isVerified: true,
-    isOpen: true,
-    languages: ['EN', 'TH'],
-  },
-];
+import { useClinics } from '@/hooks/useClinics';
 
 const SPECIALTY_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -107,16 +23,12 @@ export default function MedicalIndex() {
   const [selectedSpecialty, setSelectedSpecialty] = useState('all');
   const [filterValues, setFilterValues] = useState<FilterValues>({});
 
-  const filteredClinics = useMemo(() => {
-    return clinics.filter(clinic => {
-      const name = language === 'ru' ? clinic.nameRu : clinic.name;
-      const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesSpecialty = selectedSpecialty === 'all' || clinic.specialty === selectedSpecialty;
-      if (filterValues.clinicType && clinic.type !== filterValues.clinicType) return false;
-      if (filterValues.availability === 'open' && !clinic.isOpen) return false;
-      return matchesSearch && matchesSpecialty;
-    });
-  }, [clinics, searchQuery, selectedSpecialty, filterValues, language]);
+  const { clinics, isLoading } = useClinics({
+    specialty: selectedSpecialty,
+    clinicType: filterValues.clinicType as string | undefined,
+    is24h: filterValues.availability === 'open' ? true : undefined,
+    searchQuery,
+  });
 
   const quickItems: QuickGridItem[] = [
     { icon: '💊', label: language === 'ru' ? 'Аптеки' : 'Pharmacy', onClick: () => navigate('/pharmacy') },
@@ -125,6 +37,29 @@ export default function MedicalIndex() {
     { icon: '❤️', label: language === 'ru' ? 'Кардиолог' : 'Cardio', onClick: () => setSelectedSpecialty('cardio') },
     { icon: '👶', label: language === 'ru' ? 'Педиатр' : 'Pediatric', onClick: () => setSelectedSpecialty('pediatric') },
   ];
+
+  // Check if clinic is currently open based on working_hours
+  const isClinicOpen = (workingHours: Record<string, string>, is24h: boolean): boolean => {
+    if (is24h) return true;
+    
+    const now = new Date();
+    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const today = days[now.getDay()];
+    const hours = workingHours[today];
+    
+    if (!hours) return false;
+    
+    const [open, close] = hours.split('-');
+    if (!open || !close) return false;
+    
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const [openH, openM] = open.split(':').map(Number);
+    const [closeH, closeM] = close.split(':').map(Number);
+    const openMinutes = openH * 60 + openM;
+    const closeMinutes = closeH * 60 + closeM;
+    
+    return currentMinutes >= openMinutes && currentMinutes <= closeMinutes;
+  };
 
   return (
     <MiniAppLayout
@@ -144,8 +79,8 @@ export default function MedicalIndex() {
       filterConfig={medicalFilterConfig}
       filterValues={filterValues}
       onFilterChange={setFilterValues}
-      isLoading={false}
-      isEmpty={filteredClinics.length === 0}
+      isLoading={isLoading}
+      isEmpty={clinics.length === 0}
       emptyIcon={Stethoscope}
       emptyText={language === 'ru' ? 'Клиники не найдены' : 'No clinics found'}
     >
@@ -160,9 +95,11 @@ export default function MedicalIndex() {
               {language === 'ru' ? 'Звоните 1669' : 'Call 1669'}
             </p>
           </div>
-          <Button variant="destructive" size="sm" className="gap-1">
-            <Phone className="w-4 h-4" />
-            {language === 'ru' ? 'Позвонить' : 'Call Now'}
+          <Button variant="destructive" size="sm" className="gap-1" asChild>
+            <a href="tel:1669">
+              <Phone className="w-4 h-4" />
+              {language === 'ru' ? 'Позвонить' : 'Call Now'}
+            </a>
           </Button>
         </div>
       </div>
@@ -170,27 +107,31 @@ export default function MedicalIndex() {
       <MiniAppQuickGrid items={quickItems} columns={5} className="mb-6" />
       
       <div className="grid gap-4">
-        {filteredClinics.map((clinic) => (
-          <ItemCard
-            key={clinic.id}
-            image={clinic.image}
-            title={language === 'ru' ? clinic.nameRu : clinic.name}
-            rating={clinic.rating}
-            reviewCount={clinic.reviewCount}
-            price={clinic.price}
-            pricePrefix={language === 'ru' ? 'от' : 'from'}
-            currency="฿"
-            location={language === 'ru' ? clinic.locationRu : clinic.location}
-            isVerified={clinic.isVerified}
-            isFeatured={clinic.isFeatured}
-            badge={clinic.isOpen 
-              ? { text: language === 'ru' ? 'Открыто' : 'Open', className: 'bg-green-500 text-white' }
-              : { text: language === 'ru' ? 'Закрыто' : 'Closed', className: 'bg-muted text-muted-foreground' }
-            }
-            tags={clinic.languages}
-            onClick={() => navigate(`/medical/clinic/${clinic.id}`)}
-          />
-        ))}
+        {clinics.map((clinic) => {
+          const isOpen = isClinicOpen(clinic.working_hours || {}, clinic.is_24h);
+          
+          return (
+            <ItemCard
+              key={clinic.id}
+              image={clinic.cover_image || 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=600'}
+              title={language === 'ru' ? clinic.name_ru : clinic.name_en}
+              rating={clinic.rating}
+              reviewCount={clinic.review_count}
+              price={clinic.consultation_price || 0}
+              pricePrefix={language === 'ru' ? 'от' : 'from'}
+              currency="฿"
+              location={clinic.district || clinic.address || ''}
+              isVerified={clinic.is_verified}
+              isFeatured={clinic.is_featured}
+              badge={isOpen 
+                ? { text: language === 'ru' ? 'Открыто' : 'Open', className: 'bg-green-500 text-white' }
+                : { text: language === 'ru' ? 'Закрыто' : 'Closed', className: 'bg-muted text-muted-foreground' }
+              }
+              tags={clinic.languages}
+              onClick={() => navigate(`/medical/clinic/${clinic.id}`)}
+            />
+          );
+        })}
       </div>
     </MiniAppLayout>
   );

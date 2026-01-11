@@ -571,6 +571,110 @@ export type Database = {
         }
         Relationships: []
       }
+      clinics: {
+        Row: {
+          address: string | null
+          clinic_type: string
+          consultation_price: number | null
+          cover_image: string | null
+          created_at: string
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          district: string | null
+          email: string | null
+          id: string
+          images: string[] | null
+          is_24h: boolean | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          languages: string[] | null
+          lat: number | null
+          lng: number | null
+          name_en: string
+          name_ru: string
+          phone: string | null
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          specialty: string[] | null
+          updated_at: string
+          website: string | null
+          working_hours: Json | null
+        }
+        Insert: {
+          address?: string | null
+          clinic_type?: string
+          consultation_price?: number | null
+          cover_image?: string | null
+          created_at?: string
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          id?: string
+          images?: string[] | null
+          is_24h?: boolean | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          name_en: string
+          name_ru: string
+          phone?: string | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          specialty?: string[] | null
+          updated_at?: string
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Update: {
+          address?: string | null
+          clinic_type?: string
+          consultation_price?: number | null
+          cover_image?: string | null
+          created_at?: string
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          id?: string
+          images?: string[] | null
+          is_24h?: boolean | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          name_en?: string
+          name_ru?: string
+          phone?: string | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          specialty?: string[] | null
+          updated_at?: string
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clinics_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       currencies: {
         Row: {
           code: string
@@ -591,6 +695,86 @@ export type Database = {
           symbol?: string
         }
         Relationships: []
+      }
+      doctors: {
+        Row: {
+          available_days: string[] | null
+          available_times: Json | null
+          clinic_id: string
+          consultation_price: number | null
+          created_at: string
+          currency: string | null
+          experience_years: number | null
+          id: string
+          is_active: boolean | null
+          is_available: boolean | null
+          languages: string[] | null
+          name_en: string
+          name_ru: string
+          photo: string | null
+          qualification: string | null
+          qualification_ru: string | null
+          rating: number | null
+          review_count: number | null
+          specialty: string
+          specialty_ru: string | null
+          updated_at: string
+        }
+        Insert: {
+          available_days?: string[] | null
+          available_times?: Json | null
+          clinic_id: string
+          consultation_price?: number | null
+          created_at?: string
+          currency?: string | null
+          experience_years?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_available?: boolean | null
+          languages?: string[] | null
+          name_en: string
+          name_ru: string
+          photo?: string | null
+          qualification?: string | null
+          qualification_ru?: string | null
+          rating?: number | null
+          review_count?: number | null
+          specialty: string
+          specialty_ru?: string | null
+          updated_at?: string
+        }
+        Update: {
+          available_days?: string[] | null
+          available_times?: Json | null
+          clinic_id?: string
+          consultation_price?: number | null
+          created_at?: string
+          currency?: string | null
+          experience_years?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_available?: boolean | null
+          languages?: string[] | null
+          name_en?: string
+          name_ru?: string
+          photo?: string | null
+          qualification?: string | null
+          qualification_ru?: string | null
+          rating?: number | null
+          review_count?: number | null
+          specialty?: string
+          specialty_ru?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doctors_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       event_bookings: {
         Row: {
@@ -924,6 +1108,62 @@ export type Database = {
           name_ru?: string | null
         }
         Relationships: []
+      }
+      medical_services: {
+        Row: {
+          category: string
+          clinic_id: string
+          created_at: string
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          duration_minutes: number | null
+          id: string
+          is_active: boolean | null
+          name_en: string
+          name_ru: string
+          price: number
+          specialty: string | null
+        }
+        Insert: {
+          category: string
+          clinic_id: string
+          created_at?: string
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          duration_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          name_en: string
+          name_ru: string
+          price: number
+          specialty?: string | null
+        }
+        Update: {
+          category?: string
+          clinic_id?: string
+          created_at?: string
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          duration_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          name_en?: string
+          name_ru?: string
+          price?: number
+          specialty?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medical_services_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notification_preferences: {
         Row: {
@@ -3939,6 +4179,7 @@ export type Database = {
         | "transport"
         | "food"
         | "tour"
+        | "medical"
       payment_status:
         | "pending"
         | "processing"
@@ -4105,6 +4346,7 @@ export const Constants = {
         "transport",
         "food",
         "tour",
+        "medical",
       ],
       payment_status: [
         "pending",
