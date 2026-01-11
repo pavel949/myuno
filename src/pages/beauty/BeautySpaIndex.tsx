@@ -11,7 +11,7 @@ const demoSalons = [
     id: 'salon-1',
     name: 'Orchid Spa & Wellness',
     nameRu: 'Орхидея СПА и Велнес',
-    image: 'https://images.unsplash.com/photo-1540555700478-4be289fbec6c?w=600',
+    image: 'https://images.unsplash.com/photo-1600334129128-685c5582fd35?w=600',
     rating: 4.9,
     reviewCount: 156,
     location: 'Kata Beach',
