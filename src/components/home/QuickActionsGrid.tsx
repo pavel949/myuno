@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { 
-  Car, UtensilsCrossed, AlertTriangle, Plane,
-  SprayCan, Stethoscope, Shield, Sparkles
+  Plane, Flower2, Car, Droplets, Home, Bike,
+  AlertTriangle, Stethoscope
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { triggerRipple } from '@/hooks/useRipple';
@@ -19,32 +19,59 @@ interface QuickAction {
   badgeRu?: string;
 }
 
+// Prioritized: Transfer, Flowers, Car/Bike rental, Water, Short-term rental
 const quickActions: QuickAction[] = [
   {
-    id: 'taxi',
-    icon: Car,
-    labelEn: 'Taxi',
-    labelRu: 'Такси',
-    path: '/transport/taxi',
-    gradient: 'from-yellow-500 to-amber-500',
-    badge: 'FAST',
-    badgeRu: 'БЫСТРО',
-  },
-  {
-    id: 'food',
-    icon: UtensilsCrossed,
-    labelEn: 'Food',
-    labelRu: 'Еда',
-    path: '/restaurants',
-    gradient: 'from-orange-500 to-red-500',
-  },
-  {
-    id: 'airport',
+    id: 'transfer',
     icon: Plane,
-    labelEn: 'Airport',
-    labelRu: 'Аэропорт',
+    labelEn: 'Transfer',
+    labelRu: 'Трансфер',
     path: '/transport/airport',
     gradient: 'from-blue-500 to-indigo-500',
+    badge: 'POPULAR',
+    badgeRu: 'ТОП',
+  },
+  {
+    id: 'flowers',
+    icon: Flower2,
+    labelEn: 'Flowers',
+    labelRu: 'Цветы',
+    path: '/flowers',
+    gradient: 'from-rose-500 to-pink-500',
+  },
+  {
+    id: 'car-rental',
+    icon: Car,
+    labelEn: 'Car Rental',
+    labelRu: 'Авто',
+    path: '/transport',
+    gradient: 'from-amber-500 to-orange-500',
+  },
+  {
+    id: 'bike-rental',
+    icon: Bike,
+    labelEn: 'Bike',
+    labelRu: 'Байк',
+    path: '/transport',
+    gradient: 'from-lime-500 to-green-500',
+  },
+  {
+    id: 'water',
+    icon: Droplets,
+    labelEn: 'Water',
+    labelRu: 'Вода',
+    path: '/water',
+    gradient: 'from-cyan-500 to-blue-500',
+  },
+  {
+    id: 'property',
+    icon: Home,
+    labelEn: 'Rent',
+    labelRu: 'Аренда',
+    path: '/property',
+    gradient: 'from-teal-500 to-emerald-500',
+    badge: 'INSTANT',
+    badgeRu: 'МГНОВЕННО',
   },
   {
     id: 'sos',
@@ -56,14 +83,6 @@ const quickActions: QuickAction[] = [
     isUrgent: true,
   },
   {
-    id: 'cleaning',
-    icon: SprayCan,
-    labelEn: 'Cleaning',
-    labelRu: 'Уборка',
-    path: '/cleaning',
-    gradient: 'from-cyan-500 to-teal-500',
-  },
-  {
     id: 'medical',
     icon: Stethoscope,
     labelEn: 'Medical',
@@ -72,22 +91,6 @@ const quickActions: QuickAction[] = [
     gradient: 'from-emerald-500 to-green-500',
     badge: '24/7',
     badgeRu: '24/7',
-  },
-  {
-    id: 'insurance',
-    icon: Shield,
-    labelEn: 'Insurance',
-    labelRu: 'Страховка',
-    path: '/insurance',
-    gradient: 'from-indigo-500 to-purple-500',
-  },
-  {
-    id: 'beauty',
-    icon: Sparkles,
-    labelEn: 'Beauty',
-    labelRu: 'Красота',
-    path: '/beauty',
-    gradient: 'from-pink-500 to-rose-500',
   },
 ];
 
