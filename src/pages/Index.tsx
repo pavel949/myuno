@@ -74,6 +74,22 @@ const Index = () => {
       <PullToRefresh onRefresh={handleRefresh} className="h-[calc(100vh-8rem)]">
         <div className="px-4 py-6 space-y-6" key={refreshKey}>
           
+          {/* Hero Section - What is UNO */}
+          <div className="text-center space-y-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
+              <Shield className="w-3.5 h-3.5" />
+              {language === 'ru' ? 'Надёжная инфраструктура' : 'Trusted Infrastructure'}
+            </div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground via-foreground to-primary bg-clip-text">
+              UNO
+            </h1>
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto">
+              {language === 'ru' 
+                ? 'Всё для комфортной жизни за рубежом — проверенные сервисы, надёжные партнёры, прозрачные цены' 
+                : 'Everything for comfortable life abroad — verified services, trusted partners, transparent prices'}
+            </p>
+          </div>
+
           {/* Search Bar */}
           <div 
             onClick={() => setShowSearch(true)}
@@ -102,27 +118,33 @@ const Index = () => {
             <PromoBanner />
           </FadeInUp>
 
-          {/* Property Owner CTA */}
+          {/* Property Owner CTA - Prominent */}
           <FadeInUp delay={0.12}>
             <button 
               onClick={() => navigate('/owner')}
-              className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-500/10 via-card to-emerald-500/5 p-4 border border-teal-500/20 hover:border-teal-500/40 transition-all group text-left"
+              className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 p-5 shadow-lg shadow-teal-500/20 hover:shadow-teal-500/30 transition-all group text-left"
             >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                  <Building2 className="w-6 h-6 text-white" />
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOCAxOC04LjA1OSAxOC0xOC04LjA1OS0xOC0xOC0xOHptMCAzMmMtNy43MzIgMC0xNC02LjI2OC0xNC0xNHM2LjI2OC0xNCAxNC0xNCAxNCA2LjI2OCAxNCAxNC02LjI2OCAxNC0xNCAxNHoiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iLjA1Ii8+PC9nPjwvc3ZnPg==')] opacity-30" />
+              <div className="relative flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                  <Building2 className="w-7 h-7 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-foreground text-sm">
-                    {language === 'ru' ? 'Владелец недвижимости?' : 'Property Owner?'}
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-white/80 bg-white/20 px-2 py-0.5 rounded-full">
+                      {language === 'ru' ? 'Для владельцев' : 'For Owners'}
+                    </span>
+                  </div>
+                  <h3 className="font-bold text-white text-base">
+                    {language === 'ru' ? 'Включите свой объект' : 'List Your Property'}
                   </h3>
-                  <p className="text-xs text-muted-foreground line-clamp-1">
+                  <p className="text-xs text-white/80 line-clamp-1">
                     {language === 'ru' 
-                      ? 'Управляйте арендой в одном месте' 
-                      : 'Manage rentals in one place'}
+                      ? 'Управление, сервис, бронирования — всё в одном месте' 
+                      : 'Management, service, bookings — all in one place'}
                   </p>
                 </div>
-                <ArrowRight className="w-5 h-5 text-teal-500 flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-6 h-6 text-white flex-shrink-0 group-hover:translate-x-1 transition-transform" />
               </div>
             </button>
           </FadeInUp>
