@@ -1,16 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  ShoppingBag, Apple, Gem, Palette, Gift, Shirt, Sparkles, Wine, Cookie,
-  Star, MapPin, Clock, Truck, SlidersHorizontal
-} from 'lucide-react';
+import { ShoppingBag, Clock, Truck, SlidersHorizontal } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MiniAppLayout, ItemCard, type MiniAppCategory } from '@/components/miniapp';
 import { UniversalFilter, ActiveFilters, FilterValues } from '@/components/filters/UniversalFilter';
 import { marketFilterConfig } from '@/components/filters/MarketFilters';
+import { useStores, Store } from '@/hooks/useStores';
 
 const MARKET_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '🛒' },
@@ -22,133 +19,14 @@ const MARKET_CATEGORIES: MiniAppCategory[] = [
   { id: 'clothing', labelEn: 'Clothing', labelRu: 'Одежда', icon: '👔' },
 ];
 
-export const stores = [
-  {
-    id: 'villa-market',
-    nameEn: 'Villa Market',
-    nameRu: 'Вилла Маркет',
-    category: 'grocery',
-    image: 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=800',
-    rating: 4.8,
-    reviewCount: 324,
-    address: 'Central Festival, Phuket',
-    addressRu: 'Сентрал Фестиваль, Пхукет',
-    deliveryTime: '30-45',
-    deliveryFee: 50,
-    minOrder: 300,
-    isOpen: true,
-    tags: ['imported', 'organic', 'premium'],
-    tagsRu: ['импорт', 'органик', 'премиум'],
-  },
-  {
-    id: 'makro',
-    nameEn: 'Makro',
-    nameRu: 'Макро',
-    category: 'grocery',
-    image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800',
-    rating: 4.5,
-    reviewCount: 567,
-    address: 'Phuket Town',
-    addressRu: 'Пхукет Таун',
-    deliveryTime: '45-60',
-    deliveryFee: 40,
-    minOrder: 500,
-    isOpen: true,
-    tags: ['wholesale', 'bulk'],
-    tagsRu: ['оптом', 'большие объемы'],
-  },
-  {
-    id: 'thai-souvenirs',
-    nameEn: 'Thai Treasures',
-    nameRu: 'Тайские Сокровища',
-    category: 'souvenirs',
-    image: 'https://images.unsplash.com/photo-1528181304800-259b08848526?w=800',
-    rating: 4.7,
-    reviewCount: 234,
-    address: 'Old Phuket Town',
-    addressRu: 'Старый Пхукет',
-    deliveryTime: '60-90',
-    deliveryFee: 60,
-    minOrder: 200,
-    isOpen: true,
-    tags: ['handmade', 'authentic'],
-    tagsRu: ['ручная работа', 'аутентичный'],
-  },
-  {
-    id: 'pearl-gallery',
-    nameEn: 'Pearl Gallery',
-    nameRu: 'Галерея Жемчуга',
-    category: 'jewelry',
-    image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800',
-    rating: 4.9,
-    reviewCount: 156,
-    address: 'Patong Beach',
-    addressRu: 'Пляж Патонг',
-    deliveryTime: '60-90',
-    deliveryFee: 0,
-    minOrder: 1000,
-    isOpen: true,
-    tags: ['luxury', 'certified'],
-    tagsRu: ['люкс', 'сертифицировано'],
-    isFeatured: true,
-  },
-  {
-    id: 'thai-cosmetics',
-    nameEn: 'Beauty Island',
-    nameRu: 'Бьюти Айленд',
-    category: 'cosmetics',
-    image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800',
-    rating: 4.6,
-    reviewCount: 412,
-    address: 'Jungceylon Mall',
-    addressRu: 'ТЦ Джанг Цейлон',
-    deliveryTime: '45-60',
-    deliveryFee: 50,
-    minOrder: 300,
-    isOpen: true,
-    tags: ['natural', 'thai-herbs'],
-    tagsRu: ['натуральное', 'тайские травы'],
-  },
-  {
-    id: 'home-decor',
-    nameEn: 'Bali Home',
-    nameRu: 'Бали Хоум',
-    category: 'decor',
-    image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800',
-    rating: 4.7,
-    reviewCount: 189,
-    address: 'Cherng Talay',
-    addressRu: 'Черенг Талай',
-    deliveryTime: '90-120',
-    deliveryFee: 100,
-    minOrder: 500,
-    isOpen: true,
-    tags: ['handcrafted', 'unique'],
-    tagsRu: ['ручная работа', 'уникальный'],
-  },
-  {
-    id: 'thai-silk',
-    nameEn: 'Thai Silk House',
-    nameRu: 'Дом Тайского Шёлка',
-    category: 'clothing',
-    image: 'https://images.unsplash.com/photo-1558171813-4c088753af8f?w=800',
-    rating: 4.8,
-    reviewCount: 278,
-    address: 'Kata Beach',
-    addressRu: 'Пляж Ката',
-    deliveryTime: '60-90',
-    deliveryFee: 50,
-    minOrder: 400,
-    isOpen: true,
-    tags: ['premium', 'authentic'],
-    tagsRu: ['премиум', 'аутентичный'],
-  },
-];
+// Export for StoreDetail compatibility
+export const stores: Store[] = [];
 
 const MarketIndex = () => {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { items } = useCart();
+  const { stores: dbStores, isLoading } = useStores();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterValues, setFilterValues] = useState<FilterValues>({});
@@ -179,25 +57,21 @@ const MarketIndex = () => {
   };
 
   const filteredStores = useMemo(() => {
-    return stores.filter(store => {
+    return dbStores.filter(store => {
       const matchesCategory = selectedCategory === 'all' || store.category === selectedCategory;
       
-      const name = language === 'ru' ? store.nameRu : store.nameEn;
+      const name = language === 'ru' ? store.name_ru : store.name_en;
       const matchesSearch = searchQuery === '' || 
         name.toLowerCase().includes(searchQuery.toLowerCase());
       
-      // Delivery filter
       const deliveryFilters = filterValues.delivery as string[] || [];
-      if (deliveryFilters.includes('free-delivery') && store.deliveryFee !== 0) {
-        return false;
-      }
-      if (deliveryFilters.includes('express') && parseInt(store.deliveryTime.split('-')[0]) > 45) {
+      if (deliveryFilters.includes('free-delivery') && store.delivery_fee !== 0) {
         return false;
       }
       
       return matchesCategory && matchesSearch;
     });
-  }, [stores, selectedCategory, searchQuery, filterValues, language]);
+  }, [dbStores, selectedCategory, searchQuery, filterValues, language]);
 
   return (
     <MiniAppLayout
@@ -220,6 +94,11 @@ const MarketIndex = () => {
       categories={MARKET_CATEGORIES}
       selectedCategory={selectedCategory}
       onCategoryChange={setSelectedCategory}
+      
+      isLoading={isLoading}
+      isEmpty={filteredStores.length === 0}
+      emptyIcon={ShoppingBag}
+      emptyText={language === 'ru' ? 'Магазины не найдены' : 'No stores found'}
       
       showCartButton
       cartItemCount={cartItemCount}
@@ -244,7 +123,6 @@ const MarketIndex = () => {
       resultsCount={filteredStores.length}
       resultsLabel={language === 'ru' ? 'Магазины' : 'Stores'}
     >
-      {/* Active Filters */}
       <ActiveFilters
         config={marketFilterConfig}
         values={filterValues}
@@ -253,38 +131,27 @@ const MarketIndex = () => {
         className="mb-4"
       />
 
-      {/* Stores Grid */}
       <div className="space-y-3">
         {filteredStores.map((store) => (
           <ItemCard
             key={store.id}
-            title={language === 'ru' ? store.nameRu : store.nameEn}
-            image={store.image}
+            title={language === 'ru' ? store.name_ru : store.name_en}
+            image={store.cover_image || 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=800'}
             rating={store.rating}
-            reviewCount={store.reviewCount}
-            location={language === 'ru' ? store.addressRu : store.address}
+            reviewCount={store.review_count}
+            location={store.address ?? undefined}
             meta={[
-              { icon: Clock, value: `${store.deliveryTime} ${language === 'ru' ? 'мин' : 'min'}` },
-              { icon: Truck, value: store.deliveryFee === 0 
+              { icon: Clock, value: `30-60 ${language === 'ru' ? 'мин' : 'min'}` },
+              { icon: Truck, value: store.delivery_fee === 0 
                 ? (language === 'ru' ? 'Бесплатно' : 'Free') 
-                : `฿${store.deliveryFee}` },
+                : `฿${store.delivery_fee}` },
             ]}
-            tags={language === 'ru' ? store.tagsRu : store.tags}
-            isFeatured={store.isFeatured}
-            isAvailable={store.isOpen}
+            isVerified={store.is_verified}
+            isAvailable={store.delivery_available}
             onClick={() => navigate(`/market/store/${store.id}`)}
           />
         ))}
       </div>
-
-      {filteredStores.length === 0 && (
-        <div className="text-center py-12">
-          <ShoppingBag className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
-          <p className="text-muted-foreground">
-            {language === 'ru' ? 'Магазины не найдены' : 'No stores found'}
-          </p>
-        </div>
-      )}
     </MiniAppLayout>
   );
 };
