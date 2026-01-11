@@ -63,9 +63,15 @@ export default function OwnerDashboard() {
       onClick: () => navigate('/owner/calendar')
     },
     { 
+      icon: DollarSign, 
+      label: isRu ? 'Финансы' : 'Finances', 
+      color: 'bg-green-500',
+      onClick: () => navigate('/owner/financials')
+    },
+    { 
       icon: Key, 
       label: isRu ? 'Check-in' : 'Check-in', 
-      color: 'bg-green-500',
+      color: 'bg-emerald-500',
       onClick: () => navigate('/owner/service-request?type=check_in')
     },
     { 
@@ -172,7 +178,7 @@ export default function OwnerDashboard() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {quickActions.map((action, idx) => (
               <button
                 key={idx}
