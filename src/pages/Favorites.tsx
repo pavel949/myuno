@@ -32,7 +32,7 @@ import { FavoriteCollections } from '@/components/favorites/FavoriteCollections'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 
-type FilterType = 'all' | 'course' | 'tutor' | 'event' | 'property' | 'vehicle' | 'clinic' | 'gym' | 'tour' | 'water_activity';
+type FilterType = 'all' | 'course' | 'tutor' | 'event' | 'property' | 'vehicle' | 'clinic' | 'gym' | 'tour' | 'water_activity' | 'restaurant';
 type ViewMode = 'grid' | 'list';
 
 export default function Favorites() {
@@ -50,6 +50,7 @@ export default function Favorites() {
 
   const filters: { value: FilterType; label: string; labelRu: string; icon: React.ElementType }[] = [
     { value: 'all', label: 'All', labelRu: 'Все', icon: Heart },
+    { value: 'restaurant', label: 'Restaurants', labelRu: 'Рестораны', icon: Heart },
     { value: 'tour', label: 'Tours', labelRu: 'Туры', icon: Heart },
     { value: 'course', label: 'Courses', labelRu: 'Курсы', icon: GraduationCap },
     { value: 'tutor', label: 'Tutors', labelRu: 'Репетиторы', icon: User },
@@ -75,6 +76,7 @@ export default function Favorites() {
       gym: `/fitness/${item.item_id}`,
       tour: `/tours/${item.item_id}`,
       water_activity: `/water/${item.item_id}`,
+      restaurant: `/restaurants/${item.item_id}`,
     };
     const route = routes[item.item_type];
     if (route) navigate(route);
@@ -91,6 +93,7 @@ export default function Favorites() {
       gym: { en: 'Gym', ru: 'Фитнес' },
       tour: { en: 'Tour', ru: 'Тур' },
       water_activity: { en: 'Water Activity', ru: 'Водный спорт' },
+      restaurant: { en: 'Restaurant', ru: 'Ресторан' },
     };
     return labels[type]?.[language] || type;
   };

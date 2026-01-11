@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   ArrowLeft, Star, Clock, MapPin, Phone, Bike, Plus, Minus, 
-  ShoppingCart, Heart, Share2, CalendarDays, UtensilsCrossed
+  ShoppingCart, Share2, CalendarDays, UtensilsCrossed
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -14,6 +14,8 @@ import { cn } from '@/lib/utils';
 import { useViewHistory } from '@/hooks/useViewHistory';
 import { toast } from 'sonner';
 import { getRestaurantById } from './restaurantsData';
+import { FavoriteButton } from '@/components/uno/FavoriteButton';
+import { ReviewsSection } from '@/components/reviews/ReviewsSection';
 
 export default function RestaurantDetail() {
   const { id } = useParams();
@@ -21,11 +23,10 @@ export default function RestaurantDetail() {
   const [searchParams] = useSearchParams();
   const { language } = useLanguage();
   const { addItem, removeItem, updateQuantity, items, getItemsByProvider } = useCart();
-  const [isFavorite, setIsFavorite] = useState(false);
   const { trackView } = useViewHistory();
 
   const initialMode = searchParams.get('mode') || 'delivery';
-  const [activeTab, setActiveTab] = useState<'menu' | 'sets'>('menu');
+  const [activeTab, setActiveTab] = useState<'menu' | 'sets' | 'reviews'>('menu');
 
   const restaurant = getRestaurantById(id || '');
   const providerId = id || '';
@@ -110,12 +111,19 @@ export default function RestaurantDetail() {
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="flex gap-2">
-              <button
-                onClick={() => setIsFavorite(!isFavorite)}
-                className="w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center"
-              >
-                <Heart className={cn("w-5 h-5", isFavorite && "fill-red-500 text-red-500")} />
-              </button>
+              <FavoriteButton
+                itemType="restaurant"
+                itemId={id || ''}
+                itemData={{
+                  name: restaurant.nameEn,
+                  nameRu: restaurant.nameRu,
+                  image: restaurant.image,
+                  rating: restaurant.rating,
+                  location: restaurant.location,
+                  cuisine: restaurant.cuisine,
+                }}
+                className="bg-background/80 backdrop-blur-sm"
+              />
               <button className="w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center">
                 <Share2 className="w-5 h-5" />
               </button>
@@ -197,22 +205,26 @@ export default function RestaurantDetail() {
           </div>
         </div>
 
-        {/* Tabs for Menu / Set Menus */}
-        {restaurant.hasSetMenus && restaurant.setMenus && restaurant.setMenus.length > 0 && (
-          <div className="px-4 mt-6">
-            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'menu' | 'sets')}>
-              <TabsList className="w-full grid grid-cols-2">
-                <TabsTrigger value="menu" className="gap-2">
-                  <UtensilsCrossed className="w-4 h-4" />
-                  {language === 'ru' ? 'Меню' : 'Menu'}
-                </TabsTrigger>
+        {/* Tabs for Menu / Set Menus / Reviews */}
+        <div className="px-4 mt-6">
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'menu' | 'sets' | 'reviews')}>
+            <TabsList className={cn("w-full grid", restaurant.hasSetMenus && restaurant.setMenus && restaurant.setMenus.length > 0 ? "grid-cols-3" : "grid-cols-2")}>
+              <TabsTrigger value="menu" className="gap-2">
+                <UtensilsCrossed className="w-4 h-4" />
+                {language === 'ru' ? 'Меню' : 'Menu'}
+              </TabsTrigger>
+              {restaurant.hasSetMenus && restaurant.setMenus && restaurant.setMenus.length > 0 && (
                 <TabsTrigger value="sets" className="gap-2">
-                  🥂 {language === 'ru' ? 'Сет-меню' : 'Set Menus'}
+                  🥂 {language === 'ru' ? 'Сеты' : 'Sets'}
                 </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-        )}
+              )}
+              <TabsTrigger value="reviews" className="gap-2">
+                <Star className="w-4 h-4" />
+                {language === 'ru' ? 'Отзывы' : 'Reviews'}
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
 
         {/* Set Menus */}
         {activeTab === 'sets' && restaurant.setMenus && (
@@ -364,6 +376,17 @@ export default function RestaurantDetail() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Reviews Tab */}
+        {activeTab === 'reviews' && (
+          <div className="px-4 mt-4">
+            <ReviewsSection 
+              itemType="restaurant" 
+              itemId={id || ''} 
+              itemName={language === 'ru' ? restaurant.nameRu : restaurant.nameEn}
+            />
           </div>
         )}
 
