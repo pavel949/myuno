@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { format } from 'date-fns';
-import { Anchor, Users, Clock } from 'lucide-react';
+import { Anchor, Users, Clock, Sparkles } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -14,6 +14,7 @@ import { BookingSummary } from '@/components/booking/BookingSummary';
 import { BookingBottomBar } from '@/components/booking/BookingBottomBar';
 import { BookingConfirmation } from '@/components/booking/BookingConfirmation';
 import { BackButton } from '@/components/uno/BackButton';
+import { YachtExperienceSelect, YACHT_EXPERIENCES } from '@/components/yachts/YachtExperienceSelect';
 
 // Demo yacht data
 const getYacht = (id: string) => ({
@@ -48,11 +49,18 @@ export default function YachtBooking() {
     notes: '',
   });
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
+  const [selectedExperiences, setSelectedExperiences] = useState<string[]>([]);
   const [bookingResult, setBookingResult] = useState<{ bookingId: string } | null>(null);
 
+  // Calculate experiences total
+  const experiencesTotal = selectedExperiences.reduce((sum, id) => {
+    const exp = YACHT_EXPERIENCES.find(e => e.id === id);
+    return sum + (exp?.price || 0);
+  }, 0);
+
   const basePrice = isHalfDay ? yacht.priceHalfDay : yacht.priceFullDay;
-  const serviceFee = Math.round(basePrice * 0.05);
-  const total = basePrice + serviceFee;
+  const serviceFee = Math.round((basePrice + experiencesTotal) * 0.05);
+  const total = basePrice + experiencesTotal + serviceFee;
 
   const availableTimes = isHalfDay 
     ? ['09:00', '14:00']
@@ -65,19 +73,37 @@ export default function YachtBooking() {
     const [hours, minutes] = time.split(':').map(Number);
     scheduledAt.setHours(hours, minutes);
 
+    // Build experiences list for notes
+    const experienceNames = selectedExperiences.map(id => {
+      const exp = YACHT_EXPERIENCES.find(e => e.id === id);
+      return exp ? (language === 'ru' ? exp.labelRu : exp.labelEn) : '';
+    }).filter(Boolean).join(', ');
+
     const result = await createBooking({
       booking_type: 'transport', // Use transport as closest type for yacht
       scheduled_at: scheduledAt.toISOString(),
       total_amount: total,
       currency: 'THB',
-      notes: `Yacht: ${yacht.nameEn}. ${isHalfDay ? 'Half day' : 'Full day'} charter. ${guests} guests. ${contactData.notes || ''}`,
-      items: [{
-        item_type: 'yacht-rental',
-        item_name: language === 'ru' ? yacht.nameRu : yacht.nameEn,
-        quantity: 1,
-        unit_price: basePrice,
-        subtotal: basePrice,
-      }],
+      notes: `Yacht: ${yacht.nameEn}. ${isHalfDay ? 'Half day' : 'Full day'} charter. ${guests} guests.${experienceNames ? ` Experiences: ${experienceNames}.` : ''} ${contactData.notes || ''}`,
+      items: [
+        {
+          item_type: 'yacht-rental',
+          item_name: language === 'ru' ? yacht.nameRu : yacht.nameEn,
+          quantity: 1,
+          unit_price: basePrice,
+          subtotal: basePrice,
+        },
+        ...selectedExperiences.map(id => {
+          const exp = YACHT_EXPERIENCES.find(e => e.id === id)!;
+          return {
+            item_type: 'yacht-experience',
+            item_name: language === 'ru' ? exp.labelRu : exp.labelEn,
+            quantity: 1,
+            unit_price: exp.price,
+            subtotal: exp.price,
+          };
+        }),
+      ],
       participants: [{
         name: contactData.name,
         phone: contactData.phone,
@@ -178,6 +204,14 @@ export default function YachtBooking() {
             label={language === 'ru' ? 'Количество гостей' : 'Number of Guests'}
           />
 
+          {/* Experiences */}
+          <div className="p-4 bg-gradient-to-br from-amber-500/5 to-orange-500/5 rounded-xl border border-amber-500/20">
+            <YachtExperienceSelect
+              selected={selectedExperiences}
+              onChange={setSelectedExperiences}
+            />
+          </div>
+
           {/* Contact */}
           <div>
             <h3 className="font-semibold mb-3">
@@ -226,6 +260,14 @@ export default function YachtBooking() {
                 quantity: 1,
                 price: basePrice,
               },
+              ...selectedExperiences.map(id => {
+                const exp = YACHT_EXPERIENCES.find(e => e.id === id)!;
+                return {
+                  name: language === 'ru' ? exp.labelRu : exp.labelEn,
+                  quantity: 1,
+                  price: exp.price,
+                };
+              }),
               {
                 name: language === 'ru' ? 'Сервисный сбор' : 'Service fee',
                 quantity: 1,

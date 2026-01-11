@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Anchor, Users, Clock, SlidersHorizontal } from 'lucide-react';
+import { Anchor, Users, Clock, SlidersHorizontal, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { MiniAppLayout, MiniAppQuickGrid, ItemCard, type MiniAppCategory } from '@/components/miniapp';
 import { UniversalFilter, ActiveFilters, yachtFilterConfig, FilterValues } from '@/components/filters';
+import { ExperienceFilterChips, YACHT_EXPERIENCES } from '@/components/yachts/YachtExperienceSelect';
 
 const YACHT_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -110,6 +111,7 @@ export default function YachtsIndex() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterValues, setFilterValues] = useState<FilterValues>({});
+  const [selectedExperiences, setSelectedExperiences] = useState<string[]>([]);
 
   const activeFilterCount = useMemo(() => {
     return Object.values(filterValues).filter(v => 
@@ -196,6 +198,20 @@ export default function YachtsIndex() {
       
       quickActions={
         <>
+          {/* Experience Filters */}
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="w-4 h-4 text-amber-500" />
+              <h3 className="text-sm font-medium">
+                {language === 'ru' ? 'Впечатления' : 'Experiences'}
+              </h3>
+            </div>
+            <ExperienceFilterChips 
+              selected={selectedExperiences}
+              onChange={setSelectedExperiences}
+            />
+          </div>
+
           <h3 className="text-sm font-medium text-muted-foreground mb-2">
             {language === 'ru' ? 'Популярные маршруты' : 'Popular Routes'}
           </h3>
