@@ -3862,6 +3862,19 @@ export type Database = {
         }
         Returns: boolean
       }
+      create_booking_with_wallet_payment: {
+        Args: {
+          p_booking_type: string
+          p_currency: string
+          p_notes?: string
+          p_provider_id?: string
+          p_scheduled_at: string
+          p_service_id?: string
+          p_total_amount: number
+          p_user_id: string
+        }
+        Returns: string
+      }
       generate_referral_code: { Args: { p_user_id: string }; Returns: string }
       get_or_create_wallet: {
         Args: { p_user_id: string }
@@ -3890,6 +3903,10 @@ export type Database = {
       increment_helpful_count: {
         Args: { review_id_param: string }
         Returns: undefined
+      }
+      refund_wallet_booking: {
+        Args: { p_booking_id: string; p_user_id: string }
+        Returns: boolean
       }
     }
     Enums: {
@@ -3921,6 +3938,7 @@ export type Database = {
         | "event"
         | "transport"
         | "food"
+        | "tour"
       payment_status:
         | "pending"
         | "processing"
@@ -4086,6 +4104,7 @@ export const Constants = {
         "event",
         "transport",
         "food",
+        "tour",
       ],
       payment_status: [
         "pending",

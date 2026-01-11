@@ -103,7 +103,7 @@ export default function TourBooking() {
     scheduledAt.setHours(hours, minutes, 0, 0);
 
     const result = await createBooking({
-      booking_type: 'event',
+      booking_type: 'tour',
       scheduled_at: scheduledAt,
       total_amount: totalAmount,
       currency: tour.currency || 'THB',
