@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { 
-  ArrowLeft, Star, Clock, MapPin, Phone, Bike, Plus, Minus, 
+  ArrowLeft, Star, Clock, MapPin, Bike, Plus, Minus, 
   ShoppingCart, Share2, CalendarDays, UtensilsCrossed
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
+import { useRestaurant } from '@/hooks/useRestaurants';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SkeletonCard } from '@/components/uno/SkeletonCard';
 import { cn } from '@/lib/utils';
 import { useViewHistory } from '@/hooks/useViewHistory';
 import { toast } from 'sonner';
-import { getRestaurantById } from './restaurantsData';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { ReviewsSection } from '@/components/reviews/ReviewsSection';
 
@@ -25,24 +26,37 @@ export default function RestaurantDetail() {
   const { addItem, removeItem, updateQuantity, items, getItemsByProvider } = useCart();
   const { trackView } = useViewHistory();
 
-  const initialMode = searchParams.get('mode') || 'delivery';
-  const [activeTab, setActiveTab] = useState<'menu' | 'sets' | 'reviews'>('menu');
+  const { restaurant, menuCategories, menuItems, isLoading } = useRestaurant(id || '');
 
-  const restaurant = getRestaurantById(id || '');
+  const initialMode = searchParams.get('mode') || 'delivery';
+  const [activeTab, setActiveTab] = useState<'menu' | 'reviews'>('menu');
+
   const providerId = id || '';
   const cartItems = getItemsByProvider(providerId);
 
   useEffect(() => {
     if (restaurant) {
       trackView(id || restaurant.id, 'restaurant', {
-        name_en: restaurant.nameEn,
-        name_ru: restaurant.nameRu,
-        image: restaurant.image,
+        name_en: restaurant.name_en,
+        name_ru: restaurant.name_ru,
+        image: restaurant.cover_image,
         rating: restaurant.rating,
-        location: restaurant.location,
+        location: restaurant.district,
       });
     }
-  }, [id, restaurant]);
+  }, [id, restaurant, trackView]);
+
+  if (isLoading) {
+    return (
+      <AppLayout showBottomNav={false}>
+        <div className="p-4 space-y-4">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+      </AppLayout>
+    );
+  }
 
   if (!restaurant) {
     return (
@@ -56,18 +70,18 @@ export default function RestaurantDetail() {
     );
   }
 
-  const addToCart = (item: any) => {
+  const addToCart = (item: typeof menuItems[0]) => {
     addItem({
       id: `food-${providerId}-${item.id}`,
       type: 'food',
-      name: item.nameEn,
-      nameRu: item.nameRu,
+      name: item.name_en,
+      nameRu: item.name_ru,
       price: item.price,
-      currency: '฿',
-      image: item.image,
+      currency: item.currency || '฿',
+      image: item.image || undefined,
       providerId: providerId,
-      providerName: restaurant.nameEn,
-      providerNameRu: restaurant.nameRu,
+      providerName: restaurant.name_en,
+      providerNameRu: restaurant.name_ru,
     });
     toast.success(language === 'ru' ? 'Добавлено в корзину' : 'Added to cart');
   };
@@ -90,14 +104,23 @@ export default function RestaurantDetail() {
   const cartTotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
+  // Group menu items by category
+  const menuByCategory = menuCategories.map(category => ({
+    ...category,
+    items: menuItems.filter(item => item.category_id === category.id)
+  })).filter(category => category.items.length > 0);
+
+  // Items without category
+  const uncategorizedItems = menuItems.filter(item => !item.category_id);
+
   return (
     <AppLayout showBottomNav={false}>
       <div className="pb-24">
         {/* Header with Image */}
         <div className="relative h-48">
           <img
-            src={restaurant.coverImage}
-            alt={language === 'ru' ? restaurant.nameRu : restaurant.nameEn}
+            src={restaurant.cover_image || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800'}
+            alt={language === 'ru' ? restaurant.name_ru : restaurant.name_en}
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
@@ -115,11 +138,11 @@ export default function RestaurantDetail() {
                 itemType="restaurant"
                 itemId={id || ''}
                 itemData={{
-                  name: restaurant.nameEn,
-                  nameRu: restaurant.nameRu,
-                  image: restaurant.image,
+                  name: restaurant.name_en,
+                  nameRu: restaurant.name_ru,
+                  image: restaurant.cover_image,
                   rating: restaurant.rating,
-                  location: restaurant.location,
+                  location: restaurant.district,
                   cuisine: restaurant.cuisine,
                 }}
                 className="bg-background/80 backdrop-blur-sm"
@@ -137,14 +160,14 @@ export default function RestaurantDetail() {
             <div className="flex items-start justify-between">
               <div>
                 <h1 className="text-xl font-display font-bold">
-                  {language === 'ru' ? restaurant.nameRu : restaurant.nameEn}
+                  {language === 'ru' ? restaurant.name_ru : restaurant.name_en}
                 </h1>
                 <p className="text-sm text-muted-foreground">
-                  {language === 'ru' ? restaurant.cuisineRu : restaurant.cuisine}
+                  {restaurant.cuisine} • {'฿'.repeat(restaurant.price_range || 2)}
                 </p>
               </div>
-              <Badge variant={restaurant.isOpen ? "default" : "secondary"}>
-                {restaurant.isOpen 
+              <Badge variant={restaurant.is_active ? "default" : "secondary"}>
+                {restaurant.is_active 
                   ? (language === 'ru' ? 'Открыто' : 'Open')
                   : (language === 'ru' ? 'Закрыто' : 'Closed')}
               </Badge>
@@ -153,35 +176,37 @@ export default function RestaurantDetail() {
             <div className="flex items-center gap-4 mt-3 text-sm">
               <div className="flex items-center gap-1">
                 <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                <span className="font-medium">{restaurant.rating}</span>
-                <span className="text-muted-foreground">({restaurant.reviewCount})</span>
+                <span className="font-medium">{restaurant.rating || 0}</span>
+                <span className="text-muted-foreground">({restaurant.review_count || 0})</span>
               </div>
-              {restaurant.acceptsDelivery && (
+              {restaurant.delivery_available && (
                 <>
                   <div className="flex items-center gap-1 text-muted-foreground">
                     <Clock className="w-4 h-4" />
-                    <span>{restaurant.deliveryTime} min</span>
+                    <span>{restaurant.delivery_time} min</span>
                   </div>
                   <div className="flex items-center gap-1 text-muted-foreground">
                     <Bike className="w-4 h-4" />
-                    <span>฿{restaurant.deliveryFee}</span>
+                    <span>฿{restaurant.delivery_fee || 0}</span>
                   </div>
                 </>
               )}
             </div>
             
             <p className="text-sm text-muted-foreground mt-3">
-              {language === 'ru' ? restaurant.descriptionRu : restaurant.descriptionEn}
+              {language === 'ru' ? restaurant.description_ru : restaurant.description_en}
             </p>
             
-            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50">
-              <MapPin className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">{restaurant.address}</span>
-            </div>
+            {restaurant.address && (
+              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50">
+                <MapPin className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">{restaurant.address}</span>
+              </div>
+            )}
 
             {/* Action Buttons */}
             <div className="grid grid-cols-2 gap-3 mt-4">
-              {restaurant.acceptsDelivery && (
+              {restaurant.delivery_available && (
                 <Button
                   variant={initialMode === 'delivery' ? 'default' : 'outline'}
                   className="h-12"
@@ -191,33 +216,26 @@ export default function RestaurantDetail() {
                   {language === 'ru' ? 'Доставка' : 'Delivery'}
                 </Button>
               )}
-              {restaurant.acceptsReservations && (
-                <Button
-                  variant={initialMode === 'reservation' ? 'default' : 'outline'}
-                  className="h-12"
-                  onClick={() => navigate(`/restaurants/${id}/reserve`)}
-                >
-                  <CalendarDays className="w-4 h-4 mr-2" />
-                  {language === 'ru' ? 'Столик' : 'Book Table'}
-                </Button>
-              )}
+              <Button
+                variant={initialMode === 'reservation' ? 'default' : 'outline'}
+                className="h-12"
+                onClick={() => navigate(`/restaurants/${id}/reserve`)}
+              >
+                <CalendarDays className="w-4 h-4 mr-2" />
+                {language === 'ru' ? 'Столик' : 'Book Table'}
+              </Button>
             </div>
           </div>
         </div>
 
-        {/* Tabs for Menu / Set Menus / Reviews */}
+        {/* Tabs for Menu / Reviews */}
         <div className="px-4 mt-6">
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'menu' | 'sets' | 'reviews')}>
-            <TabsList className={cn("w-full grid", restaurant.hasSetMenus && restaurant.setMenus && restaurant.setMenus.length > 0 ? "grid-cols-3" : "grid-cols-2")}>
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'menu' | 'reviews')}>
+            <TabsList className="w-full grid grid-cols-2">
               <TabsTrigger value="menu" className="gap-2">
                 <UtensilsCrossed className="w-4 h-4" />
                 {language === 'ru' ? 'Меню' : 'Menu'}
               </TabsTrigger>
-              {restaurant.hasSetMenus && restaurant.setMenus && restaurant.setMenus.length > 0 && (
-                <TabsTrigger value="sets" className="gap-2">
-                  🥂 {language === 'ru' ? 'Сеты' : 'Sets'}
-                </TabsTrigger>
-              )}
               <TabsTrigger value="reviews" className="gap-2">
                 <Star className="w-4 h-4" />
                 {language === 'ru' ? 'Отзывы' : 'Reviews'}
@@ -226,156 +244,165 @@ export default function RestaurantDetail() {
           </Tabs>
         </div>
 
-        {/* Set Menus */}
-        {activeTab === 'sets' && restaurant.setMenus && (
-          <div className="px-4 mt-4 space-y-4">
-            {restaurant.setMenus.map((set) => (
-              <div
-                key={set.id}
-                className="rounded-xl bg-card border border-border/50 overflow-hidden"
-              >
-                <div className="relative h-40">
-                  <img
-                    src={set.image}
-                    alt={language === 'ru' ? set.nameRu : set.nameEn}
-                    className="w-full h-full object-cover"
-                  />
-                  {set.originalPrice && (
-                    <div className="absolute top-2 right-2 px-2 py-1 rounded bg-destructive text-white text-xs font-medium">
-                      -{Math.round((1 - set.price / set.originalPrice) * 100)}%
-                    </div>
-                  )}
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-lg">
-                    {language === 'ru' ? set.nameRu : set.nameEn}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {language === 'ru' ? set.descriptionRu : set.descriptionEn}
-                  </p>
-                  
-                  <div className="mt-3 space-y-1">
-                    <p className="text-xs font-medium text-muted-foreground">
-                      {language === 'ru' ? 'Включено:' : 'Includes:'}
-                    </p>
-                    <div className="flex flex-wrap gap-1">
-                      {(language === 'ru' ? set.includesRu : set.includes).map((item, i) => (
-                        <span key={i} className="px-2 py-0.5 rounded-full bg-secondary text-xs">
-                          {item}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between mt-4">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl font-bold text-primary">฿{set.price}</span>
-                        {set.originalPrice && (
-                          <span className="text-sm text-muted-foreground line-through">
-                            ฿{set.originalPrice}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Clock className="w-3 h-3" />
-                        <span>{set.duration}</span>
-                        <span>•</span>
-                        <span>👥 до {set.maxGuests}</span>
-                      </div>
-                    </div>
-                    <Button
-                      onClick={() => navigate(`/restaurants/${id}/experience/${set.id}`)}
-                    >
-                      {language === 'ru' ? 'Забронировать' : 'Book'}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
         {/* Menu */}
         {activeTab === 'menu' && (
           <div className="px-4 mt-6 space-y-6">
-            {restaurant.menu.map((section) => (
-              <div key={section.category}>
-                <h2 className="text-lg font-semibold mb-3">
-                  {language === 'ru' ? section.categoryRu : section.category}
-                </h2>
-                
-                <div className="space-y-3">
-                  {section.items.map((item) => {
-                    const quantity = getItemQuantity(item.id);
-                    return (
-                      <div
-                        key={item.id}
-                        className="flex gap-4 p-3 rounded-xl bg-card border border-border/50"
-                      >
-                        {/* Image */}
-                        <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
-                          <img
-                            src={item.image}
-                            alt={language === 'ru' ? item.nameRu : item.nameEn}
-                            className="w-full h-full object-cover"
-                          />
-                          {item.isPopular && (
-                            <div className="absolute top-1 left-1 px-1 py-0.5 rounded bg-orange-500 text-white text-[10px]">
-                              🔥
+            {menuByCategory.length === 0 && uncategorizedItems.length === 0 ? (
+              <div className="text-center py-12">
+                <UtensilsCrossed className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">
+                  {language === 'ru' ? 'Меню пока не добавлено' : 'Menu not available yet'}
+                </p>
+              </div>
+            ) : (
+              <>
+                {menuByCategory.map((section) => (
+                  <div key={section.id}>
+                    <h2 className="text-lg font-semibold mb-3">
+                      {language === 'ru' ? section.name_ru : section.name_en}
+                    </h2>
+                    
+                    <div className="space-y-3">
+                      {section.items.map((item) => {
+                        const quantity = getItemQuantity(item.id);
+                        return (
+                          <div
+                            key={item.id}
+                            className="flex gap-4 p-3 rounded-xl bg-card border border-border/50"
+                          >
+                            {/* Image */}
+                            {item.image && (
+                              <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                                <img
+                                  src={item.image}
+                                  alt={language === 'ru' ? item.name_ru : item.name_en}
+                                  className="w-full h-full object-cover"
+                                />
+                                {item.is_popular && (
+                                  <div className="absolute top-1 left-1 px-1 py-0.5 rounded bg-orange-500 text-white text-[10px]">
+                                    🔥
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            
+                            {/* Content */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between">
+                                <div>
+                                  <h3 className="font-medium">
+                                    {language === 'ru' ? item.name_ru : item.name_en}
+                                    {item.is_spicy && <span className="ml-1">🌶️</span>}
+                                    {item.is_vegetarian && <span className="ml-1">🌱</span>}
+                                  </h3>
+                                  <p className="text-xs text-muted-foreground line-clamp-2">
+                                    {language === 'ru' ? item.description_ru : item.description_en}
+                                  </p>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center justify-between mt-2">
+                                <span className="font-bold text-primary">฿{item.price}</span>
+                                
+                                {quantity > 0 ? (
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      onClick={() => removeFromCart(item.id)}
+                                      className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center"
+                                    >
+                                      <Minus className="w-4 h-4" />
+                                    </button>
+                                    <span className="w-6 text-center font-medium">{quantity}</span>
+                                    <button
+                                      onClick={() => addToCart(item)}
+                                      className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center"
+                                    >
+                                      <Plus className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={() => addToCart(item)}
+                                    className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center"
+                                  >
+                                    <Plus className="w-4 h-4" />
+                                  </button>
+                                )}
+                              </div>
                             </div>
-                          )}
-                        </div>
-                        
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between">
-                            <div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Uncategorized items */}
+                {uncategorizedItems.length > 0 && (
+                  <div>
+                    <h2 className="text-lg font-semibold mb-3">
+                      {language === 'ru' ? 'Другое' : 'Other'}
+                    </h2>
+                    <div className="space-y-3">
+                      {uncategorizedItems.map((item) => {
+                        const quantity = getItemQuantity(item.id);
+                        return (
+                          <div
+                            key={item.id}
+                            className="flex gap-4 p-3 rounded-xl bg-card border border-border/50"
+                          >
+                            {item.image && (
+                              <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                                <img
+                                  src={item.image}
+                                  alt={language === 'ru' ? item.name_ru : item.name_en}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
                               <h3 className="font-medium">
-                                {language === 'ru' ? item.nameRu : item.nameEn}
-                                {item.isSpicy && <span className="ml-1">🌶️</span>}
+                                {language === 'ru' ? item.name_ru : item.name_en}
                               </h3>
                               <p className="text-xs text-muted-foreground line-clamp-2">
-                                {language === 'ru' ? item.descriptionRu : item.descriptionEn}
+                                {language === 'ru' ? item.description_ru : item.description_en}
                               </p>
+                              <div className="flex items-center justify-between mt-2">
+                                <span className="font-bold text-primary">฿{item.price}</span>
+                                {quantity > 0 ? (
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      onClick={() => removeFromCart(item.id)}
+                                      className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center"
+                                    >
+                                      <Minus className="w-4 h-4" />
+                                    </button>
+                                    <span className="w-6 text-center font-medium">{quantity}</span>
+                                    <button
+                                      onClick={() => addToCart(item)}
+                                      className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center"
+                                    >
+                                      <Plus className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={() => addToCart(item)}
+                                    className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center"
+                                  >
+                                    <Plus className="w-4 h-4" />
+                                  </button>
+                                )}
+                              </div>
                             </div>
                           </div>
-                          
-                          <div className="flex items-center justify-between mt-2">
-                            <span className="font-bold text-primary">฿{item.price}</span>
-                            
-                            {quantity > 0 ? (
-                              <div className="flex items-center gap-2">
-                                <button
-                                  onClick={() => removeFromCart(item.id)}
-                                  className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center"
-                                >
-                                  <Minus className="w-4 h-4" />
-                                </button>
-                                <span className="w-6 text-center font-medium">{quantity}</span>
-                                <button
-                                  onClick={() => addToCart(item)}
-                                  className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center"
-                                >
-                                  <Plus className="w-4 h-4" />
-                                </button>
-                              </div>
-                            ) : (
-                              <button
-                                onClick={() => addToCart(item)}
-                                className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center"
-                              >
-                                <Plus className="w-4 h-4" />
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         )}
 
@@ -385,7 +412,7 @@ export default function RestaurantDetail() {
             <ReviewsSection 
               itemType="restaurant" 
               itemId={id || ''} 
-              itemName={language === 'ru' ? restaurant.nameRu : restaurant.nameEn}
+              itemName={language === 'ru' ? restaurant.name_ru : restaurant.name_en}
             />
           </div>
         )}
