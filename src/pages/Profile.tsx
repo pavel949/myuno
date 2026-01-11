@@ -105,6 +105,9 @@ export default function Profile() {
           </PremiumButton>
         </SectionCard>
 
+        {/* Role Switcher */}
+        <RoleSwitcher />
+
         {/* Theme switcher */}
         <SectionCard>
           <div className="flex items-center gap-2 mb-3">
