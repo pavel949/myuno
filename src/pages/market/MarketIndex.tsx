@@ -82,10 +82,8 @@ const MarketIndex = () => {
       heroIcon={ShoppingBag}
       heroTitle={language === 'ru' ? 'Магазины Пхукета' : 'Phuket Stores'}
       heroSubtitle={language === 'ru' ? 'Доставка продуктов, сувениров и подарков' : 'Groceries, souvenirs and gifts delivery'}
-      heroBackgroundImage="https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=800"
-      heroGradientFrom="from-emerald-500/20"
-      heroGradientVia="via-green-500/20"
-      heroGradientTo="to-primary/20"
+      heroImage="https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=800"
+      heroGradient={{ from: 'from-emerald-500/20', via: 'via-green-500/20', to: 'to-primary/20' }}
       
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}

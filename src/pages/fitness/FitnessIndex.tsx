@@ -79,10 +79,8 @@ export default function FitnessIndex() {
       heroIcon={Dumbbell}
       heroTitle={language === 'ru' ? 'Фитнес и спорт' : 'Fitness & Sports'}
       heroSubtitle={language === 'ru' ? 'Залы, тренеры, занятия' : 'Gyms, trainers, classes'}
-      heroBackgroundImage="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800"
-      heroGradientFrom="from-orange-500/20"
-      heroGradientVia="via-red-500/20"
-      heroGradientTo="to-primary/20"
+      heroImage="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800"
+      heroGradient={{ from: 'from-orange-500/20', via: 'via-red-500/20', to: 'to-primary/20' }}
       
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}

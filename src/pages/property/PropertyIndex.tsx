@@ -199,10 +199,8 @@ export default function PropertyIndex() {
       heroIcon={Home}
       heroTitle={language === 'ru' ? 'Найдите идеальное жильё' : 'Find Your Perfect Home'}
       heroSubtitle={language === 'ru' ? 'Виллы, квартиры и кондо на Пхукете' : 'Villas, apartments & condos in Phuket'}
-      heroBackgroundImage="https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800"
-      heroGradientFrom="from-emerald-500/20"
-      heroGradientVia="via-teal-500/20"
-      heroGradientTo="to-primary/20"
+      heroImage="https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800"
+      heroGradient={{ from: 'from-emerald-500/20', via: 'via-teal-500/20', to: 'to-primary/20' }}
       
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}

@@ -134,9 +134,8 @@ export default function CleaningIndex() {
       heroIcon={Sparkles}
       heroTitle={language === 'ru' ? 'Чистота и свежесть' : 'Clean & Fresh'}
       heroSubtitle={language === 'ru' ? 'Профессиональная уборка и услуги прачечной' : 'Professional cleaning and laundry services'}
-      heroGradientFrom="from-emerald-500/20"
-      heroGradientVia="via-green-500/20"
-      heroGradientTo="to-primary/20"
+      heroImage="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800"
+      heroGradient={{ from: 'from-emerald-500/20', via: 'via-green-500/20', to: 'to-primary/20' }}
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}
       searchPlaceholder={language === 'ru' ? 'Поиск услуг...' : 'Search services...'}
