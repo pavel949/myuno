@@ -988,6 +988,84 @@ export type Database = {
         }
         Relationships: []
       }
+      owner_properties: {
+        Row: {
+          address: string
+          area_sqm: number | null
+          bathrooms: number | null
+          bedrooms: number | null
+          cover_image: string | null
+          created_at: string
+          description: string | null
+          description_ru: string | null
+          district: string | null
+          id: string
+          images: string[] | null
+          is_rented: boolean | null
+          management_type: string | null
+          notes: string | null
+          owner_id: string
+          property_type: string
+          rental_platform: string | null
+          status: string | null
+          title: string
+          title_ru: string | null
+          updated_at: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          address: string
+          area_sqm?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          cover_image?: string | null
+          created_at?: string
+          description?: string | null
+          description_ru?: string | null
+          district?: string | null
+          id?: string
+          images?: string[] | null
+          is_rented?: boolean | null
+          management_type?: string | null
+          notes?: string | null
+          owner_id: string
+          property_type?: string
+          rental_platform?: string | null
+          status?: string | null
+          title: string
+          title_ru?: string | null
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          address?: string
+          area_sqm?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          cover_image?: string | null
+          created_at?: string
+          description?: string | null
+          description_ru?: string | null
+          district?: string | null
+          id?: string
+          images?: string[] | null
+          is_rented?: boolean | null
+          management_type?: string | null
+          notes?: string | null
+          owner_id?: string
+          property_type?: string
+          rental_platform?: string | null
+          status?: string | null
+          title?: string
+          title_ru?: string | null
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: []
+      }
       partner_applications: {
         Row: {
           address: string | null
@@ -1462,6 +1540,65 @@ export type Database = {
           },
         ]
       }
+      property_financials: {
+        Row: {
+          amount: number
+          category: string | null
+          created_at: string
+          currency: string | null
+          description: string | null
+          description_ru: string | null
+          id: string
+          owner_id: string
+          property_id: string
+          receipt_url: string | null
+          reference_id: string | null
+          reference_type: string | null
+          transaction_date: string
+          transaction_type: string
+        }
+        Insert: {
+          amount: number
+          category?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          description_ru?: string | null
+          id?: string
+          owner_id: string
+          property_id: string
+          receipt_url?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          transaction_date?: string
+          transaction_type: string
+        }
+        Update: {
+          amount?: number
+          category?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          description_ru?: string | null
+          id?: string
+          owner_id?: string
+          property_id?: string
+          receipt_url?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          transaction_date?: string
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_financials_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_inquiries: {
         Row: {
           check_in: string | null
@@ -1514,6 +1651,169 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_inspections: {
+        Row: {
+          checklist_results: Json | null
+          completed_at: string | null
+          cost: number | null
+          created_at: string
+          currency: string | null
+          id: string
+          inspection_type: string
+          inspector_id: string | null
+          issues_found: Json | null
+          notes: string | null
+          owner_id: string
+          photos: string[] | null
+          property_id: string
+          report_summary: string | null
+          report_summary_ru: string | null
+          scheduled_at: string
+          status: string | null
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          checklist_results?: Json | null
+          completed_at?: string | null
+          cost?: number | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          inspection_type?: string
+          inspector_id?: string | null
+          issues_found?: Json | null
+          notes?: string | null
+          owner_id: string
+          photos?: string[] | null
+          property_id: string
+          report_summary?: string | null
+          report_summary_ru?: string | null
+          scheduled_at: string
+          status?: string | null
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          checklist_results?: Json | null
+          completed_at?: string | null
+          cost?: number | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          inspection_type?: string
+          inspector_id?: string | null
+          issues_found?: Json | null
+          notes?: string | null
+          owner_id?: string
+          photos?: string[] | null
+          property_id?: string
+          report_summary?: string | null
+          report_summary_ru?: string | null
+          scheduled_at?: string
+          status?: string | null
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_inspections_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_service_requests: {
+        Row: {
+          assigned_to: string | null
+          completed_at: string | null
+          completion_notes: string | null
+          completion_photos: string[] | null
+          created_at: string
+          currency: string | null
+          deposit_amount: number | null
+          deposit_collected: boolean | null
+          deposit_returned: boolean | null
+          description: string | null
+          description_ru: string | null
+          guest_count: number | null
+          guest_name: string | null
+          guest_phone: string | null
+          id: string
+          owner_id: string
+          priority: string | null
+          property_id: string
+          scheduled_at: string | null
+          service_cost: number | null
+          service_type: string
+          special_instructions: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          completion_notes?: string | null
+          completion_photos?: string[] | null
+          created_at?: string
+          currency?: string | null
+          deposit_amount?: number | null
+          deposit_collected?: boolean | null
+          deposit_returned?: boolean | null
+          description?: string | null
+          description_ru?: string | null
+          guest_count?: number | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          id?: string
+          owner_id: string
+          priority?: string | null
+          property_id: string
+          scheduled_at?: string | null
+          service_cost?: number | null
+          service_type: string
+          special_instructions?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          completion_notes?: string | null
+          completion_photos?: string[] | null
+          created_at?: string
+          currency?: string | null
+          deposit_amount?: number | null
+          deposit_collected?: boolean | null
+          deposit_returned?: boolean | null
+          description?: string | null
+          description_ru?: string | null
+          guest_count?: number | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          id?: string
+          owner_id?: string
+          priority?: string | null
+          property_id?: string
+          scheduled_at?: string | null
+          service_cost?: number | null
+          service_type?: string
+          special_instructions?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_service_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
             referencedColumns: ["id"]
           },
         ]
@@ -3390,6 +3690,7 @@ export type Database = {
         | "admin"
         | "ombudsman"
         | "vendor"
+        | "property_owner"
       booking_status:
         | "draft"
         | "submitted"
@@ -3552,6 +3853,7 @@ export const Constants = {
         "admin",
         "ombudsman",
         "vendor",
+        "property_owner",
       ],
       booking_status: [
         "draft",
