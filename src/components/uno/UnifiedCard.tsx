@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star, MapPin, Clock, BadgeCheck } from 'lucide-react';
+import { Star, MapPin, Clock, BadgeCheck, Palmtree } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { triggerRipple } from '@/hooks/useRipple';
@@ -74,7 +74,7 @@ export function UnifiedCard({
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
-            <span className="text-muted-foreground text-4xl">🏝️</span>
+            <Palmtree className="w-12 h-12 text-muted-foreground/50" />
           </div>
         )}
         

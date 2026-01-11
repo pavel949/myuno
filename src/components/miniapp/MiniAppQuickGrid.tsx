@@ -2,9 +2,11 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { triggerRipple } from '@/hooks/useRipple';
+import { getIconForEmoji, isEmoji } from '@/lib/iconMap';
+import type { LucideIcon } from 'lucide-react';
 
 export interface QuickGridItem {
-  icon: string;
+  icon: string | LucideIcon;
   label: string;
   sublabel?: string;
   path?: string;
@@ -31,6 +33,25 @@ export function MiniAppQuickGrid({
     5: 'grid-cols-5',
   };
 
+  const renderIcon = (icon: string | LucideIcon) => {
+    // If it's already a Lucide component
+    if (typeof icon !== 'string') {
+      const IconComponent = icon;
+      return <IconComponent className="w-6 h-6 text-primary" />;
+    }
+    
+    // If it's an emoji string, try to get a Lucide icon
+    if (isEmoji(icon)) {
+      const LucideIcon = getIconForEmoji(icon);
+      if (LucideIcon) {
+        return <LucideIcon className="w-6 h-6 text-primary" />;
+      }
+    }
+    
+    // Fallback to displaying the emoji/string
+    return <span className="text-2xl">{icon}</span>;
+  };
+
   return (
     <div className={cn("grid gap-3", gridCols[columns], className)}>
       {items.map((item, i) => (
@@ -46,7 +67,9 @@ export function MiniAppQuickGrid({
           }}
           className="relative overflow-hidden flex flex-col items-center p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all active:scale-95"
         >
-          <span className="text-2xl mb-1">{item.icon}</span>
+          <div className="mb-1.5 flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
+            {renderIcon(item.icon)}
+          </div>
           <span className="text-xs font-medium text-center truncate w-full">{item.label}</span>
           {(item.sublabel || item.price) && (
             <span className="text-xs text-primary mt-0.5">{item.sublabel || item.price}</span>

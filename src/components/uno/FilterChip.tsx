@@ -1,24 +1,51 @@
 import React, { forwardRef } from 'react';
-import { X } from 'lucide-react';
+import { X, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { triggerRipple } from '@/hooks/useRipple';
+import { getIconForEmoji, isEmoji } from '@/lib/iconMap';
 
 interface FilterChipProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   label: string;
   isActive?: boolean;
-  icon?: React.ReactNode;
+  icon?: React.ReactNode | string;
   onToggle?: () => void;
   onRemove?: () => void;
   size?: 'sm' | 'md' | 'lg';
 }
 
+// Standard icon sizes for consistency across the app
+const iconSizeClasses = {
+  sm: 'w-3.5 h-3.5',
+  md: 'w-4 h-4',
+  lg: 'w-5 h-5',
+};
+
 export const FilterChip = forwardRef<HTMLButtonElement, FilterChipProps>(
   ({ label, isActive = false, icon, onToggle, onRemove, size = 'md', className, ...props }, ref) => {
     const sizeClasses = {
-      sm: 'h-6 px-2 text-[11px] gap-0.5',
-      md: 'h-7 px-2.5 text-xs gap-1',
-      lg: 'h-8 px-3 text-sm gap-1.5',
+      sm: 'h-6 px-2 text-[11px] gap-1',
+      md: 'h-7 px-2.5 text-xs gap-1.5',
+      lg: 'h-8 px-3 text-sm gap-2',
+    };
+
+    const renderIcon = () => {
+      if (!icon) return null;
+      
+      // If icon is a string (emoji), try to convert to Lucide icon
+      if (typeof icon === 'string') {
+        if (isEmoji(icon)) {
+          const LucideIcon = getIconForEmoji(icon);
+          if (LucideIcon) {
+            return <LucideIcon className={cn(iconSizeClasses[size], "flex-shrink-0")} />;
+          }
+        }
+        // Fallback to emoji if no mapping found
+        return <span className="flex-shrink-0 text-sm">{icon}</span>;
+      }
+      
+      // React node (already an icon component)
+      return <span className="flex-shrink-0">{icon}</span>;
     };
 
     return (
@@ -41,11 +68,11 @@ export const FilterChip = forwardRef<HTMLButtonElement, FilterChipProps>(
         )}
         {...props}
       >
-        {icon && <span className="flex-shrink-0">{icon}</span>}
+        {renderIcon()}
         <span className="truncate max-w-[120px]">{label}</span>
         {onRemove && isActive && (
           <X
-            className="w-3.5 h-3.5 ml-1 hover:text-destructive cursor-pointer flex-shrink-0"
+            className={cn(iconSizeClasses[size], "ml-1 hover:text-destructive cursor-pointer flex-shrink-0")}
             onClick={(e) => {
               e.stopPropagation();
               onRemove();
