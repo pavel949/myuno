@@ -164,6 +164,7 @@ import VendorActivities from '@/pages/vendor/VendorActivities';
 import OwnerDashboard from '@/pages/owner/OwnerDashboard';
 import OwnerProperties from '@/pages/owner/OwnerProperties';
 import OwnerPropertyDetail from '@/pages/owner/OwnerPropertyDetail';
+import OwnerCalendar from '@/pages/owner/OwnerCalendar';
 import AddProperty from '@/pages/owner/AddProperty';
 import ServiceRequest from '@/pages/owner/ServiceRequest';
 import InspectionRequest from '@/pages/owner/InspectionRequest';
@@ -337,6 +338,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/owner/properties" element={<PageTransition><OwnerProperties /></PageTransition>} />
         <Route path="/owner/properties/new" element={<PageTransition><AddProperty /></PageTransition>} />
         <Route path="/owner/properties/:id" element={<PageTransition><OwnerPropertyDetail /></PageTransition>} />
+        <Route path="/owner/calendar" element={<PageTransition><OwnerCalendar /></PageTransition>} />
         <Route path="/owner/service-request" element={<PageTransition><ServiceRequest /></PageTransition>} />
         <Route path="/owner/inspection" element={<PageTransition><InspectionRequest /></PageTransition>} />
         

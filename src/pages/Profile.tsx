@@ -12,6 +12,7 @@ import { SectionCard, SectionTitle } from '@/components/uno/SectionCard';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { ReferralCard } from '@/components/uno/ReferralCard';
 import { UserPreferences } from '@/components/profile/UserPreferences';
+import { RoleSwitcher } from '@/components/uno/RoleSwitcher';
 import { supabase } from '@/integrations/supabase/client';
 
 export default function Profile() {
