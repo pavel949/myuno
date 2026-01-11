@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
-  ArrowLeft, Star, Clock, MapPin, Phone, Bike, Plus, Minus, 
+  Star, Clock, MapPin, Phone, Bike, Plus, Minus, 
   ShoppingCart, Heart, Share2, Info
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useViewHistory } from '@/hooks/useViewHistory';
 import { toast } from 'sonner';
+import { BackButton } from '@/components/uno/BackButton';
 
 // Demo restaurant data
 const demoRestaurant = {
@@ -186,12 +187,7 @@ export default function RestaurantDetail() {
           
           {/* Navigation */}
           <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-4">
-            <button
-              onClick={() => navigate(-1)}
-              className="w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
+            <BackButton fallbackPath="/restaurants" variant="overlay" />
             <div className="flex gap-2">
               <button
                 onClick={() => setIsFavorite(!isFavorite)}

@@ -180,6 +180,8 @@ export default function OwnerDashboard() {
       <PageHeader 
         title={isRu ? 'Property Care' : 'Property Care'}
         subtitle={isRu ? 'Управление вашей недвижимостью' : 'Manage your property'}
+        showBack
+        fallbackPath="/"
       />
 
       {/* Today's Activity */}

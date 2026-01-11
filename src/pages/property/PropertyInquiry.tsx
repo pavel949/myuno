@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, Users, MessageCircle, Check, AlertCircle, Clock, Shield } from 'lucide-react';
+import { Calendar, Users, MessageCircle, Check, AlertCircle, Clock, Shield } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { BackButton } from '@/components/uno/BackButton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -196,12 +197,7 @@ export default function PropertyInquiry() {
       <div className="px-4 py-6 pb-24">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+          <BackButton fallbackPath="/property" variant="ghost" />
           <h1 className="text-xl font-display font-bold">
             {isRu ? 'Бронирование' : 'Book Property'}
           </h1>

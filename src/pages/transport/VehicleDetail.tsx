@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
-  ArrowLeft, Star, MapPin, Users, Fuel, Settings2, Calendar,
+  Star, MapPin, Users, Fuel, Settings2, Calendar,
   Shield, Check, Share2, Phone, MessageCircle
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { useViewHistory } from '@/hooks/useViewHistory';
+import { BackButton } from '@/components/uno/BackButton';
 
 // Demo vehicle data
 const demoVehicle = {
@@ -81,12 +82,7 @@ export default function VehicleDetail() {
       <div className="pb-24">
         {/* Header */}
         <div className="sticky top-0 z-20 flex items-center justify-between p-4 bg-background/80 backdrop-blur-sm border-b border-border/50">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+          <BackButton fallbackPath="/transport" variant="ghost" />
           
           <div className="flex items-center gap-2">
             <FavoriteButton

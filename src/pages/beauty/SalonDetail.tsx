@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
-  ArrowLeft, Star, MapPin, Clock, Phone, Globe, 
+  Star, MapPin, Clock, Phone, Globe, 
   BadgeCheck, Heart, Share2, Calendar
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PremiumButton } from '@/components/uno/PremiumButton';
 import { useViewHistory } from '@/hooks/useViewHistory';
 import { cn } from '@/lib/utils';
+import { BackButton } from '@/components/uno/BackButton';
 
 // Demo salon details
 const salonDetails = {
@@ -121,12 +122,7 @@ export default function SalonDetail() {
         
         {/* Header actions */}
         <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between">
-          <button
-            onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-full glass flex items-center justify-center"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+          <BackButton fallbackPath="/beauty" variant="overlay" />
           <div className="flex gap-2">
             <button
               onClick={() => setIsFavorite(!isFavorite)}
