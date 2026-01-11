@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { 
   Home, MapPin, Bed, Bath, SquareStack, Settings, 
   Globe, ClipboardList, Wrench, Calendar, ExternalLink,
-  CheckCircle, Clock, AlertTriangle, Loader2
+  CheckCircle, Clock, AlertTriangle, Loader2, DollarSign
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
@@ -231,6 +231,22 @@ export default function OwnerPropertyDetail() {
         <Button 
           variant="outline" 
           className="h-auto py-4 flex-col gap-2"
+          onClick={() => navigate(`/owner/properties/${id}/terms`)}
+        >
+          <DollarSign className="h-5 w-5" />
+          <span className="text-sm">{isRu ? 'Условия аренды' : 'Rental Terms'}</span>
+        </Button>
+        <Button 
+          variant="outline" 
+          className="h-auto py-4 flex-col gap-2"
+          onClick={() => navigate(`/owner/calendar`)}
+        >
+          <Calendar className="h-5 w-5" />
+          <span className="text-sm">{isRu ? 'Календарь' : 'Calendar'}</span>
+        </Button>
+        <Button 
+          variant="outline" 
+          className="h-auto py-4 flex-col gap-2"
           onClick={() => navigate(`/owner/service-request?property=${id}`)}
         >
           <Wrench className="h-5 w-5" />
@@ -242,7 +258,7 @@ export default function OwnerPropertyDetail() {
           onClick={() => navigate(`/owner/inspection?property=${id}`)}
         >
           <ClipboardList className="h-5 w-5" />
-          <span className="text-sm">{isRu ? 'Заказать инспекцию' : 'Order Inspection'}</span>
+          <span className="text-sm">{isRu ? 'Инспекция' : 'Inspection'}</span>
         </Button>
       </div>
 
