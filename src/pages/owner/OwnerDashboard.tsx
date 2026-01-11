@@ -69,6 +69,12 @@ export default function OwnerDashboard() {
       onClick: () => navigate('/owner/financials')
     },
     { 
+      icon: FileText, 
+      label: isRu ? 'Сообщения' : 'Messages', 
+      color: 'bg-blue-500',
+      onClick: () => navigate('/owner/messages')
+    },
+    { 
       icon: Key, 
       label: isRu ? 'Check-in' : 'Check-in', 
       color: 'bg-emerald-500',
@@ -83,14 +89,8 @@ export default function OwnerDashboard() {
     { 
       icon: Camera, 
       label: isRu ? 'Инспекция' : 'Inspection', 
-      color: 'bg-blue-500',
-      onClick: () => navigate('/owner/inspection')
-    },
-    { 
-      icon: Wrench, 
-      label: isRu ? 'Ремонт' : 'Maintenance', 
       color: 'bg-purple-500',
-      onClick: () => navigate('/owner/service-request?type=maintenance')
+      onClick: () => navigate('/owner/inspection')
     },
   ];
 
