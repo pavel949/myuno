@@ -3,12 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Star, MapPin, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTours } from '@/hooks/useTours';
-import { useWaterActivities } from '@/hooks/useWaterActivities';
-import { cn } from '@/lib/utils';
 
 interface CarouselItem {
   id: string;
-  type: 'tour' | 'water' | 'featured';
+  type: 'tour';
   image: string;
   title: string;
   titleRu: string;
@@ -28,37 +26,21 @@ export function RecommendedCarousel() {
   const [canScrollRight, setCanScrollRight] = useState(true);
 
   const { tours, isLoading: toursLoading } = useTours({ category: undefined });
-  const { activities, isLoading: waterLoading } = useWaterActivities({});
 
-  // Combine and shuffle items
-  const items: CarouselItem[] = [
-    ...tours.slice(0, 4).map(tour => ({
-      id: tour.id,
-      type: 'tour' as const,
-      image: tour.cover_image || 'https://images.unsplash.com/photo-1537956965359-7573183d1f57?w=400',
-      title: tour.title_en,
-      titleRu: tour.title_ru,
-      rating: tour.rating ?? undefined,
-      price: tour.price ?? undefined,
-      location: tour.meeting_point ?? undefined,
-      locationRu: tour.meeting_point ?? undefined,
-      duration: tour.duration_hours ? `${tour.duration_hours}h` : undefined,
-      path: `/tours/${tour.id}`,
-    })),
-    ...activities.slice(0, 4).map(activity => ({
-      id: activity.id,
-      type: 'water' as const,
-      image: activity.cover_image || 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400',
-      title: activity.title_en,
-      titleRu: activity.title_ru,
-      rating: activity.rating ?? undefined,
-      price: activity.price ?? undefined,
-      location: activity.location_name ?? undefined,
-      locationRu: activity.location_name ?? undefined,
-      duration: activity.duration_minutes ? `${Math.round(activity.duration_minutes / 60)}h` : undefined,
-      path: `/water/${activity.id}`,
-    })),
-  ].sort(() => Math.random() - 0.5).slice(0, 8);
+  // Tours only
+  const items: CarouselItem[] = tours.slice(0, 8).map(tour => ({
+    id: tour.id,
+    type: 'tour' as const,
+    image: tour.cover_image || 'https://images.unsplash.com/photo-1537956965359-7573183d1f57?w=400',
+    title: tour.title_en,
+    titleRu: tour.title_ru,
+    rating: tour.rating ?? undefined,
+    price: tour.price ?? undefined,
+    location: tour.meeting_point ?? undefined,
+    locationRu: tour.meeting_point ?? undefined,
+    duration: tour.duration_hours ? `${tour.duration_hours}h` : undefined,
+    path: `/tours/${tour.id}`,
+  }));
 
   const checkScroll = () => {
     if (scrollRef.current) {
@@ -82,7 +64,7 @@ export function RecommendedCarousel() {
     }
   };
 
-  if (toursLoading || waterLoading) {
+  if (toursLoading) {
     return (
       <div className="flex gap-4 overflow-hidden">
         {[1, 2, 3].map((i) => (
@@ -154,13 +136,8 @@ export function RecommendedCarousel() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                 
                 {/* Type badge */}
-                <span className={cn(
-                  "absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-medium text-white uppercase",
-                  item.type === 'tour' ? "bg-amber-500" : "bg-cyan-500"
-                )}>
-                  {item.type === 'tour' 
-                    ? (language === 'ru' ? 'Тур' : 'Tour') 
-                    : (language === 'ru' ? 'Активность' : 'Activity')}
+                <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-medium text-white uppercase bg-amber-500">
+                  {language === 'ru' ? 'Тур' : 'Tour'}
                 </span>
 
                 {/* Price */}
