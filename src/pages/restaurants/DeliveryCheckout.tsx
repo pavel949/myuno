@@ -82,13 +82,57 @@ export default function DeliveryCheckout() {
   const handleSubmit = async () => {
     if (!user || !isFormValid) return;
 
-    // If online payment selected, redirect to Stripe
+    // Create booking items for all payment methods
+    const bookingItems = cartItems.map(item => ({
+      item_type: 'food',
+      item_name: language === 'ru' ? (item.nameRu || item.name) : item.name,
+      quantity: item.quantity,
+      unit_price: item.price,
+      subtotal: item.price * item.quantity,
+    }));
+
+    const bookingParams = {
+      booking_type: 'food' as const,
+      provider_id: restaurant.id,
+      service_id: 'food-delivery',
+      total_amount: total,
+      currency: 'THB',
+      notes: `Payment: ${paymentMethod}. ${contactData.notes || ''}`,
+      payment: { 
+        amount: total, 
+        payment_method: paymentMethod,
+        status: paymentMethod === 'online' ? 'pending' as const : undefined,
+      },
+      items: bookingItems,
+      participants: [{
+        name: contactData.name,
+        phone: contactData.phone,
+        is_primary: true,
+      }],
+      addresses: [{
+        address_type: 'delivery' as const,
+        address: address,
+        notes: contactData.notes,
+      }],
+      metadata: {
+        restaurantName: restaurant.nameEn,
+        restaurantNameRu: restaurant.nameRu,
+        deliveryTime: restaurant.deliveryTime,
+      },
+    };
+
+    // If online payment - create pending booking first, then redirect to Stripe
     if (paymentMethod === 'online') {
-      const { createRestaurantCheckout, isProcessing: stripeProcessing } = await import('@/hooks/useStripeCheckout').then(m => ({ 
-        createRestaurantCheckout: m.useStripeCheckout, 
-        isProcessing: false 
-      }));
-      
+      // Create pending booking before Stripe redirect
+      const result = await createBooking({
+        ...bookingParams,
+        payment: { ...bookingParams.payment, status: 'pending' as const },
+      });
+
+      if (!result.success || !result.booking_id) {
+        return; // Error already shown by useBooking
+      }
+
       const checkoutItems = cartItems.map(item => ({
         name: language === 'ru' ? (item.nameRu || item.name) : item.name,
         quantity: item.quantity,
@@ -104,6 +148,7 @@ export default function DeliveryCheckout() {
 
       const response = await supabase.functions.invoke('create-restaurant-checkout', {
         body: {
+          booking_id: result.booking_id, // Pass booking ID for webhook to update
           booking_type: 'food_delivery',
           restaurant_id: restaurant.id,
           restaurant_name: restaurant.nameEn,
@@ -111,6 +156,7 @@ export default function DeliveryCheckout() {
           currency: 'thb',
           items: checkoutItems,
           metadata: {
+            booking_id: result.booking_id,
             delivery_address: address,
             contact_name: contactData.name,
             contact_phone: contactData.phone,
@@ -119,42 +165,15 @@ export default function DeliveryCheckout() {
       });
 
       if (response.data?.url) {
+        clearByProvider(id || '');
         window.location.href = response.data.url;
         return;
       }
+      return;
     }
 
-    const result = await createBooking({
-      booking_type: 'food',
-      provider_id: restaurant.id,
-      service_id: 'food-delivery',
-      total_amount: total,
-      currency: 'THB',
-      notes: `Payment: ${paymentMethod}. ${contactData.notes || ''}`,
-      payment: { amount: total, payment_method: paymentMethod },
-      items: cartItems.map(item => ({
-        item_type: 'food',
-        item_name: language === 'ru' ? (item.nameRu || item.name) : item.name,
-        quantity: item.quantity,
-        unit_price: item.price,
-        subtotal: item.price * item.quantity,
-      })),
-      participants: [{
-        name: contactData.name,
-        phone: contactData.phone,
-        is_primary: true,
-      }],
-      addresses: [{
-        address_type: 'delivery',
-        address: address,
-        notes: contactData.notes,
-      }],
-      metadata: {
-        restaurantName: restaurant.nameEn,
-        restaurantNameRu: restaurant.nameRu,
-        deliveryTime: restaurant.deliveryTime,
-      },
-    });
+    // For non-online payments, create booking directly
+    const result = await createBooking(bookingParams);
 
     if (result.success && result.booking_id) {
       setBookingId(result.booking_id);

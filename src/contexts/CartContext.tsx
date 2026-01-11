@@ -29,6 +29,8 @@ interface CartContextType {
   getTotal: () => number;
   getItemsByType: (type: CartItem['type']) => CartItem[];
   getItemsByProvider: (providerId: string) => CartItem[];
+  getProviderIds: () => string[];
+  hasMultipleProviders: () => boolean;
   isLoading: boolean;
 }
 
@@ -306,6 +308,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return items.filter(item => item.providerId === providerId);
   }, [items]);
 
+  const getProviderIds = useCallback(() => {
+    const providerIds = new Set<string>();
+    items.forEach(item => {
+      if (item.providerId) providerIds.add(item.providerId);
+    });
+    return Array.from(providerIds);
+  }, [items]);
+
+  const hasMultipleProviders = useCallback(() => {
+    return getProviderIds().length > 1;
+  }, [getProviderIds]);
+
   return (
     <CartContext.Provider value={{
       items,
@@ -319,6 +333,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       getTotal,
       getItemsByType,
       getItemsByProvider,
+      getProviderIds,
+      hasMultipleProviders,
       isLoading,
     }}>
       {children}
