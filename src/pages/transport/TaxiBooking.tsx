@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Navigation, Clock, Users, Check, Minus, Plus } from 'lucide-react';
+import { MapPin, Navigation, Clock, Users, Check, Minus, Plus, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -9,71 +9,19 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { useBooking } from '@/hooks/useBooking';
+import { useVehicleTypes, VehicleType } from '@/hooks/useTransportConfig';
 import { cn } from '@/lib/utils';
 import LocationPickerMap from '@/components/transport/LocationPickerMap';
 import { BackButton } from '@/components/uno/BackButton';
 
-// Vehicle options with pricing
-const vehicleOptions = [
-  { 
-    id: 'standard', 
-    nameEn: 'Standard', 
-    nameRu: 'Стандарт',
-    descEn: 'Toyota Vios or similar',
-    descRu: 'Toyota Vios или аналог',
-    maxPassengers: 4,
-    basePrice: 100,
-    pricePerKm: 15,
-    icon: '🚕',
-    eta: '3-5 min'
-  },
-  { 
-    id: 'comfort', 
-    nameEn: 'Comfort', 
-    nameRu: 'Комфорт',
-    descEn: 'Toyota Camry or similar',
-    descRu: 'Toyota Camry или аналог',
-    maxPassengers: 4,
-    basePrice: 150,
-    pricePerKm: 20,
-    icon: '🚙',
-    eta: '5-8 min'
-  },
-  { 
-    id: 'minivan', 
-    nameEn: 'Minivan', 
-    nameRu: 'Минивэн',
-    descEn: 'Toyota Innova or similar',
-    descRu: 'Toyota Innova или аналог',
-    maxPassengers: 6,
-    basePrice: 200,
-    pricePerKm: 25,
-    icon: '🚐',
-    eta: '8-12 min'
-  },
-  { 
-    id: 'premium', 
-    nameEn: 'Premium', 
-    nameRu: 'Премиум',
-    descEn: 'Mercedes or BMW',
-    descRu: 'Mercedes или BMW',
-    maxPassengers: 4,
-    basePrice: 300,
-    pricePerKm: 40,
-    icon: '🚘',
-    eta: '10-15 min'
-  },
-];
-
-// Time options
+// Time options generator
 const getTimeOptions = (language: string) => {
   const now = new Date();
   const options = [
     { id: 'now', label: language === 'ru' ? 'Сейчас' : 'Now', value: '' },
   ];
   
-  // Add time slots for next 4 hours
   for (let i = 0; i < 8; i++) {
     const time = new Date(now.getTime() + (15 + i * 30) * 60 * 1000);
     const hours = time.getHours().toString().padStart(2, '0');
@@ -92,9 +40,9 @@ const getTimeOptions = (language: string) => {
   return options;
 };
 
-// Simulated distance calculation
+// Distance calculation
 const getEstimatedDistance = (from: { lat: number; lng: number }, to: { lat: number; lng: number }): number => {
-  const R = 6371; // Earth's radius in km
+  const R = 6371;
   const dLat = (to.lat - from.lat) * Math.PI / 180;
   const dLng = (to.lng - from.lng) * Math.PI / 180;
   const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
@@ -102,7 +50,6 @@ const getEstimatedDistance = (from: { lat: number; lng: number }, to: { lat: num
     Math.sin(dLng / 2) * Math.sin(dLng / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const distance = R * c;
-  // Add 20% for road distance vs straight line
   return Math.round(distance * 1.2 * 10) / 10;
 };
 
@@ -117,8 +64,9 @@ export default function TaxiBooking() {
   const { language } = useLanguage();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { vehicleTypes, isLoading: isLoadingVehicles } = useVehicleTypes('taxi');
+  const { createBooking, isSubmitting } = useBooking();
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [locationPickerType, setLocationPickerType] = useState<'pickup' | 'destination' | null>(null);
   
@@ -126,22 +74,40 @@ export default function TaxiBooking() {
   const [destinationLocation, setDestinationLocation] = useState<LocationData | null>(null);
   
   const [formData, setFormData] = useState({
-    vehicleType: 'standard',
+    vehicleType: '',
     passengers: 1,
-    scheduledTime: '', // Empty for "now"
+    scheduledTime: '',
     phone: '',
     notes: '',
   });
 
-  const selectedVehicle = vehicleOptions.find(v => v.id === formData.vehicleType);
-  const estimatedDistance = pickupLocation && destinationLocation 
-    ? getEstimatedDistance(pickupLocation, destinationLocation)
-    : 0;
-  const estimatedPrice = selectedVehicle 
-    ? selectedVehicle.basePrice + (estimatedDistance * selectedVehicle.pricePerKm)
-    : 0;
+  // Set default vehicle type when loaded
+  useEffect(() => {
+    if (vehicleTypes.length > 0 && !formData.vehicleType) {
+      setFormData(prev => ({ ...prev, vehicleType: vehicleTypes[0].id }));
+    }
+  }, [vehicleTypes, formData.vehicleType]);
 
-  const timeOptions = getTimeOptions(language);
+  const selectedVehicle = useMemo(() => 
+    vehicleTypes.find(v => v.id === formData.vehicleType),
+    [vehicleTypes, formData.vehicleType]
+  );
+
+  const estimatedDistance = useMemo(() => 
+    pickupLocation && destinationLocation 
+      ? getEstimatedDistance(pickupLocation, destinationLocation)
+      : 0,
+    [pickupLocation, destinationLocation]
+  );
+
+  const estimatedPrice = useMemo(() => 
+    selectedVehicle 
+      ? selectedVehicle.base_price + (estimatedDistance * selectedVehicle.price_per_km)
+      : 0,
+    [selectedVehicle, estimatedDistance]
+  );
+
+  const timeOptions = useMemo(() => getTimeOptions(language), [language]);
 
   const handleLocationSelect = (location: LocationData) => {
     if (locationPickerType === 'pickup') {
@@ -153,7 +119,7 @@ export default function TaxiBooking() {
   };
 
   const handlePassengerChange = (delta: number) => {
-    const maxPassengers = selectedVehicle?.maxPassengers || 4;
+    const maxPassengers = selectedVehicle?.max_passengers || 4;
     const newValue = Math.max(1, Math.min(maxPassengers, formData.passengers + delta));
     setFormData({ ...formData, passengers: newValue });
   };
@@ -179,59 +145,40 @@ export default function TaxiBooking() {
       return;
     }
 
-    setIsSubmitting(true);
-
-    try {
-      const { data: booking, error } = await supabase
-        .from('bookings')
-        .insert({
-          user_id: user.id,
-          booking_type: 'transport',
-          status: 'submitted',
-          scheduled_at: formData.scheduledTime || new Date().toISOString(),
-          total_amount: Math.round(estimatedPrice),
-          notes: `Taxi booking\nVehicle: ${formData.vehicleType}\nPassengers: ${formData.passengers}\nScheduled: ${formData.scheduledTime ? new Date(formData.scheduledTime).toLocaleString() : 'Now'}\n${formData.notes}`,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Add pickup address
-      await supabase.from('booking_addresses').insert({
-        booking_id: booking.id,
-        address_type: 'pickup',
-        address: pickupLocation.address,
-        lat: pickupLocation.lat,
-        lng: pickupLocation.lng,
-      });
-
-      // Add destination address
-      await supabase.from('booking_addresses').insert({
-        booking_id: booking.id,
-        address_type: 'dropoff',
-        address: destinationLocation.address,
-        lat: destinationLocation.lat,
-        lng: destinationLocation.lng,
-      });
-
-      // Add participant
-      await supabase.from('booking_participants').insert({
-        booking_id: booking.id,
+    const result = await createBooking({
+      booking_type: 'transport',
+      scheduled_at: formData.scheduledTime || new Date().toISOString(),
+      total_amount: Math.round(estimatedPrice),
+      currency: 'THB',
+      notes: `Taxi booking\nVehicle: ${selectedVehicle?.name_en || formData.vehicleType}\nPassengers: ${formData.passengers}\nScheduled: ${formData.scheduledTime ? new Date(formData.scheduledTime).toLocaleString() : 'Now'}\n${formData.notes}`,
+      participants: [{
         name: user.email?.split('@')[0] || 'Guest',
         phone: formData.phone,
         is_primary: true,
-      });
+      }],
+      addresses: [
+        {
+          address_type: 'pickup',
+          address: pickupLocation.address,
+          lat: pickupLocation.lat,
+          lng: pickupLocation.lng,
+        },
+        {
+          address_type: 'dropoff',
+          address: destinationLocation.address,
+          lat: destinationLocation.lat,
+          lng: destinationLocation.lng,
+        },
+      ],
+      metadata: {
+        vehicle_type: formData.vehicleType,
+        passengers: formData.passengers,
+        distance_km: estimatedDistance,
+      },
+    });
 
+    if (result.success) {
       setIsSuccess(true);
-    } catch (error) {
-      console.error('Error:', error);
-      toast({
-        title: language === 'ru' ? 'Ошибка при бронировании' : 'Booking Error',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -247,8 +194,8 @@ export default function TaxiBooking() {
           </h2>
           <p className="text-muted-foreground text-center max-w-sm mb-4">
             {language === 'ru' 
-              ? `${selectedVehicle?.nameRu} • ~${selectedVehicle?.eta}`
-              : `${selectedVehicle?.nameEn} • ~${selectedVehicle?.eta}`}
+              ? `${selectedVehicle?.name_ru} • ~${selectedVehicle?.eta_minutes || 5} мин`
+              : `${selectedVehicle?.name_en} • ~${selectedVehicle?.eta_minutes || 5} min`}
           </p>
           <p className="text-muted-foreground text-center max-w-sm mb-8">
             {language === 'ru' 
@@ -263,6 +210,16 @@ export default function TaxiBooking() {
               {language === 'ru' ? 'Мои брони' : 'My Bookings'}
             </Button>
           </div>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (isLoadingVehicles) {
+    return (
+      <AppLayout showBottomNav={false}>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       </AppLayout>
     );
@@ -320,7 +277,7 @@ export default function TaxiBooking() {
               <MapPin className="w-5 h-5 text-muted-foreground" />
             </button>
 
-            {/* Divider with dots */}
+            {/* Divider */}
             <div className="flex items-center gap-3 px-3">
               <div className="w-8 flex justify-center">
                 <div className="w-0.5 h-6 bg-border rounded-full" />
@@ -395,14 +352,14 @@ export default function TaxiBooking() {
                 <span className="text-2xl font-bold">{formData.passengers}</span>
                 <p className="text-xs text-muted-foreground">
                   {language === 'ru' 
-                    ? `макс. ${selectedVehicle?.maxPassengers || 4}` 
-                    : `max ${selectedVehicle?.maxPassengers || 4}`}
+                    ? `макс. ${selectedVehicle?.max_passengers || 4}` 
+                    : `max ${selectedVehicle?.max_passengers || 4}`}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => handlePassengerChange(1)}
-                disabled={formData.passengers >= (selectedVehicle?.maxPassengers || 4)}
+                disabled={formData.passengers >= (selectedVehicle?.max_passengers || 4)}
                 className="w-10 h-10 rounded-full bg-muted flex items-center justify-center disabled:opacity-50 hover:bg-muted/80 transition-colors"
               >
                 <Plus className="w-4 h-4" />
@@ -416,52 +373,58 @@ export default function TaxiBooking() {
               {language === 'ru' ? 'Тип автомобиля' : 'Vehicle Type'}
             </Label>
             <div className="space-y-2">
-              {vehicleOptions.filter(v => v.maxPassengers >= formData.passengers).map((vehicle) => {
-                const price = vehicle.basePrice + (estimatedDistance * vehicle.pricePerKm);
-                
-                return (
-                  <button
-                    key={vehicle.id}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, vehicleType: vehicle.id })}
-                    className={cn(
-                      "w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all",
-                      formData.vehicleType === vehicle.id
-                        ? "border-primary bg-primary/10"
-                        : "border-border/50 bg-card"
-                    )}
-                  >
-                    <span className="text-3xl">{vehicle.icon}</span>
-                    <div className="flex-1 text-left">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium">
-                          {language === 'ru' ? vehicle.nameRu : vehicle.nameEn}
-                        </p>
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {vehicle.eta}
-                        </span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {language === 'ru' ? vehicle.descRu : vehicle.descEn}
-                      </p>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                        <Users className="w-3 h-3" />
-                        <span>{language === 'ru' ? `до ${vehicle.maxPassengers} чел.` : `up to ${vehicle.maxPassengers}`}</span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      {estimatedDistance > 0 ? (
-                        <p className="font-bold text-primary">฿{Math.round(price)}</p>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">
-                          {language === 'ru' ? `от ฿${vehicle.basePrice}` : `from ฿${vehicle.basePrice}`}
-                        </p>
+              {vehicleTypes
+                .filter(v => v.max_passengers >= formData.passengers)
+                .map((vehicle) => {
+                  const price = vehicle.base_price + (estimatedDistance * vehicle.price_per_km);
+                  
+                  return (
+                    <button
+                      key={vehicle.id}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, vehicleType: vehicle.id })}
+                      className={cn(
+                        "w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all",
+                        formData.vehicleType === vehicle.id
+                          ? "border-primary bg-primary/10"
+                          : "border-border/50 bg-card"
                       )}
-                    </div>
-                  </button>
-                );
-              })}
+                    >
+                      <span className="text-3xl">{vehicle.icon || '🚗'}</span>
+                      <div className="flex-1 text-left">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">
+                            {language === 'ru' ? vehicle.name_ru : vehicle.name_en}
+                          </p>
+                          {vehicle.eta_minutes && (
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {vehicle.eta_minutes} min
+                            </span>
+                          )}
+                        </div>
+                        {vehicle.description_en && (
+                          <p className="text-xs text-muted-foreground">
+                            {language === 'ru' ? vehicle.description_ru : vehicle.description_en}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                          <Users className="w-3 h-3" />
+                          <span>{language === 'ru' ? `до ${vehicle.max_passengers} чел.` : `up to ${vehicle.max_passengers}`}</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        {estimatedDistance > 0 ? (
+                          <p className="font-bold text-primary">฿{Math.round(price)}</p>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">
+                            {language === 'ru' ? `от ฿${vehicle.base_price}` : `from ฿${vehicle.base_price}`}
+                          </p>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
             </div>
           </div>
 
@@ -472,80 +435,57 @@ export default function TaxiBooking() {
                 <span className="text-sm text-muted-foreground">
                   {language === 'ru' ? 'Расстояние' : 'Distance'}
                 </span>
-                <span className="font-medium">~{estimatedDistance} km</span>
+                <span className="font-medium">{estimatedDistance} km</span>
               </div>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-muted-foreground">
-                  {language === 'ru' ? 'Пассажиры' : 'Passengers'}
-                </span>
-                <span className="font-medium">{formData.passengers}</span>
-              </div>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-muted-foreground">
-                  {language === 'ru' ? 'Время подачи' : 'Pickup time'}
-                </span>
-                <span className="font-medium">
-                  {formData.scheduledTime 
-                    ? new Date(formData.scheduledTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                    : (language === 'ru' ? 'Сейчас' : 'Now')}
-                </span>
-              </div>
-              <div className="h-px bg-border my-2" />
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">
                   {language === 'ru' ? 'Примерная стоимость' : 'Estimated price'}
                 </span>
-                <span className="font-bold text-primary text-lg">฿{Math.round(estimatedPrice)}</span>
+                <span className="font-bold text-lg text-primary">฿{Math.round(estimatedPrice)}</span>
               </div>
             </div>
           )}
 
-          {/* Contact */}
-          <div className="space-y-4">
-            <h3 className="font-semibold">
-              {language === 'ru' ? 'Контакт (опционально)' : 'Contact (optional)'}
-            </h3>
-            <div>
-              <Label>{language === 'ru' ? 'Телефон' : 'Phone'}</Label>
-              <Input
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                placeholder="+66 xxx xxx xxxx"
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label>{language === 'ru' ? 'Примечания' : 'Notes'}</Label>
-              <Textarea
-                value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                placeholder={language === 'ru' ? 'Детские кресла, багаж и т.д.' : 'Child seats, luggage, etc.'}
-                className="mt-1"
-                rows={2}
-              />
-            </div>
+          {/* Phone */}
+          <div className="space-y-3">
+            <Label htmlFor="phone">
+              {language === 'ru' ? 'Телефон' : 'Phone'}
+            </Label>
+            <Input
+              id="phone"
+              type="tel"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              placeholder="+66 XX XXX XXXX"
+            />
           </div>
 
-          {/* Submit Button */}
-          <div className="sticky bottom-4 pt-4">
-            <Button
-              type="submit"
-              disabled={isSubmitting || !pickupLocation || !destinationLocation}
-              className="w-full h-14 text-lg font-semibold"
-              size="lg"
-            >
-              {isSubmitting ? (
-                language === 'ru' ? 'Оформление...' : 'Processing...'
-              ) : estimatedDistance > 0 ? (
-                language === 'ru' 
-                  ? `Вызвать за ฿${Math.round(estimatedPrice)}` 
-                  : `Order for ฿${Math.round(estimatedPrice)}`
-              ) : (
-                language === 'ru' ? 'Выберите маршрут' : 'Select route'
-              )}
-            </Button>
+          {/* Notes */}
+          <div className="space-y-3">
+            <Label htmlFor="notes">
+              {language === 'ru' ? 'Комментарий' : 'Notes'}
+            </Label>
+            <Textarea
+              id="notes"
+              value={formData.notes}
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              placeholder={language === 'ru' 
+                ? 'Особые пожелания...' 
+                : 'Special requests...'}
+            />
           </div>
+
+          <Button
+            type="submit"
+            className="w-full h-14 text-lg"
+            disabled={isSubmitting || !pickupLocation || !destinationLocation}
+          >
+            {isSubmitting 
+              ? (language === 'ru' ? 'Оформление...' : 'Booking...') 
+              : estimatedDistance > 0 
+                ? (language === 'ru' ? `Вызвать такси за ฿${Math.round(estimatedPrice)}` : `Order Taxi for ฿${Math.round(estimatedPrice)}`)
+                : (language === 'ru' ? 'Вызвать такси' : 'Order Taxi')}
+          </Button>
         </form>
       </div>
     </AppLayout>

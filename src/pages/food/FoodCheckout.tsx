@@ -1,35 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MapPin, Clock, CreditCard, Banknote, Check, Wallet, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCart } from '@/contexts/CartContext';
 import { useWallet } from '@/hooks/useWallet';
+import { useBooking } from '@/hooks/useBooking';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { BackButton } from '@/components/uno/BackButton';
-
-// Demo cart items
-const demoCartItems = [
-  { id: 'dish-1', name: 'Pad Thai', nameRu: 'Пад Тай', price: 180, quantity: 2 },
-  { id: 'dish-2', name: 'Tom Yum Goong', nameRu: 'Том Ям Кунг', price: 220, quantity: 1 },
-];
 
 export default function FoodCheckout() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
+  const { getItemsByProvider, clearByProvider } = useCart();
   const { balance, payFromWallet, hasEnoughBalance, isLoading: isWalletLoading } = useWallet();
+  const { createBooking, isSubmitting } = useBooking();
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [bookingId, setBookingId] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [formData, setFormData] = useState({
     address: '',
@@ -37,11 +34,19 @@ export default function FoodCheckout() {
     notes: '',
   });
 
-  const cartItems = demoCartItems;
+  // Get cart items for this restaurant
+  const cartItems = getItemsByProvider(id || '');
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const deliveryFee = 40;
   const total = subtotal + deliveryFee;
   const canPayWithWallet = hasEnoughBalance(total);
+
+  // Redirect if no items in cart
+  useEffect(() => {
+    if (!authLoading && cartItems.length === 0 && !isSuccess) {
+      navigate(`/food/${id}`);
+    }
+  }, [cartItems.length, authLoading, isSuccess, navigate, id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,74 +74,60 @@ export default function FoodCheckout() {
       return;
     }
 
-    setIsSubmitting(true);
-
-    try {
-      // If paying with wallet, deduct balance first
-      if (paymentMethod === 'wallet') {
-        const result = await payFromWallet(
-          total,
-          `Food order`,
-          `Заказ еды`,
-          'food_order'
-        );
-        
-        if (!result.success) {
-          toast({
-            title: language === 'ru' ? 'Ошибка оплаты' : 'Payment Error',
-            description: language === 'ru' 
-              ? 'Недостаточно средств на кошельке' 
-              : 'Insufficient wallet balance',
-            variant: 'destructive',
-          });
-          setIsSubmitting(false);
-          return;
-        }
+    // If paying with wallet, deduct balance first
+    if (paymentMethod === 'wallet') {
+      const result = await payFromWallet(
+        total,
+        `Food order`,
+        `Заказ еды`,
+        'food_order'
+      );
+      
+      if (!result.success) {
+        toast({
+          title: language === 'ru' ? 'Ошибка оплаты' : 'Payment Error',
+          description: language === 'ru' 
+            ? 'Недостаточно средств на кошельке' 
+            : 'Insufficient wallet balance',
+          variant: 'destructive',
+        });
+        return;
       }
+    }
 
-      // Create booking
-      const { data: booking, error: bookingError } = await supabase
-        .from('bookings')
-        .insert({
-          user_id: user.id,
-          booking_type: 'food',
-          status: paymentMethod === 'wallet' ? 'confirmed' : 'submitted',
-          total_amount: total,
-          notes: `Payment: ${paymentMethod}. ${formData.notes}`,
-        })
-        .select()
-        .single();
-
-      if (bookingError) throw bookingError;
-
-      // Add booking items
-      const bookingItems = cartItems.map(item => ({
-        booking_id: booking.id,
+    const result = await createBooking({
+      booking_type: 'food',
+      provider_id: id,
+      total_amount: total,
+      currency: 'THB',
+      notes: `Payment: ${paymentMethod}. ${formData.notes || ''}`,
+      payment: { 
+        amount: total, 
+        payment_method: paymentMethod as 'cash' | 'card' | 'wallet' | 'online',
+        status: paymentMethod === 'wallet' ? 'paid' : 'pending',
+      },
+      items: cartItems.map(item => ({
         item_type: 'food',
-        item_name: language === 'ru' ? item.nameRu : item.name,
+        item_name: language === 'ru' ? (item.nameRu || item.name) : item.name,
         quantity: item.quantity,
         unit_price: item.price,
         subtotal: item.price * item.quantity,
-      }));
-
-      await supabase.from('booking_items').insert(bookingItems);
-
-      // Add delivery address
-      await supabase.from('booking_addresses').insert({
-        booking_id: booking.id,
+      })),
+      participants: [{
+        name: user.email?.split('@')[0] || 'Customer',
+        phone: formData.phone,
+        is_primary: true,
+      }],
+      addresses: [{
         address_type: 'delivery',
         address: formData.address,
         notes: formData.notes,
-      });
+      }],
+    });
 
-      // Add contact
-      await supabase.from('booking_participants').insert({
-        booking_id: booking.id,
-        name: user.email || 'Customer',
-        phone: formData.phone,
-        is_primary: true,
-      });
-
+    if (result.success && result.booking_id) {
+      setBookingId(result.booking_id);
+      clearByProvider(id || '');
       setIsSuccess(true);
       toast({
         title: language === 'ru' ? 'Заказ оформлен!' : 'Order Placed!',
@@ -144,17 +135,6 @@ export default function FoodCheckout() {
           ? (language === 'ru' ? 'Оплачено из кошелька' : 'Paid from wallet')
           : (language === 'ru' ? 'Ваш заказ принят и готовится' : 'Your order has been received'),
       });
-    } catch (error) {
-      console.error('Error placing order:', error);
-      toast({
-        title: language === 'ru' ? 'Ошибка' : 'Error',
-        description: language === 'ru' 
-          ? 'Не удалось оформить заказ' 
-          : 'Failed to place order',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -210,7 +190,7 @@ export default function FoodCheckout() {
             <div className="space-y-2">
               {cartItems.map(item => (
                 <div key={item.id} className="flex justify-between text-sm">
-                  <span>{item.quantity}x {language === 'ru' ? item.nameRu : item.name}</span>
+                  <span>{item.quantity}x {language === 'ru' ? (item.nameRu || item.name) : item.name}</span>
                   <span>฿{item.price * item.quantity}</span>
                 </div>
               ))}
