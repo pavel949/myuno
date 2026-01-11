@@ -159,13 +159,13 @@ export default function Discover() {
                   )}
                 </Button>
               </SheetTrigger>
-              <SheetContent>
-                <SheetHeader>
+              <SheetContent className="flex flex-col h-full max-h-screen overflow-hidden">
+                <SheetHeader className="flex-shrink-0">
                   <SheetTitle>
                     {language === 'ru' ? 'Фильтры' : 'Filters'}
                   </SheetTitle>
                 </SheetHeader>
-                <div className="py-6 space-y-6">
+                <div className="flex-1 overflow-y-auto py-6 space-y-6 -mx-6 px-6">
                   {/* Sort options */}
                   <div>
                     <h4 className="font-medium mb-3">
@@ -252,9 +252,11 @@ export default function Discover() {
                       })}
                     </div>
                   </div>
+                </div>
 
-                  {/* Clear filters */}
-                  {activeFiltersCount > 0 && (
+                {/* Clear filters - sticky at bottom */}
+                {activeFiltersCount > 0 && (
+                  <div className="flex-shrink-0 pt-4 border-t">
                     <Button 
                       variant="outline" 
                       className="w-full"
@@ -265,8 +267,8 @@ export default function Discover() {
                     >
                       {language === 'ru' ? 'Сбросить фильтры' : 'Clear filters'}
                     </Button>
-                  )}
-                </div>
+                  </div>
+                )}
               </SheetContent>
             </Sheet>
           </div>
