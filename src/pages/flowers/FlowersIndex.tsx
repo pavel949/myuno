@@ -208,10 +208,8 @@ const FlowersIndex = () => {
       heroIcon={Flower}
       heroTitle={language === 'ru' ? 'Доставка цветов' : 'Flower Delivery'}
       heroSubtitle={language === 'ru' ? 'Свежие букеты с доставкой за 2 часа' : 'Fresh bouquets delivered in 2 hours'}
-      heroBackgroundImage="https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?w=800"
-      heroGradientFrom="from-pink-500/20"
-      heroGradientVia="via-rose-500/20"
-      heroGradientTo="to-primary/20"
+      heroImage="https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?w=800"
+      heroGradient={{ from: 'from-pink-500/20', via: 'via-rose-500/20', to: 'to-primary/20' }}
       
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}

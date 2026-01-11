@@ -211,9 +211,8 @@ export default function EducationIndex() {
       heroIcon={GraduationCap}
       heroTitle={language === "ru" ? "Образование" : "Education"}
       heroSubtitle={language === "ru" ? "Курсы и репетиторы для детей и взрослых" : "Courses and tutors for kids and adults"}
-      heroGradientFrom="from-indigo-500/20"
-      heroGradientVia="via-purple-500/20"
-      heroGradientTo="to-primary/20"
+      heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800"
+      heroGradient={{ from: 'from-indigo-500/20', via: 'via-purple-500/20', to: 'to-primary/20' }}
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}
       searchPlaceholder={language === "ru" ? "Поиск курсов и репетиторов..." : "Search courses and tutors..."}

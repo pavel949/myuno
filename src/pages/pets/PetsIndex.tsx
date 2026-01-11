@@ -60,9 +60,8 @@ export default function PetsIndex() {
       heroIcon={PawPrint}
       heroTitle={language === 'ru' ? 'Забота о вашем друге' : 'Care for Your Friend'}
       heroSubtitle={language === 'ru' ? 'Перевозка, ветеринария, гостиницы, груминг' : 'Transport, veterinary, hotels, grooming'}
-      heroGradientFrom="from-amber-500/20"
-      heroGradientVia="via-orange-500/20"
-      heroGradientTo="to-primary/20"
+      heroImage="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800"
+      heroGradient={{ from: 'from-amber-500/20', via: 'via-orange-500/20', to: 'to-primary/20' }}
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}
       searchPlaceholder={language === 'ru' ? 'Поиск услуг...' : 'Search services...'}

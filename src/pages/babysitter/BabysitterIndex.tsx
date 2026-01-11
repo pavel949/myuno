@@ -145,9 +145,8 @@ export default function BabysitterIndex() {
       heroIcon={Baby}
       heroTitle={language === 'ru' ? 'Проверенные няни' : 'Trusted Babysitters'}
       heroSubtitle={language === 'ru' ? 'Все няни прошли проверку и имеют сертификаты' : 'All babysitters are verified and certified'}
-      heroGradientFrom="from-pink-500/20"
-      heroGradientVia="via-rose-500/20"
-      heroGradientTo="to-primary/20"
+      heroImage="https://images.unsplash.com/photo-1587616211892-f743fcca64f9?w=800"
+      heroGradient={{ from: 'from-pink-500/20', via: 'via-rose-500/20', to: 'to-primary/20' }}
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}
       searchPlaceholder={language === 'ru' ? 'Поиск няни...' : 'Search babysitters...'}

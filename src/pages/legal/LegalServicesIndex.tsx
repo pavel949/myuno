@@ -70,9 +70,8 @@ export default function LegalServicesIndex() {
       heroIcon={Award}
       heroTitle={language === "ru" ? "Юридические и бизнес-услуги" : "Legal & Business Services"}
       heroSubtitle={language === "ru" ? "Проверенные специалисты для вашего бизнеса в Таиланде" : "Verified professionals for your business in Thailand"}
-      heroGradientFrom="from-blue-600/20"
-      heroGradientVia="via-indigo-600/20"
-      heroGradientTo="to-purple-700/20"
+      heroImage="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800"
+      heroGradient={{ from: 'from-blue-600/20', via: 'via-indigo-600/20', to: 'to-purple-700/20' }}
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}
       searchPlaceholder={language === "ru" ? "Найти услугу или компанию..." : "Find service or company..."}
