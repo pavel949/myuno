@@ -1003,6 +1003,7 @@ export type Database = {
           images: string[] | null
           is_rented: boolean | null
           management_type: string | null
+          marketplace_property_id: string | null
           notes: string | null
           owner_id: string
           property_type: string
@@ -1028,6 +1029,7 @@ export type Database = {
           images?: string[] | null
           is_rented?: boolean | null
           management_type?: string | null
+          marketplace_property_id?: string | null
           notes?: string | null
           owner_id: string
           property_type?: string
@@ -1053,6 +1055,7 @@ export type Database = {
           images?: string[] | null
           is_rented?: boolean | null
           management_type?: string | null
+          marketplace_property_id?: string | null
           notes?: string | null
           owner_id?: string
           property_type?: string
@@ -1064,7 +1067,15 @@ export type Database = {
           verified_at?: string | null
           verified_by?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "owner_properties_marketplace_property_id_fkey"
+            columns: ["marketplace_property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       partner_applications: {
         Row: {
