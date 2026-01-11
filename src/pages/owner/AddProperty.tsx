@@ -226,9 +226,9 @@ export default function AddProperty() {
           </CardHeader>
           <CardContent>
             <ImageUpload
-              bucket="property-care"
-              onUpload={handleImageUpload}
-              label={isRu ? 'Загрузить фото' : 'Upload Photo'}
+              folder="property-care"
+              onChange={handleImageUpload}
+              placeholder={isRu ? 'Загрузить фото' : 'Upload Photo'}
             />
             
             {(formData.cover_image || formData.images.length > 0) && (
