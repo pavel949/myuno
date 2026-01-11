@@ -4,6 +4,7 @@ import { Search, Home, Building2, Hotel, MapPin, BedDouble, Bath, Users, ArrowRi
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { UnifiedCard } from '@/components/uno/UnifiedCard';
+import { BackButton } from '@/components/uno/BackButton';
 import { FilterChip } from '@/components/uno/FilterChip';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -206,6 +207,9 @@ export default function PropertyIndex() {
   return (
     <AppLayout>
       <div className="px-4 py-6 space-y-6">
+        {/* Back Button */}
+        <BackButton fallbackPath="/" />
+
         {/* Hero Section */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500/20 via-teal-500/20 to-primary/20 p-6">
           <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800')] bg-cover bg-center opacity-10" />
