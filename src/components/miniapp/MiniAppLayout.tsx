@@ -18,61 +18,39 @@ export interface MiniAppCategory {
   icon?: string;
 }
 
-interface MiniAppLayoutProps {
-  // Header
+export interface MiniAppLayoutProps {
   title: string;
   subtitle?: string;
   fallbackPath?: string;
   headerActions?: ReactNode;
-  
-  // Hero section
   heroIcon?: LucideIcon;
   heroTitle?: string;
   heroSubtitle?: string;
-  heroBackgroundImage?: string;
-  heroGradientFrom?: string;
-  heroGradientVia?: string;
-  heroGradientTo?: string;
+  heroImage?: string;
+  heroGradient?: { from?: string; via?: string; to?: string };
   showHero?: boolean;
-  
-  // Search
   searchValue?: string;
   onSearchChange?: (value: string) => void;
   searchPlaceholder?: string;
   showSearch?: boolean;
-  
-  // Categories
   categories?: MiniAppCategory[];
   selectedCategory?: string;
   onCategoryChange?: (categoryId: string) => void;
   showCategories?: boolean;
-  
-  // Filter button
-  filterActiveCount?: number;
-  filterButton?: ReactNode;
-  showFilter?: boolean;
-  
-  // Map button
-  mapPath?: string;
+  filterConfig?: any;
+  filterValues?: any;
+  onFilterChange?: (values: any) => void;
   showMapButton?: boolean;
-  
-  // Cart button
-  cartItemCount?: number;
+  onMapClick?: () => void;
   showCartButton?: boolean;
-  
-  // Results count
-  resultsCount?: number;
-  resultsLabel?: string;
-  
-  // Content
+  cartItemCount?: number;
+  isLoading?: boolean;
+  isEmpty?: boolean;
+  emptyIcon?: LucideIcon;
+  emptyText?: string;
   children: ReactNode;
-  
-  // Layout options
   showBottomNav?: boolean;
   contentClassName?: string;
-  
-  // Quick actions grid
-  quickActions?: ReactNode;
 }
 
 export function MiniAppLayout({
