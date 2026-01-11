@@ -57,6 +57,12 @@ export default function OwnerDashboard() {
 
   const quickActions = [
     { 
+      icon: Calendar, 
+      label: isRu ? 'Календарь' : 'Calendar', 
+      color: 'bg-primary',
+      onClick: () => navigate('/owner/calendar')
+    },
+    { 
       icon: Key, 
       label: isRu ? 'Check-in' : 'Check-in', 
       color: 'bg-green-500',
