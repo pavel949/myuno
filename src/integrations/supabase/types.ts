@@ -1551,6 +1551,74 @@ export type Database = {
           },
         ]
       }
+      property_bookings: {
+        Row: {
+          check_in: string
+          check_out: string
+          created_at: string
+          currency: string | null
+          external_id: string | null
+          guest_email: string | null
+          guest_name: string | null
+          guest_phone: string | null
+          guests_count: number | null
+          id: string
+          notes: string | null
+          owner_id: string
+          property_id: string
+          source: string | null
+          status: string | null
+          total_amount: number | null
+          updated_at: string
+        }
+        Insert: {
+          check_in: string
+          check_out: string
+          created_at?: string
+          currency?: string | null
+          external_id?: string | null
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          guests_count?: number | null
+          id?: string
+          notes?: string | null
+          owner_id: string
+          property_id: string
+          source?: string | null
+          status?: string | null
+          total_amount?: number | null
+          updated_at?: string
+        }
+        Update: {
+          check_in?: string
+          check_out?: string
+          created_at?: string
+          currency?: string | null
+          external_id?: string | null
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          guests_count?: number | null
+          id?: string
+          notes?: string | null
+          owner_id?: string
+          property_id?: string
+          source?: string | null
+          status?: string | null
+          total_amount?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_bookings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_financials: {
         Row: {
           amount: number
