@@ -469,6 +469,15 @@ export const cuisineCategories = [
   { id: 'indian', labelEn: 'Indian', labelRu: 'Индийская', icon: '🍛' },
 ];
 
+export const locationCategories = [
+  { id: 'all', labelEn: 'All areas', labelRu: 'Все районы' },
+  { id: 'patong', labelEn: 'Patong', labelRu: 'Патонг' },
+  { id: 'kata', labelEn: 'Kata', labelRu: 'Ката' },
+  { id: 'rawai', labelEn: 'Rawai', labelRu: 'Равай' },
+  { id: 'kamala', labelEn: 'Kamala', labelRu: 'Камала' },
+  { id: 'chalong', labelEn: 'Chalong', labelRu: 'Чалонг' },
+];
+
 export const getRestaurantById = (id: string): Restaurant | undefined => {
   return demoRestaurants.find(r => r.id === id);
 };

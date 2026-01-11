@@ -36,6 +36,7 @@ import RestaurantDetail from '@/pages/restaurants/RestaurantDetail';
 import TableReservation from '@/pages/restaurants/TableReservation';
 import DeliveryCheckout from '@/pages/restaurants/DeliveryCheckout';
 import SetMenuBooking from '@/pages/restaurants/SetMenuBooking';
+import RestaurantMap from '@/pages/restaurants/RestaurantMap';
 
 // Transport Mini-App
 import TransportIndex from '@/pages/transport/TransportIndex';
@@ -202,6 +203,7 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* Restaurants Mini-App Routes */}
         <Route path="/restaurants" element={<PageTransition><RestaurantsIndex /></PageTransition>} />
+        <Route path="/restaurants/map" element={<PageTransition><RestaurantMap /></PageTransition>} />
         <Route path="/restaurants/:id" element={<PageTransition><RestaurantDetail /></PageTransition>} />
         <Route path="/restaurants/:id/reserve" element={<PageTransition><TableReservation /></PageTransition>} />
         <Route path="/restaurants/:id/delivery" element={<PageTransition><DeliveryCheckout /></PageTransition>} />

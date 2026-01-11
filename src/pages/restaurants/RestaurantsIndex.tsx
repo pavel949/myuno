@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { UtensilsCrossed, Clock, Star, MapPin, Bike, ArrowRight, Flame, CalendarDays, Banknote } from 'lucide-react';
+import { UtensilsCrossed, Clock, Star, MapPin, Bike, ArrowRight, Flame, CalendarDays, Banknote, Map } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { FilterChip } from '@/components/uno/FilterChip';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import { triggerRipple } from '@/hooks/useRipple';
-import { demoRestaurants, cuisineCategories } from './restaurantsData';
+import { demoRestaurants, cuisineCategories, locationCategories } from './restaurantsData';
 import { MiniAppHero, MiniAppSearch, MiniAppQuickActions } from '@/components/miniapp';
 
 type Mode = 'delivery' | 'reservation';
@@ -22,6 +23,7 @@ export default function RestaurantsIndex() {
   const [mode, setMode] = useState<Mode>(initialMode);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCuisine, setSelectedCuisine] = useState('all');
+  const [selectedLocation, setSelectedLocation] = useState('all');
 
   const handleModeChange = (newMode: Mode) => {
     setMode(newMode);
@@ -33,11 +35,13 @@ export default function RestaurantsIndex() {
     const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCuisine = selectedCuisine === 'all' || 
       rest.cuisine.toLowerCase() === selectedCuisine.toLowerCase();
+    const matchesLocation = selectedLocation === 'all' ||
+      rest.location.toLowerCase() === selectedLocation.toLowerCase();
     
     if (mode === 'delivery' && !rest.acceptsDelivery) return false;
     if (mode === 'reservation' && !rest.acceptsReservations) return false;
     
-    return matchesSearch && matchesCuisine;
+    return matchesSearch && matchesCuisine && matchesLocation;
   });
 
   const openRestaurants = filteredRestaurants.filter(r => r.isOpen);
@@ -68,6 +72,15 @@ export default function RestaurantsIndex() {
           showBack
           fallbackPath="/"
           subtitle={language === 'ru' ? `${filteredRestaurants.length} мест` : `${filteredRestaurants.length} places`}
+          actions={
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(`/restaurants/map?mode=${mode}`)}
+            >
+              <Map className="w-5 h-5" />
+            </Button>
+          }
         />
 
         {/* Hero Section */}
@@ -109,13 +122,25 @@ export default function RestaurantsIndex() {
         />
 
         {/* Cuisine filters */}
-        <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide mb-4">
+        <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide mb-2">
           {cuisineCategories.map((cat) => (
             <FilterChip
               key={cat.id}
               label={`${cat.icon} ${language === 'ru' ? cat.labelRu : cat.labelEn}`}
               isActive={selectedCuisine === cat.id}
               onToggle={() => setSelectedCuisine(cat.id)}
+            />
+          ))}
+        </div>
+
+        {/* Location filters */}
+        <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide mb-4">
+          {locationCategories.map((loc) => (
+            <FilterChip
+              key={loc.id}
+              label={`📍 ${language === 'ru' ? loc.labelRu : loc.labelEn}`}
+              isActive={selectedLocation === loc.id}
+              onToggle={() => setSelectedLocation(loc.id)}
             />
           ))}
         </div>
