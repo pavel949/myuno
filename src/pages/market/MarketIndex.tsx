@@ -258,7 +258,6 @@ const MarketIndex = () => {
         {filteredStores.map((store) => (
           <ItemCard
             key={store.id}
-            id={store.id}
             title={language === 'ru' ? store.nameRu : store.nameEn}
             image={store.image}
             rating={store.rating}
