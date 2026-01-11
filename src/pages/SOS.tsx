@@ -19,7 +19,8 @@ import {
   Lightbulb,
   WifiOff,
   Download,
-  CheckCircle2
+  CheckCircle2,
+  ChevronDown
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -123,146 +124,118 @@ const serviceLinks = [
   },
 ];
 
-// Grouped emergency tips
+// Grouped emergency tips - more practical with clear actions
 const tipCategories = [
   {
     id: 'medical',
-    title: 'Medical Emergencies',
-    titleRu: 'Медицинские ситуации',
+    title: 'Medical',
+    titleRu: 'Медицина',
     icon: '🏥',
     tips: [
-      { en: 'For snake bites, call 1669 and go to hospital immediately', ru: 'При укусе змеи звоните 1669 и езжайте в больницу' },
-      { en: 'Jellyfish sting: rinse with vinegar, remove tentacles, seek medical help', ru: 'Укус медузы: промойте уксусом, удалите щупальца, обратитесь к врачу' },
-      { en: 'Sunstroke: move to shade, cool down with wet cloths, drink water, call ambulance if severe', ru: 'Солнечный удар: переместитесь в тень, охладите тело, пейте воду, при тяжёлом состоянии — скорая' },
-      { en: 'Food poisoning: drink plenty of water, take activated charcoal, visit hospital if symptoms persist', ru: 'Отравление: пейте много воды, примите активированный уголь, при ухудшении — в больницу' },
-      { en: 'Allergic reaction: take antihistamine, call 1669 if breathing difficulty', ru: 'Аллергия: примите антигистаминное, при затруднении дыхания — 1669' },
-      { en: 'Burns: cool with running water 10+ min, do not apply ice or butter, seek help for large burns', ru: 'Ожоги: охладите водой 10+ мин, не прикладывайте лёд или масло, при сильных — к врачу' },
-      { en: 'Dengue fever symptoms: high fever, rash, joint pain — go to hospital immediately', ru: 'Симптомы денге: высокая температура, сыпь, боль в суставах — сразу в больницу' },
-      { en: 'Dehydration: drink ORS solution or coconut water, seek shade, rest', ru: 'Обезвоживание: пейте раствор ORS или кокосовую воду, укрытие в тени, отдых' },
-      { en: 'Insect bites: clean wound, apply antihistamine cream, watch for infection signs', ru: 'Укусы насекомых: очистите рану, нанесите антигистаминный крем, следите за признаками инфекции' },
-      { en: 'Sprained ankle: RICE method - Rest, Ice, Compression, Elevation', ru: 'Растяжение: метод RICE — Покой, Лёд, Компрессия, Подъём ноги' },
+      { en: 'Snake bite → Call 1669, do NOT suck venom, keep limb below heart level', ru: 'Укус змеи → Звоните 1669, НЕ отсасывайте яд, держите конечность ниже сердца' },
+      { en: 'Jellyfish → Rinse with vinegar (NOT fresh water), scrape tentacles with card', ru: 'Медуза → Промойте уксусом (НЕ пресной водой), соскребите щупальца картой' },
+      { en: 'Sunstroke → Shade + wet towels on neck/armpits + sips of water → 1669 if unconscious', ru: 'Солнечный удар → Тень + мокрые полотенца на шею/подмышки + вода → 1669 при потере сознания' },
+      { en: 'Food poisoning → ORS/coconut water + activated charcoal → hospital if blood in stool', ru: 'Отравление → Раствор ОРС/кокос + уголь → больница если кровь в стуле' },
+      { en: 'Allergic reaction → Antihistamine now, EpiPen if have → 1669 if throat swelling', ru: 'Аллергия → Антигистамин сейчас, EpiPen если есть → 1669 при отёке горла' },
+      { en: 'Dengue signs: fever + rash + joint pain → hospital immediately, drink fluids', ru: 'Признаки денге: температура + сыпь + боль в суставах → в больницу, пить жидкость' },
+      { en: 'Burns → 10+ min under cool (not ice) water → cling film → hospital for large burns', ru: 'Ожоги → 10+ мин под прохладной водой → пищевая плёнка → больница при больших ожогах' },
     ]
   },
   {
     id: 'water',
-    title: 'Water & Beach Safety',
-    titleRu: 'Безопасность на воде',
+    title: 'Beach & Sea',
+    titleRu: 'Пляж и море',
     icon: '🌊',
     tips: [
-      { en: 'Drowning risk: swim only at beaches with lifeguards, avoid red flag areas', ru: 'Риск утонуть: купайтесь только на пляжах со спасателями, избегайте зон с красным флагом' },
-      { en: 'Rip current: do not swim against it, swim parallel to shore, then back to beach', ru: 'Отбойное течение: не плывите против него, плывите параллельно берегу, затем к пляжу' },
-      { en: 'Red flags mean no swimming — this is strictly enforced during monsoon', ru: 'Красные флаги означают запрет купания — строго соблюдается в сезон муссонов' },
-      { en: 'Never swim alone, especially at night or after drinking alcohol', ru: 'Никогда не плавайте в одиночку, особенно ночью или после алкоголя' },
-      { en: 'Coral cuts: clean thoroughly with fresh water, apply antiseptic, monitor for infection', ru: 'Порезы о кораллы: тщательно промойте пресной водой, нанесите антисептик, следите за инфекцией' },
-      { en: 'Sea urchin spines: soak in hot water, remove carefully, seek medical help if deep', ru: 'Иглы морского ежа: замочите в горячей воде, аккуратно удалите, при глубоких — к врачу' },
-      { en: 'Boat accident: wear life jacket, stay calm, signal for help with bright colors', ru: 'ДТП на лодке: наденьте спасжилет, сохраняйте спокойствие, подавайте сигналы яркими цветами' },
-      { en: 'Diving emergency: do not fly for 24h after diving, call DAN hotline for decompression', ru: 'Экстренная ситуация при дайвинге: не летайте 24ч после погружения, звоните на горячую линию DAN' },
+      { en: 'Rip current → Do NOT fight it! Swim PARALLEL to shore until free, then to beach', ru: 'Отбойное течение → НЕ боритесь! Плывите ПАРАЛЛЕЛЬНО берегу, затем к пляжу' },
+      { en: 'Red flags = NO SWIMMING. Fines + real danger. Lifeguards enforce strictly.', ru: 'Красные флаги = КУПАТЬСЯ НЕЛЬЗЯ. Штрафы + реальная опасность.' },
+      { en: 'Sea urchin spines → Soak in hot water 30min, tweezers for shallow ones, doctor for deep', ru: 'Иглы ежа → Замочите в горячей воде 30мин, пинцет для мелких, врач для глубоких' },
+      { en: 'Coral cuts → Wash with fresh water + soap, antiseptic, watch for infection 3 days', ru: 'Порезы о кораллы → Промыть пресной водой + мыло, антисептик, следить 3 дня' },
+      { en: 'Diving: no flying 24h after! DAN emergency: +66-2-256-7939', ru: 'Дайвинг: не летать 24ч после! DAN экстренный: +66-2-256-7939' },
     ]
   },
   {
     id: 'traffic',
-    title: 'Traffic & Transport',
-    titleRu: 'Дорожные ситуации',
+    title: 'Road & Transport',
+    titleRu: 'Дорога',
     icon: '🛵',
     tips: [
-      { en: 'Motorbike accident: do not move the injured, call 1669 immediately', ru: 'ДТП на мотобайке: не перемещайте пострадавших, сразу звоните 1669' },
-      { en: 'Scooter breakdown: call your rental company or use Road Assistance in this app', ru: 'Поломка скутера: звоните в прокат или используйте Помощь на дороге в приложении' },
-      { en: 'Always wear a helmet — fines are strict and hospitals may not treat without it', ru: 'Всегда носите шлем — штрафы строгие, больницы могут отказать без него' },
-      { en: 'Traffic accident: take photos of damage, license plates, and call Tourist Police 1155', ru: 'ДТП: сфотографируйте повреждения, номера, позвоните в турполицию 1155' },
-      { en: 'Never leave the scene of an accident — call police and wait', ru: 'Никогда не покидайте место ДТП — вызовите полицию и ждите' },
-      { en: 'Flat tire: pull over safely, turn on hazard lights, call Road Assistance', ru: 'Спущенное колесо: безопасно остановитесь, включите аварийку, вызовите помощь на дороге' },
-      { en: 'Out of fuel: many 7-Elevens sell bottled gasoline, or call for delivery', ru: 'Закончился бензин: многие 7-Eleven продают бутылочный бензин, или вызовите доставку' },
-      { en: 'Lost rental key: contact rental immediately, do not leave bike unattended', ru: 'Потеряли ключ от аренды: сразу свяжитесь с прокатом, не оставляйте байк без присмотра' },
+      { en: 'Accident → Photos of everything FIRST (damage, plates, scene) → then call 1155', ru: 'ДТП → СНАЧАЛА фото всего (повреждения, номера, место) → потом звоните 1155' },
+      { en: 'No helmet = hospital may refuse treatment + insurance void. Always wear!', ru: 'Без шлема = больница может отказать + страховка недействительна. Всегда носите!' },
+      { en: 'Out of fuel → 7-Eleven sells bottles (40-50 THB), or Grab delivery', ru: 'Кончился бензин → 7-Eleven продаёт бутылки (40-50 бат), или доставка Grab' },
+      { en: 'Flat tire/breakdown → Hazards on, move off road, use Road Assistance in this app', ru: 'Прокол/поломка → Аварийка, съехать с дороги, Помощь на дороге в приложении' },
+      { en: 'Traffic fine → Pay ONLY at police station with receipt. Never to officer directly.', ru: 'Штраф → Платите ТОЛЬКО в участке с квитанцией. Никогда напрямую офицеру.' },
     ]
   },
   {
     id: 'documents',
-    title: 'Documents & Legal',
-    titleRu: 'Документы и право',
+    title: 'Documents',
+    titleRu: 'Документы',
     icon: '📄',
     tips: [
-      { en: 'Lost passport: contact your embassy and file a police report at Tourist Police', ru: 'Потеря паспорта: свяжитесь с посольством и подайте заявление в турполицию' },
-      { en: 'Theft: file a report at Tourist Police for insurance claims', ru: 'Кража: подайте заявление в турполицию для страховой компании' },
-      { en: 'Keep copies of passport, visa, and insurance in cloud storage', ru: 'Храните копии паспорта, визы и страховки в облаке' },
-      { en: 'Visa overstay: contact Immigration immediately — fines increase daily', ru: 'Просрочка визы: сразу свяжитесь с иммиграцией — штрафы растут ежедневно' },
-      { en: 'Police stop: stay calm, be polite, ask for Tourist Police if needed', ru: 'Остановила полиция: будьте спокойны, вежливы, попросите турполицию при необходимости' },
-      { en: 'Never hand over your original passport — show a copy instead', ru: 'Никогда не отдавайте оригинал паспорта — показывайте копию' },
-      { en: 'For legal disputes, contact your consulate for recommended lawyers', ru: 'При юридических спорах свяжитесь с консульством для рекомендаций адвокатов' },
-      { en: 'Traffic fine: pay at police station, get receipt, do not pay to officers directly', ru: 'Штраф за ПДД: платите в участке, берите квитанцию, не платите офицерам напрямую' },
+      { en: 'Lost passport → 1) Police report at Tourist Police 1155, 2) Embassy for temp passport', ru: 'Потеря паспорта → 1) Заявление в турполицию 1155, 2) Посольство за временным' },
+      { en: 'Theft → Police report needed for insurance. Tourist Police speaks English: 1155', ru: 'Кража → Нужен полицейский отчёт для страховки. Турполиция на английском: 1155' },
+      { en: 'Visa overstay → Immigration ASAP. Fine: 500 THB/day, max 20,000. Overstay 90+ days = ban', ru: 'Просрочка визы → В иммиграцию СРОЧНО. Штраф: 500 бат/день, макс 20,000. 90+ дней = бан' },
+      { en: 'Keep passport COPY on phone + cloud. Never give original to tuk-tuk/jet-ski rentals', ru: 'Держите КОПИЮ паспорта в телефоне + облаке. Никогда не давайте оригинал прокату' },
     ]
   },
   {
     id: 'wildlife',
-    title: 'Wildlife & Nature',
-    titleRu: 'Животные и природа',
+    title: 'Animals',
+    titleRu: 'Животные',
     icon: '🐒',
     tips: [
-      { en: 'Monkeys: do not feed or provoke, keep belongings secure, seek help if bitten', ru: 'Обезьяны: не кормите и не провоцируйте, держите вещи при себе, при укусе — к врачу' },
-      { en: 'Stray dogs: avoid eye contact, do not run, back away slowly', ru: 'Бродячие собаки: избегайте зрительного контакта, не бегите, медленно отступайте' },
-      { en: 'Dog or cat bite: wash wound, get rabies vaccination within 24h — very important!', ru: 'Укус собаки/кошки: промойте рану, сделайте прививку от бешенства в течение 24ч — очень важно!' },
-      { en: 'Centipede bite: extremely painful, apply ice, take painkiller, seek medical help', ru: 'Укус сороконожки: очень больно, приложите лёд, примите обезболивающее, обратитесь к врачу' },
-      { en: 'Scorpion sting: apply ice, take antihistamine, go to hospital if severe reaction', ru: 'Укус скорпиона: приложите лёд, примите антигистаминное, при сильной реакции — в больницу' },
-      { en: 'Elephant encounter: stay calm, do not run, give them space', ru: 'Встреча со слоном: сохраняйте спокойствие, не бегите, дайте им пространство' },
-      { en: 'Gecko bites are harmless — clean with antiseptic, no treatment needed', ru: 'Укусы гекконов безвредны — обработайте антисептиком, лечение не нужно' },
-      { en: 'Avoid touching any unfamiliar marine life — many are venomous', ru: 'Не трогайте незнакомых морских обитателей — многие ядовиты' },
+      { en: 'Dog/cat bite → Wash 15min with soap → Rabies shots WITHIN 24H. Not optional!', ru: 'Укус собаки/кошки → Мыть 15мин с мылом → Прививки от бешенства ЧЕРЕЗ 24Ч. Обязательно!' },
+      { en: 'Monkeys → No eye contact, no food showing, bag closed. If bitten = rabies shots', ru: 'Обезьяны → Без зрительного контакта, еда спрятана, сумка закрыта. Укус = прививки' },
+      { en: 'Stray dogs → Freeze, no eye contact, back away slowly. Never run.', ru: 'Бродячие собаки → Замрите, без зрительного контакта, медленно отступайте. Не бегите.' },
+      { en: 'Centipede (very painful!) → Ice + painkiller + antihistamine → hospital if severe', ru: 'Сороконожка (очень больно!) → Лёд + обезболивающее + антигистамин → больница при сильной' },
     ]
   },
   {
     id: 'weather',
-    title: 'Weather & Natural Disasters',
-    titleRu: 'Погода и стихийные бедствия',
+    title: 'Weather',
+    titleRu: 'Погода',
     icon: '⛈️',
     tips: [
-      { en: 'Monsoon season: flash floods possible, avoid low areas, do not cross flooded roads', ru: 'Сезон муссонов: возможны наводнения, избегайте низин, не переезжайте затопленные дороги' },
-      { en: 'Thunderstorm: get out of water, seek shelter, avoid open areas and tall objects', ru: 'Гроза: выйдите из воды, найдите укрытие, избегайте открытых мест и высоких объектов' },
-      { en: 'Earthquake: drop, cover, hold on, then evacuate to open area', ru: 'Землетрясение: упадите, укройтесь, держитесь, затем эвакуируйтесь на открытое место' },
-      { en: 'Tsunami warning: move immediately to high ground or upper floors', ru: 'Предупреждение о цунами: немедленно двигайтесь на возвышенность или верхние этажи' },
-      { en: 'If sea suddenly recedes far from shore — this is a tsunami sign, run to high ground!', ru: 'Если море внезапно отступило далеко — это знак цунами, бегите на возвышенность!' },
-      { en: 'Landslide risk after heavy rain — avoid hillsides and unstable slopes', ru: 'Риск оползней после сильного дождя — избегайте склонов холмов' },
+      { en: 'Tsunami sign → Sea suddenly pulls FAR back = RUN to high ground/upper floors NOW', ru: 'Знак цунами → Море внезапно отступило ДАЛЕКО = БЕГИТЕ на возвышенность СЕЙЧАС' },
+      { en: 'Monsoon floods → Never cross flooded roads. 30cm water can sweep a car.', ru: 'Муссонные наводнения → Никогда не переезжайте затопленные дороги. 30см сносят машину.' },
+      { en: 'Thunderstorm → Exit water immediately, avoid trees/metal, crouch if caught in open', ru: 'Гроза → Выйти из воды немедленно, избегать деревьев/металла, присесть на открытом месте' },
     ]
   },
   {
     id: 'security',
-    title: 'Personal Security',
-    titleRu: 'Личная безопасность',
+    title: 'Safety & Scams',
+    titleRu: 'Безопасность',
     icon: '🔒',
     tips: [
-      { en: 'UNO ALERT provides personal security and emergency help 24/7', ru: 'UNO ALERT — личная безопасность и экстренная помощь 24/7' },
-      { en: 'Tourist Police (1155) speaks English and helps tourists', ru: 'Турполиция (1155) говорит по-английски и помогает туристам' },
-      { en: 'Scam alert: never show your credit card to strangers, use official taxis', ru: 'Осторожно, мошенники: не показывайте карту посторонним, пользуйтесь официальным такси' },
-      { en: 'ATM skimming: use ATMs inside banks, cover keypad when entering PIN', ru: 'Скимминг банкоматов: используйте банкоматы внутри банков, прикрывайте клавиатуру при вводе PIN' },
-      { en: 'Drink spiking: never leave drinks unattended, watch your drink being made', ru: 'Подсыпание в напитки: не оставляйте напитки без присмотра, следите за приготовлением' },
-      { en: 'Fake police: real officers have ID cards, ask to see them', ru: 'Фальшивая полиция: у настоящих офицеров есть удостоверения, попросите показать' },
-      { en: 'Jet ski scam: photograph any damage before renting, use reputable companies', ru: 'Обман с гидроциклами: фотографируйте повреждения до аренды, пользуйтесь надёжными компаниями' },
-      { en: 'Share your location with family/friends when going on tours or remote areas', ru: 'Делитесь геолокацией с семьёй/друзьями при поездках на экскурсии или в отдалённые места' },
+      { en: 'Jet-ski scam → Video ALL scratches before rent. Use phone timestamp.', ru: 'Обман с гидроциклами → Снимите ВСЕ царапины до аренды. Используйте метку времени.' },
+      { en: 'Drink spiking → Never leave drink, watch it being made, buy your own', ru: 'Подсыпание в напиток → Не оставляйте напиток, следите за приготовлением, покупайте сами' },
+      { en: 'ATM → Use bank ATMs inside. Cover PIN. 200 THB fee is normal, more = scam', ru: 'Банкомат → Используйте в банках. Прикрывайте PIN. 200 бат комиссия нормально, больше = обман' },
+      { en: 'Fake police → Real police have ID card + badge number. Ask to see. Call 1155 if unsure.', ru: 'Фальшивая полиция → У настоящих есть удостоверение + номер значка. Попросите. Звоните 1155.' },
+      { en: 'Share location with someone when going to remote areas or on tours', ru: 'Делитесь локацией когда едете в отдалённые места или на экскурсии' },
     ]
   },
   {
     id: 'accommodation',
-    title: 'Accommodation Issues',
-    titleRu: 'Проблемы с жильём',
+    title: 'Accommodation',
+    titleRu: 'Жильё',
     icon: '🏠',
     tips: [
-      { en: 'Power outage: check if it is building-wide, contact reception or landlord', ru: 'Отключение электричества: проверьте, во всём ли здании, свяжитесь с ресепшн или владельцем' },
-      { en: 'AC not working: check if filters are clean, call maintenance, use fans temporarily', ru: 'Не работает кондиционер: проверьте чистоту фильтров, вызовите обслуживание, временно используйте вентилятор' },
-      { en: 'Water leak: turn off main valve, contact building management immediately', ru: 'Протечка воды: перекройте главный вентиль, сразу свяжитесь с управляющей компанией' },
-      { en: 'Locked out: contact reception or use locksmith service in this app', ru: 'Заперлись снаружи: свяжитесь с ресепшн или используйте службу слесаря в приложении' },
-      { en: 'Fire in building: do not use elevators, use fire stairs, meet at assembly point', ru: 'Пожар в здании: не пользуйтесь лифтами, используйте пожарные лестницы, соберитесь в точке сбора' },
-      { en: 'Suspicious person: do not confront, go to safe area, call security or police', ru: 'Подозрительный человек: не вступайте в контакт, идите в безопасное место, вызовите охрану или полицию' },
+      { en: 'Locked out → Reception first, or Locksmith service in this app (24/7)', ru: 'Заперлись → Сначала ресепшн, или Слесарь в приложении (24/7)' },
+      { en: 'Power out → Check breaker box first. If building-wide, wait 10-30min usually', ru: 'Нет света → Проверьте автоматы. Если во всём доме, обычно ждать 10-30мин' },
+      { en: 'Fire → Do NOT use elevator. Wet towel over mouth. Fire stairs only.', ru: 'Пожар → НЕ используйте лифт. Мокрое полотенце на рот. Только пожарная лестница.' },
     ]
   },
   {
     id: 'general',
-    title: 'General Tips',
-    titleRu: 'Общие советы',
+    title: 'Pro Tips',
+    titleRu: 'Важное',
     icon: '💡',
     tips: [
-      { en: 'Save this page offline for emergencies', ru: 'Сохраните эту страницу для офлайн-доступа' },
-      { en: 'Always have travel insurance — medical costs can be very high', ru: 'Всегда имейте туристическую страховку — медицинские расходы могут быть очень высокими' },
-      { en: 'Carry emergency cash in THB — not all places accept cards', ru: 'Имейте при себе наличные в батах — не везде принимают карты' },
-      { en: 'Know your hotel address in Thai — show to taxi drivers', ru: 'Знайте адрес отеля на тайском — покажите водителю такси' },
-      { en: 'Download offline maps of Phuket — GPS works without internet', ru: 'Скачайте офлайн-карты Пхукета — GPS работает без интернета' },
-      { en: 'Register with your embassy for emergency notifications', ru: 'Зарегистрируйтесь в посольстве для экстренных уведомлений' },
+      { en: 'Save this page offline NOW — works without internet', ru: 'Сохраните эту страницу офлайн СЕЙЧАС — работает без интернета' },
+      { en: 'Travel insurance = MUST. Hospital bill can be 50,000-500,000 THB easily', ru: 'Страховка = ОБЯЗАТЕЛЬНО. Счёт больницы легко 50,000-500,000 бат' },
+      { en: 'Keep 2000+ THB cash always — not all accept cards, ATMs may be far', ru: 'Всегда 2000+ бат наличными — не везде карты, банкоматы могут быть далеко' },
+      { en: 'Hotel address in Thai on phone — show taxi driver, they often cannot read English', ru: 'Адрес отеля на тайском в телефоне — показать таксисту, часто не читают английский' },
     ]
   },
 ];
@@ -272,6 +245,13 @@ export default function SOS() {
   const navigate = useNavigate();
   const { isOffline, isSOSCached, cacheSOS } = useOfflineStatus();
   const [isCaching, setIsCaching] = useState(false);
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
+
+  const toggleCategory = (id: string) => {
+    setExpandedCategories(prev => 
+      prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
+    );
+  };
 
   const handleCall = (phone: string) => {
     window.location.href = `tel:${phone}`;
@@ -479,36 +459,60 @@ export default function SOS() {
           );
         })}
 
-        {/* Grouped Tips */}
+        {/* Grouped Tips - Accordion Style */}
         <FadeInUp delay={0.45}>
           <div className="flex items-center gap-2 mb-3">
             <Lightbulb className="w-5 h-5 text-amber-500" />
             <h2 className="font-semibold text-lg">
-              {language === 'ru' ? 'Экстренные ситуации и советы' : 'Emergency Situations & Tips'}
+              {language === 'ru' ? 'Что делать если...' : 'What to do if...'}
             </h2>
           </div>
         </FadeInUp>
 
-        {tipCategories.map((category, catIdx) => (
-          <FadeInUp key={category.id} delay={0.5 + catIdx * 0.03}>
-            <SectionCard className="mb-3 bg-muted/30">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-lg">{category.icon}</span>
-                <SectionTitle className="mb-0 text-sm">
-                  {language === 'ru' ? category.titleRu : category.title}
-                </SectionTitle>
-              </div>
-              <ul className="space-y-1.5">
-                {category.tips.map((tip, idx) => (
-                  <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
-                    <span className="text-primary mt-0.5 text-xs">•</span>
-                    <span>{language === 'ru' ? tip.ru : tip.en}</span>
-                  </li>
-                ))}
-              </ul>
-            </SectionCard>
-          </FadeInUp>
-        ))}
+        <div className="space-y-2">
+          {tipCategories.map((category, catIdx) => {
+            const isExpanded = expandedCategories.includes(category.id);
+            return (
+              <FadeInUp key={category.id} delay={0.5 + catIdx * 0.02}>
+                <div className="rounded-xl border border-border/50 bg-card overflow-hidden">
+                  <button
+                    onClick={() => toggleCategory(category.id)}
+                    className="w-full flex items-center justify-between p-3 hover:bg-muted/30 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{category.icon}</span>
+                      <span className="font-medium text-sm">
+                        {language === 'ru' ? category.titleRu : category.title}
+                      </span>
+                      <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                        {category.tips.length}
+                      </span>
+                    </div>
+                    <ChevronDown 
+                      className={cn(
+                        "w-4 h-4 text-muted-foreground transition-transform duration-200",
+                        isExpanded && "rotate-180"
+                      )} 
+                    />
+                  </button>
+                  
+                  {isExpanded && (
+                    <div className="px-3 pb-3 pt-1 border-t border-border/30">
+                      <ul className="space-y-2">
+                        {category.tips.map((tip, idx) => (
+                          <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2 py-1">
+                            <span className="text-primary mt-0.5 font-bold">→</span>
+                            <span>{language === 'ru' ? tip.ru : tip.en}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </FadeInUp>
+            );
+          })}
+        </div>
 
         {/* Save Offline Button */}
         <FadeInUp delay={0.5}>
