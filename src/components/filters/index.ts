@@ -123,3 +123,53 @@ export {
   waterDurationOptions,
   waterFeatureOptions,
 } from './WaterFilters';
+
+// Pharmacy filters
+export {
+  pharmacyFilterConfig,
+  pharmacyCategoryOptions,
+  pharmacyFeatureOptions,
+  pharmacyDistanceOptions,
+} from './PharmacyFilters';
+
+// Pets filters
+export {
+  petsFilterConfig,
+  petServiceTypeOptions,
+  petServiceFeatureOptions,
+  petTypeOptions,
+} from './PetsFilters';
+
+// Education filters
+export {
+  educationFilterConfig,
+  educationCategoryOptions,
+  educationAgeOptions,
+  educationTypeOptions,
+  educationFeatureOptions,
+} from './EducationFilters';
+
+// Cleaning filters
+export {
+  cleaningFilterConfig,
+  cleaningTypeOptions,
+  cleaningFeatureOptions,
+  cleaningFrequencyOptions,
+} from './CleaningFilters';
+
+// Babysitter filters
+export {
+  babysitterFilterConfig,
+  babysitterAgeGroupOptions,
+  babysitterLanguageOptions,
+  babysitterCertOptions,
+  babysitterFeatureOptions,
+} from './BabysitterFilters';
+
+// Legal/Business filters
+export {
+  legalFilterConfig,
+  legalCategoryOptions,
+  legalLanguageOptions,
+  legalFeatureOptions,
+} from './LegalFilters';

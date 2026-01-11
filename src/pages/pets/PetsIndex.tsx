@@ -1,46 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  PawPrint, 
-  Plane, 
-  Syringe, 
-  Hotel, 
-  Scissors, 
-  GraduationCap,
-  Heart,
-  Stethoscope,
-  Search,
-  MapPin,
-  Star,
-  Clock,
-  Shield,
-  Filter
-} from 'lucide-react';
-import { AppLayout } from '@/components/layout/AppLayout';
-import { PageContainer } from '@/components/uno/PageContainer';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PawPrint, Plane, Syringe, Hotel, Scissors, GraduationCap, Star, Clock, MapPin, Shield } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { cn } from '@/lib/utils';
+import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from '@/components/miniapp';
+import { FilterValues, petsFilterConfig } from '@/components/filters';
 
-interface PetCategory {
-  id: string;
-  icon: React.ElementType;
-  label: string;
-  labelRu: string;
-  color: string;
-  count: number;
-}
-
-const categories: PetCategory[] = [
-  { id: 'all', icon: PawPrint, label: 'All', labelRu: 'Все', color: 'from-amber-500 to-orange-500', count: 24 },
-  { id: 'transport', icon: Plane, label: 'Transport', labelRu: 'Перевозка', color: 'from-blue-500 to-indigo-500', count: 6 },
-  { id: 'veterinary', icon: Stethoscope, label: 'Veterinary', labelRu: 'Ветеринария', color: 'from-emerald-500 to-green-500', count: 8 },
-  { id: 'hotel', icon: Hotel, label: 'Hotels', labelRu: 'Гостиницы', color: 'from-purple-500 to-pink-500', count: 5 },
-  { id: 'grooming', icon: Scissors, label: 'Grooming', labelRu: 'Груминг', color: 'from-rose-500 to-red-500', count: 7 },
-  { id: 'training', icon: GraduationCap, label: 'Training', labelRu: 'Дрессировка', color: 'from-cyan-500 to-blue-500', count: 4 },
+const categories: MiniAppCategory[] = [
+  { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '🐾' },
+  { id: 'transport', labelEn: 'Transport', labelRu: 'Перевозка', icon: '✈️' },
+  { id: 'veterinary', labelEn: 'Veterinary', labelRu: 'Ветеринария', icon: '🏥' },
+  { id: 'hotel', labelEn: 'Hotels', labelRu: 'Гостиницы', icon: '🏨' },
+  { id: 'grooming', labelEn: 'Grooming', labelRu: 'Груминг', icon: '✂️' },
+  { id: 'training', labelEn: 'Training', labelRu: 'Дрессировка', icon: '🎓' },
 ];
 
 interface PetService {
@@ -143,55 +114,6 @@ const petServices: PetService[] = [
     isVerified: true,
     badges: ['Certified Trainer'],
   },
-  {
-    id: 'pet-relocate-asia',
-    name: 'Pet Relocate Asia',
-    nameRu: 'Pet Relocate Asia',
-    category: 'transport',
-    description: 'Stress-free pet relocation. All paperwork handled.',
-    descriptionRu: 'Релокация питомцев без стресса. Оформление всех документов.',
-    image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800',
-    rating: 4.8,
-    reviews: 92,
-    priceFrom: 12000,
-    location: 'All Thailand',
-    locationRu: 'Вся Таиланд',
-    isVerified: true,
-    badges: ['Documents', 'Quarantine Help'],
-  },
-  {
-    id: 'animal-hospital',
-    name: 'Samui Animal Hospital',
-    nameRu: 'Госпиталь для Животных Самуи',
-    category: 'veterinary',
-    description: 'Modern hospital with surgery, x-ray, and laboratory.',
-    descriptionRu: 'Современный госпиталь с хирургией, рентгеном и лабораторией.',
-    image: 'https://images.unsplash.com/photo-1612531386530-97286d97c2d2?w=800',
-    rating: 4.9,
-    reviews: 312,
-    priceFrom: 800,
-    location: 'Nathon, Koh Samui',
-    locationRu: 'Натон, Самуи',
-    isVerified: true,
-    is24h: true,
-    badges: ['Surgery', 'X-Ray', '24/7'],
-  },
-  {
-    id: 'happy-tails-hotel',
-    name: 'Happy Tails Pet Resort',
-    nameRu: 'Happy Tails Резорт',
-    category: 'hotel',
-    description: 'Family-run pet resort with garden and personal care.',
-    descriptionRu: 'Семейный пансион с садом и персональным уходом.',
-    image: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800',
-    rating: 4.8,
-    reviews: 145,
-    priceFrom: 600,
-    location: 'Chaweng, Koh Samui',
-    locationRu: 'Чавенг, Самуи',
-    isVerified: true,
-    badges: ['Garden', 'Pick-up'],
-  },
 ];
 
 export default function PetsIndex() {
@@ -199,182 +121,85 @@ export default function PetsIndex() {
   const { language } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [filterValues, setFilterValues] = useState<FilterValues>({});
 
-  const filteredServices = petServices.filter(service => {
-    const matchesSearch = service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      service.nameRu.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || service.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    Object.entries(filterValues).forEach(([key, value]) => {
+      if (key === 'priceLevel' && value) count++;
+      else if (Array.isArray(value)) count += value.length;
+      else if (value) count++;
+    });
+    return count;
+  }, [filterValues]);
+
+  const filteredServices = useMemo(() => {
+    return petServices.filter(service => {
+      const matchesSearch = service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        service.nameRu.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = selectedCategory === 'all' || service.category === selectedCategory;
+      
+      // Filter by service type
+      const serviceTypes = filterValues.serviceType as string[] | undefined;
+      if (serviceTypes?.length && !serviceTypes.includes(service.category)) return false;
+      
+      return matchesSearch && matchesCategory;
+    });
+  }, [searchQuery, selectedCategory, filterValues]);
+
+  const quickItems: QuickGridItem[] = [
+    { icon: '✈️', label: language === 'ru' ? 'Перевозка' : 'Transport', sublabel: language === 'ru' ? 'По миру' : 'Worldwide', onClick: () => navigate('/pets/transport') },
+    { icon: '💉', label: language === 'ru' ? 'Вакцинация' : 'Vaccination', sublabel: language === 'ru' ? 'Сертификаты' : 'Certificates', onClick: () => setSelectedCategory('veterinary') },
+    { icon: '🏨', label: language === 'ru' ? 'Отели' : 'Hotels', onClick: () => setSelectedCategory('hotel') },
+    { icon: '✂️', label: language === 'ru' ? 'Груминг' : 'Grooming', onClick: () => setSelectedCategory('grooming') },
+  ];
 
   return (
-    <AppLayout title={language === 'ru' ? 'Питомцы' : 'Pets'}>
-      <PageContainer className="pb-24">
-        {/* Hero Section */}
-        <div className="relative rounded-2xl overflow-hidden mb-6">
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/90 to-orange-600/90" />
-          <div className="relative p-6 text-white">
-            <div className="flex items-center gap-2 mb-2">
-              <PawPrint className="w-6 h-6" />
-              <span className="text-sm font-medium opacity-90">
-                {language === 'ru' ? 'Всё для питомцев' : 'Everything for Pets'}
-              </span>
-            </div>
-            <h1 className="text-2xl font-bold mb-2">
-              {language === 'ru' ? 'Забота о вашем друге' : 'Care for Your Friend'}
-            </h1>
-            <p className="text-sm opacity-90">
-              {language === 'ru' 
-                ? 'Перевозка, ветеринария, гостиницы, груминг' 
-                : 'Transport, veterinary, hotels, grooming'}
-            </p>
-          </div>
-        </div>
+    <MiniAppLayout
+      title={language === 'ru' ? 'Питомцы' : 'Pets'}
+      subtitle={language === 'ru' ? `${filteredServices.length} услуг` : `${filteredServices.length} services`}
+      heroIcon={PawPrint}
+      heroTitle={language === 'ru' ? 'Забота о вашем друге' : 'Care for Your Friend'}
+      heroSubtitle={language === 'ru' ? 'Перевозка, ветеринария, гостиницы, груминг' : 'Transport, veterinary, hotels, grooming'}
+      heroGradientFrom="from-amber-500/20"
+      heroGradientVia="via-orange-500/20"
+      heroGradientTo="to-primary/20"
+      searchValue={searchQuery}
+      onSearchChange={setSearchQuery}
+      searchPlaceholder={language === 'ru' ? 'Поиск услуг...' : 'Search services...'}
+      categories={categories}
+      selectedCategory={selectedCategory}
+      onCategoryChange={setSelectedCategory}
+      filterConfig={petsFilterConfig}
+      filterValues={filterValues}
+      onFilterChange={setFilterValues}
+      filterActiveCount={activeFilterCount}
+      isEmpty={filteredServices.length === 0}
+      emptyIcon={PawPrint}
+      emptyText={language === 'ru' ? 'Услуги не найдены' : 'No services found'}
+    >
+      <MiniAppQuickGrid items={quickItems} columns={4} className="mb-6" />
 
-        {/* Search */}
-        <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-          <Input
-            placeholder={language === 'ru' ? 'Поиск услуг...' : 'Search services...'}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 h-12 rounded-xl"
+      <div className="grid gap-4">
+        {filteredServices.map((service) => (
+          <ItemCard
+            key={service.id}
+            image={service.image}
+            title={language === 'ru' ? service.nameRu : service.name}
+            subtitle={language === 'ru' ? service.descriptionRu : service.description}
+            rating={service.rating}
+            reviewCount={service.reviews}
+            location={language === 'ru' ? service.locationRu : service.location}
+            price={service.priceFrom}
+            pricePrefix={language === 'ru' ? 'от' : 'from'}
+            currency="฿"
+            isVerified={service.isVerified}
+            badge={service.is24h ? { text: '24/7', className: 'bg-green-500 text-white' } : undefined}
+            tags={service.badges.slice(0, 2)}
+            onClick={() => navigate(`/pets/${service.id}`)}
           />
-        </div>
-
-        {/* Categories */}
-        <div className="flex gap-2 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide">
-          {categories.map((cat) => {
-            const Icon = cat.icon;
-            const isSelected = selectedCategory === cat.id;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={cn(
-                  "flex items-center gap-2 px-4 py-2.5 rounded-full whitespace-nowrap transition-all",
-                  isSelected
-                    ? "bg-primary text-primary-foreground shadow-md"
-                    : "bg-card border border-border hover:border-primary/30"
-                )}
-              >
-                <Icon className="w-4 h-4" />
-                <span className="text-sm font-medium">
-                  {language === 'ru' ? cat.labelRu : cat.label}
-                </span>
-                <span className={cn(
-                  "text-xs px-1.5 py-0.5 rounded-full",
-                  isSelected ? "bg-white/20" : "bg-muted"
-                )}>
-                  {cat.count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Quick Actions */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          <button
-            onClick={() => navigate('/pets/transport')}
-            className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white"
-          >
-            <Plane className="w-8 h-8" />
-            <div className="text-left">
-              <div className="font-semibold">
-                {language === 'ru' ? 'Перевозка' : 'Transport'}
-              </div>
-              <div className="text-xs opacity-80">
-                {language === 'ru' ? 'По всему миру' : 'Worldwide'}
-              </div>
-            </div>
-          </button>
-          <button
-            onClick={() => setSelectedCategory('veterinary')}
-            className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white"
-          >
-            <Syringe className="w-8 h-8" />
-            <div className="text-left">
-              <div className="font-semibold">
-                {language === 'ru' ? 'Вакцинация' : 'Vaccination'}
-              </div>
-              <div className="text-xs opacity-80">
-                {language === 'ru' ? 'Сертификаты' : 'Certificates'}
-              </div>
-            </div>
-          </button>
-        </div>
-
-        {/* Services List */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="font-semibold">
-              {language === 'ru' ? 'Услуги' : 'Services'}
-              <span className="text-muted-foreground font-normal ml-2">
-                ({filteredServices.length})
-              </span>
-            </h2>
-            <Button variant="ghost" size="sm">
-              <Filter className="w-4 h-4 mr-1" />
-              {language === 'ru' ? 'Фильтр' : 'Filter'}
-            </Button>
-          </div>
-
-          {filteredServices.map((service) => (
-            <button
-              key={service.id}
-              onClick={() => navigate(`/pets/${service.id}`)}
-              className="w-full flex gap-4 p-3 rounded-xl bg-card border border-border hover:border-primary/30 transition-all text-left"
-            >
-              <img
-                src={service.image}
-                alt={service.name}
-                className="w-24 h-24 rounded-lg object-cover"
-              />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-semibold line-clamp-1">
-                    {language === 'ru' ? service.nameRu : service.name}
-                  </h3>
-                  {service.isVerified && (
-                    <Shield className="w-4 h-4 text-emerald-500 shrink-0" />
-                  )}
-                </div>
-                
-                <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
-                  {language === 'ru' ? service.descriptionRu : service.description}
-                </p>
-
-                <div className="flex items-center gap-2 mt-2 flex-wrap">
-                  <div className="flex items-center gap-1 text-xs">
-                    <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                    <span className="font-medium">{service.rating}</span>
-                    <span className="text-muted-foreground">({service.reviews})</span>
-                  </div>
-                  {service.is24h && (
-                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-                      <Clock className="w-3 h-3 mr-0.5" />
-                      24/7
-                    </Badge>
-                  )}
-                </div>
-
-                <div className="flex items-center justify-between mt-2">
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <MapPin className="w-3 h-3" />
-                    <span className="line-clamp-1">
-                      {language === 'ru' ? service.locationRu : service.location}
-                    </span>
-                  </div>
-                  <div className="text-sm font-semibold text-primary">
-                    {language === 'ru' ? 'от' : 'from'} ฿{service.priceFrom.toLocaleString()}
-                  </div>
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-      </PageContainer>
-    </AppLayout>
+        ))}
+      </div>
+    </MiniAppLayout>
   );
 }

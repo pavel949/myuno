@@ -9,7 +9,9 @@ import { MiniAppHero } from './MiniAppHero';
 import { MiniAppSearch } from './MiniAppSearch';
 import { FilterChip, FilterChipGroup } from '@/components/uno/FilterChip';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { UniversalFilter, type FilterConfig, type FilterValues } from '@/components/filters/UniversalFilter';
 
 export interface MiniAppCategory {
   id: string;
@@ -41,9 +43,9 @@ export interface MiniAppLayoutProps {
   selectedCategory?: string;
   onCategoryChange?: (categoryId: string) => void;
   showCategories?: boolean;
-  filterConfig?: any;
-  filterValues?: any;
-  onFilterChange?: (values: any) => void;
+  filterConfig?: FilterConfig;
+  filterValues?: FilterValues;
+  onFilterChange?: (values: FilterValues) => void;
   filterActiveCount?: number;
   filterButton?: ReactNode;
   showFilter?: boolean;
@@ -94,6 +96,9 @@ export function MiniAppLayout({
   showCategories = true,
   
   // Filter
+  filterConfig,
+  filterValues,
+  onFilterChange,
   filterActiveCount = 0,
   filterButton,
   showFilter = true,
@@ -213,6 +218,22 @@ export function MiniAppLayout({
               </div>
             )}
             {showFilter && filterButton}
+            {showFilter && !filterButton && filterConfig && onFilterChange && (
+              <UniversalFilter
+                config={filterConfig}
+                values={filterValues || {}}
+                onChange={onFilterChange}
+              >
+                <Button variant="outline" size="icon" className="h-12 w-12 relative shrink-0">
+                  <SlidersHorizontal className="w-5 h-5" />
+                  {filterActiveCount > 0 && (
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
+                      {filterActiveCount}
+                    </Badge>
+                  )}
+                </Button>
+              </UniversalFilter>
+            )}
           </div>
         )}
 

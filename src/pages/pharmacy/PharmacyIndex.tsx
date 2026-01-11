@@ -3,9 +3,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { usePharmacies } from "@/hooks/usePharmacy";
 import { Pill, Clock, MapPin, Truck, Shield, Phone } from "lucide-react";
 import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from "@/components/miniapp";
-import { useState } from "react";
-import { FilterValues } from "@/components/filters";
-import { Button } from "@/components/ui/button";
+import { useState, useMemo } from "react";
+import { FilterValues, pharmacyFilterConfig } from "@/components/filters";
 
 const PHARMACY_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All Pharmacies', labelRu: 'Все аптеки' },
@@ -21,12 +20,32 @@ export default function PharmacyIndex() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [filterValues, setFilterValues] = useState<FilterValues>({});
 
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    Object.entries(filterValues).forEach(([key, value]) => {
+      if (key === 'priceLevel' && value) count++;
+      else if (Array.isArray(value)) count += value.length;
+      else if (value) count++;
+    });
+    return count;
+  }, [filterValues]);
+
   const filteredPharmacies = pharmacies.filter(pharmacy => {
     const name = language === 'ru' ? pharmacy.name_ru : pharmacy.name_en;
     const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' 
       || (selectedCategory === '24h' && pharmacy.is_24h)
       || (selectedCategory === 'delivery' && pharmacy.delivery_available);
+    
+    // Filter by features
+    const features = filterValues.features as string[] | undefined;
+    if (features?.length) {
+      if (features.includes('24h') && !pharmacy.is_24h) return false;
+      if (features.includes('delivery') && !pharmacy.delivery_available) return false;
+      if (features.includes('pharmacist') && !pharmacy.has_pharmacist) return false;
+      if (features.includes('verified') && !pharmacy.is_verified) return false;
+    }
+    
     return matchesSearch && matchesCategory;
   });
 
@@ -52,8 +71,10 @@ export default function PharmacyIndex() {
       categories={PHARMACY_CATEGORIES}
       selectedCategory={selectedCategory}
       onCategoryChange={setSelectedCategory}
+      filterConfig={pharmacyFilterConfig}
       filterValues={filterValues}
       onFilterChange={setFilterValues}
+      filterActiveCount={activeFilterCount}
       isLoading={isLoading}
       isEmpty={filteredPharmacies.length === 0}
       emptyIcon={Pill}

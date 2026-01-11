@@ -1,24 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Sparkles, Shirt, Home, Building, Sofa, Trash2, 
-  Star, Clock, MapPin, Check, Shield, Calendar
-} from 'lucide-react';
-import { AppLayout } from '@/components/layout/AppLayout';
-import { PageContainer } from '@/components/uno/PageContainer';
-import { PageHeader } from '@/components/uno/PageHeader';
+import { Sparkles, Shirt, Home, Building, Sofa } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { FilterChip } from '@/components/uno/FilterChip';
-import { Badge } from '@/components/ui/badge';
+import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from '@/components/miniapp';
+import { FilterValues, cleaningFilterConfig } from '@/components/filters';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
-const serviceTypes = [
-  { id: 'all', labelEn: 'All', labelRu: 'Все', icon: Sparkles },
-  { id: 'home', labelEn: 'Home', labelRu: 'Дом', icon: Home },
-  { id: 'laundry', labelEn: 'Laundry', labelRu: 'Прачечная', icon: Shirt },
-  { id: 'office', labelEn: 'Office', labelRu: 'Офис', icon: Building },
-  { id: 'deep', labelEn: 'Deep Clean', labelRu: 'Генеральная', icon: Sofa },
+const serviceTypes: MiniAppCategory[] = [
+  { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '✨' },
+  { id: 'home', labelEn: 'Home', labelRu: 'Дом', icon: '🏠' },
+  { id: 'laundry', labelEn: 'Laundry', labelRu: 'Прачечная', icon: '👔' },
+  { id: 'office', labelEn: 'Office', labelRu: 'Офис', icon: '🏢' },
+  { id: 'deep', labelEn: 'Deep Clean', labelRu: 'Генеральная', icon: '🧹' },
 ];
 
 const cleaningServices = [
@@ -94,154 +87,95 @@ const cleaningServices = [
     reviewCount: 78,
     provider: 'Clean House Phuket',
   },
-  {
-    id: 'clean-6',
-    type: 'laundry',
-    nameEn: 'Dry Cleaning',
-    nameRu: 'Химчистка',
-    descEn: 'Premium dry cleaning for delicate items',
-    descRu: 'Химчистка деликатных вещей',
-    image: 'https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?w=600',
-    priceFrom: 300,
-    duration: '48h',
-    rating: 4.6,
-    reviewCount: 145,
-    provider: 'Deluxe Dry Clean',
-  },
 ];
 
 export default function CleaningIndex() {
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('all');
+  const [filterValues, setFilterValues] = useState<FilterValues>({});
 
-  const filteredServices = cleaningServices.filter(s => 
-    selectedType === 'all' || s.type === selectedType
-  );
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    Object.entries(filterValues).forEach(([key, value]) => {
+      if (key === 'priceLevel' && value) count++;
+      else if (Array.isArray(value)) count += value.length;
+      else if (value) count++;
+    });
+    return count;
+  }, [filterValues]);
+
+  const filteredServices = useMemo(() => {
+    return cleaningServices.filter(s => {
+      const name = language === 'ru' ? s.nameRu : s.nameEn;
+      const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesType = selectedType === 'all' || s.type === selectedType;
+      
+      // Service type filter
+      const serviceTypes = filterValues.serviceType as string[] | undefined;
+      if (serviceTypes?.length && !serviceTypes.includes(s.type)) return false;
+      
+      return matchesSearch && matchesType;
+    });
+  }, [searchQuery, selectedType, filterValues, language]);
+
+  const quickItems: QuickGridItem[] = [
+    { icon: '🏠', label: language === 'ru' ? 'Заказать' : 'Book', sublabel: language === 'ru' ? 'Уборку' : 'Cleaning', onClick: () => navigate('/services/booking/cleaning') },
+    { icon: '👔', label: language === 'ru' ? 'Прачечная' : 'Laundry', sublabel: language === 'ru' ? 'Забор' : 'Pickup', onClick: () => navigate('/services/booking/laundry') },
+    { icon: '✨', label: language === 'ru' ? 'Генеральная' : 'Deep', onClick: () => setSelectedType('deep') },
+    { icon: '🏢', label: language === 'ru' ? 'Офис' : 'Office', onClick: () => setSelectedType('office') },
+  ];
 
   return (
-    <AppLayout>
-      <PageContainer>
-        <PageHeader
-          title={language === 'ru' ? 'Уборка и прачечная' : 'Cleaning & Laundry'}
-          showBack
-          fallbackPath="/"
-          subtitle={language === 'ru' ? `${filteredServices.length} услуг` : `${filteredServices.length} services`}
-        />
+    <MiniAppLayout
+      title={language === 'ru' ? 'Уборка и прачечная' : 'Cleaning & Laundry'}
+      subtitle={language === 'ru' ? `${filteredServices.length} услуг` : `${filteredServices.length} services`}
+      heroIcon={Sparkles}
+      heroTitle={language === 'ru' ? 'Чистота и свежесть' : 'Clean & Fresh'}
+      heroSubtitle={language === 'ru' ? 'Профессиональная уборка и услуги прачечной' : 'Professional cleaning and laundry services'}
+      heroGradientFrom="from-emerald-500/20"
+      heroGradientVia="via-green-500/20"
+      heroGradientTo="to-primary/20"
+      searchValue={searchQuery}
+      onSearchChange={setSearchQuery}
+      searchPlaceholder={language === 'ru' ? 'Поиск услуг...' : 'Search services...'}
+      categories={serviceTypes}
+      selectedCategory={selectedType}
+      onCategoryChange={setSelectedType}
+      filterConfig={cleaningFilterConfig}
+      filterValues={filterValues}
+      onFilterChange={setFilterValues}
+      filterActiveCount={activeFilterCount}
+      isEmpty={filteredServices.length === 0}
+      emptyIcon={Sparkles}
+      emptyText={language === 'ru' ? 'Услуги не найдены' : 'No services found'}
+    >
+      <MiniAppQuickGrid items={quickItems} columns={4} className="mb-6" />
 
-        {/* Hero */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500/20 via-green-500/20 to-primary/20 p-6 mt-4 mb-6">
-          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800')] bg-cover bg-center opacity-10" />
-          <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="w-6 h-6 text-emerald-500" />
-              <span className="text-sm font-medium text-emerald-600">
-                {language === 'ru' ? 'Чистота и свежесть' : 'Clean & Fresh'}
-              </span>
-            </div>
-            <p className="text-muted-foreground text-sm">
-              {language === 'ru'
-                ? 'Профессиональная уборка и услуги прачечной'
-                : 'Professional cleaning and laundry services'}
-            </p>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="grid grid-cols-2 gap-3">
-          <Button 
-            variant="outline" 
-            className="h-auto py-4 flex-col gap-2"
-            onClick={() => navigate('/services/booking/cleaning')}
-          >
-            <Home className="w-6 h-6 text-emerald-500" />
-            <span className="text-sm font-medium">
-              {language === 'ru' ? 'Заказать уборку' : 'Book Cleaning'}
-            </span>
-          </Button>
-          <Button 
-            variant="outline" 
-            className="h-auto py-4 flex-col gap-2"
-            onClick={() => navigate('/services/booking/laundry')}
-          >
-            <Shirt className="w-6 h-6 text-blue-500" />
-            <span className="text-sm font-medium">
-              {language === 'ru' ? 'Сдать в стирку' : 'Laundry Pickup'}
-            </span>
-          </Button>
-        </div>
-
-        {/* Filters */}
-        <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-          {serviceTypes.map((type) => {
-            const Icon = type.icon;
-            return (
-              <FilterChip
-                key={type.id}
-                label={language === 'ru' ? type.labelRu : type.labelEn}
-                isActive={selectedType === type.id}
-                onToggle={() => setSelectedType(type.id)}
-                icon={<Icon className="w-4 h-4" />}
-              />
-            );
-          })}
-        </div>
-
-        {/* Services Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {filteredServices.map((service) => (
-            <div
-              key={service.id}
-              onClick={() => navigate(`/cleaning/${service.id}`)}
-              className="bg-card rounded-2xl overflow-hidden border border-border/50 hover:border-primary/30 transition-all cursor-pointer"
-            >
-              <div className="relative h-36">
-                <img
-                  src={service.image}
-                  alt={language === 'ru' ? service.nameRu : service.nameEn}
-                  className="w-full h-full object-cover"
-                />
-                {service.isPopular && (
-                  <Badge className="absolute top-2 left-2 bg-amber-500 text-white">
-                    {language === 'ru' ? 'Популярно' : 'Popular'}
-                  </Badge>
-                )}
-                {service.isNew && (
-                  <Badge className="absolute top-2 left-2 bg-green-500 text-white">
-                    {language === 'ru' ? 'Новое' : 'New'}
-                  </Badge>
-                )}
-              </div>
-              <div className="p-4">
-                <h3 className="font-semibold truncate">
-                  {language === 'ru' ? service.nameRu : service.nameEn}
-                </h3>
-                <p className="text-sm text-muted-foreground truncate mt-1">
-                  {language === 'ru' ? service.descRu : service.descEn}
-                </p>
-                
-                <div className="flex items-center gap-3 mt-3 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span>{service.rating}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    <span>{service.duration}</span>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50">
-                  <span className="text-sm text-muted-foreground">{service.provider}</span>
-                  <span className="text-lg font-bold text-primary">
-                    ฿{service.priceFrom}+
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </PageContainer>
-    </AppLayout>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {filteredServices.map((service) => (
+          <ItemCard
+            key={service.id}
+            image={service.image}
+            title={language === 'ru' ? service.nameRu : service.nameEn}
+            subtitle={language === 'ru' ? service.descRu : service.descEn}
+            rating={service.rating}
+            reviewCount={service.reviewCount}
+            price={service.priceFrom}
+            priceUnit={`+`}
+            currency="฿"
+            badge={service.isPopular 
+              ? { text: language === 'ru' ? 'Популярно' : 'Popular', className: 'bg-amber-500 text-white' }
+              : service.isNew 
+                ? { text: language === 'ru' ? 'Новое' : 'New', className: 'bg-green-500 text-white' }
+                : undefined
+            }
+            tags={[service.provider, service.duration]}
+            onClick={() => navigate(`/cleaning/${service.id}`)}
+          />
+        ))}
+      </div>
+    </MiniAppLayout>
   );
 }
