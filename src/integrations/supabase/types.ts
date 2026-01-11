@@ -14,6 +14,104 @@ export type Database = {
   }
   public: {
     Tables: {
+      babysitters: {
+        Row: {
+          age_groups: string[] | null
+          availability: Json | null
+          background_checked: boolean | null
+          bio_en: string | null
+          bio_ru: string | null
+          can_cook: boolean | null
+          can_drive: boolean | null
+          certifications: string[] | null
+          created_at: string | null
+          currency: string | null
+          experience_years: number | null
+          first_aid_certified: boolean | null
+          id: string
+          images: string[] | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          languages: string[] | null
+          name_en: string
+          name_ru: string
+          photo: string | null
+          price_per_day: number | null
+          price_per_hour: number | null
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          age_groups?: string[] | null
+          availability?: Json | null
+          background_checked?: boolean | null
+          bio_en?: string | null
+          bio_ru?: string | null
+          can_cook?: boolean | null
+          can_drive?: boolean | null
+          certifications?: string[] | null
+          created_at?: string | null
+          currency?: string | null
+          experience_years?: number | null
+          first_aid_certified?: boolean | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          name_en: string
+          name_ru: string
+          photo?: string | null
+          price_per_day?: number | null
+          price_per_hour?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          age_groups?: string[] | null
+          availability?: Json | null
+          background_checked?: boolean | null
+          bio_en?: string | null
+          bio_ru?: string | null
+          can_cook?: boolean | null
+          can_drive?: boolean | null
+          certifications?: string[] | null
+          created_at?: string | null
+          currency?: string | null
+          experience_years?: number | null
+          first_aid_certified?: boolean | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          name_en?: string
+          name_ru?: string
+          photo?: string | null
+          price_per_day?: number | null
+          price_per_hour?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "babysitters_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking_addresses: {
         Row: {
           address: string
@@ -571,6 +669,89 @@ export type Database = {
         }
         Relationships: []
       }
+      cleaning_services: {
+        Row: {
+          areas_served: string[] | null
+          cover_image: string | null
+          created_at: string | null
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          duration_hours: number | null
+          features: string[] | null
+          id: string
+          images: string[] | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          name_en: string
+          name_ru: string
+          price_fixed: number | null
+          price_per_hour: number | null
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          service_type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          areas_served?: string[] | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          duration_hours?: number | null
+          features?: string[] | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          name_en: string
+          name_ru: string
+          price_fixed?: number | null
+          price_per_hour?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          service_type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          areas_served?: string[] | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          duration_hours?: number | null
+          features?: string[] | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          name_en?: string
+          name_ru?: string
+          price_fixed?: number | null
+          price_per_hour?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          service_type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cleaning_services_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clinics: {
         Row: {
           address: string | null
@@ -772,6 +953,116 @@ export type Database = {
             columns: ["clinic_id"]
             isOneToOne: false
             referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      education_providers: {
+        Row: {
+          address: string | null
+          age_groups: string[] | null
+          cover_image: string | null
+          created_at: string | null
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          district: string | null
+          email: string | null
+          id: string
+          images: string[] | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_online: boolean | null
+          is_verified: boolean | null
+          languages: string[] | null
+          lat: number | null
+          lng: number | null
+          name_en: string
+          name_ru: string
+          phone: string | null
+          price_per_course: number | null
+          price_per_hour: number | null
+          provider_id: string | null
+          provider_type: string | null
+          qualifications: string[] | null
+          rating: number | null
+          review_count: number | null
+          subjects: string[] | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          age_groups?: string[] | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_online?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          name_en: string
+          name_ru: string
+          phone?: string | null
+          price_per_course?: number | null
+          price_per_hour?: number | null
+          provider_id?: string | null
+          provider_type?: string | null
+          qualifications?: string[] | null
+          rating?: number | null
+          review_count?: number | null
+          subjects?: string[] | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          age_groups?: string[] | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_online?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          name_en?: string
+          name_ru?: string
+          phone?: string | null
+          price_per_course?: number | null
+          price_per_hour?: number | null
+          provider_id?: string | null
+          provider_type?: string | null
+          qualifications?: string[] | null
+          rating?: number | null
+          review_count?: number | null
+          subjects?: string[] | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "education_providers_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
             referencedColumns: ["id"]
           },
         ]
@@ -1063,6 +1354,214 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "flower_shops_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gyms: {
+        Row: {
+          address: string | null
+          amenities: string[] | null
+          classes: string[] | null
+          cover_image: string | null
+          created_at: string | null
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          district: string | null
+          email: string | null
+          gym_type: string | null
+          id: string
+          images: string[] | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          lat: number | null
+          lng: number | null
+          name_en: string
+          name_ru: string
+          phone: string | null
+          price_day_pass: number | null
+          price_month_pass: number | null
+          price_week_pass: number | null
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          updated_at: string | null
+          website: string | null
+          working_hours: Json | null
+        }
+        Insert: {
+          address?: string | null
+          amenities?: string[] | null
+          classes?: string[] | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          gym_type?: string | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          name_en: string
+          name_ru: string
+          phone?: string | null
+          price_day_pass?: number | null
+          price_month_pass?: number | null
+          price_week_pass?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string | null
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Update: {
+          address?: string | null
+          amenities?: string[] | null
+          classes?: string[] | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          gym_type?: string | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          name_en?: string
+          name_ru?: string
+          phone?: string | null
+          price_day_pass?: number | null
+          price_month_pass?: number | null
+          price_week_pass?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string | null
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gyms_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      legal_services: {
+        Row: {
+          address: string | null
+          cover_image: string | null
+          created_at: string | null
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          district: string | null
+          email: string | null
+          id: string
+          images: string[] | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          languages: string[] | null
+          lat: number | null
+          lng: number | null
+          name_en: string
+          name_ru: string
+          phone: string | null
+          price_consultation: number | null
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          service_type: string | null
+          specializations: string[] | null
+          updated_at: string | null
+          website: string | null
+          working_hours: Json | null
+        }
+        Insert: {
+          address?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          name_en: string
+          name_ru: string
+          phone?: string | null
+          price_consultation?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          service_type?: string | null
+          specializations?: string[] | null
+          updated_at?: string | null
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Update: {
+          address?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          name_en?: string
+          name_ru?: string
+          phone?: string | null
+          price_consultation?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          service_type?: string | null
+          specializations?: string[] | null
+          updated_at?: string | null
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_services_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
@@ -1424,6 +1923,104 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      pet_services: {
+        Row: {
+          address: string | null
+          cover_image: string | null
+          created_at: string | null
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          district: string | null
+          email: string | null
+          features: string[] | null
+          id: string
+          images: string[] | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          lat: number | null
+          lng: number | null
+          name_en: string
+          name_ru: string
+          pet_types: string[] | null
+          phone: string | null
+          price_from: number | null
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          service_type: string | null
+          updated_at: string | null
+          working_hours: Json | null
+        }
+        Insert: {
+          address?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          features?: string[] | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          name_en: string
+          name_ru: string
+          pet_types?: string[] | null
+          phone?: string | null
+          price_from?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          service_type?: string | null
+          updated_at?: string | null
+          working_hours?: Json | null
+        }
+        Update: {
+          address?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          features?: string[] | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          name_en?: string
+          name_ru?: string
+          pet_types?: string[] | null
+          phone?: string | null
+          price_from?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          service_type?: string | null
+          updated_at?: string | null
+          working_hours?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_services_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pharmacies: {
         Row: {
@@ -2825,6 +3422,166 @@ export type Database = {
         }
         Relationships: []
       }
+      salon_services: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          duration_minutes: number | null
+          id: string
+          is_active: boolean | null
+          is_popular: boolean | null
+          name_en: string
+          name_ru: string
+          price: number
+          salon_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          duration_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          name_en: string
+          name_ru: string
+          price: number
+          salon_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          duration_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          name_en?: string
+          name_ru?: string
+          price?: number
+          salon_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salon_services_salon_id_fkey"
+            columns: ["salon_id"]
+            isOneToOne: false
+            referencedRelation: "salons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      salons: {
+        Row: {
+          address: string | null
+          amenities: string[] | null
+          cover_image: string | null
+          created_at: string | null
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          district: string | null
+          email: string | null
+          id: string
+          images: string[] | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          languages: string[] | null
+          lat: number | null
+          lng: number | null
+          name_en: string
+          name_ru: string
+          phone: string | null
+          price_from: number | null
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          salon_type: string | null
+          services: string[] | null
+          updated_at: string | null
+          website: string | null
+          working_hours: Json | null
+        }
+        Insert: {
+          address?: string | null
+          amenities?: string[] | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          name_en: string
+          name_ru: string
+          phone?: string | null
+          price_from?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          salon_type?: string | null
+          services?: string[] | null
+          updated_at?: string | null
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Update: {
+          address?: string | null
+          amenities?: string[] | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          name_en?: string
+          name_ru?: string
+          phone?: string | null
+          price_from?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          salon_type?: string | null
+          services?: string[] | null
+          updated_at?: string | null
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salons_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       services: {
         Row: {
           category_id: string | null
@@ -3412,6 +4169,95 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      vehicles: {
+        Row: {
+          capacity: number | null
+          cover_image: string | null
+          created_at: string | null
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          features: string[] | null
+          id: string
+          images: string[] | null
+          is_active: boolean | null
+          is_available: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          luggage_capacity: number | null
+          name_en: string
+          name_ru: string
+          price_airport_transfer: number | null
+          price_per_day: number | null
+          price_per_hour: number | null
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          updated_at: string | null
+          vehicle_type: string | null
+        }
+        Insert: {
+          capacity?: number | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          features?: string[] | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_available?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          luggage_capacity?: number | null
+          name_en: string
+          name_ru: string
+          price_airport_transfer?: number | null
+          price_per_day?: number | null
+          price_per_hour?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string | null
+          vehicle_type?: string | null
+        }
+        Update: {
+          capacity?: number | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          features?: string[] | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_available?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          luggage_capacity?: number | null
+          name_en?: string
+          name_ru?: string
+          price_airport_transfer?: number | null
+          price_per_day?: number | null
+          price_per_hour?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string | null
+          vehicle_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicles_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       vendor_analytics: {
         Row: {
