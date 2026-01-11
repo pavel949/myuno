@@ -1,12 +1,18 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, GraduationCap, BookOpen, Users, Baby, User, Star, Clock, MapPin } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AppLayout } from "@/components/layout/AppLayout";
+import { GraduationCap, BookOpen, Users, Baby, User, Star, Clock, MapPin } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { triggerRipple } from "@/hooks/useRipple";
+import { MiniAppLayout, ItemCard, type MiniAppCategory } from "@/components/miniapp";
+import { FilterValues, educationFilterConfig } from "@/components/filters";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+const categories: MiniAppCategory[] = [
+  { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '📚' },
+  { id: 'languages', labelEn: 'Languages', labelRu: 'Языки', icon: '🌍' },
+  { id: 'creative', labelEn: 'Creative', labelRu: 'Творчество', icon: '🎨' },
+  { id: 'technology', labelEn: 'Technology', labelRu: 'Технологии', icon: '💻' },
+  { id: 'sports', labelEn: 'Sports', labelRu: 'Спорт', icon: '⚽' },
+];
 
 const courses = [
   {
@@ -17,14 +23,12 @@ const courses = [
     description_ru: "Веселые интерактивные уроки английского для детей 5-12 лет",
     image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400",
     price: 150,
-    currency: "฿",
     duration: "1 час",
     category: "languages",
     age_group: "kids",
     rating: 4.9,
     reviews: 128,
     location: "Patong, Phuket",
-    schedule: "Пн, Ср, Пт - 10:00"
   },
   {
     id: "2",
@@ -34,14 +38,12 @@ const courses = [
     description_ru: "Изучайте тайский с носителями языка, от начального до продвинутого",
     image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400",
     price: 200,
-    currency: "฿",
     duration: "1.5 часа",
     category: "languages",
     age_group: "adults",
     rating: 4.8,
     reviews: 95,
     location: "Kata, Phuket",
-    schedule: "Вт, Чт - 18:00"
   },
   {
     id: "3",
@@ -51,14 +53,12 @@ const courses = [
     description_ru: "Рисование, живопись и поделки для детей 4-10 лет",
     image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=400",
     price: 120,
-    currency: "฿",
     duration: "1.5 часа",
     category: "creative",
     age_group: "kids",
     rating: 4.9,
     reviews: 76,
     location: "Rawai, Phuket",
-    schedule: "Сб, Вс - 10:00"
   },
   {
     id: "4",
@@ -68,14 +68,12 @@ const courses = [
     description_ru: "Изучите основы Python и веб-разработки",
     image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400",
     price: 300,
-    currency: "฿",
     duration: "2 часа",
     category: "technology",
     age_group: "adults",
     rating: 4.7,
     reviews: 54,
     location: "Phuket Town",
-    schedule: "Пн, Ср - 19:00"
   },
   {
     id: "5",
@@ -85,14 +83,12 @@ const courses = [
     description_ru: "Собирайте и программируйте роботов с LEGO",
     image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400",
     price: 250,
-    currency: "฿",
     duration: "2 часа",
     category: "technology",
     age_group: "kids",
     rating: 4.9,
     reviews: 89,
     location: "Cherngtalay, Phuket",
-    schedule: "Сб - 14:00"
   },
   {
     id: "6",
@@ -102,14 +98,12 @@ const courses = [
     description_ru: "Обретите баланс и внутренний покой с опытными инструкторами",
     image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400",
     price: 180,
-    currency: "฿",
     duration: "1.5 часа",
     category: "sports",
     age_group: "adults",
     rating: 4.8,
     reviews: 112,
     location: "Kamala, Phuket",
-    schedule: "Ежедневно - 07:00"
   }
 ];
 
@@ -123,7 +117,6 @@ const tutors = [
     description_ru: "Носитель языка с 10+ летним опытом преподавания",
     image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400",
     price: 500,
-    currency: "฿",
     subjects: ["English", "IELTS", "TOEFL"],
     age_groups: ["kids", "adults"],
     rating: 4.9,
@@ -139,7 +132,6 @@ const tutors = [
     description_ru: "Профессиональный преподаватель тайского для иностранцев",
     image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",
     price: 400,
-    currency: "฿",
     subjects: ["Thai", "Thai Culture"],
     age_groups: ["adults"],
     rating: 4.8,
@@ -155,37 +147,12 @@ const tutors = [
     description_ru: "Кандидат физ-мат наук, подготовка к экзаменам и олимпиадам",
     image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400",
     price: 600,
-    currency: "฿",
     subjects: ["Math", "Physics", "IB"],
     age_groups: ["kids", "adults"],
     rating: 5.0,
     reviews: 87,
     location: "Online / Kata"
   },
-  {
-    id: "t4",
-    name: "John Smith",
-    specialty_en: "Music Teacher",
-    specialty_ru: "Преподаватель музыки",
-    description_en: "Guitar, piano and ukulele lessons for all ages",
-    description_ru: "Уроки гитары, фортепиано и укулеле для всех возрастов",
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400",
-    price: 450,
-    currency: "฿",
-    subjects: ["Guitar", "Piano", "Ukulele"],
-    age_groups: ["kids", "adults"],
-    rating: 4.7,
-    reviews: 64,
-    location: "Rawai, Phuket"
-  }
-];
-
-const categories = [
-  { id: "all", label_en: "All", label_ru: "Все", icon: BookOpen },
-  { id: "languages", label_en: "Languages", label_ru: "Языки", icon: GraduationCap },
-  { id: "creative", label_en: "Creative", label_ru: "Творчество", icon: Star },
-  { id: "technology", label_en: "Technology", label_ru: "Технологии", icon: Users },
-  { id: "sports", label_en: "Sports", label_ru: "Спорт", icon: Clock }
 ];
 
 export default function EducationIndex() {
@@ -193,220 +160,135 @@ export default function EducationIndex() {
   const { language } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [ageFilter, setAgeFilter] = useState<"all" | "kids" | "adults">("all");
+  const [filterValues, setFilterValues] = useState<FilterValues>({});
+  const [activeTab, setActiveTab] = useState("courses");
 
-  const filteredCourses = courses.filter(course => {
-    const title = language === "ru" ? course.title_ru : course.title_en;
-    const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || course.category === selectedCategory;
-    const matchesAge = ageFilter === "all" || course.age_group === ageFilter;
-    return matchesSearch && matchesCategory && matchesAge;
-  });
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    Object.entries(filterValues).forEach(([key, value]) => {
+      if (key === 'priceLevel' && value) count++;
+      else if (Array.isArray(value)) count += value.length;
+      else if (value) count++;
+    });
+    return count;
+  }, [filterValues]);
 
-  const filteredTutors = tutors.filter(tutor => {
-    const name = tutor.name.toLowerCase();
-    const specialty = language === "ru" ? tutor.specialty_ru : tutor.specialty_en;
-    const matchesSearch = name.includes(searchQuery.toLowerCase()) || 
-                          specialty.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesAge = ageFilter === "all" || tutor.age_groups.includes(ageFilter);
-    return matchesSearch && matchesAge;
-  });
+  const filteredCourses = useMemo(() => {
+    return courses.filter(course => {
+      const title = language === "ru" ? course.title_ru : course.title_en;
+      const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = selectedCategory === "all" || course.category === selectedCategory;
+      
+      // Category filter
+      const cats = filterValues.category as string[] | undefined;
+      if (cats?.length && !cats.includes(course.category)) return false;
+      
+      // Age group filter
+      const ages = filterValues.ageGroup as string[] | undefined;
+      if (ages?.length && !ages.includes(course.age_group)) return false;
+      
+      return matchesSearch && matchesCategory;
+    });
+  }, [searchQuery, selectedCategory, filterValues, language]);
+
+  const filteredTutors = useMemo(() => {
+    return tutors.filter(tutor => {
+      const matchesSearch = tutor.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        (language === "ru" ? tutor.specialty_ru : tutor.specialty_en).toLowerCase().includes(searchQuery.toLowerCase());
+      
+      // Age group filter
+      const ages = filterValues.ageGroup as string[] | undefined;
+      if (ages?.length && !ages.some(a => tutor.age_groups.includes(a))) return false;
+      
+      return matchesSearch;
+    });
+  }, [searchQuery, filterValues, language]);
 
   return (
-    <AppLayout>
-      <div className="min-h-screen bg-background pb-20">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-6 pb-24">
-          <h1 className="text-2xl font-bold mb-2">
-            {language === "ru" ? "Образование" : "Education"}
-          </h1>
-          <p className="text-white/80">
-            {language === "ru" ? "Курсы и репетиторы для детей и взрослых" : "Courses and tutors for kids and adults"}
-          </p>
-        </div>
+    <MiniAppLayout
+      title={language === "ru" ? "Образование" : "Education"}
+      subtitle={language === "ru" ? "Курсы и репетиторы" : "Courses and tutors"}
+      heroIcon={GraduationCap}
+      heroTitle={language === "ru" ? "Образование" : "Education"}
+      heroSubtitle={language === "ru" ? "Курсы и репетиторы для детей и взрослых" : "Courses and tutors for kids and adults"}
+      heroGradientFrom="from-indigo-500/20"
+      heroGradientVia="via-purple-500/20"
+      heroGradientTo="to-primary/20"
+      searchValue={searchQuery}
+      onSearchChange={setSearchQuery}
+      searchPlaceholder={language === "ru" ? "Поиск курсов и репетиторов..." : "Search courses and tutors..."}
+      categories={categories}
+      selectedCategory={selectedCategory}
+      onCategoryChange={setSelectedCategory}
+      filterConfig={educationFilterConfig}
+      filterValues={filterValues}
+      onFilterChange={setFilterValues}
+      filterActiveCount={activeFilterCount}
+      showCategories={activeTab === 'courses'}
+    >
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="courses">
+            <BookOpen className="h-4 w-4 mr-2" />
+            {language === "ru" ? "Курсы" : "Courses"}
+          </TabsTrigger>
+          <TabsTrigger value="tutors">
+            <GraduationCap className="h-4 w-4 mr-2" />
+            {language === "ru" ? "Репетиторы" : "Tutors"}
+          </TabsTrigger>
+        </TabsList>
 
-        {/* Search & Filters */}
-        <div className="px-4 -mt-16 space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input
-              placeholder={language === "ru" ? "Поиск курсов и репетиторов..." : "Search courses and tutors..."}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-card shadow-lg border-0"
+        <TabsContent value="courses" className="mt-4 space-y-4">
+          {filteredCourses.map(course => (
+            <ItemCard
+              key={course.id}
+              image={course.image}
+              title={language === "ru" ? course.title_ru : course.title_en}
+              subtitle={language === "ru" ? course.description_ru : course.description_en}
+              rating={course.rating}
+              reviewCount={course.reviews}
+              location={course.location}
+              price={course.price}
+              currency="฿"
+              badge={course.age_group === "kids" 
+                ? { text: language === "ru" ? "Дети" : "Kids", className: "bg-pink-100 text-pink-600" }
+                : { text: language === "ru" ? "Взрослые" : "Adults", className: "bg-blue-100 text-blue-600" }
+              }
+              tags={[course.duration]}
+              onClick={() => navigate(`/education/course/${course.id}`)}
             />
-          </div>
+          ))}
+          {filteredCourses.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              {language === "ru" ? "Курсы не найдены" : "No courses found"}
+            </div>
+          )}
+        </TabsContent>
 
-          {/* Age Filter */}
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            <Button
-              variant={ageFilter === "all" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setAgeFilter("all")}
-              className="whitespace-nowrap"
-            >
-              <Users className="h-4 w-4 mr-1" />
-              {language === "ru" ? "Все" : "All"}
-            </Button>
-            <Button
-              variant={ageFilter === "kids" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setAgeFilter("kids")}
-              className="whitespace-nowrap"
-            >
-              <Baby className="h-4 w-4 mr-1" />
-              {language === "ru" ? "Для детей" : "For Kids"}
-            </Button>
-            <Button
-              variant={ageFilter === "adults" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setAgeFilter("adults")}
-              className="whitespace-nowrap"
-            >
-              <User className="h-4 w-4 mr-1" />
-              {language === "ru" ? "Для взрослых" : "For Adults"}
-            </Button>
-          </div>
-
-          {/* Categories */}
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            {categories.map(cat => (
-              <Button
-                key={cat.id}
-                variant={selectedCategory === cat.id ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedCategory(cat.id)}
-                className="whitespace-nowrap"
-              >
-                <cat.icon className="h-4 w-4 mr-1" />
-                {language === "ru" ? cat.label_ru : cat.label_en}
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <Tabs defaultValue="courses" className="mt-6 px-4">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="courses">
-              <BookOpen className="h-4 w-4 mr-2" />
-              {language === "ru" ? "Курсы" : "Courses"}
-            </TabsTrigger>
-            <TabsTrigger value="tutors">
-              <GraduationCap className="h-4 w-4 mr-2" />
-              {language === "ru" ? "Репетиторы" : "Tutors"}
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="courses" className="mt-4 space-y-4">
-            {filteredCourses.map(course => (
-              <div
-                key={course.id}
-                onClick={(e) => {
-                  triggerRipple(e);
-                  navigate(`/education/course/${course.id}`);
-                }}
-                className="relative overflow-hidden bg-card rounded-xl shadow-sm cursor-pointer hover:shadow-md transition-shadow active:scale-[0.98]"
-              >
-                <div className="flex">
-                  <img
-                    src={course.image}
-                    alt={language === "ru" ? course.title_ru : course.title_en}
-                    className="w-28 h-28 object-cover"
-                  />
-                  <div className="flex-1 p-3">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="font-semibold text-foreground">
-                          {language === "ru" ? course.title_ru : course.title_en}
-                        </h3>
-                        <p className="text-sm text-muted-foreground line-clamp-1">
-                          {language === "ru" ? course.description_ru : course.description_en}
-                        </p>
-                      </div>
-                      <span className={`text-xs px-2 py-1 rounded-full ${course.age_group === "kids" ? "bg-pink-100 text-pink-600" : "bg-blue-100 text-blue-600"}`}>
-                        {course.age_group === "kids" 
-                          ? (language === "ru" ? "Дети" : "Kids") 
-                          : (language === "ru" ? "Взрослые" : "Adults")}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span>{course.rating}</span>
-                      <span>({course.reviews})</span>
-                      <Clock className="h-4 w-4 ml-2" />
-                      <span>{course.duration}</span>
-                    </div>
-                    <div className="flex items-center justify-between mt-2">
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <MapPin className="h-4 w-4 mr-1" />
-                        {course.location}
-                      </div>
-                      <span className="font-bold text-primary">
-                        {course.currency}{course.price}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </TabsContent>
-
-          <TabsContent value="tutors" className="mt-4 space-y-4">
-            {filteredTutors.map(tutor => (
-              <div
-                key={tutor.id}
-                onClick={(e) => {
-                  triggerRipple(e);
-                  navigate(`/education/tutor/${tutor.id}`);
-                }}
-                className="relative overflow-hidden bg-card rounded-xl shadow-sm cursor-pointer hover:shadow-md transition-shadow active:scale-[0.98]"
-              >
-                <div className="flex">
-                  <img
-                    src={tutor.image}
-                    alt={tutor.name}
-                    className="w-28 h-28 object-cover"
-                  />
-                  <div className="flex-1 p-3">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="font-semibold text-foreground">{tutor.name}</h3>
-                        <p className="text-sm text-primary">
-                          {language === "ru" ? tutor.specialty_ru : tutor.specialty_en}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1 text-sm">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span>{tutor.rating}</span>
-                      </div>
-                    </div>
-                    <p className="text-sm text-muted-foreground line-clamp-1 mt-1">
-                      {language === "ru" ? tutor.description_ru : tutor.description_en}
-                    </p>
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {tutor.subjects.slice(0, 3).map(subject => (
-                        <span key={subject} className="text-xs bg-muted px-2 py-0.5 rounded-full">
-                          {subject}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="flex items-center justify-between mt-2">
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <MapPin className="h-4 w-4 mr-1" />
-                        {tutor.location}
-                      </div>
-                      <span className="font-bold text-primary">
-                        {tutor.currency}{tutor.price}/{language === "ru" ? "час" : "hr"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </TabsContent>
-        </Tabs>
-      </div>
-    </AppLayout>
+        <TabsContent value="tutors" className="mt-4 space-y-4">
+          {filteredTutors.map(tutor => (
+            <ItemCard
+              key={tutor.id}
+              image={tutor.image}
+              title={tutor.name}
+              subtitle={language === "ru" ? tutor.description_ru : tutor.description_en}
+              rating={tutor.rating}
+              reviewCount={tutor.reviews}
+              location={tutor.location}
+              price={tutor.price}
+              priceUnit={`/${language === "ru" ? "час" : "hr"}`}
+              currency="฿"
+              tags={tutor.subjects.slice(0, 3)}
+              onClick={() => navigate(`/education/tutor/${tutor.id}`)}
+            />
+          ))}
+          {filteredTutors.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              {language === "ru" ? "Репетиторы не найдены" : "No tutors found"}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
+    </MiniAppLayout>
   );
 }
