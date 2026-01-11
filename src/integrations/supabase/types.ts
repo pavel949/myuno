@@ -1619,6 +1619,60 @@ export type Database = {
           },
         ]
       }
+      property_chat_messages: {
+        Row: {
+          attachments: Json | null
+          booking_id: string | null
+          created_at: string
+          id: string
+          is_read: boolean | null
+          message: string
+          property_id: string | null
+          sender_id: string
+          sender_name: string | null
+          sender_type: string
+        }
+        Insert: {
+          attachments?: Json | null
+          booking_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message: string
+          property_id?: string | null
+          sender_id: string
+          sender_name?: string | null
+          sender_type?: string
+        }
+        Update: {
+          attachments?: Json | null
+          booking_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          property_id?: string | null
+          sender_id?: string
+          sender_name?: string | null
+          sender_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_chat_messages_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "property_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_chat_messages_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_financials: {
         Row: {
           amount: number
@@ -1627,14 +1681,24 @@ export type Database = {
           currency: string | null
           description: string | null
           description_ru: string | null
+          due_date: string | null
           id: string
+          invoice_number: string | null
+          notes: string | null
           owner_id: string
+          paid_date: string | null
+          payment_method: string | null
           property_id: string
           receipt_url: string | null
+          recurring: boolean | null
+          recurring_interval: string | null
           reference_id: string | null
           reference_type: string | null
+          status: string | null
+          tax_deductible: boolean | null
           transaction_date: string
           transaction_type: string
+          vendor_name: string | null
         }
         Insert: {
           amount: number
@@ -1643,14 +1707,24 @@ export type Database = {
           currency?: string | null
           description?: string | null
           description_ru?: string | null
+          due_date?: string | null
           id?: string
+          invoice_number?: string | null
+          notes?: string | null
           owner_id: string
+          paid_date?: string | null
+          payment_method?: string | null
           property_id: string
           receipt_url?: string | null
+          recurring?: boolean | null
+          recurring_interval?: string | null
           reference_id?: string | null
           reference_type?: string | null
+          status?: string | null
+          tax_deductible?: boolean | null
           transaction_date?: string
           transaction_type: string
+          vendor_name?: string | null
         }
         Update: {
           amount?: number
@@ -1659,14 +1733,24 @@ export type Database = {
           currency?: string | null
           description?: string | null
           description_ru?: string | null
+          due_date?: string | null
           id?: string
+          invoice_number?: string | null
+          notes?: string | null
           owner_id?: string
+          paid_date?: string | null
+          payment_method?: string | null
           property_id?: string
           receipt_url?: string | null
+          recurring?: boolean | null
+          recurring_interval?: string | null
           reference_id?: string | null
           reference_type?: string | null
+          status?: string | null
+          tax_deductible?: boolean | null
           transaction_date?: string
           transaction_type?: string
+          vendor_name?: string | null
         }
         Relationships: [
           {
