@@ -1468,6 +1468,199 @@ export type Database = {
           },
         ]
       }
+      insurance_plans: {
+        Row: {
+          coverage_amount: number | null
+          created_at: string | null
+          currency: string | null
+          deductible: number | null
+          description_en: string | null
+          description_ru: string | null
+          exclusions: Json | null
+          features: Json | null
+          id: string
+          insurance_type: string
+          is_active: boolean | null
+          is_popular: boolean | null
+          max_age: number | null
+          min_age: number | null
+          name_en: string
+          name_ru: string
+          plan_tier: string | null
+          price_monthly: number | null
+          price_yearly: number | null
+          provider_id: string
+          requires_medical_exam: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          coverage_amount?: number | null
+          created_at?: string | null
+          currency?: string | null
+          deductible?: number | null
+          description_en?: string | null
+          description_ru?: string | null
+          exclusions?: Json | null
+          features?: Json | null
+          id?: string
+          insurance_type: string
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          max_age?: number | null
+          min_age?: number | null
+          name_en: string
+          name_ru: string
+          plan_tier?: string | null
+          price_monthly?: number | null
+          price_yearly?: number | null
+          provider_id: string
+          requires_medical_exam?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          coverage_amount?: number | null
+          created_at?: string | null
+          currency?: string | null
+          deductible?: number | null
+          description_en?: string | null
+          description_ru?: string | null
+          exclusions?: Json | null
+          features?: Json | null
+          id?: string
+          insurance_type?: string
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          max_age?: number | null
+          min_age?: number | null
+          name_en?: string
+          name_ru?: string
+          plan_tier?: string | null
+          price_monthly?: number | null
+          price_yearly?: number | null
+          provider_id?: string
+          requires_medical_exam?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insurance_plans_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "insurance_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      insurance_providers: {
+        Row: {
+          address: string | null
+          cover_image: string | null
+          created_at: string | null
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          district: string | null
+          email: string | null
+          has_24h_support: boolean | null
+          has_online_claims: boolean | null
+          id: string
+          images: string[] | null
+          insurance_types: string[] | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          languages: string[] | null
+          lat: number | null
+          license_number: string | null
+          lng: number | null
+          max_coverage_amount: number | null
+          min_coverage_amount: number | null
+          name_en: string
+          name_ru: string
+          phone: string | null
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          updated_at: string | null
+          website: string | null
+          working_hours: Json | null
+        }
+        Insert: {
+          address?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          has_24h_support?: boolean | null
+          has_online_claims?: boolean | null
+          id?: string
+          images?: string[] | null
+          insurance_types?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          license_number?: string | null
+          lng?: number | null
+          max_coverage_amount?: number | null
+          min_coverage_amount?: number | null
+          name_en: string
+          name_ru: string
+          phone?: string | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string | null
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Update: {
+          address?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          has_24h_support?: boolean | null
+          has_online_claims?: boolean | null
+          id?: string
+          images?: string[] | null
+          insurance_types?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          license_number?: string | null
+          lng?: number | null
+          max_coverage_amount?: number | null
+          min_coverage_amount?: number | null
+          name_en?: string
+          name_ru?: string
+          phone?: string | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string | null
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insurance_providers_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       legal_services: {
         Row: {
           address: string | null
@@ -4529,6 +4722,89 @@ export type Database = {
           viewed_at?: string
         }
         Relationships: []
+      }
+      visa_services: {
+        Row: {
+          created_at: string | null
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          documents_required: Json | null
+          eligible_nationalities: string[] | null
+          government_fee: number | null
+          id: string
+          is_active: boolean | null
+          is_popular: boolean | null
+          max_age: number | null
+          min_age: number | null
+          name_en: string
+          name_ru: string
+          processing_days: number | null
+          provider_id: string | null
+          requirements: Json | null
+          service_fee: number
+          total_price: number | null
+          updated_at: string | null
+          validity_months: number | null
+          visa_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          documents_required?: Json | null
+          eligible_nationalities?: string[] | null
+          government_fee?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          max_age?: number | null
+          min_age?: number | null
+          name_en: string
+          name_ru: string
+          processing_days?: number | null
+          provider_id?: string | null
+          requirements?: Json | null
+          service_fee: number
+          total_price?: number | null
+          updated_at?: string | null
+          validity_months?: number | null
+          visa_type: string
+        }
+        Update: {
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          documents_required?: Json | null
+          eligible_nationalities?: string[] | null
+          government_fee?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          max_age?: number | null
+          min_age?: number | null
+          name_en?: string
+          name_ru?: string
+          processing_days?: number | null
+          provider_id?: string | null
+          requirements?: Json | null
+          service_fee?: number
+          total_price?: number | null
+          updated_at?: string | null
+          validity_months?: number | null
+          visa_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visa_services_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "legal_services"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       wallet_transactions: {
         Row: {
