@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Check } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
@@ -237,7 +237,7 @@ export function YachtExperienceSelect({ selected, onChange, className }: YachtEx
   );
 }
 
-// Quick filter chips for experiences on index page
+// Quick filter chips for experiences on index page - compact version
 interface ExperienceFilterChipsProps {
   selected: string[];
   onChange: (ids: string[]) => void;
@@ -245,6 +245,7 @@ interface ExperienceFilterChipsProps {
 
 export function ExperienceFilterChips({ selected, onChange }: ExperienceFilterChipsProps) {
   const { language } = useLanguage();
+  const [showAll, setShowAll] = useState(false);
 
   const toggleExperience = (id: string) => {
     if (selected.includes(id)) {
@@ -254,26 +255,59 @@ export function ExperienceFilterChips({ selected, onChange }: ExperienceFilterCh
     }
   };
 
+  // Show popular first, then others if expanded
+  const popularExperiences = YACHT_EXPERIENCES.filter(e => e.popular);
+  const otherExperiences = YACHT_EXPERIENCES.filter(e => !e.popular);
+  const displayExperiences = showAll 
+    ? [...popularExperiences, ...otherExperiences]
+    : popularExperiences;
+
   return (
-    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
-      {YACHT_EXPERIENCES.map((exp) => {
-        const isSelected = selected.includes(exp.id);
-        return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap gap-2">
+        {displayExperiences.map((exp) => {
+          const isSelected = selected.includes(exp.id);
+          return (
+            <button
+              key={exp.id}
+              onClick={() => toggleExperience(exp.id)}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-sm transition-all",
+                isSelected 
+                  ? "border-primary bg-primary text-primary-foreground" 
+                  : "border-border bg-card hover:border-primary/30"
+              )}
+            >
+              <span className="text-base">{exp.icon}</span>
+              <span className="text-xs">{language === 'ru' ? exp.labelRu : exp.labelEn}</span>
+            </button>
+          );
+        })}
+        
+        {!showAll && otherExperiences.length > 0 && (
           <button
-            key={exp.id}
-            onClick={() => toggleExperience(exp.id)}
-            className={cn(
-              "flex items-center gap-1.5 px-3 py-2 rounded-full border whitespace-nowrap text-sm transition-all",
-              isSelected 
-                ? "border-primary bg-primary text-primary-foreground" 
-                : "border-border bg-card hover:border-primary/30"
-            )}
+            onClick={() => setShowAll(true)}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-full border border-dashed border-muted-foreground/50 text-xs text-muted-foreground hover:border-primary hover:text-primary transition-all"
           >
-            <span>{exp.icon}</span>
-            <span>{language === 'ru' ? exp.labelRu : exp.labelEn}</span>
+            +{otherExperiences.length} {language === 'ru' ? 'ещё' : 'more'}
           </button>
-        );
-      })}
+        )}
+        
+        {showAll && (
+          <button
+            onClick={() => setShowAll(false)}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-full border border-dashed border-muted-foreground/50 text-xs text-muted-foreground hover:border-primary hover:text-primary transition-all"
+          >
+            {language === 'ru' ? 'Свернуть' : 'Less'}
+          </button>
+        )}
+      </div>
+
+      {selected.length > 0 && (
+        <div className="text-xs text-primary font-medium">
+          {language === 'ru' ? 'Выбрано:' : 'Selected:'} {selected.length}
+        </div>
+      )}
     </div>
   );
 }
