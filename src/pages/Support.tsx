@@ -11,7 +11,18 @@ import {
   ShoppingBag,
   CreditCard,
   MapPin,
-  AlertTriangle
+  AlertTriangle,
+  Sparkles,
+  Shield,
+  Star,
+  Users,
+  CheckCircle2,
+  Home,
+  Car,
+  Anchor,
+  Wrench,
+  UtensilsCrossed,
+  Ticket
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -65,11 +76,85 @@ export default function Support() {
     },
   ];
 
+  const conciergeServices = [
+    { icon: UtensilsCrossed, label: isRu ? 'Столик в ресторане' : 'Restaurant table' },
+    { icon: Ticket, label: isRu ? 'Билеты на мероприятия' : 'Event tickets' },
+    { icon: Anchor, label: isRu ? 'Подбор яхты' : 'Yacht selection' },
+    { icon: Car, label: isRu ? 'Аренда авто' : 'Car rental' },
+    { icon: Home, label: isRu ? 'Поиск жилья' : 'Property search' },
+    { icon: Wrench, label: isRu ? 'Ремонт и обслуживание' : 'Maintenance & repairs' },
+  ];
+
+  const guarantees = [
+    {
+      icon: Shield,
+      title: isRu ? 'Проверенные партнёры' : 'Verified Partners',
+      desc: isRu 
+        ? 'Каждый партнёр проходит многоступенчатую проверку: документы, качество услуг, отзывы клиентов' 
+        : 'Every partner undergoes multi-step verification: documents, service quality, customer reviews'
+    },
+    {
+      icon: CheckCircle2,
+      title: isRu ? 'Гарантия качества' : 'Quality Guarantee',
+      desc: isRu 
+        ? 'Если услуга не соответствует описанию — вернём деньги или предложим альтернативу' 
+        : 'If the service doesn\'t match the description — we\'ll refund or offer an alternative'
+    },
+    {
+      icon: Users,
+      title: isRu ? 'Поддержка 24/7' : '24/7 Support',
+      desc: isRu 
+        ? 'Наши менеджеры на связи круглосуточно — поможем в любой ситуации' 
+        : 'Our managers are available around the clock — we\'ll help in any situation'
+    },
+    {
+      icon: Star,
+      title: isRu ? 'Честные цены' : 'Fair Prices',
+      desc: isRu 
+        ? 'Никаких скрытых комиссий. Цена, которую вы видите — это финальная цена' 
+        : 'No hidden fees. The price you see is the final price'
+    },
+  ];
+
+  const unoValues = [
+    {
+      title: isRu ? 'Экономия времени' : 'Time Saving',
+      desc: isRu 
+        ? 'Все услуги в одном месте. Не нужно искать в разных источниках' 
+        : 'All services in one place. No need to search multiple sources'
+    },
+    {
+      title: isRu ? 'Локальная экспертиза' : 'Local Expertise',
+      desc: isRu 
+        ? 'Мы живём на Пхукете и знаем остров изнутри — советуем только лучшее' 
+        : 'We live in Phuket and know the island inside out — we recommend only the best'
+    },
+    {
+      title: isRu ? 'Без языкового барьера' : 'No Language Barrier',
+      desc: isRu 
+        ? 'Поддержка на русском и английском. Переводим и решаем вопросы с местными' 
+        : 'Support in Russian and English. We translate and resolve issues with locals'
+    },
+    {
+      title: isRu ? 'Персональный подход' : 'Personal Approach',
+      desc: isRu 
+        ? 'Подбираем варианты под ваш бюджет и предпочтения' 
+        : 'We select options based on your budget and preferences'
+    },
+  ];
+
   const handleSendQuickMessage = () => {
     if (quickMessage.trim()) {
       openWhatsApp(quickMessage);
       setQuickMessage('');
     }
+  };
+
+  const handleConciergeRequest = () => {
+    const message = isRu 
+      ? 'Здравствуйте! Мне нужна помощь с бронированием услуги' 
+      : 'Hello! I need help booking a service';
+    openWhatsApp(message);
   };
 
   return (
@@ -106,6 +191,52 @@ export default function Support() {
           
           <p className="text-xs text-center text-muted-foreground mt-3">
             {UNO_WHATSAPP}
+          </p>
+        </SectionCard>
+
+        {/* Personal Concierge Section */}
+        <SectionCard className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+              <Sparkles className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-semibold">
+                {isRu ? 'Персональный менеджер' : 'Personal Manager'}
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                {isRu ? 'Поможем забронировать что угодно' : 'We\'ll help book anything'}
+              </p>
+            </div>
+          </div>
+
+          <p className="text-sm text-muted-foreground mb-4">
+            {isRu 
+              ? 'Не хотите искать сами? Менеджер UNO подберёт лучшие варианты, договорится о цене и забронирует за вас:' 
+              : 'Don\'t want to search yourself? UNO manager will find the best options, negotiate the price and book for you:'}
+          </p>
+
+          <div className="grid grid-cols-2 gap-2 mb-4">
+            {conciergeServices.map((service, idx) => (
+              <div key={idx} className="flex items-center gap-2 text-sm py-2 px-3 bg-background/50 rounded-lg">
+                <service.icon className="w-4 h-4 text-primary flex-shrink-0" />
+                <span className="text-muted-foreground">{service.label}</span>
+              </div>
+            ))}
+          </div>
+
+          <PremiumButton 
+            className="w-full"
+            onClick={handleConciergeRequest}
+          >
+            <MessageCircle className="w-4 h-4 mr-2" />
+            {isRu ? 'Написать менеджеру' : 'Contact Manager'}
+          </PremiumButton>
+
+          <p className="text-xs text-center text-muted-foreground mt-3">
+            {isRu 
+              ? '💬 Опишите что нужно — мы найдём и забронируем' 
+              : '💬 Describe what you need — we\'ll find and book it'}
           </p>
         </SectionCard>
 
@@ -148,6 +279,46 @@ export default function Support() {
             <Send className="w-4 h-4 mr-2" />
             {isRu ? 'Отправить в WhatsApp' : 'Send to WhatsApp'}
           </PremiumButton>
+        </SectionCard>
+
+        {/* Guarantees Section */}
+        <div className="text-sm font-medium text-muted-foreground mb-2 mt-4">
+          {isRu ? 'Наши гарантии' : 'Our Guarantees'}
+        </div>
+        <SectionCard>
+          <div className="space-y-4">
+            {guarantees.map((item, idx) => (
+              <div key={idx} className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <item.icon className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h4 className="font-medium text-sm">{item.title}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+
+        {/* Why UNO Section */}
+        <div className="text-sm font-medium text-muted-foreground mb-2 mt-4">
+          {isRu ? 'Почему UNO?' : 'Why UNO?'}
+        </div>
+        <SectionCard className="bg-gradient-to-br from-muted/50 to-muted/30">
+          <div className="grid grid-cols-1 gap-4">
+            {unoValues.map((item, idx) => (
+              <div key={idx} className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-xs font-bold text-primary-foreground">{idx + 1}</span>
+                </div>
+                <div>
+                  <h4 className="font-medium text-sm">{item.title}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </SectionCard>
 
         {/* Contact Info */}
