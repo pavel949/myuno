@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Car, Bike, Plane, Ship, Clock, Star, MapPin, Users, Fuel, Settings2 } from 'lucide-react';
+import { Car, Bike, Plane, Ship, Clock, Star, MapPin, Users, Fuel, Settings2, SlidersHorizontal } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { FilterChip } from '@/components/uno/FilterChip';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { triggerRipple } from '@/hooks/useRipple';
+import { UniversalFilter, ActiveFilters, transportFilterConfig, FilterValues } from '@/components/filters';
 const demoVehicles = [
   {
     id: 'car-1',
@@ -144,10 +146,43 @@ export default function TransportIndex() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState('all');
+  const [filterValues, setFilterValues] = useState<FilterValues>({});
 
-  const filteredVehicles = demoVehicles.filter(v => 
-    selectedType === 'all' || v.type === selectedType
-  );
+  const activeFilterCount = useMemo(() => {
+    return Object.values(filterValues).filter(v => 
+      Array.isArray(v) ? v.length > 0 : v !== undefined && v !== null
+    ).length;
+  }, [filterValues]);
+
+  const handleRemoveFilter = (sectionId: string, optionId?: string) => {
+    setFilterValues(prev => {
+      const newValues = { ...prev };
+      if (optionId && Array.isArray(newValues[sectionId])) {
+        newValues[sectionId] = (newValues[sectionId] as string[]).filter(id => id !== optionId);
+        if ((newValues[sectionId] as string[]).length === 0) delete newValues[sectionId];
+      } else {
+        delete newValues[sectionId];
+      }
+      return newValues;
+    });
+  };
+
+  const handleClearAllFilters = () => setFilterValues({});
+
+  const filteredVehicles = demoVehicles.filter(v => {
+    if (selectedType !== 'all' && v.type !== selectedType) return false;
+    
+    // Passengers filter
+    if (filterValues.passengers) {
+      const passMap: Record<string, number[]> = {
+        '1-2': [1, 2], '3-4': [3, 4], '5-7': [5, 6, 7], '8+': [8, 9, 10, 11, 12]
+      };
+      const allowedSeats = passMap[filterValues.passengers as string] || [];
+      if (!allowedSeats.includes(v.seats)) return false;
+    }
+    
+    return true;
+  });
 
   const availableVehicles = filteredVehicles.filter(v => v.isAvailable);
 
@@ -241,6 +276,37 @@ export default function TransportIndex() {
             ))}
           </div>
         </div>
+
+        {/* Filters Button */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">
+            {language === 'ru' ? 'Аренда транспорта' : 'Vehicle Rental'}
+          </h2>
+          <UniversalFilter
+            config={transportFilterConfig}
+            values={filterValues}
+            onChange={setFilterValues}
+            activeCount={activeFilterCount}
+          >
+            <Button variant="outline" size="sm" className="relative gap-2">
+              <SlidersHorizontal className="w-4 h-4" />
+              {language === 'ru' ? 'Фильтры' : 'Filters'}
+              {activeFilterCount > 0 && (
+                <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
+                  {activeFilterCount}
+                </span>
+              )}
+            </Button>
+          </UniversalFilter>
+        </div>
+
+        {/* Active Filters */}
+        <ActiveFilters
+          config={transportFilterConfig}
+          values={filterValues}
+          onRemove={handleRemoveFilter}
+          onClearAll={handleClearAllFilters}
+        />
 
         {/* Vehicle Type Filters */}
         <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">

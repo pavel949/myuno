@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter, Sparkles, Star, MapPin, Clock, ArrowRight, Map } from 'lucide-react';
+import { Search, SlidersHorizontal, Sparkles, Star, MapPin, Clock, ArrowRight, Map } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { triggerRipple } from '@/hooks/useRipple';
+import { UniversalFilter, ActiveFilters, beautyFilterConfig, FilterValues } from '@/components/filters';
 
 // Demo salon data
 const demoSalons = [
@@ -88,11 +89,42 @@ export default function BeautySpaIndex() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [filterValues, setFilterValues] = useState<FilterValues>({});
+
+  const activeFilterCount = useMemo(() => {
+    return Object.values(filterValues).filter(v => 
+      Array.isArray(v) ? v.length > 0 : v !== undefined && v !== null
+    ).length;
+  }, [filterValues]);
+
+  const handleRemoveFilter = (sectionId: string, optionId?: string) => {
+    setFilterValues(prev => {
+      const newValues = { ...prev };
+      if (optionId && Array.isArray(newValues[sectionId])) {
+        newValues[sectionId] = (newValues[sectionId] as string[]).filter(id => id !== optionId);
+        if ((newValues[sectionId] as string[]).length === 0) delete newValues[sectionId];
+      } else {
+        delete newValues[sectionId];
+      }
+      return newValues;
+    });
+  };
+
+  const handleClearAllFilters = () => setFilterValues({});
 
   const filteredSalons = demoSalons.filter(salon => {
     const name = language === 'ru' ? salon.nameRu : salon.name;
     const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
-    // For now, all salons match all categories (would filter by actual data)
+    
+    // Price level filter
+    if (filterValues.priceLevel) {
+      const priceLevel = parseInt(filterValues.priceLevel as string) || 4;
+      const priceLevels: Record<string, number> = {
+        'salon-1': 3, 'salon-2': 2, 'salon-3': 1, 'salon-4': 1
+      };
+      if ((priceLevels[salon.id] || 2) > priceLevel) return false;
+    }
+    
     return matchesSearch;
   });
 
@@ -124,16 +156,41 @@ export default function BeautySpaIndex() {
           </div>
         </div>
 
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-          <Input
-            placeholder={language === 'ru' ? 'Поиск салонов...' : 'Search salons...'}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 h-12 bg-card border-border/50"
-          />
+        {/* Search & Filter */}
+        <div className="flex gap-2 mb-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <Input
+              placeholder={language === 'ru' ? 'Поиск салонов...' : 'Search salons...'}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 h-12 bg-card border-border/50"
+            />
+          </div>
+          <UniversalFilter
+            config={beautyFilterConfig}
+            values={filterValues}
+            onChange={setFilterValues}
+            activeCount={activeFilterCount}
+          >
+            <Button variant="outline" size="icon" className="relative shrink-0 h-12 w-12">
+              <SlidersHorizontal className="w-4 h-4" />
+              {activeFilterCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
+                  {activeFilterCount}
+                </span>
+              )}
+            </Button>
+          </UniversalFilter>
         </div>
+
+        {/* Active Filters */}
+        <ActiveFilters
+          config={beautyFilterConfig}
+          values={filterValues}
+          onRemove={handleRemoveFilter}
+          onClearAll={handleClearAllFilters}
+        />
 
         {/* Category filters */}
         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">

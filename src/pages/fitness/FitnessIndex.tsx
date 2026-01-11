@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Search, MapPin, Star, Clock, Users, Dumbbell, 
-  Heart, Flame, Trophy, ArrowLeft, Filter
+  Heart, Flame, Trophy, ArrowLeft, SlidersHorizontal
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { triggerRipple } from '@/hooks/useRipple';
+import { UniversalFilter, ActiveFilters, fitnessFilterConfig, FilterValues } from '@/components/filters';
 
 const gymTypes = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -104,11 +105,42 @@ const FitnessIndex = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('all');
+  const [filterValues, setFilterValues] = useState<FilterValues>({});
+
+  const activeFilterCount = useMemo(() => {
+    return Object.values(filterValues).filter(v => 
+      Array.isArray(v) ? v.length > 0 : v !== undefined && v !== null
+    ).length;
+  }, [filterValues]);
+
+  const handleRemoveFilter = (sectionId: string, optionId?: string) => {
+    setFilterValues(prev => {
+      const newValues = { ...prev };
+      if (optionId && Array.isArray(newValues[sectionId])) {
+        newValues[sectionId] = (newValues[sectionId] as string[]).filter(id => id !== optionId);
+        if ((newValues[sectionId] as string[]).length === 0) delete newValues[sectionId];
+      } else {
+        delete newValues[sectionId];
+      }
+      return newValues;
+    });
+  };
+
+  const handleClearAllFilters = () => setFilterValues({});
 
   const filteredGyms = gyms.filter(gym => {
     const matchesSearch = gym.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          gym.nameRu.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType = selectedType === 'all' || gym.type === selectedType;
+    
+    // Price filter via membership
+    if (filterValues.membership) {
+      const memberMap: Record<string, string[]> = {
+        'day-pass': ['day'], 'weekly': ['week'], 'monthly': ['month'], 'annual': ['year']
+      };
+      if (!memberMap[filterValues.membership as string]?.includes(gym.priceType)) return false;
+    }
+    
     return matchesSearch && matchesType;
   });
 
@@ -141,15 +173,32 @@ const FitnessIndex = () => {
               </div>
             </div>
 
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder={language === 'ru' ? 'Поиск залов...' : 'Search gyms...'}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+            {/* Search & Filter */}
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder={language === 'ru' ? 'Поиск залов...' : 'Search gyms...'}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <UniversalFilter
+                config={fitnessFilterConfig}
+                values={filterValues}
+                onChange={setFilterValues}
+                activeCount={activeFilterCount}
+              >
+                <Button variant="outline" size="icon" className="relative shrink-0">
+                  <SlidersHorizontal className="w-4 h-4" />
+                  {activeFilterCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </Button>
+              </UniversalFilter>
             </div>
           </div>
 
@@ -167,6 +216,16 @@ const FitnessIndex = () => {
               </Button>
             ))}
           </div>
+        </div>
+
+        {/* Active Filters */}
+        <div className="px-4">
+          <ActiveFilters
+            config={fitnessFilterConfig}
+            values={filterValues}
+            onRemove={handleRemoveFilter}
+            onClearAll={handleClearAllFilters}
+          />
         </div>
 
         {/* Quick Stats */}

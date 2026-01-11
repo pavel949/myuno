@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Compass, Clock, Users } from "lucide-react";
+import { Compass, Clock, Users, SlidersHorizontal } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTours } from "@/hooks/useTours";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -9,6 +9,8 @@ import { PageHeader } from "@/components/uno/PageHeader";
 import { FilterChip } from "@/components/uno/FilterChip";
 import { SkeletonCard } from "@/components/uno/SkeletonCard";
 import { MiniAppHero, MiniAppSearch, ListCard } from "@/components/miniapp";
+import { Button } from "@/components/ui/button";
+import { UniversalFilter, ActiveFilters, tourFilterConfig, FilterValues } from "@/components/filters";
 
 const TOUR_CATEGORIES = [
   { id: 'all', labelEn: 'All Tours', labelRu: 'Все туры' },
@@ -23,15 +25,56 @@ export default function ToursIndex() {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterValues, setFilterValues] = useState<FilterValues>({});
   
   const { tours, isLoading } = useTours({
     category: selectedCategory === 'all' ? undefined : selectedCategory,
   });
 
+  const activeFilterCount = useMemo(() => {
+    return Object.values(filterValues).filter(v => 
+      Array.isArray(v) ? v.length > 0 : v !== undefined && v !== null
+    ).length;
+  }, [filterValues]);
+
+  const handleRemoveFilter = (sectionId: string, optionId?: string) => {
+    setFilterValues(prev => {
+      const newValues = { ...prev };
+      if (optionId && Array.isArray(newValues[sectionId])) {
+        newValues[sectionId] = (newValues[sectionId] as string[]).filter(id => id !== optionId);
+        if ((newValues[sectionId] as string[]).length === 0) delete newValues[sectionId];
+      } else {
+        delete newValues[sectionId];
+      }
+      return newValues;
+    });
+  };
+
+  const handleClearAllFilters = () => setFilterValues({});
+
   const filteredTours = tours.filter(tour => {
-    if (!searchQuery) return true;
-    const title = language === 'ru' ? tour.title_ru : tour.title_en;
-    return title.toLowerCase().includes(searchQuery.toLowerCase());
+    if (searchQuery) {
+      const title = language === 'ru' ? tour.title_ru : tour.title_en;
+      if (!title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    }
+    
+    // Duration filter
+    if (filterValues.duration) {
+      const duration = tour.duration_hours || 0;
+      const durationMap: Record<string, boolean> = {
+        'half-day': duration <= 5,
+        'full-day': duration > 5 && duration <= 10,
+        'multi-day': duration > 10,
+      };
+      if (!durationMap[filterValues.duration as string]) return false;
+    }
+    
+    // Difficulty filter
+    if (filterValues.difficulty && filterValues.difficulty !== tour.difficulty) {
+      return false;
+    }
+    
+    return true;
   });
 
   return (
@@ -58,12 +101,38 @@ export default function ToursIndex() {
           className="mt-4 mb-4"
         />
 
-        {/* Search */}
-        <MiniAppSearch
-          value={searchQuery}
-          onChange={setSearchQuery}
-          placeholder={language === 'ru' ? 'Поиск туров...' : 'Search tours...'}
-          className="mb-4"
+        {/* Search & Filter */}
+        <div className="flex gap-2 mb-4">
+          <div className="flex-1">
+            <MiniAppSearch
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder={language === 'ru' ? 'Поиск туров...' : 'Search tours...'}
+            />
+          </div>
+          <UniversalFilter
+            config={tourFilterConfig}
+            values={filterValues}
+            onChange={setFilterValues}
+            activeCount={activeFilterCount}
+          >
+            <Button variant="outline" size="icon" className="relative shrink-0">
+              <SlidersHorizontal className="w-4 h-4" />
+              {activeFilterCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
+                  {activeFilterCount}
+                </span>
+              )}
+            </Button>
+          </UniversalFilter>
+        </div>
+
+        {/* Active Filters */}
+        <ActiveFilters
+          config={tourFilterConfig}
+          values={filterValues}
+          onRemove={handleRemoveFilter}
+          onClearAll={handleClearAllFilters}
         />
 
         {/* Category Filters */}

@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Search, MapPin, Star, Calendar, Clock, Users, 
   Ticket, Music, Compass, PartyPopper, Ship, Mountain,
-  ArrowLeft
+  ArrowLeft, SlidersHorizontal
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { triggerRipple } from '@/hooks/useRipple';
+import { UniversalFilter, ActiveFilters, eventsFilterConfig, FilterValues } from '@/components/filters';
 
 const eventCategories = [
   { id: 'all', labelEn: 'All', labelRu: 'Все', icon: Ticket },
@@ -28,8 +29,30 @@ const EventsIndex = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [filterValues, setFilterValues] = useState<FilterValues>({});
   
   const { events, isLoading } = useEvents({ category: selectedCategory !== 'all' ? selectedCategory : undefined });
+
+  const activeFilterCount = useMemo(() => {
+    return Object.values(filterValues).filter(v => 
+      Array.isArray(v) ? v.length > 0 : v !== undefined && v !== null
+    ).length;
+  }, [filterValues]);
+
+  const handleRemoveFilter = (sectionId: string, optionId?: string) => {
+    setFilterValues(prev => {
+      const newValues = { ...prev };
+      if (optionId && Array.isArray(newValues[sectionId])) {
+        newValues[sectionId] = (newValues[sectionId] as string[]).filter(id => id !== optionId);
+        if ((newValues[sectionId] as string[]).length === 0) delete newValues[sectionId];
+      } else {
+        delete newValues[sectionId];
+      }
+      return newValues;
+    });
+  };
+
+  const handleClearAllFilters = () => setFilterValues({});
 
   const filteredEvents = events.filter(event => {
     const matchesSearch = event.title_en.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -70,15 +93,32 @@ const EventsIndex = () => {
               </div>
             </div>
 
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder={language === 'ru' ? 'Поиск событий...' : 'Search events...'}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+            {/* Search & Filter */}
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder={language === 'ru' ? 'Поиск событий...' : 'Search events...'}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <UniversalFilter
+                config={eventsFilterConfig}
+                values={filterValues}
+                onChange={setFilterValues}
+                activeCount={activeFilterCount}
+              >
+                <Button variant="outline" size="icon" className="relative shrink-0">
+                  <SlidersHorizontal className="w-4 h-4" />
+                  {activeFilterCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </Button>
+              </UniversalFilter>
             </div>
           </div>
 
@@ -99,6 +139,16 @@ const EventsIndex = () => {
                 </Button>
               );
             })}
+          </div>
+
+          {/* Active Filters */}
+          <div className="px-4 pb-2">
+            <ActiveFilters
+              config={eventsFilterConfig}
+              values={filterValues}
+              onRemove={handleRemoveFilter}
+              onClearAll={handleClearAllFilters}
+            />
           </div>
         </div>
 
