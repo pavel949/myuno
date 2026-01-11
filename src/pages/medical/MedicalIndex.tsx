@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Search, MapPin, Star, Clock, Stethoscope, 
-  Heart, Pill, Baby, Bone, Eye, ArrowLeft
+  Heart, Pill, Baby, Bone, Eye, ArrowLeft, Filter
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { triggerRipple } from '@/hooks/useRipple';
+import { UniversalFilter, ActiveFilters, FilterValues } from '@/components/filters/UniversalFilter';
+import { medicalFilterConfig } from '@/components/filters/MedicalFilters';
 
 const specialties = [
   { id: 'all', labelEn: 'All', labelRu: 'Все', icon: Stethoscope },
@@ -111,13 +113,52 @@ const MedicalIndex = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] = useState('all');
+  const [filterValues, setFilterValues] = useState<FilterValues>({});
 
-  const filteredClinics = clinics.filter(clinic => {
-    const matchesSearch = clinic.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         clinic.nameRu.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesSpecialty = selectedSpecialty === 'all' || clinic.specialty === selectedSpecialty;
-    return matchesSearch && matchesSpecialty;
-  });
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    Object.entries(filterValues).forEach(([key, value]) => {
+      if (key === 'priceLevel' && value) count++;
+      else if (Array.isArray(value)) count += value.length;
+      else if (value) count++;
+    });
+    return count;
+  }, [filterValues]);
+
+  const handleRemoveFilter = (sectionId: string, optionId?: string) => {
+    setFilterValues(prev => {
+      const newValues = { ...prev };
+      if (optionId && Array.isArray(newValues[sectionId])) {
+        newValues[sectionId] = (newValues[sectionId] as string[]).filter(id => id !== optionId);
+        if ((newValues[sectionId] as string[]).length === 0) delete newValues[sectionId];
+      } else {
+        delete newValues[sectionId];
+      }
+      return newValues;
+    });
+  };
+
+  const handleClearAllFilters = () => setFilterValues({});
+
+  const filteredClinics = useMemo(() => {
+    return clinics.filter(clinic => {
+      const matchesSearch = clinic.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           clinic.nameRu.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSpecialty = selectedSpecialty === 'all' || clinic.specialty === selectedSpecialty;
+      
+      // Clinic type filter
+      if (filterValues.clinicType && clinic.type !== filterValues.clinicType) {
+        return false;
+      }
+      
+      // Availability filter
+      if (filterValues.availability === 'open' && !clinic.isOpen) {
+        return false;
+      }
+      
+      return matchesSearch && matchesSpecialty;
+    });
+  }, [clinics, searchQuery, selectedSpecialty, filterValues]);
 
   return (
     <AppLayout>
@@ -129,7 +170,7 @@ const MedicalIndex = () => {
               <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
                 <ArrowLeft className="w-5 h-5" />
               </Button>
-              <div>
+              <div className="flex-1">
                 <h1 className="text-xl font-display font-bold">
                   {language === 'ru' ? 'Медицина' : 'Medical'}
                 </h1>
@@ -137,6 +178,21 @@ const MedicalIndex = () => {
                   {language === 'ru' ? 'Клиники, врачи, запись' : 'Clinics, doctors, appointments'}
                 </p>
               </div>
+              <UniversalFilter
+                config={medicalFilterConfig}
+                values={filterValues}
+                onChange={setFilterValues}
+                language={language as 'en' | 'ru'}
+              >
+                <Button variant="outline" size="icon" className="relative">
+                  <Filter className="w-4 h-4" />
+                  {activeFilterCount > 0 && (
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
+                      {activeFilterCount}
+                    </Badge>
+                  )}
+                </Button>
+              </UniversalFilter>
             </div>
 
             {/* Search */}
@@ -170,6 +226,16 @@ const MedicalIndex = () => {
             })}
           </div>
         </div>
+
+        {/* Active Filters */}
+        <ActiveFilters
+          config={medicalFilterConfig}
+          values={filterValues}
+          onRemove={handleRemoveFilter}
+          onClearAll={handleClearAllFilters}
+          language={language as 'en' | 'ru'}
+          className="px-4 pt-3"
+        />
 
         {/* Emergency Banner */}
         <div className="mx-4 mt-4 p-4 rounded-xl bg-red-500/10 border border-red-500/30">

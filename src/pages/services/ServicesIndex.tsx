@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -20,9 +20,12 @@ import {
   Clock,
   MapPin,
   CheckCircle2,
-  Map
+  Map,
+  Filter
 } from "lucide-react";
 import { triggerRipple } from "@/hooks/useRipple";
+import { UniversalFilter, ActiveFilters, FilterValues } from "@/components/filters/UniversalFilter";
+import { servicesFilterConfig } from "@/components/filters/ServicesFilters";
 
 const ServicesIndex = () => {
   const { language } = useLanguage();
@@ -30,6 +33,7 @@ const ServicesIndex = () => {
   const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [filterValues, setFilterValues] = useState<FilterValues>({});
 
   // Read category from URL params on mount
   useEffect(() => {
@@ -93,6 +97,11 @@ const ServicesIndex = () => {
       id: "srv-1",
       name: language === "ru" ? "Алексей Мастеров" : "Alex Masters",
       category: "plumbing",
+      rating: 4.9,
+      reviews: 156,
+      experience: language === "ru" ? "10 лет опыта" : "10 years exp.",
+      price: 1500,
+      currency: "฿",
       priceUnit: language === "ru" ? "/час" : "/hour",
       location: language === "ru" ? "Центр" : "Downtown",
       available: true,
@@ -110,7 +119,7 @@ const ServicesIndex = () => {
       reviews: 203,
       experience: language === "ru" ? "15 лет опыта" : "15 years exp.",
       price: 2000,
-      currency: "₽",
+      currency: "฿",
       priceUnit: language === "ru" ? "/час" : "/hour",
       location: language === "ru" ? "Весь город" : "City-wide",
       available: true,
@@ -128,7 +137,7 @@ const ServicesIndex = () => {
       reviews: 312,
       experience: language === "ru" ? "Команда из 20+ человек" : "Team of 20+ people",
       price: 3000,
-      currency: "₽",
+      currency: "฿",
       priceUnit: language === "ru" ? "/уборка" : "/cleaning",
       location: language === "ru" ? "Весь город" : "City-wide",
       available: true,
@@ -146,7 +155,7 @@ const ServicesIndex = () => {
       reviews: 89,
       experience: language === "ru" ? "8 лет опыта" : "8 years exp.",
       price: 1800,
-      currency: "₽",
+      currency: "฿",
       priceUnit: language === "ru" ? "/час" : "/hour",
       location: language === "ru" ? "Север города" : "North side",
       available: false,
@@ -164,7 +173,7 @@ const ServicesIndex = () => {
       reviews: 67,
       experience: language === "ru" ? "12 лет опыта" : "12 years exp.",
       price: 500,
-      currency: "₽",
+      currency: "฿",
       priceUnit: language === "ru" ? "/м²" : "/m²",
       location: language === "ru" ? "Юг города" : "South side",
       available: true,
@@ -248,17 +257,50 @@ const ServicesIndex = () => {
     },
   ];
 
-  const filteredProviders = providers.filter((provider) => {
-    const matchesSearch = provider.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      provider.services.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesCategory = !selectedCategory || provider.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    Object.entries(filterValues).forEach(([key, value]) => {
+      if (key === 'priceLevel' && value) count++;
+      else if (Array.isArray(value)) count += value.length;
+      else if (value) count++;
+    });
+    return count;
+  }, [filterValues]);
+
+  const handleRemoveFilter = (sectionId: string, optionId?: string) => {
+    setFilterValues(prev => {
+      const newValues = { ...prev };
+      if (optionId && Array.isArray(newValues[sectionId])) {
+        newValues[sectionId] = (newValues[sectionId] as string[]).filter(id => id !== optionId);
+        if ((newValues[sectionId] as string[]).length === 0) delete newValues[sectionId];
+      } else {
+        delete newValues[sectionId];
+      }
+      return newValues;
+    });
+  };
+
+  const handleClearAllFilters = () => setFilterValues({});
+
+  const filteredProviders = useMemo(() => {
+    return providers.filter((provider) => {
+      const matchesSearch = provider.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        provider.services.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesCategory = !selectedCategory || provider.category === selectedCategory;
+      
+      // Features filter
+      const features = filterValues.features as string[] || [];
+      if (features.includes('verified') && !provider.verified) return false;
+      if (features.includes('same-day') && !provider.available) return false;
+      
+      return matchesSearch && matchesCategory;
+    });
+  }, [providers, searchQuery, selectedCategory, filterValues]);
 
   return (
     <AppLayout title={language === "ru" ? "Домашние услуги" : "Home Services"} showBottomNav={false}>
       <div className="p-4 space-y-6 pb-24">
-        {/* Search + Map Button */}
+        {/* Search + Map + Filter Buttons */}
         <div className="flex gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
@@ -269,6 +311,25 @@ const ServicesIndex = () => {
               className="pl-10 h-12 rounded-xl bg-card border-border"
             />
           </div>
+          <UniversalFilter
+            config={servicesFilterConfig}
+            values={filterValues}
+            onChange={setFilterValues}
+            language={language as 'en' | 'ru'}
+          >
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-12 w-12 rounded-xl relative"
+            >
+              <Filter className="w-5 h-5" />
+              {activeFilterCount > 0 && (
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
+                  {activeFilterCount}
+                </Badge>
+              )}
+            </Button>
+          </UniversalFilter>
           <Button
             variant="outline"
             size="icon"
@@ -278,6 +339,15 @@ const ServicesIndex = () => {
             <Map className="w-5 h-5" />
           </Button>
         </div>
+
+        {/* Active Filters */}
+        <ActiveFilters
+          config={servicesFilterConfig}
+          values={filterValues}
+          onRemove={handleRemoveFilter}
+          onClearAll={handleClearAllFilters}
+          language={language as 'en' | 'ru'}
+        />
 
         {/* Categories */}
         <div>
@@ -397,17 +467,24 @@ const ServicesIndex = () => {
                 </div>
 
                 {/* Price */}
-                <div className="mt-3 pt-3 border-t border-border flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
-                    {language === "ru" ? "от" : "from"}
-                  </span>
+                <div className="absolute top-4 right-4">
                   <span className="text-lg font-bold text-primary">
-                    {provider.currency}{provider.price}{provider.priceUnit}
+                    {provider.currency}{provider.price}
                   </span>
+                  <span className="text-xs text-muted-foreground">{provider.priceUnit}</span>
                 </div>
               </div>
             ))}
           </div>
+
+          {filteredProviders.length === 0 && (
+            <div className="text-center py-12">
+              <Wrench className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
+              <p className="text-muted-foreground">
+                {language === "ru" ? "Мастера не найдены" : "No professionals found"}
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </AppLayout>
