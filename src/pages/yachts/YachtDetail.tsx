@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Anchor, Star, Users, MapPin, Clock, Shield, Check, 
-  Calendar, ChevronLeft, Share2, Heart, Phone, MessageCircle
+  Calendar, Share2, Heart, Phone, MessageCircle
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
@@ -10,6 +10,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BackButton } from '@/components/uno/BackButton';
 
 // Demo yacht data - in production would come from API
 const getYachtById = (id: string) => ({
@@ -76,12 +77,9 @@ export default function YachtDetail() {
           className="w-full h-full object-cover"
         />
         {/* Back button */}
-        <button
-          onClick={() => navigate(-1)}
-          className="absolute top-4 left-4 w-10 h-10 rounded-full bg-black/50 flex items-center justify-center text-white"
-        >
-          <ChevronLeft className="w-6 h-6" />
-        </button>
+        <div className="absolute top-4 left-4">
+          <BackButton fallbackPath="/yachts" variant="overlay" />
+        </div>
         {/* Actions */}
         <div className="absolute top-4 right-4 flex gap-2">
           <button className="w-10 h-10 rounded-full bg-black/50 flex items-center justify-center text-white">

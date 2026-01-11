@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
-  ArrowLeft, MapPin, Star, BedDouble, Bath, Users, Maximize, 
+  MapPin, Star, BedDouble, Bath, Users, Maximize, 
   Check, Share2, Calendar, Phone, MessageCircle, Shield
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -9,6 +9,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
+import { BackButton } from '@/components/uno/BackButton';
 
 // Demo property data
 const demoProperty = {
@@ -82,12 +83,7 @@ export default function PropertyDetail() {
       <div className="pb-24">
         {/* Header */}
         <div className="sticky top-0 z-20 flex items-center justify-between p-4 bg-background/80 backdrop-blur-sm border-b border-border/50">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+          <BackButton fallbackPath="/property" variant="ghost" />
           
           <div className="flex items-center gap-2">
             <FavoriteButton
