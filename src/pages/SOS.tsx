@@ -128,6 +128,16 @@ const tips = [
   { en: 'Tourist Police (1155) speaks English and helps tourists', ru: 'Турполиция (1155) говорит по-английски и помогает туристам' },
   { en: 'Save this page offline for emergencies', ru: 'Сохраните эту страницу для офлайн-доступа' },
   { en: 'For snake bites, call 1669 and go to hospital immediately', ru: 'При укусе змеи звоните 1669 и езжайте в больницу' },
+  { en: 'Jellyfish sting: rinse with vinegar, remove tentacles, seek medical help', ru: 'Укус медузы: промойте уксусом, удалите щупальца, обратитесь к врачу' },
+  { en: 'Lost passport: contact your embassy and file a police report at Tourist Police', ru: 'Потеря паспорта: свяжитесь с посольством и подайте заявление в турполицию' },
+  { en: 'Motorbike accident: do not move the injured, call 1669 immediately', ru: 'ДТП на мотобайке: не перемещайте пострадавших, сразу звоните 1669' },
+  { en: 'Sunstroke: move to shade, cool down with wet cloths, drink water, call ambulance if severe', ru: 'Солнечный удар: переместитесь в тень, охладите тело, пейте воду, при тяжёлом состоянии — скорая' },
+  { en: 'Drowning risk: swim only at beaches with lifeguards, avoid red flag areas', ru: 'Риск утонуть: купайтесь только на пляжах со спасателями, избегайте зон с красным флагом' },
+  { en: 'Food poisoning: drink plenty of water, take activated charcoal, visit hospital if symptoms persist', ru: 'Отравление: пейте много воды, примите активированный уголь, при ухудшении — в больницу' },
+  { en: 'Theft: file a report at Tourist Police for insurance claims', ru: 'Кража: подайте заявление в турполицию для страховой компании' },
+  { en: 'Rip current: do not swim against it, swim parallel to shore, then back to beach', ru: 'Отбойное течение: не плывите против него, плывите параллельно берегу, затем к пляжу' },
+  { en: 'Monkeys: do not feed or provoke, keep belongings secure, seek help if bitten', ru: 'Обезьяны: не кормите и не провоцируйте, держите вещи при себе, при укусе — к врачу' },
+  { en: 'Scooter breakdown: call your rental company or use Road Assistance in this app', ru: 'Поломка скутера: звоните в прокат или используйте Помощь на дороге в приложении' },
 ];
 
 export default function SOS() {
