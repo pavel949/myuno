@@ -1,16 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Home, Building2, Hotel, MapPin, BedDouble, Bath, Users, ArrowRight, Map, Filter } from 'lucide-react';
-import { AppLayout } from '@/components/layout/AppLayout';
+import { Home, BedDouble, Bath, Users, SlidersHorizontal } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { UnifiedCard } from '@/components/uno/UnifiedCard';
-import { BackButton } from '@/components/uno/BackButton';
-import { FilterChip } from '@/components/uno/FilterChip';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
-import { triggerRipple } from '@/hooks/useRipple';
+import { MiniAppLayout, MiniAppCategory } from '@/components/miniapp/MiniAppLayout';
+import { ItemCard } from '@/components/miniapp/ItemCard';
+import { FilterChip, FilterChipGroup } from '@/components/uno/FilterChip';
 import { UniversalFilter, ActiveFilters, FilterValues } from '@/components/filters/UniversalFilter';
 import { propertyFilterConfig } from '@/components/filters/PropertyFilters';
 
@@ -120,7 +115,7 @@ const demoProperties = [
   },
 ];
 
-const propertyTypes = [
+const propertyTypes: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '🏠' },
   { id: 'villa', labelEn: 'Villa', labelRu: 'Вилла', icon: '🏡' },
   { id: 'apartment', labelEn: 'Apartment', labelRu: 'Апартаменты', icon: '🏢' },
@@ -136,7 +131,7 @@ const listingTypes = [
 ];
 
 export default function PropertyIndex() {
-  const { t, language } = useLanguage();
+  const { language } = useLanguage();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('all');
@@ -166,8 +161,6 @@ export default function PropertyIndex() {
     });
   };
 
-  const handleClearAllFilters = () => setFilterValues({});
-
   const filteredProperties = useMemo(() => {
     return demoProperties.filter(prop => {
       const title = language === 'ru' ? prop.titleRu : prop.titleEn;
@@ -186,13 +179,7 @@ export default function PropertyIndex() {
     });
   }, [demoProperties, searchQuery, selectedType, selectedListing, filterValues, language]);
 
-  const formatPrice = (price: number, period: string) => {
-    const formatted = price >= 1000000 
-      ? `${(price / 1000000).toFixed(1)}M` 
-      : price >= 1000 
-        ? `${(price / 1000).toFixed(0)}K`
-        : price.toString();
-    
+  const formatPriceLabel = (period: string) => {
     const periodLabels: Record<string, { en: string; ru: string }> = {
       night: { en: '/night', ru: '/ночь' },
       week: { en: '/week', ru: '/нед' },
@@ -200,76 +187,54 @@ export default function PropertyIndex() {
       year: { en: '/year', ru: '/год' },
       total: { en: '', ru: '' },
     };
-    
-    return `฿${formatted}${periodLabels[period]?.[language] || ''}`;
+    return periodLabels[period]?.[language] || '';
   };
 
   return (
-    <AppLayout>
-      <div className="px-4 py-6 space-y-6">
-        {/* Back Button */}
-        <BackButton fallbackPath="/" />
-
-        {/* Hero Section */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500/20 via-teal-500/20 to-primary/20 p-6">
-          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800')] bg-cover bg-center opacity-10" />
-          <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-2">
-              <Home className="w-6 h-6 text-primary" />
-              <span className="text-sm font-medium text-primary">
-                {language === 'ru' ? 'Недвижимость' : 'Property'}
-              </span>
-            </div>
-            <h1 className="text-2xl font-display font-bold text-foreground mb-2">
-              {language === 'ru' 
-                ? 'Найдите идеальное жильё' 
-                : 'Find Your Perfect Home'}
-            </h1>
-            <p className="text-muted-foreground text-sm">
-              {language === 'ru'
-                ? 'Виллы, квартиры и кондо на Пхукете'
-                : 'Villas, apartments & condos in Phuket'}
-            </p>
-          </div>
-        </div>
-
-        {/* Search + Filters */}
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <Input
-              placeholder={language === 'ru' ? 'Поиск недвижимости...' : 'Search properties...'}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-12 bg-card border-border/50"
-            />
-          </div>
-          <UniversalFilter
-            config={propertyFilterConfig}
-            values={filterValues}
-            onChange={setFilterValues}
-          >
-            <Button variant="outline" size="icon" className="h-12 w-12 relative">
-              <Filter className="w-5 h-5" />
-              {activeFilterCount > 0 && (
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
-                  {activeFilterCount}
-                </Badge>
-              )}
-            </Button>
-          </UniversalFilter>
-        </div>
-
-        {/* Active Filters */}
-        <ActiveFilters
+    <MiniAppLayout
+      title={language === 'ru' ? 'Недвижимость' : 'Property'}
+      subtitle={language === 'ru' ? `${filteredProperties.length} объектов` : `${filteredProperties.length} properties`}
+      fallbackPath="/"
+      
+      heroIcon={Home}
+      heroTitle={language === 'ru' ? 'Найдите идеальное жильё' : 'Find Your Perfect Home'}
+      heroSubtitle={language === 'ru' ? 'Виллы, квартиры и кондо на Пхукете' : 'Villas, apartments & condos in Phuket'}
+      heroBackgroundImage="https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800"
+      heroGradientFrom="from-emerald-500/20"
+      heroGradientVia="via-teal-500/20"
+      heroGradientTo="to-primary/20"
+      
+      searchValue={searchQuery}
+      onSearchChange={setSearchQuery}
+      searchPlaceholder={language === 'ru' ? 'Поиск недвижимости...' : 'Search properties...'}
+      
+      categories={propertyTypes}
+      selectedCategory={selectedType}
+      onCategoryChange={setSelectedType}
+      
+      filterButton={
+        <UniversalFilter
           config={propertyFilterConfig}
           values={filterValues}
-          onRemove={handleRemoveFilter}
-          onClearAll={handleClearAllFilters}
-        />
-
-        {/* Listing type toggle */}
-        <div className="flex gap-2">
+          onChange={setFilterValues}
+          activeCount={activeFilterCount}
+        >
+          <Button variant="outline" size="icon" className="relative shrink-0 h-12 w-12">
+            <SlidersHorizontal className="w-5 h-5" />
+            {activeFilterCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
+                {activeFilterCount}
+              </span>
+            )}
+          </Button>
+        </UniversalFilter>
+      }
+      
+      showMapButton
+      mapPath="/property/map"
+      
+      quickActions={
+        <FilterChipGroup scrollable>
           {listingTypes.map((type) => (
             <FilterChip
               key={type.id}
@@ -278,145 +243,46 @@ export default function PropertyIndex() {
               onToggle={() => setSelectedListing(type.id)}
             />
           ))}
-        </div>
+        </FilterChipGroup>
+      }
+      
+      resultsCount={filteredProperties.length}
+      resultsLabel={language === 'ru' ? 'Доступные объекты' : 'Available Properties'}
+    >
+      {/* Active Filters */}
+      <ActiveFilters
+        config={propertyFilterConfig}
+        values={filterValues}
+        onRemove={handleRemoveFilter}
+        onClearAll={() => setFilterValues({})}
+        className="mb-4"
+      />
 
-        {/* Property type filters */}
-        <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-          {propertyTypes.map((type) => (
-            <FilterChip
-              key={type.id}
-              label={`${type.icon} ${language === 'ru' ? type.labelRu : type.labelEn}`}
-              isActive={selectedType === type.id}
-              onToggle={() => setSelectedType(type.id)}
-            />
-          ))}
-        </div>
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            { icon: '🏡', count: '150+', label: language === 'ru' ? 'Виллы' : 'Villas' },
-            { icon: '🏢', count: '280+', label: language === 'ru' ? 'Квартиры' : 'Apartments' },
-            { icon: '🏬', count: '120+', label: language === 'ru' ? 'Кондо' : 'Condos' },
-          ].map((stat, i) => (
-            <div
-              key={i}
-              className="flex flex-col items-center p-4 rounded-xl bg-card border border-border/50"
-            >
-              <span className="text-2xl mb-1">{stat.icon}</span>
-              <span className="text-lg font-bold text-primary">{stat.count}</span>
-              <span className="text-xs text-muted-foreground">{stat.label}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Properties List */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">
-              {language === 'ru' ? 'Доступные объекты' : 'Available Properties'}
-            </h2>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate('/property/map')}
-              className="flex items-center gap-2"
-            >
-              <Map className="w-4 h-4" />
-              {language === 'ru' ? 'На карте' : 'Map'}
-            </Button>
-          </div>
-          <p className="text-sm text-muted-foreground mb-4">
-            {filteredProperties.length} {language === 'ru' ? 'найдено' : 'found'}
-          </p>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {filteredProperties.map((property) => (
-              <div
-                key={property.id}
-                onClick={(e) => {
-                  triggerRipple(e);
-                  navigate(`/property/${property.id}`);
-                }}
-                className="relative overflow-hidden group cursor-pointer rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all hover:shadow-lg active:scale-[0.98]"
-              >
-                {/* Image */}
-                <div className="relative aspect-[16/10] overflow-hidden">
-                  <img
-                    src={property.image}
-                    alt={language === 'ru' ? property.titleRu : property.titleEn}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  {/* Price badge */}
-                  <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-primary text-primary-foreground text-sm font-semibold">
-                    {formatPrice(property.price, property.pricePeriod)}
-                  </div>
-                  {/* Badges */}
-                  <div className="absolute top-3 right-3 flex gap-2">
-                    {property.isFeatured && (
-                      <span className="px-2 py-1 rounded-full bg-gold/90 text-black text-xs font-medium">
-                        ⭐ Featured
-                      </span>
-                    )}
-                    {property.isNew && (
-                      <span className="px-2 py-1 rounded-full bg-success/90 text-white text-xs font-medium">
-                        New
-                      </span>
-                    )}
-                  </div>
-                  {/* Type badge */}
-                  <div className="absolute bottom-3 left-3 px-2 py-1 rounded-full bg-black/50 backdrop-blur-sm text-white text-xs">
-                    {language === 'ru' 
-                      ? propertyTypes.find(t => t.id === property.propertyType)?.labelRu
-                      : propertyTypes.find(t => t.id === property.propertyType)?.labelEn}
-                  </div>
-                </div>
-                
-                {/* Content */}
-                <div className="p-4">
-                  <h3 className="font-semibold text-foreground mb-2 line-clamp-1">
-                    {language === 'ru' ? property.titleRu : property.titleEn}
-                  </h3>
-                  
-                  {/* Location */}
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground mb-3">
-                    <MapPin className="w-4 h-4" />
-                    <span>{language === 'ru' ? property.locationRu : property.location}</span>
-                  </div>
-                  
-                  {/* Specs */}
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <BedDouble className="w-4 h-4" />
-                      <span>{property.bedrooms}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Bath className="w-4 h-4" />
-                      <span>{property.bathrooms}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span>{property.area} м²</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Users className="w-4 h-4" />
-                      <span>{property.maxGuests}</span>
-                    </div>
-                  </div>
-                  
-                  {/* Rating */}
-                  {property.rating > 0 && (
-                    <div className="flex items-center gap-1 mt-3 text-sm">
-                      <span className="text-yellow-500">★</span>
-                      <span className="font-medium">{property.rating}</span>
-                      <span className="text-muted-foreground">({property.reviewCount})</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* Results Grid */}
+      <div className="grid gap-4">
+        {filteredProperties.map((property) => (
+          <ItemCard
+            key={property.id}
+            title={language === 'ru' ? property.titleRu : property.titleEn}
+            image={property.image}
+            price={property.price}
+            priceLabel={formatPriceLabel(property.pricePeriod)}
+            rating={property.rating}
+            reviewCount={property.reviewCount}
+            location={language === 'ru' ? property.locationRu : property.location}
+            meta={[
+              { icon: BedDouble, value: property.bedrooms },
+              { icon: Bath, value: property.bathrooms },
+              { icon: Users, value: property.maxGuests },
+            ]}
+            tags={property.amenities.slice(0, 2)}
+            isVerified={property.isVerified}
+            isNew={property.isNew}
+            isFeatured={property.isFeatured}
+            onClick={() => navigate(`/property/${property.id}`)}
+          />
+        ))}
       </div>
-    </AppLayout>
+    </MiniAppLayout>
   );
 }
