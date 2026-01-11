@@ -4,7 +4,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { openWhatsApp, UNO_WHATSAPP } from '@/hooks/useChat';
 import type { Database } from '@/integrations/supabase/types';
+import { format } from 'date-fns';
 
 type BookingType = Database['public']['Enums']['booking_type'];
 type BookingStatus = Database['public']['Enums']['booking_status'];
@@ -52,6 +54,10 @@ export interface CreateBookingParams {
   addresses?: BookingAddress[];
   payment?: BookingPayment;
   metadata?: Record<string, unknown>;
+  // For WhatsApp message
+  serviceName?: string;
+  providerName?: string;
+  openWhatsAppOnCash?: boolean;
 }
 
 export interface BookingResult {
@@ -238,6 +244,48 @@ export function useBooking() {
         title: t('booking.success'),
         description: `#${booking.id.slice(0, 8).toUpperCase()}`,
       });
+
+      // If cash payment, open WhatsApp with booking details
+      if (params.payment?.payment_method === 'cash' && params.openWhatsAppOnCash !== false) {
+        const scheduledAtFormatted = params.scheduled_at 
+          ? format(new Date(params.scheduled_at), 'dd.MM.yyyy HH:mm')
+          : '';
+        
+        const primaryParticipant = params.participants?.find(p => p.is_primary) || params.participants?.[0];
+        const itemsList = params.items?.map(i => `• ${i.item_name}${i.quantity ? ` x${i.quantity}` : ''}`).join('\n') || '';
+        
+        const message = language === 'ru'
+          ? `🔔 *Новое бронирование UNO*
+
+📋 *Номер:* #${booking.id.slice(0, 8).toUpperCase()}
+📁 *Тип:* ${params.booking_type}
+${params.serviceName ? `🏷️ *Услуга:* ${params.serviceName}\n` : ''}${params.providerName ? `🏢 *Провайдер:* ${params.providerName}\n` : ''}
+📅 *Дата:* ${scheduledAtFormatted}
+💰 *Сумма:* ${params.currency || 'THB'} ${params.total_amount.toLocaleString()}
+💵 *Оплата:* Наличными
+
+${primaryParticipant ? `👤 *Контакт:* ${primaryParticipant.name}${primaryParticipant.phone ? ` | ${primaryParticipant.phone}` : ''}` : ''}
+${itemsList ? `\n📦 *Состав:*\n${itemsList}` : ''}
+${params.notes ? `\n📝 *Примечание:* ${params.notes}` : ''}
+
+Прошу подтвердить бронирование.`
+          : `🔔 *New UNO Booking*
+
+📋 *Number:* #${booking.id.slice(0, 8).toUpperCase()}
+📁 *Type:* ${params.booking_type}
+${params.serviceName ? `🏷️ *Service:* ${params.serviceName}\n` : ''}${params.providerName ? `🏢 *Provider:* ${params.providerName}\n` : ''}
+📅 *Date:* ${scheduledAtFormatted}
+💰 *Amount:* ${params.currency || 'THB'} ${params.total_amount.toLocaleString()}
+💵 *Payment:* Cash
+
+${primaryParticipant ? `👤 *Contact:* ${primaryParticipant.name}${primaryParticipant.phone ? ` | ${primaryParticipant.phone}` : ''}` : ''}
+${itemsList ? `\n📦 *Items:*\n${itemsList}` : ''}
+${params.notes ? `\n📝 *Note:* ${params.notes}` : ''}
+
+Please confirm my booking.`;
+
+        openWhatsApp(message);
+      }
 
       return { success: true, booking_id: booking.id };
 
