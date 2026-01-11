@@ -6,6 +6,7 @@ import { triggerRipple } from '@/hooks/useRipple';
 export interface QuickGridItem {
   icon: string;
   label: string;
+  sublabel?: string;
   path?: string;
   onClick?: () => void;
   price?: string;
@@ -47,8 +48,8 @@ export function MiniAppQuickGrid({
         >
           <span className="text-2xl mb-1">{item.icon}</span>
           <span className="text-xs font-medium text-center truncate w-full">{item.label}</span>
-          {item.price && (
-            <span className="text-xs text-primary mt-1">{item.price}</span>
+          {(item.sublabel || item.price) && (
+            <span className="text-xs text-primary mt-0.5">{item.sublabel || item.price}</span>
           )}
         </button>
       ))}

@@ -7,55 +7,45 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 export interface ItemCardMeta {
   icon: LucideIcon;
-  value: string | number;
+  value?: string | number;
   label?: string;
 }
 
 export interface ItemCardProps {
-  // Required
-  id: string;
   title: string;
+  subtitle?: string;
   image?: string;
   onClick?: () => void;
-  
-  // Price
   price?: number;
   originalPrice?: number;
   priceLabel?: string;
+  pricePrefix?: string;
+  priceUnit?: string;
   currency?: string;
-  
-  // Rating & reviews
   rating?: number;
   reviewCount?: number;
-  
-  // Location
   location?: string;
-  
-  // Meta info (duration, capacity, etc.)
   meta?: ItemCardMeta[];
-  
-  // Tags & badges
   tags?: string[];
   isVerified?: boolean;
   isNew?: boolean;
   isFeatured?: boolean;
   isAvailable?: boolean;
-  customBadge?: { label: string; className?: string };
-  
-  // Variant
+  badge?: { text: string; className?: string };
   variant?: 'horizontal' | 'vertical';
-  
   className?: string;
 }
 
 export function ItemCard({
-  id,
   title,
+  subtitle,
   image,
   onClick,
   price,
   originalPrice,
   priceLabel,
+  pricePrefix,
+  priceUnit,
   currency = '฿',
   rating,
   reviewCount,
@@ -66,7 +56,7 @@ export function ItemCard({
   isNew,
   isFeatured,
   isAvailable = true,
-  customBadge,
+  badge,
   variant = 'horizontal',
   className,
 }: ItemCardProps) {
@@ -116,9 +106,9 @@ export function ItemCard({
                 ⭐
               </span>
             )}
-            {customBadge && (
-              <span className={cn("px-1.5 py-0.5 text-[10px] font-medium rounded", customBadge.className || "bg-primary text-primary-foreground")}>
-                {customBadge.label}
+            {badge && (
+              <span className={cn("px-1.5 py-0.5 text-[10px] font-medium rounded", badge.className || "bg-primary text-primary-foreground")}>
+                {badge.text}
               </span>
             )}
           </div>
@@ -198,9 +188,9 @@ export function ItemCard({
                 ⭐
               </span>
             )}
-            {customBadge && (
-              <span className={cn("px-1.5 py-0.5 text-[10px] font-medium rounded", customBadge.className || "bg-primary text-primary-foreground")}>
-                {customBadge.label}
+            {badge && (
+              <span className={cn("px-1.5 py-0.5 text-[10px] font-medium rounded", badge.className || "bg-primary text-primary-foreground")}>
+                {badge.text}
               </span>
             )}
           </div>
@@ -238,7 +228,7 @@ export function ItemCard({
               {meta.map((item, i) => (
                 <span key={i} className="flex items-center gap-1">
                   <item.icon className="w-3.5 h-3.5" />
-                  {item.value}
+                  {item.value || item.label}
                 </span>
               ))}
               {rating !== undefined && (
@@ -267,9 +257,11 @@ export function ItemCard({
             {/* Price */}
             {price !== undefined && (
               <div className="text-right">
+                {pricePrefix && <span className="text-xs text-muted-foreground mr-1">{pricePrefix}</span>}
                 <span className="text-base font-bold text-primary">
                   {currency}{price.toLocaleString()}
                 </span>
+                {priceUnit && <span className="text-xs text-muted-foreground">{priceUnit}</span>}
                 {priceLabel && (
                   <span className="text-xs text-muted-foreground">
                     {priceLabel}

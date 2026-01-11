@@ -1,492 +1,224 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { AppLayout } from "@/components/layout/AppLayout";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { 
-  Search, 
-  Wrench, 
-  Zap, 
-  Droplets, 
-  Sparkles, 
-  Hammer, 
-  PaintBucket,
-  Wind,
-  Key,
-  Truck,
-  Star,
-  Clock,
-  MapPin,
-  CheckCircle2,
-  Map,
-  Filter
+  Wrench, Zap, Droplets, Sparkles, Hammer, PaintBucket,
+  Wind, Key, Truck, Star, Clock, MapPin, CheckCircle2
 } from "lucide-react";
-import { triggerRipple } from "@/hooks/useRipple";
-import { UniversalFilter, ActiveFilters, FilterValues } from "@/components/filters/UniversalFilter";
-import { servicesFilterConfig } from "@/components/filters/ServicesFilters";
+import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from "@/components/miniapp";
+import { servicesFilterConfig, FilterValues } from "@/components/filters";
+import { Badge } from "@/components/ui/badge";
 
-const ServicesIndex = () => {
+const categories = [
+  { id: "water-delivery", icon: '💧', name: 'Water', nameRu: 'Вода' },
+  { id: "plumbing", icon: '🔧', name: 'Plumbing', nameRu: 'Сантехник' },
+  { id: "electrical", icon: '⚡', name: 'Electrical', nameRu: 'Электрик' },
+  { id: "cleaning", icon: '✨', name: 'Cleaning', nameRu: 'Уборка' },
+  { id: "repair", icon: '🔨', name: 'Repair', nameRu: 'Ремонт' },
+  { id: "hvac", icon: '❄️', name: 'HVAC', nameRu: 'Кондиционеры' },
+  { id: "moving", icon: '🚚', name: 'Moving', nameRu: 'Переезд' },
+  { id: "road-assistance", icon: '🚗', name: 'Road Help', nameRu: 'Помощь на дороге' },
+];
+
+const providers = [
+  {
+    id: "srv-water-1",
+    name: "Aqua Delivery",
+    nameRu: "Аква Доставка",
+    category: "water-delivery",
+    rating: 4.9,
+    reviews: 234,
+    experience: "5 years",
+    experienceRu: "5 лет опыта",
+    price: 150,
+    location: "All Phuket",
+    locationRu: "Весь Пхукет",
+    available: true,
+    verified: true,
+    image: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=200",
+    services: ["19L water", "Same day", "Cooler rental"],
+    servicesRu: ["Вода 19л", "В день заказа", "Аренда кулера"],
+  },
+  {
+    id: "srv-1",
+    name: "Alex Masters",
+    nameRu: "Алексей Мастеров",
+    category: "plumbing",
+    rating: 4.9,
+    reviews: 156,
+    experience: "10 years",
+    experienceRu: "10 лет опыта",
+    price: 1500,
+    location: "Downtown",
+    locationRu: "Центр",
+    available: true,
+    verified: true,
+    image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200",
+    services: ["Installation", "Pipe repair", "Drain cleaning"],
+    servicesRu: ["Установка", "Ремонт труб", "Прочистка"],
+  },
+  {
+    id: "srv-2",
+    name: "Igor Electrician",
+    nameRu: "Игорь Электриков",
+    category: "electrical",
+    rating: 4.8,
+    reviews: 203,
+    experience: "15 years",
+    experienceRu: "15 лет опыта",
+    price: 2000,
+    location: "City-wide",
+    locationRu: "Весь город",
+    available: true,
+    verified: true,
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200",
+    services: ["Wiring", "Outlets", "Electrical installation"],
+    servicesRu: ["Проводка", "Розетки", "Электромонтаж"],
+  },
+  {
+    id: "srv-3",
+    name: "Clean House",
+    nameRu: "Чистый Дом",
+    category: "cleaning",
+    rating: 4.7,
+    reviews: 312,
+    experience: "Team of 20+",
+    experienceRu: "Команда 20+ человек",
+    price: 3000,
+    location: "City-wide",
+    locationRu: "Весь город",
+    available: true,
+    verified: true,
+    image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=200",
+    services: ["Deep cleaning", "Maintenance", "Windows"],
+    servicesRu: ["Генеральная уборка", "Поддерживающая", "Мытьё окон"],
+  },
+  {
+    id: "srv-6",
+    name: "Climate Service",
+    nameRu: "Климат Сервис",
+    category: "hvac",
+    rating: 4.8,
+    reviews: 145,
+    experience: "6 years",
+    experienceRu: "6 лет опыта",
+    price: 3500,
+    location: "All Phuket",
+    locationRu: "Весь Пхукет",
+    available: true,
+    verified: true,
+    image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=200",
+    services: ["AC install", "Cleaning", "Repair"],
+    servicesRu: ["Установка", "Чистка", "Ремонт"],
+  },
+  {
+    id: "srv-road-1",
+    name: "Phuket Road Help",
+    nameRu: "Phuket Road Help",
+    category: "road-assistance",
+    rating: 4.9,
+    reviews: 312,
+    experience: "24/7 service",
+    experienceRu: "24/7 сервис",
+    price: 500,
+    location: "All Phuket",
+    locationRu: "Весь Пхукет",
+    available: true,
+    verified: true,
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200",
+    services: ["Tow truck", "Jump start", "Tire change"],
+    servicesRu: ["Эвакуатор", "Запуск", "Замена колеса"],
+  },
+];
+
+const SERVICE_CATEGORIES: MiniAppCategory[] = [
+  { id: 'all', labelEn: 'All', labelRu: 'Все' },
+  ...categories.map(c => ({ id: c.id, labelEn: c.name, labelRu: c.nameRu })),
+];
+
+export default function ServicesIndex() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [filterValues, setFilterValues] = useState<FilterValues>({});
 
-  // Read category from URL params on mount
   useEffect(() => {
     const categoryParam = searchParams.get('category');
-    if (categoryParam) {
-      setSelectedCategory(categoryParam);
-    }
+    if (categoryParam) setSelectedCategory(categoryParam);
   }, [searchParams]);
-
-  const categories = [
-    { id: "water-delivery", icon: Droplets, name: language === "ru" ? "Доставка воды" : "Water Delivery", color: "from-cyan-500 to-blue-500" },
-    { id: "plumbing", icon: Wrench, name: language === "ru" ? "Сантехник" : "Plumbing", color: "from-blue-500 to-indigo-500" },
-    { id: "electrical", icon: Zap, name: language === "ru" ? "Электрик" : "Electrical", color: "from-yellow-500 to-orange-500" },
-    { id: "cleaning", icon: Sparkles, name: language === "ru" ? "Уборка / Прачечная" : "Cleaning / Laundry", color: "from-green-500 to-emerald-500" },
-    { id: "repair", icon: Hammer, name: language === "ru" ? "Ремонт" : "Repair", color: "from-stone-500 to-zinc-600" },
-    { id: "painting", icon: PaintBucket, name: language === "ru" ? "Покраска" : "Painting", color: "from-purple-500 to-violet-500" },
-    { id: "hvac", icon: Wind, name: language === "ru" ? "Кондиционеры" : "HVAC", color: "from-sky-500 to-blue-500" },
-    { id: "moving", icon: Truck, name: language === "ru" ? "Переезд" : "Moving", color: "from-rose-500 to-red-500" },
-    { id: "locksmith", icon: Key, name: language === "ru" ? "Слесарь" : "Locksmith", color: "from-slate-500 to-zinc-600" },
-    { id: "road-assistance", icon: Truck, name: language === "ru" ? "Помощь на дороге" : "Road Assistance", color: "from-amber-500 to-orange-500" },
-  ];
-
-  const providers = [
-    {
-      id: "srv-water-1",
-      name: language === "ru" ? "Аква Доставка" : "Aqua Delivery",
-      category: "water-delivery",
-      rating: 4.9,
-      reviews: 234,
-      experience: language === "ru" ? "5 лет на рынке" : "5 years in business",
-      price: 150,
-      currency: "฿",
-      priceUnit: language === "ru" ? "/бутыль" : "/bottle",
-      location: language === "ru" ? "Весь Пхукет" : "All Phuket",
-      available: true,
-      verified: true,
-      image: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=200&h=200&fit=crop",
-      services: language === "ru" 
-        ? ["Питьевая вода 19л", "Доставка в день заказа", "Аренда кулера"]
-        : ["19L drinking water", "Same day delivery", "Cooler rental"],
-    },
-    {
-      id: "srv-water-2",
-      name: language === "ru" ? "Чистая Вода" : "Pure Water",
-      category: "water-delivery",
-      rating: 4.8,
-      reviews: 189,
-      experience: language === "ru" ? "Бесплатная доставка" : "Free delivery",
-      price: 120,
-      currency: "฿",
-      priceUnit: language === "ru" ? "/бутыль" : "/bottle",
-      location: language === "ru" ? "Патонг, Карон, Ката" : "Patong, Karon, Kata",
-      available: true,
-      verified: true,
-      image: "https://images.unsplash.com/photo-1559839914-17aae19cec71?w=200&h=200&fit=crop",
-      services: language === "ru"
-        ? ["Артезианская вода", "Минеральная вода", "Подписка со скидкой"]
-        : ["Artesian water", "Mineral water", "Subscription discount"],
-    },
-    {
-      id: "srv-1",
-      name: language === "ru" ? "Алексей Мастеров" : "Alex Masters",
-      category: "plumbing",
-      rating: 4.9,
-      reviews: 156,
-      experience: language === "ru" ? "10 лет опыта" : "10 years exp.",
-      price: 1500,
-      currency: "฿",
-      priceUnit: language === "ru" ? "/час" : "/hour",
-      location: language === "ru" ? "Центр" : "Downtown",
-      available: true,
-      verified: true,
-      image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200&h=200&fit=crop",
-      services: language === "ru" 
-        ? ["Установка сантехники", "Ремонт труб", "Прочистка канализации"]
-        : ["Plumbing installation", "Pipe repair", "Drain cleaning"],
-    },
-    {
-      id: "srv-2",
-      name: language === "ru" ? "Игорь Электриков" : "Igor Electrician",
-      category: "electrical",
-      rating: 4.8,
-      reviews: 203,
-      experience: language === "ru" ? "15 лет опыта" : "15 years exp.",
-      price: 2000,
-      currency: "฿",
-      priceUnit: language === "ru" ? "/час" : "/hour",
-      location: language === "ru" ? "Весь город" : "City-wide",
-      available: true,
-      verified: true,
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop",
-      services: language === "ru"
-        ? ["Электромонтаж", "Замена проводки", "Установка розеток"]
-        : ["Electrical installation", "Rewiring", "Outlet installation"],
-    },
-    {
-      id: "srv-3",
-      name: language === "ru" ? "Чистый Дом" : "Clean House",
-      category: "cleaning",
-      rating: 4.7,
-      reviews: 312,
-      experience: language === "ru" ? "Команда из 20+ человек" : "Team of 20+ people",
-      price: 3000,
-      currency: "฿",
-      priceUnit: language === "ru" ? "/уборка" : "/cleaning",
-      location: language === "ru" ? "Весь город" : "City-wide",
-      available: true,
-      verified: true,
-      image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=200&h=200&fit=crop",
-      services: language === "ru"
-        ? ["Генеральная уборка", "Поддерживающая уборка", "Мытьё окон"]
-        : ["Deep cleaning", "Maintenance cleaning", "Window washing"],
-    },
-    {
-      id: "srv-4",
-      name: language === "ru" ? "Мастер Ремонта" : "Repair Master",
-      category: "repair",
-      rating: 4.6,
-      reviews: 89,
-      experience: language === "ru" ? "8 лет опыта" : "8 years exp.",
-      price: 1800,
-      currency: "฿",
-      priceUnit: language === "ru" ? "/час" : "/hour",
-      location: language === "ru" ? "Север города" : "North side",
-      available: false,
-      verified: true,
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop",
-      services: language === "ru"
-        ? ["Сборка мебели", "Мелкий ремонт", "Навеска полок"]
-        : ["Furniture assembly", "Minor repairs", "Shelf mounting"],
-    },
-    {
-      id: "srv-5",
-      name: language === "ru" ? "Краски и Стены" : "Paint & Walls",
-      category: "painting",
-      rating: 4.9,
-      reviews: 67,
-      experience: language === "ru" ? "12 лет опыта" : "12 years exp.",
-      price: 500,
-      currency: "฿",
-      priceUnit: language === "ru" ? "/м²" : "/m²",
-      location: language === "ru" ? "Юг города" : "South side",
-      available: true,
-      verified: false,
-      image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=200&fit=crop",
-      services: language === "ru"
-        ? ["Покраска стен", "Поклейка обоев", "Декоративная штукатурка"]
-        : ["Wall painting", "Wallpaper", "Decorative plaster"],
-    },
-    {
-      id: "srv-6",
-      name: language === "ru" ? "Климат Сервис" : "Climate Service",
-      category: "hvac",
-      rating: 4.8,
-      reviews: 145,
-      experience: language === "ru" ? "6 лет опыта" : "6 years exp.",
-      price: 3500,
-      currency: "฿",
-      priceUnit: language === "ru" ? "/установка" : "/installation",
-      location: language === "ru" ? "Весь Пхукет" : "All Phuket",
-      available: true,
-      verified: true,
-      image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=200&h=200&fit=crop",
-      services: language === "ru"
-        ? ["Установка кондиционеров", "Чистка и заправка", "Ремонт"]
-        : ["AC installation", "Cleaning & refill", "Repair"],
-    },
-    {
-      id: "srv-road-1",
-      name: language === "ru" ? "Phuket Road Help" : "Phuket Road Help",
-      category: "road-assistance",
-      rating: 4.9,
-      reviews: 312,
-      experience: language === "ru" ? "24/7 сервис" : "24/7 service",
-      price: 500,
-      currency: "฿",
-      priceUnit: language === "ru" ? "/вызов" : "/call",
-      location: language === "ru" ? "Весь Пхукет" : "All Phuket",
-      available: true,
-      verified: true,
-      image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=200&fit=crop",
-      services: language === "ru"
-        ? ["Эвакуатор", "Запуск аккумулятора", "Замена колеса"]
-        : ["Tow truck", "Jump start", "Tire change"],
-    },
-    {
-      id: "srv-road-2",
-      name: language === "ru" ? "Быстрая Помощь" : "Quick Assist",
-      category: "road-assistance",
-      rating: 4.7,
-      reviews: 189,
-      experience: language === "ru" ? "Приедем за 30 мин" : "30 min response",
-      price: 400,
-      currency: "฿",
-      priceUnit: language === "ru" ? "/вызов" : "/call",
-      location: language === "ru" ? "Патонг, Карон, Ката" : "Patong, Karon, Kata",
-      available: true,
-      verified: true,
-      image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=200&h=200&fit=crop",
-      services: language === "ru"
-        ? ["Подвоз топлива", "Вскрытие замков", "Буксировка"]
-        : ["Fuel delivery", "Lockout service", "Towing"],
-    },
-    {
-      id: "srv-road-3",
-      name: language === "ru" ? "АвтоСпас Пхукет" : "Auto Rescue Phuket",
-      category: "road-assistance",
-      rating: 4.8,
-      reviews: 156,
-      experience: language === "ru" ? "10 лет опыта" : "10 years exp.",
-      price: 600,
-      currency: "฿",
-      priceUnit: language === "ru" ? "/вызов" : "/call",
-      location: language === "ru" ? "Весь Пхукет" : "All Phuket",
-      available: false,
-      verified: true,
-      image: "https://images.unsplash.com/photo-1486006920555-c77dcf18193c?w=200&h=200&fit=crop",
-      services: language === "ru"
-        ? ["Эвакуация мотоциклов", "Ремонт на месте", "Техпомощь"]
-        : ["Motorcycle towing", "On-site repair", "Technical help"],
-    },
-  ];
-
-  const activeFilterCount = useMemo(() => {
-    let count = 0;
-    Object.entries(filterValues).forEach(([key, value]) => {
-      if (key === 'priceLevel' && value) count++;
-      else if (Array.isArray(value)) count += value.length;
-      else if (value) count++;
-    });
-    return count;
-  }, [filterValues]);
-
-  const handleRemoveFilter = (sectionId: string, optionId?: string) => {
-    setFilterValues(prev => {
-      const newValues = { ...prev };
-      if (optionId && Array.isArray(newValues[sectionId])) {
-        newValues[sectionId] = (newValues[sectionId] as string[]).filter(id => id !== optionId);
-        if ((newValues[sectionId] as string[]).length === 0) delete newValues[sectionId];
-      } else {
-        delete newValues[sectionId];
-      }
-      return newValues;
-    });
-  };
-
-  const handleClearAllFilters = () => setFilterValues({});
 
   const filteredProviders = useMemo(() => {
     return providers.filter((provider) => {
-      const matchesSearch = provider.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        provider.services.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()));
-      const matchesCategory = !selectedCategory || provider.category === selectedCategory;
+      const name = language === 'ru' ? provider.nameRu : provider.name;
+      const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = selectedCategory === 'all' || provider.category === selectedCategory;
       
-      // Features filter
       const features = filterValues.features as string[] || [];
       if (features.includes('verified') && !provider.verified) return false;
       if (features.includes('same-day') && !provider.available) return false;
       
       return matchesSearch && matchesCategory;
     });
-  }, [providers, searchQuery, selectedCategory, filterValues]);
+  }, [providers, searchQuery, selectedCategory, filterValues, language]);
+
+  const quickItems: QuickGridItem[] = categories.slice(0, 4).map(c => ({
+    icon: c.icon,
+    label: language === 'ru' ? c.nameRu : c.name,
+    onClick: () => setSelectedCategory(c.id),
+  }));
 
   return (
-    <AppLayout title={language === "ru" ? "Домашние услуги" : "Home Services"} showBottomNav={false}>
-      <div className="p-4 space-y-6 pb-24">
-        {/* Search + Map + Filter Buttons */}
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
-            <Input
-              placeholder={language === "ru" ? "Найти услугу или мастера..." : "Find service or professional..."}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-12 rounded-xl bg-card border-border"
-            />
-          </div>
-          <UniversalFilter
-            config={servicesFilterConfig}
-            values={filterValues}
-            onChange={setFilterValues}
-          >
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-12 w-12 rounded-xl relative"
-            >
-              <Filter className="w-5 h-5" />
-              {activeFilterCount > 0 && (
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
-                  {activeFilterCount}
-                </Badge>
-              )}
-            </Button>
-          </UniversalFilter>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-12 w-12 rounded-xl"
-            onClick={() => navigate("/services/map")}
-          >
-            <Map className="w-5 h-5" />
-          </Button>
-        </div>
-
-        {/* Active Filters */}
-        <ActiveFilters
-          config={servicesFilterConfig}
-          values={filterValues}
-          onRemove={handleRemoveFilter}
-          onClearAll={handleClearAllFilters}
-        />
-
-        {/* Categories */}
-        <div>
-          <h2 className="text-lg font-semibold mb-3">
-            {language === "ru" ? "Категории" : "Categories"}
-          </h2>
-          <div className="grid grid-cols-4 gap-3">
-            {categories.map((category) => {
-              const Icon = category.icon;
-              const isSelected = selectedCategory === category.id;
-              return (
-                <button
-                  key={category.id}
-                  onClick={(e) => {
-                    triggerRipple(e);
-                    setSelectedCategory(isSelected ? null : category.id);
-                  }}
-                  className={`relative overflow-hidden flex flex-col items-center p-3 rounded-xl transition-all active:scale-95 ${
-                    isSelected 
-                      ? `bg-gradient-to-br ${category.color} text-white shadow-lg` 
-                      : "bg-card border border-border hover:border-primary/50"
-                  }`}
-                >
-                  <Icon className="w-6 h-6 mb-1" />
-                  <span className="text-xs font-medium text-center leading-tight truncate w-full">
-                    {category.name}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Available Providers */}
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold">
-              {language === "ru" ? "Доступные мастера" : "Available Professionals"}
-            </h2>
-            <span className="text-sm text-muted-foreground">
-              {filteredProviders.length} {language === "ru" ? "найдено" : "found"}
-            </span>
-          </div>
-          
-          <div className="space-y-3">
-            {filteredProviders.map((provider) => (
-              <div
-                key={provider.id}
-                onClick={(e) => {
-                  triggerRipple(e);
-                  navigate(`/services/provider/${provider.id}?category=${provider.category}&name=${encodeURIComponent(provider.name)}`);
-                }}
-                className="relative overflow-hidden bg-card border border-border rounded-xl p-4 cursor-pointer hover:border-primary/50 transition-all active:scale-[0.98]"
-              >
-                <div className="flex gap-4">
-                  {/* Avatar */}
-                  <div className="relative">
-                    <img
-                      src={provider.image}
-                      alt={provider.name}
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
-                    {provider.available && (
-                      <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-card flex items-center justify-center">
-                        <div className="w-2 h-2 bg-white rounded-full" />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold truncate">{provider.name}</h3>
-                        {provider.verified && (
-                          <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
-                        )}
-                      </div>
-                      <Badge variant={provider.available ? "default" : "secondary"} className="flex-shrink-0">
-                        {provider.available 
-                          ? (language === "ru" ? "Доступен" : "Available")
-                          : (language === "ru" ? "Занят" : "Busy")
-                        }
-                      </Badge>
-                    </div>
-
-                    <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span>{provider.rating}</span>
-                        <span>({provider.reviews})</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        <span>{provider.experience}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-1 mt-1 text-sm text-muted-foreground">
-                      <MapPin className="w-3 h-3" />
-                      <span>{provider.location}</span>
-                    </div>
-
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {provider.services.slice(0, 2).map((service, idx) => (
-                        <Badge key={idx} variant="outline" className="text-xs">
-                          {service}
-                        </Badge>
-                      ))}
-                      {provider.services.length > 2 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{provider.services.length - 2}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Price */}
-                <div className="absolute top-4 right-4">
-                  <span className="text-lg font-bold text-primary">
-                    {provider.currency}{provider.price}
-                  </span>
-                  <span className="text-xs text-muted-foreground">{provider.priceUnit}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {filteredProviders.length === 0 && (
-            <div className="text-center py-12">
-              <Wrench className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
-              <p className="text-muted-foreground">
-                {language === "ru" ? "Мастера не найдены" : "No professionals found"}
-              </p>
-            </div>
-          )}
-        </div>
+    <MiniAppLayout
+      title={language === "ru" ? "Домашние услуги" : "Home Services"}
+      subtitle={language === 'ru' ? `${filteredProviders.length} мастеров` : `${filteredProviders.length} professionals`}
+      heroIcon={Wrench}
+      heroTitle={language === 'ru' ? 'Мастера на все руки' : 'Professional Services'}
+      heroSubtitle={language === 'ru' ? 'Сантехники, электрики, уборка и многое другое' : 'Plumbers, electricians, cleaning and more'}
+      heroImage="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800"
+      heroGradient={{ from: 'from-amber-500/20', via: 'via-orange-500/20', to: 'to-primary/20' }}
+      searchValue={searchQuery}
+      onSearchChange={setSearchQuery}
+      searchPlaceholder={language === "ru" ? "Найти услугу или мастера..." : "Find service or professional..."}
+      categories={SERVICE_CATEGORIES}
+      selectedCategory={selectedCategory}
+      onCategoryChange={setSelectedCategory}
+      filterConfig={servicesFilterConfig}
+      filterValues={filterValues}
+      onFilterChange={setFilterValues}
+      showMapButton
+      onMapClick={() => navigate("/services/map")}
+      isLoading={false}
+      isEmpty={filteredProviders.length === 0}
+      emptyIcon={Wrench}
+      emptyText={language === 'ru' ? 'Мастера не найдены' : 'No professionals found'}
+    >
+      <MiniAppQuickGrid items={quickItems} columns={4} className="mb-6" />
+      
+      <div className="grid gap-4">
+        {filteredProviders.map((provider) => (
+          <ItemCard
+            key={provider.id}
+            image={provider.image}
+            title={language === 'ru' ? provider.nameRu : provider.name}
+            subtitle={language === 'ru' ? provider.experienceRu : provider.experience}
+            rating={provider.rating}
+            reviewCount={provider.reviews}
+            price={provider.price}
+            priceUnit={language === 'ru' ? '/час' : '/hour'}
+            currency="฿"
+            location={language === 'ru' ? provider.locationRu : provider.location}
+            isVerified={provider.verified}
+            badge={provider.available 
+              ? { text: language === 'ru' ? 'Доступен' : 'Available', className: 'bg-green-500 text-white' }
+              : { text: language === 'ru' ? 'Занят' : 'Busy', className: 'bg-muted text-muted-foreground' }
+            }
+            tags={(language === 'ru' ? provider.servicesRu : provider.services).slice(0, 2)}
+            onClick={() => navigate(`/services/provider/${provider.id}?category=${provider.category}`)}
+          />
+        ))}
       </div>
-    </AppLayout>
+    </MiniAppLayout>
   );
-};
-
-export default ServicesIndex;
+}
