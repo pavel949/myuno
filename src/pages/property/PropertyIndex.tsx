@@ -244,7 +244,6 @@ export default function PropertyIndex() {
             config={propertyFilterConfig}
             values={filterValues}
             onChange={setFilterValues}
-            language={language as 'en' | 'ru'}
           >
             <Button variant="outline" size="icon" className="h-12 w-12 relative">
               <Filter className="w-5 h-5" />
@@ -263,7 +262,6 @@ export default function PropertyIndex() {
           values={filterValues}
           onRemove={handleRemoveFilter}
           onClearAll={handleClearAllFilters}
-          language={language as 'en' | 'ru'}
         />
 
         {/* Listing type toggle */}

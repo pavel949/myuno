@@ -315,7 +315,6 @@ const ServicesIndex = () => {
             config={servicesFilterConfig}
             values={filterValues}
             onChange={setFilterValues}
-            language={language as 'en' | 'ru'}
           >
             <Button
               variant="outline"
@@ -346,7 +345,6 @@ const ServicesIndex = () => {
           values={filterValues}
           onRemove={handleRemoveFilter}
           onClearAll={handleClearAllFilters}
-          language={language as 'en' | 'ru'}
         />
 
         {/* Categories */}
