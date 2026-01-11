@@ -24,20 +24,22 @@ const GlobalSearchModal = lazy(() => import('@/components/search/GlobalSearchMod
 const ForYouSection = lazy(() => import('@/components/recommendations/ForYouSection').then(m => ({ default: m.ForYouSection })));
 const PersonalizedOffersSection = lazy(() => import('@/components/notifications/PersonalizedOffersSection').then(m => ({ default: m.PersonalizedOffersSection })));
 
-// All service categories in a single grid
+// All service categories - prioritized by demand
 const allCategories = [
-  { id: 'real-estate', icon: Home, path: '/property', color: 'from-teal-500 to-emerald-500' },
+  // Most popular first
   { id: 'transport', icon: Car, path: '/transport', color: 'from-indigo-500 to-blue-500' },
-  { id: 'restaurants', icon: UtensilsCrossed, path: '/restaurants', color: 'from-orange-500 to-red-500' },
-  { id: 'tours', icon: Compass, path: '/tours', color: 'from-amber-500 to-orange-500' },
+  { id: 'flowers', icon: Flower2, path: '/flowers', color: 'from-rose-500 to-pink-500' },
   { id: 'water', icon: Waves, path: '/water', color: 'from-cyan-500 to-blue-500' },
+  { id: 'real-estate', icon: Home, path: '/property', color: 'from-teal-500 to-emerald-500' },
+  { id: 'restaurants', icon: UtensilsCrossed, path: '/restaurants', color: 'from-orange-500 to-red-500' },
+  // Secondary services
+  { id: 'tours', icon: Compass, path: '/tours', color: 'from-amber-500 to-orange-500' },
   { id: 'beauty-spa', icon: Sparkles, path: '/beauty', color: 'from-pink-500 to-purple-500' },
   { id: 'medical', icon: Stethoscope, path: '/medical', color: 'from-emerald-500 to-green-500' },
   { id: 'legal', icon: Scale, path: '/legal', color: 'from-indigo-500 to-blue-600' },
   { id: 'insurance', icon: Shield, path: '/insurance', color: 'from-violet-500 to-purple-500' },
   { id: 'fitness', icon: Dumbbell, path: '/fitness', color: 'from-blue-500 to-cyan-500' },
   { id: 'market', icon: ShoppingBag, path: '/market', color: 'from-amber-500 to-yellow-500' },
-  { id: 'flowers', icon: Flower2, path: '/flowers', color: 'from-rose-500 to-pink-500' },
   { id: 'kids-education', icon: GraduationCap, path: '/education', color: 'from-yellow-500 to-orange-500' },
   { id: 'events', icon: Ticket, path: '/events', color: 'from-purple-500 to-pink-500' },
   { id: 'services', icon: Wrench, path: '/services', color: 'from-slate-500 to-zinc-600' },
