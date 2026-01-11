@@ -203,6 +203,13 @@ export const useServices = (options: UseServicesOptions = {}) => {
       if (!data || data.length === 0) {
         let filteredDemo = [...demoServices];
         
+        // Filter by category slug instead of category_id for demo data
+        if (options.categoryId) {
+          filteredDemo = filteredDemo.filter(s => 
+            s.category?.slug === options.categoryId || s.category_id === options.categoryId
+          );
+        }
+        
         if (options.searchQuery) {
           const q = options.searchQuery.toLowerCase();
           filteredDemo = filteredDemo.filter(s => 
@@ -253,14 +260,35 @@ export const useCategories = () => {
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const { data, error } = await supabase
-          .from('categories')
-          .select('*')
-          .eq('is_active', true)
-          .order('sort_order');
+        // First get category IDs that have services
+        const { data: serviceCategories } = await supabase
+          .from('services')
+          .select('category_id')
+          .eq('is_active', true);
+        
+        const categoryIds = [...new Set((serviceCategories || []).map(s => s.category_id).filter(Boolean))];
+        
+        if (categoryIds.length === 0) {
+          // Fallback to main categories if no services exist
+          const { data } = await supabase
+            .from('categories')
+            .select('*')
+            .eq('is_active', true)
+            .in('slug', ['beauty-spa', 'restaurants', 'fitness', 'medical', 'transport', 'services'])
+            .order('sort_order');
+          setCategories(data || []);
+        } else {
+          // Get categories that have services
+          const { data, error } = await supabase
+            .from('categories')
+            .select('id, name_en, name_ru, slug, icon, mini_app_type')
+            .eq('is_active', true)
+            .in('id', categoryIds)
+            .order('sort_order');
 
-        if (error) throw error;
-        setCategories(data || []);
+          if (error) throw error;
+          setCategories(data || []);
+        }
       } catch (err) {
         console.error('Error loading categories:', err);
       } finally {
