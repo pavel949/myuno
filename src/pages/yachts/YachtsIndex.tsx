@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Anchor, Star, Users, Clock, MapPin, Waves, Shield, ChevronRight } from 'lucide-react';
+import { Anchor, Star, Users, Clock, MapPin, Waves, Shield, ChevronRight, SlidersHorizontal } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { FilterChip } from '@/components/uno/FilterChip';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { UniversalFilter, ActiveFilters, yachtFilterConfig, FilterValues } from '@/components/filters';
 
 const YACHT_TYPES = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -141,10 +143,46 @@ export default function YachtsIndex() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState('all');
+  const [filterValues, setFilterValues] = useState<FilterValues>({});
 
-  const filteredYachts = demoYachts.filter(y => 
-    selectedType === 'all' || y.type === selectedType
-  );
+  const activeFilterCount = useMemo(() => {
+    return Object.values(filterValues).filter(v => 
+      Array.isArray(v) ? v.length > 0 : v !== undefined && v !== null
+    ).length;
+  }, [filterValues]);
+
+  const handleRemoveFilter = (sectionId: string, optionId?: string) => {
+    setFilterValues(prev => {
+      const newValues = { ...prev };
+      if (optionId && Array.isArray(newValues[sectionId])) {
+        newValues[sectionId] = (newValues[sectionId] as string[]).filter(id => id !== optionId);
+        if ((newValues[sectionId] as string[]).length === 0) delete newValues[sectionId];
+      } else {
+        delete newValues[sectionId];
+      }
+      return newValues;
+    });
+  };
+
+  const handleClearAllFilters = () => setFilterValues({});
+
+  const filteredYachts = demoYachts.filter(y => {
+    if (selectedType !== 'all' && y.type !== selectedType) return false;
+    
+    // Capacity filter
+    if (filterValues.capacity) {
+      const cap = y.capacity;
+      const capMap: Record<string, boolean> = {
+        '2-6': cap >= 2 && cap <= 6,
+        '7-12': cap >= 7 && cap <= 12,
+        '13-20': cap >= 13 && cap <= 20,
+        '20+': cap > 20,
+      };
+      if (!capMap[filterValues.capacity as string]) return false;
+    }
+    
+    return true;
+  });
 
   return (
     <AppLayout>
@@ -206,6 +244,29 @@ export default function YachtsIndex() {
           </div>
         </div>
 
+        {/* Filter Header */}
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-sm text-muted-foreground">
+            {language === 'ru' ? 'Тип яхты' : 'Yacht Type'}
+          </span>
+          <UniversalFilter
+            config={yachtFilterConfig}
+            values={filterValues}
+            onChange={setFilterValues}
+            activeCount={activeFilterCount}
+          >
+            <Button variant="outline" size="sm" className="relative gap-2">
+              <SlidersHorizontal className="w-4 h-4" />
+              {language === 'ru' ? 'Ещё' : 'More'}
+              {activeFilterCount > 0 && (
+                <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
+                  {activeFilterCount}
+                </span>
+              )}
+            </Button>
+          </UniversalFilter>
+        </div>
+
         {/* Filters */}
         <div className="flex gap-2 overflow-x-auto pb-3 -mx-4 px-4 scrollbar-hide">
           {YACHT_TYPES.map((type) => (
@@ -218,6 +279,14 @@ export default function YachtsIndex() {
           ))}
         </div>
 
+        {/* Active Filters */}
+        <ActiveFilters
+          config={yachtFilterConfig}
+          values={filterValues}
+          onRemove={handleRemoveFilter}
+          onClearAll={handleClearAllFilters}
+        />
+
         {/* Results */}
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">
@@ -227,8 +296,6 @@ export default function YachtsIndex() {
             {filteredYachts.length} {language === 'ru' ? 'найдено' : 'found'}
           </span>
         </div>
-
-        {/* Yachts Grid */}
         <div className="grid gap-4">
           {filteredYachts.map((yacht) => (
             <div

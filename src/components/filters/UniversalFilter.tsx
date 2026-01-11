@@ -41,6 +41,7 @@ export interface UniversalFilterProps {
   onChange: (values: FilterValues) => void;
   activeCount?: number;
   className?: string;
+  children?: React.ReactNode; // Custom trigger
 }
 
 // ====== PRICE LEVEL COMPONENT ======
@@ -182,7 +183,8 @@ export function UniversalFilter({
   values, 
   onChange,
   activeCount = 0,
-  className 
+  className,
+  children
 }: UniversalFilterProps) {
   const { language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
@@ -225,22 +227,27 @@ export function UniversalFilter({
     return count;
   }, [localValues]);
 
+  // Default trigger if children not provided
+  const trigger = children || (
+    <Button
+      variant="outline"
+      size="sm"
+      className={cn("gap-2", className)}
+    >
+      <Filter className="w-4 h-4" />
+      {language === 'ru' ? 'Фильтры' : 'Filters'}
+      {activeCount > 0 && (
+        <Badge className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
+          {activeCount}
+        </Badge>
+      )}
+    </Button>
+  );
+
   return (
     <Sheet open={isOpen} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className={cn("gap-2", className)}
-        >
-          <Filter className="w-4 h-4" />
-          {language === 'ru' ? 'Фильтры' : 'Filters'}
-          {activeCount > 0 && (
-            <Badge className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
-              {activeCount}
-            </Badge>
-          )}
-        </Button>
+        {trigger}
       </SheetTrigger>
       
       <SheetContent side="bottom" className="h-[85vh] rounded-t-3xl">
