@@ -994,18 +994,29 @@ export type Database = {
           area_sqm: number | null
           bathrooms: number | null
           bedrooms: number | null
+          cancellation_policy: string | null
+          check_in_time: string | null
+          check_out_time: string | null
           cover_image: string | null
           created_at: string
+          deposit_amount: number | null
+          deposit_currency: string | null
           description: string | null
           description_ru: string | null
           district: string | null
+          house_rules: string | null
+          house_rules_ru: string | null
           id: string
           images: string[] | null
+          instant_booking: boolean | null
           is_rented: boolean | null
           management_type: string | null
           marketplace_property_id: string | null
+          max_guests: number | null
+          min_stay_nights: number | null
           notes: string | null
           owner_id: string
+          price_per_night: number | null
           property_type: string
           rental_platform: string | null
           status: string | null
@@ -1020,18 +1031,29 @@ export type Database = {
           area_sqm?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
+          cancellation_policy?: string | null
+          check_in_time?: string | null
+          check_out_time?: string | null
           cover_image?: string | null
           created_at?: string
+          deposit_amount?: number | null
+          deposit_currency?: string | null
           description?: string | null
           description_ru?: string | null
           district?: string | null
+          house_rules?: string | null
+          house_rules_ru?: string | null
           id?: string
           images?: string[] | null
+          instant_booking?: boolean | null
           is_rented?: boolean | null
           management_type?: string | null
           marketplace_property_id?: string | null
+          max_guests?: number | null
+          min_stay_nights?: number | null
           notes?: string | null
           owner_id: string
+          price_per_night?: number | null
           property_type?: string
           rental_platform?: string | null
           status?: string | null
@@ -1046,18 +1068,29 @@ export type Database = {
           area_sqm?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
+          cancellation_policy?: string | null
+          check_in_time?: string | null
+          check_out_time?: string | null
           cover_image?: string | null
           created_at?: string
+          deposit_amount?: number | null
+          deposit_currency?: string | null
           description?: string | null
           description_ru?: string | null
           district?: string | null
+          house_rules?: string | null
+          house_rules_ru?: string | null
           id?: string
           images?: string[] | null
+          instant_booking?: boolean | null
           is_rented?: boolean | null
           management_type?: string | null
           marketplace_property_id?: string | null
+          max_guests?: number | null
+          min_stay_nights?: number | null
           notes?: string | null
           owner_id?: string
+          price_per_night?: number | null
           property_type?: string
           rental_platform?: string | null
           status?: string | null
@@ -1563,6 +1596,7 @@ export type Database = {
           guest_phone: string | null
           guests_count: number | null
           id: string
+          marketplace_booking_id: string | null
           notes: string | null
           owner_id: string
           property_id: string
@@ -1582,6 +1616,7 @@ export type Database = {
           guest_phone?: string | null
           guests_count?: number | null
           id?: string
+          marketplace_booking_id?: string | null
           notes?: string | null
           owner_id: string
           property_id: string
@@ -1601,6 +1636,7 @@ export type Database = {
           guest_phone?: string | null
           guests_count?: number | null
           id?: string
+          marketplace_booking_id?: string | null
           notes?: string | null
           owner_id?: string
           property_id?: string
@@ -1610,6 +1646,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "property_bookings_marketplace_booking_id_fkey"
+            columns: ["marketplace_booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "property_bookings_property_id_fkey"
             columns: ["property_id"]
@@ -3809,6 +3852,14 @@ export type Database = {
     Functions: {
       apply_referral_code: {
         Args: { p_code: string; p_referred_id: string }
+        Returns: boolean
+      }
+      check_property_availability: {
+        Args: {
+          p_check_in: string
+          p_check_out: string
+          p_marketplace_property_id: string
+        }
         Returns: boolean
       }
       generate_referral_code: { Args: { p_user_id: string }; Returns: string }

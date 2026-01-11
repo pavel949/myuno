@@ -173,6 +173,7 @@ import OwnerSupportChat from '@/pages/owner/OwnerSupportChat';
 import AddProperty from '@/pages/owner/AddProperty';
 import ServiceRequest from '@/pages/owner/ServiceRequest';
 import InspectionRequest from '@/pages/owner/InspectionRequest';
+import OwnerRentalTerms from '@/pages/owner/OwnerRentalTerms';
 
 export const AnimatedRoutes: React.FC = () => {
   const location = useLocation();
@@ -343,6 +344,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/owner/properties" element={<PageTransition><OwnerProperties /></PageTransition>} />
         <Route path="/owner/properties/new" element={<PageTransition><AddProperty /></PageTransition>} />
         <Route path="/owner/properties/:id" element={<PageTransition><OwnerPropertyDetail /></PageTransition>} />
+        <Route path="/owner/properties/:id/terms" element={<PageTransition><OwnerRentalTerms /></PageTransition>} />
         <Route path="/owner/calendar" element={<PageTransition><OwnerCalendar /></PageTransition>} />
         <Route path="/owner/financials" element={<PageTransition><OwnerFinancials /></PageTransition>} />
         <Route path="/owner/financials/new" element={<PageTransition><OwnerFinancialForm /></PageTransition>} />

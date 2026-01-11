@@ -28,6 +28,18 @@ export interface OwnerProperty {
   created_at: string;
   updated_at: string;
   marketplace_property_id?: string;
+  // Rental terms
+  price_per_night?: number;
+  min_stay_nights?: number;
+  max_guests?: number;
+  deposit_amount?: number;
+  deposit_currency?: string;
+  check_in_time?: string;
+  check_out_time?: string;
+  house_rules?: string;
+  house_rules_ru?: string;
+  cancellation_policy?: string;
+  instant_booking?: boolean;
 }
 
 export interface PropertyInspection {
