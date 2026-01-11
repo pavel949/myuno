@@ -155,6 +155,9 @@ import BecomePartnerPage from '@/pages/info/BecomePartnerPage';
 
 // Admin pages
 import PartnerApplicationsAdmin from '@/pages/admin/PartnerApplicationsAdmin';
+import AdminDashboard from '@/pages/admin/AdminDashboard';
+import AdminProviders from '@/pages/admin/AdminProviders';
+import AdminServices from '@/pages/admin/AdminServices';
 
 // Vendor pages
 import VendorDashboard from '@/pages/vendor/VendorDashboard';
@@ -340,6 +343,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/view-history" element={<PageTransition><ViewHistory /></PageTransition>} />
         
         {/* Admin Routes */}
+        <Route path="/admin" element={<PageTransition><AdminDashboard /></PageTransition>} />
+        <Route path="/admin/providers" element={<PageTransition><AdminProviders /></PageTransition>} />
+        <Route path="/admin/services" element={<PageTransition><AdminServices /></PageTransition>} />
         <Route path="/admin/partner-applications" element={<PageTransition><PartnerApplicationsAdmin /></PageTransition>} />
         
         {/* Vendor Routes */}
