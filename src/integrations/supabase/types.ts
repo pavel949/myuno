@@ -1568,6 +1568,229 @@ export type Database = {
         }
         Relationships: []
       }
+      restaurant_menu_categories: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean | null
+          name_en: string
+          name_ru: string
+          restaurant_id: string
+          sort_order: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          name_en: string
+          name_ru: string
+          restaurant_id: string
+          sort_order?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          name_en?: string
+          name_ru?: string
+          restaurant_id?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_menu_categories_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      restaurant_menu_items: {
+        Row: {
+          calories: number | null
+          category_id: string | null
+          created_at: string
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          id: string
+          image: string | null
+          is_active: boolean | null
+          is_popular: boolean | null
+          is_spicy: boolean | null
+          is_vegetarian: boolean | null
+          name_en: string
+          name_ru: string
+          prep_time_minutes: number | null
+          price: number
+          restaurant_id: string
+          updated_at: string
+        }
+        Insert: {
+          calories?: number | null
+          category_id?: string | null
+          created_at?: string
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          id?: string
+          image?: string | null
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          is_spicy?: boolean | null
+          is_vegetarian?: boolean | null
+          name_en: string
+          name_ru: string
+          prep_time_minutes?: number | null
+          price: number
+          restaurant_id: string
+          updated_at?: string
+        }
+        Update: {
+          calories?: number | null
+          category_id?: string | null
+          created_at?: string
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          id?: string
+          image?: string | null
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          is_spicy?: boolean | null
+          is_vegetarian?: boolean | null
+          name_en?: string
+          name_ru?: string
+          prep_time_minutes?: number | null
+          price?: number
+          restaurant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_menu_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "restaurant_menu_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restaurant_menu_items_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      restaurants: {
+        Row: {
+          address: string | null
+          cover_image: string | null
+          created_at: string
+          cuisine: string
+          delivery_available: boolean | null
+          delivery_fee: number | null
+          delivery_time: string | null
+          description_en: string | null
+          description_ru: string | null
+          district: string | null
+          email: string | null
+          features: string[] | null
+          id: string
+          images: string[] | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          lat: number | null
+          lng: number | null
+          min_order_amount: number | null
+          name_en: string
+          name_ru: string
+          phone: string | null
+          price_range: number | null
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          updated_at: string
+          website: string | null
+          working_hours: Json | null
+        }
+        Insert: {
+          address?: string | null
+          cover_image?: string | null
+          created_at?: string
+          cuisine?: string
+          delivery_available?: boolean | null
+          delivery_fee?: number | null
+          delivery_time?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          features?: string[] | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          min_order_amount?: number | null
+          name_en: string
+          name_ru: string
+          phone?: string | null
+          price_range?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Update: {
+          address?: string | null
+          cover_image?: string | null
+          created_at?: string
+          cuisine?: string
+          delivery_available?: boolean | null
+          delivery_fee?: number | null
+          delivery_time?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          features?: string[] | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          min_order_amount?: number | null
+          name_en?: string
+          name_ru?: string
+          phone?: string | null
+          price_range?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurants_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       review_helpful: {
         Row: {
           created_at: string
@@ -1934,6 +2157,108 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      transport_destinations: {
+        Row: {
+          base_price: number
+          created_at: string
+          duration_minutes: number | null
+          id: string
+          is_active: boolean | null
+          is_popular: boolean | null
+          lat: number | null
+          lng: number | null
+          name_en: string
+          name_ru: string
+          sort_order: number | null
+          type: string
+        }
+        Insert: {
+          base_price: number
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          name_en: string
+          name_ru: string
+          sort_order?: number | null
+          type?: string
+        }
+        Update: {
+          base_price?: number
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          name_en?: string
+          name_ru?: string
+          sort_order?: number | null
+          type?: string
+        }
+        Relationships: []
+      }
+      transport_vehicle_types: {
+        Row: {
+          base_price: number | null
+          created_at: string
+          description_en: string | null
+          description_ru: string | null
+          eta_minutes: number | null
+          features: string[] | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          max_passengers: number | null
+          name_en: string
+          name_ru: string
+          price_multiplier: number | null
+          price_per_km: number | null
+          sort_order: number | null
+          type: string
+        }
+        Insert: {
+          base_price?: number | null
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          eta_minutes?: number | null
+          features?: string[] | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_passengers?: number | null
+          name_en: string
+          name_ru: string
+          price_multiplier?: number | null
+          price_per_km?: number | null
+          sort_order?: number | null
+          type: string
+        }
+        Update: {
+          base_price?: number | null
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          eta_minutes?: number | null
+          features?: string[] | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_passengers?: number | null
+          name_en?: string
+          name_ru?: string
+          price_multiplier?: number | null
+          price_per_km?: number | null
+          sort_order?: number | null
+          type?: string
+        }
+        Relationships: []
       }
       trust_badges: {
         Row: {
