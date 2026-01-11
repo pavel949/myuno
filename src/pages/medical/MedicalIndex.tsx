@@ -119,6 +119,7 @@ export default function MedicalIndex() {
   }, [clinics, searchQuery, selectedSpecialty, filterValues, language]);
 
   const quickItems: QuickGridItem[] = [
+    { icon: '💊', label: language === 'ru' ? 'Аптеки' : 'Pharmacy', onClick: () => navigate('/pharmacy') },
     { icon: '🏥', label: language === 'ru' ? 'Терапевт' : 'General', onClick: () => setSelectedSpecialty('general') },
     { icon: '🦷', label: language === 'ru' ? 'Стоматолог' : 'Dental', onClick: () => setSelectedSpecialty('dental') },
     { icon: '❤️', label: language === 'ru' ? 'Кардиолог' : 'Cardio', onClick: () => setSelectedSpecialty('cardio') },
@@ -166,7 +167,7 @@ export default function MedicalIndex() {
         </div>
       </div>
 
-      <MiniAppQuickGrid items={quickItems} columns={4} className="mb-6" />
+      <MiniAppQuickGrid items={quickItems} columns={5} className="mb-6" />
       
       <div className="grid gap-4">
         {filteredClinics.map((clinic) => (

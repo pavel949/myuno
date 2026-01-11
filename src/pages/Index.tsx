@@ -4,7 +4,7 @@ import {
   Sparkles, UtensilsCrossed, Dumbbell, Stethoscope, 
   GraduationCap, Home, Car, Ticket, Flower2,
   ArrowRight, MapPin, Search, Wrench, AlertTriangle,
-  Compass, Waves, Pill, Star, Shield, Scale, Building2, Calendar, BarChart3, Key
+  Compass, Waves, Star, Shield, Scale, Building2, Calendar, BarChart3, Key, ShoppingBag
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -37,9 +37,9 @@ const topCategories = [
 // Other categories
 const otherCategories = [
   { id: 'water', icon: Waves, path: '/water', color: 'from-cyan-500 to-blue-500' },
-  { id: 'pharmacy', icon: Pill, path: '/pharmacy', color: 'from-green-500 to-emerald-500' },
+  { id: 'medical', icon: Stethoscope, path: '/medical', color: 'from-emerald-500 to-green-500' }, // Pharmacy is part of Medical
+  { id: 'market', icon: ShoppingBag, path: '/market', color: 'from-amber-500 to-yellow-500' },
   { id: 'flowers', icon: Flower2, path: '/flowers', color: 'from-rose-500 to-pink-500' },
-  { id: 'medical', icon: Stethoscope, path: '/medical', color: 'from-emerald-500 to-green-500' },
   { id: 'beauty-spa', icon: Sparkles, path: '/beauty', color: 'from-pink-500 to-purple-500' },
   { id: 'fitness', icon: Dumbbell, path: '/fitness', color: 'from-blue-500 to-cyan-500' },
   { id: 'legal', icon: Scale, path: '/legal', color: 'from-indigo-500 to-blue-600' },
