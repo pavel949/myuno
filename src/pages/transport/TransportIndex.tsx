@@ -229,7 +229,6 @@ export default function TransportIndex() {
         {filteredVehicles.map((vehicle) => (
           <ItemCard
             key={vehicle.id}
-            id={vehicle.id}
             title={language === 'ru' ? vehicle.nameRu : vehicle.nameEn}
             image={vehicle.image}
             price={vehicle.pricePerDay}

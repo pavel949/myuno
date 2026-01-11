@@ -223,7 +223,6 @@ export default function YachtsIndex() {
         {filteredYachts.map((yacht) => (
           <ItemCard
             key={yacht.id}
-            id={yacht.id}
             title={language === 'ru' ? yacht.nameRu : yacht.nameEn}
             image={yacht.image}
             price={yacht.price}

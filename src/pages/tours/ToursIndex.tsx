@@ -84,7 +84,7 @@ export default function ToursIndex() {
             rating={tour.rating ?? undefined}
             price={tour.price ?? undefined}
             currency="฿"
-            location={tour.location_name ?? undefined}
+            location={tour.meeting_point ?? undefined}
             meta={[
               { icon: Clock, label: `${tour.duration_hours}h` },
               { icon: Users, label: `${tour.max_participants ?? 0}` },

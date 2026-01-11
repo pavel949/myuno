@@ -262,7 +262,6 @@ const FlowersIndex = () => {
         {filteredBouquets.map((bouquet) => (
           <ItemCard
             key={bouquet.id}
-            id={bouquet.id}
             title={language === 'ru' ? bouquet.nameRu : bouquet.name}
             image={bouquet.image}
             price={bouquet.price}
