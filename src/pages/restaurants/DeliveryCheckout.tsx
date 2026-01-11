@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MapPin, Clock } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -22,7 +22,7 @@ export default function DeliveryCheckout() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { getItemsByProvider, clearByProvider } = useCart();
   const { createBooking, isSubmitting } = useBooking();
 
@@ -39,12 +39,31 @@ export default function DeliveryCheckout() {
     notes: '',
   });
 
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate(`/auth?redirect=/restaurants/${id}/delivery`);
+    }
+  }, [user, authLoading, navigate, id]);
+
   if (!restaurant) {
     return (
       <AppLayout showBottomNav={false}>
         <div className="flex items-center justify-center min-h-screen">
           <p className="text-muted-foreground">
             {language === 'ru' ? 'Ресторан не найден' : 'Restaurant not found'}
+          </p>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (authLoading) {
+    return (
+      <AppLayout showBottomNav={false}>
+        <div className="flex items-center justify-center min-h-screen">
+          <p className="text-muted-foreground">
+            {language === 'ru' ? 'Загрузка...' : 'Loading...'}
           </p>
         </div>
       </AppLayout>

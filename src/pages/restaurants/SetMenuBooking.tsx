@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Check } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -25,7 +25,7 @@ export default function SetMenuBooking() {
   const { id, setId } = useParams();
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { createBooking, isSubmitting } = useBooking();
 
   const restaurant = getRestaurantById(id || '');
@@ -45,12 +45,31 @@ export default function SetMenuBooking() {
     email: '',
   });
 
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate(`/auth?redirect=/restaurants/${id}/experience/${setId}`);
+    }
+  }, [user, authLoading, navigate, id, setId]);
+
   if (!restaurant || !setMenu) {
     return (
       <AppLayout showBottomNav={false}>
         <div className="flex items-center justify-center min-h-screen">
           <p className="text-muted-foreground">
             {language === 'ru' ? 'Сет-меню не найдено' : 'Set menu not found'}
+          </p>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (authLoading) {
+    return (
+      <AppLayout showBottomNav={false}>
+        <div className="flex items-center justify-center min-h-screen">
+          <p className="text-muted-foreground">
+            {language === 'ru' ? 'Загрузка...' : 'Loading...'}
           </p>
         </div>
       </AppLayout>
