@@ -7,7 +7,7 @@ import { BackButton } from '@/components/uno/BackButton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Home, Plus, MapPin, Bed, Bath, SquareStack } from 'lucide-react';
+import { Home, Plus, MapPin, Bed, Bath, SquareStack, Globe } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function OwnerProperties() {
@@ -117,7 +117,14 @@ export default function OwnerProperties() {
                       <h3 className="font-semibold line-clamp-1">
                         {isRu && property.title_ru ? property.title_ru : property.title}
                       </h3>
-                      {getStatusBadge(property.status)}
+                      <div className="flex items-center gap-1">
+                        {property.marketplace_property_id && (
+                          <Badge variant="outline" className="text-xs gap-1">
+                            <Globe className="h-3 w-3" />
+                          </Badge>
+                        )}
+                        {getStatusBadge(property.status)}
+                      </div>
                     </div>
                     
                     <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">

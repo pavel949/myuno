@@ -160,6 +160,14 @@ import VendorProperties from '@/pages/vendor/VendorProperties';
 import VendorTours from '@/pages/vendor/VendorTours';
 import VendorActivities from '@/pages/vendor/VendorActivities';
 
+// Owner (Property Care) pages
+import OwnerDashboard from '@/pages/owner/OwnerDashboard';
+import OwnerProperties from '@/pages/owner/OwnerProperties';
+import OwnerPropertyDetail from '@/pages/owner/OwnerPropertyDetail';
+import AddProperty from '@/pages/owner/AddProperty';
+import ServiceRequest from '@/pages/owner/ServiceRequest';
+import InspectionRequest from '@/pages/owner/InspectionRequest';
+
 export const AnimatedRoutes: React.FC = () => {
   const location = useLocation();
 
@@ -323,6 +331,14 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/vendor/properties" element={<PageTransition><VendorProperties /></PageTransition>} />
         <Route path="/vendor/tours" element={<PageTransition><VendorTours /></PageTransition>} />
         <Route path="/vendor/activities" element={<PageTransition><VendorActivities /></PageTransition>} />
+        
+        {/* Owner (Property Care) Routes */}
+        <Route path="/owner" element={<PageTransition><OwnerDashboard /></PageTransition>} />
+        <Route path="/owner/properties" element={<PageTransition><OwnerProperties /></PageTransition>} />
+        <Route path="/owner/properties/new" element={<PageTransition><AddProperty /></PageTransition>} />
+        <Route path="/owner/properties/:id" element={<PageTransition><OwnerPropertyDetail /></PageTransition>} />
+        <Route path="/owner/service-request" element={<PageTransition><ServiceRequest /></PageTransition>} />
+        <Route path="/owner/inspection" element={<PageTransition><InspectionRequest /></PageTransition>} />
         
         {/* Catch-all */}
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />

@@ -27,6 +27,7 @@ export interface OwnerProperty {
   notes?: string;
   created_at: string;
   updated_at: string;
+  marketplace_property_id?: string;
 }
 
 export interface PropertyInspection {
@@ -183,6 +184,77 @@ export function useUpdateOwnerProperty() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['owner-properties'] });
       toast.success('Объект обновлён!');
+    },
+  });
+}
+
+// Publish owner property to marketplace
+export function usePublishToMarketplace() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async (data: {
+      ownerPropertyId: string;
+      listingType: 'rent' | 'sale';
+      price: number;
+      pricePeriod?: string;
+    }) => {
+      if (!user) throw new Error('Not authenticated');
+
+      // Get owner property data
+      const { data: ownerProperty, error: fetchError } = await supabase
+        .from('owner_properties')
+        .select('*')
+        .eq('id', data.ownerPropertyId)
+        .single();
+
+      if (fetchError || !ownerProperty) throw new Error('Property not found');
+
+      // Create marketplace listing
+      const { data: marketplaceProperty, error: createError } = await supabase
+        .from('properties')
+        .insert({
+          title_en: ownerProperty.title,
+          title_ru: ownerProperty.title_ru || ownerProperty.title,
+          description_en: ownerProperty.description,
+          description_ru: ownerProperty.description_ru,
+          address: ownerProperty.address,
+          district: ownerProperty.district,
+          property_type: ownerProperty.property_type,
+          listing_type: data.listingType,
+          bedrooms: ownerProperty.bedrooms,
+          bathrooms: ownerProperty.bathrooms,
+          area_sqm: ownerProperty.area_sqm,
+          cover_image: ownerProperty.cover_image,
+          images: ownerProperty.images,
+          price: data.price,
+          price_period: data.listingType === 'rent' ? data.pricePeriod : null,
+          currency: 'THB',
+          is_active: true,
+        } as any)
+        .select()
+        .single();
+
+      if (createError) throw createError;
+
+      // Link marketplace property to owner property
+      const { error: updateError } = await supabase
+        .from('owner_properties')
+        .update({ marketplace_property_id: marketplaceProperty.id } as any)
+        .eq('id', data.ownerPropertyId);
+
+      if (updateError) throw updateError;
+
+      return marketplaceProperty;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['owner-properties'] });
+      queryClient.invalidateQueries({ queryKey: ['owner-property'] });
+      toast.success('Объект опубликован на маркетплейсе!');
+    },
+    onError: (error) => {
+      toast.error('Ошибка публикации: ' + error.message);
     },
   });
 }
