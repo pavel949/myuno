@@ -6,6 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBooking } from '@/hooks/useBooking';
 import { format } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   BookingSummary,
   BookingDateTimeSelect, 
@@ -85,6 +86,36 @@ export default function SetMenuBooking() {
     const scheduledAt = new Date(selectedDate);
     const [hours, minutes] = selectedTime.split(':');
     scheduledAt.setHours(parseInt(hours), parseInt(minutes));
+
+    // If online payment selected, redirect to Stripe
+    if (paymentMethod === 'online') {
+      const response = await supabase.functions.invoke('create-restaurant-checkout', {
+        body: {
+          booking_type: 'set_menu',
+          restaurant_id: restaurant.id,
+          restaurant_name: restaurant.nameEn,
+          amount: totalPrice,
+          currency: 'thb',
+          items: [{
+            name: language === 'ru' ? setMenu.nameRu : setMenu.nameEn,
+            quantity: guests,
+            price: setMenu.price,
+          }],
+          metadata: {
+            set_menu_id: setMenu.id,
+            scheduled_at: scheduledAt.toISOString(),
+            guests: guests.toString(),
+            contact_name: contactData.name,
+            contact_phone: contactData.phone,
+          },
+        },
+      });
+
+      if (response.data?.url) {
+        window.location.href = response.data.url;
+        return;
+      }
+    }
 
     const result = await createBooking({
       booking_type: 'food',
@@ -240,6 +271,7 @@ export default function SetMenuBooking() {
             amount={totalPrice}
             currency="฿"
             showWallet
+            showOnline
           />
         </div>
 

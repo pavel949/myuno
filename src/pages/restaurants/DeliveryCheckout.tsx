@@ -6,6 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { useBooking } from '@/hooks/useBooking';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   BookingContactForm,
   BookingPaymentSelect,
@@ -80,6 +81,48 @@ export default function DeliveryCheckout() {
 
   const handleSubmit = async () => {
     if (!user || !isFormValid) return;
+
+    // If online payment selected, redirect to Stripe
+    if (paymentMethod === 'online') {
+      const { createRestaurantCheckout, isProcessing: stripeProcessing } = await import('@/hooks/useStripeCheckout').then(m => ({ 
+        createRestaurantCheckout: m.useStripeCheckout, 
+        isProcessing: false 
+      }));
+      
+      const checkoutItems = cartItems.map(item => ({
+        name: language === 'ru' ? (item.nameRu || item.name) : item.name,
+        quantity: item.quantity,
+        price: item.price,
+      }));
+      
+      // Add delivery fee as separate item
+      checkoutItems.push({
+        name: language === 'ru' ? 'Доставка' : 'Delivery',
+        quantity: 1,
+        price: deliveryFee,
+      });
+
+      const response = await supabase.functions.invoke('create-restaurant-checkout', {
+        body: {
+          booking_type: 'food_delivery',
+          restaurant_id: restaurant.id,
+          restaurant_name: restaurant.nameEn,
+          amount: total,
+          currency: 'thb',
+          items: checkoutItems,
+          metadata: {
+            delivery_address: address,
+            contact_name: contactData.name,
+            contact_phone: contactData.phone,
+          },
+        },
+      });
+
+      if (response.data?.url) {
+        window.location.href = response.data.url;
+        return;
+      }
+    }
 
     const result = await createBooking({
       booking_type: 'food',
@@ -216,6 +259,7 @@ export default function DeliveryCheckout() {
             currency="฿"
             showWallet
             showCash
+            showOnline
           />
         </div>
 

@@ -34,7 +34,7 @@ export function BookingPaymentSelect({
   showWallet = true,
   showCash = true,
   showCard = false,
-  showOnline = false,
+  showOnline = true,
 }: BookingPaymentSelectProps) {
   const { language } = useLanguage();
   const { user } = useAuth();

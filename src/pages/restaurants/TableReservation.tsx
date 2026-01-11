@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { BabyIcon, Utensils, Banknote } from 'lucide-react';
+import { BabyIcon, Utensils, Banknote, CreditCard } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBooking } from '@/hooks/useBooking';
 import { format } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   BookingDateTimeSelect, 
   BookingParticipants,
@@ -95,6 +96,31 @@ export default function TableReservation() {
       isOutdoor ? 'Outdoor seating preferred' : '',
       specialRequests,
     ].filter(Boolean).join('. ');
+
+    // If deposit required, redirect to Stripe for payment
+    if (depositRequired && depositAmount > 0) {
+      const response = await supabase.functions.invoke('create-restaurant-checkout', {
+        body: {
+          booking_type: 'table_reservation',
+          restaurant_id: restaurant.id,
+          restaurant_name: restaurant.nameEn,
+          amount: depositAmount,
+          currency: 'thb',
+          metadata: {
+            scheduled_at: scheduledAt.toISOString(),
+            guests: guests.toString(),
+            contact_name: contactData.name,
+            contact_phone: contactData.phone,
+            notes: notes,
+          },
+        },
+      });
+
+      if (response.data?.url) {
+        window.location.href = response.data.url;
+        return;
+      }
+    }
 
     const result = await createBooking({
       booking_type: 'service',
@@ -258,15 +284,15 @@ export default function TableReservation() {
           {/* Reservation Notice - Conditional based on deposit */}
           {depositRequired ? (
             <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
-              <Banknote className="w-5 h-5 text-amber-600 flex-shrink-0" />
+              <CreditCard className="w-5 h-5 text-amber-600 flex-shrink-0" />
               <div>
                 <p className="font-medium text-amber-700 dark:text-amber-400">
                   {language === 'ru' ? `Депозит: ${depositAmount}฿` : `Deposit: ${depositAmount}฿`}
                 </p>
                 <p className="text-sm text-amber-600 dark:text-amber-500 mt-1">
                   {language === 'ru' 
-                    ? 'Депозит будет зачтён в счёт заказа. Возвращается при отмене за 24 часа.'
-                    : 'Deposit will be applied to your bill. Refundable if cancelled 24h in advance.'}
+                    ? 'Оплата депозита онлайн через Stripe. Будет зачтён в счёт заказа.'
+                    : 'Pay deposit online via Stripe. Will be applied to your bill.'}
                 </p>
               </div>
             </div>
