@@ -147,7 +147,7 @@ export default function TutorDetail() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/education')}
           className="absolute top-4 left-4 text-white hover:bg-white/20"
         >
           <ArrowLeft className="h-5 w-5" />

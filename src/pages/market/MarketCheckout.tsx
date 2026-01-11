@@ -142,6 +142,7 @@ const MarketCheckout = () => {
         <PageHeader 
           title={language === 'ru' ? 'Оформление заказа' : 'Checkout'} 
           showBack 
+          fallbackPath="/market"
         />
 
         {/* Store Info */}

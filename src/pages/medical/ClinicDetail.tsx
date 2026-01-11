@@ -114,7 +114,7 @@ const ClinicDetail = () => {
         
         {/* Top Actions */}
         <div className="absolute top-4 left-4 right-4 flex justify-between">
-          <Button variant="secondary" size="icon" onClick={() => navigate(-1)}>
+          <Button variant="secondary" size="icon" onClick={() => navigate('/medical')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex gap-2">

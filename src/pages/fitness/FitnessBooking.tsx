@@ -107,6 +107,7 @@ export default function FitnessBooking() {
         <PageHeader 
           title={language === 'ru' ? 'Оформление записи' : 'Book Membership'} 
           showBack 
+          fallbackPath="/fitness"
         />
 
         {/* Summary Card */}

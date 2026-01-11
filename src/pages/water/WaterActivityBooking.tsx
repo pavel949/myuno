@@ -132,6 +132,7 @@ export default function WaterActivityBooking() {
         <PageHeader 
           title={language === 'ru' ? 'Бронирование' : 'Booking'}
           showBack
+          fallbackPath="/water"
         />
 
         {/* Summary Card */}

@@ -123,7 +123,7 @@ export default function RestaurantMap() {
             variant="secondary"
             size="icon"
             className="bg-background/90 backdrop-blur-sm shadow-lg"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/restaurants')}
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>

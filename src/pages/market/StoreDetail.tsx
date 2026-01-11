@@ -145,7 +145,7 @@ const StoreDetail = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           
           <div className="absolute top-4 left-4 right-4 flex justify-between">
-            <Button variant="secondary" size="icon" className="rounded-full bg-white/90 backdrop-blur" onClick={() => navigate(-1)}>
+            <Button variant="secondary" size="icon" className="rounded-full bg-white/90 backdrop-blur" onClick={() => navigate('/market')}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="flex gap-2">

@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
+import { PageHeader } from '@/components/uno/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -88,8 +89,9 @@ export default function PetTransport() {
   };
 
   return (
-    <AppLayout title={language === 'ru' ? 'Перевозка питомцев' : 'Pet Transport'}>
+    <AppLayout showBottomNav={false}>
       <PageContainer className="pb-32">
+        <PageHeader title={language === 'ru' ? 'Перевозка питомцев' : 'Pet Transport'} showBack fallbackPath="/pets" />
         {/* Hero */}
         <div className="relative rounded-2xl overflow-hidden mb-6">
           <img

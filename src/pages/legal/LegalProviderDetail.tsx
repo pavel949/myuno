@@ -4,6 +4,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BackButton } from "@/components/uno/BackButton";
 import { 
   Star, 
   MapPin, 
@@ -100,10 +101,11 @@ const LegalProviderDetail = () => {
   };
 
   return (
-    <AppLayout title={provider.name} showBottomNav={false}>
+    <AppLayout showBottomNav={false}>
       <div className="pb-24">
         {/* Hero Image */}
         <div className="relative h-48">
+          <BackButton fallbackPath="/legal" variant="overlay" className="absolute top-4 left-4 z-10" />
           <img
             src={provider.image}
             alt={provider.name}
