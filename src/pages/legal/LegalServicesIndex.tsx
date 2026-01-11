@@ -1,10 +1,11 @@
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Scale, Award } from "lucide-react";
 import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from "@/components/miniapp";
 import { FilterValues, legalFilterConfig } from "@/components/filters";
 import { useLegalServices } from "@/hooks/useLegalServices";
+import { VisaServicesSection } from "./VisaServicesSection";
 
 const categories: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -19,9 +20,11 @@ const categories: MiniAppCategory[] = [
 export default function LegalServicesIndex() {
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { services: legalServices, isLoading } = useLegalServices();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const initialCategory = searchParams.get('category') || 'all';
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [filterValues, setFilterValues] = useState<FilterValues>({});
 
   const activeFilterCount = useMemo(() => {
@@ -87,24 +90,42 @@ export default function LegalServicesIndex() {
     >
       <MiniAppQuickGrid items={quickItems} columns={4} className="mb-6" />
 
-      <div className="space-y-4">
-        {filteredProviders.map((provider) => (
-          <ItemCard
-            key={provider.id}
-            image={provider.cover_image || 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=200'}
-            title={language === 'ru' ? provider.name_ru : provider.name_en}
-            subtitle={language === 'ru' ? provider.description_ru : provider.description_en}
-            rating={provider.rating}
-            reviewCount={provider.review_count}
-            price={provider.price_consultation ?? undefined}
-            priceUnit={language === 'ru' ? '/консультация' : '/consultation'}
-            currency="฿"
-            isVerified={provider.is_verified}
-            tags={provider.specializations?.slice(0, 2) || []}
-            onClick={() => navigate(`/legal/provider/${provider.id}`)}
+      {/* Visa Services Section - показываем когда выбрана категория visa или all */}
+      {(selectedCategory === 'visa' || selectedCategory === 'all') && (
+        <div className="mb-6">
+          <VisaServicesSection 
+            limit={selectedCategory === 'visa' ? 20 : 4} 
+            showTitle={selectedCategory === 'all'} 
           />
-        ))}
-      </div>
+        </div>
+      )}
+
+      {/* Legal Providers - скрываем когда только визы */}
+      {selectedCategory !== 'visa' && (
+        <>
+          <h2 className="text-lg font-semibold mb-3">
+            {language === 'ru' ? 'Юридические компании' : 'Legal Companies'}
+          </h2>
+          <div className="space-y-4">
+            {filteredProviders.map((provider) => (
+              <ItemCard
+                key={provider.id}
+                image={provider.cover_image || 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=200'}
+                title={language === 'ru' ? provider.name_ru : provider.name_en}
+                subtitle={language === 'ru' ? provider.description_ru : provider.description_en}
+                rating={provider.rating}
+                reviewCount={provider.review_count}
+                price={provider.price_consultation ?? undefined}
+                priceUnit={language === 'ru' ? '/консультация' : '/consultation'}
+                currency="฿"
+                isVerified={provider.is_verified}
+                tags={provider.specializations?.slice(0, 2) || []}
+                onClick={() => navigate(`/legal/provider/${provider.id}`)}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </MiniAppLayout>
   );
 }

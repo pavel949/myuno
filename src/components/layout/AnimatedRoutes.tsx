@@ -82,11 +82,13 @@ import ServicesMap from '@/pages/services/ServicesMap';
 import LegalServicesIndex from '@/pages/legal/LegalServicesIndex';
 import LegalProviderDetail from '@/pages/legal/LegalProviderDetail';
 import LegalBooking from '@/pages/legal/LegalBooking';
+import VisaServiceDetail from '@/pages/legal/VisaServiceDetail';
 
 // Insurance Mini-App
 import InsuranceIndex from '@/pages/insurance/InsuranceIndex';
 import InsuranceDetail from '@/pages/insurance/InsuranceDetail';
 import InsuranceQuote from '@/pages/insurance/InsuranceQuote';
+import InsurancePlanDetail from '@/pages/insurance/InsurancePlanDetail';
 
 // Tours Mini-App
 import ToursIndex from '@/pages/tours/ToursIndex';
@@ -275,10 +277,12 @@ export const AnimatedRoutes: React.FC = () => {
         {/* Legal & Business Services Mini-App Routes */}
         <Route path="/legal" element={<PageTransition><LegalServicesIndex /></PageTransition>} />
         <Route path="/legal/provider/:id" element={<PageTransition><LegalProviderDetail /></PageTransition>} />
+        <Route path="/legal/visa/:id" element={<PageTransition><VisaServiceDetail /></PageTransition>} />
         <Route path="/legal/booking/:id" element={<PageTransition><LegalBooking /></PageTransition>} />
         
         {/* Insurance Mini-App Routes */}
         <Route path="/insurance" element={<PageTransition><InsuranceIndex /></PageTransition>} />
+        <Route path="/insurance/plan/:planId" element={<PageTransition><InsurancePlanDetail /></PageTransition>} />
         <Route path="/insurance/:id" element={<PageTransition><InsuranceDetail /></PageTransition>} />
         <Route path="/insurance/:id/quote" element={<PageTransition><InsuranceQuote /></PageTransition>} />
         
