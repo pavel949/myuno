@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { UtensilsCrossed, Clock, Star, MapPin, Bike, ArrowRight, Flame, CalendarDays, Banknote, Map } from 'lucide-react';
+import { UtensilsCrossed, Clock, Star, MapPin, Bike, ArrowRight, Flame, CalendarDays, Banknote, Map, SlidersHorizontal } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -8,9 +8,18 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { FilterChip } from '@/components/uno/FilterChip';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { triggerRipple } from '@/hooks/useRipple';
 import { demoRestaurants, cuisineCategories, locationCategories } from './restaurantsData';
 import { MiniAppHero, MiniAppSearch, MiniAppQuickActions } from '@/components/miniapp';
+import { 
+  UniversalFilter, 
+  QuickFilterBar,
+  ActiveFilters,
+  deliveryFilterConfig, 
+  reservationFilterConfig,
+  type FilterValues 
+} from '@/components/filters';
 
 type Mode = 'delivery' | 'reservation';
 
@@ -24,31 +33,118 @@ export default function RestaurantsIndex() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCuisine, setSelectedCuisine] = useState('all');
   const [selectedLocation, setSelectedLocation] = useState('all');
+  
+  // Advanced filters
+  const [filterValues, setFilterValues] = useState<FilterValues>({
+    priceLevel: null,
+    cuisine: [],
+    features: [],
+    occasion: [],
+    dietary: [],
+    delivery: [],
+  });
+
+  // Get current filter config based on mode
+  const filterConfig = mode === 'delivery' ? deliveryFilterConfig : reservationFilterConfig;
+
+  // Calculate active filter count
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    Object.values(filterValues).forEach(value => {
+      if (Array.isArray(value)) {
+        count += value.length;
+      } else if (value) {
+        count += 1;
+      }
+    });
+    return count;
+  }, [filterValues]);
 
   const handleModeChange = (newMode: Mode) => {
     setMode(newMode);
     setSearchParams({ mode: newMode });
   };
 
-  const filteredRestaurants = demoRestaurants.filter(rest => {
-    const name = language === 'ru' ? rest.nameRu : rest.nameEn;
-    const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCuisine = selectedCuisine === 'all' || 
-      rest.cuisine.toLowerCase() === selectedCuisine.toLowerCase();
-    const matchesLocation = selectedLocation === 'all' ||
-      rest.location.toLowerCase() === selectedLocation.toLowerCase();
-    
-    if (mode === 'delivery' && !rest.acceptsDelivery) return false;
-    if (mode === 'reservation' && !rest.acceptsReservations) return false;
-    
-    return matchesSearch && matchesCuisine && matchesLocation;
-  });
+  const filteredRestaurants = useMemo(() => {
+    return demoRestaurants.filter(rest => {
+      const name = language === 'ru' ? rest.nameRu : rest.nameEn;
+      const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCuisine = selectedCuisine === 'all' || 
+        rest.cuisine.toLowerCase() === selectedCuisine.toLowerCase();
+      const matchesLocation = selectedLocation === 'all' ||
+        rest.location.toLowerCase() === selectedLocation.toLowerCase();
+      
+      // Advanced filter matching
+      const priceFilter = filterValues.priceLevel;
+      const matchesPriceLevel = !priceFilter || rest.priceLevel === parseInt(priceFilter as string);
+      
+      const cuisineFilter = filterValues.cuisine as string[];
+      const matchesCuisineFilter = cuisineFilter.length === 0 || 
+        cuisineFilter.some(c => rest.cuisine.toLowerCase() === c.toLowerCase());
+      
+      const featureFilter = filterValues.features as string[];
+      const matchesFeatures = featureFilter.length === 0 ||
+        featureFilter.every(f => rest.features?.includes(f));
+      
+      const occasionFilter = filterValues.occasion as string[];
+      const matchesOccasion = occasionFilter.length === 0 ||
+        occasionFilter.some(o => rest.occasions?.includes(o));
+      
+      const dietaryFilter = filterValues.dietary as string[];
+      const matchesDietary = dietaryFilter.length === 0 ||
+        dietaryFilter.every(d => rest.dietary?.includes(d));
+      
+      // Delivery specific filters
+      const deliveryFilter = filterValues.delivery as string[];
+      let matchesDeliveryOptions = true;
+      if (deliveryFilter.length > 0) {
+        if (deliveryFilter.includes('free_delivery') && rest.deliveryFee > 0) matchesDeliveryOptions = false;
+        if (deliveryFilter.includes('fast_delivery')) {
+          const minTime = parseInt(rest.deliveryTime.split('-')[0]);
+          if (minTime > 30) matchesDeliveryOptions = false;
+        }
+        if (deliveryFilter.includes('no_min_order') && rest.minOrder > 0) matchesDeliveryOptions = false;
+      }
+      
+      if (mode === 'delivery' && !rest.acceptsDelivery) return false;
+      if (mode === 'reservation' && !rest.acceptsReservations) return false;
+      
+      return matchesSearch && matchesCuisine && matchesLocation && 
+             matchesPriceLevel && matchesCuisineFilter && matchesFeatures && 
+             matchesOccasion && matchesDietary && matchesDeliveryOptions;
+    });
+  }, [language, searchQuery, selectedCuisine, selectedLocation, filterValues, mode]);
 
   const openRestaurants = filteredRestaurants.filter(r => r.isOpen);
   const closedRestaurants = filteredRestaurants.filter(r => !r.isOpen);
 
   const handleRestaurantClick = (restaurantId: string) => {
     navigate(`/restaurants/${restaurantId}?mode=${mode}`);
+  };
+
+  // Handle removing individual filter
+  const handleRemoveFilter = (sectionId: string, optionId?: string) => {
+    setFilterValues(prev => {
+      const sectionValue = prev[sectionId];
+      if (Array.isArray(sectionValue) && optionId) {
+        return { ...prev, [sectionId]: sectionValue.filter(v => v !== optionId) };
+      }
+      return { ...prev, [sectionId]: null };
+    });
+  };
+
+  // Clear all filters
+  const handleClearAllFilters = () => {
+    setFilterValues({
+      priceLevel: null,
+      cuisine: [],
+      features: [],
+      occasion: [],
+      dietary: [],
+      delivery: [],
+    });
+    setSelectedCuisine('all');
+    setSelectedLocation('all');
   };
 
   const deliveryQuickActions = [
@@ -73,13 +169,21 @@ export default function RestaurantsIndex() {
           fallbackPath="/"
           subtitle={language === 'ru' ? `${filteredRestaurants.length} мест` : `${filteredRestaurants.length} places`}
           actions={
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate(`/restaurants/map?mode=${mode}`)}
-            >
-              <Map className="w-5 h-5" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <UniversalFilter
+                config={filterConfig}
+                values={filterValues}
+                onChange={setFilterValues}
+                activeCount={activeFilterCount}
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate(`/restaurants/map?mode=${mode}`)}
+              >
+                <Map className="w-5 h-5" />
+              </Button>
+            </div>
           }
         />
 
@@ -132,6 +236,17 @@ export default function RestaurantsIndex() {
             />
           ))}
         </div>
+
+        {/* Active Filters Display */}
+        {activeFilterCount > 0 && (
+          <ActiveFilters
+            config={filterConfig}
+            values={filterValues}
+            onRemove={handleRemoveFilter}
+            onClearAll={handleClearAllFilters}
+            className="mb-4"
+          />
+        )}
 
         {/* Location filters */}
         <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide mb-4">

@@ -58,6 +58,10 @@ export interface Restaurant {
   isNew?: boolean;
   priceLevel: number;
   tags: string[];
+  // New: Features & Amenities
+  features: string[]; // sea_view, terrace, live_music, private_room, etc.
+  occasions: string[]; // romantic, birthday, business, family, etc.
+  dietary: string[]; // vegetarian, vegan, halal, gluten_free, seafood
   // Capabilities
   acceptsDelivery: boolean;
   acceptsReservations: boolean;
@@ -96,6 +100,9 @@ export const demoRestaurants: Restaurant[] = [
     isFeatured: true,
     priceLevel: 2,
     tags: ['Thai', 'Seafood', 'Spicy'],
+    features: ['terrace', 'ac', 'wifi', 'parking'],
+    occasions: ['family', 'romantic', 'group'],
+    dietary: ['vegetarian', 'seafood'],
     acceptsDelivery: true,
     acceptsReservations: true,
     hasSetMenus: true,
@@ -236,6 +243,9 @@ export const demoRestaurants: Restaurant[] = [
     isFeatured: true,
     priceLevel: 3,
     tags: ['Japanese', 'Sushi', 'Fresh'],
+    features: ['sea_view', 'private_room', 'ac', 'parking'],
+    occasions: ['romantic', 'date', 'celebration', 'business'],
+    dietary: ['seafood', 'gluten_free'],
     acceptsDelivery: true,
     acceptsReservations: true,
     hasSetMenus: true,
@@ -311,6 +321,9 @@ export const demoRestaurants: Restaurant[] = [
     isNew: true,
     priceLevel: 2,
     tags: ['Italian', 'Pizza', 'Pasta'],
+    features: ['terrace', 'kids_friendly', 'wifi', 'parking'],
+    occasions: ['family', 'birthday', 'group'],
+    dietary: ['vegetarian'],
     acceptsDelivery: true,
     acceptsReservations: true,
     hasSetMenus: false,
@@ -368,6 +381,9 @@ export const demoRestaurants: Restaurant[] = [
     isOpen: false,
     priceLevel: 1,
     tags: ['American', 'Burgers', 'Fast Food'],
+    features: ['wifi', 'ac', 'kids_friendly'],
+    occasions: ['family', 'group'],
+    dietary: [],
     acceptsDelivery: true,
     acceptsReservations: false,
     hasSetMenus: false,
@@ -416,6 +432,9 @@ export const demoRestaurants: Restaurant[] = [
     isOpen: true,
     priceLevel: 2,
     tags: ['Indian', 'Curry', 'Vegetarian'],
+    features: ['terrace', 'ac', 'parking', 'live_music'],
+    occasions: ['family', 'celebration', 'group'],
+    dietary: ['vegetarian', 'vegan', 'halal'],
     acceptsDelivery: true,
     acceptsReservations: true,
     hasSetMenus: true,
