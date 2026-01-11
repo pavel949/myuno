@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBooking } from "@/hooks/useBooking";
+import { useClinic, useDoctors, useMedicalServices } from "@/hooks/useClinics";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageContainer } from "@/components/uno/PageContainer";
 import { PageHeader } from "@/components/uno/PageHeader";
@@ -20,13 +21,27 @@ import { addDays, format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function MedicalAppointment() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const doctorId = searchParams.get('doctor');
+  const serviceId = searchParams.get('service');
+  
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
   const { createBooking, isSubmitting } = useBooking();
+
+  // Fetch clinic, doctors, and services
+  const { clinic, isLoading: clinicLoading } = useClinic(id);
+  const { doctors } = useDoctors(id);
+  const { services } = useMedicalServices(id);
+
+  // Find selected doctor or service
+  const selectedDoctor = doctors.find(d => d.id === doctorId);
+  const selectedService = services.find(s => s.id === serviceId);
 
   // Form state
   const [date, setDate] = useState<Date | undefined>(addDays(new Date(), 1));
@@ -36,24 +51,46 @@ export default function MedicalAppointment() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
   const [bookingResult, setBookingResult] = useState<{ success: boolean; bookingId?: string } | null>(null);
 
-  const consultationPrice = 1500;
+  // Calculate price
+  const price = selectedService?.price || selectedDoctor?.consultation_price || clinic?.consultation_price || 1500;
 
   // Auth redirect
-  if (!authLoading && !user) {
-    navigate('/auth', { state: { from: `/medical/${id}/appointment` } });
-    return null;
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/auth', { state: { from: `/medical/appointment/${id}` } });
+    }
+  }, [authLoading, user, navigate, id]);
+
+  if (authLoading || clinicLoading) {
+    return (
+      <AppLayout showBottomNav={false}>
+        <PageContainer className="pb-32">
+          <Skeleton className="h-8 w-1/2 mb-4" />
+          <Skeleton className="h-32 w-full mb-4" />
+          <Skeleton className="h-48 w-full mb-4" />
+        </PageContainer>
+      </AppLayout>
+    );
   }
+
+  if (!user) return null;
 
   // Success state
   if (bookingResult?.success && bookingResult.bookingId) {
+    const bookingTitle = selectedService
+      ? (language === 'ru' ? selectedService.name_ru : selectedService.name_en)
+      : selectedDoctor
+        ? `${language === 'ru' ? 'Консультация:' : 'Consultation:'} ${language === 'ru' ? selectedDoctor.name_ru : selectedDoctor.name_en}`
+        : (language === 'ru' ? 'Запись к врачу' : 'Medical Appointment');
+
     return (
       <AppLayout showBottomNav={false}>
         <BookingConfirmation
           bookingId={bookingResult.bookingId}
-          title={language === 'ru' ? 'Запись к врачу' : 'Medical Appointment'}
+          title={bookingTitle}
           date={date ? format(date, 'PPP', { locale: language === 'ru' ? ru : undefined }) : undefined}
           time={time}
-          total={consultationPrice}
+          total={price}
           currency="THB"
           continuePath="/medical"
           continueLabel={language === 'ru' ? 'К клиникам' : 'Browse Clinics'}
@@ -70,19 +107,25 @@ export default function MedicalAppointment() {
     const [hours, minutes] = time.split(':').map(Number);
     scheduledAt.setHours(hours, minutes, 0, 0);
 
+    const itemName = selectedService
+      ? (language === 'ru' ? selectedService.name_ru : selectedService.name_en)
+      : selectedDoctor
+        ? `${language === 'ru' ? 'Консультация:' : 'Consultation:'} ${language === 'ru' ? selectedDoctor.name_ru : selectedDoctor.name_en}`
+        : (language === 'ru' ? 'Консультация врача' : 'Medical Consultation');
+
     const result = await createBooking({
-      booking_type: 'service',
+      booking_type: 'medical',
       scheduled_at: scheduledAt,
-      total_amount: consultationPrice,
+      total_amount: price,
       currency: 'THB',
-      notes: `Medical Appointment. Symptoms: ${symptoms}`,
+      notes: `Clinic: ${clinic?.name_en || id}. ${selectedDoctor ? `Doctor: ${selectedDoctor.name_en}.` : ''} Symptoms: ${symptoms}`,
       items: [{
-        item_type: 'medical_consultation',
-        item_id: id || 'consultation',
-        item_name: language === 'ru' ? 'Консультация врача' : 'Medical Consultation',
+        item_type: selectedService ? 'medical_service' : 'medical_consultation',
+        item_id: selectedService?.id || selectedDoctor?.id || id || 'consultation',
+        item_name: itemName,
         quantity: 1,
-        unit_price: consultationPrice,
-        subtotal: consultationPrice,
+        unit_price: price,
+        subtotal: price,
       }],
       participants: [{
         name: contactData.name,
@@ -91,7 +134,7 @@ export default function MedicalAppointment() {
         is_primary: true,
       }],
       payment: {
-        amount: consultationPrice,
+        amount: price,
         payment_method: paymentMethod,
       },
     });
@@ -117,10 +160,15 @@ export default function MedicalAppointment() {
         {/* Summary Card */}
         <div className="mt-4 mb-6">
           <BookingSummary
-            title={language === 'ru' ? 'Консультация врача' : 'Medical Consultation'}
+            title={selectedService 
+              ? (language === 'ru' ? selectedService.name_ru : selectedService.name_en)
+              : selectedDoctor
+                ? `${language === 'ru' ? selectedDoctor.name_ru : selectedDoctor.name_en}`
+                : (language === 'ru' ? 'Консультация врача' : 'Medical Consultation')}
+            subtitle={clinic ? (language === 'ru' ? clinic.name_ru : clinic.name_en) : undefined}
             date={date}
             time={time}
-            price={consultationPrice}
+            price={price}
             currency="THB"
           />
         </div>
@@ -174,7 +222,7 @@ export default function MedicalAppointment() {
           <BookingPaymentSelect
             selected={paymentMethod}
             onSelect={setPaymentMethod}
-            amount={consultationPrice}
+            amount={price}
             currency="THB"
             showWallet
             showCash
@@ -183,7 +231,7 @@ export default function MedicalAppointment() {
 
         {/* Bottom Bar */}
         <BookingBottomBar
-          total={consultationPrice}
+          total={price}
           currency="THB"
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
