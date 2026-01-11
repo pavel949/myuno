@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, BedDouble, Bath, Users, SlidersHorizontal } from 'lucide-react';
+import { Home, BedDouble, Bath, Users, SlidersHorizontal, Zap } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { MiniAppLayout, MiniAppCategory } from '@/components/miniapp/MiniAppLayout';
@@ -8,109 +8,106 @@ import { ItemCard } from '@/components/miniapp/ItemCard';
 import { FilterChip, FilterChipGroup } from '@/components/uno/FilterChip';
 import { UniversalFilter, ActiveFilters, FilterValues } from '@/components/filters/UniversalFilter';
 import { propertyFilterConfig } from '@/components/filters/PropertyFilters';
+import { useProperties, Property } from '@/hooks/useProperties';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 
-// Demo properties data
+// Demo properties as fallback when DB is empty
 const demoProperties = [
   {
     id: 'prop-1',
-    titleEn: 'Luxury Ocean View Villa',
-    titleRu: 'Роскошная вилла с видом на океан',
-    image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=600',
+    title_en: 'Luxury Ocean View Villa',
+    title_ru: 'Роскошная вилла с видом на океан',
+    cover_image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=600',
     rating: 4.9,
-    reviewCount: 48,
-    location: 'Kamala',
-    locationRu: 'Камала',
+    review_count: 48,
+    district: 'Kamala',
     price: 85000,
-    pricePeriod: 'month',
-    propertyType: 'villa',
-    listingType: 'rent',
+    price_period: 'month',
+    property_type: 'villa',
+    listing_type: 'rent',
     bedrooms: 4,
     bathrooms: 3,
-    area: 350,
-    maxGuests: 8,
-    isVerified: true,
-    isFeatured: true,
+    area_sqm: 350,
+    max_guests: 8,
+    is_verified: true,
+    is_featured: true,
     amenities: ['Pool', 'Sea View', 'Gym', 'Garden'],
   },
   {
     id: 'prop-2',
-    titleEn: 'Modern Condo in Patong',
-    titleRu: 'Современное кондо в Патонге',
-    image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600',
+    title_en: 'Modern Condo in Patong',
+    title_ru: 'Современное кондо в Патонге',
+    cover_image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600',
     rating: 4.7,
-    reviewCount: 92,
-    location: 'Patong',
-    locationRu: 'Патонг',
+    review_count: 92,
+    district: 'Patong',
     price: 25000,
-    pricePeriod: 'month',
-    propertyType: 'condo',
-    listingType: 'rent',
+    price_period: 'month',
+    property_type: 'condo',
+    listing_type: 'rent',
     bedrooms: 2,
     bathrooms: 2,
-    area: 85,
-    maxGuests: 4,
-    isVerified: true,
-    isNew: true,
+    area_sqm: 85,
+    max_guests: 4,
+    is_verified: true,
     amenities: ['Pool', 'Gym', 'Parking'],
   },
   {
     id: 'prop-3',
-    titleEn: 'Cozy Studio near Beach',
-    titleRu: 'Уютная студия у пляжа',
-    image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600',
+    title_en: 'Cozy Studio near Beach',
+    title_ru: 'Уютная студия у пляжа',
+    cover_image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600',
     rating: 4.5,
-    reviewCount: 156,
-    location: 'Kata',
-    locationRu: 'Ката',
+    review_count: 156,
+    district: 'Kata',
     price: 1500,
-    pricePeriod: 'night',
-    propertyType: 'studio',
-    listingType: 'rent',
-    bedrooms: 1,
+    price_period: 'night',
+    property_type: 'studio',
+    listing_type: 'rent',
+    bedrooms: 0,
     bathrooms: 1,
-    area: 45,
-    maxGuests: 2,
-    isVerified: false,
+    area_sqm: 45,
+    max_guests: 2,
+    is_verified: false,
     amenities: ['AC', 'WiFi', 'Kitchen'],
   },
   {
     id: 'prop-4',
-    titleEn: 'Beachfront Apartment',
-    titleRu: 'Апартаменты на берегу',
-    image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600',
+    title_en: 'Beachfront Apartment',
+    title_ru: 'Апартаменты на берегу',
+    cover_image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600',
     rating: 4.8,
-    reviewCount: 67,
-    location: 'Rawai',
-    locationRu: 'Равай',
+    review_count: 67,
+    district: 'Rawai',
     price: 35000,
-    pricePeriod: 'month',
-    propertyType: 'apartment',
-    listingType: 'rent',
+    price_period: 'month',
+    property_type: 'apartment',
+    listing_type: 'rent',
     bedrooms: 3,
     bathrooms: 2,
-    area: 120,
-    maxGuests: 6,
-    isVerified: true,
+    area_sqm: 120,
+    max_guests: 6,
+    is_verified: true,
     amenities: ['Pool', 'Beach Access', 'Balcony'],
   },
   {
     id: 'prop-5',
-    titleEn: 'Traditional Thai House',
-    titleRu: 'Традиционный тайский дом',
-    image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600',
+    title_en: 'Traditional Thai House',
+    title_ru: 'Традиционный тайский дом',
+    cover_image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600',
     rating: 4.6,
-    reviewCount: 34,
-    location: 'Chalong',
-    locationRu: 'Чалонг',
+    review_count: 34,
+    district: 'Chalong',
     price: 4500000,
-    pricePeriod: 'total',
-    propertyType: 'house',
-    listingType: 'sale',
+    price_period: 'total',
+    property_type: 'house',
+    listing_type: 'sale',
     bedrooms: 3,
     bathrooms: 2,
-    area: 180,
-    maxGuests: 6,
-    isVerified: true,
+    area_sqm: 180,
+    max_guests: 6,
+    is_verified: true,
     amenities: ['Garden', 'Parking', 'Traditional Style'],
   },
 ];
@@ -134,9 +131,47 @@ export default function PropertyIndex() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedType, setSelectedType] = useState('all');
   const [selectedListing, setSelectedListing] = useState('all');
   const [filterValues, setFilterValues] = useState<FilterValues>({});
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Fetch real properties from database
+  const { data: dbProperties, isLoading } = useProperties({
+    search: debouncedSearch,
+    propertyType: selectedType,
+    listingType: selectedListing,
+    bedrooms: filterValues.bedrooms as string,
+  }, 100);
+
+  // Use DB data or fallback to demo
+  const properties = useMemo(() => {
+    if (dbProperties && dbProperties.length > 0) {
+      return dbProperties;
+    }
+    // Fallback to demo data with client-side filtering
+    return demoProperties.filter(prop => {
+      const title = language === 'ru' ? prop.title_ru : prop.title_en;
+      const matchesSearch = !debouncedSearch || title.toLowerCase().includes(debouncedSearch.toLowerCase());
+      const matchesType = selectedType === 'all' || prop.property_type === selectedType;
+      const matchesListing = selectedListing === 'all' || prop.listing_type === selectedListing;
+      
+      if (filterValues.bedrooms) {
+        const bedroomFilter = filterValues.bedrooms as string;
+        if (bedroomFilter === 'studio' && prop.bedrooms !== 0) return false;
+        if (bedroomFilter === '4+' && (prop.bedrooms || 0) < 4) return false;
+        if (bedroomFilter !== '4+' && bedroomFilter !== 'studio' && prop.bedrooms !== parseInt(bedroomFilter)) return false;
+      }
+      
+      return matchesSearch && matchesType && matchesListing;
+    }) as unknown as Property[];
+  }, [dbProperties, demoProperties, debouncedSearch, selectedType, selectedListing, filterValues, language]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -161,25 +196,8 @@ export default function PropertyIndex() {
     });
   };
 
-  const filteredProperties = useMemo(() => {
-    return demoProperties.filter(prop => {
-      const title = language === 'ru' ? prop.titleRu : prop.titleEn;
-      const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesType = selectedType === 'all' || prop.propertyType === selectedType;
-      const matchesListing = selectedListing === 'all' || prop.listingType === selectedListing;
-      
-      // Bedrooms filter
-      if (filterValues.bedrooms) {
-        const bedroomFilter = filterValues.bedrooms as string;
-        if (bedroomFilter === '4+' && prop.bedrooms < 4) return false;
-        else if (bedroomFilter !== '4+' && prop.bedrooms !== parseInt(bedroomFilter)) return false;
-      }
-      
-      return matchesSearch && matchesType && matchesListing;
-    });
-  }, [demoProperties, searchQuery, selectedType, selectedListing, filterValues, language]);
-
-  const formatPriceLabel = (period: string) => {
+  const formatPriceLabel = (period?: string) => {
+    if (!period) return '';
     const periodLabels: Record<string, { en: string; ru: string }> = {
       night: { en: '/night', ru: '/ночь' },
       week: { en: '/week', ru: '/нед' },
@@ -193,7 +211,7 @@ export default function PropertyIndex() {
   return (
     <MiniAppLayout
       title={language === 'ru' ? 'Недвижимость' : 'Property'}
-      subtitle={language === 'ru' ? `${filteredProperties.length} объектов` : `${filteredProperties.length} properties`}
+      subtitle={language === 'ru' ? `${properties.length} объектов` : `${properties.length} properties`}
       fallbackPath="/"
       
       heroIcon={Home}
@@ -244,7 +262,7 @@ export default function PropertyIndex() {
         </FilterChipGroup>
       }
       
-      resultsCount={filteredProperties.length}
+      resultsCount={properties.length}
       resultsLabel={language === 'ru' ? 'Доступные объекты' : 'Available Properties'}
     >
       {/* Active Filters */}
@@ -256,31 +274,58 @@ export default function PropertyIndex() {
         className="mb-4"
       />
 
+      {/* Loading State */}
+      {isLoading && (
+        <div className="grid gap-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="rounded-xl overflow-hidden bg-card border">
+              <Skeleton className="h-48 w-full" />
+              <div className="p-4 space-y-2">
+                <Skeleton className="h-5 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Results Grid */}
-      <div className="grid gap-4">
-        {filteredProperties.map((property) => (
-          <ItemCard
-            key={property.id}
-            title={language === 'ru' ? property.titleRu : property.titleEn}
-            image={property.image}
-            price={property.price}
-            priceLabel={formatPriceLabel(property.pricePeriod)}
-            rating={property.rating}
-            reviewCount={property.reviewCount}
-            location={language === 'ru' ? property.locationRu : property.location}
-            meta={[
-              { icon: BedDouble, value: property.bedrooms },
-              { icon: Bath, value: property.bathrooms },
-              { icon: Users, value: property.maxGuests },
-            ]}
-            tags={property.amenities.slice(0, 2)}
-            isVerified={property.isVerified}
-            isNew={property.isNew}
-            isFeatured={property.isFeatured}
-            onClick={() => navigate(`/property/${property.id}`)}
-          />
-        ))}
-      </div>
+      {!isLoading && (
+        <div className="grid gap-4">
+          {properties.map((property) => (
+            <ItemCard
+              key={property.id}
+              title={language === 'ru' ? property.title_ru : property.title_en}
+              image={property.cover_image || property.images?.[0] || 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=600'}
+              price={property.price || 0}
+              priceLabel={formatPriceLabel(property.price_period)}
+              rating={property.rating || 0}
+              reviewCount={property.review_count || 0}
+              location={property.district || ''}
+              meta={[
+                { icon: BedDouble, value: property.bedrooms || 0 },
+                { icon: Bath, value: property.bathrooms || 0 },
+                { icon: Users, value: property.max_guests || 0 },
+              ]}
+              tags={property.amenities?.slice(0, 2) || []}
+              isVerified={property.is_verified}
+              isFeatured={property.is_featured}
+              badge={
+                property.min_stay_nights === 1 
+                  ? { text: language === 'ru' ? '⚡ Мин. 1 ночь' : '⚡ Min 1 night' }
+                  : undefined
+              }
+              onClick={() => navigate(`/property/${property.id}`)}
+            />
+          ))}
+          
+          {properties.length === 0 && (
+            <div className="text-center py-12 text-muted-foreground">
+              {language === 'ru' ? 'Объекты не найдены' : 'No properties found'}
+            </div>
+          )}
+        </div>
+      )}
     </MiniAppLayout>
   );
 }
