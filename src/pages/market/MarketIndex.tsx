@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Search, 
@@ -14,7 +14,8 @@ import {
   Star,
   MapPin,
   Clock,
-  Truck
+  Truck,
+  Filter
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -25,6 +26,8 @@ import { Button } from '@/components/ui/button';
 import { BackButton } from '@/components/uno/BackButton';
 import { cn } from '@/lib/utils';
 import { triggerRipple } from '@/hooks/useRipple';
+import { UniversalFilter, ActiveFilters, FilterValues } from '@/components/filters/UniversalFilter';
+import { marketFilterConfig } from '@/components/filters/MarketFilters';
 
 const categories = [
   { id: 'all', icon: ShoppingBag, labelEn: 'All', labelRu: 'Все' },
@@ -191,16 +194,54 @@ const MarketIndex = () => {
   const { items } = useCart();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterValues, setFilterValues] = useState<FilterValues>({});
 
   const cartItemCount = items.filter(i => i.type === 'product').reduce((sum, i) => sum + i.quantity, 0);
 
-  const filteredStores = stores.filter(store => {
-    const matchesCategory = selectedCategory === 'all' || store.category === selectedCategory;
-    const matchesSearch = searchQuery === '' || 
-      store.nameEn.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      store.nameRu.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    Object.entries(filterValues).forEach(([key, value]) => {
+      if (key === 'priceLevel' && value) count++;
+      else if (Array.isArray(value)) count += value.length;
+      else if (value) count++;
+    });
+    return count;
+  }, [filterValues]);
+
+  const handleRemoveFilter = (sectionId: string, optionId?: string) => {
+    setFilterValues(prev => {
+      const newValues = { ...prev };
+      if (optionId && Array.isArray(newValues[sectionId])) {
+        newValues[sectionId] = (newValues[sectionId] as string[]).filter(id => id !== optionId);
+        if ((newValues[sectionId] as string[]).length === 0) delete newValues[sectionId];
+      } else {
+        delete newValues[sectionId];
+      }
+      return newValues;
+    });
+  };
+
+  const handleClearAllFilters = () => setFilterValues({});
+
+  const filteredStores = useMemo(() => {
+    return stores.filter(store => {
+      const matchesCategory = selectedCategory === 'all' || store.category === selectedCategory;
+      const matchesSearch = searchQuery === '' || 
+        store.nameEn.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        store.nameRu.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      // Delivery filter
+      const deliveryFilters = filterValues.delivery as string[] || [];
+      if (deliveryFilters.includes('free-delivery') && store.deliveryFee !== 0) {
+        return false;
+      }
+      if (deliveryFilters.includes('express') && parseInt(store.deliveryTime.split('-')[0]) > 45) {
+        return false;
+      }
+      
+      return matchesCategory && matchesSearch;
+    });
+  }, [stores, selectedCategory, searchQuery, filterValues]);
 
   return (
     <AppLayout>
@@ -211,22 +252,36 @@ const MarketIndex = () => {
           <h1 className="text-lg font-semibold">
             {language === 'ru' ? 'Магазин' : 'Market'}
           </h1>
-          <h1 className="text-lg font-semibold">
-            {language === 'ru' ? 'Магазин' : 'Market'}
-          </h1>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative"
-            onClick={() => navigate('/cart')}
-          >
-            <ShoppingBag className="h-5 w-5" />
-            {cartItemCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
-                {cartItemCount}
-              </span>
-            )}
-          </Button>
+          <div className="flex items-center gap-2">
+            <UniversalFilter
+              config={marketFilterConfig}
+              values={filterValues}
+              onChange={setFilterValues}
+              language={language as 'en' | 'ru'}
+            >
+              <Button variant="ghost" size="icon" className="relative">
+                <Filter className="h-5 w-5" />
+                {activeFilterCount > 0 && (
+                  <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
+                    {activeFilterCount}
+                  </Badge>
+                )}
+              </Button>
+            </UniversalFilter>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative"
+              onClick={() => navigate('/cart')}
+            >
+              <ShoppingBag className="h-5 w-5" />
+              {cartItemCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
+                  {cartItemCount}
+                </span>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -241,6 +296,15 @@ const MarketIndex = () => {
             className="pl-10"
           />
         </div>
+
+        {/* Active Filters */}
+        <ActiveFilters
+          config={marketFilterConfig}
+          values={filterValues}
+          onRemove={handleRemoveFilter}
+          onClearAll={handleClearAllFilters}
+          language={language as 'en' | 'ru'}
+        />
 
         {/* Categories */}
         <div className="overflow-x-auto -mx-4 px-4 scrollbar-hide">

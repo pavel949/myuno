@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useWaterActivities } from "@/hooks/useWaterActivities";
@@ -8,7 +8,10 @@ import { PageHeader } from "@/components/uno/PageHeader";
 import { FilterChip } from "@/components/uno/FilterChip";
 import { SkeletonCard } from "@/components/uno/SkeletonCard";
 import { Badge } from "@/components/ui/badge";
-import { Waves, Clock, Users, Star, Shield, MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Waves, Clock, Users, Star, Shield, MapPin, Filter } from "lucide-react";
+import { UniversalFilter, ActiveFilters, FilterValues } from "@/components/filters/UniversalFilter";
+import { waterFilterConfig } from "@/components/filters/WaterFilters";
 
 const CATEGORIES = [
   { id: 'all', labelEn: 'All Activities', labelRu: 'Все активности' },
@@ -26,9 +29,47 @@ export default function WaterActivitiesIndex() {
   const { language, t } = useLanguage();
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [filterValues, setFilterValues] = useState<FilterValues>({});
+  
   const { activities, isLoading } = useWaterActivities({
     category: selectedCategory === 'all' ? undefined : selectedCategory,
   });
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    Object.entries(filterValues).forEach(([key, value]) => {
+      if (key === 'priceLevel' && value) count++;
+      else if (Array.isArray(value)) count += value.length;
+      else if (value) count++;
+    });
+    return count;
+  }, [filterValues]);
+
+  const handleRemoveFilter = (sectionId: string, optionId?: string) => {
+    setFilterValues(prev => {
+      const newValues = { ...prev };
+      if (optionId && Array.isArray(newValues[sectionId])) {
+        newValues[sectionId] = (newValues[sectionId] as string[]).filter(id => id !== optionId);
+        if ((newValues[sectionId] as string[]).length === 0) delete newValues[sectionId];
+      } else {
+        delete newValues[sectionId];
+      }
+      return newValues;
+    });
+  };
+
+  const handleClearAllFilters = () => setFilterValues({});
+
+  // Apply filters
+  const filteredActivities = useMemo(() => {
+    return activities.filter(activity => {
+      // Difficulty filter
+      if (filterValues.difficulty && activity.difficulty !== filterValues.difficulty) {
+        return false;
+      }
+      return true;
+    });
+  }, [activities, filterValues]);
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -47,30 +88,60 @@ export default function WaterActivitiesIndex() {
           title={t('water.title')}
           showBack
           fallbackPath="/"
-          subtitle={language === 'ru' ? `${activities.length} активностей` : `${activities.length} activities`}
+          subtitle={language === 'ru' ? `${filteredActivities.length} активностей` : `${filteredActivities.length} activities`}
         />
 
-        <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide mt-4">
-          {CATEGORIES.map(cat => (
-            <FilterChip
-              key={cat.id}
-              label={language === 'ru' ? cat.labelRu : cat.labelEn}
-              isActive={selectedCategory === cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-            />
-          ))}
+        {/* Filters Row */}
+        <div className="flex items-center gap-2 mt-4">
+          <UniversalFilter
+            config={waterFilterConfig}
+            values={filterValues}
+            onChange={setFilterValues}
+            language={language as 'en' | 'ru'}
+          >
+            <Button variant="outline" size="sm" className="gap-2">
+              <Filter className="w-4 h-4" />
+              {language === 'ru' ? 'Фильтры' : 'Filters'}
+              {activeFilterCount > 0 && (
+                <Badge className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
+                  {activeFilterCount}
+                </Badge>
+              )}
+            </Button>
+          </UniversalFilter>
+          
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide flex-1">
+            {CATEGORIES.map(cat => (
+              <FilterChip
+                key={cat.id}
+                label={language === 'ru' ? cat.labelRu : cat.labelEn}
+                isActive={selectedCategory === cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
+              />
+            ))}
+          </div>
         </div>
 
+        {/* Active Filters */}
+        <ActiveFilters
+          config={waterFilterConfig}
+          values={filterValues}
+          onRemove={handleRemoveFilter}
+          onClearAll={handleClearAllFilters}
+          language={language as 'en' | 'ru'}
+          className="mt-3"
+        />
+
         {isLoading ? (
-          <div className="grid gap-4">{[1, 2, 3].map(i => <SkeletonCard key={i} />)}</div>
-        ) : activities.length === 0 ? (
-          <div className="text-center py-12">
+          <div className="grid gap-4 mt-4">{[1, 2, 3].map(i => <SkeletonCard key={i} />)}</div>
+        ) : filteredActivities.length === 0 ? (
+          <div className="text-center py-12 mt-4">
             <Waves className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
             <p>{t('water.noActivitiesFound')}</p>
           </div>
         ) : (
-          <div className="grid gap-4">
-            {activities.map(activity => (
+          <div className="grid gap-4 mt-4">
+            {filteredActivities.map(activity => (
               <div 
                 key={activity.id} 
                 onClick={() => navigate(`/water/${activity.id}`)} 

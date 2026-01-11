@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Home, Building2, Hotel, MapPin, BedDouble, Bath, Users, ArrowRight, Map } from 'lucide-react';
+import { Search, Home, Building2, Hotel, MapPin, BedDouble, Bath, Users, ArrowRight, Map, Filter } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { UnifiedCard } from '@/components/uno/UnifiedCard';
 import { FilterChip } from '@/components/uno/FilterChip';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { triggerRipple } from '@/hooks/useRipple';
+import { UniversalFilter, ActiveFilters, FilterValues } from '@/components/filters/UniversalFilter';
+import { propertyFilterConfig } from '@/components/filters/PropertyFilters';
 
 // Demo properties data
 const demoProperties = [
@@ -137,14 +140,50 @@ export default function PropertyIndex() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('all');
   const [selectedListing, setSelectedListing] = useState('all');
+  const [filterValues, setFilterValues] = useState<FilterValues>({});
 
-  const filteredProperties = demoProperties.filter(prop => {
-    const title = language === 'ru' ? prop.titleRu : prop.titleEn;
-    const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesType = selectedType === 'all' || prop.propertyType === selectedType;
-    const matchesListing = selectedListing === 'all' || prop.listingType === selectedListing;
-    return matchesSearch && matchesType && matchesListing;
-  });
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    Object.entries(filterValues).forEach(([key, value]) => {
+      if (key === 'priceLevel' && value) count++;
+      else if (Array.isArray(value)) count += value.length;
+      else if (value) count++;
+    });
+    return count;
+  }, [filterValues]);
+
+  const handleRemoveFilter = (sectionId: string, optionId?: string) => {
+    setFilterValues(prev => {
+      const newValues = { ...prev };
+      if (optionId && Array.isArray(newValues[sectionId])) {
+        newValues[sectionId] = (newValues[sectionId] as string[]).filter(id => id !== optionId);
+        if ((newValues[sectionId] as string[]).length === 0) delete newValues[sectionId];
+      } else {
+        delete newValues[sectionId];
+      }
+      return newValues;
+    });
+  };
+
+  const handleClearAllFilters = () => setFilterValues({});
+
+  const filteredProperties = useMemo(() => {
+    return demoProperties.filter(prop => {
+      const title = language === 'ru' ? prop.titleRu : prop.titleEn;
+      const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesType = selectedType === 'all' || prop.propertyType === selectedType;
+      const matchesListing = selectedListing === 'all' || prop.listingType === selectedListing;
+      
+      // Bedrooms filter
+      if (filterValues.bedrooms) {
+        const bedroomFilter = filterValues.bedrooms as string;
+        if (bedroomFilter === '4+' && prop.bedrooms < 4) return false;
+        else if (bedroomFilter !== '4+' && prop.bedrooms !== parseInt(bedroomFilter)) return false;
+      }
+      
+      return matchesSearch && matchesType && matchesListing;
+    });
+  }, [demoProperties, searchQuery, selectedType, selectedListing, filterValues, language]);
 
   const formatPrice = (price: number, period: string) => {
     const formatted = price >= 1000000 
@@ -190,16 +229,42 @@ export default function PropertyIndex() {
           </div>
         </div>
 
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-          <Input
-            placeholder={language === 'ru' ? 'Поиск недвижимости...' : 'Search properties...'}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 h-12 bg-card border-border/50"
-          />
+        {/* Search + Filters */}
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <Input
+              placeholder={language === 'ru' ? 'Поиск недвижимости...' : 'Search properties...'}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 h-12 bg-card border-border/50"
+            />
+          </div>
+          <UniversalFilter
+            config={propertyFilterConfig}
+            values={filterValues}
+            onChange={setFilterValues}
+            language={language as 'en' | 'ru'}
+          >
+            <Button variant="outline" size="icon" className="h-12 w-12 relative">
+              <Filter className="w-5 h-5" />
+              {activeFilterCount > 0 && (
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
+                  {activeFilterCount}
+                </Badge>
+              )}
+            </Button>
+          </UniversalFilter>
         </div>
+
+        {/* Active Filters */}
+        <ActiveFilters
+          config={propertyFilterConfig}
+          values={filterValues}
+          onRemove={handleRemoveFilter}
+          onClearAll={handleClearAllFilters}
+          language={language as 'en' | 'ru'}
+        />
 
         {/* Listing type toggle */}
         <div className="flex gap-2">

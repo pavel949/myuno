@@ -114,3 +114,12 @@ export {
   marketDeliveryOptions,
   storeFeatureOptions,
 } from './MarketFilters';
+
+// Water Activities filters
+export {
+  waterFilterConfig,
+  waterActivityTypeOptions,
+  waterDifficultyOptions,
+  waterDurationOptions,
+  waterFeatureOptions,
+} from './WaterFilters';
