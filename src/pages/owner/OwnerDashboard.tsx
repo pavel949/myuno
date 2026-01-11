@@ -395,7 +395,7 @@ export default function OwnerDashboard() {
           <Button 
             variant="secondary" 
             size="sm"
-            onClick={() => window.open('https://wa.me/66612345678', '_blank')}
+            onClick={() => window.open('https://wa.me/66922407355', '_blank')}
           >
             WhatsApp
           </Button>

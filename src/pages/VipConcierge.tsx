@@ -26,8 +26,8 @@ import { Button } from '@/components/ui/button';
 import { FadeInUp, AnimatedList, AnimatedItem } from '@/components/layout/AnimatedList';
 import { cn } from '@/lib/utils';
 
-const UNO_CONCIERGE_PHONE = '+66-XX-XXX-XXXX'; // Replace with actual number
-const UNO_WHATSAPP = 'https://wa.me/66XXXXXXXXX'; // Replace with actual WhatsApp
+const UNO_CONCIERGE_PHONE = '+66922407355';
+const UNO_WHATSAPP = 'https://wa.me/66922407355';
 
 interface VipService {
   id: string;

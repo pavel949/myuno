@@ -163,7 +163,7 @@ export default function PartnersPage() {
             partners@uno.app
           </p>
           <p className="text-sm text-muted-foreground">
-            +66 XX XXX XXXX
+            +66 92 240 7355
           </p>
         </SectionCard>
       </PageContainer>
