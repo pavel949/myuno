@@ -97,7 +97,6 @@ export default function WaterActivitiesIndex() {
             config={waterFilterConfig}
             values={filterValues}
             onChange={setFilterValues}
-            language={language as 'en' | 'ru'}
           >
             <Button variant="outline" size="sm" className="gap-2">
               <Filter className="w-4 h-4" />
@@ -128,7 +127,6 @@ export default function WaterActivitiesIndex() {
           values={filterValues}
           onRemove={handleRemoveFilter}
           onClearAll={handleClearAllFilters}
-          language={language as 'en' | 'ru'}
           className="mt-3"
         />
 

@@ -253,11 +253,10 @@ const MarketIndex = () => {
             {language === 'ru' ? 'Магазин' : 'Market'}
           </h1>
           <div className="flex items-center gap-2">
-            <UniversalFilter
+          <UniversalFilter
               config={marketFilterConfig}
               values={filterValues}
               onChange={setFilterValues}
-              language={language as 'en' | 'ru'}
             >
               <Button variant="ghost" size="icon" className="relative">
                 <Filter className="h-5 w-5" />
@@ -303,7 +302,6 @@ const MarketIndex = () => {
           values={filterValues}
           onRemove={handleRemoveFilter}
           onClearAll={handleClearAllFilters}
-          language={language as 'en' | 'ru'}
         />
 
         {/* Categories */}

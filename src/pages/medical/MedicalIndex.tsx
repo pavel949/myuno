@@ -182,7 +182,6 @@ const MedicalIndex = () => {
                 config={medicalFilterConfig}
                 values={filterValues}
                 onChange={setFilterValues}
-                language={language as 'en' | 'ru'}
               >
                 <Button variant="outline" size="icon" className="relative">
                   <Filter className="w-4 h-4" />
@@ -233,7 +232,6 @@ const MedicalIndex = () => {
           values={filterValues}
           onRemove={handleRemoveFilter}
           onClearAll={handleClearAllFilters}
-          language={language as 'en' | 'ru'}
           className="px-4 pt-3"
         />
 
