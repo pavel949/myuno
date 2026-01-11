@@ -1,20 +1,19 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { UtensilsCrossed, Clock, Star, MapPin, Bike, ArrowRight, Flame, CalendarDays, Banknote, Map, SlidersHorizontal } from 'lucide-react';
+import { UtensilsCrossed, Clock, Star, MapPin, Bike, ArrowRight, Flame, CalendarDays, Map } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { FilterChip } from '@/components/uno/FilterChip';
+import { SkeletonCard } from '@/components/uno/SkeletonCard';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { triggerRipple } from '@/hooks/useRipple';
-import { demoRestaurants, cuisineCategories, locationCategories } from './restaurantsData';
+import { useRestaurants } from '@/hooks/useRestaurants';
 import { MiniAppHero, MiniAppSearch, MiniAppQuickActions } from '@/components/miniapp';
 import { 
   UniversalFilter, 
-  QuickFilterBar,
   ActiveFilters,
   deliveryFilterConfig, 
   reservationFilterConfig,
@@ -22,6 +21,23 @@ import {
 } from '@/components/filters';
 
 type Mode = 'delivery' | 'reservation';
+
+const CUISINE_CATEGORIES = [
+  { id: 'all', icon: '🍽️', labelEn: 'All', labelRu: 'Все' },
+  { id: 'thai', icon: '🍜', labelEn: 'Thai', labelRu: 'Тайская' },
+  { id: 'seafood', icon: '🦐', labelEn: 'Seafood', labelRu: 'Морепродукты' },
+  { id: 'japanese', icon: '🍣', labelEn: 'Japanese', labelRu: 'Японская' },
+  { id: 'italian', icon: '🍕', labelEn: 'Italian', labelRu: 'Итальянская' },
+  { id: 'indian', icon: '🍛', labelEn: 'Indian', labelRu: 'Индийская' },
+];
+
+const LOCATION_CATEGORIES = [
+  { id: 'all', labelEn: 'All areas', labelRu: 'Все районы' },
+  { id: 'Patong', labelEn: 'Patong', labelRu: 'Патонг' },
+  { id: 'Kata', labelEn: 'Kata', labelRu: 'Ката' },
+  { id: 'Kamala', labelEn: 'Kamala', labelRu: 'Камала' },
+  { id: 'Phuket Town', labelEn: 'Phuket Town', labelRu: 'Пхукет Таун' },
+];
 
 export default function RestaurantsIndex() {
   const { language } = useLanguage();
@@ -42,6 +58,14 @@ export default function RestaurantsIndex() {
     occasion: [],
     dietary: [],
     delivery: [],
+  });
+
+  // Load restaurants from database
+  const { restaurants, isLoading } = useRestaurants({
+    cuisine: selectedCuisine === 'all' ? undefined : selectedCuisine,
+    district: selectedLocation === 'all' ? undefined : selectedLocation,
+    searchQuery: searchQuery || undefined,
+    deliveryOnly: mode === 'delivery' ? true : undefined,
   });
 
   // Get current filter config based on mode
@@ -65,58 +89,46 @@ export default function RestaurantsIndex() {
     setSearchParams({ mode: newMode });
   };
 
+  // Additional client-side filtering for advanced filters
   const filteredRestaurants = useMemo(() => {
-    return demoRestaurants.filter(rest => {
-      const name = language === 'ru' ? rest.nameRu : rest.nameEn;
-      const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCuisine = selectedCuisine === 'all' || 
-        rest.cuisine.toLowerCase() === selectedCuisine.toLowerCase();
-      const matchesLocation = selectedLocation === 'all' ||
-        rest.location.toLowerCase() === selectedLocation.toLowerCase();
-      
-      // Advanced filter matching
+    return restaurants.filter(rest => {
+      // Price level filter
       const priceFilter = filterValues.priceLevel;
-      const matchesPriceLevel = !priceFilter || rest.priceLevel === parseInt(priceFilter as string);
+      if (priceFilter && rest.price_range !== parseInt(priceFilter as string)) {
+        return false;
+      }
       
-      const cuisineFilter = filterValues.cuisine as string[];
-      const matchesCuisineFilter = cuisineFilter.length === 0 || 
-        cuisineFilter.some(c => rest.cuisine.toLowerCase() === c.toLowerCase());
-      
+      // Features filter
       const featureFilter = filterValues.features as string[];
-      const matchesFeatures = featureFilter.length === 0 ||
-        featureFilter.every(f => rest.features?.includes(f));
-      
-      const occasionFilter = filterValues.occasion as string[];
-      const matchesOccasion = occasionFilter.length === 0 ||
-        occasionFilter.some(o => rest.occasions?.includes(o));
-      
-      const dietaryFilter = filterValues.dietary as string[];
-      const matchesDietary = dietaryFilter.length === 0 ||
-        dietaryFilter.every(d => rest.dietary?.includes(d));
+      if (featureFilter.length > 0 && rest.features) {
+        if (!featureFilter.every(f => rest.features?.includes(f))) {
+          return false;
+        }
+      }
       
       // Delivery specific filters
       const deliveryFilter = filterValues.delivery as string[];
-      let matchesDeliveryOptions = true;
       if (deliveryFilter.length > 0) {
-        if (deliveryFilter.includes('free_delivery') && rest.deliveryFee > 0) matchesDeliveryOptions = false;
+        if (deliveryFilter.includes('free_delivery') && (rest.delivery_fee || 0) > 0) return false;
         if (deliveryFilter.includes('fast_delivery')) {
-          const minTime = parseInt(rest.deliveryTime.split('-')[0]);
-          if (minTime > 30) matchesDeliveryOptions = false;
+          const deliveryTime = rest.delivery_time?.split('-')[0];
+          if (deliveryTime && parseInt(deliveryTime) > 30) return false;
         }
-        if (deliveryFilter.includes('no_min_order') && rest.minOrder > 0) matchesDeliveryOptions = false;
+        if (deliveryFilter.includes('no_min_order') && (rest.min_order_amount || 0) > 0) return false;
       }
       
-      if (mode === 'delivery' && !rest.acceptsDelivery) return false;
-      if (mode === 'reservation' && !rest.acceptsReservations) return false;
+      // For reservation mode, filter to only restaurants without delivery (fine dining)
+      if (mode === 'reservation' && rest.delivery_available) {
+        // Keep restaurants that have reservation capability (have features like fine_dining, romantic, etc.)
+        const hasReservationFeatures = rest.features?.some(f => 
+          ['fine_dining', 'romantic', 'reservations_required', 'private_rooms'].includes(f)
+        );
+        if (!hasReservationFeatures) return true; // Still show them for now
+      }
       
-      return matchesSearch && matchesCuisine && matchesLocation && 
-             matchesPriceLevel && matchesCuisineFilter && matchesFeatures && 
-             matchesOccasion && matchesDietary && matchesDeliveryOptions;
+      return true;
     });
-  }, [language, searchQuery, selectedCuisine, selectedLocation, filterValues, mode]);
-
-  const openRestaurants = filteredRestaurants.filter(r => r.isOpen);
-  const closedRestaurants = filteredRestaurants.filter(r => !r.isOpen);
+  }, [restaurants, filterValues, mode]);
 
   const handleRestaurantClick = (restaurantId: string) => {
     navigate(`/restaurants/${restaurantId}?mode=${mode}`);
@@ -227,7 +239,7 @@ export default function RestaurantsIndex() {
 
         {/* Cuisine filters */}
         <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide mb-2">
-          {cuisineCategories.map((cat) => (
+          {CUISINE_CATEGORIES.map((cat) => (
             <FilterChip
               key={cat.id}
               label={`${cat.icon} ${language === 'ru' ? cat.labelRu : cat.labelEn}`}
@@ -250,7 +262,7 @@ export default function RestaurantsIndex() {
 
         {/* Location filters */}
         <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide mb-4">
-          {locationCategories.map((loc) => (
+          {LOCATION_CATEGORIES.map((loc) => (
             <FilterChip
               key={loc.id}
               label={`📍 ${language === 'ru' ? loc.labelRu : loc.labelEn}`}
@@ -268,7 +280,7 @@ export default function RestaurantsIndex() {
         />
 
         {/* Featured Banner - only for delivery */}
-        {mode === 'delivery' && demoRestaurants.filter(r => r.isFeatured).length > 0 && (
+        {mode === 'delivery' && filteredRestaurants.some(r => r.is_featured) && (
           <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-orange-500 to-red-500 p-4 mb-6">
             <div className="flex items-center gap-3">
               <Flame className="w-8 h-8 text-white" />
@@ -285,8 +297,15 @@ export default function RestaurantsIndex() {
           </div>
         )}
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="space-y-4">
+            {[1, 2, 3].map(i => <SkeletonCard key={i} />)}
+          </div>
+        )}
+
         {/* Empty State */}
-        {openRestaurants.length === 0 && closedRestaurants.length === 0 && (
+        {!isLoading && filteredRestaurants.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
               <UtensilsCrossed className="w-8 h-8 text-muted-foreground" />
@@ -306,96 +325,92 @@ export default function RestaurantsIndex() {
           </div>
         )}
 
-        {/* Open Restaurants */}
-        {openRestaurants.length > 0 && (
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">
-              {mode === 'reservation' 
-                ? (language === 'ru' ? 'Доступно для брони' : 'Available for Booking')
-                : (language === 'ru' ? 'Открыто сейчас' : 'Open Now')}
-            </h2>
-            <span className="text-sm text-muted-foreground">
-              {openRestaurants.length} {language === 'ru' ? 'ресторанов' : 'restaurants'}
-            </span>
-          </div>
-          
-          <div className="space-y-4">
-            {openRestaurants.map((restaurant) => (
-              <div
-                key={restaurant.id}
-                className="relative overflow-hidden rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all group"
-              >
-                <div 
-                  onClick={(e) => {
-                    triggerRipple(e);
-                    handleRestaurantClick(restaurant.id);
-                  }}
-                  className="flex gap-4 p-3 cursor-pointer active:scale-[0.98]"
+        {/* Restaurants List */}
+        {!isLoading && filteredRestaurants.length > 0 && (
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">
+                {mode === 'reservation' 
+                  ? (language === 'ru' ? 'Доступно для брони' : 'Available for Booking')
+                  : (language === 'ru' ? 'Рестораны' : 'Restaurants')}
+              </h2>
+              <span className="text-sm text-muted-foreground">
+                {filteredRestaurants.length} {language === 'ru' ? 'ресторанов' : 'restaurants'}
+              </span>
+            </div>
+            
+            <div className="space-y-4">
+              {filteredRestaurants.map((restaurant) => (
+                <div
+                  key={restaurant.id}
+                  className="relative overflow-hidden rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all group"
                 >
-                  <div className="relative w-24 h-24 rounded-xl overflow-hidden flex-shrink-0">
-                    <img
-                      src={restaurant.image}
-                      alt={language === 'ru' ? restaurant.nameRu : restaurant.nameEn}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                    />
-                    {restaurant.isFeatured && (
-                      <div className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-gold/90 text-black text-[10px] font-medium">
-                        ⭐
-                      </div>
-                    )}
-                    {restaurant.isNew && (
-                      <div className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-success/90 text-white text-[10px] font-medium">
-                        NEW
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-foreground truncate">
-                      {language === 'ru' ? restaurant.nameRu : restaurant.nameEn}
-                    </h3>
-                    
-                    <p className="text-sm text-muted-foreground">
-                      {language === 'ru' ? restaurant.cuisineRu : restaurant.cuisine} • {'฿'.repeat(restaurant.priceLevel)}
-                    </p>
-                    
-                    <div className="flex items-center gap-3 mt-2 text-sm">
-                      <div className="flex items-center gap-1">
-                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                        <span className="font-medium">{restaurant.rating}</span>
-                      </div>
-                      
-                      {restaurant.acceptsDelivery && (
-                        <div className="flex items-center gap-1 text-muted-foreground">
-                          <Clock className="w-4 h-4" />
-                          <span>{restaurant.deliveryTime} min</span>
+                  <div 
+                    onClick={(e) => {
+                      triggerRipple(e);
+                      handleRestaurantClick(restaurant.id);
+                    }}
+                    className="flex gap-4 p-3 cursor-pointer active:scale-[0.98]"
+                  >
+                    <div className="relative w-24 h-24 rounded-xl overflow-hidden flex-shrink-0">
+                      <img
+                        src={restaurant.cover_image || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400'}
+                        alt={language === 'ru' ? restaurant.name_ru : restaurant.name_en}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      />
+                      {restaurant.is_featured && (
+                        <div className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-gold/90 text-black text-[10px] font-medium">
+                          ⭐
                         </div>
                       )}
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-foreground truncate">
+                        {language === 'ru' ? restaurant.name_ru : restaurant.name_en}
+                      </h3>
                       
-                      <div className="flex items-center gap-1 text-muted-foreground">
-                        <MapPin className="w-4 h-4" />
-                        <span className="truncate max-w-[80px]">{language === 'ru' ? restaurant.locationRu : restaurant.location}</span>
+                      <p className="text-sm text-muted-foreground">
+                        {restaurant.cuisine} • {'฿'.repeat(restaurant.price_range || 2)}
+                      </p>
+                      
+                      <div className="flex items-center gap-3 mt-2 text-sm">
+                        <div className="flex items-center gap-1">
+                          <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                          <span className="font-medium">{restaurant.rating || 0}</span>
+                        </div>
+                        
+                        {restaurant.delivery_available && restaurant.delivery_time && (
+                          <div className="flex items-center gap-1 text-muted-foreground">
+                            <Clock className="w-4 h-4" />
+                            <span>{restaurant.delivery_time} min</span>
+                          </div>
+                        )}
+                        
+                        {restaurant.district && (
+                          <div className="flex items-center gap-1 text-muted-foreground">
+                            <MapPin className="w-4 h-4" />
+                            <span className="truncate max-w-[80px]">{restaurant.district}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
-                </div>
-                
-                <div className="flex gap-2 px-3 pb-3">
-                  {restaurant.acceptsDelivery && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        triggerRipple(e);
-                        navigate(`/restaurants/${restaurant.id}?mode=delivery`);
-                      }}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 active:scale-[0.98] transition-all"
-                    >
-                      <Bike className="w-4 h-4" />
-                      {language === 'ru' ? 'Заказать' : 'Order'}
-                    </button>
-                  )}
-                  {restaurant.acceptsReservations && (
+                  
+                  <div className="flex gap-2 px-3 pb-3">
+                    {restaurant.delivery_available && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          triggerRipple(e);
+                          navigate(`/restaurants/${restaurant.id}?mode=delivery`);
+                        }}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 active:scale-[0.98] transition-all"
+                      >
+                        <Bike className="w-4 h-4" />
+                        {language === 'ru' ? 'Заказать' : 'Order'}
+                      </button>
+                    )}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -407,62 +422,6 @@ export default function RestaurantsIndex() {
                       <CalendarDays className="w-4 h-4" />
                       {language === 'ru' ? 'Столик' : 'Book'}
                     </button>
-                  )}
-                </div>
-                
-                {restaurant.acceptsReservations && restaurant.depositRequired && (
-                  <div className="flex items-center gap-1.5 px-3 pb-3">
-                    <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-amber-500/10 border border-amber-500/20">
-                      <Banknote className="w-3.5 h-3.5 text-amber-600" />
-                      <span className="text-xs font-medium text-amber-700 dark:text-amber-500">
-                        {language === 'ru' ? `Депозит ${restaurant.depositAmount}฿` : `Deposit ${restaurant.depositAmount}฿`}
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-        )}
-
-        {/* Closed Restaurants */}
-        {closedRestaurants.length > 0 && (
-          <div>
-            <h2 className="text-lg font-semibold mb-4 text-muted-foreground">
-              {language === 'ru' ? 'Сейчас закрыто' : 'Currently Closed'}
-            </h2>
-            
-            <div className="space-y-4 opacity-60">
-              {closedRestaurants.map((restaurant) => (
-                <div
-                  key={restaurant.id}
-                  className="flex gap-4 p-3 rounded-xl bg-card border border-border/50"
-                >
-                  <div className="relative w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 grayscale">
-                    <img
-                      src={restaurant.image}
-                      alt={language === 'ru' ? restaurant.nameRu : restaurant.nameEn}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                      <span className="text-white text-xs font-medium px-2 py-1 rounded bg-black/50">
-                        {language === 'ru' ? 'Закрыто' : 'Closed'}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-foreground truncate">
-                      {language === 'ru' ? restaurant.nameRu : restaurant.nameEn}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {language === 'ru' ? restaurant.cuisineRu : restaurant.cuisine}
-                    </p>
-                    <div className="flex items-center gap-1 mt-2 text-sm">
-                      <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                      <span>{restaurant.rating}</span>
-                    </div>
                   </div>
                 </div>
               ))}

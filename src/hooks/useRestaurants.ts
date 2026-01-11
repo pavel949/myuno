@@ -64,6 +64,8 @@ export interface MenuItem {
 
 interface UseRestaurantsOptions {
   cuisine?: string;
+  district?: string;
+  searchQuery?: string;
   featured?: boolean;
   deliveryOnly?: boolean;
   limit?: number;
@@ -86,6 +88,12 @@ export function useRestaurants(options: UseRestaurantsOptions = {}) {
 
       if (options.cuisine && options.cuisine !== 'all') {
         query = query.eq('cuisine', options.cuisine);
+      }
+      if (options.district && options.district !== 'all') {
+        query = query.eq('district', options.district);
+      }
+      if (options.searchQuery) {
+        query = query.or(`name_en.ilike.%${options.searchQuery}%,name_ru.ilike.%${options.searchQuery}%`);
       }
       if (options.featured) {
         query = query.eq('is_featured', true);
@@ -110,7 +118,7 @@ export function useRestaurants(options: UseRestaurantsOptions = {}) {
     } finally {
       setIsLoading(false);
     }
-  }, [options.cuisine, options.featured, options.deliveryOnly, options.limit]);
+  }, [options.cuisine, options.district, options.searchQuery, options.featured, options.deliveryOnly, options.limit]);
 
   useEffect(() => {
     fetchRestaurants();
