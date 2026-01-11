@@ -40,7 +40,8 @@ export interface InsurancePlan {
   currency: string;
   coverage_amount: number | null;
   deductible: number | null;
-  features: { en: string; ru: string }[];
+  features: { en?: string[]; ru?: string[] } | null;
+  exclusions: { en?: string[]; ru?: string[] } | null;
   min_age: number | null;
   max_age: number | null;
   requires_medical_exam: boolean;
@@ -140,7 +141,8 @@ export function useInsurancePlans(providerId?: string, insuranceType?: string) {
         setPlans(
           data.map((p: any) => ({
             ...p,
-            features: Array.isArray(p.features) ? p.features : [],
+            features: p.features || null,
+            exclusions: p.exclusions || null,
           })) as InsurancePlan[]
         );
       }

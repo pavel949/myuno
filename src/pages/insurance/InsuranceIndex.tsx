@@ -38,11 +38,11 @@ export default function InsuranceIndex() {
 
   const { plans, isLoading: plansLoading } = useInsurancePlans(undefined, selectedCategory);
 
-  const quickItems: QuickGridItem[] = [
+const quickItems: QuickGridItem[] = [
     { icon: '🏥', label: language === 'ru' ? 'Здоровье' : 'Health', onClick: () => setSelectedCategory('health') },
     { icon: '✈️', label: language === 'ru' ? 'Путешествия' : 'Travel', onClick: () => setSelectedCategory('travel') },
-    { icon: '🛂', label: language === 'ru' ? 'Для визы' : 'Visa', onClick: () => navigate('/legal?category=visa') },
-    { icon: '⭐', label: language === 'ru' ? 'Elite Виза' : 'Elite Visa', onClick: () => navigate('/legal/visa/elite') },
+    { icon: '🏠', label: language === 'ru' ? 'Имущество' : 'Property', onClick: () => setSelectedCategory('property') },
+    { icon: '🚗', label: language === 'ru' ? 'Авто' : 'Vehicle', onClick: () => setSelectedCategory('vehicle') },
   ];
 
   const popularPlans = useMemo(() => plans.filter((p) => p.is_popular).slice(0, 4), [plans]);

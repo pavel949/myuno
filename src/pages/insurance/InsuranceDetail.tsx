@@ -175,21 +175,21 @@ export default function InsuranceDetail() {
                     </p>
                   )}
 
-                  {plan.features.length > 0 && (
+                  {plan.features && (language === 'ru' ? plan.features.ru : plan.features.en)?.length ? (
                     <div className="space-y-1">
-                      {plan.features.slice(0, 3).map((feature, idx) => (
+                      {(language === 'ru' ? plan.features.ru : plan.features.en)?.slice(0, 3).map((feature, idx) => (
                         <div key={idx} className="flex items-center gap-2 text-sm">
                           <CheckCircle2 className="w-3 h-3 text-green-500 flex-shrink-0" />
-                          <span className="text-muted-foreground">{language === 'ru' ? feature.ru : feature.en}</span>
+                          <span className="text-muted-foreground">{feature}</span>
                         </div>
                       ))}
-                      {plan.features.length > 3 && (
+                      {((language === 'ru' ? plan.features.ru : plan.features.en)?.length || 0) > 3 && (
                         <p className="text-xs text-primary">
-                          +{plan.features.length - 3} {language === 'ru' ? 'ещё' : 'more'}
+                          +{((language === 'ru' ? plan.features.ru : plan.features.en)?.length || 0) - 3} {language === 'ru' ? 'ещё' : 'more'}
                         </p>
                       )}
                     </div>
-                  )}
+                  ) : null}
 
                   <Button className="w-full mt-4" variant="outline">
                     {language === 'ru' ? 'Подробнее' : 'View Details'}
