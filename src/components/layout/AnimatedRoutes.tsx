@@ -167,6 +167,9 @@ import OwnerPropertyDetail from '@/pages/owner/OwnerPropertyDetail';
 import OwnerCalendar from '@/pages/owner/OwnerCalendar';
 import OwnerFinancials from '@/pages/owner/OwnerFinancials';
 import OwnerFinancialForm from '@/pages/owner/OwnerFinancialForm';
+import OwnerMessages from '@/pages/owner/OwnerMessages';
+import OwnerChatRoom from '@/pages/owner/OwnerChatRoom';
+import OwnerSupportChat from '@/pages/owner/OwnerSupportChat';
 import AddProperty from '@/pages/owner/AddProperty';
 import ServiceRequest from '@/pages/owner/ServiceRequest';
 import InspectionRequest from '@/pages/owner/InspectionRequest';
@@ -344,6 +347,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/owner/financials" element={<PageTransition><OwnerFinancials /></PageTransition>} />
         <Route path="/owner/financials/new" element={<PageTransition><OwnerFinancialForm /></PageTransition>} />
         <Route path="/owner/financials/:id" element={<PageTransition><OwnerFinancialForm /></PageTransition>} />
+        <Route path="/owner/messages" element={<PageTransition><OwnerMessages /></PageTransition>} />
+        <Route path="/owner/chat/:type/:id" element={<PageTransition><OwnerChatRoom /></PageTransition>} />
+        <Route path="/owner/support-chat" element={<PageTransition><OwnerSupportChat /></PageTransition>} />
         <Route path="/owner/service-request" element={<PageTransition><ServiceRequest /></PageTransition>} />
         <Route path="/owner/inspection" element={<PageTransition><InspectionRequest /></PageTransition>} />
         
