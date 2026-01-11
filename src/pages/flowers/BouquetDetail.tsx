@@ -83,7 +83,7 @@ const BouquetDetail = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate(-1)}
+              onClick={() => navigate('/flowers')}
               className="bg-black/20 backdrop-blur-sm text-white hover:bg-black/40"
             >
               <ArrowLeft className="w-5 h-5" />

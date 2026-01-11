@@ -139,6 +139,7 @@ export default function TourBooking() {
         <PageHeader 
           title={language === 'ru' ? 'Бронирование тура' : 'Book Tour'} 
           showBack 
+          fallbackPath="/tours"
         />
 
         {/* Summary Card */}

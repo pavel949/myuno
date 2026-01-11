@@ -121,6 +121,7 @@ export default function BeautyBooking() {
         <PageHeader 
           title={language === 'ru' ? 'Бронирование' : 'Book Appointment'} 
           showBack 
+          fallbackPath="/beauty"
         />
 
         {/* Summary Card */}

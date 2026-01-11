@@ -128,7 +128,7 @@ export default function RestaurantDetail() {
           {/* Navigation */}
           <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-4">
             <button
-              onClick={() => navigate(-1)}
+              onClick={() => navigate('/restaurants')}
               className="w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center"
             >
               <ArrowLeft className="w-5 h-5" />

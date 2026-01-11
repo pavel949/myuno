@@ -15,6 +15,7 @@ import {
   Calendar
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { BackButton } from '@/components/uno/BackButton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -148,9 +149,10 @@ export default function PetServiceDetail() {
   };
 
   return (
-    <AppLayout title={language === 'ru' ? service.nameRu : service.name}>
+    <AppLayout showBottomNav={false}>
       {/* Hero Image */}
       <div className="relative h-64">
+        <BackButton fallbackPath="/pets" variant="overlay" className="absolute top-4 left-4 z-10" />
         <img
           src={service.image}
           alt={service.name}

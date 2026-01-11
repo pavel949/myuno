@@ -129,6 +129,7 @@ export default function EducationBooking() {
         <PageHeader 
           title={language === 'ru' ? 'Запись на занятие' : 'Book a Lesson'} 
           showBack 
+          fallbackPath="/education"
         />
 
         {/* Summary Card */}

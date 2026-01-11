@@ -31,7 +31,7 @@ export default function TourDetail() {
           <img src={tour.cover_image || 'https://images.unsplash.com/photo-1537956965359-7573183d1f57?w=800'} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
           <div className="absolute top-4 left-4 right-4 flex justify-between">
-            <Button variant="ghost" size="icon" className="bg-background/80 backdrop-blur-sm" onClick={() => navigate(-1)}><ArrowLeft className="w-5 h-5" /></Button>
+            <Button variant="ghost" size="icon" className="bg-background/80 backdrop-blur-sm" onClick={() => navigate('/tours')}><ArrowLeft className="w-5 h-5" /></Button>
             <FavoriteButton itemId={tour.id} itemType="tour" itemData={{ title: tourName, image: tour.cover_image, price: tour.price }} />
           </div>
           <div className="absolute bottom-4 left-4 right-4">

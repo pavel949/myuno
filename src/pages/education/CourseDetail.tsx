@@ -123,7 +123,7 @@ export default function CourseDetail() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/education')}
           className="absolute top-4 left-4 bg-white/20 backdrop-blur-sm text-white hover:bg-white/30"
         >
           <ArrowLeft className="h-5 w-5" />

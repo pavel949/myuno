@@ -141,6 +141,7 @@ export default function EventBooking() {
         <PageHeader 
           title={language === 'ru' ? 'Оформление билетов' : 'Book Tickets'} 
           showBack 
+          fallbackPath="/events"
         />
 
         {/* Summary Card */}

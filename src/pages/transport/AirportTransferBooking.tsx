@@ -197,7 +197,7 @@ export default function AirportTransferBooking() {
         <div className="relative px-4 pt-4">
           <div className="flex items-center gap-4 mb-4">
             <button 
-              onClick={() => step > 1 ? setStep(step - 1) : navigate(-1)} 
+              onClick={() => step > 1 ? setStep(step - 1) : navigate('/transport')} 
               className="w-10 h-10 flex items-center justify-center rounded-full bg-background/80 backdrop-blur-sm border border-border/50 text-foreground hover:bg-background transition-colors"
             >
               <ChevronLeft className="w-5 h-5" />

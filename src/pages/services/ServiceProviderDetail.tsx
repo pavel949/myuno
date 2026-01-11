@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { triggerRipple } from "@/hooks/useRipple";
 import { toast } from "sonner";
+import { BackButton } from "@/components/uno/BackButton";
 
 // Services data by category
 const getServicesByCategory = (category: string, language: string) => {
@@ -159,10 +160,11 @@ const ServiceProviderDetail = () => {
   };
 
   return (
-    <AppLayout title={provider.name} showBottomNav={false}>
+    <AppLayout showBottomNav={false}>
       <div className="pb-32">
         {/* Header */}
         <div className="relative">
+          <BackButton fallbackPath="/services" variant="overlay" className="absolute top-4 left-4 z-10" />
           <div className="h-32 bg-gradient-to-br from-blue-500 to-cyan-500" />
           <div className="absolute -bottom-12 left-4">
             <div className="relative">
