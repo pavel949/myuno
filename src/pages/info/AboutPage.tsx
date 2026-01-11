@@ -186,7 +186,7 @@ export default function AboutPage() {
           <h2 className="font-semibold mb-2">{isRu ? 'Связаться с нами' : 'Contact Us'}</h2>
           <div className="space-y-2 text-sm text-muted-foreground">
             <p>📧 assist@myuno.app</p>
-            <p>📱 +66 92 250 7355</p>
+            <p>📱 +66 92 240 7355</p>
             <p>📍 Phuket, Thailand</p>
           </div>
         </SectionCard>
