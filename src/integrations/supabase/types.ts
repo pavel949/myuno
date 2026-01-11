@@ -311,6 +311,77 @@ export type Database = {
           },
         ]
       }
+      bouquets: {
+        Row: {
+          category: string | null
+          colors: string[] | null
+          created_at: string
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          flowers: string[] | null
+          id: string
+          image: string | null
+          images: string[] | null
+          is_active: boolean | null
+          is_popular: boolean | null
+          name_en: string
+          name_ru: string
+          price: number
+          shop_id: string
+          size: string | null
+          stock_quantity: number | null
+        }
+        Insert: {
+          category?: string | null
+          colors?: string[] | null
+          created_at?: string
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          flowers?: string[] | null
+          id?: string
+          image?: string | null
+          images?: string[] | null
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          name_en: string
+          name_ru: string
+          price: number
+          shop_id: string
+          size?: string | null
+          stock_quantity?: number | null
+        }
+        Update: {
+          category?: string | null
+          colors?: string[] | null
+          created_at?: string
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          flowers?: string[] | null
+          id?: string
+          image?: string | null
+          images?: string[] | null
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          name_en?: string
+          name_ru?: string
+          price?: number
+          shop_id?: string
+          size?: string | null
+          stock_quantity?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bouquets_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "flower_shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cart_items: {
         Row: {
           created_at: string
@@ -722,6 +793,98 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      flower_shops: {
+        Row: {
+          address: string | null
+          approval_status: string | null
+          cover_image: string | null
+          created_at: string
+          delivery_available: boolean | null
+          delivery_fee: number | null
+          description_en: string | null
+          description_ru: string | null
+          email: string | null
+          id: string
+          images: string[] | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          lat: number | null
+          lng: number | null
+          min_order_amount: number | null
+          name_en: string
+          name_ru: string
+          phone: string | null
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          updated_at: string
+          working_hours: Json | null
+        }
+        Insert: {
+          address?: string | null
+          approval_status?: string | null
+          cover_image?: string | null
+          created_at?: string
+          delivery_available?: boolean | null
+          delivery_fee?: number | null
+          description_en?: string | null
+          description_ru?: string | null
+          email?: string | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          min_order_amount?: number | null
+          name_en: string
+          name_ru: string
+          phone?: string | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string
+          working_hours?: Json | null
+        }
+        Update: {
+          address?: string | null
+          approval_status?: string | null
+          cover_image?: string | null
+          created_at?: string
+          delivery_available?: boolean | null
+          delivery_fee?: number | null
+          description_en?: string | null
+          description_ru?: string | null
+          email?: string | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          min_order_amount?: number | null
+          name_en?: string
+          name_ru?: string
+          phone?: string | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string
+          working_hours?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flower_shops_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       locations: {
         Row: {
@@ -1402,6 +1565,9 @@ export type Database = {
       }
       providers: {
         Row: {
+          address: string | null
+          business_category: string | null
+          commission_rate: number | null
           cover_image: string | null
           created_at: string
           description_en: string | null
@@ -1410,15 +1576,24 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_verified: boolean | null
+          lat: number | null
+          lng: number | null
           logo_url: string | null
           name: string
+          pending_payout: number | null
           phone: string | null
+          rating: number | null
+          review_count: number | null
+          total_earnings: number | null
           trust_score: number | null
           updated_at: string
           user_id: string | null
           website: string | null
         }
         Insert: {
+          address?: string | null
+          business_category?: string | null
+          commission_rate?: number | null
           cover_image?: string | null
           created_at?: string
           description_en?: string | null
@@ -1427,15 +1602,24 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_verified?: boolean | null
+          lat?: number | null
+          lng?: number | null
           logo_url?: string | null
           name: string
+          pending_payout?: number | null
           phone?: string | null
+          rating?: number | null
+          review_count?: number | null
+          total_earnings?: number | null
           trust_score?: number | null
           updated_at?: string
           user_id?: string | null
           website?: string | null
         }
         Update: {
+          address?: string | null
+          business_category?: string | null
+          commission_rate?: number | null
           cover_image?: string | null
           created_at?: string
           description_en?: string | null
@@ -1444,9 +1628,15 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_verified?: boolean | null
+          lat?: number | null
+          lng?: number | null
           logo_url?: string | null
           name?: string
+          pending_payout?: number | null
           phone?: string | null
+          rating?: number | null
+          review_count?: number | null
+          total_earnings?: number | null
           trust_score?: number | null
           updated_at?: string
           user_id?: string | null
@@ -1968,6 +2158,160 @@ export type Database = {
           },
         ]
       }
+      store_products: {
+        Row: {
+          category: string | null
+          created_at: string
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          id: string
+          image: string | null
+          is_active: boolean | null
+          is_popular: boolean | null
+          name_en: string
+          name_ru: string
+          price: number
+          stock_quantity: number | null
+          store_id: string
+          unit: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          id?: string
+          image?: string | null
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          name_en: string
+          name_ru: string
+          price: number
+          stock_quantity?: number | null
+          store_id: string
+          unit?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          id?: string
+          image?: string | null
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          name_en?: string
+          name_ru?: string
+          price?: number
+          stock_quantity?: number | null
+          store_id?: string
+          unit?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_products_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stores: {
+        Row: {
+          address: string | null
+          approval_status: string | null
+          category: string | null
+          cover_image: string | null
+          created_at: string
+          delivery_available: boolean | null
+          delivery_fee: number | null
+          description_en: string | null
+          description_ru: string | null
+          id: string
+          images: string[] | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          lat: number | null
+          lng: number | null
+          min_order_amount: number | null
+          name_en: string
+          name_ru: string
+          phone: string | null
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          updated_at: string
+          working_hours: Json | null
+        }
+        Insert: {
+          address?: string | null
+          approval_status?: string | null
+          category?: string | null
+          cover_image?: string | null
+          created_at?: string
+          delivery_available?: boolean | null
+          delivery_fee?: number | null
+          description_en?: string | null
+          description_ru?: string | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          min_order_amount?: number | null
+          name_en: string
+          name_ru: string
+          phone?: string | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string
+          working_hours?: Json | null
+        }
+        Update: {
+          address?: string | null
+          approval_status?: string | null
+          category?: string | null
+          cover_image?: string | null
+          created_at?: string
+          delivery_available?: boolean | null
+          delivery_fee?: number | null
+          description_en?: string | null
+          description_ru?: string | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          min_order_amount?: number | null
+          name_en?: string
+          name_ru?: string
+          phone?: string | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string
+          working_hours?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stores_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tags: {
         Row: {
           category: string | null
@@ -2323,6 +2667,247 @@ export type Database = {
         }
         Relationships: []
       }
+      vendor_analytics: {
+        Row: {
+          avg_rating: number | null
+          cancelled_bookings: number | null
+          commission: number | null
+          completed_bookings: number | null
+          created_at: string
+          date: string
+          id: string
+          net_revenue: number | null
+          new_customers: number | null
+          provider_id: string
+          revenue: number | null
+          total_bookings: number | null
+        }
+        Insert: {
+          avg_rating?: number | null
+          cancelled_bookings?: number | null
+          commission?: number | null
+          completed_bookings?: number | null
+          created_at?: string
+          date: string
+          id?: string
+          net_revenue?: number | null
+          new_customers?: number | null
+          provider_id: string
+          revenue?: number | null
+          total_bookings?: number | null
+        }
+        Update: {
+          avg_rating?: number | null
+          cancelled_bookings?: number | null
+          commission?: number | null
+          completed_bookings?: number | null
+          created_at?: string
+          date?: string
+          id?: string
+          net_revenue?: number | null
+          new_customers?: number | null
+          provider_id?: string
+          revenue?: number | null
+          total_bookings?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_analytics_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_bookings: {
+        Row: {
+          amount: number
+          booking_id: string | null
+          commission_amount: number
+          created_at: string
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          duration_minutes: number | null
+          id: string
+          net_amount: number
+          notes: string | null
+          provider_id: string
+          scheduled_at: string | null
+          service_id: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          booking_id?: string | null
+          commission_amount?: number
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          duration_minutes?: number | null
+          id?: string
+          net_amount?: number
+          notes?: string | null
+          provider_id: string
+          scheduled_at?: string | null
+          service_id?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          booking_id?: string | null
+          commission_amount?: number
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          duration_minutes?: number | null
+          id?: string
+          net_amount?: number
+          notes?: string | null
+          provider_id?: string
+          scheduled_at?: string | null
+          service_id?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_bookings_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_bookings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_bookings_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_payouts: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string | null
+          id: string
+          notes: string | null
+          payment_details: Json | null
+          payment_method: string | null
+          processed_at: string | null
+          provider_id: string
+          status: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string | null
+          id?: string
+          notes?: string | null
+          payment_details?: Json | null
+          payment_method?: string | null
+          processed_at?: string | null
+          provider_id: string
+          status?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string | null
+          id?: string
+          notes?: string | null
+          payment_details?: Json | null
+          payment_method?: string | null
+          processed_at?: string | null
+          provider_id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_payouts_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_services: {
+        Row: {
+          category: string | null
+          created_at: string
+          currency: string | null
+          description: string | null
+          description_ru: string | null
+          duration_minutes: number | null
+          id: string
+          images: string[] | null
+          is_active: boolean | null
+          max_capacity: number | null
+          name: string
+          name_ru: string | null
+          price: number
+          provider_id: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          description_ru?: string | null
+          duration_minutes?: number | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          max_capacity?: number | null
+          name: string
+          name_ru?: string | null
+          price?: number
+          provider_id: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          description_ru?: string | null
+          duration_minutes?: number | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          max_capacity?: number | null
+          name?: string
+          name_ru?: string | null
+          price?: number
+          provider_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_services_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       view_history: {
         Row: {
           id: string
@@ -2616,6 +3201,140 @@ export type Database = {
             columns: ["activity_id"]
             isOneToOne: false
             referencedRelation: "water_activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      yachts: {
+        Row: {
+          approval_status: string | null
+          bathrooms: number | null
+          beam: string | null
+          cabins: number | null
+          capacity: number | null
+          cover_image: string | null
+          created_at: string
+          cruising_speed: string | null
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          draft: string | null
+          engines: string | null
+          features_en: string[] | null
+          features_ru: string[] | null
+          fuel_capacity: string | null
+          has_catering: boolean | null
+          has_crew: boolean | null
+          id: string
+          images: string[] | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          lat: number | null
+          length_meters: number | null
+          lng: number | null
+          location_name: string | null
+          location_ru: string | null
+          max_speed: string | null
+          name_en: string
+          name_ru: string
+          price_full_day: number | null
+          price_half_day: number | null
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          updated_at: string
+          yacht_type: string | null
+          year_built: number | null
+        }
+        Insert: {
+          approval_status?: string | null
+          bathrooms?: number | null
+          beam?: string | null
+          cabins?: number | null
+          capacity?: number | null
+          cover_image?: string | null
+          created_at?: string
+          cruising_speed?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          draft?: string | null
+          engines?: string | null
+          features_en?: string[] | null
+          features_ru?: string[] | null
+          fuel_capacity?: string | null
+          has_catering?: boolean | null
+          has_crew?: boolean | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          length_meters?: number | null
+          lng?: number | null
+          location_name?: string | null
+          location_ru?: string | null
+          max_speed?: string | null
+          name_en: string
+          name_ru: string
+          price_full_day?: number | null
+          price_half_day?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string
+          yacht_type?: string | null
+          year_built?: number | null
+        }
+        Update: {
+          approval_status?: string | null
+          bathrooms?: number | null
+          beam?: string | null
+          cabins?: number | null
+          capacity?: number | null
+          cover_image?: string | null
+          created_at?: string
+          cruising_speed?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          draft?: string | null
+          engines?: string | null
+          features_en?: string[] | null
+          features_ru?: string[] | null
+          fuel_capacity?: string | null
+          has_catering?: boolean | null
+          has_crew?: boolean | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          length_meters?: number | null
+          lng?: number | null
+          location_name?: string | null
+          location_ru?: string | null
+          max_speed?: string | null
+          name_en?: string
+          name_ru?: string
+          price_full_day?: number | null
+          price_half_day?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string
+          yacht_type?: string | null
+          year_built?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "yachts_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
             referencedColumns: ["id"]
           },
         ]

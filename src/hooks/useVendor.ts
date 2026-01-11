@@ -5,9 +5,8 @@ import { useAuth } from '@/contexts/AuthContext';
 export interface VendorProfile {
   id: string;
   user_id: string;
-  business_name: string;
-  business_name_ru?: string;
-  description?: string;
+  name: string;
+  description_en?: string;
   description_ru?: string;
   logo_url?: string;
   cover_image?: string;
@@ -21,17 +20,18 @@ export interface VendorProfile {
   commission_rate: number;
   is_verified: boolean;
   is_active: boolean;
-  rating: number;
-  review_count: number;
-  total_earnings: number;
-  pending_payout: number;
+  trust_score: number;
+  rating?: number;
+  review_count?: number;
+  total_earnings?: number;
+  pending_payout?: number;
   created_at: string;
   updated_at: string;
 }
 
 export interface VendorService {
   id: string;
-  vendor_id: string;
+  provider_id: string;
   name: string;
   name_ru?: string;
   description?: string;
@@ -49,7 +49,7 @@ export interface VendorService {
 
 export interface VendorBooking {
   id: string;
-  vendor_id: string;
+  provider_id: string;
   booking_id?: string;
   service_id?: string;
   customer_name?: string;
@@ -69,7 +69,7 @@ export interface VendorBooking {
 
 export interface VendorPayout {
   id: string;
-  vendor_id: string;
+  provider_id: string;
   amount: number;
   currency: string;
   status: string;
@@ -82,7 +82,7 @@ export interface VendorPayout {
 
 export interface VendorAnalytics {
   id: string;
-  vendor_id: string;
+  provider_id: string;
   date: string;
   total_bookings: number;
   completed_bookings: number;
@@ -109,16 +109,49 @@ export function useVendorProfile() {
 
     try {
       setIsLoading(true);
+      // Use the real providers table
       const { data, error } = await supabase
-        .from('vendor_profiles' as any)
+        .from('providers')
         .select('*')
         .eq('user_id', user.id)
         .maybeSingle();
 
       if (error) throw error;
-      setProfile(data as unknown as VendorProfile | null);
+      
+      if (data) {
+        // Map providers table to VendorProfile interface
+        setProfile({
+          id: data.id,
+          user_id: data.user_id || user.id,
+          name: data.name,
+          description_en: data.description_en || undefined,
+          description_ru: data.description_ru || undefined,
+          logo_url: data.logo_url || undefined,
+          cover_image: data.cover_image || undefined,
+          phone: data.phone || undefined,
+          email: data.email || undefined,
+          website: data.website || undefined,
+          address: data.address || undefined,
+          lat: data.lat ? Number(data.lat) : undefined,
+          lng: data.lng ? Number(data.lng) : undefined,
+          business_category: data.business_category || 'services',
+          commission_rate: Number(data.commission_rate) || 10,
+          is_verified: data.is_verified || false,
+          is_active: data.is_active || true,
+          trust_score: Number(data.trust_score) || 0,
+          rating: data.rating ? Number(data.rating) : undefined,
+          review_count: data.review_count || undefined,
+          total_earnings: data.total_earnings ? Number(data.total_earnings) : undefined,
+          pending_payout: data.pending_payout ? Number(data.pending_payout) : undefined,
+          created_at: data.created_at,
+          updated_at: data.updated_at,
+        });
+      } else {
+        setProfile(null);
+      }
     } catch (err) {
       setError(err as Error);
+      console.error('Error fetching vendor profile:', err);
     } finally {
       setIsLoading(false);
     }
@@ -131,33 +164,75 @@ export function useVendorProfile() {
   const updateProfile = async (updates: Partial<VendorProfile>) => {
     if (!profile) return { error: new Error('No profile found') };
     
+    // Map VendorProfile fields to providers table fields
+    const dbUpdates: Record<string, unknown> = {};
+    if (updates.name !== undefined) dbUpdates.name = updates.name;
+    if (updates.description_en !== undefined) dbUpdates.description_en = updates.description_en;
+    if (updates.description_ru !== undefined) dbUpdates.description_ru = updates.description_ru;
+    if (updates.logo_url !== undefined) dbUpdates.logo_url = updates.logo_url;
+    if (updates.cover_image !== undefined) dbUpdates.cover_image = updates.cover_image;
+    if (updates.phone !== undefined) dbUpdates.phone = updates.phone;
+    if (updates.email !== undefined) dbUpdates.email = updates.email;
+    if (updates.website !== undefined) dbUpdates.website = updates.website;
+    if (updates.address !== undefined) dbUpdates.address = updates.address;
+    if (updates.lat !== undefined) dbUpdates.lat = updates.lat;
+    if (updates.lng !== undefined) dbUpdates.lng = updates.lng;
+    if (updates.business_category !== undefined) dbUpdates.business_category = updates.business_category;
+    if (updates.commission_rate !== undefined) dbUpdates.commission_rate = updates.commission_rate;
+    if (updates.is_verified !== undefined) dbUpdates.is_verified = updates.is_verified;
+    if (updates.is_active !== undefined) dbUpdates.is_active = updates.is_active;
+
     const { data, error } = await supabase
-      .from('vendor_profiles' as any)
-      .update(updates)
+      .from('providers')
+      .update(dbUpdates)
       .eq('id', profile.id)
       .select()
       .single();
 
     if (!error && data) {
-      setProfile(data as unknown as VendorProfile);
+      await fetchProfile();
     }
     return { data, error };
   };
 
-  const createProfile = async (profileData: Partial<VendorProfile>) => {
+  const createProfile = async (profileData: {
+    business_name: string;
+    business_name_ru?: string;
+    description?: string;
+    description_ru?: string;
+    business_category: string;
+    phone?: string;
+    email?: string;
+    website?: string;
+    address?: string;
+    commission_rate?: number;
+    is_verified?: boolean;
+    is_active?: boolean;
+  }) => {
     if (!user) return { error: new Error('Not authenticated') };
 
+    // Map to providers table structure
     const { data, error } = await supabase
-      .from('vendor_profiles' as any)
+      .from('providers')
       .insert({
-        ...profileData,
         user_id: user.id,
+        name: profileData.business_name,
+        description_en: profileData.description,
+        description_ru: profileData.description_ru,
+        business_category: profileData.business_category,
+        phone: profileData.phone,
+        email: profileData.email,
+        website: profileData.website,
+        address: profileData.address,
+        commission_rate: profileData.commission_rate || 10,
+        is_verified: profileData.is_verified || false,
+        is_active: profileData.is_active !== false,
       })
       .select()
       .single();
 
     if (!error && data) {
-      setProfile(data as unknown as VendorProfile);
+      await fetchProfile();
     }
     return { data, error };
   };
@@ -179,13 +254,13 @@ export function useVendorServices(vendorId?: string) {
     try {
       setIsLoading(true);
       const { data, error } = await supabase
-        .from('vendor_services' as any)
+        .from('vendor_services')
         .select('*')
-        .eq('vendor_id', vendorId)
+        .eq('provider_id', vendorId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setServices((data || []) as unknown as VendorService[]);
+      setServices((data || []) as VendorService[]);
     } catch (err) {
       console.error('Error fetching services:', err);
     } finally {
@@ -200,9 +275,10 @@ export function useVendorServices(vendorId?: string) {
   const createService = async (serviceData: Partial<VendorService>) => {
     if (!vendorId) return { error: new Error('No vendor ID') };
 
+    const insertData = { ...serviceData, provider_id: vendorId };
     const { data, error } = await supabase
-      .from('vendor_services' as any)
-      .insert({ ...serviceData, vendor_id: vendorId })
+      .from('vendor_services')
+      .insert(insertData as any)
       .select()
       .single();
 
@@ -212,7 +288,7 @@ export function useVendorServices(vendorId?: string) {
 
   const updateService = async (serviceId: string, updates: Partial<VendorService>) => {
     const { data, error } = await supabase
-      .from('vendor_services' as any)
+      .from('vendor_services')
       .update(updates)
       .eq('id', serviceId)
       .select()
@@ -224,7 +300,7 @@ export function useVendorServices(vendorId?: string) {
 
   const deleteService = async (serviceId: string) => {
     const { error } = await supabase
-      .from('vendor_services' as any)
+      .from('vendor_services')
       .delete()
       .eq('id', serviceId);
 
@@ -249,9 +325,9 @@ export function useVendorBookings(vendorId?: string, options?: { status?: string
     try {
       setIsLoading(true);
       let query = supabase
-        .from('vendor_bookings' as any)
+        .from('vendor_bookings')
         .select('*')
-        .eq('vendor_id', vendorId)
+        .eq('provider_id', vendorId)
         .order('scheduled_at', { ascending: false });
 
       if (options?.status) {
@@ -263,7 +339,7 @@ export function useVendorBookings(vendorId?: string, options?: { status?: string
 
       const { data, error } = await query;
       if (error) throw error;
-      setBookings((data || []) as unknown as VendorBooking[]);
+      setBookings((data || []) as VendorBooking[]);
     } catch (err) {
       console.error('Error fetching bookings:', err);
     } finally {
@@ -277,7 +353,7 @@ export function useVendorBookings(vendorId?: string, options?: { status?: string
 
   const updateBookingStatus = async (bookingId: string, status: string) => {
     const { data, error } = await supabase
-      .from('vendor_bookings' as any)
+      .from('vendor_bookings')
       .update({ status })
       .eq('id', bookingId)
       .select()
@@ -315,14 +391,14 @@ export function useVendorAnalytics(vendorId?: string, days: number = 30) {
       startDate.setDate(startDate.getDate() - days);
 
       const { data, error } = await supabase
-        .from('vendor_analytics' as any)
+        .from('vendor_analytics')
         .select('*')
-        .eq('vendor_id', vendorId)
+        .eq('provider_id', vendorId)
         .gte('date', startDate.toISOString().split('T')[0])
         .order('date', { ascending: true });
 
       if (error) throw error;
-      const analyticsData = (data || []) as unknown as VendorAnalytics[];
+      const analyticsData = (data || []) as VendorAnalytics[];
       setAnalytics(analyticsData);
 
       const totals = analyticsData.reduce(
@@ -373,13 +449,13 @@ export function useVendorPayouts(vendorId?: string) {
     try {
       setIsLoading(true);
       const { data, error } = await supabase
-        .from('vendor_payouts' as any)
+        .from('vendor_payouts')
         .select('*')
-        .eq('vendor_id', vendorId)
+        .eq('provider_id', vendorId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setPayouts((data || []) as unknown as VendorPayout[]);
+      setPayouts((data || []) as VendorPayout[]);
     } catch (err) {
       console.error('Error fetching payouts:', err);
     } finally {
@@ -394,15 +470,16 @@ export function useVendorPayouts(vendorId?: string) {
   const requestPayout = async (amount: number, paymentMethod: string, paymentDetails: Record<string, unknown>) => {
     if (!vendorId) return { error: new Error('No vendor ID') };
 
+    const insertData = {
+      provider_id: vendorId,
+      amount,
+      payment_method: paymentMethod,
+      payment_details: paymentDetails,
+      status: 'pending',
+    };
     const { data, error } = await supabase
-      .from('vendor_payouts' as any)
-      .insert({
-        vendor_id: vendorId,
-        amount,
-        payment_method: paymentMethod,
-        payment_details: paymentDetails,
-        status: 'pending',
-      })
+      .from('vendor_payouts')
+      .insert(insertData as any)
       .select()
       .single();
 
