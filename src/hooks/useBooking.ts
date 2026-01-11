@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { openWhatsApp, UNO_WHATSAPP } from '@/hooks/useChat';
+import { openWhatsApp } from '@/hooks/useChat';
 import type { Database } from '@/integrations/supabase/types';
 import { format } from 'date-fns';
 
@@ -82,6 +82,8 @@ export function useBooking() {
       'booking.processing': { en: 'Processing...', ru: 'Обработка...' },
       'booking.paymentFailed': { en: 'Payment failed', ru: 'Ошибка оплаты' },
       'booking.insufficientBalance': { en: 'Insufficient wallet balance', ru: 'Недостаточно средств на кошельке' },
+      'booking.cancelled': { en: 'Booking cancelled', ru: 'Бронирование отменено' },
+      'booking.refunded': { en: 'Payment refunded to wallet', ru: 'Оплата возвращена на кошелёк' },
     };
     return translations[key]?.[language] || key;
   }, [language]);
@@ -96,71 +98,76 @@ export function useBooking() {
     setIsSubmitting(true);
 
     try {
-      // Handle wallet payment if selected
-      if (params.payment?.payment_method === 'wallet') {
-        const { data: wallet, error: walletError } = await supabase
-          .from('wallets')
-          .select('id, balance')
-          .eq('user_id', user.id)
-          .single();
-
-        if (walletError || !wallet || wallet.balance < params.total_amount) {
-          toast({ title: t('booking.insufficientBalance'), variant: 'destructive' });
-          return { success: false, error: 'insufficient_balance' };
-        }
-
-        // Deduct from wallet
-        const { error: deductError } = await supabase
-          .from('wallets')
-          .update({ balance: wallet.balance - params.total_amount })
-          .eq('user_id', user.id);
-
-        if (deductError) throw deductError;
-
-        // Record transaction
-        await supabase.from('wallet_transactions').insert({
-          wallet_id: wallet.id,
-          user_id: user.id,
-          amount: -params.total_amount,
-          type: 'payment',
-          description: `Booking payment - ${params.booking_type}`,
-          status: 'completed',
-        });
-      }
-
-      // Determine initial status
-      let status: BookingStatus = 'submitted';
-      if (params.payment?.payment_method === 'wallet' || params.payment?.status === 'paid') {
-        status = 'confirmed';
-      }
-
-      // Create main booking
       const scheduledAt = params.scheduled_at 
         ? (params.scheduled_at instanceof Date ? params.scheduled_at.toISOString() : params.scheduled_at)
         : null;
 
-      const { data: booking, error: bookingError } = await supabase
-        .from('bookings')
-        .insert({
-          user_id: user.id,
-          booking_type: params.booking_type,
-          status,
-          scheduled_at: scheduledAt,
-          total_amount: params.total_amount,
-          currency: params.currency || 'THB',
-          provider_id: params.provider_id || null,
-          service_id: params.service_id || null,
-          notes: params.notes || null,
-        })
-        .select()
-        .single();
+      let bookingId: string;
 
-      if (bookingError) throw bookingError;
+      // Use atomic function for wallet payments
+      if (params.payment?.payment_method === 'wallet') {
+        const { data, error } = await supabase.rpc('create_booking_with_wallet_payment', {
+          p_user_id: user.id,
+          p_booking_type: params.booking_type,
+          p_scheduled_at: scheduledAt,
+          p_total_amount: params.total_amount,
+          p_currency: params.currency || 'THB',
+          p_provider_id: params.provider_id || null,
+          p_service_id: params.service_id || null,
+          p_notes: params.notes || null,
+        });
+
+        if (error) {
+          if (error.message.includes('Insufficient balance')) {
+            toast({ title: t('booking.insufficientBalance'), variant: 'destructive' });
+            return { success: false, error: 'insufficient_balance' };
+          }
+          throw error;
+        }
+
+        bookingId = data;
+      } else {
+        // Non-wallet payment: create booking normally
+        let status: BookingStatus = 'submitted';
+        if (params.payment?.status === 'paid') {
+          status = 'confirmed';
+        }
+
+        const { data: booking, error: bookingError } = await supabase
+          .from('bookings')
+          .insert({
+            user_id: user.id,
+            booking_type: params.booking_type,
+            status,
+            scheduled_at: scheduledAt,
+            total_amount: params.total_amount,
+            currency: params.currency || 'THB',
+            provider_id: params.provider_id || null,
+            service_id: params.service_id || null,
+            notes: params.notes || null,
+          })
+          .select()
+          .single();
+
+        if (bookingError) throw bookingError;
+        bookingId = booking.id;
+
+        // Insert payment record for non-wallet
+        if (params.payment) {
+          await supabase.from('booking_payments').insert([{
+            booking_id: bookingId,
+            amount: params.payment.amount,
+            payment_method: params.payment.payment_method,
+            status: 'pending',
+            currency: params.currency || 'THB',
+          }]);
+        }
+      }
 
       // Insert booking items
       if (params.items && params.items.length > 0) {
         const itemsToInsert = params.items.map(item => ({
-          booking_id: booking.id,
+          booking_id: bookingId,
           item_type: item.item_type,
           item_id: item.item_id || null,
           item_name: item.item_name,
@@ -169,34 +176,26 @@ export function useBooking() {
           subtotal: item.subtotal || null,
         }));
 
-        const { error: itemsError } = await supabase
-          .from('booking_items')
-          .insert(itemsToInsert);
-
-        if (itemsError) console.error('Items insert error:', itemsError);
+        await supabase.from('booking_items').insert(itemsToInsert);
       }
 
       // Insert participants
       if (params.participants && params.participants.length > 0) {
         const participantsToInsert = params.participants.map((p, idx) => ({
-          booking_id: booking.id,
+          booking_id: bookingId,
           name: p.name,
           phone: p.phone || null,
           email: p.email || null,
           is_primary: p.is_primary ?? idx === 0,
         }));
 
-        const { error: participantsError } = await supabase
-          .from('booking_participants')
-          .insert(participantsToInsert);
-
-        if (participantsError) console.error('Participants insert error:', participantsError);
+        await supabase.from('booking_participants').insert(participantsToInsert);
       }
 
       // Insert addresses
       if (params.addresses && params.addresses.length > 0) {
         const addressesToInsert = params.addresses.map(addr => ({
-          booking_id: booking.id,
+          booking_id: bookingId,
           address: addr.address,
           address_type: addr.address_type,
           lat: addr.lat || null,
@@ -204,29 +203,7 @@ export function useBooking() {
           notes: addr.notes || null,
         }));
 
-        const { error: addressesError } = await supabase
-          .from('booking_addresses')
-          .insert(addressesToInsert);
-
-        if (addressesError) console.error('Addresses insert error:', addressesError);
-      }
-
-      // Insert payment record
-      if (params.payment) {
-        // Map our payment status to DB enum
-        const paymentStatus = params.payment.payment_method === 'wallet' ? 'completed' : 'pending';
-        
-        const { error: paymentError } = await supabase
-          .from('booking_payments')
-          .insert([{
-            booking_id: booking.id,
-            amount: params.payment.amount,
-            payment_method: params.payment.payment_method,
-            status: paymentStatus as 'pending' | 'completed',
-            paid_at: params.payment.payment_method === 'wallet' ? new Date().toISOString() : null,
-          }]);
-
-        if (paymentError) console.error('Payment insert error:', paymentError);
+        await supabase.from('booking_addresses').insert(addressesToInsert);
       }
 
       // Create notification
@@ -234,15 +211,24 @@ export function useBooking() {
         user_id: user.id,
         title: language === 'ru' ? 'Бронирование создано' : 'Booking Created',
         body: language === 'ru' 
-          ? `Ваше бронирование #${booking.id.slice(0, 8)} успешно создано`
-          : `Your booking #${booking.id.slice(0, 8)} has been created`,
+          ? `Ваше бронирование #${bookingId.slice(0, 8)} успешно создано`
+          : `Your booking #${bookingId.slice(0, 8)} has been created`,
         type: 'booking',
-        data: { booking_id: booking.id, booking_type: params.booking_type },
+        data: { booking_id: bookingId, booking_type: params.booking_type },
+      });
+
+      // Record initial status in history
+      await supabase.from('booking_status_history').insert({
+        booking_id: bookingId,
+        from_status: null,
+        to_status: params.payment?.payment_method === 'wallet' ? 'confirmed' : 'submitted',
+        changed_by: user.id,
+        notes: 'Booking created',
       });
 
       toast({ 
         title: t('booking.success'),
-        description: `#${booking.id.slice(0, 8).toUpperCase()}`,
+        description: `#${bookingId.slice(0, 8).toUpperCase()}`,
       });
 
       // If cash payment, open WhatsApp with booking details
@@ -257,7 +243,7 @@ export function useBooking() {
         const message = language === 'ru'
           ? `🔔 *Новое бронирование UNO*
 
-📋 *Номер:* #${booking.id.slice(0, 8).toUpperCase()}
+📋 *Номер:* #${bookingId.slice(0, 8).toUpperCase()}
 📁 *Тип:* ${params.booking_type}
 ${params.serviceName ? `🏷️ *Услуга:* ${params.serviceName}\n` : ''}${params.providerName ? `🏢 *Провайдер:* ${params.providerName}\n` : ''}
 📅 *Дата:* ${scheduledAtFormatted}
@@ -271,7 +257,7 @@ ${params.notes ? `\n📝 *Примечание:* ${params.notes}` : ''}
 Прошу подтвердить бронирование.`
           : `🔔 *New UNO Booking*
 
-📋 *Number:* #${booking.id.slice(0, 8).toUpperCase()}
+📋 *Number:* #${bookingId.slice(0, 8).toUpperCase()}
 📁 *Type:* ${params.booking_type}
 ${params.serviceName ? `🏷️ *Service:* ${params.serviceName}\n` : ''}${params.providerName ? `🏢 *Provider:* ${params.providerName}\n` : ''}
 📅 *Date:* ${scheduledAtFormatted}
@@ -287,7 +273,7 @@ Please confirm my booking.`;
         openWhatsApp(message);
       }
 
-      return { success: true, booking_id: booking.id };
+      return { success: true, booking_id: bookingId };
 
     } catch (error) {
       console.error('Booking error:', error);
@@ -299,26 +285,54 @@ Please confirm my booking.`;
   }, [user, navigate, toast, t, language]);
 
   const cancelBooking = useCallback(async (bookingId: string): Promise<boolean> => {
+    if (!user) return false;
+
     try {
+      // Get current booking status for history
+      const { data: currentBooking } = await supabase
+        .from('bookings')
+        .select('status')
+        .eq('id', bookingId)
+        .single();
+
+      // Try to refund if wallet payment
+      const { data: refunded } = await supabase.rpc('refund_wallet_booking', {
+        p_booking_id: bookingId,
+        p_user_id: user.id,
+      });
+
+      // Update booking status
       const { error } = await supabase
         .from('bookings')
         .update({ status: 'cancelled_by_user' })
         .eq('id', bookingId)
-        .eq('user_id', user?.id);
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
       // Record status change
       await supabase.from('booking_status_history').insert({
         booking_id: bookingId,
-        from_status: 'submitted',
+        from_status: currentBooking?.status || 'submitted',
         to_status: 'cancelled_by_user',
-        changed_by: user?.id,
-        notes: 'Cancelled by user',
+        changed_by: user.id,
+        notes: refunded ? 'Cancelled by user. Payment refunded.' : 'Cancelled by user',
+      });
+
+      // Create notification
+      await supabase.from('notifications').insert({
+        user_id: user.id,
+        title: language === 'ru' ? 'Бронирование отменено' : 'Booking Cancelled',
+        body: language === 'ru' 
+          ? `Бронирование #${bookingId.slice(0, 8)} отменено${refunded ? '. Средства возвращены на кошелёк.' : ''}`
+          : `Booking #${bookingId.slice(0, 8)} cancelled${refunded ? '. Payment refunded to wallet.' : ''}`,
+        type: 'booking',
+        data: { booking_id: bookingId },
       });
 
       toast({ 
-        title: language === 'ru' ? 'Бронирование отменено' : 'Booking cancelled' 
+        title: t('booking.cancelled'),
+        description: refunded ? t('booking.refunded') : undefined,
       });
 
       return true;
@@ -330,7 +344,7 @@ Please confirm my booking.`;
       });
       return false;
     }
-  }, [user, toast, language]);
+  }, [user, toast, language, t]);
 
   return {
     createBooking,
