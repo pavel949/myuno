@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Star, Heart, ShoppingCart, Plus, Minus, Flower } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -11,6 +11,7 @@ import { FilterChip, FilterChipGroup } from '@/components/uno/FilterChip';
 import { triggerRipple } from '@/hooks/useRipple';
 import { toast } from 'sonner';
 import { MiniAppHero, MiniAppSearch } from '@/components/miniapp';
+import { UniversalFilter, ActiveFilters, flowerFilterConfig, FilterValues } from '@/components/filters';
 
 const categories = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -218,9 +219,41 @@ const FlowersIndex = () => {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { addItem, removeItem, updateQuantity, items, getItemsByType } = useCart();
-  const [selectedCategory, setSelectedCategory] = React.useState('all');
-  const [selectedPrice, setSelectedPrice] = React.useState('all');
-  const [searchQuery, setSearchQuery] = React.useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterValues, setFilterValues] = useState<FilterValues>({
+    priceLevel: null,
+    occasion: [],
+    flowerType: [],
+    color: [],
+    features: [],
+    delivery: [],
+  });
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    Object.entries(filterValues).forEach(([_, value]) => {
+      if (Array.isArray(value)) count += value.length;
+      else if (value) count += 1;
+    });
+    return count;
+  }, [filterValues]);
+
+  const handleRemoveFilter = (sectionId: string, optionId?: string) => {
+    setFilterValues(prev => {
+      const sectionValue = prev[sectionId];
+      if (Array.isArray(sectionValue) && optionId) {
+        return { ...prev, [sectionId]: sectionValue.filter(v => v !== optionId) };
+      }
+      return { ...prev, [sectionId]: null };
+    });
+  };
+
+  const handleClearAllFilters = () => {
+    setFilterValues({
+      priceLevel: null, occasion: [], flowerType: [], color: [], features: [], delivery: [],
+    });
+  };
 
   const flowersInCart = getItemsByType('flowers');
   const totalItems = flowersInCart.reduce((sum, item) => sum + item.quantity, 0);
@@ -229,10 +262,15 @@ const FlowersIndex = () => {
   const filteredBouquets = bouquets.filter((bouquet) => {
     if (selectedCategory !== 'all' && bouquet.category !== selectedCategory) return false;
     
-    const priceFilter = priceFilters.find(p => p.id === selectedPrice);
-    if (priceFilter) {
-      if (priceFilter.min && bouquet.price < priceFilter.min) return false;
-      if (priceFilter.max && bouquet.price > priceFilter.max) return false;
+    const priceLevel = filterValues.priceLevel as string | null;
+    if (priceLevel) {
+      const level = parseInt(priceLevel);
+      const priceRanges: Record<number, { min: number; max: number }> = {
+        1: { min: 0, max: 1000 }, 2: { min: 1000, max: 2500 },
+        3: { min: 2500, max: 4000 }, 4: { min: 4000, max: Infinity },
+      };
+      const range = priceRanges[level];
+      if (range && (bouquet.price < range.min || bouquet.price > range.max)) return false;
     }
     
     if (searchQuery) {
@@ -321,31 +359,38 @@ const FlowersIndex = () => {
           className="mb-4"
         />
 
-        {/* Category Filters */}
-        <FilterChipGroup scrollable className="mb-2">
-          {categories.map((cat) => (
-            <FilterChip
-              key={cat.id}
-              label={language === 'ru' ? cat.labelRu : cat.labelEn}
-              isActive={selectedCategory === cat.id}
-              size="sm"
-              onToggle={() => setSelectedCategory(cat.id)}
-            />
-          ))}
-        </FilterChipGroup>
+        {/* Category Filters + Universal Filter */}
+        <div className="flex items-center gap-2 mb-4">
+          <FilterChipGroup scrollable className="flex-1">
+            {categories.map((cat) => (
+              <FilterChip
+                key={cat.id}
+                label={language === 'ru' ? cat.labelRu : cat.labelEn}
+                isActive={selectedCategory === cat.id}
+                size="sm"
+                onToggle={() => setSelectedCategory(cat.id)}
+              />
+            ))}
+          </FilterChipGroup>
+          
+          <UniversalFilter
+            config={flowerFilterConfig}
+            values={filterValues}
+            onChange={setFilterValues}
+            activeCount={activeFilterCount}
+          />
+        </div>
 
-        {/* Price Filters */}
-        <FilterChipGroup scrollable className="mb-4">
-          {priceFilters.map((price) => (
-            <FilterChip
-              key={price.id}
-              label={language === 'ru' ? price.labelRu : price.labelEn}
-              isActive={selectedPrice === price.id}
-              size="sm"
-              onToggle={() => setSelectedPrice(price.id)}
-            />
-          ))}
-        </FilterChipGroup>
+        {/* Active Filters */}
+        {activeFilterCount > 0 && (
+          <ActiveFilters
+            config={flowerFilterConfig}
+            values={filterValues}
+            onRemove={handleRemoveFilter}
+            onClearAll={handleClearAllFilters}
+            className="mb-4"
+          />
+        )}
 
         {/* Results count */}
         <p className="text-sm text-muted-foreground mb-4">
