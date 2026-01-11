@@ -67,16 +67,23 @@ interface FilterChipGroupProps {
 }
 
 export function FilterChipGroup({ children, className, scrollable = false }: FilterChipGroupProps) {
+  if (scrollable) {
+    return (
+      <div className="overflow-hidden -mx-4">
+        <div
+          className={cn(
+            "flex gap-2 overflow-x-auto pb-2 scrollbar-hide px-4",
+            className
+          )}
+        >
+          {children}
+        </div>
+      </div>
+    );
+  }
+  
   return (
-    <div
-      className={cn(
-        "flex gap-2",
-        scrollable 
-          ? "overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4" 
-          : "flex-wrap",
-        className
-      )}
-    >
+    <div className={cn("flex gap-2 flex-wrap", className)}>
       {children}
     </div>
   );
