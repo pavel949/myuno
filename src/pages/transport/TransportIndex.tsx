@@ -1,101 +1,17 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Car, Users, Fuel, Settings2, SlidersHorizontal, Clock } from 'lucide-react';
+import { Car, Users, Fuel, Settings2, SlidersHorizontal } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { MiniAppLayout, MiniAppQuickGrid, ItemCard, type MiniAppCategory } from '@/components/miniapp';
 import { UniversalFilter, ActiveFilters, transportFilterConfig, FilterValues } from '@/components/filters';
+import { useVehicles } from '@/hooks/useVehicles';
 
 const VEHICLE_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '🚗' },
   { id: 'car', labelEn: 'Cars', labelRu: 'Авто', icon: '🚙' },
   { id: 'motorbike', labelEn: 'Bikes', labelRu: 'Мото', icon: '🏍️' },
   { id: 'suv', labelEn: 'SUV', labelRu: 'Внедорожник', icon: '🚐' },
-];
-
-const demoVehicles = [
-  {
-    id: 'car-1',
-    type: 'car',
-    nameEn: 'Toyota Camry',
-    nameRu: 'Тойота Камри',
-    image: 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=600',
-    pricePerDay: 1500,
-    rating: 4.8,
-    reviewCount: 89,
-    location: 'Patong',
-    locationRu: 'Патонг',
-    seats: 5,
-    transmission: 'Auto',
-    fuel: 'Petrol',
-    isAvailable: true,
-    isFeatured: true,
-  },
-  {
-    id: 'car-2',
-    type: 'car',
-    nameEn: 'Honda City',
-    nameRu: 'Хонда Сити',
-    image: 'https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=600',
-    pricePerDay: 1200,
-    rating: 4.6,
-    reviewCount: 156,
-    location: 'Kata',
-    locationRu: 'Ката',
-    seats: 5,
-    transmission: 'Auto',
-    fuel: 'Petrol',
-    isAvailable: true,
-  },
-  {
-    id: 'bike-1',
-    type: 'motorbike',
-    nameEn: 'Honda PCX 160',
-    nameRu: 'Хонда PCX 160',
-    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600',
-    pricePerDay: 300,
-    rating: 4.9,
-    reviewCount: 234,
-    location: 'Rawai',
-    locationRu: 'Равай',
-    seats: 2,
-    transmission: 'Auto',
-    fuel: 'Petrol',
-    isAvailable: true,
-    isNew: true,
-  },
-  {
-    id: 'car-3',
-    type: 'suv',
-    nameEn: 'Toyota Fortuner',
-    nameRu: 'Тойота Фортунер',
-    image: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=600',
-    pricePerDay: 2500,
-    rating: 4.7,
-    reviewCount: 67,
-    location: 'Airport',
-    locationRu: 'Аэропорт',
-    seats: 7,
-    transmission: 'Auto',
-    fuel: 'Diesel',
-    isAvailable: true,
-  },
-  {
-    id: 'bike-2',
-    type: 'motorbike',
-    nameEn: 'Yamaha NMAX',
-    nameRu: 'Ямаха NMAX',
-    image: 'https://images.unsplash.com/photo-1449426468159-d96dbf08f19f?w=600',
-    pricePerDay: 350,
-    rating: 4.5,
-    reviewCount: 178,
-    location: 'Kamala',
-    locationRu: 'Камала',
-    seats: 2,
-    transmission: 'Auto',
-    fuel: 'Petrol',
-    isAvailable: false,
-  },
 ];
 
 const quickServices = [
@@ -108,6 +24,7 @@ const quickServices = [
 export default function TransportIndex() {
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const { vehicles, isLoading } = useVehicles();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterValues, setFilterValues] = useState<FilterValues>({});
@@ -132,15 +49,16 @@ export default function TransportIndex() {
   };
 
   const filteredVehicles = useMemo(() => {
-    return demoVehicles.filter(v => {
-      if (selectedCategory !== 'all' && v.type !== selectedCategory) return false;
+    return vehicles.filter(v => {
+      if (selectedCategory !== 'all' && v.vehicle_type !== selectedCategory) return false;
       
       if (searchQuery) {
-        const name = language === 'ru' ? v.nameRu : v.nameEn;
+        const name = language === 'ru' ? v.name_ru : v.name_en;
         if (!name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       }
       
       if (filterValues.passengers) {
+        const cap = v.capacity || 0;
         const passMap: Record<string, number[]> = {
           '1-2': [1, 2],
           '3-4': [3, 4],
@@ -148,14 +66,14 @@ export default function TransportIndex() {
           '8+': [8, 9, 10, 11, 12]
         };
         const allowedSeats = passMap[filterValues.passengers as string] || [];
-        if (!allowedSeats.includes(v.seats)) return false;
+        if (!allowedSeats.includes(cap)) return false;
       }
       
       return true;
     });
-  }, [demoVehicles, selectedCategory, searchQuery, filterValues, language]);
+  }, [vehicles, selectedCategory, searchQuery, filterValues, language]);
 
-  const availableCount = filteredVehicles.filter(v => v.isAvailable).length;
+  const availableCount = filteredVehicles.filter(v => v.is_available).length;
 
   return (
     <MiniAppLayout
@@ -178,6 +96,11 @@ export default function TransportIndex() {
       categories={VEHICLE_CATEGORIES}
       selectedCategory={selectedCategory}
       onCategoryChange={setSelectedCategory}
+      
+      isLoading={isLoading}
+      isEmpty={filteredVehicles.length === 0}
+      emptyIcon={Car}
+      emptyText={language === 'ru' ? 'Транспорт не найден' : 'No vehicles found'}
       
       filterButton={
         <UniversalFilter
@@ -215,7 +138,6 @@ export default function TransportIndex() {
       resultsCount={filteredVehicles.length}
       resultsLabel={language === 'ru' ? 'Доступно для аренды' : 'Available for Rent'}
     >
-      {/* Active Filters */}
       <ActiveFilters
         config={transportFilterConfig}
         values={filterValues}
@@ -224,26 +146,24 @@ export default function TransportIndex() {
         className="mb-4"
       />
 
-      {/* Vehicles Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {filteredVehicles.map((vehicle) => (
           <ItemCard
             key={vehicle.id}
-            title={language === 'ru' ? vehicle.nameRu : vehicle.nameEn}
-            image={vehicle.image}
-            price={vehicle.pricePerDay}
+            title={language === 'ru' ? vehicle.name_ru : vehicle.name_en}
+            image={vehicle.cover_image || 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=600'}
+            price={vehicle.price_per_day || 0}
             priceLabel={`/${language === 'ru' ? 'день' : 'day'}`}
             rating={vehicle.rating}
-            reviewCount={vehicle.reviewCount}
-            location={language === 'ru' ? vehicle.locationRu : vehicle.location}
+            reviewCount={vehicle.review_count}
             meta={[
-              { icon: Users, value: vehicle.seats },
-              { icon: Settings2, value: vehicle.transmission },
-              { icon: Fuel, value: vehicle.fuel },
+              { icon: Users, value: vehicle.capacity || 0 },
+              { icon: Settings2, value: 'Auto' },
+              { icon: Fuel, value: 'Petrol' },
             ]}
-            isNew={vehicle.isNew}
-            isFeatured={vehicle.isFeatured}
-            isAvailable={vehicle.isAvailable}
+            tags={vehicle.features?.slice(0, 2) || []}
+            isVerified={vehicle.is_verified}
+            isAvailable={vehicle.is_available}
             onClick={() => navigate(`/transport/vehicle/${vehicle.id}`)}
           />
         ))}

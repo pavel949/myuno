@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Anchor, Users, Clock, SlidersHorizontal, Sparkles } from 'lucide-react';
+import { Anchor, Users, SlidersHorizontal, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { MiniAppLayout, MiniAppQuickGrid, ItemCard, type MiniAppCategory } from '@/components/miniapp';
 import { UniversalFilter, ActiveFilters, yachtFilterConfig, FilterValues } from '@/components/filters';
-import { ExperienceFilterChips, YACHT_EXPERIENCES } from '@/components/yachts/YachtExperienceSelect';
+import { ExperienceFilterChips } from '@/components/yachts/YachtExperienceSelect';
+import { useYachts } from '@/hooks/useYachts';
 
 const YACHT_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -13,89 +14,6 @@ const YACHT_CATEGORIES: MiniAppCategory[] = [
   { id: 'catamaran', labelEn: 'Catamarans', labelRu: 'Катамараны' },
   { id: 'speedboat', labelEn: 'Speedboats', labelRu: 'Катера' },
   { id: 'sailing', labelEn: 'Sailing', labelRu: 'Парусные' },
-];
-
-const demoYachts = [
-  {
-    id: 'yacht-1',
-    nameEn: 'Luxury Ocean Dream',
-    nameRu: 'Люкс Океан Дрим',
-    type: 'yacht',
-    image: 'https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?w=600',
-    price: 45000,
-    priceUnit: 'day',
-    capacity: 12,
-    length: '24m',
-    rating: 4.9,
-    reviewCount: 45,
-    location: 'Chalong Bay',
-    locationRu: 'Бухта Чалонг',
-    isFeatured: true,
-    hasCrew: true,
-  },
-  {
-    id: 'yacht-2',
-    nameEn: 'Sunset Catamaran',
-    nameRu: 'Катамаран Сансет',
-    type: 'catamaran',
-    image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600',
-    price: 35000,
-    priceUnit: 'day',
-    capacity: 20,
-    length: '18m',
-    rating: 4.8,
-    reviewCount: 78,
-    location: 'Patong',
-    locationRu: 'Патонг',
-    hasCrew: true,
-  },
-  {
-    id: 'yacht-3',
-    nameEn: 'Speed Runner',
-    nameRu: 'Спид Раннер',
-    type: 'speedboat',
-    image: 'https://images.unsplash.com/photo-1605281317010-fe5ffe798166?w=600',
-    price: 18000,
-    priceUnit: 'day',
-    capacity: 8,
-    length: '12m',
-    rating: 4.7,
-    reviewCount: 123,
-    location: 'Rawai',
-    locationRu: 'Равай',
-  },
-  {
-    id: 'yacht-4',
-    nameEn: 'Wind Dancer',
-    nameRu: 'Винд Дансер',
-    type: 'sailing',
-    image: 'https://images.unsplash.com/photo-1540946485063-a40da27545f8?w=600',
-    price: 28000,
-    priceUnit: 'day',
-    capacity: 6,
-    length: '15m',
-    rating: 4.9,
-    reviewCount: 34,
-    location: 'Nai Harn',
-    locationRu: 'Най Харн',
-    isNew: true,
-    hasCrew: true,
-  },
-  {
-    id: 'yacht-5',
-    nameEn: 'Party Boat XL',
-    nameRu: 'Пати Бот XL',
-    type: 'catamaran',
-    image: 'https://images.unsplash.com/photo-1559494007-9f5847c49d94?w=600',
-    price: 55000,
-    priceUnit: 'day',
-    capacity: 30,
-    length: '22m',
-    rating: 4.6,
-    reviewCount: 89,
-    location: 'Patong',
-    locationRu: 'Патонг',
-  },
 ];
 
 const popularRoutes = [
@@ -108,6 +26,7 @@ const popularRoutes = [
 export default function YachtsIndex() {
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const { yachts, isLoading } = useYachts();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterValues, setFilterValues] = useState<FilterValues>({});
@@ -133,16 +52,16 @@ export default function YachtsIndex() {
   };
 
   const filteredYachts = useMemo(() => {
-    return demoYachts.filter(y => {
-      if (selectedCategory !== 'all' && y.type !== selectedCategory) return false;
+    return yachts.filter(y => {
+      if (selectedCategory !== 'all' && y.yacht_type !== selectedCategory) return false;
       
       if (searchQuery) {
-        const name = language === 'ru' ? y.nameRu : y.nameEn;
+        const name = language === 'ru' ? y.name_ru : y.name_en;
         if (!name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       }
       
       if (filterValues.capacity) {
-        const cap = y.capacity;
+        const cap = y.capacity || 0;
         const capMap: Record<string, boolean> = {
           '2-6': cap >= 2 && cap <= 6,
           '7-12': cap >= 7 && cap <= 12,
@@ -154,7 +73,7 @@ export default function YachtsIndex() {
       
       return true;
     });
-  }, [demoYachts, selectedCategory, searchQuery, filterValues, language]);
+  }, [yachts, selectedCategory, searchQuery, filterValues, language]);
 
   return (
     <MiniAppLayout
@@ -178,6 +97,11 @@ export default function YachtsIndex() {
       selectedCategory={selectedCategory}
       onCategoryChange={setSelectedCategory}
       
+      isLoading={isLoading}
+      isEmpty={filteredYachts.length === 0}
+      emptyIcon={Anchor}
+      emptyText={language === 'ru' ? 'Яхты не найдены' : 'No yachts found'}
+      
       filterButton={
         <UniversalFilter
           config={yachtFilterConfig}
@@ -198,7 +122,6 @@ export default function YachtsIndex() {
       
       quickActions={
         <>
-          {/* Experience Filters */}
           <div className="mb-4">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles className="w-4 h-4 text-amber-500" />
@@ -225,7 +148,6 @@ export default function YachtsIndex() {
       resultsCount={filteredYachts.length}
       resultsLabel={language === 'ru' ? 'Доступные яхты' : 'Available Yachts'}
     >
-      {/* Active Filters */}
       <ActiveFilters
         config={yachtFilterConfig}
         values={filterValues}
@@ -234,25 +156,24 @@ export default function YachtsIndex() {
         className="mb-4"
       />
 
-      {/* Results Grid */}
       <div className="grid gap-4">
         {filteredYachts.map((yacht) => (
           <ItemCard
             key={yacht.id}
-            title={language === 'ru' ? yacht.nameRu : yacht.nameEn}
-            image={yacht.image}
-            price={yacht.price}
+            title={language === 'ru' ? yacht.name_ru : yacht.name_en}
+            image={yacht.cover_image || 'https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?w=600'}
+            price={yacht.price_full_day || yacht.price_half_day || 0}
             priceLabel={`/${language === 'ru' ? 'день' : 'day'}`}
             rating={yacht.rating}
-            reviewCount={yacht.reviewCount}
-            location={language === 'ru' ? yacht.locationRu : yacht.location}
+            reviewCount={yacht.review_count}
+            location={language === 'ru' ? yacht.location_ru : yacht.location_name}
             meta={[
-              { icon: Users, value: yacht.capacity },
-              { icon: Anchor, value: yacht.length },
+              { icon: Users, value: yacht.capacity || 0 },
+              { icon: Anchor, value: `${yacht.capacity}p` },
             ]}
-            tags={yacht.hasCrew ? [language === 'ru' ? 'С экипажем' : 'With crew'] : []}
-            isNew={yacht.isNew}
-            isFeatured={yacht.isFeatured}
+            tags={yacht.features_en?.slice(0, 2) || []}
+            isFeatured={yacht.is_featured}
+            isVerified={yacht.is_verified}
             onClick={() => navigate(`/yachts/${yacht.id}`)}
           />
         ))}

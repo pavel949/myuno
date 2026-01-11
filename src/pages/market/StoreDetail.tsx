@@ -10,9 +10,7 @@ import {
   Plus,
   Minus,
   ShoppingCart,
-  Heart,
-  Share2,
-  Phone
+  Heart
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -20,11 +18,9 @@ import { useCart } from '@/contexts/CartContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
-import { triggerRipple } from '@/hooks/useRipple';
 import { toast } from 'sonner';
-import { stores } from './MarketIndex';
+import { useStore } from '@/hooks/useStores';
 
 // Products data
 const storeProducts: Record<string, Array<{
@@ -79,10 +75,10 @@ const StoreDetail = () => {
   const { id } = useParams();
   const { language } = useLanguage();
   const { addItem, removeItem, getItemsByType } = useCart();
+  const { store, isLoading } = useStore(id || '');
   const [searchQuery, setSearchQuery] = useState('');
   const [isFavorite, setIsFavorite] = useState(false);
 
-  const store = stores.find(s => s.id === id);
   const products = storeProducts[id || ''] || [];
   const cartItems = getItemsByType('product');
 
@@ -101,8 +97,8 @@ const StoreDetail = () => {
       currency: '฿',
       image: product.image,
       providerId: store?.id,
-      providerName: store?.nameEn,
-      providerNameRu: store?.nameRu,
+      providerName: store?.name_en,
+      providerNameRu: store?.name_ru,
     });
     toast.success(language === 'ru' ? 'Добавлено в корзину' : 'Added to cart');
   };
@@ -120,7 +116,15 @@ const StoreDetail = () => {
     p.nameRu.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const categories = [...new Set(products.map(p => p.category))];
+  if (isLoading) {
+    return (
+      <AppLayout>
+        <div className="p-4 text-center">
+          <p>{language === 'ru' ? 'Загрузка...' : 'Loading...'}</p>
+        </div>
+      </AppLayout>
+    );
+  }
 
   if (!store) {
     return (
@@ -137,7 +141,7 @@ const StoreDetail = () => {
       <div className="pb-32">
         {/* Hero Image */}
         <div className="relative h-48">
-          <img src={store.image} alt={language === 'ru' ? store.nameRu : store.nameEn} className="w-full h-full object-cover" />
+          <img src={store.cover_image || 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=800'} alt={language === 'ru' ? store.name_ru : store.name_en} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           
           <div className="absolute top-4 left-4 right-4 flex justify-between">
@@ -152,7 +156,7 @@ const StoreDetail = () => {
           </div>
 
           <div className="absolute bottom-4 left-4 right-4 text-white">
-            <h1 className="text-2xl font-bold">{language === 'ru' ? store.nameRu : store.nameEn}</h1>
+            <h1 className="text-2xl font-bold">{language === 'ru' ? store.name_ru : store.name_en}</h1>
             <div className="flex items-center gap-3 mt-1 text-sm">
               <div className="flex items-center gap-1">
                 <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
@@ -160,7 +164,7 @@ const StoreDetail = () => {
               </div>
               <div className="flex items-center gap-1">
                 <MapPin className="w-4 h-4" />
-                <span>{language === 'ru' ? store.addressRu : store.address}</span>
+                <span>{store.address}</span>
               </div>
             </div>
           </div>
@@ -192,7 +196,7 @@ const StoreDetail = () => {
 
         {totalItems > 0 && (
           <div className="fixed bottom-20 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t">
-            <Button className="w-full h-12 text-base font-semibold" onClick={() => navigate('/market/checkout', { state: { storeId: store.id, storeName: store.nameEn, storeNameRu: store.nameRu, deliveryFee: store.deliveryFee, minOrder: store.minOrder } })}>
+            <Button className="w-full h-12 text-base font-semibold" onClick={() => navigate('/market/checkout', { state: { storeId: store.id, storeName: store.name_en, storeNameRu: store.name_ru, deliveryFee: store.delivery_fee, minOrder: store.min_order_amount } })}>
               <ShoppingCart className="w-5 h-5 mr-2" />
               <span>{language === 'ru' ? 'Корзина' : 'Cart'} ({totalItems})</span>
               <span className="ml-auto">฿{totalPrice.toLocaleString()}</span>
