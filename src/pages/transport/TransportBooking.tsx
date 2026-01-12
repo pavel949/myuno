@@ -54,8 +54,19 @@ export default function TransportBooking() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
   const [bookingResult, setBookingResult] = useState<{ success: boolean; bookingId?: string } | null>(null);
 
-  // Auth redirect
-  if (!authLoading && !user) {
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <AppLayout showBottomNav={false}>
+        <PageContainer className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </PageContainer>
+      </AppLayout>
+    );
+  }
+
+  // Auth redirect - use useEffect pattern to avoid render-time navigation
+  if (!user) {
     navigate('/auth', { state: { from: `/transport/booking/${id}` } });
     return null;
   }
