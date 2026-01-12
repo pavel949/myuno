@@ -28,8 +28,8 @@ export default function AboutPage() {
       icon: Globe,
       title: isRu ? 'Доступность' : 'Accessibility',
       description: isRu 
-        ? 'Все сервисы на русском и английском языках'
-        : 'All services in Russian and English',
+        ? 'Все сервисы на русском, английском и тайском'
+        : 'All services in Russian, English and Thai',
     },
     {
       icon: Heart,
@@ -117,10 +117,13 @@ export default function AboutPage() {
             <Award className="w-5 h-5 text-primary" />
             <h2 className="font-semibold">{isRu ? 'Наша миссия' : 'Our Mission'}</h2>
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground mb-3">
             {isRu 
               ? 'Быть рядом, когда вы далеко от дома. Мы создаём экосистему проверенных сервисов, которая помогает чувствовать себя как дома в любой точке мира. Тщательно отбираем партнёров, гарантируем качество и честные цены. Сегодня — Пхукет, завтра — весь мир.'
               : 'Be there when you\'re far from home. We build an ecosystem of trusted services that helps you feel at home anywhere in the world. We carefully select partners, guarantee quality and fair prices. Today — Phuket, tomorrow — the world.'}
+          </p>
+          <p className="text-xs text-muted-foreground/70 italic border-t border-border/50 pt-3">
+            🇹🇭 อยู่เคียงข้างคุณเมื่อคุณอยู่ห่างบ้าน เราสร้างระบบนิเวศของบริการที่เชื่อถือได้ ช่วยให้คุณรู้สึกเหมือนอยู่บ้านได้ทุกที่ในโลก คัดสรรพันธมิตรอย่างพิถีพิถัน รับประกันคุณภาพและราคาที่เป็นธรรม วันนี้ — ภูเก็ต พรุ่งนี้ — ทั่วโลก
           </p>
         </SectionCard>
 
