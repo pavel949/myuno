@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import type { Json } from '@/integrations/supabase/types';
 
 // Types
 export interface OwnerProperty {
@@ -28,18 +29,89 @@ export interface OwnerProperty {
   created_at: string;
   updated_at: string;
   marketplace_property_id?: string;
-  // Rental terms
+  // Rental terms - Basic
   price_per_night?: number;
   min_stay_nights?: number;
   max_guests?: number;
   deposit_amount?: number;
   deposit_currency?: string;
+  deposit_type?: string;
   check_in_time?: string;
   check_out_time?: string;
   house_rules?: string;
   house_rules_ru?: string;
   cancellation_policy?: string;
   instant_booking?: boolean;
+  // Seasonality and discounts
+  seasonal_pricing?: Json;
+  weekly_discount?: number;
+  monthly_discount?: number;
+  // Electricity
+  electricity_included?: boolean;
+  electricity_unit_price?: number;
+  electricity_provider?: string;
+  electricity_metering?: string;
+  electricity_notes?: string;
+  electricity_notes_ru?: string;
+  // Water
+  water_included?: boolean;
+  water_unit_price?: number;
+  water_notes?: string;
+  water_notes_ru?: string;
+  // Internet
+  internet_speed?: string;
+  internet_provider?: string;
+  // Included/extra services
+  included_services?: Json;
+  extra_services?: Json;
+  // Cleaning
+  cleaning_included?: boolean;
+  cleaning_frequency?: string;
+  extra_cleaning_price?: number;
+  linen_change_price?: number;
+  linen_change_frequency?: string;
+  // Check-in details
+  early_checkin_price?: number;
+  late_checkout_price?: number;
+  key_handover?: string;
+  check_in_instructions?: string;
+  check_in_instructions_ru?: string;
+  // Transfer
+  transfer_available?: boolean;
+  transfer_airport_price?: number;
+  transfer_notes?: string;
+  transfer_notes_ru?: string;
+  // Extra guests
+  extra_guest_price?: number;
+  extra_guest_threshold?: number;
+  // Parking
+  parking_included?: boolean;
+  parking_spaces?: number;
+  parking_notes?: string;
+  // Pets
+  pets_allowed?: boolean;
+  pet_deposit?: number;
+  pet_notes?: string;
+  pet_notes_ru?: string;
+  // Quiet hours & parties
+  quiet_hours_start?: string;
+  quiet_hours_end?: string;
+  parties_allowed?: boolean;
+  max_party_guests?: number;
+  // Children
+  children_friendly?: boolean;
+  has_crib?: boolean;
+  has_high_chair?: boolean;
+  // Penalties
+  late_checkout_penalty?: number;
+  smoking_penalty?: number;
+  // Manager contact
+  manager_name?: string;
+  manager_phone?: string;
+  manager_line_id?: string;
+  emergency_contact_name?: string;
+  emergency_contact_phone?: string;
+  host_languages?: string[];
 }
 
 export interface PropertyInspection {
