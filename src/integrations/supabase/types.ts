@@ -2510,6 +2510,7 @@ export type Database = {
           district: string | null
           id: string
           images: string[] | null
+          instant_booking: boolean | null
           is_active: boolean | null
           is_featured: boolean | null
           is_verified: boolean | null
@@ -2544,6 +2545,7 @@ export type Database = {
           district?: string | null
           id?: string
           images?: string[] | null
+          instant_booking?: boolean | null
           is_active?: boolean | null
           is_featured?: boolean | null
           is_verified?: boolean | null
@@ -2578,6 +2580,7 @@ export type Database = {
           district?: string | null
           id?: string
           images?: string[] | null
+          instant_booking?: boolean | null
           is_active?: boolean | null
           is_featured?: boolean | null
           is_verified?: boolean | null
