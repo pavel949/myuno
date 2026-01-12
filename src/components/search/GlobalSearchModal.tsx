@@ -88,9 +88,10 @@ const typeConfig: Record<string, { icon: any; labelEn: string; labelRu: string; 
   events: { icon: Ticket, labelEn: 'Events', labelRu: 'События', color: 'from-purple-500 to-pink-500' },
 };
 
-const trendingSearches = {
+const trendingSearches: Record<string, string[]> = {
   en: ['beach villa', 'thai massage', 'scooter rental', 'phi phi tour', 'dentist'],
   ru: ['вилла на пляже', 'тайский массаж', 'аренда скутера', 'тур пхи-пхи', 'стоматолог'],
+  th: ['วิลล่าชายหาด', 'นวดแผนไทย', 'เช่ามอเตอร์ไซค์', 'ทัวร์พีพี', 'ทันตแพทย์'],
 };
 
 export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps) {
