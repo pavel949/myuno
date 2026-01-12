@@ -1,0 +1,137 @@
+import React from 'react';
+import { Calculator, Percent, Calendar, Users } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { Badge } from '@/components/ui/badge';
+
+interface PropertyPriceBreakdownProps {
+  pricePerNight?: number;
+  weeklyDiscount?: number;
+  monthlyDiscount?: number;
+  depositAmount?: number;
+  depositType?: string;
+  depositCurrency?: string;
+  extraGuestPrice?: number;
+  extraGuestThreshold?: number;
+  minStayNights?: number;
+  currency?: string;
+  className?: string;
+}
+
+export function PropertyPriceBreakdown({
+  pricePerNight,
+  weeklyDiscount,
+  monthlyDiscount,
+  depositAmount,
+  depositType,
+  depositCurrency,
+  extraGuestPrice,
+  extraGuestThreshold,
+  minStayNights,
+  currency = 'THB',
+  className,
+}: PropertyPriceBreakdownProps) {
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
+  const symbol = currency === 'THB' ? '฿' : currency === 'USD' ? '$' : currency === 'EUR' ? '€' : currency;
+
+  const depositTypeLabels: Record<string, { en: string; ru: string }> = {
+    fixed: { en: 'Fixed amount', ru: 'Фиксированная сумма' },
+    per_night: { en: 'Per night', ru: 'За ночь' },
+    percentage: { en: 'Percentage', ru: 'Процент' },
+  };
+
+  return (
+    <div className={className}>
+      <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+        <Calculator className="w-5 h-5 text-primary" />
+        {isRu ? 'Стоимость' : 'Pricing'}
+      </h3>
+      
+      <div className="space-y-3">
+        {/* Base price */}
+        {pricePerNight && (
+          <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
+            <div className="flex items-end justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">{isRu ? 'Базовая цена' : 'Base Price'}</p>
+                <p className="text-3xl font-bold text-primary">
+                  {symbol}{pricePerNight.toLocaleString()}
+                  <span className="text-base font-normal text-muted-foreground">
+                    /{isRu ? 'ночь' : 'night'}
+                  </span>
+                </p>
+              </div>
+              {minStayNights && minStayNights > 1 && (
+                <Badge variant="secondary" className="gap-1">
+                  <Calendar className="w-3 h-3" />
+                  {isRu ? `Мин. ${minStayNights} ночей` : `Min ${minStayNights} nights`}
+                </Badge>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Discounts */}
+        {(weeklyDiscount || monthlyDiscount) && (
+          <div className="grid grid-cols-2 gap-2">
+            {weeklyDiscount && weeklyDiscount > 0 && (
+              <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+                <div className="flex items-center gap-1 mb-1">
+                  <Percent className="w-4 h-4 text-green-500" />
+                  <span className="text-xs text-muted-foreground">{isRu ? '7+ ночей' : '7+ nights'}</span>
+                </div>
+                <p className="text-lg font-bold text-green-600">-{weeklyDiscount}%</p>
+              </div>
+            )}
+            {monthlyDiscount && monthlyDiscount > 0 && (
+              <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+                <div className="flex items-center gap-1 mb-1">
+                  <Percent className="w-4 h-4 text-green-500" />
+                  <span className="text-xs text-muted-foreground">{isRu ? '30+ ночей' : '30+ nights'}</span>
+                </div>
+                <p className="text-lg font-bold text-green-600">-{monthlyDiscount}%</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Extra guest pricing */}
+        {extraGuestPrice && extraGuestPrice > 0 && (
+          <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50">
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm">
+                {isRu 
+                  ? `Более ${extraGuestThreshold || 2} гостей` 
+                  : `More than ${extraGuestThreshold || 2} guests`}
+              </span>
+            </div>
+            <span className="text-sm font-medium">
+              +{symbol}{extraGuestPrice}/{isRu ? 'чел' : 'person'}
+            </span>
+          </div>
+        )}
+
+        {/* Deposit */}
+        {depositAmount && depositAmount > 0 && (
+          <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">{isRu ? 'Залог' : 'Security Deposit'}</p>
+                <p className="text-xs text-muted-foreground">
+                  {depositType && depositTypeLabels[depositType] 
+                    ? (isRu ? depositTypeLabels[depositType].ru : depositTypeLabels[depositType].en)
+                    : (isRu ? 'Возвратный' : 'Refundable')}
+                </p>
+              </div>
+              <p className="text-lg font-bold">
+                {depositCurrency === 'THB' || !depositCurrency ? '฿' : depositCurrency}
+                {depositAmount.toLocaleString()}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

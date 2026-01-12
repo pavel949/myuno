@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   MapPin, Star, BedDouble, Bath, Users, Maximize, 
   Share2, Calendar, Phone, MessageCircle, Shield,
-  Clock, Zap, FileText, Loader2
+  Zap, Loader2
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -13,6 +13,14 @@ import { cn } from '@/lib/utils';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { BackButton } from '@/components/uno/BackButton';
 import { usePropertyWithRentalTerms } from '@/hooks/useProperties';
+import { 
+  IncludedServices, 
+  ExtraServices, 
+  UtilitiesInfo, 
+  CheckInDetails, 
+  HouseRules,
+  PropertyPriceBreakdown 
+} from '@/components/property';
 
 // Demo property data as fallback
 const demoProperty = {
@@ -45,14 +53,49 @@ const demoProperty = {
   amenities: ['Pool', 'Ocean View', 'Fitness Center', 'Garden', 'Parking', 'WiFi', 'AC', 'Kitchen'],
   rentalTerms: {
     price_per_night: 3500,
+    weekly_discount: 10,
+    monthly_discount: 25,
     check_in_time: '14:00',
     check_out_time: '12:00',
     deposit_amount: 10000,
     deposit_currency: 'THB',
-    house_rules: 'No smoking, no pets, quiet hours after 10pm',
-    house_rules_ru: 'Не курить, без животных, тишина после 22:00',
+    deposit_type: 'fixed',
+    house_rules: 'No smoking indoors. Quiet hours after 10pm. Please respect the neighbors.',
+    house_rules_ru: 'Не курить в помещении. Тишина после 22:00. Пожалуйста, уважайте соседей.',
     cancellation_policy: 'flexible',
     instant_booking: true,
+    electricity_included: false,
+    electricity_unit_price: 7,
+    electricity_provider: 'PEA',
+    electricity_metering: 'meter',
+    water_included: true,
+    internet_speed: '100 Mbps',
+    internet_provider: 'True',
+    included_services: ['wifi', 'ac', 'cleaning_weekly', 'pool', 'parking', 'security'],
+    extra_services: [
+      { id: 'extra_cleaning', price: 500, currency: 'THB' },
+      { id: 'airport_transfer', price: 1200, currency: 'THB' },
+      { id: 'linen_change', price: 300, currency: 'THB' },
+    ],
+    key_handover: 'in_person',
+    transfer_available: true,
+    transfer_airport_price: 1200,
+    manager_name: 'Somchai',
+    manager_phone: '+66-81-234-5678',
+    host_languages: ['Thai', 'English', 'Russian'],
+    pets_allowed: false,
+    parties_allowed: false,
+    quiet_hours_start: '22:00',
+    quiet_hours_end: '08:00',
+    children_friendly: true,
+    has_crib: true,
+    has_high_chair: true,
+    extra_guest_price: 500,
+    extra_guest_threshold: 4,
+    early_checkin_price: 500,
+    late_checkout_price: 500,
+    late_checkout_penalty: 2000,
+    smoking_penalty: 5000,
   },
   host: {
     name: 'Phuket Luxury Homes',
@@ -78,13 +121,6 @@ const amenityIcons: Record<string, string> = {
   'beach': '🏖️', 'Beach Access': '🏖️',
 };
 
-const cancellationPolicies: Record<string, { en: string; ru: string }> = {
-  'flexible': { en: 'Flexible - Free cancellation 24h before', ru: 'Гибкая - бесплатная отмена за 24ч' },
-  'moderate': { en: 'Moderate - Free cancellation 5 days before', ru: 'Умеренная - бесплатная отмена за 5 дней' },
-  'strict': { en: 'Strict - 50% refund up to 1 week before', ru: 'Строгая - 50% возврат за неделю' },
-  'non_refundable': { en: 'Non-refundable', ru: 'Без возврата' },
-};
-
 export default function PropertyDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -103,21 +139,30 @@ export default function PropertyDetail() {
     return demoProperty;
   }, [dbProperty, id]);
 
-  const formatPrice = (price?: number, period?: string) => {
-    if (!price) return '';
-    const periodLabels: Record<string, { en: string; ru: string }> = {
-      night: { en: '/night', ru: '/ночь' },
-      week: { en: '/week', ru: '/неделю' },
-      month: { en: '/month', ru: '/месяц' },
-      year: { en: '/year', ru: '/год' },
-      total: { en: '', ru: '' },
-    };
-    return `฿${price.toLocaleString()}${periodLabels[period || '']?.[language] || ''}`;
-  };
-
   const images = property.images || [property.cover_image].filter(Boolean);
   const amenities = property.amenities || [];
   const rentalTerms = property.rentalTerms;
+
+  // Parse included_services and extra_services from JSON if needed
+  const includedServices = useMemo(() => {
+    if (!rentalTerms?.included_services) return [];
+    if (Array.isArray(rentalTerms.included_services)) return rentalTerms.included_services;
+    try {
+      return JSON.parse(rentalTerms.included_services as string);
+    } catch {
+      return [];
+    }
+  }, [rentalTerms?.included_services]);
+
+  const extraServices = useMemo(() => {
+    if (!rentalTerms?.extra_services) return [];
+    if (Array.isArray(rentalTerms.extra_services)) return rentalTerms.extra_services;
+    try {
+      return JSON.parse(rentalTerms.extra_services as string);
+    } catch {
+      return [];
+    }
+  }, [rentalTerms?.extra_services]);
 
   if (isLoading) {
     return (
@@ -223,28 +268,6 @@ export default function PropertyDetail() {
             )}
           </div>
 
-          {/* Price Card */}
-          <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
-            <div className="flex items-end justify-between">
-              <div>
-                <span className="text-sm text-muted-foreground">
-                  {isRu ? 'Цена' : 'Price'}
-                </span>
-                <p className="text-3xl font-bold text-primary">
-                  {formatPrice(property.price, property.price_period)}
-                </p>
-              </div>
-              <div className="text-right">
-                <span className="text-xs text-muted-foreground">
-                  {isRu ? 'Мин. срок' : 'Min. stay'}
-                </span>
-                <p className="text-sm font-medium">
-                  {property.min_stay_nights || rentalTerms?.min_stay_nights || 1} {isRu ? 'ночей' : 'nights'}
-                </p>
-              </div>
-            </div>
-          </div>
-
           {/* Specs */}
           <div className="grid grid-cols-4 gap-3">
             <div className="flex flex-col items-center p-3 rounded-xl bg-card border border-border/50">
@@ -275,51 +298,20 @@ export default function PropertyDetail() {
             </div>
           </div>
 
-          {/* Rental Terms (if available) */}
+          {/* Price Breakdown (Airbnb style) */}
           {rentalTerms && (
-            <div className="p-4 rounded-xl bg-muted/30 border border-border/50 space-y-3">
-              <h2 className="text-lg font-semibold flex items-center gap-2">
-                <FileText className="w-5 h-5 text-primary" />
-                {isRu ? 'Условия аренды' : 'Rental Terms'}
-              </h2>
-              
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                {rentalTerms.check_in_time && (
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-muted-foreground" />
-                    <span>{isRu ? 'Заезд:' : 'Check-in:'} {rentalTerms.check_in_time}</span>
-                  </div>
-                )}
-                {rentalTerms.check_out_time && (
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-muted-foreground" />
-                    <span>{isRu ? 'Выезд:' : 'Check-out:'} {rentalTerms.check_out_time}</span>
-                  </div>
-                )}
-              </div>
-
-              {rentalTerms.deposit_amount && (
-                <div className="text-sm text-muted-foreground">
-                  {isRu ? 'Залог:' : 'Deposit:'} ฿{rentalTerms.deposit_amount.toLocaleString()}
-                </div>
-              )}
-
-              {rentalTerms.cancellation_policy && (
-                <div className="text-sm">
-                  <span className="text-muted-foreground">{isRu ? 'Отмена:' : 'Cancellation:'} </span>
-                  <span>{cancellationPolicies[rentalTerms.cancellation_policy]?.[isRu ? 'ru' : 'en'] || rentalTerms.cancellation_policy}</span>
-                </div>
-              )}
-
-              {(rentalTerms.house_rules || rentalTerms.house_rules_ru) && (
-                <div className="text-sm border-t border-border/50 pt-3 mt-3">
-                  <p className="font-medium mb-1">{isRu ? 'Правила дома:' : 'House rules:'}</p>
-                  <p className="text-muted-foreground">
-                    {isRu ? rentalTerms.house_rules_ru || rentalTerms.house_rules : rentalTerms.house_rules}
-                  </p>
-                </div>
-              )}
-            </div>
+            <PropertyPriceBreakdown
+              pricePerNight={rentalTerms.price_per_night}
+              weeklyDiscount={rentalTerms.weekly_discount}
+              monthlyDiscount={rentalTerms.monthly_discount}
+              depositAmount={rentalTerms.deposit_amount}
+              depositType={rentalTerms.deposit_type}
+              depositCurrency={rentalTerms.deposit_currency}
+              extraGuestPrice={rentalTerms.extra_guest_price}
+              extraGuestThreshold={rentalTerms.extra_guest_threshold}
+              minStayNights={rentalTerms.min_stay_nights}
+              currency="THB"
+            />
           )}
 
           {/* Description */}
@@ -332,7 +324,67 @@ export default function PropertyDetail() {
             </p>
           </div>
 
-          {/* Amenities */}
+          {/* Included Services */}
+          {includedServices.length > 0 && (
+            <IncludedServices services={includedServices} />
+          )}
+
+          {/* Extra Services */}
+          {extraServices.length > 0 && (
+            <ExtraServices services={extraServices} currency="THB" />
+          )}
+
+          {/* Utilities Info */}
+          {rentalTerms && (
+            <UtilitiesInfo
+              electricity={{
+                included: rentalTerms.electricity_included || false,
+                unitPrice: rentalTerms.electricity_unit_price,
+                provider: rentalTerms.electricity_provider,
+                metering: rentalTerms.electricity_metering,
+                notes: rentalTerms.electricity_notes,
+                notes_ru: rentalTerms.electricity_notes_ru,
+              }}
+              water={{
+                included: rentalTerms.water_included !== false,
+                unitPrice: rentalTerms.water_unit_price,
+                notes: rentalTerms.water_notes,
+                notes_ru: rentalTerms.water_notes_ru,
+              }}
+              internet={{
+                speed: rentalTerms.internet_speed,
+                provider: rentalTerms.internet_provider,
+              }}
+            />
+          )}
+
+          {/* Check-in Details */}
+          {rentalTerms && (
+            <CheckInDetails
+              checkIn={rentalTerms.check_in_time}
+              checkOut={rentalTerms.check_out_time}
+              earlyCheckinPrice={rentalTerms.early_checkin_price}
+              lateCheckoutPrice={rentalTerms.late_checkout_price}
+              lateCheckoutPenalty={rentalTerms.late_checkout_penalty}
+              keyHandover={rentalTerms.key_handover}
+              instructions_ru={rentalTerms.check_in_instructions_ru}
+              transfer={{
+                available: rentalTerms.transfer_available || false,
+                airportPrice: rentalTerms.transfer_airport_price,
+                notes: rentalTerms.transfer_notes,
+                notes_ru: rentalTerms.transfer_notes_ru,
+              }}
+              manager={{
+                name: rentalTerms.manager_name,
+                phone: rentalTerms.manager_phone,
+                lineId: rentalTerms.manager_line_id,
+                languages: rentalTerms.host_languages,
+              }}
+              currency="THB"
+            />
+          )}
+
+          {/* Amenities (physical) */}
           {amenities.length > 0 && (
             <div>
               <h2 className="text-lg font-semibold mb-3">
@@ -354,6 +406,42 @@ export default function PropertyDetail() {
                 })}
               </div>
             </div>
+          )}
+
+          {/* House Rules */}
+          {rentalTerms && (
+            <HouseRules
+              rules={rentalTerms.house_rules}
+              rules_ru={rentalTerms.house_rules_ru}
+              pets={{
+                allowed: rentalTerms.pets_allowed || false,
+                deposit: rentalTerms.pet_deposit,
+                notes: rentalTerms.pet_notes,
+                notes_ru: rentalTerms.pet_notes_ru,
+              }}
+              parties={{
+                allowed: rentalTerms.parties_allowed || false,
+                maxGuests: rentalTerms.max_party_guests,
+              }}
+              quietHours={{
+                start: rentalTerms.quiet_hours_start,
+                end: rentalTerms.quiet_hours_end,
+              }}
+              children={{
+                friendly: rentalTerms.children_friendly || false,
+                hasCrib: rentalTerms.has_crib,
+                hasHighChair: rentalTerms.has_high_chair,
+              }}
+              smoking={{
+                allowed: false,
+                penalty: rentalTerms.smoking_penalty,
+              }}
+              emergencyContact={{
+                name: rentalTerms.emergency_contact_name,
+                phone: rentalTerms.emergency_contact_phone,
+              }}
+              cancellationPolicy={rentalTerms.cancellation_policy}
+            />
           )}
 
           {/* Host (for demo) */}
@@ -399,7 +487,10 @@ export default function PropertyDetail() {
                 {isRu ? 'От' : 'From'}
               </span>
               <p className="text-xl font-bold text-primary">
-                {formatPrice(property.price, property.price_period)}
+                ฿{(rentalTerms?.price_per_night || property.price || 0).toLocaleString()}
+                <span className="text-sm font-normal text-muted-foreground">
+                  /{isRu ? 'ночь' : 'night'}
+                </span>
               </p>
             </div>
             <Button variant="outline" size="icon">
@@ -410,7 +501,7 @@ export default function PropertyDetail() {
             </Button>
             <Button
               className="flex-1"
-              onClick={() => navigate(`/property/inquiry/${id}`)}
+              onClick={() => navigate(`/property/${id}/inquiry`)}
             >
               <Calendar className="w-4 h-4 mr-2" />
               {isRu ? 'Забронировать' : 'Book Now'}
