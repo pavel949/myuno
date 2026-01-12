@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-type Language = 'ru' | 'en';
+type Language = 'ru' | 'en' | 'th';
 
 interface LanguageContextType {
   language: Language;
@@ -441,6 +441,222 @@ const translations: Record<Language, Record<string, string>> = {
     'beauty.confirmBooking': 'Confirm Booking',
     'beauty.bookingSuccess': 'Booking Confirmed!',
   },
+  th: {
+    // Navigation
+    'nav.home': 'หน้าแรก',
+    'nav.discover': 'ค้นหา',
+    'nav.map': 'แผนที่',
+    'nav.support': 'แชท',
+    'nav.bookings': 'การจอง',
+    'nav.profile': 'โปรไฟล์',
+    
+    // Auth
+    'auth.login': 'เข้าสู่ระบบ',
+    'auth.signup': 'สมัครสมาชิก',
+    'auth.logout': 'ออกจากระบบ',
+    'auth.email': 'อีเมล',
+    'auth.password': 'รหัสผ่าน',
+    'auth.fullName': 'ชื่อเต็ม',
+    'auth.forgotPassword': 'ลืมรหัสผ่าน?',
+    'auth.noAccount': 'ยังไม่มีบัญชี?',
+    'auth.hasAccount': 'มีบัญชีอยู่แล้ว?',
+    'auth.createAccount': 'สร้างบัญชี',
+    'auth.welcomeBack': 'ยินดีต้อนรับกลับ!',
+    'auth.getStarted': 'เริ่มต้นใช้งาน',
+    
+    // Common actions
+    'action.book': 'จองเลย',
+    'action.cancel': 'ยกเลิก',
+    'action.confirm': 'ยืนยัน',
+    'action.save': 'บันทึก',
+    'action.edit': 'แก้ไข',
+    'action.delete': 'ลบ',
+    'action.view': 'ดู',
+    'action.viewAll': 'ดูทั้งหมด',
+    'action.search': 'ค้นหา',
+    'action.filter': 'กรอง',
+    'action.sort': 'เรียงลำดับ',
+    'action.apply': 'ใช้งาน',
+    'action.clear': 'ล้าง',
+    'action.back': 'กลับ',
+    'action.next': 'ถัดไป',
+    'action.submit': 'ส่ง',
+    
+    // Booking statuses
+    'status.draft': 'ฉบับร่าง',
+    'status.submitted': 'ส่งแล้ว',
+    'status.confirmed': 'ยืนยันแล้ว',
+    'status.in_progress': 'กำลังดำเนินการ',
+    'status.completed': 'เสร็จสิ้น',
+    'status.cancelled_by_user': 'ยกเลิกโดยคุณ',
+    'status.cancelled_by_provider': 'ยกเลิกโดยผู้ให้บริการ',
+    'status.expired': 'หมดอายุ',
+    
+    // Categories
+    'category.beauty-spa': 'ความงาม',
+    'category.restaurants': 'อาหาร',
+    'category.flowers': 'ดอกไม้',
+    'category.fitness': 'ฟิตเนส',
+    'category.medical': 'การแพทย์',
+    'category.kids-education': 'การศึกษา',
+    'category.real-estate': 'ที่พัก',
+    'category.transport': 'ขนส่ง',
+    'category.events': 'กิจกรรม',
+    'category.shopping': 'ช้อปปิ้ง',
+    'category.services': 'บริการ',
+    'category.legal': 'ธุรกิจ',
+    'category.tours': 'ทัวร์',
+    'category.water': 'กิจกรรมทางน้ำ',
+    'category.pharmacy': 'ร้านขายยา',
+    
+    // Hero section
+    'home.heroTitle': 'บ้านอยู่ที่ไหน UNO อยู่ที่นั่น',
+    'home.heroSubtitle': 'ชีวิตต่างแดนของคุณ ง่ายขึ้น',
+    'home.trustBadge': 'ยืนยันแล้ว',
+    
+    // Tours
+    'tours.title': 'ทัวร์และทริป',
+    'tours.subtitle': 'ค้นพบภูเก็ต',
+    'tours.featured': 'ทัวร์ยอดนิยม',
+    'tours.duration': 'ระยะเวลา',
+    'tours.includes': 'รวม',
+    'tours.itinerary': 'กำหนดการ',
+    'tours.meetingPoint': 'จุดนัดพบ',
+    'tours.maxParticipants': 'ผู้เข้าร่วมสูงสุด',
+    'tours.difficulty': 'ระดับความยาก',
+    'tours.highlights': 'ไฮไลท์',
+    'tours.bookNow': 'จองทัวร์',
+    'tours.selectDate': 'เลือกวันที่',
+    'tours.selectTime': 'เลือกเวลา',
+    'tours.participants': 'ผู้เข้าร่วม',
+    'tours.contactDetails': 'ข้อมูลติดต่อ',
+    'tours.confirmBooking': 'ยืนยันการจอง',
+    'tours.bookingSuccess': 'จองทัวร์สำเร็จ!',
+    'tours.notFound': 'ไม่พบทัวร์',
+    'tours.description': 'รายละเอียด',
+    'tours.perPerson': '/คน',
+    'tours.booking': 'จองทัวร์',
+    'tours.name': 'ชื่อ',
+    'tours.phone': 'โทรศัพท์',
+    'tours.total': 'รวม',
+    'tours.fillAllFields': 'กรุณากรอกข้อมูลให้ครบ',
+    'tours.bookingSent': 'ส่งการจองแล้ว',
+    'tours.bookingFailed': 'การจองล้มเหลว',
+    
+    // Water Activities
+    'water.title': 'กิจกรรมทางน้ำ',
+    'water.subtitle': 'ดำน้ำ สน็อกเกิล เรือยอร์ช และอื่นๆ',
+    'water.featured': 'กิจกรรมยอดนิยม',
+    'water.diving': 'ดำน้ำ',
+    'water.snorkeling': 'สน็อกเกิล',
+    'water.jetski': 'เจ็ตสกี',
+    'water.yacht': 'เรือยอร์ช',
+    'water.surfing': 'เซิร์ฟ',
+    'water.kayaking': 'พายเรือ',
+    'water.fishing': 'ตกปลา',
+    'water.parasailing': 'ร่มร่อน',
+    'water.certified': 'ได้รับการรับรอง',
+    'water.equipmentIncluded': 'รวมอุปกรณ์',
+    'water.safetyBriefing': 'บรรยายสรุปความปลอดภัย',
+    'water.ageRestriction': 'อายุขั้นต่ำ',
+    'water.difficulty.easy': 'ง่าย',
+    'water.difficulty.moderate': 'ปานกลาง',
+    'water.difficulty.challenging': 'ท้าทาย',
+    'water.difficulty.expert': 'ผู้เชี่ยวชาญ',
+    'water.notFound': 'ไม่พบกิจกรรม',
+    'water.goBack': 'กลับ',
+    'water.description': 'รายละเอียด',
+    'water.whatsIncluded': 'รวมอะไรบ้าง',
+    'water.requirements': 'ข้อกำหนด',
+    'water.safety': 'ความปลอดภัย',
+    'water.safetyRequired': 'ต้องมีการบรรยายสรุปความปลอดภัย',
+    'water.minAge': 'อายุขั้นต่ำ',
+    'water.years': 'ปี',
+    'water.meetingPoint': 'จุดนัดพบ',
+    'water.availableTimes': 'เวลาที่เปิดให้บริการ',
+    'water.bookNow': 'จองเลย',
+    'water.pricePer': 'ราคาต่อ',
+    'water.upTo': 'สูงสุด',
+    'water.max': 'สูงสุด',
+    
+    // Pharmacy
+    'pharmacy.title': 'ร้านขายยา',
+    'pharmacy.subtitle': 'ยาและผลิตภัณฑ์สุขภาพ',
+    'pharmacy.24h': '24 ชม.',
+    'pharmacy.delivery': 'จัดส่ง',
+    'pharmacy.fastDelivery': 'จัดส่งด่วน',
+    'pharmacy.fromMinutes': 'ภายใน 30 นาที',
+    'pharmacy.pharmacist': 'ปรึกษาเภสัชกร',
+    'pharmacy.pharmacistAvailable': 'มีเภสัชกร',
+    'pharmacy.prescription': 'ต้องมีใบสั่งยา',
+    'pharmacy.products': 'สินค้า',
+    'pharmacy.general': 'ทั่วไป',
+    'pharmacy.vitamins': 'วิตามิน',
+    'pharmacy.firstAid': 'ปฐมพยาบาล',
+    'pharmacy.skincare': 'ดูแลผิว',
+    'pharmacy.personalCare': 'ของใช้ส่วนตัว',
+    'pharmacy.addToCart': 'เพิ่มในตะกร้า',
+    'pharmacy.addedToCart': 'เพิ่มในตะกร้าแล้ว',
+    'pharmacy.cart': 'ตะกร้า',
+    'pharmacy.minOrder': 'สั่งขั้นต่ำ',
+    'pharmacy.deliveryFee': 'ค่าจัดส่ง',
+    'pharmacy.deliveryFrom': 'จัดส่งจาก',
+    'pharmacy.notFound': 'ไม่พบร้านขายยา',
+    'pharmacy.noProducts': 'ไม่พบสินค้า',
+    'pharmacy.verified': 'ยืนยันแล้ว',
+    'pharmacy.all': 'ทั้งหมด',
+    
+    // User types
+    'userType.tourist': 'นักท่องเที่ยว',
+    'userType.resident': 'ผู้พักอาศัย',
+    
+    // Common labels
+    'label.price': 'ราคา',
+    'label.duration': 'ระยะเวลา',
+    'label.rating': 'คะแนน',
+    'label.reviews': 'รีวิว',
+    'label.location': 'สถานที่',
+    'label.date': 'วันที่',
+    'label.time': 'เวลา',
+    'label.from': 'จาก',
+    'label.perHour': '/ชม.',
+    'label.perDay': '/วัน',
+    'label.perNight': '/คืน',
+    'label.verified': 'ยืนยันแล้ว',
+    'label.popular': 'ยอดนิยม',
+    'label.new': 'ใหม่',
+    'label.featured': 'แนะนำ',
+    
+    // Messages
+    'message.noResults': 'ไม่พบผลลัพธ์',
+    'message.loading': 'กำลังโหลด...',
+    'message.error': 'เกิดข้อผิดพลาด',
+    'message.success': 'สำเร็จ!',
+    'message.loginRequired': 'กรุณาเข้าสู่ระบบ',
+    
+    // Home page
+    'home.welcome': 'ยินดีต้อนรับสู่ UNO',
+    'home.subtitle': 'ไกด์ส่วนตัวของคุณในภูเก็ต',
+    'home.featuredServices': 'บริการยอดนิยม',
+    'home.categories': 'หมวดหมู่',
+    'home.nearYou': 'ใกล้คุณ',
+    
+    // Beauty & Spa
+    'beauty.title': 'ความงามและสปา',
+    'beauty.salons': 'ร้าน',
+    'beauty.services': 'บริการ',
+    'beauty.selectServices': 'เลือกบริการ',
+    'beauty.popularServices': 'บริการยอดนิยม',
+    'beauty.nearbySalons': 'ร้านใกล้เคียง',
+    'beauty.searchSalons': 'ค้นหาร้าน...',
+    'beauty.searchServices': 'ค้นหาบริการ...',
+    'beauty.bookAppointment': 'นัดหมาย',
+    'beauty.selectDate': 'เลือกวันที่',
+    'beauty.selectTime': 'เลือกเวลา',
+    'beauty.contactInfo': 'ข้อมูลติดต่อ',
+    'beauty.confirmBooking': 'ยืนยันการจอง',
+    'beauty.bookingSuccess': 'จองสำเร็จ!',
+  },
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -456,13 +672,13 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('uno-language', lang);
   };
 
-  const t = (key: string): string => {
-    return translations[language][key] || key;
-  };
-
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
+
+  const t = (key: string): string => {
+    return translations[language][key] || translations['en'][key] || key;
+  };
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t }}>
@@ -473,8 +689,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
 export function useLanguage() {
   const context = useContext(LanguageContext);
-  if (context === undefined) {
-    throw new Error('useLanguage must be used within a LanguageProvider');
+  if (!context) {
+    throw new Error('useLanguage must be used within LanguageProvider');
   }
   return context;
 }

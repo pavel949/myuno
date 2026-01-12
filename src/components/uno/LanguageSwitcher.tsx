@@ -18,6 +18,7 @@ interface LanguageSwitcherProps {
 const languages = [
   { code: 'ru' as const, flag: '🇷🇺', name: 'Русский', shortName: 'RU' },
   { code: 'en' as const, flag: '🇬🇧', name: 'English', shortName: 'EN' },
+  { code: 'th' as const, flag: '🇹🇭', name: 'ไทย', shortName: 'TH' },
 ];
 
 export function LanguageSwitcher({
@@ -78,15 +79,16 @@ export function LanguageSwitcher({
           key={lang.code}
           onClick={() => setLanguage(lang.code)}
           className={cn(
-            "flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl",
-            "font-medium transition-all duration-200 border",
+            "flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl",
+            "font-medium transition-all duration-200 border text-sm",
             language === lang.code
               ? "bg-primary/10 border-primary text-primary"
               : "bg-secondary/50 border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary"
           )}
         >
           <span>{lang.flag}</span>
-          <span>{lang.name}</span>
+          <span className="hidden sm:inline">{lang.name}</span>
+          <span className="sm:hidden">{lang.shortName}</span>
         </button>
       ))}
     </div>

@@ -167,7 +167,7 @@ function ServiceCard({
   onClick 
 }: { 
   service: typeof allServices[0];
-  language: 'ru' | 'en';
+  language: 'ru' | 'en' | 'th';
   onClick: () => void;
 }) {
   return (
