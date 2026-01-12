@@ -62,13 +62,16 @@ export function UnitSpecs({
   unitNumber, 
   viewType, 
   furnishingLevel, 
-  equipment = [],
+  equipment,
   className 
 }: UnitSpecsProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  
+  // Handle null/undefined equipment from database
+  const safeEquipment = equipment ?? [];
 
-  const hasAnyData = floor !== undefined || unitNumber || viewType || furnishingLevel || equipment.length > 0;
+  const hasAnyData = floor !== undefined || unitNumber || viewType || furnishingLevel || safeEquipment.length > 0;
   
   if (!hasAnyData) return null;
 
@@ -102,9 +105,9 @@ export function UnitSpecs({
       </div>
 
       {/* Equipment */}
-      {equipment.length > 0 && (
+      {safeEquipment.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
-          {equipment.map((item) => (
+          {safeEquipment.map((item) => (
             <span
               key={item}
               className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-md bg-muted text-muted-foreground"
