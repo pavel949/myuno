@@ -119,8 +119,8 @@ export default function AboutPage() {
           </div>
           <p className="text-sm text-muted-foreground">
             {isRu 
-              ? 'Сделать жизнь на Пхукете простой и безопасной для каждого. Мы тщательно отбираем партнёров, проверяем качество услуг и гарантируем честные цены. UNO — это не просто приложение, это ваш надёжный помощник в новой стране.'
-              : 'Make life in Phuket simple and safe for everyone. We carefully select partners, verify service quality and guarantee fair prices. UNO is not just an app, it is your reliable assistant in a new country.'}
+              ? 'Быть рядом, когда вы далеко от дома. Мы создаём экосистему проверенных сервисов, которая помогает чувствовать себя как дома в любой точке мира. Тщательно отбираем партнёров, гарантируем качество и честные цены. Сегодня — Пхукет, завтра — весь мир.'
+              : 'Be there when you\'re far from home. We build an ecosystem of trusted services that helps you feel at home anywhere in the world. We carefully select partners, guarantee quality and fair prices. Today — Phuket, tomorrow — the world.'}
           </p>
         </SectionCard>
 
