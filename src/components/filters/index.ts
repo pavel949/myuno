@@ -2,6 +2,9 @@
 export { UniversalFilter, QuickFilterBar, ActiveFilters } from './UniversalFilter';
 export type { FilterConfig, FilterOption, FilterValues, FilterSection, UniversalFilterProps } from './UniversalFilter';
 
+// Nearby/Geolocation filter
+export { NearbyFilter, DistanceBadge } from './NearbyFilter';
+
 // Restaurant filters
 export { 
   restaurantFilterConfig, 
