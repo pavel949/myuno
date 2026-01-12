@@ -14,58 +14,64 @@ interface OnboardingModalProps {
   onComplete: () => void;
 }
 
+type Language = 'ru' | 'en' | 'th';
+
 const steps = [
   {
     id: 'welcome',
-    titleEn: 'Home is where UNO is',
-    titleRu: 'Дом там, где UNO',
-    subtitleEn: 'Your life abroad, simplified',
-    subtitleRu: 'Твоя жизнь за рубежом — проще',
+    title: { en: 'Home is where UNO is', ru: 'Дом там, где UNO', th: 'บ้านอยู่ที่ UNO' },
+    subtitle: { en: 'Your life abroad, simplified', ru: 'Твоя жизнь за рубежом — проще', th: 'ชีวิตต่างแดนของคุณ ง่ายขึ้น' },
     icon: Sparkles,
   },
   {
     id: 'location',
-    titleEn: 'Where are you?',
-    titleRu: 'Где вы находитесь?',
-    subtitleEn: 'Select your current location',
-    subtitleRu: 'Выберите ваше местоположение',
+    title: { en: 'Where are you?', ru: 'Где вы находитесь?', th: 'คุณอยู่ที่ไหน?' },
+    subtitle: { en: 'Select your current location', ru: 'Выберите ваше местоположение', th: 'เลือกตำแหน่งปัจจุบันของคุณ' },
     icon: MapPin,
   },
   {
     id: 'interests',
-    titleEn: 'What interests you?',
-    titleRu: 'Что вас интересует?',
-    subtitleEn: 'Select categories to personalize your experience',
-    subtitleRu: 'Выберите категории для персонализации',
+    title: { en: 'What interests you?', ru: 'Что вас интересует?', th: 'คุณสนใจอะไร?' },
+    subtitle: { en: 'Select categories to personalize your experience', ru: 'Выберите категории для персонализации', th: 'เลือกหมวดหมู่เพื่อปรับแต่งประสบการณ์' },
     icon: Sparkles,
   },
   {
     id: 'ready',
-    titleEn: "You're all set!",
-    titleRu: 'Всё готово!',
-    subtitleEn: 'Start exploring verified services',
-    subtitleRu: 'Начните изучать проверенные сервисы',
+    title: { en: "You're all set!", ru: 'Всё готово!', th: 'พร้อมแล้ว!' },
+    subtitle: { en: 'Start exploring verified services', ru: 'Начните изучать проверенные сервисы', th: 'เริ่มค้นหาบริการที่ได้รับการยืนยัน' },
     icon: Check,
   },
 ];
 
 const locations = [
-  { id: 'phuket', nameEn: 'Phuket', nameRu: 'Пхукет', flag: '🇹🇭' },
-  { id: 'bangkok', nameEn: 'Bangkok', nameRu: 'Бангкок', flag: '🇹🇭' },
-  { id: 'samui', nameEn: 'Koh Samui', nameRu: 'Ко Самуи', flag: '🇹🇭' },
-  { id: 'pattaya', nameEn: 'Pattaya', nameRu: 'Паттайя', flag: '🇹🇭' },
-  { id: 'bali', nameEn: 'Bali', nameRu: 'Бали', flag: '🇮🇩' },
-  { id: 'other', nameEn: 'Other', nameRu: 'Другое', flag: '🌍' },
+  { id: 'phuket', name: { en: 'Phuket', ru: 'Пхукет', th: 'ภูเก็ต' }, flag: '🇹🇭' },
+  { id: 'bangkok', name: { en: 'Bangkok', ru: 'Бангкок', th: 'กรุงเทพฯ' }, flag: '🇹🇭' },
+  { id: 'samui', name: { en: 'Koh Samui', ru: 'Ко Самуи', th: 'เกาะสมุย' }, flag: '🇹🇭' },
+  { id: 'pattaya', name: { en: 'Pattaya', ru: 'Паттайя', th: 'พัทยา' }, flag: '🇹🇭' },
+  { id: 'bali', name: { en: 'Bali', ru: 'Бали', th: 'บาหลี' }, flag: '🇮🇩' },
+  { id: 'other', name: { en: 'Other', ru: 'Другое', th: 'อื่นๆ' }, flag: '🌍' },
 ];
 
 const interests = [
-  { id: 'housing', nameEn: 'Housing', nameRu: 'Жильё', icon: Home, color: 'from-teal-500 to-emerald-500' },
-  { id: 'transport', nameEn: 'Transport', nameRu: 'Транспорт', icon: Car, color: 'from-indigo-500 to-blue-500' },
-  { id: 'food', nameEn: 'Food & Dining', nameRu: 'Еда', icon: UtensilsCrossed, color: 'from-orange-500 to-red-500' },
-  { id: 'medical', nameEn: 'Medical', nameRu: 'Медицина', icon: Stethoscope, color: 'from-emerald-500 to-green-500' },
-  { id: 'beauty', nameEn: 'Beauty & Spa', nameRu: 'Красота и СПА', icon: Sparkles, color: 'from-pink-500 to-purple-500' },
-  { id: 'finance', nameEn: 'Finance & Legal', nameRu: 'Финансы и право', icon: Wallet, color: 'from-amber-500 to-orange-500' },
+  { id: 'housing', name: { en: 'Housing', ru: 'Жильё', th: 'ที่พัก' }, icon: Home, color: 'from-teal-500 to-emerald-500' },
+  { id: 'transport', name: { en: 'Transport', ru: 'Транспорт', th: 'การเดินทาง' }, icon: Car, color: 'from-indigo-500 to-blue-500' },
+  { id: 'food', name: { en: 'Food & Dining', ru: 'Еда', th: 'อาหาร' }, icon: UtensilsCrossed, color: 'from-orange-500 to-red-500' },
+  { id: 'medical', name: { en: 'Medical', ru: 'Медицина', th: 'การแพทย์' }, icon: Stethoscope, color: 'from-emerald-500 to-green-500' },
+  { id: 'beauty', name: { en: 'Beauty & Spa', ru: 'Красота и СПА', th: 'ความงามและสปา' }, icon: Sparkles, color: 'from-pink-500 to-purple-500' },
+  { id: 'finance', name: { en: 'Finance & Legal', ru: 'Финансы и право', th: 'การเงินและกฎหมาย' }, icon: Wallet, color: 'from-amber-500 to-orange-500' },
 ];
+
+const languageOptions = [
+  { code: 'en' as const, flag: '🇬🇧', label: 'English' },
+  { code: 'ru' as const, flag: '🇷🇺', label: 'Русский' },
+  { code: 'th' as const, flag: '🇹🇭', label: 'ไทย' },
+];
+
+const uiTexts = {
+  skip: { en: 'Skip', ru: 'Пропустить', th: 'ข้าม' },
+  continue: { en: 'Continue', ru: 'Далее', th: 'ถัดไป' },
+  getStarted: { en: 'Get Started', ru: 'Начать', th: 'เริ่มต้น' },
+};
 
 export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
   const { language, setLanguage } = useLanguage();
@@ -74,6 +80,7 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
 
   const step = steps[currentStep];
+  const lang = language as Language;
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
@@ -137,41 +144,31 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold mb-2">
-                    {language === 'ru' ? step.titleRu : step.titleEn}
+                    {step.title[lang]}
                   </h2>
                   <p className="text-muted-foreground">
-                    {language === 'ru' ? step.subtitleRu : step.subtitleEn}
+                    {step.subtitle[lang]}
                   </p>
                 </div>
                 
-                {/* Language selector */}
-                <div className="flex justify-center gap-3">
-                  <button
-                    onClick={() => setLanguage('en')}
-                    className={cn(
-                      "flex items-center gap-2 px-4 py-2 rounded-xl border transition-all",
-                      language === 'en' 
-                        ? "border-primary bg-primary/10" 
-                        : "border-border hover:border-primary/50"
-                    )}
-                  >
-                    <Globe className="w-4 h-4" />
-                    <span>English</span>
-                    {language === 'en' && <Check className="w-4 h-4 text-primary" />}
-                  </button>
-                  <button
-                    onClick={() => setLanguage('ru')}
-                    className={cn(
-                      "flex items-center gap-2 px-4 py-2 rounded-xl border transition-all",
-                      language === 'ru' 
-                        ? "border-primary bg-primary/10" 
-                        : "border-border hover:border-primary/50"
-                    )}
-                  >
-                    <Globe className="w-4 h-4" />
-                    <span>Русский</span>
-                    {language === 'ru' && <Check className="w-4 h-4 text-primary" />}
-                  </button>
+                {/* Language selector - 3 languages */}
+                <div className="flex justify-center gap-2 flex-wrap">
+                  {languageOptions.map((opt) => (
+                    <button
+                      key={opt.code}
+                      onClick={() => setLanguage(opt.code)}
+                      className={cn(
+                        "flex items-center gap-2 px-3 py-2 rounded-xl border transition-all",
+                        language === opt.code 
+                          ? "border-primary bg-primary/10" 
+                          : "border-border hover:border-primary/50"
+                      )}
+                    >
+                      <span className="text-lg">{opt.flag}</span>
+                      <span className="text-sm">{opt.label}</span>
+                      {language === opt.code && <Check className="w-4 h-4 text-primary" />}
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
@@ -184,10 +181,10 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
                     <step.icon className="w-8 h-8 text-primary-foreground" />
                   </div>
                   <h2 className="text-xl font-bold mb-1">
-                    {language === 'ru' ? step.titleRu : step.titleEn}
+                    {step.title[lang]}
                   </h2>
                   <p className="text-sm text-muted-foreground">
-                    {language === 'ru' ? step.subtitleRu : step.subtitleEn}
+                    {step.subtitle[lang]}
                   </p>
                 </div>
                 
@@ -205,7 +202,7 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
                     >
                       <span className="text-xl">{loc.flag}</span>
                       <span className="font-medium">
-                        {language === 'ru' ? loc.nameRu : loc.nameEn}
+                        {loc.name[lang]}
                       </span>
                       {selectedLocation === loc.id && (
                         <Check className="w-4 h-4 text-primary ml-auto" />
@@ -221,10 +218,10 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
               <div className="space-y-6">
                 <div className="text-center">
                   <h2 className="text-xl font-bold mb-1">
-                    {language === 'ru' ? step.titleRu : step.titleEn}
+                    {step.title[lang]}
                   </h2>
                   <p className="text-sm text-muted-foreground">
-                    {language === 'ru' ? step.subtitleRu : step.subtitleEn}
+                    {step.subtitle[lang]}
                   </p>
                 </div>
                 
@@ -250,7 +247,7 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
                           <Icon className="w-5 h-5 text-white" />
                         </div>
                         <span className="font-medium text-sm text-left flex-1">
-                          {language === 'ru' ? interest.nameRu : interest.nameEn}
+                          {interest.name[lang]}
                         </span>
                         {isSelected && (
                           <Check className="w-4 h-4 text-primary flex-shrink-0" />
@@ -270,10 +267,10 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold mb-2">
-                    {language === 'ru' ? step.titleRu : step.titleEn}
+                    {step.title[lang]}
                   </h2>
                   <p className="text-muted-foreground">
-                    {language === 'ru' ? step.subtitleRu : step.subtitleEn}
+                    {step.subtitle[lang]}
                   </p>
                 </div>
                 <div className="flex flex-wrap justify-center gap-2">
@@ -285,7 +282,7 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
                         key={id}
                         className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
                       >
-                        {language === 'ru' ? interest.nameRu : interest.nameEn}
+                        {interest.name[lang]}
                       </span>
                     );
                   })}
@@ -301,7 +298,7 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
                   className="flex-1"
                   onClick={handleSkip}
                 >
-                  {language === 'ru' ? 'Пропустить' : 'Skip'}
+                  {uiTexts.skip[lang]}
                 </Button>
               )}
               <Button 
@@ -310,8 +307,8 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
                 disabled={!canProceed()}
               >
                 {step.id === 'ready' 
-                  ? (language === 'ru' ? 'Начать' : 'Get Started')
-                  : (language === 'ru' ? 'Далее' : 'Continue')
+                  ? uiTexts.getStarted[lang]
+                  : uiTexts.continue[lang]
                 }
                 <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
