@@ -157,7 +157,9 @@ export default function PropertyDetail() {
     return demoProperty;
   }, [dbProperty, id]);
 
-  const images = property.images || [property.cover_image].filter(Boolean);
+  const images = (property.images && property.images.length > 0) 
+    ? property.images 
+    : [property.cover_image].filter(Boolean);
   const amenities = property.amenities || [];
   const rentalTerms = property.rentalTerms;
 
