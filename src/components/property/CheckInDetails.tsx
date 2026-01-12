@@ -11,7 +11,9 @@ interface CheckInDetailsProps {
   lateCheckoutPrice?: number;
   lateCheckoutPenalty?: number;
   keyHandover?: string;
+  /** English version of check-in instructions */
   instructions?: string;
+  /** Russian version of check-in instructions */
   instructions_ru?: string;
   transfer?: {
     available: boolean;

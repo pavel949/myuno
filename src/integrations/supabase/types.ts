@@ -1927,6 +1927,7 @@ export type Database = {
           bathrooms: number | null
           bedrooms: number | null
           cancellation_policy: string | null
+          check_in_instructions: string | null
           check_in_instructions_ru: string | null
           check_in_time: string | null
           check_out_time: string | null
@@ -2019,6 +2020,7 @@ export type Database = {
           bathrooms?: number | null
           bedrooms?: number | null
           cancellation_policy?: string | null
+          check_in_instructions?: string | null
           check_in_instructions_ru?: string | null
           check_in_time?: string | null
           check_out_time?: string | null
@@ -2111,6 +2113,7 @@ export type Database = {
           bathrooms?: number | null
           bedrooms?: number | null
           cancellation_policy?: string | null
+          check_in_instructions?: string | null
           check_in_instructions_ru?: string | null
           check_in_time?: string | null
           check_out_time?: string | null

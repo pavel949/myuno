@@ -35,6 +35,76 @@ export interface Property {
   updated_at: string;
 }
 
+export interface PropertyRentalTerms {
+  price_per_night?: number;
+  min_stay_nights?: number;
+  max_guests?: number;
+  deposit_amount?: number;
+  deposit_currency?: string;
+  deposit_type?: string;
+  check_in_time?: string;
+  check_out_time?: string;
+  house_rules?: string;
+  house_rules_ru?: string;
+  cancellation_policy?: string;
+  instant_booking?: boolean;
+  weekly_discount?: number;
+  monthly_discount?: number;
+  seasonal_pricing?: Record<string, unknown>;
+  electricity_included?: boolean;
+  electricity_unit_price?: number;
+  electricity_provider?: string;
+  electricity_metering?: string;
+  electricity_notes?: string;
+  electricity_notes_ru?: string;
+  water_included?: boolean;
+  water_unit_price?: number;
+  water_notes?: string;
+  water_notes_ru?: string;
+  included_services?: string[] | string;
+  extra_services?: Array<{ id: string; price: number; currency: string }> | string;
+  cleaning_included?: boolean;
+  cleaning_frequency?: string;
+  extra_cleaning_price?: number;
+  linen_change_price?: number;
+  linen_change_frequency?: string;
+  early_checkin_price?: number;
+  late_checkout_price?: number;
+  late_checkout_penalty?: number;
+  key_handover?: string;
+  check_in_instructions?: string;
+  check_in_instructions_ru?: string;
+  transfer_available?: boolean;
+  transfer_airport_price?: number;
+  transfer_notes?: string;
+  transfer_notes_ru?: string;
+  extra_guest_price?: number;
+  extra_guest_threshold?: number;
+  internet_speed?: string;
+  internet_provider?: string;
+  manager_name?: string;
+  manager_phone?: string;
+  manager_line_id?: string;
+  parking_included?: boolean;
+  parking_spaces?: number;
+  parking_notes?: string;
+  pets_allowed?: boolean;
+  pet_deposit?: number;
+  pet_notes?: string;
+  pet_notes_ru?: string;
+  parties_allowed?: boolean;
+  max_party_guests?: number;
+  quiet_hours_start?: string;
+  quiet_hours_end?: string;
+  children_friendly?: boolean;
+  has_crib?: boolean;
+  has_high_chair?: boolean;
+  smoking_penalty?: number;
+  emergency_contact_name?: string;
+  emergency_contact_phone?: string;
+  host_languages?: string[];
+}
+
 export interface PropertyFilters {
   search?: string;
   propertyType?: string;
@@ -266,7 +336,7 @@ export function usePropertyWithRentalTerms(marketplacePropertyId?: string) {
       return {
         ...property,
         rentalTerms: ownerProperty || null,
-      } as Property & { rentalTerms: any };
+      } as Property & { rentalTerms: PropertyRentalTerms | null };
     },
     enabled: !!marketplacePropertyId,
   });
