@@ -76,11 +76,19 @@ const translations: Record<Language, Record<string, string>> = {
     'category.tours': 'Туры',
     'category.water': 'Вода',
     'category.pharmacy': 'Аптеки',
+    'category.insurance': 'Страхование',
+    'category.market': 'Магазины',
     
     // Hero section
     'home.heroTitle': 'Дом там, где UNO',
-    'home.heroSubtitle': 'Твоя жизнь за рубежом — проще',
-    'home.trustBadge': 'Проверено',
+    'home.heroSubtitle': 'Всё для комфортной жизни за рубежом — проверенные сервисы, надёжные партнёры, прозрачные цены',
+    'home.trustBadge': 'Надёжная инфраструктура',
+    'home.forOwners': 'Для владельцев',
+    'home.listProperty': 'Включите свой объект',
+    'home.listPropertyDesc': 'Управление, сервис, бронирования — всё в одном месте',
+    'home.allServices': 'Все сервисы',
+    'home.verifiedPartners': 'Проверенные партнёры',
+    'home.realReviews': 'Реальные отзывы',
     
     // Tours
     'tours.title': 'Экскурсии и туры',
@@ -292,11 +300,19 @@ const translations: Record<Language, Record<string, string>> = {
     'category.tours': 'Tours',
     'category.water': 'Water',
     'category.pharmacy': 'Pharmacy',
+    'category.insurance': 'Insurance',
+    'category.market': 'Shops',
     
     // Hero section
     'home.heroTitle': 'Home is where UNO is',
-    'home.heroSubtitle': 'Your life abroad, simplified',
-    'home.trustBadge': 'Verified',
+    'home.heroSubtitle': 'Everything for comfortable life abroad — verified services, trusted partners, transparent prices',
+    'home.trustBadge': 'Trusted Infrastructure',
+    'home.forOwners': 'For Owners',
+    'home.listProperty': 'List Your Property',
+    'home.listPropertyDesc': 'Management, service, bookings — all in one place',
+    'home.allServices': 'All Services',
+    'home.verifiedPartners': 'Verified partners',
+    'home.realReviews': 'Real reviews',
     
     // Tours
     'tours.title': 'Tours & Excursions',
@@ -508,11 +524,19 @@ const translations: Record<Language, Record<string, string>> = {
     'category.tours': 'ทัวร์',
     'category.water': 'กิจกรรมทางน้ำ',
     'category.pharmacy': 'ร้านขายยา',
+    'category.insurance': 'ประกันภัย',
+    'category.market': 'ร้านค้า',
     
     // Hero section
     'home.heroTitle': 'บ้านอยู่ที่ไหน UNO อยู่ที่นั่น',
-    'home.heroSubtitle': 'ชีวิตต่างแดนของคุณ ง่ายขึ้น',
-    'home.trustBadge': 'ยืนยันแล้ว',
+    'home.heroSubtitle': 'ทุกอย่างเพื่อชีวิตที่สะดวกสบายในต่างแดน — บริการที่ยืนยัน พันธมิตรที่เชื่อถือได้ ราคาโปร่งใส',
+    'home.trustBadge': 'โครงสร้างที่เชื่อถือได้',
+    'home.forOwners': 'สำหรับเจ้าของ',
+    'home.listProperty': 'ลงประกาศที่พักของคุณ',
+    'home.listPropertyDesc': 'การจัดการ บริการ การจอง — ทุกอย่างในที่เดียว',
+    'home.allServices': 'บริการทั้งหมด',
+    'home.verifiedPartners': 'พันธมิตรที่ยืนยัน',
+    'home.realReviews': 'รีวิวจริง',
     
     // Tours
     'tours.title': 'ทัวร์และทริป',

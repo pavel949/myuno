@@ -46,7 +46,7 @@ const allCategories = [
 ];
 
 const Index = () => {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [refreshKey, setRefreshKey] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(() => {
@@ -80,15 +80,13 @@ const Index = () => {
           <div className="text-center space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
               <Shield className="w-3.5 h-3.5" />
-              {language === 'ru' ? 'Надёжная инфраструктура' : 'Trusted Infrastructure'}
+              {t('home.trustBadge')}
             </div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground via-foreground to-primary bg-clip-text">
               UNO
             </h1>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto">
-              {language === 'ru' 
-                ? 'Всё для комфортной жизни за рубежом — проверенные сервисы, надёжные партнёры, прозрачные цены' 
-                : 'Everything for comfortable life abroad — verified services, trusted partners, transparent prices'}
+              {t('home.heroSubtitle')}
             </p>
           </div>
 
@@ -99,7 +97,7 @@ const Index = () => {
           >
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
-              placeholder={language === 'ru' ? 'Поиск услуг, мест, событий...' : 'Search services, places, events...'}
+              placeholder={t('action.search') + '...'}
               className="pl-10 cursor-pointer"
               readOnly
             />
@@ -134,16 +132,14 @@ const Index = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-[10px] font-semibold uppercase tracking-wider text-white/80 bg-white/20 px-2 py-0.5 rounded-full">
-                      {language === 'ru' ? 'Для владельцев' : 'For Owners'}
+                      {t('home.forOwners')}
                     </span>
                   </div>
                   <h3 className="font-bold text-white text-base">
-                    {language === 'ru' ? 'Включите свой объект' : 'List Your Property'}
+                    {t('home.listProperty')}
                   </h3>
                   <p className="text-xs text-white/80 line-clamp-1">
-                    {language === 'ru' 
-                      ? 'Управление, сервис, бронирования — всё в одном месте' 
-                      : 'Management, service, bookings — all in one place'}
+                    {t('home.listPropertyDesc')}
                   </p>
                 </div>
                 <ArrowRight className="w-6 h-6 text-white flex-shrink-0 group-hover:translate-x-1 transition-transform" />
@@ -154,12 +150,12 @@ const Index = () => {
           {/* All Services Grid */}
           <FadeInUp delay={0.14}>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-base font-semibold">{language === 'ru' ? 'Все сервисы' : 'All Services'}</h2>
+              <h2 className="text-base font-semibold">{t('home.allServices')}</h2>
               <button 
                 onClick={() => navigate('/discover')}
                 className="text-xs text-primary flex items-center gap-1"
               >
-                {language === 'ru' ? 'Ещё' : 'More'}
+                {t('action.viewAll')}
                 <ArrowRight className="w-3 h-3" />
               </button>
             </div>
@@ -215,11 +211,11 @@ const Index = () => {
             <div className="flex items-center justify-center gap-6 py-4 border-t border-border/50">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Shield className="w-4 h-4 text-primary" />
-                <span>{language === 'ru' ? 'Проверенные партнёры' : 'Verified partners'}</span>
+                <span>{t('home.verifiedPartners')}</span>
               </div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Star className="w-4 h-4 text-amber-500" />
-                <span>{language === 'ru' ? 'Реальные отзывы' : 'Real reviews'}</span>
+                <span>{t('home.realReviews')}</span>
               </div>
             </div>
           </FadeInUp>
