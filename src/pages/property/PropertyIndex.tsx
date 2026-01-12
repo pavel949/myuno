@@ -8,10 +8,10 @@ import { ItemCard } from '@/components/miniapp/ItemCard';
 import { FilterChip, FilterChipGroup } from '@/components/uno/FilterChip';
 import { UniversalFilter, ActiveFilters, FilterValues } from '@/components/filters/UniversalFilter';
 import { propertyFilterConfig } from '@/components/filters/PropertyFilters';
-import { useProperties, Property } from '@/hooks/useProperties';
+import { useProperties, useInstantBookingProperties, Property } from '@/hooks/useProperties';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 // Demo properties as fallback when DB is empty
 const demoProperties = [
   {
@@ -142,6 +142,9 @@ export default function PropertyIndex() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  // Fetch instant booking properties
+  const { data: instantBookingProperties, isLoading: isLoadingInstant } = useInstantBookingProperties(10);
+
   // Fetch real properties from database
   const { data: dbProperties, isLoading } = useProperties({
     search: debouncedSearch,
@@ -265,6 +268,71 @@ export default function PropertyIndex() {
       resultsCount={properties.length}
       resultsLabel={language === 'ru' ? 'Доступные объекты' : 'Available Properties'}
     >
+      {/* Instant Booking Section */}
+      {!isLoadingInstant && instantBookingProperties && instantBookingProperties.length > 0 && !debouncedSearch && selectedType === 'all' && (
+        <section className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <Zap className="w-5 h-5 text-amber-500" />
+            <h2 className="font-semibold text-lg">
+              {language === 'ru' ? 'Мгновенное бронирование' : 'Instant Booking'}
+            </h2>
+            <Badge variant="secondary" className="bg-amber-500/10 text-amber-600 border-amber-500/20">
+              {instantBookingProperties.length}
+            </Badge>
+          </div>
+          <ScrollArea className="w-full">
+            <div className="flex gap-3 pb-3">
+              {instantBookingProperties.map((property) => (
+                <div 
+                  key={property.id} 
+                  className="min-w-[280px] max-w-[280px] cursor-pointer"
+                  onClick={() => navigate(`/property/${property.id}`)}
+                >
+                  <div className="relative rounded-xl overflow-hidden bg-card border shadow-sm hover:shadow-md transition-shadow">
+                    <div className="relative h-40">
+                      <img 
+                        src={property.cover_image || property.images?.[0] || 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=400'} 
+                        alt={language === 'ru' ? property.title_ru : property.title_en}
+                        className="w-full h-full object-cover"
+                      />
+                      <Badge className="absolute top-2 left-2 bg-amber-500 text-white border-0 gap-1">
+                        <Zap className="w-3 h-3" />
+                        {language === 'ru' ? 'Мгновенно' : 'Instant'}
+                      </Badge>
+                      {property.is_verified && (
+                        <Badge className="absolute top-2 right-2 bg-emerald-500 text-white border-0 text-xs">
+                          ✓
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="p-3">
+                      <h3 className="font-medium text-sm line-clamp-1">
+                        {language === 'ru' ? property.title_ru : property.title_en}
+                      </h3>
+                      <p className="text-xs text-muted-foreground">{property.district}</p>
+                      <div className="flex items-center justify-between mt-2">
+                        <span className="font-semibold text-primary">
+                          ฿{property.price?.toLocaleString()}{formatPriceLabel(property.price_period)}
+                        </span>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <BedDouble className="w-3 h-3" /> {property.bedrooms}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Bath className="w-3 h-3" /> {property.bathrooms}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+        </section>
+      )}
+
       {/* Active Filters */}
       <ActiveFilters
         config={propertyFilterConfig}

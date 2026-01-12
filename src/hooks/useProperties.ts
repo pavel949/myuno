@@ -26,6 +26,7 @@ export interface Property {
   is_active?: boolean;
   is_featured?: boolean;
   is_verified?: boolean;
+  instant_booking?: boolean;
   available_from?: string;
   min_stay_nights?: number;
   rating?: number;
@@ -227,6 +228,26 @@ export function useFeaturedProperties(limit = 6) {
         .eq('is_active', true)
         .eq('is_featured', true)
         .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (error) throw error;
+      return (data || []) as Property[];
+    },
+  });
+}
+
+// Instant booking properties
+export function useInstantBookingProperties(limit = 10) {
+  return useQuery({
+    queryKey: ['instant-booking-properties', limit],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('is_active', true)
+        .eq('instant_booking', true)
+        .order('is_featured', { ascending: false })
+        .order('rating', { ascending: false })
         .limit(limit);
 
       if (error) throw error;
