@@ -1,16 +1,17 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   MapPin, Star, BedDouble, Bath, Users, Maximize, 
   Share2, Calendar, Phone, MessageCircle, Shield,
   Zap, Loader2, ChevronRight, Home, Eye, Sofa, Building2,
-  Sparkles, Clock, Award
+  Sparkles, Clock, Award, Copy, Check
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { BackButton } from '@/components/uno/BackButton';
@@ -167,6 +168,7 @@ export default function PropertyDetail() {
   const { language } = useLanguage();
   const [activeImage, setActiveImage] = useState(0);
   const [showAllPhotos, setShowAllPhotos] = useState(false);
+  const [copied, setCopied] = useState(false);
   const isRu = language === 'ru';
 
   // Fetch real property from DB
@@ -206,6 +208,40 @@ export default function PropertyDetail() {
     }
   }, [rentalTerms?.extra_services]);
 
+  // Share functionality (after property is defined)
+  const handleShare = useCallback(async () => {
+    const shareUrl = window.location.href;
+    const shareTitle = isRu ? property.title_ru : property.title_en;
+    const shareText = isRu 
+      ? `Посмотрите это жильё: ${shareTitle}` 
+      : `Check out this property: ${shareTitle}`;
+
+    // Try Web Share API first (mobile)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl,
+        });
+        return;
+      } catch (err) {
+        // User cancelled or error - fall through to clipboard
+        if ((err as Error).name === 'AbortError') return;
+      }
+    }
+
+    // Fallback: copy to clipboard
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      toast.success(isRu ? 'Ссылка скопирована!' : 'Link copied!');
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error(isRu ? 'Не удалось скопировать' : 'Failed to copy');
+    }
+  }, [isRu, property.title_en, property.title_ru]);
+
   if (isLoading) {
     return (
       <AppLayout showBottomNav={false}>
@@ -227,9 +263,16 @@ export default function PropertyDetail() {
           <BackButton fallbackPath="/property" variant="ghost" />
           
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="sm" className="gap-2 text-sm">
-              <Share2 className="w-4 h-4" />
-              <span className="hidden sm:inline">{isRu ? 'Поделиться' : 'Share'}</span>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="gap-2 text-sm"
+              onClick={handleShare}
+            >
+              {copied ? <Check className="w-4 h-4 text-green-500" /> : <Share2 className="w-4 h-4" />}
+              <span className="hidden sm:inline">
+                {copied ? (isRu ? 'Скопировано' : 'Copied') : (isRu ? 'Поделиться' : 'Share')}
+              </span>
             </Button>
             <FavoriteButton
               itemType="property"
