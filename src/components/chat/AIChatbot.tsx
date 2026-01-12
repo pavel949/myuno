@@ -13,7 +13,7 @@ interface Message {
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-support-chat`;
 
-export const AIChatbot: React.FC = () => {
+export const AIChatbot = React.forwardRef<HTMLDivElement, object>(function AIChatbot(_props, ref) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -290,6 +290,6 @@ export const AIChatbot: React.FC = () => {
       </button>
     </>
   );
-};
+});
 
 export default AIChatbot;
