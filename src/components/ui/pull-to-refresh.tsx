@@ -91,44 +91,42 @@ export function PullToRefresh({
   return (
     <div 
       ref={containerRef}
-      className={cn("relative overflow-auto", className)}
+      className={cn("relative overflow-auto overscroll-contain", className)}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      style={{ WebkitOverflowScrolling: 'touch' }}
     >
       {/* Pull indicator */}
-      <div 
-        className={cn(
-          "absolute left-0 right-0 flex justify-center items-center transition-all duration-200 z-10 pointer-events-none",
-          showIndicator ? "opacity-100" : "opacity-0"
-        )}
-        style={{ 
-          top: Math.max(pullDistance - 40, 8),
-          transform: `translateY(${isRefreshing ? 0 : -10}px)`
-        }}
-      >
-        <div className={cn(
-          "flex items-center justify-center w-10 h-10 rounded-full bg-background border border-border shadow-lg",
-          isRefreshing && "animate-pulse"
-        )}>
-          <RefreshCw 
-            className={cn(
-              "w-5 h-5 text-primary transition-transform duration-200",
-              isRefreshing && "animate-spin"
-            )}
-            style={{ 
-              transform: isRefreshing ? undefined : `rotate(${rotation}deg)`,
-            }}
-          />
+      {showIndicator && (
+        <div 
+          className="sticky top-2 left-0 right-0 flex justify-center items-center z-10 pointer-events-none"
+          style={{ 
+            marginBottom: -40,
+          }}
+        >
+          <div className={cn(
+            "flex items-center justify-center w-10 h-10 rounded-full bg-background border border-border shadow-lg transition-opacity duration-200",
+            isRefreshing && "animate-pulse"
+          )}>
+            <RefreshCw 
+              className={cn(
+                "w-5 h-5 text-primary transition-transform duration-200",
+                isRefreshing && "animate-spin"
+              )}
+              style={{ 
+                transform: isRefreshing ? undefined : `rotate(${rotation}deg)`,
+              }}
+            />
+          </div>
         </div>
-      </div>
+      )}
       
-      {/* Content wrapper */}
+      {/* Content wrapper - no transform to avoid blank screen issues */}
       <div 
-        className="transition-transform duration-200"
         style={{ 
-          transform: `translateY(${isRefreshing ? 50 : pullDistance}px)`,
-          transitionDuration: isPulling ? '0ms' : '200ms'
+          paddingTop: isRefreshing ? 50 : pullDistance > 0 ? pullDistance : 0,
+          transition: isPulling ? 'none' : 'padding-top 200ms ease-out'
         }}
       >
         {children}

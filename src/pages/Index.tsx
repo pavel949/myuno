@@ -73,8 +73,8 @@ const Index = () => {
         />
       </Suspense>
 
-      <PullToRefresh onRefresh={handleRefresh} className="h-[calc(100vh-8rem)]">
-        <div className="px-4 py-6 space-y-6" key={refreshKey}>
+      <PullToRefresh onRefresh={handleRefresh} className="min-h-[calc(100vh-8rem)]">
+        <div className="px-4 py-6 pb-24 space-y-6" key={refreshKey}>
           
           {/* Hero Section - What is UNO */}
           <div className="text-center space-y-3">
