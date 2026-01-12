@@ -5219,6 +5219,10 @@ export type Database = {
         Args: { p_code: string; p_referred_id: string }
         Returns: boolean
       }
+      calculate_distance_km: {
+        Args: { lat1: number; lat2: number; lng1: number; lng2: number }
+        Returns: number
+      }
       check_property_availability: {
         Args: {
           p_check_in: string
@@ -5239,6 +5243,61 @@ export type Database = {
           p_user_id: string
         }
         Returns: string
+      }
+      find_nearby_clinics: {
+        Args: { radius_km?: number; user_lat: number; user_lng: number }
+        Returns: {
+          distance_km: number
+          id: string
+          lat: number
+          lng: number
+          name_en: string
+          name_ru: string
+        }[]
+      }
+      find_nearby_flower_shops: {
+        Args: { radius_km?: number; user_lat: number; user_lng: number }
+        Returns: {
+          distance_km: number
+          id: string
+          lat: number
+          lng: number
+          name_en: string
+          name_ru: string
+        }[]
+      }
+      find_nearby_gyms: {
+        Args: { radius_km?: number; user_lat: number; user_lng: number }
+        Returns: {
+          distance_km: number
+          id: string
+          lat: number
+          lng: number
+          name_en: string
+          name_ru: string
+        }[]
+      }
+      find_nearby_restaurants: {
+        Args: { radius_km?: number; user_lat: number; user_lng: number }
+        Returns: {
+          distance_km: number
+          id: string
+          lat: number
+          lng: number
+          name_en: string
+          name_ru: string
+        }[]
+      }
+      find_nearby_salons: {
+        Args: { radius_km?: number; user_lat: number; user_lng: number }
+        Returns: {
+          distance_km: number
+          id: string
+          lat: number
+          lng: number
+          name_en: string
+          name_ru: string
+        }[]
       }
       generate_referral_code: { Args: { p_user_id: string }; Returns: string }
       get_or_create_wallet: {
