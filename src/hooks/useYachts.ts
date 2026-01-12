@@ -22,6 +22,18 @@ export interface Yacht {
   is_featured: boolean;
   features_en: string[] | null;
   features_ru: string[] | null;
+  // Technical specs
+  length_meters: number | null;
+  year_built: number | null;
+  beam: string | null;
+  draft: string | null;
+  engines: string | null;
+  cruising_speed: string | null;
+  max_speed: string | null;
+  fuel_capacity: string | null;
+  cabins: number | null;
+  bathrooms: number | null;
+  has_crew: boolean | null;
 }
 
 export function useYachts(yachtType?: string) {
