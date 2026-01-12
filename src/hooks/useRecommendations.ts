@@ -20,11 +20,16 @@ export function useRecommendations() {
   const { history } = useViewHistory();
   const [recommendations, setRecommendations] = useState<RecommendedItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const hasFetched = useRef(false);
+  const hasFetchedRef = useRef(false);
+  const historyRef = useRef(history);
 
-  const fetchRecommendations = useCallback(async (viewedTypes: string[]) => {
+  // Update ref when history changes
+  historyRef.current = history;
+
+  const fetchRecommendations = useCallback(async () => {
     setIsLoading(true);
     const items: RecommendedItem[] = [];
+    const viewedTypes = [...new Set(historyRef.current.slice(0, 10).map(h => h.item_type))];
 
     try {
       // Fetch popular tours
@@ -139,22 +144,14 @@ export function useRecommendations() {
 
   useEffect(() => {
     // Only fetch once on mount to avoid infinite loops
-    if (hasFetched.current) return;
-    hasFetched.current = true;
-    
-    // Get user's preferred categories from history
-    const viewedTypes = [...new Set(history.slice(0, 10).map(h => h.item_type))];
-    fetchRecommendations(viewedTypes);
-  }, []);
-
-  const refetch = useCallback(() => {
-    const viewedTypes = [...new Set(history.slice(0, 10).map(h => h.item_type))];
-    fetchRecommendations(viewedTypes);
-  }, [history, fetchRecommendations]);
+    if (hasFetchedRef.current) return;
+    hasFetchedRef.current = true;
+    fetchRecommendations();
+  }, [fetchRecommendations]);
 
   return {
     recommendations,
     isLoading,
-    refetch
+    refetch: fetchRecommendations
   };
 }
