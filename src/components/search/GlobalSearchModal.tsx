@@ -280,7 +280,7 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
                     {language === 'ru' ? 'Популярное' : 'Trending'}
                   </h3>
                   <div className="flex flex-wrap gap-2">
-                    {trendingSearches[language].map((search, i) => (
+                    {(trendingSearches[language as keyof typeof trendingSearches] || trendingSearches.en).map((search, i) => (
                       <button
                         key={i}
                         onClick={() => handleQuickSearch(search)}
