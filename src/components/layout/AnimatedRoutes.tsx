@@ -10,6 +10,7 @@ import MapView from '@/pages/MapView';
 import Bookings from '@/pages/Bookings';
 import BookingDetail from '@/pages/BookingDetail';
 import Profile from '@/pages/Profile';
+import EditProfile from '@/pages/profile/EditProfile';
 import NotFound from '@/pages/NotFound';
 
 // Beauty & Spa Mini-App
@@ -198,6 +199,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/bookings" element={<PageTransition><Bookings /></PageTransition>} />
         <Route path="/bookings/:id" element={<PageTransition><BookingDetail /></PageTransition>} />
         <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
+        <Route path="/profile/edit" element={<PageTransition><EditProfile /></PageTransition>} />
         <Route path="/favorites" element={<PageTransition><Favorites /></PageTransition>} />
         <Route path="/search" element={<PageTransition><Search /></PageTransition>} />
         <Route path="/notifications" element={<PageTransition><Notifications /></PageTransition>} />

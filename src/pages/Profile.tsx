@@ -14,10 +14,12 @@ import { ReferralCard } from '@/components/uno/ReferralCard';
 import { UserPreferences } from '@/components/profile/UserPreferences';
 import { RoleSwitcher } from '@/components/uno/RoleSwitcher';
 import { supabase } from '@/integrations/supabase/client';
+import { useProfile } from '@/hooks/useProfile';
 
 export default function Profile() {
   const { t, language } = useLanguage();
   const { user, isLoading, signOut } = useAuth();
+  const { profile } = useProfile();
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -62,7 +64,7 @@ export default function Profile() {
   };
 
   const menuItems = [
-    { icon: User, label: language === 'ru' ? 'Редактировать профиль' : 'Edit Profile', onClick: () => {} },
+    { icon: User, label: language === 'ru' ? 'Редактировать профиль' : 'Edit Profile', onClick: () => navigate('/profile/edit') },
     { icon: MessageCircle, label: language === 'ru' ? 'Чат поддержки' : 'Support Chat', onClick: () => navigate('/support') },
     { icon: Wallet, label: language === 'ru' ? 'Кошелёк' : 'Wallet', onClick: () => navigate('/wallet') },
     { icon: Heart, label: language === 'ru' ? 'Избранное' : 'Favorites', onClick: () => navigate('/favorites') },
@@ -89,18 +91,28 @@ export default function Profile() {
       <PageContainer>
         {/* Profile header */}
         <SectionCard className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
-            <span className="text-2xl font-bold text-primary-foreground">
-              {user.email?.charAt(0).toUpperCase()}
-            </span>
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center overflow-hidden">
+            {profile?.avatar_url ? (
+              <img 
+                src={profile.avatar_url} 
+                alt="Avatar" 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-2xl font-bold text-primary-foreground">
+                {profile?.full_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
+              </span>
+            )}
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="text-lg font-semibold truncate">{user.email}</h2>
+            <h2 className="text-lg font-semibold truncate">
+              {profile?.full_name || user.email}
+            </h2>
             <p className="text-sm text-muted-foreground">
-              {language === 'ru' ? 'Аккаунт туриста' : 'Tourist Account'}
+              {profile?.full_name ? user.email : (language === 'ru' ? 'Аккаунт туриста' : 'Tourist Account')}
             </p>
           </div>
-          <PremiumButton variant="outline" size="sm">
+          <PremiumButton variant="outline" size="sm" onClick={() => navigate('/profile/edit')}>
             {t('action.edit')}
           </PremiumButton>
         </SectionCard>
