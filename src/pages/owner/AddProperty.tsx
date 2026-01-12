@@ -14,6 +14,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Home, MapPin, Bed, Bath, SquareStack, Upload, Loader2 } from 'lucide-react';
 import { ImageUpload } from '@/components/upload/ImageUpload';
+import { ProjectSelector } from '@/components/property/ProjectSelector';
+import { UnitFields } from '@/components/property/UnitFields';
+import { PropertyProject } from '@/hooks/usePropertyProjects';
 
 export default function AddProperty() {
   const { language } = useLanguage();
@@ -22,6 +25,7 @@ export default function AddProperty() {
   
   const createProperty = useCreateOwnerProperty();
 
+  const [selectedProject, setSelectedProject] = useState<PropertyProject | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     title_ru: '',
@@ -38,6 +42,13 @@ export default function AddProperty() {
     management_type: 'full',
     is_rented: false,
     rental_platform: '',
+    // Unit-specific fields (when part of a project)
+    project_id: undefined as string | undefined,
+    floor: undefined as number | undefined,
+    unit_number: '',
+    view_type: '',
+    furnishing_level: '',
+    equipment: [] as string[],
   });
 
   const districts = [
@@ -87,6 +98,41 @@ export default function AddProperty() {
       />
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Project Selection */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">
+              {isRu ? 'Проект / ЖК' : 'Project / Complex'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ProjectSelector
+              value={formData.project_id}
+              selectedProject={selectedProject}
+              onChange={(projectId, project) => {
+                setFormData(prev => ({ ...prev, project_id: projectId }));
+                setSelectedProject(project || null);
+              }}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Unit-specific fields (shown when project is selected) */}
+        {formData.project_id && (
+          <UnitFields
+            floor={formData.floor}
+            unitNumber={formData.unit_number}
+            viewType={formData.view_type}
+            furnishingLevel={formData.furnishing_level}
+            equipment={formData.equipment}
+            onFloorChange={(floor) => setFormData(prev => ({ ...prev, floor }))}
+            onUnitNumberChange={(unit_number) => setFormData(prev => ({ ...prev, unit_number }))}
+            onViewTypeChange={(view_type) => setFormData(prev => ({ ...prev, view_type }))}
+            onFurnishingLevelChange={(furnishing_level) => setFormData(prev => ({ ...prev, furnishing_level }))}
+            onEquipmentChange={(equipment) => setFormData(prev => ({ ...prev, equipment }))}
+          />
+        )}
+
         {/* Basic Info */}
         <Card>
           <CardHeader>

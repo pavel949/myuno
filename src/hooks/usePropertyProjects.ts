@@ -1,0 +1,162 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+
+export interface PropertyProject {
+  id: string;
+  name_en: string;
+  name_ru: string;
+  description_en?: string;
+  description_ru?: string;
+  address?: string;
+  district?: string;
+  lat?: number;
+  lng?: number;
+  developer_name?: string;
+  year_built?: number;
+  total_units?: number;
+  cover_image?: string;
+  images?: string[];
+  video_url?: string;
+  amenities?: string[];
+  infrastructure?: string[];
+  is_active?: boolean;
+  is_featured?: boolean;
+  created_by?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CreatePropertyProjectData {
+  name_en: string;
+  name_ru: string;
+  description_en?: string;
+  description_ru?: string;
+  address?: string;
+  district?: string;
+  lat?: number;
+  lng?: number;
+  developer_name?: string;
+  year_built?: number;
+  total_units?: number;
+  cover_image?: string;
+  images?: string[];
+  video_url?: string;
+  amenities?: string[];
+  infrastructure?: string[];
+}
+
+export function usePropertyProjects() {
+  return useQuery({
+    queryKey: ['property-projects'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('property_projects')
+        .select('*')
+        .eq('is_active', true)
+        .order('name_en');
+
+      if (error) throw error;
+      return data as PropertyProject[];
+    },
+  });
+}
+
+export function usePropertyProject(id?: string) {
+  return useQuery({
+    queryKey: ['property-project', id],
+    queryFn: async () => {
+      if (!id) return null;
+      
+      const { data, error } = await supabase
+        .from('property_projects')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+      return data as PropertyProject;
+    },
+    enabled: !!id,
+  });
+}
+
+export function useCreatePropertyProject() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async (projectData: CreatePropertyProjectData) => {
+      if (!user?.id) throw new Error('User not authenticated');
+
+      const { data, error } = await supabase
+        .from('property_projects')
+        .insert({
+          ...projectData,
+          created_by: user.id,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as PropertyProject;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['property-projects'] });
+      toast.success('Project created successfully');
+    },
+    onError: (error) => {
+      console.error('Error creating project:', error);
+      toast.error('Failed to create project');
+    },
+  });
+}
+
+export function useUpdatePropertyProject() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, ...projectData }: Partial<PropertyProject> & { id: string }) => {
+      const { data, error } = await supabase
+        .from('property_projects')
+        .update(projectData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as PropertyProject;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['property-projects'] });
+      queryClient.invalidateQueries({ queryKey: ['property-project', data.id] });
+      toast.success('Project updated successfully');
+    },
+    onError: (error) => {
+      console.error('Error updating project:', error);
+      toast.error('Failed to update project');
+    },
+  });
+}
+
+export function useMyPropertyProjects() {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['my-property-projects', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+
+      const { data, error } = await supabase
+        .from('property_projects')
+        .select('*')
+        .eq('created_by', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data as PropertyProject[];
+    },
+    enabled: !!user?.id,
+  });
+}

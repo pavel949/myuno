@@ -1951,10 +1951,13 @@ export type Database = {
           electricity_unit_price: number | null
           emergency_contact_name: string | null
           emergency_contact_phone: string | null
+          equipment: string[] | null
           extra_cleaning_price: number | null
           extra_guest_price: number | null
           extra_guest_threshold: number | null
           extra_services: Json | null
+          floor: number | null
+          furnishing_level: string | null
           has_crib: boolean | null
           has_high_chair: boolean | null
           host_languages: string[] | null
@@ -1992,6 +1995,7 @@ export type Database = {
           pet_notes_ru: string | null
           pets_allowed: boolean | null
           price_per_night: number | null
+          project_id: string | null
           property_type: string
           quiet_hours_end: string | null
           quiet_hours_start: string | null
@@ -2005,9 +2009,11 @@ export type Database = {
           transfer_available: boolean | null
           transfer_notes: string | null
           transfer_notes_ru: string | null
+          unit_number: string | null
           updated_at: string
           verified_at: string | null
           verified_by: string | null
+          view_type: string | null
           water_included: boolean | null
           water_notes: string | null
           water_notes_ru: string | null
@@ -2044,10 +2050,13 @@ export type Database = {
           electricity_unit_price?: number | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
+          equipment?: string[] | null
           extra_cleaning_price?: number | null
           extra_guest_price?: number | null
           extra_guest_threshold?: number | null
           extra_services?: Json | null
+          floor?: number | null
+          furnishing_level?: string | null
           has_crib?: boolean | null
           has_high_chair?: boolean | null
           host_languages?: string[] | null
@@ -2085,6 +2094,7 @@ export type Database = {
           pet_notes_ru?: string | null
           pets_allowed?: boolean | null
           price_per_night?: number | null
+          project_id?: string | null
           property_type?: string
           quiet_hours_end?: string | null
           quiet_hours_start?: string | null
@@ -2098,9 +2108,11 @@ export type Database = {
           transfer_available?: boolean | null
           transfer_notes?: string | null
           transfer_notes_ru?: string | null
+          unit_number?: string | null
           updated_at?: string
           verified_at?: string | null
           verified_by?: string | null
+          view_type?: string | null
           water_included?: boolean | null
           water_notes?: string | null
           water_notes_ru?: string | null
@@ -2137,10 +2149,13 @@ export type Database = {
           electricity_unit_price?: number | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
+          equipment?: string[] | null
           extra_cleaning_price?: number | null
           extra_guest_price?: number | null
           extra_guest_threshold?: number | null
           extra_services?: Json | null
+          floor?: number | null
+          furnishing_level?: string | null
           has_crib?: boolean | null
           has_high_chair?: boolean | null
           host_languages?: string[] | null
@@ -2178,6 +2193,7 @@ export type Database = {
           pet_notes_ru?: string | null
           pets_allowed?: boolean | null
           price_per_night?: number | null
+          project_id?: string | null
           property_type?: string
           quiet_hours_end?: string | null
           quiet_hours_start?: string | null
@@ -2191,9 +2207,11 @@ export type Database = {
           transfer_available?: boolean | null
           transfer_notes?: string | null
           transfer_notes_ru?: string | null
+          unit_number?: string | null
           updated_at?: string
           verified_at?: string | null
           verified_by?: string | null
+          view_type?: string | null
           water_included?: boolean | null
           water_notes?: string | null
           water_notes_ru?: string | null
@@ -2201,6 +2219,13 @@ export type Database = {
           weekly_discount?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_owner_properties_project"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "owner_properties_marketplace_property_id_fkey"
             columns: ["marketplace_property_id"]
@@ -2676,6 +2701,9 @@ export type Database = {
           description_en: string | null
           description_ru: string | null
           district: string | null
+          equipment: string[] | null
+          floor: number | null
+          furnishing_level: string | null
           id: string
           images: string[] | null
           instant_booking: boolean | null
@@ -2690,13 +2718,16 @@ export type Database = {
           min_stay_nights: number | null
           price: number | null
           price_period: string | null
+          project_id: string | null
           property_type: string
           provider_id: string | null
           rating: number | null
           review_count: number | null
           title_en: string
           title_ru: string
+          unit_number: string | null
           updated_at: string
+          view_type: string | null
         }
         Insert: {
           address?: string | null
@@ -2711,6 +2742,9 @@ export type Database = {
           description_en?: string | null
           description_ru?: string | null
           district?: string | null
+          equipment?: string[] | null
+          floor?: number | null
+          furnishing_level?: string | null
           id?: string
           images?: string[] | null
           instant_booking?: boolean | null
@@ -2725,13 +2759,16 @@ export type Database = {
           min_stay_nights?: number | null
           price?: number | null
           price_period?: string | null
+          project_id?: string | null
           property_type: string
           provider_id?: string | null
           rating?: number | null
           review_count?: number | null
           title_en: string
           title_ru: string
+          unit_number?: string | null
           updated_at?: string
+          view_type?: string | null
         }
         Update: {
           address?: string | null
@@ -2746,6 +2783,9 @@ export type Database = {
           description_en?: string | null
           description_ru?: string | null
           district?: string | null
+          equipment?: string[] | null
+          floor?: number | null
+          furnishing_level?: string | null
           id?: string
           images?: string[] | null
           instant_booking?: boolean | null
@@ -2760,15 +2800,25 @@ export type Database = {
           min_stay_nights?: number | null
           price?: number | null
           price_period?: string | null
+          project_id?: string | null
           property_type?: string
           provider_id?: string | null
           rating?: number | null
           review_count?: number | null
           title_en?: string
           title_ru?: string
+          unit_number?: string | null
           updated_at?: string
+          view_type?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_properties_project"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "properties_location_id_fkey"
             columns: ["location_id"]
@@ -3135,6 +3185,81 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      property_projects: {
+        Row: {
+          address: string | null
+          amenities: string[] | null
+          cover_image: string | null
+          created_at: string | null
+          created_by: string | null
+          description_en: string | null
+          description_ru: string | null
+          developer_name: string | null
+          district: string | null
+          id: string
+          images: string[] | null
+          infrastructure: string[] | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          lat: number | null
+          lng: number | null
+          name_en: string
+          name_ru: string
+          total_units: number | null
+          updated_at: string | null
+          video_url: string | null
+          year_built: number | null
+        }
+        Insert: {
+          address?: string | null
+          amenities?: string[] | null
+          cover_image?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          developer_name?: string | null
+          district?: string | null
+          id?: string
+          images?: string[] | null
+          infrastructure?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          name_en: string
+          name_ru: string
+          total_units?: number | null
+          updated_at?: string | null
+          video_url?: string | null
+          year_built?: number | null
+        }
+        Update: {
+          address?: string | null
+          amenities?: string[] | null
+          cover_image?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          developer_name?: string | null
+          district?: string | null
+          id?: string
+          images?: string[] | null
+          infrastructure?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          name_en?: string
+          name_ru?: string
+          total_units?: number | null
+          updated_at?: string | null
+          video_url?: string | null
+          year_built?: number | null
+        }
+        Relationships: []
       }
       property_service_requests: {
         Row: {
