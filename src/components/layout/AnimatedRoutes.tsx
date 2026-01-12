@@ -218,7 +218,7 @@ export const AnimatedRoutes: React.FC = () => {
         {/* Property Mini-App Routes */}
         <Route path="/property" element={<PageTransition><PropertyIndex /></PageTransition>} />
         <Route path="/property/:id" element={<PageTransition><PropertyDetail /></PageTransition>} />
-        <Route path="/property/inquiry/:id" element={<PageTransition><PropertyInquiry /></PageTransition>} />
+        <Route path="/property/:id/inquiry" element={<PageTransition><PropertyInquiry /></PageTransition>} />
         <Route path="/property/map" element={<PageTransition><PropertyMap /></PageTransition>} />
         
         {/* Food & Delivery Mini-App Routes (legacy - redirects) */}
