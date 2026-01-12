@@ -29,7 +29,7 @@ export function BookingBottomBar({
     <motion.div
       initial={{ y: 100 }}
       animate={{ y: 0 }}
-      className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-lg border-t z-40 safe-area-bottom"
+      className="fixed bottom-0 left-0 right-0 p-3 sm:p-4 bg-background/95 backdrop-blur-lg border-t z-40 pb-safe"
     >
       {showBreakdown && showBreakdown.length > 0 && (
         <div className="mb-3 space-y-1">
@@ -55,7 +55,7 @@ export function BookingBottomBar({
         <Button
           onClick={onSubmit}
           disabled={disabled || isSubmitting}
-          className="h-12 px-8 text-base font-semibold min-w-[160px]"
+          className="h-11 sm:h-12 px-6 sm:px-8 text-sm sm:text-base font-semibold min-w-[140px] sm:min-w-[160px] touch-manipulation"
           size="lg"
         >
           {isSubmitting && <LoadingSpinner size="sm" className="mr-2" />}

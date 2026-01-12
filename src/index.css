@@ -4,6 +4,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Safe area insets for iOS notch/home indicator */
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
 /* UNO SuperApp Premium Dark Design System */
 
 @layer base {

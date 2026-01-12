@@ -147,9 +147,9 @@ export const ReviewsSection = ({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <h2 className="text-xl font-display font-bold">
+          <h2 className="text-lg sm:text-xl font-display font-bold">
             {language === 'ru' ? 'Отзывы' : 'Reviews'}
           </h2>
           {stats.total > 0 && (
@@ -159,7 +159,7 @@ export const ReviewsSection = ({
             </Badge>
           )}
         </div>
-        <Button onClick={() => setIsWriteModalOpen(true)}>
+        <Button onClick={() => setIsWriteModalOpen(true)} size="sm" className="w-full sm:w-auto touch-manipulation">
           <MessageSquare className="w-4 h-4 mr-2" />
           {language === 'ru' ? 'Написать отзыв' : 'Write Review'}
         </Button>
