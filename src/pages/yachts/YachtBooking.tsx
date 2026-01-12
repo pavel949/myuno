@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { format } from 'date-fns';
-import { Anchor, Users, Clock, Sparkles } from 'lucide-react';
+import { Anchor, Users, Clock, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useBooking } from '@/hooks/useBooking';
+import { useYacht } from '@/hooks/useYachts';
 import { BookingDateTimeSelect } from '@/components/booking/BookingDateTimeSelect';
 import { BookingParticipants } from '@/components/booking/BookingParticipants';
 import { BookingContactForm, ContactFormData } from '@/components/booking/BookingContactForm';
@@ -16,28 +17,15 @@ import { BookingConfirmation } from '@/components/booking/BookingConfirmation';
 import { BackButton } from '@/components/uno/BackButton';
 import { YachtExperienceSelect, YACHT_EXPERIENCES } from '@/components/yachts/YachtExperienceSelect';
 
-// Demo yacht data
-const getYacht = (id: string) => ({
-  id,
-  nameEn: 'Luxury Ocean Dream',
-  nameRu: 'Люкс Океан Дрим',
-  image: 'https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?w=400',
-  priceFullDay: 45000,
-  priceHalfDay: 28000,
-  capacity: 12,
-  location: 'Chalong Bay',
-  locationRu: 'Бухта Чалонг',
-});
-
 export default function YachtBooking() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { language } = useLanguage();
   const { createBooking, isSubmitting } = useBooking();
+  const { yacht, isLoading } = useYacht(id || '');
 
   const isHalfDay = searchParams.get('type') === 'half';
-  const yacht = getYacht(id || 'yacht-1');
 
   const [date, setDate] = useState<Date | undefined>();
   const [time, setTime] = useState<string>('');
@@ -52,19 +40,52 @@ export default function YachtBooking() {
   const [selectedExperiences, setSelectedExperiences] = useState<string[]>([]);
   const [bookingResult, setBookingResult] = useState<{ bookingId: string } | null>(null);
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <AppLayout>
+        <PageContainer className="flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </PageContainer>
+      </AppLayout>
+    );
+  }
+
+  // Not found state
+  if (!yacht) {
+    return (
+      <AppLayout>
+        <PageContainer className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+          <Anchor className="w-16 h-16 text-muted-foreground mb-4" />
+          <h1 className="text-2xl font-bold mb-2">
+            {language === 'ru' ? 'Яхта не найдена' : 'Yacht not found'}
+          </h1>
+          <BackButton fallbackPath="/yachts" />
+        </PageContainer>
+      </AppLayout>
+    );
+  }
+
   // Calculate experiences total
-  const experiencesTotal = selectedExperiences.reduce((sum, id) => {
-    const exp = YACHT_EXPERIENCES.find(e => e.id === id);
+  const experiencesTotal = selectedExperiences.reduce((sum, expId) => {
+    const exp = YACHT_EXPERIENCES.find(e => e.id === expId);
     return sum + (exp?.price || 0);
   }, 0);
 
-  const basePrice = isHalfDay ? yacht.priceHalfDay : yacht.priceFullDay;
+  const basePrice = isHalfDay 
+    ? (yacht.price_half_day || 0) 
+    : (yacht.price_full_day || 0);
   const serviceFee = Math.round((basePrice + experiencesTotal) * 0.05);
   const total = basePrice + experiencesTotal + serviceFee;
 
   const availableTimes = isHalfDay 
     ? ['09:00', '14:00']
     : ['08:00', '09:00', '10:00'];
+  
+  const yachtName = language === 'ru' ? yacht.name_ru : yacht.name_en;
+  const yachtLocation = language === 'ru' 
+    ? (yacht.location_ru || yacht.location_name || '') 
+    : (yacht.location_name || '');
 
   const handleSubmit = async () => {
     if (!date || !time || !contactData.name || !contactData.phone) return;
@@ -74,27 +95,27 @@ export default function YachtBooking() {
     scheduledAt.setHours(hours, minutes);
 
     // Build experiences list for notes
-    const experienceNames = selectedExperiences.map(id => {
-      const exp = YACHT_EXPERIENCES.find(e => e.id === id);
+    const experienceNames = selectedExperiences.map(expId => {
+      const exp = YACHT_EXPERIENCES.find(e => e.id === expId);
       return exp ? (language === 'ru' ? exp.labelRu : exp.labelEn) : '';
     }).filter(Boolean).join(', ');
 
     const result = await createBooking({
-      booking_type: 'transport', // Use transport as closest type for yacht
+      booking_type: 'transport',
       scheduled_at: scheduledAt.toISOString(),
       total_amount: total,
-      currency: 'THB',
-      notes: `Yacht: ${yacht.nameEn}. ${isHalfDay ? 'Half day' : 'Full day'} charter. ${guests} guests.${experienceNames ? ` Experiences: ${experienceNames}.` : ''} ${contactData.notes || ''}`,
+      currency: yacht.currency || 'THB',
+      notes: `Yacht: ${yacht.name_en}. ${isHalfDay ? 'Half day' : 'Full day'} charter. ${guests} guests.${experienceNames ? ` Experiences: ${experienceNames}.` : ''} ${contactData.notes || ''}`,
       items: [
         {
           item_type: 'yacht-rental',
-          item_name: language === 'ru' ? yacht.nameRu : yacht.nameEn,
+          item_name: yachtName,
           quantity: 1,
           unit_price: basePrice,
           subtotal: basePrice,
         },
-        ...selectedExperiences.map(id => {
-          const exp = YACHT_EXPERIENCES.find(e => e.id === id)!;
+        ...selectedExperiences.map(expId => {
+          const exp = YACHT_EXPERIENCES.find(e => e.id === expId)!;
           return {
             item_type: 'yacht-experience',
             item_name: language === 'ru' ? exp.labelRu : exp.labelEn,
@@ -113,7 +134,7 @@ export default function YachtBooking() {
       payment: {
         amount: total,
         payment_method: paymentMethod,
-        status: paymentMethod === 'cash' ? 'pending' : 'pending',
+        status: 'pending',
       },
       addresses: [],
     });
@@ -127,12 +148,12 @@ export default function YachtBooking() {
     return (
       <BookingConfirmation
         bookingId={bookingResult.bookingId}
-        title={language === 'ru' ? yacht.nameRu : yacht.nameEn}
+        title={yachtName}
         date={date ? format(date, 'PPP') : undefined}
         time={time}
-        location={language === 'ru' ? yacht.locationRu : yacht.location}
+        location={yachtLocation}
         total={total}
-        currency="THB"
+        currency={yacht.currency || 'THB'}
         onViewBookings={() => navigate('/bookings')}
         continuePath="/yachts"
         continueLabel={language === 'ru' ? 'К яхтам' : 'Browse Yachts'}
@@ -156,18 +177,18 @@ export default function YachtBooking() {
         {/* Yacht Summary */}
         <div className="flex gap-4 p-4 bg-card rounded-xl border mb-6">
           <img
-            src={yacht.image}
-            alt=""
+            src={yacht.cover_image || '/placeholder.svg'}
+            alt={yachtName}
             className="w-24 h-24 rounded-lg object-cover"
           />
           <div className="flex-1">
-            <h3 className="font-semibold">
-              {language === 'ru' ? yacht.nameRu : yacht.nameEn}
-            </h3>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-              <Anchor className="w-4 h-4" />
-              <span>{language === 'ru' ? yacht.locationRu : yacht.location}</span>
-            </div>
+            <h3 className="font-semibold">{yachtName}</h3>
+            {yachtLocation && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                <Anchor className="w-4 h-4" />
+                <span>{yachtLocation}</span>
+              </div>
+            )}
             <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Users className="w-4 h-4" />
@@ -200,7 +221,7 @@ export default function YachtBooking() {
             count={guests}
             onChange={setGuests}
             min={1}
-            max={yacht.capacity}
+            max={yacht.capacity || 12}
             label={language === 'ru' ? 'Количество гостей' : 'Number of Guests'}
           />
 
@@ -242,12 +263,12 @@ export default function YachtBooking() {
 
           {/* Summary */}
           <BookingSummary
-            title={language === 'ru' ? yacht.nameRu : yacht.nameEn}
+            title={yachtName}
             subtitle={isHalfDay 
               ? (language === 'ru' ? 'Полдня (4 часа)' : 'Half Day (4 hours)')
               : (language === 'ru' ? 'Полный день (8 часов)' : 'Full Day (8 hours)')
             }
-            image={yacht.image}
+            image={yacht.cover_image || '/placeholder.svg'}
             date={date}
             time={time}
             participants={guests}
@@ -260,8 +281,8 @@ export default function YachtBooking() {
                 quantity: 1,
                 price: basePrice,
               },
-              ...selectedExperiences.map(id => {
-                const exp = YACHT_EXPERIENCES.find(e => e.id === id)!;
+              ...selectedExperiences.map(expId => {
+                const exp = YACHT_EXPERIENCES.find(e => e.id === expId)!;
                 return {
                   name: language === 'ru' ? exp.labelRu : exp.labelEn,
                   quantity: 1,
@@ -274,14 +295,14 @@ export default function YachtBooking() {
                 price: serviceFee,
               },
             ]}
-            currency="THB"
+            currency={yacht.currency || 'THB'}
           />
         </div>
       </PageContainer>
 
       <BookingBottomBar
         total={total}
-        currency="THB"
+        currency={yacht.currency || 'THB'}
         onSubmit={handleSubmit}
         isSubmitting={isSubmitting}
         disabled={!canSubmit}
