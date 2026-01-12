@@ -1,78 +1,19 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, MapPin, Star } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useSalons } from '@/hooks/useSalons';
 import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from '@/components/miniapp';
 import { beautyFilterConfig, FilterValues } from '@/components/filters';
-import { Button } from '@/components/ui/button';
-
-const demoSalons = [
-  {
-    id: 'salon-1',
-    name: 'Orchid Spa & Wellness',
-    nameRu: 'Орхидея СПА и Велнес',
-    image: 'https://images.unsplash.com/photo-1600334129128-685c5582fd35?w=600',
-    rating: 4.9,
-    reviewCount: 156,
-    location: 'Kata Beach',
-    locationRu: 'Ката Бич',
-    isVerified: true,
-    isFeatured: true,
-    priceFrom: 1500,
-    tags: ['Massage', 'Facial', 'Nail'],
-    tagsRu: ['Массаж', 'Уход за лицом', 'Ногти'],
-  },
-  {
-    id: 'salon-2',
-    name: 'Zen Beauty Studio',
-    nameRu: 'Зен Бьюти Студио',
-    image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600',
-    rating: 4.8,
-    reviewCount: 89,
-    location: 'Patong',
-    locationRu: 'Патонг',
-    isVerified: true,
-    priceFrom: 800,
-    tags: ['Hair', 'Makeup', 'Nails'],
-    tagsRu: ['Волосы', 'Макияж', 'Ногти'],
-  },
-  {
-    id: 'salon-3',
-    name: 'Thai Serenity Massage',
-    nameRu: 'Тайский Массаж Серенити',
-    image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600',
-    rating: 4.7,
-    reviewCount: 234,
-    location: 'Kamala',
-    locationRu: 'Камала',
-    isVerified: false,
-    priceFrom: 600,
-    tags: ['Thai Massage', 'Oil Massage'],
-    tagsRu: ['Тайский массаж', 'Масляный массаж'],
-  },
-  {
-    id: 'salon-4',
-    name: 'Luxe Nail Bar',
-    nameRu: 'Люкс Нейл Бар',
-    image: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=600',
-    rating: 4.6,
-    reviewCount: 67,
-    location: 'Rawai',
-    locationRu: 'Равай',
-    isVerified: true,
-    priceFrom: 500,
-    tags: ['Manicure', 'Pedicure', 'Gel'],
-    tagsRu: ['Маникюр', 'Педикюр', 'Гель'],
-  },
-];
 
 const SERVICE_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
+  { id: 'spa', labelEn: 'Spa', labelRu: 'Спа' },
   { id: 'massage', labelEn: 'Massage', labelRu: 'Массаж' },
-  { id: 'hair', labelEn: 'Hair', labelRu: 'Волосы' },
-  { id: 'nails', labelEn: 'Nails', labelRu: 'Ногти' },
-  { id: 'facial', labelEn: 'Facial', labelRu: 'Уход за лицом' },
-  { id: 'makeup', labelEn: 'Makeup', labelRu: 'Макияж' },
+  { id: 'beauty_salon', labelEn: 'Beauty', labelRu: 'Красота' },
+  { id: 'hair_salon', labelEn: 'Hair', labelRu: 'Волосы' },
+  { id: 'nail_salon', labelEn: 'Nails', labelRu: 'Ногти' },
+  { id: 'barber', labelEn: 'Barber', labelRu: 'Барбер' },
 ];
 
 export default function BeautySpaIndex() {
@@ -82,16 +23,39 @@ export default function BeautySpaIndex() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [filterValues, setFilterValues] = useState<FilterValues>({});
 
-  const filteredSalons = demoSalons.filter(salon => {
-    const name = language === 'ru' ? salon.nameRu : salon.name;
-    return name.toLowerCase().includes(searchQuery.toLowerCase());
-  });
+  // Fetch salons from database
+  const { salons, isLoading } = useSalons(selectedCategory === 'all' ? undefined : selectedCategory);
+
+  // Filter salons based on search query and filters
+  const filteredSalons = useMemo(() => {
+    return salons.filter(salon => {
+      // Search filter
+      const name = language === 'ru' ? salon.name_ru : salon.name_en;
+      const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      // Price filter
+      const minPrice = typeof filterValues.minPrice === 'number' ? filterValues.minPrice : undefined;
+      const maxPrice = typeof filterValues.maxPrice === 'number' ? filterValues.maxPrice : undefined;
+      const matchesPrice = (!minPrice || (salon.price_from ?? 0) >= minPrice) && 
+                          (!maxPrice || (salon.price_from ?? 0) <= maxPrice);
+      
+      // Rating filter
+      const minRating = typeof filterValues.rating === 'number' ? filterValues.rating : undefined;
+      const matchesRating = !minRating || (salon.rating ?? 0) >= minRating;
+      
+      // Verified filter
+      const verifiedOnly = typeof filterValues.verified === 'boolean' ? filterValues.verified : false;
+      const matchesVerified = !verifiedOnly || salon.is_verified;
+      
+      return matchesSearch && matchesPrice && matchesRating && matchesVerified;
+    });
+  }, [salons, searchQuery, language, filterValues]);
 
   const quickItems: QuickGridItem[] = [
-    { icon: '💆', label: language === 'ru' ? 'Массаж' : 'Massage', sublabel: '฿600', onClick: () => navigate('/beauty/services') },
-    { icon: '💅', label: language === 'ru' ? 'Маникюр' : 'Manicure', sublabel: '฿400', onClick: () => navigate('/beauty/services') },
-    { icon: '💇', label: language === 'ru' ? 'Стрижка' : 'Haircut', sublabel: '฿500', onClick: () => navigate('/beauty/services') },
-    { icon: '🧖', label: language === 'ru' ? 'СПА' : 'Spa', sublabel: '฿1,500', onClick: () => navigate('/beauty/services') },
+    { icon: '💆', label: language === 'ru' ? 'Массаж' : 'Massage', sublabel: '฿600', onClick: () => setSelectedCategory('massage') },
+    { icon: '💅', label: language === 'ru' ? 'Ногти' : 'Nails', sublabel: '฿400', onClick: () => setSelectedCategory('nail_salon') },
+    { icon: '💇', label: language === 'ru' ? 'Волосы' : 'Hair', sublabel: '฿500', onClick: () => setSelectedCategory('hair_salon') },
+    { icon: '🧖', label: language === 'ru' ? 'СПА' : 'Spa', sublabel: '฿1,500', onClick: () => setSelectedCategory('spa') },
   ];
 
   return (
@@ -114,8 +78,8 @@ export default function BeautySpaIndex() {
       onFilterChange={setFilterValues}
       showMapButton
       onMapClick={() => navigate('/beauty/map')}
-      isLoading={false}
-      isEmpty={filteredSalons.length === 0}
+      isLoading={isLoading}
+      isEmpty={!isLoading && filteredSalons.length === 0}
       emptyIcon={Sparkles}
       emptyText={language === 'ru' ? 'Салоны не найдены' : 'No salons found'}
     >
@@ -126,17 +90,17 @@ export default function BeautySpaIndex() {
           <ItemCard
             key={salon.id}
             variant="vertical"
-            image={salon.image}
-            title={language === 'ru' ? salon.nameRu : salon.name}
+            image={salon.cover_image || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600'}
+            title={language === 'ru' ? salon.name_ru : salon.name_en}
             rating={salon.rating}
-            reviewCount={salon.reviewCount}
-            price={salon.priceFrom}
+            reviewCount={salon.review_count}
+            price={salon.price_from ?? undefined}
             pricePrefix={t('label.from')}
             currency="฿"
-            location={language === 'ru' ? salon.locationRu : salon.location}
-            isVerified={salon.isVerified}
-            isFeatured={salon.isFeatured}
-            tags={(language === 'ru' ? salon.tagsRu : salon.tags).slice(0, 2)}
+            location={salon.district || salon.address || ''}
+            isVerified={salon.is_verified}
+            isFeatured={salon.is_featured}
+            tags={(salon.services || []).slice(0, 2)}
             onClick={() => navigate(`/beauty/salon/${salon.id}`)}
           />
         ))}
