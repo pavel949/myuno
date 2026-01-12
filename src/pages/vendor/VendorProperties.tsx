@@ -45,6 +45,7 @@ import {
   Zap
 } from 'lucide-react';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
+import { CardPreview, CardPreviewSection } from '@/components/vendor/CardPreview';
 
 const propertyTypes = [
   { id: 'villa', label: 'Villa', labelRu: 'Вилла' },
@@ -421,7 +422,7 @@ const VendorProperties = () => {
 
         {/* Add/Edit Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {editingProperty 
@@ -430,281 +431,305 @@ const VendorProperties = () => {
               </DialogTitle>
             </DialogHeader>
 
-            <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>{isRussian ? 'Тип объекта' : 'Property Type'}</Label>
-                  <Select
-                    value={formData.property_type}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, property_type: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {propertyTypes.map(type => (
-                        <SelectItem key={type.id} value={type.id}>
-                          {isRussian ? type.labelRu : type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>{isRussian ? 'Тип объявления' : 'Listing Type'}</Label>
-                  <Select
-                    value={formData.listing_type}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, listing_type: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {listingTypes.map(type => (
-                        <SelectItem key={type.id} value={type.id}>
-                          {isRussian ? type.labelRu : type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="title_en">{isRussian ? 'Название (EN) *' : 'Title (EN) *'}</Label>
-                <Input
-                  id="title_en"
-                  value={formData.title_en}
-                  onChange={(e) => setFormData(prev => ({ ...prev, title_en: e.target.value }))}
-                  placeholder="Luxury Beachfront Villa"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="title_ru">{isRussian ? 'Название (RU)' : 'Title (Russian)'}</Label>
-                <Input
-                  id="title_ru"
-                  value={formData.title_ru}
-                  onChange={(e) => setFormData(prev => ({ ...prev, title_ru: e.target.value }))}
-                  placeholder="Роскошная вилла на пляже"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description_en">{isRussian ? 'Описание (EN)' : 'Description (EN)'}</Label>
-                <Textarea
-                  id="description_en"
-                  value={formData.description_en}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description_en: e.target.value }))}
-                  rows={3}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description_ru">{isRussian ? 'Описание (RU)' : 'Description (Russian)'}</Label>
-                <Textarea
-                  id="description_ru"
-                  value={formData.description_ru}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description_ru: e.target.value }))}
-                  rows={3}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="price">{isRussian ? 'Цена (฿) *' : 'Price (฿) *'}</Label>
-                  <Input
-                    id="price"
-                    type="number"
-                    value={formData.price}
-                    onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                    placeholder="50000"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{isRussian ? 'Период' : 'Period'}</Label>
-                  <Select
-                    value={formData.price_period}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, price_period: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {pricePeriods.map(period => (
-                        <SelectItem key={period.id} value={period.id}>
-                          {isRussian ? period.labelRu : period.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="bedrooms">{isRussian ? 'Спален' : 'Bedrooms'}</Label>
-                  <Input
-                    id="bedrooms"
-                    type="number"
-                    value={formData.bedrooms}
-                    onChange={(e) => setFormData(prev => ({ ...prev, bedrooms: e.target.value }))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="bathrooms">{isRussian ? 'Санузлов' : 'Bathrooms'}</Label>
-                  <Input
-                    id="bathrooms"
-                    type="number"
-                    value={formData.bathrooms}
-                    onChange={(e) => setFormData(prev => ({ ...prev, bathrooms: e.target.value }))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="area">{isRussian ? 'Площадь м²' : 'Area m²'}</Label>
-                  <Input
-                    id="area"
-                    type="number"
-                    value={formData.area_sqm}
-                    onChange={(e) => setFormData(prev => ({ ...prev, area_sqm: e.target.value }))}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="max_guests">{isRussian ? 'Макс. гостей' : 'Max Guests'}</Label>
-                  <Input
-                    id="max_guests"
-                    type="number"
-                    value={formData.max_guests}
-                    onChange={(e) => setFormData(prev => ({ ...prev, max_guests: e.target.value }))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="min_stay">{isRussian ? 'Мин. ночей' : 'Min Nights'}</Label>
-                  <Input
-                    id="min_stay"
-                    type="number"
-                    value={formData.min_stay_nights}
-                    onChange={(e) => setFormData(prev => ({ ...prev, min_stay_nights: e.target.value }))}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="district">{isRussian ? 'Район' : 'District'}</Label>
-                <Input
-                  id="district"
-                  value={formData.district}
-                  onChange={(e) => setFormData(prev => ({ ...prev, district: e.target.value }))}
-                  placeholder="Chalong, Rawai..."
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="address">{isRussian ? 'Адрес' : 'Address'}</Label>
-                <Input
-                  id="address"
-                  value={formData.address}
-                  onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="lat">{isRussian ? 'Широта (lat)' : 'Latitude'}</Label>
-                  <Input
-                    id="lat"
-                    type="number"
-                    step="any"
-                    value={formData.lat}
-                    onChange={(e) => setFormData(prev => ({ ...prev, lat: e.target.value }))}
-                    placeholder="7.8386"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lng">{isRussian ? 'Долгота (lng)' : 'Longitude'}</Label>
-                  <Input
-                    id="lng"
-                    type="number"
-                    step="any"
-                    value={formData.lng}
-                    onChange={(e) => setFormData(prev => ({ ...prev, lng: e.target.value }))}
-                    placeholder="98.3048"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>{isRussian ? 'Фото обложки' : 'Cover Image'}</Label>
-                <ImageUpload
-                  value={formData.cover_image}
-                  onChange={(url) => setFormData(prev => ({ ...prev, cover_image: url }))}
-                  folder="properties"
-                  placeholder={isRussian ? 'Загрузить фото' : 'Upload photo'}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>{isRussian ? 'Галерея фото' : 'Photo Gallery'}</Label>
-                <MultiImageUpload
-                  value={formData.images}
-                  onChange={(urls) => setFormData(prev => ({ ...prev, images: urls }))}
-                  folder="properties"
-                  maxImages={10}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>{isRussian ? 'Удобства' : 'Amenities'}</Label>
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  {amenitiesList.map(amenity => (
-                    <div key={amenity.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={amenity.id}
-                        checked={formData.amenities.includes(amenity.id)}
-                        onCheckedChange={() => handleAmenityToggle(amenity.id)}
-                      />
-                      <label htmlFor={amenity.id} className="text-sm cursor-pointer">
-                        {isRussian ? amenity.labelRu : amenity.label}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-3 pt-2">
-                <div className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
-                  <div className="flex items-center gap-2">
-                    <Zap className="h-5 w-5 text-amber-500" />
-                    <div>
-                      <Label htmlFor="instant_booking" className="font-medium">
-                        {isRussian ? 'Мгновенное бронирование' : 'Instant Booking'}
-                      </Label>
-                      <p className="text-xs text-muted-foreground">
-                        {isRussian 
-                          ? 'Гости могут бронировать без подтверждения' 
-                          : 'Guests can book without approval'}
-                      </p>
-                    </div>
+            <div className="grid md:grid-cols-[1fr,280px] gap-6 py-4">
+              {/* Form */}
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>{isRussian ? 'Тип объекта' : 'Property Type'}</Label>
+                    <Select
+                      value={formData.property_type}
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, property_type: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {propertyTypes.map(type => (
+                          <SelectItem key={type.id} value={type.id}>
+                            {isRussian ? type.labelRu : type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <Switch
-                    id="instant_booking"
-                    checked={formData.instant_booking}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, instant_booking: checked }))}
+                  <div className="space-y-2">
+                    <Label>{isRussian ? 'Тип объявления' : 'Listing Type'}</Label>
+                    <Select
+                      value={formData.listing_type}
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, listing_type: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {listingTypes.map(type => (
+                          <SelectItem key={type.id} value={type.id}>
+                            {isRussian ? type.labelRu : type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="title_en">{isRussian ? 'Название (EN) *' : 'Title (EN) *'}</Label>
+                  <Input
+                    id="title_en"
+                    value={formData.title_en}
+                    onChange={(e) => setFormData(prev => ({ ...prev, title_en: e.target.value }))}
+                    placeholder="Luxury Beachfront Villa"
                   />
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="is_active">{isRussian ? 'Объект активен' : 'Property active'}</Label>
-                  <Switch
-                    id="is_active"
-                    checked={formData.is_active}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+                <div className="space-y-2">
+                  <Label htmlFor="title_ru">{isRussian ? 'Название (RU)' : 'Title (Russian)'}</Label>
+                  <Input
+                    id="title_ru"
+                    value={formData.title_ru}
+                    onChange={(e) => setFormData(prev => ({ ...prev, title_ru: e.target.value }))}
+                    placeholder="Роскошная вилла на пляже"
                   />
                 </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description_en">{isRussian ? 'Описание (EN)' : 'Description (EN)'}</Label>
+                  <Textarea
+                    id="description_en"
+                    value={formData.description_en}
+                    onChange={(e) => setFormData(prev => ({ ...prev, description_en: e.target.value }))}
+                    rows={3}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description_ru">{isRussian ? 'Описание (RU)' : 'Description (Russian)'}</Label>
+                  <Textarea
+                    id="description_ru"
+                    value={formData.description_ru}
+                    onChange={(e) => setFormData(prev => ({ ...prev, description_ru: e.target.value }))}
+                    rows={3}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="price">{isRussian ? 'Цена (฿) *' : 'Price (฿) *'}</Label>
+                    <Input
+                      id="price"
+                      type="number"
+                      value={formData.price}
+                      onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                      placeholder="50000"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{isRussian ? 'Период' : 'Period'}</Label>
+                    <Select
+                      value={formData.price_period}
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, price_period: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {pricePeriods.map(period => (
+                          <SelectItem key={period.id} value={period.id}>
+                            {isRussian ? period.labelRu : period.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="bedrooms">{isRussian ? 'Спален' : 'Bedrooms'}</Label>
+                    <Input
+                      id="bedrooms"
+                      type="number"
+                      value={formData.bedrooms}
+                      onChange={(e) => setFormData(prev => ({ ...prev, bedrooms: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="bathrooms">{isRussian ? 'Санузлов' : 'Bathrooms'}</Label>
+                    <Input
+                      id="bathrooms"
+                      type="number"
+                      value={formData.bathrooms}
+                      onChange={(e) => setFormData(prev => ({ ...prev, bathrooms: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="area">{isRussian ? 'Площадь м²' : 'Area m²'}</Label>
+                    <Input
+                      id="area"
+                      type="number"
+                      value={formData.area_sqm}
+                      onChange={(e) => setFormData(prev => ({ ...prev, area_sqm: e.target.value }))}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="max_guests">{isRussian ? 'Макс. гостей' : 'Max Guests'}</Label>
+                    <Input
+                      id="max_guests"
+                      type="number"
+                      value={formData.max_guests}
+                      onChange={(e) => setFormData(prev => ({ ...prev, max_guests: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="min_stay">{isRussian ? 'Мин. ночей' : 'Min Nights'}</Label>
+                    <Input
+                      id="min_stay"
+                      type="number"
+                      value={formData.min_stay_nights}
+                      onChange={(e) => setFormData(prev => ({ ...prev, min_stay_nights: e.target.value }))}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="district">{isRussian ? 'Район' : 'District'}</Label>
+                  <Input
+                    id="district"
+                    value={formData.district}
+                    onChange={(e) => setFormData(prev => ({ ...prev, district: e.target.value }))}
+                    placeholder="Chalong, Rawai..."
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="address">{isRussian ? 'Адрес' : 'Address'}</Label>
+                  <Input
+                    id="address"
+                    value={formData.address}
+                    onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="lat">{isRussian ? 'Широта (lat)' : 'Latitude'}</Label>
+                    <Input
+                      id="lat"
+                      type="number"
+                      step="any"
+                      value={formData.lat}
+                      onChange={(e) => setFormData(prev => ({ ...prev, lat: e.target.value }))}
+                      placeholder="7.8386"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lng">{isRussian ? 'Долгота (lng)' : 'Longitude'}</Label>
+                    <Input
+                      id="lng"
+                      type="number"
+                      step="any"
+                      value={formData.lng}
+                      onChange={(e) => setFormData(prev => ({ ...prev, lng: e.target.value }))}
+                      placeholder="98.3048"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{isRussian ? 'Фото обложки' : 'Cover Image'}</Label>
+                  <ImageUpload
+                    value={formData.cover_image}
+                    onChange={(url) => setFormData(prev => ({ ...prev, cover_image: url }))}
+                    folder="properties"
+                    placeholder={isRussian ? 'Загрузить фото' : 'Upload photo'}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{isRussian ? 'Галерея фото' : 'Photo Gallery'}</Label>
+                  <MultiImageUpload
+                    value={formData.images}
+                    onChange={(urls) => setFormData(prev => ({ ...prev, images: urls }))}
+                    folder="properties"
+                    maxImages={10}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{isRussian ? 'Удобства' : 'Amenities'}</Label>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    {amenitiesList.map(amenity => (
+                      <div key={amenity.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={amenity.id}
+                          checked={formData.amenities.includes(amenity.id)}
+                          onCheckedChange={() => handleAmenityToggle(amenity.id)}
+                        />
+                        <label htmlFor={amenity.id} className="text-sm cursor-pointer">
+                          {isRussian ? amenity.labelRu : amenity.label}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-3 pt-2">
+                  <div className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                    <div className="flex items-center gap-2">
+                      <Zap className="h-5 w-5 text-amber-500" />
+                      <div>
+                        <Label htmlFor="instant_booking" className="font-medium">
+                          {isRussian ? 'Мгновенное бронирование' : 'Instant Booking'}
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          {isRussian 
+                            ? 'Гости могут бронировать без подтверждения' 
+                            : 'Guests can book without approval'}
+                        </p>
+                      </div>
+                    </div>
+                    <Switch
+                      id="instant_booking"
+                      checked={formData.instant_booking}
+                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, instant_booking: checked }))}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="is_active">{isRussian ? 'Объект активен' : 'Property active'}</Label>
+                    <Switch
+                      id="is_active"
+                      checked={formData.is_active}
+                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+                    />
+                  </div>
+                </div>
               </div>
+
+              {/* Preview */}
+              <CardPreviewSection className="hidden md:block sticky top-0">
+                <CardPreview
+                  type="property"
+                  image={formData.cover_image}
+                  title={formData.title_en}
+                  titleRu={formData.title_ru}
+                  description={formData.description_en}
+                  descriptionRu={formData.description_ru}
+                  price={formData.price ? parseFloat(formData.price) : undefined}
+                  pricePeriod={formData.price_period}
+                  propertyType={formData.property_type}
+                  bedrooms={formData.bedrooms ? parseInt(formData.bedrooms) : undefined}
+                  bathrooms={formData.bathrooms ? parseInt(formData.bathrooms) : undefined}
+                  areaSqm={formData.area_sqm ? parseInt(formData.area_sqm) : undefined}
+                  district={formData.district}
+                  amenities={formData.amenities}
+                  instantBooking={formData.instant_booking}
+                />
+              </CardPreviewSection>
             </div>
 
             <DialogFooter>
