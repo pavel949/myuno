@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Star, MapPin, Clock, Phone, Globe, Heart, Share2, ShoppingCart, Plus, Minus, Check } from 'lucide-react';
+import { ArrowLeft, Star, MapPin, Clock, Phone, Globe, Heart, Share2, Plus, Minus } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { triggerRipple } from '@/hooks/useRipple';
-import { toast } from 'sonner';
+import { StickyCartBar } from '@/components/cart/StickyCartBar';
+import { useCartToast } from '@/hooks/useCartToast';
 
 const shopData = {
   'shop-1': {
@@ -107,15 +108,16 @@ const FlowerShopDetail = () => {
   const { language } = useLanguage();
   const { addItem, removeItem, updateQuantity, items, getItemsByProvider } = useCart();
   const [isFavorite, setIsFavorite] = useState(false);
+  const { showAddedToast } = useCartToast();
 
   const shop = shopData[id as keyof typeof shopData] || shopData['shop-1'];
   const providerId = id || 'shop-1';
   const cartItems = getItemsByProvider(providerId);
 
   const addToCart = (product: typeof products[0]) => {
-    addItem({
+    const item = {
       id: `flowers-${providerId}-${product.id}`,
-      type: 'flowers',
+      type: 'flowers' as const,
       name: product.name,
       nameRu: product.nameRu,
       price: product.price,
@@ -124,8 +126,9 @@ const FlowerShopDetail = () => {
       providerId: providerId,
       providerName: shop.name,
       providerNameRu: shop.nameRu,
-    });
-    toast.success(language === 'ru' ? 'Добавлено в корзину' : 'Added to cart');
+    };
+    addItem(item);
+    showAddedToast({ item });
   };
 
   const removeFromCart = (productId: string) => {
@@ -144,13 +147,6 @@ const FlowerShopDetail = () => {
   };
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
-  const handleCheckout = () => {
-    if (totalItems > 0) {
-      navigate('/cart');
-    }
-  };
 
   return (
     <AppLayout showBottomNav={false}>
@@ -309,22 +305,11 @@ const FlowerShopDetail = () => {
           </div>
         </div>
 
-        {/* Cart Bar */}
-        {totalItems > 0 && (
-          <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-xl border-t border-border z-50">
-            <Button
-              onClick={handleCheckout}
-              className="w-full h-12 relative overflow-hidden"
-            >
-              <ShoppingCart className="w-5 h-5 mr-2" />
-              <span>{language === 'ru' ? 'Оформить заказ' : 'Checkout'}</span>
-              <span className="ml-auto">฿{totalPrice.toLocaleString()}</span>
-              <span className="absolute top-1 right-2 w-5 h-5 rounded-full bg-primary-foreground text-primary text-xs flex items-center justify-center">
-                {totalItems}
-              </span>
-            </Button>
-          </div>
-        )}
+        <StickyCartBar 
+          providerId={providerId} 
+          buttonLabel={language === 'ru' ? 'Оформить заказ' : 'Checkout'}
+          className="bottom-0"
+        />
       </div>
     </AppLayout>
   );

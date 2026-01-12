@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   ArrowLeft, Star, Clock, MapPin, Bike, Plus, Minus, 
-  ShoppingCart, Share2, CalendarDays, UtensilsCrossed
+  Share2, CalendarDays, UtensilsCrossed
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -14,9 +14,10 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SkeletonCard } from '@/components/uno/SkeletonCard';
 import { cn } from '@/lib/utils';
 import { useViewHistory } from '@/hooks/useViewHistory';
-import { toast } from 'sonner';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { ReviewsSection } from '@/components/reviews/ReviewsSection';
+import { StickyCartBar } from '@/components/cart/StickyCartBar';
+import { useCartToast } from '@/hooks/useCartToast';
 
 export default function RestaurantDetail() {
   const { id } = useParams();
@@ -25,6 +26,7 @@ export default function RestaurantDetail() {
   const { language } = useLanguage();
   const { addItem, removeItem, updateQuantity, items, getItemsByProvider } = useCart();
   const { trackView } = useViewHistory();
+  const { showAddedToast } = useCartToast();
 
   const { restaurant, menuCategories, menuItems, isLoading } = useRestaurant(id || '');
 
@@ -71,9 +73,9 @@ export default function RestaurantDetail() {
   }
 
   const addToCart = (item: typeof menuItems[0]) => {
-    addItem({
+    const cartItem = {
       id: `food-${providerId}-${item.id}`,
-      type: 'food',
+      type: 'food' as const,
       name: item.name_en,
       nameRu: item.name_ru,
       price: item.price,
@@ -82,8 +84,9 @@ export default function RestaurantDetail() {
       providerId: providerId,
       providerName: restaurant.name_en,
       providerNameRu: restaurant.name_ru,
-    });
-    toast.success(language === 'ru' ? 'Добавлено в корзину' : 'Added to cart');
+    };
+    addItem(cartItem);
+    showAddedToast({ item: cartItem, cartPath: `/restaurants/${id}/delivery` });
   };
 
   const removeFromCart = (itemId: string) => {
@@ -417,19 +420,11 @@ export default function RestaurantDetail() {
           </div>
         )}
 
-        {/* Cart Bottom Bar */}
-        {cartCount > 0 && (
-          <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border/50">
-            <Button
-              className="w-full h-14 text-lg"
-              onClick={() => navigate(`/restaurants/${id}/delivery`)}
-            >
-              <ShoppingCart className="w-5 h-5 mr-2" />
-              {language === 'ru' ? 'Корзина' : 'View Cart'} ({cartCount})
-              <span className="ml-auto">฿{cartTotal}</span>
-            </Button>
-          </div>
-        )}
+        <StickyCartBar
+          providerId={providerId}
+          checkoutPath={`/restaurants/${id}/delivery`}
+          className="bottom-0"
+        />
       </div>
     </AppLayout>
   );

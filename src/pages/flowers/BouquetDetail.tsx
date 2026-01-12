@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { triggerRipple } from '@/hooks/useRipple';
-import { toast } from 'sonner';
 import { bouquets } from './FlowersIndex';
+import { useCartToast } from '@/hooks/useCartToast';
 
 const BouquetDetail = () => {
   const navigate = useNavigate();
@@ -17,6 +17,7 @@ const BouquetDetail = () => {
   const { language } = useLanguage();
   const { addItem, removeItem, updateQuantity, items, getItemsByType } = useCart();
   const [isFavorite, setIsFavorite] = React.useState(false);
+  const { showAddedToast } = useCartToast();
 
   const bouquet = bouquets.find(b => b.id === id);
   
@@ -38,9 +39,9 @@ const BouquetDetail = () => {
   const quantity = items.find(i => i.id === cartItemId)?.quantity || 0;
 
   const addToCart = () => {
-    addItem({
+    const item = {
       id: cartItemId,
-      type: 'flowers',
+      type: 'flowers' as const,
       name: bouquet.name,
       nameRu: bouquet.nameRu,
       price: bouquet.price,
@@ -49,8 +50,9 @@ const BouquetDetail = () => {
       providerId: 'flowers-shop',
       providerName: 'Phuket Flowers',
       providerNameRu: 'Цветы Пхукета',
-    });
-    toast.success(language === 'ru' ? 'Добавлено в корзину' : 'Added to cart');
+    };
+    addItem(item);
+    showAddedToast({ item });
   };
 
   const removeFromCart = () => {

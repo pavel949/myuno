@@ -10,10 +10,11 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FilterChip } from "@/components/uno/FilterChip";
 import { 
-  ArrowLeft, Star, MapPin, Shield, Phone, Clock, Truck, 
-  Plus, ShoppingCart, FileText 
+  ArrowLeft, Star, MapPin, Shield, Phone, Truck, 
+  Plus, FileText 
 } from "lucide-react";
-import { toast } from "sonner";
+import { StickyCartBar } from "@/components/cart/StickyCartBar";
+import { useCartToast } from "@/hooks/useCartToast";
 
 const PRODUCT_CATEGORIES = [
   { id: 'all', labelKey: 'pharmacy.all' },
@@ -31,8 +32,8 @@ export default function PharmacyDetail() {
   const { pharmacy, isLoading } = usePharmacy(id);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const { products, isLoading: productsLoading } = usePharmacyProducts(id, selectedCategory);
-  const { addItem, items } = useCart();
-  const itemCount = items.length;
+  const { addItem } = useCart();
+  const { showAddedToast } = useCartToast();
 
   if (isLoading) {
     return (
@@ -61,9 +62,9 @@ export default function PharmacyDetail() {
   }
 
   const handleAddToCart = (product: any) => {
-    addItem({
+    const item = {
       id: product.id,
-      type: 'product',
+      type: 'product' as const,
       name: language === 'ru' ? product.name_ru : product.name_en,
       nameRu: product.name_ru,
       price: product.price,
@@ -72,8 +73,9 @@ export default function PharmacyDetail() {
       providerId: pharmacy.id,
       providerName: language === 'ru' ? pharmacy.name_ru : pharmacy.name_en,
       providerNameRu: pharmacy.name_ru,
-    });
-    toast.success(t('pharmacy.addedToCart'));
+    };
+    addItem(item);
+    showAddedToast({ item });
   };
 
   return (
@@ -218,18 +220,7 @@ export default function PharmacyDetail() {
           )}
         </div>
 
-        {/* Fixed Cart Button */}
-        {itemCount > 0 && (
-          <div className="fixed bottom-20 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t">
-            <Button 
-              className="w-full h-12 text-base font-semibold" 
-              onClick={() => navigate('/cart')}
-            >
-              <ShoppingCart className="w-5 h-5 mr-2" />
-              {t('pharmacy.cart')} ({itemCount})
-            </Button>
-          </div>
-        )}
+        <StickyCartBar providerId={pharmacy.id} />
       </PageContainer>
     </AppLayout>
   );

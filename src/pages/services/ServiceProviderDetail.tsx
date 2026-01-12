@@ -16,14 +16,12 @@ import {
   Shield,
   Award,
   Calendar,
-  ChevronRight,
   ShoppingBag,
   Plus,
   Minus,
 } from "lucide-react";
-import { triggerRipple } from "@/hooks/useRipple";
-import { toast } from "sonner";
 import { BackButton } from "@/components/uno/BackButton";
+import { useCartToast } from "@/hooks/useCartToast";
 
 // Services data by category
 const getServicesByCategory = (category: string, language: string) => {
@@ -78,15 +76,16 @@ const ServiceProviderDetail = () => {
   const category = searchParams.get("category") || "plumbing";
   const providerName = searchParams.get("name") || (language === "ru" ? "Специалист" : "Specialist");
   const [selectedService, setSelectedService] = useState<string | null>(null);
+  const { showAddedToast } = useCartToast();
 
   const getServiceInCart = (serviceId: string) => {
     return items.find(item => item.id === serviceId && item.type === 'service');
   };
 
   const handleAddToCart = (service: { id: string; name: string; price: number; duration: string }) => {
-    addItem({
+    const item = {
       id: service.id,
-      type: 'service',
+      type: 'service' as const,
       name: service.name,
       nameRu: service.name,
       price: service.price,
@@ -94,8 +93,9 @@ const ServiceProviderDetail = () => {
       providerId: id,
       providerName: providerName,
       options: { duration: service.duration }
-    });
-    toast.success(language === "ru" ? "Услуга добавлена в корзину" : "Service added to cart");
+    };
+    addItem(item);
+    showAddedToast({ item });
   };
 
   const handleRemoveFromCart = (serviceId: string) => {
