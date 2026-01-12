@@ -189,7 +189,7 @@ export function usePropertyWithRentalTerms(marketplacePropertyId?: string) {
         throw propError;
       }
 
-      // Try to get linked owner property for rental terms
+      // Try to get linked owner property for rental terms (all extended fields)
       const { data: ownerProperty } = await supabase
         .from('owner_properties')
         .select(`
@@ -198,12 +198,67 @@ export function usePropertyWithRentalTerms(marketplacePropertyId?: string) {
           max_guests,
           deposit_amount,
           deposit_currency,
+          deposit_type,
           check_in_time,
           check_out_time,
           house_rules,
           house_rules_ru,
           cancellation_policy,
-          instant_booking
+          instant_booking,
+          weekly_discount,
+          monthly_discount,
+          seasonal_pricing,
+          electricity_included,
+          electricity_unit_price,
+          electricity_provider,
+          electricity_metering,
+          electricity_notes,
+          electricity_notes_ru,
+          water_included,
+          water_unit_price,
+          water_notes,
+          water_notes_ru,
+          included_services,
+          extra_services,
+          cleaning_included,
+          cleaning_frequency,
+          extra_cleaning_price,
+          linen_change_price,
+          linen_change_frequency,
+          early_checkin_price,
+          late_checkout_price,
+          late_checkout_penalty,
+          key_handover,
+          check_in_instructions_ru,
+          transfer_available,
+          transfer_airport_price,
+          transfer_notes,
+          transfer_notes_ru,
+          extra_guest_price,
+          extra_guest_threshold,
+          internet_speed,
+          internet_provider,
+          manager_name,
+          manager_phone,
+          manager_line_id,
+          parking_included,
+          parking_spaces,
+          parking_notes,
+          pets_allowed,
+          pet_deposit,
+          pet_notes,
+          pet_notes_ru,
+          parties_allowed,
+          max_party_guests,
+          quiet_hours_start,
+          quiet_hours_end,
+          children_friendly,
+          has_crib,
+          has_high_chair,
+          smoking_penalty,
+          emergency_contact_name,
+          emergency_contact_phone,
+          host_languages
         `)
         .eq('marketplace_property_id', marketplacePropertyId)
         .single();
