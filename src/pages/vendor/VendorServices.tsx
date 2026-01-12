@@ -35,8 +35,10 @@ import {
   Edit,
   Trash2,
   Clock,
+  Users,
   Loader2
 } from 'lucide-react';
+import { ImageUpload } from '@/components/upload/ImageUpload';
 
 const VendorServices = () => {
   const navigate = useNavigate();
@@ -58,6 +60,7 @@ const VendorServices = () => {
     price: '',
     duration_minutes: '',
     max_capacity: '1',
+    image: '',
     is_active: true,
   });
 
@@ -84,6 +87,7 @@ const VendorServices = () => {
       price: '',
       duration_minutes: '',
       max_capacity: '1',
+      image: '',
       is_active: true,
     });
     setEditingService(null);
@@ -99,6 +103,7 @@ const VendorServices = () => {
       price: service.price.toString(),
       duration_minutes: service.duration_minutes?.toString() || '',
       max_capacity: service.max_capacity.toString(),
+      image: (service as any).image || '',
       is_active: service.is_active,
     });
     setIsDialogOpen(true);
@@ -121,6 +126,7 @@ const VendorServices = () => {
         currency: 'THB',
         duration_minutes: formData.duration_minutes ? parseInt(formData.duration_minutes) : undefined,
         max_capacity: parseInt(formData.max_capacity) || 1,
+        image: formData.image || undefined,
         is_active: formData.is_active,
       };
 
@@ -215,56 +221,77 @@ const VendorServices = () => {
             {services.map((service) => (
               <Card key={service.id} className={!service.is_active ? 'opacity-60' : ''}>
                 <CardContent className="p-4">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-medium">
-                          {isRussian ? (service.name_ru || service.name) : service.name}
-                        </h3>
-                        {!service.is_active && (
-                          <Badge variant="outline" className="text-xs">
-                            {isRussian ? 'Неактивна' : 'Inactive'}
-                          </Badge>
-                        )}
+                  <div className="flex gap-3">
+                    {(service as any).image ? (
+                      <img 
+                        src={(service as any).image} 
+                        alt={service.name}
+                        className="w-16 h-16 rounded-lg object-cover"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center">
+                        <Package className="h-6 w-6 text-muted-foreground" />
                       </div>
-                      {service.description && (
-                        <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                          {isRussian ? (service.description_ru || service.description) : service.description}
-                        </p>
-                      )}
-                      <div className="flex items-center gap-4 text-sm">
-                        <span className="font-bold text-primary">
-                          ฿{service.price.toLocaleString()}
-                        </span>
-                        {service.duration_minutes && (
-                          <span className="flex items-center gap-1 text-muted-foreground">
-                            <Clock className="h-3 w-3" />
-                            {service.duration_minutes} {isRussian ? 'мин' : 'min'}
-                          </span>
-                        )}
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-medium">
+                              {isRussian ? (service.name_ru || service.name) : service.name}
+                            </h3>
+                            {!service.is_active && (
+                              <Badge variant="outline" className="text-xs">
+                                {isRussian ? 'Неактивна' : 'Inactive'}
+                              </Badge>
+                            )}
+                          </div>
+                          {service.description && (
+                            <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                              {isRussian ? (service.description_ru || service.description) : service.description}
+                            </p>
+                          )}
+                          <div className="flex items-center gap-4 text-sm">
+                            <span className="font-bold text-primary">
+                              ฿{service.price.toLocaleString()}
+                            </span>
+                            {service.duration_minutes && (
+                              <span className="flex items-center gap-1 text-muted-foreground">
+                                <Clock className="h-3 w-3" />
+                                {service.duration_minutes} {isRussian ? 'мин' : 'min'}
+                              </span>
+                            )}
+                            {service.max_capacity > 1 && (
+                              <span className="flex items-center gap-1 text-muted-foreground">
+                                <Users className="h-3 w-3" />
+                                {service.max_capacity}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => openEditDialog(service)}>
+                              <Edit className="h-4 w-4 mr-2" />
+                              {isRussian ? 'Редактировать' : 'Edit'}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              className="text-red-500"
+                              onClick={() => setDeleteConfirmId(service.id)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              {isRussian ? 'Удалить' : 'Delete'}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
-
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => openEditDialog(service)}>
-                          <Edit className="h-4 w-4 mr-2" />
-                          {isRussian ? 'Редактировать' : 'Edit'}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          className="text-red-500"
-                          onClick={() => setDeleteConfirmId(service.id)}
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          {isRussian ? 'Удалить' : 'Delete'}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
                   </div>
                 </CardContent>
               </Card>
@@ -284,6 +311,16 @@ const VendorServices = () => {
             </DialogHeader>
 
             <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>{isRussian ? 'Фото услуги' : 'Service Photo'}</Label>
+                <ImageUpload
+                  value={formData.image}
+                  onChange={(url) => setFormData(prev => ({ ...prev, image: url }))}
+                  folder="services"
+                  placeholder={isRussian ? 'Загрузить фото' : 'Upload photo'}
+                />
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="name">{isRussian ? 'Название *' : 'Name *'}</Label>
                 <Input
@@ -309,6 +346,16 @@ const VendorServices = () => {
                   id="description"
                   value={formData.description}
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  rows={2}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description_ru">{isRussian ? 'Описание (RU)' : 'Description (Russian)'}</Label>
+                <Textarea
+                  id="description_ru"
+                  value={formData.description_ru}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description_ru: e.target.value }))}
                   rows={2}
                 />
               </div>
