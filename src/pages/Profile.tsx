@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Settings, HelpCircle, LogOut, ChevronRight, Shield, Bell, CreditCard, Heart, Clock, Wallet, Palette, Gift, Info, FileText, Handshake, MessageCircle, ShieldCheck, MapPin } from 'lucide-react';
+import { User, Settings, HelpCircle, LogOut, ChevronRight, Shield, Bell, CreditCard, Heart, Clock, Wallet, Palette, Gift, Info, FileText, Handshake, MessageCircle, ShieldCheck, MapPin, Mail } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,6 +12,7 @@ import { SectionCard, SectionTitle } from '@/components/uno/SectionCard';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { ReferralCard } from '@/components/uno/ReferralCard';
 import { UserPreferences } from '@/components/profile/UserPreferences';
+import { EmailVerificationBadge } from '@/components/profile/EmailVerificationBadge';
 import { RoleSwitcher } from '@/components/uno/RoleSwitcher';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
@@ -111,6 +112,7 @@ export default function Profile() {
             <p className="text-sm text-muted-foreground">
               {profile?.full_name ? user.email : (language === 'ru' ? 'Аккаунт туриста' : 'Tourist Account')}
             </p>
+            <EmailVerificationBadge variant="inline" />
           </div>
           <PremiumButton variant="outline" size="sm" onClick={() => navigate('/profile/edit')}>
             {t('action.edit')}
