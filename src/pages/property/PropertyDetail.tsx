@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { BackButton } from '@/components/uno/BackButton';
-import { usePropertyWithRentalTerms, PropertyRentalTerms } from '@/hooks/useProperties';
+import { usePropertyWithRentalTerms, PropertyRentalTerms, PropertyProject } from '@/hooks/useProperties';
 import { 
   IncludedServices, 
   ExtraServices, 
@@ -21,6 +21,8 @@ import {
   HouseRules,
   PropertyPriceBreakdown 
 } from '@/components/property';
+import { ProjectInfoCard } from '@/components/property/ProjectInfoCard';
+import { UnitSpecs } from '@/components/property/UnitSpecs';
 
 // Demo property data as fallback
 const demoProperty = {
@@ -115,6 +117,14 @@ const demoProperty = {
     emergency_contact_name: undefined,
     emergency_contact_phone: undefined,
   } as PropertyRentalTerms,
+  // Unit-specific fields (demo)
+  project_id: undefined as string | undefined,
+  floor: undefined as number | undefined,
+  unit_number: undefined as string | undefined,
+  view_type: undefined as string | undefined,
+  furnishing_level: undefined as string | undefined,
+  equipment: undefined as string[] | undefined,
+  project: null as PropertyProject | null,
   host: {
     name: 'Phuket Luxury Homes',
     image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100',
@@ -317,6 +327,20 @@ export default function PropertyDetail() {
               </span>
             </div>
           </div>
+
+          {/* Unit Specs (floor, view, furnishing, equipment) */}
+          <UnitSpecs
+            floor={property.floor}
+            unitNumber={property.unit_number}
+            viewType={property.view_type}
+            furnishingLevel={property.furnishing_level}
+            equipment={property.equipment}
+          />
+
+          {/* Project Info (if part of a project) */}
+          {property.project && (
+            <ProjectInfoCard project={property.project} />
+          )}
 
           {/* Price Breakdown (Airbnb style) */}
           {rentalTerms && (

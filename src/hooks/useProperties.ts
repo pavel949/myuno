@@ -33,6 +33,33 @@ export interface Property {
   review_count?: number;
   created_at: string;
   updated_at: string;
+  // Unit-specific fields
+  project_id?: string;
+  floor?: number;
+  unit_number?: string;
+  view_type?: string;
+  furnishing_level?: string;
+  equipment?: string[];
+}
+
+export interface PropertyProject {
+  id: string;
+  name_en: string;
+  name_ru: string;
+  description_en?: string;
+  description_ru?: string;
+  address?: string;
+  district?: string;
+  lat?: number;
+  lng?: number;
+  developer_name?: string;
+  year_built?: number;
+  total_units?: number;
+  cover_image?: string;
+  images?: string[];
+  video_url?: string;
+  amenities?: string[];
+  infrastructure?: string[];
 }
 
 export interface PropertyRentalTerms {
@@ -240,7 +267,7 @@ export function useProperty(id?: string) {
   });
 }
 
-// Get property with linked owner data (rental terms)
+// Get property with linked owner data (rental terms) and project info
 export function usePropertyWithRentalTerms(marketplacePropertyId?: string) {
   return useQuery({
     queryKey: ['property-with-terms', marketplacePropertyId],
@@ -257,6 +284,17 @@ export function usePropertyWithRentalTerms(marketplacePropertyId?: string) {
       if (propError) {
         if (propError.code === 'PGRST116') return null;
         throw propError;
+      }
+
+      // Get project info if property has project_id
+      let projectData: PropertyProject | null = null;
+      if (property.project_id) {
+        const { data: project } = await supabase
+          .from('property_projects')
+          .select('*')
+          .eq('id', property.project_id)
+          .single();
+        projectData = project as PropertyProject | null;
       }
 
       // Try to get linked owner property for rental terms (all extended fields)
@@ -336,7 +374,8 @@ export function usePropertyWithRentalTerms(marketplacePropertyId?: string) {
       return {
         ...property,
         rentalTerms: ownerProperty || null,
-      } as Property & { rentalTerms: PropertyRentalTerms | null };
+        project: projectData,
+      } as Property & { rentalTerms: PropertyRentalTerms | null; project: PropertyProject | null };
     },
     enabled: !!marketplacePropertyId,
   });
