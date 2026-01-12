@@ -20,6 +20,7 @@ export interface Salon {
   rating: number;
   review_count: number;
   is_verified: boolean;
+  is_featured: boolean;
   working_hours: Record<string, string>;
 }
 
