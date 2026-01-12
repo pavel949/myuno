@@ -267,6 +267,7 @@ export const AnimatedRoutes: React.FC = () => {
         {/* Flowers Mini-App Routes */}
         <Route path="/flowers" element={<PageTransition><FlowersIndex /></PageTransition>} />
         <Route path="/flowers/bouquet/:id" element={<PageTransition><BouquetDetail /></PageTransition>} />
+        <Route path="/flowers/shop" element={<Navigate to="/flowers" replace />} />
         <Route path="/flowers/shop/:id" element={<PageTransition><FlowerShopDetail /></PageTransition>} />
         <Route path="/flowers/order" element={<PageTransition><FlowersOrder /></PageTransition>} />
         <Route path="/flowers/order/:id" element={<PageTransition><FlowersOrder /></PageTransition>} />
