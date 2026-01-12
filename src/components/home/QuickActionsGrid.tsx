@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { 
-  Plane, Flower2, Car, Droplets, Home, Bike,
+  Plane, Flower2, Car, Droplets, Home, Sailboat,
   AlertTriangle, Stethoscope
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -48,12 +48,14 @@ const quickActions: QuickAction[] = [
     gradient: 'from-amber-500 to-orange-500',
   },
   {
-    id: 'bike-rental',
-    icon: Bike,
-    labelEn: 'Bike',
-    labelRu: 'Байк',
-    path: '/transport',
-    gradient: 'from-lime-500 to-green-500',
+    id: 'yachts',
+    icon: Sailboat,
+    labelEn: 'Yachts',
+    labelRu: 'Яхты',
+    path: '/yachts',
+    gradient: 'from-sky-500 to-blue-600',
+    badge: 'NEW',
+    badgeRu: 'NEW',
   },
   {
     id: 'water',
