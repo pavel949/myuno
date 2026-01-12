@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useViewHistory } from './useViewHistory';
@@ -20,15 +20,13 @@ export function useRecommendations() {
   const { history } = useViewHistory();
   const [recommendations, setRecommendations] = useState<RecommendedItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const hasFetched = useRef(false);
 
-  const fetchRecommendations = useCallback(async () => {
+  const fetchRecommendations = useCallback(async (viewedTypes: string[]) => {
     setIsLoading(true);
     const items: RecommendedItem[] = [];
 
     try {
-      // Get user's preferred categories from history
-      const viewedTypes = [...new Set(history.slice(0, 10).map(h => h.item_type))];
-      
       // Fetch popular tours
       const { data: tours } = await supabase
         .from('tours')
@@ -137,15 +135,26 @@ export function useRecommendations() {
     } finally {
       setIsLoading(false);
     }
-  }, [history]);
+  }, []);
 
   useEffect(() => {
-    fetchRecommendations();
-  }, [fetchRecommendations]);
+    // Only fetch once on mount to avoid infinite loops
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+    
+    // Get user's preferred categories from history
+    const viewedTypes = [...new Set(history.slice(0, 10).map(h => h.item_type))];
+    fetchRecommendations(viewedTypes);
+  }, []);
+
+  const refetch = useCallback(() => {
+    const viewedTypes = [...new Set(history.slice(0, 10).map(h => h.item_type))];
+    fetchRecommendations(viewedTypes);
+  }, [history, fetchRecommendations]);
 
   return {
     recommendations,
     isLoading,
-    refetch: fetchRecommendations
+    refetch
   };
 }
