@@ -10,11 +10,14 @@ interface CurrencyInfo {
   rate: number; // Rate relative to THB
 }
 
+// Exchange rates relative to THB (as of January 2026)
+// To convert: priceInTHB * rate = priceInTargetCurrency
+// Example: 1000 THB * 0.029 = 29 USD
 export const currencies: Record<Currency, CurrencyInfo> = {
   THB: { code: 'THB', symbol: '฿', name: 'Thai Baht', nameRu: 'Тайский бат', rate: 1 },
-  USD: { code: 'USD', symbol: '$', name: 'US Dollar', nameRu: 'Доллар США', rate: 0.028 },
-  EUR: { code: 'EUR', symbol: '€', name: 'Euro', nameRu: 'Евро', rate: 0.026 },
-  RUB: { code: 'RUB', symbol: '₽', name: 'Russian Ruble', nameRu: 'Российский рубль', rate: 2.5 },
+  USD: { code: 'USD', symbol: '$', name: 'US Dollar', nameRu: 'Доллар США', rate: 0.029 },    // 1 USD ≈ 34 THB
+  EUR: { code: 'EUR', symbol: '€', name: 'Euro', nameRu: 'Евро', rate: 0.027 },              // 1 EUR ≈ 37 THB
+  RUB: { code: 'RUB', symbol: '₽', name: 'Russian Ruble', nameRu: 'Российский рубль', rate: 2.7 }, // 1 THB ≈ 2.7 RUB
 };
 
 interface CurrencyContextType {
