@@ -169,8 +169,8 @@ export function ItemCard({
       )}
     >
       <div className="flex">
-        {/* Image */}
-        <div className="w-32 h-32 flex-shrink-0 relative">
+        {/* Image - larger on mobile for better tap targets */}
+        <div className="w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0 relative">
           <img
             src={image || 'https://images.unsplash.com/photo-1537956965359-7573183d1f57?w=400'}
             alt={title}
@@ -206,10 +206,10 @@ export function ItemCard({
         </div>
 
         {/* Content */}
-        <div className="flex-1 p-3 flex flex-col justify-between">
+        <div className="flex-1 p-2.5 sm:p-3 flex flex-col justify-between min-w-0">
           <div>
             {/* Title */}
-            <h3 className="font-semibold line-clamp-2 flex items-center gap-1">
+            <h3 className="font-semibold text-sm sm:text-base line-clamp-2 flex items-center gap-1">
               {title}
               {isVerified && (
                 <BadgeCheck className={cn(iconSizes.md, "text-primary flex-shrink-0")} />

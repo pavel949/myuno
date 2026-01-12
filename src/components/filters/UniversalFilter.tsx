@@ -250,7 +250,7 @@ export function UniversalFilter({
         {trigger}
       </SheetTrigger>
       
-      <SheetContent side="bottom" className="h-[85vh] rounded-t-3xl">
+      <SheetContent side="bottom" className="h-[80vh] sm:h-[85vh] rounded-t-3xl">
         <SheetHeader className="pb-4">
           <div className="flex items-center justify-between">
             <SheetTitle>
@@ -270,8 +270,8 @@ export function UniversalFilter({
           </div>
         </SheetHeader>
 
-        <ScrollArea className="h-[calc(85vh-140px)] pr-4">
-          <div className="space-y-6 pb-4">
+        <ScrollArea className="h-[calc(80vh-140px)] sm:h-[calc(85vh-140px)] pr-4">
+          <div className="space-y-5 sm:space-y-6 pb-4">
             {config.sections.map((section, index) => (
               <div key={section.id}>
                 {index > 0 && <Separator className="mb-6" />}
@@ -308,8 +308,8 @@ export function UniversalFilter({
         </ScrollArea>
 
         {/* Apply Button */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t border-border">
-          <Button onClick={handleApply} className="w-full" size="lg">
+        <div className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t border-border pb-safe">
+          <Button onClick={handleApply} className="w-full h-12 text-base touch-manipulation" size="lg">
             {language === 'ru' 
               ? `Применить${localActiveCount > 0 ? ` (${localActiveCount})` : ''}`
               : `Apply${localActiveCount > 0 ? ` (${localActiveCount})` : ''}`}

@@ -116,14 +116,14 @@ export function RecommendedCarousel() {
         <div
           ref={scrollRef}
           onScroll={checkScroll}
-          className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4"
-          style={{ scrollSnapType: 'x mandatory' }}
+          className="flex gap-3 sm:gap-4 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4"
+          style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
         >
           {items.map((item) => (
             <button
               key={`${item.type}-${item.id}`}
               onClick={() => navigate(item.path)}
-              className="flex-shrink-0 w-64 rounded-2xl overflow-hidden bg-card border border-border/50 hover:border-primary/30 transition-all group/card text-left"
+              className="flex-shrink-0 w-56 sm:w-64 rounded-2xl overflow-hidden bg-card border border-border/50 hover:border-primary/30 active:scale-[0.98] transition-all group/card text-left touch-manipulation"
               style={{ scrollSnapAlign: 'start' }}
             >
               {/* Image */}
