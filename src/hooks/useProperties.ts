@@ -337,6 +337,7 @@ export function usePropertyWithRentalTerms(marketplacePropertyId?: string) {
           late_checkout_price,
           late_checkout_penalty,
           key_handover,
+          check_in_instructions,
           check_in_instructions_ru,
           transfer_available,
           transfer_airport_price,
