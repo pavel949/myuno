@@ -43,7 +43,7 @@ import {
   Star,
   Shield
 } from 'lucide-react';
-import { ImageUpload } from '@/components/upload/ImageUpload';
+import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
 
 const activityCategories = [
   { id: 'diving', label: 'Diving', labelRu: 'Дайвинг' },
@@ -93,6 +93,9 @@ const VendorActivities = () => {
     is_certified: false,
     safety_briefing_required: true,
     cover_image: '',
+    images: [] as string[],
+    includes: '',
+    requirements: '',
     is_active: true,
   });
 
@@ -130,6 +133,9 @@ const VendorActivities = () => {
       is_certified: false,
       safety_briefing_required: true,
       cover_image: '',
+      images: [],
+      includes: '',
+      requirements: '',
       is_active: true,
     });
     setEditingActivity(null);
@@ -156,6 +162,9 @@ const VendorActivities = () => {
       is_certified: activity.is_certified ?? false,
       safety_briefing_required: activity.safety_briefing_required ?? true,
       cover_image: activity.cover_image || '',
+      images: activity.images || [],
+      includes: (activity.includes || []).join('\n'),
+      requirements: (activity.requirements || []).join('\n'),
       is_active: activity.is_active ?? true,
     });
     setIsDialogOpen(true);
@@ -169,6 +178,9 @@ const VendorActivities = () => {
 
     setIsSubmitting(true);
     try {
+      const includesArray = formData.includes.split('\n').filter(s => s.trim());
+      const requirementsArray = formData.requirements.split('\n').filter(s => s.trim());
+
       const activityData = {
         title_en: formData.title_en,
         title_ru: formData.title_ru || formData.title_en,
@@ -189,6 +201,9 @@ const VendorActivities = () => {
         is_certified: formData.is_certified,
         safety_briefing_required: formData.safety_briefing_required,
         cover_image: formData.cover_image || undefined,
+        images: formData.images.length > 0 ? formData.images : undefined,
+        includes: includesArray.length > 0 ? includesArray : undefined,
+        requirements: requirementsArray.length > 0 ? requirementsArray : undefined,
         is_active: formData.is_active,
       };
 
@@ -448,6 +463,16 @@ const VendorActivities = () => {
                 />
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="description_ru">{isRussian ? 'Описание (RU)' : 'Description (Russian)'}</Label>
+                <Textarea
+                  id="description_ru"
+                  value={formData.description_ru}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description_ru: e.target.value }))}
+                  rows={3}
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="price">{isRussian ? 'Цена (฿) *' : 'Price (฿) *'}</Label>
@@ -528,6 +553,46 @@ const VendorActivities = () => {
                   onChange={(url) => setFormData(prev => ({ ...prev, cover_image: url }))}
                   folder="activities"
                   placeholder={isRussian ? 'Загрузить фото' : 'Upload photo'}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>{isRussian ? 'Галерея фото' : 'Photo Gallery'}</Label>
+                <MultiImageUpload
+                  value={formData.images}
+                  onChange={(urls) => setFormData(prev => ({ ...prev, images: urls }))}
+                  folder="activities"
+                  maxImages={8}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="includes">
+                  {isRussian ? 'Что включено (по одному на строку)' : 'What\'s Included (one per line)'}
+                </Label>
+                <Textarea
+                  id="includes"
+                  value={formData.includes}
+                  onChange={(e) => setFormData(prev => ({ ...prev, includes: e.target.value }))}
+                  rows={3}
+                  placeholder={isRussian 
+                    ? "Снаряжение\nИнструктор\nСтраховка" 
+                    : "Equipment\nInstructor\nInsurance"}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="requirements">
+                  {isRussian ? 'Требования (по одному на строку)' : 'Requirements (one per line)'}
+                </Label>
+                <Textarea
+                  id="requirements"
+                  value={formData.requirements}
+                  onChange={(e) => setFormData(prev => ({ ...prev, requirements: e.target.value }))}
+                  rows={3}
+                  placeholder={isRussian 
+                    ? "Умение плавать\nМедицинская справка\nМинимум 12 лет" 
+                    : "Swimming ability\nMedical certificate\nMinimum age 12"}
                 />
               </div>
 

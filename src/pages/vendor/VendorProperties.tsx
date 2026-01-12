@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -40,9 +41,10 @@ import {
   Bath,
   Ruler,
   MapPin,
-  Loader2
+  Loader2,
+  Zap
 } from 'lucide-react';
-import { ImageUpload } from '@/components/upload/ImageUpload';
+import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
 
 const propertyTypes = [
   { id: 'villa', label: 'Villa', labelRu: 'Вилла' },
@@ -62,6 +64,21 @@ const pricePeriods = [
   { id: 'day', label: 'Per Day', labelRu: 'За день' },
   { id: 'month', label: 'Per Month', labelRu: 'За месяц' },
   { id: 'year', label: 'Per Year', labelRu: 'За год' },
+];
+
+const amenitiesList = [
+  { id: 'wifi', label: 'Wi-Fi', labelRu: 'Wi-Fi' },
+  { id: 'pool', label: 'Pool', labelRu: 'Бассейн' },
+  { id: 'gym', label: 'Gym', labelRu: 'Спортзал' },
+  { id: 'parking', label: 'Parking', labelRu: 'Парковка' },
+  { id: 'ac', label: 'Air Conditioning', labelRu: 'Кондиционер' },
+  { id: 'kitchen', label: 'Kitchen', labelRu: 'Кухня' },
+  { id: 'washer', label: 'Washer', labelRu: 'Стиральная машина' },
+  { id: 'balcony', label: 'Balcony', labelRu: 'Балкон' },
+  { id: 'sea_view', label: 'Sea View', labelRu: 'Вид на море' },
+  { id: 'security', label: '24h Security', labelRu: 'Охрана 24ч' },
+  { id: 'pets', label: 'Pets Allowed', labelRu: 'Можно с питомцами' },
+  { id: 'garden', label: 'Garden', labelRu: 'Сад' },
 ];
 
 const VendorProperties = () => {
@@ -92,7 +109,12 @@ const VendorProperties = () => {
     min_stay_nights: '1',
     address: '',
     district: '',
+    lat: '',
+    lng: '',
     cover_image: '',
+    images: [] as string[],
+    amenities: [] as string[],
+    instant_booking: false,
     is_active: true,
   });
 
@@ -127,7 +149,12 @@ const VendorProperties = () => {
       min_stay_nights: '1',
       address: '',
       district: '',
+      lat: '',
+      lng: '',
       cover_image: '',
+      images: [],
+      amenities: [],
+      instant_booking: false,
       is_active: true,
     });
     setEditingProperty(null);
@@ -151,7 +178,12 @@ const VendorProperties = () => {
       min_stay_nights: property.min_stay_nights?.toString() || '1',
       address: property.address || '',
       district: property.district || '',
+      lat: property.lat?.toString() || '',
+      lng: property.lng?.toString() || '',
       cover_image: property.cover_image || '',
+      images: property.images || [],
+      amenities: property.amenities || [],
+      instant_booking: (property as any).instant_booking ?? false,
       is_active: property.is_active ?? true,
     });
     setIsDialogOpen(true);
@@ -165,7 +197,7 @@ const VendorProperties = () => {
 
     setIsSubmitting(true);
     try {
-      const propertyData = {
+      const propertyData: any = {
         title_en: formData.title_en,
         title_ru: formData.title_ru || formData.title_en,
         description_en: formData.description_en || undefined,
@@ -182,7 +214,12 @@ const VendorProperties = () => {
         min_stay_nights: parseInt(formData.min_stay_nights) || 1,
         address: formData.address || undefined,
         district: formData.district || undefined,
+        lat: formData.lat ? parseFloat(formData.lat) : undefined,
+        lng: formData.lng ? parseFloat(formData.lng) : undefined,
         cover_image: formData.cover_image || undefined,
+        images: formData.images.length > 0 ? formData.images : undefined,
+        amenities: formData.amenities.length > 0 ? formData.amenities : undefined,
+        instant_booking: formData.instant_booking,
         is_active: formData.is_active,
       };
 
@@ -216,6 +253,15 @@ const VendorProperties = () => {
       console.error('Error deleting property:', error);
       toast.error(isRussian ? 'Ошибка при удалении' : 'Error deleting property');
     }
+  };
+
+  const handleAmenityToggle = (amenityId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      amenities: prev.amenities.includes(amenityId)
+        ? prev.amenities.filter(a => a !== amenityId)
+        : [...prev.amenities, amenityId]
+    }));
   };
 
   const formatPrice = (price: number, period?: string) => {
@@ -307,6 +353,12 @@ const VendorProperties = () => {
                             <h3 className="font-medium truncate">
                               {isRussian ? property.title_ru : property.title_en}
                             </h3>
+                            {(property as any).instant_booking && (
+                              <Badge className="bg-amber-500 text-white text-xs">
+                                <Zap className="h-3 w-3 mr-1" />
+                                {isRussian ? 'Мгновенно' : 'Instant'}
+                              </Badge>
+                            )}
                             {!property.is_active && (
                               <Badge variant="outline" className="text-xs">
                                 {isRussian ? 'Неактивен' : 'Inactive'}
@@ -444,7 +496,17 @@ const VendorProperties = () => {
                   id="description_en"
                   value={formData.description_en}
                   onChange={(e) => setFormData(prev => ({ ...prev, description_en: e.target.value }))}
-                  rows={2}
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description_ru">{isRussian ? 'Описание (RU)' : 'Description (Russian)'}</Label>
+                <Textarea
+                  id="description_ru"
+                  value={formData.description_ru}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description_ru: e.target.value }))}
+                  rows={3}
                 />
               </div>
 
@@ -549,6 +611,31 @@ const VendorProperties = () => {
                 />
               </div>
 
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="lat">{isRussian ? 'Широта (lat)' : 'Latitude'}</Label>
+                  <Input
+                    id="lat"
+                    type="number"
+                    step="any"
+                    value={formData.lat}
+                    onChange={(e) => setFormData(prev => ({ ...prev, lat: e.target.value }))}
+                    placeholder="7.8386"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lng">{isRussian ? 'Долгота (lng)' : 'Longitude'}</Label>
+                  <Input
+                    id="lng"
+                    type="number"
+                    step="any"
+                    value={formData.lng}
+                    onChange={(e) => setFormData(prev => ({ ...prev, lng: e.target.value }))}
+                    placeholder="98.3048"
+                  />
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label>{isRussian ? 'Фото обложки' : 'Cover Image'}</Label>
                 <ImageUpload
@@ -559,13 +646,64 @@ const VendorProperties = () => {
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <Label htmlFor="is_active">{isRussian ? 'Объект активен' : 'Property active'}</Label>
-                <Switch
-                  id="is_active"
-                  checked={formData.is_active}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+              <div className="space-y-2">
+                <Label>{isRussian ? 'Галерея фото' : 'Photo Gallery'}</Label>
+                <MultiImageUpload
+                  value={formData.images}
+                  onChange={(urls) => setFormData(prev => ({ ...prev, images: urls }))}
+                  folder="properties"
+                  maxImages={10}
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label>{isRussian ? 'Удобства' : 'Amenities'}</Label>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  {amenitiesList.map(amenity => (
+                    <div key={amenity.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={amenity.id}
+                        checked={formData.amenities.includes(amenity.id)}
+                        onCheckedChange={() => handleAmenityToggle(amenity.id)}
+                      />
+                      <label htmlFor={amenity.id} className="text-sm cursor-pointer">
+                        {isRussian ? amenity.labelRu : amenity.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                  <div className="flex items-center gap-2">
+                    <Zap className="h-5 w-5 text-amber-500" />
+                    <div>
+                      <Label htmlFor="instant_booking" className="font-medium">
+                        {isRussian ? 'Мгновенное бронирование' : 'Instant Booking'}
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        {isRussian 
+                          ? 'Гости могут бронировать без подтверждения' 
+                          : 'Guests can book without approval'}
+                      </p>
+                    </div>
+                  </div>
+                  <Switch
+                    id="instant_booking"
+                    checked={formData.instant_booking}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, instant_booking: checked }))}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="is_active">{isRussian ? 'Объект активен' : 'Property active'}</Label>
+                  <Switch
+                    id="is_active"
+                    checked={formData.is_active}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+                  />
+                </div>
               </div>
             </div>
 

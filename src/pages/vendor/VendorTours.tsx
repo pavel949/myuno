@@ -40,9 +40,10 @@ import {
   Users,
   MapPin,
   Loader2,
-  Star
+  Star,
+  X
 } from 'lucide-react';
-import { ImageUpload } from '@/components/upload/ImageUpload';
+import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
 
 const tourCategories = [
   { id: 'island', label: 'Island Hopping', labelRu: 'Острова' },
@@ -83,6 +84,9 @@ const VendorTours = () => {
     max_participants: '10',
     meeting_point: '',
     cover_image: '',
+    images: [] as string[],
+    includes: '',
+    highlights: '',
     is_active: true,
   });
 
@@ -113,6 +117,9 @@ const VendorTours = () => {
       max_participants: '10',
       meeting_point: '',
       cover_image: '',
+      images: [],
+      includes: '',
+      highlights: '',
       is_active: true,
     });
     setEditingTour(null);
@@ -132,6 +139,9 @@ const VendorTours = () => {
       max_participants: tour.max_participants?.toString() || '10',
       meeting_point: tour.meeting_point || '',
       cover_image: tour.cover_image || '',
+      images: tour.images || [],
+      includes: (tour.includes || []).join('\n'),
+      highlights: (tour.highlights || []).join('\n'),
       is_active: tour.is_active ?? true,
     });
     setIsDialogOpen(true);
@@ -145,6 +155,9 @@ const VendorTours = () => {
 
     setIsSubmitting(true);
     try {
+      const includesArray = formData.includes.split('\n').filter(s => s.trim());
+      const highlightsArray = formData.highlights.split('\n').filter(s => s.trim());
+
       const tourData = {
         title_en: formData.title_en,
         title_ru: formData.title_ru || formData.title_en,
@@ -158,6 +171,9 @@ const VendorTours = () => {
         max_participants: parseInt(formData.max_participants) || 10,
         meeting_point: formData.meeting_point || undefined,
         cover_image: formData.cover_image || undefined,
+        images: formData.images.length > 0 ? formData.images : undefined,
+        includes: includesArray.length > 0 ? includesArray : undefined,
+        highlights: highlightsArray.length > 0 ? highlightsArray : undefined,
         is_active: formData.is_active,
       };
 
@@ -414,6 +430,16 @@ const VendorTours = () => {
                 />
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="description_ru">{isRussian ? 'Описание (RU)' : 'Description (Russian)'}</Label>
+                <Textarea
+                  id="description_ru"
+                  value={formData.description_ru}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description_ru: e.target.value }))}
+                  rows={3}
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="price">{isRussian ? 'Цена (฿) *' : 'Price (฿) *'}</Label>
@@ -463,6 +489,46 @@ const VendorTours = () => {
                   onChange={(url) => setFormData(prev => ({ ...prev, cover_image: url }))}
                   folder="tours"
                   placeholder={isRussian ? 'Загрузить фото' : 'Upload photo'}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>{isRussian ? 'Галерея фото' : 'Photo Gallery'}</Label>
+                <MultiImageUpload
+                  value={formData.images}
+                  onChange={(urls) => setFormData(prev => ({ ...prev, images: urls }))}
+                  folder="tours"
+                  maxImages={8}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="includes">
+                  {isRussian ? 'Что включено (по одному на строку)' : 'What\'s Included (one per line)'}
+                </Label>
+                <Textarea
+                  id="includes"
+                  value={formData.includes}
+                  onChange={(e) => setFormData(prev => ({ ...prev, includes: e.target.value }))}
+                  rows={3}
+                  placeholder={isRussian 
+                    ? "Трансфер из отеля\nОбед\nСнаряжение для снорклинга" 
+                    : "Hotel pickup\nLunch\nSnorkeling gear"}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="highlights">
+                  {isRussian ? 'Основные моменты (по одному на строку)' : 'Highlights (one per line)'}
+                </Label>
+                <Textarea
+                  id="highlights"
+                  value={formData.highlights}
+                  onChange={(e) => setFormData(prev => ({ ...prev, highlights: e.target.value }))}
+                  rows={3}
+                  placeholder={isRussian 
+                    ? "Посещение Maya Bay\nСнорклинг с рыбками\nЗакат на пляже" 
+                    : "Visit Maya Bay\nSnorkeling with fish\nBeach sunset"}
                 />
               </div>
 
