@@ -1927,36 +1927,91 @@ export type Database = {
           bathrooms: number | null
           bedrooms: number | null
           cancellation_policy: string | null
+          check_in_instructions_ru: string | null
           check_in_time: string | null
           check_out_time: string | null
+          children_friendly: boolean | null
+          cleaning_frequency: string | null
+          cleaning_included: boolean | null
           cover_image: string | null
           created_at: string
           deposit_amount: number | null
           deposit_currency: string | null
+          deposit_type: string | null
           description: string | null
           description_ru: string | null
           district: string | null
+          early_checkin_price: number | null
+          electricity_included: boolean | null
+          electricity_metering: string | null
+          electricity_notes: string | null
+          electricity_notes_ru: string | null
+          electricity_provider: string | null
+          electricity_unit_price: number | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          extra_cleaning_price: number | null
+          extra_guest_price: number | null
+          extra_guest_threshold: number | null
+          extra_services: Json | null
+          has_crib: boolean | null
+          has_high_chair: boolean | null
+          host_languages: string[] | null
           house_rules: string | null
           house_rules_ru: string | null
           id: string
           images: string[] | null
+          included_services: Json | null
           instant_booking: boolean | null
+          internet_provider: string | null
+          internet_speed: string | null
           is_rented: boolean | null
+          key_handover: string | null
+          late_checkout_penalty: number | null
+          late_checkout_price: number | null
+          linen_change_frequency: string | null
+          linen_change_price: number | null
           management_type: string | null
+          manager_line_id: string | null
+          manager_name: string | null
+          manager_phone: string | null
           marketplace_property_id: string | null
           max_guests: number | null
+          max_party_guests: number | null
           min_stay_nights: number | null
+          monthly_discount: number | null
           notes: string | null
           owner_id: string
+          parking_included: boolean | null
+          parking_notes: string | null
+          parking_spaces: number | null
+          parties_allowed: boolean | null
+          pet_deposit: number | null
+          pet_notes: string | null
+          pet_notes_ru: string | null
+          pets_allowed: boolean | null
           price_per_night: number | null
           property_type: string
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
           rental_platform: string | null
+          seasonal_pricing: Json | null
+          smoking_penalty: number | null
           status: string | null
           title: string
           title_ru: string | null
+          transfer_airport_price: number | null
+          transfer_available: boolean | null
+          transfer_notes: string | null
+          transfer_notes_ru: string | null
           updated_at: string
           verified_at: string | null
           verified_by: string | null
+          water_included: boolean | null
+          water_notes: string | null
+          water_notes_ru: string | null
+          water_unit_price: number | null
+          weekly_discount: number | null
         }
         Insert: {
           address: string
@@ -1964,36 +2019,91 @@ export type Database = {
           bathrooms?: number | null
           bedrooms?: number | null
           cancellation_policy?: string | null
+          check_in_instructions_ru?: string | null
           check_in_time?: string | null
           check_out_time?: string | null
+          children_friendly?: boolean | null
+          cleaning_frequency?: string | null
+          cleaning_included?: boolean | null
           cover_image?: string | null
           created_at?: string
           deposit_amount?: number | null
           deposit_currency?: string | null
+          deposit_type?: string | null
           description?: string | null
           description_ru?: string | null
           district?: string | null
+          early_checkin_price?: number | null
+          electricity_included?: boolean | null
+          electricity_metering?: string | null
+          electricity_notes?: string | null
+          electricity_notes_ru?: string | null
+          electricity_provider?: string | null
+          electricity_unit_price?: number | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          extra_cleaning_price?: number | null
+          extra_guest_price?: number | null
+          extra_guest_threshold?: number | null
+          extra_services?: Json | null
+          has_crib?: boolean | null
+          has_high_chair?: boolean | null
+          host_languages?: string[] | null
           house_rules?: string | null
           house_rules_ru?: string | null
           id?: string
           images?: string[] | null
+          included_services?: Json | null
           instant_booking?: boolean | null
+          internet_provider?: string | null
+          internet_speed?: string | null
           is_rented?: boolean | null
+          key_handover?: string | null
+          late_checkout_penalty?: number | null
+          late_checkout_price?: number | null
+          linen_change_frequency?: string | null
+          linen_change_price?: number | null
           management_type?: string | null
+          manager_line_id?: string | null
+          manager_name?: string | null
+          manager_phone?: string | null
           marketplace_property_id?: string | null
           max_guests?: number | null
+          max_party_guests?: number | null
           min_stay_nights?: number | null
+          monthly_discount?: number | null
           notes?: string | null
           owner_id: string
+          parking_included?: boolean | null
+          parking_notes?: string | null
+          parking_spaces?: number | null
+          parties_allowed?: boolean | null
+          pet_deposit?: number | null
+          pet_notes?: string | null
+          pet_notes_ru?: string | null
+          pets_allowed?: boolean | null
           price_per_night?: number | null
           property_type?: string
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
           rental_platform?: string | null
+          seasonal_pricing?: Json | null
+          smoking_penalty?: number | null
           status?: string | null
           title: string
           title_ru?: string | null
+          transfer_airport_price?: number | null
+          transfer_available?: boolean | null
+          transfer_notes?: string | null
+          transfer_notes_ru?: string | null
           updated_at?: string
           verified_at?: string | null
           verified_by?: string | null
+          water_included?: boolean | null
+          water_notes?: string | null
+          water_notes_ru?: string | null
+          water_unit_price?: number | null
+          weekly_discount?: number | null
         }
         Update: {
           address?: string
@@ -2001,36 +2111,91 @@ export type Database = {
           bathrooms?: number | null
           bedrooms?: number | null
           cancellation_policy?: string | null
+          check_in_instructions_ru?: string | null
           check_in_time?: string | null
           check_out_time?: string | null
+          children_friendly?: boolean | null
+          cleaning_frequency?: string | null
+          cleaning_included?: boolean | null
           cover_image?: string | null
           created_at?: string
           deposit_amount?: number | null
           deposit_currency?: string | null
+          deposit_type?: string | null
           description?: string | null
           description_ru?: string | null
           district?: string | null
+          early_checkin_price?: number | null
+          electricity_included?: boolean | null
+          electricity_metering?: string | null
+          electricity_notes?: string | null
+          electricity_notes_ru?: string | null
+          electricity_provider?: string | null
+          electricity_unit_price?: number | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          extra_cleaning_price?: number | null
+          extra_guest_price?: number | null
+          extra_guest_threshold?: number | null
+          extra_services?: Json | null
+          has_crib?: boolean | null
+          has_high_chair?: boolean | null
+          host_languages?: string[] | null
           house_rules?: string | null
           house_rules_ru?: string | null
           id?: string
           images?: string[] | null
+          included_services?: Json | null
           instant_booking?: boolean | null
+          internet_provider?: string | null
+          internet_speed?: string | null
           is_rented?: boolean | null
+          key_handover?: string | null
+          late_checkout_penalty?: number | null
+          late_checkout_price?: number | null
+          linen_change_frequency?: string | null
+          linen_change_price?: number | null
           management_type?: string | null
+          manager_line_id?: string | null
+          manager_name?: string | null
+          manager_phone?: string | null
           marketplace_property_id?: string | null
           max_guests?: number | null
+          max_party_guests?: number | null
           min_stay_nights?: number | null
+          monthly_discount?: number | null
           notes?: string | null
           owner_id?: string
+          parking_included?: boolean | null
+          parking_notes?: string | null
+          parking_spaces?: number | null
+          parties_allowed?: boolean | null
+          pet_deposit?: number | null
+          pet_notes?: string | null
+          pet_notes_ru?: string | null
+          pets_allowed?: boolean | null
           price_per_night?: number | null
           property_type?: string
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
           rental_platform?: string | null
+          seasonal_pricing?: Json | null
+          smoking_penalty?: number | null
           status?: string | null
           title?: string
           title_ru?: string | null
+          transfer_airport_price?: number | null
+          transfer_available?: boolean | null
+          transfer_notes?: string | null
+          transfer_notes_ru?: string | null
           updated_at?: string
           verified_at?: string | null
           verified_by?: string | null
+          water_included?: boolean | null
+          water_notes?: string | null
+          water_notes_ru?: string | null
+          water_unit_price?: number | null
+          weekly_discount?: number | null
         }
         Relationships: [
           {
