@@ -4,7 +4,7 @@ import {
   Home, Car, Compass, Waves, Star, Shield, Scale,
   Sparkles, UtensilsCrossed, Dumbbell, Stethoscope, 
   GraduationCap, Ticket, Flower2, ShoppingBag, Wrench,
-  ArrowRight, MapPin, Search, Building2
+  ArrowRight, Search, Building2
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -17,12 +17,12 @@ import { SmartWidget } from '@/components/home/SmartWidget';
 import { PromoBanner } from '@/components/home/PromoBanner';
 import { QuickActionsGrid } from '@/components/home/QuickActionsGrid';
 import { RecommendedCarousel } from '@/components/home/RecommendedCarousel';
+import { ForYouSection } from '@/components/recommendations/ForYouSection';
+import { PersonalizedOffersSection } from '@/components/notifications/PersonalizedOffersSection';
 
-// Lazy load heavy components
+// Lazy load only modals (opened by user action)
 const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
 const GlobalSearchModal = lazy(() => import('@/components/search/GlobalSearchModal').then(m => ({ default: m.GlobalSearchModal })));
-const ForYouSection = lazy(() => import('@/components/recommendations/ForYouSection').then(m => ({ default: m.ForYouSection })));
-const PersonalizedOffersSection = lazy(() => import('@/components/notifications/PersonalizedOffersSection').then(m => ({ default: m.PersonalizedOffersSection })));
 
 // All service categories - prioritized by demand
 const allCategories = [
@@ -193,18 +193,14 @@ const Index = () => {
           </FadeInUp>
 
           {/* Personalized offers (shows only if available) */}
-          <Suspense fallback={<div className="h-24 animate-pulse bg-muted rounded-lg" />}>
-            <FadeInUp delay={0.18}>
-              <PersonalizedOffersSection />
-            </FadeInUp>
-          </Suspense>
+          <FadeInUp delay={0.18}>
+            <PersonalizedOffersSection />
+          </FadeInUp>
 
           {/* For You Section (personalized recommendations) */}
-          <Suspense fallback={<div className="h-24 animate-pulse bg-muted rounded-lg" />}>
-            <FadeInUp delay={0.2}>
-              <ForYouSection />
-            </FadeInUp>
-          </Suspense>
+          <FadeInUp delay={0.2}>
+            <ForYouSection />
+          </FadeInUp>
 
           {/* Trust Footer */}
           <FadeInUp delay={0.22}>
