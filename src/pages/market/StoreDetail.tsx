@@ -4,12 +4,9 @@ import {
   ArrowLeft, 
   Star, 
   MapPin, 
-  Clock, 
-  Truck, 
   Search,
   Plus,
   Minus,
-  ShoppingCart,
   Heart
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -19,8 +16,9 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
 import { useStore } from '@/hooks/useStores';
+import { StickyCartBar } from '@/components/cart/StickyCartBar';
+import { useCartToast } from '@/hooks/useCartToast';
 
 // Products data
 const storeProducts: Record<string, Array<{
@@ -78,6 +76,7 @@ const StoreDetail = () => {
   const { store, isLoading } = useStore(id || '');
   const [searchQuery, setSearchQuery] = useState('');
   const [isFavorite, setIsFavorite] = useState(false);
+  const { showAddedToast } = useCartToast();
 
   const products = storeProducts[id || ''] || [];
   const cartItems = getItemsByType('product');
@@ -88,9 +87,9 @@ const StoreDetail = () => {
   };
 
   const handleAddToCart = (product: typeof products[0]) => {
-    addItem({
+    const item = {
       id: product.id,
-      type: 'product',
+      type: 'product' as const,
       name: product.nameEn,
       nameRu: product.nameRu,
       price: product.price,
@@ -99,16 +98,14 @@ const StoreDetail = () => {
       providerId: store?.id,
       providerName: store?.name_en,
       providerNameRu: store?.name_ru,
-    });
-    toast.success(language === 'ru' ? 'Добавлено в корзину' : 'Added to cart');
+    };
+    addItem(item);
+    showAddedToast({ item, cartPath: '/market/checkout' });
   };
 
   const handleRemoveFromCart = (productId: string) => {
     removeItem(productId);
   };
-
-  const totalItems = cartItems.filter(i => i.providerId === store?.id).reduce((sum, i) => sum + i.quantity, 0);
-  const totalPrice = cartItems.filter(i => i.providerId === store?.id).reduce((sum, i) => sum + (i.price * i.quantity), 0);
 
   const filteredProducts = products.filter(p => 
     searchQuery === '' ||
@@ -194,15 +191,17 @@ const StoreDetail = () => {
           </div>
         </div>
 
-        {totalItems > 0 && (
-          <div className="fixed bottom-20 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t">
-            <Button className="w-full h-12 text-base font-semibold" onClick={() => navigate('/market/checkout', { state: { storeId: store.id, storeName: store.name_en, storeNameRu: store.name_ru, deliveryFee: store.delivery_fee, minOrder: store.min_order_amount } })}>
-              <ShoppingCart className="w-5 h-5 mr-2" />
-              <span>{language === 'ru' ? 'Корзина' : 'Cart'} ({totalItems})</span>
-              <span className="ml-auto">฿{totalPrice.toLocaleString()}</span>
-            </Button>
-          </div>
-        )}
+        <StickyCartBar
+          providerId={store?.id}
+          checkoutPath="/market/checkout"
+          checkoutState={{
+            storeId: store?.id,
+            storeName: store?.name_en,
+            storeNameRu: store?.name_ru,
+            deliveryFee: store?.delivery_fee,
+            minOrder: store?.min_order_amount,
+          }}
+        />
       </div>
     </AppLayout>
   );
