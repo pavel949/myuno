@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { BackButton } from '@/components/uno/BackButton';
-import { usePropertyWithRentalTerms } from '@/hooks/useProperties';
+import { usePropertyWithRentalTerms, PropertyRentalTerms } from '@/hooks/useProperties';
 import { 
   IncludedServices, 
   ExtraServices, 
@@ -53,6 +53,8 @@ const demoProperty = {
   amenities: ['Pool', 'Ocean View', 'Fitness Center', 'Garden', 'Parking', 'WiFi', 'AC', 'Kitchen'],
   rentalTerms: {
     price_per_night: 3500,
+    min_stay_nights: 30,
+    max_guests: 8,
     weekly_discount: 10,
     monthly_discount: 25,
     check_in_time: '14:00',
@@ -68,7 +70,12 @@ const demoProperty = {
     electricity_unit_price: 7,
     electricity_provider: 'PEA',
     electricity_metering: 'meter',
+    electricity_notes: undefined,
+    electricity_notes_ru: undefined,
     water_included: true,
+    water_unit_price: undefined,
+    water_notes: undefined,
+    water_notes_ru: undefined,
     internet_speed: '100 Mbps',
     internet_provider: 'True',
     included_services: ['wifi', 'ac', 'cleaning_weekly', 'pool', 'parking', 'security'],
@@ -78,13 +85,22 @@ const demoProperty = {
       { id: 'linen_change', price: 300, currency: 'THB' },
     ],
     key_handover: 'in_person',
+    check_in_instructions: 'Meet at the property entrance',
+    check_in_instructions_ru: 'Встреча у входа в объект',
     transfer_available: true,
     transfer_airport_price: 1200,
+    transfer_notes: undefined,
+    transfer_notes_ru: undefined,
     manager_name: 'Somchai',
     manager_phone: '+66-81-234-5678',
+    manager_line_id: undefined,
     host_languages: ['Thai', 'English', 'Russian'],
     pets_allowed: false,
+    pet_deposit: undefined,
+    pet_notes: undefined,
+    pet_notes_ru: undefined,
     parties_allowed: false,
+    max_party_guests: undefined,
     quiet_hours_start: '22:00',
     quiet_hours_end: '08:00',
     children_friendly: true,
@@ -96,7 +112,9 @@ const demoProperty = {
     late_checkout_price: 500,
     late_checkout_penalty: 2000,
     smoking_penalty: 5000,
-  },
+    emergency_contact_name: undefined,
+    emergency_contact_phone: undefined,
+  } as PropertyRentalTerms,
   host: {
     name: 'Phuket Luxury Homes',
     image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100',
@@ -367,6 +385,7 @@ export default function PropertyDetail() {
               lateCheckoutPrice={rentalTerms.late_checkout_price}
               lateCheckoutPenalty={rentalTerms.late_checkout_penalty}
               keyHandover={rentalTerms.key_handover}
+              instructions={rentalTerms.check_in_instructions}
               instructions_ru={rentalTerms.check_in_instructions_ru}
               transfer={{
                 available: rentalTerms.transfer_available || false,
