@@ -18,6 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { Building2, Plus, MapPin, Calendar, Loader2 } from 'lucide-react';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
 import { Checkbox } from '@/components/ui/checkbox';
+import { ProjectLocationPicker } from './ProjectLocationPicker';
 
 interface ProjectSelectorProps {
   value?: string;
@@ -60,6 +61,8 @@ export function ProjectSelector({ value, onChange, selectedProject }: ProjectSel
     description_ru: '',
     address: '',
     district: '',
+    lat: undefined as number | undefined,
+    lng: undefined as number | undefined,
     developer_name: '',
     year_built: '',
     total_units: '',
@@ -100,6 +103,8 @@ export function ProjectSelector({ value, onChange, selectedProject }: ProjectSel
       description_ru: formData.description_ru || undefined,
       address: formData.address || undefined,
       district: formData.district || undefined,
+      lat: formData.lat,
+      lng: formData.lng,
       developer_name: formData.developer_name || undefined,
       year_built: formData.year_built ? parseInt(formData.year_built) : undefined,
       total_units: formData.total_units ? parseInt(formData.total_units) : undefined,
@@ -123,6 +128,8 @@ export function ProjectSelector({ value, onChange, selectedProject }: ProjectSel
       description_ru: '',
       address: '',
       district: '',
+      lat: undefined,
+      lng: undefined,
       developer_name: '',
       year_built: '',
       total_units: '',
@@ -274,8 +281,18 @@ export function ProjectSelector({ value, onChange, selectedProject }: ProjectSel
             </div>
 
             {/* Location */}
+            <ProjectLocationPicker
+              value={formData.lat && formData.lng ? { lat: formData.lat, lng: formData.lng, address: formData.address } : undefined}
+              onChange={(location) => setFormData(prev => ({
+                ...prev,
+                lat: location.lat,
+                lng: location.lng,
+                address: location.address
+              }))}
+            />
+
             <div className="space-y-2">
-              <Label>{isRu ? 'Адрес' : 'Address'}</Label>
+              <Label>{isRu ? 'Адрес (уточнение)' : 'Address (details)'}</Label>
               <Input
                 value={formData.address}
                 onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
