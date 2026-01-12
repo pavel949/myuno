@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef } from 'react';
 import { CreditCard, Wallet, Banknote, Smartphone, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,7 +15,7 @@ interface PaymentOption {
   badge?: string;
 }
 
-interface BookingPaymentSelectProps {
+export interface BookingPaymentSelectProps {
   selected: PaymentMethod;
   onSelect: (method: PaymentMethod) => void;
   amount: number;
@@ -26,7 +26,7 @@ interface BookingPaymentSelectProps {
   showOnline?: boolean;
 }
 
-export function BookingPaymentSelect({
+export const BookingPaymentSelect = forwardRef<HTMLDivElement, BookingPaymentSelectProps>(({
   selected,
   onSelect,
   amount,
@@ -35,7 +35,7 @@ export function BookingPaymentSelect({
   showCash = true,
   showCard = false,
   showOnline = true,
-}: BookingPaymentSelectProps) {
+}, ref) => {
   const { language } = useLanguage();
   const { user } = useAuth();
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
@@ -85,7 +85,7 @@ export function BookingPaymentSelect({
   ];
 
   return (
-    <div className="space-y-2">
+    <div ref={ref} className="space-y-2">
       {paymentOptions.map((option) => (
         <button
           key={option.id}
@@ -142,4 +142,6 @@ export function BookingPaymentSelect({
       ))}
     </div>
   );
-}
+});
+
+BookingPaymentSelect.displayName = 'BookingPaymentSelect';
