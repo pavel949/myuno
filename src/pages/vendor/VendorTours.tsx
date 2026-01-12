@@ -44,6 +44,7 @@ import {
   X
 } from 'lucide-react';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
+import { CardPreview, CardPreviewSection } from '@/components/vendor/CardPreview';
 
 const tourCategories = [
   { id: 'island', label: 'Island Hopping', labelRu: 'Острова' },
@@ -351,7 +352,7 @@ const VendorTours = () => {
 
         {/* Add/Edit Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {editingTour 
@@ -360,186 +361,207 @@ const VendorTours = () => {
               </DialogTitle>
             </DialogHeader>
 
-            <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>{isRussian ? 'Категория' : 'Category'}</Label>
-                  <Select
-                    value={formData.category}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {tourCategories.map(cat => (
-                        <SelectItem key={cat.id} value={cat.id}>
-                          {isRussian ? cat.labelRu : cat.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+            <div className="grid md:grid-cols-[1fr,280px] gap-6 py-4">
+              {/* Form */}
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>{isRussian ? 'Категория' : 'Category'}</Label>
+                    <Select
+                      value={formData.category}
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {tourCategories.map(cat => (
+                          <SelectItem key={cat.id} value={cat.id}>
+                            {isRussian ? cat.labelRu : cat.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{isRussian ? 'Сложность' : 'Difficulty'}</Label>
+                    <Select
+                      value={formData.difficulty}
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, difficulty: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {difficultyLevels.map(level => (
+                          <SelectItem key={level.id} value={level.id}>
+                            {isRussian ? level.labelRu : level.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
+
                 <div className="space-y-2">
-                  <Label>{isRussian ? 'Сложность' : 'Difficulty'}</Label>
-                  <Select
-                    value={formData.difficulty}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, difficulty: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {difficultyLevels.map(level => (
-                        <SelectItem key={level.id} value={level.id}>
-                          {isRussian ? level.labelRu : level.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="title_en">{isRussian ? 'Название (EN) *' : 'Title (EN) *'}</Label>
-                <Input
-                  id="title_en"
-                  value={formData.title_en}
-                  onChange={(e) => setFormData(prev => ({ ...prev, title_en: e.target.value }))}
-                  placeholder="Phi Phi Islands Day Trip"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="title_ru">{isRussian ? 'Название (RU)' : 'Title (Russian)'}</Label>
-                <Input
-                  id="title_ru"
-                  value={formData.title_ru}
-                  onChange={(e) => setFormData(prev => ({ ...prev, title_ru: e.target.value }))}
-                  placeholder="Экскурсия на острова Пхи-Пхи"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description_en">{isRussian ? 'Описание (EN)' : 'Description (EN)'}</Label>
-                <Textarea
-                  id="description_en"
-                  value={formData.description_en}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description_en: e.target.value }))}
-                  rows={3}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description_ru">{isRussian ? 'Описание (RU)' : 'Description (Russian)'}</Label>
-                <Textarea
-                  id="description_ru"
-                  value={formData.description_ru}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description_ru: e.target.value }))}
-                  rows={3}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="price">{isRussian ? 'Цена (฿) *' : 'Price (฿) *'}</Label>
+                  <Label htmlFor="title_en">{isRussian ? 'Название (EN) *' : 'Title (EN) *'}</Label>
                   <Input
-                    id="price"
-                    type="number"
-                    value={formData.price}
-                    onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                    placeholder="2500"
+                    id="title_en"
+                    value={formData.title_en}
+                    onChange={(e) => setFormData(prev => ({ ...prev, title_en: e.target.value }))}
+                    placeholder="Phi Phi Islands Day Trip"
                   />
                 </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="duration">{isRussian ? 'Длительность (ч)' : 'Duration (hours)'}</Label>
+                  <Label htmlFor="title_ru">{isRussian ? 'Название (RU)' : 'Title (Russian)'}</Label>
                   <Input
-                    id="duration"
+                    id="title_ru"
+                    value={formData.title_ru}
+                    onChange={(e) => setFormData(prev => ({ ...prev, title_ru: e.target.value }))}
+                    placeholder="Экскурсия на острова Пхи-Пхи"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description_en">{isRussian ? 'Описание (EN)' : 'Description (EN)'}</Label>
+                  <Textarea
+                    id="description_en"
+                    value={formData.description_en}
+                    onChange={(e) => setFormData(prev => ({ ...prev, description_en: e.target.value }))}
+                    rows={3}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description_ru">{isRussian ? 'Описание (RU)' : 'Description (Russian)'}</Label>
+                  <Textarea
+                    id="description_ru"
+                    value={formData.description_ru}
+                    onChange={(e) => setFormData(prev => ({ ...prev, description_ru: e.target.value }))}
+                    rows={3}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="price">{isRussian ? 'Цена (฿) *' : 'Price (฿) *'}</Label>
+                    <Input
+                      id="price"
+                      type="number"
+                      value={formData.price}
+                      onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                      placeholder="2500"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="duration">{isRussian ? 'Длительность (ч)' : 'Duration (hours)'}</Label>
+                    <Input
+                      id="duration"
+                      type="number"
+                      value={formData.duration_hours}
+                      onChange={(e) => setFormData(prev => ({ ...prev, duration_hours: e.target.value }))}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="max_participants">{isRussian ? 'Макс. участников' : 'Max Participants'}</Label>
+                  <Input
+                    id="max_participants"
                     type="number"
-                    value={formData.duration_hours}
-                    onChange={(e) => setFormData(prev => ({ ...prev, duration_hours: e.target.value }))}
+                    value={formData.max_participants}
+                    onChange={(e) => setFormData(prev => ({ ...prev, max_participants: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="meeting_point">{isRussian ? 'Место встречи' : 'Meeting Point'}</Label>
+                  <Input
+                    id="meeting_point"
+                    value={formData.meeting_point}
+                    onChange={(e) => setFormData(prev => ({ ...prev, meeting_point: e.target.value }))}
+                    placeholder="Chalong Pier"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{isRussian ? 'Фото обложки' : 'Cover Image'}</Label>
+                  <ImageUpload
+                    value={formData.cover_image}
+                    onChange={(url) => setFormData(prev => ({ ...prev, cover_image: url }))}
+                    folder="tours"
+                    placeholder={isRussian ? 'Загрузить фото' : 'Upload photo'}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{isRussian ? 'Галерея фото' : 'Photo Gallery'}</Label>
+                  <MultiImageUpload
+                    value={formData.images}
+                    onChange={(urls) => setFormData(prev => ({ ...prev, images: urls }))}
+                    folder="tours"
+                    maxImages={8}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="includes">
+                    {isRussian ? 'Что включено (по одному на строку)' : "What's Included (one per line)"}
+                  </Label>
+                  <Textarea
+                    id="includes"
+                    value={formData.includes}
+                    onChange={(e) => setFormData(prev => ({ ...prev, includes: e.target.value }))}
+                    rows={3}
+                    placeholder={isRussian 
+                      ? "Трансфер из отеля\nОбед\nСнаряжение для снорклинга" 
+                      : "Hotel pickup\nLunch\nSnorkeling gear"}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="highlights">
+                    {isRussian ? 'Основные моменты (по одному на строку)' : 'Highlights (one per line)'}
+                  </Label>
+                  <Textarea
+                    id="highlights"
+                    value={formData.highlights}
+                    onChange={(e) => setFormData(prev => ({ ...prev, highlights: e.target.value }))}
+                    rows={3}
+                    placeholder={isRussian 
+                      ? "Посещение Maya Bay\nСнорклинг с рыбками\nЗакат на пляже" 
+                      : "Visit Maya Bay\nSnorkeling with fish\nBeach sunset"}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="is_active">{isRussian ? 'Тур активен' : 'Tour active'}</Label>
+                  <Switch
+                    id="is_active"
+                    checked={formData.is_active}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="max_participants">{isRussian ? 'Макс. участников' : 'Max Participants'}</Label>
-                <Input
-                  id="max_participants"
-                  type="number"
-                  value={formData.max_participants}
-                  onChange={(e) => setFormData(prev => ({ ...prev, max_participants: e.target.value }))}
+              {/* Preview */}
+              <CardPreviewSection className="hidden md:block sticky top-0">
+                <CardPreview
+                  type="tour"
+                  image={formData.cover_image}
+                  title={formData.title_en}
+                  titleRu={formData.title_ru}
+                  description={formData.description_en}
+                  descriptionRu={formData.description_ru}
+                  price={formData.price ? parseFloat(formData.price) : undefined}
+                  durationHours={formData.duration_hours ? parseInt(formData.duration_hours) : undefined}
+                  maxParticipants={formData.max_participants ? parseInt(formData.max_participants) : undefined}
+                  category={formData.category}
+                  difficulty={formData.difficulty}
+                  meetingPoint={formData.meeting_point}
                 />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="meeting_point">{isRussian ? 'Место встречи' : 'Meeting Point'}</Label>
-                <Input
-                  id="meeting_point"
-                  value={formData.meeting_point}
-                  onChange={(e) => setFormData(prev => ({ ...prev, meeting_point: e.target.value }))}
-                  placeholder="Chalong Pier"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>{isRussian ? 'Фото обложки' : 'Cover Image'}</Label>
-                <ImageUpload
-                  value={formData.cover_image}
-                  onChange={(url) => setFormData(prev => ({ ...prev, cover_image: url }))}
-                  folder="tours"
-                  placeholder={isRussian ? 'Загрузить фото' : 'Upload photo'}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>{isRussian ? 'Галерея фото' : 'Photo Gallery'}</Label>
-                <MultiImageUpload
-                  value={formData.images}
-                  onChange={(urls) => setFormData(prev => ({ ...prev, images: urls }))}
-                  folder="tours"
-                  maxImages={8}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="includes">
-                  {isRussian ? 'Что включено (по одному на строку)' : 'What\'s Included (one per line)'}
-                </Label>
-                <Textarea
-                  id="includes"
-                  value={formData.includes}
-                  onChange={(e) => setFormData(prev => ({ ...prev, includes: e.target.value }))}
-                  rows={3}
-                  placeholder={isRussian 
-                    ? "Трансфер из отеля\nОбед\nСнаряжение для снорклинга" 
-                    : "Hotel pickup\nLunch\nSnorkeling gear"}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="highlights">
-                  {isRussian ? 'Основные моменты (по одному на строку)' : 'Highlights (one per line)'}
-                </Label>
-                <Textarea
-                  id="highlights"
-                  value={formData.highlights}
-                  onChange={(e) => setFormData(prev => ({ ...prev, highlights: e.target.value }))}
-                  rows={3}
-                  placeholder={isRussian 
-                    ? "Посещение Maya Bay\nСнорклинг с рыбками\nЗакат на пляже" 
-                    : "Visit Maya Bay\nSnorkeling with fish\nBeach sunset"}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <Label htmlFor="is_active">{isRussian ? 'Тур активен' : 'Tour active'}</Label>
-                <Switch
-                  id="is_active"
-                  checked={formData.is_active}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
-                />
-              </div>
+              </CardPreviewSection>
             </div>
 
             <DialogFooter>

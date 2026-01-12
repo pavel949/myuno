@@ -39,6 +39,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { ImageUpload } from '@/components/upload/ImageUpload';
+import { CardPreview, CardPreviewSection } from '@/components/vendor/CardPreview';
 
 const VendorServices = () => {
   const navigate = useNavigate();
@@ -301,7 +302,7 @@ const VendorServices = () => {
 
         {/* Add/Edit Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {editingService 
@@ -310,98 +311,116 @@ const VendorServices = () => {
               </DialogTitle>
             </DialogHeader>
 
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label>{isRussian ? 'Фото услуги' : 'Service Photo'}</Label>
-                <ImageUpload
-                  value={formData.image}
-                  onChange={(url) => setFormData(prev => ({ ...prev, image: url }))}
-                  folder="services"
-                  placeholder={isRussian ? 'Загрузить фото' : 'Upload photo'}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="name">{isRussian ? 'Название *' : 'Name *'}</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder={isRussian ? 'Например: Маникюр' : 'e.g., Manicure'}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="name_ru">{isRussian ? 'Название (RU)' : 'Name (Russian)'}</Label>
-                <Input
-                  id="name_ru"
-                  value={formData.name_ru}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name_ru: e.target.value }))}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">{isRussian ? 'Описание' : 'Description'}</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  rows={2}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description_ru">{isRussian ? 'Описание (RU)' : 'Description (Russian)'}</Label>
-                <Textarea
-                  id="description_ru"
-                  value={formData.description_ru}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description_ru: e.target.value }))}
-                  rows={2}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
+            <div className="grid md:grid-cols-[1fr,280px] gap-6 py-4">
+              {/* Form */}
+              <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="price">{isRussian ? 'Цена (฿) *' : 'Price (฿) *'}</Label>
-                  <Input
-                    id="price"
-                    type="number"
-                    value={formData.price}
-                    onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                    placeholder="1000"
+                  <Label>{isRussian ? 'Фото услуги' : 'Service Photo'}</Label>
+                  <ImageUpload
+                    value={formData.image}
+                    onChange={(url) => setFormData(prev => ({ ...prev, image: url }))}
+                    folder="services"
+                    placeholder={isRussian ? 'Загрузить фото' : 'Upload photo'}
                   />
                 </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="duration">{isRussian ? 'Длительность (мин)' : 'Duration (min)'}</Label>
+                  <Label htmlFor="name">{isRussian ? 'Название *' : 'Name *'}</Label>
                   <Input
-                    id="duration"
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder={isRussian ? 'Например: Маникюр' : 'e.g., Manicure'}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="name_ru">{isRussian ? 'Название (RU)' : 'Name (Russian)'}</Label>
+                  <Input
+                    id="name_ru"
+                    value={formData.name_ru}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name_ru: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description">{isRussian ? 'Описание' : 'Description'}</Label>
+                  <Textarea
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                    rows={2}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description_ru">{isRussian ? 'Описание (RU)' : 'Description (Russian)'}</Label>
+                  <Textarea
+                    id="description_ru"
+                    value={formData.description_ru}
+                    onChange={(e) => setFormData(prev => ({ ...prev, description_ru: e.target.value }))}
+                    rows={2}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="price">{isRussian ? 'Цена (฿) *' : 'Price (฿) *'}</Label>
+                    <Input
+                      id="price"
+                      type="number"
+                      value={formData.price}
+                      onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                      placeholder="1000"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="duration">{isRussian ? 'Длительность (мин)' : 'Duration (min)'}</Label>
+                    <Input
+                      id="duration"
+                      type="number"
+                      value={formData.duration_minutes}
+                      onChange={(e) => setFormData(prev => ({ ...prev, duration_minutes: e.target.value }))}
+                      placeholder="60"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="capacity">{isRussian ? 'Макс. клиентов' : 'Max Capacity'}</Label>
+                  <Input
+                    id="capacity"
                     type="number"
-                    value={formData.duration_minutes}
-                    onChange={(e) => setFormData(prev => ({ ...prev, duration_minutes: e.target.value }))}
-                    placeholder="60"
+                    value={formData.max_capacity}
+                    onChange={(e) => setFormData(prev => ({ ...prev, max_capacity: e.target.value }))}
+                    placeholder="1"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="is_active">{isRussian ? 'Услуга активна' : 'Service active'}</Label>
+                  <Switch
+                    id="is_active"
+                    checked={formData.is_active}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="capacity">{isRussian ? 'Макс. клиентов' : 'Max Capacity'}</Label>
-                <Input
-                  id="capacity"
-                  type="number"
-                  value={formData.max_capacity}
-                  onChange={(e) => setFormData(prev => ({ ...prev, max_capacity: e.target.value }))}
-                  placeholder="1"
+              {/* Preview */}
+              <CardPreviewSection className="hidden md:block sticky top-0">
+                <CardPreview
+                  type="service"
+                  image={formData.image}
+                  title={formData.name}
+                  titleRu={formData.name_ru}
+                  description={formData.description}
+                  descriptionRu={formData.description_ru}
+                  price={formData.price ? parseFloat(formData.price) : undefined}
+                  durationMinutes={formData.duration_minutes ? parseInt(formData.duration_minutes) : undefined}
+                  maxCapacity={formData.max_capacity ? parseInt(formData.max_capacity) : undefined}
                 />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <Label htmlFor="is_active">{isRussian ? 'Услуга активна' : 'Service active'}</Label>
-                <Switch
-                  id="is_active"
-                  checked={formData.is_active}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
-                />
-              </div>
+              </CardPreviewSection>
             </div>
 
             <DialogFooter>
