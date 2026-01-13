@@ -4,7 +4,7 @@ import {
   Search, X, Clock, TrendingUp, Star,
   Sparkles, UtensilsCrossed, Dumbbell, Stethoscope, 
   GraduationCap, Home, Car, Ticket, Flower2, Waves,
-  Pill, Compass, Scale, Wrench, ArrowRight
+  Pill, Compass, Scale, Wrench, ArrowRight, Anchor
 } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -52,7 +52,11 @@ const searchData = [
   
   // Water Activities
   { id: 'water-1', type: 'water', titleEn: 'Scuba Diving Experience', titleRu: 'Дайвинг с аквалангом', image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=100', price: 3500, locationEn: 'Chalong', locationRu: 'Чалонг', rating: 4.9, path: '/water/water-1' },
-  { id: 'water-2', type: 'water', titleEn: 'Yacht Charter', titleRu: 'Аренда яхты', image: 'https://images.unsplash.com/photo-1540946485063-a40da27545f8?w=100', price: 25000, locationEn: 'Ao Po', locationRu: 'Ао По', rating: 4.8, path: '/water/water-2' },
+  
+  // Yachts
+  { id: 'yacht-1', type: 'yachts', titleEn: 'Luxury Yacht Charter', titleRu: 'Аренда люксовой яхты', image: 'https://images.unsplash.com/photo-1540946485063-a40da27545f8?w=100', price: 45000, locationEn: 'Ao Po Marina', locationRu: 'Марина Ао По', rating: 4.9, path: '/yachts' },
+  { id: 'yacht-2', type: 'yachts', titleEn: 'Catamaran Experience', titleRu: 'Катамаран прогулка', image: 'https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?w=100', price: 25000, locationEn: 'Royal Phuket Marina', locationRu: 'Рояль Пхукет Марина', rating: 4.8, path: '/yachts' },
+  { id: 'yacht-3', type: 'yachts', titleEn: 'Sunset Yacht Cruise', titleRu: 'Яхта на закате', image: 'https://images.unsplash.com/photo-1605281317010-fe5ffe798166?w=100', price: 15000, locationEn: 'Chalong Bay', locationRu: 'Залив Чалонг', rating: 4.7, path: '/yachts' },
   
   // Legal & Business
   { id: 'legal-1', type: 'legal', titleEn: 'Thai Legal Experts', titleRu: 'Тайские юристы', image: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=100', price: 2000, locationEn: 'Phuket Town', locationRu: 'Пхукет Таун', rating: 4.8, path: '/legal/provider/1' },
@@ -81,6 +85,7 @@ const typeConfig: Record<string, { icon: any; labelEn: string; labelRu: string; 
   transport: { icon: Car, labelEn: 'Transport', labelRu: 'Транспорт', color: 'from-indigo-500 to-blue-500' },
   tours: { icon: Compass, labelEn: 'Tours', labelRu: 'Туры', color: 'from-amber-500 to-orange-500' },
   water: { icon: Waves, labelEn: 'Water', labelRu: 'Вода', color: 'from-cyan-500 to-blue-500' },
+  yachts: { icon: Anchor, labelEn: 'Yachts', labelRu: 'Яхты', color: 'from-blue-600 to-indigo-600' },
   legal: { icon: Scale, labelEn: 'Business', labelRu: 'Бизнес', color: 'from-indigo-500 to-blue-600' },
   pharmacy: { icon: Pill, labelEn: 'Pharmacy', labelRu: 'Аптеки', color: 'from-green-500 to-emerald-500' },
   flowers: { icon: Flower2, labelEn: 'Flowers', labelRu: 'Цветы', color: 'from-rose-500 to-pink-500' },
@@ -89,9 +94,9 @@ const typeConfig: Record<string, { icon: any; labelEn: string; labelRu: string; 
 };
 
 const trendingSearches: Record<string, string[]> = {
-  en: ['beach villa', 'thai massage', 'scooter rental', 'phi phi tour', 'dentist'],
-  ru: ['вилла на пляже', 'тайский массаж', 'аренда скутера', 'тур пхи-пхи', 'стоматолог'],
-  th: ['วิลล่าชายหาด', 'นวดแผนไทย', 'เช่ามอเตอร์ไซค์', 'ทัวร์พีพี', 'ทันตแพทย์'],
+  en: ['beach villa', 'thai massage', 'scooter rental', 'phi phi tour', 'yacht', 'dentist'],
+  ru: ['вилла на пляже', 'тайский массаж', 'аренда скутера', 'тур пхи-пхи', 'яхты', 'стоматолог'],
+  th: ['วิลล่าชายหาด', 'นวดแผนไทย', 'เช่ามอเตอร์ไซค์', 'ทัวร์พีพี', 'เรือยอชท์', 'ทันตแพทย์'],
 };
 
 export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps) {
