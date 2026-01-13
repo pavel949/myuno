@@ -110,8 +110,14 @@ export default function AddProperty() {
               value={formData.project_id}
               selectedProject={selectedProject}
               onChange={(projectId, project) => {
-                setFormData(prev => ({ ...prev, project_id: projectId }));
                 setSelectedProject(project || null);
+                setFormData(prev => ({ 
+                  ...prev, 
+                  project_id: projectId,
+                  // Auto-fill fields from project
+                  address: project?.address || prev.address,
+                  district: project?.district || prev.district,
+                }));
               }}
             />
           </CardContent>
