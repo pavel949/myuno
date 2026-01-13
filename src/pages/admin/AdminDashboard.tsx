@@ -22,7 +22,8 @@ import {
   Map,
   Palmtree,
   Ship,
-  Home
+  Home,
+  Presentation
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -98,6 +99,13 @@ export default function AdminDashboard() {
   ];
 
   const quickActions = [
+    {
+      label: isRussian ? 'Инвестор Дек' : 'Investor Deck',
+      description: isRussian ? 'Питч презентация' : 'Pitch presentation',
+      icon: Presentation,
+      path: '/admin/pitch-deck',
+      color: 'bg-amber-500',
+    },
     {
       label: isRussian ? 'Аналитика' : 'Analytics',
       description: isRussian ? 'Метрики платформы' : 'Platform metrics',
