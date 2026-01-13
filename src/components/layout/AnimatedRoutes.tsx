@@ -172,6 +172,9 @@ import VendorTours from '@/pages/vendor/VendorTours';
 import VendorActivities from '@/pages/vendor/VendorActivities';
 import VendorYachts from '@/pages/vendor/VendorYachts';
 import VendorTransport from '@/pages/vendor/VendorTransport';
+import VendorBeauty from '@/pages/vendor/VendorBeauty';
+import VendorFitness from '@/pages/vendor/VendorFitness';
+import VendorClinics from '@/pages/vendor/VendorClinics';
 
 // Owner (Property Care) pages
 import OwnerDashboard from '@/pages/owner/OwnerDashboard';
@@ -365,6 +368,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/vendor/activities" element={<PageTransition><VendorActivities /></PageTransition>} />
         <Route path="/vendor/yachts" element={<PageTransition><VendorYachts /></PageTransition>} />
         <Route path="/vendor/transport" element={<PageTransition><VendorTransport /></PageTransition>} />
+        <Route path="/vendor/beauty" element={<PageTransition><VendorBeauty /></PageTransition>} />
+        <Route path="/vendor/fitness" element={<PageTransition><VendorFitness /></PageTransition>} />
+        <Route path="/vendor/clinics" element={<PageTransition><VendorClinics /></PageTransition>} />
         
         {/* Owner (Property Care) Routes */}
         <Route path="/owner" element={<PageTransition><OwnerDashboard /></PageTransition>} />
