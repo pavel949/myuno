@@ -70,8 +70,8 @@ export default function AddProperty() {
 
   const managementTypes = [
     { value: 'full', labelEn: 'Full Management', labelRu: 'Полное управление', desc: isRu ? 'UNO берёт на себя всё: маркетинг, бронирования, гостей, обслуживание' : 'UNO handles everything: marketing, bookings, guests, maintenance' },
-    { value: 'partial', labelEn: 'Assisted Management', labelRu: 'Управление с поддержкой', desc: isRu ? 'Вы управляете объектом, но пользуетесь услугами UNO' : 'You manage property, but use UNO services' },
-    { value: 'self', labelEn: 'Listing Only', labelRu: 'Только размещение', desc: isRu ? 'Только публикация на платформе, вы делаете всё сами' : 'Platform listing only, you do everything yourself' },
+    { value: 'partial', labelEn: 'Service Partner', labelRu: 'Сервис-партнёр', desc: isRu ? 'Check-in/out, депозит, коммуналка + услуги по партнёрским ценам' : 'Check-in/out, deposit, utilities + services at partner rates' },
+    { value: 'self', labelEn: 'Listing Only', labelRu: 'Только листинг', desc: isRu ? 'Публикация на платформе, услуги по стандартным ценам' : 'Platform listing, services at standard rates' },
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -416,95 +416,105 @@ export default function AddProperty() {
               </div>
             )}
 
-            {/* Conditions for Partial Management */}
+            {/* Conditions for Service Partner */}
             {formData.management_type === 'partial' && (
               <div className="mt-4 p-4 bg-secondary/50 rounded-xl border border-secondary space-y-3">
                 <h4 className="font-semibold flex items-center gap-2">
-                  🤝 {isRu ? 'Управление с поддержкой UNO' : 'Assisted Management'}
+                  🤝 {isRu ? 'Сервис-партнёр' : 'Service Partner'}
                 </h4>
                 <p className="text-sm text-muted-foreground">
                   {isRu 
-                    ? 'Вы сами ищете клиентов и управляете бронированиями, но можете заказывать услуги UNO' 
-                    : 'You find clients and manage bookings yourself, but can order UNO services'}
+                    ? 'Мы берём на себя операционные задачи, вы управляете бронированиями' 
+                    : 'We handle operational tasks, you manage bookings'}
                 </p>
                 <div className="space-y-2 text-sm">
+                  <p className="font-medium text-primary">{isRu ? 'Включено в 15%:' : 'Included in 15%:'}</p>
                   <div className="flex items-start gap-2">
-                    <span className="text-foreground">✓</span>
+                    <span className="text-primary">✓</span>
                     <div>
-                      <p className="font-medium">{isRu ? 'Доступ к услугам по запросу' : 'On-Demand Services'}</p>
+                      <p className="font-medium">{isRu ? 'Check-in и Check-out гостей' : 'Guest Check-in & Check-out'}</p>
                       <p className="text-muted-foreground">
                         {isRu 
-                          ? 'Уборка, встреча гостей, ремонт, стирка — заказывайте когда нужно' 
-                          : 'Cleaning, check-in, repairs, laundry — order when needed'}
+                          ? 'Встреча, передача ключей, инструктаж, выселение' 
+                          : 'Meeting, key handover, instructions, checkout'}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
-                    <span className="text-foreground">✓</span>
+                    <span className="text-primary">✓</span>
                     <div>
-                      <p className="font-medium">{isRu ? 'Комиссия за клиентов UNO' : 'UNO Client Commission'}</p>
+                      <p className="font-medium">{isRu ? 'Управление депозитом' : 'Deposit Management'}</p>
                       <p className="text-muted-foreground">
                         {isRu 
-                          ? '15% от суммы аренды, если клиент пришёл через платформу UNO' 
-                          : '15% of rental if client comes through UNO platform'}
+                          ? 'Приём, проверка состояния, возврат депозита' 
+                          : 'Collection, condition check, deposit return'}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
-                    <span className="text-foreground">✓</span>
+                    <span className="text-primary">✓</span>
                     <div>
-                      <p className="font-medium">{isRu ? 'Своя клиентская база' : 'Your Own Clients'}</p>
+                      <p className="font-medium">{isRu ? 'Оплата коммунальных' : 'Utility Payments'}</p>
                       <p className="text-muted-foreground">
                         {isRu 
-                          ? 'За ваших клиентов комиссия не берётся, только оплата услуг' 
-                          : 'No commission for your clients, only pay for services used'}
+                          ? 'Контроль счётчиков, оплата электричества и воды' 
+                          : 'Meter reading, electricity and water payments'}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
-                    <span className="text-foreground">✓</span>
+                    <span className="text-primary">✓</span>
                     <div>
-                      <p className="font-medium">{isRu ? 'Без обязательств' : 'No Commitments'}</p>
+                      <p className="font-medium">{isRu ? 'Партнёрские цены на услуги' : 'Partner Rates on Services'}</p>
                       <p className="text-muted-foreground">
-                        {isRu ? 'Гибкие условия, нет минимального срока' : 'Flexible terms, no minimum period'}
+                        {isRu 
+                          ? 'Скидки на уборку, ремонт и другие услуги UNO' 
+                          : 'Discounts on cleaning, repairs and other UNO services'}
                       </p>
                     </div>
                   </div>
                 </div>
+                <div className="pt-2 border-t border-secondary">
+                  <p className="text-xs text-muted-foreground">
+                    {isRu 
+                      ? '* 15% комиссия от бронирований через UNO. За ваших клиентов — только оплата услуг' 
+                      : '* 15% commission from UNO bookings. For your clients — only pay for services'}
+                  </p>
+                </div>
               </div>
             )}
 
-            {/* Conditions for Self Management */}
+            {/* Conditions for Listing Only */}
             {formData.management_type === 'self' && (
               <div className="mt-4 p-4 bg-muted rounded-xl border border-border space-y-3">
                 <h4 className="font-semibold flex items-center gap-2">
-                  📋 {isRu ? 'Только размещение' : 'Listing Only'}
+                  📋 {isRu ? 'Только листинг' : 'Listing Only'}
                 </h4>
                 <p className="text-sm text-muted-foreground">
                   {isRu 
-                    ? 'Ваш объект публикуется на платформе UNO, всё остальное — ваша ответственность' 
-                    : 'Your property is listed on UNO platform, everything else is your responsibility'}
+                    ? 'Ваш объект на платформе UNO, услуги доступны по стандартным ценам' 
+                    : 'Your property on UNO platform, services available at standard rates'}
                 </p>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-start gap-2">
                     <span>✓</span>
                     <div>
-                      <p className="font-medium">{isRu ? 'Комиссия за бронирования' : 'Booking Commission'}</p>
+                      <p className="font-medium">{isRu ? 'Комиссия 10%' : '10% Commission'}</p>
                       <p className="text-muted-foreground">
                         {isRu 
-                          ? '10% от суммы аренды за клиентов через платформу UNO' 
-                          : '10% of rental amount for clients via UNO platform'}
+                          ? 'От суммы аренды за клиентов через платформу UNO' 
+                          : 'Of rental amount for clients via UNO platform'}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
                     <span>✓</span>
                     <div>
-                      <p className="font-medium">{isRu ? 'Полная самостоятельность' : 'Full Independence'}</p>
+                      <p className="font-medium">{isRu ? 'Услуги по запросу' : 'On-Demand Services'}</p>
                       <p className="text-muted-foreground">
                         {isRu 
-                          ? 'Вы сами общаетесь с гостями, делаете уборку, решаете все вопросы' 
-                          : 'You communicate with guests, clean, handle all issues yourself'}
+                          ? 'Уборка, ремонт и другие услуги по стандартному прайсу' 
+                          : 'Cleaning, repairs and other services at standard prices'}
                       </p>
                     </div>
                   </div>
@@ -514,8 +524,8 @@ export default function AddProperty() {
                       <p className="font-medium">{isRu ? 'Синхронизация календаря' : 'Calendar Sync'}</p>
                       <p className="text-muted-foreground">
                         {isRu 
-                          ? 'Подключите iCal для автоматической синхронизации занятости' 
-                          : 'Connect iCal for automatic availability sync'}
+                          ? 'Подключите iCal для автоматической синхронизации' 
+                          : 'Connect iCal for automatic sync'}
                       </p>
                     </div>
                   </div>
@@ -523,8 +533,8 @@ export default function AddProperty() {
                 <div className="pt-2 border-t border-border">
                   <p className="text-xs text-muted-foreground italic">
                     {isRu 
-                      ? '💡 Хотите заказать уборку или ремонт? Выберите "Управление с поддержкой"' 
-                      : '💡 Want to order cleaning or repairs? Choose "Assisted Management"'}
+                      ? '💡 Хотите check-in/out и управление депозитом? Выберите "Сервис-партнёр"' 
+                      : '💡 Want check-in/out and deposit management? Choose "Service Partner"'}
                   </p>
                 </div>
               </div>
