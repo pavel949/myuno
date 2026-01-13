@@ -69,9 +69,9 @@ export default function AddProperty() {
   ];
 
   const managementTypes = [
-    { value: 'full', labelEn: 'Full Management', labelRu: 'Полное управление', desc: isRu ? 'UNO управляет всеми аспектами' : 'UNO manages all aspects' },
-    { value: 'partial', labelEn: 'Partial Management', labelRu: 'Частичное управление', desc: isRu ? 'Только отдельные услуги' : 'Selected services only' },
-    { value: 'self', labelEn: 'Self Management', labelRu: 'Самоуправление', desc: isRu ? 'Вы управляете, мы помогаем' : 'You manage, we assist' },
+    { value: 'full', labelEn: 'Full Management', labelRu: 'Полное управление', desc: isRu ? 'UNO берёт на себя всё: маркетинг, бронирования, гостей, обслуживание' : 'UNO handles everything: marketing, bookings, guests, maintenance' },
+    { value: 'partial', labelEn: 'Assisted Management', labelRu: 'Управление с поддержкой', desc: isRu ? 'Вы управляете объектом, но пользуетесь услугами UNO' : 'You manage property, but use UNO services' },
+    { value: 'self', labelEn: 'Listing Only', labelRu: 'Только размещение', desc: isRu ? 'Только публикация на платформе, вы делаете всё сами' : 'Platform listing only, you do everything yourself' },
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -420,37 +420,53 @@ export default function AddProperty() {
             {formData.management_type === 'partial' && (
               <div className="mt-4 p-4 bg-secondary/50 rounded-xl border border-secondary space-y-3">
                 <h4 className="font-semibold flex items-center gap-2">
-                  🤝 {isRu ? 'Частичное управление' : 'Partial Management'}
+                  🤝 {isRu ? 'Управление с поддержкой UNO' : 'Assisted Management'}
                 </h4>
+                <p className="text-sm text-muted-foreground">
+                  {isRu 
+                    ? 'Вы сами ищете клиентов и управляете бронированиями, но можете заказывать услуги UNO' 
+                    : 'You find clients and manage bookings yourself, but can order UNO services'}
+                </p>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-start gap-2">
                     <span className="text-foreground">✓</span>
                     <div>
-                      <p className="font-medium">{isRu ? 'Оплата за услуги' : 'Pay Per Service'}</p>
+                      <p className="font-medium">{isRu ? 'Доступ к услугам по запросу' : 'On-Demand Services'}</p>
                       <p className="text-muted-foreground">
                         {isRu 
-                          ? 'Выбирайте только нужные услуги: уборка, встреча гостей, ремонт' 
-                          : 'Choose only needed services: cleaning, check-in, maintenance'}
+                          ? 'Уборка, встреча гостей, ремонт, стирка — заказывайте когда нужно' 
+                          : 'Cleaning, check-in, repairs, laundry — order when needed'}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-foreground">✓</span>
                     <div>
-                      <p className="font-medium">{isRu ? 'Комиссия за бронирования' : 'Booking Commission'}</p>
+                      <p className="font-medium">{isRu ? 'Комиссия за клиентов UNO' : 'UNO Client Commission'}</p>
                       <p className="text-muted-foreground">
                         {isRu 
-                          ? '15% от суммы аренды за клиентов через UNO' 
-                          : '15% of rental amount for clients via UNO'}
+                          ? '15% от суммы аренды, если клиент пришёл через платформу UNO' 
+                          : '15% of rental if client comes through UNO platform'}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-foreground">✓</span>
                     <div>
-                      <p className="font-medium">{isRu ? 'Гибкие условия' : 'Flexible Terms'}</p>
+                      <p className="font-medium">{isRu ? 'Своя клиентская база' : 'Your Own Clients'}</p>
                       <p className="text-muted-foreground">
-                        {isRu ? 'Без долгосрочных обязательств' : 'No long-term commitments'}
+                        {isRu 
+                          ? 'За ваших клиентов комиссия не берётся, только оплата услуг' 
+                          : 'No commission for your clients, only pay for services used'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-foreground">✓</span>
+                    <div>
+                      <p className="font-medium">{isRu ? 'Без обязательств' : 'No Commitments'}</p>
+                      <p className="text-muted-foreground">
+                        {isRu ? 'Гибкие условия, нет минимального срока' : 'Flexible terms, no minimum period'}
                       </p>
                     </div>
                   </div>
@@ -462,28 +478,33 @@ export default function AddProperty() {
             {formData.management_type === 'self' && (
               <div className="mt-4 p-4 bg-muted rounded-xl border border-border space-y-3">
                 <h4 className="font-semibold flex items-center gap-2">
-                  🏠 {isRu ? 'Самоуправление' : 'Self Management'}
+                  📋 {isRu ? 'Только размещение' : 'Listing Only'}
                 </h4>
+                <p className="text-sm text-muted-foreground">
+                  {isRu 
+                    ? 'Ваш объект публикуется на платформе UNO, всё остальное — ваша ответственность' 
+                    : 'Your property is listed on UNO platform, everything else is your responsibility'}
+                </p>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-start gap-2">
                     <span>✓</span>
                     <div>
-                      <p className="font-medium">{isRu ? 'Комиссия за бронирования UNO' : 'UNO Booking Commission'}</p>
+                      <p className="font-medium">{isRu ? 'Комиссия за бронирования' : 'Booking Commission'}</p>
                       <p className="text-muted-foreground">
                         {isRu 
-                          ? '10% от суммы аренды за клиентов, пришедших через платформу UNO' 
-                          : '10% of rental amount for clients coming through UNO platform'}
+                          ? '10% от суммы аренды за клиентов через платформу UNO' 
+                          : '10% of rental amount for clients via UNO platform'}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
                     <span>✓</span>
                     <div>
-                      <p className="font-medium">{isRu ? 'Дополнительные услуги' : 'Additional Services'}</p>
+                      <p className="font-medium">{isRu ? 'Полная самостоятельность' : 'Full Independence'}</p>
                       <p className="text-muted-foreground">
                         {isRu 
-                          ? 'Заказывайте уборку, ремонт и другие услуги по необходимости' 
-                          : 'Order cleaning, repairs and other services as needed'}
+                          ? 'Вы сами общаетесь с гостями, делаете уборку, решаете все вопросы' 
+                          : 'You communicate with guests, clean, handle all issues yourself'}
                       </p>
                     </div>
                   </div>
@@ -493,22 +514,18 @@ export default function AddProperty() {
                       <p className="font-medium">{isRu ? 'Синхронизация календаря' : 'Calendar Sync'}</p>
                       <p className="text-muted-foreground">
                         {isRu 
-                          ? 'Подключите свои календари бронирований для единого управления' 
-                          : 'Connect your booking calendars for unified management'}
+                          ? 'Подключите iCal для автоматической синхронизации занятости' 
+                          : 'Connect iCal for automatic availability sync'}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <span>✓</span>
-                    <div>
-                      <p className="font-medium">{isRu ? 'Бесплатное размещение' : 'Free Listing'}</p>
-                      <p className="text-muted-foreground">
-                        {isRu 
-                          ? 'Размещение объекта на платформе бесплатно' 
-                          : 'Property listing on platform is free'}
-                      </p>
-                    </div>
-                  </div>
+                </div>
+                <div className="pt-2 border-t border-border">
+                  <p className="text-xs text-muted-foreground italic">
+                    {isRu 
+                      ? '💡 Хотите заказать уборку или ремонт? Выберите "Управление с поддержкой"' 
+                      : '💡 Want to order cleaning or repairs? Choose "Assisted Management"'}
+                  </p>
                 </div>
               </div>
             )}
