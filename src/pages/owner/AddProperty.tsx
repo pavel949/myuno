@@ -44,7 +44,8 @@ export default function AddProperty() {
     images: [] as string[],
     management_type: 'full',
     is_rented: false,
-    rental_platform: '',
+    rental_platforms: [] as string[],
+    custom_platform: '',
     // Unit-specific fields (when part of a project)
     project_id: undefined as string | undefined,
     floor: undefined as number | undefined,
@@ -378,23 +379,103 @@ export default function AddProperty() {
             </div>
 
             {formData.is_rented && (
-              <div className="space-y-2">
-                <Label>{isRu ? 'Площадка' : 'Platform'}</Label>
-                <Select 
-                  value={formData.rental_platform}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, rental_platform: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={isRu ? 'Выберите' : 'Select'} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="airbnb">Airbnb</SelectItem>
-                    <SelectItem value="booking">Booking.com</SelectItem>
-                    <SelectItem value="agoda">Agoda</SelectItem>
-                    <SelectItem value="direct">{isRu ? 'Напрямую' : 'Direct'}</SelectItem>
-                    <SelectItem value="other">{isRu ? 'Другое' : 'Other'}</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="space-y-3">
+                <Label>{isRu ? 'Каналы бронирования' : 'Booking Channels'}</Label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { value: 'airbnb', label: 'Airbnb' },
+                    { value: 'booking', label: 'Booking.com' },
+                    { value: 'agoda', label: 'Agoda' },
+                    { value: 'vrbo', label: 'VRBO' },
+                    { value: 'expedia', label: 'Expedia' },
+                    { value: 'direct', label: isRu ? 'Напрямую' : 'Direct' },
+                  ].map((platform) => {
+                    const isSelected = formData.rental_platforms.includes(platform.value);
+                    return (
+                      <button
+                        key={platform.value}
+                        type="button"
+                        onClick={() => {
+                          setFormData(prev => ({
+                            ...prev,
+                            rental_platforms: isSelected
+                              ? prev.rental_platforms.filter(p => p !== platform.value)
+                              : [...prev.rental_platforms, platform.value]
+                          }));
+                        }}
+                        className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
+                          isSelected
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted hover:bg-muted/80'
+                        }`}
+                      >
+                        {platform.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Custom platforms */}
+                <div className="space-y-2">
+                  <Label className="text-sm text-muted-foreground">
+                    {isRu ? 'Добавить свой канал' : 'Add custom channel'}
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={formData.custom_platform}
+                      onChange={(e) => setFormData(prev => ({ ...prev, custom_platform: e.target.value }))}
+                      placeholder={isRu ? 'Название канала' : 'Channel name'}
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        if (formData.custom_platform.trim()) {
+                          setFormData(prev => ({
+                            ...prev,
+                            rental_platforms: [...prev.rental_platforms, prev.custom_platform.trim()],
+                            custom_platform: ''
+                          }));
+                        }
+                      }}
+                      disabled={!formData.custom_platform.trim()}
+                    >
+                      {isRu ? 'Добавить' : 'Add'}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Display selected platforms */}
+                {formData.rental_platforms.length > 0 && (
+                  <div className="pt-2">
+                    <p className="text-xs text-muted-foreground mb-2">
+                      {isRu ? 'Выбранные каналы:' : 'Selected channels:'}
+                    </p>
+                    <div className="flex flex-wrap gap-1">
+                      {formData.rental_platforms.map((platform) => (
+                        <span
+                          key={platform}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs"
+                        >
+                          {platform}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFormData(prev => ({
+                                ...prev,
+                                rental_platforms: prev.rental_platforms.filter(p => p !== platform)
+                              }));
+                            }}
+                            className="hover:text-destructive"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
