@@ -358,59 +358,123 @@ export default function AddProperty() {
 
             {/* Conditions for Full Management */}
             {formData.management_type === 'full' && (
-              <div className="mt-4 p-4 bg-primary/10 rounded-xl border border-primary/20 space-y-3">
+              <div className="mt-4 p-4 bg-primary/10 rounded-xl border border-primary/20 space-y-4">
                 <h4 className="font-semibold text-primary flex items-center gap-2">
                   🏆 {isRu ? 'Полное управление UNO' : 'Full UNO Management'}
                 </h4>
+                
+                {/* Revenue Split */}
+                <div className="p-3 bg-primary/5 rounded-lg">
+                  <p className="font-bold text-lg text-primary">{isRu ? 'Доход: 70% вам / 30% UNO' : 'Revenue: 70% You / 30% UNO'}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {isRu 
+                      ? 'Чистый доход после вычета операционных расходов (коммуналка, уборка, мелкий ремонт)' 
+                      : 'Net income after operational expenses (utilities, cleaning, minor repairs)'}
+                  </p>
+                </div>
+
+                {/* Calendar & Marketing */}
                 <div className="space-y-2 text-sm">
-                  <div className="flex items-start gap-2">
-                    <span className="text-primary">✓</span>
-                    <div>
-                      <p className="font-medium">{isRu ? 'Распределение дохода: 70/30' : 'Revenue Split: 70/30'}</p>
-                      <p className="text-muted-foreground">
-                        {isRu 
-                          ? 'Вы получаете 70% чистого дохода после вычета операционных расходов' 
-                          : 'You receive 70% of net income after operational expenses'}
-                      </p>
+                  <p className="font-medium text-primary flex items-center gap-2">
+                    📅 {isRu ? 'Календарь и маркетинг' : 'Calendar & Marketing'}
+                  </p>
+                  <div className="grid gap-2 pl-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-primary text-xs">✓</span>
+                      <span>{isRu ? 'Мастер-календарь — синхронизация всех каналов (Airbnb, Booking, Agoda)' : 'Master calendar — sync across all channels (Airbnb, Booking, Agoda)'}</span>
                     </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-primary">✓</span>
-                    <div>
-                      <p className="font-medium">{isRu ? 'Операционные расходы' : 'Operational Costs'}</p>
-                      <p className="text-muted-foreground">
-                        {isRu 
-                          ? 'Коммунальные услуги, уборка, мелкий ремонт — вычитаются из дохода' 
-                          : 'Utilities, cleaning, minor repairs — deducted from revenue'}
-                      </p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-primary text-xs">✓</span>
+                      <span>{isRu ? 'Динамическое ценообразование под сезон и спрос' : 'Dynamic pricing based on season and demand'}</span>
                     </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-primary">✓</span>
-                    <div>
-                      <p className="font-medium">{isRu ? 'Что включено' : 'What\'s Included'}</p>
-                      <p className="text-muted-foreground">
-                        {isRu 
-                          ? 'Маркетинг, бронирования, встреча гостей, уборка, техподдержка 24/7' 
-                          : 'Marketing, bookings, guest check-in, cleaning, 24/7 support'}
-                      </p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-primary text-xs">✓</span>
+                      <span>{isRu ? 'Профессиональная фотосъёмка объекта' : 'Professional property photography'}</span>
                     </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-primary">✓</span>
-                    <div>
-                      <p className="font-medium">{isRu ? 'Минимальный срок' : 'Minimum Term'}</p>
-                      <p className="text-muted-foreground">
-                        {isRu ? 'Контракт на 12 месяцев' : '12-month contract'}
-                      </p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-primary text-xs">✓</span>
+                      <span>{isRu ? 'Приоритетное размещение в поиске UNO' : 'Priority placement in UNO search'}</span>
                     </div>
                   </div>
                 </div>
-                <div className="pt-2 border-t border-primary/20">
+
+                {/* Guest Services */}
+                <div className="space-y-2 text-sm">
+                  <p className="font-medium text-primary flex items-center gap-2">
+                    👥 {isRu ? 'Работа с гостями' : 'Guest Services'}
+                  </p>
+                  <div className="grid gap-2 pl-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-primary text-xs">✓</span>
+                      <span>{isRu ? 'Проверка и верификация гостей' : 'Guest verification and vetting'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-primary text-xs">✓</span>
+                      <span>{isRu ? 'Check-in/out, передача ключей, инструктаж' : 'Check-in/out, key handover, instructions'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-primary text-xs">✓</span>
+                      <span>{isRu ? 'Поддержка гостей 24/7 на русском и английском' : '24/7 guest support in Russian and English'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-primary text-xs">✓</span>
+                      <span>{isRu ? 'Страховка от повреждений гостями' : 'Insurance against guest damages'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Property Care */}
+                <div className="space-y-2 text-sm">
+                  <p className="font-medium text-primary flex items-center gap-2">
+                    🏠 {isRu ? 'Обслуживание объекта' : 'Property Care'}
+                  </p>
+                  <div className="grid gap-2 pl-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-primary text-xs">✓</span>
+                      <span>{isRu ? 'Уборка и подготовка к заезду' : 'Cleaning and turnover preparation'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-primary text-xs">✓</span>
+                      <span>{isRu ? 'Контроль и оплата коммунальных услуг' : 'Utility monitoring and payments'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-primary text-xs">✓</span>
+                      <span>{isRu ? 'Мелкий ремонт и техобслуживание' : 'Minor repairs and maintenance'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-primary text-xs">✓</span>
+                      <span>{isRu ? 'Координация с управляющей компанией' : 'Coordination with building management'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Analytics */}
+                <div className="space-y-2 text-sm">
+                  <p className="font-medium text-primary flex items-center gap-2">
+                    📊 {isRu ? 'Аналитика и отчётность' : 'Analytics & Reporting'}
+                  </p>
+                  <div className="grid gap-2 pl-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-primary text-xs">✓</span>
+                      <span>{isRu ? 'Ежемесячные финансовые отчёты' : 'Monthly financial reports'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-primary text-xs">✓</span>
+                      <span>{isRu ? 'Статистика загрузки и доходности' : 'Occupancy and revenue statistics'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-primary text-xs">✓</span>
+                      <span>{isRu ? 'Персональный менеджер для связи' : 'Personal account manager'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-primary/20 space-y-2">
+                  <p className="text-sm font-medium">{isRu ? '📋 Контракт: 12 месяцев' : '📋 Contract: 12 months'}</p>
                   <p className="text-xs text-muted-foreground">
                     {isRu 
-                      ? '* После регистрации менеджер свяжется для обсуждения условий и подписания договора' 
-                      : '* After registration, a manager will contact you to discuss terms and sign the agreement'}
+                      ? '* После регистрации менеджер свяжется для осмотра объекта и подписания договора' 
+                      : '* After registration, a manager will contact you for property inspection and contract signing'}
                   </p>
                 </div>
               </div>
