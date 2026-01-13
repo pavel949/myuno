@@ -175,6 +175,7 @@ import VendorTransport from '@/pages/vendor/VendorTransport';
 import VendorBeauty from '@/pages/vendor/VendorBeauty';
 import VendorFitness from '@/pages/vendor/VendorFitness';
 import VendorClinics from '@/pages/vendor/VendorClinics';
+import VendorSubscription from '@/pages/vendor/VendorSubscription';
 
 // Owner (Property Care) pages
 import OwnerDashboard from '@/pages/owner/OwnerDashboard';
@@ -371,6 +372,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/vendor/beauty" element={<PageTransition><VendorBeauty /></PageTransition>} />
         <Route path="/vendor/fitness" element={<PageTransition><VendorFitness /></PageTransition>} />
         <Route path="/vendor/clinics" element={<PageTransition><VendorClinics /></PageTransition>} />
+        <Route path="/vendor/subscription" element={<PageTransition><VendorSubscription /></PageTransition>} />
         
         {/* Owner (Property Care) Routes */}
         <Route path="/owner" element={<PageTransition><OwnerDashboard /></PageTransition>} />

@@ -1269,6 +1269,59 @@ export type Database = {
         }
         Relationships: []
       }
+      featured_listings: {
+        Row: {
+          created_at: string
+          currency: string | null
+          ends_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          is_active: boolean | null
+          package_type: string
+          price_paid: number
+          provider_id: string
+          starts_at: string
+          stripe_payment_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          currency?: string | null
+          ends_at: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          is_active?: boolean | null
+          package_type: string
+          price_paid: number
+          provider_id: string
+          starts_at?: string
+          stripe_payment_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          currency?: string | null
+          ends_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          is_active?: boolean | null
+          package_type?: string
+          price_paid?: number
+          provider_id?: string
+          starts_at?: string
+          stripe_payment_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "featured_listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       flower_shops: {
         Row: {
           address: string | null
@@ -2647,6 +2700,50 @@ export type Database = {
             columns: ["pharmacy_id"]
             isOneToOne: false
             referencedRelation: "pharmacies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platform_fees: {
+        Row: {
+          applies_to: string[] | null
+          created_at: string
+          fee_type: string
+          fee_value: number
+          id: string
+          is_active: boolean | null
+          max_fee: number | null
+          min_fee: number | null
+          plan_id: string | null
+        }
+        Insert: {
+          applies_to?: string[] | null
+          created_at?: string
+          fee_type: string
+          fee_value?: number
+          id?: string
+          is_active?: boolean | null
+          max_fee?: number | null
+          min_fee?: number | null
+          plan_id?: string | null
+        }
+        Update: {
+          applies_to?: string[] | null
+          created_at?: string
+          fee_type?: string
+          fee_value?: number
+          id?: string
+          is_active?: boolean | null
+          max_fee?: number | null
+          min_fee?: number | null
+          plan_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_fees_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
             referencedColumns: ["id"]
           },
         ]
@@ -4304,6 +4401,69 @@ export type Database = {
           },
         ]
       }
+      subscription_plans: {
+        Row: {
+          created_at: string
+          currency: string
+          description: string | null
+          description_ru: string | null
+          features: Json | null
+          id: string
+          is_active: boolean | null
+          is_popular: boolean | null
+          limits: Json | null
+          name: string
+          name_ru: string
+          price_monthly: number
+          price_yearly: number | null
+          slug: string
+          sort_order: number | null
+          stripe_price_id_monthly: string | null
+          stripe_price_id_yearly: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          description?: string | null
+          description_ru?: string | null
+          features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          limits?: Json | null
+          name: string
+          name_ru: string
+          price_monthly?: number
+          price_yearly?: number | null
+          slug: string
+          sort_order?: number | null
+          stripe_price_id_monthly?: string | null
+          stripe_price_id_yearly?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          description?: string | null
+          description_ru?: string | null
+          features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          limits?: Json | null
+          name?: string
+          name_ru?: string
+          price_monthly?: number
+          price_yearly?: number | null
+          slug?: string
+          sort_order?: number | null
+          stripe_price_id_monthly?: string | null
+          stripe_price_id_yearly?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tags: {
         Row: {
           category: string | null
@@ -5023,6 +5183,69 @@ export type Database = {
             foreignKeyName: "vendor_services_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_subscriptions: {
+        Row: {
+          billing_cycle: string | null
+          cancel_at_period_end: boolean | null
+          cancelled_at: string | null
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          plan_id: string
+          provider_id: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          billing_cycle?: string | null
+          cancel_at_period_end?: boolean | null
+          cancelled_at?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan_id: string
+          provider_id: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          billing_cycle?: string | null
+          cancel_at_period_end?: boolean | null
+          cancelled_at?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan_id?: string
+          provider_id?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_subscriptions_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: true
             referencedRelation: "providers"
             referencedColumns: ["id"]
           },

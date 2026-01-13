@@ -26,3 +26,12 @@ verify_jwt = false
 
 [functions.get-weather]
 verify_jwt = false
+
+[functions.create-vendor-subscription]
+verify_jwt = false
+
+[functions.check-vendor-subscription]
+verify_jwt = false
+
+[functions.vendor-portal]
+verify_jwt = false

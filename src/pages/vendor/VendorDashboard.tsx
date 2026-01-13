@@ -22,7 +22,8 @@ import {
   ArrowRight,
   Package,
   CreditCard,
-  BarChart3
+  BarChart3,
+  Crown
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -125,6 +126,12 @@ const VendorDashboard = () => {
       icon: CreditCard,
       path: '/vendor/payouts',
       color: 'bg-orange-500',
+    },
+    {
+      label: isRussian ? 'Подписка' : 'Subscription',
+      icon: Crown,
+      path: '/vendor/subscription',
+      color: 'bg-amber-500',
     },
   ];
 
