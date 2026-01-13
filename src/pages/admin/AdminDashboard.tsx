@@ -99,6 +99,13 @@ export default function AdminDashboard() {
 
   const quickActions = [
     {
+      label: isRussian ? 'Аналитика' : 'Analytics',
+      description: isRussian ? 'Метрики платформы' : 'Platform metrics',
+      icon: BarChart3,
+      path: '/admin/analytics',
+      color: 'bg-indigo-500',
+    },
+    {
       label: isRussian ? 'Провайдеры' : 'Providers',
       description: isRussian ? 'Добавить поставщика' : 'Add provider',
       icon: Building2,

@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_logs: {
+        Row: {
+          action: string
+          admin_id: string
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          ip_address: string | null
+          new_data: Json | null
+          old_data: Json | null
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          admin_id: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          ip_address?: string | null
+          new_data?: Json | null
+          old_data?: Json | null
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          admin_id?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          ip_address?: string | null
+          new_data?: Json | null
+          old_data?: Json | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       babysitters: {
         Row: {
           age_groups: string[] | null
@@ -2747,6 +2786,72 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      platform_metrics: {
+        Row: {
+          active_providers: number | null
+          active_users: number | null
+          cancelled_bookings: number | null
+          completed_bookings: number | null
+          created_at: string
+          date: string
+          gmv: number | null
+          id: string
+          new_bookings: number | null
+          new_providers: number | null
+          new_users: number | null
+          page_views: number | null
+          platform_revenue: number | null
+          subscription_revenue: number | null
+          total_bookings: number | null
+          total_providers: number | null
+          total_users: number | null
+          unique_visitors: number | null
+          updated_at: string
+        }
+        Insert: {
+          active_providers?: number | null
+          active_users?: number | null
+          cancelled_bookings?: number | null
+          completed_bookings?: number | null
+          created_at?: string
+          date: string
+          gmv?: number | null
+          id?: string
+          new_bookings?: number | null
+          new_providers?: number | null
+          new_users?: number | null
+          page_views?: number | null
+          platform_revenue?: number | null
+          subscription_revenue?: number | null
+          total_bookings?: number | null
+          total_providers?: number | null
+          total_users?: number | null
+          unique_visitors?: number | null
+          updated_at?: string
+        }
+        Update: {
+          active_providers?: number | null
+          active_users?: number | null
+          cancelled_bookings?: number | null
+          completed_bookings?: number | null
+          created_at?: string
+          date?: string
+          gmv?: number | null
+          id?: string
+          new_bookings?: number | null
+          new_providers?: number | null
+          new_users?: number | null
+          page_views?: number | null
+          platform_revenue?: number | null
+          subscription_revenue?: number | null
+          total_bookings?: number | null
+          total_providers?: number | null
+          total_users?: number | null
+          unique_visitors?: number | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -5774,6 +5879,7 @@ export type Database = {
         Args: { p_code: string; p_referred_id: string }
         Returns: boolean
       }
+      calculate_daily_metrics: { Args: { p_date?: string }; Returns: undefined }
       calculate_distance_km: {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
         Returns: number
