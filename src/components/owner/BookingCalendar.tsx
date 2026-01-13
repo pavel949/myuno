@@ -275,7 +275,7 @@ export function BookingCalendar({ propertyId, showPropertySelector = true }: Boo
                         </p>
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right flex flex-col items-end gap-1">
                       <Badge variant={isActive ? "default" : "secondary"} className="text-xs">
                         {isActive 
                           ? (isRu ? 'Сейчас' : 'Now') 
@@ -283,9 +283,17 @@ export function BookingCalendar({ propertyId, showPropertySelector = true }: Boo
                         }
                       </Badge>
                       {booking.source && booking.source !== 'manual' && (
-                        <p className="text-xs text-muted-foreground mt-1 capitalize">
+                        <Badge 
+                          variant="outline" 
+                          className={cn(
+                            "text-xs capitalize",
+                            booking.source.toLowerCase().includes('airbnb') && "border-[#FF5A5F] text-[#FF5A5F]",
+                            booking.source.toLowerCase().includes('booking') && "border-[#003580] text-[#003580]",
+                            booking.source.toLowerCase().includes('vrbo') && "border-[#0077CC] text-[#0077CC]",
+                          )}
+                        >
                           {booking.source}
-                        </p>
+                        </Badge>
                       )}
                     </div>
                   </div>

@@ -2055,6 +2055,7 @@ export type Database = {
           host_languages: string[] | null
           house_rules: string | null
           house_rules_ru: string | null
+          ical_token: string | null
           id: string
           images: string[] | null
           included_services: Json | null
@@ -2154,6 +2155,7 @@ export type Database = {
           host_languages?: string[] | null
           house_rules?: string | null
           house_rules_ru?: string | null
+          ical_token?: string | null
           id?: string
           images?: string[] | null
           included_services?: Json | null
@@ -2253,6 +2255,7 @@ export type Database = {
           host_languages?: string[] | null
           house_rules?: string | null
           house_rules_ru?: string | null
+          ical_token?: string | null
           id?: string
           images?: string[] | null
           included_services?: Json | null
@@ -3054,6 +3057,7 @@ export type Database = {
           owner_id: string
           property_id: string
           source: string | null
+          source_calendar_id: string | null
           status: string | null
           total_amount: number | null
           updated_at: string
@@ -3074,6 +3078,7 @@ export type Database = {
           owner_id: string
           property_id: string
           source?: string | null
+          source_calendar_id?: string | null
           status?: string | null
           total_amount?: number | null
           updated_at?: string
@@ -3094,6 +3099,7 @@ export type Database = {
           owner_id?: string
           property_id?: string
           source?: string | null
+          source_calendar_id?: string | null
           status?: string | null
           total_amount?: number | null
           updated_at?: string
@@ -3111,6 +3117,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_bookings_source_calendar_id_fkey"
+            columns: ["source_calendar_id"]
+            isOneToOne: false
+            referencedRelation: "property_external_calendars"
             referencedColumns: ["id"]
           },
         ]
@@ -3162,6 +3175,53 @@ export type Database = {
           },
           {
             foreignKeyName: "property_chat_messages_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_external_calendars: {
+        Row: {
+          created_at: string
+          ical_url: string
+          id: string
+          is_active: boolean | null
+          last_synced_at: string | null
+          name: string
+          owner_id: string
+          property_id: string
+          sync_error: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          ical_url: string
+          id?: string
+          is_active?: boolean | null
+          last_synced_at?: string | null
+          name: string
+          owner_id: string
+          property_id: string
+          sync_error?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          ical_url?: string
+          id?: string
+          is_active?: boolean | null
+          last_synced_at?: string | null
+          name?: string
+          owner_id?: string
+          property_id?: string
+          sync_error?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_external_calendars_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "owner_properties"
