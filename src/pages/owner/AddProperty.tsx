@@ -4,7 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useCreateOwnerProperty } from '@/hooks/usePropertyCare';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
-import { BackButton } from '@/components/uno/BackButton';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -95,9 +95,10 @@ export default function AddProperty() {
 
   return (
     <PageContainer>
-      <BackButton fallbackPath="/owner/properties" />
       <PageHeader 
         title={isRu ? 'Добавить объект' : 'Add Property'}
+        showBack
+        fallbackPath="/owner/properties"
         subtitle={isRu ? 'Зарегистрируйте недвижимость' : 'Register your property'}
       />
 
