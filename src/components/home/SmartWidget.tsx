@@ -1,15 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sun, Cloud, CloudRain, Calendar, Sparkles, ArrowRight, Thermometer } from 'lucide-react';
+import { Sun, Cloud, CloudRain, Calendar, Thermometer } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { cn } from '@/lib/utils';
-
-interface WeatherData {
-  temp: number;
-  condition: 'sunny' | 'cloudy' | 'rainy';
-  description: string;
-  descriptionRu: string;
-}
+import { useWeather } from '@/hooks/useWeather';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface TodayEvent {
   id: string;
@@ -28,14 +22,6 @@ interface DailyRecommendation {
   icon: string;
 }
 
-// Mock data - in production would come from API
-const mockWeather: WeatherData = {
-  temp: 31,
-  condition: 'sunny',
-  description: 'Perfect beach day',
-  descriptionRu: 'Идеальный пляжный день',
-};
-
 const mockEvent: TodayEvent = {
   id: '1',
   title: 'Patong Night Market',
@@ -50,7 +36,11 @@ const dailyRecommendations: DailyRecommendation[] = [
   { title: 'Spa Day', titleRu: 'День в СПА', subtitle: 'Treat yourself', subtitleRu: 'Побалуй себя', path: '/beauty', icon: '💆' },
 ];
 
-const WeatherIcon = ({ condition }: { condition: string }) => {
+const WeatherIcon = ({ condition, isLoading }: { condition: string; isLoading?: boolean }) => {
+  if (isLoading) {
+    return <Skeleton className="w-8 h-8 rounded-full" />;
+  }
+  
   switch (condition) {
     case 'sunny':
       return <Sun className="w-8 h-8 text-amber-400" />;
@@ -66,6 +56,7 @@ const WeatherIcon = ({ condition }: { condition: string }) => {
 export function SmartWidget() {
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const { data: weather, isLoading: isWeatherLoading } = useWeather();
   const [recommendation] = useState(() => 
     dailyRecommendations[Math.floor(Math.random() * dailyRecommendations.length)]
   );
@@ -99,15 +90,24 @@ export function SmartWidget() {
             </h2>
           </div>
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-background/50 backdrop-blur-sm border border-border/50">
-            <WeatherIcon condition={mockWeather.condition} />
+            <WeatherIcon condition={weather?.condition || 'sunny'} isLoading={isWeatherLoading} />
             <div className="text-right">
-              <p className="text-sm font-bold text-foreground flex items-center gap-1">
-                <Thermometer className="w-3 h-3" />
-                {mockWeather.temp}°C
-              </p>
-              <p className="text-[10px] text-muted-foreground">
-                {language === 'ru' ? mockWeather.descriptionRu : mockWeather.description}
-              </p>
+              {isWeatherLoading ? (
+                <>
+                  <Skeleton className="h-4 w-12 mb-1" />
+                  <Skeleton className="h-3 w-16" />
+                </>
+              ) : (
+                <>
+                  <p className="text-sm font-bold text-foreground flex items-center gap-1">
+                    <Thermometer className="w-3 h-3" />
+                    {weather?.temp || 31}°C
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {language === 'ru' ? weather?.descriptionRu : weather?.description}
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>
