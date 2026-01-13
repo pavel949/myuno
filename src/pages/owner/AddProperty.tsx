@@ -91,7 +91,7 @@ export default function AddProperty() {
 
   return (
     <PageContainer>
-      <BackButton />
+      <BackButton fallbackPath="/owner/properties" />
       <PageHeader 
         title={isRu ? 'Добавить объект' : 'Add Property'}
         subtitle={isRu ? 'Зарегистрируйте недвижимость' : 'Register your property'}

@@ -26,13 +26,15 @@ export function BackButton({
       return;
     }
     
-    // Check if we came from within the app (referrer exists and is same origin)
-    const referrer = document.referrer;
-    const isSameOrigin = referrer && referrer.includes(window.location.origin);
-    
-    if (isSameOrigin && window.history.length > 2) {
-      navigate(-1);
-    } else {
+    // Try to go back in history, fallback to specified path
+    try {
+      // Check if we have meaningful history (more than just entry point)
+      if (window.history.length > 1) {
+        navigate(-1);
+      } else {
+        navigate(fallbackPath);
+      }
+    } catch {
       navigate(fallbackPath);
     }
   };
