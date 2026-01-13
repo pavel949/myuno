@@ -28,12 +28,13 @@ export function PageHeader({
   const navigate = useNavigate();
 
   const handleBack = () => {
-    const referrer = document.referrer;
-    const isSameOrigin = referrer && referrer.includes(window.location.origin);
-    
-    if (isSameOrigin && window.history.length > 2) {
-      navigate(-1);
-    } else {
+    try {
+      if (window.history.length > 1) {
+        navigate(-1);
+      } else {
+        navigate(fallbackPath);
+      }
+    } catch {
       navigate(fallbackPath);
     }
   };
