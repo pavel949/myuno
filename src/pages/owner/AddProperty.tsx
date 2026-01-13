@@ -339,7 +339,7 @@ export default function AddProperty() {
               {isRu ? 'Тип управления' : 'Management Type'}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4">
             {managementTypes.map((type) => (
               <div
                 key={type.value}
@@ -354,6 +354,163 @@ export default function AddProperty() {
                 <p className="text-sm text-muted-foreground">{type.desc}</p>
               </div>
             ))}
+
+            {/* Conditions for Full Management */}
+            {formData.management_type === 'full' && (
+              <div className="mt-4 p-4 bg-primary/10 rounded-xl border border-primary/20 space-y-3">
+                <h4 className="font-semibold text-primary flex items-center gap-2">
+                  🏆 {isRu ? 'Полное управление UNO' : 'Full UNO Management'}
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-start gap-2">
+                    <span className="text-primary">✓</span>
+                    <div>
+                      <p className="font-medium">{isRu ? 'Распределение дохода: 70/30' : 'Revenue Split: 70/30'}</p>
+                      <p className="text-muted-foreground">
+                        {isRu 
+                          ? 'Вы получаете 70% чистого дохода после вычета операционных расходов' 
+                          : 'You receive 70% of net income after operational expenses'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-primary">✓</span>
+                    <div>
+                      <p className="font-medium">{isRu ? 'Операционные расходы' : 'Operational Costs'}</p>
+                      <p className="text-muted-foreground">
+                        {isRu 
+                          ? 'Коммунальные услуги, уборка, мелкий ремонт — вычитаются из дохода' 
+                          : 'Utilities, cleaning, minor repairs — deducted from revenue'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-primary">✓</span>
+                    <div>
+                      <p className="font-medium">{isRu ? 'Что включено' : 'What\'s Included'}</p>
+                      <p className="text-muted-foreground">
+                        {isRu 
+                          ? 'Маркетинг, бронирования, встреча гостей, уборка, техподдержка 24/7' 
+                          : 'Marketing, bookings, guest check-in, cleaning, 24/7 support'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-primary">✓</span>
+                    <div>
+                      <p className="font-medium">{isRu ? 'Минимальный срок' : 'Minimum Term'}</p>
+                      <p className="text-muted-foreground">
+                        {isRu ? 'Контракт на 12 месяцев' : '12-month contract'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-primary/20">
+                  <p className="text-xs text-muted-foreground">
+                    {isRu 
+                      ? '* После регистрации менеджер свяжется для обсуждения условий и подписания договора' 
+                      : '* After registration, a manager will contact you to discuss terms and sign the agreement'}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Conditions for Partial Management */}
+            {formData.management_type === 'partial' && (
+              <div className="mt-4 p-4 bg-secondary/50 rounded-xl border border-secondary space-y-3">
+                <h4 className="font-semibold flex items-center gap-2">
+                  🤝 {isRu ? 'Частичное управление' : 'Partial Management'}
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-start gap-2">
+                    <span className="text-foreground">✓</span>
+                    <div>
+                      <p className="font-medium">{isRu ? 'Оплата за услуги' : 'Pay Per Service'}</p>
+                      <p className="text-muted-foreground">
+                        {isRu 
+                          ? 'Выбирайте только нужные услуги: уборка, встреча гостей, ремонт' 
+                          : 'Choose only needed services: cleaning, check-in, maintenance'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-foreground">✓</span>
+                    <div>
+                      <p className="font-medium">{isRu ? 'Комиссия за бронирования' : 'Booking Commission'}</p>
+                      <p className="text-muted-foreground">
+                        {isRu 
+                          ? '15% от суммы аренды за клиентов через UNO' 
+                          : '15% of rental amount for clients via UNO'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-foreground">✓</span>
+                    <div>
+                      <p className="font-medium">{isRu ? 'Гибкие условия' : 'Flexible Terms'}</p>
+                      <p className="text-muted-foreground">
+                        {isRu ? 'Без долгосрочных обязательств' : 'No long-term commitments'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Conditions for Self Management */}
+            {formData.management_type === 'self' && (
+              <div className="mt-4 p-4 bg-muted rounded-xl border border-border space-y-3">
+                <h4 className="font-semibold flex items-center gap-2">
+                  🏠 {isRu ? 'Самоуправление' : 'Self Management'}
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-start gap-2">
+                    <span>✓</span>
+                    <div>
+                      <p className="font-medium">{isRu ? 'Комиссия за бронирования UNO' : 'UNO Booking Commission'}</p>
+                      <p className="text-muted-foreground">
+                        {isRu 
+                          ? '10% от суммы аренды за клиентов, пришедших через платформу UNO' 
+                          : '10% of rental amount for clients coming through UNO platform'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span>✓</span>
+                    <div>
+                      <p className="font-medium">{isRu ? 'Дополнительные услуги' : 'Additional Services'}</p>
+                      <p className="text-muted-foreground">
+                        {isRu 
+                          ? 'Заказывайте уборку, ремонт и другие услуги по необходимости' 
+                          : 'Order cleaning, repairs and other services as needed'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span>✓</span>
+                    <div>
+                      <p className="font-medium">{isRu ? 'Синхронизация календаря' : 'Calendar Sync'}</p>
+                      <p className="text-muted-foreground">
+                        {isRu 
+                          ? 'Подключите свои календари бронирований для единого управления' 
+                          : 'Connect your booking calendars for unified management'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span>✓</span>
+                    <div>
+                      <p className="font-medium">{isRu ? 'Бесплатное размещение' : 'Free Listing'}</p>
+                      <p className="text-muted-foreground">
+                        {isRu 
+                          ? 'Размещение объекта на платформе бесплатно' 
+                          : 'Property listing on platform is free'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
