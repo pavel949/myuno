@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.vendor-portal]
 verify_jwt = false
+
+[functions.calculate-metrics]
+verify_jwt = false
