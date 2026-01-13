@@ -1,10 +1,11 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Search, X, Clock, TrendingUp, Star,
   Sparkles, UtensilsCrossed, Dumbbell, Stethoscope, 
   GraduationCap, Home, Car, Ticket, Flower2, Waves,
-  Pill, Compass, Scale, Wrench, ArrowRight, Anchor
+  Pill, Compass, Scale, Wrench, ArrowRight, Anchor,
+  Baby, Brush, ShoppingBag, PawPrint, Loader2
 } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -12,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useGlobalSearch, SearchResult } from '@/hooks/useGlobalSearch';
 
 interface GlobalSearchModalProps {
   open: boolean;
@@ -86,11 +88,15 @@ const typeConfig: Record<string, { icon: any; labelEn: string; labelRu: string; 
   tours: { icon: Compass, labelEn: 'Tours', labelRu: 'Туры', color: 'from-amber-500 to-orange-500' },
   water: { icon: Waves, labelEn: 'Water', labelRu: 'Вода', color: 'from-cyan-500 to-blue-500' },
   yachts: { icon: Anchor, labelEn: 'Yachts', labelRu: 'Яхты', color: 'from-blue-600 to-indigo-600' },
-  legal: { icon: Scale, labelEn: 'Business', labelRu: 'Бизнес', color: 'from-indigo-500 to-blue-600' },
+  legal: { icon: Scale, labelEn: 'Legal', labelRu: 'Юридические', color: 'from-indigo-500 to-blue-600' },
   pharmacy: { icon: Pill, labelEn: 'Pharmacy', labelRu: 'Аптеки', color: 'from-green-500 to-emerald-500' },
   flowers: { icon: Flower2, labelEn: 'Flowers', labelRu: 'Цветы', color: 'from-rose-500 to-pink-500' },
   services: { icon: Wrench, labelEn: 'Services', labelRu: 'Услуги', color: 'from-slate-500 to-zinc-600' },
   events: { icon: Ticket, labelEn: 'Events', labelRu: 'События', color: 'from-purple-500 to-pink-500' },
+  cleaning: { icon: Brush, labelEn: 'Cleaning', labelRu: 'Уборка', color: 'from-sky-500 to-blue-500' },
+  babysitter: { icon: Baby, labelEn: 'Babysitter', labelRu: 'Няня', color: 'from-pink-400 to-rose-500' },
+  pets: { icon: PawPrint, labelEn: 'Pets', labelRu: 'Питомцы', color: 'from-amber-500 to-yellow-500' },
+  market: { icon: ShoppingBag, labelEn: 'Market', labelRu: 'Магазины', color: 'from-violet-500 to-purple-500' },
 };
 
 const trendingSearches: Record<string, string[]> = {
@@ -109,31 +115,16 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
     return saved ? JSON.parse(saved) : [];
   });
 
+  // Use real database search
+  const { results: dbResults, isLoading } = useGlobalSearch(query, open);
+
   useEffect(() => {
     if (open && inputRef.current) {
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [open]);
 
-  const filteredResults = useMemo(() => {
-    if (!query.trim()) return [];
-    
-    const searchLower = query.toLowerCase();
-    return searchData.filter(item => {
-      const title = language === 'ru' ? item.titleRu : item.titleEn;
-      const location = language === 'ru' ? item.locationRu : item.locationEn;
-      const typeLabel = typeConfig[item.type]?.[language === 'ru' ? 'labelRu' : 'labelEn'] || '';
-      
-      return (
-        title.toLowerCase().includes(searchLower) ||
-        location.toLowerCase().includes(searchLower) ||
-        typeLabel.toLowerCase().includes(searchLower) ||
-        item.type.includes(searchLower)
-      );
-    }).slice(0, 8);
-  }, [query, language]);
-
-  const handleSelect = (item: typeof searchData[0]) => {
+  const handleSelect = (item: SearchResult) => {
     // Save to recent searches
     const newRecent = [query, ...recentSearches.filter(s => s !== query)].slice(0, 5);
     setRecentSearches(newRecent);
@@ -190,7 +181,14 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
                 exit={{ opacity: 0 }}
                 className="p-2"
               >
-                {filteredResults.length === 0 ? (
+                {isLoading ? (
+                  <div className="text-center py-8">
+                    <Loader2 className="w-8 h-8 text-primary mx-auto mb-3 animate-spin" />
+                    <p className="text-muted-foreground">
+                      {language === 'ru' ? 'Поиск...' : 'Searching...'}
+                    </p>
+                  </div>
+                ) : dbResults.length === 0 ? (
                   <div className="text-center py-8">
                     <Search className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
                     <p className="text-muted-foreground">
@@ -199,7 +197,7 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
                   </div>
                 ) : (
                   <div className="space-y-1">
-                    {filteredResults.map((item, index) => {
+                    {dbResults.map((item, index) => {
                       const config = typeConfig[item.type];
                       const Icon = config?.icon || Search;
                       return (
@@ -211,28 +209,38 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
                           onClick={() => handleSelect(item)}
                           className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors text-left"
                         >
-                          <img
-                            src={item.image}
-                            alt=""
-                            className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
-                          />
+                          {item.image ? (
+                            <img
+                              src={item.image}
+                              alt=""
+                              className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                            />
+                          ) : (
+                            <div className={cn("w-12 h-12 rounded-lg flex items-center justify-center bg-gradient-to-br flex-shrink-0", config?.color || 'from-gray-500 to-gray-600')}>
+                              <Icon className="w-6 h-6 text-white" />
+                            </div>
+                          )}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-0.5">
                               <Badge variant="secondary" className="text-[10px] py-0 px-1.5">
                                 <Icon className="w-3 h-3 mr-0.5" />
                                 {language === 'ru' ? config?.labelRu : config?.labelEn}
                               </Badge>
-                              <span className="text-xs text-muted-foreground flex items-center gap-0.5">
-                                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                                {item.rating}
-                              </span>
+                              {item.rating && (
+                                <span className="text-xs text-muted-foreground flex items-center gap-0.5">
+                                  <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                                  {item.rating}
+                                </span>
+                              )}
                             </div>
                             <p className="font-medium truncate text-sm">
                               {language === 'ru' ? item.titleRu : item.titleEn}
                             </p>
-                            <p className="text-xs text-muted-foreground truncate">
-                              {language === 'ru' ? item.locationRu : item.locationEn}
-                            </p>
+                            {(item.locationEn || item.locationRu) && (
+                              <p className="text-xs text-muted-foreground truncate">
+                                {language === 'ru' ? item.locationRu : item.locationEn}
+                              </p>
+                            )}
                           </div>
                           <ArrowRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                         </motion.button>
