@@ -31,6 +31,8 @@ export default function AddProperty() {
     title_ru: '',
     address: '',
     district: '',
+    lat: undefined as number | undefined,
+    lng: undefined as number | undefined,
     property_type: 'apartment',
     bedrooms: 1,
     bathrooms: 1,
@@ -117,6 +119,8 @@ export default function AddProperty() {
                   // Auto-fill fields from project
                   address: project?.address || prev.address,
                   district: project?.district || prev.district,
+                  lat: project?.lat ?? prev.lat,
+                  lng: project?.lng ?? prev.lng,
                 }));
               }}
             />
