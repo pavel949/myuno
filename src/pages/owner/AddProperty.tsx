@@ -17,6 +17,7 @@ import { ImageUpload } from '@/components/upload/ImageUpload';
 import { ProjectSelector } from '@/components/property/ProjectSelector';
 import { UnitFields } from '@/components/property/UnitFields';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
+import { ProjectLocationPicker } from '@/components/property/ProjectLocationPicker';
 
 export default function AddProperty() {
   const { language } = useLanguage();
@@ -269,6 +270,29 @@ export default function AddProperty() {
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Map Location Picker */}
+            <ProjectLocationPicker
+              value={formData.lat && formData.lng ? { 
+                lat: formData.lat, 
+                lng: formData.lng, 
+                address: formData.address 
+              } : undefined}
+              onChange={(location) => {
+                setFormData(prev => ({
+                  ...prev,
+                  lat: location.lat,
+                  lng: location.lng,
+                  address: location.address || prev.address,
+                }));
+              }}
+            />
+
+            {formData.lat && formData.lng && (
+              <p className="text-xs text-muted-foreground">
+                📍 {formData.lat.toFixed(6)}, {formData.lng.toFixed(6)}
+              </p>
+            )}
           </CardContent>
         </Card>
 
