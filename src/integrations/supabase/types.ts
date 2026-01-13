@@ -4662,19 +4662,30 @@ export type Database = {
       vehicles: {
         Row: {
           capacity: number | null
+          color: string | null
           cover_image: string | null
           created_at: string | null
           currency: string | null
+          deposit_amount: number | null
           description_en: string | null
           description_ru: string | null
+          doors: number | null
+          engine_size: string | null
+          extra_km_price: number | null
           features: string[] | null
+          free_km_per_day: number | null
+          fuel_type: string | null
           id: string
           images: string[] | null
           is_active: boolean | null
           is_available: boolean | null
           is_featured: boolean | null
           is_verified: boolean | null
+          license_plate: string | null
+          location_name: string | null
+          location_ru: string | null
           luggage_capacity: number | null
+          min_rental_days: number | null
           name_en: string
           name_ru: string
           price_airport_transfer: number | null
@@ -4683,24 +4694,37 @@ export type Database = {
           provider_id: string | null
           rating: number | null
           review_count: number | null
+          transmission: string | null
           updated_at: string | null
           vehicle_type: string | null
+          year_built: number | null
         }
         Insert: {
           capacity?: number | null
+          color?: string | null
           cover_image?: string | null
           created_at?: string | null
           currency?: string | null
+          deposit_amount?: number | null
           description_en?: string | null
           description_ru?: string | null
+          doors?: number | null
+          engine_size?: string | null
+          extra_km_price?: number | null
           features?: string[] | null
+          free_km_per_day?: number | null
+          fuel_type?: string | null
           id?: string
           images?: string[] | null
           is_active?: boolean | null
           is_available?: boolean | null
           is_featured?: boolean | null
           is_verified?: boolean | null
+          license_plate?: string | null
+          location_name?: string | null
+          location_ru?: string | null
           luggage_capacity?: number | null
+          min_rental_days?: number | null
           name_en: string
           name_ru: string
           price_airport_transfer?: number | null
@@ -4709,24 +4733,37 @@ export type Database = {
           provider_id?: string | null
           rating?: number | null
           review_count?: number | null
+          transmission?: string | null
           updated_at?: string | null
           vehicle_type?: string | null
+          year_built?: number | null
         }
         Update: {
           capacity?: number | null
+          color?: string | null
           cover_image?: string | null
           created_at?: string | null
           currency?: string | null
+          deposit_amount?: number | null
           description_en?: string | null
           description_ru?: string | null
+          doors?: number | null
+          engine_size?: string | null
+          extra_km_price?: number | null
           features?: string[] | null
+          free_km_per_day?: number | null
+          fuel_type?: string | null
           id?: string
           images?: string[] | null
           is_active?: boolean | null
           is_available?: boolean | null
           is_featured?: boolean | null
           is_verified?: boolean | null
+          license_plate?: string | null
+          location_name?: string | null
+          location_ru?: string | null
           luggage_capacity?: number | null
+          min_rental_days?: number | null
           name_en?: string
           name_ru?: string
           price_airport_transfer?: number | null
@@ -4735,8 +4772,10 @@ export type Database = {
           provider_id?: string | null
           rating?: number | null
           review_count?: number | null
+          transmission?: string | null
           updated_at?: string | null
           vehicle_type?: string | null
+          year_built?: number | null
         }
         Relationships: [
           {
