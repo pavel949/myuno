@@ -278,7 +278,8 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
 
     const searchTimeout = setTimeout(async () => {
       setIsLoading(true);
-      const searchLower = query.toLowerCase();
+      // Use original query for ilike - it handles case-insensitivity for all languages including Cyrillic
+      const searchTerm = query.trim();
       const allResults: SearchResult[] = [];
 
       try {
@@ -303,7 +304,7 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
             const { data, error } = await supabase
               .from(config.table as any)
               .select(uniqueFields.join(','))
-              .or(`${config.titleEn}.ilike.%${searchLower}%,${config.titleRu}.ilike.%${searchLower}%`)
+              .or(`${config.titleEn}.ilike.%${searchTerm}%,${config.titleRu}.ilike.%${searchTerm}%`)
               .limit(5);
 
             if (error || !data) return [];
