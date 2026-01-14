@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
+
 import { Badge } from '@/components/ui/badge';
 
 interface QuickService {
@@ -92,7 +93,7 @@ const quickServices: QuickService[] = [
 ];
 
 export function QuickServicesSection() {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const navigate = useNavigate();
 
   return (
@@ -102,7 +103,7 @@ export function QuickServicesSection() {
           <Zap className="w-5 h-5 text-amber-500" />
         </div>
         <h2 className="text-lg font-semibold">
-          {language === 'ru' ? 'Быстрые услуги' : 'Quick Services'}
+          {t('home.quickServices')}
         </h2>
       </div>
 
@@ -125,7 +126,7 @@ export function QuickServicesSection() {
                 <Badge 
                   className="absolute -top-1.5 -right-1.5 text-[8px] px-1.5 py-0.5 bg-amber-500 text-white border-0"
                 >
-                  {language === 'ru' ? 'ТОП' : 'HOT'}
+                  {t('badge.hot')}
                 </Badge>
               )}
               

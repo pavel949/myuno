@@ -126,7 +126,7 @@ export function MiniAppLayout({
   quickActions,
 }: MiniAppLayoutProps) {
   const navigate = useNavigate();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   // Build header actions
   const buildHeaderActions = () => {
@@ -256,10 +256,10 @@ export function MiniAppLayout({
         {resultsCount !== undefined && (
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">
-              {resultsLabel || (language === 'ru' ? 'Результаты' : 'Results')}
+              {resultsLabel || t('booking.results')}
             </h2>
             <span className="text-sm text-muted-foreground">
-              {resultsCount} {language === 'ru' ? 'найдено' : 'found'}
+              {resultsCount} {t('booking.found')}
             </span>
           </div>
         )}

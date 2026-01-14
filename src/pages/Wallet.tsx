@@ -58,7 +58,7 @@ interface Transaction {
 const QUICK_AMOUNTS = [500, 1000, 2000, 5000];
 
 const Wallet = () => {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -76,19 +76,11 @@ const Wallet = () => {
     const amount = searchParams.get('amount');
 
     if (success === 'true') {
-      toast.success(
-        language === 'ru' 
-          ? `Кошелёк успешно пополнен на ${amount} ₽` 
-          : `Wallet topped up with ${amount} ₽`
-      );
+      toast.success(t('wallet.toppedUp').replace('{amount}', `${amount} ₽`));
       // Remove query params from URL
       navigate('/wallet', { replace: true });
     } else if (canceled === 'true') {
-      toast.error(
-        language === 'ru' 
-          ? 'Оплата отменена' 
-          : 'Payment canceled'
-      );
+      toast.error(t('wallet.paymentCanceled'));
       navigate('/wallet', { replace: true });
     }
   }, [searchParams, navigate, language]);
@@ -241,7 +233,7 @@ const Wallet = () => {
   }
 
   return (
-    <AppLayout title={language === "ru" ? "Кошелёк" : "Wallet"}>
+    <AppLayout title={t('wallet.title')}>
       <div className="p-4 space-y-6 pb-24">
         {/* Balance Card */}
         <Card className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground overflow-hidden">
