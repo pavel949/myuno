@@ -32,12 +32,12 @@ const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
   const [currency, setCurrencyState] = useState<Currency>(() => {
-    const saved = localStorage.getItem('uno-currency');
+    const saved = localStorage.getItem('myuno-currency');
     return (saved as Currency) || 'THB';
   });
 
   useEffect(() => {
-    localStorage.setItem('uno-currency', currency);
+    localStorage.setItem('myuno-currency', currency);
   }, [currency]);
 
   const setCurrency = (newCurrency: Currency) => {

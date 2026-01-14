@@ -36,7 +36,7 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const CART_STORAGE_KEY = 'superapp_cart';
+const CART_STORAGE_KEY = 'myuno-cart';
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();

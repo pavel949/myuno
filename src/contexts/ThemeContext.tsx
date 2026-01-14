@@ -10,7 +10,7 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'uno-theme';
+const STORAGE_KEY = 'myuno-theme';
 
 const getStoredTheme = (): Theme => {
   if (typeof window === 'undefined') return 'dark';

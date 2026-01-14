@@ -28,24 +28,24 @@ interface UserPreferencesProps {
 export function UserPreferences({ onSave }: UserPreferencesProps) {
   const { language } = useLanguage();
   const [selectedLocation, setSelectedLocation] = useState(() => 
-    localStorage.getItem('uno-user-location') || 'phuket'
+    localStorage.getItem('myuno-user-location') || 'phuket'
   );
   const [selectedCurrency, setSelectedCurrency] = useState(() => 
-    localStorage.getItem('uno-user-currency') || 'THB'
+    localStorage.getItem('myuno-user-currency') || 'THB'
   );
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
-    const savedLocation = localStorage.getItem('uno-user-location') || 'phuket';
-    const savedCurrency = localStorage.getItem('uno-user-currency') || 'THB';
+    const savedLocation = localStorage.getItem('myuno-user-location') || 'phuket';
+    const savedCurrency = localStorage.getItem('myuno-user-currency') || 'THB';
     setHasChanges(
       selectedLocation !== savedLocation || selectedCurrency !== savedCurrency
     );
   }, [selectedLocation, selectedCurrency]);
 
   const handleSave = () => {
-    localStorage.setItem('uno-user-location', selectedLocation);
-    localStorage.setItem('uno-user-currency', selectedCurrency);
+    localStorage.setItem('myuno-user-location', selectedLocation);
+    localStorage.setItem('myuno-user-currency', selectedCurrency);
     setHasChanges(false);
     toast.success(language === 'ru' ? 'Настройки сохранены' : 'Settings saved');
     onSave?.();

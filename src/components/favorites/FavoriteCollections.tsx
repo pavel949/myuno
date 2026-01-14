@@ -69,7 +69,7 @@ export function FavoriteCollections({
 }: FavoriteCollectionsProps) {
   const { language } = useLanguage();
   const [collections, setCollections] = useState<Collection[]>(() => {
-    const saved = localStorage.getItem('favorite-collections');
+    const saved = localStorage.getItem('myuno-favorite-collections');
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -85,7 +85,7 @@ export function FavoriteCollections({
 
   const saveCollections = (newCollections: Collection[]) => {
     setCollections(newCollections);
-    localStorage.setItem('favorite-collections', JSON.stringify(newCollections));
+    localStorage.setItem('myuno-favorite-collections', JSON.stringify(newCollections));
   };
 
   const handleCreateCollection = () => {
