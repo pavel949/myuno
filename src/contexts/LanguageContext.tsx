@@ -80,7 +80,7 @@ const translations: Record<Language, Record<string, string>> = {
     'category.market': 'Магазины',
     
     // Hero section
-    'home.heroTitle': 'Дом там, где UNO',
+    'home.heroTitle': 'Дом там, где myUNO',
     'home.heroSubtitle': 'Всё для комфортной жизни за рубежом — проверенные сервисы, надёжные партнёры, прозрачные цены',
     'home.trustBadge': 'Надёжная инфраструктура',
     'home.forOwners': 'Для владельцев',
@@ -211,7 +211,7 @@ const translations: Record<Language, Record<string, string>> = {
     'message.loginRequired': 'Требуется авторизация',
     
     // Home page
-    'home.welcome': 'Добро пожаловать в UNO',
+    'home.welcome': 'Добро пожаловать в myUNO',
     'home.subtitle': 'Ваш персональный гид по Пхукету',
     'home.featuredServices': 'Популярные услуги',
     'home.categories': 'Категории',
@@ -401,7 +401,7 @@ const translations: Record<Language, Record<string, string>> = {
     'category.market': 'Shops',
     
     // Hero section
-    'home.heroTitle': 'Home is where UNO is',
+    'home.heroTitle': 'Home is where myUNO is',
     'home.heroSubtitle': 'Everything for comfortable life abroad — verified services, trusted partners, transparent prices',
     'home.trustBadge': 'Trusted Infrastructure',
     'home.forOwners': 'For Owners',
@@ -532,7 +532,7 @@ const translations: Record<Language, Record<string, string>> = {
     'message.loginRequired': 'Login required',
     
     // Home page
-    'home.welcome': 'Welcome to UNO',
+    'home.welcome': 'Welcome to myUNO',
     'home.subtitle': 'Your personal guide to Phuket',
     'home.featuredServices': 'Featured Services',
     'home.categories': 'Categories',
@@ -722,7 +722,7 @@ const translations: Record<Language, Record<string, string>> = {
     'category.market': 'ร้านค้า',
     
     // Hero section
-    'home.heroTitle': 'บ้านอยู่ที่ไหน UNO อยู่ที่นั่น',
+    'home.heroTitle': 'บ้านอยู่ที่ไหน myUNO อยู่ที่นั่น',
     'home.heroSubtitle': 'ทุกอย่างเพื่อชีวิตที่สะดวกสบายในต่างแดน — บริการที่ยืนยัน พันธมิตรที่เชื่อถือได้ ราคาโปร่งใส',
     'home.trustBadge': 'โครงสร้างที่เชื่อถือได้',
     'home.forOwners': 'สำหรับเจ้าของ',

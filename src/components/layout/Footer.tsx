@@ -38,7 +38,7 @@ export function Footer() {
               </div>
               <div>
                 <h3 className="font-semibold text-foreground">
-                  {language === 'ru' ? 'Станьте партнёром UNO' : 'Become a UNO Partner'}
+                  {language === 'ru' ? 'Станьте партнёром myUNO' : 'Become a myUNO Partner'}
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   {language === 'ru' 
@@ -120,14 +120,15 @@ export function Footer() {
 
         {/* Bottom Bar */}
         <div className="pt-6 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-muted-foreground">my</span>
             <div className="w-6 h-6 rounded-md gradient-gold flex items-center justify-center">
               <span className="text-xs font-bold text-primary-foreground">U</span>
             </div>
             <span className="text-sm font-medium text-foreground">UNO</span>
           </div>
           <p className="text-xs text-muted-foreground text-center">
-            © {new Date().getFullYear()} UNO. {language === 'ru' ? 'Все права защищены.' : 'All rights reserved.'}
+            © {new Date().getFullYear()} myUNO. {language === 'ru' ? 'Все права защищены.' : 'All rights reserved.'}
           </p>
         </div>
       </div>

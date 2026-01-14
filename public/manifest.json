@@ -1,12 +1,13 @@
 {
-  "name": "UNO - All Services in One",
-  "short_name": "UNO",
+  "name": "myUNO - All Services in One",
+  "short_name": "myUNO",
   "description": "Все услуги в одном приложении",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0b",
   "theme_color": "#d4af37",
   "orientation": "portrait-primary",
+  "id": "myuno-app",
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
