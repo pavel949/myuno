@@ -1,0 +1,166 @@
+import React, { useState } from 'react';
+import { Lock, User, KeyRound } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { PinInput } from './PinInput';
+import { usePinAuth } from '@/hooks/usePinAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { cn } from '@/lib/utils';
+
+interface PinLoginProps {
+  onSuccess: () => void;
+  onSwitchToEmail: () => void;
+}
+
+export const PinLogin: React.FC<PinLoginProps> = ({ onSuccess, onSwitchToEmail }) => {
+  const { language } = useLanguage();
+  const { verifyPin, savedEmail, clearPinData } = usePinAuth();
+  const [error, setError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [attempts, setAttempts] = useState(0);
+
+  const t = {
+    en: {
+      title: 'Welcome back',
+      subtitle: 'Enter your PIN to continue',
+      forgotPin: 'Forgot PIN? Login with password',
+      wrongPin: 'Wrong PIN. Try again.',
+      tooManyAttempts: 'Too many attempts. Please login with password.',
+      error: 'Authentication failed. Please try again.',
+      useEmail: 'Use email instead',
+      notYou: 'Not you?'
+    },
+    ru: {
+      title: 'С возвращением',
+      subtitle: 'Введите PIN для продолжения',
+      forgotPin: 'Забыли PIN? Войти с паролем',
+      wrongPin: 'Неверный PIN. Попробуйте снова.',
+      tooManyAttempts: 'Слишком много попыток. Войдите с паролем.',
+      error: 'Ошибка аутентификации. Попробуйте снова.',
+      useEmail: 'Использовать email',
+      notYou: 'Не вы?'
+    }
+  };
+
+  const texts = t[language];
+  const MAX_ATTEMPTS = 5;
+
+  const handlePinComplete = async (pin: string) => {
+    if (attempts >= MAX_ATTEMPTS) {
+      toast.error(texts.tooManyAttempts);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(false);
+
+    try {
+      const isValid = await verifyPin(pin);
+      
+      if (!isValid) {
+        throw new Error('Invalid PIN');
+      }
+
+      // PIN verified - now we need to refresh the session
+      // The user should already have a valid refresh token stored
+      const { data, error: refreshError } = await supabase.auth.refreshSession();
+      
+      if (refreshError || !data.session) {
+        // Session expired, need to login with password
+        toast.error(texts.error);
+        onSwitchToEmail();
+        return;
+      }
+
+      toast.success(language === 'en' ? 'Welcome back!' : 'С возвращением!');
+      onSuccess();
+    } catch (err) {
+      console.error('PIN verification error:', err);
+      setError(true);
+      setAttempts(prev => prev + 1);
+      
+      if (attempts + 1 >= MAX_ATTEMPTS) {
+        toast.error(texts.tooManyAttempts);
+        onSwitchToEmail();
+      } else {
+        toast.error(texts.wrongPin);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSwitchUser = () => {
+    clearPinData();
+    onSwitchToEmail();
+  };
+
+  // Mask email for display
+  const maskedEmail = savedEmail 
+    ? savedEmail.replace(/(.{2})(.*)(@.*)/, '$1***$3')
+    : '';
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[400px] p-6">
+      <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+        <Lock className="w-8 h-8 text-primary" />
+      </div>
+
+      <h2 className="text-2xl font-bold text-foreground mb-2 text-center">
+        {texts.title}
+      </h2>
+      
+      {maskedEmail && (
+        <div className="flex items-center gap-2 text-muted-foreground mb-2">
+          <User className="w-4 h-4" />
+          <span className="text-sm">{maskedEmail}</span>
+        </div>
+      )}
+      
+      <p className="text-muted-foreground text-center mb-8">
+        {texts.subtitle}
+      </p>
+
+      <div className="w-full max-w-sm">
+        <PinInput
+          onComplete={handlePinComplete}
+          disabled={isLoading || attempts >= MAX_ATTEMPTS}
+          error={error}
+        />
+
+        {isLoading && (
+          <div className="flex items-center justify-center gap-2 mt-6 text-primary">
+            <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
+
+        {attempts > 0 && attempts < MAX_ATTEMPTS && (
+          <p className="text-sm text-muted-foreground text-center mt-4">
+            {MAX_ATTEMPTS - attempts} {language === 'en' ? 'attempts left' : 'попыток осталось'}
+          </p>
+        )}
+      </div>
+
+      <div className="flex flex-col items-center gap-2 mt-8">
+        <Button
+          variant="ghost"
+          onClick={onSwitchToEmail}
+          className="text-muted-foreground"
+          disabled={isLoading}
+        >
+          <KeyRound className="w-4 h-4 mr-2" />
+          {texts.forgotPin}
+        </Button>
+        
+        <button
+          onClick={handleSwitchUser}
+          className="text-sm text-muted-foreground hover:text-foreground"
+          disabled={isLoading}
+        >
+          {texts.notYou}
+        </button>
+      </div>
+    </div>
+  );
+};
