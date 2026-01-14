@@ -4963,6 +4963,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_pins: {
+        Row: {
+          created_at: string
+          device_id: string | null
+          id: string
+          pin_hash: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_id?: string | null
+          id?: string
+          pin_hash: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device_id?: string | null
+          id?: string
+          pin_hash?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -6051,6 +6078,14 @@ export type Database = {
       }
       refund_wallet_booking: {
         Args: { p_booking_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      set_user_pin: {
+        Args: { p_device_id?: string; p_pin: string; p_user_id: string }
+        Returns: boolean
+      }
+      verify_user_pin: {
+        Args: { p_pin: string; p_user_id: string }
         Returns: boolean
       }
     }

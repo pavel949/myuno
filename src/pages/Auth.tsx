@@ -10,9 +10,14 @@ import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { usePinAuth } from '@/hooks/usePinAuth';
+import { PinLogin } from '@/components/auth/PinLogin';
+import { PinSetup } from '@/components/auth/PinSetup';
 
 const emailSchema = z.string().email('Invalid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
+
+type AuthView = 'pin-login' | 'email-auth' | 'pin-setup';
 
 export default function Auth() {
   const [searchParams] = useSearchParams();
@@ -24,18 +29,36 @@ export default function Auth() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; fullName?: string }>({});
+  const [showPinSetup, setShowPinSetup] = useState(false);
 
   const { user, signIn, signUp } = useAuth();
   const { t, language } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { canUsePinLogin, hasPin, isLoading: pinLoading } = usePinAuth();
 
-  // Redirect if already logged in
+  // Determine initial view
+  const [view, setView] = useState<AuthView>('email-auth');
+
   useEffect(() => {
-    if (user) {
-      navigate('/', { replace: true });
+    // If user has PIN set up on this device, show PIN login
+    if (!pinLoading && canUsePinLogin) {
+      setView('pin-login');
     }
-  }, [user, navigate]);
+  }, [canUsePinLogin, pinLoading]);
+
+  // Handle successful login - check if need PIN setup
+  useEffect(() => {
+    if (user && !showPinSetup) {
+      // User just logged in, check if they have PIN
+      if (!hasPin && !pinLoading) {
+        setShowPinSetup(true);
+        setView('pin-setup');
+      } else if (hasPin || pinLoading === false) {
+        navigate('/', { replace: true });
+      }
+    }
+  }, [user, hasPin, pinLoading, navigate, showPinSetup]);
 
   const validateForm = () => {
     const newErrors: typeof errors = {};
@@ -87,7 +110,7 @@ export default function Auth() {
             title: t('auth.welcomeBack'),
             description: 'Successfully logged in',
           });
-          navigate('/');
+          // Don't navigate here - let the useEffect handle it
         }
       } else {
         const { error, data } = await signUp(email, password, fullName);
@@ -118,7 +141,7 @@ export default function Auth() {
               ? 'Аккаунт успешно создан!' 
               : 'Account created successfully!',
           });
-          navigate('/');
+          // Don't navigate here - let useEffect handle PIN setup
         }
       }
     } catch (error) {
@@ -131,6 +154,31 @@ export default function Auth() {
       setIsLoading(false);
     }
   };
+
+  const handlePinLoginSuccess = () => {
+    navigate('/', { replace: true });
+  };
+
+  const handleSwitchToEmail = () => {
+    setView('email-auth');
+  };
+
+  const handlePinSetupComplete = () => {
+    navigate('/', { replace: true });
+  };
+
+  const handleSkipPinSetup = () => {
+    navigate('/', { replace: true });
+  };
+
+  // Show loading while checking PIN status
+  if (pinLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -150,180 +198,213 @@ export default function Auth() {
 
       {/* Main content */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-8">
-        <div className="w-full max-w-md space-y-8">
-          {/* Title */}
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-display font-bold text-gradient-gold">
-              {isLogin ? t('auth.welcomeBack') : t('auth.getStarted')}
-            </h1>
-            <p className="text-muted-foreground">
-              {isLogin 
-                ? 'Enter your credentials to continue' 
-                : 'Create an account to get started'}
-            </p>
-          </div>
+        <div className="w-full max-w-md">
+          {/* PIN Login View */}
+          {view === 'pin-login' && (
+            <PinLogin 
+              onSuccess={handlePinLoginSuccess}
+              onSwitchToEmail={handleSwitchToEmail}
+            />
+          )}
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Referral code banner (signup only) */}
-            {!isLogin && referralCode && (
-              <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 flex items-center gap-3">
-                <Gift className="w-5 h-5 text-primary" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium">
-                    {language === 'ru' ? 'Реферальный код активен!' : 'Referral code active!'}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {language === 'ru' 
-                      ? 'Получите бонус после первого бронирования' 
-                      : 'Get bonus after your first booking'}
-                  </p>
-                </div>
-                <span className="font-mono font-bold text-primary">{referralCode.toUpperCase()}</span>
+          {/* PIN Setup View */}
+          {view === 'pin-setup' && (
+            <PinSetup 
+              onComplete={handlePinSetupComplete}
+              onSkip={handleSkipPinSetup}
+            />
+          )}
+
+          {/* Email Auth View */}
+          {view === 'email-auth' && (
+            <div className="space-y-8">
+              {/* Title */}
+              <div className="text-center space-y-2">
+                <h1 className="text-3xl font-display font-bold text-gradient-gold">
+                  {isLogin ? t('auth.welcomeBack') : t('auth.getStarted')}
+                </h1>
+                <p className="text-muted-foreground">
+                  {isLogin 
+                    ? 'Enter your credentials to continue' 
+                    : 'Create an account to get started'}
+                </p>
               </div>
-            )}
 
-            {/* Name field (signup only) */}
-            {!isLogin && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">
-                  {t('auth.fullName')}
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <input
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="John Doe"
-                    className={cn(
-                      "w-full h-12 pl-10 pr-4 rounded-xl bg-secondary border transition-colors",
-                      "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
-                      errors.fullName ? "border-destructive" : "border-border"
-                    )}
-                  />
-                </div>
-                {errors.fullName && (
-                  <p className="text-sm text-destructive">{errors.fullName}</p>
-                )}
-              </div>
-            )}
-
-            {/* Email field */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
-                {t('auth.email')}
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
-                  className={cn(
-                    "w-full h-12 pl-10 pr-4 rounded-xl bg-secondary border transition-colors",
-                    "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
-                    errors.email ? "border-destructive" : "border-border"
-                  )}
-                />
-              </div>
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email}</p>
-              )}
-            </div>
-
-            {/* Password field */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
-                {t('auth.password')}
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className={cn(
-                    "w-full h-12 pl-10 pr-12 rounded-xl bg-secondary border transition-colors",
-                    "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
-                    errors.password ? "border-destructive" : "border-border"
-                  )}
-                />
+              {/* Quick PIN login option */}
+              {canUsePinLogin && isLogin && (
                 <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={() => setView('pin-login')}
+                  className="w-full p-3 rounded-xl border border-border bg-secondary/50 hover:bg-secondary transition-colors text-center"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  <span className="text-sm text-muted-foreground">
+                    {language === 'ru' ? 'Войти с PIN-кодом' : 'Login with PIN'}
+                  </span>
                 </button>
-              </div>
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password}</p>
               )}
-            </div>
 
-            {/* Referral code field (signup only, if not from link) */}
-            {!isLogin && !searchParams.get('ref') && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">
-                  {language === 'ru' ? 'Реферальный код (если есть)' : 'Referral code (optional)'}
-                </label>
-                <div className="relative">
-                  <Gift className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <input
-                    type="text"
-                    value={referralCode}
-                    onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                    placeholder="ABC123"
-                    maxLength={6}
-                    className={cn(
-                      "w-full h-12 pl-10 pr-4 rounded-xl bg-secondary border transition-colors font-mono uppercase",
-                      "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary border-border"
+              {/* Form */}
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Referral code banner (signup only) */}
+                {!isLogin && referralCode && (
+                  <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 flex items-center gap-3">
+                    <Gift className="w-5 h-5 text-primary" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">
+                        {language === 'ru' ? 'Реферальный код активен!' : 'Referral code active!'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {language === 'ru' 
+                          ? 'Получите бонус после первого бронирования' 
+                          : 'Get bonus after your first booking'}
+                      </p>
+                    </div>
+                    <span className="font-mono font-bold text-primary">{referralCode.toUpperCase()}</span>
+                  </div>
+                )}
+
+                {/* Name field (signup only) */}
+                {!isLogin && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">
+                      {t('auth.fullName')}
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                      <input
+                        type="text"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        placeholder="John Doe"
+                        className={cn(
+                          "w-full h-12 pl-10 pr-4 rounded-xl bg-secondary border transition-colors",
+                          "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
+                          errors.fullName ? "border-destructive" : "border-border"
+                        )}
+                      />
+                    </div>
+                    {errors.fullName && (
+                      <p className="text-sm text-destructive">{errors.fullName}</p>
                     )}
-                  />
+                  </div>
+                )}
+
+                {/* Email field */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">
+                    {t('auth.email')}
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="your@email.com"
+                      className={cn(
+                        "w-full h-12 pl-10 pr-4 rounded-xl bg-secondary border transition-colors",
+                        "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
+                        errors.email ? "border-destructive" : "border-border"
+                      )}
+                    />
+                  </div>
+                  {errors.email && (
+                    <p className="text-sm text-destructive">{errors.email}</p>
+                  )}
                 </div>
+
+                {/* Password field */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">
+                    {t('auth.password')}
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className={cn(
+                        "w-full h-12 pl-10 pr-12 rounded-xl bg-secondary border transition-colors",
+                        "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
+                        errors.password ? "border-destructive" : "border-border"
+                      )}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                  {errors.password && (
+                    <p className="text-sm text-destructive">{errors.password}</p>
+                  )}
+                </div>
+
+                {/* Referral code field (signup only, if not from link) */}
+                {!isLogin && !searchParams.get('ref') && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">
+                      {language === 'ru' ? 'Реферальный код (если есть)' : 'Referral code (optional)'}
+                    </label>
+                    <div className="relative">
+                      <Gift className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                      <input
+                        type="text"
+                        value={referralCode}
+                        onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                        placeholder="ABC123"
+                        maxLength={6}
+                        className={cn(
+                          "w-full h-12 pl-10 pr-4 rounded-xl bg-secondary border transition-colors font-mono uppercase",
+                          "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary border-border"
+                        )}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Forgot password */}
+                {isLogin && (
+                  <div className="text-right">
+                    <button type="button" className="text-sm text-primary hover:underline">
+                      {t('auth.forgotPassword')}
+                    </button>
+                  </div>
+                )}
+
+                {/* Submit button */}
+                <PremiumButton
+                  type="submit"
+                  className="w-full"
+                  size="lg"
+                  isLoading={isLoading}
+                >
+                  {isLogin ? t('auth.login') : t('auth.createAccount')}
+                  <ArrowRight className="w-4 h-4 ml-1" />
+                </PremiumButton>
+              </form>
+
+              {/* Toggle login/signup */}
+              <div className="text-center">
+                <p className="text-muted-foreground">
+                  {isLogin ? t('auth.noAccount') : t('auth.hasAccount')}{' '}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsLogin(!isLogin);
+                      setErrors({});
+                    }}
+                    className="text-primary font-medium hover:underline"
+                  >
+                    {isLogin ? t('auth.signup') : t('auth.login')}
+                  </button>
+                </p>
               </div>
-            )}
-
-            {/* Forgot password */}
-            {isLogin && (
-              <div className="text-right">
-                <button type="button" className="text-sm text-primary hover:underline">
-                  {t('auth.forgotPassword')}
-                </button>
-              </div>
-            )}
-
-            {/* Submit button */}
-            <PremiumButton
-              type="submit"
-              className="w-full"
-              size="lg"
-              isLoading={isLoading}
-            >
-              {isLogin ? t('auth.login') : t('auth.createAccount')}
-              <ArrowRight className="w-4 h-4 ml-1" />
-            </PremiumButton>
-          </form>
-
-          {/* Toggle login/signup */}
-          <div className="text-center">
-            <p className="text-muted-foreground">
-              {isLogin ? t('auth.noAccount') : t('auth.hasAccount')}{' '}
-              <button
-                type="button"
-                onClick={() => {
-                  setIsLogin(!isLogin);
-                  setErrors({});
-                }}
-                className="text-primary font-medium hover:underline"
-              >
-                {isLogin ? t('auth.signup') : t('auth.login')}
-              </button>
-            </p>
-          </div>
+            </div>
+          )}
         </div>
       </main>
 
