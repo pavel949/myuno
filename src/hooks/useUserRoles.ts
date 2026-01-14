@@ -202,7 +202,7 @@ export function useActiveRole() {
   
   // Get stored active role from localStorage
   const getStoredRole = (): AppRole => {
-    const stored = localStorage.getItem('uno-active-role');
+    const stored = localStorage.getItem('myuno-active-role');
     if (stored && activeRoles.includes(stored as AppRole)) {
       return stored as AppRole;
     }
@@ -211,9 +211,9 @@ export function useActiveRole() {
   };
 
   const setActiveRole = (role: AppRole) => {
-    localStorage.setItem('uno-active-role', role);
+    localStorage.setItem('myuno-active-role', role);
     // Trigger re-render by dispatching storage event
-    window.dispatchEvent(new StorageEvent('storage', { key: 'uno-active-role', newValue: role }));
+    window.dispatchEvent(new StorageEvent('storage', { key: 'myuno-active-role', newValue: role }));
   };
 
   return {

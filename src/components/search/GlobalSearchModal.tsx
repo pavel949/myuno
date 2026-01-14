@@ -7,7 +7,8 @@ import {
   Pill, Compass, Scale, Wrench, ArrowRight, Anchor,
   Baby, Brush, ShoppingBag, PawPrint, Loader2
 } from 'lucide-react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -111,7 +112,7 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
   const [query, setQuery] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const [recentSearches, setRecentSearches] = useState<string[]>(() => {
-    const saved = localStorage.getItem('uno-recent-searches');
+    const saved = localStorage.getItem('myuno-recent-searches');
     return saved ? JSON.parse(saved) : [];
   });
 
@@ -128,7 +129,7 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
     // Save to recent searches
     const newRecent = [query, ...recentSearches.filter(s => s !== query)].slice(0, 5);
     setRecentSearches(newRecent);
-    localStorage.setItem('uno-recent-searches', JSON.stringify(newRecent));
+    localStorage.setItem('myuno-recent-searches', JSON.stringify(newRecent));
     
     onOpenChange(false);
     setQuery('');
@@ -141,12 +142,15 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
 
   const clearRecentSearches = () => {
     setRecentSearches([]);
-    localStorage.removeItem('uno-recent-searches');
+    localStorage.removeItem('myuno-recent-searches');
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg p-0 gap-0 max-h-[80vh] overflow-hidden" hideCloseButton>
+      <DialogContent className="sm:max-w-lg p-0 gap-0 max-h-[80vh] overflow-hidden" hideCloseButton aria-describedby={undefined}>
+        <VisuallyHidden>
+          <DialogTitle>Search</DialogTitle>
+        </VisuallyHidden>
         {/* Search Input */}
         <div className="p-4 border-b border-border">
           <div className="relative">

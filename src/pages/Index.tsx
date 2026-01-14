@@ -50,7 +50,7 @@ const Index = () => {
   const navigate = useNavigate();
   const [refreshKey, setRefreshKey] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(() => {
-    return !localStorage.getItem('uno-onboarding-complete');
+    return !localStorage.getItem('myuno-onboarding-complete');
   });
   const [showSearch, setShowSearch] = useState(false);
 

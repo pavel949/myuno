@@ -57,7 +57,7 @@ export function PersonalizedOffersSection() {
   const { history } = useViewHistory();
   const [offers, setOffers] = useState<PersonalizedOffer[]>([]);
   const [dismissedOffers, setDismissedOffers] = useState<string[]>(() => {
-    const saved = localStorage.getItem('dismissed-offers');
+    const saved = localStorage.getItem('myuno-dismissed-offers');
     return saved ? JSON.parse(saved) : [];
   });
 
@@ -92,7 +92,7 @@ export function PersonalizedOffersSection() {
   const handleDismiss = (offerId: string) => {
     const newDismissed = [...dismissedOffers, offerId];
     setDismissedOffers(newDismissed);
-    localStorage.setItem('dismissed-offers', JSON.stringify(newDismissed));
+    localStorage.setItem('myuno-dismissed-offers', JSON.stringify(newDismissed));
   };
 
   if (offers.length === 0) return null;
