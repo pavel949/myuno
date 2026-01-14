@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
@@ -17,8 +18,17 @@ interface SocialButtonsProps {
   className?: string;
 }
 
+// Pages where buttons should be hidden
+const HIDDEN_ROUTES = ['/auth'];
+
 export const WhatsAppButton: React.FC<SocialButtonsProps> = ({ className }) => {
+  const location = useLocation();
   const phoneNumber = '66922407355';
+  
+  // Hide on auth page
+  if (HIDDEN_ROUTES.includes(location.pathname)) {
+    return null;
+  }
   
   const handleWhatsApp = () => {
     window.open(`https://wa.me/${phoneNumber}`, '_blank');
