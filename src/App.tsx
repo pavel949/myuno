@@ -9,7 +9,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AnimatedRoutes } from "@/components/layout/AnimatedRoutes";
-
+import { WhatsAppButton } from "@/components/chat/WhatsAppButton";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +25,7 @@ const App = () => (
                 <Sonner />
                 <BrowserRouter>
                   <AnimatedRoutes />
+                  <WhatsAppButton />
                 </BrowserRouter>
               </TooltipProvider>
             </CartProvider>
