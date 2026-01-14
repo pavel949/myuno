@@ -255,6 +255,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/transport/airport" element={<Navigate to="/transport/airport-transfer" replace />} />
         <Route path="/airport-transfer" element={<Navigate to="/transport/airport-transfer" replace />} />
         <Route path="/transport/taxi" element={<PageTransition><TaxiBooking /></PageTransition>} />
+        <Route path="/taxi-booking" element={<Navigate to="/transport/taxi" replace />} />
         
         {/* Fitness Mini-App Routes */}
         <Route path="/fitness" element={<PageTransition><FitnessIndex /></PageTransition>} />
