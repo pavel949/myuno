@@ -232,6 +232,75 @@ const translations: Record<Language, Record<string, string>> = {
     'beauty.contactInfo': 'Контактная информация',
     'beauty.confirmBooking': 'Подтвердить бронирование',
     'beauty.bookingSuccess': 'Бронирование создано!',
+    
+    // Home Services
+    'services.homeTitle': 'Домашние услуги',
+    'services.professionals': 'мастеров',
+    'services.heroTitle': 'Мастера на все руки',
+    'services.heroSubtitle': 'Сантехники, электрики, уборка и многое другое',
+    'services.searchPlaceholder': 'Найти услугу или мастера...',
+    'services.notFound': 'Мастера не найдены',
+    
+    // Legal Services
+    'legal.businessTitle': 'Бизнес-услуги',
+    'legal.providers': 'компаний',
+    'legal.heroTitle': 'Юридические и бизнес-услуги',
+    'legal.heroSubtitle': 'Проверенные специалисты для вашего бизнеса в Таиланде',
+    'legal.searchPlaceholder': 'Найти услугу или компанию...',
+    'legal.notFound': 'Компании не найдены',
+    'legal.tax': 'Налоги',
+    'legal.business': 'Бизнес',
+    
+    // Education
+    'education.heroTitle': 'Образование',
+    'education.heroSubtitle': 'Курсы и репетиторы для детей и взрослых',
+    'education.searchPlaceholder': 'Поиск курсов и репетиторов...',
+    'education.tutor': 'Репетитор',
+    'education.school': 'Школа',
+    'education.notFound': 'Ничего не найдено',
+    'education.tutorsNotFound': 'Репетиторы не найдены',
+    'education.aboutTutor': 'О репетиторе',
+    'education.teachingLanguages': 'Языки преподавания',
+    'education.perHour': 'час',
+    
+    // SOS
+    'sos.offlineMode': 'Вы офлайн — данные из кеша',
+    'sos.savedOffline': 'Страница SOS сохранена для офлайн-доступа',
+    'sos.saveFailed': 'Не удалось сохранить. Попробуйте обновить страницу.',
+    'sos.saveError': 'Ошибка сохранения',
+    'sos.unoAlert': 'Личная безопасность и помощь в экстремальных ситуациях. 24/7.',
+    'sos.callUs': 'Позвонить',
+    'sos.saveOffline': 'Сохранить офлайн',
+    'sos.saved': 'Сохранено',
+    'sos.quickActions': 'Срочные контакты',
+    'sos.contacts': 'Контакты',
+    'sos.urgentServices': 'Срочные услуги',
+    'sos.survivalTips': 'Советы по выживанию',
+    
+    // VIP Concierge
+    'vip.title': 'VIP Консьерж',
+    'vip.subtitle': 'Люкс консьерж сервис',
+    'vip.description': 'Эксклюзивные услуги премиум-класса для взыскательных клиентов. Вертолёты, частные самолёты, персональные повара, яхты, люксовые автомобили и полный спектр VIP-сервисов.',
+    'vip.callUs': 'Позвонить',
+    'vip.whyVip': 'Почему UNO VIP?',
+    'vip.support247': 'Круглосуточная поддержка 24/7',
+    'vip.personalManager': 'Персональный менеджер',
+    'vip.exclusiveAccess': 'Эксклюзивный доступ',
+    'vip.confidentiality': 'Конфиденциальность',
+    'vip.ourServices': 'Наши услуги',
+    'vip.readyForVip': 'Готовы к VIP опыту?',
+    'vip.contactUs': 'Свяжитесь с нами для персонального предложения',
+    'vip.messageWhatsApp': 'Написать в WhatsApp',
+    
+    // Common booking
+    'booking.total': 'Итого',
+    'booking.maxPeople': 'Максимум {max} человек',
+    'booking.unavailable': 'Недоступно',
+    'booking.expires': 'Истекает:',
+    'booking.allCategories': 'Все категории',
+    
+    // Tours extras
+    'tours.noToursFound': 'Туры не найдены',
   },
   en: {
     // Navigation
@@ -456,6 +525,75 @@ const translations: Record<Language, Record<string, string>> = {
     'beauty.contactInfo': 'Contact Information',
     'beauty.confirmBooking': 'Confirm Booking',
     'beauty.bookingSuccess': 'Booking Confirmed!',
+    
+    // Home Services
+    'services.homeTitle': 'Home Services',
+    'services.professionals': 'professionals',
+    'services.heroTitle': 'Professional Services',
+    'services.heroSubtitle': 'Plumbers, electricians, cleaning and more',
+    'services.searchPlaceholder': 'Find service or professional...',
+    'services.notFound': 'No providers found',
+    
+    // Legal Services
+    'legal.businessTitle': 'Business Services',
+    'legal.providers': 'providers',
+    'legal.heroTitle': 'Legal & Business Services',
+    'legal.heroSubtitle': 'Verified professionals for your business in Thailand',
+    'legal.searchPlaceholder': 'Find service or company...',
+    'legal.notFound': 'No providers found',
+    'legal.tax': 'Tax',
+    'legal.business': 'Business',
+    
+    // Education
+    'education.heroTitle': 'Education',
+    'education.heroSubtitle': 'Courses and tutors for kids and adults',
+    'education.searchPlaceholder': 'Search courses and tutors...',
+    'education.tutor': 'Tutor',
+    'education.school': 'School',
+    'education.notFound': 'Nothing found',
+    'education.tutorsNotFound': 'No tutors found',
+    'education.aboutTutor': 'About Tutor',
+    'education.teachingLanguages': 'Teaching Languages',
+    'education.perHour': 'hr',
+    
+    // SOS
+    'sos.offlineMode': 'You are offline — using cached data',
+    'sos.savedOffline': 'SOS page saved for offline access',
+    'sos.saveFailed': 'Could not save. Try refreshing the page.',
+    'sos.saveError': 'Save failed',
+    'sos.unoAlert': 'Personal safety and emergency assistance. 24/7.',
+    'sos.callUs': 'Call Us',
+    'sos.saveOffline': 'Save Offline',
+    'sos.saved': 'Saved',
+    'sos.quickActions': 'Quick Contacts',
+    'sos.contacts': 'Contacts',
+    'sos.urgentServices': 'Urgent Services',
+    'sos.survivalTips': 'Survival Tips',
+    
+    // VIP Concierge
+    'vip.title': 'VIP Concierge',
+    'vip.subtitle': 'Luxury Concierge Service',
+    'vip.description': 'Exclusive premium services for discerning clients. Helicopters, private jets, personal chefs, yachts, luxury cars and full range of VIP services.',
+    'vip.callUs': 'Call Us',
+    'vip.whyVip': 'Why UNO VIP?',
+    'vip.support247': '24/7 support around the clock',
+    'vip.personalManager': 'Personal manager',
+    'vip.exclusiveAccess': 'Exclusive access',
+    'vip.confidentiality': 'Confidentiality',
+    'vip.ourServices': 'Our Services',
+    'vip.readyForVip': 'Ready for VIP Experience?',
+    'vip.contactUs': 'Contact us for a personalized offer',
+    'vip.messageWhatsApp': 'Message on WhatsApp',
+    
+    // Common booking
+    'booking.total': 'Total',
+    'booking.maxPeople': 'Maximum {max} people',
+    'booking.unavailable': 'Unavailable',
+    'booking.expires': 'Expires:',
+    'booking.allCategories': 'All categories',
+    
+    // Tours extras
+    'tours.noToursFound': 'No tours found',
   },
   th: {
     // Navigation

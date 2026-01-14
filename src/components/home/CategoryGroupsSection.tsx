@@ -12,7 +12,7 @@ interface CategoryGroupsSectionProps {
 }
 
 export function CategoryGroupsSection({ expanded = false, showAll = false }: CategoryGroupsSectionProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const navigate = useNavigate();
   const { groups, getName, isLoading } = useCategories();
 
@@ -91,7 +91,7 @@ export function CategoryGroupsSection({ expanded = false, showAll = false }: Cat
           onClick={() => navigate('/discover')}
           className="w-full flex items-center justify-center gap-2 py-3 text-sm font-medium text-primary hover:underline"
         >
-          {language === 'ru' ? 'Все категории' : 'All categories'}
+          {t('booking.allCategories')}
           <ChevronRight className="w-4 h-4" />
         </button>
       )}

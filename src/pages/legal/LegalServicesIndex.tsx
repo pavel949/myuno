@@ -18,7 +18,7 @@ const categories: MiniAppCategory[] = [
 ];
 
 export default function LegalServicesIndex() {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { services: legalServices, isLoading } = useLegalServices();
@@ -59,22 +59,22 @@ export default function LegalServicesIndex() {
   const quickItems: QuickGridItem[] = [
     { icon: '⚖️', label: language === 'ru' ? 'Юрист' : 'Legal', onClick: () => setSelectedCategory('legal') },
     { icon: '🛂', label: language === 'ru' ? 'Визы' : 'Visa', onClick: () => setSelectedCategory('visa') },
-    { icon: '💰', label: language === 'ru' ? 'Налоги' : 'Tax', onClick: () => setSelectedCategory('tax') },
-    { icon: '🏢', label: language === 'ru' ? 'Бизнес' : 'Business', onClick: () => setSelectedCategory('business') },
+    { icon: '💰', label: t('legal.tax'), onClick: () => setSelectedCategory('tax') },
+    { icon: '🏢', label: t('legal.business'), onClick: () => setSelectedCategory('business') },
   ];
 
   return (
     <MiniAppLayout
-      title={language === "ru" ? "Бизнес-услуги" : "Business Services"}
-      subtitle={language === "ru" ? `${filteredProviders.length} компаний` : `${filteredProviders.length} providers`}
+      title={t('legal.businessTitle')}
+      subtitle={`${filteredProviders.length} ${t('legal.providers')}`}
       heroIcon={Award}
-      heroTitle={language === "ru" ? "Юридические и бизнес-услуги" : "Legal & Business Services"}
-      heroSubtitle={language === "ru" ? "Проверенные специалисты для вашего бизнеса в Таиланде" : "Verified professionals for your business in Thailand"}
+      heroTitle={t('legal.heroTitle')}
+      heroSubtitle={t('legal.heroSubtitle')}
       heroImage="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800"
       heroGradient={{ from: 'from-blue-600/20', via: 'via-indigo-600/20', to: 'to-purple-700/20' }}
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}
-      searchPlaceholder={language === "ru" ? "Найти услугу или компанию..." : "Find service or company..."}
+      searchPlaceholder={t('legal.searchPlaceholder')}
       categories={categories}
       selectedCategory={selectedCategory}
       onCategoryChange={setSelectedCategory}
@@ -85,7 +85,7 @@ export default function LegalServicesIndex() {
       isLoading={isLoading}
       isEmpty={filteredProviders.length === 0}
       emptyIcon={Scale}
-      emptyText={language === "ru" ? "Компании не найдены" : "No providers found"}
+      emptyText={t('legal.notFound')}
     >
       <MiniAppQuickGrid items={quickItems} columns={4} className="mb-6" />
 

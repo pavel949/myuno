@@ -61,7 +61,7 @@ export function ItemCard({
   variant = 'horizontal',
   className,
 }: ItemCardProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isAvailable) return;
@@ -117,7 +117,7 @@ export function ItemCard({
           {!isAvailable && (
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
               <span className="text-white font-medium px-3 py-1 rounded bg-black/50">
-                {language === 'ru' ? 'Недоступно' : 'Unavailable'}
+                {t('booking.unavailable')}
               </span>
             </div>
           )}

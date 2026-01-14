@@ -22,7 +22,7 @@ export function BookingBottomBar({
   submitLabel,
   showBreakdown,
 }: BookingBottomBarProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const currencySymbol = currency === 'THB' ? '฿' : currency === 'USD' ? '$' : currency === 'EUR' ? '€' : '₽';
 
   return (
@@ -45,7 +45,7 @@ export function BookingBottomBar({
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="text-xs text-muted-foreground">
-            {language === 'ru' ? 'Итого' : 'Total'}
+            {t('booking.total')}
           </p>
           <p className="text-2xl font-bold text-primary">
             {currencySymbol}{total.toLocaleString()}
@@ -59,7 +59,7 @@ export function BookingBottomBar({
           size="lg"
         >
           {isSubmitting && <LoadingSpinner size="sm" className="mr-2" />}
-          {submitLabel || (language === 'ru' ? 'Подтвердить' : 'Confirm')}
+          {submitLabel || t('action.confirm')}
         </Button>
       </div>
     </motion.div>

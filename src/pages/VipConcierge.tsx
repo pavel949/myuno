@@ -154,13 +154,13 @@ const vipServices: VipService[] = [
 ];
 
 export default function VipConcierge() {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   return (
     <AppLayout>
       <PageContainer>
         <PageHeader
-          title={language === 'ru' ? 'VIP Консьерж' : 'VIP Concierge'}
+          title={t('vip.title')}
           showBack
         />
 
@@ -177,15 +177,13 @@ export default function VipConcierge() {
                 </h2>
                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
                   <Sparkles className="w-4 h-4 text-purple-500" />
-                  {language === 'ru' ? 'Люкс консьерж сервис' : 'Luxury Concierge Service'}
+                  {t('vip.subtitle')}
                 </div>
               </div>
             </div>
             
             <p className="text-foreground/80 mb-5 leading-relaxed">
-              {language === 'ru' 
-                ? 'Эксклюзивные услуги премиум-класса для взыскательных клиентов. Вертолёты, частные самолёты, персональные повара, яхты, люксовые автомобили и полный спектр VIP-сервисов.' 
-                : 'Exclusive premium services for discerning clients. Helicopters, private jets, personal chefs, yachts, luxury cars and full range of VIP services.'}
+              {t('vip.description')}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3">
@@ -195,7 +193,7 @@ export default function VipConcierge() {
                 onClick={() => window.location.href = `tel:${UNO_CONCIERGE_PHONE}`}
               >
                 <Phone className="w-5 h-5 mr-2" />
-                {language === 'ru' ? 'Позвонить' : 'Call Us'}
+                {t('vip.callUs')}
               </Button>
               <Button
                 size="lg"
@@ -216,14 +214,14 @@ export default function VipConcierge() {
             <div className="flex items-center gap-2 mb-2">
               <Star className="w-5 h-5 text-amber-500" fill="currentColor" />
               <span className="font-semibold text-amber-600">
-                {language === 'ru' ? 'Почему UNO VIP?' : 'Why UNO VIP?'}
+                {t('vip.whyVip')}
               </span>
             </div>
             <ul className="space-y-1 text-sm text-foreground/80">
-              <li>✓ {language === 'ru' ? 'Круглосуточная поддержка 24/7' : '24/7 support around the clock'}</li>
-              <li>✓ {language === 'ru' ? 'Персональный менеджер' : 'Personal manager'}</li>
-              <li>✓ {language === 'ru' ? 'Эксклюзивный доступ' : 'Exclusive access'}</li>
-              <li>✓ {language === 'ru' ? 'Конфиденциальность' : 'Confidentiality'}</li>
+              <li>✓ {t('vip.support247')}</li>
+              <li>✓ {t('vip.personalManager')}</li>
+              <li>✓ {t('vip.exclusiveAccess')}</li>
+              <li>✓ {t('vip.confidentiality')}</li>
             </ul>
           </div>
         </FadeInUp>
@@ -232,7 +230,7 @@ export default function VipConcierge() {
         <FadeInUp delay={0.1}>
           <h3 className="font-semibold mb-4 flex items-center gap-2">
             <Crown className="w-5 h-5 text-purple-500" />
-            {language === 'ru' ? 'Наши услуги' : 'Our Services'}
+            {t('vip.ourServices')}
           </h3>
         </FadeInUp>
 
@@ -270,19 +268,17 @@ export default function VipConcierge() {
           <div className="p-5 rounded-2xl bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-purple-500/20 text-center">
             <Crown className="w-10 h-10 text-purple-500 mx-auto mb-3" />
             <h3 className="font-semibold mb-2">
-              {language === 'ru' ? 'Готовы к VIP опыту?' : 'Ready for VIP Experience?'}
+              {t('vip.readyForVip')}
             </h3>
             <p className="text-sm text-muted-foreground mb-4">
-              {language === 'ru' 
-                ? 'Свяжитесь с нами для персонального предложения' 
-                : 'Contact us for a personalized offer'}
+              {t('vip.contactUs')}
             </p>
             <Button
               className="w-full bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white"
               onClick={() => window.open(UNO_WHATSAPP, '_blank')}
             >
               <MessageCircle className="w-4 h-4 mr-2" />
-              {language === 'ru' ? 'Написать в WhatsApp' : 'Message on WhatsApp'}
+              {t('vip.messageWhatsApp')}
             </Button>
           </div>
         </FadeInUp>
