@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  MapPin, Wallet, ChevronRight, Check,
+  MapPin, Wallet, ChevronRight, Check, Shield,
   Sparkles, Home, Car, UtensilsCrossed, Stethoscope, Scale
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -63,11 +63,11 @@ const welcomeCategories = [
 ];
 
 const locations = [
-  { id: 'phuket', name: { en: 'Phuket', ru: 'Пхукет', th: 'ภูเก็ต' }, flag: '🇹🇭', available: true },
-  { id: 'danang', name: { en: 'Da Nang', ru: 'Дананг', th: 'ดานัง' }, flag: '🇻🇳', available: false },
-  { id: 'bali', name: { en: 'Bali', ru: 'Бали', th: 'บาหลี' }, flag: '🇮🇩', available: false },
-  { id: 'dubai', name: { en: 'Dubai', ru: 'Дубай', th: 'ดูไบ' }, flag: '🇦🇪', available: false },
-  { id: 'lisbon', name: { en: 'Lisbon', ru: 'Лиссабон', th: 'ลิสบอน' }, flag: '🇵🇹', available: false },
+  { id: 'phuket', name: { en: 'Phuket', ru: 'Пхукет', th: 'ภูเก็ต' }, country: { en: 'Thailand', ru: 'Таиланд', th: 'ประเทศไทย' }, flag: '🇹🇭', available: true },
+  { id: 'danang', name: { en: 'Da Nang', ru: 'Дананг', th: 'ดานัง' }, country: { en: 'Vietnam', ru: 'Вьетнам', th: 'เวียดนาม' }, flag: '🇻🇳', available: false },
+  { id: 'bali', name: { en: 'Bali', ru: 'Бали', th: 'บาหลี' }, country: { en: 'Indonesia', ru: 'Индонезия', th: 'อินโดนีเซีย' }, flag: '🇮🇩', available: false },
+  { id: 'dubai', name: { en: 'Dubai', ru: 'Дубай', th: 'ดูไบ' }, country: { en: 'UAE', ru: 'ОАЭ', th: 'สหรัฐอาหรับเอมิเรตส์' }, flag: '🇦🇪', available: false },
+  { id: 'lisbon', name: { en: 'Lisbon', ru: 'Лиссабон', th: 'ลิสบอน' }, country: { en: 'Portugal', ru: 'Португалия', th: 'โปรตุเกส' }, flag: '🇵🇹', available: false },
 ];
 
 const comingSoonTexts = {
@@ -342,14 +342,47 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
                         {locations.filter(loc => !loc.available).map(loc => (
                           <div
                             key={loc.id}
-                            className="flex items-center gap-2 p-3 rounded-xl border border-border/50 bg-muted/30 opacity-60"
+                            className="flex items-center gap-2 p-2.5 rounded-xl border border-border/50 bg-muted/30 opacity-60"
                           >
                             <span className="text-lg">{loc.flag}</span>
-                            <span className="text-sm font-medium text-muted-foreground">
-                              {loc.name[lang]}
-                            </span>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-medium text-muted-foreground truncate">
+                                {loc.name[lang]}
+                              </p>
+                              <p className="text-[10px] text-muted-foreground/60 truncate">
+                                {loc.country[lang]}
+                              </p>
+                            </div>
                           </div>
                         ))}
+                      </div>
+                      
+                      {/* And more text */}
+                      <p className="text-center text-xs text-muted-foreground/70 pt-2 italic">
+                        {lang === 'en' && '...and more locations coming in 2025'}
+                        {lang === 'ru' && '...и другие города в 2025'}
+                        {lang === 'th' && '...และเมืองอื่นๆ ในปี 2025'}
+                      </p>
+                    </div>
+                    
+                    {/* Trust & Safety badge */}
+                    <div className="mt-3 p-3 rounded-xl bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 border border-primary/20">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <Shield className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-foreground">
+                            {lang === 'en' && 'Verified & Trusted'}
+                            {lang === 'ru' && 'Проверено и надёжно'}
+                            {lang === 'th' && 'ตรวจสอบและเชื่อถือได้'}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {lang === 'en' && 'All providers are vetted for quality & safety'}
+                            {lang === 'ru' && 'Все провайдеры проверены на качество'}
+                            {lang === 'th' && 'ผู้ให้บริการทุกรายผ่านการตรวจสอบ'}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
