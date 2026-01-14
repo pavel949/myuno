@@ -1,6 +1,6 @@
 // Service Worker for Push Notifications and Offline SOS Page
 
-const CACHE_NAME = 'uno-sos-cache-v1';
+const CACHE_NAME = 'myuno-sos-cache-v1';
 const SOS_CACHE_URLS = [
   '/',
   '/sos',
@@ -121,7 +121,7 @@ self.addEventListener('fetch', function(event) {
 self.addEventListener('push', function(event) {
   console.log('[SW] Push received:', event);
   
-  let data = { title: 'UNO', body: 'Новое уведомление' };
+  let data = { title: 'myUNO', body: 'Новое уведомление' };
   
   if (event.data) {
     try {

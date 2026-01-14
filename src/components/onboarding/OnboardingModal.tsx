@@ -19,7 +19,7 @@ type Language = 'ru' | 'en' | 'th';
 const steps = [
   {
     id: 'welcome',
-    title: { en: 'Home is where UNO is', ru: 'Дом там, где UNO', th: 'บ้านอยู่ที่ UNO' },
+    title: { en: 'Home is where myUNO is', ru: 'Дом там, где myUNO', th: 'บ้านอยู่ที่ myUNO' },
     subtitle: { en: 'Your life abroad, simplified', ru: 'Твоя жизнь за рубежом — проще', th: 'ชีวิตต่างแดนของคุณ ง่ายขึ้น' },
     icon: Sparkles,
   },
@@ -87,15 +87,15 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
       setCurrentStep(currentStep + 1);
     } else {
       // Save preferences to localStorage
-      localStorage.setItem('uno-onboarding-complete', 'true');
-      localStorage.setItem('uno-user-location', selectedLocation || 'phuket');
-      localStorage.setItem('uno-user-interests', JSON.stringify(selectedInterests));
+      localStorage.setItem('myuno-onboarding-complete', 'true');
+      localStorage.setItem('myuno-user-location', selectedLocation || 'phuket');
+      localStorage.setItem('myuno-user-interests', JSON.stringify(selectedInterests));
       onComplete();
     }
   };
 
   const handleSkip = () => {
-    localStorage.setItem('uno-onboarding-complete', 'true');
+    localStorage.setItem('myuno-onboarding-complete', 'true');
     onComplete();
   };
 

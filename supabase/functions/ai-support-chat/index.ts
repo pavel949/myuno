@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const SYSTEM_PROMPT = `Ты — UNO Assistant, дружелюбный AI-помощник платформы UNO для бронирования услуг в Таиланде (Пхукет, Самуи, Паттайя).
+const SYSTEM_PROMPT = `Ты — myUNO Assistant, дружелюбный AI-помощник платформы myUNO для бронирования услуг в Таиланде (Пхукет, Самуи, Паттайя).
 
 Твои возможности:
 - Помощь с бронированием туров, экскурсий, водных активностей

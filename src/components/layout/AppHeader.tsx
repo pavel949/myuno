@@ -36,7 +36,8 @@ export function AppHeader({ title, showBack, onMenuClick, className }: AppHeader
     >
       <div className="flex items-center justify-between h-12 px-3 max-w-7xl mx-auto">
         {/* Left side - Logo */}
-        <Link to="/" className="flex items-center gap-1.5">
+        <Link to="/" className="flex items-center gap-1">
+          <span className="text-sm font-medium text-muted-foreground">my</span>
           <div className="w-7 h-7 rounded-lg gradient-gold flex items-center justify-center">
             <span className="text-sm font-bold text-primary-foreground">U</span>
           </div>
