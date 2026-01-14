@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { MessageCircle, X } from 'lucide-react';
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -23,6 +24,7 @@ const HIDDEN_ROUTES = ['/auth'];
 
 export const WhatsAppButton: React.FC<SocialButtonsProps> = ({ className }) => {
   const location = useLocation();
+  const [isOpen, setIsOpen] = useState(false);
   const phoneNumber = '66922407355';
   
   // Hide on auth page
@@ -32,37 +34,72 @@ export const WhatsAppButton: React.FC<SocialButtonsProps> = ({ className }) => {
   
   const handleWhatsApp = () => {
     window.open(`https://wa.me/${phoneNumber}`, '_blank');
+    setIsOpen(false);
   };
 
   const handleTelegram = () => {
     window.open(`https://t.me/+${phoneNumber}`, '_blank');
+    setIsOpen(false);
   };
 
   return (
-    <div className={cn('fixed bottom-20 right-4 z-40 md:bottom-6 flex flex-col gap-3', className)}>
+    <div className={cn('fixed bottom-20 right-4 z-40 md:bottom-6', className)}>
+      {/* Expanded buttons */}
+      <div 
+        className={cn(
+          'flex flex-col gap-2 mb-2 transition-all duration-300',
+          isOpen 
+            ? 'opacity-100 translate-y-0 pointer-events-auto' 
+            : 'opacity-0 translate-y-4 pointer-events-none'
+        )}
+      >
+        <button
+          onClick={handleTelegram}
+          className={cn(
+            'w-11 h-11 rounded-full shadow-lg',
+            'bg-[#0088cc] hover:bg-[#0077b5] active:scale-95',
+            'flex items-center justify-center',
+            'transition-all duration-200'
+          )}
+          aria-label="Chat on Telegram"
+        >
+          <TelegramIcon className="w-5 h-5 text-white" />
+        </button>
+        <button
+          onClick={handleWhatsApp}
+          className={cn(
+            'w-11 h-11 rounded-full shadow-lg',
+            'bg-[#25D366] hover:bg-[#20BD5A] active:scale-95',
+            'flex items-center justify-center',
+            'transition-all duration-200'
+          )}
+          aria-label="Chat on WhatsApp"
+        >
+          <WhatsAppIcon className="w-5 h-5 text-white" />
+        </button>
+      </div>
+
+      {/* Toggle button */}
       <button
-        onClick={handleTelegram}
+        onClick={() => setIsOpen(!isOpen)}
         className={cn(
           'w-12 h-12 rounded-full shadow-lg',
-          'bg-[#0088cc] hover:bg-[#0077b5] active:scale-95',
+          'bg-primary hover:bg-primary/90 active:scale-95',
           'flex items-center justify-center',
-          'transition-all duration-200'
+          'transition-all duration-300'
         )}
-        aria-label="Chat on Telegram"
+        aria-label={isOpen ? 'Close chat menu' : 'Open chat menu'}
       >
-        <TelegramIcon className="w-6 h-6 text-white" />
-      </button>
-      <button
-        onClick={handleWhatsApp}
-        className={cn(
-          'w-12 h-12 rounded-full shadow-lg',
-          'bg-[#25D366] hover:bg-[#20BD5A] active:scale-95',
-          'flex items-center justify-center',
-          'transition-all duration-200'
-        )}
-        aria-label="Chat on WhatsApp"
-      >
-        <WhatsAppIcon className="w-6 h-6 text-white" />
+        <div className={cn(
+          'transition-transform duration-300',
+          isOpen && 'rotate-180'
+        )}>
+          {isOpen ? (
+            <X className="w-5 h-5 text-primary-foreground" />
+          ) : (
+            <MessageCircle className="w-5 h-5 text-primary-foreground" />
+          )}
+        </div>
       </button>
     </div>
   );
