@@ -231,8 +231,8 @@ const Cart = () => {
         })}
       </div>
 
-      {/* Bottom Checkout Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border p-4 safe-area-pb">
+      {/* Bottom Checkout Bar - positioned above BottomNav */}
+      <div className="fixed bottom-16 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border p-4 z-40">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-3">
             <span className="text-muted-foreground">
@@ -243,7 +243,7 @@ const Cart = () => {
             </span>
           </div>
           <Button 
-            className="w-full h-12 text-base"
+            className="w-full h-14 text-lg font-semibold shadow-lg"
             onClick={handleCheckout}
           >
             {language === 'ru' ? 'Оформить заказ' : 'Checkout'}
