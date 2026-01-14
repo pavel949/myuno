@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 import { triggerRipple } from '@/hooks/useRipple';
 import { supabase } from '@/integrations/supabase/client';
 import { BackButton } from '@/components/uno/BackButton';
+import { AddressPickerInput } from '@/components/booking';
 
 const deliverySlots = [
   { id: 'morning', timeEn: '9:00 - 12:00', timeRu: '9:00 - 12:00', labelEn: 'Morning', labelRu: 'Утро' },
@@ -283,18 +284,14 @@ const FlowersOrder = () => {
                 />
               </div>
               
-              <div>
-                <Label htmlFor="address">
-                  {language === 'ru' ? 'Адрес доставки *' : 'Delivery Address *'}
-                </Label>
-                <Textarea
-                  id="address"
-                  value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  placeholder={language === 'ru' ? 'Полный адрес доставки' : 'Full delivery address'}
-                  rows={2}
-                />
-              </div>
+              <AddressPickerInput
+                value={formData.address}
+                onChange={(addr) => setFormData({ ...formData, address: addr })}
+                label={language === 'ru' ? 'Адрес доставки *' : 'Delivery Address *'}
+                placeholder={language === 'ru' ? 'Полный адрес доставки' : 'Full delivery address'}
+                type="delivery"
+                required
+              />
             </div>
           </div>
 

@@ -12,6 +12,7 @@ import {
   BookingPaymentSelect,
   BookingBottomBar,
   BookingConfirmation,
+  AddressPickerInput,
   type ContactFormData,
   type PaymentMethod 
 } from "@/components/booking";
@@ -19,7 +20,7 @@ import { format, differenceInDays } from "date-fns";
 import { ru } from "date-fns/locale";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calendar, MapPin } from "lucide-react";
+import { Calendar } from "lucide-react";
 
 // Demo vehicle data (fallback)
 const demoVehicles: Record<string, { nameEn: string; nameRu: string; pricePerDay: number; image: string }> = {
@@ -189,14 +190,12 @@ export default function TransportBooking() {
 
         {/* Pickup Location */}
         <div className="bg-card rounded-2xl border p-5 mb-4">
-          <h3 className="font-semibold mb-4 flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-primary" />
-            {language === 'ru' ? 'Место получения' : 'Pickup Location'}
-          </h3>
-          <Input
+          <AddressPickerInput
             value={pickupLocation}
-            onChange={(e) => setPickupLocation(e.target.value)}
+            onChange={(addr) => setPickupLocation(addr)}
+            label={language === 'ru' ? 'Место получения' : 'Pickup Location'}
             placeholder={language === 'ru' ? 'Отель, адрес...' : 'Hotel, address...'}
+            type="pickup"
             required
           />
         </div>

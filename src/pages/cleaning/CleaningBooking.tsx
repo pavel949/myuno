@@ -12,14 +12,13 @@ import {
   BookingPaymentSelect,
   BookingBottomBar,
   BookingConfirmation,
+  AddressPickerInput,
   type ContactFormData,
   type PaymentMethod 
 } from "@/components/booking";
 import { addDays, format } from "date-fns";
 import { ru } from "date-fns/locale";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Home, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 const cleaningServices: Record<string, { nameEn: string; nameRu: string; price: number; duration: string }> = {
   'clean-1': { nameEn: 'Regular Home Cleaning', nameRu: 'Регулярная уборка', price: 800, duration: '2-3h' },
@@ -171,15 +170,12 @@ export default function CleaningBooking() {
 
         {/* Address */}
         <div className="bg-card rounded-2xl border p-5 mb-4">
-          <Label className="font-semibold mb-4 flex items-center gap-2">
-            <Home className="w-5 h-5 text-primary" />
-            {language === 'ru' ? 'Адрес' : 'Address'}
-          </Label>
-          <Input
+          <AddressPickerInput
             value={address}
-            onChange={(e) => setAddress(e.target.value)}
+            onChange={(addr) => setAddress(addr)}
+            label={language === 'ru' ? 'Адрес' : 'Address'}
             placeholder={language === 'ru' ? 'Адрес для уборки' : 'Cleaning address'}
-            className="mt-2"
+            type="service"
             required
           />
         </div>

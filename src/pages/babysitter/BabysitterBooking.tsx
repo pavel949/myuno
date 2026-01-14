@@ -12,6 +12,7 @@ import {
   BookingPaymentSelect,
   BookingBottomBar,
   BookingConfirmation,
+  AddressPickerInput,
   type ContactFormData,
   type PaymentMethod 
 } from "@/components/booking";
@@ -19,7 +20,7 @@ import { addDays, format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Baby, Home, Clock, Minus, Plus } from "lucide-react";
+import { Baby, Clock, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const babysitters: Record<string, { nameEn: string; nameRu: string; pricePerHour: number; image: string }> = {
@@ -248,15 +249,12 @@ export default function BabysitterBooking() {
 
         {/* Address */}
         <div className="bg-card rounded-2xl border p-5 mb-4">
-          <Label className="font-semibold mb-4 flex items-center gap-2">
-            <Home className="w-5 h-5 text-primary" />
-            {language === 'ru' ? 'Адрес' : 'Address'}
-          </Label>
-          <Input
+          <AddressPickerInput
             value={address}
-            onChange={(e) => setAddress(e.target.value)}
+            onChange={(addr) => setAddress(addr)}
+            label={language === 'ru' ? 'Адрес' : 'Address'}
             placeholder={language === 'ru' ? 'Ваш адрес' : 'Your address'}
-            className="mt-2"
+            type="service"
             required
           />
         </div>
