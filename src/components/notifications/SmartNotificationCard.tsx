@@ -69,7 +69,7 @@ export function SmartNotificationCard({
   onDismiss,
   className,
 }: SmartNotificationCardProps) {
-  const { language } = useLanguage();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const config = typeConfig[type];
   const Icon = config.icon;
@@ -133,7 +133,7 @@ export function SmartNotificationCard({
 
           {expiresAt && (
             <p className="text-[10px] text-muted-foreground mt-1">
-              {language === 'ru' ? 'Истекает: ' : 'Expires: '}{expiresAt}
+              {t('booking.expires')} {expiresAt}
             </p>
           )}
 

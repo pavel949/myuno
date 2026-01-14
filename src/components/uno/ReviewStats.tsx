@@ -9,7 +9,7 @@ interface ReviewStatsProps {
 }
 
 export const ReviewStats = ({ average, total, distribution }: ReviewStatsProps) => {
-  const { language } = useLanguage();
+  const { t } = useLanguage();
 
   const getPercentage = (count: number) => {
     return total > 0 ? (count / total) * 100 : 0;
@@ -30,7 +30,7 @@ export const ReviewStats = ({ average, total, distribution }: ReviewStatsProps) 
             ))}
           </div>
           <div className="text-xs text-muted-foreground">
-            {total} {language === 'ru' ? 'отзывов' : 'reviews'}
+            {total} {t('label.reviews')}
           </div>
         </div>
 

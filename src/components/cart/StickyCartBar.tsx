@@ -33,7 +33,7 @@ export function StickyCartBar({
   className,
 }: StickyCartBarProps) {
   const navigate = useNavigate();
-  const { language } = useLanguage();
+  const { t } = useLanguage();
   const { items, getItemsByType, getItemsByProvider } = useCart();
 
   // Get relevant cart items based on filters
@@ -57,7 +57,7 @@ export function StickyCartBar({
     navigate(checkoutPath, checkoutState ? { state: checkoutState } : undefined);
   };
 
-  const defaultLabel = language === 'ru' ? 'Корзина' : 'Cart';
+  const defaultLabel = t('cart.title');
   const label = buttonLabel || defaultLabel;
 
   return (

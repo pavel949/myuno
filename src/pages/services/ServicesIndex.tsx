@@ -23,7 +23,7 @@ const SERVICE_CATEGORIES: MiniAppCategory[] = [
 ];
 
 export default function ServicesIndex() {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
@@ -57,16 +57,16 @@ export default function ServicesIndex() {
 
   return (
     <MiniAppLayout
-      title={language === "ru" ? "Домашние услуги" : "Home Services"}
-      subtitle={language === 'ru' ? `${filteredProviders.length} мастеров` : `${filteredProviders.length} professionals`}
+      title={t('services.homeTitle')}
+      subtitle={`${filteredProviders.length} ${t('services.professionals')}`}
       heroIcon={Wrench}
-      heroTitle={language === 'ru' ? 'Мастера на все руки' : 'Professional Services'}
-      heroSubtitle={language === 'ru' ? 'Сантехники, электрики, уборка и многое другое' : 'Plumbers, electricians, cleaning and more'}
+      heroTitle={t('services.heroTitle')}
+      heroSubtitle={t('services.heroSubtitle')}
       heroImage="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800"
       heroGradient={{ from: 'from-amber-500/20', via: 'via-orange-500/20', to: 'to-primary/20' }}
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}
-      searchPlaceholder={language === "ru" ? "Найти услугу или мастера..." : "Find service or professional..."}
+      searchPlaceholder={t('services.searchPlaceholder')}
       categories={SERVICE_CATEGORIES}
       selectedCategory={selectedCategory}
       onCategoryChange={setSelectedCategory}
@@ -78,7 +78,7 @@ export default function ServicesIndex() {
       isLoading={isLoading}
       isEmpty={filteredProviders.length === 0}
       emptyIcon={Wrench}
-      emptyText={language === 'ru' ? 'Мастера не найдены' : 'No professionals found'}
+      emptyText={t('services.notFound')}
     >
       <MiniAppQuickGrid items={quickItems} columns={4} className="mb-6" />
       

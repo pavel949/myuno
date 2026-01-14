@@ -23,13 +23,13 @@ export function BookingParticipants({
   currency = 'THB',
   label,
 }: BookingParticipantsProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const currencySymbol = currency === 'THB' ? '฿' : currency === 'USD' ? '$' : currency === 'EUR' ? '€' : '₽';
 
   return (
     <div>
       <Label className="text-sm font-medium mb-3 block">
-        {label || (language === 'ru' ? 'Количество участников' : 'Number of participants')}
+        {label || t('tours.participants')}
       </Label>
       
       <div className="flex items-center justify-between bg-muted/50 rounded-xl p-4">
@@ -70,7 +70,7 @@ export function BookingParticipants({
 
       {max && (
         <p className="text-xs text-muted-foreground mt-2 text-center">
-          {language === 'ru' ? `Максимум ${max} человек` : `Maximum ${max} people`}
+          {t('booking.maxPeople').replace('{max}', String(max))}
         </p>
       )}
     </div>
