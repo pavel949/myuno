@@ -178,10 +178,8 @@ export default function Bookings() {
           {bookings.length === 0 ? (
             <EmptyState
               icon={Calendar}
-              title={language === 'ru' ? 'Нет бронирований' : 'No bookings yet'}
-              description={language === 'ru' 
-                ? 'Начните изучать услуги, чтобы сделать первое бронирование'
-                : 'Start exploring services to make your first booking'}
+              title={t('booking.noBookings')}
+              description={t('booking.noBookingsDesc')}
               action={
                 <PremiumButton onClick={() => navigate('/discover')}>
                   {t('nav.discover')}

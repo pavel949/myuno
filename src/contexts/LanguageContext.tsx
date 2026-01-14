@@ -298,6 +298,34 @@ const translations: Record<Language, Record<string, string>> = {
     'booking.unavailable': 'Недоступно',
     'booking.expires': 'Истекает:',
     'booking.allCategories': 'Все категории',
+    'booking.noBookings': 'Нет бронирований',
+    'booking.noBookingsDesc': 'Начните изучать услуги, чтобы сделать первое бронирование',
+    'booking.results': 'Результаты',
+    'booking.found': 'найдено',
+    
+    // Wallet
+    'wallet.title': 'Кошелёк',
+    'wallet.toppedUp': 'Кошелёк успешно пополнен на {amount}',
+    'wallet.paymentCanceled': 'Оплата отменена',
+    
+    // Quick services
+    'home.quickServices': 'Быстрые услуги',
+    'badge.top': 'ТОП',
+    'badge.hot': 'HOT',
+    'badge.certified': 'Сертифицировано',
+    'badge.featured': 'Рекомендуем',
+    
+    // Education tabs
+    'education.all': 'Все',
+    'education.tutors': 'Репетиторы',
+    'education.schools': 'Школы',
+    'education.schoolsNotFound': 'Школы не найдены',
+    'education.subjects': 'Предметы',
+    'education.studentAges': 'Возраст учеников',
+    'education.kids': 'Дети',
+    'education.adults': 'Взрослые',
+    'education.bookLesson': 'Записаться',
+    'education.verified': 'Проверено',
     
     // Tours extras
     'tours.noToursFound': 'Туры не найдены',
@@ -591,6 +619,34 @@ const translations: Record<Language, Record<string, string>> = {
     'booking.unavailable': 'Unavailable',
     'booking.expires': 'Expires:',
     'booking.allCategories': 'All categories',
+    'booking.noBookings': 'No bookings yet',
+    'booking.noBookingsDesc': 'Start exploring services to make your first booking',
+    'booking.results': 'Results',
+    'booking.found': 'found',
+    
+    // Wallet
+    'wallet.title': 'Wallet',
+    'wallet.toppedUp': 'Wallet topped up with {amount}',
+    'wallet.paymentCanceled': 'Payment canceled',
+    
+    // Quick services
+    'home.quickServices': 'Quick Services',
+    'badge.top': 'TOP',
+    'badge.hot': 'HOT',
+    'badge.certified': 'Certified',
+    'badge.featured': 'Featured',
+    
+    // Education tabs
+    'education.all': 'All',
+    'education.tutors': 'Tutors',
+    'education.schools': 'Schools',
+    'education.schoolsNotFound': 'No schools found',
+    'education.subjects': 'Subjects',
+    'education.studentAges': 'Student Ages',
+    'education.kids': 'Kids',
+    'education.adults': 'Adults',
+    'education.bookLesson': 'Book Lesson',
+    'education.verified': 'Verified',
     
     // Tours extras
     'tours.noToursFound': 'No tours found',

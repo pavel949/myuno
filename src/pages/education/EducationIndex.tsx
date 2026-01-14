@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { GraduationCap, BookOpen } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+
 import { MiniAppLayout, ItemCard, type MiniAppCategory } from "@/components/miniapp";
 import { FilterValues, educationFilterConfig } from "@/components/filters";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,7 +17,7 @@ const categories: MiniAppCategory[] = [
 
 export default function EducationIndex() {
   const navigate = useNavigate();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [filterValues, setFilterValues] = useState<FilterValues>({});
@@ -57,16 +58,16 @@ export default function EducationIndex() {
 
   return (
     <MiniAppLayout
-      title={language === "ru" ? "Образование" : "Education"}
-      subtitle={language === "ru" ? "Курсы и репетиторы" : "Courses and tutors"}
+      title={t('education.heroTitle')}
+      subtitle={t('education.heroSubtitle')}
       heroIcon={GraduationCap}
-      heroTitle={language === "ru" ? "Образование" : "Education"}
-      heroSubtitle={language === "ru" ? "Курсы и репетиторы для детей и взрослых" : "Courses and tutors for kids and adults"}
+      heroTitle={t('education.heroTitle')}
+      heroSubtitle={t('education.heroSubtitle')}
       heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800"
       heroGradient={{ from: 'from-indigo-500/20', via: 'via-purple-500/20', to: 'to-primary/20' }}
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}
-      searchPlaceholder={language === "ru" ? "Поиск курсов и репетиторов..." : "Search courses and tutors..."}
+      searchPlaceholder={t('education.searchPlaceholder')}
       categories={categories}
       selectedCategory={selectedCategory}
       onCategoryChange={setSelectedCategory}
@@ -79,15 +80,15 @@ export default function EducationIndex() {
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="all">
             <BookOpen className="h-4 w-4 mr-2" />
-            {language === "ru" ? "Все" : "All"}
+            {t('education.all')}
           </TabsTrigger>
           <TabsTrigger value="tutor">
             <GraduationCap className="h-4 w-4 mr-2" />
-            {language === "ru" ? "Репетиторы" : "Tutors"}
+            {t('education.tutors')}
           </TabsTrigger>
           <TabsTrigger value="school">
             🏫
-            <span className="ml-2">{language === "ru" ? "Школы" : "Schools"}</span>
+            <span className="ml-2">{t('education.schools')}</span>
           </TabsTrigger>
         </TabsList>
 
@@ -110,8 +111,8 @@ export default function EducationIndex() {
                   priceUnit={provider.price_per_hour ? `/${language === "ru" ? "час" : "hr"}` : undefined}
                   currency="฿"
                   badge={provider.provider_type === "tutor" 
-                    ? { text: language === "ru" ? "Репетитор" : "Tutor", className: "bg-blue-100 text-blue-600" }
-                    : { text: language === "ru" ? "Школа" : "School", className: "bg-purple-100 text-purple-600" }
+                    ? { text: t('education.tutor'), className: "bg-blue-100 text-blue-600" }
+                    : { text: t('education.school'), className: "bg-purple-100 text-purple-600" }
                   }
                   tags={provider.subjects?.slice(0, 3) || []}
                   onClick={() => navigate(`/education/tutor/${provider.id}`)}
@@ -119,7 +120,7 @@ export default function EducationIndex() {
               ))}
               {filteredProviders.length === 0 && (
                 <div className="text-center py-8 text-muted-foreground">
-                  {language === "ru" ? "Ничего не найдено" : "Nothing found"}
+                  {t('education.notFound')}
                 </div>
               )}
             </>
@@ -154,7 +155,7 @@ export default function EducationIndex() {
               ))}
               {tutors.length === 0 && (
                 <div className="text-center py-8 text-muted-foreground">
-                  {language === "ru" ? "Репетиторы не найдены" : "No tutors found"}
+                  {t('education.tutorsNotFound')}
                 </div>
               )}
             </>
@@ -180,7 +181,7 @@ export default function EducationIndex() {
                   priceUnit={school.price_per_course ? `/${language === "ru" ? "курс" : "course"}` : `/${language === "ru" ? "час" : "hr"}`}
                   currency="฿"
                   badge={school.is_verified 
-                    ? { text: language === "ru" ? "Проверено" : "Verified", className: "bg-emerald-100 text-emerald-600" }
+                    ? { text: t('education.verified'), className: "bg-emerald-100 text-emerald-600" }
                     : undefined
                   }
                   tags={school.subjects?.slice(0, 3) || []}
@@ -189,7 +190,7 @@ export default function EducationIndex() {
               ))}
               {schools.length === 0 && (
                 <div className="text-center py-8 text-muted-foreground">
-                  {language === "ru" ? "Школы не найдены" : "No schools found"}
+                  {t('education.schoolsNotFound')}
                 </div>
               )}
             </>

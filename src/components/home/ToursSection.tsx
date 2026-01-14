@@ -17,7 +17,7 @@ export function ToursSection() {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Compass className="w-5 h-5 text-amber-500" />
-          <h2 className="text-lg font-semibold">{language === 'ru' ? 'Экскурсии и туры' : 'Tours & Excursions'}</h2>
+          <h2 className="text-lg font-semibold">{t('tours.title')}</h2>
         </div>
         <button 
           onClick={() => navigate('/tours')}
@@ -43,7 +43,7 @@ export function ToursSection() {
               />
               {tour.is_featured && (
                 <Badge className="absolute top-2 left-2 bg-amber-500 text-white text-[10px]">
-                  <Star className="w-3 h-3 mr-0.5" /> Featured
+                  <Star className="w-3 h-3 mr-0.5" /> {t('badge.featured')}
                 </Badge>
               )}
             </div>
