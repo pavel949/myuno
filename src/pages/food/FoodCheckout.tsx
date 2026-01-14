@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MapPin, Clock, CreditCard, Banknote, Check, Wallet, Loader2 } from 'lucide-react';
+import { Clock, CreditCard, Banknote, Check, Wallet, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { BackButton } from '@/components/uno/BackButton';
+import { AddressPickerInput } from '@/components/booking';
 
 export default function FoodCheckout() {
   const { id } = useParams();
@@ -209,18 +210,14 @@ export default function FoodCheckout() {
 
           {/* Delivery Address */}
           <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-primary" />
-              <Label className="font-semibold">
-                {language === 'ru' ? 'Адрес доставки' : 'Delivery Address'}
-              </Label>
-            </div>
-            <Textarea
+            <AddressPickerInput
               value={formData.address}
-              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              onChange={(addr) => setFormData({ ...formData, address: addr })}
+              label={language === 'ru' ? 'Адрес доставки' : 'Delivery Address'}
               placeholder={language === 'ru' 
                 ? 'Улица, дом, квартира...' 
                 : 'Street, building, apartment...'}
+              type="delivery"
               required
             />
           </div>
