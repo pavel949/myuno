@@ -29,8 +29,8 @@ const steps = [
   },
   {
     id: 'location',
-    title: { en: 'Where are you?', ru: 'Где вы находитесь?', th: 'คุณอยู่ที่ไหน?' },
-    subtitle: { en: 'Select your current location', ru: 'Выберите ваше местоположение', th: 'เลือกตำแหน่งปัจจุบันของคุณ' },
+    title: { en: 'Choose myUNO location', ru: 'Выберите локацию myUNO', th: 'เลือกสถานที่ myUNO' },
+    subtitle: { en: 'Select where you want to use myUNO', ru: 'Выберите где вы хотите использовать myUNO', th: 'เลือกสถานที่ที่คุณต้องการใช้ myUNO' },
     icon: MapPin,
   },
   {
@@ -63,13 +63,18 @@ const welcomeCategories = [
 ];
 
 const locations = [
-  { id: 'phuket', name: { en: 'Phuket', ru: 'Пхукет', th: 'ภูเก็ต' }, flag: '🇹🇭' },
-  { id: 'bangkok', name: { en: 'Bangkok', ru: 'Бангкок', th: 'กรุงเทพฯ' }, flag: '🇹🇭' },
-  { id: 'samui', name: { en: 'Koh Samui', ru: 'Ко Самуи', th: 'เกาะสมุย' }, flag: '🇹🇭' },
-  { id: 'pattaya', name: { en: 'Pattaya', ru: 'Паттайя', th: 'พัทยา' }, flag: '🇹🇭' },
-  { id: 'bali', name: { en: 'Bali', ru: 'Бали', th: 'บาหลี' }, flag: '🇮🇩' },
-  { id: 'other', name: { en: 'Other', ru: 'Другое', th: 'อื่นๆ' }, flag: '🌍' },
+  { id: 'phuket', name: { en: 'Phuket', ru: 'Пхукет', th: 'ภูเก็ต' }, flag: '🇹🇭', available: true },
+  { id: 'danang', name: { en: 'Da Nang', ru: 'Дананг', th: 'ดานัง' }, flag: '🇻🇳', available: false },
+  { id: 'bali', name: { en: 'Bali', ru: 'Бали', th: 'บาหลี' }, flag: '🇮🇩', available: false },
+  { id: 'dubai', name: { en: 'Dubai', ru: 'Дубай', th: 'ดูไบ' }, flag: '🇦🇪', available: false },
+  { id: 'lisbon', name: { en: 'Lisbon', ru: 'Лиссабон', th: 'ลิสบอน' }, flag: '🇵🇹', available: false },
 ];
+
+const comingSoonTexts = {
+  en: 'Coming soon',
+  ru: 'Скоро',
+  th: 'เร็วๆ นี้',
+};
 
 const interests = [
   { id: 'housing', name: { en: 'Housing', ru: 'Жильё', th: 'ที่พัก' }, icon: Home, color: 'from-teal-500 to-emerald-500' },
@@ -302,27 +307,51 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
                     </p>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-2">
-                    {locations.map(loc => (
+                  <div className="space-y-3">
+                    {/* Active location - Phuket */}
+                    {locations.filter(loc => loc.available).map(loc => (
                       <button
                         key={loc.id}
                         onClick={() => setSelectedLocation(loc.id)}
                         className={cn(
-                          "flex items-center gap-2 p-3 rounded-xl border transition-all",
+                          "w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all",
                           selectedLocation === loc.id 
-                            ? "border-primary bg-primary/10" 
-                            : "border-border hover:border-primary/50"
+                            ? "border-primary bg-primary/10 shadow-md" 
+                            : "border-primary/50 hover:border-primary bg-card"
                         )}
                       >
-                        <span className="text-xl">{loc.flag}</span>
-                        <span className="font-medium">
-                          {loc.name[lang]}
-                        </span>
+                        <span className="text-2xl">{loc.flag}</span>
+                        <div className="flex-1 text-left">
+                          <span className="font-semibold text-lg">{loc.name[lang]}</span>
+                          <p className="text-xs text-muted-foreground">
+                            {lang === 'ru' ? 'Доступно сейчас' : lang === 'th' ? 'พร้อมใช้งาน' : 'Available now'}
+                          </p>
+                        </div>
                         {selectedLocation === loc.id && (
-                          <Check className="w-4 h-4 text-primary ml-auto" />
+                          <Check className="w-5 h-5 text-primary" />
                         )}
                       </button>
                     ))}
+
+                    {/* Coming soon locations */}
+                    <div className="pt-2">
+                      <p className="text-xs text-muted-foreground mb-2 font-medium uppercase tracking-wide">
+                        {comingSoonTexts[lang]}
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {locations.filter(loc => !loc.available).map(loc => (
+                          <div
+                            key={loc.id}
+                            className="flex items-center gap-2 p-3 rounded-xl border border-border/50 bg-muted/30 opacity-60"
+                          >
+                            <span className="text-lg">{loc.flag}</span>
+                            <span className="text-sm font-medium text-muted-foreground">
+                              {loc.name[lang]}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
