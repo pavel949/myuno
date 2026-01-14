@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { MessageCircle, X } from 'lucide-react';
+import { MessageCircle, X, GripVertical } from 'lucide-react';
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -22,10 +22,108 @@ interface SocialButtonsProps {
 // Pages where buttons should be hidden
 const HIDDEN_ROUTES = ['/auth'];
 
+const STORAGE_KEY = 'whatsapp-button-position';
+
 export const WhatsAppButton: React.FC<SocialButtonsProps> = ({ className }) => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
+  const dragRef = useRef<HTMLDivElement>(null);
+  const dragStartRef = useRef<{ x: number; y: number; posX: number; posY: number } | null>(null);
+  
   const phoneNumber = '66922407355';
+
+  // Load saved position
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        // Validate position is within viewport
+        const maxX = window.innerWidth - 60;
+        const maxY = window.innerHeight - 60;
+        setPosition({
+          x: Math.min(Math.max(0, parsed.x), maxX),
+          y: Math.min(Math.max(0, parsed.y), maxY),
+        });
+      } catch {
+        // Invalid saved position
+      }
+    }
+  }, []);
+
+  // Save position when changed
+  useEffect(() => {
+    if (position) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(position));
+    }
+  }, [position]);
+
+  // Drag handlers
+  const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+    
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    
+    const currentPos = position || {
+      x: window.innerWidth - 60,
+      y: window.innerHeight - 140,
+    };
+    
+    dragStartRef.current = {
+      x: clientX,
+      y: clientY,
+      posX: currentPos.x,
+      posY: currentPos.y,
+    };
+  };
+
+  const handleDrag = (e: MouseEvent | TouchEvent) => {
+    if (!isDragging || !dragStartRef.current) return;
+    
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    
+    const deltaX = clientX - dragStartRef.current.x;
+    const deltaY = clientY - dragStartRef.current.y;
+    
+    const newX = dragStartRef.current.posX + deltaX;
+    const newY = dragStartRef.current.posY + deltaY;
+    
+    // Constrain to viewport
+    const maxX = window.innerWidth - 60;
+    const maxY = window.innerHeight - 60;
+    
+    setPosition({
+      x: Math.min(Math.max(16, newX), maxX),
+      y: Math.min(Math.max(16, newY), maxY),
+    });
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+    dragStartRef.current = null;
+  };
+
+  // Add/remove global event listeners
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleDrag);
+      window.addEventListener('mouseup', handleDragEnd);
+      window.addEventListener('touchmove', handleDrag);
+      window.addEventListener('touchend', handleDragEnd);
+    }
+    
+    return () => {
+      window.removeEventListener('mousemove', handleDrag);
+      window.removeEventListener('mouseup', handleDragEnd);
+      window.removeEventListener('touchmove', handleDrag);
+      window.removeEventListener('touchend', handleDragEnd);
+    };
+  }, [isDragging]);
   
   // Hide on auth page
   if (HIDDEN_ROUTES.includes(location.pathname)) {
@@ -33,17 +131,48 @@ export const WhatsAppButton: React.FC<SocialButtonsProps> = ({ className }) => {
   }
   
   const handleWhatsApp = () => {
-    window.open(`https://wa.me/${phoneNumber}`, '_blank');
-    setIsOpen(false);
+    if (!isDragging) {
+      window.open(`https://wa.me/${phoneNumber}`, '_blank');
+      setIsOpen(false);
+    }
   };
 
   const handleTelegram = () => {
-    window.open(`https://t.me/+${phoneNumber}`, '_blank');
-    setIsOpen(false);
+    if (!isDragging) {
+      window.open(`https://t.me/+${phoneNumber}`, '_blank');
+      setIsOpen(false);
+    }
   };
 
+  const handleToggle = () => {
+    if (!isDragging) {
+      setIsOpen(!isOpen);
+    }
+  };
+
+  // Calculate style based on position
+  const positionStyle = position
+    ? {
+        left: position.x,
+        top: position.y,
+        right: 'auto',
+        bottom: 'auto',
+      }
+    : {
+        right: 16,
+        bottom: 80,
+      };
+
   return (
-    <div className={cn('fixed bottom-20 right-4 z-40 md:bottom-6', className)}>
+    <div 
+      ref={dragRef}
+      className={cn(
+        'fixed z-40',
+        isDragging && 'cursor-grabbing',
+        className
+      )}
+      style={positionStyle}
+    >
       {/* Expanded buttons */}
       <div 
         className={cn(
@@ -79,28 +208,47 @@ export const WhatsAppButton: React.FC<SocialButtonsProps> = ({ className }) => {
         </button>
       </div>
 
-      {/* Toggle button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={cn(
-          'w-12 h-12 rounded-full shadow-lg',
-          'bg-primary hover:bg-primary/90 active:scale-95',
-          'flex items-center justify-center',
-          'transition-all duration-300'
-        )}
-        aria-label={isOpen ? 'Close chat menu' : 'Open chat menu'}
-      >
-        <div className={cn(
-          'transition-transform duration-300',
-          isOpen && 'rotate-180'
-        )}>
-          {isOpen ? (
-            <X className="w-5 h-5 text-primary-foreground" />
-          ) : (
-            <MessageCircle className="w-5 h-5 text-primary-foreground" />
+      {/* Main button with drag handle */}
+      <div className="flex items-center gap-1">
+        {/* Drag handle */}
+        <button
+          onMouseDown={handleDragStart}
+          onTouchStart={handleDragStart}
+          className={cn(
+            'w-6 h-12 rounded-l-full flex items-center justify-center',
+            'bg-muted/80 backdrop-blur-sm border border-border/50',
+            'cursor-grab active:cursor-grabbing',
+            'transition-all duration-200 hover:bg-muted',
+            isDragging && 'bg-primary/20'
           )}
-        </div>
-      </button>
+          aria-label="Drag to move"
+        >
+          <GripVertical className="w-3 h-3 text-muted-foreground" />
+        </button>
+
+        {/* Toggle button */}
+        <button
+          onClick={handleToggle}
+          className={cn(
+            'w-12 h-12 rounded-full shadow-lg',
+            'bg-primary hover:bg-primary/90 active:scale-95',
+            'flex items-center justify-center',
+            'transition-all duration-300'
+          )}
+          aria-label={isOpen ? 'Close chat menu' : 'Open chat menu'}
+        >
+          <div className={cn(
+            'transition-transform duration-300',
+            isOpen && 'rotate-180'
+          )}>
+            {isOpen ? (
+              <X className="w-5 h-5 text-primary-foreground" />
+            ) : (
+              <MessageCircle className="w-5 h-5 text-primary-foreground" />
+            )}
+          </div>
+        </button>
+      </div>
     </div>
   );
 };
