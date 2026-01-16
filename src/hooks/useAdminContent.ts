@@ -490,3 +490,49 @@ export function useAdminEvents(filterProviderId?: string) {
   };
   return { events, isLoading, createEvent, updateEvent, deleteEvent, refetch: fetchData };
 }
+
+// Generic admin hook factory
+function createAdminHook(tableName: string) {
+  return function useAdminGeneric(filterProviderId?: string) {
+    const { user } = useAuth();
+    const [items, setItems] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const fetchData = useCallback(async () => {
+      if (!user) return;
+      setIsLoading(true);
+      let query = supabase.from(tableName as any).select('*');
+      if (filterProviderId) query = query.eq('provider_id', filterProviderId);
+      const { data, error } = await query.order('created_at', { ascending: false });
+      if (!error && data) setItems(data);
+      setIsLoading(false);
+    }, [user, filterProviderId]);
+
+    useEffect(() => { fetchData(); }, [fetchData]);
+
+    const createItem = async (data: any) => {
+      const { data: result, error } = await supabase.from(tableName as any).insert({ ...data, is_active: true }).select().single();
+      if (!error) await fetchData();
+      return { data: result, error };
+    };
+    const updateItem = async (data: any) => {
+      const { id, ...rest } = data;
+      const { data: result, error } = await supabase.from(tableName as any).update(rest).eq('id', id).select().single();
+      if (!error) await fetchData();
+      return { data: result, error };
+    };
+    const deleteItem = async (id: string) => {
+      const { error } = await supabase.from(tableName as any).delete().eq('id', id);
+      if (!error) await fetchData();
+      return { error };
+    };
+    return { items, isLoading, createItem, updateItem, deleteItem, refetch: fetchData };
+  };
+}
+
+export const useAdminEducation = createAdminHook('education_providers');
+export const useAdminLegal = createAdminHook('legal_services');
+export const useAdminPets = createAdminHook('pet_services');
+export const useAdminCleaning = createAdminHook('cleaning_services');
+export const useAdminBabysitters = createAdminHook('babysitters');
+export const useAdminFlowers = createAdminHook('flower_shops');
