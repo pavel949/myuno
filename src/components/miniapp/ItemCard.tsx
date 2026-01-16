@@ -37,30 +37,34 @@ export interface ItemCardProps {
   className?: string;
 }
 
-export function ItemCard({
-  title,
-  subtitle,
-  image,
-  onClick,
-  price,
-  originalPrice,
-  priceLabel,
-  pricePrefix,
-  priceUnit,
-  currency = '฿',
-  rating,
-  reviewCount,
-  location,
-  meta = [],
-  tags = [],
-  isVerified,
-  isNew,
-  isFeatured,
-  isAvailable = true,
-  badge,
-  variant = 'horizontal',
-  className,
-}: ItemCardProps) {
+export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
+  (
+    {
+      title,
+      subtitle,
+      image,
+      onClick,
+      price,
+      originalPrice,
+      priceLabel,
+      pricePrefix,
+      priceUnit,
+      currency = '฿',
+      rating,
+      reviewCount,
+      location,
+      meta = [],
+      tags = [],
+      isVerified,
+      isNew,
+      isFeatured,
+      isAvailable = true,
+      badge,
+      variant = 'horizontal',
+      className,
+    },
+    ref
+  ) => {
   const { language, t } = useLanguage();
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -74,6 +78,7 @@ export function ItemCard({
   if (variant === 'vertical') {
     return (
       <div
+        ref={ref}
         onClick={handleClick}
         className={cn(
           "relative overflow-hidden rounded-xl bg-card border border-border/50 transition-all",
@@ -159,6 +164,7 @@ export function ItemCard({
   // Horizontal variant (default)
   return (
     <div
+      ref={ref}
       onClick={handleClick}
       className={cn(
         "bg-card rounded-2xl overflow-hidden shadow-sm border",
@@ -275,4 +281,5 @@ export function ItemCard({
       </div>
     </div>
   );
-}
+});
+ItemCard.displayName = "ItemCard";
