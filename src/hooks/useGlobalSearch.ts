@@ -307,8 +307,6 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
               .or(`${config.titleEn}.ilike.%${searchTerm}%,${config.titleRu}.ilike.%${searchTerm}%`)
               .limit(5);
 
-            console.log(`[GlobalSearch] ${config.table}:`, { searchTerm, data, error });
-            
             if (error || !data) return [];
 
             return data.map((item: any) => ({

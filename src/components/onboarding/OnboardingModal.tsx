@@ -5,7 +5,7 @@ import {
   Sparkles, Home, Car, UtensilsCrossed, Stethoscope, Scale
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -159,6 +159,7 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
   return (
     <Dialog open={open} onOpenChange={() => {}}>
       <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden border-0" hideCloseButton>
+        <DialogTitle className="sr-only">Onboarding</DialogTitle>
         <div className="relative min-h-[520px] flex flex-col">
           {/* Premium gradient background for welcome step */}
           {step.id === 'welcome' && (
