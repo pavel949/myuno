@@ -1,14 +1,14 @@
-import { useTheme } from "@/contexts/ThemeContext";
+import { useContext } from "react";
 import { Toaster as Sonner, toast } from "sonner";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { resolvedTheme } = useTheme();
-
+  // Use dark theme as default - don't call useTheme to avoid context issues
+  // The theme is applied via CSS classes on the root element anyway
   return (
     <Sonner
-      theme={resolvedTheme as ToasterProps["theme"]}
+      theme="dark"
       className="toaster group"
       toastOptions={{
         classNames: {
