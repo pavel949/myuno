@@ -177,6 +177,12 @@ const AdminClinics = lazy(() => import('@/pages/admin/AdminClinics'));
 const AdminGyms = lazy(() => import('@/pages/admin/AdminGyms'));
 const AdminVehicles = lazy(() => import('@/pages/admin/AdminVehicles'));
 const AdminEvents = lazy(() => import('@/pages/admin/AdminEvents'));
+const AdminEducation = lazy(() => import('@/pages/admin/AdminEducation'));
+const AdminLegal = lazy(() => import('@/pages/admin/AdminLegal'));
+const AdminPets = lazy(() => import('@/pages/admin/AdminPets'));
+const AdminCleaning = lazy(() => import('@/pages/admin/AdminCleaning'));
+const AdminBabysitters = lazy(() => import('@/pages/admin/AdminBabysitters'));
+const AdminFlowers = lazy(() => import('@/pages/admin/AdminFlowers'));
 
 // Vendor pages
 const VendorDashboard = lazy(() => import('@/pages/vendor/VendorDashboard'));
@@ -412,6 +418,12 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/admin/gyms" element={<LazyPage><AdminGyms /></LazyPage>} />
         <Route path="/admin/vehicles" element={<LazyPage><AdminVehicles /></LazyPage>} />
         <Route path="/admin/events" element={<LazyPage><AdminEvents /></LazyPage>} />
+        <Route path="/admin/education" element={<LazyPage><AdminEducation /></LazyPage>} />
+        <Route path="/admin/legal" element={<LazyPage><AdminLegal /></LazyPage>} />
+        <Route path="/admin/pets" element={<LazyPage><AdminPets /></LazyPage>} />
+        <Route path="/admin/cleaning" element={<LazyPage><AdminCleaning /></LazyPage>} />
+        <Route path="/admin/babysitters" element={<LazyPage><AdminBabysitters /></LazyPage>} />
+        <Route path="/admin/flowers" element={<LazyPage><AdminFlowers /></LazyPage>} />
         
         {/* Staff Routes */}
         <Route path="/staff" element={<LazyPage><StaffDashboard /></LazyPage>} />
