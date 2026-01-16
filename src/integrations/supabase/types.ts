@@ -271,6 +271,59 @@ export type Database = {
           },
         ]
       }
+      booking_notifications_log: {
+        Row: {
+          body: string | null
+          booking_id: string | null
+          channel: string
+          created_at: string | null
+          delivered_at: string | null
+          error: string | null
+          id: string
+          metadata: Json | null
+          notification_type: string
+          read_at: string | null
+          sent_at: string | null
+          subject: string | null
+        }
+        Insert: {
+          body?: string | null
+          booking_id?: string | null
+          channel: string
+          created_at?: string | null
+          delivered_at?: string | null
+          error?: string | null
+          id?: string
+          metadata?: Json | null
+          notification_type: string
+          read_at?: string | null
+          sent_at?: string | null
+          subject?: string | null
+        }
+        Update: {
+          body?: string | null
+          booking_id?: string | null
+          channel?: string
+          created_at?: string | null
+          delivered_at?: string | null
+          error?: string | null
+          id?: string
+          metadata?: Json | null
+          notification_type?: string
+          read_at?: string | null
+          sent_at?: string | null
+          subject?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_notifications_log_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "property_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking_participants: {
         Row: {
           booking_id: string
@@ -1453,6 +1506,95 @@ export type Database = {
           },
         ]
       }
+      guest_check_in_data: {
+        Row: {
+          arrival_flight: string | null
+          arrival_time: string | null
+          booking_id: string | null
+          created_at: string | null
+          email: string | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          full_name: string | null
+          id: string
+          needs_transfer: boolean | null
+          passport_country: string | null
+          passport_expiry: string | null
+          passport_number: string | null
+          passport_photo_url: string | null
+          phone: string | null
+          rules_accepted: boolean | null
+          rules_accepted_at: string | null
+          signature_url: string | null
+          status: string | null
+          submitted_at: string | null
+          updated_at: string | null
+          user_id: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          arrival_flight?: string | null
+          arrival_time?: string | null
+          booking_id?: string | null
+          created_at?: string | null
+          email?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          full_name?: string | null
+          id?: string
+          needs_transfer?: boolean | null
+          passport_country?: string | null
+          passport_expiry?: string | null
+          passport_number?: string | null
+          passport_photo_url?: string | null
+          phone?: string | null
+          rules_accepted?: boolean | null
+          rules_accepted_at?: string | null
+          signature_url?: string | null
+          status?: string | null
+          submitted_at?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          arrival_flight?: string | null
+          arrival_time?: string | null
+          booking_id?: string | null
+          created_at?: string | null
+          email?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          full_name?: string | null
+          id?: string
+          needs_transfer?: boolean | null
+          passport_country?: string | null
+          passport_expiry?: string | null
+          passport_number?: string | null
+          passport_photo_url?: string | null
+          phone?: string | null
+          rules_accepted?: boolean | null
+          rules_accepted_at?: string | null
+          signature_url?: string | null
+          status?: string | null
+          submitted_at?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guest_check_in_data_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "property_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gyms: {
         Row: {
           address: string | null
@@ -1948,6 +2090,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      message_templates: {
+        Row: {
+          body: string
+          body_ru: string | null
+          category: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          name: string
+          owner_id: string
+          subject: string | null
+          subject_ru: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          body: string
+          body_ru?: string | null
+          category: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name: string
+          owner_id: string
+          subject?: string | null
+          subject_ru?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          body?: string
+          body_ru?: string | null
+          category?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name?: string
+          owner_id?: string
+          subject?: string | null
+          subject_ru?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       notification_preferences: {
         Row: {
@@ -3311,6 +3498,83 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "property_financials_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_guidebook: {
+        Row: {
+          appliance_guides: Json | null
+          checkout_instructions: string | null
+          checkout_instructions_ru: string | null
+          created_at: string | null
+          door_code: string | null
+          emergency_contacts: Json | null
+          gate_code: string | null
+          house_manual_url: string | null
+          id: string
+          local_tips: Json | null
+          lockbox_code: string | null
+          lockbox_location: string | null
+          parking_instructions: string | null
+          parking_instructions_ru: string | null
+          property_id: string | null
+          trash_instructions: string | null
+          trash_instructions_ru: string | null
+          updated_at: string | null
+          wifi_name: string | null
+          wifi_password: string | null
+        }
+        Insert: {
+          appliance_guides?: Json | null
+          checkout_instructions?: string | null
+          checkout_instructions_ru?: string | null
+          created_at?: string | null
+          door_code?: string | null
+          emergency_contacts?: Json | null
+          gate_code?: string | null
+          house_manual_url?: string | null
+          id?: string
+          local_tips?: Json | null
+          lockbox_code?: string | null
+          lockbox_location?: string | null
+          parking_instructions?: string | null
+          parking_instructions_ru?: string | null
+          property_id?: string | null
+          trash_instructions?: string | null
+          trash_instructions_ru?: string | null
+          updated_at?: string | null
+          wifi_name?: string | null
+          wifi_password?: string | null
+        }
+        Update: {
+          appliance_guides?: Json | null
+          checkout_instructions?: string | null
+          checkout_instructions_ru?: string | null
+          created_at?: string | null
+          door_code?: string | null
+          emergency_contacts?: Json | null
+          gate_code?: string | null
+          house_manual_url?: string | null
+          id?: string
+          local_tips?: Json | null
+          lockbox_code?: string | null
+          lockbox_location?: string | null
+          parking_instructions?: string | null
+          parking_instructions_ru?: string | null
+          property_id?: string | null
+          trash_instructions?: string | null
+          trash_instructions_ru?: string | null
+          updated_at?: string | null
+          wifi_name?: string | null
+          wifi_password?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_guidebook_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "owner_properties"
