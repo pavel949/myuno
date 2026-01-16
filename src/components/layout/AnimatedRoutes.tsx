@@ -377,6 +377,10 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/admin/partner-applications" element={<PageTransition><PartnerApplicationsAdmin /></PageTransition>} />
         <Route path="/admin/pitch-deck" element={<PageTransition><InvestorPitchDeck /></PageTransition>} />
         <Route path="/admin/operations" element={<PageTransition><OperationsHub /></PageTransition>} />
+        {/* Admin management routes - redirect to vendor equivalents */}
+        <Route path="/admin/tours" element={<PageTransition><VendorTours /></PageTransition>} />
+        <Route path="/admin/activities" element={<PageTransition><VendorActivities /></PageTransition>} />
+        <Route path="/admin/properties" element={<PageTransition><VendorProperties /></PageTransition>} />
         
         {/* Staff Routes */}
         <Route path="/staff" element={<PageTransition><StaffDashboard /></PageTransition>} />

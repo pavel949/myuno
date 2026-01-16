@@ -50,54 +50,52 @@ export const useWallet = () => {
     descriptionRu: string,
     referenceType?: string,
     referenceId?: string
-  ): Promise<{ success: boolean; error?: string }> => {
-    if (!user || !wallet) {
-      return { success: false, error: 'User not authenticated or wallet not found' };
-    }
-
-    if (wallet.balance < amount) {
-      return { success: false, error: 'Insufficient balance' };
+  ): Promise<{ success: boolean; error?: string; newBalance?: number }> => {
+    if (!user) {
+      return { success: false, error: 'User not authenticated' };
     }
 
     try {
-      // Deduct balance
-      const { error: updateError } = await supabase
-        .from('wallets')
-        .update({ 
-          balance: wallet.balance - amount,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', wallet.id);
+      // Use atomic RPC function with row-level locking to prevent race conditions
+      const { data, error } = await supabase.rpc('pay_from_wallet_atomic', {
+        p_user_id: user.id,
+        p_amount: amount,
+        p_description: description,
+        p_description_ru: descriptionRu,
+        p_reference_type: referenceType || null,
+        p_reference_id: referenceId || null,
+      });
 
-      if (updateError) throw updateError;
+      if (error) throw error;
 
-      // Create transaction record
-      const { error: txError } = await supabase
-        .from('wallet_transactions')
-        .insert({
-          wallet_id: wallet.id,
-          user_id: user.id,
-          type: 'payment',
-          amount: amount,
-          currency: wallet.currency,
-          description: description,
-          description_ru: descriptionRu,
-          reference_type: referenceType,
-          reference_id: referenceId,
-          status: 'completed',
-        });
+      // Parse the JSONB result
+      const result = data as {
+        success: boolean;
+        error?: string;
+        message?: string;
+        new_balance?: number;
+        transaction_id?: string;
+      };
 
-      if (txError) throw txError;
+      if (!result.success) {
+        return { 
+          success: false, 
+          error: result.message || result.error || 'Payment failed' 
+        };
+      }
 
-      // Update local state
-      setWallet(prev => prev ? { ...prev, balance: prev.balance - amount } : null);
+      // Update local state with the new balance from the atomic operation
+      setWallet(prev => prev ? { 
+        ...prev, 
+        balance: result.new_balance ?? prev.balance - amount 
+      } : null);
 
-      return { success: true };
+      return { success: true, newBalance: result.new_balance };
     } catch (error) {
       console.error('Error paying from wallet:', error);
       return { success: false, error: 'Payment failed' };
     }
-  }, [user, wallet]);
+  }, [user]);
 
   const refetch = useCallback(() => {
     loadWallet();
@@ -106,7 +104,7 @@ export const useWallet = () => {
   return {
     wallet,
     balance: wallet?.balance ?? 0,
-    currency: wallet?.currency ?? 'RUB',
+    currency: wallet?.currency ?? 'THB',
     isLoading,
     payFromWallet,
     refetch,

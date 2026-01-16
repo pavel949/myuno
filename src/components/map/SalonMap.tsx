@@ -4,6 +4,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Loader2 } from 'lucide-react';
+import { createMapPopupHtml, escapeHtml } from '@/lib/sanitize';
 
 export interface SalonMarker {
   id: string;
@@ -141,16 +142,13 @@ const SalonMap: React.FC<SalonMapProps> = ({
         </div>
       `;
 
-      const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
-        <div class="p-2 min-w-[150px]">
-          <h3 class="font-bold text-sm text-gray-900">${language === 'ru' ? salon.nameRu : salon.name}</h3>
-          <div class="flex items-center gap-1 mt-1">
-            <span class="text-yellow-500">★</span>
-            <span class="text-xs text-gray-600">${salon.rating}</span>
-          </div>
-          <p class="text-xs text-primary mt-1">฿${salon.priceFrom}+</p>
-        </div>
-      `);
+      const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(
+        createMapPopupHtml({
+          name: language === 'ru' ? salon.nameRu : salon.name,
+          rating: salon.rating,
+          price: `฿${escapeHtml(salon.priceFrom)}+`,
+        })
+      );
 
       const marker = new mapboxgl.Marker(el)
         .setLngLat([salon.lng, salon.lat])

@@ -6562,6 +6562,17 @@ export type Database = {
         Args: { review_id_param: string }
         Returns: undefined
       }
+      pay_from_wallet_atomic: {
+        Args: {
+          p_amount: number
+          p_description: string
+          p_description_ru: string
+          p_reference_id?: string
+          p_reference_type?: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       refund_wallet_booking: {
         Args: { p_booking_id: string; p_user_id: string }
         Returns: boolean
