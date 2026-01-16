@@ -3,209 +3,220 @@ import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { PageTransition } from './PageTransition';
 import { ScrollToTop } from './ScrollToTop';
+import { LoadingState } from '@/components/uno/LoadingSpinner';
 
+// Core pages - load eagerly for fast initial navigation
 import Index from '@/pages/Index';
 import Auth from '@/pages/Auth';
-import Discover from '@/pages/Discover';
-import MapView from '@/pages/MapView';
-import Bookings from '@/pages/Bookings';
-import BookingDetail from '@/pages/BookingDetail';
-import Profile from '@/pages/Profile';
-import EditProfile from '@/pages/profile/EditProfile';
 import NotFound from '@/pages/NotFound';
 
+// Lazy load all other pages for code splitting
+const Discover = lazy(() => import('@/pages/Discover'));
+const MapView = lazy(() => import('@/pages/MapView'));
+const Bookings = lazy(() => import('@/pages/Bookings'));
+const BookingDetail = lazy(() => import('@/pages/BookingDetail'));
+const Profile = lazy(() => import('@/pages/Profile'));
+const EditProfile = lazy(() => import('@/pages/profile/EditProfile'));
+
 // Beauty & Spa Mini-App
-import BeautySpaIndex from '@/pages/beauty/BeautySpaIndex';
-import SalonDetail from '@/pages/beauty/SalonDetail';
-import BeautyBooking from '@/pages/beauty/BeautyBooking';
-import BeautyServices from '@/pages/beauty/BeautyServices';
-import BeautyMap from '@/pages/beauty/BeautyMap';
+const BeautySpaIndex = lazy(() => import('@/pages/beauty/BeautySpaIndex'));
+const SalonDetail = lazy(() => import('@/pages/beauty/SalonDetail'));
+const BeautyBooking = lazy(() => import('@/pages/beauty/BeautyBooking'));
+const BeautyServices = lazy(() => import('@/pages/beauty/BeautyServices'));
+const BeautyMap = lazy(() => import('@/pages/beauty/BeautyMap'));
 
 // Property Mini-App
-import PropertyIndex from '@/pages/property/PropertyIndex';
-import PropertyDetail from '@/pages/property/PropertyDetail';
-import PropertyInquiry from '@/pages/property/PropertyInquiry';
-import PropertyMap from '@/pages/property/PropertyMap';
+const PropertyIndex = lazy(() => import('@/pages/property/PropertyIndex'));
+const PropertyDetail = lazy(() => import('@/pages/property/PropertyDetail'));
+const PropertyInquiry = lazy(() => import('@/pages/property/PropertyInquiry'));
+const PropertyMap = lazy(() => import('@/pages/property/PropertyMap'));
 
 // Food & Delivery Mini-App (legacy)
-import FoodIndex from '@/pages/food/FoodIndex';
-import FoodRestaurantDetail from '@/pages/food/RestaurantDetail';
-import FoodCheckout from '@/pages/food/FoodCheckout';
+const FoodIndex = lazy(() => import('@/pages/food/FoodIndex'));
+const FoodRestaurantDetail = lazy(() => import('@/pages/food/RestaurantDetail'));
+const FoodCheckout = lazy(() => import('@/pages/food/FoodCheckout'));
 
 // Restaurants Mini-App
-import RestaurantsIndex from '@/pages/restaurants/RestaurantsIndex';
-import RestaurantDetail from '@/pages/restaurants/RestaurantDetail';
-import TableReservation from '@/pages/restaurants/TableReservation';
-import DeliveryCheckout from '@/pages/restaurants/DeliveryCheckout';
-import SetMenuBooking from '@/pages/restaurants/SetMenuBooking';
-import RestaurantMap from '@/pages/restaurants/RestaurantMap';
+const RestaurantsIndex = lazy(() => import('@/pages/restaurants/RestaurantsIndex'));
+const RestaurantDetail = lazy(() => import('@/pages/restaurants/RestaurantDetail'));
+const TableReservation = lazy(() => import('@/pages/restaurants/TableReservation'));
+const DeliveryCheckout = lazy(() => import('@/pages/restaurants/DeliveryCheckout'));
+const SetMenuBooking = lazy(() => import('@/pages/restaurants/SetMenuBooking'));
+const RestaurantMap = lazy(() => import('@/pages/restaurants/RestaurantMap'));
 
 // Transport Mini-App
-import TransportIndex from '@/pages/transport/TransportIndex';
-import VehicleDetail from '@/pages/transport/VehicleDetail';
-import TransportBooking from '@/pages/transport/TransportBooking';
-import AirportTransferBooking from '@/pages/transport/AirportTransferBooking';
-import TaxiBooking from '@/pages/transport/TaxiBooking';
+const TransportIndex = lazy(() => import('@/pages/transport/TransportIndex'));
+const VehicleDetail = lazy(() => import('@/pages/transport/VehicleDetail'));
+const TransportBooking = lazy(() => import('@/pages/transport/TransportBooking'));
+const AirportTransferBooking = lazy(() => import('@/pages/transport/AirportTransferBooking'));
+const TaxiBooking = lazy(() => import('@/pages/transport/TaxiBooking'));
 
 // Fitness Mini-App
-import FitnessIndex from '@/pages/fitness/FitnessIndex';
-import GymDetail from '@/pages/fitness/GymDetail';
-import FitnessBooking from '@/pages/fitness/FitnessBooking';
+const FitnessIndex = lazy(() => import('@/pages/fitness/FitnessIndex'));
+const GymDetail = lazy(() => import('@/pages/fitness/GymDetail'));
+const FitnessBooking = lazy(() => import('@/pages/fitness/FitnessBooking'));
 
 // Medical Mini-App
-import MedicalIndex from '@/pages/medical/MedicalIndex';
-import ClinicDetail from '@/pages/medical/ClinicDetail';
-import MedicalAppointment from '@/pages/medical/MedicalAppointment';
+const MedicalIndex = lazy(() => import('@/pages/medical/MedicalIndex'));
+const ClinicDetail = lazy(() => import('@/pages/medical/ClinicDetail'));
+const MedicalAppointment = lazy(() => import('@/pages/medical/MedicalAppointment'));
 
 // Events Mini-App
-import EventsIndex from '@/pages/events/EventsIndex';
-import EventDetail from '@/pages/events/EventDetail';
-import EventBooking from '@/pages/events/EventBooking';
+const EventsIndex = lazy(() => import('@/pages/events/EventsIndex'));
+const EventDetail = lazy(() => import('@/pages/events/EventDetail'));
+const EventBooking = lazy(() => import('@/pages/events/EventBooking'));
 
 // Education Mini-App
-import EducationIndex from '@/pages/education/EducationIndex';
-import CourseDetail from '@/pages/education/CourseDetail';
-import TutorDetail from '@/pages/education/TutorDetail';
-import EducationBooking from '@/pages/education/EducationBooking';
+const EducationIndex = lazy(() => import('@/pages/education/EducationIndex'));
+const CourseDetail = lazy(() => import('@/pages/education/CourseDetail'));
+const TutorDetail = lazy(() => import('@/pages/education/TutorDetail'));
+const EducationBooking = lazy(() => import('@/pages/education/EducationBooking'));
 
 // Flowers Mini-App
-import FlowersIndex from '@/pages/flowers/FlowersIndex';
-import FlowerShopDetail from '@/pages/flowers/FlowerShopDetail';
-import FlowersOrder from '@/pages/flowers/FlowersOrder';
-import BouquetDetail from '@/pages/flowers/BouquetDetail';
+const FlowersIndex = lazy(() => import('@/pages/flowers/FlowersIndex'));
+const FlowerShopDetail = lazy(() => import('@/pages/flowers/FlowerShopDetail'));
+const FlowersOrder = lazy(() => import('@/pages/flowers/FlowersOrder'));
+const BouquetDetail = lazy(() => import('@/pages/flowers/BouquetDetail'));
 
 // Home Services Mini-App
-import ServicesIndex from '@/pages/services/ServicesIndex';
-import ServiceProviderDetail from '@/pages/services/ServiceProviderDetail';
-import ServiceBooking from '@/pages/services/ServiceBooking';
-import ServicesMap from '@/pages/services/ServicesMap';
+const ServicesIndex = lazy(() => import('@/pages/services/ServicesIndex'));
+const ServiceProviderDetail = lazy(() => import('@/pages/services/ServiceProviderDetail'));
+const ServiceBooking = lazy(() => import('@/pages/services/ServiceBooking'));
+const ServicesMap = lazy(() => import('@/pages/services/ServicesMap'));
 
 // Legal & Business Services Mini-App
-import LegalServicesIndex from '@/pages/legal/LegalServicesIndex';
-import LegalProviderDetail from '@/pages/legal/LegalProviderDetail';
-import LegalBooking from '@/pages/legal/LegalBooking';
-import VisaServiceDetail from '@/pages/legal/VisaServiceDetail';
+const LegalServicesIndex = lazy(() => import('@/pages/legal/LegalServicesIndex'));
+const LegalProviderDetail = lazy(() => import('@/pages/legal/LegalProviderDetail'));
+const LegalBooking = lazy(() => import('@/pages/legal/LegalBooking'));
+const VisaServiceDetail = lazy(() => import('@/pages/legal/VisaServiceDetail'));
 
 // Insurance Mini-App
-import InsuranceIndex from '@/pages/insurance/InsuranceIndex';
-import InsuranceDetail from '@/pages/insurance/InsuranceDetail';
-import InsuranceQuote from '@/pages/insurance/InsuranceQuote';
-import InsurancePlanDetail from '@/pages/insurance/InsurancePlanDetail';
+const InsuranceIndex = lazy(() => import('@/pages/insurance/InsuranceIndex'));
+const InsuranceDetail = lazy(() => import('@/pages/insurance/InsuranceDetail'));
+const InsuranceQuote = lazy(() => import('@/pages/insurance/InsuranceQuote'));
+const InsurancePlanDetail = lazy(() => import('@/pages/insurance/InsurancePlanDetail'));
 
 // Tours Mini-App
-import ToursIndex from '@/pages/tours/ToursIndex';
-import TourDetail from '@/pages/tours/TourDetail';
-import TourBooking from '@/pages/tours/TourBooking';
+const ToursIndex = lazy(() => import('@/pages/tours/ToursIndex'));
+const TourDetail = lazy(() => import('@/pages/tours/TourDetail'));
+const TourBooking = lazy(() => import('@/pages/tours/TourBooking'));
 
 // Water Activities Mini-App
-import WaterActivitiesIndex from '@/pages/water/WaterActivitiesIndex';
-import WaterActivityDetail from '@/pages/water/WaterActivityDetail';
-import WaterActivityBooking from '@/pages/water/WaterActivityBooking';
+const WaterActivitiesIndex = lazy(() => import('@/pages/water/WaterActivitiesIndex'));
+const WaterActivityDetail = lazy(() => import('@/pages/water/WaterActivityDetail'));
+const WaterActivityBooking = lazy(() => import('@/pages/water/WaterActivityBooking'));
 
 // Pharmacy Mini-App
-import PharmacyIndex from '@/pages/pharmacy/PharmacyIndex';
-import PharmacyDetail from '@/pages/pharmacy/PharmacyDetail';
+const PharmacyIndex = lazy(() => import('@/pages/pharmacy/PharmacyIndex'));
+const PharmacyDetail = lazy(() => import('@/pages/pharmacy/PharmacyDetail'));
 
 // Pets Mini-App
-import PetsIndex from '@/pages/pets/PetsIndex';
-import PetServiceDetail from '@/pages/pets/PetServiceDetail';
-import PetServiceBooking from '@/pages/pets/PetServiceBooking';
-import PetTransport from '@/pages/pets/PetTransport';
+const PetsIndex = lazy(() => import('@/pages/pets/PetsIndex'));
+const PetServiceDetail = lazy(() => import('@/pages/pets/PetServiceDetail'));
+const PetServiceBooking = lazy(() => import('@/pages/pets/PetServiceBooking'));
+const PetTransport = lazy(() => import('@/pages/pets/PetTransport'));
 
 // Yachts Mini-App
-import YachtsIndex from '@/pages/yachts/YachtsIndex';
-import YachtDetail from '@/pages/yachts/YachtDetail';
-import YachtBooking from '@/pages/yachts/YachtBooking';
+const YachtsIndex = lazy(() => import('@/pages/yachts/YachtsIndex'));
+const YachtDetail = lazy(() => import('@/pages/yachts/YachtDetail'));
+const YachtBooking = lazy(() => import('@/pages/yachts/YachtBooking'));
 
 // Cleaning Mini-App
-import CleaningIndex from '@/pages/cleaning/CleaningIndex';
-import CleaningDetail from '@/pages/cleaning/CleaningDetail';
-import CleaningBooking from '@/pages/cleaning/CleaningBooking';
+const CleaningIndex = lazy(() => import('@/pages/cleaning/CleaningIndex'));
+const CleaningDetail = lazy(() => import('@/pages/cleaning/CleaningDetail'));
+const CleaningBooking = lazy(() => import('@/pages/cleaning/CleaningBooking'));
 
 // Babysitter Mini-App
-import BabysitterDetail from '@/pages/babysitter/BabysitterDetail';
-import BabysitterBooking from '@/pages/babysitter/BabysitterBooking';
-import BabysitterIndex from '@/pages/babysitter/BabysitterIndex';
+const BabysitterDetail = lazy(() => import('@/pages/babysitter/BabysitterDetail'));
+const BabysitterBooking = lazy(() => import('@/pages/babysitter/BabysitterBooking'));
+const BabysitterIndex = lazy(() => import('@/pages/babysitter/BabysitterIndex'));
 
 // Delivery Mini-App
-import DeliveryIndex from '@/pages/delivery/DeliveryIndex';
+const DeliveryIndex = lazy(() => import('@/pages/delivery/DeliveryIndex'));
 
 // Market Mini-App
-import MarketIndex from '@/pages/market/MarketIndex';
-import StoreDetail from '@/pages/market/StoreDetail';
-import MarketCheckout from '@/pages/market/MarketCheckout';
+const MarketIndex = lazy(() => import('@/pages/market/MarketIndex'));
+const StoreDetail = lazy(() => import('@/pages/market/StoreDetail'));
+const MarketCheckout = lazy(() => import('@/pages/market/MarketCheckout'));
 
 // Other pages
-import Favorites from '@/pages/Favorites';
-import Search from '@/pages/Search';
-import Notifications from '@/pages/Notifications';
-import ViewHistory from '@/pages/ViewHistory';
-import Cart from '@/pages/Cart';
-import Wallet from '@/pages/Wallet';
-import SOS from '@/pages/SOS';
-import VipConcierge from '@/pages/VipConcierge';
-import Support from '@/pages/Support';
+const Favorites = lazy(() => import('@/pages/Favorites'));
+const Search = lazy(() => import('@/pages/Search'));
+const Notifications = lazy(() => import('@/pages/Notifications'));
+const ViewHistory = lazy(() => import('@/pages/ViewHistory'));
+const Cart = lazy(() => import('@/pages/Cart'));
+const Wallet = lazy(() => import('@/pages/Wallet'));
+const SOS = lazy(() => import('@/pages/SOS'));
+const VipConcierge = lazy(() => import('@/pages/VipConcierge'));
+const Support = lazy(() => import('@/pages/Support'));
 
 // Info pages
-import AboutPage from '@/pages/info/AboutPage';
-import HowItWorksPage from '@/pages/info/HowItWorksPage';
-import FAQPage from '@/pages/info/FAQPage';
-import PartnersPage from '@/pages/info/PartnersPage';
-import PrivacyPage from '@/pages/info/PrivacyPage';
-import TermsPage from '@/pages/info/TermsPage';
-import BecomePartnerPage from '@/pages/info/BecomePartnerPage';
+const AboutPage = lazy(() => import('@/pages/info/AboutPage'));
+const HowItWorksPage = lazy(() => import('@/pages/info/HowItWorksPage'));
+const FAQPage = lazy(() => import('@/pages/info/FAQPage'));
+const PartnersPage = lazy(() => import('@/pages/info/PartnersPage'));
+const PrivacyPage = lazy(() => import('@/pages/info/PrivacyPage'));
+const TermsPage = lazy(() => import('@/pages/info/TermsPage'));
+const BecomePartnerPage = lazy(() => import('@/pages/info/BecomePartnerPage'));
 
 // Admin pages
-import PartnerApplicationsAdmin from '@/pages/admin/PartnerApplicationsAdmin';
-import AdminDashboard from '@/pages/admin/AdminDashboard';
-import AdminProviders from '@/pages/admin/AdminProviders';
-import AdminServices from '@/pages/admin/AdminServices';
-import AdminAnalytics from '@/pages/admin/AdminAnalytics';
-import InvestorPitchDeck from '@/pages/admin/InvestorPitchDeck';
-import OperationsHub from '@/pages/admin/OperationsHub';
+const PartnerApplicationsAdmin = lazy(() => import('@/pages/admin/PartnerApplicationsAdmin'));
+const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
+const AdminProviders = lazy(() => import('@/pages/admin/AdminProviders'));
+const AdminServices = lazy(() => import('@/pages/admin/AdminServices'));
+const AdminAnalytics = lazy(() => import('@/pages/admin/AdminAnalytics'));
+const InvestorPitchDeck = lazy(() => import('@/pages/admin/InvestorPitchDeck'));
+const OperationsHub = lazy(() => import('@/pages/admin/OperationsHub'));
 
 // Vendor pages
-import VendorDashboard from '@/pages/vendor/VendorDashboard';
-import VendorOnboarding from '@/pages/vendor/VendorOnboarding';
-import VendorBookings from '@/pages/vendor/VendorBookings';
-import VendorServices from '@/pages/vendor/VendorServices';
-import VendorAnalytics from '@/pages/vendor/VendorAnalytics';
-import VendorPayouts from '@/pages/vendor/VendorPayouts';
-import VendorProperties from '@/pages/vendor/VendorProperties';
-import VendorTours from '@/pages/vendor/VendorTours';
-import VendorActivities from '@/pages/vendor/VendorActivities';
-import VendorYachts from '@/pages/vendor/VendorYachts';
-import VendorTransport from '@/pages/vendor/VendorTransport';
-import VendorBeauty from '@/pages/vendor/VendorBeauty';
-import VendorFitness from '@/pages/vendor/VendorFitness';
-import VendorClinics from '@/pages/vendor/VendorClinics';
-import VendorSubscription from '@/pages/vendor/VendorSubscription';
+const VendorDashboard = lazy(() => import('@/pages/vendor/VendorDashboard'));
+const VendorOnboarding = lazy(() => import('@/pages/vendor/VendorOnboarding'));
+const VendorBookings = lazy(() => import('@/pages/vendor/VendorBookings'));
+const VendorServices = lazy(() => import('@/pages/vendor/VendorServices'));
+const VendorAnalytics = lazy(() => import('@/pages/vendor/VendorAnalytics'));
+const VendorPayouts = lazy(() => import('@/pages/vendor/VendorPayouts'));
+const VendorProperties = lazy(() => import('@/pages/vendor/VendorProperties'));
+const VendorTours = lazy(() => import('@/pages/vendor/VendorTours'));
+const VendorActivities = lazy(() => import('@/pages/vendor/VendorActivities'));
+const VendorYachts = lazy(() => import('@/pages/vendor/VendorYachts'));
+const VendorTransport = lazy(() => import('@/pages/vendor/VendorTransport'));
+const VendorBeauty = lazy(() => import('@/pages/vendor/VendorBeauty'));
+const VendorFitness = lazy(() => import('@/pages/vendor/VendorFitness'));
+const VendorClinics = lazy(() => import('@/pages/vendor/VendorClinics'));
+const VendorSubscription = lazy(() => import('@/pages/vendor/VendorSubscription'));
 
 // Owner (Property Care) pages
-import OwnerDashboard from '@/pages/owner/OwnerDashboard';
-import OwnerProperties from '@/pages/owner/OwnerProperties';
-import OwnerPropertyDetail from '@/pages/owner/OwnerPropertyDetail';
-import OwnerCalendar from '@/pages/owner/OwnerCalendar';
-import OwnerFinancials from '@/pages/owner/OwnerFinancials';
-import OwnerFinancialForm from '@/pages/owner/OwnerFinancialForm';
-import OwnerMessages from '@/pages/owner/OwnerMessages';
-import OwnerChatRoom from '@/pages/owner/OwnerChatRoom';
-import OwnerSupportChat from '@/pages/owner/OwnerSupportChat';
-import AddProperty from '@/pages/owner/AddProperty';
-import ServiceRequest from '@/pages/owner/ServiceRequest';
-import InspectionRequest from '@/pages/owner/InspectionRequest';
-import OwnerRentalTerms from '@/pages/owner/OwnerRentalTerms';
+const OwnerDashboard = lazy(() => import('@/pages/owner/OwnerDashboard'));
+const OwnerProperties = lazy(() => import('@/pages/owner/OwnerProperties'));
+const OwnerPropertyDetail = lazy(() => import('@/pages/owner/OwnerPropertyDetail'));
+const OwnerCalendar = lazy(() => import('@/pages/owner/OwnerCalendar'));
+const OwnerFinancials = lazy(() => import('@/pages/owner/OwnerFinancials'));
+const OwnerFinancialForm = lazy(() => import('@/pages/owner/OwnerFinancialForm'));
+const OwnerMessages = lazy(() => import('@/pages/owner/OwnerMessages'));
+const OwnerChatRoom = lazy(() => import('@/pages/owner/OwnerChatRoom'));
+const OwnerSupportChat = lazy(() => import('@/pages/owner/OwnerSupportChat'));
+const AddProperty = lazy(() => import('@/pages/owner/AddProperty'));
+const ServiceRequest = lazy(() => import('@/pages/owner/ServiceRequest'));
+const InspectionRequest = lazy(() => import('@/pages/owner/InspectionRequest'));
+const OwnerRentalTerms = lazy(() => import('@/pages/owner/OwnerRentalTerms'));
 
 // Guest pages
-import MyStay from '@/pages/guest/MyStay';
-import GuestCheckIn from '@/pages/guest/GuestCheckIn';
-import GuestGuidebook from '@/pages/guest/GuestGuidebook';
+const MyStay = lazy(() => import('@/pages/guest/MyStay'));
+const GuestCheckIn = lazy(() => import('@/pages/guest/GuestCheckIn'));
+const GuestGuidebook = lazy(() => import('@/pages/guest/GuestGuidebook'));
 
 // Owner Guidebook
-import OwnerGuidebookEdit from '@/pages/owner/OwnerGuidebookEdit';
+const OwnerGuidebookEdit = lazy(() => import('@/pages/owner/OwnerGuidebookEdit'));
 
 // Staff pages
-import StaffDashboard from '@/pages/staff/StaffDashboard';
+const StaffDashboard = lazy(() => import('@/pages/staff/StaffDashboard'));
+
+// Suspense wrapper for lazy loaded components
+const LazyPage = ({ children }: { children: React.ReactNode }) => (
+  <Suspense fallback={<LoadingState />}>
+    <PageTransition>{children}</PageTransition>
+  </Suspense>
+);
 
 export const AnimatedRoutes: React.FC = () => {
   const location = useLocation();
@@ -215,214 +226,217 @@ export const AnimatedRoutes: React.FC = () => {
       <ScrollToTop />
       <AnimatePresence mode="wait" initial={false}>
         <Routes location={location} key={location.pathname}>
+        {/* Core routes - eagerly loaded */}
         <Route path="/" element={<PageTransition><Index /></PageTransition>} />
         <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
-        <Route path="/discover" element={<PageTransition><Discover /></PageTransition>} />
-        <Route path="/map" element={<PageTransition><MapView /></PageTransition>} />
-        <Route path="/bookings" element={<PageTransition><Bookings /></PageTransition>} />
-        <Route path="/bookings/:id" element={<PageTransition><BookingDetail /></PageTransition>} />
-        <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
-        <Route path="/profile/edit" element={<PageTransition><EditProfile /></PageTransition>} />
-        <Route path="/favorites" element={<PageTransition><Favorites /></PageTransition>} />
-        <Route path="/search" element={<PageTransition><Search /></PageTransition>} />
-        <Route path="/notifications" element={<PageTransition><Notifications /></PageTransition>} />
-        <Route path="/history" element={<PageTransition><ViewHistory /></PageTransition>} />
-        <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
-        <Route path="/wallet" element={<PageTransition><Wallet /></PageTransition>} />
-        <Route path="/sos" element={<PageTransition><SOS /></PageTransition>} />
-        <Route path="/vip-concierge" element={<PageTransition><VipConcierge /></PageTransition>} />
-        <Route path="/support" element={<PageTransition><Support /></PageTransition>} />
+        
+        {/* Lazy loaded routes */}
+        <Route path="/discover" element={<LazyPage><Discover /></LazyPage>} />
+        <Route path="/map" element={<LazyPage><MapView /></LazyPage>} />
+        <Route path="/bookings" element={<LazyPage><Bookings /></LazyPage>} />
+        <Route path="/bookings/:id" element={<LazyPage><BookingDetail /></LazyPage>} />
+        <Route path="/profile" element={<LazyPage><Profile /></LazyPage>} />
+        <Route path="/profile/edit" element={<LazyPage><EditProfile /></LazyPage>} />
+        <Route path="/favorites" element={<LazyPage><Favorites /></LazyPage>} />
+        <Route path="/search" element={<LazyPage><Search /></LazyPage>} />
+        <Route path="/notifications" element={<LazyPage><Notifications /></LazyPage>} />
+        <Route path="/history" element={<LazyPage><ViewHistory /></LazyPage>} />
+        <Route path="/cart" element={<LazyPage><Cart /></LazyPage>} />
+        <Route path="/wallet" element={<LazyPage><Wallet /></LazyPage>} />
+        <Route path="/sos" element={<LazyPage><SOS /></LazyPage>} />
+        <Route path="/vip-concierge" element={<LazyPage><VipConcierge /></LazyPage>} />
+        <Route path="/support" element={<LazyPage><Support /></LazyPage>} />
         
         {/* Beauty & Spa Mini-App Routes */}
-        <Route path="/beauty" element={<PageTransition><BeautySpaIndex /></PageTransition>} />
-        <Route path="/beauty/salon/:id" element={<PageTransition><SalonDetail /></PageTransition>} />
-        <Route path="/beauty/booking/:id" element={<PageTransition><BeautyBooking /></PageTransition>} />
-        <Route path="/beauty/services" element={<PageTransition><BeautyServices /></PageTransition>} />
-        <Route path="/beauty/map" element={<PageTransition><BeautyMap /></PageTransition>} />
+        <Route path="/beauty" element={<LazyPage><BeautySpaIndex /></LazyPage>} />
+        <Route path="/beauty/salon/:id" element={<LazyPage><SalonDetail /></LazyPage>} />
+        <Route path="/beauty/booking/:id" element={<LazyPage><BeautyBooking /></LazyPage>} />
+        <Route path="/beauty/services" element={<LazyPage><BeautyServices /></LazyPage>} />
+        <Route path="/beauty/map" element={<LazyPage><BeautyMap /></LazyPage>} />
         
         {/* Property Mini-App Routes */}
-        <Route path="/property" element={<PageTransition><PropertyIndex /></PageTransition>} />
-        <Route path="/property/:id" element={<PageTransition><PropertyDetail /></PageTransition>} />
-        <Route path="/property/:id/inquiry" element={<PageTransition><PropertyInquiry /></PageTransition>} />
-        <Route path="/property/map" element={<PageTransition><PropertyMap /></PageTransition>} />
+        <Route path="/property" element={<LazyPage><PropertyIndex /></LazyPage>} />
+        <Route path="/property/:id" element={<LazyPage><PropertyDetail /></LazyPage>} />
+        <Route path="/property/:id/inquiry" element={<LazyPage><PropertyInquiry /></LazyPage>} />
+        <Route path="/property/map" element={<LazyPage><PropertyMap /></LazyPage>} />
         
         {/* Food & Delivery Mini-App Routes (legacy - redirects) */}
         <Route path="/food" element={<Navigate to="/restaurants" replace />} />
-        <Route path="/food/restaurant/:id" element={<PageTransition><FoodRestaurantDetail /></PageTransition>} />
-        <Route path="/food/checkout" element={<PageTransition><FoodCheckout /></PageTransition>} />
+        <Route path="/food/restaurant/:id" element={<LazyPage><FoodRestaurantDetail /></LazyPage>} />
+        <Route path="/food/checkout" element={<LazyPage><FoodCheckout /></LazyPage>} />
         
         {/* Restaurants Mini-App Routes */}
-        <Route path="/restaurants" element={<PageTransition><RestaurantsIndex /></PageTransition>} />
-        <Route path="/restaurants/map" element={<PageTransition><RestaurantMap /></PageTransition>} />
-        <Route path="/restaurants/:id" element={<PageTransition><RestaurantDetail /></PageTransition>} />
-        <Route path="/restaurants/:id/reserve" element={<PageTransition><TableReservation /></PageTransition>} />
-        <Route path="/restaurants/:id/delivery" element={<PageTransition><DeliveryCheckout /></PageTransition>} />
-        <Route path="/restaurants/:id/experience/:setId" element={<PageTransition><SetMenuBooking /></PageTransition>} />
+        <Route path="/restaurants" element={<LazyPage><RestaurantsIndex /></LazyPage>} />
+        <Route path="/restaurants/map" element={<LazyPage><RestaurantMap /></LazyPage>} />
+        <Route path="/restaurants/:id" element={<LazyPage><RestaurantDetail /></LazyPage>} />
+        <Route path="/restaurants/:id/reserve" element={<LazyPage><TableReservation /></LazyPage>} />
+        <Route path="/restaurants/:id/delivery" element={<LazyPage><DeliveryCheckout /></LazyPage>} />
+        <Route path="/restaurants/:id/experience/:setId" element={<LazyPage><SetMenuBooking /></LazyPage>} />
         
         {/* Transport Mini-App Routes */}
-        <Route path="/transport" element={<PageTransition><TransportIndex /></PageTransition>} />
-        <Route path="/transport/vehicle/:id" element={<PageTransition><VehicleDetail /></PageTransition>} />
-        <Route path="/transport/booking/:id" element={<PageTransition><TransportBooking /></PageTransition>} />
-        <Route path="/transport/airport-transfer" element={<PageTransition><AirportTransferBooking /></PageTransition>} />
+        <Route path="/transport" element={<LazyPage><TransportIndex /></LazyPage>} />
+        <Route path="/transport/vehicle/:id" element={<LazyPage><VehicleDetail /></LazyPage>} />
+        <Route path="/transport/booking/:id" element={<LazyPage><TransportBooking /></LazyPage>} />
+        <Route path="/transport/airport-transfer" element={<LazyPage><AirportTransferBooking /></LazyPage>} />
         <Route path="/transport/airport" element={<Navigate to="/transport/airport-transfer" replace />} />
         <Route path="/airport-transfer" element={<Navigate to="/transport/airport-transfer" replace />} />
-        <Route path="/transport/taxi" element={<PageTransition><TaxiBooking /></PageTransition>} />
+        <Route path="/transport/taxi" element={<LazyPage><TaxiBooking /></LazyPage>} />
         <Route path="/taxi-booking" element={<Navigate to="/transport/taxi" replace />} />
         
         {/* Fitness Mini-App Routes */}
-        <Route path="/fitness" element={<PageTransition><FitnessIndex /></PageTransition>} />
-        <Route path="/fitness/gym/:id" element={<PageTransition><GymDetail /></PageTransition>} />
-        <Route path="/fitness/booking/:id" element={<PageTransition><FitnessBooking /></PageTransition>} />
+        <Route path="/fitness" element={<LazyPage><FitnessIndex /></LazyPage>} />
+        <Route path="/fitness/gym/:id" element={<LazyPage><GymDetail /></LazyPage>} />
+        <Route path="/fitness/booking/:id" element={<LazyPage><FitnessBooking /></LazyPage>} />
         
         {/* Medical Mini-App Routes */}
-        <Route path="/medical" element={<PageTransition><MedicalIndex /></PageTransition>} />
-        <Route path="/medical/clinic/:id" element={<PageTransition><ClinicDetail /></PageTransition>} />
-        <Route path="/medical/appointment/:id" element={<PageTransition><MedicalAppointment /></PageTransition>} />
+        <Route path="/medical" element={<LazyPage><MedicalIndex /></LazyPage>} />
+        <Route path="/medical/clinic/:id" element={<LazyPage><ClinicDetail /></LazyPage>} />
+        <Route path="/medical/appointment/:id" element={<LazyPage><MedicalAppointment /></LazyPage>} />
         
         {/* Events Mini-App Routes */}
-        <Route path="/events" element={<PageTransition><EventsIndex /></PageTransition>} />
-        <Route path="/events/:id" element={<PageTransition><EventDetail /></PageTransition>} />
-        <Route path="/events/booking/:id" element={<PageTransition><EventBooking /></PageTransition>} />
+        <Route path="/events" element={<LazyPage><EventsIndex /></LazyPage>} />
+        <Route path="/events/:id" element={<LazyPage><EventDetail /></LazyPage>} />
+        <Route path="/events/booking/:id" element={<LazyPage><EventBooking /></LazyPage>} />
         
         {/* Education Mini-App Routes */}
-        <Route path="/education" element={<PageTransition><EducationIndex /></PageTransition>} />
-        <Route path="/education/course/:id" element={<PageTransition><CourseDetail /></PageTransition>} />
-        <Route path="/education/tutor/:id" element={<PageTransition><TutorDetail /></PageTransition>} />
-        <Route path="/education/booking/:id" element={<PageTransition><EducationBooking /></PageTransition>} />
+        <Route path="/education" element={<LazyPage><EducationIndex /></LazyPage>} />
+        <Route path="/education/course/:id" element={<LazyPage><CourseDetail /></LazyPage>} />
+        <Route path="/education/tutor/:id" element={<LazyPage><TutorDetail /></LazyPage>} />
+        <Route path="/education/booking/:id" element={<LazyPage><EducationBooking /></LazyPage>} />
         
         {/* Flowers Mini-App Routes */}
-        <Route path="/flowers" element={<PageTransition><FlowersIndex /></PageTransition>} />
-        <Route path="/flowers/bouquet/:id" element={<PageTransition><BouquetDetail /></PageTransition>} />
+        <Route path="/flowers" element={<LazyPage><FlowersIndex /></LazyPage>} />
+        <Route path="/flowers/bouquet/:id" element={<LazyPage><BouquetDetail /></LazyPage>} />
         <Route path="/flowers/shop" element={<Navigate to="/flowers" replace />} />
-        <Route path="/flowers/shop/:id" element={<PageTransition><FlowerShopDetail /></PageTransition>} />
-        <Route path="/flowers/order" element={<PageTransition><FlowersOrder /></PageTransition>} />
-        <Route path="/flowers/order/:id" element={<PageTransition><FlowersOrder /></PageTransition>} />
+        <Route path="/flowers/shop/:id" element={<LazyPage><FlowerShopDetail /></LazyPage>} />
+        <Route path="/flowers/order" element={<LazyPage><FlowersOrder /></LazyPage>} />
+        <Route path="/flowers/order/:id" element={<LazyPage><FlowersOrder /></LazyPage>} />
         
         {/* Home Services Mini-App Routes */}
-        <Route path="/services" element={<PageTransition><ServicesIndex /></PageTransition>} />
-        <Route path="/services/provider/:id" element={<PageTransition><ServiceProviderDetail /></PageTransition>} />
-        <Route path="/services/booking/:id" element={<PageTransition><ServiceBooking /></PageTransition>} />
-        <Route path="/services/map" element={<PageTransition><ServicesMap /></PageTransition>} />
+        <Route path="/services" element={<LazyPage><ServicesIndex /></LazyPage>} />
+        <Route path="/services/provider/:id" element={<LazyPage><ServiceProviderDetail /></LazyPage>} />
+        <Route path="/services/booking/:id" element={<LazyPage><ServiceBooking /></LazyPage>} />
+        <Route path="/services/map" element={<LazyPage><ServicesMap /></LazyPage>} />
         
         {/* Legal & Business Services Mini-App Routes */}
-        <Route path="/legal" element={<PageTransition><LegalServicesIndex /></PageTransition>} />
-        <Route path="/legal/provider/:id" element={<PageTransition><LegalProviderDetail /></PageTransition>} />
-        <Route path="/legal/visa/:id" element={<PageTransition><VisaServiceDetail /></PageTransition>} />
-        <Route path="/legal/booking/:id" element={<PageTransition><LegalBooking /></PageTransition>} />
+        <Route path="/legal" element={<LazyPage><LegalServicesIndex /></LazyPage>} />
+        <Route path="/legal/provider/:id" element={<LazyPage><LegalProviderDetail /></LazyPage>} />
+        <Route path="/legal/visa/:id" element={<LazyPage><VisaServiceDetail /></LazyPage>} />
+        <Route path="/legal/booking/:id" element={<LazyPage><LegalBooking /></LazyPage>} />
         
         {/* Insurance Mini-App Routes */}
-        <Route path="/insurance" element={<PageTransition><InsuranceIndex /></PageTransition>} />
-        <Route path="/insurance/plan/:planId" element={<PageTransition><InsurancePlanDetail /></PageTransition>} />
-        <Route path="/insurance/:id" element={<PageTransition><InsuranceDetail /></PageTransition>} />
-        <Route path="/insurance/:id/quote" element={<PageTransition><InsuranceQuote /></PageTransition>} />
+        <Route path="/insurance" element={<LazyPage><InsuranceIndex /></LazyPage>} />
+        <Route path="/insurance/plan/:planId" element={<LazyPage><InsurancePlanDetail /></LazyPage>} />
+        <Route path="/insurance/:id" element={<LazyPage><InsuranceDetail /></LazyPage>} />
+        <Route path="/insurance/:id/quote" element={<LazyPage><InsuranceQuote /></LazyPage>} />
         
         {/* Tours Mini-App Routes */}
-        <Route path="/tours" element={<PageTransition><ToursIndex /></PageTransition>} />
-        <Route path="/tours/:id" element={<PageTransition><TourDetail /></PageTransition>} />
-        <Route path="/tours/:id/book" element={<PageTransition><TourBooking /></PageTransition>} />
+        <Route path="/tours" element={<LazyPage><ToursIndex /></LazyPage>} />
+        <Route path="/tours/:id" element={<LazyPage><TourDetail /></LazyPage>} />
+        <Route path="/tours/:id/book" element={<LazyPage><TourBooking /></LazyPage>} />
         
         {/* Water Activities Mini-App Routes */}
-        <Route path="/water" element={<PageTransition><WaterActivitiesIndex /></PageTransition>} />
-        <Route path="/water/:id" element={<PageTransition><WaterActivityDetail /></PageTransition>} />
-        <Route path="/water/:id/book" element={<PageTransition><WaterActivityBooking /></PageTransition>} />
+        <Route path="/water" element={<LazyPage><WaterActivitiesIndex /></LazyPage>} />
+        <Route path="/water/:id" element={<LazyPage><WaterActivityDetail /></LazyPage>} />
+        <Route path="/water/:id/book" element={<LazyPage><WaterActivityBooking /></LazyPage>} />
         
         {/* Pharmacy Mini-App Routes */}
-        <Route path="/pharmacy" element={<PageTransition><PharmacyIndex /></PageTransition>} />
+        <Route path="/pharmacy" element={<LazyPage><PharmacyIndex /></LazyPage>} />
         
         {/* Pets Mini-App Routes */}
-        <Route path="/pets" element={<PageTransition><PetsIndex /></PageTransition>} />
-        <Route path="/pets/transport" element={<PageTransition><PetTransport /></PageTransition>} />
-        <Route path="/pets/:id" element={<PageTransition><PetServiceDetail /></PageTransition>} />
-        <Route path="/pets/:id/booking" element={<PageTransition><PetServiceBooking /></PageTransition>} />
-        <Route path="/pharmacy/:id" element={<PageTransition><PharmacyDetail /></PageTransition>} />
+        <Route path="/pets" element={<LazyPage><PetsIndex /></LazyPage>} />
+        <Route path="/pets/transport" element={<LazyPage><PetTransport /></LazyPage>} />
+        <Route path="/pets/:id" element={<LazyPage><PetServiceDetail /></LazyPage>} />
+        <Route path="/pets/:id/booking" element={<LazyPage><PetServiceBooking /></LazyPage>} />
+        <Route path="/pharmacy/:id" element={<LazyPage><PharmacyDetail /></LazyPage>} />
         
         {/* Yachts Mini-App Routes */}
-        <Route path="/yachts" element={<PageTransition><YachtsIndex /></PageTransition>} />
-        <Route path="/yachts/:id" element={<PageTransition><YachtDetail /></PageTransition>} />
-        <Route path="/yachts/:id/booking" element={<PageTransition><YachtBooking /></PageTransition>} />
+        <Route path="/yachts" element={<LazyPage><YachtsIndex /></LazyPage>} />
+        <Route path="/yachts/:id" element={<LazyPage><YachtDetail /></LazyPage>} />
+        <Route path="/yachts/:id/booking" element={<LazyPage><YachtBooking /></LazyPage>} />
         
         {/* Cleaning Mini-App Routes */}
-        <Route path="/cleaning" element={<PageTransition><CleaningIndex /></PageTransition>} />
-        <Route path="/cleaning/:id" element={<PageTransition><CleaningDetail /></PageTransition>} />
-        <Route path="/cleaning/:id/book" element={<PageTransition><CleaningBooking /></PageTransition>} />
+        <Route path="/cleaning" element={<LazyPage><CleaningIndex /></LazyPage>} />
+        <Route path="/cleaning/:id" element={<LazyPage><CleaningDetail /></LazyPage>} />
+        <Route path="/cleaning/:id/book" element={<LazyPage><CleaningBooking /></LazyPage>} />
         
         {/* Babysitter Mini-App Routes */}
-        <Route path="/babysitter" element={<PageTransition><BabysitterIndex /></PageTransition>} />
-        <Route path="/babysitter/:id" element={<PageTransition><BabysitterDetail /></PageTransition>} />
-        <Route path="/babysitter/:id/book" element={<PageTransition><BabysitterBooking /></PageTransition>} />
+        <Route path="/babysitter" element={<LazyPage><BabysitterIndex /></LazyPage>} />
+        <Route path="/babysitter/:id" element={<LazyPage><BabysitterDetail /></LazyPage>} />
+        <Route path="/babysitter/:id/book" element={<LazyPage><BabysitterBooking /></LazyPage>} />
         
         {/* Delivery Mini-App Routes */}
-        <Route path="/delivery" element={<PageTransition><DeliveryIndex /></PageTransition>} />
+        <Route path="/delivery" element={<LazyPage><DeliveryIndex /></LazyPage>} />
         
         {/* Market Mini-App Routes */}
-        <Route path="/market" element={<PageTransition><MarketIndex /></PageTransition>} />
-        <Route path="/market/store/:id" element={<PageTransition><StoreDetail /></PageTransition>} />
-        <Route path="/market/checkout" element={<PageTransition><MarketCheckout /></PageTransition>} />
+        <Route path="/market" element={<LazyPage><MarketIndex /></LazyPage>} />
+        <Route path="/market/store/:id" element={<LazyPage><StoreDetail /></LazyPage>} />
+        <Route path="/market/checkout" element={<LazyPage><MarketCheckout /></LazyPage>} />
         
         {/* Info Pages */}
-        <Route path="/about" element={<PageTransition><AboutPage /></PageTransition>} />
-        <Route path="/how-it-works" element={<PageTransition><HowItWorksPage /></PageTransition>} />
-        <Route path="/faq" element={<PageTransition><FAQPage /></PageTransition>} />
-        <Route path="/partners" element={<PageTransition><PartnersPage /></PageTransition>} />
-        <Route path="/privacy" element={<PageTransition><PrivacyPage /></PageTransition>} />
-        <Route path="/terms" element={<PageTransition><TermsPage /></PageTransition>} />
-        <Route path="/become-partner" element={<PageTransition><BecomePartnerPage /></PageTransition>} />
-        <Route path="/view-history" element={<PageTransition><ViewHistory /></PageTransition>} />
+        <Route path="/about" element={<LazyPage><AboutPage /></LazyPage>} />
+        <Route path="/how-it-works" element={<LazyPage><HowItWorksPage /></LazyPage>} />
+        <Route path="/faq" element={<LazyPage><FAQPage /></LazyPage>} />
+        <Route path="/partners" element={<LazyPage><PartnersPage /></LazyPage>} />
+        <Route path="/privacy" element={<LazyPage><PrivacyPage /></LazyPage>} />
+        <Route path="/terms" element={<LazyPage><TermsPage /></LazyPage>} />
+        <Route path="/become-partner" element={<LazyPage><BecomePartnerPage /></LazyPage>} />
+        <Route path="/view-history" element={<LazyPage><ViewHistory /></LazyPage>} />
         
         {/* Admin Routes */}
-        <Route path="/admin" element={<PageTransition><AdminDashboard /></PageTransition>} />
-        <Route path="/admin/analytics" element={<PageTransition><AdminAnalytics /></PageTransition>} />
-        <Route path="/admin/providers" element={<PageTransition><AdminProviders /></PageTransition>} />
-        <Route path="/admin/services" element={<PageTransition><AdminServices /></PageTransition>} />
-        <Route path="/admin/partner-applications" element={<PageTransition><PartnerApplicationsAdmin /></PageTransition>} />
-        <Route path="/admin/pitch-deck" element={<PageTransition><InvestorPitchDeck /></PageTransition>} />
-        <Route path="/admin/operations" element={<PageTransition><OperationsHub /></PageTransition>} />
+        <Route path="/admin" element={<LazyPage><AdminDashboard /></LazyPage>} />
+        <Route path="/admin/analytics" element={<LazyPage><AdminAnalytics /></LazyPage>} />
+        <Route path="/admin/providers" element={<LazyPage><AdminProviders /></LazyPage>} />
+        <Route path="/admin/services" element={<LazyPage><AdminServices /></LazyPage>} />
+        <Route path="/admin/partner-applications" element={<LazyPage><PartnerApplicationsAdmin /></LazyPage>} />
+        <Route path="/admin/pitch-deck" element={<LazyPage><InvestorPitchDeck /></LazyPage>} />
+        <Route path="/admin/operations" element={<LazyPage><OperationsHub /></LazyPage>} />
         {/* Admin management routes - redirect to vendor equivalents */}
-        <Route path="/admin/tours" element={<PageTransition><VendorTours /></PageTransition>} />
-        <Route path="/admin/activities" element={<PageTransition><VendorActivities /></PageTransition>} />
-        <Route path="/admin/properties" element={<PageTransition><VendorProperties /></PageTransition>} />
+        <Route path="/admin/tours" element={<LazyPage><VendorTours /></LazyPage>} />
+        <Route path="/admin/activities" element={<LazyPage><VendorActivities /></LazyPage>} />
+        <Route path="/admin/properties" element={<LazyPage><VendorProperties /></LazyPage>} />
         
         {/* Staff Routes */}
-        <Route path="/staff" element={<PageTransition><StaffDashboard /></PageTransition>} />
+        <Route path="/staff" element={<LazyPage><StaffDashboard /></LazyPage>} />
         
         {/* Guest Routes */}
-        <Route path="/my-stay" element={<PageTransition><MyStay /></PageTransition>} />
-        <Route path="/guest/check-in/:bookingId" element={<PageTransition><GuestCheckIn /></PageTransition>} />
-        <Route path="/guest/guidebook/:propertyId" element={<PageTransition><GuestGuidebook /></PageTransition>} />
+        <Route path="/my-stay" element={<LazyPage><MyStay /></LazyPage>} />
+        <Route path="/guest/check-in/:bookingId" element={<LazyPage><GuestCheckIn /></LazyPage>} />
+        <Route path="/guest/guidebook/:propertyId" element={<LazyPage><GuestGuidebook /></LazyPage>} />
         
         {/* Vendor Routes */}
-        <Route path="/vendor" element={<PageTransition><VendorDashboard /></PageTransition>} />
-        <Route path="/vendor/onboarding" element={<PageTransition><VendorOnboarding /></PageTransition>} />
-        <Route path="/vendor/bookings" element={<PageTransition><VendorBookings /></PageTransition>} />
-        <Route path="/vendor/services" element={<PageTransition><VendorServices /></PageTransition>} />
-        <Route path="/vendor/analytics" element={<PageTransition><VendorAnalytics /></PageTransition>} />
-        <Route path="/vendor/payouts" element={<PageTransition><VendorPayouts /></PageTransition>} />
-        <Route path="/vendor/properties" element={<PageTransition><VendorProperties /></PageTransition>} />
-        <Route path="/vendor/tours" element={<PageTransition><VendorTours /></PageTransition>} />
-        <Route path="/vendor/activities" element={<PageTransition><VendorActivities /></PageTransition>} />
-        <Route path="/vendor/yachts" element={<PageTransition><VendorYachts /></PageTransition>} />
-        <Route path="/vendor/transport" element={<PageTransition><VendorTransport /></PageTransition>} />
-        <Route path="/vendor/beauty" element={<PageTransition><VendorBeauty /></PageTransition>} />
-        <Route path="/vendor/fitness" element={<PageTransition><VendorFitness /></PageTransition>} />
-        <Route path="/vendor/clinics" element={<PageTransition><VendorClinics /></PageTransition>} />
-        <Route path="/vendor/subscription" element={<PageTransition><VendorSubscription /></PageTransition>} />
+        <Route path="/vendor" element={<LazyPage><VendorDashboard /></LazyPage>} />
+        <Route path="/vendor/onboarding" element={<LazyPage><VendorOnboarding /></LazyPage>} />
+        <Route path="/vendor/bookings" element={<LazyPage><VendorBookings /></LazyPage>} />
+        <Route path="/vendor/services" element={<LazyPage><VendorServices /></LazyPage>} />
+        <Route path="/vendor/analytics" element={<LazyPage><VendorAnalytics /></LazyPage>} />
+        <Route path="/vendor/payouts" element={<LazyPage><VendorPayouts /></LazyPage>} />
+        <Route path="/vendor/properties" element={<LazyPage><VendorProperties /></LazyPage>} />
+        <Route path="/vendor/tours" element={<LazyPage><VendorTours /></LazyPage>} />
+        <Route path="/vendor/activities" element={<LazyPage><VendorActivities /></LazyPage>} />
+        <Route path="/vendor/yachts" element={<LazyPage><VendorYachts /></LazyPage>} />
+        <Route path="/vendor/transport" element={<LazyPage><VendorTransport /></LazyPage>} />
+        <Route path="/vendor/beauty" element={<LazyPage><VendorBeauty /></LazyPage>} />
+        <Route path="/vendor/fitness" element={<LazyPage><VendorFitness /></LazyPage>} />
+        <Route path="/vendor/clinics" element={<LazyPage><VendorClinics /></LazyPage>} />
+        <Route path="/vendor/subscription" element={<LazyPage><VendorSubscription /></LazyPage>} />
         
         {/* Owner (Property Care) Routes */}
-        <Route path="/owner" element={<PageTransition><OwnerDashboard /></PageTransition>} />
-        <Route path="/owner/properties" element={<PageTransition><OwnerProperties /></PageTransition>} />
-        <Route path="/owner/properties/new" element={<PageTransition><AddProperty /></PageTransition>} />
-        <Route path="/owner/properties/:id" element={<PageTransition><OwnerPropertyDetail /></PageTransition>} />
-        <Route path="/owner/properties/:id/terms" element={<PageTransition><OwnerRentalTerms /></PageTransition>} />
-        <Route path="/owner/calendar" element={<PageTransition><OwnerCalendar /></PageTransition>} />
-        <Route path="/owner/financials" element={<PageTransition><OwnerFinancials /></PageTransition>} />
-        <Route path="/owner/financials/new" element={<PageTransition><OwnerFinancialForm /></PageTransition>} />
-        <Route path="/owner/financials/:id" element={<PageTransition><OwnerFinancialForm /></PageTransition>} />
-        <Route path="/owner/messages" element={<PageTransition><OwnerMessages /></PageTransition>} />
-        <Route path="/owner/chat/:type/:id" element={<PageTransition><OwnerChatRoom /></PageTransition>} />
-        <Route path="/owner/support-chat" element={<PageTransition><OwnerSupportChat /></PageTransition>} />
-        <Route path="/owner/service-request" element={<PageTransition><ServiceRequest /></PageTransition>} />
-        <Route path="/owner/inspection" element={<PageTransition><InspectionRequest /></PageTransition>} />
-        <Route path="/owner/properties/:id/guidebook" element={<PageTransition><OwnerGuidebookEdit /></PageTransition>} />
+        <Route path="/owner" element={<LazyPage><OwnerDashboard /></LazyPage>} />
+        <Route path="/owner/properties" element={<LazyPage><OwnerProperties /></LazyPage>} />
+        <Route path="/owner/properties/new" element={<LazyPage><AddProperty /></LazyPage>} />
+        <Route path="/owner/properties/:id" element={<LazyPage><OwnerPropertyDetail /></LazyPage>} />
+        <Route path="/owner/properties/:id/terms" element={<LazyPage><OwnerRentalTerms /></LazyPage>} />
+        <Route path="/owner/calendar" element={<LazyPage><OwnerCalendar /></LazyPage>} />
+        <Route path="/owner/financials" element={<LazyPage><OwnerFinancials /></LazyPage>} />
+        <Route path="/owner/financials/new" element={<LazyPage><OwnerFinancialForm /></LazyPage>} />
+        <Route path="/owner/financials/:id" element={<LazyPage><OwnerFinancialForm /></LazyPage>} />
+        <Route path="/owner/messages" element={<LazyPage><OwnerMessages /></LazyPage>} />
+        <Route path="/owner/chat/:type/:id" element={<LazyPage><OwnerChatRoom /></LazyPage>} />
+        <Route path="/owner/support-chat" element={<LazyPage><OwnerSupportChat /></LazyPage>} />
+        <Route path="/owner/service-request" element={<LazyPage><ServiceRequest /></LazyPage>} />
+        <Route path="/owner/inspection" element={<LazyPage><InspectionRequest /></LazyPage>} />
+        <Route path="/owner/properties/:id/guidebook" element={<LazyPage><OwnerGuidebookEdit /></LazyPage>} />
         
         {/* Catch-all */}
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
