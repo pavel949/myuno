@@ -2251,10 +2251,12 @@ export type Database = {
           internet_speed: string | null
           is_rented: boolean | null
           key_handover: string | null
+          lat: number | null
           late_checkout_penalty: number | null
           late_checkout_price: number | null
           linen_change_frequency: string | null
           linen_change_price: number | null
+          lng: number | null
           management_type: string | null
           manager_line_id: string | null
           manager_name: string | null
@@ -2351,10 +2353,12 @@ export type Database = {
           internet_speed?: string | null
           is_rented?: boolean | null
           key_handover?: string | null
+          lat?: number | null
           late_checkout_penalty?: number | null
           late_checkout_price?: number | null
           linen_change_frequency?: string | null
           linen_change_price?: number | null
+          lng?: number | null
           management_type?: string | null
           manager_line_id?: string | null
           manager_name?: string | null
@@ -2451,10 +2455,12 @@ export type Database = {
           internet_speed?: string | null
           is_rented?: boolean | null
           key_handover?: string | null
+          lat?: number | null
           late_checkout_penalty?: number | null
           late_checkout_price?: number | null
           linen_change_frequency?: string | null
           linen_change_price?: number | null
+          lng?: number | null
           management_type?: string | null
           manager_line_id?: string | null
           manager_name?: string | null

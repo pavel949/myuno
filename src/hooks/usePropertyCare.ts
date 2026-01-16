@@ -29,6 +29,15 @@ export interface OwnerProperty {
   created_at: string;
   updated_at: string;
   marketplace_property_id?: string;
+  // Project/Unit fields
+  project_id?: string;
+  floor?: number;
+  unit_number?: string;
+  view_type?: string;
+  furnishing_level?: string;
+  equipment?: string[];
+  lat?: number;
+  lng?: number;
   // Rental terms - Basic
   price_per_night?: number;
   min_stay_nights?: number;
