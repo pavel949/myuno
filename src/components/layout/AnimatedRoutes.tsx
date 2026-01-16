@@ -198,6 +198,11 @@ import OwnerRentalTerms from '@/pages/owner/OwnerRentalTerms';
 
 // Guest pages
 import MyStay from '@/pages/guest/MyStay';
+import GuestCheckIn from '@/pages/guest/GuestCheckIn';
+import GuestGuidebook from '@/pages/guest/GuestGuidebook';
+
+// Owner Guidebook
+import OwnerGuidebookEdit from '@/pages/owner/OwnerGuidebookEdit';
 
 // Staff pages
 import StaffDashboard from '@/pages/staff/StaffDashboard';
@@ -378,6 +383,8 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* Guest Routes */}
         <Route path="/my-stay" element={<PageTransition><MyStay /></PageTransition>} />
+        <Route path="/guest/check-in/:bookingId" element={<PageTransition><GuestCheckIn /></PageTransition>} />
+        <Route path="/guest/guidebook/:propertyId" element={<PageTransition><GuestGuidebook /></PageTransition>} />
         
         {/* Vendor Routes */}
         <Route path="/vendor" element={<PageTransition><VendorDashboard /></PageTransition>} />
@@ -411,6 +418,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/owner/support-chat" element={<PageTransition><OwnerSupportChat /></PageTransition>} />
         <Route path="/owner/service-request" element={<PageTransition><ServiceRequest /></PageTransition>} />
         <Route path="/owner/inspection" element={<PageTransition><InspectionRequest /></PageTransition>} />
+        <Route path="/owner/properties/:id/guidebook" element={<PageTransition><OwnerGuidebookEdit /></PageTransition>} />
         
         {/* Catch-all */}
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />

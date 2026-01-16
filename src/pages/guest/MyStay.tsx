@@ -34,7 +34,9 @@ import {
   ShoppingBag,
   Wrench,
   Star,
-  User
+  User,
+  BookOpen,
+  FileCheck
 } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -229,9 +231,33 @@ export default function MyStay() {
                 </CardContent>
               </Card>
 
+              {/* Property Links */}
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                <Button 
+                  variant="outline" 
+                  className="h-auto py-4 flex-col gap-2"
+                  onClick={() => navigate(`/guest/guidebook/${currentBooking.property_id}`)}
+                >
+                  <BookOpen className="w-6 h-6" />
+                  <span className="text-sm">
+                    {language === 'ru' ? 'Гайд по объекту' : 'Property Guide'}
+                  </span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="h-auto py-4 flex-col gap-2"
+                  onClick={() => navigate(`/guest/check-in/${currentBooking.id}`)}
+                >
+                  <FileCheck className="w-6 h-6" />
+                  <span className="text-sm">
+                    {language === 'ru' ? 'Онлайн чек-ин' : 'Online Check-in'}
+                  </span>
+                </Button>
+              </div>
+
               {/* Quick Actions */}
               <h3 className="font-semibold mb-3">
-                {language === 'ru' ? 'Быстрые действия' : 'Quick Actions'}
+                {language === 'ru' ? 'Заказать услугу' : 'Order Service'}
               </h3>
               <div className="grid grid-cols-2 gap-3 mb-6">
                 {serviceTypes.map(service => {
