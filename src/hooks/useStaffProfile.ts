@@ -16,7 +16,7 @@ export interface StaffProfile {
   total_reviews: number;
   completed_tasks: number;
   is_available: boolean;
-  working_hours: unknown | null;
+  working_hours: Record<string, unknown> | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -44,12 +44,12 @@ export function useStaffProfile() {
   });
 
   const updateProfile = useMutation({
-    mutationFn: async (updates: Partial<StaffProfile>) => {
+    mutationFn: async (updates: Record<string, unknown>) => {
       if (!user) throw new Error('Not authenticated');
       
       const { data, error } = await supabase
         .from('staff_profiles')
-        .update(updates)
+        .update(updates as never)
         .eq('user_id', user.id)
         .select()
         .single();
