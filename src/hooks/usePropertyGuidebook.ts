@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import type { Json } from '@/integrations/supabase/types';
 import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -124,9 +125,9 @@ export function usePropertyGuidebook(propertyId?: string) {
         gate_code: formData.gate_code,
         lockbox_code: formData.lockbox_code,
         lockbox_location: formData.lockbox_location,
-        appliance_guides: formData.appliance_guides as unknown as Record<string, unknown>[],
-        emergency_contacts: formData.emergency_contacts as unknown as Record<string, unknown>[],
-        local_tips: formData.local_tips as unknown as Record<string, unknown>[],
+        appliance_guides: JSON.parse(JSON.stringify(formData.appliance_guides || [])) as Json,
+        emergency_contacts: JSON.parse(JSON.stringify(formData.emergency_contacts || [])) as Json,
+        local_tips: JSON.parse(JSON.stringify(formData.local_tips || [])) as Json,
         trash_instructions: formData.trash_instructions,
         trash_instructions_ru: formData.trash_instructions_ru,
         parking_instructions: formData.parking_instructions,
