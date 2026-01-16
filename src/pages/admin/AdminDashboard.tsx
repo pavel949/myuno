@@ -19,11 +19,12 @@ import {
   Shield,
   Settings,
   BarChart3,
-  Map,
   Palmtree,
   Ship,
   Home,
-  Presentation
+  Presentation,
+  Sailboat,
+  Waves
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -100,22 +101,36 @@ export default function AdminDashboard() {
 
   const quickActions = [
     {
-      label: isRussian ? 'Инвестор Дек' : 'Investor Deck',
-      description: isRussian ? 'Питч презентация' : 'Pitch presentation',
-      icon: Presentation,
-      path: '/admin/pitch-deck',
-      color: 'bg-amber-500',
+      label: isRussian ? 'Яхты' : 'Yachts',
+      description: isRussian ? 'Добавить яхту' : 'Add yacht',
+      icon: Sailboat,
+      path: '/admin/yachts',
+      color: 'bg-sky-500',
     },
     {
-      label: isRussian ? 'Аналитика' : 'Analytics',
-      description: isRussian ? 'Метрики платформы' : 'Platform metrics',
-      icon: BarChart3,
-      path: '/admin/analytics',
-      color: 'bg-indigo-500',
+      label: isRussian ? 'Туры' : 'Tours',
+      description: isRussian ? 'Добавить тур' : 'Add tour',
+      icon: Palmtree,
+      path: '/admin/tours',
+      color: 'bg-green-500',
+    },
+    {
+      label: isRussian ? 'Активности' : 'Activities',
+      description: isRussian ? 'Водные развлечения' : 'Water activities',
+      icon: Waves,
+      path: '/admin/activities',
+      color: 'bg-cyan-500',
+    },
+    {
+      label: isRussian ? 'Недвижимость' : 'Properties',
+      description: isRussian ? 'Добавить объект' : 'Add property',
+      icon: Home,
+      path: '/admin/properties',
+      color: 'bg-orange-500',
     },
     {
       label: isRussian ? 'Провайдеры' : 'Providers',
-      description: isRussian ? 'Добавить поставщика' : 'Add provider',
+      description: isRussian ? 'Управление' : 'Manage',
       icon: Building2,
       path: '/admin/providers',
       color: 'bg-blue-500',
@@ -128,32 +143,18 @@ export default function AdminDashboard() {
       color: 'bg-purple-500',
     },
     {
-      label: isRussian ? 'Туры' : 'Tours',
-      description: isRussian ? 'Управление турами' : 'Manage tours',
-      icon: Palmtree,
-      path: '/admin/tours',
-      color: 'bg-green-500',
+      label: isRussian ? 'Аналитика' : 'Analytics',
+      description: isRussian ? 'Метрики' : 'Metrics',
+      icon: BarChart3,
+      path: '/admin/analytics',
+      color: 'bg-indigo-500',
     },
     {
-      label: isRussian ? 'Активности' : 'Activities',
-      description: isRussian ? 'Водные развлечения' : 'Water activities',
-      icon: Ship,
-      path: '/admin/activities',
-      color: 'bg-cyan-500',
-    },
-    {
-      label: isRussian ? 'Недвижимость' : 'Properties',
-      description: isRussian ? 'Объекты' : 'Properties',
-      icon: Home,
-      path: '/admin/properties',
-      color: 'bg-orange-500',
-    },
-    {
-      label: isRussian ? 'Заявки' : 'Applications',
-      description: isRussian ? 'Заявки партнёров' : 'Partner applications',
-      icon: Users,
-      path: '/admin/partner-applications',
-      color: 'bg-rose-500',
+      label: isRussian ? 'Питч-дек' : 'Pitch Deck',
+      description: isRussian ? 'Презентация' : 'Presentation',
+      icon: Presentation,
+      path: '/admin/pitch-deck',
+      color: 'bg-amber-500',
     },
   ];
 

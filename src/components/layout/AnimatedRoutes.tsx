@@ -167,6 +167,10 @@ const AdminServices = lazy(() => import('@/pages/admin/AdminServices'));
 const AdminAnalytics = lazy(() => import('@/pages/admin/AdminAnalytics'));
 const InvestorPitchDeck = lazy(() => import('@/pages/admin/InvestorPitchDeck'));
 const OperationsHub = lazy(() => import('@/pages/admin/OperationsHub'));
+const AdminYachts = lazy(() => import('@/pages/admin/AdminYachts'));
+const AdminTours = lazy(() => import('@/pages/admin/AdminTours'));
+const AdminActivities = lazy(() => import('@/pages/admin/AdminActivities'));
+const AdminProperties = lazy(() => import('@/pages/admin/AdminProperties'));
 
 // Vendor pages
 const VendorDashboard = lazy(() => import('@/pages/vendor/VendorDashboard'));
@@ -391,10 +395,11 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/admin/partner-applications" element={<LazyPage><PartnerApplicationsAdmin /></LazyPage>} />
         <Route path="/admin/pitch-deck" element={<LazyPage><InvestorPitchDeck /></LazyPage>} />
         <Route path="/admin/operations" element={<LazyPage><OperationsHub /></LazyPage>} />
-        {/* Admin management routes - redirect to vendor equivalents */}
-        <Route path="/admin/tours" element={<LazyPage><VendorTours /></LazyPage>} />
-        <Route path="/admin/activities" element={<LazyPage><VendorActivities /></LazyPage>} />
-        <Route path="/admin/properties" element={<LazyPage><VendorProperties /></LazyPage>} />
+        {/* Admin management routes */}
+        <Route path="/admin/yachts" element={<LazyPage><AdminYachts /></LazyPage>} />
+        <Route path="/admin/tours" element={<LazyPage><AdminTours /></LazyPage>} />
+        <Route path="/admin/activities" element={<LazyPage><AdminActivities /></LazyPage>} />
+        <Route path="/admin/properties" element={<LazyPage><AdminProperties /></LazyPage>} />
         
         {/* Staff Routes */}
         <Route path="/staff" element={<LazyPage><StaffDashboard /></LazyPage>} />
