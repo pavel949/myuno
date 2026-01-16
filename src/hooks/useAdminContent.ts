@@ -274,3 +274,219 @@ export function useAdminProperties(filterProviderId?: string) {
 
   return { properties, isLoading, createProperty, updateProperty, deleteProperty, refetch: fetchProperties };
 }
+
+// Admin hook for restaurants
+export function useAdminRestaurants(filterProviderId?: string) {
+  const { user } = useAuth();
+  const [restaurants, setRestaurants] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchData = useCallback(async () => {
+    if (!user) return;
+    setIsLoading(true);
+    let query = supabase.from('restaurants').select('*');
+    if (filterProviderId) query = query.eq('provider_id', filterProviderId);
+    const { data, error } = await query.order('created_at', { ascending: false });
+    if (!error && data) setRestaurants(data);
+    setIsLoading(false);
+  }, [user, filterProviderId]);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  const createRestaurant = async (data: any) => {
+    const { data: result, error } = await supabase.from('restaurants').insert({ ...data, is_verified: true }).select().single();
+    if (!error) await fetchData();
+    return { data: result, error };
+  };
+  const updateRestaurant = async (id: string, data: any) => {
+    const { data: result, error } = await supabase.from('restaurants').update(data).eq('id', id).select().single();
+    if (!error) await fetchData();
+    return { data: result, error };
+  };
+  const deleteRestaurant = async (id: string) => {
+    const { error } = await supabase.from('restaurants').delete().eq('id', id);
+    if (!error) await fetchData();
+    return { error };
+  };
+  return { restaurants, isLoading, createRestaurant, updateRestaurant, deleteRestaurant, refetch: fetchData };
+}
+
+// Admin hook for salons
+export function useAdminSalons(filterProviderId?: string) {
+  const { user } = useAuth();
+  const [salons, setSalons] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchData = useCallback(async () => {
+    if (!user) return;
+    setIsLoading(true);
+    let query = supabase.from('salons').select('*');
+    if (filterProviderId) query = query.eq('provider_id', filterProviderId);
+    const { data, error } = await query.order('created_at', { ascending: false });
+    if (!error && data) setSalons(data);
+    setIsLoading(false);
+  }, [user, filterProviderId]);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  const createSalon = async (data: any) => {
+    const { data: result, error } = await supabase.from('salons').insert({ ...data, is_verified: true }).select().single();
+    if (!error) await fetchData();
+    return { data: result, error };
+  };
+  const updateSalon = async (id: string, data: any) => {
+    const { data: result, error } = await supabase.from('salons').update(data).eq('id', id).select().single();
+    if (!error) await fetchData();
+    return { data: result, error };
+  };
+  const deleteSalon = async (id: string) => {
+    const { error } = await supabase.from('salons').delete().eq('id', id);
+    if (!error) await fetchData();
+    return { error };
+  };
+  return { salons, isLoading, createSalon, updateSalon, deleteSalon, refetch: fetchData };
+}
+
+// Admin hook for clinics
+export function useAdminClinics(filterProviderId?: string) {
+  const { user } = useAuth();
+  const [clinics, setClinics] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchData = useCallback(async () => {
+    if (!user) return;
+    setIsLoading(true);
+    let query = supabase.from('clinics').select('*');
+    if (filterProviderId) query = query.eq('provider_id', filterProviderId);
+    const { data, error } = await query.order('created_at', { ascending: false });
+    if (!error && data) setClinics(data);
+    setIsLoading(false);
+  }, [user, filterProviderId]);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  const createClinic = async (data: any) => {
+    const { data: result, error } = await supabase.from('clinics').insert({ ...data, is_verified: true }).select().single();
+    if (!error) await fetchData();
+    return { data: result, error };
+  };
+  const updateClinic = async (id: string, data: any) => {
+    const { data: result, error } = await supabase.from('clinics').update(data).eq('id', id).select().single();
+    if (!error) await fetchData();
+    return { data: result, error };
+  };
+  const deleteClinic = async (id: string) => {
+    const { error } = await supabase.from('clinics').delete().eq('id', id);
+    if (!error) await fetchData();
+    return { error };
+  };
+  return { clinics, isLoading, createClinic, updateClinic, deleteClinic, refetch: fetchData };
+}
+
+// Admin hook for gyms
+export function useAdminGyms(filterProviderId?: string) {
+  const { user } = useAuth();
+  const [gyms, setGyms] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchData = useCallback(async () => {
+    if (!user) return;
+    setIsLoading(true);
+    let query = supabase.from('gyms').select('*');
+    if (filterProviderId) query = query.eq('provider_id', filterProviderId);
+    const { data, error } = await query.order('created_at', { ascending: false });
+    if (!error && data) setGyms(data);
+    setIsLoading(false);
+  }, [user, filterProviderId]);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  const createGym = async (data: any) => {
+    const { data: result, error } = await supabase.from('gyms').insert({ ...data, is_verified: true }).select().single();
+    if (!error) await fetchData();
+    return { data: result, error };
+  };
+  const updateGym = async (id: string, data: any) => {
+    const { data: result, error } = await supabase.from('gyms').update(data).eq('id', id).select().single();
+    if (!error) await fetchData();
+    return { data: result, error };
+  };
+  const deleteGym = async (id: string) => {
+    const { error } = await supabase.from('gyms').delete().eq('id', id);
+    if (!error) await fetchData();
+    return { error };
+  };
+  return { gyms, isLoading, createGym, updateGym, deleteGym, refetch: fetchData };
+}
+
+// Admin hook for vehicles
+export function useAdminVehicles(filterProviderId?: string) {
+  const { user } = useAuth();
+  const [vehicles, setVehicles] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchData = useCallback(async () => {
+    if (!user) return;
+    setIsLoading(true);
+    let query = supabase.from('vehicles').select('*');
+    if (filterProviderId) query = query.eq('provider_id', filterProviderId);
+    const { data, error } = await query.order('created_at', { ascending: false });
+    if (!error && data) setVehicles(data);
+    setIsLoading(false);
+  }, [user, filterProviderId]);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  const createVehicle = async (data: any) => {
+    const { data: result, error } = await supabase.from('vehicles').insert({ ...data, is_verified: true }).select().single();
+    if (!error) await fetchData();
+    return { data: result, error };
+  };
+  const updateVehicle = async (id: string, data: any) => {
+    const { data: result, error } = await supabase.from('vehicles').update(data).eq('id', id).select().single();
+    if (!error) await fetchData();
+    return { data: result, error };
+  };
+  const deleteVehicle = async (id: string) => {
+    const { error } = await supabase.from('vehicles').delete().eq('id', id);
+    if (!error) await fetchData();
+    return { error };
+  };
+  return { vehicles, isLoading, createVehicle, updateVehicle, deleteVehicle, refetch: fetchData };
+}
+
+// Admin hook for events
+export function useAdminEvents(filterProviderId?: string) {
+  const { user } = useAuth();
+  const [events, setEvents] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchData = useCallback(async () => {
+    if (!user) return;
+    setIsLoading(true);
+    let query = supabase.from('events').select('*');
+    if (filterProviderId) query = query.eq('provider_id', filterProviderId);
+    const { data, error } = await query.order('created_at', { ascending: false });
+    if (!error && data) setEvents(data);
+    setIsLoading(false);
+  }, [user, filterProviderId]);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  const createEvent = async (data: any) => {
+    const { data: result, error } = await supabase.from('events').insert({ ...data, is_active: true }).select().single();
+    if (!error) await fetchData();
+    return { data: result, error };
+  };
+  const updateEvent = async (id: string, data: any) => {
+    const { data: result, error } = await supabase.from('events').update(data).eq('id', id).select().single();
+    if (!error) await fetchData();
+    return { data: result, error };
+  };
+  const deleteEvent = async (id: string) => {
+    const { error } = await supabase.from('events').delete().eq('id', id);
+    if (!error) await fetchData();
+    return { error };
+  };
+  return { events, isLoading, createEvent, updateEvent, deleteEvent, refetch: fetchData };
+}
