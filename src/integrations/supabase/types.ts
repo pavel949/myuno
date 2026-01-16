@@ -3525,6 +3525,7 @@ export type Database = {
       }
       property_service_requests: {
         Row: {
+          assigned_at: string | null
           assigned_to: string | null
           completed_at: string | null
           completion_notes: string | null
@@ -3543,14 +3544,18 @@ export type Database = {
           owner_id: string
           priority: string | null
           property_id: string
+          rating: number | null
+          review: string | null
           scheduled_at: string | null
           service_cost: number | null
           service_type: string
           special_instructions: string | null
+          started_at: string | null
           status: string | null
           updated_at: string
         }
         Insert: {
+          assigned_at?: string | null
           assigned_to?: string | null
           completed_at?: string | null
           completion_notes?: string | null
@@ -3569,14 +3574,18 @@ export type Database = {
           owner_id: string
           priority?: string | null
           property_id: string
+          rating?: number | null
+          review?: string | null
           scheduled_at?: string | null
           service_cost?: number | null
           service_type: string
           special_instructions?: string | null
+          started_at?: string | null
           status?: string | null
           updated_at?: string
         }
         Update: {
+          assigned_at?: string | null
           assigned_to?: string | null
           completed_at?: string | null
           completion_notes?: string | null
@@ -3595,10 +3604,13 @@ export type Database = {
           owner_id?: string
           priority?: string | null
           property_id?: string
+          rating?: number | null
+          review?: string | null
           scheduled_at?: string | null
           service_cost?: number | null
           service_type?: string
           special_instructions?: string | null
+          started_at?: string | null
           status?: string | null
           updated_at?: string
         }
@@ -4333,6 +4345,153 @@ export type Database = {
           },
         ]
       }
+      service_order_status_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          from_status: string | null
+          id: string
+          notes: string | null
+          order_id: string
+          to_status: string
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          notes?: string | null
+          order_id: string
+          to_status: string
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          notes?: string | null
+          order_id?: string
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_order_status_history_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "service_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_orders: {
+        Row: {
+          amount: number | null
+          assigned_to: string | null
+          booking_id: string | null
+          completed_at: string | null
+          completion_notes: string | null
+          completion_photos: string[] | null
+          created_at: string
+          currency: string | null
+          description: string | null
+          guest_id: string
+          id: string
+          notes: string | null
+          order_number: string | null
+          payment_status: string | null
+          priority: string | null
+          property_id: string | null
+          provider_id: string | null
+          rating: number | null
+          review: string | null
+          scheduled_at: string | null
+          service_name: string
+          service_name_ru: string | null
+          service_type: string
+          started_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number | null
+          assigned_to?: string | null
+          booking_id?: string | null
+          completed_at?: string | null
+          completion_notes?: string | null
+          completion_photos?: string[] | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          guest_id: string
+          id?: string
+          notes?: string | null
+          order_number?: string | null
+          payment_status?: string | null
+          priority?: string | null
+          property_id?: string | null
+          provider_id?: string | null
+          rating?: number | null
+          review?: string | null
+          scheduled_at?: string | null
+          service_name: string
+          service_name_ru?: string | null
+          service_type: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number | null
+          assigned_to?: string | null
+          booking_id?: string | null
+          completed_at?: string | null
+          completion_notes?: string | null
+          completion_photos?: string[] | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          guest_id?: string
+          id?: string
+          notes?: string | null
+          order_number?: string | null
+          payment_status?: string | null
+          priority?: string | null
+          property_id?: string | null
+          provider_id?: string | null
+          rating?: number | null
+          review?: string | null
+          scheduled_at?: string | null
+          service_name?: string
+          service_name_ru?: string | null
+          service_type?: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_orders_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_orders_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_orders_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       services: {
         Row: {
           category_id: string | null
@@ -4411,6 +4570,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      staff_profiles: {
+        Row: {
+          avg_rating: number | null
+          bio: string | null
+          completed_tasks: number | null
+          created_at: string
+          display_name: string
+          id: string
+          is_active: boolean | null
+          is_available: boolean | null
+          languages: string[] | null
+          phone: string | null
+          photo: string | null
+          service_types: string[] | null
+          total_reviews: number | null
+          updated_at: string
+          user_id: string
+          working_hours: Json | null
+        }
+        Insert: {
+          avg_rating?: number | null
+          bio?: string | null
+          completed_tasks?: number | null
+          created_at?: string
+          display_name: string
+          id?: string
+          is_active?: boolean | null
+          is_available?: boolean | null
+          languages?: string[] | null
+          phone?: string | null
+          photo?: string | null
+          service_types?: string[] | null
+          total_reviews?: number | null
+          updated_at?: string
+          user_id: string
+          working_hours?: Json | null
+        }
+        Update: {
+          avg_rating?: number | null
+          bio?: string | null
+          completed_tasks?: number | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          is_active?: boolean | null
+          is_available?: boolean | null
+          languages?: string[] | null
+          phone?: string | null
+          photo?: string | null
+          service_types?: string[] | null
+          total_reviews?: number | null
+          updated_at?: string
+          user_id?: string
+          working_hours?: Json | null
+        }
+        Relationships: []
       }
       store_products: {
         Row: {
