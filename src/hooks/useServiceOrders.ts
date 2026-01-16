@@ -34,8 +34,8 @@ export interface ServiceOrder {
   // Joined data
   property?: {
     id: string;
-    name_en: string;
-    name_ru: string;
+    title_en: string;
+    title_ru: string;
     address: string | null;
   } | null;
 }
@@ -68,7 +68,7 @@ export function useGuestServiceOrders() {
         .from('service_orders')
         .select(`
           *,
-          property:properties(id, name_en, name_ru, address)
+          property:properties(id, title_en, title_ru, address)
         `)
         .eq('guest_id', user.id)
         .order('created_at', { ascending: false });
@@ -203,7 +203,7 @@ export function useStaffServiceOrders() {
         .from('service_orders')
         .select(`
           *,
-          property:properties(id, name_en, name_ru, address)
+          property:properties(id, title_en, title_ru, address)
         `)
         .eq('assigned_to', user.id)
         .in('status', ['assigned', 'in_progress'])
@@ -300,7 +300,7 @@ export function useAdminServiceOrders(filters?: { status?: string; priority?: st
         .from('service_orders')
         .select(`
           *,
-          property:properties(id, name_en, name_ru, address)
+          property:properties(id, title_en, title_ru, address)
         `)
         .order('created_at', { ascending: false });
       
