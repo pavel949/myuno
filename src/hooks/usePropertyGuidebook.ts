@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import type { Json } from '@/integrations/supabase/types';
 import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -102,9 +101,9 @@ export function usePropertyGuidebook(propertyId?: string) {
       if (data) {
         return {
           ...data,
-          appliance_guides: (data.appliance_guides as unknown as ApplianceGuide[]) || [],
-          emergency_contacts: (data.emergency_contacts as unknown as EmergencyContact[]) || [],
-          local_tips: (data.local_tips as unknown as LocalTip[]) || [],
+          appliance_guides: (data.appliance_guides as unknown[] as ApplianceGuide[]) || [],
+          emergency_contacts: (data.emergency_contacts as unknown[] as EmergencyContact[]) || [],
+          local_tips: (data.local_tips as unknown[] as LocalTip[]) || [],
         } as PropertyGuidebook;
       }
       return null;
@@ -117,7 +116,7 @@ export function usePropertyGuidebook(propertyId?: string) {
     mutationFn: async (formData: GuidebookFormData) => {
       if (!propertyId) throw new Error('Property ID is required');
 
-      const payload = {
+      const payload: Record<string, unknown> = {
         property_id: propertyId,
         wifi_name: formData.wifi_name,
         wifi_password: formData.wifi_password,
@@ -125,9 +124,9 @@ export function usePropertyGuidebook(propertyId?: string) {
         gate_code: formData.gate_code,
         lockbox_code: formData.lockbox_code,
         lockbox_location: formData.lockbox_location,
-        appliance_guides: JSON.parse(JSON.stringify(formData.appliance_guides || [])) as Json,
-        emergency_contacts: JSON.parse(JSON.stringify(formData.emergency_contacts || [])) as Json,
-        local_tips: JSON.parse(JSON.stringify(formData.local_tips || [])) as Json,
+        appliance_guides: formData.appliance_guides || [],
+        emergency_contacts: formData.emergency_contacts || [],
+        local_tips: formData.local_tips || [],
         trash_instructions: formData.trash_instructions,
         trash_instructions_ru: formData.trash_instructions_ru,
         parking_instructions: formData.parking_instructions,
@@ -141,7 +140,7 @@ export function usePropertyGuidebook(propertyId?: string) {
         // Update existing
         const { data, error } = await supabase
           .from('property_guidebook')
-          .update(payload)
+          .update(payload as never)
           .eq('id', guidebook.id)
           .select()
           .single();
@@ -152,7 +151,7 @@ export function usePropertyGuidebook(propertyId?: string) {
         // Create new
         const { data, error } = await supabase
           .from('property_guidebook')
-          .insert(payload)
+          .insert(payload as never)
           .select()
           .single();
 
@@ -237,9 +236,9 @@ export function useGuestGuidebook(propertyId?: string) {
       if (data) {
         return {
           ...data,
-          appliance_guides: (data.appliance_guides as unknown as ApplianceGuide[]) || [],
-          emergency_contacts: (data.emergency_contacts as unknown as EmergencyContact[]) || [],
-          local_tips: (data.local_tips as unknown as LocalTip[]) || [],
+          appliance_guides: (data.appliance_guides as unknown[] as ApplianceGuide[]) || [],
+          emergency_contacts: (data.emergency_contacts as unknown[] as EmergencyContact[]) || [],
+          local_tips: (data.local_tips as unknown[] as LocalTip[]) || [],
         } as PropertyGuidebook;
       }
       return null;
