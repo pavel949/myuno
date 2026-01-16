@@ -24,7 +24,21 @@ import {
   Home,
   Presentation,
   Sailboat,
-  Waves
+  Waves,
+  UtensilsCrossed,
+  Sparkles,
+  Stethoscope,
+  Dumbbell,
+  Car,
+  Calendar,
+  GraduationCap,
+  Scale,
+  PawPrint,
+  Shirt,
+  Baby,
+  Flower2,
+  Pill,
+  ShoppingBag
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -99,63 +113,51 @@ export default function AdminDashboard() {
     },
   ];
 
-  const quickActions = [
+  // Categories grouped by vertical
+  const categoryGroups = [
     {
-      label: isRussian ? 'Яхты' : 'Yachts',
-      description: isRussian ? 'Добавить яхту' : 'Add yacht',
-      icon: Sailboat,
-      path: '/admin/yachts',
-      color: 'bg-sky-500',
+      title: isRussian ? 'Travel & Leisure' : 'Travel & Leisure',
+      items: [
+        { label: isRussian ? 'Яхты' : 'Yachts', icon: Sailboat, path: '/admin/yachts', color: 'bg-sky-500' },
+        { label: isRussian ? 'Туры' : 'Tours', icon: Palmtree, path: '/admin/tours', color: 'bg-green-500' },
+        { label: isRussian ? 'Активности' : 'Activities', icon: Waves, path: '/admin/activities', color: 'bg-cyan-500' },
+        { label: isRussian ? 'Мероприятия' : 'Events', icon: Calendar, path: '/admin/events', color: 'bg-pink-500' },
+      ]
     },
     {
-      label: isRussian ? 'Туры' : 'Tours',
-      description: isRussian ? 'Добавить тур' : 'Add tour',
-      icon: Palmtree,
-      path: '/admin/tours',
-      color: 'bg-green-500',
+      title: isRussian ? 'Lifestyle' : 'Lifestyle',
+      items: [
+        { label: isRussian ? 'Рестораны' : 'Restaurants', icon: UtensilsCrossed, path: '/admin/restaurants', color: 'bg-orange-500' },
+        { label: isRussian ? 'Салоны' : 'Salons', icon: Sparkles, path: '/admin/salons', color: 'bg-pink-500' },
+        { label: isRussian ? 'Фитнес' : 'Fitness', icon: Dumbbell, path: '/admin/gyms', color: 'bg-red-500' },
+        { label: isRussian ? 'Цветы' : 'Flowers', icon: Flower2, path: '/admin/flowers', color: 'bg-rose-500' },
+      ]
     },
     {
-      label: isRussian ? 'Активности' : 'Activities',
-      description: isRussian ? 'Водные развлечения' : 'Water activities',
-      icon: Waves,
-      path: '/admin/activities',
-      color: 'bg-cyan-500',
+      title: isRussian ? 'Services' : 'Services',
+      items: [
+        { label: isRussian ? 'Уборка' : 'Cleaning', icon: Shirt, path: '/admin/cleaning', color: 'bg-emerald-500' },
+        { label: isRussian ? 'Няни' : 'Babysitters', icon: Baby, path: '/admin/babysitters', color: 'bg-violet-500' },
+        { label: isRussian ? 'Юристы' : 'Legal', icon: Scale, path: '/admin/legal', color: 'bg-slate-500' },
+        { label: isRussian ? 'Образование' : 'Education', icon: GraduationCap, path: '/admin/education', color: 'bg-blue-500' },
+        { label: isRussian ? 'Питомцы' : 'Pets', icon: PawPrint, path: '/admin/pets', color: 'bg-amber-500' },
+      ]
     },
     {
-      label: isRussian ? 'Недвижимость' : 'Properties',
-      description: isRussian ? 'Добавить объект' : 'Add property',
-      icon: Home,
-      path: '/admin/properties',
-      color: 'bg-orange-500',
+      title: isRussian ? 'Infrastructure' : 'Infrastructure',
+      items: [
+        { label: isRussian ? 'Недвижимость' : 'Properties', icon: Home, path: '/admin/properties', color: 'bg-orange-500' },
+        { label: isRussian ? 'Транспорт' : 'Transport', icon: Car, path: '/admin/vehicles', color: 'bg-indigo-500' },
+        { label: isRussian ? 'Клиники' : 'Clinics', icon: Stethoscope, path: '/admin/clinics', color: 'bg-teal-500' },
+      ]
     },
-    {
-      label: isRussian ? 'Провайдеры' : 'Providers',
-      description: isRussian ? 'Управление' : 'Manage',
-      icon: Building2,
-      path: '/admin/providers',
-      color: 'bg-blue-500',
-    },
-    {
-      label: isRussian ? 'Услуги' : 'Services',
-      description: isRussian ? 'Добавить услугу' : 'Add service',
-      icon: Package,
-      path: '/admin/services',
-      color: 'bg-purple-500',
-    },
-    {
-      label: isRussian ? 'Аналитика' : 'Analytics',
-      description: isRussian ? 'Метрики' : 'Metrics',
-      icon: BarChart3,
-      path: '/admin/analytics',
-      color: 'bg-indigo-500',
-    },
-    {
-      label: isRussian ? 'Питч-дек' : 'Pitch Deck',
-      description: isRussian ? 'Презентация' : 'Presentation',
-      icon: Presentation,
-      path: '/admin/pitch-deck',
-      color: 'bg-amber-500',
-    },
+  ];
+
+  const systemActions = [
+    { label: isRussian ? 'Провайдеры' : 'Providers', icon: Building2, path: '/admin/providers', color: 'bg-blue-500' },
+    { label: isRussian ? 'Услуги' : 'Services', icon: Package, path: '/admin/services', color: 'bg-purple-500' },
+    { label: isRussian ? 'Аналитика' : 'Analytics', icon: BarChart3, path: '/admin/analytics', color: 'bg-indigo-500' },
+    { label: isRussian ? 'Питч-дек' : 'Pitch Deck', icon: Presentation, path: '/admin/pitch-deck', color: 'bg-amber-500' },
   ];
 
   return (
@@ -185,29 +187,56 @@ export default function AdminDashboard() {
           ))}
         </div>
 
-        {/* Quick Actions */}
+        {/* Category Groups */}
+        {categoryGroups.map((group, groupIndex) => (
+          <Card key={groupIndex} className="mb-4">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-muted-foreground">
+                {group.title}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="grid grid-cols-4 gap-2">
+                {group.items.map((item, index) => (
+                  <Button
+                    key={index}
+                    variant="ghost"
+                    className="h-auto py-3 flex-col gap-1.5"
+                    onClick={() => navigate(item.path)}
+                  >
+                    <div className={`p-2 rounded-lg ${item.color}`}>
+                      <item.icon className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="text-[10px] font-medium text-center leading-tight">
+                      {item.label}
+                    </span>
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+
+        {/* System Actions */}
         <Card className="mb-6">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">
-              {isRussian ? 'Управление контентом' : 'Content Management'}
+            <CardTitle className="text-sm text-muted-foreground">
+              {isRussian ? 'Система' : 'System'}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            {quickActions.map((action, index) => (
+          <CardContent className="space-y-1">
+            {systemActions.map((action, index) => (
               <Button
                 key={index}
                 variant="ghost"
-                className="w-full justify-start h-auto py-3"
+                className="w-full justify-start h-auto py-2"
                 onClick={() => navigate(action.path)}
               >
-                <div className={`p-2 rounded-lg ${action.color} mr-3`}>
-                  <action.icon className="h-5 w-5 text-white" />
+                <div className={`p-1.5 rounded-lg ${action.color} mr-3`}>
+                  <action.icon className="h-4 w-4 text-white" />
                 </div>
-                <div className="flex-1 text-left">
-                  <p className="font-medium">{action.label}</p>
-                  <p className="text-xs text-muted-foreground">{action.description}</p>
-                </div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium text-sm">{action.label}</span>
+                <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto" />
               </Button>
             ))}
           </CardContent>
