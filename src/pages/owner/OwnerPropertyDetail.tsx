@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { 
   Home, MapPin, Bed, Bath, SquareStack, Settings, 
   Globe, ClipboardList, Wrench, Calendar, ExternalLink,
-  CheckCircle, Clock, AlertTriangle, Loader2, DollarSign
+  CheckCircle, Clock, AlertTriangle, Loader2, DollarSign, BookOpen
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
@@ -235,6 +235,14 @@ export default function OwnerPropertyDetail() {
         >
           <DollarSign className="h-5 w-5" />
           <span className="text-sm">{isRu ? 'Условия аренды' : 'Rental Terms'}</span>
+        </Button>
+        <Button 
+          variant="outline" 
+          className="h-auto py-4 flex-col gap-2"
+          onClick={() => navigate(`/owner/properties/${id}/guidebook`)}
+        >
+          <BookOpen className="h-5 w-5" />
+          <span className="text-sm">{isRu ? 'Гайд для гостей' : 'Guest Guidebook'}</span>
         </Button>
         <Button 
           variant="outline" 
