@@ -43,7 +43,7 @@ export default function EventBooking() {
 
   // Auth redirect
   if (!authLoading && !user) {
-    navigate('/auth', { state: { from: `/events/${id}/book` } });
+    navigate('/auth', { state: { from: `/events/booking/${id}` } });
     return null;
   }
 
