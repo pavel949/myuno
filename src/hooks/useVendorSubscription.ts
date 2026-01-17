@@ -161,6 +161,8 @@ export function useSubscriptionPlans() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     async function fetchPlans() {
       try {
         const { data, error } = await supabase
@@ -186,15 +188,16 @@ export function useSubscriptionPlans() {
           is_popular: p.is_popular || false,
         }));
 
-        setPlans(mappedPlans);
+        if (isMounted) setPlans(mappedPlans);
       } catch (err) {
         console.error('Error fetching plans:', err);
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     }
 
     fetchPlans();
+    return () => { isMounted = false; };
   }, []);
 
   return { plans, isLoading };

@@ -12,9 +12,10 @@ export function useAdminYachts(filterProviderId?: string) {
   const [yachts, setYachts] = useState<Yacht[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchYachts = useCallback(async () => {
+  const fetchYachts = useCallback(async (isMounted?: () => boolean) => {
+    const checkMounted = isMounted || (() => true);
     if (!user) return;
-    setIsLoading(true);
+    if (checkMounted()) setIsLoading(true);
     
     let query = supabase.from('yachts').select('*');
     
@@ -24,12 +25,14 @@ export function useAdminYachts(filterProviderId?: string) {
     
     const { data, error } = await query.order('created_at', { ascending: false });
     
-    if (!error && data) setYachts(data as Yacht[]);
-    setIsLoading(false);
+    if (!error && data && checkMounted()) setYachts(data as Yacht[]);
+    if (checkMounted()) setIsLoading(false);
   }, [user, filterProviderId]);
 
   useEffect(() => {
-    fetchYachts();
+    let isMounted = true;
+    fetchYachts(() => isMounted);
+    return () => { isMounted = false; };
   }, [fetchYachts]);
 
   const createYacht = async (yachtData: Partial<Yacht> & { provider_id: string }) => {
@@ -80,9 +83,10 @@ export function useAdminTours(filterProviderId?: string) {
   const [tours, setTours] = useState<VendorTour[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchTours = useCallback(async () => {
+  const fetchTours = useCallback(async (isMounted?: () => boolean) => {
+    const checkMounted = isMounted || (() => true);
     if (!user) return;
-    setIsLoading(true);
+    if (checkMounted()) setIsLoading(true);
     
     let query = supabase.from('tours').select('*');
     
@@ -92,12 +96,14 @@ export function useAdminTours(filterProviderId?: string) {
     
     const { data, error } = await query.order('created_at', { ascending: false });
     
-    if (!error && data) setTours(data as VendorTour[]);
-    setIsLoading(false);
+    if (!error && data && checkMounted()) setTours(data as VendorTour[]);
+    if (checkMounted()) setIsLoading(false);
   }, [user, filterProviderId]);
 
   useEffect(() => {
-    fetchTours();
+    let isMounted = true;
+    fetchTours(() => isMounted);
+    return () => { isMounted = false; };
   }, [fetchTours]);
 
   const createTour = async (tourData: Partial<VendorTour> & { provider_id: string }) => {
@@ -147,9 +153,10 @@ export function useAdminActivities(filterProviderId?: string) {
   const [activities, setActivities] = useState<VendorActivity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchActivities = useCallback(async () => {
+  const fetchActivities = useCallback(async (isMounted?: () => boolean) => {
+    const checkMounted = isMounted || (() => true);
     if (!user) return;
-    setIsLoading(true);
+    if (checkMounted()) setIsLoading(true);
     
     let query = supabase.from('water_activities').select('*');
     
@@ -159,12 +166,14 @@ export function useAdminActivities(filterProviderId?: string) {
     
     const { data, error } = await query.order('created_at', { ascending: false });
     
-    if (!error && data) setActivities(data as VendorActivity[]);
-    setIsLoading(false);
+    if (!error && data && checkMounted()) setActivities(data as VendorActivity[]);
+    if (checkMounted()) setIsLoading(false);
   }, [user, filterProviderId]);
 
   useEffect(() => {
-    fetchActivities();
+    let isMounted = true;
+    fetchActivities(() => isMounted);
+    return () => { isMounted = false; };
   }, [fetchActivities]);
 
   const createActivity = async (activityData: Partial<VendorActivity> & { provider_id: string }) => {
@@ -214,9 +223,10 @@ export function useAdminProperties(filterProviderId?: string) {
   const [properties, setProperties] = useState<VendorProperty[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchProperties = useCallback(async () => {
+  const fetchProperties = useCallback(async (isMounted?: () => boolean) => {
+    const checkMounted = isMounted || (() => true);
     if (!user) return;
-    setIsLoading(true);
+    if (checkMounted()) setIsLoading(true);
     
     let query = supabase.from('properties').select('*');
     
@@ -226,12 +236,14 @@ export function useAdminProperties(filterProviderId?: string) {
     
     const { data, error } = await query.order('created_at', { ascending: false });
     
-    if (!error && data) setProperties(data as VendorProperty[]);
-    setIsLoading(false);
+    if (!error && data && checkMounted()) setProperties(data as VendorProperty[]);
+    if (checkMounted()) setIsLoading(false);
   }, [user, filterProviderId]);
 
   useEffect(() => {
-    fetchProperties();
+    let isMounted = true;
+    fetchProperties(() => isMounted);
+    return () => { isMounted = false; };
   }, [fetchProperties]);
 
   const createProperty = async (propertyData: Partial<VendorProperty> & { provider_id: string }) => {
@@ -281,17 +293,18 @@ export function useAdminRestaurants(filterProviderId?: string) {
   const [restaurants, setRestaurants] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (isMounted?: () => boolean) => {
+    const checkMounted = isMounted || (() => true);
     if (!user) return;
-    setIsLoading(true);
+    if (checkMounted()) setIsLoading(true);
     let query = supabase.from('restaurants').select('*');
     if (filterProviderId) query = query.eq('provider_id', filterProviderId);
     const { data, error } = await query.order('created_at', { ascending: false });
-    if (!error && data) setRestaurants(data);
-    setIsLoading(false);
+    if (!error && data && checkMounted()) setRestaurants(data);
+    if (checkMounted()) setIsLoading(false);
   }, [user, filterProviderId]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => { let m = true; fetchData(() => m); return () => { m = false; }; }, [fetchData]);
 
   const createRestaurant = async (data: any) => {
     const { data: result, error } = await supabase.from('restaurants').insert({ ...data, is_verified: true }).select().single();
@@ -317,17 +330,18 @@ export function useAdminSalons(filterProviderId?: string) {
   const [salons, setSalons] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (isMounted?: () => boolean) => {
+    const checkMounted = isMounted || (() => true);
     if (!user) return;
-    setIsLoading(true);
+    if (checkMounted()) setIsLoading(true);
     let query = supabase.from('salons').select('*');
     if (filterProviderId) query = query.eq('provider_id', filterProviderId);
     const { data, error } = await query.order('created_at', { ascending: false });
-    if (!error && data) setSalons(data);
-    setIsLoading(false);
+    if (!error && data && checkMounted()) setSalons(data);
+    if (checkMounted()) setIsLoading(false);
   }, [user, filterProviderId]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => { let m = true; fetchData(() => m); return () => { m = false; }; }, [fetchData]);
 
   const createSalon = async (data: any) => {
     const { data: result, error } = await supabase.from('salons').insert({ ...data, is_verified: true }).select().single();
@@ -353,17 +367,18 @@ export function useAdminClinics(filterProviderId?: string) {
   const [clinics, setClinics] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (isMounted?: () => boolean) => {
+    const checkMounted = isMounted || (() => true);
     if (!user) return;
-    setIsLoading(true);
+    if (checkMounted()) setIsLoading(true);
     let query = supabase.from('clinics').select('*');
     if (filterProviderId) query = query.eq('provider_id', filterProviderId);
     const { data, error } = await query.order('created_at', { ascending: false });
-    if (!error && data) setClinics(data);
-    setIsLoading(false);
+    if (!error && data && checkMounted()) setClinics(data);
+    if (checkMounted()) setIsLoading(false);
   }, [user, filterProviderId]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => { let m = true; fetchData(() => m); return () => { m = false; }; }, [fetchData]);
 
   const createClinic = async (data: any) => {
     const { data: result, error } = await supabase.from('clinics').insert({ ...data, is_verified: true }).select().single();
@@ -389,17 +404,18 @@ export function useAdminGyms(filterProviderId?: string) {
   const [gyms, setGyms] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (isMounted?: () => boolean) => {
+    const checkMounted = isMounted || (() => true);
     if (!user) return;
-    setIsLoading(true);
+    if (checkMounted()) setIsLoading(true);
     let query = supabase.from('gyms').select('*');
     if (filterProviderId) query = query.eq('provider_id', filterProviderId);
     const { data, error } = await query.order('created_at', { ascending: false });
-    if (!error && data) setGyms(data);
-    setIsLoading(false);
+    if (!error && data && checkMounted()) setGyms(data);
+    if (checkMounted()) setIsLoading(false);
   }, [user, filterProviderId]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => { let m = true; fetchData(() => m); return () => { m = false; }; }, [fetchData]);
 
   const createGym = async (data: any) => {
     const { data: result, error } = await supabase.from('gyms').insert({ ...data, is_verified: true }).select().single();
@@ -425,17 +441,18 @@ export function useAdminVehicles(filterProviderId?: string) {
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (isMounted?: () => boolean) => {
+    const checkMounted = isMounted || (() => true);
     if (!user) return;
-    setIsLoading(true);
+    if (checkMounted()) setIsLoading(true);
     let query = supabase.from('vehicles').select('*');
     if (filterProviderId) query = query.eq('provider_id', filterProviderId);
     const { data, error } = await query.order('created_at', { ascending: false });
-    if (!error && data) setVehicles(data);
-    setIsLoading(false);
+    if (!error && data && checkMounted()) setVehicles(data);
+    if (checkMounted()) setIsLoading(false);
   }, [user, filterProviderId]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => { let m = true; fetchData(() => m); return () => { m = false; }; }, [fetchData]);
 
   const createVehicle = async (data: any) => {
     const { data: result, error } = await supabase.from('vehicles').insert({ ...data, is_verified: true }).select().single();
@@ -461,17 +478,18 @@ export function useAdminEvents(filterProviderId?: string) {
   const [events, setEvents] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (isMounted?: () => boolean) => {
+    const checkMounted = isMounted || (() => true);
     if (!user) return;
-    setIsLoading(true);
+    if (checkMounted()) setIsLoading(true);
     let query = supabase.from('events').select('*');
     if (filterProviderId) query = query.eq('provider_id', filterProviderId);
     const { data, error } = await query.order('created_at', { ascending: false });
-    if (!error && data) setEvents(data);
-    setIsLoading(false);
+    if (!error && data && checkMounted()) setEvents(data);
+    if (checkMounted()) setIsLoading(false);
   }, [user, filterProviderId]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => { let m = true; fetchData(() => m); return () => { m = false; }; }, [fetchData]);
 
   const createEvent = async (data: any) => {
     const { data: result, error } = await supabase.from('events').insert({ ...data, is_active: true }).select().single();
@@ -498,17 +516,18 @@ function createAdminHook(tableName: string) {
     const [items, setItems] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    const fetchData = useCallback(async () => {
+    const fetchData = useCallback(async (isMounted?: () => boolean) => {
+      const checkMounted = isMounted || (() => true);
       if (!user) return;
-      setIsLoading(true);
+      if (checkMounted()) setIsLoading(true);
       let query = supabase.from(tableName as any).select('*');
       if (filterProviderId) query = query.eq('provider_id', filterProviderId);
       const { data, error } = await query.order('created_at', { ascending: false });
-      if (!error && data) setItems(data);
-      setIsLoading(false);
+      if (!error && data && checkMounted()) setItems(data);
+      if (checkMounted()) setIsLoading(false);
     }, [user, filterProviderId]);
 
-    useEffect(() => { fetchData(); }, [fetchData]);
+    useEffect(() => { let m = true; fetchData(() => m); return () => { m = false; }; }, [fetchData]);
 
     const createItem = async (data: any) => {
       const { data: result, error } = await supabase.from(tableName as any).insert({ ...data, is_active: true }).select().single();
