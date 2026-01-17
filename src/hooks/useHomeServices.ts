@@ -47,6 +47,8 @@ export function useHomeServices(category?: string) {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+    
     async function fetchProviders() {
       setIsLoading(true);
       try {
@@ -63,16 +65,20 @@ export function useHomeServices(category?: string) {
         const { data, error } = await query.order('rating', { ascending: false });
 
         if (error) throw error;
-        setProviders(data || []);
+        if (isMounted) setProviders(data || []);
       } catch (err) {
-        setError(err as Error);
-        console.error('Error fetching home service providers:', err);
+        if (isMounted) {
+          setError(err as Error);
+          console.error('Error fetching home service providers:', err);
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     }
 
     fetchProviders();
+    
+    return () => { isMounted = false; };
   }, [category]);
 
   const getProviderImage = (provider: HomeServiceProvider) => {

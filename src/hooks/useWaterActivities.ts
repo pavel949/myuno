@@ -47,8 +47,8 @@ export const useWaterActivities = (options: UseWaterActivitiesOptions = {}) => {
   const [activities, setActivities] = useState<WaterActivity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchActivities = useCallback(async () => {
-    setIsLoading(true);
+  const fetchActivities = useCallback(async (isMounted: { current: boolean }) => {
+    if (isMounted.current) setIsLoading(true);
     try {
       let query = supabase.from('water_activities').select('*').eq('is_active', true);
       if (options.category) query = query.eq('category', options.category);
@@ -57,24 +57,31 @@ export const useWaterActivities = (options: UseWaterActivitiesOptions = {}) => {
       if (options.limit) query = query.limit(options.limit);
 
       const { data } = await query;
-      const formattedActivities: WaterActivity[] = (data || []).map(activity => ({
-        ...activity,
-        images: activity.images || [],
-        includes: activity.includes || [],
-        requirements: activity.requirements || [],
-        available_times: activity.available_times || [],
-        available_days: activity.available_days || [],
-      }));
-      setActivities(formattedActivities);
+      if (isMounted.current) {
+        const formattedActivities: WaterActivity[] = (data || []).map(activity => ({
+          ...activity,
+          images: activity.images || [],
+          includes: activity.includes || [],
+          requirements: activity.requirements || [],
+          available_times: activity.available_times || [],
+          available_days: activity.available_days || [],
+        }));
+        setActivities(formattedActivities);
+      }
     } catch (err) {
       console.error('Error fetching water activities:', err);
     } finally {
-      setIsLoading(false);
+      if (isMounted.current) setIsLoading(false);
     }
   }, [options.category, options.featured, options.limit]);
 
-  useEffect(() => { fetchActivities(); }, [fetchActivities]);
-  return { activities, isLoading, refetch: fetchActivities };
+  useEffect(() => {
+    const isMounted = { current: true };
+    fetchActivities(isMounted);
+    return () => { isMounted.current = false; };
+  }, [fetchActivities]);
+  
+  return { activities, isLoading, refetch: () => fetchActivities({ current: true }) };
 };
 
 export const useWaterActivity = (activityId: string | undefined) => {
@@ -83,6 +90,8 @@ export const useWaterActivity = (activityId: string | undefined) => {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+    
     if (!activityId) { setIsLoading(false); return; }
     const fetchActivity = async () => {
       setIsLoading(true);
@@ -93,7 +102,7 @@ export const useWaterActivity = (activityId: string | undefined) => {
           .eq('id', activityId)
           .single();
         if (fetchError) throw fetchError;
-        if (data) {
+        if (isMounted && data) {
           setActivity({
             ...data,
             images: data.images || [],
@@ -104,12 +113,14 @@ export const useWaterActivity = (activityId: string | undefined) => {
           });
         }
       } catch (err) {
-        setError(err as Error);
+        if (isMounted) setError(err as Error);
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
     fetchActivity();
+    
+    return () => { isMounted = false; };
   }, [activityId]);
 
   return { activity, isLoading, error };

@@ -46,6 +46,8 @@ export function useVisaServices(options: UseVisaServicesOptions = {}) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchServices = async () => {
       setIsLoading(true);
       let query = supabase
@@ -75,28 +77,32 @@ export function useVisaServices(options: UseVisaServicesOptions = {}) {
 
       const { data, error } = await query;
 
-      if (!error && data) {
-        setServices(
-          data.map((s: any) => ({
-            ...s,
-            requirements: s.requirements || null,
-            documents_required: s.documents_required || null,
-            process_steps: s.process_steps || null,
-            // Computed fields
-            processing_time: s.processing_days ? `${s.processing_days} days` : null,
-            validity_period: s.validity_months 
-              ? s.validity_months >= 12 
-                ? `${Math.floor(s.validity_months / 12)} year${Math.floor(s.validity_months / 12) > 1 ? 's' : ''}`
-                : `${s.validity_months} months`
-              : null,
-            price: s.service_fee || s.total_price,
-            provider: s.provider,
-          })) as VisaService[]
-        );
+      if (isMounted) {
+        if (!error && data) {
+          setServices(
+            data.map((s: any) => ({
+              ...s,
+              requirements: s.requirements || null,
+              documents_required: s.documents_required || null,
+              process_steps: s.process_steps || null,
+              // Computed fields
+              processing_time: s.processing_days ? `${s.processing_days} days` : null,
+              validity_period: s.validity_months 
+                ? s.validity_months >= 12 
+                  ? `${Math.floor(s.validity_months / 12)} year${Math.floor(s.validity_months / 12) > 1 ? 's' : ''}`
+                  : `${s.validity_months} months`
+                : null,
+              price: s.service_fee || s.total_price,
+              provider: s.provider,
+            })) as VisaService[]
+          );
+        }
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
     fetchServices();
+    
+    return () => { isMounted = false; };
   }, [options.visaType, options.providerId]);
 
   return { services, isLoading };
@@ -107,6 +113,8 @@ export function useVisaService(id: string) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     if (!id) return;
     const fetchService = async () => {
       const { data, error } = await supabase
@@ -124,25 +132,29 @@ export function useVisaService(id: string) {
         `)
         .eq('id', id)
         .single();
-      if (!error && data) {
-        setService({
-          ...data,
-          requirements: data.requirements || null,
-          documents_required: data.documents_required || null,
-          process_steps: (data as any).process_steps || null,
-          processing_time: data.processing_days ? `${data.processing_days} days` : null,
-          validity_period: data.validity_months 
-            ? data.validity_months >= 12 
-              ? `${Math.floor(data.validity_months / 12)} year${Math.floor(data.validity_months / 12) > 1 ? 's' : ''}`
-              : `${data.validity_months} months`
-            : null,
-          price: data.service_fee || data.total_price,
-          provider: (data as any).provider,
-        } as unknown as VisaService);
+      if (isMounted) {
+        if (!error && data) {
+          setService({
+            ...data,
+            requirements: data.requirements || null,
+            documents_required: data.documents_required || null,
+            process_steps: (data as any).process_steps || null,
+            processing_time: data.processing_days ? `${data.processing_days} days` : null,
+            validity_period: data.validity_months 
+              ? data.validity_months >= 12 
+                ? `${Math.floor(data.validity_months / 12)} year${Math.floor(data.validity_months / 12) > 1 ? 's' : ''}`
+                : `${data.validity_months} months`
+              : null,
+            price: data.service_fee || data.total_price,
+            provider: (data as any).provider,
+          } as unknown as VisaService);
+        }
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
     fetchService();
+    
+    return () => { isMounted = false; };
   }, [id]);
 
   return { service, isLoading };
