@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -22,6 +22,12 @@ interface CreateRestaurantCheckoutParams {
 export function useStripeCheckout() {
   const [isProcessing, setIsProcessing] = useState(false);
   const { language } = useLanguage();
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => { isMountedRef.current = false; };
+  }, []);
 
   const createRestaurantCheckout = async (params: CreateRestaurantCheckoutParams): Promise<boolean> => {
     setIsProcessing(true);
@@ -44,14 +50,16 @@ export function useStripeCheckout() {
       }
     } catch (error) {
       console.error('Error creating checkout session:', error);
-      toast.error(
-        language === 'ru' 
-          ? 'Ошибка при создании платежа' 
-          : 'Error creating payment'
-      );
+      if (isMountedRef.current) {
+        toast.error(
+          language === 'ru' 
+            ? 'Ошибка при создании платежа' 
+            : 'Error creating payment'
+        );
+      }
       return false;
     } finally {
-      setIsProcessing(false);
+      if (isMountedRef.current) setIsProcessing(false);
     }
   };
 

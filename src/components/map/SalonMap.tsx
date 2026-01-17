@@ -140,6 +140,9 @@ const SalonMap: React.FC<SalonMapProps> = ({
   useEffect(() => {
     if (!map.current || !mapboxToken) return;
 
+    // Store event listeners for cleanup
+    const clickListeners: Array<{ el: HTMLElement; handler: () => void }> = [];
+
     // Remove existing markers
     markersRef.current.forEach(marker => marker.remove());
     markersRef.current = [];
@@ -167,9 +170,11 @@ const SalonMap: React.FC<SalonMapProps> = ({
         .setPopup(popup)
         .addTo(map.current!);
 
-      el.addEventListener('click', () => {
+      const clickHandler = () => {
         onSalonSelect?.(salon.id);
-      });
+      };
+      el.addEventListener('click', clickHandler);
+      clickListeners.push({ el, handler: clickHandler });
 
       markersRef.current.push(marker);
     });
@@ -185,6 +190,13 @@ const SalonMap: React.FC<SalonMapProps> = ({
       }
       map.current.fitBounds(bounds, { padding: 50, maxZoom: 14 });
     }
+
+    // Cleanup event listeners on unmount or re-render
+    return () => {
+      clickListeners.forEach(({ el, handler }) => {
+        el.removeEventListener('click', handler);
+      });
+    };
   }, [filteredSalons, mapboxToken, language, onSalonSelect, userLocation]);
 
   if (isLoading) {

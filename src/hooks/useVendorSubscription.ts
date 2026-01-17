@@ -48,14 +48,16 @@ export function useVendorSubscription() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const checkSubscription = useCallback(async () => {
+  const checkSubscription = useCallback(async (isMounted?: () => boolean) => {
+    const checkMounted = isMounted || (() => true);
+    
     if (!user) {
-      setIsLoading(false);
+      if (checkMounted()) setIsLoading(false);
       return;
     }
 
     try {
-      setIsLoading(true);
+      if (checkMounted()) setIsLoading(true);
       const { data: sessionData } = await supabase.auth.getSession();
       
       const { data, error: fnError } = await supabase.functions.invoke('check-vendor-subscription', {
@@ -66,29 +68,35 @@ export function useVendorSubscription() {
 
       if (fnError) throw fnError;
 
-      setState({
-        subscribed: data.subscribed || false,
-        subscription: data.subscription || null,
-        plan: data.plan || null,
-        limits: data.limits || { max_listings: 3, commission_percent: 15 },
-      });
-      setError(null);
+      if (checkMounted()) {
+        setState({
+          subscribed: data.subscribed || false,
+          subscription: data.subscription || null,
+          plan: data.plan || null,
+          limits: data.limits || { max_listings: 3, commission_percent: 15 },
+        });
+        setError(null);
+      }
     } catch (err) {
       console.error('Error checking subscription:', err);
-      setError(err instanceof Error ? err.message : 'Failed to check subscription');
+      if (checkMounted()) {
+        setError(err instanceof Error ? err.message : 'Failed to check subscription');
+      }
     } finally {
-      setIsLoading(false);
+      if (checkMounted()) setIsLoading(false);
     }
   }, [user]);
 
   useEffect(() => {
-    checkSubscription();
+    let isMounted = true;
+    checkSubscription(() => isMounted);
+    return () => { isMounted = false; };
   }, [checkSubscription]);
 
   // Auto-refresh every minute
   useEffect(() => {
     if (!user) return;
-    const interval = setInterval(checkSubscription, 60000);
+    const interval = setInterval(() => checkSubscription(), 60000);
     return () => clearInterval(interval);
   }, [user, checkSubscription]);
 

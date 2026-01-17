@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Upload, X, Loader2, ImageIcon } from 'lucide-react';
@@ -22,6 +22,12 @@ export function ImageUpload({
 }: ImageUploadProps) {
   const { user } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => { isMountedRef.current = false; };
+  }, []);
 
   const uploadFile = useCallback(async (file: File) => {
     if (!user) {
@@ -56,13 +62,19 @@ export function ImageUpload({
         .from('vendor-uploads')
         .getPublicUrl(filePath);
 
-      onChange(publicUrl);
-      toast.success('Фото загружено');
+      if (isMountedRef.current) {
+        onChange(publicUrl);
+        toast.success('Фото загружено');
+      }
     } catch (error) {
       console.error('Upload error:', error);
-      toast.error('Ошибка загрузки');
+      if (isMountedRef.current) {
+        toast.error('Ошибка загрузки');
+      }
     } finally {
-      setIsUploading(false);
+      if (isMountedRef.current) {
+        setIsUploading(false);
+      }
     }
   }, [user, folder, onChange]);
 
@@ -134,6 +146,12 @@ export function MultiImageUpload({
 }: MultiImageUploadProps) {
   const { user } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => { isMountedRef.current = false; };
+  }, []);
 
   const uploadFile = useCallback(async (file: File) => {
     if (!user) {
@@ -167,13 +185,19 @@ export function MultiImageUpload({
         .from('vendor-uploads')
         .getPublicUrl(filePath);
 
-      onChange([...value, publicUrl]);
-      toast.success('Фото загружено');
+      if (isMountedRef.current) {
+        onChange([...value, publicUrl]);
+        toast.success('Фото загружено');
+      }
     } catch (error) {
       console.error('Upload error:', error);
-      toast.error('Ошибка загрузки');
+      if (isMountedRef.current) {
+        toast.error('Ошибка загрузки');
+      }
     } finally {
-      setIsUploading(false);
+      if (isMountedRef.current) {
+        setIsUploading(false);
+      }
     }
   }, [user, folder, value, onChange, maxImages]);
 
