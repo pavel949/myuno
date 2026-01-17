@@ -133,18 +133,69 @@ export const useReferral = () => {
   }, [getShareLink]);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const loadData = async () => {
+      if (!user) {
+        setIsLoading(false);
+        return;
+      }
+      
       setIsLoading(true);
-      await Promise.all([loadReferralCode(), loadReferrals(), loadSettings()]);
-      setIsLoading(false);
+      
+      try {
+        // Load referral code
+        const { data: codeData, error: codeError } = await supabase
+          .rpc('generate_referral_code', { p_user_id: user.id });
+        
+        if (!codeError && isMounted) {
+          setReferralCode(codeData);
+        }
+        
+        // Load referrals
+        const { data: referralData, error: referralError } = await supabase
+          .from('referrals')
+          .select('*')
+          .eq('referrer_id', user.id)
+          .order('created_at', { ascending: false });
+        
+        if (!referralError && isMounted) {
+          const referrals = referralData || [];
+          setReferrals(referrals);
+          
+          const completed = referrals.filter(r => r.status === 'completed');
+          setStats({
+            totalReferrals: referrals.length,
+            completedReferrals: completed.length,
+            totalEarned: completed.reduce((sum, r) => sum + Number(r.referrer_bonus), 0),
+          });
+        }
+        
+        // Load settings
+        const { data: settingsData, error: settingsError } = await supabase
+          .from('referral_settings')
+          .select('*')
+          .eq('is_active', true)
+          .single();
+        
+        if (!settingsError && isMounted) {
+          setSettings(settingsData);
+        }
+      } catch (error) {
+        console.error('Error loading referral data:', error);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
     };
 
-    if (user) {
-      loadData();
-    } else {
-      setIsLoading(false);
-    }
-  }, [user, loadReferralCode, loadReferrals, loadSettings]);
+    loadData();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [user]);
 
   return {
     referralCode,

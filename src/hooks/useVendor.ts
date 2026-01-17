@@ -158,8 +158,73 @@ export function useVendorProfile() {
   }, [user]);
 
   useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
+    let isMounted = true;
+    
+    const loadProfile = async () => {
+      if (!user) {
+        setProfile(null);
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        const { data, error } = await supabase
+          .from('providers')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (error) throw error;
+        
+        if (isMounted && data) {
+          setProfile({
+            id: data.id,
+            user_id: data.user_id || user.id,
+            name: data.name,
+            description_en: data.description_en || undefined,
+            description_ru: data.description_ru || undefined,
+            logo_url: data.logo_url || undefined,
+            cover_image: data.cover_image || undefined,
+            phone: data.phone || undefined,
+            email: data.email || undefined,
+            website: data.website || undefined,
+            address: data.address || undefined,
+            lat: data.lat ? Number(data.lat) : undefined,
+            lng: data.lng ? Number(data.lng) : undefined,
+            business_category: data.business_category || 'services',
+            commission_rate: Number(data.commission_rate) || 10,
+            is_verified: data.is_verified || false,
+            is_active: data.is_active || true,
+            trust_score: Number(data.trust_score) || 0,
+            rating: data.rating ? Number(data.rating) : undefined,
+            review_count: data.review_count || undefined,
+            total_earnings: data.total_earnings ? Number(data.total_earnings) : undefined,
+            pending_payout: data.pending_payout ? Number(data.pending_payout) : undefined,
+            created_at: data.created_at,
+            updated_at: data.updated_at,
+          });
+        } else if (isMounted) {
+          setProfile(null);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err as Error);
+        }
+        console.error('Error fetching vendor profile:', err);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+    
+    loadProfile();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [user]);
 
   const updateProfile = async (updates: Partial<VendorProfile>) => {
     if (!profile) return { error: new Error('No profile found') };
@@ -269,8 +334,42 @@ export function useVendorServices(vendorId?: string) {
   }, [vendorId]);
 
   useEffect(() => {
-    fetchServices();
-  }, [fetchServices]);
+    let isMounted = true;
+    
+    const loadServices = async () => {
+      if (!vendorId) {
+        setServices([]);
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        const { data, error } = await supabase
+          .from('vendor_services')
+          .select('*')
+          .eq('provider_id', vendorId)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        if (isMounted) {
+          setServices((data || []) as VendorService[]);
+        }
+      } catch (err) {
+        console.error('Error fetching services:', err);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+    
+    loadServices();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [vendorId]);
 
   const createService = async (serviceData: Partial<VendorService>) => {
     if (!vendorId) return { error: new Error('No vendor ID') };
@@ -348,8 +447,50 @@ export function useVendorBookings(vendorId?: string, options?: { status?: string
   }, [vendorId, options?.status, options?.limit]);
 
   useEffect(() => {
-    fetchBookings();
-  }, [fetchBookings]);
+    let isMounted = true;
+    
+    const loadBookings = async () => {
+      if (!vendorId) {
+        setBookings([]);
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        let query = supabase
+          .from('vendor_bookings')
+          .select('*')
+          .eq('provider_id', vendorId)
+          .order('scheduled_at', { ascending: false });
+
+        if (options?.status) {
+          query = query.eq('status', options.status);
+        }
+        if (options?.limit) {
+          query = query.limit(options.limit);
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+        if (isMounted) {
+          setBookings((data || []) as VendorBooking[]);
+        }
+      } catch (err) {
+        console.error('Error fetching bookings:', err);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+    
+    loadBookings();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [vendorId, options?.status, options?.limit]);
 
   const updateBookingStatus = async (bookingId: string, status: string) => {
     const { data, error } = await supabase
@@ -429,8 +570,69 @@ export function useVendorAnalytics(vendorId?: string, days: number = 30) {
   }, [vendorId, days]);
 
   useEffect(() => {
-    fetchAnalytics();
-  }, [fetchAnalytics]);
+    let isMounted = true;
+    
+    const loadAnalytics = async () => {
+      if (!vendorId) {
+        setAnalytics([]);
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - days);
+
+        const { data, error } = await supabase
+          .from('vendor_analytics')
+          .select('*')
+          .eq('provider_id', vendorId)
+          .gte('date', startDate.toISOString().split('T')[0])
+          .order('date', { ascending: true });
+
+        if (error) throw error;
+        
+        if (isMounted) {
+          const analyticsData = (data || []) as VendorAnalytics[];
+          setAnalytics(analyticsData);
+
+          const totals = analyticsData.reduce(
+            (acc, day) => ({
+              totalRevenue: acc.totalRevenue + (day.net_revenue || 0),
+              totalBookings: acc.totalBookings + (day.total_bookings || 0),
+              completedBookings: acc.completedBookings + (day.completed_bookings || 0),
+              cancelledBookings: acc.cancelledBookings + (day.cancelled_bookings || 0),
+              ratingSum: acc.ratingSum + (day.avg_rating || 0),
+              ratingCount: acc.ratingCount + (day.avg_rating ? 1 : 0),
+            }),
+            { totalRevenue: 0, totalBookings: 0, completedBookings: 0, cancelledBookings: 0, ratingSum: 0, ratingCount: 0 }
+          );
+
+          setSummary({
+            totalRevenue: totals.totalRevenue,
+            totalBookings: totals.totalBookings,
+            completedBookings: totals.completedBookings,
+            cancelledBookings: totals.cancelledBookings,
+            avgRating: totals.ratingCount > 0 ? totals.ratingSum / totals.ratingCount : 0,
+            pendingPayout: 0,
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching analytics:', err);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+    
+    loadAnalytics();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [vendorId, days]);
 
   return { analytics, summary, isLoading, refetch: fetchAnalytics };
 }
@@ -464,8 +666,42 @@ export function useVendorPayouts(vendorId?: string) {
   }, [vendorId]);
 
   useEffect(() => {
-    fetchPayouts();
-  }, [fetchPayouts]);
+    let isMounted = true;
+    
+    const loadPayouts = async () => {
+      if (!vendorId) {
+        setPayouts([]);
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        const { data, error } = await supabase
+          .from('vendor_payouts')
+          .select('*')
+          .eq('provider_id', vendorId)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        if (isMounted) {
+          setPayouts((data || []) as VendorPayout[]);
+        }
+      } catch (err) {
+        console.error('Error fetching payouts:', err);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+    
+    loadPayouts();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [vendorId]);
 
   const requestPayout = async (amount: number, paymentMethod: string, paymentDetails: Record<string, unknown>) => {
     if (!vendorId) return { error: new Error('No vendor ID') };

@@ -93,15 +93,67 @@ export function useNotifications() {
   }, [isSupported, user]);
 
   useEffect(() => {
-    if (user) {
-      fetchNotifications();
-      fetchPreferences();
-      checkSubscription();
-    } else {
-      setNotifications([]);
-      setIsLoading(false);
-    }
-  }, [user, fetchNotifications, fetchPreferences, checkSubscription]);
+    let isMounted = true;
+    
+    const loadData = async () => {
+      if (!user) {
+        setNotifications([]);
+        setIsLoading(false);
+        return;
+      }
+      
+      // Fetch notifications
+      const { data: notifData, error: notifError } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      
+      if (!notifError && notifData && isMounted) {
+        setNotifications(notifData);
+        setUnreadCount(notifData.filter(n => !n.is_read).length);
+      }
+      
+      // Fetch preferences
+      const { data: prefData, error: prefError } = await supabase
+        .from('notification_preferences')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (!prefError && prefData && isMounted) {
+        setPreferences({
+          booking_reminders: prefData.booking_reminders,
+          promotions: prefData.promotions,
+          status_updates: prefData.status_updates,
+        });
+      }
+      
+      // Check subscription
+      if (isSupported) {
+        try {
+          const registration = await navigator.serviceWorker.ready;
+          const subscription = await registration.pushManager.getSubscription();
+          if (isMounted) {
+            setIsSubscribed(!!subscription);
+          }
+        } catch (error) {
+          console.error('Error checking subscription:', error);
+        }
+      }
+      
+      if (isMounted) {
+        setIsLoading(false);
+      }
+    };
+    
+    loadData();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [user, isSupported]);
 
   // Subscribe to push notifications
   const subscribe = async () => {
