@@ -10,30 +10,33 @@ import { CartProvider } from "@/contexts/CartContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AnimatedRoutes } from "@/components/layout/AnimatedRoutes";
 import { WhatsAppButton } from "@/components/chat/WhatsAppButton";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <LanguageProvider>
-        <CurrencyProvider>
-          <AuthProvider>
-            <CartProvider>
-              <TooltipProvider>
-                <Toaster />
-                <Sonner />
-                <BrowserRouter>
-                  <AnimatedRoutes />
-                  <WhatsAppButton />
-                </BrowserRouter>
-              </TooltipProvider>
-            </CartProvider>
-          </AuthProvider>
-        </CurrencyProvider>
-      </LanguageProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <LanguageProvider>
+          <CurrencyProvider>
+            <AuthProvider>
+              <CartProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <Sonner />
+                  <BrowserRouter>
+                    <AnimatedRoutes />
+                    <WhatsAppButton />
+                  </BrowserRouter>
+                </TooltipProvider>
+              </CartProvider>
+            </AuthProvider>
+          </CurrencyProvider>
+        </LanguageProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
