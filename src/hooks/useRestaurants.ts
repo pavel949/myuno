@@ -121,8 +121,57 @@ export function useRestaurants(options: UseRestaurantsOptions = {}) {
   }, [options.cuisine, options.district, options.searchQuery, options.featured, options.deliveryOnly, options.limit]);
 
   useEffect(() => {
-    fetchRestaurants();
-  }, [fetchRestaurants]);
+    let isMounted = true;
+    
+    const loadData = async () => {
+      if (isMounted) {
+        setIsLoading(true);
+        setError(null);
+      }
+
+      try {
+        let query = supabase
+          .from('restaurants')
+          .select('*')
+          .eq('is_active', true);
+
+        if (options.cuisine && options.cuisine !== 'all') {
+          query = query.eq('cuisine', options.cuisine);
+        }
+        if (options.district && options.district !== 'all') {
+          query = query.eq('district', options.district);
+        }
+        if (options.searchQuery) {
+          query = query.or(`name_en.ilike.%${options.searchQuery}%,name_ru.ilike.%${options.searchQuery}%`);
+        }
+        if (options.featured) {
+          query = query.eq('is_featured', true);
+        }
+        if (options.deliveryOnly) {
+          query = query.eq('delivery_available', true);
+        }
+
+        query = query.order('rating', { ascending: false });
+
+        if (options.limit) {
+          query = query.limit(options.limit);
+        }
+
+        const { data, error: fetchError } = await query;
+
+        if (fetchError) throw fetchError;
+        if (isMounted) setRestaurants((data || []) as Restaurant[]);
+      } catch (err) {
+        console.error('Error fetching restaurants:', err);
+        if (isMounted) setError(err as Error);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    loadData();
+    return () => { isMounted = false; };
+  }, [options.cuisine, options.district, options.searchQuery, options.featured, options.deliveryOnly, options.limit]);
 
   return { restaurants, isLoading, error, refetch: fetchRestaurants };
 }

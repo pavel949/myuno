@@ -247,8 +247,113 @@ export const useServices = (options: UseServicesOptions = {}) => {
   }, [options.categoryId, options.searchQuery, options.priceMin, options.priceMax, options.sortBy, options.limit]);
 
   useEffect(() => {
-    loadServices();
-  }, [loadServices]);
+    let isMounted = true;
+    
+    const load = async () => {
+      if (isMounted) {
+        setIsLoading(true);
+        setError(null);
+      }
+
+      try {
+        let query = supabase
+          .from('services')
+          .select(`
+            *,
+            provider:providers(name, logo_url, is_verified),
+            category:categories(name_en, name_ru, slug)
+          `)
+          .eq('is_active', true);
+
+        if (options.categoryId) {
+          query = query.eq('category_id', options.categoryId);
+        }
+
+        if (options.searchQuery) {
+          query = query.or(`name_en.ilike.%${options.searchQuery}%,name_ru.ilike.%${options.searchQuery}%`);
+        }
+
+        if (options.priceMin !== undefined) {
+          query = query.gte('price', options.priceMin);
+        }
+
+        if (options.priceMax !== undefined) {
+          query = query.lte('price', options.priceMax);
+        }
+
+        switch (options.sortBy) {
+          case 'price_asc':
+            query = query.order('price', { ascending: true, nullsFirst: false });
+            break;
+          case 'price_desc':
+            query = query.order('price', { ascending: false, nullsFirst: false });
+            break;
+          case 'newest':
+            query = query.order('created_at', { ascending: false });
+            break;
+          case 'rating':
+          case 'popular':
+          default:
+            query = query.order('created_at', { ascending: false });
+            break;
+        }
+
+        query = query.limit(options.limit || 50);
+
+        const { data, error: queryError } = await query;
+
+        if (queryError) throw queryError;
+
+        if (!isMounted) return;
+
+        if (!data || data.length === 0) {
+          let filteredDemo = [...demoServices];
+          
+          if (options.categoryId) {
+            filteredDemo = filteredDemo.filter(s => 
+              s.category?.slug === options.categoryId || s.category_id === options.categoryId
+            );
+          }
+          
+          if (options.searchQuery) {
+            const q = options.searchQuery.toLowerCase();
+            filteredDemo = filteredDemo.filter(s => 
+              s.name_en.toLowerCase().includes(q) || 
+              s.name_ru.toLowerCase().includes(q)
+            );
+          }
+          
+          if (options.priceMin !== undefined) {
+            filteredDemo = filteredDemo.filter(s => (s.price || 0) >= options.priceMin!);
+          }
+          
+          if (options.priceMax !== undefined) {
+            filteredDemo = filteredDemo.filter(s => (s.price || 0) <= options.priceMax!);
+          }
+
+          if (options.sortBy === 'price_asc') {
+            filteredDemo.sort((a, b) => (a.price || 0) - (b.price || 0));
+          } else if (options.sortBy === 'price_desc') {
+            filteredDemo.sort((a, b) => (b.price || 0) - (a.price || 0));
+          }
+          setServices(filteredDemo);
+        } else {
+          setServices(data as Service[]);
+        }
+      } catch (err) {
+        console.error('Error loading services:', err);
+        if (isMounted) {
+          setError(err as Error);
+          setServices(demoServices);
+        }
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    load();
+    return () => { isMounted = false; };
+  }, [options.categoryId, options.searchQuery, options.priceMin, options.priceMax, options.sortBy, options.limit]);
 
   return { services, isLoading, error, refetch: loadServices };
 };
