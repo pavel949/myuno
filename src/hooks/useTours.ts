@@ -68,7 +68,38 @@ export const useTours = (options: UseToursOptions = {}) => {
     }
   }, [options.category, options.featured, options.limit]);
 
-  useEffect(() => { fetchTours(); }, [fetchTours]);
+  useEffect(() => {
+    let isMounted = true;
+    
+    const loadData = async () => {
+      if (isMounted) setIsLoading(true);
+      try {
+        let query = supabase.from('tours').select('*').eq('is_active', true);
+        if (options.category) query = query.eq('category', options.category);
+        if (options.featured) query = query.eq('is_featured', true);
+        query = query.order('rating', { ascending: false });
+        if (options.limit) query = query.limit(options.limit);
+
+        const { data } = await query;
+        const formattedTours: Tour[] = (data || []).map(tour => ({
+          ...tour,
+          images: tour.images || [],
+          includes: tour.includes || [],
+          highlights: tour.highlights || [],
+          itinerary: Array.isArray(tour.itinerary) ? tour.itinerary as unknown as ItineraryItem[] : [],
+          start_times: tour.start_times || [],
+        }));
+        if (isMounted) setTours(formattedTours);
+      } catch (err) {
+        console.error('Error fetching tours:', err);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    loadData();
+    return () => { isMounted = false; };
+  }, [options.category, options.featured, options.limit]);
   return { tours, isLoading, refetch: fetchTours };
 };
 
