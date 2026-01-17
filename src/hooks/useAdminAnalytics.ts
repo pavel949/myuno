@@ -40,9 +40,11 @@ export function useAdminAnalytics(days: number = 30) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchMetrics = async () => {
       try {
-        setIsLoading(true);
+        if (isMounted) setIsLoading(true);
         const startDate = format(subDays(new Date(), days), 'yyyy-MM-dd');
         
         const { data, error: fetchError } = await supabase
@@ -52,16 +54,17 @@ export function useAdminAnalytics(days: number = 30) {
           .order('date', { ascending: true });
 
         if (fetchError) throw fetchError;
-        setMetrics((data as PlatformMetrics[]) || []);
+        if (isMounted) setMetrics((data as PlatformMetrics[]) || []);
       } catch (err: any) {
         console.error('Error fetching analytics:', err);
-        setError(err.message);
+        if (isMounted) setError(err.message);
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
 
     fetchMetrics();
+    return () => { isMounted = false; };
   }, [days]);
 
   // Fill in missing dates with zero values
@@ -194,6 +197,8 @@ export function useRealtimeStats() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchStats = async () => {
       try {
         const today = format(new Date(), 'yyyy-MM-dd');
@@ -216,24 +221,29 @@ export function useRealtimeStats() {
 
         const todayRevenue = todayBookingsRes.data?.reduce((sum, b) => sum + (b.total_amount || 0), 0) || 0;
 
-        setStats({
-          totalUsers: usersRes.count || 0,
-          totalProviders: providersRes.count || 0,
-          totalBookings: bookingsRes.count || 0,
-          pendingBookings: confirmedRes.count || 0,
-          activeSubscriptions: subscriptionsRes.count || 0,
-          todayRevenue: todayRevenue * 0.1 // Platform fee
-        });
+        if (isMounted) {
+          setStats({
+            totalUsers: usersRes.count || 0,
+            totalProviders: providersRes.count || 0,
+            totalBookings: bookingsRes.count || 0,
+            pendingBookings: confirmedRes.count || 0,
+            activeSubscriptions: subscriptionsRes.count || 0,
+            todayRevenue: todayRevenue * 0.1 // Platform fee
+          });
+        }
       } catch (err) {
         console.error('Error fetching realtime stats:', err);
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
 
     fetchStats();
     const interval = setInterval(fetchStats, 60000); // Refresh every minute
-    return () => clearInterval(interval);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   return { stats, isLoading };
@@ -245,6 +255,8 @@ export function useTopProviders(limit: number = 10) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchTopProviders = async () => {
       try {
         const { data, error } = await supabase
@@ -262,15 +274,16 @@ export function useTopProviders(limit: number = 10) {
           .limit(limit);
 
         if (error) throw error;
-        setProviders(data || []);
+        if (isMounted) setProviders(data || []);
       } catch (err) {
         console.error('Error fetching top providers:', err);
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
 
     fetchTopProviders();
+    return () => { isMounted = false; };
   }, [limit]);
 
   return { providers, isLoading };
