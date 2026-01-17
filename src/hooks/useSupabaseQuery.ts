@@ -213,7 +213,8 @@ export function useSupabaseSingle<T>({
     return () => {
       isMounted = false;
     };
-  }, [table, id, select, transform]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [table, id, select]);
 
   return { data, isLoading, error };
 }
