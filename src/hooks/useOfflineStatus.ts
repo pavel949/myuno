@@ -5,8 +5,14 @@ export function useOfflineStatus() {
   const [isSOSCached, setIsSOSCached] = useState(false);
 
   useEffect(() => {
-    const handleOnline = () => setIsOffline(false);
-    const handleOffline = () => setIsOffline(true);
+    let isMounted = true;
+    
+    const handleOnline = () => {
+      if (isMounted) setIsOffline(false);
+    };
+    const handleOffline = () => {
+      if (isMounted) setIsOffline(true);
+    };
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
@@ -15,14 +21,15 @@ export function useOfflineStatus() {
     if ('caches' in window) {
       caches.open('uno-sos-cache-v1').then(cache => {
         cache.match('/sos').then(response => {
-          setIsSOSCached(!!response);
+          if (isMounted) setIsSOSCached(!!response);
         });
       }).catch(() => {
-        setIsSOSCached(false);
+        if (isMounted) setIsSOSCached(false);
       });
     }
 
     return () => {
+      isMounted = false;
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
