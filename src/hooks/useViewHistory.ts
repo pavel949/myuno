@@ -50,8 +50,43 @@ export function useViewHistory() {
   }, [user]);
 
   useEffect(() => {
-    fetchHistory();
-  }, [fetchHistory]);
+    let isMounted = true;
+    
+    const loadHistory = async () => {
+      if (!user) {
+        setHistory([]);
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('view_history')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('viewed_at', { ascending: false })
+          .limit(50);
+
+        if (error) throw error;
+        
+        if (isMounted) {
+          setHistory((data || []) as ViewHistoryItem[]);
+        }
+      } catch (error) {
+        console.error('Error fetching view history:', error);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+    
+    loadHistory();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [user]);
 
   const trackView = useCallback(async (
     itemId: string,

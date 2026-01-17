@@ -46,10 +46,51 @@ export function useFavorites(itemType?: string) {
       setLoading(false);
     }
   }, [user, itemType]);
+  
+  // External refetch function (for manual refresh)
 
   useEffect(() => {
-    fetchFavorites();
-  }, [fetchFavorites]);
+    let isMounted = true;
+    
+    const loadFavorites = async () => {
+      if (!user) {
+        setFavorites([]);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        let query = supabase
+          .from('favorites')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (itemType) {
+          query = query.eq('item_type', itemType);
+        }
+
+        const { data, error } = await query;
+
+        if (error) throw error;
+        if (isMounted) {
+          setFavorites(data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching favorites:', error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadFavorites();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [user, itemType]);
 
   const isFavorite = useCallback((type: string, id: string): boolean => {
     return favorites.some(f => f.item_type === type && f.item_id === id);
