@@ -26,6 +26,8 @@ export function usePetServices(serviceType?: string) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchServices = async () => {
       setIsLoading(true);
       let query = supabase.from('pet_services').select('*').eq('is_active', true);
@@ -33,10 +35,14 @@ export function usePetServices(serviceType?: string) {
         query = query.eq('service_type', serviceType);
       }
       const { data, error } = await query.order('is_featured', { ascending: false });
-      if (!error && data) setServices(data as PetService[]);
-      setIsLoading(false);
+      if (isMounted) {
+        if (!error && data) setServices(data as PetService[]);
+        setIsLoading(false);
+      }
     };
     fetchServices();
+    
+    return () => { isMounted = false; };
   }, [serviceType]);
 
   return { services, isLoading };
@@ -47,13 +53,19 @@ export function usePetService(id: string) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     if (!id) return;
     const fetchService = async () => {
       const { data, error } = await supabase.from('pet_services').select('*').eq('id', id).single();
-      if (!error && data) setService(data as PetService);
-      setIsLoading(false);
+      if (isMounted) {
+        if (!error && data) setService(data as PetService);
+        setIsLoading(false);
+      }
     };
     fetchService();
+    
+    return () => { isMounted = false; };
   }, [id]);
 
   return { service, isLoading };

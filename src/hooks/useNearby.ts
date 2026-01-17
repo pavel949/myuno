@@ -39,14 +39,16 @@ export function useNearby({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchNearby = useCallback(async () => {
+  const fetchNearby = useCallback(async (isMounted: { current: boolean }) => {
     if (!userLat || !userLng || !enabled) {
-      setNearbyItems([]);
+      if (isMounted.current) setNearbyItems([]);
       return;
     }
 
-    setIsLoading(true);
-    setError(null);
+    if (isMounted.current) {
+      setIsLoading(true);
+      setError(null);
+    }
 
     try {
       const functionName = functionMap[entityType] as 
@@ -66,18 +68,26 @@ export function useNearby({
         throw rpcError;
       }
 
-      setNearbyItems((data as NearbyItem[]) || []);
+      if (isMounted.current) {
+        setNearbyItems((data as NearbyItem[]) || []);
+      }
     } catch (err) {
       console.error('Error fetching nearby items:', err);
-      setError('Failed to fetch nearby locations');
-      setNearbyItems([]);
+      if (isMounted.current) {
+        setError('Failed to fetch nearby locations');
+        setNearbyItems([]);
+      }
     } finally {
-      setIsLoading(false);
+      if (isMounted.current) {
+        setIsLoading(false);
+      }
     }
   }, [entityType, userLat, userLng, radiusKm, enabled]);
 
   useEffect(() => {
-    fetchNearby();
+    const isMounted = { current: true };
+    fetchNearby(isMounted);
+    return () => { isMounted.current = false; };
   }, [fetchNearby]);
 
   return {
@@ -86,6 +96,6 @@ export function useNearby({
     distanceMap: Object.fromEntries(nearbyItems.map(item => [item.id, item.distance_km])),
     isLoading,
     error,
-    refetch: fetchNearby,
+    refetch: () => fetchNearby({ current: true }),
   };
 }
