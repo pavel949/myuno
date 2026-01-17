@@ -32,19 +32,23 @@ export default function Profile() {
 
   // Check admin role
   useEffect(() => {
+    let isMounted = true;
+    
     const checkAdminRole = async () => {
       if (!user) {
-        setIsAdmin(false);
+        if (isMounted) setIsAdmin(false);
         return;
       }
 
       const { data } = await supabase
         .rpc('has_role', { _user_id: user.id, _role: 'admin' });
 
-      setIsAdmin(data === true);
+      if (isMounted) setIsAdmin(data === true);
     };
 
     checkAdminRole();
+    
+    return () => { isMounted = false; };
   }, [user]);
 
   if (isLoading) {

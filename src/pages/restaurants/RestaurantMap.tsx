@@ -80,6 +80,10 @@ export default function RestaurantMap() {
       'top-right'
     );
 
+    // Store markers and listeners for cleanup
+    const markers: mapboxgl.Marker[] = [];
+    const clickListeners: Array<{ el: HTMLElement; handler: () => void }> = [];
+
     map.on('load', () => {
       setMapLoaded(true);
       
@@ -96,23 +100,33 @@ export default function RestaurantMap() {
           </div>
         `;
 
-        el.addEventListener('click', () => {
+        const clickHandler = () => {
           setSelectedRestaurant(restaurant.id);
           map.flyTo({
             center: [coords.lng, coords.lat],
             zoom: 14,
           });
-        });
+        };
+        
+        el.addEventListener('click', clickHandler);
+        clickListeners.push({ el, handler: clickHandler });
 
-        new mapboxgl.Marker(el)
+        const marker = new mapboxgl.Marker(el)
           .setLngLat([coords.lng, coords.lat])
           .addTo(map);
+        markers.push(marker);
       });
     });
 
     mapRef.current = map;
 
     return () => {
+      // Clean up event listeners
+      clickListeners.forEach(({ el, handler }) => {
+        el.removeEventListener('click', handler);
+      });
+      // Remove markers
+      markers.forEach(marker => marker.remove());
       map.remove();
       mapRef.current = null;
     };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Camera, User, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -13,6 +13,12 @@ interface AvatarUploadProps {
 
 export function AvatarUpload({ value, onChange, name, className }: AvatarUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => { isMountedRef.current = false; };
+  }, []);
 
   const getInitials = (fullName: string | undefined) => {
     if (!fullName) return '';
@@ -57,13 +63,19 @@ export function AvatarUpload({ value, onChange, name, className }: AvatarUploadP
         .from('vendor-uploads')
         .getPublicUrl(filePath);
 
-      onChange(urlData.publicUrl);
-      toast.success('Аватар загружен');
+      if (isMountedRef.current) {
+        onChange(urlData.publicUrl);
+        toast.success('Аватар загружен');
+      }
     } catch (error) {
       console.error('Upload error:', error);
-      toast.error('Ошибка загрузки аватара');
+      if (isMountedRef.current) {
+        toast.error('Ошибка загрузки аватара');
+      }
     } finally {
-      setIsUploading(false);
+      if (isMountedRef.current) {
+        setIsUploading(false);
+      }
     }
   };
 
