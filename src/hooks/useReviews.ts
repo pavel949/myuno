@@ -48,8 +48,9 @@ export const useReviews = ({ itemType, itemId }: UseReviewsOptions) => {
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({ average: 0, total: 0, distribution: [0, 0, 0, 0, 0] });
 
-  const fetchReviews = useCallback(async () => {
-    setIsLoading(true);
+  const fetchReviews = useCallback(async (isMounted?: () => boolean) => {
+    const checkMounted = isMounted || (() => true);
+    if (checkMounted()) setIsLoading(true);
     try {
       const { data } = await supabase
         .from('reviews')
@@ -58,6 +59,8 @@ export const useReviews = ({ itemType, itemId }: UseReviewsOptions) => {
         .eq('item_id', itemId)
         .eq('is_approved', true)
         .order('created_at', { ascending: false });
+
+      if (!checkMounted()) return;
 
       const formatted: Review[] = (data || []).map(r => ({
         ...r,
@@ -80,12 +83,17 @@ export const useReviews = ({ itemType, itemId }: UseReviewsOptions) => {
     } catch (err) {
       console.error('Error fetching reviews:', err);
     } finally {
-      setIsLoading(false);
+      if (checkMounted()) setIsLoading(false);
     }
   }, [itemType, itemId]);
 
-  useEffect(() => { fetchReviews(); }, [fetchReviews]);
-  return { reviews, isLoading, stats, refetch: fetchReviews };
+  useEffect(() => {
+    let isMounted = true;
+    fetchReviews(() => isMounted);
+    return () => { isMounted = false; };
+  }, [fetchReviews]);
+  
+  return { reviews, isLoading, stats, refetch: () => fetchReviews() };
 };
 
 export const useCreateReview = () => {
@@ -136,8 +144,10 @@ export const useTrustBadges = (providerId?: string) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchBadges = async () => {
-      setIsLoading(true);
+      if (isMounted) setIsLoading(true);
       try {
         if (providerId) {
           const { data } = await supabase
@@ -145,25 +155,29 @@ export const useTrustBadges = (providerId?: string) => {
             .select('badge_id, trust_badges(*)')
             .eq('provider_id', providerId);
           
-          const formatted = (data || [])
-            .map(pb => pb.trust_badges as unknown as TrustBadge)
-            .filter(Boolean);
-          setBadges(formatted);
+          if (isMounted) {
+            const formatted = (data || [])
+              .map(pb => pb.trust_badges as unknown as TrustBadge)
+              .filter(Boolean);
+            setBadges(formatted);
+          }
         } else {
           const { data } = await supabase
             .from('trust_badges')
             .select('*')
             .eq('is_active', true)
             .order('sort_order');
-          setBadges(data || []);
+          if (isMounted) setBadges(data || []);
         }
       } catch (err) {
         console.error('Error fetching badges:', err);
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
     fetchBadges();
+    
+    return () => { isMounted = false; };
   }, [providerId]);
 
   return { badges, isLoading };

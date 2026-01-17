@@ -41,17 +41,21 @@ export function useYachts(yachtType?: string) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchYachts = async () => {
-      setIsLoading(true);
+      if (isMounted) setIsLoading(true);
       let query = supabase.from('yachts').select('*').eq('is_active', true);
       if (yachtType && yachtType !== 'all') {
         query = query.eq('yacht_type', yachtType);
       }
       const { data, error } = await query.order('is_featured', { ascending: false });
-      if (!error && data) setYachts(data as Yacht[]);
-      setIsLoading(false);
+      if (!error && data && isMounted) setYachts(data as Yacht[]);
+      if (isMounted) setIsLoading(false);
     };
     fetchYachts();
+    
+    return () => { isMounted = false; };
   }, [yachtType]);
 
   return { yachts, isLoading };
@@ -62,13 +66,18 @@ export function useYacht(id: string) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     if (!id) return;
+    
     const fetchYacht = async () => {
       const { data, error } = await supabase.from('yachts').select('*').eq('id', id).single();
-      if (!error && data) setYacht(data as Yacht);
-      setIsLoading(false);
+      if (!error && data && isMounted) setYacht(data as Yacht);
+      if (isMounted) setIsLoading(false);
     };
     fetchYacht();
+    
+    return () => { isMounted = false; };
   }, [id]);
 
   return { yacht, isLoading };

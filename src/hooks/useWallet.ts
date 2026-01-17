@@ -13,10 +13,12 @@ export const useWallet = () => {
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadWallet = useCallback(async () => {
+  const loadWallet = useCallback(async (isMounted: () => boolean) => {
     if (!user) {
-      setWallet(null);
-      setIsLoading(false);
+      if (isMounted()) {
+        setWallet(null);
+        setIsLoading(false);
+      }
       return;
     }
 
@@ -26,7 +28,7 @@ export const useWallet = () => {
 
       if (error) throw error;
 
-      if (data) {
+      if (data && isMounted()) {
         setWallet({
           id: data.id,
           balance: Number(data.balance),
@@ -36,12 +38,16 @@ export const useWallet = () => {
     } catch (error) {
       console.error('Error loading wallet:', error);
     } finally {
-      setIsLoading(false);
+      if (isMounted()) {
+        setIsLoading(false);
+      }
     }
   }, [user]);
 
   useEffect(() => {
-    loadWallet();
+    let isMounted = true;
+    loadWallet(() => isMounted);
+    return () => { isMounted = false; };
   }, [loadWallet]);
 
   const payFromWallet = useCallback(async (
@@ -98,7 +104,7 @@ export const useWallet = () => {
   }, [user]);
 
   const refetch = useCallback(() => {
-    loadWallet();
+    loadWallet(() => true);
   }, [loadWallet]);
 
   return {
