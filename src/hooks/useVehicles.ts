@@ -43,6 +43,8 @@ export function useVehicles(vehicleType?: string) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchVehicles = async () => {
       setIsLoading(true);
       let query = supabase.from('vehicles').select('*').eq('is_active', true);
@@ -50,10 +52,14 @@ export function useVehicles(vehicleType?: string) {
         query = query.eq('vehicle_type', vehicleType);
       }
       const { data, error } = await query.order('is_featured', { ascending: false });
-      if (!error && data) setVehicles(data as Vehicle[]);
-      setIsLoading(false);
+      if (isMounted) {
+        if (!error && data) setVehicles(data as Vehicle[]);
+        setIsLoading(false);
+      }
     };
     fetchVehicles();
+    
+    return () => { isMounted = false; };
   }, [vehicleType]);
 
   return { vehicles, isLoading };
@@ -64,13 +70,19 @@ export function useVehicle(id: string) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     if (!id) return;
     const fetchVehicle = async () => {
       const { data, error } = await supabase.from('vehicles').select('*').eq('id', id).single();
-      if (!error && data) setVehicle(data as Vehicle);
-      setIsLoading(false);
+      if (isMounted) {
+        if (!error && data) setVehicle(data as Vehicle);
+        setIsLoading(false);
+      }
     };
     fetchVehicle();
+    
+    return () => { isMounted = false; };
   }, [id]);
 
   return { vehicle, isLoading };

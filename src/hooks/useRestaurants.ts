@@ -135,6 +135,8 @@ export function useRestaurant(id: string | undefined) {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+    
     if (!id) {
       setRestaurant(null);
       setIsLoading(false);
@@ -154,6 +156,7 @@ export function useRestaurant(id: string | undefined) {
           .single();
 
         if (restaurantError) throw restaurantError;
+        if (!isMounted) return;
         setRestaurant(restaurantData as Restaurant);
 
         // Fetch menu categories
@@ -164,6 +167,7 @@ export function useRestaurant(id: string | undefined) {
           .eq('is_active', true)
           .order('sort_order', { ascending: true });
 
+        if (!isMounted) return;
         setMenuCategories((categoriesData || []) as MenuCategory[]);
 
         // Fetch menu items
@@ -174,16 +178,19 @@ export function useRestaurant(id: string | undefined) {
           .eq('is_active', true)
           .order('is_popular', { ascending: false });
 
+        if (!isMounted) return;
         setMenuItems((itemsData || []) as MenuItem[]);
       } catch (err) {
         console.error('Error fetching restaurant:', err);
-        setError(err as Error);
+        if (isMounted) setError(err as Error);
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
 
     fetchRestaurant();
+    
+    return () => { isMounted = false; };
   }, [id]);
 
   return { restaurant, menuCategories, menuItems, isLoading, error };
