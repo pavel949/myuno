@@ -55,7 +55,7 @@ export function useGuestCheckIn(marketplaceBookingId?: string) {
 
   const t = (en: string, ru: string) => language === 'ru' ? ru : en;
 
-  // First, find the property_booking by marketplace_booking_id
+  // First, find the property_booking by marketplace_booking_id with owner property details
   const { data: propertyBooking, isLoading: isLoadingPropertyBooking } = useQuery({
     queryKey: ['property-booking-by-marketplace', marketplaceBookingId],
     queryFn: async () => {
@@ -63,7 +63,15 @@ export function useGuestCheckIn(marketplaceBookingId?: string) {
 
       const { data, error } = await supabase
         .from('property_bookings')
-        .select('*')
+        .select(`
+          *,
+          owner_properties (
+            house_rules,
+            house_rules_ru,
+            check_in_time,
+            check_out_time
+          )
+        `)
         .eq('marketplace_booking_id', marketplaceBookingId)
         .maybeSingle();
 
