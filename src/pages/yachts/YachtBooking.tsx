@@ -5,6 +5,7 @@ import { Anchor, Users, Clock, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useBooking } from '@/hooks/useBooking';
 import { useYacht } from '@/hooks/useYachts';
 import { BookingDateTimeSelect } from '@/components/booking/BookingDateTimeSelect';
@@ -22,8 +23,15 @@ export default function YachtBooking() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { language } = useLanguage();
+  const { user, isLoading: authLoading } = useAuth();
   const { createBooking, isSubmitting } = useBooking();
   const { yacht, isLoading } = useYacht(id || '');
+
+  // Auth redirect
+  if (!authLoading && !user) {
+    navigate('/auth', { state: { from: `/yachts/${id}/booking` } });
+    return null;
+  }
 
   const isHalfDay = searchParams.get('type') === 'half';
 

@@ -47,11 +47,10 @@ export default function TableReservation() {
   });
 
   // Redirect to auth if not logged in
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate(`/auth?redirect=/restaurants/${id}/reserve`);
-    }
-  }, [user, authLoading, navigate, id]);
+  if (!authLoading && !user) {
+    navigate('/auth', { state: { from: `/restaurants/${id}/reserve` } });
+    return null;
+  }
 
   if (!restaurant) {
     return (
