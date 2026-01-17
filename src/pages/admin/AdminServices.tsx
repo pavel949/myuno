@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck, useAdminProviders, useAdminServices, useAdminCategories, Service } from '@/hooks/useAdmin';
+import { useAdminFormHotkeys, useFormProgress } from '@/hooks/useAdminFormHotkeys';
+import { useAutoTranslate } from '@/hooks/useAutoTranslate';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
+import { AdminFormToolbar } from '@/components/admin/AdminFormToolbar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Select,
   SelectContent,
@@ -45,7 +49,8 @@ import {
   Loader2,
   Clock,
   Star,
-  Building2
+  Building2,
+  Copy
 } from 'lucide-react';
 
 export default function AdminServices() {
@@ -137,6 +142,19 @@ export default function AdminServices() {
     setIsDialogOpen(true);
   };
 
+  // Duplicate functionality
+  const handleDuplicate = useCallback(() => {
+    if (!editingService) return;
+    
+    setEditingService(null);
+    setFormData(prev => ({
+      ...prev,
+      name: `${prev.name} (copy)`,
+      name_ru: prev.name_ru ? `${prev.name_ru} (копия)` : '',
+    }));
+    toast.info(isRussian ? 'Создание копии...' : 'Creating a copy...');
+  }, [editingService, isRussian]);
+
   const handleSubmit = async () => {
     if (!formData.name || !formData.price || !formData.provider_id) {
       toast.error(isRussian ? 'Заполните обязательные поля' : 'Please fill required fields');
@@ -191,6 +209,51 @@ export default function AdminServices() {
       toast.error(isRussian ? 'Ошибка при удалении' : 'Error deleting service');
     }
   };
+
+  // Auto-translate hook
+  const { translateMultiple, isTranslating } = useAutoTranslate();
+
+  const handleAutoTranslate = async () => {
+    const fieldsToTranslate: Record<string, string> = {};
+    
+    if (formData.name && !formData.name_ru) {
+      fieldsToTranslate.name = formData.name;
+    }
+    if (formData.description && !formData.description_ru) {
+      fieldsToTranslate.description = formData.description;
+    }
+    
+    if (Object.keys(fieldsToTranslate).length === 0) {
+      toast.info(isRussian ? 'Нечего переводить' : 'Nothing to translate');
+      return;
+    }
+
+    const translations = await translateMultiple(fieldsToTranslate, 'ru');
+    
+    setFormData(prev => ({
+      ...prev,
+      name_ru: translations.name || prev.name_ru,
+      description_ru: translations.description || prev.description_ru,
+    }));
+    
+    if (Object.keys(translations).length > 0) {
+      toast.success(isRussian ? 'Переведено!' : 'Translated!');
+    }
+  };
+
+  // Form progress tracking
+  const { progress, filled, total } = useFormProgress(formData, 
+    ['provider_id', 'name', 'price'],
+    ['name_ru', 'description', 'description_ru', 'duration_minutes']
+  );
+
+  // Hotkeys
+  useAdminFormHotkeys({
+    onSave: handleSubmit,
+    onClose: () => setIsDialogOpen(false),
+    isDialogOpen,
+    isSubmitting,
+  });
 
   const filteredServices = services.filter(s => 
     s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -360,6 +423,13 @@ export default function AdminServices() {
                           <Edit className="h-4 w-4 mr-2" />
                           {isRussian ? 'Редактировать' : 'Edit'}
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => {
+                          openEditDialog(service);
+                          setTimeout(() => handleDuplicate(), 100);
+                        }}>
+                          <Copy className="h-4 w-4 mr-2" />
+                          {isRussian ? 'Дублировать' : 'Duplicate'}
+                        </DropdownMenuItem>
                         <DropdownMenuItem 
                           className="text-red-500"
                           onClick={() => setDeleteConfirmId(service.id)}
@@ -378,8 +448,8 @@ export default function AdminServices() {
 
         {/* Add/Edit Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
+          <DialogContent className="max-h-[90vh] p-0">
+            <DialogHeader className="p-6 pb-0">
               <DialogTitle>
                 {editingService 
                   ? (isRussian ? 'Редактировать услугу' : 'Edit Service')
@@ -387,24 +457,37 @@ export default function AdminServices() {
               </DialogTitle>
             </DialogHeader>
 
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label>{isRussian ? 'Провайдер *' : 'Provider *'}</Label>
-                <Select
-                  value={formData.provider_id}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, provider_id: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={isRussian ? 'Выберите провайдера' : 'Select provider'} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {providers.map((provider) => (
-                      <SelectItem key={provider.id} value={provider.id}>
-                        {isRussian ? (provider.business_name_ru || provider.business_name) : provider.business_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            <div className="px-6 pt-4">
+              <AdminFormToolbar
+                progress={progress}
+                filled={filled}
+                total={total}
+                onTranslate={handleAutoTranslate}
+                onDuplicate={handleDuplicate}
+                isTranslating={isTranslating}
+                isEditing={!!editingService}
+              />
+            </div>
+
+            <ScrollArea className="max-h-[calc(90vh-240px)] px-6">
+              <div className="space-y-4 pb-4">
+                <div className="space-y-2">
+                  <Label>{isRussian ? 'Провайдер *' : 'Provider *'}</Label>
+                  <Select
+                    value={formData.provider_id}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, provider_id: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={isRussian ? 'Выберите провайдера' : 'Select provider'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {providers.map((provider) => (
+                        <SelectItem key={provider.id} value={provider.id}>
+                          {isRussian ? (provider.business_name_ru || provider.business_name) : provider.business_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
               </div>
 
               <div className="space-y-2">

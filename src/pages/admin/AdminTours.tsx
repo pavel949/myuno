@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
 import { useAdminTours } from '@/hooks/useAdminContent';
 import { VendorTour } from '@/hooks/useVendorTours';
+import { useAdminFormHotkeys, useFormProgress } from '@/hooks/useAdminFormHotkeys';
+import { useAutoTranslate } from '@/hooks/useAutoTranslate';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { ProviderSelector } from '@/components/admin/ProviderSelector';
+import { AdminFormToolbar } from '@/components/admin/AdminFormToolbar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Dialog,
@@ -42,7 +46,8 @@ import {
   Users,
   MapPin,
   Loader2,
-  Star
+  Star,
+  Copy
 } from 'lucide-react';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
 
@@ -154,6 +159,20 @@ export default function AdminTours() {
     setIsDialogOpen(true);
   };
 
+  // Duplicate tour functionality
+  const handleDuplicate = useCallback(() => {
+    if (!editingTour) return;
+    
+    // Keep all data but clear the editing reference
+    setEditingTour(null);
+    setFormData(prev => ({
+      ...prev,
+      title_en: `${prev.title_en} (copy)`,
+      title_ru: prev.title_ru ? `${prev.title_ru} (копия)` : '',
+    }));
+    toast.info(isRussian ? 'Создание копии...' : 'Creating a copy...');
+  }, [editingTour, isRussian]);
+
   const handleSubmit = async () => {
     if (!formData.title_en || !formData.price || !formData.provider_id) {
       toast.error(isRussian ? 'Заполните обязательные поля' : 'Please fill required fields');
@@ -204,6 +223,54 @@ export default function AdminTours() {
       setIsSubmitting(false);
     }
   };
+
+  // Auto-translate hook
+  const { translateMultiple, isTranslating } = useAutoTranslate();
+
+  const handleAutoTranslate = async () => {
+    const fieldsToTranslate: Record<string, string> = {};
+    
+    if (formData.title_en && !formData.title_ru) {
+      fieldsToTranslate.title = formData.title_en;
+    }
+    if (formData.description_en && !formData.description_ru) {
+      fieldsToTranslate.description = formData.description_en;
+    }
+    if (formData.includes && !formData.includes.includes('(RU)')) {
+      // We'll translate includes separately if EN is filled
+    }
+    
+    if (Object.keys(fieldsToTranslate).length === 0) {
+      toast.info(isRussian ? 'Нечего переводить' : 'Nothing to translate');
+      return;
+    }
+
+    const translations = await translateMultiple(fieldsToTranslate, 'ru');
+    
+    setFormData(prev => ({
+      ...prev,
+      title_ru: translations.title || prev.title_ru,
+      description_ru: translations.description || prev.description_ru,
+    }));
+    
+    if (Object.keys(translations).length > 0) {
+      toast.success(isRussian ? 'Переведено!' : 'Translated!');
+    }
+  };
+
+  // Form progress tracking
+  const { progress, filled, total } = useFormProgress(formData, 
+    ['provider_id', 'title_en', 'price'],
+    ['title_ru', 'description_en', 'description_ru', 'cover_image', 'meeting_point', 'includes', 'highlights']
+  );
+
+  // Hotkeys
+  useAdminFormHotkeys({
+    onSave: handleSubmit,
+    onClose: () => setIsDialogOpen(false),
+    isDialogOpen,
+    isSubmitting,
+  });
 
   const handleDelete = async (tourId: string) => {
     try {
@@ -339,6 +406,14 @@ export default function AdminTours() {
                               <Edit className="h-4 w-4 mr-2" />
                               {isRussian ? 'Редактировать' : 'Edit'}
                             </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {
+                              openEditDialog(tour);
+                              // Small delay to ensure form is populated
+                              setTimeout(() => handleDuplicate(), 100);
+                            }}>
+                              <Copy className="h-4 w-4 mr-2" />
+                              {isRussian ? 'Дублировать' : 'Duplicate'}
+                            </DropdownMenuItem>
                             <DropdownMenuItem 
                               className="text-red-500"
                               onClick={() => setDeleteConfirmId(tour.id)}
@@ -368,16 +443,28 @@ export default function AdminTours() {
               </DialogTitle>
             </DialogHeader>
 
-            <div className="space-y-4 py-4">
-              {/* Provider Selection */}
-              <div className="p-4 bg-muted/50 rounded-lg border-2 border-dashed">
-                <ProviderSelector
-                  value={formData.provider_id}
-                  onChange={(id) => setFormData(prev => ({ ...prev, provider_id: id }))}
-                  label={isRussian ? 'Привязать к провайдеру' : 'Assign to Provider'}
-                  required
-                />
-              </div>
+            {/* Form Toolbar with progress, translate, duplicate */}
+            <AdminFormToolbar
+              progress={progress}
+              filled={filled}
+              total={total}
+              onTranslate={handleAutoTranslate}
+              onDuplicate={handleDuplicate}
+              isTranslating={isTranslating}
+              isEditing={!!editingTour}
+            />
+
+            <ScrollArea className="max-h-[calc(90vh-280px)]">
+              <div className="space-y-4 pr-4">
+                {/* Provider Selection */}
+                <div className="p-4 bg-muted/50 rounded-lg border-2 border-dashed">
+                  <ProviderSelector
+                    value={formData.provider_id}
+                    onChange={(id) => setFormData(prev => ({ ...prev, provider_id: id }))}
+                    label={isRussian ? 'Привязать к провайдеру' : 'Assign to Provider'}
+                    required
+                  />
+                </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -537,7 +624,8 @@ export default function AdminTours() {
                   onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
                 />
               </div>
-            </div>
+              </div>
+            </ScrollArea>
 
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
