@@ -79,23 +79,28 @@ export function useVisaServices(options: UseVisaServicesOptions = {}) {
 
       if (isMounted) {
         if (!error && data) {
-          setServices(
-            data.map((s: any) => ({
-              ...s,
-              requirements: s.requirements || null,
-              documents_required: s.documents_required || null,
-              process_steps: s.process_steps || null,
+          const mappedServices = data.map((s) => {
+            const service = s as Record<string, unknown>;
+            const processingDays = service.processing_days as number | null;
+            const validityMonths = service.validity_months as number | null;
+            
+            return {
+              ...service,
+              requirements: service.requirements || null,
+              documents_required: service.documents_required || null,
+              process_steps: service.process_steps || null,
               // Computed fields
-              processing_time: s.processing_days ? `${s.processing_days} days` : null,
-              validity_period: s.validity_months 
-                ? s.validity_months >= 12 
-                  ? `${Math.floor(s.validity_months / 12)} year${Math.floor(s.validity_months / 12) > 1 ? 's' : ''}`
-                  : `${s.validity_months} months`
+              processing_time: processingDays ? `${processingDays} days` : null,
+              validity_period: validityMonths 
+                ? validityMonths >= 12 
+                  ? `${Math.floor(validityMonths / 12)} year${Math.floor(validityMonths / 12) > 1 ? 's' : ''}`
+                  : `${validityMonths} months`
                 : null,
-              price: s.service_fee || s.total_price,
-              provider: s.provider,
-            })) as VisaService[]
-          );
+              price: (service.service_fee as number) || (service.total_price as number),
+              provider: service.provider as VisaServiceProvider | undefined,
+            } as VisaService;
+          });
+          setServices(mappedServices);
         }
         setIsLoading(false);
       }
