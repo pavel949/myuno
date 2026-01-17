@@ -12,10 +12,14 @@ export function useAdminCheck() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const checkAdmin = async () => {
       if (!user) {
-        setIsAdmin(false);
-        setIsLoading(false);
+        if (isMounted) {
+          setIsAdmin(false);
+          setIsLoading(false);
+        }
         return;
       }
 
@@ -24,16 +28,17 @@ export function useAdminCheck() {
           .rpc('has_role', { _user_id: user.id, _role: 'admin' });
 
         if (error) throw error;
-        setIsAdmin(data === true);
+        if (isMounted) setIsAdmin(data === true);
       } catch (err) {
         console.error('Error checking admin:', err);
-        setIsAdmin(false);
+        if (isMounted) setIsAdmin(false);
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
 
     checkAdmin();
+    return () => { isMounted = false; };
   }, [user]);
 
   return { isAdmin, isLoading };
@@ -43,25 +48,28 @@ export function useAdminProviders() {
   const [providers, setProviders] = useState<Provider[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchProviders = useCallback(async () => {
+  const fetchProviders = useCallback(async (isMounted?: () => boolean) => {
+    const checkMounted = isMounted || (() => true);
     try {
-      setIsLoading(true);
+      if (checkMounted()) setIsLoading(true);
       const { data, error } = await supabase
         .from('providers')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setProviders(data || []);
+      if (checkMounted()) setProviders(data || []);
     } catch (err) {
       console.error('Error fetching providers:', err);
     } finally {
-      setIsLoading(false);
+      if (checkMounted()) setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchProviders();
+    let isMounted = true;
+    fetchProviders(() => isMounted);
+    return () => { isMounted = false; };
   }, [fetchProviders]);
 
   const createProvider = async (providerData: Partial<Provider>) => {
@@ -111,9 +119,10 @@ export function useAdminServices(providerId?: string) {
   const [services, setServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchServices = useCallback(async () => {
+  const fetchServices = useCallback(async (isMounted?: () => boolean) => {
+    const checkMounted = isMounted || (() => true);
     try {
-      setIsLoading(true);
+      if (checkMounted()) setIsLoading(true);
       let query = supabase
         .from('services')
         .select('*')
@@ -126,16 +135,18 @@ export function useAdminServices(providerId?: string) {
       const { data, error } = await query;
 
       if (error) throw error;
-      setServices(data || []);
+      if (checkMounted()) setServices(data || []);
     } catch (err) {
       console.error('Error fetching services:', err);
     } finally {
-      setIsLoading(false);
+      if (checkMounted()) setIsLoading(false);
     }
   }, [providerId]);
 
   useEffect(() => {
-    fetchServices();
+    let isMounted = true;
+    fetchServices(() => isMounted);
+    return () => { isMounted = false; };
   }, [fetchServices]);
 
   const createService = async (serviceData: Partial<Service>) => {
@@ -185,6 +196,8 @@ export function useAdminCategories() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchCategories = async () => {
       try {
         const { data, error } = await supabase
@@ -194,15 +207,16 @@ export function useAdminCategories() {
           .order('sort_order');
 
         if (error) throw error;
-        setCategories(data || []);
+        if (isMounted) setCategories(data || []);
       } catch (err) {
         console.error('Error fetching categories:', err);
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
 
     fetchCategories();
+    return () => { isMounted = false; };
   }, []);
 
   return { categories, isLoading };

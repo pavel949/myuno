@@ -38,9 +38,12 @@ export function useVehicleTypes(type: 'taxi' | 'airport_transfer' | 'rental' = '
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchVehicleTypes = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  const fetchVehicleTypes = useCallback(async (isMounted?: () => boolean) => {
+    const checkMounted = isMounted || (() => true);
+    if (checkMounted()) {
+      setIsLoading(true);
+      setError(null);
+    }
 
     try {
       const { data, error: fetchError } = await supabase
@@ -51,17 +54,19 @@ export function useVehicleTypes(type: 'taxi' | 'airport_transfer' | 'rental' = '
         .order('sort_order', { ascending: true });
 
       if (fetchError) throw fetchError;
-      setVehicleTypes((data || []) as VehicleType[]);
+      if (checkMounted()) setVehicleTypes((data || []) as VehicleType[]);
     } catch (err) {
       console.error('Error fetching vehicle types:', err);
-      setError(err as Error);
+      if (checkMounted()) setError(err as Error);
     } finally {
-      setIsLoading(false);
+      if (checkMounted()) setIsLoading(false);
     }
   }, [type]);
 
   useEffect(() => {
-    fetchVehicleTypes();
+    let isMounted = true;
+    fetchVehicleTypes(() => isMounted);
+    return () => { isMounted = false; };
   }, [fetchVehicleTypes]);
 
   return { vehicleTypes, isLoading, error, refetch: fetchVehicleTypes };
@@ -72,9 +77,12 @@ export function useTransportDestinations(type: string = 'airport_transfer') {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchDestinations = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  const fetchDestinations = useCallback(async (isMounted?: () => boolean) => {
+    const checkMounted = isMounted || (() => true);
+    if (checkMounted()) {
+      setIsLoading(true);
+      setError(null);
+    }
 
     try {
       const { data, error: fetchError } = await supabase
@@ -85,17 +93,19 @@ export function useTransportDestinations(type: string = 'airport_transfer') {
         .order('sort_order', { ascending: true });
 
       if (fetchError) throw fetchError;
-      setDestinations((data || []) as TransportDestination[]);
+      if (checkMounted()) setDestinations((data || []) as TransportDestination[]);
     } catch (err) {
       console.error('Error fetching destinations:', err);
-      setError(err as Error);
+      if (checkMounted()) setError(err as Error);
     } finally {
-      setIsLoading(false);
+      if (checkMounted()) setIsLoading(false);
     }
   }, [type]);
 
   useEffect(() => {
-    fetchDestinations();
+    let isMounted = true;
+    fetchDestinations(() => isMounted);
+    return () => { isMounted = false; };
   }, [fetchDestinations]);
 
   return { destinations, isLoading, error, refetch: fetchDestinations };

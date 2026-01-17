@@ -12,8 +12,9 @@ export function useCashback() {
   const [settings, setSettings] = useState<CashbackSettings[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchSettings = useCallback(async () => {
-    setIsLoading(true);
+  const fetchSettings = useCallback(async (isMounted?: () => boolean) => {
+    const checkMounted = isMounted || (() => true);
+    if (checkMounted()) setIsLoading(true);
     try {
       const { data, error } = await supabase
         .from('cashback_settings')
@@ -21,16 +22,18 @@ export function useCashback() {
         .eq('is_active', true);
 
       if (error) throw error;
-      setSettings(data || []);
+      if (checkMounted()) setSettings(data || []);
     } catch (error) {
       console.error('Error fetching cashback settings:', error);
     } finally {
-      setIsLoading(false);
+      if (checkMounted()) setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchSettings();
+    let isMounted = true;
+    fetchSettings(() => isMounted);
+    return () => { isMounted = false; };
   }, [fetchSettings]);
 
 

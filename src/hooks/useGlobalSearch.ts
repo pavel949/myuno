@@ -271,12 +271,15 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
   const { language } = useLanguage();
 
   useEffect(() => {
+    let isMounted = true;
+    
     if (!query.trim() || query.length < 2 || !enabled) {
       setResults([]);
       return;
     }
 
     const searchTimeout = setTimeout(async () => {
+      if (!isMounted) return;
       setIsLoading(true);
       // Use original query for ilike - it handles case-insensitivity for all languages including Cyrillic
       const searchTerm = query.trim();
@@ -331,16 +334,19 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
 
         // Sort by rating and limit
         allResults.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-        setResults(allResults.slice(0, 12));
+        if (isMounted) setResults(allResults.slice(0, 12));
       } catch (error) {
         console.error('Search error:', error);
-        setResults([]);
+        if (isMounted) setResults([]);
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     }, 300); // Debounce
 
-    return () => clearTimeout(searchTimeout);
+    return () => {
+      isMounted = false;
+      clearTimeout(searchTimeout);
+    };
   }, [query, enabled]);
 
   return { results, isLoading };

@@ -88,7 +88,8 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
     if (mergedOptions.autoFetch && state.supported) {
       getPosition();
     }
-  }, [mergedOptions.autoFetch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mergedOptions.autoFetch, state.supported]);
 
   const clearError = useCallback(() => {
     setState(prev => ({ ...prev, error: null }));
