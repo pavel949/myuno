@@ -55,8 +55,8 @@ export const useEvents = (options: UseEventsOptions = {}) => {
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchEvents = useCallback(async () => {
-    setIsLoading(true);
+  const fetchEvents = useCallback(async (isMounted: { current: boolean }) => {
+    if (isMounted.current) setIsLoading(true);
     try {
       let query = supabase.from('events').select('*').eq('is_active', true);
       if (options.category && options.category !== 'all') {
@@ -67,23 +67,30 @@ export const useEvents = (options: UseEventsOptions = {}) => {
       if (options.limit) query = query.limit(options.limit);
 
       const { data } = await query;
-      const formattedEvents: Event[] = (data || []).map(event => ({
-        ...event,
-        images: event.images || [],
-        includes: Array.isArray(event.includes) ? event.includes as unknown as IncludeExcludeItem[] : [],
-        excludes: Array.isArray(event.excludes) ? event.excludes as unknown as IncludeExcludeItem[] : [],
-        itinerary: Array.isArray(event.itinerary) ? event.itinerary as unknown as ItineraryItem[] : [],
-      }));
-      setEvents(formattedEvents);
+      if (isMounted.current) {
+        const formattedEvents: Event[] = (data || []).map(event => ({
+          ...event,
+          images: event.images || [],
+          includes: Array.isArray(event.includes) ? event.includes as unknown as IncludeExcludeItem[] : [],
+          excludes: Array.isArray(event.excludes) ? event.excludes as unknown as IncludeExcludeItem[] : [],
+          itinerary: Array.isArray(event.itinerary) ? event.itinerary as unknown as ItineraryItem[] : [],
+        }));
+        setEvents(formattedEvents);
+      }
     } catch (err) {
       console.error('Error fetching events:', err);
     } finally {
-      setIsLoading(false);
+      if (isMounted.current) setIsLoading(false);
     }
   }, [options.category, options.featured, options.limit]);
 
-  useEffect(() => { fetchEvents(); }, [fetchEvents]);
-  return { events, isLoading, refetch: fetchEvents };
+  useEffect(() => {
+    const isMounted = { current: true };
+    fetchEvents(isMounted);
+    return () => { isMounted.current = false; };
+  }, [fetchEvents]);
+  
+  return { events, isLoading, refetch: () => fetchEvents({ current: true }) };
 };
 
 export const useEvent = (eventId: string | undefined) => {
