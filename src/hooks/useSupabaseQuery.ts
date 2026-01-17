@@ -43,6 +43,10 @@ export function useSupabaseQuery<T>({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const isMountedRef = useRef(true);
+  
+  // Store transform in ref to avoid re-fetching when transform changes
+  const transformRef = useRef(transform);
+  transformRef.current = transform;
 
   // Memoize filters to prevent unnecessary re-fetches
   const stableFilters = useMemo(() => JSON.stringify(filters), [filters]);
@@ -113,8 +117,8 @@ export function useSupabaseQuery<T>({
       if (queryError) throw queryError;
 
       if (isMountedRef.current) {
-        const finalData = transform 
-          ? transform(result || []) 
+        const finalData = transformRef.current 
+          ? transformRef.current(result || []) 
           : (result || []) as unknown as T[];
         setData(finalData);
         setError(null);
@@ -130,7 +134,7 @@ export function useSupabaseQuery<T>({
         setIsLoading(false);
       }
     }
-  }, [table, select, stableFilters, stableOrderBy, limit, enabled, transform]);
+  }, [table, select, stableFilters, stableOrderBy, limit, enabled]);
 
   useEffect(() => {
     isMountedRef.current = true;
