@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useSupabaseCRUD } from './useSupabaseCRUD';
 
 export interface VendorActivity {
   id: string;
@@ -40,101 +39,20 @@ export interface VendorActivity {
 }
 
 export function useVendorActivities(providerId?: string) {
-  const [activities, setActivities] = useState<VendorActivity[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { items, isLoading, create, update, remove, refetch } = useSupabaseCRUD<VendorActivity>({
+    table: 'water_activities',
+    providerId,
+    providerIdField: 'provider_id',
+    orderByColumn: 'created_at',
+    orderAscending: false,
+  });
 
-  const fetchActivities = useCallback(async () => {
-    if (!providerId) {
-      setActivities([]);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('water_activities')
-        .select('*')
-        .eq('provider_id', providerId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setActivities((data || []) as unknown as VendorActivity[]);
-    } catch (err) {
-      console.error('Error fetching activities:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [providerId]);
-
-  useEffect(() => {
-    let isMounted = true;
-    
-    const loadData = async () => {
-      if (!providerId) {
-        if (isMounted) {
-          setActivities([]);
-          setIsLoading(false);
-        }
-        return;
-      }
-
-      try {
-        if (isMounted) setIsLoading(true);
-        const { data, error } = await supabase
-          .from('water_activities')
-          .select('*')
-          .eq('provider_id', providerId)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        if (isMounted) setActivities((data || []) as unknown as VendorActivity[]);
-      } catch (err) {
-        console.error('Error fetching activities:', err);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-
-    loadData();
-    return () => { isMounted = false; };
-  }, [providerId]);
-
-  const createActivity = async (activityData: Partial<VendorActivity>) => {
-    if (!providerId) return { error: new Error('No provider ID') };
-
-    const insertData = { ...activityData, provider_id: providerId };
-    const { data, error } = await supabase
-      .from('water_activities')
-      .insert(insertData as any)
-      .select()
-      .single();
-
-    if (!error) await fetchActivities();
-    return { data, error };
+  return {
+    activities: items,
+    isLoading,
+    createActivity: async (activityData: Partial<VendorActivity>) => create(activityData),
+    updateActivity: async (activityId: string, updates: Partial<VendorActivity>) => update(activityId, updates),
+    deleteActivity: async (activityId: string) => remove(activityId),
+    refetch,
   };
-
-  const updateActivity = async (activityId: string, updates: Partial<VendorActivity>) => {
-    const { data, error } = await supabase
-      .from('water_activities')
-      .update(updates)
-      .eq('id', activityId)
-      .select()
-      .single();
-
-    if (!error) await fetchActivities();
-    return { data, error };
-  };
-
-  const deleteActivity = async (activityId: string) => {
-    const { error } = await supabase
-      .from('water_activities')
-      .delete()
-      .eq('id', activityId);
-
-    if (!error) await fetchActivities();
-    return { error };
-  };
-
-  return { activities, isLoading, createActivity, updateActivity, deleteActivity, refetch: fetchActivities };
 }

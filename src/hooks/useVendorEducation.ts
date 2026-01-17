@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useSupabaseCRUD } from './useSupabaseCRUD';
 
 export interface VendorEducationProvider {
   id: string;
@@ -36,101 +35,20 @@ export interface VendorEducationProvider {
 }
 
 export function useVendorEducation(providerId?: string) {
-  const [providers, setProviders] = useState<VendorEducationProvider[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { items, isLoading, create, update, remove, refetch } = useSupabaseCRUD<VendorEducationProvider>({
+    table: 'education_providers',
+    providerId,
+    providerIdField: 'provider_id',
+    orderByColumn: 'created_at',
+    orderAscending: false,
+  });
 
-  const fetchProviders = useCallback(async () => {
-    if (!providerId) {
-      setProviders([]);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('education_providers')
-        .select('*')
-        .eq('provider_id', providerId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setProviders((data || []) as unknown as VendorEducationProvider[]);
-    } catch (err) {
-      console.error('Error fetching education providers:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [providerId]);
-
-  useEffect(() => {
-    let isMounted = true;
-    
-    const loadData = async () => {
-      if (!providerId) {
-        if (isMounted) {
-          setProviders([]);
-          setIsLoading(false);
-        }
-        return;
-      }
-
-      try {
-        if (isMounted) setIsLoading(true);
-        const { data, error } = await supabase
-          .from('education_providers')
-          .select('*')
-          .eq('provider_id', providerId)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        if (isMounted) setProviders((data || []) as unknown as VendorEducationProvider[]);
-      } catch (err) {
-        console.error('Error fetching education providers:', err);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-
-    loadData();
-    return () => { isMounted = false; };
-  }, [providerId]);
-
-  const createProvider = async (data: Partial<VendorEducationProvider>) => {
-    if (!providerId) return { error: new Error('No provider ID') };
-
-    const insertData = { ...data, provider_id: providerId };
-    const { data: result, error } = await supabase
-      .from('education_providers')
-      .insert(insertData as any)
-      .select()
-      .single();
-
-    if (!error) await fetchProviders();
-    return { data: result, error };
+  return {
+    providers: items,
+    isLoading,
+    createProvider: async (data: Partial<VendorEducationProvider>) => create(data),
+    updateProvider: async (id: string, updates: Partial<VendorEducationProvider>) => update(id, updates),
+    deleteProvider: async (id: string) => remove(id),
+    refetch,
   };
-
-  const updateProvider = async (id: string, updates: Partial<VendorEducationProvider>) => {
-    const { data, error } = await supabase
-      .from('education_providers')
-      .update(updates as any)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (!error) await fetchProviders();
-    return { data, error };
-  };
-
-  const deleteProvider = async (id: string) => {
-    const { error } = await supabase
-      .from('education_providers')
-      .delete()
-      .eq('id', id);
-
-    if (!error) await fetchProviders();
-    return { error };
-  };
-
-  return { providers, isLoading, createProvider, updateProvider, deleteProvider, refetch: fetchProviders };
 }

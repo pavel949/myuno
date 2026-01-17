@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useSupabaseCRUD } from './useSupabaseCRUD';
 
 export interface VendorBabysitter {
   id: string;
@@ -32,101 +31,20 @@ export interface VendorBabysitter {
 }
 
 export function useVendorBabysitters(providerId?: string) {
-  const [babysitters, setBabysitters] = useState<VendorBabysitter[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { items, isLoading, create, update, remove, refetch } = useSupabaseCRUD<VendorBabysitter>({
+    table: 'babysitters',
+    providerId,
+    providerIdField: 'provider_id',
+    orderByColumn: 'created_at',
+    orderAscending: false,
+  });
 
-  const fetchBabysitters = useCallback(async () => {
-    if (!providerId) {
-      setBabysitters([]);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('babysitters')
-        .select('*')
-        .eq('provider_id', providerId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setBabysitters((data || []) as unknown as VendorBabysitter[]);
-    } catch (err) {
-      console.error('Error fetching babysitters:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [providerId]);
-
-  useEffect(() => {
-    let isMounted = true;
-    
-    const loadData = async () => {
-      if (!providerId) {
-        if (isMounted) {
-          setBabysitters([]);
-          setIsLoading(false);
-        }
-        return;
-      }
-
-      try {
-        if (isMounted) setIsLoading(true);
-        const { data, error } = await supabase
-          .from('babysitters')
-          .select('*')
-          .eq('provider_id', providerId)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        if (isMounted) setBabysitters((data || []) as unknown as VendorBabysitter[]);
-      } catch (err) {
-        console.error('Error fetching babysitters:', err);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-
-    loadData();
-    return () => { isMounted = false; };
-  }, [providerId]);
-
-  const createBabysitter = async (data: Partial<VendorBabysitter>) => {
-    if (!providerId) return { error: new Error('No provider ID') };
-
-    const insertData = { ...data, provider_id: providerId };
-    const { data: result, error } = await supabase
-      .from('babysitters')
-      .insert(insertData as any)
-      .select()
-      .single();
-
-    if (!error) await fetchBabysitters();
-    return { data: result, error };
+  return {
+    babysitters: items,
+    isLoading,
+    createBabysitter: async (data: Partial<VendorBabysitter>) => create(data),
+    updateBabysitter: async (id: string, updates: Partial<VendorBabysitter>) => update(id, updates),
+    deleteBabysitter: async (id: string) => remove(id),
+    refetch,
   };
-
-  const updateBabysitter = async (id: string, updates: Partial<VendorBabysitter>) => {
-    const { data, error } = await supabase
-      .from('babysitters')
-      .update(updates as any)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (!error) await fetchBabysitters();
-    return { data, error };
-  };
-
-  const deleteBabysitter = async (id: string) => {
-    const { error } = await supabase
-      .from('babysitters')
-      .delete()
-      .eq('id', id);
-
-    if (!error) await fetchBabysitters();
-    return { error };
-  };
-
-  return { babysitters, isLoading, createBabysitter, updateBabysitter, deleteBabysitter, refetch: fetchBabysitters };
 }

@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useSupabaseCRUD } from './useSupabaseCRUD';
 import { Json } from '@/integrations/supabase/types';
 
 export interface VendorTour {
@@ -35,101 +34,20 @@ export interface VendorTour {
 }
 
 export function useVendorTours(providerId?: string) {
-  const [tours, setTours] = useState<VendorTour[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { items, isLoading, create, update, remove, refetch } = useSupabaseCRUD<VendorTour>({
+    table: 'tours',
+    providerId,
+    providerIdField: 'provider_id',
+    orderByColumn: 'created_at',
+    orderAscending: false,
+  });
 
-  const fetchTours = useCallback(async () => {
-    if (!providerId) {
-      setTours([]);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('tours')
-        .select('*')
-        .eq('provider_id', providerId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setTours((data || []) as unknown as VendorTour[]);
-    } catch (err) {
-      console.error('Error fetching tours:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [providerId]);
-
-  useEffect(() => {
-    let isMounted = true;
-    
-    const loadData = async () => {
-      if (!providerId) {
-        if (isMounted) {
-          setTours([]);
-          setIsLoading(false);
-        }
-        return;
-      }
-
-      try {
-        if (isMounted) setIsLoading(true);
-        const { data, error } = await supabase
-          .from('tours')
-          .select('*')
-          .eq('provider_id', providerId)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        if (isMounted) setTours((data || []) as unknown as VendorTour[]);
-      } catch (err) {
-        console.error('Error fetching tours:', err);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-
-    loadData();
-    return () => { isMounted = false; };
-  }, [providerId]);
-
-  const createTour = async (tourData: Partial<VendorTour>) => {
-    if (!providerId) return { error: new Error('No provider ID') };
-
-    const insertData = { ...tourData, provider_id: providerId };
-    const { data, error } = await supabase
-      .from('tours')
-      .insert(insertData as any)
-      .select()
-      .single();
-
-    if (!error) await fetchTours();
-    return { data, error };
+  return {
+    tours: items,
+    isLoading,
+    createTour: async (tourData: Partial<VendorTour>) => create(tourData),
+    updateTour: async (tourId: string, updates: Partial<VendorTour>) => update(tourId, updates),
+    deleteTour: async (tourId: string) => remove(tourId),
+    refetch,
   };
-
-  const updateTour = async (tourId: string, updates: Partial<VendorTour>) => {
-    const { data, error } = await supabase
-      .from('tours')
-      .update(updates)
-      .eq('id', tourId)
-      .select()
-      .single();
-
-    if (!error) await fetchTours();
-    return { data, error };
-  };
-
-  const deleteTour = async (tourId: string) => {
-    const { error } = await supabase
-      .from('tours')
-      .delete()
-      .eq('id', tourId);
-
-    if (!error) await fetchTours();
-    return { error };
-  };
-
-  return { tours, isLoading, createTour, updateTour, deleteTour, refetch: fetchTours };
 }

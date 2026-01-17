@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useSupabaseCRUD } from './useSupabaseCRUD';
 
 export interface VendorRestaurant {
   id: string;
@@ -33,101 +32,20 @@ export interface VendorRestaurant {
 }
 
 export function useVendorRestaurants(providerId?: string) {
-  const [restaurants, setRestaurants] = useState<VendorRestaurant[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { items, isLoading, create, update, remove, refetch } = useSupabaseCRUD<VendorRestaurant>({
+    table: 'restaurants',
+    providerId,
+    providerIdField: 'provider_id',
+    orderByColumn: 'created_at',
+    orderAscending: false,
+  });
 
-  const fetchRestaurants = useCallback(async () => {
-    if (!providerId) {
-      setRestaurants([]);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('restaurants')
-        .select('*')
-        .eq('provider_id', providerId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setRestaurants((data || []) as unknown as VendorRestaurant[]);
-    } catch (err) {
-      console.error('Error fetching restaurants:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [providerId]);
-
-  useEffect(() => {
-    let isMounted = true;
-    
-    const loadData = async () => {
-      if (!providerId) {
-        if (isMounted) {
-          setRestaurants([]);
-          setIsLoading(false);
-        }
-        return;
-      }
-
-      try {
-        if (isMounted) setIsLoading(true);
-        const { data, error } = await supabase
-          .from('restaurants')
-          .select('*')
-          .eq('provider_id', providerId)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        if (isMounted) setRestaurants((data || []) as unknown as VendorRestaurant[]);
-      } catch (err) {
-        console.error('Error fetching restaurants:', err);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-
-    loadData();
-    return () => { isMounted = false; };
-  }, [providerId]);
-
-  const createRestaurant = async (data: Partial<VendorRestaurant>) => {
-    if (!providerId) return { error: new Error('No provider ID') };
-
-    const insertData = { ...data, provider_id: providerId };
-    const { data: result, error } = await supabase
-      .from('restaurants')
-      .insert(insertData as any)
-      .select()
-      .single();
-
-    if (!error) await fetchRestaurants();
-    return { data: result, error };
+  return {
+    restaurants: items,
+    isLoading,
+    createRestaurant: async (data: Partial<VendorRestaurant>) => create(data),
+    updateRestaurant: async (id: string, updates: Partial<VendorRestaurant>) => update(id, updates),
+    deleteRestaurant: async (id: string) => remove(id),
+    refetch,
   };
-
-  const updateRestaurant = async (id: string, updates: Partial<VendorRestaurant>) => {
-    const { data, error } = await supabase
-      .from('restaurants')
-      .update(updates as any)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (!error) await fetchRestaurants();
-    return { data, error };
-  };
-
-  const deleteRestaurant = async (id: string) => {
-    const { error } = await supabase
-      .from('restaurants')
-      .delete()
-      .eq('id', id);
-
-    if (!error) await fetchRestaurants();
-    return { error };
-  };
-
-  return { restaurants, isLoading, createRestaurant, updateRestaurant, deleteRestaurant, refetch: fetchRestaurants };
 }
