@@ -130,7 +130,7 @@ export function usePropertyRentalTerms(marketplacePropertyId?: string) {
           instant_booking
         `)
         .eq('marketplace_property_id', marketplacePropertyId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         return null;

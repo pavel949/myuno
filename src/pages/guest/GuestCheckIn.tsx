@@ -442,10 +442,32 @@ export default function GuestCheckIn() {
           </CardHeader>
           <CardContent>
             <div className="bg-muted p-4 rounded-lg mb-4 text-sm space-y-2">
-              <p>• {isRu ? 'Заезд с 14:00, выезд до 12:00' : 'Check-in from 2 PM, check-out by 12 PM'}</p>
-              <p>• {isRu ? 'Не курить в помещении' : 'No smoking indoors'}</p>
-              <p>• {isRu ? 'Соблюдать тишину после 22:00' : 'Quiet hours after 10 PM'}</p>
-              <p>• {isRu ? 'Бережно относиться к имуществу' : 'Take care of the property'}</p>
+              {(() => {
+                const ownerProperty = propertyBooking?.owner_properties as { house_rules?: string; house_rules_ru?: string; check_in_time?: string; check_out_time?: string } | null;
+                const houseRules = isRu ? ownerProperty?.house_rules_ru : ownerProperty?.house_rules;
+                const checkInTime = ownerProperty?.check_in_time || '14:00';
+                const checkOutTime = ownerProperty?.check_out_time || '12:00';
+                
+                // Default rules if none provided
+                const defaultRules = [
+                  isRu ? `Заезд с ${checkInTime}, выезд до ${checkOutTime}` : `Check-in from ${checkInTime}, check-out by ${checkOutTime}`,
+                  isRu ? 'Не курить в помещении' : 'No smoking indoors',
+                  isRu ? 'Соблюдать тишину после 22:00' : 'Quiet hours after 10 PM',
+                  isRu ? 'Бережно относиться к имуществу' : 'Take care of the property',
+                ];
+
+                if (houseRules && houseRules.trim()) {
+                  // Parse house rules - split by newlines or bullets
+                  const rules = houseRules.split(/[\n•\-]/).map(r => r.trim()).filter(r => r.length > 0);
+                  return rules.map((rule, idx) => (
+                    <p key={idx}>• {rule}</p>
+                  ));
+                }
+                
+                return defaultRules.map((rule, idx) => (
+                  <p key={idx}>• {rule}</p>
+                ));
+              })()}
             </div>
 
             <div className="flex items-start space-x-3">
