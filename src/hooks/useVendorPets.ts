@@ -63,8 +63,37 @@ export function useVendorPets(providerId?: string) {
   }, [providerId]);
 
   useEffect(() => {
-    fetchServices();
-  }, [fetchServices]);
+    let isMounted = true;
+    
+    const loadData = async () => {
+      if (!providerId) {
+        if (isMounted) {
+          setServices([]);
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      try {
+        if (isMounted) setIsLoading(true);
+        const { data, error } = await supabase
+          .from('pet_services')
+          .select('*')
+          .eq('provider_id', providerId)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        if (isMounted) setServices((data || []) as unknown as VendorPetService[]);
+      } catch (err) {
+        console.error('Error fetching pet services:', err);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    loadData();
+    return () => { isMounted = false; };
+  }, [providerId]);
 
   const createService = async (data: Partial<VendorPetService>) => {
     if (!providerId) return { error: new Error('No provider ID') };

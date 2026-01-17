@@ -68,8 +68,37 @@ export function useVendorActivities(providerId?: string) {
   }, [providerId]);
 
   useEffect(() => {
-    fetchActivities();
-  }, [fetchActivities]);
+    let isMounted = true;
+    
+    const loadData = async () => {
+      if (!providerId) {
+        if (isMounted) {
+          setActivities([]);
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      try {
+        if (isMounted) setIsLoading(true);
+        const { data, error } = await supabase
+          .from('water_activities')
+          .select('*')
+          .eq('provider_id', providerId)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        if (isMounted) setActivities((data || []) as unknown as VendorActivity[]);
+      } catch (err) {
+        console.error('Error fetching activities:', err);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    loadData();
+    return () => { isMounted = false; };
+  }, [providerId]);
 
   const createActivity = async (activityData: Partial<VendorActivity>) => {
     if (!providerId) return { error: new Error('No provider ID') };

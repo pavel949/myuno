@@ -61,8 +61,37 @@ export function useVendorRestaurants(providerId?: string) {
   }, [providerId]);
 
   useEffect(() => {
-    fetchRestaurants();
-  }, [fetchRestaurants]);
+    let isMounted = true;
+    
+    const loadData = async () => {
+      if (!providerId) {
+        if (isMounted) {
+          setRestaurants([]);
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      try {
+        if (isMounted) setIsLoading(true);
+        const { data, error } = await supabase
+          .from('restaurants')
+          .select('*')
+          .eq('provider_id', providerId)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        if (isMounted) setRestaurants((data || []) as unknown as VendorRestaurant[]);
+      } catch (err) {
+        console.error('Error fetching restaurants:', err);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    loadData();
+    return () => { isMounted = false; };
+  }, [providerId]);
 
   const createRestaurant = async (data: Partial<VendorRestaurant>) => {
     if (!providerId) return { error: new Error('No provider ID') };

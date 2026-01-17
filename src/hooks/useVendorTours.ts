@@ -63,8 +63,37 @@ export function useVendorTours(providerId?: string) {
   }, [providerId]);
 
   useEffect(() => {
-    fetchTours();
-  }, [fetchTours]);
+    let isMounted = true;
+    
+    const loadData = async () => {
+      if (!providerId) {
+        if (isMounted) {
+          setTours([]);
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      try {
+        if (isMounted) setIsLoading(true);
+        const { data, error } = await supabase
+          .from('tours')
+          .select('*')
+          .eq('provider_id', providerId)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        if (isMounted) setTours((data || []) as unknown as VendorTour[]);
+      } catch (err) {
+        console.error('Error fetching tours:', err);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    loadData();
+    return () => { isMounted = false; };
+  }, [providerId]);
 
   const createTour = async (tourData: Partial<VendorTour>) => {
     if (!providerId) return { error: new Error('No provider ID') };

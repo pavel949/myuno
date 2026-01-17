@@ -61,8 +61,37 @@ export function useVendorLegal(providerId?: string) {
   }, [providerId]);
 
   useEffect(() => {
-    fetchServices();
-  }, [fetchServices]);
+    let isMounted = true;
+    
+    const loadData = async () => {
+      if (!providerId) {
+        if (isMounted) {
+          setServices([]);
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      try {
+        if (isMounted) setIsLoading(true);
+        const { data, error } = await supabase
+          .from('legal_services')
+          .select('*')
+          .eq('provider_id', providerId)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        if (isMounted) setServices((data || []) as unknown as VendorLegalService[]);
+      } catch (err) {
+        console.error('Error fetching legal services:', err);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    loadData();
+    return () => { isMounted = false; };
+  }, [providerId]);
 
   const createService = async (data: Partial<VendorLegalService>) => {
     if (!providerId) return { error: new Error('No provider ID') };

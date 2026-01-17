@@ -62,8 +62,29 @@ export function useVendorVehicles(providerId?: string) {
   }, [user, providerId]);
 
   useEffect(() => {
-    fetchVehicles();
-  }, [fetchVehicles]);
+    let isMounted = true;
+    
+    const loadData = async () => {
+      if (!user) return;
+      if (isMounted) setIsLoading(true);
+      
+      let query = supabase.from('vehicles').select('*');
+      
+      if (providerId) {
+        query = query.eq('provider_id', providerId);
+      }
+      
+      const { data, error } = await query.order('created_at', { ascending: false });
+      
+      if (isMounted) {
+        if (!error && data) setVehicles(data as VendorVehicle[]);
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+    return () => { isMounted = false; };
+  }, [user, providerId]);
 
   const createVehicle = async (vehicleData: Partial<VendorVehicle> & { provider_id?: string }) => {
     if (!user) return { error: new Error('Not authenticated') };
