@@ -78,36 +78,36 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden border-0" hideCloseButton>
+      <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden border-0 max-h-[90vh]" hideCloseButton>
         <DialogTitle className="sr-only">Welcome to myUNO</DialogTitle>
-        <div className="relative min-h-[580px] flex flex-col">
+        <div className="relative min-h-[500px] max-h-[85vh] flex flex-col overflow-y-auto">
           {/* Background gradient */}
           <div 
             className="absolute inset-0 pointer-events-none" 
-            style={{ background: 'radial-gradient(circle at 50% 0%, hsl(var(--primary) / 0.15) 0%, transparent 50%)' }} 
+            style={{ background: 'radial-gradient(circle at 50% 0%, hsl(var(--primary) / 0.15) 0%, transparent 50%)' }}
           />
 
           <MotionDiv
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="p-6 relative z-10 flex-1 flex flex-col"
+            className="p-4 sm:p-6 relative z-10 flex-1 flex flex-col"
           >
             {/* Hero Section */}
-            <div className="text-center space-y-4">
+            <div className="text-center space-y-3">
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
-                className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-primary via-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/25"
+                className="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-2xl bg-gradient-to-br from-primary via-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/25"
               >
-                <Sparkles className="w-10 h-10 text-primary-foreground" />
+                <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 text-primary-foreground" />
               </motion.div>
               
               <div className="space-y-1">
-                <h2 className="text-3xl font-bold">{texts.title[lang]}</h2>
-                <p className="text-muted-foreground text-sm">{texts.subtitle[lang]}</p>
-                <p className="text-xs text-muted-foreground/70">{texts.audience[lang]}</p>
+                <h2 className="text-2xl sm:text-3xl font-bold">{texts.title[lang]}</h2>
+                <p className="text-muted-foreground text-xs sm:text-sm">{texts.subtitle[lang]}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground/70">{texts.audience[lang]}</p>
               </div>
             </div>
 
@@ -116,7 +116,7 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="grid grid-cols-3 gap-2 mt-5"
+              className="grid grid-cols-3 gap-1.5 sm:gap-2 mt-4"
             >
               {categories.map((cat, idx) => (
                 <motion.div 
@@ -124,12 +124,12 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.25 + idx * 0.05 }}
-                  className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl bg-card/50 border border-border/50"
+                  className="flex flex-col items-center gap-1 p-2 rounded-xl bg-card/50 border border-border/50"
                 >
-                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                     <cat.icon className="w-4 h-4 text-primary" />
                   </div>
-                  <span className="text-[11px] font-medium text-foreground/80">{cat.name[lang]}</span>
+                  <span className="text-[10px] sm:text-[11px] font-medium text-foreground/80">{cat.name[lang]}</span>
                 </motion.div>
               ))}
             </motion.div>
@@ -139,30 +139,30 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="mt-5 p-4 rounded-2xl bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20"
+              className="mt-4 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20"
             >
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                  <Globe className="w-5 h-5 text-primary" />
+              <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                  <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">🇹🇭</span>
-                  <span className="font-semibold text-sm">{texts.nowIn[lang]}</span>
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <span className="text-base sm:text-lg">🇹🇭</span>
+                  <span className="font-semibold text-xs sm:text-sm">{texts.nowIn[lang]}</span>
                 </div>
               </div>
               
-              <div className="flex items-start gap-2 mb-3">
-                <Plane className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                <p className="text-sm text-foreground/80 leading-relaxed">
+              <div className="flex items-start gap-2 mb-2">
+                <Plane className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary mt-0.5 shrink-0" />
+                <p className="text-xs sm:text-sm text-foreground/80 leading-relaxed">
                   {texts.mission[lang]}
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 pt-2 border-t border-primary/10">
-                <span className="text-xs text-muted-foreground">{texts.comingSoon[lang]}:</span>
-                <div className="flex gap-2">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-2 border-t border-primary/10">
+                <span className="text-[10px] sm:text-xs text-muted-foreground">{texts.comingSoon[lang]}:</span>
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
                   {futureLocations.map((loc, idx) => (
-                    <span key={idx} className="text-xs text-muted-foreground/70 flex items-center gap-1">
+                    <span key={idx} className="text-[10px] sm:text-xs text-muted-foreground/70 flex items-center gap-0.5">
                       {loc.flag} {loc.name[lang]}
                     </span>
                   ))}
@@ -175,14 +175,14 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="flex justify-center gap-2 mt-5"
+              className="flex justify-center gap-1.5 sm:gap-2 mt-4"
             >
               {languageOptions.map(opt => (
                 <button
                   key={opt.code}
                   onClick={() => setLanguage(opt.code)}
                   className={cn(
-                    "px-3 py-2 rounded-lg text-sm flex items-center gap-2 transition-all",
+                    "px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 transition-all",
                     language === opt.code 
                       ? "bg-primary text-primary-foreground shadow-md" 
                       : "bg-muted hover:bg-muted/80"
@@ -199,14 +199,14 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
-              className="mt-auto pt-5"
+              className="mt-auto pt-4"
             >
               <Button 
-                className="w-full h-12 text-base font-semibold" 
+                className="w-full h-10 sm:h-12 text-sm sm:text-base font-semibold" 
                 onClick={handleComplete}
               >
                 {texts.getStarted[lang]}
-                <ChevronRight className="w-5 h-5 ml-1" />
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 ml-1" />
               </Button>
             </motion.div>
           </MotionDiv>
