@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight, Gift } from 'lucide-react';
 import { z } from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
@@ -35,7 +35,13 @@ export default function Auth() {
   const { t, language } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   const { canUsePinLogin, hasPin, isLoading: pinLoading } = usePinAuth();
+  
+  // Get redirect path from state or query params
+  const redirectPath = (location.state as { from?: string })?.from || 
+    searchParams.get('redirect') || 
+    '/';
 
   // Determine initial view
   const [view, setView] = useState<AuthView>('email-auth');
@@ -55,10 +61,10 @@ export default function Auth() {
         setShowPinSetup(true);
         setView('pin-setup');
       } else if (hasPin || pinLoading === false) {
-        navigate('/', { replace: true });
+        navigate(redirectPath, { replace: true });
       }
     }
-  }, [user, hasPin, pinLoading, navigate, showPinSetup]);
+  }, [user, hasPin, pinLoading, navigate, showPinSetup, redirectPath]);
 
   const validateForm = () => {
     const newErrors: typeof errors = {};
@@ -156,7 +162,7 @@ export default function Auth() {
   };
 
   const handlePinLoginSuccess = () => {
-    navigate('/', { replace: true });
+    navigate(redirectPath, { replace: true });
   };
 
   const handleSwitchToEmail = () => {
@@ -164,11 +170,11 @@ export default function Auth() {
   };
 
   const handlePinSetupComplete = () => {
-    navigate('/', { replace: true });
+    navigate(redirectPath, { replace: true });
   };
 
   const handleSkipPinSetup = () => {
-    navigate('/', { replace: true });
+    navigate(redirectPath, { replace: true });
   };
 
   // Show loading while checking PIN status
