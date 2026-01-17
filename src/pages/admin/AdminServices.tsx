@@ -591,9 +591,10 @@ export default function AdminServices() {
                   onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_featured: checked }))}
                 />
               </div>
-            </div>
+              </div>
+            </ScrollArea>
 
-            <DialogFooter>
+            <DialogFooter className="p-6 pt-0">
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                 {isRussian ? 'Отмена' : 'Cancel'}
               </Button>
