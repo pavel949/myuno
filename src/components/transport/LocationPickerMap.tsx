@@ -51,20 +51,32 @@ const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
   useEffect(() => {
     if (!isOpen) return;
     
+    let isMounted = true;
+    
     const fetchToken = async () => {
       try {
         const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+        if (!isMounted) return;
+        
         if (error) throw error;
         if (data?.token) {
           setMapboxToken(data.token);
         }
       } catch (err) {
-        console.error('Failed to fetch Mapbox token:', err);
+        if (isMounted) {
+          console.error('Failed to fetch Mapbox token:', err);
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
     fetchToken();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [isOpen]);
 
   // Update marker position
