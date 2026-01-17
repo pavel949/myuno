@@ -29,6 +29,8 @@ export function useBabysitters(ageGroup?: string) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchBabysitters = async () => {
       setIsLoading(true);
       let query = supabase.from('babysitters').select('*').eq('is_active', true);
@@ -36,10 +38,14 @@ export function useBabysitters(ageGroup?: string) {
         query = query.contains('age_groups', [ageGroup]);
       }
       const { data, error } = await query.order('is_featured', { ascending: false });
-      if (!error && data) setBabysitters(data as Babysitter[]);
-      setIsLoading(false);
+      if (isMounted) {
+        if (!error && data) setBabysitters(data as Babysitter[]);
+        setIsLoading(false);
+      }
     };
     fetchBabysitters();
+    
+    return () => { isMounted = false; };
   }, [ageGroup]);
 
   return { babysitters, isLoading };
@@ -50,13 +56,19 @@ export function useBabysitter(id: string) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     if (!id) return;
     const fetchBabysitter = async () => {
       const { data, error } = await supabase.from('babysitters').select('*').eq('id', id).single();
-      if (!error && data) setBabysitter(data as Babysitter);
-      setIsLoading(false);
+      if (isMounted) {
+        if (!error && data) setBabysitter(data as Babysitter);
+        setIsLoading(false);
+      }
     };
     fetchBabysitter();
+    
+    return () => { isMounted = false; };
   }, [id]);
 
   return { babysitter, isLoading };
