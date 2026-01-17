@@ -1,6 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSupabaseCRUD } from './useSupabaseCRUD';
 
 export interface VendorProperty {
   id: string;
@@ -37,101 +35,20 @@ export interface VendorProperty {
 }
 
 export function useVendorProperties(providerId?: string) {
-  const [properties, setProperties] = useState<VendorProperty[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { items, isLoading, create, update, remove, refetch } = useSupabaseCRUD<VendorProperty>({
+    table: 'properties',
+    providerId,
+    providerIdField: 'provider_id',
+    orderByColumn: 'created_at',
+    orderAscending: false,
+  });
 
-  const fetchProperties = useCallback(async () => {
-    if (!providerId) {
-      setProperties([]);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('provider_id', providerId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setProperties((data || []) as unknown as VendorProperty[]);
-    } catch (err) {
-      console.error('Error fetching properties:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [providerId]);
-
-  useEffect(() => {
-    let isMounted = true;
-    
-    const loadData = async () => {
-      if (!providerId) {
-        if (isMounted) {
-          setProperties([]);
-          setIsLoading(false);
-        }
-        return;
-      }
-
-      try {
-        if (isMounted) setIsLoading(true);
-        const { data, error } = await supabase
-          .from('properties')
-          .select('*')
-          .eq('provider_id', providerId)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        if (isMounted) setProperties((data || []) as unknown as VendorProperty[]);
-      } catch (err) {
-        console.error('Error fetching properties:', err);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-
-    loadData();
-    return () => { isMounted = false; };
-  }, [providerId]);
-
-  const createProperty = async (propertyData: Partial<VendorProperty>) => {
-    if (!providerId) return { error: new Error('No provider ID') };
-
-    const insertData = { ...propertyData, provider_id: providerId };
-    const { data, error } = await supabase
-      .from('properties')
-      .insert(insertData as any)
-      .select()
-      .single();
-
-    if (!error) await fetchProperties();
-    return { data, error };
+  return {
+    properties: items,
+    isLoading,
+    createProperty: async (propertyData: Partial<VendorProperty>) => create(propertyData),
+    updateProperty: async (propertyId: string, updates: Partial<VendorProperty>) => update(propertyId, updates),
+    deleteProperty: async (propertyId: string) => remove(propertyId),
+    refetch,
   };
-
-  const updateProperty = async (propertyId: string, updates: Partial<VendorProperty>) => {
-    const { data, error } = await supabase
-      .from('properties')
-      .update(updates)
-      .eq('id', propertyId)
-      .select()
-      .single();
-
-    if (!error) await fetchProperties();
-    return { data, error };
-  };
-
-  const deleteProperty = async (propertyId: string) => {
-    const { error } = await supabase
-      .from('properties')
-      .delete()
-      .eq('id', propertyId);
-
-    if (!error) await fetchProperties();
-    return { error };
-  };
-
-  return { properties, isLoading, createProperty, updateProperty, deleteProperty, refetch: fetchProperties };
 }

@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useSupabaseCRUD } from './useSupabaseCRUD';
 
 export interface VendorFlowerShop {
   id: string;
@@ -29,101 +28,20 @@ export interface VendorFlowerShop {
 }
 
 export function useVendorFlowers(providerId?: string) {
-  const [shops, setShops] = useState<VendorFlowerShop[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { items, isLoading, create, update, remove, refetch } = useSupabaseCRUD<VendorFlowerShop>({
+    table: 'flower_shops',
+    providerId,
+    providerIdField: 'provider_id',
+    orderByColumn: 'created_at',
+    orderAscending: false,
+  });
 
-  const fetchShops = useCallback(async () => {
-    if (!providerId) {
-      setShops([]);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('flower_shops')
-        .select('*')
-        .eq('provider_id', providerId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setShops((data || []) as unknown as VendorFlowerShop[]);
-    } catch (err) {
-      console.error('Error fetching flower shops:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [providerId]);
-
-  useEffect(() => {
-    let isMounted = true;
-    
-    const loadData = async () => {
-      if (!providerId) {
-        if (isMounted) {
-          setShops([]);
-          setIsLoading(false);
-        }
-        return;
-      }
-
-      try {
-        if (isMounted) setIsLoading(true);
-        const { data, error } = await supabase
-          .from('flower_shops')
-          .select('*')
-          .eq('provider_id', providerId)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        if (isMounted) setShops((data || []) as unknown as VendorFlowerShop[]);
-      } catch (err) {
-        console.error('Error fetching flower shops:', err);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-
-    loadData();
-    return () => { isMounted = false; };
-  }, [providerId]);
-
-  const createShop = async (data: Partial<VendorFlowerShop>) => {
-    if (!providerId) return { error: new Error('No provider ID') };
-
-    const insertData = { ...data, provider_id: providerId };
-    const { data: result, error } = await supabase
-      .from('flower_shops')
-      .insert(insertData as any)
-      .select()
-      .single();
-
-    if (!error) await fetchShops();
-    return { data: result, error };
+  return {
+    shops: items,
+    isLoading,
+    createShop: async (data: Partial<VendorFlowerShop>) => create(data),
+    updateShop: async (id: string, updates: Partial<VendorFlowerShop>) => update(id, updates),
+    deleteShop: async (id: string) => remove(id),
+    refetch,
   };
-
-  const updateShop = async (id: string, updates: Partial<VendorFlowerShop>) => {
-    const { data, error } = await supabase
-      .from('flower_shops')
-      .update(updates as any)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (!error) await fetchShops();
-    return { data, error };
-  };
-
-  const deleteShop = async (id: string) => {
-    const { error } = await supabase
-      .from('flower_shops')
-      .delete()
-      .eq('id', id);
-
-    if (!error) await fetchShops();
-    return { error };
-  };
-
-  return { shops, isLoading, createShop, updateShop, deleteShop, refetch: fetchShops };
 }

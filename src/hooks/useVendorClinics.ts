@@ -1,6 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSupabaseCRUD } from './useSupabaseCRUD';
 
 export interface VendorClinic {
   id: string;
@@ -35,88 +33,20 @@ export interface VendorClinic {
 }
 
 export function useVendorClinics(providerId?: string) {
-  const { user } = useAuth();
-  const [clinics, setClinics] = useState<VendorClinic[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { items, isLoading, create, update, remove, refetch } = useSupabaseCRUD<VendorClinic>({
+    table: 'clinics',
+    providerId,
+    providerIdField: 'provider_id',
+    orderByColumn: 'created_at',
+    orderAscending: false,
+  });
 
-  const fetchClinics = useCallback(async () => {
-    if (!user) return;
-    setIsLoading(true);
-    
-    let query = supabase.from('clinics').select('*');
-    
-    if (providerId) {
-      query = query.eq('provider_id', providerId);
-    }
-    
-    const { data, error } = await query.order('created_at', { ascending: false });
-    
-    if (!error && data) setClinics(data as VendorClinic[]);
-    setIsLoading(false);
-  }, [user, providerId]);
-
-  useEffect(() => {
-    let isMounted = true;
-    
-    const loadData = async () => {
-      if (!user) return;
-      if (isMounted) setIsLoading(true);
-      
-      let query = supabase.from('clinics').select('*');
-      
-      if (providerId) {
-        query = query.eq('provider_id', providerId);
-      }
-      
-      const { data, error } = await query.order('created_at', { ascending: false });
-      
-      if (isMounted) {
-        if (!error && data) setClinics(data as VendorClinic[]);
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
-    return () => { isMounted = false; };
-  }, [user, providerId]);
-
-  const createClinic = async (clinicData: Partial<VendorClinic> & { provider_id?: string }) => {
-    if (!user) return { error: new Error('Not authenticated') };
-    const insertData = { ...clinicData };
-    if (providerId) {
-      insertData.provider_id = providerId;
-    }
-    const { data, error } = await supabase
-      .from('clinics')
-      .insert(insertData as any)
-      .select()
-      .single();
-    
-    if (!error) await fetchClinics();
-    return { data, error };
+  return {
+    clinics: items,
+    isLoading,
+    createClinic: async (clinicData: Partial<VendorClinic> & { provider_id?: string }) => create(clinicData),
+    updateClinic: async (id: string, clinicData: Partial<VendorClinic>) => update(id, clinicData),
+    deleteClinic: async (id: string) => remove(id),
+    refetch,
   };
-
-  const updateClinic = async (id: string, clinicData: Partial<VendorClinic>) => {
-    const { data, error } = await supabase
-      .from('clinics')
-      .update(clinicData as any)
-      .eq('id', id)
-      .select()
-      .single();
-    
-    if (!error) await fetchClinics();
-    return { data, error };
-  };
-
-  const deleteClinic = async (id: string) => {
-    const { error } = await supabase
-      .from('clinics')
-      .delete()
-      .eq('id', id);
-    
-    if (!error) await fetchClinics();
-    return { error };
-  };
-
-  return { clinics, isLoading, createClinic, updateClinic, deleteClinic, refetch: fetchClinics };
 }

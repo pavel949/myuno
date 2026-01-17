@@ -1,6 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSupabaseCRUD } from './useSupabaseCRUD';
 
 export interface VendorVehicle {
   id: string;
@@ -41,88 +39,20 @@ export interface VendorVehicle {
 }
 
 export function useVendorVehicles(providerId?: string) {
-  const { user } = useAuth();
-  const [vehicles, setVehicles] = useState<VendorVehicle[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { items, isLoading, create, update, remove, refetch } = useSupabaseCRUD<VendorVehicle>({
+    table: 'vehicles',
+    providerId,
+    providerIdField: 'provider_id',
+    orderByColumn: 'created_at',
+    orderAscending: false,
+  });
 
-  const fetchVehicles = useCallback(async () => {
-    if (!user) return;
-    setIsLoading(true);
-    
-    let query = supabase.from('vehicles').select('*');
-    
-    if (providerId) {
-      query = query.eq('provider_id', providerId);
-    }
-    
-    const { data, error } = await query.order('created_at', { ascending: false });
-    
-    if (!error && data) setVehicles(data as VendorVehicle[]);
-    setIsLoading(false);
-  }, [user, providerId]);
-
-  useEffect(() => {
-    let isMounted = true;
-    
-    const loadData = async () => {
-      if (!user) return;
-      if (isMounted) setIsLoading(true);
-      
-      let query = supabase.from('vehicles').select('*');
-      
-      if (providerId) {
-        query = query.eq('provider_id', providerId);
-      }
-      
-      const { data, error } = await query.order('created_at', { ascending: false });
-      
-      if (isMounted) {
-        if (!error && data) setVehicles(data as VendorVehicle[]);
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
-    return () => { isMounted = false; };
-  }, [user, providerId]);
-
-  const createVehicle = async (vehicleData: Partial<VendorVehicle> & { provider_id?: string }) => {
-    if (!user) return { error: new Error('Not authenticated') };
-    const insertData = { ...vehicleData };
-    if (providerId) {
-      insertData.provider_id = providerId;
-    }
-    const { data, error } = await supabase
-      .from('vehicles')
-      .insert(insertData as any)
-      .select()
-      .single();
-    
-    if (!error) await fetchVehicles();
-    return { data, error };
+  return {
+    vehicles: items,
+    isLoading,
+    createVehicle: async (vehicleData: Partial<VendorVehicle> & { provider_id?: string }) => create(vehicleData),
+    updateVehicle: async (id: string, vehicleData: Partial<VendorVehicle>) => update(id, vehicleData),
+    deleteVehicle: async (id: string) => remove(id),
+    refetch,
   };
-
-  const updateVehicle = async (id: string, vehicleData: Partial<VendorVehicle>) => {
-    const { data, error } = await supabase
-      .from('vehicles')
-      .update(vehicleData as any)
-      .eq('id', id)
-      .select()
-      .single();
-    
-    if (!error) await fetchVehicles();
-    return { data, error };
-  };
-
-  const deleteVehicle = async (id: string) => {
-    const { error } = await supabase
-      .from('vehicles')
-      .delete()
-      .eq('id', id);
-    
-    if (!error) await fetchVehicles();
-    return { error };
-  };
-
-  return { vehicles, isLoading, createVehicle, updateVehicle, deleteVehicle, refetch: fetchVehicles };
 }

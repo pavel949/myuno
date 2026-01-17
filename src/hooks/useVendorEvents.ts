@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useSupabaseCRUD } from './useSupabaseCRUD';
 import { Json } from '@/integrations/supabase/types';
 
 export interface VendorEvent {
@@ -38,101 +37,20 @@ export interface VendorEvent {
 }
 
 export function useVendorEvents(providerId?: string) {
-  const [events, setEvents] = useState<VendorEvent[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { items, isLoading, create, update, remove, refetch } = useSupabaseCRUD<VendorEvent>({
+    table: 'events',
+    providerId,
+    providerIdField: 'provider_id',
+    orderByColumn: 'created_at',
+    orderAscending: false,
+  });
 
-  const fetchEvents = useCallback(async () => {
-    if (!providerId) {
-      setEvents([]);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('events')
-        .select('*')
-        .eq('provider_id', providerId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setEvents((data || []) as unknown as VendorEvent[]);
-    } catch (err) {
-      console.error('Error fetching events:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [providerId]);
-
-  useEffect(() => {
-    let isMounted = true;
-    
-    const loadData = async () => {
-      if (!providerId) {
-        if (isMounted) {
-          setEvents([]);
-          setIsLoading(false);
-        }
-        return;
-      }
-
-      try {
-        if (isMounted) setIsLoading(true);
-        const { data, error } = await supabase
-          .from('events')
-          .select('*')
-          .eq('provider_id', providerId)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        if (isMounted) setEvents((data || []) as unknown as VendorEvent[]);
-      } catch (err) {
-        console.error('Error fetching events:', err);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-
-    loadData();
-    return () => { isMounted = false; };
-  }, [providerId]);
-
-  const createEvent = async (data: Partial<VendorEvent>) => {
-    if (!providerId) return { error: new Error('No provider ID') };
-
-    const insertData = { ...data, provider_id: providerId };
-    const { data: result, error } = await supabase
-      .from('events')
-      .insert(insertData as any)
-      .select()
-      .single();
-
-    if (!error) await fetchEvents();
-    return { data: result, error };
+  return {
+    events: items,
+    isLoading,
+    createEvent: async (data: Partial<VendorEvent>) => create(data),
+    updateEvent: async (id: string, updates: Partial<VendorEvent>) => update(id, updates),
+    deleteEvent: async (id: string) => remove(id),
+    refetch,
   };
-
-  const updateEvent = async (id: string, updates: Partial<VendorEvent>) => {
-    const { data, error } = await supabase
-      .from('events')
-      .update(updates as any)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (!error) await fetchEvents();
-    return { data, error };
-  };
-
-  const deleteEvent = async (id: string) => {
-    const { error } = await supabase
-      .from('events')
-      .delete()
-      .eq('id', id);
-
-    if (!error) await fetchEvents();
-    return { error };
-  };
-
-  return { events, isLoading, createEvent, updateEvent, deleteEvent, refetch: fetchEvents };
 }
