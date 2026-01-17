@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useMemo, useCallback } from 'react';
+import { useSupabaseQuery, useSupabaseSingle, QueryFilter } from './useSupabaseQuery';
 
 interface ItineraryItem {
   time: string;
@@ -38,109 +38,51 @@ interface UseToursOptions {
   limit?: number;
 }
 
+const transformTour = (tour: unknown): Tour => {
+  const t = tour as Record<string, unknown>;
+  return {
+    ...t,
+    images: (t.images as string[]) || [],
+    includes: (t.includes as string[]) || [],
+    highlights: (t.highlights as string[]) || [],
+    itinerary: Array.isArray(t.itinerary) ? t.itinerary as ItineraryItem[] : [],
+    start_times: (t.start_times as string[]) || [],
+  } as Tour;
+};
+
 export const useTours = (options: UseToursOptions = {}) => {
-  const [tours, setTours] = useState<Tour[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetchTours = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      let query = supabase.from('tours').select('*').eq('is_active', true);
-      if (options.category) query = query.eq('category', options.category);
-      if (options.featured) query = query.eq('is_featured', true);
-      query = query.order('rating', { ascending: false });
-      if (options.limit) query = query.limit(options.limit);
-
-      const { data } = await query;
-      const formattedTours: Tour[] = (data || []).map(tour => ({
-        ...tour,
-        images: tour.images || [],
-        includes: tour.includes || [],
-        highlights: tour.highlights || [],
-        itinerary: Array.isArray(tour.itinerary) ? tour.itinerary as unknown as ItineraryItem[] : [],
-        start_times: tour.start_times || [],
-      }));
-      setTours(formattedTours);
-    } catch (err) {
-      console.error('Error fetching tours:', err);
-    } finally {
-      setIsLoading(false);
+  const filters = useMemo((): QueryFilter[] => {
+    const result: QueryFilter[] = [{ column: 'is_active', value: true }];
+    if (options.category) {
+      result.push({ column: 'category', value: options.category });
     }
-  }, [options.category, options.featured, options.limit]);
+    if (options.featured) {
+      result.push({ column: 'is_featured', value: true });
+    }
+    return result;
+  }, [options.category, options.featured]);
 
-  useEffect(() => {
-    let isMounted = true;
-    
-    const loadData = async () => {
-      if (isMounted) setIsLoading(true);
-      try {
-        let query = supabase.from('tours').select('*').eq('is_active', true);
-        if (options.category) query = query.eq('category', options.category);
-        if (options.featured) query = query.eq('is_featured', true);
-        query = query.order('rating', { ascending: false });
-        if (options.limit) query = query.limit(options.limit);
+  const transform = useCallback((data: unknown[]) => data.map(transformTour), []);
 
-        const { data } = await query;
-        const formattedTours: Tour[] = (data || []).map(tour => ({
-          ...tour,
-          images: tour.images || [],
-          includes: tour.includes || [],
-          highlights: tour.highlights || [],
-          itinerary: Array.isArray(tour.itinerary) ? tour.itinerary as unknown as ItineraryItem[] : [],
-          start_times: tour.start_times || [],
-        }));
-        if (isMounted) setTours(formattedTours);
-      } catch (err) {
-        console.error('Error fetching tours:', err);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
+  const { data, isLoading, refetch } = useSupabaseQuery<Tour>({
+    table: 'tours',
+    filters,
+    orderBy: { column: 'rating', ascending: false },
+    limit: options.limit,
+    transform,
+  });
 
-    loadData();
-    return () => { isMounted = false; };
-  }, [options.category, options.featured, options.limit]);
-  return { tours, isLoading, refetch: fetchTours };
+  return { tours: data, isLoading, refetch };
 };
 
 export const useTour = (tourId: string | undefined) => {
-  const [tour, setTour] = useState<Tour | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const transform = useCallback((data: unknown) => transformTour(data), []);
 
-  useEffect(() => {
-    let isMounted = true;
-    
-    if (!tourId) { 
-      setIsLoading(false); 
-      return; 
-    }
-    
-    const fetchTour = async () => {
-      if (isMounted) setIsLoading(true);
-      try {
-        const { data, error: fetchError } = await supabase.from('tours').select('*').eq('id', tourId).single();
-        if (fetchError) throw fetchError;
-        if (data && isMounted) {
-          setTour({
-            ...data,
-            images: data.images || [],
-            includes: data.includes || [],
-            highlights: data.highlights || [],
-            itinerary: Array.isArray(data.itinerary) ? data.itinerary as unknown as ItineraryItem[] : [],
-            start_times: data.start_times || [],
-          });
-        }
-      } catch (err) {
-        if (isMounted) setError(err as Error);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-    fetchTour();
-    
-    return () => { isMounted = false; };
-  }, [tourId]);
+  const { data, isLoading, error } = useSupabaseSingle<Tour>({
+    table: 'tours',
+    id: tourId,
+    transform,
+  });
 
-  return { tour, isLoading, error };
+  return { tour: data, isLoading, error };
 };

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useMemo, useCallback } from 'react';
+import { useSupabaseQuery, useSupabaseSingle, QueryFilter } from './useSupabaseQuery';
 
 export interface Salon {
   id: string;
@@ -36,79 +36,47 @@ export interface SalonService {
 }
 
 export function useSalons(salonType?: string) {
-  const [salons, setSalons] = useState<Salon[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    let isMounted = true;
-    
-    const fetchSalons = async () => {
-      setIsLoading(true);
-      let query = supabase.from('salons').select('*').eq('is_active', true);
-      if (salonType && salonType !== 'all') {
-        query = query.eq('salon_type', salonType);
-      }
-      const { data, error } = await query.order('is_featured', { ascending: false });
-      if (isMounted) {
-        if (!error && data) setSalons(data as Salon[]);
-        setIsLoading(false);
-      }
-    };
-    fetchSalons();
-    
-    return () => { isMounted = false; };
+  const filters = useMemo((): QueryFilter[] => {
+    const result: QueryFilter[] = [{ column: 'is_active', value: true }];
+    if (salonType && salonType !== 'all') {
+      result.push({ column: 'salon_type', value: salonType });
+    }
+    return result;
   }, [salonType]);
 
-  return { salons, isLoading };
+  const { data, isLoading } = useSupabaseQuery<Salon>({
+    table: 'salons',
+    filters,
+    orderBy: { column: 'is_featured', ascending: false },
+  });
+
+  return { salons: data, isLoading };
 }
 
 export function useSalon(id: string) {
-  const [salon, setSalon] = useState<Salon | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const transform = useCallback((data: unknown) => data as Salon, []);
 
-  useEffect(() => {
-    let isMounted = true;
-    
-    if (!id) return;
-    const fetchSalon = async () => {
-      const { data, error } = await supabase.from('salons').select('*').eq('id', id).single();
-      if (isMounted) {
-        if (!error && data) setSalon(data as Salon);
-        setIsLoading(false);
-      }
-    };
-    fetchSalon();
-    
-    return () => { isMounted = false; };
-  }, [id]);
+  const { data, isLoading } = useSupabaseSingle<Salon>({
+    table: 'salons',
+    id,
+    transform,
+  });
 
-  return { salon, isLoading };
+  return { salon: data, isLoading };
 }
 
 export function useSalonServices(salonId: string) {
-  const [services, setServices] = useState<SalonService[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const filters = useMemo(() => [
+    { column: 'salon_id', value: salonId },
+    { column: 'is_active', value: true },
+  ], [salonId]);
 
-  useEffect(() => {
-    let isMounted = true;
-    
-    if (!salonId) return;
-    const fetchServices = async () => {
-      const { data, error } = await supabase
-        .from('salon_services')
-        .select('*')
-        .eq('salon_id', salonId)
-        .eq('is_active', true)
-        .order('is_popular', { ascending: false });
-      if (isMounted) {
-        if (!error && data) setServices(data as SalonService[]);
-        setIsLoading(false);
-      }
-    };
-    fetchServices();
-    
-    return () => { isMounted = false; };
-  }, [salonId]);
+  const { data, isLoading } = useSupabaseQuery<SalonService>({
+    table: 'salon_services',
+    filters,
+    orderBy: { column: 'is_popular', ascending: false },
+    enabled: !!salonId,
+  });
 
-  return { services, isLoading };
+  return { services: data, isLoading };
 }

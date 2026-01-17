@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useMemo, useCallback } from 'react';
+import { useSupabaseQuery, useSupabaseSingle, QueryFilter } from './useSupabaseQuery';
 
 export interface WaterActivity {
   id: string;
@@ -43,85 +43,51 @@ interface UseWaterActivitiesOptions {
   limit?: number;
 }
 
+const transformActivity = (activity: unknown): WaterActivity => {
+  const a = activity as Record<string, unknown>;
+  return {
+    ...a,
+    images: (a.images as string[]) || [],
+    includes: (a.includes as string[]) || [],
+    requirements: (a.requirements as string[]) || [],
+    available_times: (a.available_times as string[]) || [],
+    available_days: (a.available_days as string[]) || [],
+  } as WaterActivity;
+};
+
 export const useWaterActivities = (options: UseWaterActivitiesOptions = {}) => {
-  const [activities, setActivities] = useState<WaterActivity[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetchActivities = useCallback(async (isMounted: { current: boolean }) => {
-    if (isMounted.current) setIsLoading(true);
-    try {
-      let query = supabase.from('water_activities').select('*').eq('is_active', true);
-      if (options.category) query = query.eq('category', options.category);
-      if (options.featured) query = query.eq('is_featured', true);
-      query = query.order('rating', { ascending: false });
-      if (options.limit) query = query.limit(options.limit);
-
-      const { data } = await query;
-      if (isMounted.current) {
-        const formattedActivities: WaterActivity[] = (data || []).map(activity => ({
-          ...activity,
-          images: activity.images || [],
-          includes: activity.includes || [],
-          requirements: activity.requirements || [],
-          available_times: activity.available_times || [],
-          available_days: activity.available_days || [],
-        }));
-        setActivities(formattedActivities);
-      }
-    } catch (err) {
-      console.error('Error fetching water activities:', err);
-    } finally {
-      if (isMounted.current) setIsLoading(false);
+  const filters = useMemo((): QueryFilter[] => {
+    const result: QueryFilter[] = [{ column: 'is_active', value: true }];
+    if (options.category) {
+      result.push({ column: 'category', value: options.category });
     }
-  }, [options.category, options.featured, options.limit]);
+    if (options.featured) {
+      result.push({ column: 'is_featured', value: true });
+    }
+    return result;
+  }, [options.category, options.featured]);
 
-  useEffect(() => {
-    const isMounted = { current: true };
-    fetchActivities(isMounted);
-    return () => { isMounted.current = false; };
-  }, [fetchActivities]);
-  
-  return { activities, isLoading, refetch: () => fetchActivities({ current: true }) };
+  const transform = useCallback((data: unknown[]) => data.map(transformActivity), []);
+
+  const { data, isLoading, refetch } = useSupabaseQuery<WaterActivity>({
+    table: 'water_activities',
+    filters,
+    orderBy: { column: 'rating', ascending: false },
+    limit: options.limit,
+    transform,
+  });
+
+  return { activities: data, isLoading, refetch };
 };
 
 export const useWaterActivity = (activityId: string | undefined) => {
-  const [activity, setActivity] = useState<WaterActivity | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const transform = useCallback((data: unknown) => transformActivity(data), []);
 
-  useEffect(() => {
-    let isMounted = true;
-    
-    if (!activityId) { setIsLoading(false); return; }
-    const fetchActivity = async () => {
-      setIsLoading(true);
-      try {
-        const { data, error: fetchError } = await supabase
-          .from('water_activities')
-          .select('*')
-          .eq('id', activityId)
-          .single();
-        if (fetchError) throw fetchError;
-        if (isMounted && data) {
-          setActivity({
-            ...data,
-            images: data.images || [],
-            includes: data.includes || [],
-            requirements: data.requirements || [],
-            available_times: data.available_times || [],
-            available_days: data.available_days || [],
-          });
-        }
-      } catch (err) {
-        if (isMounted) setError(err as Error);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-    fetchActivity();
-    
-    return () => { isMounted = false; };
-  }, [activityId]);
+  const { data, isLoading, error } = useSupabaseSingle<WaterActivity>({
+    table: 'water_activities',
+    id: activityId,
+    transform,
+  });
 
-  return { activity, isLoading, error };
+  return { activity: data, isLoading, error };
 };

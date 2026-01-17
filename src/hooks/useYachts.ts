@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useMemo, useCallback } from 'react';
+import { useSupabaseQuery, useSupabaseSingle, QueryFilter } from './useSupabaseQuery';
 
 export interface Yacht {
   id: string;
@@ -34,51 +34,35 @@ export interface Yacht {
   cabins: number | null;
   bathrooms: number | null;
   has_crew: boolean | null;
+  provider_id?: string | null;
 }
 
 export function useYachts(yachtType?: string) {
-  const [yachts, setYachts] = useState<Yacht[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    let isMounted = true;
-    
-    const fetchYachts = async () => {
-      if (isMounted) setIsLoading(true);
-      let query = supabase.from('yachts').select('*').eq('is_active', true);
-      if (yachtType && yachtType !== 'all') {
-        query = query.eq('yacht_type', yachtType);
-      }
-      const { data, error } = await query.order('is_featured', { ascending: false });
-      if (!error && data && isMounted) setYachts(data as Yacht[]);
-      if (isMounted) setIsLoading(false);
-    };
-    fetchYachts();
-    
-    return () => { isMounted = false; };
+  const filters = useMemo((): QueryFilter[] => {
+    const result: QueryFilter[] = [{ column: 'is_active', value: true }];
+    if (yachtType && yachtType !== 'all') {
+      result.push({ column: 'yacht_type', value: yachtType });
+    }
+    return result;
   }, [yachtType]);
 
-  return { yachts, isLoading };
+  const { data, isLoading } = useSupabaseQuery<Yacht>({
+    table: 'yachts',
+    filters,
+    orderBy: { column: 'is_featured', ascending: false },
+  });
+
+  return { yachts: data, isLoading };
 }
 
 export function useYacht(id: string) {
-  const [yacht, setYacht] = useState<Yacht | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const transform = useCallback((data: unknown) => data as Yacht, []);
 
-  useEffect(() => {
-    let isMounted = true;
-    
-    if (!id) return;
-    
-    const fetchYacht = async () => {
-      const { data, error } = await supabase.from('yachts').select('*').eq('id', id).single();
-      if (!error && data && isMounted) setYacht(data as Yacht);
-      if (isMounted) setIsLoading(false);
-    };
-    fetchYacht();
-    
-    return () => { isMounted = false; };
-  }, [id]);
+  const { data, isLoading } = useSupabaseSingle<Yacht>({
+    table: 'yachts',
+    id,
+    transform,
+  });
 
-  return { yacht, isLoading };
+  return { yacht: data, isLoading };
 }

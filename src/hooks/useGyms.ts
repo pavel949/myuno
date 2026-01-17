@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useMemo, useCallback } from 'react';
+import { useSupabaseQuery, useSupabaseSingle, QueryFilter } from './useSupabaseQuery';
 
 export interface Gym {
   id: string;
@@ -26,51 +26,31 @@ export interface Gym {
 }
 
 export function useGyms(gymType?: string) {
-  const [gyms, setGyms] = useState<Gym[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    let isMounted = true;
-    
-    const fetchGyms = async () => {
-      setIsLoading(true);
-      let query = supabase.from('gyms').select('*').eq('is_active', true);
-      if (gymType && gymType !== 'all') {
-        query = query.eq('gym_type', gymType);
-      }
-      const { data, error } = await query.order('is_featured', { ascending: false });
-      if (isMounted) {
-        if (!error && data) setGyms(data as Gym[]);
-        setIsLoading(false);
-      }
-    };
-    fetchGyms();
-    
-    return () => { isMounted = false; };
+  const filters = useMemo((): QueryFilter[] => {
+    const result: QueryFilter[] = [{ column: 'is_active', value: true }];
+    if (gymType && gymType !== 'all') {
+      result.push({ column: 'gym_type', value: gymType });
+    }
+    return result;
   }, [gymType]);
 
-  return { gyms, isLoading };
+  const { data, isLoading } = useSupabaseQuery<Gym>({
+    table: 'gyms',
+    filters,
+    orderBy: { column: 'is_featured', ascending: false },
+  });
+
+  return { gyms: data, isLoading };
 }
 
 export function useGym(id: string) {
-  const [gym, setGym] = useState<Gym | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const transform = useCallback((data: unknown) => data as Gym, []);
 
-  useEffect(() => {
-    let isMounted = true;
-    
-    if (!id) return;
-    const fetchGym = async () => {
-      const { data, error } = await supabase.from('gyms').select('*').eq('id', id).single();
-      if (isMounted) {
-        if (!error && data) setGym(data as Gym);
-        setIsLoading(false);
-      }
-    };
-    fetchGym();
-    
-    return () => { isMounted = false; };
-  }, [id]);
+  const { data, isLoading } = useSupabaseSingle<Gym>({
+    table: 'gyms',
+    id,
+    transform,
+  });
 
-  return { gym, isLoading };
+  return { gym: data, isLoading };
 }
