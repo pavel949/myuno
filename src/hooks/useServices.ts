@@ -258,6 +258,8 @@ export const useCategories = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const loadCategories = async () => {
       try {
         // First get category IDs that have services
@@ -265,6 +267,8 @@ export const useCategories = () => {
           .from('services')
           .select('category_id')
           .eq('is_active', true);
+        
+        if (!isMounted) return;
         
         const categoryIds = [...new Set((serviceCategories || []).map(s => s.category_id).filter(Boolean))];
         
@@ -276,7 +280,7 @@ export const useCategories = () => {
             .eq('is_active', true)
             .in('slug', ['beauty-spa', 'restaurants', 'fitness', 'medical', 'transport', 'services'])
             .order('sort_order');
-          setCategories(data || []);
+          if (isMounted) setCategories(data || []);
         } else {
           // Get categories that have services
           const { data, error } = await supabase
@@ -287,16 +291,18 @@ export const useCategories = () => {
             .order('sort_order');
 
           if (error) throw error;
-          setCategories(data || []);
+          if (isMounted) setCategories(data || []);
         }
       } catch (err) {
         console.error('Error loading categories:', err);
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
 
     loadCategories();
+    
+    return () => { isMounted = false; };
   }, []);
 
   return { categories, isLoading };

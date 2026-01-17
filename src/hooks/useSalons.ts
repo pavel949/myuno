@@ -40,6 +40,8 @@ export function useSalons(salonType?: string) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchSalons = async () => {
       setIsLoading(true);
       let query = supabase.from('salons').select('*').eq('is_active', true);
@@ -47,10 +49,14 @@ export function useSalons(salonType?: string) {
         query = query.eq('salon_type', salonType);
       }
       const { data, error } = await query.order('is_featured', { ascending: false });
-      if (!error && data) setSalons(data as Salon[]);
-      setIsLoading(false);
+      if (isMounted) {
+        if (!error && data) setSalons(data as Salon[]);
+        setIsLoading(false);
+      }
     };
     fetchSalons();
+    
+    return () => { isMounted = false; };
   }, [salonType]);
 
   return { salons, isLoading };
@@ -61,13 +67,19 @@ export function useSalon(id: string) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     if (!id) return;
     const fetchSalon = async () => {
       const { data, error } = await supabase.from('salons').select('*').eq('id', id).single();
-      if (!error && data) setSalon(data as Salon);
-      setIsLoading(false);
+      if (isMounted) {
+        if (!error && data) setSalon(data as Salon);
+        setIsLoading(false);
+      }
     };
     fetchSalon();
+    
+    return () => { isMounted = false; };
   }, [id]);
 
   return { salon, isLoading };
@@ -78,6 +90,8 @@ export function useSalonServices(salonId: string) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     if (!salonId) return;
     const fetchServices = async () => {
       const { data, error } = await supabase
@@ -86,10 +100,14 @@ export function useSalonServices(salonId: string) {
         .eq('salon_id', salonId)
         .eq('is_active', true)
         .order('is_popular', { ascending: false });
-      if (!error && data) setServices(data as SalonService[]);
-      setIsLoading(false);
+      if (isMounted) {
+        if (!error && data) setServices(data as SalonService[]);
+        setIsLoading(false);
+      }
     };
     fetchServices();
+    
+    return () => { isMounted = false; };
   }, [salonId]);
 
   return { services, isLoading };

@@ -26,6 +26,8 @@ export function useStores(category?: string) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchStores = async () => {
       setIsLoading(true);
       let query = supabase.from('stores').select('*').eq('is_active', true);
@@ -33,10 +35,14 @@ export function useStores(category?: string) {
         query = query.eq('category', category);
       }
       const { data, error } = await query.order('is_featured', { ascending: false });
-      if (!error && data) setStores(data as Store[]);
-      setIsLoading(false);
+      if (isMounted) {
+        if (!error && data) setStores(data as Store[]);
+        setIsLoading(false);
+      }
     };
     fetchStores();
+    
+    return () => { isMounted = false; };
   }, [category]);
 
   return { stores, isLoading };
@@ -47,13 +53,19 @@ export function useStore(id: string) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     if (!id) return;
     const fetchStore = async () => {
       const { data, error } = await supabase.from('stores').select('*').eq('id', id).single();
-      if (!error && data) setStore(data as Store);
-      setIsLoading(false);
+      if (isMounted) {
+        if (!error && data) setStore(data as Store);
+        setIsLoading(false);
+      }
     };
     fetchStore();
+    
+    return () => { isMounted = false; };
   }, [id]);
 
   return { store, isLoading };
