@@ -44,7 +44,7 @@ export default function FitnessBooking() {
 
   // Auth redirect
   if (!authLoading && !user) {
-    navigate('/auth', { state: { from: `/fitness/${id}/book` } });
+    navigate('/auth', { state: { from: `/fitness/booking/${id}` } });
     return null;
   }
 

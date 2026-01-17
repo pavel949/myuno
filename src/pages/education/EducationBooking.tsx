@@ -60,7 +60,7 @@ export default function EducationBooking() {
 
   // Auth redirect
   if (!authLoading && !user) {
-    navigate('/auth', { state: { from: `/education/${id}/book` } });
+    navigate('/auth', { state: { from: `/education/booking/${id}` } });
     return null;
   }
 

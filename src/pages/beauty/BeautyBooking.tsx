@@ -41,7 +41,7 @@ export default function BeautyBooking() {
 
   // Auth redirect
   if (!authLoading && !user) {
-    navigate('/auth', { state: { from: `/beauty/${id}/book` } });
+    navigate('/auth', { state: { from: `/beauty/booking/${id}` } });
     return null;
   }
 
