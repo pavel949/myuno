@@ -58,17 +58,27 @@ export function AddressPickerInput({
 
   // Fetch Mapbox token
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchToken = async () => {
       try {
         const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+        if (!isMounted) return;
+        
         if (data?.token) {
           setMapboxToken(data.token);
         }
       } catch (err) {
-        console.error('Failed to fetch mapbox token:', err);
+        if (isMounted) {
+          console.error('Failed to fetch mapbox token:', err);
+        }
       }
     };
     fetchToken();
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Initialize map when dialog opens

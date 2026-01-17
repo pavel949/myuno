@@ -42,9 +42,13 @@ const SalonMap: React.FC<SalonMapProps> = ({
 
   // Fetch Mapbox token from edge function
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchToken = async () => {
       try {
         const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+        if (!isMounted) return;
+        
         if (error) throw error;
         if (data?.token) {
           setMapboxToken(data.token);
@@ -52,13 +56,21 @@ const SalonMap: React.FC<SalonMapProps> = ({
           throw new Error('No token received');
         }
       } catch (err) {
-        console.error('Failed to fetch Mapbox token:', err);
-        setError('Failed to load map');
+        if (isMounted) {
+          console.error('Failed to fetch Mapbox token:', err);
+          setError('Failed to load map');
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
     fetchToken();
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Calculate distance between two points (Haversine formula)

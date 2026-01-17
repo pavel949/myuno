@@ -38,17 +38,25 @@ export default function RestaurantMap() {
   });
 
   useEffect(() => {
+    let isMounted = true;
+    
     const getToken = async () => {
       try {
         const { data } = await supabase.functions.invoke('get-mapbox-token');
-        if (data?.token) {
+        if (isMounted && data?.token) {
           setMapboxToken(data.token);
         }
       } catch (error) {
-        console.error('Error fetching mapbox token:', error);
+        if (isMounted) {
+          console.error('Error fetching mapbox token:', error);
+        }
       }
     };
     getToken();
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
