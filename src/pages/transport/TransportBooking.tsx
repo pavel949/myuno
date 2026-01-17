@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -66,9 +66,14 @@ export default function TransportBooking() {
     );
   }
 
-  // Auth redirect - use useEffect pattern to avoid render-time navigation
+  // Auth redirect
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/auth', { state: { from: `/transport/booking/${id}` } });
+    }
+  }, [authLoading, user, navigate, id]);
+
   if (!user) {
-    navigate('/auth', { state: { from: `/transport/booking/${id}` } });
     return null;
   }
 

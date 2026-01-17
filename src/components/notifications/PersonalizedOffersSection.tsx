@@ -57,8 +57,12 @@ export function PersonalizedOffersSection() {
   const { history } = useViewHistory();
   const [offers, setOffers] = useState<PersonalizedOffer[]>([]);
   const [dismissedOffers, setDismissedOffers] = useState<string[]>(() => {
-    const saved = localStorage.getItem('myuno-dismissed-offers');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('myuno-dismissed-offers');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
   });
 
   useEffect(() => {
