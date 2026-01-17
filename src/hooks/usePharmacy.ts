@@ -53,8 +53,8 @@ export const usePharmacies = () => {
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchPharmacies = useCallback(async () => {
-    setIsLoading(true);
+  const fetchPharmacies = useCallback(async (isMounted: { current: boolean }) => {
+    if (isMounted.current) setIsLoading(true);
     try {
       const { data } = await supabase
         .from('pharmacies')
@@ -62,21 +62,28 @@ export const usePharmacies = () => {
         .eq('is_active', true)
         .order('rating', { ascending: false });
       
-      const formatted: Pharmacy[] = (data || []).map(p => ({
-        ...p,
-        images: p.images || [],
-        working_hours: (p.working_hours as Record<string, string>) || {},
-      }));
-      setPharmacies(formatted);
+      if (isMounted.current) {
+        const formatted: Pharmacy[] = (data || []).map(p => ({
+          ...p,
+          images: p.images || [],
+          working_hours: (p.working_hours as Record<string, string>) || {},
+        }));
+        setPharmacies(formatted);
+      }
     } catch (err) {
       console.error('Error fetching pharmacies:', err);
     } finally {
-      setIsLoading(false);
+      if (isMounted.current) setIsLoading(false);
     }
   }, []);
 
-  useEffect(() => { fetchPharmacies(); }, [fetchPharmacies]);
-  return { pharmacies, isLoading, refetch: fetchPharmacies };
+  useEffect(() => {
+    const isMounted = { current: true };
+    fetchPharmacies(isMounted);
+    return () => { isMounted.current = false; };
+  }, [fetchPharmacies]);
+  
+  return { pharmacies, isLoading, refetch: () => fetchPharmacies({ current: true }) };
 };
 
 export const usePharmacy = (pharmacyId: string | undefined) => {
@@ -84,6 +91,8 @@ export const usePharmacy = (pharmacyId: string | undefined) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     if (!pharmacyId) { setIsLoading(false); return; }
     const fetch = async () => {
       setIsLoading(true);
@@ -93,7 +102,7 @@ export const usePharmacy = (pharmacyId: string | undefined) => {
           .select('*')
           .eq('id', pharmacyId)
           .single();
-        if (data) {
+        if (isMounted && data) {
           setPharmacy({
             ...data,
             images: data.images || [],
@@ -103,10 +112,12 @@ export const usePharmacy = (pharmacyId: string | undefined) => {
       } catch (err) {
         console.error('Error fetching pharmacy:', err);
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
     fetch();
+    
+    return () => { isMounted = false; };
   }, [pharmacyId]);
 
   return { pharmacy, isLoading };
@@ -117,6 +128,8 @@ export const usePharmacyProducts = (pharmacyId: string | undefined, category?: s
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     if (!pharmacyId) { setIsLoading(false); return; }
     const fetch = async () => {
       setIsLoading(true);
@@ -132,14 +145,16 @@ export const usePharmacyProducts = (pharmacyId: string | undefined, category?: s
         }
         
         const { data } = await query.order('name_en');
-        setProducts(data || []);
+        if (isMounted) setProducts(data || []);
       } catch (err) {
         console.error('Error fetching products:', err);
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
     fetch();
+    
+    return () => { isMounted = false; };
   }, [pharmacyId, category]);
 
   return { products, isLoading };

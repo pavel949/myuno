@@ -13,6 +13,7 @@ export function useCashback() {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchSettings = useCallback(async () => {
+    setIsLoading(true);
     try {
       const { data, error } = await supabase
         .from('cashback_settings')
@@ -29,34 +30,9 @@ export function useCashback() {
   }, []);
 
   useEffect(() => {
-    let isMounted = true;
-    
-    const loadSettings = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('cashback_settings')
-          .select('category, percentage, min_order_amount, max_cashback_amount')
-          .eq('is_active', true);
+    fetchSettings();
+  }, [fetchSettings]);
 
-        if (error) throw error;
-        if (isMounted) {
-          setSettings(data || []);
-        }
-      } catch (error) {
-        console.error('Error fetching cashback settings:', error);
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-    
-    loadSettings();
-    
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   const getCashbackPercentage = useCallback((category?: string): number => {
     // Find category-specific or default
