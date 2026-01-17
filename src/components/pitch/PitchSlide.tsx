@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -49,23 +49,26 @@ interface AnimatedSlideProps {
   dark?: boolean;
 }
 
-export function AnimatedSlide({ children, direction, className, dark = true }: AnimatedSlideProps) {
-  return (
-    <motion.div
-      custom={direction}
-      variants={slideVariants}
-      initial="enter"
-      animate="center"
-      exit="exit"
-      transition={transition}
-      className="absolute inset-0"
-    >
-      <PitchSlide className={className} dark={dark}>
-        {children}
-      </PitchSlide>
-    </motion.div>
-  );
-}
+export const AnimatedSlide = forwardRef<HTMLDivElement, AnimatedSlideProps>(
+  function AnimatedSlide({ children, direction, className, dark = true }, ref) {
+    return (
+      <motion.div
+        ref={ref}
+        custom={direction}
+        variants={slideVariants}
+        initial="enter"
+        animate="center"
+        exit="exit"
+        transition={transition}
+        className="absolute inset-0"
+      >
+        <PitchSlide className={className} dark={dark}>
+          {children}
+        </PitchSlide>
+      </motion.div>
+    );
+  }
+);
 
 export function SlideTitle({ children, className }: { children: React.ReactNode; className?: string }) {
   return (

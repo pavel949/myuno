@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Search, SlidersHorizontal, X, Sparkles, UtensilsCrossed, 
@@ -72,10 +72,13 @@ export default function Discover() {
   });
 
   // Debounce search
+  const searchTimerRef = useRef<NodeJS.Timeout>();
   const handleSearchChange = useCallback((value: string) => {
     setSearchQuery(value);
-    const timer = setTimeout(() => setDebouncedSearch(value), 300);
-    return () => clearTimeout(timer);
+    if (searchTimerRef.current) {
+      clearTimeout(searchTimerRef.current);
+    }
+    searchTimerRef.current = setTimeout(() => setDebouncedSearch(value), 300);
   }, []);
 
   const handleRefresh = useCallback(async () => {

@@ -121,7 +121,8 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
 
   useEffect(() => {
     if (open && inputRef.current) {
-      setTimeout(() => inputRef.current?.focus(), 100);
+      const timer = setTimeout(() => inputRef.current?.focus(), 100);
+      return () => clearTimeout(timer);
     }
   }, [open]);
 
