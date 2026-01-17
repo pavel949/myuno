@@ -112,8 +112,12 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
   const [query, setQuery] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const [recentSearches, setRecentSearches] = useState<string[]>(() => {
-    const saved = localStorage.getItem('myuno-recent-searches');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('myuno-recent-searches');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
   });
 
   // Use real database search

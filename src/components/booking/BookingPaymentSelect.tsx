@@ -42,18 +42,26 @@ export const BookingPaymentSelect = forwardRef<HTMLDivElement, BookingPaymentSel
   const [loadingWallet, setLoadingWallet] = useState(false);
 
   useEffect(() => {
-    if (showWallet && user) {
-      setLoadingWallet(true);
-      supabase
-        .from('wallets')
-        .select('balance')
-        .eq('user_id', user.id)
-        .single()
-        .then(({ data }) => {
+    if (!showWallet || !user) return;
+    
+    let isMounted = true;
+    setLoadingWallet(true);
+    
+    supabase
+      .from('wallets')
+      .select('balance')
+      .eq('user_id', user.id)
+      .single()
+      .then(({ data }) => {
+        if (isMounted) {
           setWalletBalance(data?.balance ?? 0);
           setLoadingWallet(false);
-        });
-    }
+        }
+      });
+    
+    return () => {
+      isMounted = false;
+    };
   }, [user, showWallet]);
 
   const currencySymbol = currency === 'THB' ? '฿' : currency === 'USD' ? '$' : currency === 'EUR' ? '€' : '₽';

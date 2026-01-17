@@ -42,7 +42,12 @@ serve(async (req) => {
     } else {
       // For development without webhook secret
       console.warn("No STRIPE_WEBHOOK_SECRET set, parsing event without verification");
-      event = JSON.parse(body);
+      try {
+        event = JSON.parse(body);
+      } catch (parseErr) {
+        console.error("Failed to parse webhook body:", parseErr);
+        throw new Error("Invalid JSON payload");
+      }
     }
 
     console.log("Received Stripe event:", event.type, event.id);
