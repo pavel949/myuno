@@ -251,6 +251,7 @@ export function useRealtimeStats() {
 
 // Hook for top providers
 export function useTopProviders(limit: number = 10) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [providers, setProviders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -261,14 +262,7 @@ export function useTopProviders(limit: number = 10) {
       try {
         const { data, error } = await supabase
           .from('providers')
-          .select(`
-            id,
-            business_name,
-            business_category,
-            rating,
-            review_count,
-            is_verified
-          `)
+          .select('*')
           .eq('is_active', true)
           .order('rating', { ascending: false })
           .limit(limit);

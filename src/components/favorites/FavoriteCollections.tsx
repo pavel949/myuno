@@ -57,6 +57,7 @@ const iconMap: Record<string, React.ElementType> = {
 };
 
 interface FavoriteCollectionsProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   favorites: any[];
   onSelectCollection: (id: string) => void;
   selectedCollection: string;

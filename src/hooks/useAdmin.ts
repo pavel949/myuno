@@ -2,9 +2,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-// Use 'any' to match flexible DB schema - admin tools handle display logic
-export type Provider = any;
-export type Service = any;
+// Flexible types to match DB schema - admin tools handle display logic
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type Provider = Record<string, any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type Service = Record<string, any>;
 
 export function useAdminCheck() {
   const { user } = useAuth();
@@ -191,8 +193,9 @@ export function useAdminServices(providerId?: string) {
   return { services, isLoading, createService, updateService, deleteService, refetch: fetchServices };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useAdminCategories() {
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<Record<string, any>[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
