@@ -1,6 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSupabaseCRUD } from './useSupabaseCRUD';
 
 export interface VendorSalon {
   id: string;
@@ -34,88 +32,17 @@ export interface VendorSalon {
 }
 
 export function useVendorSalons(providerId?: string) {
-  const { user } = useAuth();
-  const [salons, setSalons] = useState<VendorSalon[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { items, isLoading, create, update, remove, refetch } = useSupabaseCRUD<VendorSalon>({
+    table: 'salons',
+    providerId,
+  });
 
-  const fetchSalons = useCallback(async () => {
-    if (!user) return;
-    setIsLoading(true);
-    
-    let query = supabase.from('salons').select('*');
-    
-    if (providerId) {
-      query = query.eq('provider_id', providerId);
-    }
-    
-    const { data, error } = await query.order('created_at', { ascending: false });
-    
-    if (!error && data) setSalons(data as VendorSalon[]);
-    setIsLoading(false);
-  }, [user, providerId]);
-
-  useEffect(() => {
-    let isMounted = true;
-    
-    const loadData = async () => {
-      if (!user) return;
-      if (isMounted) setIsLoading(true);
-      
-      let query = supabase.from('salons').select('*');
-      
-      if (providerId) {
-        query = query.eq('provider_id', providerId);
-      }
-      
-      const { data, error } = await query.order('created_at', { ascending: false });
-      
-      if (isMounted) {
-        if (!error && data) setSalons(data as VendorSalon[]);
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
-    return () => { isMounted = false; };
-  }, [user, providerId]);
-
-  const createSalon = async (salonData: Partial<VendorSalon> & { provider_id?: string }) => {
-    if (!user) return { error: new Error('Not authenticated') };
-    const insertData = { ...salonData };
-    if (providerId) {
-      insertData.provider_id = providerId;
-    }
-    const { data, error } = await supabase
-      .from('salons')
-      .insert(insertData as any)
-      .select()
-      .single();
-    
-    if (!error) await fetchSalons();
-    return { data, error };
+  return {
+    salons: items,
+    isLoading,
+    createSalon: create,
+    updateSalon: update,
+    deleteSalon: remove,
+    refetch,
   };
-
-  const updateSalon = async (id: string, salonData: Partial<VendorSalon>) => {
-    const { data, error } = await supabase
-      .from('salons')
-      .update(salonData as any)
-      .eq('id', id)
-      .select()
-      .single();
-    
-    if (!error) await fetchSalons();
-    return { data, error };
-  };
-
-  const deleteSalon = async (id: string) => {
-    const { error } = await supabase
-      .from('salons')
-      .delete()
-      .eq('id', id);
-    
-    if (!error) await fetchSalons();
-    return { error };
-  };
-
-  return { salons, isLoading, createSalon, updateSalon, deleteSalon, refetch: fetchSalons };
 }
