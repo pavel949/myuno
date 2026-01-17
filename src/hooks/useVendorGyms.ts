@@ -1,6 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSupabaseCRUD } from './useSupabaseCRUD';
 
 export interface VendorGym {
   id: string;
@@ -36,88 +34,17 @@ export interface VendorGym {
 }
 
 export function useVendorGyms(providerId?: string) {
-  const { user } = useAuth();
-  const [gyms, setGyms] = useState<VendorGym[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { items, isLoading, create, update, remove, refetch } = useSupabaseCRUD<VendorGym>({
+    table: 'gyms',
+    providerId,
+  });
 
-  const fetchGyms = useCallback(async () => {
-    if (!user) return;
-    setIsLoading(true);
-    
-    let query = supabase.from('gyms').select('*');
-    
-    if (providerId) {
-      query = query.eq('provider_id', providerId);
-    }
-    
-    const { data, error } = await query.order('created_at', { ascending: false });
-    
-    if (!error && data) setGyms(data as VendorGym[]);
-    setIsLoading(false);
-  }, [user, providerId]);
-
-  useEffect(() => {
-    let isMounted = true;
-    
-    const loadData = async () => {
-      if (!user) return;
-      if (isMounted) setIsLoading(true);
-      
-      let query = supabase.from('gyms').select('*');
-      
-      if (providerId) {
-        query = query.eq('provider_id', providerId);
-      }
-      
-      const { data, error } = await query.order('created_at', { ascending: false });
-      
-      if (isMounted) {
-        if (!error && data) setGyms(data as VendorGym[]);
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
-    return () => { isMounted = false; };
-  }, [user, providerId]);
-
-  const createGym = async (gymData: Partial<VendorGym> & { provider_id?: string }) => {
-    if (!user) return { error: new Error('Not authenticated') };
-    const insertData = { ...gymData };
-    if (providerId) {
-      insertData.provider_id = providerId;
-    }
-    const { data, error } = await supabase
-      .from('gyms')
-      .insert(insertData as any)
-      .select()
-      .single();
-    
-    if (!error) await fetchGyms();
-    return { data, error };
+  return {
+    gyms: items,
+    isLoading,
+    createGym: create,
+    updateGym: update,
+    deleteGym: remove,
+    refetch,
   };
-
-  const updateGym = async (id: string, gymData: Partial<VendorGym>) => {
-    const { data, error } = await supabase
-      .from('gyms')
-      .update(gymData as any)
-      .eq('id', id)
-      .select()
-      .single();
-    
-    if (!error) await fetchGyms();
-    return { data, error };
-  };
-
-  const deleteGym = async (id: string) => {
-    const { error } = await supabase
-      .from('gyms')
-      .delete()
-      .eq('id', id);
-    
-    if (!error) await fetchGyms();
-    return { error };
-  };
-
-  return { gyms, isLoading, createGym, updateGym, deleteGym, refetch: fetchGyms };
 }

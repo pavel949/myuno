@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, forwardRef } from 'react';
+import { motion, AnimatePresence, HTMLMotionProps } from 'framer-motion';
 import { 
   MapPin, Wallet, ChevronRight, Check, Shield,
   Sparkles, Home, Car, UtensilsCrossed, Stethoscope, Scale
@@ -8,6 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
+
+// ForwardRef wrapper for motion.div to work with AnimatePresence inside Radix portals
+const MotionDiv = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>((props, ref) => (
+  <motion.div ref={ref} {...props} />
+));
+MotionDiv.displayName = 'MotionDiv';
 
 interface OnboardingModalProps {
   open: boolean;
@@ -184,13 +190,13 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
             </>
           )}
 
-          <AnimatePresence mode="wait">
-            <motion.div
+          <AnimatePresence mode="wait" initial={false}>
+            <MotionDiv
               key={currentStep}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
               className="p-6 relative z-10 flex-1 flex flex-col"
             >
               {/* Step indicator */}
@@ -495,7 +501,7 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
                   <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
-            </motion.div>
+            </MotionDiv>
           </AnimatePresence>
         </div>
       </DialogContent>
