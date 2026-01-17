@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, forwardRef } from 'react';
 import { cn } from '@/lib/utils';
 
 interface SectionCardProps {
@@ -7,17 +7,24 @@ interface SectionCardProps {
   noPadding?: boolean;
 }
 
-export function SectionCard({ children, className, noPadding = false }: SectionCardProps) {
-  return (
-    <div className={cn(
-      "bg-card rounded-2xl border border-border",
-      !noPadding && "p-4",
-      className
-    )}>
-      {children}
-    </div>
-  );
-}
+export const SectionCard = forwardRef<HTMLDivElement, SectionCardProps>(
+  ({ children, className, noPadding = false }, ref) => {
+    return (
+      <div 
+        ref={ref}
+        className={cn(
+          "bg-card rounded-2xl border border-border",
+          !noPadding && "p-4",
+          className
+        )}
+      >
+        {children}
+      </div>
+    );
+  }
+);
+
+SectionCard.displayName = 'SectionCard';
 
 interface SectionTitleProps {
   children: ReactNode;

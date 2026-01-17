@@ -58,6 +58,8 @@ export function useInsuranceProviders(options: UseInsuranceProvidersOptions = {}
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchProviders = async () => {
       setIsLoading(true);
       let query = supabase
@@ -73,21 +75,25 @@ export function useInsuranceProviders(options: UseInsuranceProvidersOptions = {}
 
       const { data, error } = await query;
 
-      if (!error && data) {
-        let filtered = data as InsuranceProvider[];
-        if (options.searchQuery) {
-          const q = options.searchQuery.toLowerCase();
-          filtered = filtered.filter(
-            (p) =>
-              p.name_en.toLowerCase().includes(q) ||
-              p.name_ru.toLowerCase().includes(q)
-          );
+      if (isMounted) {
+        if (!error && data) {
+          let filtered = data as InsuranceProvider[];
+          if (options.searchQuery) {
+            const q = options.searchQuery.toLowerCase();
+            filtered = filtered.filter(
+              (p) =>
+                p.name_en.toLowerCase().includes(q) ||
+                p.name_ru.toLowerCase().includes(q)
+            );
+          }
+          setProviders(filtered);
         }
-        setProviders(filtered);
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
     fetchProviders();
+    
+    return () => { isMounted = false; };
   }, [options.insuranceType, options.searchQuery]);
 
   return { providers, isLoading };
@@ -98,6 +104,8 @@ export function useInsuranceProvider(id: string) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     if (!id) return;
     const fetchProvider = async () => {
       const { data, error } = await supabase
@@ -105,10 +113,14 @@ export function useInsuranceProvider(id: string) {
         .select('*')
         .eq('id', id)
         .single();
-      if (!error && data) setProvider(data as InsuranceProvider);
-      setIsLoading(false);
+      if (isMounted) {
+        if (!error && data) setProvider(data as InsuranceProvider);
+        setIsLoading(false);
+      }
     };
     fetchProvider();
+    
+    return () => { isMounted = false; };
   }, [id]);
 
   return { provider, isLoading };
@@ -119,6 +131,8 @@ export function useInsurancePlans(providerId?: string, insuranceType?: string) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchPlans = async () => {
       setIsLoading(true);
       let query = supabase
@@ -137,18 +151,22 @@ export function useInsurancePlans(providerId?: string, insuranceType?: string) {
       }
 
       const { data, error } = await query;
-      if (!error && data) {
-        setPlans(
-          data.map((p: any) => ({
-            ...p,
-            features: p.features || null,
-            exclusions: p.exclusions || null,
-          })) as InsurancePlan[]
-        );
+      if (isMounted) {
+        if (!error && data) {
+          setPlans(
+            data.map((p: any) => ({
+              ...p,
+              features: p.features || null,
+              exclusions: p.exclusions || null,
+            })) as InsurancePlan[]
+          );
+        }
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
     fetchPlans();
+    
+    return () => { isMounted = false; };
   }, [providerId, insuranceType]);
 
   return { plans, isLoading };
