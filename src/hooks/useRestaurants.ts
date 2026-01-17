@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useMemo, useCallback, useState, useEffect } from 'react';
+import { useSupabaseQuery, useSupabaseSingle, QueryFilter } from './useSupabaseQuery';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Restaurant {
@@ -72,175 +73,99 @@ interface UseRestaurantsOptions {
 }
 
 export function useRestaurants(options: UseRestaurantsOptions = {}) {
-  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
-  const fetchRestaurants = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      let query = supabase
-        .from('restaurants')
-        .select('*')
-        .eq('is_active', true);
-
-      if (options.cuisine && options.cuisine !== 'all') {
-        query = query.eq('cuisine', options.cuisine);
-      }
-      if (options.district && options.district !== 'all') {
-        query = query.eq('district', options.district);
-      }
-      if (options.searchQuery) {
-        query = query.or(`name_en.ilike.%${options.searchQuery}%,name_ru.ilike.%${options.searchQuery}%`);
-      }
-      if (options.featured) {
-        query = query.eq('is_featured', true);
-      }
-      if (options.deliveryOnly) {
-        query = query.eq('delivery_available', true);
-      }
-
-      query = query.order('rating', { ascending: false });
-
-      if (options.limit) {
-        query = query.limit(options.limit);
-      }
-
-      const { data, error: fetchError } = await query;
-
-      if (fetchError) throw fetchError;
-      setRestaurants((data || []) as Restaurant[]);
-    } catch (err) {
-      console.error('Error fetching restaurants:', err);
-      setError(err as Error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [options.cuisine, options.district, options.searchQuery, options.featured, options.deliveryOnly, options.limit]);
-
-  useEffect(() => {
-    let isMounted = true;
+  const filters = useMemo((): QueryFilter[] => {
+    const result: QueryFilter[] = [{ column: 'is_active', value: true }];
     
-    const loadData = async () => {
-      if (isMounted) {
-        setIsLoading(true);
-        setError(null);
-      }
+    if (options.cuisine && options.cuisine !== 'all') {
+      result.push({ column: 'cuisine', value: options.cuisine });
+    }
+    if (options.district && options.district !== 'all') {
+      result.push({ column: 'district', value: options.district });
+    }
+    if (options.featured) {
+      result.push({ column: 'is_featured', value: true });
+    }
+    if (options.deliveryOnly) {
+      result.push({ column: 'delivery_available', value: true });
+    }
+    if (options.searchQuery) {
+      result.push({
+        column: '',
+        value: `name_en.ilike.%${options.searchQuery}%,name_ru.ilike.%${options.searchQuery}%`,
+        operator: 'or',
+      });
+    }
+    
+    return result;
+  }, [options.cuisine, options.district, options.searchQuery, options.featured, options.deliveryOnly]);
 
-      try {
-        let query = supabase
-          .from('restaurants')
-          .select('*')
-          .eq('is_active', true);
+  const { data, isLoading, error, refetch } = useSupabaseQuery<Restaurant>({
+    table: 'restaurants',
+    filters,
+    orderBy: { column: 'rating', ascending: false },
+    limit: options.limit,
+  });
 
-        if (options.cuisine && options.cuisine !== 'all') {
-          query = query.eq('cuisine', options.cuisine);
-        }
-        if (options.district && options.district !== 'all') {
-          query = query.eq('district', options.district);
-        }
-        if (options.searchQuery) {
-          query = query.or(`name_en.ilike.%${options.searchQuery}%,name_ru.ilike.%${options.searchQuery}%`);
-        }
-        if (options.featured) {
-          query = query.eq('is_featured', true);
-        }
-        if (options.deliveryOnly) {
-          query = query.eq('delivery_available', true);
-        }
-
-        query = query.order('rating', { ascending: false });
-
-        if (options.limit) {
-          query = query.limit(options.limit);
-        }
-
-        const { data, error: fetchError } = await query;
-
-        if (fetchError) throw fetchError;
-        if (isMounted) setRestaurants((data || []) as Restaurant[]);
-      } catch (err) {
-        console.error('Error fetching restaurants:', err);
-        if (isMounted) setError(err as Error);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-
-    loadData();
-    return () => { isMounted = false; };
-  }, [options.cuisine, options.district, options.searchQuery, options.featured, options.deliveryOnly, options.limit]);
-
-  return { restaurants, isLoading, error, refetch: fetchRestaurants };
+  return { restaurants: data, isLoading, error, refetch };
 }
 
 export function useRestaurant(id: string | undefined) {
-  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [menuCategories, setMenuCategories] = useState<MenuCategory[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [menuLoading, setMenuLoading] = useState(false);
 
+  const transform = useCallback((data: unknown) => data as Restaurant, []);
+  
+  const { data: restaurant, isLoading: restaurantLoading, error } = useSupabaseSingle<Restaurant>({
+    table: 'restaurants',
+    id,
+    transform,
+  });
+
+  // Fetch menu data when restaurant is loaded
   useEffect(() => {
     let isMounted = true;
     
-    if (!id) {
-      setRestaurant(null);
-      setIsLoading(false);
-      return;
-    }
+    if (!id) return;
 
-    const fetchRestaurant = async () => {
-      setIsLoading(true);
-      setError(null);
-
+    const fetchMenuData = async () => {
+      setMenuLoading(true);
       try {
-        // Fetch restaurant
-        const { data: restaurantData, error: restaurantError } = await supabase
-          .from('restaurants')
-          .select('*')
-          .eq('id', id)
-          .single();
+        const [categoriesResult, itemsResult] = await Promise.all([
+          supabase
+            .from('restaurant_menu_categories')
+            .select('*')
+            .eq('restaurant_id', id)
+            .eq('is_active', true)
+            .order('sort_order', { ascending: true }),
+          supabase
+            .from('restaurant_menu_items')
+            .select('*')
+            .eq('restaurant_id', id)
+            .eq('is_active', true)
+            .order('is_popular', { ascending: false }),
+        ]);
 
-        if (restaurantError) throw restaurantError;
-        if (!isMounted) return;
-        setRestaurant(restaurantData as Restaurant);
-
-        // Fetch menu categories
-        const { data: categoriesData } = await supabase
-          .from('restaurant_menu_categories')
-          .select('*')
-          .eq('restaurant_id', id)
-          .eq('is_active', true)
-          .order('sort_order', { ascending: true });
-
-        if (!isMounted) return;
-        setMenuCategories((categoriesData || []) as MenuCategory[]);
-
-        // Fetch menu items
-        const { data: itemsData } = await supabase
-          .from('restaurant_menu_items')
-          .select('*')
-          .eq('restaurant_id', id)
-          .eq('is_active', true)
-          .order('is_popular', { ascending: false });
-
-        if (!isMounted) return;
-        setMenuItems((itemsData || []) as MenuItem[]);
+        if (isMounted) {
+          setMenuCategories((categoriesResult.data || []) as MenuCategory[]);
+          setMenuItems((itemsResult.data || []) as MenuItem[]);
+        }
       } catch (err) {
-        console.error('Error fetching restaurant:', err);
-        if (isMounted) setError(err as Error);
+        console.error('Error fetching menu data:', err);
       } finally {
-        if (isMounted) setIsLoading(false);
+        if (isMounted) setMenuLoading(false);
       }
     };
 
-    fetchRestaurant();
-    
+    fetchMenuData();
     return () => { isMounted = false; };
   }, [id]);
 
-  return { restaurant, menuCategories, menuItems, isLoading, error };
+  return { 
+    restaurant, 
+    menuCategories, 
+    menuItems, 
+    isLoading: restaurantLoading || menuLoading, 
+    error 
+  };
 }

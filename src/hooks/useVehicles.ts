@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useMemo, useCallback } from 'react';
+import { useSupabaseQuery, useSupabaseSingle, QueryFilter } from './useSupabaseQuery';
 
 export interface Vehicle {
   id: string;
@@ -39,51 +39,31 @@ export interface Vehicle {
 }
 
 export function useVehicles(vehicleType?: string) {
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    let isMounted = true;
-    
-    const fetchVehicles = async () => {
-      setIsLoading(true);
-      let query = supabase.from('vehicles').select('*').eq('is_active', true);
-      if (vehicleType && vehicleType !== 'all') {
-        query = query.eq('vehicle_type', vehicleType);
-      }
-      const { data, error } = await query.order('is_featured', { ascending: false });
-      if (isMounted) {
-        if (!error && data) setVehicles(data as Vehicle[]);
-        setIsLoading(false);
-      }
-    };
-    fetchVehicles();
-    
-    return () => { isMounted = false; };
+  const filters = useMemo((): QueryFilter[] => {
+    const result: QueryFilter[] = [{ column: 'is_active', value: true }];
+    if (vehicleType && vehicleType !== 'all') {
+      result.push({ column: 'vehicle_type', value: vehicleType });
+    }
+    return result;
   }, [vehicleType]);
 
-  return { vehicles, isLoading };
+  const { data, isLoading } = useSupabaseQuery<Vehicle>({
+    table: 'vehicles',
+    filters,
+    orderBy: { column: 'is_featured', ascending: false },
+  });
+
+  return { vehicles: data, isLoading };
 }
 
 export function useVehicle(id: string) {
-  const [vehicle, setVehicle] = useState<Vehicle | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const transform = useCallback((data: unknown) => data as Vehicle, []);
 
-  useEffect(() => {
-    let isMounted = true;
-    
-    if (!id) return;
-    const fetchVehicle = async () => {
-      const { data, error } = await supabase.from('vehicles').select('*').eq('id', id).single();
-      if (isMounted) {
-        if (!error && data) setVehicle(data as Vehicle);
-        setIsLoading(false);
-      }
-    };
-    fetchVehicle();
-    
-    return () => { isMounted = false; };
-  }, [id]);
+  const { data, isLoading } = useSupabaseSingle<Vehicle>({
+    table: 'vehicles',
+    id,
+    transform,
+  });
 
-  return { vehicle, isLoading };
+  return { vehicle: data, isLoading };
 }

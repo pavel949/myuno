@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useMemo, useCallback } from 'react';
+import { useSupabaseQuery, useSupabaseSingle, QueryFilter } from './useSupabaseQuery';
 
 interface IncludeExcludeItem {
   en: string;
@@ -51,85 +51,50 @@ interface UseEventsOptions {
   limit?: number;
 }
 
+const transformEvent = (event: unknown): Event => {
+  const e = event as Record<string, unknown>;
+  return {
+    ...e,
+    images: (e.images as string[]) || [],
+    includes: Array.isArray(e.includes) ? e.includes as IncludeExcludeItem[] : [],
+    excludes: Array.isArray(e.excludes) ? e.excludes as IncludeExcludeItem[] : [],
+    itinerary: Array.isArray(e.itinerary) ? e.itinerary as ItineraryItem[] : [],
+  } as Event;
+};
+
 export const useEvents = (options: UseEventsOptions = {}) => {
-  const [events, setEvents] = useState<Event[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetchEvents = useCallback(async (isMounted: { current: boolean }) => {
-    if (isMounted.current) setIsLoading(true);
-    try {
-      let query = supabase.from('events').select('*').eq('is_active', true);
-      if (options.category && options.category !== 'all') {
-        query = query.eq('category', options.category);
-      }
-      if (options.featured) query = query.eq('is_featured', true);
-      query = query.order('event_date', { ascending: true });
-      if (options.limit) query = query.limit(options.limit);
-
-      const { data } = await query;
-      if (isMounted.current) {
-        const formattedEvents: Event[] = (data || []).map(event => ({
-          ...event,
-          images: event.images || [],
-          includes: Array.isArray(event.includes) ? event.includes as unknown as IncludeExcludeItem[] : [],
-          excludes: Array.isArray(event.excludes) ? event.excludes as unknown as IncludeExcludeItem[] : [],
-          itinerary: Array.isArray(event.itinerary) ? event.itinerary as unknown as ItineraryItem[] : [],
-        }));
-        setEvents(formattedEvents);
-      }
-    } catch (err) {
-      console.error('Error fetching events:', err);
-    } finally {
-      if (isMounted.current) setIsLoading(false);
+  const filters = useMemo((): QueryFilter[] => {
+    const result: QueryFilter[] = [{ column: 'is_active', value: true }];
+    if (options.category && options.category !== 'all') {
+      result.push({ column: 'category', value: options.category });
     }
-  }, [options.category, options.featured, options.limit]);
+    if (options.featured) {
+      result.push({ column: 'is_featured', value: true });
+    }
+    return result;
+  }, [options.category, options.featured]);
 
-  useEffect(() => {
-    const isMounted = { current: true };
-    fetchEvents(isMounted);
-    return () => { isMounted.current = false; };
-  }, [fetchEvents]);
-  
-  return { events, isLoading, refetch: () => fetchEvents({ current: true }) };
+  const transform = useCallback((data: unknown[]) => data.map(transformEvent), []);
+
+  const { data, isLoading, refetch } = useSupabaseQuery<Event>({
+    table: 'events',
+    filters,
+    orderBy: { column: 'event_date', ascending: true },
+    limit: options.limit,
+    transform,
+  });
+
+  return { events: data, isLoading, refetch };
 };
 
 export const useEvent = (eventId: string | undefined) => {
-  const [event, setEvent] = useState<Event | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const transform = useCallback((data: unknown) => transformEvent(data), []);
 
-  useEffect(() => {
-    let isMounted = true;
-    
-    if (!eventId) { setIsLoading(false); return; }
-    const fetchEvent = async () => {
-      setIsLoading(true);
-      try {
-        const { data, error: fetchError } = await supabase
-          .from('events')
-          .select('*')
-          .eq('id', eventId)
-          .single();
-        if (fetchError) throw fetchError;
-        if (isMounted && data) {
-          setEvent({
-            ...data,
-            images: data.images || [],
-            includes: Array.isArray(data.includes) ? data.includes as unknown as IncludeExcludeItem[] : [],
-            excludes: Array.isArray(data.excludes) ? data.excludes as unknown as IncludeExcludeItem[] : [],
-            itinerary: Array.isArray(data.itinerary) ? data.itinerary as unknown as ItineraryItem[] : [],
-          });
-        }
-      } catch (err) {
-        if (isMounted) setError(err as Error);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-    fetchEvent();
-    
-    return () => { isMounted = false; };
-  }, [eventId]);
+  const { data, isLoading, error } = useSupabaseSingle<Event>({
+    table: 'events',
+    id: eventId,
+    transform,
+  });
 
-  return { event, isLoading, error };
+  return { event: data, isLoading, error };
 };
