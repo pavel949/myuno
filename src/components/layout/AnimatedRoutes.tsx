@@ -223,6 +223,7 @@ const AddProperty = lazy(() => import('@/pages/owner/AddProperty'));
 const ServiceRequest = lazy(() => import('@/pages/owner/ServiceRequest'));
 const InspectionRequest = lazy(() => import('@/pages/owner/InspectionRequest'));
 const OwnerRentalTerms = lazy(() => import('@/pages/owner/OwnerRentalTerms'));
+const EditProperty = lazy(() => import('@/pages/owner/EditProperty'));
 
 // Guest pages
 const MyStay = lazy(() => import('@/pages/guest/MyStay'));
@@ -472,6 +473,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/owner/properties/new" element={<LazyPage><AddProperty /></LazyPage>} />
         <Route path="/owner/properties/:id" element={<LazyPage><OwnerPropertyDetail /></LazyPage>} />
         <Route path="/owner/properties/:id/terms" element={<LazyPage><OwnerRentalTerms /></LazyPage>} />
+        <Route path="/owner/properties/:id/edit" element={<LazyPage><EditProperty /></LazyPage>} />
         <Route path="/owner/calendar" element={<LazyPage><OwnerCalendar /></LazyPage>} />
         <Route path="/owner/financials" element={<LazyPage><OwnerFinancials /></LazyPage>} />
         <Route path="/owner/financials/new" element={<LazyPage><OwnerFinancialForm /></LazyPage>} />
