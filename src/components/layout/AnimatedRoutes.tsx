@@ -200,6 +200,14 @@ const VendorBeauty = lazy(() => import('@/pages/vendor/VendorBeauty'));
 const VendorFitness = lazy(() => import('@/pages/vendor/VendorFitness'));
 const VendorClinics = lazy(() => import('@/pages/vendor/VendorClinics'));
 const VendorSubscription = lazy(() => import('@/pages/vendor/VendorSubscription'));
+const VendorRestaurants = lazy(() => import('@/pages/vendor/VendorRestaurants'));
+const VendorEvents = lazy(() => import('@/pages/vendor/VendorEvents'));
+const VendorEducation = lazy(() => import('@/pages/vendor/VendorEducation'));
+const VendorLegal = lazy(() => import('@/pages/vendor/VendorLegal'));
+const VendorPets = lazy(() => import('@/pages/vendor/VendorPets'));
+const VendorCleaning = lazy(() => import('@/pages/vendor/VendorCleaning'));
+const VendorBabysitters = lazy(() => import('@/pages/vendor/VendorBabysitters'));
+const VendorFlowers = lazy(() => import('@/pages/vendor/VendorFlowers'));
 
 // Owner (Property Care) pages
 const OwnerDashboard = lazy(() => import('@/pages/owner/OwnerDashboard'));
@@ -449,6 +457,14 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/vendor/fitness" element={<LazyPage><VendorFitness /></LazyPage>} />
         <Route path="/vendor/clinics" element={<LazyPage><VendorClinics /></LazyPage>} />
         <Route path="/vendor/subscription" element={<LazyPage><VendorSubscription /></LazyPage>} />
+        <Route path="/vendor/restaurants" element={<LazyPage><VendorRestaurants /></LazyPage>} />
+        <Route path="/vendor/events" element={<LazyPage><VendorEvents /></LazyPage>} />
+        <Route path="/vendor/education" element={<LazyPage><VendorEducation /></LazyPage>} />
+        <Route path="/vendor/legal" element={<LazyPage><VendorLegal /></LazyPage>} />
+        <Route path="/vendor/pets" element={<LazyPage><VendorPets /></LazyPage>} />
+        <Route path="/vendor/cleaning" element={<LazyPage><VendorCleaning /></LazyPage>} />
+        <Route path="/vendor/babysitters" element={<LazyPage><VendorBabysitters /></LazyPage>} />
+        <Route path="/vendor/flowers" element={<LazyPage><VendorFlowers /></LazyPage>} />
         
         {/* Owner (Property Care) Routes */}
         <Route path="/owner" element={<LazyPage><OwnerDashboard /></LazyPage>} />

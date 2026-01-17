@@ -103,36 +103,29 @@ const VendorDashboard = () => {
   ];
 
   const quickActions = [
-    {
-      label: isRussian ? 'Бронирования' : 'Bookings',
-      icon: Calendar,
-      path: '/vendor/bookings',
-      color: 'bg-blue-500',
-    },
-    {
-      label: isRussian ? 'Услуги' : 'Services',
-      icon: Package,
-      path: '/vendor/services',
-      color: 'bg-purple-500',
-    },
-    {
-      label: isRussian ? 'Аналитика' : 'Analytics',
-      icon: BarChart3,
-      path: '/vendor/analytics',
-      color: 'bg-green-500',
-    },
-    {
-      label: isRussian ? 'Выплаты' : 'Payouts',
-      icon: CreditCard,
-      path: '/vendor/payouts',
-      color: 'bg-orange-500',
-    },
-    {
-      label: isRussian ? 'Подписка' : 'Subscription',
-      icon: Crown,
-      path: '/vendor/subscription',
-      color: 'bg-amber-500',
-    },
+    { label: isRussian ? 'Бронирования' : 'Bookings', icon: Calendar, path: '/vendor/bookings', color: 'bg-blue-500' },
+    { label: isRussian ? 'Услуги' : 'Services', icon: Package, path: '/vendor/services', color: 'bg-purple-500' },
+    { label: isRussian ? 'Аналитика' : 'Analytics', icon: BarChart3, path: '/vendor/analytics', color: 'bg-green-500' },
+    { label: isRussian ? 'Выплаты' : 'Payouts', icon: CreditCard, path: '/vendor/payouts', color: 'bg-orange-500' },
+  ];
+
+  const categoryActions = [
+    { label: isRussian ? 'Яхты' : 'Yachts', path: '/vendor/yachts' },
+    { label: isRussian ? 'Туры' : 'Tours', path: '/vendor/tours' },
+    { label: isRussian ? 'Активности' : 'Activities', path: '/vendor/activities' },
+    { label: isRussian ? 'Недвижимость' : 'Properties', path: '/vendor/properties' },
+    { label: isRussian ? 'Рестораны' : 'Restaurants', path: '/vendor/restaurants' },
+    { label: isRussian ? 'Красота' : 'Beauty', path: '/vendor/beauty' },
+    { label: isRussian ? 'Фитнес' : 'Fitness', path: '/vendor/fitness' },
+    { label: isRussian ? 'Клиники' : 'Clinics', path: '/vendor/clinics' },
+    { label: isRussian ? 'Транспорт' : 'Transport', path: '/vendor/transport' },
+    { label: isRussian ? 'Мероприятия' : 'Events', path: '/vendor/events' },
+    { label: isRussian ? 'Образование' : 'Education', path: '/vendor/education' },
+    { label: isRussian ? 'Юридические' : 'Legal', path: '/vendor/legal' },
+    { label: isRussian ? 'Питомцы' : 'Pets', path: '/vendor/pets' },
+    { label: isRussian ? 'Уборка' : 'Cleaning', path: '/vendor/cleaning' },
+    { label: isRussian ? 'Няни' : 'Babysitters', path: '/vendor/babysitters' },
+    { label: isRussian ? 'Цветы' : 'Flowers', path: '/vendor/flowers' },
   ];
 
   const getStatusBadge = (status: string) => {
@@ -194,7 +187,7 @@ const VendorDashboard = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-4 gap-3 mb-6">
+        <div className="grid grid-cols-4 gap-3 mb-4">
           {quickActions.map((action, index) => (
             <Button
               key={index}
@@ -209,6 +202,22 @@ const VendorDashboard = () => {
             </Button>
           ))}
         </div>
+
+        {/* Category Navigation */}
+        <Card className="mb-6">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">{isRussian ? 'Мои категории' : 'My Categories'}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-4 gap-2">
+              {categoryActions.map((cat, index) => (
+                <Button key={index} variant="ghost" size="sm" className="h-auto py-2 text-xs" onClick={() => navigate(cat.path)}>
+                  {cat.label}
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Recent Bookings */}
         <Card>
