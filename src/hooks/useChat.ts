@@ -36,13 +36,15 @@ export const useChat = (bookingId?: string) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchMessages = useCallback(async () => {
+  const fetchMessages = useCallback(async (isMounted?: () => boolean) => {
+    const checkMounted = isMounted || (() => true);
+    
     if (!user) {
-      setIsLoading(false);
+      if (checkMounted()) setIsLoading(false);
       return;
     }
 
-    setIsLoading(true);
+    if (checkMounted()) setIsLoading(true);
     try {
       if (bookingId) {
         // Fetch booking-specific messages
@@ -54,23 +56,25 @@ export const useChat = (bookingId?: string) => {
 
         if (error) throw error;
 
-        const formattedMessages: ChatMessage[] = (data || []).map(msg => ({
-          id: msg.id,
-          booking_id: msg.booking_id,
-          sender_id: msg.sender_id,
-          message: msg.message,
-          is_read: msg.is_read || false,
-          created_at: msg.created_at,
-          is_support: false,
-          sender_type: msg.sender_id === user.id ? 'user' : 'provider'
-        }));
+        if (checkMounted()) {
+          const formattedMessages: ChatMessage[] = (data || []).map(msg => ({
+            id: msg.id,
+            booking_id: msg.booking_id,
+            sender_id: msg.sender_id,
+            message: msg.message,
+            is_read: msg.is_read || false,
+            created_at: msg.created_at,
+            is_support: false,
+            sender_type: msg.sender_id === user.id ? 'user' : 'provider'
+          }));
 
-        setMessages(formattedMessages);
+          setMessages(formattedMessages);
+        }
       }
     } catch (error) {
       console.error('Error fetching messages:', error);
     } finally {
-      setIsLoading(false);
+      if (checkMounted()) setIsLoading(false);
     }
   }, [user, bookingId]);
 
@@ -99,7 +103,9 @@ export const useChat = (bookingId?: string) => {
   }, [user, bookingId, fetchMessages]);
 
   useEffect(() => {
-    fetchMessages();
+    let isMounted = true;
+    fetchMessages(() => isMounted);
+    return () => { isMounted = false; };
   }, [fetchMessages]);
 
   // Subscribe to realtime updates for booking messages

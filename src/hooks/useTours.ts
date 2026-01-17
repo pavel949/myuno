@@ -78,13 +78,19 @@ export const useTour = (tourId: string | undefined) => {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (!tourId) { setIsLoading(false); return; }
+    let isMounted = true;
+    
+    if (!tourId) { 
+      setIsLoading(false); 
+      return; 
+    }
+    
     const fetchTour = async () => {
-      setIsLoading(true);
+      if (isMounted) setIsLoading(true);
       try {
         const { data, error: fetchError } = await supabase.from('tours').select('*').eq('id', tourId).single();
         if (fetchError) throw fetchError;
-        if (data) {
+        if (data && isMounted) {
           setTour({
             ...data,
             images: data.images || [],
@@ -95,12 +101,14 @@ export const useTour = (tourId: string | undefined) => {
           });
         }
       } catch (err) {
-        setError(err as Error);
+        if (isMounted) setError(err as Error);
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
     fetchTour();
+    
+    return () => { isMounted = false; };
   }, [tourId]);
 
   return { tour, isLoading, error };
