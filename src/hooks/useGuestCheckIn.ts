@@ -48,38 +48,60 @@ export interface CheckInFormData {
   signature_url?: string;
 }
 
-export function useGuestCheckIn(bookingId?: string) {
+export function useGuestCheckIn(marketplaceBookingId?: string) {
   const { user } = useAuth();
   const { language } = useLanguage();
   const queryClient = useQueryClient();
 
   const t = (en: string, ru: string) => language === 'ru' ? ru : en;
 
-  // Fetch check-in data for a booking
-  const { data: checkInData, isLoading } = useQuery({
-    queryKey: ['guest-check-in', bookingId],
+  // First, find the property_booking by marketplace_booking_id
+  const { data: propertyBooking, isLoading: isLoadingPropertyBooking } = useQuery({
+    queryKey: ['property-booking-by-marketplace', marketplaceBookingId],
     queryFn: async () => {
-      if (!bookingId) return null;
+      if (!marketplaceBookingId) return null;
+
+      const { data, error } = await supabase
+        .from('property_bookings')
+        .select('*')
+        .eq('marketplace_booking_id', marketplaceBookingId)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!marketplaceBookingId,
+  });
+
+  const propertyBookingId = propertyBooking?.id;
+
+  // Fetch check-in data for the property booking
+  const { data: checkInData, isLoading: isLoadingCheckIn } = useQuery({
+    queryKey: ['guest-check-in', propertyBookingId],
+    queryFn: async () => {
+      if (!propertyBookingId) return null;
 
       const { data, error } = await supabase
         .from('guest_check_in_data')
         .select('*')
-        .eq('booking_id', bookingId)
+        .eq('booking_id', propertyBookingId)
         .maybeSingle();
 
       if (error) throw error;
       return data as GuestCheckInData | null;
     },
-    enabled: !!bookingId,
+    enabled: !!propertyBookingId,
   });
+
+  const isLoading = isLoadingPropertyBooking || isLoadingCheckIn;
 
   // Create or update check-in data
   const submitCheckIn = useMutation({
     mutationFn: async (formData: CheckInFormData) => {
-      if (!bookingId) throw new Error('Booking ID is required');
+      if (!propertyBookingId) throw new Error('Property booking not found');
 
       const payload = {
-        booking_id: bookingId,
+        booking_id: propertyBookingId,
         user_id: user?.id,
         ...formData,
         status: 'submitted' as const,
@@ -111,7 +133,7 @@ export function useGuestCheckIn(bookingId?: string) {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['guest-check-in', bookingId] });
+      queryClient.invalidateQueries({ queryKey: ['guest-check-in', propertyBookingId] });
       toast({
         title: t('Check-in submitted', 'Регистрация отправлена'),
         description: t(
@@ -157,11 +179,13 @@ export function useGuestCheckIn(bookingId?: string) {
 
   return {
     checkInData,
+    propertyBooking,
     isLoading,
     submitCheckIn,
     verifyCheckIn,
     isSubmitted: checkInData?.status === 'submitted' || checkInData?.status === 'verified',
     isVerified: checkInData?.status === 'verified',
+    hasPropertyBooking: !!propertyBooking,
   };
 }
 

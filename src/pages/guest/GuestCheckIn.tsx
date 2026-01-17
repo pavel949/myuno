@@ -52,7 +52,8 @@ export default function GuestCheckIn() {
   const navigate = useNavigate();
   const isRu = language === 'ru';
 
-  const { checkInData, isLoading, submitCheckIn, isSubmitted, isVerified } = useGuestCheckIn(bookingId);
+  // Pass the marketplace bookingId (from 'bookings' table) - hook will find property_booking
+  const { checkInData, propertyBooking, isLoading, submitCheckIn, isSubmitted, isVerified, hasPropertyBooking } = useGuestCheckIn(bookingId);
 
   const [formData, setFormData] = useState<CheckInFormData>({
     full_name: '',
@@ -125,6 +126,34 @@ export default function GuestCheckIn() {
         <div className="flex items-center justify-center min-h-[60vh]">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
+      </PageContainer>
+    );
+  }
+
+  // Show message if property booking not yet created (booking not synced to owner calendar)
+  if (!isLoading && !hasPropertyBooking) {
+    return (
+      <PageContainer>
+        <PageHeader 
+          title={isRu ? 'Онлайн регистрация' : 'Online Check-in'} 
+          showBack 
+        />
+        <Card className="border-yellow-500/50 bg-yellow-500/5">
+          <CardContent className="p-6 text-center">
+            <Clock className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
+            <h2 className="text-xl font-bold mb-2">
+              {isRu ? 'Ожидайте подтверждения' : 'Awaiting Confirmation'}
+            </h2>
+            <p className="text-muted-foreground mb-4">
+              {isRu 
+                ? 'Онлайн регистрация станет доступна после подтверждения бронирования владельцем.'
+                : 'Online check-in will be available after the booking is confirmed by the property owner.'}
+            </p>
+            <Button variant="outline" onClick={() => navigate('/bookings')}>
+              {isRu ? 'К бронированиям' : 'Back to Bookings'}
+            </Button>
+          </CardContent>
+        </Card>
       </PageContainer>
     );
   }
