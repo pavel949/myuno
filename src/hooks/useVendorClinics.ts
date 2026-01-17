@@ -56,8 +56,29 @@ export function useVendorClinics(providerId?: string) {
   }, [user, providerId]);
 
   useEffect(() => {
-    fetchClinics();
-  }, [fetchClinics]);
+    let isMounted = true;
+    
+    const loadData = async () => {
+      if (!user) return;
+      if (isMounted) setIsLoading(true);
+      
+      let query = supabase.from('clinics').select('*');
+      
+      if (providerId) {
+        query = query.eq('provider_id', providerId);
+      }
+      
+      const { data, error } = await query.order('created_at', { ascending: false });
+      
+      if (isMounted) {
+        if (!error && data) setClinics(data as VendorClinic[]);
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+    return () => { isMounted = false; };
+  }, [user, providerId]);
 
   const createClinic = async (clinicData: Partial<VendorClinic> & { provider_id?: string }) => {
     if (!user) return { error: new Error('Not authenticated') };

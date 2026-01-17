@@ -25,8 +25,29 @@ export function useVendorYachts(providerId?: string) {
   }, [user, providerId]);
 
   useEffect(() => {
-    fetchYachts();
-  }, [fetchYachts]);
+    let isMounted = true;
+    
+    const loadData = async () => {
+      if (!user) return;
+      if (isMounted) setIsLoading(true);
+      
+      let query = supabase.from('yachts').select('*');
+      
+      if (providerId) {
+        query = query.eq('provider_id', providerId);
+      }
+      
+      const { data, error } = await query.order('created_at', { ascending: false });
+      
+      if (isMounted) {
+        if (!error && data) setYachts(data as Yacht[]);
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+    return () => { isMounted = false; };
+  }, [user, providerId]);
 
   const createYacht = async (yachtData: Partial<Yacht> & { provider_id?: string }) => {
     if (!user) return { error: new Error('Not authenticated') };

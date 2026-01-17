@@ -55,8 +55,29 @@ export function useVendorSalons(providerId?: string) {
   }, [user, providerId]);
 
   useEffect(() => {
-    fetchSalons();
-  }, [fetchSalons]);
+    let isMounted = true;
+    
+    const loadData = async () => {
+      if (!user) return;
+      if (isMounted) setIsLoading(true);
+      
+      let query = supabase.from('salons').select('*');
+      
+      if (providerId) {
+        query = query.eq('provider_id', providerId);
+      }
+      
+      const { data, error } = await query.order('created_at', { ascending: false });
+      
+      if (isMounted) {
+        if (!error && data) setSalons(data as VendorSalon[]);
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+    return () => { isMounted = false; };
+  }, [user, providerId]);
 
   const createSalon = async (salonData: Partial<VendorSalon> & { provider_id?: string }) => {
     if (!user) return { error: new Error('Not authenticated') };

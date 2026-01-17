@@ -65,8 +65,37 @@ export function useVendorProperties(providerId?: string) {
   }, [providerId]);
 
   useEffect(() => {
-    fetchProperties();
-  }, [fetchProperties]);
+    let isMounted = true;
+    
+    const loadData = async () => {
+      if (!providerId) {
+        if (isMounted) {
+          setProperties([]);
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      try {
+        if (isMounted) setIsLoading(true);
+        const { data, error } = await supabase
+          .from('properties')
+          .select('*')
+          .eq('provider_id', providerId)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        if (isMounted) setProperties((data || []) as unknown as VendorProperty[]);
+      } catch (err) {
+        console.error('Error fetching properties:', err);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    loadData();
+    return () => { isMounted = false; };
+  }, [providerId]);
 
   const createProperty = async (propertyData: Partial<VendorProperty>) => {
     if (!providerId) return { error: new Error('No provider ID') };

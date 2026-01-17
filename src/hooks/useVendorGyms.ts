@@ -57,8 +57,29 @@ export function useVendorGyms(providerId?: string) {
   }, [user, providerId]);
 
   useEffect(() => {
-    fetchGyms();
-  }, [fetchGyms]);
+    let isMounted = true;
+    
+    const loadData = async () => {
+      if (!user) return;
+      if (isMounted) setIsLoading(true);
+      
+      let query = supabase.from('gyms').select('*');
+      
+      if (providerId) {
+        query = query.eq('provider_id', providerId);
+      }
+      
+      const { data, error } = await query.order('created_at', { ascending: false });
+      
+      if (isMounted) {
+        if (!error && data) setGyms(data as VendorGym[]);
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+    return () => { isMounted = false; };
+  }, [user, providerId]);
 
   const createGym = async (gymData: Partial<VendorGym> & { provider_id?: string }) => {
     if (!user) return { error: new Error('Not authenticated') };

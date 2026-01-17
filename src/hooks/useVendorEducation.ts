@@ -64,8 +64,37 @@ export function useVendorEducation(providerId?: string) {
   }, [providerId]);
 
   useEffect(() => {
-    fetchProviders();
-  }, [fetchProviders]);
+    let isMounted = true;
+    
+    const loadData = async () => {
+      if (!providerId) {
+        if (isMounted) {
+          setProviders([]);
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      try {
+        if (isMounted) setIsLoading(true);
+        const { data, error } = await supabase
+          .from('education_providers')
+          .select('*')
+          .eq('provider_id', providerId)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        if (isMounted) setProviders((data || []) as unknown as VendorEducationProvider[]);
+      } catch (err) {
+        console.error('Error fetching education providers:', err);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    loadData();
+    return () => { isMounted = false; };
+  }, [providerId]);
 
   const createProvider = async (data: Partial<VendorEducationProvider>) => {
     if (!providerId) return { error: new Error('No provider ID') };
