@@ -140,7 +140,65 @@ export function useClinics(filters?: ClinicsFilters) {
   };
 
   useEffect(() => {
-    fetchClinics();
+    let isMounted = true;
+    
+    const loadClinics = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        let query = supabase
+          .from('clinics')
+          .select('*')
+          .eq('is_active', true)
+          .order('is_featured', { ascending: false })
+          .order('rating', { ascending: false });
+
+        if (filters?.specialty && filters.specialty !== 'all') {
+          query = query.contains('specialty', [filters.specialty]);
+        }
+
+        if (filters?.clinicType) {
+          query = query.eq('clinic_type', filters.clinicType);
+        }
+
+        if (filters?.district) {
+          query = query.eq('district', filters.district);
+        }
+
+        if (filters?.is24h) {
+          query = query.eq('is_24h', true);
+        }
+
+        const { data, error: fetchError } = await query;
+
+        if (fetchError) throw fetchError;
+        if (!isMounted) return;
+
+        let result = (data || []) as Clinic[];
+
+        // Client-side search filtering
+        if (filters?.searchQuery) {
+          const searchLower = filters.searchQuery.toLowerCase();
+          result = result.filter(clinic =>
+            clinic.name_en.toLowerCase().includes(searchLower) ||
+            clinic.name_ru.toLowerCase().includes(searchLower) ||
+            clinic.address?.toLowerCase().includes(searchLower)
+          );
+        }
+
+        setClinics(result);
+      } catch (err) {
+        if (isMounted) setError(err as Error);
+        console.error('Error fetching clinics:', err);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+    
+    loadClinics();
+    
+    return () => { isMounted = false; };
   }, [filters?.specialty, filters?.clinicType, filters?.district, filters?.is24h, filters?.searchQuery]);
 
   return { clinics, isLoading, error, refetch: fetchClinics };
@@ -152,6 +210,8 @@ export function useClinic(id: string | undefined) {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+    
     if (!id) {
       setIsLoading(false);
       return;
@@ -167,16 +227,18 @@ export function useClinic(id: string | undefined) {
           .single();
 
         if (fetchError) throw fetchError;
-        setClinic(data as Clinic);
+        if (isMounted) setClinic(data as Clinic);
       } catch (err) {
-        setError(err as Error);
+        if (isMounted) setError(err as Error);
         console.error('Error fetching clinic:', err);
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
 
     fetchClinic();
+    
+    return () => { isMounted = false; };
   }, [id]);
 
   return { clinic, isLoading, error };
@@ -188,6 +250,8 @@ export function useDoctors(clinicId: string | undefined, specialty?: string) {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+    
     if (!clinicId) {
       setDoctors([]);
       setIsLoading(false);
@@ -211,16 +275,18 @@ export function useDoctors(clinicId: string | undefined, specialty?: string) {
         const { data, error: fetchError } = await query;
 
         if (fetchError) throw fetchError;
-        setDoctors((data || []) as Doctor[]);
+        if (isMounted) setDoctors((data || []) as Doctor[]);
       } catch (err) {
-        setError(err as Error);
+        if (isMounted) setError(err as Error);
         console.error('Error fetching doctors:', err);
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
 
     fetchDoctors();
+    
+    return () => { isMounted = false; };
   }, [clinicId, specialty]);
 
   return { doctors, isLoading, error };
@@ -232,6 +298,8 @@ export function useMedicalServices(clinicId: string | undefined, category?: stri
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+    
     if (!clinicId) {
       setServices([]);
       setIsLoading(false);
@@ -256,16 +324,18 @@ export function useMedicalServices(clinicId: string | undefined, category?: stri
         const { data, error: fetchError } = await query;
 
         if (fetchError) throw fetchError;
-        setServices((data || []) as MedicalService[]);
+        if (isMounted) setServices((data || []) as MedicalService[]);
       } catch (err) {
-        setError(err as Error);
+        if (isMounted) setError(err as Error);
         console.error('Error fetching medical services:', err);
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
 
     fetchServices();
+    
+    return () => { isMounted = false; };
   }, [clinicId, category]);
 
   return { services, isLoading, error };

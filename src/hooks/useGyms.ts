@@ -30,6 +30,8 @@ export function useGyms(gymType?: string) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchGyms = async () => {
       setIsLoading(true);
       let query = supabase.from('gyms').select('*').eq('is_active', true);
@@ -37,10 +39,14 @@ export function useGyms(gymType?: string) {
         query = query.eq('gym_type', gymType);
       }
       const { data, error } = await query.order('is_featured', { ascending: false });
-      if (!error && data) setGyms(data as Gym[]);
-      setIsLoading(false);
+      if (isMounted) {
+        if (!error && data) setGyms(data as Gym[]);
+        setIsLoading(false);
+      }
     };
     fetchGyms();
+    
+    return () => { isMounted = false; };
   }, [gymType]);
 
   return { gyms, isLoading };
@@ -51,13 +57,19 @@ export function useGym(id: string) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     if (!id) return;
     const fetchGym = async () => {
       const { data, error } = await supabase.from('gyms').select('*').eq('id', id).single();
-      if (!error && data) setGym(data as Gym);
-      setIsLoading(false);
+      if (isMounted) {
+        if (!error && data) setGym(data as Gym);
+        setIsLoading(false);
+      }
     };
     fetchGym();
+    
+    return () => { isMounted = false; };
   }, [id]);
 
   return { gym, isLoading };

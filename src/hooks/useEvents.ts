@@ -92,6 +92,8 @@ export const useEvent = (eventId: string | undefined) => {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+    
     if (!eventId) { setIsLoading(false); return; }
     const fetchEvent = async () => {
       setIsLoading(true);
@@ -102,7 +104,7 @@ export const useEvent = (eventId: string | undefined) => {
           .eq('id', eventId)
           .single();
         if (fetchError) throw fetchError;
-        if (data) {
+        if (isMounted && data) {
           setEvent({
             ...data,
             images: data.images || [],
@@ -112,12 +114,14 @@ export const useEvent = (eventId: string | undefined) => {
           });
         }
       } catch (err) {
-        setError(err as Error);
+        if (isMounted) setError(err as Error);
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
     fetchEvent();
+    
+    return () => { isMounted = false; };
   }, [eventId]);
 
   return { event, isLoading, error };
