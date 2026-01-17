@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, Clock, MapPin, Phone, User, Package, XCircle, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, MapPin, Phone, User, Package, XCircle, CheckCircle, AlertCircle, Loader2, ClipboardCheck, Home } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,7 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
-import { format } from 'date-fns';
+import { format, parseISO, isBefore, addDays } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { toast } from 'sonner';
 import {
@@ -217,6 +217,12 @@ export default function BookingDetail() {
   const canCancel = ['submitted', 'confirmed', 'draft'].includes(booking.status);
   const primaryParticipant = booking.participants.find(p => p);
   const deliveryAddress = booking.addresses.find(a => a.address_type === 'delivery' || a.address_type === 'service');
+  
+  // Check if this is a property booking and check-in is available
+  const isPropertyBooking = booking.booking_type === 'property';
+  const isConfirmed = booking.status === 'confirmed';
+  const checkInDate = booking.scheduled_at ? parseISO(booking.scheduled_at) : null;
+  const canCheckIn = isPropertyBooking && isConfirmed && checkInDate && isBefore(new Date(), addDays(checkInDate, 1));
 
   return (
     <AppLayout showBottomNav={false}>
@@ -267,6 +273,34 @@ export default function BookingDetail() {
                 {language === 'ru' ? 'Дата и время' : 'Date & Time'}
               </h3>
               <p className="text-lg font-semibold">{formatDate(booking.scheduled_at)}</p>
+            </div>
+          )}
+
+          {/* Property Check-in Card */}
+          {canCheckIn && (
+            <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <ClipboardCheck className="w-6 h-6 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-medium">
+                    {language === 'ru' ? 'Онлайн регистрация' : 'Online Check-in'}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {language === 'ru' 
+                      ? 'Заполните данные заранее для быстрого заселения'
+                      : 'Complete your details in advance for quick check-in'}
+                  </p>
+                </div>
+              </div>
+              <Button 
+                className="w-full mt-3" 
+                onClick={() => navigate(`/guest/check-in/${booking.id}`)}
+              >
+                <Home className="w-4 h-4 mr-2" />
+                {language === 'ru' ? 'Начать регистрацию' : 'Start Check-in'}
+              </Button>
             </div>
           )}
 
