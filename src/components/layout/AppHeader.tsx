@@ -29,7 +29,7 @@ export function AppHeader({ title, showBack, onMenuClick, className }: AppHeader
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 w-full",
+        "sticky top-0 z-50 w-full",
         "bg-background/80 backdrop-blur-xl border-b border-border/50",
         className
       )}
