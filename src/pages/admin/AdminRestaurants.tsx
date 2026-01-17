@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
 import { useAdminRestaurants } from '@/hooks/useAdminContent';
+import { useAdminFormHotkeys, useFormProgress } from '@/hooks/useAdminFormHotkeys';
+import { useAutoTranslate } from '@/hooks/useAutoTranslate';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { ProviderSelector } from '@/components/admin/ProviderSelector';
+import { AdminFormToolbar } from '@/components/admin/AdminFormToolbar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -46,7 +49,8 @@ import {
   Trash2,
   Loader2,
   Star,
-  MapPin
+  MapPin,
+  Copy
 } from 'lucide-react';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
 
@@ -159,6 +163,19 @@ export default function AdminRestaurants() {
     setIsDialogOpen(true);
   };
 
+  // Duplicate functionality
+  const handleDuplicate = useCallback(() => {
+    if (!editingItem) return;
+    
+    setEditingItem(null);
+    setFormData(prev => ({
+      ...prev,
+      name_en: `${prev.name_en} (copy)`,
+      name_ru: prev.name_ru ? `${prev.name_ru} (копия)` : '',
+    }));
+    toast.info(isRussian ? 'Создание копии...' : 'Creating a copy...');
+  }, [editingItem, isRussian]);
+
   const handleSubmit = async () => {
     if (!formData.name_en || !formData.provider_id) {
       toast.error(isRussian ? 'Заполните обязательные поля' : 'Fill required fields');
@@ -202,6 +219,51 @@ export default function AdminRestaurants() {
       toast.error(isRussian ? 'Ошибка удаления' : 'Error deleting');
     }
   };
+
+  // Auto-translate hook
+  const { translateMultiple, isTranslating } = useAutoTranslate();
+
+  const handleAutoTranslate = async () => {
+    const fieldsToTranslate: Record<string, string> = {};
+    
+    if (formData.name_en && !formData.name_ru) {
+      fieldsToTranslate.name = formData.name_en;
+    }
+    if (formData.description_en && !formData.description_ru) {
+      fieldsToTranslate.description = formData.description_en;
+    }
+    
+    if (Object.keys(fieldsToTranslate).length === 0) {
+      toast.info(isRussian ? 'Нечего переводить' : 'Nothing to translate');
+      return;
+    }
+
+    const translations = await translateMultiple(fieldsToTranslate, 'ru');
+    
+    setFormData(prev => ({
+      ...prev,
+      name_ru: translations.name || prev.name_ru,
+      description_ru: translations.description || prev.description_ru,
+    }));
+    
+    if (Object.keys(translations).length > 0) {
+      toast.success(isRussian ? 'Переведено!' : 'Translated!');
+    }
+  };
+
+  // Form progress tracking
+  const { progress, filled, total } = useFormProgress(formData, 
+    ['provider_id', 'name_en'],
+    ['name_ru', 'description_en', 'description_ru', 'cover_image', 'address', 'phone']
+  );
+
+  // Hotkeys
+  useAdminFormHotkeys({
+    onSave: handleSubmit,
+    onClose: () => setIsDialogOpen(false),
+    isDialogOpen,
+    isSubmitting,
+  });
 
   if (authLoading || adminLoading) {
     return (
@@ -281,6 +343,12 @@ export default function AdminRestaurants() {
                             <DropdownMenuItem onClick={() => openEditDialog(item)}>
                               <Edit className="h-4 w-4 mr-2" />{isRussian ? 'Редактировать' : 'Edit'}
                             </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {
+                              openEditDialog(item);
+                              setTimeout(() => handleDuplicate(), 100);
+                            }}>
+                              <Copy className="h-4 w-4 mr-2" />{isRussian ? 'Дублировать' : 'Duplicate'}
+                            </DropdownMenuItem>
                             <DropdownMenuItem className="text-red-500" onClick={() => setDeleteConfirmId(item.id)}>
                               <Trash2 className="h-4 w-4 mr-2" />{isRussian ? 'Удалить' : 'Delete'}
                             </DropdownMenuItem>
@@ -301,8 +369,19 @@ export default function AdminRestaurants() {
               <DialogTitle>{editingItem ? (isRussian ? 'Редактировать' : 'Edit') : (isRussian ? 'Новый ресторан' : 'New Restaurant')}</DialogTitle>
               <DialogDescription>{isRussian ? 'Заполните данные ресторана' : 'Fill in restaurant details'}</DialogDescription>
             </DialogHeader>
-            <ScrollArea className="max-h-[calc(90vh-140px)] px-6">
-              <div className="space-y-4 py-4">
+            <div className="px-6 pt-4">
+              <AdminFormToolbar
+                progress={progress}
+                filled={filled}
+                total={total}
+                onTranslate={handleAutoTranslate}
+                onDuplicate={handleDuplicate}
+                isTranslating={isTranslating}
+                isEditing={!!editingItem}
+              />
+            </div>
+            <ScrollArea className="max-h-[calc(90vh-220px)] px-6">
+              <div className="space-y-4 pb-4">
                 <ProviderSelector value={formData.provider_id} onChange={(v) => setFormData({...formData, provider_id: v})} />
                 
                 <div className="grid grid-cols-2 gap-4">
