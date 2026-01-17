@@ -12,12 +12,51 @@ export function usePinAuth() {
   const [savedUserId, setSavedUserId] = useState<string | null>(null);
   const [savedEmail, setSavedEmail] = useState<string | null>(null);
 
-  // Check if current user has PIN set up
+  // Check for saved PIN login data on mount
+  useEffect(() => {
+    const userId = localStorage.getItem(PIN_USER_KEY);
+    const email = localStorage.getItem(PIN_EMAIL_KEY);
+    setSavedUserId(userId);
+    setSavedEmail(email);
+  }, []);
+
+  // Check if user has PIN when authenticated
+  useEffect(() => {
+    let isMounted = true;
+    
+    const checkPinStatus = async () => {
+      if (!user) {
+        if (isMounted) {
+          setHasPin(false);
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('user_pins')
+          .select('id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (error) throw error;
+        if (isMounted) setHasPin(!!data);
+      } catch (error) {
+        console.error('Error checking PIN:', error);
+        if (isMounted) setHasPin(false);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+    
+    checkPinStatus();
+    return () => { isMounted = false; };
+  }, [user]);
+
+  // Manual check function for external use
   const checkHasPin = useCallback(async () => {
-    if (!user) {
-      setIsLoading(false);
-      return;
-    }
+    if (!user) return;
 
     try {
       const { data, error } = await supabase
@@ -31,28 +70,8 @@ export function usePinAuth() {
     } catch (error) {
       console.error('Error checking PIN:', error);
       setHasPin(false);
-    } finally {
-      setIsLoading(false);
     }
   }, [user]);
-
-  // Check for saved PIN login data on mount
-  useEffect(() => {
-    const userId = localStorage.getItem(PIN_USER_KEY);
-    const email = localStorage.getItem(PIN_EMAIL_KEY);
-    setSavedUserId(userId);
-    setSavedEmail(email);
-  }, []);
-
-  // Check if user has PIN when authenticated
-  useEffect(() => {
-    if (user) {
-      checkHasPin();
-    } else {
-      setHasPin(false);
-      setIsLoading(false);
-    }
-  }, [user, checkHasPin]);
 
   // Set up PIN for current user
   const setupPin = useCallback(async (pin: string) => {

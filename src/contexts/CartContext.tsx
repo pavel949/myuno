@@ -125,13 +125,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Initialize cart based on auth state
   useEffect(() => {
+    let isMounted = true;
+    
     const initializeCart = async () => {
-      setIsLoading(true);
+      if (isMounted) setIsLoading(true);
       
       if (user) {
         // User is logged in - load from database
         const localItems = loadLocalCart();
         const dbItems = await loadDatabaseCart();
+        
+        if (!isMounted) return;
         
         // If there are local items, sync them to database
         if (localItems.length > 0) {
@@ -139,20 +143,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
           await syncLocalCartToDatabase(localItems);
           // Reload from database after sync
           const updatedItems = await loadDatabaseCart();
-          setItems(updatedItems);
-          setIsSyncing(false);
+          if (isMounted) {
+            setItems(updatedItems);
+            setIsSyncing(false);
+          }
         } else {
           setItems(dbItems);
         }
       } else {
         // Guest user - load from localStorage
-        setItems(loadLocalCart());
+        if (isMounted) setItems(loadLocalCart());
       }
       
-      setIsLoading(false);
+      if (isMounted) setIsLoading(false);
     };
 
     initializeCart();
+    return () => { isMounted = false; };
   }, [user, loadLocalCart, loadDatabaseCart, syncLocalCartToDatabase]);
 
   // Save to localStorage for guests when items change
