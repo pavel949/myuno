@@ -64,7 +64,7 @@ export function usePropertyBlockedDates(marketplacePropertyId?: string) {
         .from('owner_properties')
         .select('id')
         .eq('marketplace_property_id', marketplacePropertyId)
-        .single();
+        .maybeSingle();
 
       if (opError || !ownerProperty) {
         return [];
