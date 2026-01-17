@@ -26,8 +26,9 @@ export function useRecommendations() {
   // Update ref when history changes
   historyRef.current = history;
 
-  const fetchRecommendations = useCallback(async () => {
-    setIsLoading(true);
+  const fetchRecommendations = useCallback(async (isMounted?: () => boolean) => {
+    const checkMounted = isMounted || (() => true);
+    if (checkMounted()) setIsLoading(true);
     const items: RecommendedItem[] = [];
     const viewedTypes = [...new Set(historyRef.current.slice(0, 10).map(h => h.item_type))];
 
@@ -127,6 +128,8 @@ export function useRecommendations() {
         });
       }
 
+      if (!checkMounted()) return;
+
       // Shuffle and prioritize by history
       const historyItems = items.filter(i => i.reason === 'history');
       const otherItems = items.filter(i => i.reason !== 'history');
@@ -138,7 +141,7 @@ export function useRecommendations() {
     } catch (error) {
       console.error('Error fetching recommendations:', error);
     } finally {
-      setIsLoading(false);
+      if (checkMounted()) setIsLoading(false);
     }
   }, []);
 
@@ -146,12 +149,15 @@ export function useRecommendations() {
     // Only fetch once on mount to avoid infinite loops
     if (hasFetchedRef.current) return;
     hasFetchedRef.current = true;
-    fetchRecommendations();
+    
+    let isMounted = true;
+    fetchRecommendations(() => isMounted);
+    return () => { isMounted = false; };
   }, [fetchRecommendations]);
 
   return {
     recommendations,
     isLoading,
-    refetch: fetchRecommendations
+    refetch: () => fetchRecommendations()
   };
 }
