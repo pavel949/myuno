@@ -15,6 +15,8 @@ import {
   BookingPaymentSelect,
   BookingBottomBar,
   BookingConfirmation,
+  BookingStepProgress,
+  eventBookingSteps,
   type ContactFormData,
   type PaymentMethod 
 } from "@/components/booking";
@@ -40,6 +42,15 @@ export default function EventBooking() {
   const [pickupInfo, setPickupInfo] = useState({ hotelName: "", roomNumber: "" });
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
   const [bookingResult, setBookingResult] = useState<{ success: boolean; bookingId?: string } | null>(null);
+
+  // Calculate current step based on filled fields
+  const getCurrentStep = () => {
+    if (paymentMethod) return 2; // Payment step
+    if (contactData.name && contactData.phone) return 2; // Moving to payment
+    if (participants > 0) return 1; // Contact step
+    return 0; // Details step
+  };
+  const currentStep = getCurrentStep();
 
   // Auth redirect
   if (!authLoading && !user) {
@@ -144,8 +155,11 @@ export default function EventBooking() {
           fallbackPath="/events"
         />
 
+        {/* Step Progress */}
+        <BookingStepProgress steps={eventBookingSteps} currentStep={currentStep} className="mt-4" />
+
         {/* Summary Card */}
-        <div className="mt-4 mb-6">
+        <div className="mb-6">
           <BookingSummary
             image={event.cover_image || undefined}
             title={eventTitle}

@@ -6,3 +6,4 @@ export { BookingDateTimeSelect } from './BookingDateTimeSelect';
 export { BookingParticipants } from './BookingParticipants';
 export { BookingBottomBar } from './BookingBottomBar';
 export { AddressPickerInput } from './AddressPickerInput';
+export { BookingStepProgress, defaultBookingSteps, eventBookingSteps, deliveryBookingSteps, serviceBookingSteps, type BookingStep } from './BookingStepProgress';

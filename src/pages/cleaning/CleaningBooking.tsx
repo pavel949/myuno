@@ -13,6 +13,8 @@ import {
   BookingBottomBar,
   BookingConfirmation,
   AddressPickerInput,
+  BookingStepProgress,
+  serviceBookingSteps,
   type ContactFormData,
   type PaymentMethod 
 } from "@/components/booking";
@@ -47,6 +49,15 @@ export default function CleaningBooking() {
   const [contactData, setContactData] = useState<ContactFormData>({ name: "", phone: "" });
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
   const [bookingResult, setBookingResult] = useState<{ success: boolean; bookingId?: string } | null>(null);
+
+  // Calculate current step based on filled fields
+  const getCurrentStep = () => {
+    if (paymentMethod) return 2; // Payment step
+    if (contactData.name && contactData.phone) return 2; // Moving to payment
+    if (date && time && address) return 1; // Contact step
+    return 0; // DateTime step
+  };
+  const currentStep = getCurrentStep();
 
   const availableTimes = ["09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00"];
 
@@ -138,8 +149,11 @@ export default function CleaningBooking() {
           showBack 
         />
 
+        {/* Step Progress */}
+        <BookingStepProgress steps={serviceBookingSteps} currentStep={currentStep} className="mt-4" />
+
         {/* Service Info */}
-        <div className="flex items-center gap-3 p-4 bg-card rounded-xl border mt-4 mb-6">
+        <div className="flex items-center gap-3 p-4 bg-card rounded-xl border mb-6">
           <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center">
             <Sparkles className="w-6 h-6 text-emerald-500" />
           </div>
