@@ -13,6 +13,8 @@ import {
   BookingPaymentSelect,
   BookingBottomBar,
   BookingConfirmation,
+  BookingStepProgress,
+  serviceBookingSteps,
   type ContactFormData,
   type PaymentMethod 
 } from "@/components/booking";
@@ -38,6 +40,15 @@ export default function BeautyBooking() {
   const [contactData, setContactData] = useState<ContactFormData>({ name: "", phone: "" });
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
   const [bookingResult, setBookingResult] = useState<{ success: boolean; bookingId?: string } | null>(null);
+
+  // Calculate current step based on filled fields
+  const getCurrentStep = () => {
+    if (paymentMethod) return 2; // Payment step
+    if (contactData.name && contactData.phone) return 2; // Moving to payment
+    if (date && time) return 1; // Contact step
+    return 0; // DateTime step
+  };
+  const currentStep = getCurrentStep();
 
   // Auth redirect
   if (!authLoading && !user) {
@@ -124,8 +135,11 @@ export default function BeautyBooking() {
           fallbackPath="/beauty"
         />
 
+        {/* Step Progress */}
+        <BookingStepProgress steps={serviceBookingSteps} currentStep={currentStep} className="mt-4" />
+
         {/* Summary Card */}
-        <div className="mt-4 mb-6">
+        <div className="mb-6">
           <BookingSummary
             title={salon?.name || (language === 'ru' ? 'Салон красоты' : 'Beauty Salon')}
             subtitle={selectedServiceDetails.map((s: any) => 

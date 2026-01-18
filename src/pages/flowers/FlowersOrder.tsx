@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 import { triggerRipple } from '@/hooks/useRipple';
 import { supabase } from '@/integrations/supabase/client';
 import { BackButton } from '@/components/uno/BackButton';
-import { AddressPickerInput } from '@/components/booking';
+import { AddressPickerInput, BookingStepProgress, deliveryBookingSteps } from '@/components/booking';
 
 const deliverySlots = [
   { id: 'morning', timeEn: '9:00 - 12:00', timeRu: '9:00 - 12:00', labelEn: 'Morning', labelRu: 'Утро' },
@@ -59,6 +59,15 @@ const FlowersOrder = () => {
   const giftWrapFee = formData.giftWrap ? 150 : 0;
   const finalTotal = totalPrice + deliveryFee + giftWrapFee;
   const canPayWithWallet = hasEnoughBalance(finalTotal);
+
+  // Calculate current step based on filled fields
+  const getCurrentStep = () => {
+    if (formData.paymentMethod) return 2; // Payment step
+    if (formData.deliveryDate && formData.deliverySlot) return 2; // Moving to payment
+    if (formData.recipientName && formData.recipientPhone && formData.address) return 1; // Delivery step
+    return 0; // Recipient step
+  };
+  const currentStep = getCurrentStep();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -251,6 +260,9 @@ const FlowersOrder = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="p-4 space-y-6 pb-32">
+          {/* Step Progress */}
+          <BookingStepProgress steps={deliveryBookingSteps} currentStep={currentStep} />
+
           {/* Recipient Info */}
           <div className="space-y-4">
             <h2 className="text-lg font-semibold flex items-center gap-2">
