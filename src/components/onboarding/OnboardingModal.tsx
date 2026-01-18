@@ -20,9 +20,9 @@ type Language = 'ru' | 'en' | 'th';
 
 const texts = {
   headline: { 
-    en: 'Feel at home anywhere in the world', 
-    ru: 'Чувствуйте себя как дома в любой точке мира', 
-    th: 'รู้สึกเหมือนอยู่บ้านทุกที่ในโลก' 
+    en: 'The world is yours. At home everywhere.', 
+    ru: 'Мир — твой. Везде как дома.', 
+    th: 'โลกเป็นของคุณ ทุกที่คือบ้าน' 
   },
   subtitle: { 
     en: 'All services for living abroad — in one app', 
