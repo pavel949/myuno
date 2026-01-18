@@ -54,16 +54,46 @@ export default function RestaurantsIndex() {
 
   const filterConfig = mode === 'delivery' ? deliveryFilterConfig : reservationFilterConfig;
 
+  // Sync cuisine filter from modal to category chips
+  const effectiveCuisine = useMemo(() => {
+    const modalCuisine = filterValues.cuisine as string[];
+    if (modalCuisine?.length === 1) return modalCuisine[0];
+    if (modalCuisine?.length > 1) return 'all'; // Multiple selected, show all from API
+    return selectedCuisine;
+  }, [filterValues.cuisine, selectedCuisine]);
+
   const filteredRestaurants = useMemo(() => {
     return restaurants.filter(rest => {
+      // Price level filter
       const priceFilter = filterValues.priceLevel;
       if (priceFilter && rest.price_range !== parseInt(priceFilter as string)) return false;
       
-      const featureFilter = filterValues.features as string[];
-      if (featureFilter?.length > 0 && rest.features) {
-        if (!featureFilter.every(f => rest.features?.includes(f))) return false;
+      // Cuisine filter from modal (when multiple selected)
+      const cuisineFilter = filterValues.cuisine as string[];
+      if (cuisineFilter?.length > 0) {
+        const restCuisine = rest.cuisine?.toLowerCase();
+        if (!cuisineFilter.some(c => restCuisine?.includes(c.toLowerCase()))) return false;
       }
       
+      // Features filter
+      const featureFilter = filterValues.features as string[];
+      if (featureFilter?.length > 0) {
+        if (!rest.features || !featureFilter.some(f => rest.features?.includes(f))) return false;
+      }
+      
+      // Occasion filter (check against features since occasions are stored there)
+      const occasionFilter = filterValues.occasion as string[];
+      if (occasionFilter?.length > 0) {
+        if (!rest.features || !occasionFilter.some(o => rest.features?.includes(o))) return false;
+      }
+      
+      // Dietary filter
+      const dietaryFilter = filterValues.dietary as string[];
+      if (dietaryFilter?.length > 0) {
+        if (!rest.features || !dietaryFilter.some(d => rest.features?.includes(d))) return false;
+      }
+      
+      // Delivery-specific filters
       const deliveryFilter = filterValues.delivery as string[];
       if (deliveryFilter?.length > 0) {
         if (deliveryFilter.includes('free_delivery') && (rest.delivery_fee || 0) > 0) return false;
@@ -71,6 +101,7 @@ export default function RestaurantsIndex() {
           const deliveryTime = rest.delivery_time?.split('-')[0];
           if (deliveryTime && parseInt(deliveryTime) > 30) return false;
         }
+        if (deliveryFilter.includes('no_min_order') && (rest.min_order_amount || 0) > 0) return false;
       }
       
       return true;
