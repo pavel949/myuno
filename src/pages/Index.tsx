@@ -135,7 +135,7 @@ const Index = () => {
                       {t('home.forOwners')}
                     </span>
                   </div>
-                  <h3 className="font-bold text-white text-base">
+                  <h3 className="font-bold text-white text-lg leading-tight">
                     {t('home.listProperty')}
                   </h3>
                   <p className="text-xs text-white/80 line-clamp-1">
