@@ -41,13 +41,14 @@ serve(async (req) => {
         throw new Error(`Webhook signature verification failed: ${errMessage}`);
       }
     } else {
-      console.warn("No STRIPE_WEBHOOK_SECRET set, parsing event without verification");
-      try {
-        event = JSON.parse(body);
-      } catch {
-        logStep("ERROR", "Failed to parse webhook body");
-        throw new Error("Invalid JSON payload");
-      }
+      logStep("ERROR", "STRIPE_WEBHOOK_SECRET not configured - rejecting unverified request");
+      return new Response(
+        JSON.stringify({ error: "Webhook secret not configured - cannot verify request" }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
     }
 
     logStep("Event received", { type: event.type, id: event.id });
