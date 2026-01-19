@@ -260,8 +260,8 @@ export default function PropertyDetail() {
     <AppLayout showBottomNav={false}>
       <div className="pb-28">
         {/* Sticky Header */}
-        <div className="sticky top-0 z-20 flex items-center justify-between p-4 bg-background/95 backdrop-blur-md border-b border-border/30">
-          <BackButton fallbackPath="/property" variant="ghost" />
+        <div className="sticky top-0 z-50 flex items-center justify-between p-4 bg-background/95 backdrop-blur-md border-b border-border/30">
+          <BackButton fallbackPath="/property" variant="default" size="md" />
           
           <div className="flex items-center gap-1">
             <Button 
