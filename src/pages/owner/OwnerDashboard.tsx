@@ -3,7 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { usePropertyCareStats, useOwnerProperties, useServiceRequests, usePropertyInspections } from '@/hooks/usePropertyCare';
-import { useAllPropertyBookings } from '@/hooks/usePropertyBookings';
+import { useOwnerOrders } from '@/hooks/useOwnerOrders';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,9 +29,17 @@ export default function OwnerDashboard() {
   const { data: properties } = useOwnerProperties();
   const { data: requests } = useServiceRequests();
   const { data: inspections } = usePropertyInspections();
-  const { bookings, upcomingBookings, activeBookings } = useAllPropertyBookings();
+  // Use canonical orders from the new unified order system
+  const { 
+    orders, 
+    activeOrders, 
+    upcomingOrders, 
+    todayCheckIns, 
+    todayCheckOuts,
+    stats: orderStats 
+  } = useOwnerOrders();
 
-  // Today's activities
+  // Today's activities from canonical orders
   const todayActivities = useMemo(() => {
     const activities: Array<{
       type: 'check_in' | 'check_out' | 'cleaning' | 'service';
@@ -41,24 +49,28 @@ export default function OwnerDashboard() {
       propertyTitle?: string;
     }> = [];
 
-    // Check-ins today
-    bookings?.forEach(booking => {
-      if (isToday(new Date(booking.check_in))) {
-        activities.push({
-          type: 'check_in',
-          title: booking.guest_name || (isRu ? 'Гость' : 'Guest'),
-          subtitle: isRu ? 'Заезд' : 'Check-in',
-          propertyTitle: (booking as any).owner_properties?.title,
-        });
-      }
-      if (isToday(new Date(booking.check_out))) {
-        activities.push({
-          type: 'check_out',
-          title: booking.guest_name || (isRu ? 'Гость' : 'Guest'),
-          subtitle: isRu ? 'Выезд' : 'Check-out',
-          propertyTitle: (booking as any).owner_properties?.title,
-        });
-      }
+    // Check-ins today from canonical orders
+    todayCheckIns.forEach(order => {
+      const guestName = (order.metadata as any)?.guest_name || (isRu ? 'Гость' : 'Guest');
+      activities.push({
+        type: 'check_in',
+        title: guestName,
+        subtitle: isRu ? 'Заезд' : 'Check-in',
+        propertyTitle: order.items?.[0]?.product_name || undefined,
+        time: order.start_at ? format(new Date(order.start_at), 'HH:mm') : undefined,
+      });
+    });
+
+    // Check-outs today from canonical orders
+    todayCheckOuts.forEach(order => {
+      const guestName = (order.metadata as any)?.guest_name || (isRu ? 'Гость' : 'Guest');
+      activities.push({
+        type: 'check_out',
+        title: guestName,
+        subtitle: isRu ? 'Выезд' : 'Check-out',
+        propertyTitle: order.items?.[0]?.product_name || undefined,
+        time: order.end_at ? format(new Date(order.end_at), 'HH:mm') : undefined,
+      });
     });
 
     // Today's service requests
@@ -80,31 +92,16 @@ export default function OwnerDashboard() {
     });
 
     return activities;
-  }, [bookings, requests, isRu]);
+  }, [todayCheckIns, todayCheckOuts, requests, isRu]);
 
-  // This month's financials
+  // This month's financials from canonical orders
   const monthlyFinancials = useMemo(() => {
-    const now = new Date();
-    const monthStart = startOfMonth(now);
-    const monthEnd = endOfMonth(now);
-
-    let income = 0;
-    let expenses = 0;
-
-    // Calculate from bookings
-    bookings?.forEach(booking => {
-      const checkIn = new Date(booking.check_in);
-      if (checkIn >= monthStart && checkIn <= monthEnd && booking.total_amount) {
-        income += booking.total_amount;
-      }
-    });
-
     return {
-      income,
+      income: orderStats.monthlyRevenue,
       expenses: stats?.totalExpenses || 0,
-      net: income - (stats?.totalExpenses || 0),
+      net: orderStats.monthlyRevenue - (stats?.totalExpenses || 0),
     };
-  }, [bookings, stats]);
+  }, [orderStats, stats]);
 
   if (!user) {
     return (
@@ -242,65 +239,65 @@ export default function OwnerDashboard() {
           </Button>
         </CardHeader>
         <CardContent className="pt-0">
-          {/* Active (current guests) */}
-          {activeBookings.length > 0 && (
+          {/* Active (current guests) - from canonical orders */}
+          {activeOrders.length > 0 && (
             <div className="mb-3">
               <p className="text-xs font-medium text-muted-foreground mb-2">
                 {isRu ? 'Сейчас проживают' : 'Currently staying'}
               </p>
               <div className="space-y-2">
-                {activeBookings.slice(0, 2).map((booking) => (
-                  <div 
-                    key={booking.id}
-                    className="flex items-center gap-3 p-3 rounded-xl bg-green-500/10 border border-green-500/20"
-                  >
-                    <div className="p-2 rounded-full bg-green-500/20">
-                      <Users className="h-4 w-4 text-green-500" />
+                {activeOrders.slice(0, 2).map((order) => {
+                  const guestName = (order.metadata as any)?.guest_name || (isRu ? 'Гость' : 'Guest');
+                  return (
+                    <div 
+                      key={order.id}
+                      className="flex items-center gap-3 p-3 rounded-xl bg-green-500/10 border border-green-500/20"
+                    >
+                      <div className="p-2 rounded-full bg-green-500/20">
+                        <Users className="h-4 w-4 text-green-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{guestName}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {order.items?.[0]?.product_name || order.order_number} • 
+                          {isRu ? ' до ' : ' until '}
+                          {order.end_at && format(new Date(order.end_at), 'd MMM', { locale: isRu ? ru : undefined })}
+                        </p>
+                      </div>
+                      <Badge variant="secondary" className="bg-green-500/20 text-green-700">
+                        {isRu ? 'Активно' : 'Active'}
+                      </Badge>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">
-                        {booking.guest_name || (isRu ? 'Гость' : 'Guest')}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {(booking as any).owner_properties?.title} • 
-                        {isRu ? ' до ' : ' until '}
-                        {format(new Date(booking.check_out), 'd MMM', { locale: isRu ? ru : undefined })}
-                      </p>
-                    </div>
-                    <Badge variant="secondary" className="bg-green-500/20 text-green-700">
-                      {isRu ? 'Активно' : 'Active'}
-                    </Badge>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
 
-          {/* Upcoming */}
-          {upcomingBookings.length > 0 ? (
+          {/* Upcoming - from canonical orders */}
+          {upcomingOrders.length > 0 ? (
             <div>
               <p className="text-xs font-medium text-muted-foreground mb-2">
                 {isRu ? 'Предстоящие' : 'Upcoming'}
               </p>
               <div className="space-y-2">
-                {upcomingBookings.slice(0, 3).map((booking) => {
-                  const checkIn = new Date(booking.check_in);
+                {upcomingOrders.slice(0, 3).map((order) => {
+                  const checkIn = order.start_at ? new Date(order.start_at) : new Date();
                   const daysUntil = differenceInDays(checkIn, new Date());
+                  const guestName = (order.metadata as any)?.guest_name || (isRu ? 'Гость' : 'Guest');
                   
                   return (
                     <div 
-                      key={booking.id}
+                      key={order.id}
                       className="flex items-center gap-3 p-3 rounded-xl bg-muted/50"
                     >
                       <div className="p-2 rounded-full bg-primary/20">
                         <Calendar className="h-4 w-4 text-primary" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">
-                          {booking.guest_name || (isRu ? 'Гость' : 'Guest')}
-                        </p>
+                        <p className="font-medium text-sm truncate">{guestName}</p>
                         <p className="text-xs text-muted-foreground">
-                          {(booking as any).owner_properties?.title} • 
+                          {order.items?.[0]?.product_name || order.order_number} • 
                           {format(checkIn, 'd MMM', { locale: isRu ? ru : undefined })}
                         </p>
                       </div>
@@ -314,7 +311,7 @@ export default function OwnerDashboard() {
                 })}
               </div>
             </div>
-          ) : activeBookings.length === 0 && (
+          ) : activeOrders.length === 0 && (
             <div className="text-center py-6 text-muted-foreground">
               <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p className="text-sm">{isRu ? 'Нет предстоящих бронирований' : 'No upcoming bookings'}</p>
