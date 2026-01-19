@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Navigation, Clock, Users, Check, Minus, Plus, Loader2 } from 'lucide-react';
+import { MapPin, Navigation, Clock, Users, Check, Minus, Plus, Loader2, Crosshair } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,6 +14,7 @@ import { useVehicleTypes, VehicleType } from '@/hooks/useTransportConfig';
 import { cn } from '@/lib/utils';
 import LocationPickerMap from '@/components/transport/LocationPickerMap';
 import { BackButton } from '@/components/uno/BackButton';
+import { supabase } from '@/integrations/supabase/client';
 
 // Time options generator
 const getTimeOptions = (language: string) => {
@@ -69,6 +70,7 @@ export default function TaxiBooking() {
 
   const [isSuccess, setIsSuccess] = useState(false);
   const [locationPickerType, setLocationPickerType] = useState<'pickup' | 'destination' | null>(null);
+  const [isGettingCurrentLocation, setIsGettingCurrentLocation] = useState(false);
   
   const [pickupLocation, setPickupLocation] = useState<LocationData | null>(null);
   const [destinationLocation, setDestinationLocation] = useState<LocationData | null>(null);
@@ -80,6 +82,72 @@ export default function TaxiBooking() {
     phone: '',
     notes: '',
   });
+
+  // Get current location and reverse geocode
+  const useCurrentLocation = async () => {
+    if (!navigator.geolocation) {
+      toast({
+        title: language === 'ru' ? 'Геолокация недоступна' : 'Geolocation unavailable',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsGettingCurrentLocation(true);
+    
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+        });
+      });
+
+      const { latitude, longitude } = position.coords;
+      
+      // Get mapbox token and reverse geocode
+      const { data: tokenData } = await supabase.functions.invoke('get-mapbox-token');
+      if (tokenData?.token) {
+        const response = await fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${tokenData.token}&language=${language}`
+        );
+        const data = await response.json();
+        
+        const address = data.features?.[0]?.place_name || 
+          (language === 'ru' ? 'Текущее местоположение' : 'Current location');
+        
+        setPickupLocation({
+          address,
+          lat: latitude,
+          lng: longitude,
+        });
+        
+        toast({
+          title: language === 'ru' ? 'Местоположение определено' : 'Location detected',
+          description: address,
+        });
+      }
+    } catch (error: any) {
+      let message = language === 'ru' ? 'Не удалось определить местоположение' : 'Could not get location';
+      
+      if (error.code === 1) {
+        message = language === 'ru' 
+          ? 'Доступ к геолокации запрещён. Разрешите в настройках браузера.' 
+          : 'Location access denied. Enable in browser settings.';
+      } else if (error.code === 2) {
+        message = language === 'ru' ? 'Местоположение недоступно' : 'Location unavailable';
+      } else if (error.code === 3) {
+        message = language === 'ru' ? 'Превышено время ожидания' : 'Request timed out';
+      }
+      
+      toast({
+        title: message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsGettingCurrentLocation(false);
+    }
+  };
 
   // Set default vehicle type when loaded
   useEffect(() => {
@@ -254,6 +322,31 @@ export default function TaxiBooking() {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Route Selection */}
           <div className="p-4 rounded-xl bg-card border border-border/50 space-y-3">
+            {/* Current Location Quick Button */}
+            <button
+              type="button"
+              onClick={useCurrentLocation}
+              disabled={isGettingCurrentLocation}
+              className="w-full flex items-center gap-3 p-3 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/20 transition-colors text-left"
+            >
+              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                {isGettingCurrentLocation ? (
+                  <Loader2 className="w-4 h-4 text-primary animate-spin" />
+                ) : (
+                  <Crosshair className="w-4 h-4 text-primary" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-primary">
+                  {language === 'ru' ? 'Моё местоположение' : 'My location'}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {language === 'ru' ? 'Определить автоматически' : 'Detect automatically'}
+                </p>
+              </div>
+              <Navigation className="w-5 h-5 text-primary" />
+            </button>
+
             {/* Pickup */}
             <button
               type="button"
