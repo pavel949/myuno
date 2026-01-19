@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVendorProfile } from '@/hooks/useVendor';
 import { useVendorTours, VendorTour } from '@/hooks/useVendorTours';
+import { useFormDraft } from '@/hooks/useFormDraft';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -11,17 +12,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog';
 import {
   DropdownMenu,
@@ -39,12 +37,24 @@ import {
   Clock,
   Users,
   MapPin,
-  Loader2,
   Star,
-  X
+  FileText,
+  Image,
+  CheckCircle,
+  Settings
 } from 'lucide-react';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
-import { CardPreview, CardPreviewSection } from '@/components/vendor/CardPreview';
+import {
+  CardPreview,
+  CardPreviewSection,
+  VendorFormSection,
+  VendorFormWizard,
+  WizardStepContent,
+  FormFieldWithHelp,
+  DraftIndicator,
+  DraftRestorationBanner,
+  type WizardStep,
+} from '@/components/vendor';
 
 const tourCategories = [
   { id: 'island', label: 'Island Hopping', labelRu: 'Острова' },
@@ -61,6 +71,42 @@ const difficultyLevels = [
   { id: 'challenging', label: 'Challenging', labelRu: 'Сложный' },
 ];
 
+interface TourFormData {
+  title_en: string;
+  title_ru: string;
+  description_en: string;
+  description_ru: string;
+  category: string;
+  difficulty: string;
+  duration_hours: string;
+  price: string;
+  max_participants: string;
+  meeting_point: string;
+  cover_image: string;
+  images: string[];
+  includes: string;
+  highlights: string;
+  is_active: boolean;
+}
+
+const initialFormData: TourFormData = {
+  title_en: '',
+  title_ru: '',
+  description_en: '',
+  description_ru: '',
+  category: 'island',
+  difficulty: 'easy',
+  duration_hours: '4',
+  price: '',
+  max_participants: '10',
+  meeting_point: '',
+  cover_image: '',
+  images: [],
+  includes: '',
+  highlights: '',
+  is_active: true,
+};
+
 const VendorTours = () => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
@@ -72,26 +118,93 @@ const VendorTours = () => {
   const [editingTour, setEditingTour] = useState<VendorTour | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [showDraftBanner, setShowDraftBanner] = useState(false);
 
-  const [formData, setFormData] = useState({
-    title_en: '',
-    title_ru: '',
-    description_en: '',
-    description_ru: '',
-    category: 'island',
-    difficulty: 'easy',
-    duration_hours: '4',
-    price: '',
-    max_participants: '10',
-    meeting_point: '',
-    cover_image: '',
-    images: [] as string[],
-    includes: '',
-    highlights: '',
-    is_active: true,
+  // Form draft auto-save
+  const {
+    formData,
+    setFormData,
+    updateField,
+    hasDraft,
+    lastSaved,
+    clearDraft,
+    resetForm: resetDraft,
+    restoreDraft,
+  } = useFormDraft<TourFormData>({
+    key: 'tour_form',
+    initialData: initialFormData,
   });
 
+  // Form validation
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  
+  const errors = useMemo(() => {
+    const errs: Record<string, string> = {};
+    
+    if (touched.title_en && !formData.title_en.trim()) {
+      errs.title_en = isRussian ? 'Название обязательно' : 'Title is required';
+    }
+    
+    if (touched.price) {
+      if (!formData.price) {
+        errs.price = isRussian ? 'Укажите цену' : 'Price is required';
+      } else if (parseFloat(formData.price) <= 0) {
+        errs.price = isRussian ? 'Цена должна быть больше 0' : 'Price must be greater than 0';
+      }
+    }
+    
+    if (touched.duration_hours && (!formData.duration_hours || parseInt(formData.duration_hours) <= 0)) {
+      errs.duration_hours = isRussian ? 'Укажите длительность' : 'Duration is required';
+    }
+    
+    if (touched.max_participants && (!formData.max_participants || parseInt(formData.max_participants) <= 0)) {
+      errs.max_participants = isRussian ? 'Укажите количество участников' : 'Max participants is required';
+    }
+    
+    return errs;
+  }, [formData, touched]);
+
   const isRussian = language === 'ru';
+
+  // Wizard steps
+  const wizardSteps: WizardStep[] = [
+    { 
+      id: 'basic', 
+      title: 'Basic Info', 
+      titleRu: 'Основное',
+      icon: <FileText className="h-4 w-4" />,
+      validate: () => {
+        if (!formData.title_en.trim()) {
+          setTouched(prev => ({ ...prev, title_en: true }));
+          return isRussian ? 'Заполните название' : 'Please fill in the title';
+        }
+        if (!formData.price || parseFloat(formData.price) <= 0) {
+          setTouched(prev => ({ ...prev, price: true }));
+          return isRussian ? 'Укажите цену' : 'Please enter a price';
+        }
+        return null;
+      }
+    },
+    { 
+      id: 'details', 
+      title: 'Details', 
+      titleRu: 'Детали',
+      icon: <Settings className="h-4 w-4" />
+    },
+    { 
+      id: 'media', 
+      title: 'Photos', 
+      titleRu: 'Фото',
+      icon: <Image className="h-4 w-4" />
+    },
+    { 
+      id: 'review', 
+      title: 'Review', 
+      titleRu: 'Проверка',
+      icon: <CheckCircle className="h-4 w-4" />
+    },
+  ];
 
   React.useEffect(() => {
     if (!authLoading && !user) {
@@ -106,24 +219,19 @@ const VendorTours = () => {
   }, [profile, profileLoading, user, navigate]);
 
   const resetForm = () => {
-    setFormData({
-      title_en: '',
-      title_ru: '',
-      description_en: '',
-      description_ru: '',
-      category: 'island',
-      difficulty: 'easy',
-      duration_hours: '4',
-      price: '',
-      max_participants: '10',
-      meeting_point: '',
-      cover_image: '',
-      images: [],
-      includes: '',
-      highlights: '',
-      is_active: true,
-    });
+    resetDraft();
+    setTouched({});
     setEditingTour(null);
+    setCurrentStep(0);
+  };
+
+  const openNewDialog = () => {
+    resetForm();
+    // Check if there's a saved draft
+    if (hasDraft) {
+      setShowDraftBanner(true);
+    }
+    setIsDialogOpen(true);
   };
 
   const openEditDialog = (tour: VendorTour) => {
@@ -145,10 +253,14 @@ const VendorTours = () => {
       highlights: (tour.highlights || []).join('\n'),
       is_active: tour.is_active ?? true,
     });
+    setTouched({});
+    setCurrentStep(0);
+    setShowDraftBanner(false);
     setIsDialogOpen(true);
   };
 
   const handleSubmit = async () => {
+    // Final validation
     if (!formData.title_en || !formData.price) {
       toast.error(isRussian ? 'Заполните обязательные поля' : 'Please fill required fields');
       return;
@@ -190,6 +302,7 @@ const VendorTours = () => {
 
       setIsDialogOpen(false);
       resetForm();
+      clearDraft();
     } catch (error) {
       console.error('Error saving tour:', error);
       toast.error(isRussian ? 'Ошибка при сохранении' : 'Error saving tour');
@@ -208,6 +321,10 @@ const VendorTours = () => {
       console.error('Error deleting tour:', error);
       toast.error(isRussian ? 'Ошибка при удалении' : 'Error deleting tour');
     }
+  };
+
+  const handleBlur = (field: string) => {
+    setTouched(prev => ({ ...prev, [field]: true }));
   };
 
   if (authLoading || profileLoading) {
@@ -237,10 +354,7 @@ const VendorTours = () => {
 
         <Button 
           className="w-full mb-4" 
-          onClick={() => {
-            resetForm();
-            setIsDialogOpen(true);
-          }}
+          onClick={openNewDialog}
         >
           <Plus className="h-4 w-4 mr-2" />
           {isRussian ? 'Добавить тур' : 'Add Tour'}
@@ -350,203 +464,321 @@ const VendorTours = () => {
           </div>
         )}
 
-        {/* Add/Edit Dialog */}
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                {editingTour 
-                  ? (isRussian ? 'Редактировать тур' : 'Edit Tour')
-                  : (isRussian ? 'Новый тур' : 'New Tour')}
-              </DialogTitle>
+        {/* Add/Edit Dialog with Wizard */}
+        <Dialog open={isDialogOpen} onOpenChange={(open) => {
+          if (!open) {
+            setShowDraftBanner(false);
+          }
+          setIsDialogOpen(open);
+        }}>
+          <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
+            <DialogHeader className="flex-shrink-0">
+              <div className="flex items-center justify-between">
+                <DialogTitle>
+                  {editingTour 
+                    ? (isRussian ? 'Редактировать тур' : 'Edit Tour')
+                    : (isRussian ? 'Новый тур' : 'New Tour')}
+                </DialogTitle>
+                {!editingTour && (
+                  <DraftIndicator
+                    hasDraft={hasDraft}
+                    lastSaved={lastSaved}
+                    onClear={clearDraft}
+                    onRestore={restoreDraft}
+                  />
+                )}
+              </div>
             </DialogHeader>
 
-            <div className="grid md:grid-cols-[1fr,280px] gap-6 py-4">
-              {/* Form */}
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>{isRussian ? 'Категория' : 'Category'}</Label>
-                    <Select
-                      value={formData.category}
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {tourCategories.map(cat => (
-                          <SelectItem key={cat.id} value={cat.id}>
-                            {isRussian ? cat.labelRu : cat.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{isRussian ? 'Сложность' : 'Difficulty'}</Label>
-                    <Select
-                      value={formData.difficulty}
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, difficulty: value }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {difficultyLevels.map(level => (
-                          <SelectItem key={level.id} value={level.id}>
-                            {isRussian ? level.labelRu : level.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+            {/* Draft restoration banner */}
+            {showDraftBanner && !editingTour && (
+              <DraftRestorationBanner
+                onRestore={() => {
+                  restoreDraft();
+                  setShowDraftBanner(false);
+                }}
+                onDiscard={() => {
+                  resetDraft();
+                  setShowDraftBanner(false);
+                }}
+              />
+            )}
 
-                <div className="space-y-2">
-                  <Label htmlFor="title_en">{isRussian ? 'Название (EN) *' : 'Title (EN) *'}</Label>
-                  <Input
-                    id="title_en"
-                    value={formData.title_en}
-                    onChange={(e) => setFormData(prev => ({ ...prev, title_en: e.target.value }))}
-                    placeholder="Phi Phi Islands Day Trip"
-                  />
-                </div>
+            <div className="flex-1 min-h-0 grid md:grid-cols-[1fr,280px] gap-6">
+              {/* Wizard Form */}
+              <VendorFormWizard
+                steps={wizardSteps}
+                currentStep={currentStep}
+                onStepChange={setCurrentStep}
+                onSubmit={handleSubmit}
+                isSubmitting={isSubmitting}
+                submitLabel="Create Tour"
+                submitLabelRu="Создать тур"
+              >
+                {/* Step 1: Basic Info */}
+                <WizardStepContent stepId="basic" currentStepId={wizardSteps[currentStep].id}>
+                  <VendorFormSection
+                    title={isRussian ? 'Основная информация' : 'Basic Information'}
+                    description={isRussian ? 'Название и описание тура' : 'Tour name and description'}
+                    icon={<FileText className="h-4 w-4" />}
+                  >
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>{isRussian ? 'Категория' : 'Category'}</Label>
+                        <Select
+                          value={formData.category}
+                          onValueChange={(value) => updateField('category', value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {tourCategories.map(cat => (
+                              <SelectItem key={cat.id} value={cat.id}>
+                                {isRussian ? cat.labelRu : cat.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>{isRussian ? 'Сложность' : 'Difficulty'}</Label>
+                        <Select
+                          value={formData.difficulty}
+                          onValueChange={(value) => updateField('difficulty', value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {difficultyLevels.map(level => (
+                              <SelectItem key={level.id} value={level.id}>
+                                {isRussian ? level.labelRu : level.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="title_ru">{isRussian ? 'Название (RU)' : 'Title (Russian)'}</Label>
-                  <Input
-                    id="title_ru"
-                    value={formData.title_ru}
-                    onChange={(e) => setFormData(prev => ({ ...prev, title_ru: e.target.value }))}
-                    placeholder="Экскурсия на острова Пхи-Пхи"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="description_en">{isRussian ? 'Описание (EN)' : 'Description (EN)'}</Label>
-                  <Textarea
-                    id="description_en"
-                    value={formData.description_en}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description_en: e.target.value }))}
-                    rows={3}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="description_ru">{isRussian ? 'Описание (RU)' : 'Description (Russian)'}</Label>
-                  <Textarea
-                    id="description_ru"
-                    value={formData.description_ru}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description_ru: e.target.value }))}
-                    rows={3}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="price">{isRussian ? 'Цена (฿) *' : 'Price (฿) *'}</Label>
-                    <Input
-                      id="price"
-                      type="number"
-                      value={formData.price}
-                      onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                      placeholder="2500"
+                    <FormFieldWithHelp
+                      label={isRussian ? 'Название (EN)' : 'Title (EN)'}
+                      name="title_en"
+                      value={formData.title_en}
+                      onChange={(value) => updateField('title_en', value)}
+                      required
+                      placeholder="Phi Phi Islands Day Trip"
+                      helpText={isRussian ? 'Название на английском для международных гостей' : 'English title for international guests'}
+                      error={errors.title_en}
+                      isValid={!!formData.title_en && !errors.title_en}
                     />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="duration">{isRussian ? 'Длительность (ч)' : 'Duration (hours)'}</Label>
-                    <Input
-                      id="duration"
-                      type="number"
-                      value={formData.duration_hours}
-                      onChange={(e) => setFormData(prev => ({ ...prev, duration_hours: e.target.value }))}
+
+                    <FormFieldWithHelp
+                      label={isRussian ? 'Название (RU)' : 'Title (Russian)'}
+                      name="title_ru"
+                      value={formData.title_ru}
+                      onChange={(value) => updateField('title_ru', value)}
+                      placeholder="Экскурсия на острова Пхи-Пхи"
+                      example={isRussian ? 'Оставьте пустым для автоперевода' : 'Leave empty for auto-translation'}
                     />
-                  </div>
-                </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="max_participants">{isRussian ? 'Макс. участников' : 'Max Participants'}</Label>
-                  <Input
-                    id="max_participants"
-                    type="number"
-                    value={formData.max_participants}
-                    onChange={(e) => setFormData(prev => ({ ...prev, max_participants: e.target.value }))}
-                  />
-                </div>
+                    <FormFieldWithHelp
+                      label={isRussian ? 'Описание (EN)' : 'Description (EN)'}
+                      name="description_en"
+                      value={formData.description_en}
+                      onChange={(value) => updateField('description_en', value)}
+                      type="textarea"
+                      rows={3}
+                      helpText={isRussian ? 'Подробное описание тура' : 'Detailed tour description'}
+                    />
 
-                <div className="space-y-2">
-                  <Label htmlFor="meeting_point">{isRussian ? 'Место встречи' : 'Meeting Point'}</Label>
-                  <Input
-                    id="meeting_point"
-                    value={formData.meeting_point}
-                    onChange={(e) => setFormData(prev => ({ ...prev, meeting_point: e.target.value }))}
-                    placeholder="Chalong Pier"
-                  />
-                </div>
+                    <FormFieldWithHelp
+                      label={isRussian ? 'Описание (RU)' : 'Description (Russian)'}
+                      name="description_ru"
+                      value={formData.description_ru}
+                      onChange={(value) => updateField('description_ru', value)}
+                      type="textarea"
+                      rows={3}
+                    />
+                  </VendorFormSection>
 
-                <div className="space-y-2">
-                  <Label>{isRussian ? 'Фото обложки' : 'Cover Image'}</Label>
-                  <ImageUpload
-                    value={formData.cover_image}
-                    onChange={(url) => setFormData(prev => ({ ...prev, cover_image: url }))}
-                    folder="tours"
-                    placeholder={isRussian ? 'Загрузить фото' : 'Upload photo'}
-                  />
-                </div>
+                  <VendorFormSection
+                    title={isRussian ? 'Цена и время' : 'Price & Time'}
+                    icon={<Clock className="h-4 w-4" />}
+                    className="mt-6"
+                  >
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormFieldWithHelp
+                        label={isRussian ? 'Цена (฿)' : 'Price (฿)'}
+                        name="price"
+                        value={formData.price}
+                        onChange={(value) => updateField('price', value)}
+                        type="number"
+                        required
+                        placeholder="2500"
+                        min={0}
+                        error={errors.price}
+                        isValid={!!formData.price && parseFloat(formData.price) > 0}
+                      />
+                      <FormFieldWithHelp
+                        label={isRussian ? 'Длительность (часы)' : 'Duration (hours)'}
+                        name="duration_hours"
+                        value={formData.duration_hours}
+                        onChange={(value) => updateField('duration_hours', value)}
+                        type="number"
+                        min={1}
+                        max={24}
+                        error={errors.duration_hours}
+                      />
+                    </div>
+                  </VendorFormSection>
+                </WizardStepContent>
 
-                <div className="space-y-2">
-                  <Label>{isRussian ? 'Галерея фото' : 'Photo Gallery'}</Label>
-                  <MultiImageUpload
-                    value={formData.images}
-                    onChange={(urls) => setFormData(prev => ({ ...prev, images: urls }))}
-                    folder="tours"
-                    maxImages={8}
-                  />
-                </div>
+                {/* Step 2: Details */}
+                <WizardStepContent stepId="details" currentStepId={wizardSteps[currentStep].id}>
+                  <VendorFormSection
+                    title={isRussian ? 'Параметры тура' : 'Tour Parameters'}
+                    icon={<Settings className="h-4 w-4" />}
+                  >
+                    <FormFieldWithHelp
+                      label={isRussian ? 'Макс. участников' : 'Max Participants'}
+                      name="max_participants"
+                      value={formData.max_participants}
+                      onChange={(value) => updateField('max_participants', value)}
+                      type="number"
+                      min={1}
+                      helpText={isRussian ? 'Максимальное количество гостей в группе' : 'Maximum guests per group'}
+                    />
 
-                <div className="space-y-2">
-                  <Label htmlFor="includes">
-                    {isRussian ? 'Что включено (по одному на строку)' : "What's Included (one per line)"}
-                  </Label>
-                  <Textarea
-                    id="includes"
-                    value={formData.includes}
-                    onChange={(e) => setFormData(prev => ({ ...prev, includes: e.target.value }))}
-                    rows={3}
-                    placeholder={isRussian 
-                      ? "Трансфер из отеля\nОбед\nСнаряжение для снорклинга" 
-                      : "Hotel pickup\nLunch\nSnorkeling gear"}
-                  />
-                </div>
+                    <FormFieldWithHelp
+                      label={isRussian ? 'Место встречи' : 'Meeting Point'}
+                      name="meeting_point"
+                      value={formData.meeting_point}
+                      onChange={(value) => updateField('meeting_point', value)}
+                      placeholder="Chalong Pier"
+                      helpText={isRussian ? 'Где гости встречаются с гидом' : 'Where guests meet the guide'}
+                    />
+                  </VendorFormSection>
 
-                <div className="space-y-2">
-                  <Label htmlFor="highlights">
-                    {isRussian ? 'Основные моменты (по одному на строку)' : 'Highlights (one per line)'}
-                  </Label>
-                  <Textarea
-                    id="highlights"
-                    value={formData.highlights}
-                    onChange={(e) => setFormData(prev => ({ ...prev, highlights: e.target.value }))}
-                    rows={3}
-                    placeholder={isRussian 
-                      ? "Посещение Maya Bay\nСнорклинг с рыбками\nЗакат на пляже" 
-                      : "Visit Maya Bay\nSnorkeling with fish\nBeach sunset"}
-                  />
-                </div>
+                  <VendorFormSection
+                    title={isRussian ? 'Что включено' : "What's Included"}
+                    icon={<CheckCircle className="h-4 w-4" />}
+                    className="mt-6"
+                  >
+                    <FormFieldWithHelp
+                      label={isRussian ? 'Включено в стоимость' : 'Included in price'}
+                      name="includes"
+                      value={formData.includes}
+                      onChange={(value) => updateField('includes', value)}
+                      type="textarea"
+                      rows={4}
+                      placeholder={isRussian 
+                        ? "Трансфер из отеля\nОбед\nСнаряжение для снорклинга" 
+                        : "Hotel pickup\nLunch\nSnorkeling gear"}
+                      example={isRussian ? 'По одному пункту на строку' : 'One item per line'}
+                    />
 
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="is_active">{isRussian ? 'Тур активен' : 'Tour active'}</Label>
-                  <Switch
-                    id="is_active"
-                    checked={formData.is_active}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
-                  />
-                </div>
-              </div>
+                    <FormFieldWithHelp
+                      label={isRussian ? 'Основные моменты' : 'Highlights'}
+                      name="highlights"
+                      value={formData.highlights}
+                      onChange={(value) => updateField('highlights', value)}
+                      type="textarea"
+                      rows={4}
+                      placeholder={isRussian 
+                        ? "Посещение Maya Bay\nСнорклинг с рыбками\nЗакат на пляже" 
+                        : "Visit Maya Bay\nSnorkeling with fish\nBeach sunset"}
+                      example={isRussian ? 'По одному пункту на строку' : 'One item per line'}
+                    />
+                  </VendorFormSection>
+                </WizardStepContent>
 
-              {/* Preview */}
-              <CardPreviewSection className="hidden md:block sticky top-0">
+                {/* Step 3: Photos */}
+                <WizardStepContent stepId="media" currentStepId={wizardSteps[currentStep].id}>
+                  <VendorFormSection
+                    title={isRussian ? 'Фотографии' : 'Photos'}
+                    description={isRussian ? 'Добавьте качественные фото тура' : 'Add high-quality tour photos'}
+                    icon={<Image className="h-4 w-4" />}
+                    helpText={isRussian 
+                      ? 'Первое фото будет использоваться как обложка' 
+                      : 'First photo will be used as cover'}
+                  >
+                    <div className="space-y-2">
+                      <Label>{isRussian ? 'Фото обложки' : 'Cover Image'}</Label>
+                      <ImageUpload
+                        value={formData.cover_image}
+                        onChange={(url) => updateField('cover_image', url)}
+                        folder="tours"
+                        placeholder={isRussian ? 'Загрузить фото' : 'Upload photo'}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>{isRussian ? 'Галерея фото' : 'Photo Gallery'}</Label>
+                      <MultiImageUpload
+                        value={formData.images}
+                        onChange={(urls) => updateField('images', urls)}
+                        folder="tours"
+                        maxImages={8}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        {isRussian ? 'До 8 фотографий' : 'Up to 8 photos'}
+                      </p>
+                    </div>
+                  </VendorFormSection>
+                </WizardStepContent>
+
+                {/* Step 4: Review */}
+                <WizardStepContent stepId="review" currentStepId={wizardSteps[currentStep].id}>
+                  <VendorFormSection
+                    title={isRussian ? 'Проверка и публикация' : 'Review & Publish'}
+                    description={isRussian ? 'Проверьте данные перед сохранением' : 'Review details before saving'}
+                    icon={<CheckCircle className="h-4 w-4" />}
+                  >
+                    <div className="space-y-4">
+                      <div className="p-4 bg-muted/50 rounded-lg space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">{isRussian ? 'Название' : 'Title'}:</span>
+                          <span className="font-medium">{formData.title_en || '-'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">{isRussian ? 'Категория' : 'Category'}:</span>
+                          <span>{tourCategories.find(c => c.id === formData.category)?.[isRussian ? 'labelRu' : 'label']}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">{isRussian ? 'Цена' : 'Price'}:</span>
+                          <span className="font-bold text-primary">฿{parseFloat(formData.price || '0').toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">{isRussian ? 'Длительность' : 'Duration'}:</span>
+                          <span>{formData.duration_hours} {isRussian ? 'ч' : 'h'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">{isRussian ? 'Участники' : 'Participants'}:</span>
+                          <span>{isRussian ? 'до' : 'up to'} {formData.max_participants}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <Label htmlFor="is_active">{isRussian ? 'Опубликовать сразу' : 'Publish immediately'}</Label>
+                          <p className="text-xs text-muted-foreground">
+                            {isRussian ? 'Тур станет видимым для клиентов' : 'Tour will be visible to customers'}
+                          </p>
+                        </div>
+                        <Switch
+                          id="is_active"
+                          checked={formData.is_active}
+                          onCheckedChange={(checked) => updateField('is_active', checked)}
+                        />
+                      </div>
+                    </div>
+                  </VendorFormSection>
+                </WizardStepContent>
+              </VendorFormWizard>
+
+              {/* Preview Panel */}
+              <CardPreviewSection className="hidden md:block">
                 <CardPreview
                   type="tour"
                   image={formData.cover_image}
@@ -563,16 +795,6 @@ const VendorTours = () => {
                 />
               </CardPreviewSection>
             </div>
-
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                {isRussian ? 'Отмена' : 'Cancel'}
-              </Button>
-              <Button onClick={handleSubmit} disabled={isSubmitting}>
-                {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                {isRussian ? 'Сохранить' : 'Save'}
-              </Button>
-            </DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -585,14 +807,14 @@ const VendorTours = () => {
             <p className="text-sm text-muted-foreground">
               {isRussian ? 'Это действие нельзя отменить.' : 'This action cannot be undone.'}
             </p>
-            <DialogFooter>
+            <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={() => setDeleteConfirmId(null)}>
                 {isRussian ? 'Отмена' : 'Cancel'}
               </Button>
               <Button variant="destructive" onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)}>
                 {isRussian ? 'Удалить' : 'Delete'}
               </Button>
-            </DialogFooter>
+            </div>
           </DialogContent>
         </Dialog>
       </PageContainer>
