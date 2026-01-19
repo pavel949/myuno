@@ -22,7 +22,8 @@ import {
   UtilitiesInfo, 
   CheckInDetails, 
   HouseRules,
-  PropertyPriceBreakdown 
+  PropertyPriceBreakdown,
+  PropertyBookingCard
 } from '@/components/property';
 import { ProjectInfoCard } from '@/components/property/ProjectInfoCard';
 import { UnitSpecs } from '@/components/property/UnitSpecs';
@@ -366,7 +367,11 @@ export default function PropertyDetail() {
           </button>
         </div>
 
-        <div className="px-4 py-6 space-y-6">
+        {/* Main Content with Sidebar Layout for Desktop */}
+        <div className="px-4 py-6">
+          <div className="grid lg:grid-cols-[1fr,380px] gap-8">
+            {/* Main Content Column */}
+            <div className="space-y-6">
           {/* Title Section - Airbnb Style */}
           <div>
             <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground leading-tight">
@@ -727,10 +732,22 @@ export default function PropertyDetail() {
               <p>{property.address || property.district}</p>
             </div>
           </div>
+            </div>
+
+            {/* Sidebar - Booking Card (Desktop Only) */}
+            <div className="hidden lg:block">
+              <PropertyBookingCard
+                propertyId={id || 'prop-1'}
+                pricePerNight={pricePerNight}
+                rentalTerms={rentalTerms}
+                currency="THB"
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Fixed Bottom CTA - Enhanced */}
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-md border-t border-border shadow-lg">
+        {/* Fixed Bottom CTA - Mobile Only */}
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-md border-t border-border shadow-lg lg:hidden">
           <div className="max-w-7xl mx-auto flex items-center gap-3">
             <div className="flex-1 min-w-0">
               <div className="flex items-baseline gap-1">
