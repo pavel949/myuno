@@ -98,7 +98,6 @@ interface YachtFormData {
   bathrooms: string;
   has_crew: boolean;
   is_featured: boolean;
-  is_active: boolean;
 }
 
 const initialFormData: YachtFormData = {
@@ -128,7 +127,6 @@ const initialFormData: YachtFormData = {
   bathrooms: '',
   has_crew: true,
   is_featured: false,
-  is_active: true,
 };
 
 const VendorYachts = () => {
@@ -169,7 +167,7 @@ const VendorYachts = () => {
       id: 'basic', 
       title: 'Basic Info', 
       titleRu: 'Основное',
-      icon: FileText,
+      icon: <FileText className="h-4 w-4" />,
       validate: () => {
         const newErrors: Record<string, string> = {};
         if (!formData.name_en.trim()) {
@@ -179,36 +177,36 @@ const VendorYachts = () => {
           newErrors.yacht_type = isRussian ? 'Выберите тип' : 'Select type';
         }
         setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+        return Object.keys(newErrors).length === 0 ? null : 'Validation failed';
       }
     },
     { 
       id: 'specs', 
       title: 'Specifications', 
       titleRu: 'Характеристики',
-      icon: Settings,
+      icon: <Settings className="h-4 w-4" />,
       validate: () => {
         const newErrors: Record<string, string> = {};
         if (!formData.price_full_day) {
           newErrors.price_full_day = isRussian ? 'Укажите цену' : 'Set price';
         }
         setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+        return Object.keys(newErrors).length === 0 ? null : 'Validation failed';
       }
     },
     { 
       id: 'photos', 
       title: 'Photos', 
       titleRu: 'Фото',
-      icon: Image,
-      validate: () => true
+      icon: <Image className="h-4 w-4" />,
+      validate: () => null
     },
     { 
       id: 'review', 
       title: 'Review', 
       titleRu: 'Проверка',
-      icon: Eye,
-      validate: () => true
+      icon: <Eye className="h-4 w-4" />,
+      validate: () => null
     },
   ], [formData, isRussian]);
 
@@ -262,7 +260,6 @@ const VendorYachts = () => {
       bathrooms: yacht.bathrooms?.toString() || '',
       has_crew: yacht.has_crew ?? true,
       is_featured: yacht.is_featured,
-      is_active: true,
     });
     setCurrentStep(0);
     setIsDialogOpen(true);
@@ -304,7 +301,6 @@ const VendorYachts = () => {
         bathrooms: formData.bathrooms ? parseInt(formData.bathrooms) : undefined,
         has_crew: formData.has_crew,
         is_featured: formData.is_featured,
-        is_active: formData.is_active,
       };
 
       if (editingYacht) {
@@ -507,8 +503,8 @@ const VendorYachts = () => {
                               {isRussian ? 'Редактировать' : 'Edit'}
                             </DropdownMenuItem>
                             <DropdownMenuItem 
-                              className="text-red-500"
                               onClick={() => setDeleteConfirmId(yacht.id)}
+                              className="text-destructive"
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
                               {isRussian ? 'Удалить' : 'Delete'}
@@ -524,27 +520,32 @@ const VendorYachts = () => {
           </div>
         )}
 
-        {/* Delete confirmation */}
+        {/* Delete Confirmation Dialog */}
         <Dialog open={!!deleteConfirmId} onOpenChange={() => setDeleteConfirmId(null)}>
-          <DialogContent>
+          <DialogContent className="max-w-sm">
             <DialogHeader>
-              <DialogTitle>{isRussian ? 'Удалить яхту?' : 'Delete yacht?'}</DialogTitle>
+              <DialogTitle>
+                {isRussian ? 'Удалить яхту?' : 'Delete yacht?'}
+              </DialogTitle>
             </DialogHeader>
-            <p className="text-muted-foreground">
-              {isRussian ? 'Это действие нельзя отменить' : 'This action cannot be undone'}
+            <p className="text-sm text-muted-foreground">
+              {isRussian ? 'Это действие нельзя отменить.' : 'This action cannot be undone.'}
             </p>
             <div className="flex gap-2 justify-end">
               <Button variant="outline" onClick={() => setDeleteConfirmId(null)}>
                 {isRussian ? 'Отмена' : 'Cancel'}
               </Button>
-              <Button variant="destructive" onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)}>
+              <Button 
+                variant="destructive" 
+                onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)}
+              >
                 {isRussian ? 'Удалить' : 'Delete'}
               </Button>
             </div>
           </DialogContent>
         </Dialog>
 
-        {/* Add/Edit Dialog with Wizard */}
+        {/* Edit/Add Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={(open) => {
           if (!open && !editingYacht) {
             // Keep draft when closing without editing
@@ -584,14 +585,14 @@ const VendorYachts = () => {
                     <VendorFormSection
                       title={isRussian ? 'Название яхты' : 'Yacht Name'}
                       description={isRussian ? 'Укажите название на двух языках' : 'Provide name in two languages'}
-                      icon={Ship}
+                      icon={<Ship className="h-4 w-4" />}
                     >
                       <div className="grid md:grid-cols-2 gap-4">
                         <FormFieldWithHelp
                           label={isRussian ? 'Название (EN)' : 'Name (EN)'}
                           name="name_en"
                           value={formData.name_en}
-                          onChange={(e) => updateField('name_en', e.target.value)}
+                          onChange={(value) => updateField('name_en', value)}
                           placeholder="Luxury Yacht 42ft"
                           example="Princess 65, Sunseeker Manhattan"
                           required
@@ -602,7 +603,7 @@ const VendorYachts = () => {
                           label={isRussian ? 'Название (RU)' : 'Name (RU)'}
                           name="name_ru"
                           value={formData.name_ru}
-                          onChange={(e) => updateField('name_ru', e.target.value)}
+                          onChange={(value) => updateField('name_ru', value)}
                           placeholder="Люксовая яхта 42ft"
                           helpText={isRussian ? 'Оставьте пустым для автозаполнения' : 'Leave empty to auto-fill'}
                         />
@@ -611,7 +612,7 @@ const VendorYachts = () => {
 
                     <VendorFormSection
                       title={isRussian ? 'Тип судна' : 'Vessel Type'}
-                      icon={Anchor}
+                      icon={<Anchor className="h-4 w-4" />}
                     >
                       <div className="space-y-2">
                         <Label>{isRussian ? 'Тип яхты' : 'Yacht Type'}</Label>
@@ -639,7 +640,7 @@ const VendorYachts = () => {
                     <VendorFormSection
                       title={isRussian ? 'Описание' : 'Description'}
                       description={isRussian ? 'Расскажите о преимуществах и особенностях' : 'Describe highlights and features'}
-                      icon={FileText}
+                      icon={<FileText className="h-4 w-4" />}
                       collapsible
                       defaultOpen={false}
                     >
@@ -648,7 +649,7 @@ const VendorYachts = () => {
                           label={isRussian ? 'Описание (EN)' : 'Description (EN)'}
                           name="description_en"
                           value={formData.description_en}
-                          onChange={(e) => updateField('description_en', e.target.value)}
+                          onChange={(value) => updateField('description_en', value)}
                           type="textarea"
                           rows={4}
                           placeholder="Describe your yacht..."
@@ -657,7 +658,7 @@ const VendorYachts = () => {
                           label={isRussian ? 'Описание (RU)' : 'Description (RU)'}
                           name="description_ru"
                           value={formData.description_ru}
-                          onChange={(e) => updateField('description_ru', e.target.value)}
+                          onChange={(value) => updateField('description_ru', value)}
                           type="textarea"
                           rows={4}
                           placeholder="Опишите вашу яхту..."
@@ -670,7 +671,7 @@ const VendorYachts = () => {
                   <WizardStepContent stepId="specs" currentStepId={wizardSteps[currentStep].id}>
                     <VendorFormSection
                       title={isRussian ? 'Цена и вместимость' : 'Price & Capacity'}
-                      icon={Users}
+                      icon={<Users className="h-4 w-4" />}
                       badge={isRussian ? 'Важно' : 'Important'}
                     >
                       <div className="grid md:grid-cols-3 gap-4">
@@ -678,7 +679,7 @@ const VendorYachts = () => {
                           label={isRussian ? 'Цена за день (THB)' : 'Full Day Price (THB)'}
                           name="price_full_day"
                           value={formData.price_full_day}
-                          onChange={(e) => updateField('price_full_day', e.target.value)}
+                          onChange={(value) => updateField('price_full_day', value)}
                           type="number"
                           placeholder="150000"
                           required
@@ -689,7 +690,7 @@ const VendorYachts = () => {
                           label={isRussian ? 'Цена за полдня (THB)' : 'Half Day Price (THB)'}
                           name="price_half_day"
                           value={formData.price_half_day}
-                          onChange={(e) => updateField('price_half_day', e.target.value)}
+                          onChange={(value) => updateField('price_half_day', value)}
                           type="number"
                           placeholder="90000"
                           helpText={isRussian ? 'Опционально' : 'Optional'}
@@ -698,7 +699,7 @@ const VendorYachts = () => {
                           label={isRussian ? 'Вместимость' : 'Capacity'}
                           name="capacity"
                           value={formData.capacity}
-                          onChange={(e) => updateField('capacity', e.target.value)}
+                          onChange={(value) => updateField('capacity', value)}
                           type="number"
                           placeholder="10"
                         />
@@ -708,7 +709,7 @@ const VendorYachts = () => {
                     <VendorFormSection
                       title={isRussian ? 'Технические характеристики' : 'Technical Specs'}
                       description={isRussian ? 'Детали для опытных яхтсменов' : 'Details for experienced boaters'}
-                      icon={Settings}
+                      icon={<Settings className="h-4 w-4" />}
                       collapsible
                       defaultOpen
                     >
@@ -717,7 +718,7 @@ const VendorYachts = () => {
                           label={isRussian ? 'Длина (м)' : 'Length (m)'}
                           name="length_meters"
                           value={formData.length_meters}
-                          onChange={(e) => updateField('length_meters', e.target.value)}
+                          onChange={(value) => updateField('length_meters', value)}
                           type="number"
                           placeholder="20"
                         />
@@ -725,7 +726,7 @@ const VendorYachts = () => {
                           label={isRussian ? 'Год постройки' : 'Year Built'}
                           name="year_built"
                           value={formData.year_built}
-                          onChange={(e) => updateField('year_built', e.target.value)}
+                          onChange={(value) => updateField('year_built', value)}
                           type="number"
                           placeholder="2020"
                         />
@@ -733,7 +734,7 @@ const VendorYachts = () => {
                           label={isRussian ? 'Кают' : 'Cabins'}
                           name="cabins"
                           value={formData.cabins}
-                          onChange={(e) => updateField('cabins', e.target.value)}
+                          onChange={(value) => updateField('cabins', value)}
                           type="number"
                           placeholder="3"
                         />
@@ -741,7 +742,7 @@ const VendorYachts = () => {
                           label={isRussian ? 'Санузлов' : 'Bathrooms'}
                           name="bathrooms"
                           value={formData.bathrooms}
-                          onChange={(e) => updateField('bathrooms', e.target.value)}
+                          onChange={(value) => updateField('bathrooms', value)}
                           type="number"
                           placeholder="2"
                         />
@@ -752,21 +753,21 @@ const VendorYachts = () => {
                           label={isRussian ? 'Ширина' : 'Beam'}
                           name="beam"
                           value={formData.beam}
-                          onChange={(e) => updateField('beam', e.target.value)}
+                          onChange={(value) => updateField('beam', value)}
                           placeholder="5.5m"
                         />
                         <FormFieldWithHelp
                           label={isRussian ? 'Осадка' : 'Draft'}
                           name="draft"
                           value={formData.draft}
-                          onChange={(e) => updateField('draft', e.target.value)}
+                          onChange={(value) => updateField('draft', value)}
                           placeholder="1.8m"
                         />
                         <FormFieldWithHelp
                           label={isRussian ? 'Двигатели' : 'Engines'}
                           name="engines"
                           value={formData.engines}
-                          onChange={(e) => updateField('engines', e.target.value)}
+                          onChange={(value) => updateField('engines', value)}
                           placeholder="2x CAT C12"
                         />
                       </div>
@@ -776,21 +777,21 @@ const VendorYachts = () => {
                           label={isRussian ? 'Крейсерская скорость' : 'Cruising Speed'}
                           name="cruising_speed"
                           value={formData.cruising_speed}
-                          onChange={(e) => updateField('cruising_speed', e.target.value)}
+                          onChange={(value) => updateField('cruising_speed', value)}
                           placeholder="22 knots"
                         />
                         <FormFieldWithHelp
                           label={isRussian ? 'Макс. скорость' : 'Max Speed'}
                           name="max_speed"
                           value={formData.max_speed}
-                          onChange={(e) => updateField('max_speed', e.target.value)}
+                          onChange={(value) => updateField('max_speed', value)}
                           placeholder="28 knots"
                         />
                         <FormFieldWithHelp
                           label={isRussian ? 'Топливный бак' : 'Fuel Capacity'}
                           name="fuel_capacity"
                           value={formData.fuel_capacity}
-                          onChange={(e) => updateField('fuel_capacity', e.target.value)}
+                          onChange={(value) => updateField('fuel_capacity', value)}
                           placeholder="3000L"
                         />
                       </div>
@@ -798,7 +799,7 @@ const VendorYachts = () => {
 
                     <VendorFormSection
                       title={isRussian ? 'Локация и особенности' : 'Location & Features'}
-                      icon={Anchor}
+                      icon={<Anchor className="h-4 w-4" />}
                       collapsible
                       defaultOpen={false}
                     >
@@ -807,14 +808,14 @@ const VendorYachts = () => {
                           label={isRussian ? 'Локация (EN)' : 'Location (EN)'}
                           name="location_name"
                           value={formData.location_name}
-                          onChange={(e) => updateField('location_name', e.target.value)}
+                          onChange={(value) => updateField('location_name', value)}
                           placeholder="Phuket Marina"
                         />
                         <FormFieldWithHelp
                           label={isRussian ? 'Локация (RU)' : 'Location (RU)'}
                           name="location_ru"
                           value={formData.location_ru}
-                          onChange={(e) => updateField('location_ru', e.target.value)}
+                          onChange={(value) => updateField('location_ru', value)}
                           placeholder="Марина Пхукет"
                         />
                       </div>
@@ -823,7 +824,7 @@ const VendorYachts = () => {
                           label={isRussian ? 'Особенности (EN)' : 'Features (EN)'}
                           name="features_en"
                           value={formData.features_en}
-                          onChange={(e) => updateField('features_en', e.target.value)}
+                          onChange={(value) => updateField('features_en', value)}
                           placeholder="Jet ski, BBQ, Snorkeling gear"
                           helpText={isRussian ? 'Через запятую' : 'Comma separated'}
                         />
@@ -831,7 +832,7 @@ const VendorYachts = () => {
                           label={isRussian ? 'Особенности (RU)' : 'Features (RU)'}
                           name="features_ru"
                           value={formData.features_ru}
-                          onChange={(e) => updateField('features_ru', e.target.value)}
+                          onChange={(value) => updateField('features_ru', value)}
                           placeholder="Гидроцикл, Барбекю, Снаряжение"
                         />
                       </div>
@@ -848,10 +849,10 @@ const VendorYachts = () => {
                         </div>
                         <div className="flex items-center gap-2">
                           <Switch
-                            checked={formData.is_active}
-                            onCheckedChange={(checked) => updateField('is_active', checked)}
+                            checked={formData.is_featured}
+                            onCheckedChange={(checked) => updateField('is_featured', checked)}
                           />
-                          <Label>{isRussian ? 'Активна' : 'Active'}</Label>
+                          <Label>{isRussian ? 'Избранное' : 'Featured'}</Label>
                         </div>
                       </div>
                     </VendorFormSection>
@@ -862,7 +863,7 @@ const VendorYachts = () => {
                     <VendorFormSection
                       title={isRussian ? 'Обложка' : 'Cover Image'}
                       description={isRussian ? 'Главное фото яхты' : 'Main yacht photo'}
-                      icon={Image}
+                      icon={<Image className="h-4 w-4" />}
                       badge={isRussian ? 'Рекомендуется' : 'Recommended'}
                     >
                       <ImageUpload
@@ -876,7 +877,7 @@ const VendorYachts = () => {
                     <VendorFormSection
                       title={isRussian ? 'Галерея' : 'Gallery'}
                       description={isRussian ? 'До 10 дополнительных фото' : 'Up to 10 additional photos'}
-                      icon={Image}
+                      icon={<Image className="h-4 w-4" />}
                     >
                       <MultiImageUpload
                         value={formData.images}
@@ -892,7 +893,7 @@ const VendorYachts = () => {
                     <VendorFormSection
                       title={isRussian ? 'Проверьте данные' : 'Review Your Listing'}
                       description={isRussian ? 'Убедитесь, что всё верно' : 'Make sure everything is correct'}
-                      icon={Eye}
+                      icon={<Eye className="h-4 w-4" />}
                     >
                       <div className="space-y-4">
                         <div className="grid md:grid-cols-2 gap-4 text-sm">
@@ -909,7 +910,7 @@ const VendorYachts = () => {
                           <div>
                             <span className="text-muted-foreground">{isRussian ? 'Цена/день:' : 'Day price:'}</span>{' '}
                             <span className="font-medium">
-                              {formData.price_full_day ? `฿${parseInt(formData.price_full_day).toLocaleString()}` : '-'}
+                              {formData.price_full_day ? `฿${parseFloat(formData.price_full_day).toLocaleString()}` : '-'}
                             </span>
                           </div>
                           <div>

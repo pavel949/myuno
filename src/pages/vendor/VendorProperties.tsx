@@ -177,13 +177,12 @@ const VendorProperties = () => {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Wizard steps
   const wizardSteps = useMemo(() => [
     { 
       id: 'basic', 
       title: 'Basic Info', 
       titleRu: 'Основное',
-      icon: FileText,
+      icon: <FileText className="h-4 w-4" />,
       validate: () => {
         const newErrors: Record<string, string> = {};
         if (!formData.title_en.trim()) {
@@ -197,7 +196,7 @@ const VendorProperties = () => {
       id: 'details', 
       title: 'Details', 
       titleRu: 'Детали',
-      icon: Settings,
+      icon: <Settings className="h-4 w-4" />,
       validate: () => {
         const newErrors: Record<string, string> = {};
         if (!formData.price) {
@@ -211,21 +210,21 @@ const VendorProperties = () => {
       id: 'amenities', 
       title: 'Amenities', 
       titleRu: 'Удобства',
-      icon: Home,
+      icon: <Home className="h-4 w-4" />,
       validate: () => true
     },
     { 
       id: 'photos', 
       title: 'Photos', 
       titleRu: 'Фото',
-      icon: Image,
+      icon: <Image className="h-4 w-4" />,
       validate: () => true
     },
     { 
       id: 'review', 
       title: 'Review', 
       titleRu: 'Проверка',
-      icon: Eye,
+      icon: <Eye className="h-4 w-4" />,
       validate: () => true
     },
   ], [formData, isRussian]);
@@ -319,7 +318,6 @@ const VendorProperties = () => {
         is_active: formData.is_active,
       };
 
-      // Add instant_booking separately since it may not be in VendorProperty type
       const dataWithExtras = {
         ...propertyData,
         instant_booking: formData.instant_booking,
@@ -375,7 +373,6 @@ const VendorProperties = () => {
     return `฿${price.toLocaleString()}${periodLabel}`;
   };
 
-  // Preview data
   const previewData = {
     image: formData.cover_image,
     title: isRussian ? formData.title_ru : formData.title_en,
@@ -418,7 +415,6 @@ const VendorProperties = () => {
           showBack
         />
 
-        {/* Draft restoration banner */}
         {showDraftBanner && (
           <div className="mb-4">
             <DraftRestorationBanner
@@ -500,11 +496,7 @@ const VendorProperties = () => {
                               </Badge>
                             )}
                           </div>
-                          <p className="text-xs text-muted-foreground flex items-center gap-1 mb-2">
-                            <MapPin className="h-3 w-3" />
-                            {property.district || property.address || (isRussian ? 'Не указано' : 'Not specified')}
-                          </p>
-                          <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-1">
                             <span className="flex items-center gap-1">
                               <Bed className="h-3 w-3" />
                               {property.bedrooms}
@@ -516,15 +508,22 @@ const VendorProperties = () => {
                             {property.area_sqm && (
                               <span className="flex items-center gap-1">
                                 <Ruler className="h-3 w-3" />
-                                {property.area_sqm}m²
+                                {property.area_sqm}м²
                               </span>
                             )}
                           </div>
-                          <p className="font-bold text-primary">
-                            {property.price ? formatPrice(property.price, property.price_period) : '-'}
-                          </p>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-primary">
+                              {property.price && formatPrice(property.price, property.price_period)}
+                            </span>
+                            {property.district && (
+                              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                <MapPin className="h-3 w-3" />
+                                {property.district}
+                              </span>
+                            )}
+                          </div>
                         </div>
-
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon">
@@ -537,8 +536,8 @@ const VendorProperties = () => {
                               {isRussian ? 'Редактировать' : 'Edit'}
                             </DropdownMenuItem>
                             <DropdownMenuItem 
-                              className="text-red-500"
                               onClick={() => setDeleteConfirmId(property.id)}
+                              className="text-destructive"
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
                               {isRussian ? 'Удалить' : 'Delete'}
@@ -554,27 +553,30 @@ const VendorProperties = () => {
           </div>
         )}
 
-        {/* Delete confirmation */}
         <Dialog open={!!deleteConfirmId} onOpenChange={() => setDeleteConfirmId(null)}>
-          <DialogContent>
+          <DialogContent className="max-w-sm">
             <DialogHeader>
-              <DialogTitle>{isRussian ? 'Удалить объект?' : 'Delete property?'}</DialogTitle>
+              <DialogTitle>
+                {isRussian ? 'Удалить объект?' : 'Delete property?'}
+              </DialogTitle>
             </DialogHeader>
-            <p className="text-muted-foreground">
-              {isRussian ? 'Это действие нельзя отменить' : 'This action cannot be undone'}
+            <p className="text-sm text-muted-foreground">
+              {isRussian ? 'Это действие нельзя отменить.' : 'This action cannot be undone.'}
             </p>
             <div className="flex gap-2 justify-end">
               <Button variant="outline" onClick={() => setDeleteConfirmId(null)}>
                 {isRussian ? 'Отмена' : 'Cancel'}
               </Button>
-              <Button variant="destructive" onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)}>
+              <Button 
+                variant="destructive" 
+                onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)}
+              >
                 {isRussian ? 'Удалить' : 'Delete'}
               </Button>
             </div>
           </DialogContent>
         </Dialog>
 
-        {/* Add/Edit Dialog with Wizard */}
         <Dialog open={isDialogOpen} onOpenChange={(open) => {
           setIsDialogOpen(open);
         }}>
@@ -606,18 +608,17 @@ const VendorProperties = () => {
             >
               <div className="grid lg:grid-cols-[1fr,280px] gap-6 px-6">
                 <div className="min-h-[400px]">
-                  {/* Step 1: Basic Info */}
                   <WizardStepContent stepId="basic" currentStepId={wizardSteps[currentStep].id}>
                     <VendorFormSection
                       title={isRussian ? 'Название объекта' : 'Property Title'}
-                      icon={Building2}
+                      icon={<Building2 className="h-4 w-4" />}
                     >
                       <div className="grid md:grid-cols-2 gap-4">
                         <FormFieldWithHelp
                           label={isRussian ? 'Название (EN)' : 'Title (EN)'}
                           name="title_en"
                           value={formData.title_en}
-                          onChange={(e) => updateField('title_en', e.target.value)}
+                          onChange={(value) => updateField('title_en', value)}
                           placeholder="Modern 2BR Apartment"
                           example="Cozy Villa with Pool"
                           required
@@ -628,7 +629,7 @@ const VendorProperties = () => {
                           label={isRussian ? 'Название (RU)' : 'Title (RU)'}
                           name="title_ru"
                           value={formData.title_ru}
-                          onChange={(e) => updateField('title_ru', e.target.value)}
+                          onChange={(value) => updateField('title_ru', value)}
                           placeholder="Современные апартаменты 2BR"
                           helpText={isRussian ? 'Оставьте пустым для автозаполнения' : 'Leave empty to auto-fill'}
                         />
@@ -637,7 +638,7 @@ const VendorProperties = () => {
 
                     <VendorFormSection
                       title={isRussian ? 'Тип объекта' : 'Property Type'}
-                      icon={Home}
+                      icon={<Home className="h-4 w-4" />}
                     >
                       <div className="grid md:grid-cols-2 gap-4">
                         <div className="space-y-2">
@@ -681,7 +682,7 @@ const VendorProperties = () => {
 
                     <VendorFormSection
                       title={isRussian ? 'Описание' : 'Description'}
-                      icon={FileText}
+                      icon={<FileText className="h-4 w-4" />}
                       collapsible
                       defaultOpen={false}
                     >
@@ -690,7 +691,7 @@ const VendorProperties = () => {
                           label={isRussian ? 'Описание (EN)' : 'Description (EN)'}
                           name="description_en"
                           value={formData.description_en}
-                          onChange={(e) => updateField('description_en', e.target.value)}
+                          onChange={(value) => updateField('description_en', value)}
                           type="textarea"
                           rows={4}
                           placeholder="Describe your property..."
@@ -699,7 +700,7 @@ const VendorProperties = () => {
                           label={isRussian ? 'Описание (RU)' : 'Description (RU)'}
                           name="description_ru"
                           value={formData.description_ru}
-                          onChange={(e) => updateField('description_ru', e.target.value)}
+                          onChange={(value) => updateField('description_ru', value)}
                           type="textarea"
                           rows={4}
                           placeholder="Опишите объект..."
@@ -708,11 +709,10 @@ const VendorProperties = () => {
                     </VendorFormSection>
                   </WizardStepContent>
 
-                  {/* Step 2: Details */}
                   <WizardStepContent stepId="details" currentStepId={wizardSteps[currentStep].id}>
                     <VendorFormSection
                       title={isRussian ? 'Цена' : 'Pricing'}
-                      icon={DollarSign}
+                      icon={<DollarSign className="h-4 w-4" />}
                       badge={isRussian ? 'Важно' : 'Important'}
                     >
                       <div className="grid md:grid-cols-2 gap-4">
@@ -720,7 +720,7 @@ const VendorProperties = () => {
                           label={isRussian ? 'Цена (THB)' : 'Price (THB)'}
                           name="price"
                           value={formData.price}
-                          onChange={(e) => updateField('price', e.target.value)}
+                          onChange={(value) => updateField('price', value)}
                           type="number"
                           placeholder="25000"
                           required
@@ -750,14 +750,14 @@ const VendorProperties = () => {
 
                     <VendorFormSection
                       title={isRussian ? 'Параметры' : 'Specifications'}
-                      icon={Settings}
+                      icon={<Settings className="h-4 w-4" />}
                     >
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <FormFieldWithHelp
                           label={isRussian ? 'Спален' : 'Bedrooms'}
                           name="bedrooms"
                           value={formData.bedrooms}
-                          onChange={(e) => updateField('bedrooms', e.target.value)}
+                          onChange={(value) => updateField('bedrooms', value)}
                           type="number"
                           min={0}
                         />
@@ -765,7 +765,7 @@ const VendorProperties = () => {
                           label={isRussian ? 'Ванных' : 'Bathrooms'}
                           name="bathrooms"
                           value={formData.bathrooms}
-                          onChange={(e) => updateField('bathrooms', e.target.value)}
+                          onChange={(value) => updateField('bathrooms', value)}
                           type="number"
                           min={0}
                         />
@@ -773,7 +773,7 @@ const VendorProperties = () => {
                           label={isRussian ? 'Площадь (м²)' : 'Area (m²)'}
                           name="area_sqm"
                           value={formData.area_sqm}
-                          onChange={(e) => updateField('area_sqm', e.target.value)}
+                          onChange={(value) => updateField('area_sqm', value)}
                           type="number"
                           placeholder="80"
                         />
@@ -781,7 +781,7 @@ const VendorProperties = () => {
                           label={isRussian ? 'Гостей' : 'Guests'}
                           name="max_guests"
                           value={formData.max_guests}
-                          onChange={(e) => updateField('max_guests', e.target.value)}
+                          onChange={(value) => updateField('max_guests', value)}
                           type="number"
                           min={1}
                         />
@@ -793,7 +793,7 @@ const VendorProperties = () => {
                             label={isRussian ? 'Мин. срок (ночей)' : 'Min Stay (nights)'}
                             name="min_stay_nights"
                             value={formData.min_stay_nights}
-                            onChange={(e) => updateField('min_stay_nights', e.target.value)}
+                            onChange={(value) => updateField('min_stay_nights', value)}
                             type="number"
                             min={1}
                             className="max-w-[200px]"
@@ -804,7 +804,7 @@ const VendorProperties = () => {
 
                     <VendorFormSection
                       title={isRussian ? 'Локация' : 'Location'}
-                      icon={MapPin}
+                      icon={<MapPin className="h-4 w-4" />}
                       collapsible
                       defaultOpen
                     >
@@ -813,14 +813,14 @@ const VendorProperties = () => {
                           label={isRussian ? 'Район' : 'District'}
                           name="district"
                           value={formData.district}
-                          onChange={(e) => updateField('district', e.target.value)}
+                          onChange={(value) => updateField('district', value)}
                           placeholder="Bangtao, Phuket"
                         />
                         <FormFieldWithHelp
                           label={isRussian ? 'Адрес' : 'Address'}
                           name="address"
                           value={formData.address}
-                          onChange={(e) => updateField('address', e.target.value)}
+                          onChange={(value) => updateField('address', value)}
                           placeholder="123 Beach Road"
                         />
                       </div>
@@ -849,12 +849,11 @@ const VendorProperties = () => {
                     </VendorFormSection>
                   </WizardStepContent>
 
-                  {/* Step 3: Amenities */}
                   <WizardStepContent stepId="amenities" currentStepId={wizardSteps[currentStep].id}>
                     <VendorFormSection
                       title={isRussian ? 'Удобства и услуги' : 'Amenities & Features'}
                       description={isRussian ? 'Выберите все доступные удобства' : 'Select all available amenities'}
-                      icon={Home}
+                      icon={<Home className="h-4 w-4" />}
                     >
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                         {amenitiesList.map(amenity => (
@@ -886,12 +885,11 @@ const VendorProperties = () => {
                     </VendorFormSection>
                   </WizardStepContent>
 
-                  {/* Step 4: Photos */}
                   <WizardStepContent stepId="photos" currentStepId={wizardSteps[currentStep].id}>
                     <VendorFormSection
                       title={isRussian ? 'Обложка' : 'Cover Image'}
                       description={isRussian ? 'Главное фото объекта' : 'Main property photo'}
-                      icon={Image}
+                      icon={<Image className="h-4 w-4" />}
                       badge={isRussian ? 'Рекомендуется' : 'Recommended'}
                     >
                       <ImageUpload
@@ -905,7 +903,7 @@ const VendorProperties = () => {
                     <VendorFormSection
                       title={isRussian ? 'Галерея' : 'Gallery'}
                       description={isRussian ? 'До 20 дополнительных фото' : 'Up to 20 additional photos'}
-                      icon={Image}
+                      icon={<Image className="h-4 w-4" />}
                     >
                       <MultiImageUpload
                         value={formData.images}
@@ -916,12 +914,11 @@ const VendorProperties = () => {
                     </VendorFormSection>
                   </WizardStepContent>
 
-                  {/* Step 5: Review */}
                   <WizardStepContent stepId="review" currentStepId={wizardSteps[currentStep].id}>
                     <VendorFormSection
                       title={isRussian ? 'Проверьте данные' : 'Review Your Listing'}
                       description={isRussian ? 'Убедитесь, что всё верно' : 'Make sure everything is correct'}
-                      icon={Eye}
+                      icon={<Eye className="h-4 w-4" />}
                     >
                       <div className="space-y-4">
                         <div className="grid md:grid-cols-2 gap-4 text-sm">
@@ -977,7 +974,6 @@ const VendorProperties = () => {
                   </WizardStepContent>
                 </div>
 
-                {/* Live Preview */}
                 <CardPreviewSection className="hidden lg:block">
                   <CardPreview
                     image={previewData.image}
