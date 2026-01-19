@@ -4,3 +4,4 @@ export { UtilitiesInfo } from './UtilitiesInfo';
 export { CheckInDetails } from './CheckInDetails';
 export { HouseRules } from './HouseRules';
 export { PropertyPriceBreakdown } from './PropertyPriceBreakdown';
+export { PropertyBookingCard } from './PropertyBookingCard';

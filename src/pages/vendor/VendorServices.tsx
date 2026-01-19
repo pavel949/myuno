@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVendorProfile, useVendorServices, VendorService } from '@/hooks/useVendor';
+import { useFormDraft } from '@/hooks/useFormDraft';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -10,16 +11,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog';
 import {
   DropdownMenu,
@@ -36,10 +34,42 @@ import {
   Trash2,
   Clock,
   Users,
-  Loader2
+  FileText,
+  Image as ImageIcon,
+  Eye
 } from 'lucide-react';
 import { ImageUpload } from '@/components/upload/ImageUpload';
 import { CardPreview, CardPreviewSection } from '@/components/vendor/CardPreview';
+import { VendorFormWizard, WizardStep, WizardStepContent } from '@/components/vendor/VendorFormWizard';
+import { VendorFormSection } from '@/components/vendor/VendorFormSection';
+import { FormFieldWithHelp } from '@/components/vendor/FormFieldWithHelp';
+import { DraftRestorationBanner, DraftIndicator } from '@/components/vendor/DraftIndicator';
+
+const DRAFT_KEY = 'vendor-service-draft';
+
+interface ServiceFormData {
+  name: string;
+  name_ru: string;
+  description: string;
+  description_ru: string;
+  price: string;
+  duration_minutes: string;
+  max_capacity: string;
+  image: string;
+  is_active: boolean;
+}
+
+const initialFormData: ServiceFormData = {
+  name: '',
+  name_ru: '',
+  description: '',
+  description_ru: '',
+  price: '',
+  duration_minutes: '',
+  max_capacity: '1',
+  image: '',
+  is_active: true,
+};
 
 const VendorServices = () => {
   const navigate = useNavigate();
@@ -52,20 +82,75 @@ const VendorServices = () => {
   const [editingService, setEditingService] = useState<VendorService | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [errors, setErrors] = useState<Partial<Record<keyof ServiceFormData, string>>>({});
 
-  const [formData, setFormData] = useState({
-    name: '',
-    name_ru: '',
-    description: '',
-    description_ru: '',
-    price: '',
-    duration_minutes: '',
-    max_capacity: '1',
-    image: '',
-    is_active: true,
+  const {
+    formData,
+    setFormData,
+    lastSaved,
+    hasDraft,
+    clearDraft,
+    restoreDraft,
+  } = useFormDraft<ServiceFormData>({
+    key: DRAFT_KEY,
+    initialData: initialFormData,
   });
 
   const isRussian = language === 'ru';
+
+  // Validation
+  const validateStep = (stepIndex: number): string | null => {
+    const newErrors: Partial<Record<keyof ServiceFormData, string>> = {};
+    
+    if (stepIndex === 0) {
+      if (!formData.name.trim()) {
+        newErrors.name = isRussian ? 'Введите название' : 'Name is required';
+      }
+    }
+    
+    if (stepIndex === 1) {
+      if (!formData.price || parseFloat(formData.price) <= 0) {
+        newErrors.price = isRussian ? 'Введите цену' : 'Price is required';
+      }
+    }
+    
+    setErrors(newErrors);
+    const firstError = Object.values(newErrors)[0];
+    if (firstError) {
+      toast.error(firstError);
+    }
+    return firstError || null;
+  };
+
+  const steps: WizardStep[] = useMemo(() => [
+    {
+      id: 'basic',
+      title: 'Basic Info',
+      titleRu: 'Основное',
+      icon: <FileText className="h-4 w-4" />,
+      validate: () => validateStep(0),
+    },
+    {
+      id: 'details',
+      title: 'Details',
+      titleRu: 'Детали',
+      icon: <Clock className="h-4 w-4" />,
+      validate: () => validateStep(1),
+    },
+    {
+      id: 'photo',
+      title: 'Photo',
+      titleRu: 'Фото',
+      icon: <ImageIcon className="h-4 w-4" />,
+    },
+    {
+      id: 'review',
+      title: 'Review',
+      titleRu: 'Проверка',
+      icon: <Eye className="h-4 w-4" />,
+    },
+  ], [isRussian, formData]);
 
   React.useEffect(() => {
     if (!authLoading && !user) {
@@ -80,18 +165,11 @@ const VendorServices = () => {
   }, [profile, profileLoading, user, navigate]);
 
   const resetForm = () => {
-    setFormData({
-      name: '',
-      name_ru: '',
-      description: '',
-      description_ru: '',
-      price: '',
-      duration_minutes: '',
-      max_capacity: '1',
-      image: '',
-      is_active: true,
-    });
+    setFormData(initialFormData);
+    clearDraft();
     setEditingService(null);
+    setCurrentStep(0);
+    setErrors({});
   };
 
   const openEditDialog = (service: VendorService) => {
@@ -107,15 +185,11 @@ const VendorServices = () => {
       image: (service as any).image || '',
       is_active: service.is_active,
     });
+    setCurrentStep(0);
     setIsDialogOpen(true);
   };
 
   const handleSubmit = async () => {
-    if (!formData.name || !formData.price) {
-      toast.error(isRussian ? 'Заполните обязательные поля' : 'Please fill required fields');
-      return;
-    }
-
     setIsSubmitting(true);
     try {
       const serviceData = {
@@ -163,6 +237,18 @@ const VendorServices = () => {
     }
   };
 
+  const handleOpenDialog = () => {
+    resetForm();
+    setIsDialogOpen(true);
+  };
+
+  const handleDialogChange = (open: boolean) => {
+    if (!open && !editingService && (formData.name || formData.price)) {
+      // Keep draft when closing without saving
+    }
+    setIsDialogOpen(open);
+  };
+
   if (authLoading || profileLoading) {
     return (
       <AppLayout>
@@ -188,12 +274,20 @@ const VendorServices = () => {
           showBack
         />
 
+        {/* Draft restoration banner */}
+        {hasDraft && !isDialogOpen && !editingService && (
+          <DraftRestorationBanner
+            onRestore={() => {
+              restoreDraft();
+              setIsDialogOpen(true);
+            }}
+            onDiscard={clearDraft}
+          />
+        )}
+
         <Button 
           className="w-full mb-4" 
-          onClick={() => {
-            resetForm();
-            setIsDialogOpen(true);
-          }}
+          onClick={handleOpenDialog}
         >
           <Plus className="h-4 w-4 mr-2" />
           {isRussian ? 'Добавить услугу' : 'Add Service'}
@@ -300,115 +394,236 @@ const VendorServices = () => {
           </div>
         )}
 
-        {/* Add/Edit Dialog */}
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                {editingService 
-                  ? (isRussian ? 'Редактировать услугу' : 'Edit Service')
-                  : (isRussian ? 'Новая услуга' : 'New Service')}
-              </DialogTitle>
+        {/* Add/Edit Dialog with Wizard */}
+        <Dialog open={isDialogOpen} onOpenChange={handleDialogChange}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+            <DialogHeader className="flex-shrink-0">
+              <div className="flex items-center justify-between">
+                <DialogTitle>
+                  {editingService 
+                    ? (isRussian ? 'Редактировать услугу' : 'Edit Service')
+                    : (isRussian ? 'Новая услуга' : 'New Service')}
+                </DialogTitle>
+                {!editingService && lastSaved && hasDraft && (
+                  <DraftIndicator 
+                    lastSaved={lastSaved} 
+                    hasDraft={hasDraft}
+                    onClear={clearDraft}
+                    onRestore={restoreDraft}
+                  />
+                )}
+              </div>
             </DialogHeader>
 
-            <div className="grid md:grid-cols-[1fr,280px] gap-6 py-4">
-              {/* Form */}
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>{isRussian ? 'Фото услуги' : 'Service Photo'}</Label>
-                  <ImageUpload
-                    value={formData.image}
-                    onChange={(url) => setFormData(prev => ({ ...prev, image: url }))}
-                    folder="services"
-                    placeholder={isRussian ? 'Загрузить фото' : 'Upload photo'}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="name">{isRussian ? 'Название *' : 'Name *'}</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder={isRussian ? 'Например: Маникюр' : 'e.g., Manicure'}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="name_ru">{isRussian ? 'Название (RU)' : 'Name (Russian)'}</Label>
-                  <Input
-                    id="name_ru"
-                    value={formData.name_ru}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name_ru: e.target.value }))}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="description">{isRussian ? 'Описание' : 'Description'}</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    rows={2}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="description_ru">{isRussian ? 'Описание (RU)' : 'Description (Russian)'}</Label>
-                  <Textarea
-                    id="description_ru"
-                    value={formData.description_ru}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description_ru: e.target.value }))}
-                    rows={2}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="price">{isRussian ? 'Цена (฿) *' : 'Price (฿) *'}</Label>
-                    <Input
-                      id="price"
-                      type="number"
-                      value={formData.price}
-                      onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                      placeholder="1000"
+            <div className="grid md:grid-cols-[1fr,280px] gap-6 flex-1 min-h-0 py-4">
+              {/* Form Wizard */}
+              <VendorFormWizard
+                steps={steps}
+                currentStep={currentStep}
+                onStepChange={setCurrentStep}
+                onSubmit={handleSubmit}
+                isSubmitting={isSubmitting}
+                submitLabel="Save Service"
+                submitLabelRu="Сохранить услугу"
+              >
+                {/* Step 1: Basic Info */}
+                <WizardStepContent stepId="basic" currentStepId={steps[currentStep].id}>
+                  <VendorFormSection
+                    title={isRussian ? 'Основная информация' : 'Basic Information'}
+                    description={isRussian ? 'Название и описание услуги' : 'Service name and description'}
+                    icon={<FileText className="h-5 w-5" />}
+                  >
+                    <FormFieldWithHelp
+                      label={isRussian ? 'Название услуги' : 'Service Name'}
+                      name="name"
+                      value={formData.name}
+                      onChange={(v) => setFormData({ ...formData, name: v })}
+                      placeholder={isRussian ? 'Например: Маникюр' : 'e.g., Manicure'}
+                      required
+                      error={errors.name}
+                      isValid={!!formData.name.trim()}
+                      helpText={isRussian ? 'Краткое название услуги для клиентов' : 'Short service name for customers'}
+                      example={isRussian ? 'Пример: Стрижка мужская' : 'Example: Men\'s Haircut'}
                     />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="duration">{isRussian ? 'Длительность (мин)' : 'Duration (min)'}</Label>
-                    <Input
-                      id="duration"
-                      type="number"
-                      value={formData.duration_minutes}
-                      onChange={(e) => setFormData(prev => ({ ...prev, duration_minutes: e.target.value }))}
-                      placeholder="60"
+
+                    <FormFieldWithHelp
+                      label={isRussian ? 'Название (RU)' : 'Name (Russian)'}
+                      name="name_ru"
+                      value={formData.name_ru}
+                      onChange={(v) => setFormData({ ...formData, name_ru: v })}
+                      placeholder={isRussian ? 'Название на русском' : 'Russian name'}
+                      helpText={isRussian ? 'Для русскоязычных клиентов' : 'For Russian-speaking customers'}
                     />
-                  </div>
-                </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="capacity">{isRussian ? 'Макс. клиентов' : 'Max Capacity'}</Label>
-                  <Input
-                    id="capacity"
-                    type="number"
-                    value={formData.max_capacity}
-                    onChange={(e) => setFormData(prev => ({ ...prev, max_capacity: e.target.value }))}
-                    placeholder="1"
-                  />
-                </div>
+                    <FormFieldWithHelp
+                      label={isRussian ? 'Описание' : 'Description'}
+                      name="description"
+                      value={formData.description}
+                      onChange={(v) => setFormData({ ...formData, description: v })}
+                      type="textarea"
+                      rows={3}
+                      placeholder={isRussian ? 'Опишите что включено...' : 'Describe what\'s included...'}
+                      helpText={isRussian ? 'Подробности, что входит в услугу' : 'Details about what\'s included'}
+                    />
 
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="is_active">{isRussian ? 'Услуга активна' : 'Service active'}</Label>
-                  <Switch
-                    id="is_active"
-                    checked={formData.is_active}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
-                  />
-                </div>
-              </div>
+                    <FormFieldWithHelp
+                      label={isRussian ? 'Описание (RU)' : 'Description (Russian)'}
+                      name="description_ru"
+                      value={formData.description_ru}
+                      onChange={(v) => setFormData({ ...formData, description_ru: v })}
+                      type="textarea"
+                      rows={3}
+                    />
+                  </VendorFormSection>
+                </WizardStepContent>
+
+                {/* Step 2: Details */}
+                <WizardStepContent stepId="details" currentStepId={steps[currentStep].id}>
+                  <VendorFormSection
+                    title={isRussian ? 'Цена и длительность' : 'Price & Duration'}
+                    description={isRussian ? 'Настройте стоимость и время' : 'Set pricing and timing'}
+                    icon={<Clock className="h-5 w-5" />}
+                  >
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormFieldWithHelp
+                        label={isRussian ? 'Цена (฿)' : 'Price (฿)'}
+                        name="price"
+                        value={formData.price}
+                        onChange={(v) => setFormData({ ...formData, price: v })}
+                        type="number"
+                        placeholder="1000"
+                        required
+                        error={errors.price}
+                        isValid={!!formData.price && parseFloat(formData.price) > 0}
+                        min={0}
+                      />
+
+                      <FormFieldWithHelp
+                        label={isRussian ? 'Длительность (мин)' : 'Duration (min)'}
+                        name="duration_minutes"
+                        value={formData.duration_minutes}
+                        onChange={(v) => setFormData({ ...formData, duration_minutes: v })}
+                        type="number"
+                        placeholder="60"
+                        helpText={isRussian ? 'Сколько времени занимает' : 'How long does it take'}
+                        min={0}
+                      />
+                    </div>
+
+                    <FormFieldWithHelp
+                      label={isRussian ? 'Макс. клиентов' : 'Max Capacity'}
+                      name="max_capacity"
+                      value={formData.max_capacity}
+                      onChange={(v) => setFormData({ ...formData, max_capacity: v })}
+                      type="number"
+                      placeholder="1"
+                      helpText={isRussian ? 'Сколько клиентов за раз' : 'How many clients at once'}
+                      min={1}
+                    />
+
+                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                      <div>
+                        <Label htmlFor="is_active" className="font-medium">
+                          {isRussian ? 'Услуга активна' : 'Service active'}
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          {isRussian ? 'Видна клиентам' : 'Visible to customers'}
+                        </p>
+                      </div>
+                      <Switch
+                        id="is_active"
+                        checked={formData.is_active}
+                        onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                      />
+                    </div>
+                  </VendorFormSection>
+                </WizardStepContent>
+
+                {/* Step 3: Photo */}
+                <WizardStepContent stepId="photo" currentStepId={steps[currentStep].id}>
+                  <VendorFormSection
+                    title={isRussian ? 'Фото услуги' : 'Service Photo'}
+                    description={isRussian ? 'Добавьте привлекательное фото' : 'Add an attractive photo'}
+                    icon={<ImageIcon className="h-5 w-5" />}
+                  >
+                    <ImageUpload
+                      value={formData.image}
+                      onChange={(url) => setFormData({ ...formData, image: url })}
+                      folder="services"
+                      placeholder={isRussian ? 'Загрузить фото' : 'Upload photo'}
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      {isRussian 
+                        ? 'Качественное фото повышает доверие клиентов' 
+                        : 'A quality photo increases customer trust'}
+                    </p>
+                  </VendorFormSection>
+                </WizardStepContent>
+
+                {/* Step 4: Review */}
+                <WizardStepContent stepId="review" currentStepId={steps[currentStep].id}>
+                  <VendorFormSection
+                    title={isRussian ? 'Проверьте данные' : 'Review Your Service'}
+                    description={isRussian ? 'Убедитесь что всё верно' : 'Make sure everything is correct'}
+                    icon={<Eye className="h-5 w-5" />}
+                  >
+                    <div className="space-y-4">
+                      <div className="p-4 rounded-lg bg-muted/50 space-y-3">
+                        <div>
+                          <span className="text-xs text-muted-foreground uppercase tracking-wide">
+                            {isRussian ? 'Название' : 'Name'}
+                          </span>
+                          <p className="font-medium">{formData.name || '-'}</p>
+                          {formData.name_ru && (
+                            <p className="text-sm text-muted-foreground">{formData.name_ru}</p>
+                          )}
+                        </div>
+
+                        {formData.description && (
+                          <div>
+                            <span className="text-xs text-muted-foreground uppercase tracking-wide">
+                              {isRussian ? 'Описание' : 'Description'}
+                            </span>
+                            <p className="text-sm">{formData.description}</p>
+                          </div>
+                        )}
+
+                        <div className="grid grid-cols-3 gap-4 pt-2 border-t">
+                          <div>
+                            <span className="text-xs text-muted-foreground uppercase tracking-wide">
+                              {isRussian ? 'Цена' : 'Price'}
+                            </span>
+                            <p className="font-bold text-primary">
+                              ฿{formData.price ? parseFloat(formData.price).toLocaleString() : '-'}
+                            </p>
+                          </div>
+                          {formData.duration_minutes && (
+                            <div>
+                              <span className="text-xs text-muted-foreground uppercase tracking-wide">
+                                {isRussian ? 'Время' : 'Duration'}
+                              </span>
+                              <p className="font-medium">{formData.duration_minutes} мин</p>
+                            </div>
+                          )}
+                          <div>
+                            <span className="text-xs text-muted-foreground uppercase tracking-wide">
+                              {isRussian ? 'Статус' : 'Status'}
+                            </span>
+                            <p className="font-medium">
+                              {formData.is_active 
+                                ? (isRussian ? '✓ Активна' : '✓ Active')
+                                : (isRussian ? '○ Неактивна' : '○ Inactive')}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </VendorFormSection>
+                </WizardStepContent>
+              </VendorFormWizard>
 
               {/* Preview */}
-              <CardPreviewSection className="hidden md:block sticky top-0">
+              <CardPreviewSection className="hidden md:block">
                 <CardPreview
                   type="service"
                   image={formData.image}
@@ -422,16 +637,6 @@ const VendorServices = () => {
                 />
               </CardPreviewSection>
             </div>
-
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                {isRussian ? 'Отмена' : 'Cancel'}
-              </Button>
-              <Button onClick={handleSubmit} disabled={isSubmitting}>
-                {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                {isRussian ? 'Сохранить' : 'Save'}
-              </Button>
-            </DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -444,14 +649,14 @@ const VendorServices = () => {
             <p className="text-sm text-muted-foreground">
               {isRussian ? 'Это действие нельзя отменить.' : 'This action cannot be undone.'}
             </p>
-            <DialogFooter>
+            <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={() => setDeleteConfirmId(null)}>
                 {isRussian ? 'Отмена' : 'Cancel'}
               </Button>
               <Button variant="destructive" onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)}>
                 {isRussian ? 'Удалить' : 'Delete'}
               </Button>
-            </DialogFooter>
+            </div>
           </DialogContent>
         </Dialog>
       </PageContainer>
