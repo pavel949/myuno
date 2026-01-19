@@ -335,21 +335,16 @@ const VendorYachts = () => {
     }
   };
 
-  // Preview data for CardPreview
+  // Preview data for CardPreview - using service type as closest match for yachts
   const previewData = {
+    type: 'service' as const,
     image: formData.cover_image,
-    title: isRussian ? formData.name_ru : formData.name_en,
-    subtitle: yachtTypes.find(t => t.value === formData.yacht_type)?.[isRussian ? 'labelRu' : 'label'],
-    price: formData.price_full_day ? `฿${parseInt(formData.price_full_day).toLocaleString()}` : undefined,
-    priceLabel: isRussian ? '/день' : '/day',
-    badges: [
-      formData.has_crew && { label: isRussian ? 'С экипажем' : 'With Crew', variant: 'default' as const },
-    ].filter(Boolean),
-    specs: [
-      { icon: Users, value: formData.capacity, label: isRussian ? 'гостей' : 'guests' },
-      formData.length_meters && { icon: Ruler, value: `${formData.length_meters}м`, label: '' },
-      formData.cabins && { icon: Bed, value: formData.cabins, label: isRussian ? 'кают' : 'cabins' },
-    ].filter(Boolean) as Array<{ icon: React.ElementType; value: string; label: string }>,
+    title: formData.name_en,
+    titleRu: formData.name_ru,
+    description: formData.description_en,
+    descriptionRu: formData.description_ru,
+    price: formData.price_full_day ? parseFloat(formData.price_full_day) : undefined,
+    maxCapacity: formData.capacity ? parseInt(formData.capacity) : undefined,
   };
 
   if (authLoading) {
@@ -949,17 +944,7 @@ const VendorYachts = () => {
 
                 {/* Live Preview */}
                 <CardPreviewSection className="hidden lg:block">
-                  <CardPreview
-                    image={previewData.image}
-                    title={previewData.title || (isRussian ? 'Название яхты' : 'Yacht name')}
-                    subtitle={previewData.subtitle}
-                    price={previewData.price}
-                    priceLabel={previewData.priceLabel}
-                    badges={previewData.badges}
-                    specs={previewData.specs}
-                    emptyIcon={Sailboat}
-                    emptyText={isRussian ? 'Добавьте фото' : 'Add photo'}
-                  />
+                  <CardPreview {...previewData} />
                 </CardPreviewSection>
               </div>
             </VendorFormWizard>

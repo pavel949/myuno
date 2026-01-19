@@ -189,7 +189,7 @@ const VendorProperties = () => {
           newErrors.title_en = isRussian ? 'Обязательное поле' : 'Required field';
         }
         setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+        return Object.keys(newErrors).length === 0 ? null : (isRussian ? 'Заполните обязательные поля' : 'Please fill required fields');
       }
     },
     { 
@@ -203,7 +203,7 @@ const VendorProperties = () => {
           newErrors.price = isRussian ? 'Укажите цену' : 'Set price';
         }
         setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+        return Object.keys(newErrors).length === 0 ? null : (isRussian ? 'Укажите цену' : 'Set price');
       }
     },
     { 
@@ -211,21 +211,21 @@ const VendorProperties = () => {
       title: 'Amenities', 
       titleRu: 'Удобства',
       icon: <Home className="h-4 w-4" />,
-      validate: () => true
+      validate: () => null
     },
     { 
       id: 'photos', 
       title: 'Photos', 
       titleRu: 'Фото',
       icon: <Image className="h-4 w-4" />,
-      validate: () => true
+      validate: () => null
     },
     { 
       id: 'review', 
       title: 'Review', 
       titleRu: 'Проверка',
       icon: <Eye className="h-4 w-4" />,
-      validate: () => true
+      validate: () => null
     },
   ], [formData, isRussian]);
 
@@ -374,20 +374,20 @@ const VendorProperties = () => {
   };
 
   const previewData = {
+    type: 'property' as const,
     image: formData.cover_image,
-    title: isRussian ? formData.title_ru : formData.title_en,
-    subtitle: propertyTypes.find(t => t.id === formData.property_type)?.[isRussian ? 'labelRu' : 'label'],
-    price: formData.price ? `฿${parseInt(formData.price).toLocaleString()}` : undefined,
-    priceLabel: pricePeriods.find(p => p.id === formData.price_period)?.[isRussian ? 'labelRu' : 'label']?.toLowerCase(),
-    badges: [
-      formData.instant_booking && { label: isRussian ? 'Мгновенно' : 'Instant', variant: 'default' as const },
-      formData.listing_type === 'sale' && { label: isRussian ? 'Продажа' : 'Sale', variant: 'secondary' as const },
-    ].filter(Boolean),
-    specs: [
-      { icon: Bed, value: formData.bedrooms, label: isRussian ? 'спален' : 'beds' },
-      { icon: Bath, value: formData.bathrooms, label: isRussian ? 'ванных' : 'baths' },
-      formData.area_sqm && { icon: Ruler, value: `${formData.area_sqm}м²`, label: '' },
-    ].filter(Boolean) as Array<{ icon: React.ElementType; value: string; label: string }>,
+    title: formData.title_en,
+    titleRu: formData.title_ru,
+    description: formData.description_en,
+    descriptionRu: formData.description_ru,
+    price: formData.price ? parseInt(formData.price) : undefined,
+    pricePeriod: formData.price_period,
+    propertyType: propertyTypes.find(t => t.id === formData.property_type)?.label,
+    bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : undefined,
+    bathrooms: formData.bathrooms ? parseInt(formData.bathrooms) : undefined,
+    areaSqm: formData.area_sqm ? parseInt(formData.area_sqm) : undefined,
+    district: formData.district,
+    instantBooking: formData.instant_booking,
   };
 
   if (authLoading || profileLoading) {
@@ -975,17 +975,7 @@ const VendorProperties = () => {
                 </div>
 
                 <CardPreviewSection className="hidden lg:block">
-                  <CardPreview
-                    image={previewData.image}
-                    title={previewData.title || (isRussian ? 'Название объекта' : 'Property title')}
-                    subtitle={previewData.subtitle}
-                    price={previewData.price}
-                    priceLabel={previewData.priceLabel}
-                    badges={previewData.badges}
-                    specs={previewData.specs}
-                    emptyIcon={Building2}
-                    emptyText={isRussian ? 'Добавьте фото' : 'Add photo'}
-                  />
+                  <CardPreview {...previewData} />
                 </CardPreviewSection>
               </div>
             </VendorFormWizard>
