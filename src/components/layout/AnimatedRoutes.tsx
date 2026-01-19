@@ -4,6 +4,7 @@ import { AnimatePresence } from 'framer-motion';
 import { PageTransition } from './PageTransition';
 import { ScrollToTop } from './ScrollToTop';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
+import { AdminGuard, VendorGuard, OwnerGuard } from '@/components/auth/RoleGuard';
 
 // Core pages - load eagerly for fast initial navigation
 import Index from '@/pages/Index';
@@ -408,82 +409,82 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/become-partner" element={<LazyPage><BecomePartnerPage /></LazyPage>} />
         <Route path="/view-history" element={<LazyPage><ViewHistory /></LazyPage>} />
         
-        {/* Admin Routes */}
-        <Route path="/admin" element={<LazyPage><AdminDashboard /></LazyPage>} />
-        <Route path="/admin/analytics" element={<LazyPage><AdminAnalytics /></LazyPage>} />
-        <Route path="/admin/providers" element={<LazyPage><AdminProviders /></LazyPage>} />
-        <Route path="/admin/services" element={<LazyPage><AdminServices /></LazyPage>} />
-        <Route path="/admin/partner-applications" element={<LazyPage><PartnerApplicationsAdmin /></LazyPage>} />
-        <Route path="/admin/pitch-deck" element={<LazyPage><InvestorPitchDeck /></LazyPage>} />
-        <Route path="/admin/operations" element={<LazyPage><OperationsHub /></LazyPage>} />
+        {/* Admin Routes - Protected */}
+        <Route path="/admin" element={<LazyPage><AdminGuard><AdminDashboard /></AdminGuard></LazyPage>} />
+        <Route path="/admin/analytics" element={<LazyPage><AdminGuard><AdminAnalytics /></AdminGuard></LazyPage>} />
+        <Route path="/admin/providers" element={<LazyPage><AdminGuard><AdminProviders /></AdminGuard></LazyPage>} />
+        <Route path="/admin/services" element={<LazyPage><AdminGuard><AdminServices /></AdminGuard></LazyPage>} />
+        <Route path="/admin/partner-applications" element={<LazyPage><AdminGuard><PartnerApplicationsAdmin /></AdminGuard></LazyPage>} />
+        <Route path="/admin/pitch-deck" element={<LazyPage><AdminGuard><InvestorPitchDeck /></AdminGuard></LazyPage>} />
+        <Route path="/admin/operations" element={<LazyPage><AdminGuard><OperationsHub /></AdminGuard></LazyPage>} />
         {/* Admin management routes */}
-        <Route path="/admin/yachts" element={<LazyPage><AdminYachts /></LazyPage>} />
-        <Route path="/admin/tours" element={<LazyPage><AdminTours /></LazyPage>} />
-        <Route path="/admin/activities" element={<LazyPage><AdminActivities /></LazyPage>} />
-        <Route path="/admin/properties" element={<LazyPage><AdminProperties /></LazyPage>} />
-        <Route path="/admin/restaurants" element={<LazyPage><AdminRestaurants /></LazyPage>} />
-        <Route path="/admin/salons" element={<LazyPage><AdminSalons /></LazyPage>} />
-        <Route path="/admin/clinics" element={<LazyPage><AdminClinics /></LazyPage>} />
-        <Route path="/admin/gyms" element={<LazyPage><AdminGyms /></LazyPage>} />
-        <Route path="/admin/vehicles" element={<LazyPage><AdminVehicles /></LazyPage>} />
-        <Route path="/admin/events" element={<LazyPage><AdminEvents /></LazyPage>} />
-        <Route path="/admin/education" element={<LazyPage><AdminEducation /></LazyPage>} />
-        <Route path="/admin/legal" element={<LazyPage><AdminLegal /></LazyPage>} />
-        <Route path="/admin/pets" element={<LazyPage><AdminPets /></LazyPage>} />
-        <Route path="/admin/cleaning" element={<LazyPage><AdminCleaning /></LazyPage>} />
-        <Route path="/admin/babysitters" element={<LazyPage><AdminBabysitters /></LazyPage>} />
-        <Route path="/admin/flowers" element={<LazyPage><AdminFlowers /></LazyPage>} />
+        <Route path="/admin/yachts" element={<LazyPage><AdminGuard><AdminYachts /></AdminGuard></LazyPage>} />
+        <Route path="/admin/tours" element={<LazyPage><AdminGuard><AdminTours /></AdminGuard></LazyPage>} />
+        <Route path="/admin/activities" element={<LazyPage><AdminGuard><AdminActivities /></AdminGuard></LazyPage>} />
+        <Route path="/admin/properties" element={<LazyPage><AdminGuard><AdminProperties /></AdminGuard></LazyPage>} />
+        <Route path="/admin/restaurants" element={<LazyPage><AdminGuard><AdminRestaurants /></AdminGuard></LazyPage>} />
+        <Route path="/admin/salons" element={<LazyPage><AdminGuard><AdminSalons /></AdminGuard></LazyPage>} />
+        <Route path="/admin/clinics" element={<LazyPage><AdminGuard><AdminClinics /></AdminGuard></LazyPage>} />
+        <Route path="/admin/gyms" element={<LazyPage><AdminGuard><AdminGyms /></AdminGuard></LazyPage>} />
+        <Route path="/admin/vehicles" element={<LazyPage><AdminGuard><AdminVehicles /></AdminGuard></LazyPage>} />
+        <Route path="/admin/events" element={<LazyPage><AdminGuard><AdminEvents /></AdminGuard></LazyPage>} />
+        <Route path="/admin/education" element={<LazyPage><AdminGuard><AdminEducation /></AdminGuard></LazyPage>} />
+        <Route path="/admin/legal" element={<LazyPage><AdminGuard><AdminLegal /></AdminGuard></LazyPage>} />
+        <Route path="/admin/pets" element={<LazyPage><AdminGuard><AdminPets /></AdminGuard></LazyPage>} />
+        <Route path="/admin/cleaning" element={<LazyPage><AdminGuard><AdminCleaning /></AdminGuard></LazyPage>} />
+        <Route path="/admin/babysitters" element={<LazyPage><AdminGuard><AdminBabysitters /></AdminGuard></LazyPage>} />
+        <Route path="/admin/flowers" element={<LazyPage><AdminGuard><AdminFlowers /></AdminGuard></LazyPage>} />
         
-        {/* Staff Routes */}
-        <Route path="/staff" element={<LazyPage><StaffDashboard /></LazyPage>} />
+        {/* Staff Routes - Protected */}
+        <Route path="/staff" element={<LazyPage><AdminGuard><StaffDashboard /></AdminGuard></LazyPage>} />
         
         {/* Guest Routes */}
         <Route path="/my-stay" element={<LazyPage><MyStay /></LazyPage>} />
         <Route path="/guest/check-in/:bookingId" element={<LazyPage><GuestCheckIn /></LazyPage>} />
         <Route path="/guest/guidebook/:propertyId" element={<LazyPage><GuestGuidebook /></LazyPage>} />
         
-        {/* Vendor Routes */}
-        <Route path="/vendor" element={<LazyPage><VendorDashboard /></LazyPage>} />
+        {/* Vendor Routes - Protected */}
+        <Route path="/vendor" element={<LazyPage><VendorGuard><VendorDashboard /></VendorGuard></LazyPage>} />
         <Route path="/vendor/onboarding" element={<LazyPage><VendorOnboarding /></LazyPage>} />
-        <Route path="/vendor/bookings" element={<LazyPage><VendorBookings /></LazyPage>} />
-        <Route path="/vendor/services" element={<LazyPage><VendorServices /></LazyPage>} />
-        <Route path="/vendor/analytics" element={<LazyPage><VendorAnalytics /></LazyPage>} />
-        <Route path="/vendor/payouts" element={<LazyPage><VendorPayouts /></LazyPage>} />
-        <Route path="/vendor/properties" element={<LazyPage><VendorProperties /></LazyPage>} />
-        <Route path="/vendor/tours" element={<LazyPage><VendorTours /></LazyPage>} />
-        <Route path="/vendor/activities" element={<LazyPage><VendorActivities /></LazyPage>} />
-        <Route path="/vendor/yachts" element={<LazyPage><VendorYachts /></LazyPage>} />
-        <Route path="/vendor/transport" element={<LazyPage><VendorTransport /></LazyPage>} />
-        <Route path="/vendor/beauty" element={<LazyPage><VendorBeauty /></LazyPage>} />
-        <Route path="/vendor/fitness" element={<LazyPage><VendorFitness /></LazyPage>} />
-        <Route path="/vendor/clinics" element={<LazyPage><VendorClinics /></LazyPage>} />
-        <Route path="/vendor/subscription" element={<LazyPage><VendorSubscription /></LazyPage>} />
-        <Route path="/vendor/restaurants" element={<LazyPage><VendorRestaurants /></LazyPage>} />
-        <Route path="/vendor/events" element={<LazyPage><VendorEvents /></LazyPage>} />
-        <Route path="/vendor/education" element={<LazyPage><VendorEducation /></LazyPage>} />
-        <Route path="/vendor/legal" element={<LazyPage><VendorLegal /></LazyPage>} />
-        <Route path="/vendor/pets" element={<LazyPage><VendorPets /></LazyPage>} />
-        <Route path="/vendor/cleaning" element={<LazyPage><VendorCleaning /></LazyPage>} />
-        <Route path="/vendor/babysitters" element={<LazyPage><VendorBabysitters /></LazyPage>} />
-        <Route path="/vendor/flowers" element={<LazyPage><VendorFlowers /></LazyPage>} />
+        <Route path="/vendor/bookings" element={<LazyPage><VendorGuard><VendorBookings /></VendorGuard></LazyPage>} />
+        <Route path="/vendor/services" element={<LazyPage><VendorGuard><VendorServices /></VendorGuard></LazyPage>} />
+        <Route path="/vendor/analytics" element={<LazyPage><VendorGuard><VendorAnalytics /></VendorGuard></LazyPage>} />
+        <Route path="/vendor/payouts" element={<LazyPage><VendorGuard><VendorPayouts /></VendorGuard></LazyPage>} />
+        <Route path="/vendor/properties" element={<LazyPage><VendorGuard><VendorProperties /></VendorGuard></LazyPage>} />
+        <Route path="/vendor/tours" element={<LazyPage><VendorGuard><VendorTours /></VendorGuard></LazyPage>} />
+        <Route path="/vendor/activities" element={<LazyPage><VendorGuard><VendorActivities /></VendorGuard></LazyPage>} />
+        <Route path="/vendor/yachts" element={<LazyPage><VendorGuard><VendorYachts /></VendorGuard></LazyPage>} />
+        <Route path="/vendor/transport" element={<LazyPage><VendorGuard><VendorTransport /></VendorGuard></LazyPage>} />
+        <Route path="/vendor/beauty" element={<LazyPage><VendorGuard><VendorBeauty /></VendorGuard></LazyPage>} />
+        <Route path="/vendor/fitness" element={<LazyPage><VendorGuard><VendorFitness /></VendorGuard></LazyPage>} />
+        <Route path="/vendor/clinics" element={<LazyPage><VendorGuard><VendorClinics /></VendorGuard></LazyPage>} />
+        <Route path="/vendor/subscription" element={<LazyPage><VendorGuard><VendorSubscription /></VendorGuard></LazyPage>} />
+        <Route path="/vendor/restaurants" element={<LazyPage><VendorGuard><VendorRestaurants /></VendorGuard></LazyPage>} />
+        <Route path="/vendor/events" element={<LazyPage><VendorGuard><VendorEvents /></VendorGuard></LazyPage>} />
+        <Route path="/vendor/education" element={<LazyPage><VendorGuard><VendorEducation /></VendorGuard></LazyPage>} />
+        <Route path="/vendor/legal" element={<LazyPage><VendorGuard><VendorLegal /></VendorGuard></LazyPage>} />
+        <Route path="/vendor/pets" element={<LazyPage><VendorGuard><VendorPets /></VendorGuard></LazyPage>} />
+        <Route path="/vendor/cleaning" element={<LazyPage><VendorGuard><VendorCleaning /></VendorGuard></LazyPage>} />
+        <Route path="/vendor/babysitters" element={<LazyPage><VendorGuard><VendorBabysitters /></VendorGuard></LazyPage>} />
+        <Route path="/vendor/flowers" element={<LazyPage><VendorGuard><VendorFlowers /></VendorGuard></LazyPage>} />
         
-        {/* Owner (Property Care) Routes */}
-        <Route path="/owner" element={<LazyPage><OwnerDashboard /></LazyPage>} />
-        <Route path="/owner/properties" element={<LazyPage><OwnerProperties /></LazyPage>} />
-        <Route path="/owner/properties/new" element={<LazyPage><AddProperty /></LazyPage>} />
-        <Route path="/owner/properties/:id" element={<LazyPage><OwnerPropertyDetail /></LazyPage>} />
-        <Route path="/owner/properties/:id/terms" element={<LazyPage><OwnerRentalTerms /></LazyPage>} />
-        <Route path="/owner/properties/:id/edit" element={<LazyPage><EditProperty /></LazyPage>} />
-        <Route path="/owner/calendar" element={<LazyPage><OwnerCalendar /></LazyPage>} />
-        <Route path="/owner/financials" element={<LazyPage><OwnerFinancials /></LazyPage>} />
-        <Route path="/owner/financials/new" element={<LazyPage><OwnerFinancialForm /></LazyPage>} />
-        <Route path="/owner/financials/:id" element={<LazyPage><OwnerFinancialForm /></LazyPage>} />
-        <Route path="/owner/messages" element={<LazyPage><OwnerMessages /></LazyPage>} />
-        <Route path="/owner/chat/:type/:id" element={<LazyPage><OwnerChatRoom /></LazyPage>} />
-        <Route path="/owner/support-chat" element={<LazyPage><OwnerSupportChat /></LazyPage>} />
-        <Route path="/owner/service-request" element={<LazyPage><ServiceRequest /></LazyPage>} />
-        <Route path="/owner/inspection" element={<LazyPage><InspectionRequest /></LazyPage>} />
-        <Route path="/owner/properties/:id/guidebook" element={<LazyPage><OwnerGuidebookEdit /></LazyPage>} />
+        {/* Owner (Property Care) Routes - Protected */}
+        <Route path="/owner" element={<LazyPage><OwnerGuard><OwnerDashboard /></OwnerGuard></LazyPage>} />
+        <Route path="/owner/properties" element={<LazyPage><OwnerGuard><OwnerProperties /></OwnerGuard></LazyPage>} />
+        <Route path="/owner/properties/new" element={<LazyPage><OwnerGuard><AddProperty /></OwnerGuard></LazyPage>} />
+        <Route path="/owner/properties/:id" element={<LazyPage><OwnerGuard><OwnerPropertyDetail /></OwnerGuard></LazyPage>} />
+        <Route path="/owner/properties/:id/terms" element={<LazyPage><OwnerGuard><OwnerRentalTerms /></OwnerGuard></LazyPage>} />
+        <Route path="/owner/properties/:id/edit" element={<LazyPage><OwnerGuard><EditProperty /></OwnerGuard></LazyPage>} />
+        <Route path="/owner/calendar" element={<LazyPage><OwnerGuard><OwnerCalendar /></OwnerGuard></LazyPage>} />
+        <Route path="/owner/financials" element={<LazyPage><OwnerGuard><OwnerFinancials /></OwnerGuard></LazyPage>} />
+        <Route path="/owner/financials/new" element={<LazyPage><OwnerGuard><OwnerFinancialForm /></OwnerGuard></LazyPage>} />
+        <Route path="/owner/financials/:id" element={<LazyPage><OwnerGuard><OwnerFinancialForm /></OwnerGuard></LazyPage>} />
+        <Route path="/owner/messages" element={<LazyPage><OwnerGuard><OwnerMessages /></OwnerGuard></LazyPage>} />
+        <Route path="/owner/chat/:type/:id" element={<LazyPage><OwnerGuard><OwnerChatRoom /></OwnerGuard></LazyPage>} />
+        <Route path="/owner/support-chat" element={<LazyPage><OwnerGuard><OwnerSupportChat /></OwnerGuard></LazyPage>} />
+        <Route path="/owner/service-request" element={<LazyPage><OwnerGuard><ServiceRequest /></OwnerGuard></LazyPage>} />
+        <Route path="/owner/inspection" element={<LazyPage><OwnerGuard><InspectionRequest /></OwnerGuard></LazyPage>} />
+        <Route path="/owner/properties/:id/guidebook" element={<LazyPage><OwnerGuard><OwnerGuidebookEdit /></OwnerGuard></LazyPage>} />
         
         {/* Catch-all */}
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
