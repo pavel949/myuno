@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@14.21.0";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import Stripe from "https://esm.sh/stripe@18.5.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -15,7 +15,7 @@ serve(async (req) => {
 
   try {
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
-      apiVersion: "2023-10-16",
+      apiVersion: "2025-08-27.basil",
     });
 
     // Get raw body for signature verification
@@ -64,10 +64,126 @@ serve(async (req) => {
       console.log("Processing checkout session:", session.id);
       console.log("Session metadata:", session.metadata);
 
-      // Handle booking payment confirmation
+      // Handle canonical ORDER payment confirmation (new system)
+      if (session.metadata?.order_id) {
+        const orderId = session.metadata.order_id;
+        console.log("Updating order status for:", orderId);
+
+        // Get current order status for history
+        const { data: currentOrder } = await supabaseAdmin
+          .from('orders')
+          .select('status, customer_user_id, total_amount, currency, order_type')
+          .eq('id', orderId)
+          .single();
+
+        // Update order status to confirmed
+        const { error: orderUpdateError } = await supabaseAdmin
+          .from('orders')
+          .update({ status: 'confirmed' })
+          .eq('id', orderId);
+
+        if (orderUpdateError) {
+          console.error("Error updating order:", orderUpdateError);
+          throw orderUpdateError;
+        }
+
+        // Update payment_intent status
+        const { error: paymentUpdateError } = await supabaseAdmin
+          .from('payment_intents')
+          .update({ 
+            status: 'succeeded',
+            provider_ref: session.payment_intent as string,
+          })
+          .eq('order_id', orderId)
+          .eq('method', 'stripe');
+
+        if (paymentUpdateError) {
+          console.error("Error updating payment intent:", paymentUpdateError);
+        }
+
+        // Add order status history entry
+        await supabaseAdmin
+          .from('order_status_history')
+          .insert({
+            order_id: orderId,
+            from_status: currentOrder?.status || 'pending',
+            to_status: 'confirmed',
+            reason: `Payment confirmed via Stripe. Session: ${session.id}`,
+          });
+
+        // Create ledger entries for payment
+        if (currentOrder) {
+          // Get platform revenue account
+          const { data: platformAccount } = await supabaseAdmin
+            .from('ledger_accounts')
+            .select('id')
+            .eq('account_type', 'platform_revenue')
+            .single();
+
+          // Get customer wallet account (create if not exists)
+          const { data: existingAccount } = await supabaseAdmin
+            .from('ledger_accounts')
+            .select('id')
+            .eq('owner_user_id', currentOrder.customer_user_id)
+            .eq('account_type', 'customer')
+            .single();
+
+          let customerAccountId = existingAccount?.id;
+
+          if (!customerAccountId) {
+            // Create customer ledger account
+            const { data: newAccount } = await supabaseAdmin
+              .from('ledger_accounts')
+              .insert({
+                owner_user_id: currentOrder.customer_user_id,
+                account_type: 'customer',
+                currency: currentOrder.currency || 'THB',
+              })
+              .select('id')
+              .single();
+            customerAccountId = newAccount?.id;
+          }
+
+          if (platformAccount?.id && customerAccountId) {
+            // Create ledger entry: debit customer, credit platform
+            await supabaseAdmin
+              .from('ledger_entries')
+              .insert({
+                debit_account_id: customerAccountId,
+                credit_account_id: platformAccount.id,
+                amount: currentOrder.total_amount,
+                currency: currentOrder.currency || 'THB',
+                order_id: orderId,
+                entry_type: 'payment',
+                description: `Payment for order ${orderId}`,
+              });
+          }
+        }
+
+        // Create notification for user
+        if (currentOrder) {
+          await supabaseAdmin
+            .from('notifications')
+            .insert({
+              user_id: currentOrder.customer_user_id,
+              title: 'Payment Confirmed',
+              body: `Your payment of ${currentOrder.total_amount} ${currentOrder.currency} has been confirmed.`,
+              type: 'payment',
+              data: {
+                order_id: orderId,
+                order_type: currentOrder.order_type,
+                session_id: session.id,
+              },
+            });
+        }
+
+        console.log("Order payment confirmed successfully:", orderId);
+      }
+
+      // Handle legacy BOOKING payment confirmation (backward compatibility)
       if (session.metadata?.booking_id) {
         const bookingId = session.metadata.booking_id;
-        console.log("Updating booking status for:", bookingId);
+        console.log("Updating legacy booking status for:", bookingId);
 
         // Update booking status to confirmed
         const { error: bookingUpdateError } = await supabaseAdmin
@@ -92,7 +208,6 @@ serve(async (req) => {
 
         if (paymentUpdateError) {
           console.error("Error updating payment:", paymentUpdateError);
-          // Don't throw - payment record might not exist yet
         }
 
         // Add status history entry
@@ -135,7 +250,7 @@ serve(async (req) => {
       if (session.metadata?.type === "wallet_topup") {
         const userId = session.metadata.user_id;
         const amount = parseFloat(session.metadata.amount);
-        const currency = session.metadata.currency || "RUB";
+        const currency = session.metadata.currency || "THB";
 
         console.log("Processing wallet top up for user:", userId, "amount:", amount);
 

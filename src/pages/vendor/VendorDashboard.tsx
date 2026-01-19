@@ -2,7 +2,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useVendorProfile, useVendorBookings, useVendorAnalytics } from '@/hooks/useVendor';
+import { useUserContext } from '@/hooks/useUserContext';
+import { useVendorOrders } from '@/hooks/useOrders';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -23,7 +24,8 @@ import {
   Package,
   CreditCard,
   BarChart3,
-  Crown
+  Crown,
+  Building2
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -32,9 +34,8 @@ const VendorDashboard = () => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
-  const { profile, isLoading: profileLoading } = useVendorProfile();
-  const { bookings, isLoading: bookingsLoading } = useVendorBookings(profile?.id, { limit: 5 });
-  const { summary, isLoading: analyticsLoading } = useVendorAnalytics(profile?.id, 30);
+  const { activeOrg, vendorOrgs, isLoading: contextLoading } = useUserContext();
+  const { orders, isLoading: ordersLoading, stats } = useVendorOrders();
 
   const isRussian = language === 'ru';
 
@@ -45,14 +46,14 @@ const VendorDashboard = () => {
     }
   }, [user, authLoading, navigate]);
 
-  // Redirect to onboarding if no vendor profile
+  // Redirect to onboarding if no vendor org
   React.useEffect(() => {
-    if (!profileLoading && !profile && user) {
+    if (!contextLoading && vendorOrgs.length === 0 && user) {
       navigate('/vendor/onboarding');
     }
-  }, [profile, profileLoading, user, navigate]);
+  }, [vendorOrgs, contextLoading, user, navigate]);
 
-  if (authLoading || profileLoading) {
+  if (authLoading || contextLoading) {
     return (
       <AppLayout>
         <PageContainer>
@@ -69,34 +70,36 @@ const VendorDashboard = () => {
     );
   }
 
-  if (!profile) return null;
+  if (vendorOrgs.length === 0) return null;
 
-  const stats = [
+  const currentOrg = activeOrg || vendorOrgs[0]?.org;
+
+  const statCards = [
     {
       label: isRussian ? 'Доход за месяц' : 'Monthly Revenue',
-      value: `฿${summary.totalRevenue.toLocaleString()}`,
+      value: `฿${stats.totalRevenue.toLocaleString()}`,
       icon: DollarSign,
       color: 'text-green-500',
       bgColor: 'bg-green-500/10',
     },
     {
-      label: isRussian ? 'Бронирования' : 'Bookings',
-      value: summary.totalBookings.toString(),
+      label: isRussian ? 'Заказы' : 'Orders',
+      value: (stats.pendingCount + stats.confirmedCount + stats.completedCount).toString(),
       icon: Calendar,
       color: 'text-blue-500',
       bgColor: 'bg-blue-500/10',
     },
     {
       label: isRussian ? 'Завершено' : 'Completed',
-      value: summary.completedBookings.toString(),
+      value: stats.completedCount.toString(),
       icon: CheckCircle,
       color: 'text-emerald-500',
       bgColor: 'bg-emerald-500/10',
     },
     {
-      label: isRussian ? 'К выплате' : 'Pending Payout',
-      value: `฿${profile.pending_payout.toLocaleString()}`,
-      icon: CreditCard,
+      label: isRussian ? 'Ожидает' : 'Pending',
+      value: stats.pendingCount.toString(),
+      icon: Clock,
       color: 'text-orange-500',
       bgColor: 'bg-orange-500/10',
     },
@@ -150,17 +153,17 @@ const VendorDashboard = () => {
           title={isRussian ? 'Панель управления' : 'Dashboard'}
         />
 
-        {/* Verification Badge */}
-        {!profile.is_verified && (
-          <Card className="mb-6 border-yellow-500/20 bg-yellow-500/5">
+        {/* Org Info */}
+        {currentOrg && (
+          <Card className="mb-6 border-primary/20 bg-primary/5">
             <CardContent className="p-4 flex items-center gap-3">
-              <Clock className="h-5 w-5 text-yellow-500" />
+              <Building2 className="h-5 w-5 text-primary" />
               <div className="flex-1">
-                <p className="text-sm font-medium">
-                  {isRussian ? 'Аккаунт на модерации' : 'Account pending verification'}
-                </p>
+                <p className="text-sm font-medium">{currentOrg.name}</p>
                 <p className="text-xs text-muted-foreground">
-                  {isRussian ? 'Ваш профиль будет виден клиентам после проверки' : 'Your profile will be visible to customers after review'}
+                  {currentOrg.is_verified 
+                    ? (isRussian ? 'Верифицирован' : 'Verified') 
+                    : (isRussian ? 'На модерации' : 'Pending verification')}
                 </p>
               </div>
             </CardContent>
@@ -169,7 +172,7 @@ const VendorDashboard = () => {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-4 mb-6">
-          {stats.map((stat, index) => (
+          {statCards.map((stat, index) => (
             <Card key={index} className="overflow-hidden">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
@@ -219,11 +222,11 @@ const VendorDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Recent Bookings */}
+        {/* Recent Orders */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-base">
-              {isRussian ? 'Последние бронирования' : 'Recent Bookings'}
+              {isRussian ? 'Последние заказы' : 'Recent Orders'}
             </CardTitle>
             <Button variant="ghost" size="sm" onClick={() => navigate('/vendor/bookings')}>
               {isRussian ? 'Все' : 'View All'}
@@ -231,37 +234,37 @@ const VendorDashboard = () => {
             </Button>
           </CardHeader>
           <CardContent>
-            {bookingsLoading ? (
+            {ordersLoading ? (
               <div className="space-y-3">
                 {[1, 2, 3].map(i => (
                   <Skeleton key={i} className="h-16" />
                 ))}
               </div>
-            ) : bookings.length === 0 ? (
+            ) : orders.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <Calendar className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                <p>{isRussian ? 'Пока нет бронирований' : 'No bookings yet'}</p>
+                <p>{isRussian ? 'Пока нет заказов' : 'No orders yet'}</p>
               </div>
             ) : (
               <div className="space-y-3">
-                {bookings.map((booking) => (
+                {orders.slice(0, 5).map((order) => (
                   <div
-                    key={booking.id}
+                    key={order.id}
                     className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
                   >
                     <div className="flex-1">
-                      <p className="font-medium text-sm">{booking.customer_name || 'Customer'}</p>
+                      <p className="font-medium text-sm">{order.order_number || order.id.slice(0, 8)}</p>
                       <p className="text-xs text-muted-foreground">
-                        {booking.scheduled_at
-                          ? format(new Date(booking.scheduled_at), 'dd MMM, HH:mm', {
+                        {order.start_at
+                          ? format(new Date(order.start_at), 'dd MMM, HH:mm', {
                               locale: isRussian ? ru : undefined,
                             })
-                          : '-'}
+                          : format(new Date(order.created_at), 'dd MMM', { locale: isRussian ? ru : undefined })}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium text-sm">฿{booking.amount.toLocaleString()}</p>
-                      {getStatusBadge(booking.status)}
+                      <p className="font-medium text-sm">฿{order.total_amount.toLocaleString()}</p>
+                      {getStatusBadge(order.status)}
                     </div>
                   </div>
                 ))}
@@ -269,23 +272,6 @@ const VendorDashboard = () => {
             )}
           </CardContent>
         </Card>
-
-        {/* Rating Card */}
-        {profile.review_count > 0 && (
-          <Card className="mt-4">
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="p-3 rounded-full bg-yellow-500/10">
-                <Star className="h-6 w-6 text-yellow-500 fill-yellow-500" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{profile.rating.toFixed(1)}</p>
-                <p className="text-sm text-muted-foreground">
-                  {profile.review_count} {isRussian ? 'отзывов' : 'reviews'}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </PageContainer>
     </AppLayout>
   );
