@@ -7,8 +7,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, stripe-signature",
 };
 
+const logStep = (step: string, details?: unknown) => {
+  console.log(`[STRIPE-WEBHOOK] ${step}`, details ? JSON.stringify(details) : '');
+};
+
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -18,16 +21,14 @@ serve(async (req) => {
       apiVersion: "2025-08-27.basil",
     });
 
-    // Get raw body for signature verification
     const body = await req.text();
     const signature = req.headers.get("stripe-signature");
 
     if (!signature) {
-      console.error("No Stripe signature found");
+      logStep("ERROR", "No Stripe signature found");
       throw new Error("No Stripe signature");
     }
 
-    // Verify webhook signature
     const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
     let event: Stripe.Event;
 
@@ -36,45 +37,50 @@ serve(async (req) => {
         event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
       } catch (err: unknown) {
         const errMessage = err instanceof Error ? err.message : "Unknown error";
-        console.error("Webhook signature verification failed:", errMessage);
+        logStep("ERROR", `Webhook signature verification failed: ${errMessage}`);
         throw new Error(`Webhook signature verification failed: ${errMessage}`);
       }
     } else {
-      // For development without webhook secret
       console.warn("No STRIPE_WEBHOOK_SECRET set, parsing event without verification");
       try {
         event = JSON.parse(body);
-      } catch (parseErr) {
-        console.error("Failed to parse webhook body:", parseErr);
+      } catch {
+        logStep("ERROR", "Failed to parse webhook body");
         throw new Error("Invalid JSON payload");
       }
     }
 
-    console.log("Received Stripe event:", event.type, event.id);
+    logStep("Event received", { type: event.type, id: event.id });
 
-    // Initialize Supabase with service role for admin access
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
+    // =====================================================
+    // HANDLE: checkout.session.completed
+    // =====================================================
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
-      
-      console.log("Processing checkout session:", session.id);
-      console.log("Session metadata:", session.metadata);
+      logStep("Processing checkout.session.completed", { sessionId: session.id, metadata: session.metadata });
 
-      // Handle canonical ORDER payment confirmation (new system)
+      // ===== CANONICAL ORDER PAYMENT =====
       if (session.metadata?.order_id) {
         const orderId = session.metadata.order_id;
-        console.log("Updating order status for:", orderId);
+        const paymentIntentId = session.metadata.payment_intent_id;
+        logStep("Processing order payment", { orderId, paymentIntentId });
 
-        // Get current order status for history
-        const { data: currentOrder } = await supabaseAdmin
+        // Get current order
+        const { data: order, error: orderFetchError } = await supabaseAdmin
           .from('orders')
-          .select('status, customer_user_id, total_amount, currency, order_type')
+          .select('status, customer_user_id, provider_org_id, total_amount, currency, order_type')
           .eq('id', orderId)
           .single();
+
+        if (orderFetchError || !order) {
+          logStep("ERROR", `Order not found: ${orderId}`);
+          throw new Error(`Order not found: ${orderId}`);
+        }
 
         // Update order status to confirmed
         const { error: orderUpdateError } = await supabaseAdmin
@@ -83,7 +89,7 @@ serve(async (req) => {
           .eq('id', orderId);
 
         if (orderUpdateError) {
-          console.error("Error updating order:", orderUpdateError);
+          logStep("ERROR", `Failed to update order: ${orderUpdateError.message}`);
           throw orderUpdateError;
         }
 
@@ -98,106 +104,167 @@ serve(async (req) => {
           .eq('method', 'stripe');
 
         if (paymentUpdateError) {
-          console.error("Error updating payment intent:", paymentUpdateError);
+          logStep("WARN", `Failed to update payment intent: ${paymentUpdateError.message}`);
         }
 
-        // Add order status history entry
+        // Add order status history
         await supabaseAdmin
           .from('order_status_history')
           .insert({
             order_id: orderId,
-            from_status: currentOrder?.status || 'pending',
+            from_status: order.status || 'pending',
             to_status: 'confirmed',
             reason: `Payment confirmed via Stripe. Session: ${session.id}`,
           });
 
-        // Create ledger entries for payment
-        if (currentOrder) {
-          // Get platform revenue account
-          const { data: platformAccount } = await supabaseAdmin
+        // ===== CREATE LEDGER ENTRIES =====
+        logStep("Creating ledger entries", { orderId, amount: order.total_amount });
+
+        // Get or create platform revenue account
+        let platformAccountId: string | null = null;
+        const { data: platformAccount } = await supabaseAdmin
+          .from('ledger_accounts')
+          .select('id')
+          .eq('account_type', 'platform_revenue')
+          .single();
+
+        if (platformAccount) {
+          platformAccountId = platformAccount.id;
+        } else {
+          const { data: newPlatformAccount } = await supabaseAdmin
+            .from('ledger_accounts')
+            .insert({ account_type: 'platform_revenue', currency: order.currency || 'THB' })
+            .select('id')
+            .single();
+          platformAccountId = newPlatformAccount?.id || null;
+        }
+
+        // Get or create customer account
+        let customerAccountId: string | null = null;
+        const { data: existingCustomerAccount } = await supabaseAdmin
+          .from('ledger_accounts')
+          .select('id')
+          .eq('owner_user_id', order.customer_user_id)
+          .eq('account_type', 'customer')
+          .single();
+
+        if (existingCustomerAccount) {
+          customerAccountId = existingCustomerAccount.id;
+        } else {
+          const { data: newCustomerAccount } = await supabaseAdmin
+            .from('ledger_accounts')
+            .insert({
+              owner_user_id: order.customer_user_id,
+              account_type: 'customer',
+              currency: order.currency || 'THB',
+            })
+            .select('id')
+            .single();
+          customerAccountId = newCustomerAccount?.id || null;
+        }
+
+        // Get or create vendor balance account (if order has provider_org_id)
+        let vendorAccountId: string | null = null;
+        if (order.provider_org_id) {
+          const { data: existingVendorAccount } = await supabaseAdmin
             .from('ledger_accounts')
             .select('id')
-            .eq('account_type', 'platform_revenue')
+            .eq('owner_org_id', order.provider_org_id)
+            .eq('account_type', 'vendor_balance')
             .single();
 
-          // Get customer wallet account (create if not exists)
-          const { data: existingAccount } = await supabaseAdmin
-            .from('ledger_accounts')
-            .select('id')
-            .eq('owner_user_id', currentOrder.customer_user_id)
-            .eq('account_type', 'customer')
-            .single();
-
-          let customerAccountId = existingAccount?.id;
-
-          if (!customerAccountId) {
-            // Create customer ledger account
-            const { data: newAccount } = await supabaseAdmin
+          if (existingVendorAccount) {
+            vendorAccountId = existingVendorAccount.id;
+          } else {
+            const { data: newVendorAccount } = await supabaseAdmin
               .from('ledger_accounts')
               .insert({
-                owner_user_id: currentOrder.customer_user_id,
-                account_type: 'customer',
-                currency: currentOrder.currency || 'THB',
+                owner_org_id: order.provider_org_id,
+                account_type: 'vendor_balance',
+                currency: order.currency || 'THB',
               })
               .select('id')
               .single();
-            customerAccountId = newAccount?.id;
-          }
-
-          if (platformAccount?.id && customerAccountId) {
-            // Create ledger entry: debit customer, credit platform
-            await supabaseAdmin
-              .from('ledger_entries')
-              .insert({
-                debit_account_id: customerAccountId,
-                credit_account_id: platformAccount.id,
-                amount: currentOrder.total_amount,
-                currency: currentOrder.currency || 'THB',
-                order_id: orderId,
-                entry_type: 'payment',
-                description: `Payment for order ${orderId}`,
-              });
+            vendorAccountId = newVendorAccount?.id || null;
           }
         }
 
-        // Create notification for user
-        if (currentOrder) {
-          await supabaseAdmin
-            .from('notifications')
-            .insert({
-              user_id: currentOrder.customer_user_id,
-              title: 'Payment Confirmed',
-              body: `Your payment of ${currentOrder.total_amount} ${currentOrder.currency} has been confirmed.`,
-              type: 'payment',
-              data: {
-                order_id: orderId,
-                order_type: currentOrder.order_type,
-                session_id: session.id,
-              },
-            });
+        // Calculate platform fee (e.g., 10%)
+        const platformFeeRate = 0.10;
+        const totalAmount = order.total_amount || 0;
+        const platformFee = Math.round(totalAmount * platformFeeRate * 100) / 100;
+        const vendorAmount = totalAmount - platformFee;
+
+        // Create ledger entries
+        const ledgerEntries = [];
+
+        // Entry 1: Customer payment (debit customer / credit escrow or platform)
+        if (customerAccountId && platformAccountId) {
+          ledgerEntries.push({
+            debit_account_id: customerAccountId,
+            credit_account_id: platformAccountId,
+            amount: platformFee,
+            currency: order.currency || 'THB',
+            order_id: orderId,
+            entry_type: 'platform_fee',
+            description: `Platform fee for order ${orderId}`,
+          });
         }
 
-        console.log("Order payment confirmed successfully:", orderId);
+        // Entry 2: Vendor credit (if vendor exists)
+        if (customerAccountId && vendorAccountId) {
+          ledgerEntries.push({
+            debit_account_id: customerAccountId,
+            credit_account_id: vendorAccountId,
+            amount: vendorAmount,
+            currency: order.currency || 'THB',
+            order_id: orderId,
+            entry_type: 'vendor_payment',
+            description: `Vendor payment for order ${orderId}`,
+          });
+        }
+
+        if (ledgerEntries.length > 0) {
+          const { error: ledgerError } = await supabaseAdmin
+            .from('ledger_entries')
+            .insert(ledgerEntries);
+
+          if (ledgerError) {
+            logStep("ERROR", `Failed to create ledger entries: ${ledgerError.message}`);
+          } else {
+            logStep("Ledger entries created", { count: ledgerEntries.length });
+          }
+        }
+
+        // Create notification
+        await supabaseAdmin
+          .from('notifications')
+          .insert({
+            user_id: order.customer_user_id,
+            title: 'Payment Confirmed',
+            body: `Your payment of ${order.total_amount} ${order.currency} has been confirmed.`,
+            type: 'payment',
+            data: { order_id: orderId, order_type: order.order_type, session_id: session.id },
+          });
+
+        logStep("Order payment completed", { orderId });
       }
 
-      // Handle legacy BOOKING payment confirmation (backward compatibility)
+      // ===== LEGACY BOOKING PAYMENT (backward compatibility) =====
       if (session.metadata?.booking_id) {
         const bookingId = session.metadata.booking_id;
-        console.log("Updating legacy booking status for:", bookingId);
+        logStep("Processing legacy booking payment", { bookingId });
 
-        // Update booking status to confirmed
         const { error: bookingUpdateError } = await supabaseAdmin
           .from('bookings')
           .update({ status: 'confirmed' })
           .eq('id', bookingId);
 
         if (bookingUpdateError) {
-          console.error("Error updating booking:", bookingUpdateError);
-          throw bookingUpdateError;
+          logStep("ERROR", `Failed to update booking: ${bookingUpdateError.message}`);
         }
 
-        // Update payment status
-        const { error: paymentUpdateError } = await supabaseAdmin
+        await supabaseAdmin
           .from('booking_payments')
           .update({ 
             status: 'paid',
@@ -206,11 +273,6 @@ serve(async (req) => {
           })
           .eq('booking_id', bookingId);
 
-        if (paymentUpdateError) {
-          console.error("Error updating payment:", paymentUpdateError);
-        }
-
-        // Add status history entry
         await supabaseAdmin
           .from('booking_status_history')
           .insert({
@@ -220,7 +282,6 @@ serve(async (req) => {
             notes: `Payment confirmed via Stripe. Session: ${session.id}`,
           });
 
-        // Get booking for notification
         const { data: booking } = await supabaseAdmin
           .from('bookings')
           .select('user_id, booking_type, total_amount, currency')
@@ -235,52 +296,36 @@ serve(async (req) => {
               title: 'Payment Confirmed',
               body: `Your payment of ${booking.total_amount} ${booking.currency} has been confirmed.`,
               type: 'payment',
-              data: {
-                booking_id: bookingId,
-                booking_type: booking.booking_type,
-                session_id: session.id,
-              },
+              data: { booking_id: bookingId, booking_type: booking.booking_type, session_id: session.id },
             });
         }
 
-        console.log("Booking payment confirmed successfully:", bookingId);
+        logStep("Legacy booking payment completed", { bookingId });
       }
 
-      // Handle wallet top-up
+      // ===== WALLET TOP-UP =====
       if (session.metadata?.type === "wallet_topup") {
         const userId = session.metadata.user_id;
         const amount = parseFloat(session.metadata.amount);
         const currency = session.metadata.currency || "THB";
 
-        console.log("Processing wallet top up for user:", userId, "amount:", amount);
+        logStep("Processing wallet top-up", { userId, amount });
 
-        // Get or create wallet
         const { data: walletData, error: walletError } = await supabaseAdmin
           .rpc('get_or_create_wallet', { p_user_id: userId });
 
         if (walletError) {
-          console.error("Error getting wallet:", walletError);
+          logStep("ERROR", `Failed to get wallet: ${walletError.message}`);
           throw walletError;
         }
 
-        console.log("Got wallet:", walletData.id, "current balance:", walletData.balance);
-
-        // Update wallet balance
         const newBalance = Number(walletData.balance) + amount;
-        const { error: updateError } = await supabaseAdmin
+        await supabaseAdmin
           .from('wallets')
           .update({ balance: newBalance })
           .eq('id', walletData.id);
 
-        if (updateError) {
-          console.error("Error updating wallet balance:", updateError);
-          throw updateError;
-        }
-
-        console.log("Updated wallet balance to:", newBalance);
-
-        // Create transaction record
-        const { error: txError } = await supabaseAdmin
+        await supabaseAdmin
           .from('wallet_transactions')
           .insert({
             wallet_id: walletData.id,
@@ -295,14 +340,6 @@ serve(async (req) => {
             status: 'completed',
           });
 
-        if (txError) {
-          console.error("Error creating transaction:", txError);
-          throw txError;
-        }
-
-        console.log("Created transaction record for amount:", amount);
-
-        // Create notification for user
         await supabaseAdmin
           .from('notifications')
           .insert({
@@ -310,14 +347,70 @@ serve(async (req) => {
             title: 'Wallet Top Up Successful',
             body: `Your wallet has been topped up with ${amount} ${currency.toUpperCase()}`,
             type: 'payment',
-            data: {
-              amount,
-              currency,
-              session_id: session.id,
-            },
+            data: { amount, currency, session_id: session.id },
           });
 
-        console.log("Wallet top up completed successfully");
+        logStep("Wallet top-up completed", { userId, newBalance });
+      }
+    }
+
+    // =====================================================
+    // HANDLE: payment_intent.payment_failed
+    // =====================================================
+    if (event.type === "payment_intent.payment_failed") {
+      const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      logStep("Processing payment_intent.payment_failed", { paymentIntentId: paymentIntent.id });
+
+      const orderId = paymentIntent.metadata?.order_id;
+
+      if (orderId) {
+        // Get current order status
+        const { data: order } = await supabaseAdmin
+          .from('orders')
+          .select('status, customer_user_id')
+          .eq('id', orderId)
+          .single();
+
+        // Update order status to cancelled
+        const { error: orderUpdateError } = await supabaseAdmin
+          .from('orders')
+          .update({ status: 'cancelled' })
+          .eq('id', orderId);
+
+        if (orderUpdateError) {
+          logStep("ERROR", `Failed to cancel order: ${orderUpdateError.message}`);
+        }
+
+        // Update payment_intent status
+        await supabaseAdmin
+          .from('payment_intents')
+          .update({ status: 'failed' })
+          .eq('order_id', orderId);
+
+        // Add order status history
+        await supabaseAdmin
+          .from('order_status_history')
+          .insert({
+            order_id: orderId,
+            from_status: order?.status || 'pending',
+            to_status: 'cancelled',
+            reason: `Payment failed. Error: ${paymentIntent.last_payment_error?.message || 'Unknown'}`,
+          });
+
+        // Notify customer
+        if (order?.customer_user_id) {
+          await supabaseAdmin
+            .from('notifications')
+            .insert({
+              user_id: order.customer_user_id,
+              title: 'Payment Failed',
+              body: `Your payment could not be processed. Please try again or use a different payment method.`,
+              type: 'payment',
+              data: { order_id: orderId, error: paymentIntent.last_payment_error?.message },
+            });
+        }
+
+        logStep("Order cancelled due to payment failure", { orderId });
       }
     }
 
@@ -327,13 +420,10 @@ serve(async (req) => {
     });
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error("Webhook error:", errorMessage);
+    logStep("ERROR", errorMessage);
     return new Response(
       JSON.stringify({ error: errorMessage }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 400,
-      }
+      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
     );
   }
 });
