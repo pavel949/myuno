@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, forwardRef, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, X, Clock, TrendingUp, Star, ArrowRight, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
@@ -16,7 +16,8 @@ interface GlobalSearchModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps) {
+export const GlobalSearchModal = memo(forwardRef<HTMLDivElement, GlobalSearchModalProps>(
+  function GlobalSearchModal({ open, onOpenChange }, ref) {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const [query, setQuery] = useState('');
@@ -62,7 +63,7 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg p-0 gap-0 max-h-[80vh] overflow-hidden" hideCloseButton aria-describedby={undefined}>
+      <DialogContent ref={ref} className="sm:max-w-lg p-0 gap-0 max-h-[80vh] overflow-hidden" hideCloseButton aria-describedby={undefined}>
         <VisuallyHidden>
           <DialogTitle>Search</DialogTitle>
         </VisuallyHidden>
@@ -263,4 +264,6 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
       </DialogContent>
     </Dialog>
   );
-}
+}));
+
+GlobalSearchModal.displayName = 'GlobalSearchModal';

@@ -1,4 +1,4 @@
-import React, { forwardRef, useCallback } from 'react';
+import React, { forwardRef, useCallback, memo } from 'react';
 import { motion, HTMLMotionProps } from 'framer-motion';
 import { ChevronRight, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -46,7 +46,8 @@ const languageOptions = [
   { code: 'th' as const, flag: '🇹🇭', label: 'TH' },
 ];
 
-export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
+export const OnboardingModal = memo(forwardRef<HTMLDivElement, OnboardingModalProps>(
+  function OnboardingModal({ open, onComplete }, ref) {
   const { language, setLanguage } = useLanguage();
   const lang = language as Language;
 
@@ -58,7 +59,7 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-sm p-0 gap-0 overflow-hidden border-0" hideCloseButton>
+      <DialogContent ref={ref} className="sm:max-w-sm p-0 gap-0 overflow-hidden border-0" hideCloseButton>
         <DialogTitle className="sr-only">Welcome to myUNO</DialogTitle>
         <div className="relative flex flex-col">
           {/* Background gradient */}
@@ -173,4 +174,6 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
       </DialogContent>
     </Dialog>
   );
-}
+}));
+
+OnboardingModal.displayName = 'OnboardingModal';

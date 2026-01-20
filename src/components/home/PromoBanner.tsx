@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Gift, Percent, Sparkles, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -60,7 +60,7 @@ const promos: Promo[] = [
   },
 ];
 
-export function PromoBanner() {
+export const PromoBanner = memo(function PromoBanner() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -68,23 +68,24 @@ export function PromoBanner() {
 
   useEffect(() => {
     if (isPaused) return;
+    // Increased interval to 8 seconds to reduce DOM updates
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % promos.length);
-    }, 5000);
+    }, 8000);
     return () => clearInterval(timer);
   }, [isPaused]);
 
   const currentPromo = promos[currentIndex];
   const Icon = currentPromo.icon;
 
-  const goTo = (index: number) => {
+  const goTo = useCallback((index: number) => {
     setCurrentIndex(index);
     setIsPaused(true);
     setTimeout(() => setIsPaused(false), 10000);
-  };
+  }, []);
 
-  const prev = () => goTo((currentIndex - 1 + promos.length) % promos.length);
-  const next = () => goTo((currentIndex + 1) % promos.length);
+  const prev = useCallback(() => goTo((currentIndex - 1 + promos.length) % promos.length), [currentIndex, goTo]);
+  const next = useCallback(() => goTo((currentIndex + 1) % promos.length), [currentIndex, goTo]);
 
   return (
     <div 
@@ -169,4 +170,6 @@ export function PromoBanner() {
       </button>
     </div>
   );
-}
+});
+
+PromoBanner.displayName = 'PromoBanner';
