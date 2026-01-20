@@ -1,21 +1,25 @@
 import { useState, useEffect } from "react";
-import { Download, Smartphone, Share, Plus, MoreVertical, Check } from "lucide-react";
+import { Download, Smartphone, Share, Plus, MoreVertical, Check, Loader2, CheckCircle2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { PageContainer } from "@/components/uno/PageContainer";
 import { PageHeader } from "@/components/uno/PageHeader";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+type InstallState = 'idle' | 'installing' | 'success' | 'already-installed';
+
 const Install = () => {
   const { language } = useLanguage();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstalled, setIsInstalled] = useState(false);
+  const [installState, setInstallState] = useState<InstallState>('idle');
+  const [progress, setProgress] = useState(0);
   const [isIOS, setIsIOS] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
 
@@ -26,8 +30,8 @@ const Install = () => {
     setIsAndroid(/android/.test(userAgent));
 
     // Check if already installed
-    if (window.matchMedia("(display-mode: standalone)").matches) {
-      setIsInstalled(true);
+    if (window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone === true) {
+      setInstallState('already-installed');
     }
 
     // Listen for install prompt
@@ -36,46 +40,94 @@ const Install = () => {
       setDeferredPrompt(e as BeforeInstallPromptEvent);
     };
 
+    // Listen for app installed
+    const handleAppInstalled = () => {
+      setInstallState('success');
+      setDeferredPrompt(null);
+    };
+
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
     };
   }, []);
+
+  const simulateProgress = () => {
+    setProgress(0);
+    const steps = [15, 35, 55, 75, 90, 100];
+    let stepIndex = 0;
+    
+    const interval = setInterval(() => {
+      if (stepIndex < steps.length) {
+        setProgress(steps[stepIndex]);
+        stepIndex++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 300);
+    
+    return () => clearInterval(interval);
+  };
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
 
-    await deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
+    setInstallState('installing');
+    const cleanup = simulateProgress();
 
-    if (outcome === "accepted") {
-      setIsInstalled(true);
+    try {
+      await deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+
+      if (outcome === "accepted") {
+        // Wait for progress animation to complete
+        setTimeout(() => {
+          setInstallState('success');
+        }, 2000);
+      } else {
+        setInstallState('idle');
+        setProgress(0);
+      }
+    } catch (error) {
+      console.error('Install error:', error);
+      setInstallState('idle');
+      setProgress(0);
     }
+    
     setDeferredPrompt(null);
   };
 
   const t = {
     title: language === "ru" ? "Установить приложение" : "Install App",
     subtitle: language === "ru" 
-      ? "Добавьте myUNO на главный экран для быстрого доступа" 
-      : "Add myUNO to your home screen for quick access",
+      ? "Добавьте UNO на главный экран для быстрого доступа" 
+      : "Add UNO to your home screen for quick access",
     installed: language === "ru" ? "Приложение установлено!" : "App installed!",
     installedDesc: language === "ru" 
-      ? "myUNO уже добавлено на ваш главный экран" 
-      : "myUNO is already on your home screen",
+      ? "UNO уже добавлено на ваш главный экран" 
+      : "UNO is already on your home screen",
+    installing: language === "ru" ? "Установка..." : "Installing...",
     installButton: language === "ru" ? "Установить" : "Install",
+    successTitle: language === "ru" ? "Готово!" : "Done!",
+    successDesc: language === "ru" 
+      ? "UNO успешно установлено на ваше устройство" 
+      : "UNO has been installed on your device",
+    openApp: language === "ru" ? "Открыть приложение" : "Open App",
+    appSize: language === "ru" ? "Размер: ~2 МБ" : "Size: ~2 MB",
     benefits: {
       title: language === "ru" ? "Преимущества" : "Benefits",
       items: language === "ru" ? [
         "Быстрый запуск с главного экрана",
         "Работает без интернета",
-        "Не занимает много места",
+        "Не занимает много места (~2 МБ)",
         "Мгновенные уведомления"
       ] : [
         "Quick launch from home screen",
         "Works offline",
-        "Lightweight installation",
+        "Lightweight installation (~2 MB)",
         "Instant notifications"
       ]
     },
@@ -114,7 +166,76 @@ const Install = () => {
     visible: { opacity: 1, y: 0 }
   };
 
-  if (isInstalled) {
+  // Success screen
+  if (installState === 'success') {
+    return (
+      <PageContainer>
+        <PageHeader title={t.title} showBack />
+        <motion.div 
+          className="flex flex-col items-center justify-center py-16 text-center"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", duration: 0.6, delay: 0.1 }}
+            className="relative mb-6"
+          >
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/30">
+              <CheckCircle2 className="w-12 h-12 text-white" />
+            </div>
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.4, type: "spring" }}
+              className="absolute -top-2 -right-2 w-10 h-10 rounded-full bg-primary flex items-center justify-center"
+            >
+              <Sparkles className="w-5 h-5 text-primary-foreground" />
+            </motion.div>
+          </motion.div>
+          
+          <motion.h2 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="text-2xl font-bold mb-2"
+          >
+            {t.successTitle}
+          </motion.h2>
+          
+          <motion.p 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="text-muted-foreground mb-8"
+          >
+            {t.successDesc}
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="space-y-3 w-full max-w-xs"
+          >
+            <Button 
+              onClick={() => window.location.href = '/'}
+              className="w-full gap-2"
+              size="lg"
+            >
+              <Smartphone className="w-5 h-5" />
+              {t.openApp}
+            </Button>
+          </motion.div>
+        </motion.div>
+      </PageContainer>
+    );
+  }
+
+  // Already installed screen
+  if (installState === 'already-installed') {
     return (
       <PageContainer>
         <PageHeader title={t.title} showBack />
@@ -146,24 +267,53 @@ const Install = () => {
       >
         {/* Hero Section */}
         <motion.div variants={itemVariants} className="text-center py-6">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center mx-auto mb-4 shadow-lg">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/30">
             <Smartphone className="w-10 h-10 text-primary-foreground" />
           </div>
           <h1 className="text-2xl font-bold mb-2">{t.title}</h1>
           <p className="text-muted-foreground">{t.subtitle}</p>
+          <p className="text-xs text-muted-foreground/70 mt-1">{t.appSize}</p>
         </motion.div>
 
-        {/* Install Button (for supported browsers) */}
+        {/* Install Button with Progress */}
         {deferredPrompt && (
-          <motion.div variants={itemVariants}>
-            <Button 
-              onClick={handleInstallClick} 
-              className="w-full h-14 text-lg gap-3"
-              size="lg"
-            >
-              <Download className="w-6 h-6" />
-              {t.installButton}
-            </Button>
+          <motion.div variants={itemVariants} className="space-y-3">
+            <AnimatePresence mode="wait">
+              {installState === 'installing' ? (
+                <motion.div
+                  key="installing"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="space-y-3"
+                >
+                  <div className="flex items-center justify-center gap-3 py-4">
+                    <Loader2 className="w-6 h-6 text-primary animate-spin" />
+                    <span className="font-medium">{t.installing}</span>
+                  </div>
+                  <div className="space-y-2">
+                    <Progress value={progress} className="h-2" />
+                    <p className="text-xs text-center text-muted-foreground">{progress}%</p>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="idle"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                >
+                  <Button 
+                    onClick={handleInstallClick} 
+                    className="w-full h-14 text-lg gap-3 shadow-lg shadow-primary/20"
+                    size="lg"
+                  >
+                    <Download className="w-6 h-6" />
+                    {t.installButton}
+                  </Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         )}
 
