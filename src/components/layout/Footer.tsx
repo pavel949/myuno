@@ -9,7 +9,8 @@ import {
   Users, 
   Lightbulb,
   Handshake,
-  Download
+  Download,
+  Mail
 } from 'lucide-react';
 
 export function Footer() {
@@ -25,6 +26,8 @@ export function Footer() {
   const legalLinks = [
     { to: '/terms', icon: FileText, label: language === 'ru' ? 'Условия' : 'Terms' },
     { to: '/privacy', icon: Shield, label: language === 'ru' ? 'Конфиденциальность' : 'Privacy' },
+    { to: '/cookies', icon: FileText, label: 'Cookie' },
+    { to: '/refund-policy', icon: FileText, label: language === 'ru' ? 'Возврат' : 'Refunds' },
   ];
 
   return (
@@ -102,6 +105,13 @@ export function Footer() {
             <h4 className="text-sm font-semibold text-foreground mb-3">
               {language === 'ru' ? 'Поддержка' : 'Support'}
             </h4>
+            <Link
+              to="/contact"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors py-1"
+            >
+              <Mail className="w-4 h-4" />
+              {language === 'ru' ? 'Контакты' : 'Contact Us'}
+            </Link>
             <Link
               to="/support"
               className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors py-1"
