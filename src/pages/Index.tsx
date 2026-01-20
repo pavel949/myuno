@@ -22,6 +22,7 @@ import { RecommendedCarousel } from '@/components/home/RecommendedCarousel';
 import { ForYouSection } from '@/components/recommendations/ForYouSection';
 import { PersonalizedOffersSection } from '@/components/notifications/PersonalizedOffersSection';
 import { InstallBanner } from '@/components/pwa/InstallBanner';
+import { DownloadAppButton } from '@/components/pwa/DownloadAppButton';
 import { supabase } from '@/integrations/supabase/client';
 
 // Lazy load only modals (opened by user action)
@@ -197,6 +198,11 @@ const Index = () => {
           {/* Promo Banner */}
           <FadeInUp delay={0.1}>
             <PromoBanner />
+          </FadeInUp>
+
+          {/* Download App Button */}
+          <FadeInUp delay={0.11}>
+            <DownloadAppButton />
           </FadeInUp>
 
           {/* Property Owner CTA - Prominent */}
