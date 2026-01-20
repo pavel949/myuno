@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Delete, Fingerprint } from 'lucide-react';
+import { Delete } from 'lucide-react';
+import { playSound } from '@/hooks/useSoundEffects';
+import { triggerHaptic } from '@/hooks/useHapticFeedback';
+import { getFeedbackSettings } from '@/hooks/useFeedbackSettings';
 
 interface PinInputProps {
   length?: number;
@@ -26,8 +29,20 @@ export const PinInput: React.FC<PinInputProps> = ({
     }
   }, [error]);
 
+  const triggerFeedback = (type: 'keypad' | 'click' = 'keypad') => {
+    const settings = getFeedbackSettings();
+    if (settings.soundEnabled) {
+      playSound(type);
+    }
+    if (settings.hapticEnabled) {
+      triggerHaptic('light');
+    }
+  };
+
   const handleNumberClick = (num: number) => {
     if (disabled || pin.length >= length) return;
+    
+    triggerFeedback('keypad');
     
     const newPin = pin + num.toString();
     setPin(newPin);
@@ -39,11 +54,13 @@ export const PinInput: React.FC<PinInputProps> = ({
 
   const handleDelete = () => {
     if (disabled) return;
+    triggerFeedback('click');
     setPin(prev => prev.slice(0, -1));
   };
 
   const handleClear = () => {
     if (disabled) return;
+    triggerFeedback('click');
     setPin('');
   };
 

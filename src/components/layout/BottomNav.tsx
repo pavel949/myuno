@@ -5,6 +5,8 @@ import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { triggerRipple } from '@/hooks/useRipple';
+import { playSound } from '@/hooks/useSoundEffects';
+import { getFeedbackSettings } from '@/hooks/useFeedbackSettings';
 
 const navItems = [
   { path: '/', icon: Home, labelKey: 'nav.home' },
@@ -21,7 +23,13 @@ export const BottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
 
     const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
       triggerRipple(e);
-      triggerHaptic('light');
+      const settings = getFeedbackSettings();
+      if (settings.hapticEnabled) {
+        triggerHaptic('light');
+      }
+      if (settings.soundEnabled) {
+        playSound('click');
+      }
     };
 
     return (

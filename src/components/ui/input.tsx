@@ -1,9 +1,32 @@
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
+import { playSound, isTypingKey } from "@/hooks/useSoundEffects";
+import { triggerHaptic } from "@/hooks/useHapticFeedback";
+import { getFeedbackSettings } from "@/hooks/useFeedbackSettings";
 
-const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
-  ({ className, type, ...props }, ref) => {
+export interface InputProps extends React.ComponentProps<"input"> {
+  enableTypeSound?: boolean;
+}
+
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, type, enableTypeSound = true, onKeyDown, ...props }, ref) => {
+    const handleKeyDown = React.useCallback(
+      (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (enableTypeSound && isTypingKey(e)) {
+          const settings = getFeedbackSettings();
+          if (settings.typingSoundEnabled) {
+            playSound('type');
+          }
+          if (settings.hapticEnabled) {
+            triggerHaptic('light');
+          }
+        }
+        onKeyDown?.(e);
+      },
+      [enableTypeSound, onKeyDown]
+    );
+
     return (
       <input
         type={type}
@@ -12,6 +35,7 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
           className,
         )}
         ref={ref}
+        onKeyDown={handleKeyDown}
         {...props}
       />
     );
