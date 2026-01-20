@@ -3943,6 +3943,72 @@ export type Database = {
           },
         ]
       }
+      profile_details: {
+        Row: {
+          address_line1: string | null
+          address_line2: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          date_of_birth: string | null
+          dietary_restrictions: string[] | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          emergency_contact_relation: string | null
+          gender: string | null
+          id: string
+          medical_conditions: string | null
+          nationality: string | null
+          postal_code: string | null
+          state_province: string | null
+          travel_preferences: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address_line1?: string | null
+          address_line2?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          dietary_restrictions?: string[] | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_contact_relation?: string | null
+          gender?: string | null
+          id?: string
+          medical_conditions?: string | null
+          nationality?: string | null
+          postal_code?: string | null
+          state_province?: string | null
+          travel_preferences?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address_line1?: string | null
+          address_line2?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          dietary_restrictions?: string[] | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_contact_relation?: string | null
+          gender?: string | null
+          id?: string
+          medical_conditions?: string | null
+          nationality?: string | null
+          postal_code?: string | null
+          state_province?: string | null
+          travel_preferences?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -6430,6 +6496,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_documents: {
+        Row: {
+          country: string | null
+          created_at: string
+          document_number: string | null
+          document_type: string
+          expiry_date: string | null
+          file_name: string | null
+          file_url: string | null
+          id: string
+          is_verified: boolean | null
+          issue_date: string | null
+          notes: string | null
+          updated_at: string
+          user_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          document_number?: string | null
+          document_type: string
+          expiry_date?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          is_verified?: boolean | null
+          issue_date?: string | null
+          notes?: string | null
+          updated_at?: string
+          user_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          document_number?: string | null
+          document_type?: string
+          expiry_date?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          is_verified?: boolean | null
+          issue_date?: string | null
+          notes?: string | null
+          updated_at?: string
+          user_id?: string
+          verified_at?: string | null
+        }
+        Relationships: []
       }
       user_pins: {
         Row: {
