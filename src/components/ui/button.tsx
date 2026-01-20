@@ -4,6 +4,8 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 import { triggerHaptic } from "@/hooks/useHapticFeedback";
+import { playSound } from "@/hooks/useSoundEffects";
+import { getFeedbackSettings } from "@/hooks/useFeedbackSettings";
 import { triggerRipple } from "@/hooks/useRipple";
 
 const buttonVariants = cva(
@@ -47,8 +49,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const handleClick = React.useCallback(
       (e: React.MouseEvent<HTMLButtonElement>) => {
         triggerRipple(e);
-        if (haptic) {
+        const settings = getFeedbackSettings();
+        if (haptic && settings.hapticEnabled) {
           triggerHaptic(hapticStyle);
+        }
+        if (settings.soundEnabled) {
+          playSound('click');
         }
         onClick?.(e);
       },

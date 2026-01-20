@@ -2,6 +2,9 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { triggerRipple } from '@/hooks/useRipple';
+import { triggerHaptic } from '@/hooks/useHapticFeedback';
+import { playSound } from '@/hooks/useSoundEffects';
+import { getFeedbackSettings } from '@/hooks/useFeedbackSettings';
 import { getIconForEmoji, isEmoji } from '@/lib/iconMap';
 import type { LucideIcon } from 'lucide-react';
 
@@ -59,6 +62,13 @@ export function MiniAppQuickGrid({
           key={i}
           onClick={(e) => {
             triggerRipple(e);
+            const settings = getFeedbackSettings();
+            if (settings.hapticEnabled) {
+              triggerHaptic('light');
+            }
+            if (settings.soundEnabled) {
+              playSound('click');
+            }
             if (item.onClick) {
               item.onClick();
             } else if (item.path) {
