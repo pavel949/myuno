@@ -249,9 +249,26 @@ const LazyPage = ({ children }: { children: React.ReactNode }) => (
   </Suspense>
 );
 
+// Prefetch popular routes on idle
+const prefetchRoutes = () => {
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(() => {
+      // Prefetch most common user journeys
+      import('@/pages/property/PropertyIndex');
+      import('@/pages/restaurants/RestaurantsIndex');
+      import('@/pages/tours/ToursIndex');
+      import('@/pages/beauty/BeautySpaIndex');
+    });
+  }
+};
+
 export const AnimatedRoutes: React.FC = () => {
   const location = useLocation();
 
+  // Prefetch on mount
+  React.useEffect(() => {
+    prefetchRoutes();
+  }, []);
   return (
     <>
       <ScrollToTop />
