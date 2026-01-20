@@ -301,7 +301,7 @@ export function useOrders() {
         reason: 'Order created',
       });
 
-      // Create notification
+      // Create notification for customer
       await supabase.from('notifications').insert({
         user_id: user.id,
         title: language === 'ru' ? 'Заказ создан' : 'Order Created',
@@ -311,6 +311,29 @@ export function useOrders() {
         type: 'booking',
         data: { order_id: orderId, order_type: input.order_type },
       });
+
+      // Send admin email notification (non-blocking)
+      const primaryParticipant = input.participants?.find(p => p.role === 'primary') || input.participants?.[0];
+      supabase.functions.invoke('notify-admin-order', {
+        body: {
+          order_id: orderId,
+          order_number: orderNumber,
+          order_type: input.order_type,
+          total_amount: input.total_amount,
+          currency: input.currency || 'THB',
+          customer_name: primaryParticipant?.name || user.email?.split('@')[0],
+          customer_email: primaryParticipant?.email || user.email,
+          customer_phone: primaryParticipant?.phone,
+          items: input.items?.map(i => ({
+            name: i.item_name,
+            quantity: i.qty || 1,
+            price: i.unit_price,
+          })),
+          scheduled_at: startAt,
+          notes: input.notes,
+          provider_name: input.providerName,
+        },
+      }).catch(err => console.error('Admin notification error:', err));
 
       toast({ 
         title: t('order.success'),
