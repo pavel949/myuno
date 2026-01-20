@@ -209,6 +209,7 @@ export function useOwnerProperties() {
       return data as OwnerProperty[];
     },
     enabled: !!user,
+    staleTime: 30000, // Cache for 30 seconds
   });
 }
 
@@ -376,6 +377,7 @@ export function usePropertyInspections(propertyId?: string) {
       return (data || []) as unknown as PropertyInspection[];
     },
     enabled: !!user,
+    staleTime: 30000, // Cache for 30 seconds
   });
 }
 
@@ -427,6 +429,7 @@ export function useServiceRequests(propertyId?: string) {
       return data as PropertyServiceRequest[];
     },
     enabled: !!user,
+    staleTime: 30000, // Cache for 30 seconds
   });
 }
 
@@ -481,7 +484,7 @@ export function usePropertyFinancials(propertyId?: string) {
   });
 }
 
-// Stats
+// Stats - optimized with staleTime to reduce redundant calls
 export function usePropertyCareStats() {
   const { user } = useAuth();
 
@@ -517,5 +520,6 @@ export function usePropertyCareStats() {
       };
     },
     enabled: !!user,
+    staleTime: 60000, // Cache stats for 1 minute
   });
 }

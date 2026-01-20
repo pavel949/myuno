@@ -1,5 +1,6 @@
 import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { 
   Home, Car, Compass, Waves, Star, Shield, Scale,
   Sparkles, UtensilsCrossed, Dumbbell, Stethoscope, 
@@ -8,6 +9,7 @@ import {
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
@@ -20,6 +22,7 @@ import { RecommendedCarousel } from '@/components/home/RecommendedCarousel';
 import { ForYouSection } from '@/components/recommendations/ForYouSection';
 import { PersonalizedOffersSection } from '@/components/notifications/PersonalizedOffersSection';
 import { InstallBanner } from '@/components/pwa/InstallBanner';
+import { supabase } from '@/integrations/supabase/client';
 
 // Lazy load only modals (opened by user action)
 const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
@@ -49,6 +52,8 @@ const allCategories = [
 const Index = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [refreshKey, setRefreshKey] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(() => {
     return !localStorage.getItem('myuno-onboarding-complete');
@@ -59,6 +64,39 @@ const Index = () => {
     await new Promise(resolve => setTimeout(resolve, 1000));
     setRefreshKey(prev => prev + 1);
   }, []);
+
+  // Prefetch owner dashboard data on hover for faster navigation
+  const prefetchOwnerData = useCallback(() => {
+    if (!user?.id) return;
+    
+    // Prefetch user context data
+    queryClient.prefetchQuery({
+      queryKey: ['user-active-context', user.id],
+      queryFn: async () => {
+        const { data } = await supabase
+          .from('user_active_context')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        return data;
+      },
+      staleTime: 60000,
+    });
+    
+    // Prefetch owner properties
+    queryClient.prefetchQuery({
+      queryKey: ['owner-properties', user.id],
+      queryFn: async () => {
+        const { data } = await supabase
+          .from('owner_properties')
+          .select('*')
+          .eq('owner_id', user.id)
+          .order('created_at', { ascending: false });
+        return data || [];
+      },
+      staleTime: 30000,
+    });
+  }, [user?.id, queryClient]);
 
   return (
     <AppLayout showFooter>
@@ -129,6 +167,8 @@ const Index = () => {
           <FadeInUp delay={0.12}>
             <button 
               onClick={() => navigate('/owner')}
+              onMouseEnter={prefetchOwnerData}
+              onTouchStart={prefetchOwnerData}
               className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 p-5 shadow-lg shadow-teal-500/20 hover:shadow-teal-500/30 transition-all group text-left"
             >
               <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOCAxOC04LjA1OSAxOC0xOC04LjA1OS0xOC0xOC0xOHptMCAzMmMtNy43MzIgMC0xNC02LjI2OC0xNC0xNHM2LjI2OC0xNCAxNC0xNCAxNCA2LjI2OCAxNCAxNC02LjI2OCAxNC0xNCAxNHoiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iLjA1Ii8+PC9nPjwvc3ZnPg==')] opacity-30" />

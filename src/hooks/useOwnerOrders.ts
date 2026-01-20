@@ -124,6 +124,7 @@ export function useOwnerOrders() {
       return Array.from(ordersMap.values());
     },
     enabled: !!activeOrgId && activeRole === 'owner',
+    staleTime: 30000, // Cache for 30 seconds
   });
 
   // Computed values
