@@ -60,7 +60,7 @@ export default function WaterActivitiesIndex() {
       title={t('water.title')}
       subtitle={language === 'ru' ? `${filteredActivities.length} активностей` : `${filteredActivities.length} activities`}
       heroIcon={Waves}
-      heroTitle={language === 'ru' ? 'Водные развлечения' : 'Water Activities'}
+      heroTitle={language === 'ru' ? 'Водный спорт' : 'Water Sports'}
       heroSubtitle={language === 'ru' ? 'Дайвинг, серфинг, снорклинг и многое другое' : 'Diving, surfing, snorkeling and more'}
       heroImage="https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800"
       heroGradient={{ from: 'from-cyan-500/20', via: 'via-blue-500/20', to: 'to-primary/20' }}
