@@ -443,6 +443,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/cookies" element={<LazyPage><CookiePolicyPage /></LazyPage>} />
         <Route path="/refund-policy" element={<LazyPage><RefundPolicyPage /></LazyPage>} />
         <Route path="/contact" element={<LazyPage><ContactPage /></LazyPage>} />
+        <Route path="/g-trust" element={<LazyPage><GTrustPage /></LazyPage>} />
         <Route path="/view-history" element={<LazyPage><ViewHistory /></LazyPage>} />
         
         {/* Admin Routes - Protected */}
