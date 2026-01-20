@@ -5,6 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from '@/components/miniapp';
 import { FilterValues, cleaningFilterConfig } from '@/components/filters';
 import { useCleaningServices } from '@/hooks/useCleaningServices';
+import { matchesFilter, matchesPriceLevel } from '@/lib/filterUtils';
 
 const serviceTypes: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '✨' },
@@ -37,12 +38,35 @@ export default function CleaningIndex() {
     return services.filter(s => {
       const name = language === 'ru' ? s.name_ru : s.name_en;
       const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
+      if (!matchesSearch) return false;
       
       // Service type filter from filters panel
       const filterServiceTypes = filterValues.serviceType as string[] | undefined;
-      if (filterServiceTypes?.length && !filterServiceTypes.includes(s.service_type)) return false;
+      if (filterServiceTypes?.length && !matchesFilter([s.service_type || ''], filterServiceTypes)) return false;
       
-      return matchesSearch;
+      // Price level filter
+      const priceLevel = filterValues.priceLevel as string | undefined;
+      const price = s.price_fixed || s.price_per_hour || 0;
+      if (priceLevel && !matchesPriceLevel(price, priceLevel)) return false;
+      
+      // Features filter
+      const featuresFilter = filterValues.features as string[] | undefined;
+      if (featuresFilter?.length) {
+        if (!matchesFilter(s.features || [], featuresFilter)) return false;
+      }
+      
+      // Verified filter - check if in features array
+      const featuresArr = filterValues.features as string[] | undefined;
+      if (featuresArr?.includes('verified') && !s.is_verified) return false;
+      
+      // Rating filter
+      const ratingFilter = filterValues.rating as string | undefined;
+      if (ratingFilter) {
+        const minRating = parseFloat(ratingFilter);
+        if ((s.rating || 0) < minRating) return false;
+      }
+      
+      return true;
     });
   }, [searchQuery, filterValues, language, services]);
 

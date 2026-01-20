@@ -13,6 +13,7 @@ import {
   reservationFilterConfig,
   type FilterValues 
 } from '@/components/filters';
+import { matchesFilter, matchesPriceLevel, isOpenNow } from '@/lib/filterUtils';
 
 type Mode = 'delivery' | 'reservation';
 
@@ -64,34 +65,43 @@ export default function RestaurantsIndex() {
 
   const filteredRestaurants = useMemo(() => {
     return restaurants.filter(rest => {
-      // Price level filter
-      const priceFilter = filterValues.priceLevel;
-      if (priceFilter && rest.price_range !== parseInt(priceFilter as string)) return false;
+      // Price level filter - using normalized matching
+      const priceFilter = filterValues.priceLevel as string | undefined;
+      if (priceFilter && !matchesPriceLevel(rest.price_range ? rest.price_range * 500 : undefined, priceFilter)) return false;
       
-      // Cuisine filter from modal (when multiple selected)
+      // Cuisine filter from modal (when multiple selected) - using normalized matching
       const cuisineFilter = filterValues.cuisine as string[];
       if (cuisineFilter?.length > 0) {
-        const restCuisine = rest.cuisine?.toLowerCase();
-        if (!cuisineFilter.some(c => restCuisine?.includes(c.toLowerCase()))) return false;
+        if (!matchesFilter(rest.cuisine ? [rest.cuisine] : [], cuisineFilter)) return false;
       }
       
-      // Features filter
+      // Features filter - using normalized matching
       const featureFilter = filterValues.features as string[];
       if (featureFilter?.length > 0) {
-        if (!rest.features || !featureFilter.some(f => rest.features?.includes(f))) return false;
+        if (!matchesFilter(rest.features || [], featureFilter)) return false;
       }
       
-      // Occasion filter (check against features since occasions are stored there)
+      // Occasion filter - using normalized matching
       const occasionFilter = filterValues.occasion as string[];
       if (occasionFilter?.length > 0) {
-        if (!rest.features || !occasionFilter.some(o => rest.features?.includes(o))) return false;
+        if (!matchesFilter(rest.features || [], occasionFilter)) return false;
       }
       
-      // Dietary filter
+      // Dietary filter - using normalized matching
       const dietaryFilter = filterValues.dietary as string[];
       if (dietaryFilter?.length > 0) {
-        if (!rest.features || !dietaryFilter.some(d => rest.features?.includes(d))) return false;
+        if (!matchesFilter(rest.features || [], dietaryFilter)) return false;
       }
+      
+      // Rating filter
+      const ratingFilter = filterValues.rating as string | undefined;
+      if (ratingFilter) {
+        const minRating = parseFloat(ratingFilter);
+        if ((rest.rating || 0) < minRating) return false;
+      }
+      
+      // Open now filter
+      if (filterValues.openNow && !isOpenNow(rest.working_hours as Record<string, string> | null)) return false;
       
       // Delivery-specific filters
       const deliveryFilter = filterValues.delivery as string[];

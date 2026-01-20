@@ -6,6 +6,7 @@ import { useEvents } from '@/hooks/useEvents';
 import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from '@/components/miniapp';
 import { eventsFilterConfig, FilterValues } from '@/components/filters';
 import { Badge } from '@/components/ui/badge';
+import { matchesFilter, matchesPriceLevel } from '@/lib/filterUtils';
 
 const EVENT_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -25,10 +26,80 @@ export default function EventsIndex() {
   
   const { events, isLoading } = useEvents({ category: selectedCategory !== 'all' ? selectedCategory : undefined });
 
-  const filteredEvents = events.filter(event => {
-    const title = language === 'ru' ? event.title_ru : event.title_en;
-    return title.toLowerCase().includes(searchQuery.toLowerCase());
-  });
+  const filteredEvents = useMemo(() => {
+    return events.filter(event => {
+      // Search filter
+      const title = language === 'ru' ? event.title_ru : event.title_en;
+      if (searchQuery && !title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      
+      // Price level filter
+      const priceLevel = filterValues.priceLevel as string | undefined;
+      if (priceLevel && !matchesPriceLevel(event.price, priceLevel)) return false;
+      
+      // Date filter
+      const dateFilter = filterValues.date as string | undefined;
+      if (dateFilter && event.event_date) {
+        const eventDate = new Date(event.event_date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const weekEnd = new Date(today);
+        weekEnd.setDate(weekEnd.getDate() + 7);
+        
+        switch (dateFilter) {
+          case 'today':
+            if (eventDate.toDateString() !== today.toDateString()) return false;
+            break;
+          case 'tomorrow':
+            if (eventDate.toDateString() !== tomorrow.toDateString()) return false;
+            break;
+          case 'this-week':
+            if (eventDate < today || eventDate > weekEnd) return false;
+            break;
+        }
+      }
+      
+      // Time filter
+      const timeFilter = filterValues.time as string | undefined;
+      if (timeFilter && event.event_time) {
+        const hour = parseInt(event.event_time.split(':')[0]);
+        switch (timeFilter) {
+          case 'morning':
+            if (hour < 6 || hour >= 12) return false;
+            break;
+          case 'afternoon':
+            if (hour < 12 || hour >= 18) return false;
+            break;
+          case 'evening':
+            if (hour < 18) return false;
+            break;
+        }
+      }
+      
+      // Features filter
+      const features = filterValues.features as string[] | undefined;
+      if (features?.length) {
+        if (features.includes('hot') && !event.is_hot) return false;
+        if (features.includes('featured') && !event.is_featured) return false;
+      }
+      
+      // Category filter from modal
+      const categoryFilter = filterValues.category as string[] | undefined;
+      if (categoryFilter?.length) {
+        if (!matchesFilter([event.category || ''], categoryFilter)) return false;
+      }
+      
+      // Rating filter
+      const ratingFilter = filterValues.rating as string | undefined;
+      if (ratingFilter) {
+        const minRating = parseFloat(ratingFilter);
+        if ((event.rating || 0) < minRating) return false;
+      }
+      
+      return true;
+    });
+  }, [events, searchQuery, filterValues, language]);
 
   const featuredEvent = events.find(e => e.is_featured);
 

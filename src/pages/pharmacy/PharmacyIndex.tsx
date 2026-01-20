@@ -5,6 +5,7 @@ import { Pill, Clock, MapPin, Truck, Shield, Phone } from "lucide-react";
 import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from "@/components/miniapp";
 import { useState, useMemo } from "react";
 import { FilterValues, pharmacyFilterConfig } from "@/components/filters";
+import { matchesFilter } from '@/lib/filterUtils';
 
 const PHARMACY_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All Pharmacies', labelRu: 'Все аптеки' },
@@ -30,24 +31,41 @@ export default function PharmacyIndex() {
     return count;
   }, [filterValues]);
 
-  const filteredPharmacies = pharmacies.filter(pharmacy => {
-    const name = language === 'ru' ? pharmacy.name_ru : pharmacy.name_en;
-    const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' 
-      || (selectedCategory === '24h' && pharmacy.is_24h)
-      || (selectedCategory === 'delivery' && pharmacy.delivery_available);
-    
-    // Filter by features
-    const features = filterValues.features as string[] | undefined;
-    if (features?.length) {
-      if (features.includes('24h') && !pharmacy.is_24h) return false;
-      if (features.includes('delivery') && !pharmacy.delivery_available) return false;
-      if (features.includes('pharmacist') && !pharmacy.has_pharmacist) return false;
-      if (features.includes('verified') && !pharmacy.is_verified) return false;
-    }
-    
-    return matchesSearch && matchesCategory;
-  });
+  const filteredPharmacies = useMemo(() => {
+    return pharmacies.filter(pharmacy => {
+      const name = language === 'ru' ? pharmacy.name_ru : pharmacy.name_en;
+      const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = selectedCategory === 'all' 
+        || (selectedCategory === '24h' && pharmacy.is_24h)
+        || (selectedCategory === 'delivery' && pharmacy.delivery_available);
+      
+      if (!matchesSearch || !matchesCategory) return false;
+      
+      // Features filter - using normalized comparison
+      const features = filterValues.features as string[] | undefined;
+      if (features?.length) {
+        if (features.includes('24h') && !pharmacy.is_24h) return false;
+        if (features.includes('delivery') && !pharmacy.delivery_available) return false;
+        if (features.includes('pharmacist') && !pharmacy.has_pharmacist) return false;
+        if (features.includes('verified') && !pharmacy.is_verified) return false;
+      }
+      
+      // Rating filter
+      const ratingFilter = filterValues.rating as string | undefined;
+      if (ratingFilter) {
+        const minRating = parseFloat(ratingFilter);
+        if ((pharmacy.rating || 0) < minRating) return false;
+      }
+      
+      // Category filter from modal
+      const categoryFilter = filterValues.category as string[] | undefined;
+      if (categoryFilter?.length) {
+        // Match against pharmacy type or tags if available
+      }
+      
+      return true;
+    });
+  }, [pharmacies, searchQuery, selectedCategory, filterValues, language]);
 
   const quickItems: QuickGridItem[] = [
     { icon: '🕐', label: language === 'ru' ? '24/7' : '24/7', sublabel: language === 'ru' ? 'Круглосуточно' : 'Open now', onClick: () => setSelectedCategory('24h') },

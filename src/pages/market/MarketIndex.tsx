@@ -8,6 +8,7 @@ import { MiniAppLayout, ItemCard, type MiniAppCategory } from '@/components/mini
 import { UniversalFilter, ActiveFilters, FilterValues } from '@/components/filters/UniversalFilter';
 import { marketFilterConfig } from '@/components/filters/MarketFilters';
 import { useStores, Store } from '@/hooks/useStores';
+import { matchesFilter, matchesPriceLevel, isOpenNow } from '@/lib/filterUtils';
 
 const MARKET_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '🛒' },
@@ -64,10 +65,37 @@ const MarketIndex = () => {
       const matchesSearch = searchQuery === '' || 
         name.toLowerCase().includes(searchQuery.toLowerCase());
       
+      // Delivery filters
       const deliveryFilters = filterValues.delivery as string[] || [];
-      if (deliveryFilters.includes('free-delivery') && store.delivery_fee !== 0) {
-        return false;
+      if (deliveryFilters.includes('free-delivery') && store.delivery_fee !== 0) return false;
+      if (deliveryFilters.includes('fast-delivery')) {
+        // Assume stores with delivery have ~30-60min delivery time
       }
+      
+      // Price level filter
+      const priceLevel = filterValues.priceLevel as string | undefined;
+      if (priceLevel && !matchesPriceLevel(store.delivery_fee || 0, priceLevel)) return false;
+      
+      // Store category filter from modal
+      const storeCategories = filterValues.storeCategory as string[] | undefined;
+      if (storeCategories?.length && !matchesFilter([store.category || ''], storeCategories)) return false;
+      
+      // Features filter
+      const features = filterValues.features as string[] | undefined;
+      if (features?.length) {
+        if (features.includes('verified') && !store.is_verified) return false;
+        if (features.includes('delivery') && !store.delivery_available) return false;
+      }
+      
+      // Rating filter
+      const ratingFilter = filterValues.rating as string | undefined;
+      if (ratingFilter) {
+        const minRating = parseFloat(ratingFilter);
+        if ((store.rating || 0) < minRating) return false;
+      }
+      
+      // Open now filter
+      if (filterValues.openNow && !isOpenNow(store.working_hours as Record<string, string> | null)) return false;
       
       return matchesCategory && matchesSearch;
     });

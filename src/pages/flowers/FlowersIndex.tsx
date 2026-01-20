@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { MiniAppLayout, ItemCard, type MiniAppCategory } from '@/components/miniapp';
 import { UniversalFilter, ActiveFilters, flowerFilterConfig, FilterValues } from '@/components/filters';
 import { toast } from 'sonner';
+import { matchesFilter, matchesSingleFilter } from '@/lib/filterUtils';
 
 const FLOWER_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -177,6 +178,7 @@ const FlowersIndex = () => {
     return bouquets.filter((bouquet) => {
       if (selectedCategory !== 'all' && bouquet.category !== selectedCategory) return false;
       
+      // Price level filter
       const priceLevel = filterValues.priceLevel as string | null;
       if (priceLevel) {
         const level = parseInt(priceLevel);
@@ -190,9 +192,44 @@ const FlowersIndex = () => {
         if (range && (bouquet.price < range.min || bouquet.price > range.max)) return false;
       }
       
+      // Search filter
       if (searchQuery) {
         const name = language === 'ru' ? bouquet.nameRu : bouquet.name;
         if (!name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      }
+      
+      // Occasion filter - match against tags
+      const occasionFilter = filterValues.occasion as string[] | undefined;
+      if (occasionFilter?.length) {
+        if (!matchesFilter(bouquet.tags || [], occasionFilter)) return false;
+      }
+      
+      // Color filter - match against name or tags
+      const colorFilter = filterValues.color as string[] | undefined;
+      if (colorFilter?.length) {
+        const bouquetName = (bouquet.name + ' ' + bouquet.nameRu).toLowerCase();
+        const hasColor = colorFilter.some(c => bouquetName.includes(c.toLowerCase()));
+        if (!hasColor) return false;
+      }
+      
+      // Flower type filter - match against category
+      const flowerTypeFilter = filterValues.flowerType as string[] | undefined;
+      if (flowerTypeFilter?.length) {
+        if (!matchesSingleFilter(bouquet.category, flowerTypeFilter)) return false;
+      }
+      
+      // Size filter - match against flowersCount
+      const sizeFilter = filterValues.size as string | undefined;
+      if (sizeFilter) {
+        const count = bouquet.flowersCount || 0;
+        const sizeRanges: Record<string, [number, number]> = {
+          'small': [1, 15],
+          'medium': [15, 30],
+          'large': [30, 50],
+          'xl': [50, Infinity],
+        };
+        const range = sizeRanges[sizeFilter];
+        if (range && (count < range[0] || count >= range[1])) return false;
       }
       
       return true;
