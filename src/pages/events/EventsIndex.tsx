@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Ticket, Calendar, Clock, Users, MapPin, Music, Compass, PartyPopper, Ship, Mountain } from 'lucide-react';
+import { Ticket, Calendar, Clock, Users, MapPin, Music, PartyPopper, Trophy, Sparkles, Wine } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useEvents } from '@/hooks/useEvents';
 import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from '@/components/miniapp';
@@ -8,14 +8,18 @@ import { eventsFilterConfig, FilterValues } from '@/components/filters';
 import { Badge } from '@/components/ui/badge';
 import { matchesFilter, matchesPriceLevel } from '@/lib/filterUtils';
 
+// Entertainment-focused categories (no tours/excursions)
 const EVENT_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
-  { id: 'concerts', labelEn: 'Shows', labelRu: 'Шоу' },
-  { id: 'tours', labelEn: 'Tours', labelRu: 'Экскурсии' },
+  { id: 'concerts', labelEn: 'Concerts & Shows', labelRu: 'Концерты и шоу' },
   { id: 'parties', labelEn: 'Parties', labelRu: 'Вечеринки' },
-  { id: 'boats', labelEn: 'Boat Trips', labelRu: 'Морские прогулки' },
-  { id: 'adventures', labelEn: 'Adventures', labelRu: 'Приключения' },
+  { id: 'clubs', labelEn: 'Clubs & Bars', labelRu: 'Клубы и бары' },
+  { id: 'sports', labelEn: 'Sports', labelRu: 'Спорт' },
+  { id: 'festivals', labelEn: 'Festivals', labelRu: 'Фестивали' },
 ];
+
+// Only show entertainment events (exclude tours, boats, adventures)
+const ENTERTAINMENT_CATEGORIES = ['concerts', 'parties', 'clubs', 'sports', 'festivals', 'shows', 'nightlife'];
 
 export default function EventsIndex() {
   const { language } = useLanguage();
@@ -28,6 +32,15 @@ export default function EventsIndex() {
 
   const filteredEvents = useMemo(() => {
     return events.filter(event => {
+      // Only entertainment events - exclude tours, boats, adventures
+      const category = event.category?.toLowerCase() || '';
+      if (selectedCategory === 'all') {
+        // Filter out tour-related categories
+        if (['tours', 'boats', 'adventures', 'excursions'].some(c => category.includes(c))) {
+          return false;
+        }
+      }
+      
       // Search filter
       const title = language === 'ru' ? event.title_ru : event.title_en;
       if (searchQuery && !title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
@@ -46,6 +59,8 @@ export default function EventsIndex() {
         tomorrow.setDate(tomorrow.getDate() + 1);
         const weekEnd = new Date(today);
         weekEnd.setDate(weekEnd.getDate() + 7);
+        const monthEnd = new Date(today);
+        monthEnd.setMonth(monthEnd.getMonth() + 1);
         
         switch (dateFilter) {
           case 'today':
@@ -57,6 +72,9 @@ export default function EventsIndex() {
           case 'this-week':
             if (eventDate < today || eventDate > weekEnd) return false;
             break;
+          case 'this-month':
+            if (eventDate < today || eventDate > monthEnd) return false;
+            break;
         }
       }
       
@@ -65,14 +83,14 @@ export default function EventsIndex() {
       if (timeFilter && event.event_time) {
         const hour = parseInt(event.event_time.split(':')[0]);
         switch (timeFilter) {
-          case 'morning':
-            if (hour < 6 || hour >= 12) return false;
-            break;
-          case 'afternoon':
-            if (hour < 12 || hour >= 18) return false;
+          case 'daytime':
+            if (hour < 10 || hour >= 18) return false;
             break;
           case 'evening':
-            if (hour < 18) return false;
+            if (hour < 18 || hour >= 22) return false;
+            break;
+          case 'night':
+            if (hour < 22 && hour >= 6) return false;
             break;
         }
       }
@@ -84,12 +102,6 @@ export default function EventsIndex() {
         if (features.includes('featured') && !event.is_featured) return false;
       }
       
-      // Category filter from modal
-      const categoryFilter = filterValues.category as string[] | undefined;
-      if (categoryFilter?.length) {
-        if (!matchesFilter([event.category || ''], categoryFilter)) return false;
-      }
-      
       // Rating filter
       const ratingFilter = filterValues.rating as string | undefined;
       if (ratingFilter) {
@@ -99,9 +111,9 @@ export default function EventsIndex() {
       
       return true;
     });
-  }, [events, searchQuery, filterValues, language]);
+  }, [events, searchQuery, filterValues, language, selectedCategory]);
 
-  const featuredEvent = events.find(e => e.is_featured);
+  const featuredEvent = filteredEvents.find(e => e.is_featured) || filteredEvents[0];
 
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return '';
@@ -112,24 +124,64 @@ export default function EventsIndex() {
   };
 
   const quickItems: QuickGridItem[] = [
-    { icon: '🎵', label: language === 'ru' ? 'Шоу' : 'Shows', onClick: () => setSelectedCategory('concerts') },
-    { icon: '🎉', label: language === 'ru' ? 'Вечеринки' : 'Parties', onClick: () => setSelectedCategory('parties') },
-    { icon: '⛵', label: language === 'ru' ? 'На лодке' : 'Boats', onClick: () => setSelectedCategory('boats') },
-    { icon: '🏔️', label: language === 'ru' ? 'Приключения' : 'Adventures', onClick: () => setSelectedCategory('adventures') },
+    { 
+      icon: '🎤', 
+      label: language === 'ru' ? 'Концерты' : 'Concerts', 
+      onClick: () => setSelectedCategory('concerts') 
+    },
+    { 
+      icon: '🎉', 
+      label: language === 'ru' ? 'Вечеринки' : 'Parties', 
+      onClick: () => setSelectedCategory('parties') 
+    },
+    { 
+      icon: '🍸', 
+      label: language === 'ru' ? 'Клубы' : 'Clubs', 
+      onClick: () => setSelectedCategory('clubs') 
+    },
+    { 
+      icon: '🥊', 
+      label: language === 'ru' ? 'Спорт' : 'Sports', 
+      onClick: () => setSelectedCategory('sports') 
+    },
+  ];
+
+  // Secondary quick items
+  const quickItems2: QuickGridItem[] = [
+    { 
+      icon: '🎭', 
+      label: language === 'ru' ? 'Шоу' : 'Shows', 
+      onClick: () => setSelectedCategory('concerts') 
+    },
+    { 
+      icon: '🎪', 
+      label: language === 'ru' ? 'Фестивали' : 'Festivals', 
+      onClick: () => setSelectedCategory('festivals') 
+    },
+    { 
+      icon: '🎬', 
+      label: language === 'ru' ? 'Кино' : 'Cinema', 
+      onClick: () => setSelectedCategory('concerts') 
+    },
+    { 
+      icon: '🎲', 
+      label: language === 'ru' ? 'Всё' : 'All', 
+      onClick: () => setSelectedCategory('all') 
+    },
   ];
 
   return (
     <MiniAppLayout
-      title={language === 'ru' ? 'События' : 'Events'}
-      subtitle={language === 'ru' ? 'Концерты, туры, развлечения' : 'Concerts, tours, entertainment'}
+      title={language === 'ru' ? 'Афиша' : 'Playbill'}
+      subtitle={language === 'ru' ? 'Концерты, шоу, вечеринки' : 'Concerts, shows, parties'}
       heroIcon={Ticket}
-      heroTitle={language === 'ru' ? 'Лучшие события Пхукета' : 'Best Events in Phuket'}
-      heroSubtitle={language === 'ru' ? 'Концерты, вечеринки, экскурсии' : 'Concerts, parties, excursions'}
+      heroTitle={language === 'ru' ? 'Афиша Пхукета' : 'Phuket Playbill'}
+      heroSubtitle={language === 'ru' ? 'Билеты на концерты, шоу и мероприятия' : 'Tickets for concerts, shows & events'}
       heroImage={featuredEvent?.cover_image || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800'}
       heroGradient={{ from: 'from-purple-500/20', via: 'via-pink-500/20', to: 'to-primary/20' }}
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}
-      searchPlaceholder={language === 'ru' ? 'Поиск событий...' : 'Search events...'}
+      searchPlaceholder={language === 'ru' ? 'Поиск мероприятий...' : 'Search events...'}
       categories={EVENT_CATEGORIES}
       selectedCategory={selectedCategory}
       onCategoryChange={setSelectedCategory}
@@ -139,47 +191,70 @@ export default function EventsIndex() {
       isLoading={isLoading}
       isEmpty={filteredEvents.length === 0}
       emptyIcon={Ticket}
-      emptyText={language === 'ru' ? 'События не найдены' : 'No events found'}
+      emptyText={language === 'ru' ? 'Мероприятия не найдены' : 'No events found'}
     >
-      <MiniAppQuickGrid items={quickItems} columns={4} className="mb-6" />
+      {/* Quick Categories Grid */}
+      <MiniAppQuickGrid items={quickItems} columns={4} className="mb-3" />
+      <MiniAppQuickGrid items={quickItems2} columns={4} className="mb-6" />
 
       {/* Featured Event Banner */}
       {selectedCategory === 'all' && featuredEvent && (
         <div 
           onClick={() => navigate(`/events/${featuredEvent.id}`)}
-          className="relative h-40 rounded-2xl overflow-hidden cursor-pointer group mb-6"
+          className="relative h-48 rounded-2xl overflow-hidden cursor-pointer group mb-6"
         >
           <img
-            src={featuredEvent.cover_image || ''}
+            src={featuredEvent.cover_image || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800'}
             alt={featuredEvent.title_en}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
           <div className="absolute bottom-4 left-4 right-4">
-            <Badge className="bg-primary mb-2">
-              {language === 'ru' ? 'Популярное' : 'Featured'}
-            </Badge>
-            <h3 className="text-lg font-bold text-white mb-1 line-clamp-1">
+            <div className="flex gap-2 mb-2">
+              <Badge className="bg-primary">
+                {language === 'ru' ? '🎫 Билеты' : '🎫 Tickets'}
+              </Badge>
+              {featuredEvent.is_hot && (
+                <Badge className="bg-red-500 text-white">🔥 Hot</Badge>
+              )}
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2 line-clamp-2">
               {language === 'ru' ? featuredEvent.title_ru : featuredEvent.title_en}
             </h3>
-            <div className="flex items-center gap-3 text-white/80 text-sm">
+            <div className="flex items-center gap-4 text-white/80 text-sm">
               <span className="flex items-center gap-1">
-                <Calendar className="w-3 h-3" />
+                <Calendar className="w-4 h-4" />
                 {formatDate(featuredEvent.event_date)}
               </span>
               <span className="flex items-center gap-1">
-                <Clock className="w-3 h-3" />
+                <Clock className="w-4 h-4" />
                 {featuredEvent.event_time}
               </span>
+              {featuredEvent.spots_left && (
+                <span className="flex items-center gap-1">
+                  <Users className="w-4 h-4" />
+                  {featuredEvent.spots_left} {language === 'ru' ? 'мест' : 'left'}
+                </span>
+              )}
             </div>
           </div>
           <div className="absolute top-4 right-4">
-            <Badge variant="secondary" className="bg-white/90 text-black">
+            <Badge variant="secondary" className="bg-white/95 text-black font-bold text-lg px-3 py-1">
               ฿{featuredEvent.price?.toLocaleString()}
             </Badge>
           </div>
         </div>
       )}
+
+      {/* Upcoming Events Section */}
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold">
+          {language === 'ru' ? '📅 Ближайшие события' : '📅 Upcoming Events'}
+        </h2>
+        <span className="text-sm text-muted-foreground">
+          {filteredEvents.length} {language === 'ru' ? 'событий' : 'events'}
+        </span>
+      </div>
       
       <div className="grid gap-4">
         {filteredEvents.map((event) => (
@@ -192,11 +267,12 @@ export default function EventsIndex() {
             originalPrice={event.original_price ?? undefined}
             currency="฿"
             location={language === 'ru' ? (event.location_ru ?? undefined) : (event.location_name ?? undefined)}
-            badge={event.is_hot ? { text: '🔥 Hot', className: 'bg-red-500 text-white' } : undefined}
+            badge={event.is_hot ? { text: '🔥 Hot', className: 'bg-red-500 text-white' } : 
+                   event.is_featured ? { text: '⭐ Featured', className: 'bg-primary text-primary-foreground' } : undefined}
             meta={[
               { icon: Calendar, label: formatDate(event.event_date) },
               { icon: Clock, label: event.event_time ?? '' },
-              { icon: Users, label: `${event.spots_left} ${language === 'ru' ? 'мест' : 'spots'}` },
+              { icon: Users, label: `${event.spots_left || '∞'} ${language === 'ru' ? 'мест' : 'spots'}` },
             ]}
             onClick={() => navigate(`/events/${event.id}`)}
           />
