@@ -14,6 +14,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
 import { AirbnbSearchBar, SearchParams } from '@/components/property/AirbnbSearchBar';
 import { cn } from '@/lib/utils';
+import { ConsultationCTA } from '@/components/property/ConsultationCTA';
 
 // Demo properties as fallback when DB is empty
 const demoProperties = [
@@ -308,6 +309,11 @@ export default function PropertyIndex() {
             />
           </div>
         )}
+
+        {/* Consultation CTA */}
+        <div className="container max-w-7xl mx-auto px-4 py-2">
+          <ConsultationCTA />
+        </div>
 
         {/* Results Count */}
         <div className="container max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">

@@ -16,6 +16,7 @@ import {
   ShoppingCart, TrendingUp, TrendingDown, CalendarDays,
   LogIn, LogOut, Brush, Package
 } from 'lucide-react';
+import { FullManagementCard } from '@/components/owner/FullManagementCard';
 import { format, isToday, isTomorrow, addDays, differenceInDays, startOfMonth, endOfMonth } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
@@ -513,6 +514,9 @@ export default function OwnerDashboard() {
           )}
         </CardContent>
       </Card>
+
+      {/* Full Management CTA */}
+      <FullManagementCard />
 
       {/* Active Requests */}
       {pendingRequests && pendingRequests.length > 0 && (
