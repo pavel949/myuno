@@ -1,5 +1,5 @@
-import { useMemo, useCallback } from 'react';
-import { useSupabaseQuery, useSupabaseSingle, QueryFilter } from './useSupabaseQuery';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ItineraryItem {
   time: string;
@@ -50,38 +50,61 @@ const transformTour = (tour: unknown): Tour => {
   } as Tour;
 };
 
+const fetchTours = async (options: UseToursOptions): Promise<Tour[]> => {
+  let query = supabase
+    .from('tours')
+    .select('*')
+    .eq('is_active', true);
+
+  if (options.category) {
+    query = query.eq('category', options.category);
+  }
+  if (options.featured) {
+    query = query.eq('is_featured', true);
+  }
+
+  query = query.order('rating', { ascending: false });
+
+  if (options.limit) {
+    query = query.limit(options.limit);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data || []).map(transformTour);
+};
+
+const fetchTourById = async (id: string): Promise<Tour | null> => {
+  const { data, error } = await supabase
+    .from('tours')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) throw error;
+  return data ? transformTour(data) : null;
+};
+
 export const useTours = (options: UseToursOptions = {}) => {
-  const filters = useMemo((): QueryFilter[] => {
-    const result: QueryFilter[] = [{ column: 'is_active', value: true }];
-    if (options.category) {
-      result.push({ column: 'category', value: options.category });
-    }
-    if (options.featured) {
-      result.push({ column: 'is_featured', value: true });
-    }
-    return result;
-  }, [options.category, options.featured]);
+  const queryKey = ['tours', options.category || 'all', options.featured, options.limit];
 
-  const transform = useCallback((data: unknown[]) => data.map(transformTour), []);
-
-  const { data, isLoading, refetch } = useSupabaseQuery<Tour>({
-    table: 'tours',
-    filters,
-    orderBy: { column: 'rating', ascending: false },
-    limit: options.limit,
-    transform,
+  const { data, isLoading, refetch } = useQuery({
+    queryKey,
+    queryFn: () => fetchTours(options),
+    staleTime: 60 * 1000, // 1 minute cache
+    gcTime: 5 * 60 * 1000, // 5 minutes garbage collection
   });
 
-  return { tours: data, isLoading, refetch };
+  return { tours: data || [], isLoading, refetch };
 };
 
 export const useTour = (tourId: string | undefined) => {
-  const transform = useCallback((data: unknown) => transformTour(data), []);
-
-  const { data, isLoading, error } = useSupabaseSingle<Tour>({
-    table: 'tours',
-    id: tourId,
-    transform,
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['tour', tourId],
+    queryFn: () => fetchTourById(tourId!),
+    enabled: !!tourId,
+    staleTime: 60 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 
   return { tour: data, isLoading, error };
