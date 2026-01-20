@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Calendar, Users, X, ChevronLeft, Minus, Plus } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { Search, MapPin, X, Minus, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
@@ -162,19 +163,19 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
           </div>
         </motion.div>
 
-        {/* Mobile Full Screen Modal */}
-        <AnimatePresence>
-          {isOpen && (
+        {/* Mobile Full Screen Modal - Using Portal */}
+        {isOpen && createPortal(
+          <AnimatePresence>
             <motion.div 
-              className="fixed inset-0 z-50 bg-background"
+              className="fixed inset-0 z-[100] bg-background"
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             >
-              <div className="flex flex-col h-full">
+              <div className="flex flex-col h-full overflow-hidden">
                 {/* Header with Tabs */}
-                <div className="border-b">
+                <div className="border-b shrink-0">
                   <div className="flex items-center justify-between px-4 py-3">
                     <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
                       <X className="w-5 h-5" />
@@ -356,7 +357,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 border-t bg-background safe-area-inset-bottom">
+                <div className="p-4 border-t bg-background shrink-0">
                   <Button 
                     className="w-full h-14 rounded-xl text-base gap-2 font-semibold"
                     onClick={handleSearch}
@@ -367,8 +368,9 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                 </div>
               </div>
             </motion.div>
-          )}
-        </AnimatePresence>
+          </AnimatePresence>,
+          document.body
+        )}
       </div>
 
       {/* Desktop Search Bar with Backdrop */}
