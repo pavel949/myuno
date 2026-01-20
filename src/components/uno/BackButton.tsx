@@ -26,17 +26,9 @@ export function BackButton({
       return;
     }
     
-    // Try to go back in history, fallback to specified path
-    try {
-      // Check if we have meaningful history (more than just entry point)
-      if (window.history.length > 1) {
-        navigate(-1);
-      } else {
-        navigate(fallbackPath);
-      }
-    } catch {
-      navigate(fallbackPath);
-    }
+    // Always use fallback for reliability - history.length check is unreliable
+    // in SPAs where history includes all internal navigations
+    navigate(fallbackPath);
   };
 
   const sizeClasses = {
