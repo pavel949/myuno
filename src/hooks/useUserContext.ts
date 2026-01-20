@@ -75,6 +75,7 @@ export function useUserContext() {
       return data as UserActiveContext;
     },
     enabled: !!user?.id,
+    staleTime: 60000, // Cache for 1 minute
   });
 
   // Fetch user's org memberships
@@ -96,6 +97,7 @@ export function useUserContext() {
       return (data || []) as OrgMember[];
     },
     enabled: !!user?.id,
+    staleTime: 60000, // Cache for 1 minute
   });
 
   // Fetch user roles from user_roles table (legacy support)
@@ -113,6 +115,7 @@ export function useUserContext() {
       return data?.map(r => r.role) || [];
     },
     enabled: !!user?.id,
+    staleTime: 60000, // Cache for 1 minute
   });
 
   // Switch active role and optionally org
