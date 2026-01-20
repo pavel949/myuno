@@ -39,38 +39,30 @@ export function DownloadAppButton() {
 
   return (
     <motion.button
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.2 }}
+      transition={{ duration: 0.3, delay: 0.1 }}
       onClick={handleClick}
-      className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-primary/80 p-5 shadow-lg hover:shadow-xl transition-all duration-300 active:scale-[0.98] group"
+      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-muted/50 border border-border hover:bg-muted/80 hover:border-primary/20 transition-all duration-200 active:scale-[0.98] group"
     >
-      {/* Decorative background elements */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute -right-4 -top-4 w-24 h-24 rounded-full bg-white/20" />
-        <div className="absolute -left-2 -bottom-2 w-16 h-16 rounded-full bg-white/10" />
+      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+        {isIOS ? (
+          <Smartphone className="w-5 h-5 text-primary" />
+        ) : (
+          <Download className="w-5 h-5 text-primary" />
+        )}
       </div>
-
-      <div className="relative flex items-center gap-4">
-        <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
-          {isIOS ? (
-            <Smartphone className="w-7 h-7 text-primary-foreground" />
-          ) : (
-            <Download className="w-7 h-7 text-primary-foreground" />
-          )}
-        </div>
-        
-        <div className="flex-1 text-left">
-          <h3 className="font-bold text-primary-foreground text-lg">
-            {isIOS ? t.iosHint : t.title}
-          </h3>
-          <p className="text-sm text-primary-foreground/80">
-            {t.subtitle}
-          </p>
-        </div>
-        
-        <ArrowRight className="w-6 h-6 text-primary-foreground group-hover:translate-x-1 transition-transform" />
+      
+      <div className="flex-1 text-left min-w-0">
+        <h3 className="font-medium text-foreground text-sm">
+          {isIOS ? t.iosHint : t.title}
+        </h3>
+        <p className="text-xs text-muted-foreground truncate">
+          {t.subtitle}
+        </p>
       </div>
+      
+      <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
     </motion.button>
   );
 }
