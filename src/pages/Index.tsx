@@ -19,6 +19,7 @@ import { QuickActionsGrid } from '@/components/home/QuickActionsGrid';
 import { RecommendedCarousel } from '@/components/home/RecommendedCarousel';
 import { ForYouSection } from '@/components/recommendations/ForYouSection';
 import { PersonalizedOffersSection } from '@/components/notifications/PersonalizedOffersSection';
+import { InstallBanner } from '@/components/pwa/InstallBanner';
 
 // Lazy load only modals (opened by user action)
 const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
@@ -102,6 +103,11 @@ const Index = () => {
               readOnly
             />
           </div>
+
+          {/* Install App Banner (mobile only) */}
+          <FadeInUp delay={0.03}>
+            <InstallBanner />
+          </FadeInUp>
 
           {/* Smart Widget - Weather, Event, Recommendation */}
           <FadeInUp delay={0.05}>
