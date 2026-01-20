@@ -193,6 +193,13 @@ const AdminBabysitters = lazy(() => import('@/pages/admin/AdminBabysitters'));
 const AdminFlowers = lazy(() => import('@/pages/admin/AdminFlowers'));
 const AdminLookups = lazy(() => import('@/pages/admin/AdminLookups'));
 const AcquisitionMetrics = lazy(() => import('@/pages/admin/AcquisitionMetrics'));
+const AdminTickets = lazy(() => import('@/pages/admin/AdminTickets'));
+const AdminTicketDetail = lazy(() => import('@/pages/admin/AdminTicketDetail'));
+
+// Support pages (user tickets)
+const NewTicket = lazy(() => import('@/pages/support/NewTicket'));
+const MyTickets = lazy(() => import('@/pages/support/MyTickets'));
+const TicketDetail = lazy(() => import('@/pages/support/TicketDetail'));
 
 // Vendor pages
 const VendorDashboard = lazy(() => import('@/pages/vendor/VendorDashboard'));
@@ -303,6 +310,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/sos" element={<LazyPage><SOS /></LazyPage>} />
         <Route path="/vip-concierge" element={<LazyPage><VipConcierge /></LazyPage>} />
         <Route path="/support" element={<LazyPage><Support /></LazyPage>} />
+        <Route path="/support/new-ticket" element={<LazyPage><NewTicket /></LazyPage>} />
+        <Route path="/support/tickets" element={<LazyPage><MyTickets /></LazyPage>} />
+        <Route path="/support/tickets/:ticketId" element={<LazyPage><TicketDetail /></LazyPage>} />
         <Route path="/install" element={<LazyPage><Install /></LazyPage>} />
         
         {/* Beauty & Spa Mini-App Routes */}
@@ -473,6 +483,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/admin/flowers" element={<LazyPage><AdminGuard><AdminFlowers /></AdminGuard></LazyPage>} />
         <Route path="/admin/lookups" element={<LazyPage><AdminGuard><AdminLookups /></AdminGuard></LazyPage>} />
         <Route path="/admin/acquisition-metrics" element={<LazyPage><AdminGuard><AcquisitionMetrics /></AdminGuard></LazyPage>} />
+        <Route path="/admin/tickets" element={<LazyPage><AdminGuard><AdminTickets /></AdminGuard></LazyPage>} />
+        <Route path="/admin/tickets/:ticketId" element={<LazyPage><AdminGuard><AdminTicketDetail /></AdminGuard></LazyPage>} />
         
         {/* Staff Routes - Protected */}
         <Route path="/staff" element={<LazyPage><AdminGuard><StaffDashboard /></AdminGuard></LazyPage>} />

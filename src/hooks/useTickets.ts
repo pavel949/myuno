@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import type { Database } from '@/integrations/supabase/types';
+
+type SupportTicketInsert = Database['public']['Tables']['support_tickets']['Insert'];
 
 export type TicketCategory = 'refund' | 'quality' | 'fraud' | 'damage' | 'payment' | 'delivery' | 'cancellation' | 'other';
 export type TicketPriority = 'low' | 'normal' | 'high' | 'urgent';
@@ -102,26 +105,26 @@ export function useTickets() {
 
   const createTicket = async (input: CreateTicketInput): Promise<SupportTicket | null> => {
     try {
-      const ticketData: Record<string, unknown> = {
+      const ticketData = {
         user_id: user?.id || null,
         category: input.category,
         priority: input.priority || 'normal',
         subject: input.subject,
         description: input.description,
         reporter_type: input.reporter_type || (user ? 'guest' : 'anonymous'),
-        reporter_name: input.reporter_name,
-        reporter_email: input.reporter_email,
-        reporter_phone: input.reporter_phone,
+        reporter_name: input.reporter_name || null,
+        reporter_email: input.reporter_email || null,
+        reporter_phone: input.reporter_phone || null,
         order_id: input.order_id || null,
         booking_id: input.booking_id || null,
         property_id: input.property_id || null,
         provider_id: input.provider_id || null,
         attachments: JSON.stringify(input.attachments || []),
-      };
+      } as Omit<SupportTicketInsert, 'ticket_number'>;
 
       const { data, error } = await supabase
         .from('support_tickets')
-        .insert(ticketData)
+        .insert([ticketData as SupportTicketInsert])
         .select()
         .single();
 
