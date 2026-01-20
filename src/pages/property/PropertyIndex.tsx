@@ -154,7 +154,7 @@ export default function PropertyIndex() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useState<SearchParams>({
-    location: 'all',
+    locations: [],
     checkIn: undefined,
     checkOut: undefined,
     guests: 2,
@@ -168,7 +168,7 @@ export default function PropertyIndex() {
 
   // Fetch real properties from database
   const { data: dbProperties, isLoading } = useProperties({
-    search: searchParams.location !== 'all' ? searchParams.location : undefined,
+    search: searchParams.locations.length === 1 ? searchParams.locations[0] : undefined,
     propertyType: selectedType,
     listingType: 'rent', // Always show rentals for Airbnb-style
     bedrooms: filterValues.bedrooms as string,
@@ -181,8 +181,10 @@ export default function PropertyIndex() {
       : demoProperties.filter(p => p.listing_type === 'rent');
     
     return sourceData.filter(prop => {
-      const matchesLocation = searchParams.location === 'all' || 
-        prop.district?.toLowerCase().includes(searchParams.location.toLowerCase());
+      const matchesLocation = searchParams.locations.length === 0 || 
+        searchParams.locations.some(loc => 
+          prop.district?.toLowerCase().includes(loc.toLowerCase())
+        );
       const matchesType = selectedType === 'all' || prop.property_type === selectedType;
       const matchesGuests = !searchParams.guests || (prop.max_guests || 0) >= searchParams.guests;
       
@@ -428,7 +430,7 @@ export default function PropertyIndex() {
                       : 'Try adjusting your search criteria'}
                   </p>
                   <Button variant="outline" onClick={() => {
-                    setSearchParams({ location: 'all', checkIn: undefined, checkOut: undefined, guests: 2 });
+                    setSearchParams({ locations: [], checkIn: undefined, checkOut: undefined, guests: 2 });
                     setSelectedType('all');
                     setFilterValues({});
                   }}>
