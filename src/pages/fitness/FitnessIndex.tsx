@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory } from '@/components/miniapp';
 import { UniversalFilter, ActiveFilters, fitnessFilterConfig, FilterValues } from '@/components/filters';
 import { useGyms } from '@/hooks/useGyms';
+import { matchesFilter, matchesPriceLevel, matchesMembership, isOpenNow } from '@/lib/filterUtils';
 
 const GYM_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -52,16 +53,35 @@ export default function FitnessIndex() {
 
   const filteredGyms = useMemo(() => {
     return gyms.filter(gym => {
+      // Category filter
       if (selectedCategory !== 'all' && gym.gym_type !== selectedCategory) return false;
       
+      // Search filter
       if (searchQuery) {
         const name = language === 'ru' ? gym.name_ru : gym.name_en;
         if (!name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       }
       
+      // Price level filter
+      const lowestPrice = gym.price_day_pass || gym.price_week_pass || gym.price_month_pass;
+      if (!matchesPriceLevel(lowestPrice, filterValues.priceLevel as string)) return false;
+      
+      // Amenities filter (multi-select)
+      const amenitiesFilter = Array.isArray(filterValues.amenities) ? filterValues.amenities : [];
+      if (!matchesFilter(gym.amenities, amenitiesFilter)) return false;
+      
+      // Membership type filter
+      if (!matchesMembership(gym, filterValues.membership as string)) return false;
+      
+      // Schedule/availability filter
+      const scheduleFilter = Array.isArray(filterValues.schedule) ? filterValues.schedule : [];
+      if (scheduleFilter.includes('open-now') && !isOpenNow(gym.working_hours as Record<string, string>)) {
+        return false;
+      }
+      
       return true;
     });
-  }, [gyms, selectedCategory, searchQuery, language]);
+  }, [gyms, selectedCategory, searchQuery, language, filterValues]);
 
   const getPriceLabel = (gym: typeof gyms[0]) => {
     if (gym.price_day_pass) return { price: gym.price_day_pass, label: language === 'ru' ? '/день' : '/day' };

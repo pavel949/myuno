@@ -5,6 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useTours } from "@/hooks/useTours";
 import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from "@/components/miniapp";
 import { tourFilterConfig, FilterValues } from "@/components/filters";
+import { matchesFilter, matchesPriceLevel, matchesGroupSize } from "@/lib/filterUtils";
 
 const TOUR_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All Tours', labelRu: 'Все туры' },
@@ -25,11 +26,17 @@ export default function ToursIndex() {
     category: selectedCategory === 'all' ? undefined : selectedCategory,
   });
 
-  const filteredTours = tours.filter(tour => {
+  const filteredTours = useMemo(() => tours.filter(tour => {
+    // Search filter
     if (searchQuery) {
       const title = language === 'ru' ? tour.title_ru : tour.title_en;
       if (!title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     }
+    
+    // Price level filter
+    if (!matchesPriceLevel(tour.price, filterValues.priceLevel as string)) return false;
+    
+    // Duration filter
     if (filterValues.duration) {
       const duration = tour.duration_hours || 0;
       const durationMap: Record<string, boolean> = {
@@ -39,9 +46,24 @@ export default function ToursIndex() {
       };
       if (!durationMap[filterValues.duration as string]) return false;
     }
+    
+    // Difficulty filter
     if (filterValues.difficulty && filterValues.difficulty !== tour.difficulty) return false;
+    
+    // Group size filter
+    if (!matchesGroupSize(tour.max_participants, filterValues.groupSize as string)) return false;
+    
+    // Features filter (matching against includes array)
+    const featuresFilter = Array.isArray(filterValues.features) ? filterValues.features : [];
+    if (featuresFilter.length > 0) {
+      const tourIncludes = (tour.includes as any[])?.map(i => 
+        typeof i === 'string' ? i : i.text_en || ''
+      ) || [];
+      if (!matchesFilter(tourIncludes, featuresFilter)) return false;
+    }
+    
     return true;
-  });
+  }), [tours, searchQuery, language, filterValues]);
 
   const quickItems: QuickGridItem[] = [
     { icon: '🏝️', label: language === 'ru' ? 'Острова' : 'Islands', onClick: () => setSelectedCategory('islands') },
