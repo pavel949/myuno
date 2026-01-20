@@ -28,7 +28,6 @@ import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { SectionCard, SectionTitle } from '@/components/uno/SectionCard';
 import { Button } from '@/components/ui/button';
-import { FadeInUp } from '@/components/layout/AnimatedList';
 import { cn } from '@/lib/utils';
 import { useOfflineStatus } from '@/hooks/useOfflineStatus';
 import { toast } from 'sonner';
@@ -296,247 +295,231 @@ export default function SOS() {
         )}
 
         {/* UNO ALERT */}
-        <FadeInUp>
-          <div className="mb-5 p-4 rounded-2xl bg-gradient-to-br from-amber-500/20 via-orange-500/15 to-red-500/20 border-2 border-amber-500/40">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="p-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500">
-                <Star className="w-4 h-4 text-white" fill="white" />
-              </div>
-              <h2 className="font-bold text-lg bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-                UNO ALERT
-              </h2>
-              <Crown className="w-4 h-4 text-amber-500" />
+        <div className="mb-5 p-4 rounded-2xl bg-gradient-to-br from-amber-500/20 via-orange-500/15 to-red-500/20 border-2 border-amber-500/40">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="p-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500">
+              <Star className="w-4 h-4 text-white" fill="white" />
             </div>
-            
-            <p className="text-sm text-foreground/80 mb-3">
-              {language === 'ru' 
-                ? 'Личная безопасность и помощь в экстремальных ситуациях. 24/7.' 
-                : 'Personal security & emergency assistance. 24/7.'}
-            </p>
-
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
-                onClick={() => window.location.href = `tel:${UNO_EMERGENCY_PHONE}`}
-              >
-                <Phone className="w-4 h-4 mr-1.5" />
-                {language === 'ru' ? 'Позвонить' : 'Call'}
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="flex-1 border-amber-500/50 text-amber-600 hover:bg-amber-500/10"
-                onClick={() => window.open(UNO_WHATSAPP, '_blank')}
-              >
-                <MessageCircle className="w-4 h-4 mr-1.5" />
-                WhatsApp
-              </Button>
-            </div>
+            <h2 className="font-bold text-lg bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+              UNO ALERT
+            </h2>
+            <Crown className="w-4 h-4 text-amber-500" />
           </div>
-        </FadeInUp>
+          
+          <p className="text-sm text-foreground/80 mb-3">
+            {language === 'ru' 
+              ? 'Личная безопасность и помощь в экстремальных ситуациях. 24/7.' 
+              : 'Personal security & emergency assistance. 24/7.'}
+          </p>
+
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+              onClick={() => window.location.href = `tel:${UNO_EMERGENCY_PHONE}`}
+            >
+              <Phone className="w-4 h-4 mr-1.5" />
+              {language === 'ru' ? 'Позвонить' : 'Call'}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="flex-1 border-amber-500/50 text-amber-600 hover:bg-amber-500/10"
+              onClick={() => window.open(UNO_WHATSAPP, '_blank')}
+            >
+              <MessageCircle className="w-4 h-4 mr-1.5" />
+              WhatsApp
+            </Button>
+          </div>
+        </div>
 
         {/* Quick Actions - 4 big buttons */}
-        <FadeInUp delay={0.05}>
-          <div className="grid grid-cols-4 gap-2 mb-5">
-            {quickActions.map((action) => {
-              const Icon = action.icon;
-              return (
-                <button
-                  key={action.id}
-                  onClick={() => handleCall(action.phone)}
-                  className={cn(
-                    "flex flex-col items-center p-3 rounded-xl border transition-all active:scale-95",
-                    action.bg, "border-transparent hover:border-current/20"
-                  )}
-                >
-                  <Icon className={cn("w-6 h-6 mb-1", action.color)} />
-                  <span className="font-bold text-lg">{action.phone}</span>
-                  <span className="text-[10px] text-muted-foreground">
-                    {language === 'ru' ? action.labelRu : action.label}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </FadeInUp>
+        <div className="grid grid-cols-4 gap-2 mb-5">
+          {quickActions.map((action) => {
+            const Icon = action.icon;
+            return (
+              <button
+                key={action.id}
+                onClick={() => handleCall(action.phone)}
+                className={cn(
+                  "flex flex-col items-center p-3 rounded-xl border transition-all active:scale-95",
+                  action.bg, "border-transparent hover:border-current/20"
+                )}
+              >
+                <Icon className={cn("w-6 h-6 mb-1", action.color)} />
+                <span className="font-bold text-lg">{action.phone}</span>
+                <span className="text-[10px] text-muted-foreground">
+                  {language === 'ru' ? action.labelRu : action.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
 
         {/* VIP Concierge Link */}
-        <FadeInUp delay={0.1}>
-          <button 
-            className="w-full mb-5 p-3 rounded-xl bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-purple-500/30 flex items-center justify-between hover:border-purple-500/50 transition-colors"
-            onClick={() => navigate('/vip-concierge')}
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-gradient-to-r from-violet-500 to-purple-500">
-                <Crown className="w-5 h-5 text-white" />
+        <button 
+          className="w-full mb-5 p-3 rounded-xl bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-purple-500/30 flex items-center justify-between hover:border-purple-500/50 transition-colors"
+          onClick={() => navigate('/vip-concierge')}
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-full bg-gradient-to-r from-violet-500 to-purple-500">
+              <Crown className="w-5 h-5 text-white" />
+            </div>
+            <div className="text-left">
+              <div className="font-semibold text-sm flex items-center gap-1">
+                {language === 'ru' ? 'VIP Консьерж' : 'VIP Concierge'}
+                <Sparkles className="w-3 h-3 text-purple-500" />
               </div>
-              <div className="text-left">
-                <div className="font-semibold text-sm flex items-center gap-1">
-                  {language === 'ru' ? 'VIP Консьерж' : 'VIP Concierge'}
-                  <Sparkles className="w-3 h-3 text-purple-500" />
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  {language === 'ru' ? 'Вертолёты, яхты, повара...' : 'Helicopters, yachts, chefs...'}
-                </div>
+              <div className="text-xs text-muted-foreground">
+                {language === 'ru' ? 'Вертолёты, яхты, повара...' : 'Helicopters, yachts, chefs...'}
               </div>
             </div>
-            <ChevronRight className="w-5 h-5 text-purple-500" />
-          </button>
-        </FadeInUp>
+          </div>
+          <ChevronRight className="w-5 h-5 text-purple-500" />
+        </button>
 
         {/* Service Links */}
-        <FadeInUp delay={0.15}>
-          <div className="grid grid-cols-2 gap-3 mb-5">
-            {serviceLinks.map((service) => {
-              const Icon = service.icon;
-              return (
-                <button
-                  key={service.id}
-                  onClick={() => navigate(service.path)}
-                  className={cn(
-                    "flex items-center gap-3 p-3 rounded-xl border transition-all text-left",
-                    service.bg, "border-transparent hover:border-current/20"
-                  )}
-                >
-                  <Icon className={cn("w-5 h-5", service.color)} />
-                  <div>
-                    <div className="font-medium text-sm">
-                      {language === 'ru' ? service.titleRu : service.title}
-                    </div>
-                    <div className="text-[10px] text-muted-foreground">
-                      {language === 'ru' ? service.descRu : service.desc}
-                    </div>
+        <div className="grid grid-cols-2 gap-3 mb-5">
+          {serviceLinks.map((service) => {
+            const Icon = service.icon;
+            return (
+              <button
+                key={service.id}
+                onClick={() => navigate(service.path)}
+                className={cn(
+                  "flex items-center gap-3 p-3 rounded-xl border transition-all text-left",
+                  service.bg, "border-transparent hover:border-current/20"
+                )}
+              >
+                <Icon className={cn("w-5 h-5", service.color)} />
+                <div>
+                  <div className="font-medium text-sm">
+                    {language === 'ru' ? service.titleRu : service.title}
                   </div>
-                </button>
-              );
-            })}
-          </div>
-        </FadeInUp>
+                  <div className="text-[10px] text-muted-foreground">
+                    {language === 'ru' ? service.descRu : service.desc}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
 
         {/* Emergency Categories */}
-        {emergencyCategories.map((category, catIdx) => {
+        {emergencyCategories.map((category) => {
           const CatIcon = category.icon;
           return (
-            <FadeInUp key={category.id} delay={0.2 + catIdx * 0.05}>
-              <SectionCard className="mb-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <CatIcon className={cn("w-5 h-5", category.color)} />
-                  <SectionTitle className="mb-0">
-                    {language === 'ru' ? category.titleRu : category.title}
-                  </SectionTitle>
-                </div>
-                <div className="space-y-2">
-                  {category.contacts.map((contact, idx) => (
-                    <div 
-                      key={idx}
-                      className="flex items-center justify-between py-2 border-b border-border/50 last:border-0 last:pb-0"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm">
-                          {language === 'ru' ? contact.nameRu : contact.name}
-                        </div>
-                        {contact.desc && (
-                          <div className="text-xs text-muted-foreground">
-                            {language === 'ru' ? contact.descRu : contact.desc}
-                          </div>
-                        )}
+            <SectionCard key={category.id} className="mb-4">
+              <div className="flex items-center gap-2 mb-3">
+                <CatIcon className={cn("w-5 h-5", category.color)} />
+                <SectionTitle className="mb-0">
+                  {language === 'ru' ? category.titleRu : category.title}
+                </SectionTitle>
+              </div>
+              <div className="space-y-2">
+                {category.contacts.map((contact, idx) => (
+                  <div 
+                    key={idx}
+                    className="flex items-center justify-between py-2 border-b border-border/50 last:border-0 last:pb-0"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm">
+                        {language === 'ru' ? contact.nameRu : contact.name}
                       </div>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-8 px-3 text-primary"
-                        onClick={() => handleCall(contact.phone)}
-                      >
-                        <Phone className="w-3.5 h-3.5 mr-1.5" />
-                        {contact.phone}
-                      </Button>
+                      {contact.desc && (
+                        <div className="text-xs text-muted-foreground">
+                          {language === 'ru' ? contact.descRu : contact.desc}
+                        </div>
+                      )}
                     </div>
-                  ))}
-                </div>
-              </SectionCard>
-            </FadeInUp>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 px-3 text-primary"
+                      onClick={() => handleCall(contact.phone)}
+                    >
+                      <Phone className="w-3.5 h-3.5 mr-1.5" />
+                      {contact.phone}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </SectionCard>
           );
         })}
 
         {/* Grouped Tips - Accordion Style */}
-        <FadeInUp delay={0.45}>
-          <div className="flex items-center gap-2 mb-3">
-            <Lightbulb className="w-5 h-5 text-amber-500" />
-            <h2 className="font-semibold text-lg">
-              {language === 'ru' ? 'Что делать если...' : 'What to do if...'}
-            </h2>
-          </div>
-        </FadeInUp>
+        <div className="flex items-center gap-2 mb-3">
+          <Lightbulb className="w-5 h-5 text-amber-500" />
+          <h2 className="font-semibold text-lg">
+            {language === 'ru' ? 'Что делать если...' : 'What to do if...'}
+          </h2>
+        </div>
 
         <div className="space-y-2">
-          {tipCategories.map((category, catIdx) => {
+          {tipCategories.map((category) => {
             const isExpanded = expandedCategories.includes(category.id);
             return (
-              <FadeInUp key={category.id} delay={0.5 + catIdx * 0.02}>
-                <div className="rounded-xl border border-border/50 bg-card overflow-hidden">
-                  <button
-                    onClick={() => toggleCategory(category.id)}
-                    className="w-full flex items-center justify-between p-3 hover:bg-muted/30 transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">{category.icon}</span>
-                      <span className="font-medium text-sm">
-                        {language === 'ru' ? category.titleRu : category.title}
-                      </span>
-                      <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                        {category.tips.length}
-                      </span>
-                    </div>
-                    <ChevronDown 
-                      className={cn(
-                        "w-4 h-4 text-muted-foreground transition-transform duration-200",
-                        isExpanded && "rotate-180"
-                      )} 
-                    />
-                  </button>
-                  
-                  {isExpanded && (
-                    <div className="px-3 pb-3 pt-1 border-t border-border/30">
-                      <ul className="space-y-2">
-                        {category.tips.map((tip, idx) => (
-                          <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2 py-1">
-                            <span className="text-primary mt-0.5 font-bold">→</span>
-                            <span>{language === 'ru' ? tip.ru : tip.en}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              </FadeInUp>
+              <div key={category.id} className="rounded-xl border border-border/50 bg-card overflow-hidden">
+                <button
+                  onClick={() => toggleCategory(category.id)}
+                  className="w-full flex items-center justify-between p-3 hover:bg-muted/30 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">{category.icon}</span>
+                    <span className="font-medium text-sm">
+                      {language === 'ru' ? category.titleRu : category.title}
+                    </span>
+                    <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                      {category.tips.length}
+                    </span>
+                  </div>
+                  <ChevronDown 
+                    className={cn(
+                      "w-4 h-4 text-muted-foreground transition-transform duration-200",
+                      isExpanded && "rotate-180"
+                    )} 
+                  />
+                </button>
+                
+                {isExpanded && (
+                  <div className="px-3 pb-3 pt-1 border-t border-border/30">
+                    <ul className="space-y-2">
+                      {category.tips.map((tip, idx) => (
+                        <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2 py-1">
+                          <span className="text-primary mt-0.5 font-bold">→</span>
+                          <span>{language === 'ru' ? tip.ru : tip.en}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>
 
         {/* Save Offline Button */}
-        <FadeInUp delay={0.5}>
-          <Button
-            variant="outline"
-            className="w-full mt-4 gap-2"
-            onClick={handleSaveOffline}
-            disabled={isCaching}
-          >
-            {isSOSCached ? (
-              <>
-                <CheckCircle2 className="w-4 h-4 text-green-500" />
-                {language === 'ru' ? 'Сохранено для офлайн' : 'Saved for offline'}
-              </>
-            ) : (
-              <>
-                <Download className="w-4 h-4" />
-                {isCaching 
-                  ? (language === 'ru' ? 'Сохранение...' : 'Saving...') 
-                  : (language === 'ru' ? 'Сохранить для офлайн' : 'Save for offline')}
-              </>
-            )}
-          </Button>
-        </FadeInUp>
+        <Button
+          variant="outline"
+          className="w-full mt-4 gap-2"
+          onClick={handleSaveOffline}
+          disabled={isCaching}
+        >
+          {isSOSCached ? (
+            <>
+              <CheckCircle2 className="w-4 h-4 text-green-500" />
+              {language === 'ru' ? 'Сохранено для офлайн' : 'Saved for offline'}
+            </>
+          ) : (
+            <>
+              <Download className="w-4 h-4" />
+              {isCaching 
+                ? (language === 'ru' ? 'Сохранение...' : 'Saving...') 
+                : (language === 'ru' ? 'Сохранить для офлайн' : 'Save for offline')}
+            </>
+          )}
+        </Button>
 
         <div className="h-8" />
       </PageContainer>
