@@ -220,11 +220,11 @@ export default function AdminTicketDetail() {
                     >
                       Подтвердить решение
                     </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        )}
-        />
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
+        
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Left Column - Info */}
