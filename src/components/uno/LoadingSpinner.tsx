@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { cn } from '@/lib/utils';
 
 interface LoadingSpinnerProps {
@@ -12,29 +12,38 @@ const sizeClasses = {
   lg: 'w-12 h-12',
 };
 
-export function LoadingSpinner({ size = 'md', className }: LoadingSpinnerProps) {
-  return (
-    <div 
-      className={cn(
-        "animate-spin border-2 border-primary border-t-transparent rounded-full",
-        sizeClasses[size],
-        className
-      )} 
-    />
-  );
-}
+export const LoadingSpinner = forwardRef<HTMLDivElement, LoadingSpinnerProps>(
+  ({ size = 'md', className }, ref) => {
+    return (
+      <div 
+        ref={ref}
+        className={cn(
+          "animate-spin border-2 border-primary border-t-transparent rounded-full",
+          sizeClasses[size],
+          className
+        )} 
+      />
+    );
+  }
+);
+
+LoadingSpinner.displayName = 'LoadingSpinner';
 
 interface LoadingStateProps {
   message?: string;
 }
 
-export function LoadingState({ message }: LoadingStateProps) {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-      <LoadingSpinner size="lg" />
-      {message && (
-        <p className="text-muted-foreground text-sm">{message}</p>
-      )}
-    </div>
-  );
-}
+export const LoadingState = forwardRef<HTMLDivElement, LoadingStateProps>(
+  ({ message }, ref) => {
+    return (
+      <div ref={ref} className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <LoadingSpinner size="lg" />
+        {message && (
+          <p className="text-muted-foreground text-sm">{message}</p>
+        )}
+      </div>
+    );
+  }
+);
+
+LoadingState.displayName = 'LoadingState';
