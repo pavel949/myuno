@@ -98,6 +98,8 @@ const InsuranceDetail = lazy(() => import('@/pages/insurance/InsuranceDetail'));
 const InsuranceQuote = lazy(() => import('@/pages/insurance/InsuranceQuote'));
 const InsurancePlanDetail = lazy(() => import('@/pages/insurance/InsurancePlanDetail'));
 
+// Install Page
+const Install = lazy(() => import('@/pages/Install'));
 // Tours Mini-App
 const ToursIndex = lazy(() => import('@/pages/tours/ToursIndex'));
 const TourDetail = lazy(() => import('@/pages/tours/TourDetail'));
@@ -274,6 +276,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/sos" element={<LazyPage><SOS /></LazyPage>} />
         <Route path="/vip-concierge" element={<LazyPage><VipConcierge /></LazyPage>} />
         <Route path="/support" element={<LazyPage><Support /></LazyPage>} />
+        <Route path="/install" element={<LazyPage><Install /></LazyPage>} />
         
         {/* Beauty & Spa Mini-App Routes */}
         <Route path="/beauty" element={<LazyPage><BeautySpaIndex /></LazyPage>} />

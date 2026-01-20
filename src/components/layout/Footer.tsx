@@ -8,7 +8,8 @@ import {
   Shield, 
   Users, 
   Lightbulb,
-  Handshake
+  Handshake,
+  Download
 } from 'lucide-react';
 
 export function Footer() {
@@ -114,6 +115,13 @@ export function Footer() {
             >
               <Shield className="w-4 h-4" />
               {language === 'ru' ? 'SOS' : 'Emergency'}
+            </Link>
+            <Link
+              to="/install"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors py-1"
+            >
+              <Download className="w-4 h-4" />
+              {language === 'ru' ? 'Установить' : 'Install App'}
             </Link>
           </div>
         </div>
