@@ -8029,6 +8029,7 @@ export type Database = {
         Args: { review_id_param: string }
         Returns: undefined
       }
+      is_org_owner: { Args: { check_org_id: string }; Returns: boolean }
       pay_from_wallet_atomic: {
         Args: {
           p_amount: number
