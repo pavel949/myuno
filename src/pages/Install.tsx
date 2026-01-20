@@ -1,5 +1,20 @@
 import { useState, useEffect } from "react";
-import { Download, Smartphone, Share, Plus, MoreVertical, Check, Loader2, CheckCircle2, Sparkles } from "lucide-react";
+import { 
+  Download, 
+  Smartphone, 
+  Share, 
+  Plus, 
+  MoreVertical, 
+  Check, 
+  Loader2, 
+  CheckCircle2, 
+  Sparkles,
+  Zap,
+  Bell,
+  Wifi,
+  Shield,
+  ArrowRight
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -7,6 +22,7 @@ import { PageContainer } from "@/components/uno/PageContainer";
 import { PageHeader } from "@/components/uno/PageHeader";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
+import { IOSInstallGuide } from "@/components/pwa/IOSInstallGuide";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -22,6 +38,7 @@ const Install = () => {
   const [progress, setProgress] = useState(0);
   const [isIOS, setIsIOS] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
+  const [showIOSGuide, setShowIOSGuide] = useState(false);
 
   useEffect(() => {
     // Detect platform
@@ -46,111 +63,126 @@ const Install = () => {
       setDeferredPrompt(null);
     };
 
-    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-    window.addEventListener("appinstalled", handleAppInstalled);
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
 
     return () => {
-      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-      window.removeEventListener("appinstalled", handleAppInstalled);
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
 
   const simulateProgress = () => {
     setProgress(0);
-    const steps = [15, 35, 55, 75, 90, 100];
-    let stepIndex = 0;
-    
     const interval = setInterval(() => {
-      if (stepIndex < steps.length) {
-        setProgress(steps[stepIndex]);
-        stepIndex++;
-      } else {
-        clearInterval(interval);
-      }
-    }, 300);
-    
-    return () => clearInterval(interval);
+      setProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          return 100;
+        }
+        return prev + Math.random() * 15;
+      });
+    }, 100);
+    return interval;
   };
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
+    // If we have the native prompt, use it
+    if (deferredPrompt) {
+      setInstallState('installing');
+      const progressInterval = simulateProgress();
 
-    setInstallState('installing');
-    const cleanup = simulateProgress();
+      try {
+        await deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
 
-    try {
-      await deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
+        clearInterval(progressInterval);
 
-      if (outcome === "accepted") {
-        // Wait for progress animation to complete
-        setTimeout(() => {
+        if (outcome === 'accepted') {
+          setProgress(100);
           setInstallState('success');
-        }, 2000);
-      } else {
+          setDeferredPrompt(null);
+        } else {
+          setInstallState('idle');
+          setProgress(0);
+        }
+      } catch (error) {
+        clearInterval(progressInterval);
         setInstallState('idle');
         setProgress(0);
       }
-    } catch (error) {
-      console.error('Install error:', error);
-      setInstallState('idle');
-      setProgress(0);
+    } else if (isIOS) {
+      // Show iOS interactive guide
+      setShowIOSGuide(true);
     }
-    
-    setDeferredPrompt(null);
   };
 
-  const t = {
-    title: language === "ru" ? "Установить приложение" : "Install App",
-    subtitle: language === "ru" 
-      ? "Добавьте UNO на главный экран для быстрого доступа" 
-      : "Add UNO to your home screen for quick access",
-    installed: language === "ru" ? "Приложение установлено!" : "App installed!",
-    installedDesc: language === "ru" 
-      ? "UNO уже добавлено на ваш главный экран" 
-      : "UNO is already on your home screen",
-    installing: language === "ru" ? "Установка..." : "Installing...",
-    installButton: language === "ru" ? "Установить" : "Install",
-    successTitle: language === "ru" ? "Готово!" : "Done!",
-    successDesc: language === "ru" 
-      ? "UNO успешно установлено на ваше устройство" 
-      : "UNO has been installed on your device",
-    openApp: language === "ru" ? "Открыть приложение" : "Open App",
-    appSize: language === "ru" ? "Размер: ~2 МБ" : "Size: ~2 MB",
+  const t = language === 'ru' ? {
+    title: 'Установить myUNO',
+    subtitle: 'Быстрый доступ с главного экрана',
+    installButton: 'Установить приложение',
+    showGuide: 'Показать инструкцию',
+    installing: 'Установка...',
+    successTitle: 'Приложение установлено!',
+    successDesc: 'Иконка myUNO добавлена на главный экран',
+    openApp: 'Открыть приложение',
+    alreadyTitle: 'Уже установлено',
+    alreadyDesc: 'myUNO уже на вашем главном экране',
+    appSize: '~2 МБ • Бесплатно',
     benefits: {
-      title: language === "ru" ? "Преимущества" : "Benefits",
-      items: language === "ru" ? [
-        "Быстрый запуск с главного экрана",
-        "Работает без интернета",
-        "Не занимает много места (~2 МБ)",
-        "Мгновенные уведомления"
-      ] : [
-        "Quick launch from home screen",
-        "Works offline",
-        "Lightweight installation (~2 MB)",
-        "Instant notifications"
+      title: 'Преимущества приложения',
+      items: [
+        { icon: Zap, text: 'Быстрый запуск без браузера' },
+        { icon: Bell, text: 'Push-уведомления о заказах' },
+        { icon: Wifi, text: 'Работает офлайн' },
+        { icon: Shield, text: 'Безопасное хранение данных' },
       ]
     },
-    iosTitle: language === "ru" ? "Инструкция для iPhone" : "Instructions for iPhone",
-    iosSteps: language === "ru" ? [
-      { icon: Share, text: "Нажмите кнопку «Поделиться»" },
-      { icon: Plus, text: "Выберите «На экран Домой»" },
-      { icon: Check, text: "Нажмите «Добавить»" }
-    ] : [
-      { icon: Share, text: "Tap the Share button" },
-      { icon: Plus, text: "Select 'Add to Home Screen'" },
-      { icon: Check, text: "Tap 'Add'" }
+    iosTitle: 'Установка на iPhone/iPad',
+    iosSteps: [
+      { icon: Share, text: 'Нажмите кнопку "Поделиться"' },
+      { icon: Plus, text: 'Выберите "На экран Домой"' },
+      { icon: CheckCircle2, text: 'Нажмите "Добавить"' },
     ],
-    androidTitle: language === "ru" ? "Инструкция для Android" : "Instructions for Android",
-    androidSteps: language === "ru" ? [
-      { icon: MoreVertical, text: "Нажмите меню (⋮) в браузере" },
-      { icon: Download, text: "Выберите «Добавить на главный экран»" },
-      { icon: Check, text: "Подтвердите установку" }
-    ] : [
-      { icon: MoreVertical, text: "Tap browser menu (⋮)" },
-      { icon: Download, text: "Select 'Add to Home Screen'" },
-      { icon: Check, text: "Confirm installation" }
-    ]
+    androidTitle: 'Установка на Android',
+    androidSteps: [
+      { icon: MoreVertical, text: 'Нажмите меню браузера (⋮)' },
+      { icon: Download, text: 'Выберите "Установить приложение"' },
+      { icon: CheckCircle2, text: 'Подтвердите установку' },
+    ],
+  } : {
+    title: 'Install myUNO',
+    subtitle: 'Quick access from your home screen',
+    installButton: 'Install App',
+    showGuide: 'Show Instructions',
+    installing: 'Installing...',
+    successTitle: 'App Installed!',
+    successDesc: 'myUNO icon added to your home screen',
+    openApp: 'Open App',
+    alreadyTitle: 'Already Installed',
+    alreadyDesc: 'myUNO is already on your home screen',
+    appSize: '~2 MB • Free',
+    benefits: {
+      title: 'App Benefits',
+      items: [
+        { icon: Zap, text: 'Fast launch without browser' },
+        { icon: Bell, text: 'Push notifications for orders' },
+        { icon: Wifi, text: 'Works offline' },
+        { icon: Shield, text: 'Secure data storage' },
+      ]
+    },
+    iosTitle: 'Install on iPhone/iPad',
+    iosSteps: [
+      { icon: Share, text: 'Tap the Share button' },
+      { icon: Plus, text: 'Select "Add to Home Screen"' },
+      { icon: CheckCircle2, text: 'Tap "Add"' },
+    ],
+    androidTitle: 'Install on Android',
+    androidSteps: [
+      { icon: MoreVertical, text: 'Tap browser menu (⋮)' },
+      { icon: Download, text: 'Select "Install app"' },
+      { icon: CheckCircle2, text: 'Confirm installation' },
+    ],
   };
 
   const containerVariants = {
@@ -248,35 +280,55 @@ const Install = () => {
           >
             <Check className="w-10 h-10 text-primary" />
           </motion.div>
-          <h2 className="text-2xl font-bold mb-2">{t.installed}</h2>
-          <p className="text-muted-foreground">{t.installedDesc}</p>
+          <h2 className="text-2xl font-bold mb-2">{t.alreadyTitle}</h2>
+          <p className="text-muted-foreground">{t.alreadyDesc}</p>
+          <Button 
+            onClick={() => window.location.href = '/'}
+            className="mt-6 gap-2"
+            size="lg"
+          >
+            <ArrowRight className="w-5 h-5" />
+            {t.openApp}
+          </Button>
         </div>
       </PageContainer>
     );
   }
 
-  return (
-    <PageContainer>
-      <PageHeader title={t.title} showBack />
-      
-      <motion.div 
-        className="space-y-6"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        {/* Hero Section */}
-        <motion.div variants={itemVariants} className="text-center py-6">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/30">
-            <Smartphone className="w-10 h-10 text-primary-foreground" />
-          </div>
-          <h1 className="text-2xl font-bold mb-2">{t.title}</h1>
-          <p className="text-muted-foreground">{t.subtitle}</p>
-          <p className="text-xs text-muted-foreground/70 mt-1">{t.appSize}</p>
-        </motion.div>
+  // Determine which steps to show
+  const showNativeInstall = !!deferredPrompt;
+  const currentSteps = isIOS ? t.iosSteps : t.androidSteps;
+  const stepsTitle = isIOS ? t.iosTitle : t.androidTitle;
 
-        {/* Install Button with Progress */}
-        {deferredPrompt && (
+  return (
+    <>
+      {/* iOS Interactive Guide Modal */}
+      <AnimatePresence>
+        {showIOSGuide && (
+          <IOSInstallGuide onClose={() => setShowIOSGuide(false)} />
+        )}
+      </AnimatePresence>
+
+      <PageContainer>
+        <PageHeader title={t.title} showBack />
+        
+        <motion.div 
+          className="space-y-6"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {/* Hero Section */}
+          <motion.div variants={itemVariants} className="text-center py-6">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/30">
+              <Smartphone className="w-10 h-10 text-primary-foreground" />
+            </div>
+            <h1 className="text-2xl font-bold mb-2">{t.title}</h1>
+            <p className="text-muted-foreground">{t.subtitle}</p>
+            <p className="text-xs text-muted-foreground/70 mt-1">{t.appSize}</p>
+          </motion.div>
+
+          {/* Install Button - ALWAYS visible */}
           <motion.div variants={itemVariants} className="space-y-3">
             <AnimatePresence mode="wait">
               {installState === 'installing' ? (
@@ -293,7 +345,7 @@ const Install = () => {
                   </div>
                   <div className="space-y-2">
                     <Progress value={progress} className="h-2" />
-                    <p className="text-xs text-center text-muted-foreground">{progress}%</p>
+                    <p className="text-xs text-center text-muted-foreground">{Math.round(progress)}%</p>
                   </div>
                 </motion.div>
               ) : (
@@ -308,109 +360,87 @@ const Install = () => {
                     className="w-full h-14 text-lg gap-3 shadow-lg shadow-primary/20"
                     size="lg"
                   >
-                    <Download className="w-6 h-6" />
-                    {t.installButton}
+                    {isIOS ? (
+                      <>
+                        <Share className="w-6 h-6" />
+                        {showNativeInstall ? t.installButton : t.showGuide}
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-6 h-6" />
+                        {showNativeInstall ? t.installButton : t.showGuide}
+                      </>
+                    )}
                   </Button>
                 </motion.div>
               )}
             </AnimatePresence>
           </motion.div>
-        )}
 
-        {/* Benefits */}
-        <motion.div variants={itemVariants}>
-          <Card className="bg-card/50 backdrop-blur border-border/50">
-            <CardContent className="p-4">
-              <h3 className="font-semibold mb-3">{t.benefits.title}</h3>
-              <ul className="space-y-2">
-                {t.benefits.items.map((item, index) => (
-                  <li key={index} className="flex items-center gap-3 text-sm">
-                    <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                      <Check className="w-3 h-3 text-primary" />
+          {/* Benefits */}
+          <motion.div variants={itemVariants}>
+            <Card className="bg-card/50 backdrop-blur border-border/50">
+              <CardContent className="p-4">
+                <h3 className="font-semibold mb-3">{t.benefits.title}</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {t.benefits.items.map((item, index) => (
+                    <div key={index} className="flex items-start gap-2 text-sm">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <item.icon className="w-4 h-4 text-primary" />
+                      </div>
+                      <span className="text-muted-foreground leading-tight pt-1">{item.text}</span>
                     </div>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Manual Installation Steps (shown when no native prompt) */}
+          {!showNativeInstall && (
+            <motion.div variants={itemVariants}>
+              <Card className="bg-card/50 backdrop-blur border-border/50">
+                <CardContent className="p-4">
+                  <h3 className="font-semibold mb-4 flex items-center gap-2">
+                    {isIOS ? (
+                      <div className="w-6 h-6 rounded bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">iOS</span>
+                      </div>
+                    ) : (
+                      <div className="w-6 h-6 rounded bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">A</span>
+                      </div>
+                    )}
+                    {stepsTitle}
+                  </h3>
+                  <div className="space-y-4">
+                    {currentSteps.map((step, index) => (
+                      <motion.div
+                        key={index}
+                        className="flex items-center gap-4"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.15 }}
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <step.icon className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <span className="text-xs text-muted-foreground">
+                            {language === "ru" ? "Шаг" : "Step"} {index + 1}
+                          </span>
+                          <p className="text-sm font-medium">{step.text}</p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
         </motion.div>
-
-        {/* iOS Instructions */}
-        {(isIOS || !isAndroid) && (
-          <motion.div variants={itemVariants}>
-            <Card className="bg-card/50 backdrop-blur border-border/50">
-              <CardContent className="p-4">
-                <h3 className="font-semibold mb-4 flex items-center gap-2">
-                  <div className="w-6 h-6 rounded bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">iOS</span>
-                  </div>
-                  {t.iosTitle}
-                </h3>
-                <div className="space-y-4">
-                  {t.iosSteps.map((step, index) => (
-                    <motion.div
-                      key={index}
-                      className="flex items-center gap-4"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.15 }}
-                    >
-                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <step.icon className="w-5 h-5 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <span className="text-xs text-muted-foreground">
-                          {language === "ru" ? "Шаг" : "Step"} {index + 1}
-                        </span>
-                        <p className="text-sm font-medium">{step.text}</p>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-
-        {/* Android Instructions */}
-        {(isAndroid || !isIOS) && (
-          <motion.div variants={itemVariants}>
-            <Card className="bg-card/50 backdrop-blur border-border/50">
-              <CardContent className="p-4">
-                <h3 className="font-semibold mb-4 flex items-center gap-2">
-                  <div className="w-6 h-6 rounded bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">A</span>
-                  </div>
-                  {t.androidTitle}
-                </h3>
-                <div className="space-y-4">
-                  {t.androidSteps.map((step, index) => (
-                    <motion.div
-                      key={index}
-                      className="flex items-center gap-4"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.15 }}
-                    >
-                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <step.icon className="w-5 h-5 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <span className="text-xs text-muted-foreground">
-                          {language === "ru" ? "Шаг" : "Step"} {index + 1}
-                        </span>
-                        <p className="text-sm font-medium">{step.text}</p>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-      </motion.div>
-    </PageContainer>
+      </PageContainer>
+    </>
   );
 };
 
