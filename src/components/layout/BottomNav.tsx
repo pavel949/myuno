@@ -33,12 +33,14 @@ export const BottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
         <div className="relative flex items-center justify-around h-16 px-2 max-w-lg mx-auto">
           {navItems.map(({ path, icon: Icon, labelKey }) => {
             const isActive = location.pathname === path;
+            const tourId = path === '/profile' ? 'profile' : path === '/bookings' ? 'cart' : undefined;
             
             return (
               <NavLink
                 key={path}
                 to={path}
                 onClick={handleNavClick}
+                data-tour={tourId}
                 className={cn(
                   "relative overflow-hidden flex flex-col items-center justify-center flex-1 h-full gap-0.5 transition-colors active:scale-95",
                   isActive ? "text-primary" : "text-muted-foreground"

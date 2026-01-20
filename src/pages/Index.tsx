@@ -95,6 +95,7 @@ const Index = () => {
           <div 
             onClick={() => setShowSearch(true)}
             className="relative cursor-pointer"
+            data-tour="search"
           >
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
@@ -154,7 +155,7 @@ const Index = () => {
           </FadeInUp>
 
           {/* All Services Grid */}
-          <FadeInUp delay={0.14}>
+          <FadeInUp delay={0.14} data-tour="categories">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-base font-semibold">{t('home.allServices')}</h2>
               <button 
@@ -195,7 +196,9 @@ const Index = () => {
 
           {/* Recommended Carousel - Combined Tours/Water/Featured */}
           <FadeInUp delay={0.16}>
-            <RecommendedCarousel />
+            <div data-tour="recommended">
+              <RecommendedCarousel />
+            </div>
           </FadeInUp>
 
           {/* Personalized offers (shows only if available) */}

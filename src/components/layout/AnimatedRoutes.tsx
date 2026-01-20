@@ -242,6 +242,11 @@ const OwnerGuidebookEdit = lazy(() => import('@/pages/owner/OwnerGuidebookEdit')
 // Staff pages
 const StaffDashboard = lazy(() => import('@/pages/staff/StaffDashboard'));
 
+// Demo pages
+const DemoIndex = lazy(() => import('@/pages/demo/DemoIndex'));
+const DemoHome = lazy(() => import('@/pages/demo/DemoHome'));
+const VendorDemo = lazy(() => import('@/pages/demo/VendorDemo'));
+
 // Suspense wrapper for lazy loaded components
 const LazyPage = ({ children }: { children: React.ReactNode }) => (
   <Suspense fallback={<LoadingState />}>
@@ -511,6 +516,11 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/owner/service-request" element={<LazyPage><OwnerGuard><ServiceRequest /></OwnerGuard></LazyPage>} />
         <Route path="/owner/inspection" element={<LazyPage><OwnerGuard><InspectionRequest /></OwnerGuard></LazyPage>} />
         <Route path="/owner/properties/:id/guidebook" element={<LazyPage><OwnerGuard><OwnerGuidebookEdit /></OwnerGuard></LazyPage>} />
+        
+        {/* Demo Routes - No Auth Required */}
+        <Route path="/demo" element={<LazyPage><DemoIndex /></LazyPage>} />
+        <Route path="/demo/home" element={<LazyPage><DemoHome /></LazyPage>} />
+        <Route path="/demo/vendor" element={<LazyPage><VendorDemo /></LazyPage>} />
         
         {/* Catch-all */}
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />

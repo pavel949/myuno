@@ -149,10 +149,11 @@ export const AnimatedCard: React.FC<AnimatedItemProps> = ({
 };
 
 // Fade in from different directions
-export const FadeInUp: React.FC<AnimatedItemProps & { delay?: number }> = ({ 
+export const FadeInUp: React.FC<AnimatedItemProps & { delay?: number; 'data-tour'?: string }> = ({ 
   children, 
   className = '',
   delay = 0,
+  ...props
 }) => {
   return (
     <motion.div
@@ -164,6 +165,7 @@ export const FadeInUp: React.FC<AnimatedItemProps & { delay?: number }> = ({
         ease: [0.25, 0.46, 0.45, 0.94],
       }}
       className={className}
+      {...props}
     >
       {children}
     </motion.div>
