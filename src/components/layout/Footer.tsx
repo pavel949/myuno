@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { DownloadAppButton } from '@/components/pwa/DownloadAppButton';
 import { 
   Info, 
   HelpCircle, 
@@ -34,6 +35,11 @@ export function Footer() {
   return (
     <footer className="bg-secondary/50 border-t border-border/50 mt-auto">
       <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Download App CTA */}
+        <div className="mb-6">
+          <DownloadAppButton />
+        </div>
+
         {/* Become a Partner CTA */}
         <div className="mb-8 p-4 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">

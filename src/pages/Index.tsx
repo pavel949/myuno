@@ -19,14 +19,12 @@ import { triggerRipple } from '@/hooks/useRipple';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { playSound } from '@/hooks/useSoundEffects';
 import { getFeedbackSettings } from '@/hooks/useFeedbackSettings';
-import { FadeInUp } from '@/components/layout/AnimatedList';
 import { SmartWidget } from '@/components/home/SmartWidget';
 import { PromoBanner } from '@/components/home/PromoBanner';
 import { QuickActionsGrid } from '@/components/home/QuickActionsGrid';
 import { RecommendedCarousel } from '@/components/home/RecommendedCarousel';
 import { ForYouSection } from '@/components/recommendations/ForYouSection';
 import { PersonalizedOffersSection } from '@/components/notifications/PersonalizedOffersSection';
-import { DownloadAppButton } from '@/components/pwa/DownloadAppButton';
 import { supabase } from '@/integrations/supabase/client';
 
 // Lazy load only modals (opened by user action)
@@ -158,70 +156,74 @@ const Index = () => {
       </Suspense>
 
       <PullToRefresh onRefresh={handleRefresh} className="min-h-[calc(100vh-8rem)]">
-        <div className="px-4 py-6 pb-24 space-y-6" key={refreshKey}>
+        <div className="px-4 py-6 pb-24" key={refreshKey}>
           
-          {/* Hero Section - myUNO Logo */}
-          <motion.button
-            onClick={(e) => {
-              triggerRipple(e);
-              const settings = getFeedbackSettings();
-              if (settings.hapticEnabled) triggerHaptic('light');
-              if (settings.soundEnabled) playSound('click');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            transition={{ duration: 0.3 }}
-            className="relative overflow-hidden w-full text-center space-y-3 p-4 rounded-2xl bg-gradient-to-br from-card via-card to-primary/5 border border-border/50 shadow-sm hover:shadow-md transition-shadow cursor-pointer group"
-          >
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium group-hover:bg-primary/20 transition-colors">
-              <Shield className="w-3.5 h-3.5" />
-              {t('home.trustBadge')}
+          {/* ===== GROUP 1: Hero & Search ===== */}
+          <div className="space-y-4 mb-8">
+            {/* Hero Section - myUNO Logo */}
+            <motion.button
+              onClick={(e) => {
+                triggerRipple(e);
+                const settings = getFeedbackSettings();
+                if (settings.hapticEnabled) triggerHaptic('light');
+                if (settings.soundEnabled) playSound('click');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.3 }}
+              className="relative overflow-hidden w-full text-center space-y-3 p-4 rounded-2xl bg-gradient-to-br from-card via-card to-primary/5 border border-border/50 shadow-sm hover:shadow-md transition-shadow cursor-pointer group"
+              aria-label="Scroll to top"
+            >
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium group-hover:bg-primary/20 transition-colors">
+                <Shield className="w-3.5 h-3.5" aria-hidden="true" />
+                {t('home.trustBadge')}
+              </div>
+              <h1 className="text-3xl font-bold">
+                <span className="text-muted-foreground">my</span>
+                <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">UNO</span>
+              </h1>
+              <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto">
+                {t('home.heroSubtitle')}
+              </p>
+            </motion.button>
+
+            {/* Search Bar */}
+            <div 
+              onClick={() => setShowSearch(true)}
+              className="relative cursor-pointer"
+              data-tour="search"
+              role="button"
+              tabIndex={0}
+              aria-label={t('action.search')}
+              onKeyDown={(e) => e.key === 'Enter' && setShowSearch(true)}
+            >
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" aria-hidden="true" />
+              <Input
+                placeholder={t('action.search') + '...'}
+                className="pl-10 cursor-pointer"
+                readOnly
+                tabIndex={-1}
+              />
             </div>
-            <h1 className="text-3xl font-bold">
-              <span className="text-muted-foreground">my</span>
-              <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">UNO</span>
-            </h1>
-            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto">
-              {t('home.heroSubtitle')}
-            </p>
-          </motion.button>
-
-
-          {/* Search Bar */}
-          <div 
-            onClick={() => setShowSearch(true)}
-            className="relative cursor-pointer"
-            data-tour="search"
-          >
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <Input
-              placeholder={t('action.search') + '...'}
-              className="pl-10 cursor-pointer"
-              readOnly
-            />
           </div>
 
-          {/* Smart Widget - Weather, Event, Recommendation */}
-          <FadeInUp delay={0.05}>
+          {/* ===== GROUP 2: Smart Widget & Quick Actions ===== */}
+          <div className="space-y-4 mb-8">
             <SmartWidget />
-          </FadeInUp>
-
-          {/* Quick Actions - Large prominent buttons */}
-          <FadeInUp delay={0.08}>
             <QuickActionsGrid />
-          </FadeInUp>
+          </div>
 
-          {/* Promo Banner */}
-          <FadeInUp delay={0.1}>
+          {/* Visual Divider */}
+          <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent mb-8" />
+
+          {/* ===== GROUP 3: Promotions & Owner CTA ===== */}
+          <div className="space-y-4 mb-8">
             <PromoBanner />
-          </FadeInUp>
 
-
-          {/* Property Owner CTA - Prominent */}
-          <FadeInUp delay={0.12}>
+            {/* Property Owner CTA */}
             <button 
               onClick={(e) => {
                 triggerRipple(e);
@@ -233,11 +235,12 @@ const Index = () => {
               onMouseEnter={prefetchOwnerData}
               onTouchStart={prefetchOwnerData}
               className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 p-5 shadow-lg shadow-teal-500/20 hover:shadow-teal-500/30 transition-all group text-left active:scale-95"
+              aria-label={t('home.listProperty')}
             >
-              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOCAxOC04LjA1OSAxOC0xOC04LjA1OS0xOC0xOC0xOHptMCAzMmMtNy43MzIgMC0xNC02LjI2OC0xNC0xNHM2LjI2OC0xNCAxNC0xNCAxNCA2LjI2OCAxNCAxNC02LjI2OCAxNC0xNCAxNHoiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iLjA1Ii8+PC9nPjwvc3ZnPg==')] opacity-30 pointer-events-none" />
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOCAxOC04LjA1OSAxOC0xOC04LjA1OS0xOC0xOC0xOHptMCAzMmMtNy43MzIgMC0xNC02LjI2OC0xNC0xNHM2LjI2OC0xNCAxNC0xNCAxNCA2LjI2OCAxNCAxNC02LjI2OCAxNC0xNCAxNHoiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iLjA1Ii8+PC9nPjwvc3ZnPg==')] opacity-30 pointer-events-none" aria-hidden="true" />
               <div className="relative flex items-center gap-4">
                 <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                  <Building2 className="w-7 h-7 text-white" />
+                  <Building2 className="w-7 h-7 text-white" aria-hidden="true" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
@@ -252,13 +255,16 @@ const Index = () => {
                     {t('home.listPropertyDesc')}
                   </p>
                 </div>
-                <ArrowRight className="w-6 h-6 text-white flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-6 h-6 text-white flex-shrink-0 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
               </div>
             </button>
-          </FadeInUp>
+          </div>
 
-          {/* All Services Grid */}
-          <FadeInUp delay={0.14} data-tour="categories">
+          {/* Visual Divider */}
+          <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent mb-8" />
+
+          {/* ===== GROUP 4: All Services ===== */}
+          <div className="mb-8" data-tour="categories">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-base font-semibold">{t('home.allServices')}</h2>
               <button 
@@ -269,10 +275,11 @@ const Index = () => {
                   if (settings.soundEnabled) playSound('click');
                   navigate('/discover');
                 }}
-                className="relative overflow-hidden text-xs text-primary flex items-center gap-1 active:scale-95"
+                className="relative overflow-hidden text-xs text-primary flex items-center gap-1 active:scale-95 min-h-[44px] px-2"
+                aria-label={t('action.viewAll')}
               >
                 {t('action.viewAll')}
-                <ArrowRight className="w-3 h-3" />
+                <ArrowRight className="w-3 h-3" aria-hidden="true" />
               </button>
             </div>
             <div className="grid grid-cols-5 gap-2">
@@ -288,14 +295,15 @@ const Index = () => {
                       if (settings.soundEnabled) playSound('click');
                       navigate(cat.path);
                     }}
-                    className="relative overflow-hidden flex flex-col items-center p-2 rounded-xl hover:bg-card/80 transition-all group active:scale-95"
+                    className="relative overflow-hidden flex flex-col items-center p-2 rounded-xl hover:bg-card/80 transition-all group active:scale-95 min-h-[72px]"
+                    aria-label={t(`category.${cat.id}`)}
                   >
                     <div className={cn(
-                      "w-10 h-10 rounded-xl flex items-center justify-center mb-1.5 bg-gradient-to-br",
+                      "w-11 h-11 rounded-xl flex items-center justify-center mb-1.5 bg-gradient-to-br",
                       cat.color,
                       "group-hover:scale-110 transition-transform"
                     )}>
-                      <Icon className="w-5 h-5 text-white" />
+                      <Icon className="w-5 h-5 text-white" aria-hidden="true" />
                     </div>
                     <span className="text-[10px] font-medium text-center leading-tight text-muted-foreground group-hover:text-foreground transition-colors line-clamp-2">
                       {t(`category.${cat.id}`)}
@@ -304,38 +312,36 @@ const Index = () => {
                 );
               })}
             </div>
-          </FadeInUp>
+          </div>
 
-          {/* Recommended Carousel - Combined Tours/Water/Featured */}
-          <FadeInUp delay={0.16}>
+          {/* Visual Divider */}
+          <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent mb-8" />
+
+          {/* ===== GROUP 5: Recommendations ===== */}
+          <div className="space-y-6">
+            {/* Recommended Carousel */}
             <div data-tour="recommended">
               <RecommendedCarousel />
             </div>
-          </FadeInUp>
 
-          {/* Personalized offers (shows only if available) */}
-          <FadeInUp delay={0.18}>
+            {/* Personalized offers */}
             <PersonalizedOffersSection />
-          </FadeInUp>
 
-          {/* For You Section (personalized recommendations) */}
-          <FadeInUp delay={0.2}>
+            {/* For You Section */}
             <ForYouSection />
-          </FadeInUp>
 
-          {/* Trust Footer */}
-          <FadeInUp delay={0.22}>
+            {/* Trust Footer */}
             <div className="flex items-center justify-center gap-6 py-4 border-t border-border/50">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Shield className="w-4 h-4 text-primary" />
+                <Shield className="w-4 h-4 text-primary" aria-hidden="true" />
                 <span>{t('home.verifiedPartners')}</span>
               </div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Star className="w-4 h-4 text-amber-500" />
+                <Star className="w-4 h-4 text-amber-500" aria-hidden="true" />
                 <span>{t('home.realReviews')}</span>
               </div>
             </div>
-          </FadeInUp>
+          </div>
         </div>
       </PullToRefresh>
     </AppLayout>
