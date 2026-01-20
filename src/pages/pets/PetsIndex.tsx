@@ -5,6 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from '@/components/miniapp';
 import { FilterValues, petsFilterConfig } from '@/components/filters';
 import { usePetServices } from '@/hooks/usePetServices';
+import { matchesFilter, matchesPriceLevel } from '@/lib/filterUtils';
 
 const categories: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '🐾' },
@@ -39,10 +40,36 @@ export default function PetsIndex() {
       const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = selectedCategory === 'all' || service.service_type === selectedCategory;
       
-      const serviceTypes = filterValues.serviceType as string[] | undefined;
-      if (serviceTypes?.length && !serviceTypes.includes(service.service_type || '')) return false;
+      if (!matchesSearch || !matchesCategory) return false;
       
-      return matchesSearch && matchesCategory;
+      // Service type filter from modal - using normalized comparison
+      const serviceTypes = filterValues.serviceType as string[] | undefined;
+      if (serviceTypes?.length && !matchesFilter([service.service_type || ''], serviceTypes)) return false;
+      
+      // Pet type filter
+      const petTypes = filterValues.petType as string[] | undefined;
+      if (petTypes?.length && !matchesFilter(service.pet_types || [], petTypes)) return false;
+      
+      // Price level filter
+      const priceLevel = filterValues.priceLevel as string | undefined;
+      if (priceLevel && !matchesPriceLevel(service.price_from, priceLevel)) return false;
+      
+      // Features filter
+      const featuresFilter = filterValues.features as string[] | undefined;
+      if (featuresFilter?.length && !matchesFilter(service.features || [], featuresFilter)) return false;
+      
+      // Verified filter
+      const verifiedFeatures = filterValues.features as string[] | undefined;
+      if (verifiedFeatures?.includes('verified') && !service.is_verified) return false;
+      
+      // Rating filter
+      const ratingFilter = filterValues.rating as string | undefined;
+      if (ratingFilter) {
+        const minRating = parseFloat(ratingFilter);
+        if ((service.rating || 0) < minRating) return false;
+      }
+      
+      return true;
     });
   }, [petServices, searchQuery, selectedCategory, filterValues, language]);
 

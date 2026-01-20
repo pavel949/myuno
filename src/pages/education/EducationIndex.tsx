@@ -8,6 +8,7 @@ import { FilterValues, educationFilterConfig } from "@/components/filters";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEducationProviders } from "@/hooks/useEducation";
 import { Skeleton } from "@/components/ui/skeleton";
+import { matchesFilter, matchesPriceLevel } from '@/lib/filterUtils';
 
 const categories: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '📚' },
@@ -42,14 +43,48 @@ export default function EducationIndex() {
       const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
       
-      // Age group filter
+      if (!matchesSearch) return false;
+      
+      // Age group filter - using normalized comparison
       const ages = filterValues.ageGroup as string[] | undefined;
-      if (ages?.length && !ages.some(a => provider.age_groups?.includes(a))) return false;
+      if (ages?.length && !matchesFilter(provider.age_groups || [], ages)) return false;
       
       // Tab filter
       if (activeTab !== 'all' && provider.provider_type !== activeTab) return false;
       
-      return matchesSearch;
+      // Subject filter
+      const subjects = filterValues.subjects as string[] | undefined;
+      if (subjects?.length && !matchesFilter(provider.subjects || [], subjects)) return false;
+      
+      // Languages filter
+      const langs = filterValues.languages as string[] | undefined;
+      if (langs?.length && !matchesFilter(provider.languages || [], langs)) return false;
+      
+      // Price level filter
+      const priceLevel = filterValues.priceLevel as string | undefined;
+      const price = provider.price_per_hour || provider.price_per_course || 0;
+      if (priceLevel && !matchesPriceLevel(price, priceLevel)) return false;
+      
+      // Lesson type filter
+      const lessonType = filterValues.lessonType as string[] | undefined;
+      if (lessonType?.length) {
+        if (lessonType.includes('online') && !provider.is_online) return false;
+      }
+      
+      // Features filter
+      const features = filterValues.features as string[] | undefined;
+      if (features?.length) {
+        if (features.includes('verified') && !provider.is_verified) return false;
+      }
+      
+      // Rating filter
+      const ratingFilter = filterValues.rating as string | undefined;
+      if (ratingFilter) {
+        const minRating = parseFloat(ratingFilter);
+        if ((provider.rating || 0) < minRating) return false;
+      }
+      
+      return true;
     });
   }, [searchQuery, filterValues, language, providers, activeTab]);
 

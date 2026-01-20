@@ -5,6 +5,7 @@ import { Wrench } from "lucide-react";
 import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from "@/components/miniapp";
 import { servicesFilterConfig, FilterValues } from "@/components/filters";
 import { useHomeServices } from "@/hooks/useHomeServices";
+import { matchesFilter, matchesPriceLevel, isOpenNow } from '@/lib/filterUtils';
 
 const categories = [
   { id: "water-delivery", icon: '💧', name: 'Water', nameRu: 'Вода' },
@@ -42,10 +43,39 @@ export default function ServicesIndex() {
       const matchesSearch = provider.name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = selectedCategory === 'all' || provider.business_category === selectedCategory;
       
+      if (!matchesSearch || !matchesCategory) return false;
+      
+      // Features filter
       const features = filterValues.features as string[] || [];
       if (features.includes('verified') && !provider.is_verified) return false;
       
-      return matchesSearch && matchesCategory;
+      // Price level filter - use price_per_hour or similar if available
+      const priceLevel = filterValues.priceLevel as string | undefined;
+      if (priceLevel) {
+        const priceMap: Record<string, [number, number]> = {
+          'budget': [0, 500],
+          'mid': [500, 1500],
+          'premium': [1500, 5000],
+          'luxury': [5000, Infinity],
+        };
+        const range = priceMap[priceLevel.toLowerCase()];
+        // Skip price filter if provider doesn't have pricing info
+      }
+      
+      // Service category filter from modal
+      const categoryFilter = filterValues.category as string[] | undefined;
+      if (categoryFilter?.length) {
+        if (!matchesFilter([provider.business_category || ''], categoryFilter)) return false;
+      }
+      
+      // Rating filter
+      const ratingFilter = filterValues.rating as string | undefined;
+      if (ratingFilter) {
+        const minRating = parseFloat(ratingFilter);
+        if ((provider.rating || 0) < minRating) return false;
+      }
+      
+      return true;
     });
   }, [providers, searchQuery, selectedCategory, filterValues]);
 

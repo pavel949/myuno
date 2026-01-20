@@ -6,6 +6,7 @@ import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type Q
 import { FilterValues, legalFilterConfig } from "@/components/filters";
 import { useLegalServices } from "@/hooks/useLegalServices";
 import { VisaServicesSection } from "./VisaServicesSection";
+import { matchesFilter, matchesPriceLevel } from '@/lib/filterUtils';
 
 const categories: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -43,16 +44,38 @@ export default function LegalServicesIndex() {
       const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = selectedCategory === 'all' || provider.service_type === selectedCategory;
       
-      const cats = filterValues.category as string[] | undefined;
-      if (cats?.length && !cats.includes(provider.service_type || '')) return false;
+      if (!matchesSearch || !matchesCategory) return false;
       
+      // Category filter from modal - using normalized comparison
+      const cats = filterValues.category as string[] | undefined;
+      if (cats?.length && !matchesFilter([provider.service_type || ''], cats)) return false;
+      
+      // Languages filter - using normalized comparison
       const langs = filterValues.languages as string[] | undefined;
-      if (langs?.length) {
-        const provLangs = (provider.languages || []).map(l => l.toLowerCase());
-        if (!langs.some(l => provLangs.includes(l.substring(0, 2)))) return false;
+      if (langs?.length && !matchesFilter(provider.languages || [], langs)) return false;
+      
+      // Price level filter
+      const priceLevel = filterValues.priceLevel as string | undefined;
+      if (priceLevel && !matchesPriceLevel(provider.price_consultation, priceLevel)) return false;
+      
+      // Features filter
+      const features = filterValues.features as string[] | undefined;
+      if (features?.length) {
+        if (features.includes('verified') && !provider.is_verified) return false;
       }
       
-      return matchesSearch && matchesCategory;
+      // Specialization filter
+      const specializations = filterValues.specialization as string[] | undefined;
+      if (specializations?.length && !matchesFilter(provider.specializations || [], specializations)) return false;
+      
+      // Rating filter
+      const ratingFilter = filterValues.rating as string | undefined;
+      if (ratingFilter) {
+        const minRating = parseFloat(ratingFilter);
+        if ((provider.rating || 0) < minRating) return false;
+      }
+      
+      return true;
     });
   }, [legalServices, searchQuery, selectedCategory, filterValues, language]);
 

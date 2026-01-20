@@ -6,6 +6,7 @@ import { MiniAppLayout, ItemCard, type MiniAppCategory } from '@/components/mini
 import { FilterValues, babysitterFilterConfig } from '@/components/filters';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { matchesFilter, matchesPriceLevel } from '@/lib/filterUtils';
 
 const experienceFilters: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -123,18 +124,40 @@ export default function BabysitterIndex() {
       const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesAge = selectedAgeGroup === 'all' || bs.ageGroups.includes(selectedAgeGroup);
       
-      // Age group filter
-      const ageGroups = filterValues.ageGroup as string[] | undefined;
-      if (ageGroups?.length && !ageGroups.some(ag => bs.ageGroups.includes(ag))) return false;
+      if (!matchesSearch || !matchesAge) return false;
       
-      // Languages filter
+      // Age group filter - using normalized comparison
+      const ageGroups = filterValues.ageGroup as string[] | undefined;
+      if (ageGroups?.length && !matchesFilter(bs.ageGroups, ageGroups)) return false;
+      
+      // Languages filter - using normalized comparison
       const langs = filterValues.languages as string[] | undefined;
-      if (langs?.length) {
-        const bsLangsLower = bs.languages.map(l => l.toLowerCase());
-        if (!langs.some(l => bsLangsLower.includes(l))) return false;
+      if (langs?.length && !matchesFilter(bs.languages, langs)) return false;
+      
+      // Certifications filter
+      const certsFilter = filterValues.certifications as string[] | undefined;
+      if (certsFilter?.length && !matchesFilter(bs.certifications, certsFilter)) return false;
+      
+      // Price level filter
+      const priceLevel = filterValues.priceLevel as string | undefined;
+      if (priceLevel && !matchesPriceLevel(bs.pricePerHour, priceLevel)) return false;
+      
+      // Features filter
+      const features = filterValues.features as string[] | undefined;
+      if (features?.length) {
+        if (features.includes('verified') && !bs.isVerified) return false;
+        if (features.includes('available') && !bs.available) return false;
+        if (features.includes('featured') && !bs.isFeatured) return false;
       }
       
-      return matchesSearch && matchesAge;
+      // Rating filter
+      const ratingFilter = filterValues.rating as string | undefined;
+      if (ratingFilter) {
+        const minRating = parseFloat(ratingFilter);
+        if ((bs.rating || 0) < minRating) return false;
+      }
+      
+      return true;
     });
   }, [searchQuery, selectedAgeGroup, filterValues, language]);
 

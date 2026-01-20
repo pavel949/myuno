@@ -5,6 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { MiniAppLayout, MiniAppQuickGrid, ItemCard, type MiniAppCategory, type QuickGridItem } from '@/components/miniapp';
 import { transportFilterConfig, FilterValues } from '@/components/filters';
 import { useVehicles } from '@/hooks/useVehicles';
+import { matchesFilter, matchesPriceLevel } from '@/lib/filterUtils';
 
 const VEHICLE_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -30,6 +31,7 @@ export default function TransportIndex() {
         if (!name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       }
       
+      // Passengers filter
       if (filterValues.passengers) {
         const cap = v.capacity || 0;
         const passMap: Record<string, number[]> = {
@@ -41,6 +43,38 @@ export default function TransportIndex() {
         const allowedSeats = passMap[filterValues.passengers as string] || [];
         if (!allowedSeats.includes(cap)) return false;
       }
+      
+      // Price level filter
+      const priceLevel = filterValues.priceLevel as string | undefined;
+      if (priceLevel && !matchesPriceLevel(v.price_per_day, priceLevel)) return false;
+      
+      // Vehicle type filter from modal
+      const vehicleTypeFilter = filterValues.vehicleType as string[] | undefined;
+      if (vehicleTypeFilter?.length) {
+        if (!matchesFilter([v.vehicle_type || ''], vehicleTypeFilter)) return false;
+      }
+      
+      // Features filter
+      const featuresFilter = filterValues.features as string[] | undefined;
+      if (featuresFilter?.length) {
+        if (!matchesFilter(v.features || [], featuresFilter)) return false;
+      }
+      
+      // Transmission filter
+      const transmissionFilter = filterValues.transmission as string | undefined;
+      if (transmissionFilter) {
+        if (v.transmission?.toLowerCase() !== transmissionFilter.toLowerCase()) return false;
+      }
+      
+      // Rating filter
+      const ratingFilter = filterValues.rating as string | undefined;
+      if (ratingFilter) {
+        const minRating = parseFloat(ratingFilter);
+        if ((v.rating || 0) < minRating) return false;
+      }
+      
+      // Verified filter
+      if (filterValues.verified && !v.is_verified) return false;
       
       return true;
     });
