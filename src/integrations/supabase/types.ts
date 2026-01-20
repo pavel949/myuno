@@ -1258,6 +1258,7 @@ export type Database = {
           title_en: string
           title_ru: string
           updated_at: string
+          venue_id: string | null
         }
         Insert: {
           address?: string | null
@@ -1295,6 +1296,7 @@ export type Database = {
           title_en: string
           title_ru: string
           updated_at?: string
+          venue_id?: string | null
         }
         Update: {
           address?: string | null
@@ -1332,6 +1334,7 @@ export type Database = {
           title_en?: string
           title_ru?: string
           updated_at?: string
+          venue_id?: string | null
         }
         Relationships: [
           {
@@ -1339,6 +1342,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
             referencedColumns: ["id"]
           },
         ]
@@ -6900,6 +6910,87 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      venues: {
+        Row: {
+          address: string | null
+          address_ru: string | null
+          amenities: Json | null
+          capacity: number | null
+          cover_image: string | null
+          created_at: string
+          description_en: string | null
+          description_ru: string | null
+          email: string | null
+          id: string
+          images: string[] | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          lat: number | null
+          lng: number | null
+          name_en: string
+          name_ru: string
+          opening_hours: Json | null
+          phone: string | null
+          rating: number | null
+          review_count: number | null
+          updated_at: string
+          venue_type: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          address_ru?: string | null
+          amenities?: Json | null
+          capacity?: number | null
+          cover_image?: string | null
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          email?: string | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          name_en: string
+          name_ru: string
+          opening_hours?: Json | null
+          phone?: string | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string
+          venue_type?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          address_ru?: string | null
+          amenities?: Json | null
+          capacity?: number | null
+          cover_image?: string | null
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          email?: string | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          name_en?: string
+          name_ru?: string
+          opening_hours?: Json | null
+          phone?: string | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string
+          venue_type?: string
+          website?: string | null
+        }
+        Relationships: []
       }
       view_history: {
         Row: {
