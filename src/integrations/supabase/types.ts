@@ -6323,6 +6323,108 @@ export type Database = {
         }
         Relationships: []
       }
+      support_tickets: {
+        Row: {
+          assigned_to: string | null
+          attachments: Json | null
+          booking_id: string | null
+          category: string
+          closed_at: string | null
+          created_at: string | null
+          description: string
+          id: string
+          order_id: string | null
+          priority: string | null
+          property_id: string | null
+          provider_id: string | null
+          refund_amount: number | null
+          reporter_email: string | null
+          reporter_name: string | null
+          reporter_phone: string | null
+          reporter_type: string
+          resolution: string | null
+          resolution_type: string | null
+          resolved_at: string | null
+          sla_deadline: string | null
+          status: string | null
+          subject: string
+          ticket_number: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          attachments?: Json | null
+          booking_id?: string | null
+          category: string
+          closed_at?: string | null
+          created_at?: string | null
+          description: string
+          id?: string
+          order_id?: string | null
+          priority?: string | null
+          property_id?: string | null
+          provider_id?: string | null
+          refund_amount?: number | null
+          reporter_email?: string | null
+          reporter_name?: string | null
+          reporter_phone?: string | null
+          reporter_type: string
+          resolution?: string | null
+          resolution_type?: string | null
+          resolved_at?: string | null
+          sla_deadline?: string | null
+          status?: string | null
+          subject: string
+          ticket_number: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          attachments?: Json | null
+          booking_id?: string | null
+          category?: string
+          closed_at?: string | null
+          created_at?: string | null
+          description?: string
+          id?: string
+          order_id?: string | null
+          priority?: string | null
+          property_id?: string | null
+          provider_id?: string | null
+          refund_amount?: number | null
+          reporter_email?: string | null
+          reporter_name?: string | null
+          reporter_phone?: string | null
+          reporter_type?: string
+          resolution?: string | null
+          resolution_type?: string | null
+          resolved_at?: string | null
+          sla_deadline?: string | null
+          status?: string | null
+          subject?: string
+          ticket_number?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tags: {
         Row: {
           category: string | null
@@ -6346,6 +6448,50 @@ export type Database = {
           name_ru?: string
         }
         Relationships: []
+      }
+      ticket_messages: {
+        Row: {
+          attachments: Json | null
+          created_at: string | null
+          id: string
+          is_internal: boolean | null
+          message: string
+          sender_id: string | null
+          sender_name: string | null
+          sender_type: string
+          ticket_id: string
+        }
+        Insert: {
+          attachments?: Json | null
+          created_at?: string | null
+          id?: string
+          is_internal?: boolean | null
+          message: string
+          sender_id?: string | null
+          sender_name?: string | null
+          sender_type: string
+          ticket_id: string
+        }
+        Update: {
+          attachments?: Json | null
+          created_at?: string | null
+          id?: string
+          is_internal?: boolean | null
+          message?: string
+          sender_id?: string | null
+          sender_name?: string | null
+          sender_type?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tour_bookings: {
         Row: {
