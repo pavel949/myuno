@@ -28,15 +28,9 @@ export function PageHeader({
   const navigate = useNavigate();
 
   const handleBack = () => {
-    try {
-      if (window.history.length > 1) {
-        navigate(-1);
-      } else {
-        navigate(fallbackPath);
-      }
-    } catch {
-      navigate(fallbackPath);
-    }
+    // Always use fallback for reliability - history.length check is unreliable
+    // in SPAs where history includes all internal navigations
+    navigate(fallbackPath);
   };
 
   const variantClasses = {

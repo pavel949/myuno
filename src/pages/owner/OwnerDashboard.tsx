@@ -106,19 +106,29 @@ export default function OwnerDashboard() {
   if (!user) {
     return (
       <PageContainer>
-        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <PageHeader 
+          title={isRu ? 'Управление недвижимостью' : 'Property Care'}
+          showBack
+          fallbackPath="/"
+        />
+        <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
           <Home className="h-16 w-16 text-muted-foreground mb-4" />
-          <h1 className="text-2xl font-bold mb-2">
-            {isRu ? 'UNO Property Care' : 'UNO Property Care'}
-          </h1>
-          <p className="text-muted-foreground mb-6">
+          <h2 className="text-xl font-bold mb-2">
+            {isRu ? 'Добро пожаловать в UNO Property Care' : 'Welcome to UNO Property Care'}
+          </h2>
+          <p className="text-muted-foreground mb-6 max-w-sm">
             {isRu 
-              ? 'Войдите, чтобы управлять своей недвижимостью' 
-              : 'Sign in to manage your property'}
+              ? 'Войдите или зарегистрируйтесь, чтобы управлять своей недвижимостью на Пхукете' 
+              : 'Sign in or register to manage your property in Phuket'}
           </p>
-          <Button onClick={() => navigate('/auth')}>
-            {isRu ? 'Войти' : 'Sign In'}
-          </Button>
+          <div className="flex flex-col gap-3 w-full max-w-xs">
+            <Button onClick={() => navigate('/auth')} size="lg">
+              {isRu ? 'Войти' : 'Sign In'}
+            </Button>
+            <Button variant="outline" onClick={() => navigate('/auth?mode=signup')} size="lg">
+              {isRu ? 'Зарегистрироваться как собственник' : 'Register as Owner'}
+            </Button>
+          </div>
         </div>
       </PageContainer>
     );
@@ -175,8 +185,8 @@ export default function OwnerDashboard() {
   return (
     <PageContainer>
       <PageHeader 
-        title={isRu ? 'Property Care' : 'Property Care'}
-        subtitle={isRu ? 'Управление вашей недвижимостью' : 'Manage your property'}
+        title={isRu ? 'Управление недвижимостью' : 'Property Care'}
+        subtitle={isRu ? 'Ваши объекты на Пхукете' : 'Manage your property'}
         showBack
         fallbackPath="/"
       />
