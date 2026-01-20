@@ -1,15 +1,19 @@
-import { useState, useCallback } from 'react';
+/**
+ * DEPRECATED: This hook is maintained for backwards compatibility.
+ * All new code should use useOrders() from '@/hooks/useOrders'
+ * 
+ * This wrapper delegates to useOrders internally while maintaining
+ * the legacy API for existing booking pages.
+ */
+import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { openWhatsApp } from '@/hooks/useChat';
+import { useOrders, CreateOrderInput, PaymentMethod } from '@/hooks/useOrders';
 import type { Database } from '@/integrations/supabase/types';
-import { format } from 'date-fns';
 
 type BookingType = Database['public']['Enums']['booking_type'];
-type BookingStatus = Database['public']['Enums']['booking_status'];
 
 export interface BookingItem {
   item_type: string;
@@ -54,7 +58,6 @@ export interface CreateBookingParams {
   addresses?: BookingAddress[];
   payment?: BookingPayment;
   metadata?: Record<string, unknown>;
-  // For WhatsApp message
   serviceName?: string;
   providerName?: string;
   openWhatsAppOnCash?: boolean;
@@ -66,24 +69,59 @@ export interface BookingResult {
   error?: string;
 }
 
+// Map legacy booking types to new order types
+const mapBookingTypeToOrderType = (bookingType: BookingType): CreateOrderInput['order_type'] => {
+  const mapping: Record<string, CreateOrderInput['order_type']> = {
+    'service': 'service',
+    'tour': 'tour',
+    'property': 'property',
+    'yacht': 'yacht',
+    'vehicle': 'vehicle',
+    'event': 'event',
+    'activity': 'activity',
+    'beauty': 'beauty',
+    'cleaning': 'cleaning',
+    'babysitter': 'babysitter',
+    'education': 'education',
+    'medical': 'medical',
+    'legal': 'legal',
+    'pet_service': 'pet_service',
+    'flowers': 'flowers',
+    'food': 'food',
+    'transport': 'vehicle',
+    'rental': 'property',
+    'restaurant': 'food',
+  };
+  return mapping[bookingType] || 'service';
+};
+
+// Map legacy payment methods to new ones
+const mapPaymentMethod = (method: BookingPayment['payment_method']): PaymentMethod => {
+  const mapping: Record<string, PaymentMethod> = {
+    'cash': 'cash',
+    'card': 'stripe',
+    'wallet': 'wallet',
+    'online': 'stripe',
+  };
+  return mapping[method] || 'cash';
+};
+
+/**
+ * @deprecated Use useOrders() instead
+ */
 export function useBooking() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { language } = useLanguage();
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { createOrder, cancelOrder, isCreating } = useOrders();
 
   const t = useCallback((key: string) => {
     const translations: Record<string, Record<string, string>> = {
       'booking.success': { en: 'Booking confirmed!', ru: 'Бронирование подтверждено!' },
       'booking.error': { en: 'Booking failed', ru: 'Ошибка бронирования' },
       'booking.loginRequired': { en: 'Please login to continue', ru: 'Войдите для продолжения' },
-      'booking.fillRequired': { en: 'Please fill all required fields', ru: 'Заполните обязательные поля' },
-      'booking.processing': { en: 'Processing...', ru: 'Обработка...' },
-      'booking.paymentFailed': { en: 'Payment failed', ru: 'Ошибка оплаты' },
-      'booking.insufficientBalance': { en: 'Insufficient wallet balance', ru: 'Недостаточно средств на кошельке' },
       'booking.cancelled': { en: 'Booking cancelled', ru: 'Бронирование отменено' },
-      'booking.refunded': { en: 'Payment refunded to wallet', ru: 'Оплата возвращена на кошелёк' },
     };
     return translations[key]?.[language] || key;
   }, [language]);
@@ -95,247 +133,91 @@ export function useBooking() {
       return { success: false, error: 'not_authenticated' };
     }
 
-    setIsSubmitting(true);
-
     try {
-      const scheduledAt = params.scheduled_at 
-        ? (params.scheduled_at instanceof Date ? params.scheduled_at.toISOString() : params.scheduled_at)
-        : null;
-
-      let bookingId: string;
-
-      // Use atomic function for wallet payments
-      if (params.payment?.payment_method === 'wallet') {
-        const { data, error } = await supabase.rpc('create_booking_with_wallet_payment', {
-          p_user_id: user.id,
-          p_booking_type: params.booking_type,
-          p_scheduled_at: scheduledAt,
-          p_total_amount: params.total_amount,
-          p_currency: params.currency || 'THB',
-          p_provider_id: params.provider_id || null,
-          p_service_id: params.service_id || null,
-          p_notes: params.notes || null,
-        });
-
-        if (error) {
-          if (error.message.includes('Insufficient balance')) {
-            toast({ title: t('booking.insufficientBalance'), variant: 'destructive' });
-            return { success: false, error: 'insufficient_balance' };
-          }
-          throw error;
-        }
-
-        bookingId = data;
-      } else {
-        // Non-wallet payment: create booking normally
-        let status: BookingStatus = 'submitted';
-        if (params.payment?.status === 'paid') {
-          status = 'confirmed';
-        }
-
-        const { data: booking, error: bookingError } = await supabase
-          .from('bookings')
-          .insert({
-            user_id: user.id,
-            booking_type: params.booking_type,
-            status,
-            scheduled_at: scheduledAt,
-            total_amount: params.total_amount,
-            currency: params.currency || 'THB',
-            provider_id: params.provider_id || null,
-            service_id: params.service_id || null,
-            notes: params.notes || null,
-          })
-          .select()
-          .single();
-
-        if (bookingError) throw bookingError;
-        bookingId = booking.id;
-
-        // Insert payment record for non-wallet
-        if (params.payment) {
-          await supabase.from('booking_payments').insert([{
-            booking_id: bookingId,
-            amount: params.payment.amount,
-            payment_method: params.payment.payment_method,
-            status: 'pending',
-            currency: params.currency || 'THB',
-          }]);
-        }
-      }
-
-      // Insert booking items
-      if (params.items && params.items.length > 0) {
-        const itemsToInsert = params.items.map(item => ({
-          booking_id: bookingId,
-          item_type: item.item_type,
-          item_id: item.item_id || null,
+      // Convert legacy booking params to new order input
+      const orderInput: CreateOrderInput = {
+        order_type: mapBookingTypeToOrderType(params.booking_type),
+        provider_org_id: params.provider_id,
+        start_at: params.scheduled_at,
+        total_amount: params.total_amount,
+        currency: params.currency || 'THB',
+        notes: params.notes,
+        metadata: {
+          ...params.metadata,
+          service_id: params.service_id,
+          legacy_booking_type: params.booking_type,
+        },
+        items: (params.items || []).map(item => ({
+          product_id: item.item_id,
           item_name: item.item_name,
-          quantity: item.quantity || 1,
-          unit_price: item.unit_price || null,
-          subtotal: item.subtotal || null,
-        }));
-
-        await supabase.from('booking_items').insert(itemsToInsert);
-      }
-
-      // Insert participants
-      if (params.participants && params.participants.length > 0) {
-        const participantsToInsert = params.participants.map((p, idx) => ({
-          booking_id: bookingId,
+          item_type: item.item_type,
+          qty: item.quantity || 1,
+          unit_price: item.unit_price || 0,
+          amount: item.subtotal || (item.unit_price || 0) * (item.quantity || 1),
+        })),
+        participants: (params.participants || []).map((p, idx) => ({
+          role: p.is_primary || idx === 0 ? 'primary' as const : 'guest' as const,
           name: p.name,
-          phone: p.phone || null,
-          email: p.email || null,
-          is_primary: p.is_primary ?? idx === 0,
-        }));
+          phone: p.phone,
+          email: p.email,
+        })),
+        addresses: (params.addresses || []).map(addr => ({
+          address_type: addr.address_type === 'delivery' ? 'service' as const : addr.address_type as 'pickup' | 'service' | 'dropoff',
+          address_text: addr.address,
+          lat: addr.lat,
+          lng: addr.lng,
+          notes: addr.notes,
+        })),
+        payment: params.payment ? {
+          method: mapPaymentMethod(params.payment.payment_method),
+          amount: params.payment.amount,
+        } : undefined,
+        serviceName: params.serviceName,
+        providerName: params.providerName,
+        openWhatsAppOnCash: params.openWhatsAppOnCash,
+      };
 
-        await supabase.from('booking_participants').insert(participantsToInsert);
+      // If no items provided but we have service details, create a default item
+      if (orderInput.items.length === 0 && params.serviceName) {
+        orderInput.items = [{
+          item_name: params.serviceName,
+          item_type: params.booking_type,
+          qty: 1,
+          unit_price: params.total_amount,
+          amount: params.total_amount,
+        }];
       }
 
-      // Insert addresses
-      if (params.addresses && params.addresses.length > 0) {
-        const addressesToInsert = params.addresses.map(addr => ({
-          booking_id: bookingId,
-          address: addr.address,
-          address_type: addr.address_type,
-          lat: addr.lat || null,
-          lng: addr.lng || null,
-          notes: addr.notes || null,
-        }));
+      const result = await createOrder(orderInput);
 
-        await supabase.from('booking_addresses').insert(addressesToInsert);
+      if (result.success) {
+        return { 
+          success: true, 
+          booking_id: result.order_id,
+        };
       }
 
-      // Create notification
-      await supabase.from('notifications').insert({
-        user_id: user.id,
-        title: language === 'ru' ? 'Бронирование создано' : 'Booking Created',
-        body: language === 'ru' 
-          ? `Ваше бронирование #${bookingId.slice(0, 8)} успешно создано`
-          : `Your booking #${bookingId.slice(0, 8)} has been created`,
-        type: 'booking',
-        data: { booking_id: bookingId, booking_type: params.booking_type },
-      });
-
-      // Record initial status in history
-      await supabase.from('booking_status_history').insert({
-        booking_id: bookingId,
-        from_status: null,
-        to_status: params.payment?.payment_method === 'wallet' ? 'confirmed' : 'submitted',
-        changed_by: user.id,
-        notes: 'Booking created',
-      });
-
-      toast({ 
-        title: t('booking.success'),
-        description: `#${bookingId.slice(0, 8).toUpperCase()}`,
-      });
-
-      // If cash payment, open WhatsApp with booking details
-      if (params.payment?.payment_method === 'cash' && params.openWhatsAppOnCash !== false) {
-        const scheduledAtFormatted = params.scheduled_at 
-          ? format(new Date(params.scheduled_at), 'dd.MM.yyyy HH:mm')
-          : '';
-        
-        const primaryParticipant = params.participants?.find(p => p.is_primary) || params.participants?.[0];
-        const itemsList = params.items?.map(i => `• ${i.item_name}${i.quantity ? ` x${i.quantity}` : ''}`).join('\n') || '';
-        
-        const message = language === 'ru'
-          ? `🔔 *Новое бронирование UNO*
-
-📋 *Номер:* #${bookingId.slice(0, 8).toUpperCase()}
-📁 *Тип:* ${params.booking_type}
-${params.serviceName ? `🏷️ *Услуга:* ${params.serviceName}\n` : ''}${params.providerName ? `🏢 *Провайдер:* ${params.providerName}\n` : ''}
-📅 *Дата:* ${scheduledAtFormatted}
-💰 *Сумма:* ${params.currency || 'THB'} ${params.total_amount.toLocaleString()}
-💵 *Оплата:* Наличными
-
-${primaryParticipant ? `👤 *Контакт:* ${primaryParticipant.name}${primaryParticipant.phone ? ` | ${primaryParticipant.phone}` : ''}` : ''}
-${itemsList ? `\n📦 *Состав:*\n${itemsList}` : ''}
-${params.notes ? `\n📝 *Примечание:* ${params.notes}` : ''}
-
-Прошу подтвердить бронирование.`
-          : `🔔 *New UNO Booking*
-
-📋 *Number:* #${bookingId.slice(0, 8).toUpperCase()}
-📁 *Type:* ${params.booking_type}
-${params.serviceName ? `🏷️ *Service:* ${params.serviceName}\n` : ''}${params.providerName ? `🏢 *Provider:* ${params.providerName}\n` : ''}
-📅 *Date:* ${scheduledAtFormatted}
-💰 *Amount:* ${params.currency || 'THB'} ${params.total_amount.toLocaleString()}
-💵 *Payment:* Cash
-
-${primaryParticipant ? `👤 *Contact:* ${primaryParticipant.name}${primaryParticipant.phone ? ` | ${primaryParticipant.phone}` : ''}` : ''}
-${itemsList ? `\n📦 *Items:*\n${itemsList}` : ''}
-${params.notes ? `\n📝 *Note:* ${params.notes}` : ''}
-
-Please confirm my booking.`;
-
-        openWhatsApp(message);
-      }
-
-      return { success: true, booking_id: bookingId };
+      return { 
+        success: false, 
+        error: result.error,
+      };
 
     } catch (error) {
       console.error('Booking error:', error);
       toast({ title: t('booking.error'), variant: 'destructive' });
       return { success: false, error: error instanceof Error ? error.message : 'unknown' };
-    } finally {
-      setIsSubmitting(false);
     }
-  }, [user, navigate, toast, t, language]);
+  }, [user, navigate, toast, t, createOrder]);
 
-  const cancelBooking = useCallback(async (bookingId: string): Promise<boolean> => {
+  const cancelBookingFn = useCallback(async (bookingId: string): Promise<boolean> => {
     if (!user) return false;
 
     try {
-      // Get current booking status for history
-      const { data: currentBooking } = await supabase
-        .from('bookings')
-        .select('status')
-        .eq('id', bookingId)
-        .single();
-
-      // Try to refund if wallet payment
-      const { data: refunded } = await supabase.rpc('refund_wallet_booking', {
-        p_booking_id: bookingId,
-        p_user_id: user.id,
-      });
-
-      // Update booking status
-      const { error } = await supabase
-        .from('bookings')
-        .update({ status: 'cancelled_by_user' })
-        .eq('id', bookingId)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      // Record status change
-      await supabase.from('booking_status_history').insert({
-        booking_id: bookingId,
-        from_status: currentBooking?.status || 'submitted',
-        to_status: 'cancelled_by_user',
-        changed_by: user.id,
-        notes: refunded ? 'Cancelled by user. Payment refunded.' : 'Cancelled by user',
-      });
-
-      // Create notification
-      await supabase.from('notifications').insert({
-        user_id: user.id,
-        title: language === 'ru' ? 'Бронирование отменено' : 'Booking Cancelled',
-        body: language === 'ru' 
-          ? `Бронирование #${bookingId.slice(0, 8)} отменено${refunded ? '. Средства возвращены на кошелёк.' : ''}`
-          : `Booking #${bookingId.slice(0, 8)} cancelled${refunded ? '. Payment refunded to wallet.' : ''}`,
-        type: 'booking',
-        data: { booking_id: bookingId },
-      });
-
-      toast({ 
-        title: t('booking.cancelled'),
-        description: refunded ? t('booking.refunded') : undefined,
-      });
-
-      return true;
+      const result = await cancelOrder(bookingId);
+      if (result) {
+        toast({ title: t('booking.cancelled') });
+      }
+      return result;
     } catch (error) {
       console.error('Cancel error:', error);
       toast({ 
@@ -344,11 +226,11 @@ Please confirm my booking.`;
       });
       return false;
     }
-  }, [user, toast, language, t]);
+  }, [user, cancelOrder, toast, language, t]);
 
   return {
     createBooking,
-    cancelBooking,
-    isSubmitting,
+    cancelBooking: cancelBookingFn,
+    isSubmitting: isCreating,
   };
 }
