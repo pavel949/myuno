@@ -22,7 +22,6 @@ import { QuickActionsGrid } from '@/components/home/QuickActionsGrid';
 import { RecommendedCarousel } from '@/components/home/RecommendedCarousel';
 import { ForYouSection } from '@/components/recommendations/ForYouSection';
 import { PersonalizedOffersSection } from '@/components/notifications/PersonalizedOffersSection';
-import { InstallBanner } from '@/components/pwa/InstallBanner';
 import { DownloadAppButton } from '@/components/pwa/DownloadAppButton';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -176,6 +175,11 @@ const Index = () => {
             </p>
           </motion.button>
 
+          {/* Download App Button - Primary CTA */}
+          <FadeInUp delay={0.02}>
+            <DownloadAppButton />
+          </FadeInUp>
+
           {/* Search Bar */}
           <div 
             onClick={() => setShowSearch(true)}
@@ -189,11 +193,6 @@ const Index = () => {
               readOnly
             />
           </div>
-
-          {/* Install App Banner (mobile only) */}
-          <FadeInUp delay={0.03}>
-            <InstallBanner />
-          </FadeInUp>
 
           {/* Smart Widget - Weather, Event, Recommendation */}
           <FadeInUp delay={0.05}>
@@ -210,10 +209,6 @@ const Index = () => {
             <PromoBanner />
           </FadeInUp>
 
-          {/* Download App Button */}
-          <FadeInUp delay={0.11}>
-            <DownloadAppButton />
-          </FadeInUp>
 
           {/* Property Owner CTA - Prominent */}
           <FadeInUp delay={0.12}>
