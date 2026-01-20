@@ -16,6 +16,9 @@ import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { triggerRipple } from '@/hooks/useRipple';
+import { triggerHaptic } from '@/hooks/useHapticFeedback';
+import { playSound } from '@/hooks/useSoundEffects';
+import { getFeedbackSettings } from '@/hooks/useFeedbackSettings';
 import { FadeInUp } from '@/components/layout/AnimatedList';
 import { SmartWidget } from '@/components/home/SmartWidget';
 import { PromoBanner } from '@/components/home/PromoBanner';
@@ -159,13 +162,19 @@ const Index = () => {
           
           {/* Hero Section - myUNO Logo */}
           <motion.button
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            onClick={(e) => {
+              triggerRipple(e);
+              const settings = getFeedbackSettings();
+              if (settings.hapticEnabled) triggerHaptic('light');
+              if (settings.soundEnabled) playSound('click');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             transition={{ duration: 0.3 }}
-            className="w-full text-center space-y-3 p-4 rounded-2xl bg-gradient-to-br from-card via-card to-primary/5 border border-border/50 shadow-sm hover:shadow-md transition-shadow cursor-pointer group"
+            className="relative overflow-hidden w-full text-center space-y-3 p-4 rounded-2xl bg-gradient-to-br from-card via-card to-primary/5 border border-border/50 shadow-sm hover:shadow-md transition-shadow cursor-pointer group"
           >
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium group-hover:bg-primary/20 transition-colors">
               <Shield className="w-3.5 h-3.5" />
@@ -218,12 +227,18 @@ const Index = () => {
           {/* Property Owner CTA - Prominent */}
           <FadeInUp delay={0.12}>
             <button 
-              onClick={() => navigate('/owner')}
+              onClick={(e) => {
+                triggerRipple(e);
+                const settings = getFeedbackSettings();
+                if (settings.hapticEnabled) triggerHaptic('light');
+                if (settings.soundEnabled) playSound('click');
+                navigate('/owner');
+              }}
               onMouseEnter={prefetchOwnerData}
               onTouchStart={prefetchOwnerData}
-              className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 p-5 shadow-lg shadow-teal-500/20 hover:shadow-teal-500/30 transition-all group text-left"
+              className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 p-5 shadow-lg shadow-teal-500/20 hover:shadow-teal-500/30 transition-all group text-left active:scale-95"
             >
-              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOCAxOC04LjA1OSAxOC0xOC04LjA1OS0xOC0xOC0xOHptMCAzMmMtNy43MzIgMC0xNC02LjI2OC0xNC0xNHM2LjI2OC0xNCAxNC0xNCAxNCA2LjI2OCAxNCAxNC02LjI2OCAxNC0xNCAxNHoiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iLjA1Ii8+PC9nPjwvc3ZnPg==')] opacity-30" />
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOCAxOC04LjA1OSAxOC0xOC04LjA1OS0xOC0xOC0xOHptMCAzMmMtNy43MzIgMC0xNC02LjI2OC0xNC0xNHM2LjI2OC0xNCAxNC0xNCAxNCA2LjI2OCAxNCAxNC02LjI2OCAxNC0xNCAxNHoiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iLjA1Ii8+PC9nPjwvc3ZnPg==')] opacity-30 pointer-events-none" />
               <div className="relative flex items-center gap-4">
                 <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                   <Building2 className="w-7 h-7 text-white" />
@@ -251,8 +266,14 @@ const Index = () => {
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-base font-semibold">{t('home.allServices')}</h2>
               <button 
-                onClick={() => navigate('/discover')}
-                className="text-xs text-primary flex items-center gap-1"
+                onClick={(e) => {
+                  triggerRipple(e);
+                  const settings = getFeedbackSettings();
+                  if (settings.hapticEnabled) triggerHaptic('light');
+                  if (settings.soundEnabled) playSound('click');
+                  navigate('/discover');
+                }}
+                className="relative overflow-hidden text-xs text-primary flex items-center gap-1 active:scale-95"
               >
                 {t('action.viewAll')}
                 <ArrowRight className="w-3 h-3" />
@@ -266,9 +287,12 @@ const Index = () => {
                     key={cat.id}
                     onClick={(e) => {
                       triggerRipple(e);
+                      const settings = getFeedbackSettings();
+                      if (settings.hapticEnabled) triggerHaptic('light');
+                      if (settings.soundEnabled) playSound('click');
                       navigate(cat.path);
                     }}
-                    className="flex flex-col items-center p-2 rounded-xl hover:bg-card/80 transition-all group active:scale-95"
+                    className="relative overflow-hidden flex flex-col items-center p-2 rounded-xl hover:bg-card/80 transition-all group active:scale-95"
                   >
                     <div className={cn(
                       "w-10 h-10 rounded-xl flex items-center justify-center mb-1.5 bg-gradient-to-br",
