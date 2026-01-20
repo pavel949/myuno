@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Settings, HelpCircle, LogOut, ChevronRight, Shield, Bell, CreditCard, Heart, Clock, Wallet, Palette, Gift, Info, FileText, Handshake, MessageCircle, ShieldCheck, MapPin, Mail } from 'lucide-react';
+import { User, Settings, HelpCircle, LogOut, ChevronRight, Shield, Bell, CreditCard, Heart, Clock, Wallet, Palette, Gift, Info, FileText, Handshake, MessageCircle, ShieldCheck, MapPin, Mail, Globe, Coins } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { PremiumButton } from '@/components/uno/PremiumButton';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
+import { CurrencySwitcher } from '@/components/uno/CurrencySwitcher';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { SectionCard, SectionTitle } from '@/components/uno/SectionCard';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
@@ -126,6 +127,12 @@ export default function Profile() {
         {/* Role Switcher */}
         <RoleSwitcher />
 
+        {/* Appearance & Settings */}
+        <div className="text-xs font-medium text-muted-foreground mb-2 mt-4 flex items-center gap-1">
+          <Settings className="w-3 h-3" />
+          {language === 'ru' ? 'Оформление' : 'Appearance'}
+        </div>
+        
         {/* Theme switcher */}
         <SectionCard>
           <div className="flex items-center gap-2 mb-3">
@@ -139,10 +146,24 @@ export default function Profile() {
 
         {/* Language switcher */}
         <SectionCard className="flex items-center justify-between">
-          <span className="font-medium">
-            {language === 'ru' ? 'Язык' : 'Language'}
-          </span>
+          <div className="flex items-center gap-2">
+            <Globe className="w-5 h-5 text-muted-foreground" />
+            <span className="font-medium">
+              {language === 'ru' ? 'Язык' : 'Language'}
+            </span>
+          </div>
           <LanguageSwitcher variant="toggle" size="sm" />
+        </SectionCard>
+
+        {/* Currency switcher */}
+        <SectionCard className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Coins className="w-5 h-5 text-muted-foreground" />
+            <span className="font-medium">
+              {language === 'ru' ? 'Валюта' : 'Currency'}
+            </span>
+          </div>
+          <CurrencySwitcher size="sm" />
         </SectionCard>
 
         {/* User Preferences */}

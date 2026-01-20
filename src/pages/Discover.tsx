@@ -375,7 +375,7 @@ export default function Discover() {
             <FadeInUp>
               <AnimatedGrid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" staggerDelay={0.05}>
                 {services.map((service) => {
-                  // Get fallback image based on category - using direct Unsplash URLs
+                  // Get fallback image based on category - using category-specific Unsplash URLs
                   const getCategoryImage = (slug: string, idx: number): string => {
                     const imagesByCategory: Record<string, string[]> = {
                       'beauty-spa': [
@@ -391,21 +391,41 @@ export default function Discover() {
                       'restaurants': [
                         'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&q=80',
                         'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=600&q=80',
+                        'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=600&q=80',
                       ],
                       'medical': [
                         'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=600&q=80',
                         'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=600&q=80',
+                        'https://images.unsplash.com/photo-1666214280557-f1b5022eb634?w=600&q=80',
                       ],
                       'transport': [
-                        'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80',
-                        'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=600&q=80',
+                        'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=600&q=80',
+                        'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600&q=80',
+                        'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&q=80',
                       ],
-                      'services': [
-                        'https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=600&q=80',
-                        'https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=600&q=80',
+                      'real-estate': [
+                        'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=80',
+                        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=80',
+                        'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=600&q=80',
+                      ],
+                      'kids-education': [
+                        'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&q=80',
+                        'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600&q=80',
+                        'https://images.unsplash.com/photo-1588072432836-e10032774350?w=600&q=80',
                       ],
                       'events': [
                         'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&q=80',
+                        'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&q=80',
+                        'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=600&q=80',
+                      ],
+                      'shopping': [
+                        'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80',
+                        'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=600&q=80',
+                      ],
+                      'services': [
+                        'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=600&q=80',
+                        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80',
+                        'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&q=80',
                       ],
                     };
                     const categoryImages = imagesByCategory[slug] || imagesByCategory['services']!;

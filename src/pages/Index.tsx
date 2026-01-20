@@ -189,10 +189,6 @@ const Index = () => {
             </p>
           </motion.button>
 
-          {/* Download App Button - Primary CTA */}
-          <FadeInUp delay={0.02}>
-            <DownloadAppButton />
-          </FadeInUp>
 
           {/* Search Bar */}
           <div 

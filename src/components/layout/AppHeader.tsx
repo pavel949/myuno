@@ -3,9 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Bell, ShoppingBag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
-import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
-import { CurrencySwitcher } from '@/components/uno/CurrencySwitcher';
-import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { PremiumButton } from '@/components/uno/PremiumButton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -34,11 +31,11 @@ export function AppHeader({ title, showBack, onMenuClick, className }: AppHeader
         className
       )}
     >
-      <div className="flex items-center justify-between h-12 px-3 max-w-7xl mx-auto">
+      <div className="flex items-center justify-between h-14 px-4 max-w-7xl mx-auto">
         {/* Left side - Logo */}
-        <Link to="/" className="flex items-center gap-1">
+        <Link to="/" className="flex items-center gap-1.5">
           <span className="text-sm font-medium text-muted-foreground">my</span>
-          <div className="w-7 h-7 rounded-lg gradient-gold flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg gradient-gold flex items-center justify-center">
             <span className="text-sm font-bold text-primary-foreground">U</span>
           </div>
           {!title && (
@@ -49,29 +46,21 @@ export function AppHeader({ title, showBack, onMenuClick, className }: AppHeader
         </Link>
         
         {title && (
-          <h1 className="text-base font-semibold truncate flex-1 text-center mx-2 max-w-[40%]">{title}</h1>
+          <h1 className="text-base font-semibold truncate flex-1 text-center mx-4 max-w-[40%]">{title}</h1>
         )}
 
-        {/* Right side - Actions */}
-        <div className="flex items-center gap-0.5">
-          {/* Theme Switcher */}
-          <ThemeSwitcher variant="dropdown" size="sm" />
-          
-          {/* Currency Switcher */}
-          <CurrencySwitcher size="sm" />
-          
-          {/* Language Switcher */}
-          <LanguageSwitcher size="sm" />
-          
+        {/* Right side - Actions (simplified: Cart, Notifications, Profile) */}
+        <div className="flex items-center gap-1">
           {/* Cart Button */}
           <button 
             onClick={() => navigate('/cart')}
-            className="relative flex items-center justify-center w-8 h-8 rounded-lg hover:bg-secondary transition-colors"
+            aria-label={t('nav.cart')}
+            className="relative flex items-center justify-center w-10 h-10 rounded-xl hover:bg-secondary transition-colors"
           >
-            <ShoppingBag className="w-4 h-4" />
+            <ShoppingBag className="w-5 h-5" />
             {cartItemCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] px-0.5 bg-primary rounded-full flex items-center justify-center">
-                <span className="text-[9px] font-bold text-primary-foreground">
+              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-primary rounded-full flex items-center justify-center">
+                <span className="text-[10px] font-bold text-primary-foreground">
                   {cartItemCount > 99 ? '99+' : cartItemCount}
                 </span>
               </span>
@@ -83,12 +72,13 @@ export function AppHeader({ title, showBack, onMenuClick, className }: AppHeader
               {/* Notifications */}
               <button 
                 onClick={() => navigate('/notifications')}
-                className="relative flex items-center justify-center w-8 h-8 rounded-lg hover:bg-secondary transition-colors"
+                aria-label={t('nav.notifications')}
+                className="relative flex items-center justify-center w-10 h-10 rounded-xl hover:bg-secondary transition-colors"
               >
-                <Bell className="w-4 h-4" />
+                <Bell className="w-5 h-5" />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] px-0.5 bg-primary rounded-full flex items-center justify-center">
-                    <span className="text-[9px] font-bold text-primary-foreground">
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-primary rounded-full flex items-center justify-center">
+                    <span className="text-[10px] font-bold text-primary-foreground">
                       {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                   </span>
@@ -96,9 +86,9 @@ export function AppHeader({ title, showBack, onMenuClick, className }: AppHeader
               </button>
               
               {/* Profile Avatar */}
-              <Link to="/profile">
-                <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center overflow-hidden border border-primary/30 ml-0.5">
-                  <span className="text-xs font-medium">
+              <Link to="/profile" aria-label={t('nav.profile')}>
+                <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center overflow-hidden border-2 border-primary/30 ml-0.5 hover:border-primary/60 transition-colors">
+                  <span className="text-sm font-medium">
                     {user.email?.charAt(0).toUpperCase()}
                   </span>
                 </div>
@@ -106,7 +96,7 @@ export function AppHeader({ title, showBack, onMenuClick, className }: AppHeader
             </>
           ) : (
             <Link to="/auth" className="ml-1">
-              <PremiumButton size="sm" className="h-7 text-xs px-2.5">
+              <PremiumButton size="sm" className="h-9 text-sm px-3">
                 {t('auth.login')}
               </PremiumButton>
             </Link>
