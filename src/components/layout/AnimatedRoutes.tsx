@@ -184,6 +184,7 @@ const AdminPets = lazy(() => import('@/pages/admin/AdminPets'));
 const AdminCleaning = lazy(() => import('@/pages/admin/AdminCleaning'));
 const AdminBabysitters = lazy(() => import('@/pages/admin/AdminBabysitters'));
 const AdminFlowers = lazy(() => import('@/pages/admin/AdminFlowers'));
+const AdminLookups = lazy(() => import('@/pages/admin/AdminLookups'));
 
 // Vendor pages
 const VendorDashboard = lazy(() => import('@/pages/vendor/VendorDashboard'));
@@ -434,6 +435,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/admin/cleaning" element={<LazyPage><AdminGuard><AdminCleaning /></AdminGuard></LazyPage>} />
         <Route path="/admin/babysitters" element={<LazyPage><AdminGuard><AdminBabysitters /></AdminGuard></LazyPage>} />
         <Route path="/admin/flowers" element={<LazyPage><AdminGuard><AdminFlowers /></AdminGuard></LazyPage>} />
+        <Route path="/admin/lookups" element={<LazyPage><AdminGuard><AdminLookups /></AdminGuard></LazyPage>} />
         
         {/* Staff Routes - Protected */}
         <Route path="/staff" element={<LazyPage><AdminGuard><StaffDashboard /></AdminGuard></LazyPage>} />

@@ -156,6 +156,7 @@ export default function AdminDashboard() {
   const systemActions = [
     { label: isRussian ? 'Провайдеры' : 'Providers', icon: Building2, path: '/admin/providers', color: 'bg-blue-500' },
     { label: isRussian ? 'Услуги' : 'Services', icon: Package, path: '/admin/services', color: 'bg-purple-500' },
+    { label: isRussian ? 'Справочники' : 'Lookups', icon: Settings, path: '/admin/lookups', color: 'bg-slate-500' },
     { label: isRussian ? 'Аналитика' : 'Analytics', icon: BarChart3, path: '/admin/analytics', color: 'bg-indigo-500' },
     { label: isRussian ? 'Питч-дек' : 'Pitch Deck', icon: Presentation, path: '/admin/pitch-deck', color: 'bg-amber-500' },
   ];
