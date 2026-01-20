@@ -948,6 +948,84 @@ export type Database = {
           },
         ]
       }
+      cohort_metrics: {
+        Row: {
+          cohort_date: string
+          cohort_size: number
+          created_at: string | null
+          d1_retained: number | null
+          d1_retention_rate: number | null
+          d30_retained: number | null
+          d30_retention_rate: number | null
+          d7_retained: number | null
+          d7_retention_rate: number | null
+          d90_retained: number | null
+          d90_retention_rate: number | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          cohort_date: string
+          cohort_size?: number
+          created_at?: string | null
+          d1_retained?: number | null
+          d1_retention_rate?: number | null
+          d30_retained?: number | null
+          d30_retention_rate?: number | null
+          d7_retained?: number | null
+          d7_retention_rate?: number | null
+          d90_retained?: number | null
+          d90_retention_rate?: number | null
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          cohort_date?: string
+          cohort_size?: number
+          created_at?: string | null
+          d1_retained?: number | null
+          d1_retention_rate?: number | null
+          d30_retained?: number | null
+          d30_retention_rate?: number | null
+          d7_retained?: number | null
+          d7_retention_rate?: number | null
+          d90_retained?: number | null
+          d90_retention_rate?: number | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      cross_sell_metrics: {
+        Row: {
+          conversion_rate: number | null
+          created_at: string | null
+          date: string
+          from_vertical: string
+          id: string
+          to_vertical: string
+          users_count: number | null
+        }
+        Insert: {
+          conversion_rate?: number | null
+          created_at?: string | null
+          date: string
+          from_vertical: string
+          id?: string
+          to_vertical: string
+          users_count?: number | null
+        }
+        Update: {
+          conversion_rate?: number | null
+          created_at?: string | null
+          date?: string
+          from_vertical?: string
+          id?: string
+          to_vertical?: string
+          users_count?: number | null
+        }
+        Relationships: []
+      }
       currencies: {
         Row: {
           code: string
@@ -1524,6 +1602,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      geographic_metrics: {
+        Row: {
+          avg_order_value: number | null
+          bookings_count: number | null
+          created_at: string | null
+          date: string
+          gmv: number | null
+          id: string
+          lat: number | null
+          lng: number | null
+          location_name: string
+          providers_count: number | null
+          top_vertical: string | null
+          users_count: number | null
+        }
+        Insert: {
+          avg_order_value?: number | null
+          bookings_count?: number | null
+          created_at?: string | null
+          date: string
+          gmv?: number | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          location_name: string
+          providers_count?: number | null
+          top_vertical?: string | null
+          users_count?: number | null
+        }
+        Update: {
+          avg_order_value?: number | null
+          bookings_count?: number | null
+          created_at?: string | null
+          date?: string
+          gmv?: number | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          location_name?: string
+          providers_count?: number | null
+          top_vertical?: string | null
+          users_count?: number | null
+        }
+        Relationships: []
       }
       guest_check_in_data: {
         Row: {
@@ -3701,65 +3824,134 @@ export type Database = {
         Row: {
           active_providers: number | null
           active_users: number | null
+          avg_order_value: number | null
+          avg_session_duration_seconds: number | null
+          avg_take_rate: number | null
+          cac: number | null
           cancelled_bookings: number | null
           completed_bookings: number | null
           created_at: string
+          cross_sell_rate: number | null
+          d30_retention: number | null
+          d7_retention: number | null
           date: string
+          dau: number | null
           gmv: number | null
+          gross_margin: number | null
           id: string
+          ltv: number | null
+          ltv_cac_ratio: number | null
+          mau: number | null
           new_bookings: number | null
           new_providers: number | null
           new_users: number | null
           page_views: number | null
           platform_revenue: number | null
+          property_adr: number | null
+          property_gmv: number | null
+          property_listings_count: number | null
+          property_occupancy_rate: number | null
+          repeat_purchase_rate: number | null
+          session_count: number | null
           subscription_revenue: number | null
           total_bookings: number | null
           total_providers: number | null
           total_users: number | null
+          tours_avg_rating: number | null
+          tours_count: number | null
+          tours_gmv: number | null
           unique_visitors: number | null
           updated_at: string
+          yachts_count: number | null
+          yachts_gmv: number | null
         }
         Insert: {
           active_providers?: number | null
           active_users?: number | null
+          avg_order_value?: number | null
+          avg_session_duration_seconds?: number | null
+          avg_take_rate?: number | null
+          cac?: number | null
           cancelled_bookings?: number | null
           completed_bookings?: number | null
           created_at?: string
+          cross_sell_rate?: number | null
+          d30_retention?: number | null
+          d7_retention?: number | null
           date: string
+          dau?: number | null
           gmv?: number | null
+          gross_margin?: number | null
           id?: string
+          ltv?: number | null
+          ltv_cac_ratio?: number | null
+          mau?: number | null
           new_bookings?: number | null
           new_providers?: number | null
           new_users?: number | null
           page_views?: number | null
           platform_revenue?: number | null
+          property_adr?: number | null
+          property_gmv?: number | null
+          property_listings_count?: number | null
+          property_occupancy_rate?: number | null
+          repeat_purchase_rate?: number | null
+          session_count?: number | null
           subscription_revenue?: number | null
           total_bookings?: number | null
           total_providers?: number | null
           total_users?: number | null
+          tours_avg_rating?: number | null
+          tours_count?: number | null
+          tours_gmv?: number | null
           unique_visitors?: number | null
           updated_at?: string
+          yachts_count?: number | null
+          yachts_gmv?: number | null
         }
         Update: {
           active_providers?: number | null
           active_users?: number | null
+          avg_order_value?: number | null
+          avg_session_duration_seconds?: number | null
+          avg_take_rate?: number | null
+          cac?: number | null
           cancelled_bookings?: number | null
           completed_bookings?: number | null
           created_at?: string
+          cross_sell_rate?: number | null
+          d30_retention?: number | null
+          d7_retention?: number | null
           date?: string
+          dau?: number | null
           gmv?: number | null
+          gross_margin?: number | null
           id?: string
+          ltv?: number | null
+          ltv_cac_ratio?: number | null
+          mau?: number | null
           new_bookings?: number | null
           new_providers?: number | null
           new_users?: number | null
           page_views?: number | null
           platform_revenue?: number | null
+          property_adr?: number | null
+          property_gmv?: number | null
+          property_listings_count?: number | null
+          property_occupancy_rate?: number | null
+          repeat_purchase_rate?: number | null
+          session_count?: number | null
           subscription_revenue?: number | null
           total_bookings?: number | null
           total_providers?: number | null
           total_users?: number | null
+          tours_avg_rating?: number | null
+          tours_count?: number | null
+          tours_gmv?: number | null
           unique_visitors?: number | null
           updated_at?: string
+          yachts_count?: number | null
+          yachts_gmv?: number | null
         }
         Relationships: []
       }
@@ -7106,6 +7298,57 @@ export type Database = {
           updated_at?: string
           venue_type?: string
           website?: string | null
+        }
+        Relationships: []
+      }
+      vertical_metrics: {
+        Row: {
+          active_listings: number | null
+          avg_order_value: number | null
+          avg_rating: number | null
+          bookings_count: number | null
+          created_at: string | null
+          date: string
+          gmv: number | null
+          id: string
+          listings_count: number | null
+          providers_count: number | null
+          revenue: number | null
+          take_rate: number | null
+          updated_at: string | null
+          vertical: string
+        }
+        Insert: {
+          active_listings?: number | null
+          avg_order_value?: number | null
+          avg_rating?: number | null
+          bookings_count?: number | null
+          created_at?: string | null
+          date: string
+          gmv?: number | null
+          id?: string
+          listings_count?: number | null
+          providers_count?: number | null
+          revenue?: number | null
+          take_rate?: number | null
+          updated_at?: string | null
+          vertical: string
+        }
+        Update: {
+          active_listings?: number | null
+          avg_order_value?: number | null
+          avg_rating?: number | null
+          bookings_count?: number | null
+          created_at?: string | null
+          date?: string
+          gmv?: number | null
+          id?: string
+          listings_count?: number | null
+          providers_count?: number | null
+          revenue?: number | null
+          take_rate?: number | null
+          updated_at?: string | null
+          vertical?: string
         }
         Relationships: []
       }
