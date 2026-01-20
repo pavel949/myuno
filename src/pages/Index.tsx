@@ -67,6 +67,9 @@ const Index = () => {
 
   // Prefetch owner dashboard data on hover for faster navigation
   const prefetchOwnerData = useCallback(() => {
+    // Prefetch the module first for faster code loading
+    import('@/pages/owner/OwnerDashboard');
+    
     if (!user?.id) return;
     
     // Prefetch user context data
@@ -94,7 +97,40 @@ const Index = () => {
           .order('created_at', { ascending: false });
         return data || [];
       },
-      staleTime: 30000,
+      staleTime: 60000,
+    });
+    
+    // Prefetch property care stats
+    queryClient.prefetchQuery({
+      queryKey: ['property-care-stats', user.id],
+      queryFn: async () => {
+        const [properties, inspections, requests, financials] = await Promise.all([
+          supabase.from('owner_properties').select('id, status').eq('owner_id', user.id),
+          supabase.from('property_inspections').select('id, status').eq('owner_id', user.id),
+          supabase.from('property_service_requests').select('id, status').eq('owner_id', user.id),
+          supabase.from('property_financials').select('amount, transaction_type').eq('owner_id', user.id),
+        ]);
+
+        const income = (financials.data || [])
+          .filter((f: any) => f.transaction_type === 'income')
+          .reduce((sum: number, f: any) => sum + Number(f.amount), 0);
+        
+        const expenses = (financials.data || [])
+          .filter((f: any) => f.transaction_type === 'expense')
+          .reduce((sum: number, f: any) => sum + Number(f.amount), 0);
+
+        return {
+          totalProperties: properties.data?.length || 0,
+          activeProperties: properties.data?.filter((p: any) => p.status === 'active').length || 0,
+          pendingInspections: inspections.data?.filter((i: any) => i.status === 'scheduled').length || 0,
+          completedInspections: inspections.data?.filter((i: any) => i.status === 'completed').length || 0,
+          pendingRequests: requests.data?.filter((r: any) => ['pending', 'confirmed', 'in_progress'].includes(r.status)).length || 0,
+          totalIncome: income,
+          totalExpenses: expenses,
+          netIncome: income - expenses,
+        };
+      },
+      staleTime: 60000,
     });
   }, [user?.id, queryClient]);
 
