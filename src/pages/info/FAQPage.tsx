@@ -41,6 +41,35 @@ export default function FAQPage() {
       ],
     },
     {
+      title: isRu ? 'G-Trust и Гарантии' : 'G-Trust & Guarantees',
+      items: [
+        {
+          q: isRu ? 'Что такое G-Trust?' : 'What is G-Trust?',
+          a: isRu 
+            ? 'G-Trust — это система гарантий myUNO, которая защищает каждую транзакцию на платформе. Мы гарантируем 100% возврат средств, если услуга не была оказана или не соответствует описанию.'
+            : 'G-Trust is myUNO\'s guarantee system that protects every transaction on the platform. We guarantee 100% refund if the service was not provided or doesn\'t match the description.',
+        },
+        {
+          q: isRu ? 'Как получить 100% возврат средств?' : 'How do I get a 100% refund?',
+          a: isRu 
+            ? 'Если услуга не была оказана, свяжитесь с поддержкой через SOS-кнопку или раздел «Помощь». Мы рассмотрим вашу заявку в течение 24 часов и вернём полную сумму на ваш счёт или карту.'
+            : 'If the service was not provided, contact support via the SOS button or "Help" section. We will review your request within 24 hours and return the full amount to your account or card.',
+        },
+        {
+          q: isRu ? 'Как проверяются партнёры G-Trust?' : 'How are G-Trust partners verified?',
+          a: isRu 
+            ? 'Все партнёры проходят многоуровневую проверку: документы, лицензии, страховка, история работы. Премиум-партнёры также проходят физическую инспекцию и финансовую проверку.'
+            : 'All partners undergo multi-level verification: documents, licenses, insurance, work history. Premium partners also undergo physical inspection and financial verification.',
+        },
+        {
+          q: isRu ? 'Что означает Trust Score?' : 'What does Trust Score mean?',
+          a: isRu 
+            ? 'Trust Score — это индекс доверия от 0 до 100%, который показывает надёжность партнёра. Он рассчитывается на основе отзывов, повторных заказов, времени отклика и других факторов.'
+            : 'Trust Score is a trust index from 0 to 100% that shows partner reliability. It is calculated based on reviews, repeat orders, response time and other factors.',
+        },
+      ],
+    },
+    {
       title: isRu ? 'Бронирование' : 'Booking',
       items: [
         {
@@ -81,8 +110,8 @@ export default function FAQPage() {
         {
           q: isRu ? 'Безопасна ли оплата картой?' : 'Is card payment secure?',
           a: isRu 
-            ? 'Да, все платежи защищены шифрованием. Мы используем проверенные платёжные системы и не храним данные карт.'
-            : 'Yes, all payments are encrypted. We use trusted payment systems and do not store card data.',
+            ? 'Да, все платежи защищены системой G-Trust. Мы используем шифрование и escrow-счета — деньги переводятся партнёру только после оказания услуги.'
+            : 'Yes, all payments are protected by the G-Trust system. We use encryption and escrow accounts — money is transferred to the partner only after the service is provided.',
         },
       ],
     },
@@ -92,14 +121,14 @@ export default function FAQPage() {
         {
           q: isRu ? 'Как вы проверяете партнёров?' : 'How do you verify partners?',
           a: isRu 
-            ? 'Каждый партнёр проходит проверку документов, лицензий и качества услуг. Мы также отслеживаем отзывы и оперативно реагируем на жалобы.'
-            : 'Each partner undergoes document, license and service quality verification. We also monitor reviews and promptly respond to complaints.',
+            ? 'Каждый партнёр проходит проверку документов, лицензий и качества услуг через систему G-Trust. Мы также отслеживаем отзывы и оперативно реагируем на жалобы.'
+            : 'Each partner undergoes document, license and service quality verification through the G-Trust system. We also monitor reviews and promptly respond to complaints.',
         },
         {
           q: isRu ? 'Что делать, если услуга оказана некачественно?' : 'What if the service was poor quality?',
           a: isRu 
-            ? 'Свяжитесь с нашей поддержкой через SOS-кнопку или раздел «Помощь». Мы разберёмся в ситуации и поможем решить проблему, включая возврат средств.'
-            : 'Contact our support via the SOS button or "Help" section. We will investigate and help resolve the issue, including refunds.',
+            ? 'Свяжитесь с нашей поддержкой через SOS-кнопку или раздел «Помощь». G-Trust гарантирует разбор ситуации в течение 24 часов и возврат средств при подтверждении проблемы.'
+            : 'Contact our support via the SOS button or "Help" section. G-Trust guarantees case review within 24 hours and refund upon problem confirmation.',
         },
       ],
     },

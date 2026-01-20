@@ -165,6 +165,7 @@ const BecomePartnerPage = lazy(() => import('@/pages/info/BecomePartnerPage'));
 const CookiePolicyPage = lazy(() => import('@/pages/info/CookiePolicyPage'));
 const RefundPolicyPage = lazy(() => import('@/pages/info/RefundPolicyPage'));
 const ContactPage = lazy(() => import('@/pages/info/ContactPage'));
+const GTrustPage = lazy(() => import('@/pages/info/GTrustPage'));
 
 // Admin pages
 const PartnerApplicationsAdmin = lazy(() => import('@/pages/admin/PartnerApplicationsAdmin'));

@@ -19,6 +19,7 @@ export function Footer() {
   const infoLinks = [
     { to: '/about', icon: Info, label: language === 'ru' ? 'О нас' : 'About Us' },
     { to: '/how-it-works', icon: Lightbulb, label: language === 'ru' ? 'Как это работает' : 'How It Works' },
+    { to: '/g-trust', icon: Shield, label: language === 'ru' ? 'G-Trust Гарантии' : 'G-Trust Guarantees' },
     { to: '/faq', icon: HelpCircle, label: language === 'ru' ? 'FAQ' : 'FAQ' },
     { to: '/partners', icon: Users, label: language === 'ru' ? 'Партнёры' : 'Partners' },
   ];
