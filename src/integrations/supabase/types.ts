@@ -7364,11 +7364,54 @@ export type Database = {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
         Returns: number
       }
+      check_availability: {
+        Args: {
+          p_end_datetime?: string
+          p_entity_id: string
+          p_exclude_order_id?: string
+          p_participants?: number
+          p_provider_id: string
+          p_start_datetime: string
+          p_vertical: string
+        }
+        Returns: Json
+      }
       check_property_availability: {
         Args: {
           p_check_in: string
           p_check_out: string
           p_marketplace_property_id: string
+        }
+        Returns: boolean
+      }
+      check_service_slot_availability: {
+        Args: {
+          p_datetime: string
+          p_duration_minutes?: number
+          p_exclude_order_id?: string
+          p_provider_id: string
+          p_service_id: string
+        }
+        Returns: boolean
+      }
+      check_tour_availability: {
+        Args: {
+          p_date: string
+          p_exclude_order_id?: string
+          p_participants: number
+          p_tour_id: string
+        }
+        Returns: {
+          available: boolean
+          spots_remaining: number
+        }[]
+      }
+      check_yacht_availability: {
+        Args: {
+          p_end_date: string
+          p_exclude_order_id?: string
+          p_start_date: string
+          p_yacht_id: string
         }
         Returns: boolean
       }
@@ -7385,6 +7428,7 @@ export type Database = {
         }
         Returns: string
       }
+      credit_cashback: { Args: { p_order_id: string }; Returns: Json }
       find_nearby_clinics: {
         Args: { radius_km?: number; user_lat: number; user_lng: number }
         Returns: {
