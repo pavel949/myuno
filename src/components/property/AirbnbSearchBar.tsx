@@ -16,7 +16,7 @@ interface AirbnbSearchBarProps {
 }
 
 export interface SearchParams {
-  location: string;
+  locations: string[];
   checkIn: Date | undefined;
   checkOut: Date | undefined;
   guests: number;
@@ -48,7 +48,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeField, setActiveField] = useState<string | null>(null);
   const [mobileTab, setMobileTab] = useState<MobileTab>('location');
-  const [location, setLocation] = useState('all');
+  const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [checkIn, setCheckIn] = useState<Date | undefined>();
   const [checkOut, setCheckOut] = useState<Date | undefined>();
   const [adults, setAdults] = useState(2);
@@ -69,23 +69,36 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
   }, [isOpen]);
 
   const handleSearch = () => {
-    onSearch({ location, checkIn, checkOut, guests: totalGuests });
+    onSearch({ locations: selectedLocations, checkIn, checkOut, guests: totalGuests });
     setActiveField(null);
     setIsOpen(false);
   };
 
   const clearAll = () => {
-    setLocation('all');
+    setSelectedLocations([]);
     setCheckIn(undefined);
     setCheckOut(undefined);
     setAdults(2);
     setChildren(0);
   };
 
-  const selectedLocation = locations.find(l => l.id === location);
-  const locationLabel = selectedLocation 
-    ? (language === 'ru' ? selectedLocation.labelRu : selectedLocation.labelEn)
-    : (language === 'ru' ? 'Куда?' : 'Where?');
+  const toggleLocation = (locId: string) => {
+    if (locId === 'all') {
+      setSelectedLocations([]);
+    } else {
+      setSelectedLocations(prev => 
+        prev.includes(locId) 
+          ? prev.filter(id => id !== locId)
+          : [...prev, locId]
+      );
+    }
+  };
+
+  const locationLabel = selectedLocations.length === 0
+    ? (language === 'ru' ? 'Весь Пхукет' : 'Anywhere in Phuket')
+    : selectedLocations.length === 1
+      ? locations.find(l => l.id === selectedLocations[0])?.[language === 'ru' ? 'labelRu' : 'labelEn'] || ''
+      : `${selectedLocations.length} ${language === 'ru' ? 'районов' : 'areas'}`;
 
   const formatDate = (date: Date | undefined) => {
     if (!date) return null;
@@ -221,31 +234,51 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                       >
                         <h3 className="text-xl font-bold">{language === 'ru' ? 'Куда вы едете?' : 'Where are you going?'}</h3>
                         <div className="grid grid-cols-2 gap-3">
-                          {locations.map((loc) => (
+                          {locations.filter(l => l.id !== 'all').map((loc) => (
                             <motion.button
                               key={loc.id}
                               className={cn(
                                 "flex items-center gap-3 p-4 rounded-2xl text-left transition-all border-2",
-                                location === loc.id 
+                                selectedLocations.includes(loc.id)
                                   ? "border-primary bg-primary/5" 
                                   : "border-border hover:border-primary/30"
                               )}
-                              onClick={() => {
-                                setLocation(loc.id);
-                                goToNextTab();
-                              }}
+                              onClick={() => toggleLocation(loc.id)}
                               whileTap={{ scale: 0.97 }}
                             >
                               <span className="text-2xl">{loc.icon}</span>
                               <span className={cn(
                                 "text-sm font-medium",
-                                location === loc.id && "text-primary"
+                                selectedLocations.includes(loc.id) && "text-primary"
                               )}>
                                 {language === 'ru' ? loc.labelRu : loc.labelEn}
                               </span>
                             </motion.button>
                           ))}
                         </div>
+                        {selectedLocations.length > 0 && (
+                          <div className="flex flex-wrap gap-2 pt-2">
+                            {selectedLocations.map(locId => {
+                              const loc = locations.find(l => l.id === locId);
+                              return loc ? (
+                                <span key={locId} className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
+                                  {loc.icon} {language === 'ru' ? loc.labelRu : loc.labelEn}
+                                  <button onClick={() => toggleLocation(locId)} className="ml-1 hover:text-primary/70">
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                </span>
+                              ) : null;
+                            })}
+                          </div>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full mt-2"
+                          onClick={goToNextTab}
+                        >
+                          {language === 'ru' ? 'Далее' : 'Next'} →
+                        </Button>
                       </motion.div>
                     )}
 
@@ -412,33 +445,45 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                 )}
               >
                 <p className="text-xs font-semibold">{language === 'ru' ? 'Куда' : 'Where'}</p>
-                <p className={cn("text-sm", location === 'all' ? "text-muted-foreground" : "font-medium")}>
+                <p className={cn("text-sm", selectedLocations.length === 0 ? "text-muted-foreground" : "font-medium")}>
                   {locationLabel}
                 </p>
               </button>
             </PopoverTrigger>
             <PopoverContent className="w-96 p-4" align="start" sideOffset={8}>
-              <h4 className="font-semibold mb-3">{language === 'ru' ? 'Выберите район' : 'Choose location'}</h4>
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-semibold">{language === 'ru' ? 'Выберите районы' : 'Choose areas'}</h4>
+                {selectedLocations.length > 0 && (
+                  <Button variant="ghost" size="sm" onClick={() => setSelectedLocations([])}>
+                    {language === 'ru' ? 'Сбросить' : 'Clear'}
+                  </Button>
+                )}
+              </div>
               <div className="grid grid-cols-2 gap-2">
-                {locations.map((loc) => (
+                {locations.filter(l => l.id !== 'all').map((loc) => (
                   <button
                     key={loc.id}
                     className={cn(
                       "flex items-center gap-3 p-3 rounded-xl text-left text-sm transition-all border",
-                      location === loc.id 
+                      selectedLocations.includes(loc.id)
                         ? "bg-primary/10 border-primary text-primary font-medium" 
                         : "border-transparent hover:bg-muted"
                     )}
-                    onClick={() => {
-                      setLocation(loc.id);
-                      setActiveField('checkin');
-                    }}
+                    onClick={() => toggleLocation(loc.id)}
                   >
                     <span className="text-lg">{loc.icon}</span>
                     {language === 'ru' ? loc.labelRu : loc.labelEn}
                   </button>
                 ))}
               </div>
+              {selectedLocations.length > 0 && (
+                <Button 
+                  className="w-full mt-4" 
+                  onClick={() => setActiveField('checkin')}
+                >
+                  {language === 'ru' ? 'Выбрать даты' : 'Select dates'} →
+                </Button>
+              )}
             </PopoverContent>
           </Popover>
 
