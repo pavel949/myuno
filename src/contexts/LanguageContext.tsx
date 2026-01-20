@@ -74,7 +74,7 @@ const translations: Record<Language, Record<string, string>> = {
     'category.services': 'Услуги',
     'category.legal': 'Бизнес',
     'category.tours': 'Туры',
-    'category.water': 'Вода',
+    'category.water': 'Водный спорт',
     'category.pharmacy': 'Аптеки',
     'category.insurance': 'Страхование',
     'category.market': 'Магазины',
@@ -120,7 +120,7 @@ const translations: Record<Language, Record<string, string>> = {
     'tours.bookingFailed': 'Не удалось забронировать',
     
     // Water Activities
-    'water.title': 'Водные активности',
+    'water.title': 'Водный спорт',
     'water.subtitle': 'Дайвинг, снорклинг, яхты и многое другое',
     'water.featured': 'Популярные активности',
     'water.diving': 'Дайвинг',
@@ -395,7 +395,7 @@ const translations: Record<Language, Record<string, string>> = {
     'category.services': 'Services',
     'category.legal': 'Business',
     'category.tours': 'Tours',
-    'category.water': 'Water',
+    'category.water': 'Water Sports',
     'category.pharmacy': 'Pharmacy',
     'category.insurance': 'Insurance',
     'category.market': 'Shops',
@@ -441,7 +441,7 @@ const translations: Record<Language, Record<string, string>> = {
     'tours.bookingFailed': 'Booking failed',
     
     // Water Activities
-    'water.title': 'Water Activities',
+    'water.title': 'Water Sports',
     'water.subtitle': 'Diving, snorkeling, yachts and more',
     'water.featured': 'Featured Activities',
     'water.diving': 'Diving',

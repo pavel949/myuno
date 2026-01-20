@@ -84,6 +84,8 @@ export const emojiToIconMap: Record<string, LucideIcon> = {
   '🛥️': Ship,
   '⚓': Anchor,
   '🏄': Waves,
+  '🏄‍♂️': Waves,
+  '🏄‍♀️': Waves,
   '🌊': Waves,
   '🐠': Fish,
   '🐬': Fish,

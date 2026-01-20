@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { 
-  Plane, Flower2, Car, Droplets, Home, Sailboat,
+  Plane, Flower2, Car, Waves, Home, Sailboat,
   AlertTriangle, Stethoscope
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -19,7 +19,7 @@ interface QuickAction {
   badgeRu?: string;
 }
 
-// Prioritized: Transfer, Flowers, Car/Bike rental, Water, Short-term rental
+// Prioritized: Transfer, Flowers, Car/Bike rental, Water Sports, Short-term rental
 const quickActions: QuickAction[] = [
   {
     id: 'transfer',
@@ -59,9 +59,9 @@ const quickActions: QuickAction[] = [
   },
   {
     id: 'water',
-    icon: Droplets,
-    labelEn: 'Water',
-    labelRu: 'Вода',
+    icon: Waves,
+    labelEn: 'Water Sports',
+    labelRu: 'Водный спорт',
     path: '/water',
     gradient: 'from-cyan-500 to-blue-500',
   },
