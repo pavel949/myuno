@@ -4,6 +4,8 @@ import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { triggerRipple } from '@/hooks/useRipple';
 
+type CardVariant = 'vertical' | 'horizontal' | 'compact' | 'featured';
+
 interface UnifiedCardProps {
   id: string;
   image?: string;
@@ -22,6 +24,7 @@ interface UnifiedCardProps {
   isFeatured?: boolean;
   onClick?: () => void;
   className?: string;
+  variant?: CardVariant;
 }
 
 export function UnifiedCard({
@@ -41,6 +44,7 @@ export function UnifiedCard({
   isFeatured,
   onClick,
   className,
+  variant = 'vertical',
 }: UnifiedCardProps) {
   const { t } = useLanguage();
 
@@ -49,6 +53,216 @@ export function UnifiedCard({
     onClick?.();
   };
 
+  // Compact variant - minimal info, small image
+  if (variant === 'compact') {
+    return (
+      <div
+        onClick={handleClick}
+        className={cn(
+          "group relative overflow-hidden rounded-xl bg-card border border-border/50",
+          "transition-all duration-200 cursor-pointer",
+          "hover:border-primary/30 hover:shadow-md",
+          "active:scale-[0.98]",
+          "flex flex-col w-36 flex-shrink-0",
+          className
+        )}
+      >
+        <div className="relative aspect-square overflow-hidden">
+          {image && image.trim() !== '' ? (
+            <img
+              src={image}
+              alt={title}
+              loading="lazy"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1540555700478-4be289fbec6c?w=300';
+              }}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
+              <Palmtree className="w-8 h-8 text-muted-foreground/50" />
+            </div>
+          )}
+          {isNew && (
+            <span className="absolute top-2 left-2 px-1.5 py-0.5 text-[10px] font-medium rounded-full bg-primary text-primary-foreground">
+              {t('label.new')}
+            </span>
+          )}
+        </div>
+        <div className="p-2.5 space-y-1">
+          <h3 className="font-medium text-sm text-foreground line-clamp-1">{title}</h3>
+          {price !== undefined && (
+            <span className="text-sm font-semibold text-primary">
+              {currency}{price.toLocaleString()}
+            </span>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Horizontal variant - image left, content right
+  if (variant === 'horizontal') {
+    return (
+      <div
+        onClick={handleClick}
+        className={cn(
+          "group relative overflow-hidden rounded-xl bg-card border border-border/50",
+          "transition-all duration-200 cursor-pointer",
+          "hover:border-primary/30 hover:shadow-md",
+          "active:scale-[0.98]",
+          "flex gap-3 p-3",
+          className
+        )}
+      >
+        {/* Image */}
+        <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
+          {image && image.trim() !== '' ? (
+            <img
+              src={image}
+              alt={title}
+              loading="lazy"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1540555700478-4be289fbec6c?w=300';
+              }}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
+              <Palmtree className="w-6 h-6 text-muted-foreground/50" />
+            </div>
+          )}
+          {isNew && (
+            <span className="absolute top-1 left-1 px-1.5 py-0.5 text-[9px] font-medium rounded-full bg-primary text-primary-foreground">
+              {t('label.new')}
+            </span>
+          )}
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+          <div>
+            <h3 className="font-semibold text-foreground line-clamp-1 flex items-center gap-1">
+              {title}
+              {isVerified && <BadgeCheck className="w-3.5 h-3.5 text-primary flex-shrink-0" />}
+            </h3>
+            {subtitle && (
+              <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{subtitle}</p>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between gap-2 mt-auto">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              {rating !== undefined && (
+                <div className="flex items-center gap-0.5">
+                  <Star className="w-3 h-3 fill-primary text-primary" />
+                  <span className="font-medium text-foreground">{rating.toFixed(1)}</span>
+                </div>
+              )}
+              {location && (
+                <div className="flex items-center gap-0.5">
+                  <MapPin className="w-3 h-3" />
+                  <span className="truncate max-w-[80px]">{location}</span>
+                </div>
+              )}
+            </div>
+            {price !== undefined && (
+              <span className="text-sm font-bold text-primary flex-shrink-0">
+                {currency}{price.toLocaleString()}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Featured variant - larger, gradient overlay
+  if (variant === 'featured') {
+    return (
+      <div
+        onClick={handleClick}
+        className={cn(
+          "group relative overflow-hidden rounded-2xl",
+          "transition-all duration-300 cursor-pointer",
+          "hover:shadow-xl hover:scale-[1.01]",
+          "active:scale-[0.99]",
+          className
+        )}
+      >
+        <div className="relative aspect-[16/9] overflow-hidden">
+          {image && image.trim() !== '' ? (
+            <img
+              src={image}
+              alt={title}
+              loading="lazy"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1540555700478-4be289fbec6c?w=800';
+              }}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+              <Palmtree className="w-16 h-16 text-primary/30" />
+            </div>
+          )}
+          
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+          
+          {/* Content overlay */}
+          <div className="absolute inset-x-0 bottom-0 p-5">
+            <div className="flex items-end justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                {isNew && (
+                  <span className="inline-block mb-2 px-2 py-0.5 text-xs font-medium rounded-full bg-primary text-primary-foreground">
+                    {t('label.new')}
+                  </span>
+                )}
+                <h3 className="font-bold text-xl text-white line-clamp-2 flex items-center gap-2">
+                  {title}
+                  {isVerified && <BadgeCheck className="w-5 h-5 text-primary flex-shrink-0" />}
+                </h3>
+                {subtitle && (
+                  <p className="text-sm text-white/80 line-clamp-1 mt-1">{subtitle}</p>
+                )}
+                <div className="flex items-center gap-3 mt-2 text-sm text-white/70">
+                  {rating !== undefined && (
+                    <div className="flex items-center gap-1">
+                      <Star className="w-4 h-4 fill-primary text-primary" />
+                      <span className="font-medium text-white">{rating.toFixed(1)}</span>
+                      {reviewCount && <span>({reviewCount})</span>}
+                    </div>
+                  )}
+                  {location && (
+                    <div className="flex items-center gap-1">
+                      <MapPin className="w-4 h-4" />
+                      <span>{location}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {price !== undefined && (
+                <div className="text-right flex-shrink-0">
+                  <div className="px-4 py-2 rounded-xl glass">
+                    <span className="text-2xl font-bold text-primary">
+                      {currency}{price.toLocaleString()}
+                    </span>
+                    {priceLabel && (
+                      <span className="block text-xs text-muted-foreground">{priceLabel}</span>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Default vertical variant
   return (
     <div
       onClick={handleClick}
