@@ -1,23 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Star, MapPin, Clock, Calendar, Users,
-  Share2, CheckCircle, AlertCircle
+  Share2, CheckCircle, AlertCircle, Building2, ChevronRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useEvent } from '@/hooks/useEvents';
+import { useVenue, VENUE_TYPES } from '@/hooks/useVenues';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { useViewHistory } from '@/hooks/useViewHistory';
-import { useEffect } from 'react';
 
 const EventDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { event, isLoading } = useEvent(id);
+  const { venue } = useVenue(event?.venue_id || undefined);
   const [selectedImage, setSelectedImage] = useState(0);
   const [tickets, setTickets] = useState(1);
   const { trackView } = useViewHistory();
@@ -170,11 +172,46 @@ const EventDetail = () => {
           </div>
         </div>
 
-        {/* Location */}
-        <div className="flex items-center gap-2 mb-6 text-sm text-muted-foreground">
-          <MapPin className="w-4 h-4" />
-          <span>{language === 'ru' ? event.location_ru : event.location_name}</span>
-        </div>
+        {/* Location / Venue */}
+        {venue ? (
+          <Card 
+            className="mb-6 cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => navigate(`/venues/${venue.id}`)}
+          >
+            <CardContent className="p-3 flex items-center gap-3">
+              <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                <img 
+                  src={venue.cover_image || '/placeholder.svg'} 
+                  alt={language === 'ru' ? venue.name_ru : venue.name_en}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <Building2 className="w-4 h-4 text-primary" />
+                  <p className="font-medium truncate">
+                    {language === 'ru' ? venue.name_ru : venue.name_en}
+                  </p>
+                </div>
+                <p className="text-sm text-muted-foreground truncate">
+                  {language === 'ru' ? (venue.address_ru || venue.address) : venue.address}
+                </p>
+                {venue.capacity && (
+                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                    <Users className="w-3 h-3" />
+                    {language === 'ru' ? 'Вместимость:' : 'Capacity:'} {venue.capacity.toLocaleString()}
+                  </p>
+                )}
+              </div>
+              <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="flex items-center gap-2 mb-6 text-sm text-muted-foreground">
+            <MapPin className="w-4 h-4" />
+            <span>{language === 'ru' ? event.location_ru : event.location_name}</span>
+          </div>
+        )}
 
         {/* Description */}
         <div className="mb-6">

@@ -15,6 +15,7 @@ interface ItineraryItem {
 export interface Event {
   id: string;
   provider_id: string | null;
+  venue_id: string | null;
   title_en: string;
   title_ru: string;
   description_en: string | null;

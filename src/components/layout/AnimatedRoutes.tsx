@@ -66,6 +66,7 @@ const MedicalAppointment = lazy(() => import('@/pages/medical/MedicalAppointment
 const EventsIndex = lazy(() => import('@/pages/events/EventsIndex'));
 const EventDetail = lazy(() => import('@/pages/events/EventDetail'));
 const EventBooking = lazy(() => import('@/pages/events/EventBooking'));
+const VenueDetail = lazy(() => import('@/pages/events/VenueDetail'));
 
 // Education Mini-App
 const EducationIndex = lazy(() => import('@/pages/education/EducationIndex'));
@@ -324,6 +325,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/events" element={<LazyPage><EventsIndex /></LazyPage>} />
         <Route path="/events/:id" element={<LazyPage><EventDetail /></LazyPage>} />
         <Route path="/events/booking/:id" element={<LazyPage><EventBooking /></LazyPage>} />
+        <Route path="/venues/:id" element={<LazyPage><VenueDetail /></LazyPage>} />
         
         {/* Education Mini-App Routes */}
         <Route path="/education" element={<LazyPage><EducationIndex /></LazyPage>} />
