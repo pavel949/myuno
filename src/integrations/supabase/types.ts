@@ -996,6 +996,105 @@ export type Database = {
         }
         Relationships: []
       }
+      consultation_requests: {
+        Row: {
+          admin_notes: string | null
+          assigned_to: string | null
+          bedrooms_max: number | null
+          bedrooms_min: number | null
+          budget_max: number | null
+          budget_min: number | null
+          created_at: string
+          currency: string | null
+          current_occupancy: string | null
+          districts: string[] | null
+          email: string | null
+          follow_up_date: string | null
+          id: string
+          name: string
+          notes: string | null
+          outcome: string | null
+          owner_property_id: string | null
+          phone: string
+          preferred_contact_method: string | null
+          preferred_dates: Json | null
+          preferred_language: string | null
+          priority: string | null
+          property_ids: string[] | null
+          property_types: string[] | null
+          purpose: string | null
+          request_type: string
+          services_requested: string[] | null
+          status: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          assigned_to?: string | null
+          bedrooms_max?: number | null
+          bedrooms_min?: number | null
+          budget_max?: number | null
+          budget_min?: number | null
+          created_at?: string
+          currency?: string | null
+          current_occupancy?: string | null
+          districts?: string[] | null
+          email?: string | null
+          follow_up_date?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          outcome?: string | null
+          owner_property_id?: string | null
+          phone: string
+          preferred_contact_method?: string | null
+          preferred_dates?: Json | null
+          preferred_language?: string | null
+          priority?: string | null
+          property_ids?: string[] | null
+          property_types?: string[] | null
+          purpose?: string | null
+          request_type: string
+          services_requested?: string[] | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          assigned_to?: string | null
+          bedrooms_max?: number | null
+          bedrooms_min?: number | null
+          budget_max?: number | null
+          budget_min?: number | null
+          created_at?: string
+          currency?: string | null
+          current_occupancy?: string | null
+          districts?: string[] | null
+          email?: string | null
+          follow_up_date?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          outcome?: string | null
+          owner_property_id?: string | null
+          phone?: string
+          preferred_contact_method?: string | null
+          preferred_dates?: Json | null
+          preferred_language?: string | null
+          priority?: string | null
+          property_ids?: string[] | null
+          property_types?: string[] | null
+          purpose?: string | null
+          request_type?: string
+          services_requested?: string[] | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       cross_sell_metrics: {
         Row: {
           conversion_rate: number | null

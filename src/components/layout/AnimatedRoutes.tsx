@@ -241,6 +241,10 @@ const ServiceRequest = lazy(() => import('@/pages/owner/ServiceRequest'));
 const InspectionRequest = lazy(() => import('@/pages/owner/InspectionRequest'));
 const OwnerRentalTerms = lazy(() => import('@/pages/owner/OwnerRentalTerms'));
 const EditProperty = lazy(() => import('@/pages/owner/EditProperty'));
+const FullManagement = lazy(() => import('@/pages/owner/FullManagement'));
+
+// Property Consultation
+const PropertyConsultation = lazy(() => import('@/pages/property/PropertyConsultation'));
 
 // Guest pages
 const MyStay = lazy(() => import('@/pages/guest/MyStay'));
@@ -324,6 +328,7 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* Property Mini-App Routes */}
         <Route path="/property" element={<LazyPage><PropertyIndex /></LazyPage>} />
+        <Route path="/property/consultation" element={<LazyPage><PropertyConsultation /></LazyPage>} />
         <Route path="/property/:id" element={<LazyPage><PropertyDetail /></LazyPage>} />
         <Route path="/property/:id/inquiry" element={<LazyPage><PropertyInquiry /></LazyPage>} />
         <Route path="/property/map" element={<LazyPage><PropertyMap /></LazyPage>} />
@@ -536,6 +541,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/owner/service-request" element={<LazyPage><OwnerGuard><ServiceRequest /></OwnerGuard></LazyPage>} />
         <Route path="/owner/inspection" element={<LazyPage><OwnerGuard><InspectionRequest /></OwnerGuard></LazyPage>} />
         <Route path="/owner/properties/:id/guidebook" element={<LazyPage><OwnerGuard><OwnerGuidebookEdit /></OwnerGuard></LazyPage>} />
+        <Route path="/owner/full-management" element={<LazyPage><OwnerGuard><FullManagement /></OwnerGuard></LazyPage>} />
         
         {/* Demo Routes - No Auth Required */}
         <Route path="/demo" element={<LazyPage><DemoIndex /></LazyPage>} />
