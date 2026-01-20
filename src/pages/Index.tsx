@@ -1,4 +1,5 @@
 import React, { useState, useCallback, lazy, Suspense } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { 
@@ -152,19 +153,28 @@ const Index = () => {
       <PullToRefresh onRefresh={handleRefresh} className="min-h-[calc(100vh-8rem)]">
         <div className="px-4 py-6 pb-24 space-y-6" key={refreshKey}>
           
-          {/* Hero Section - What is UNO */}
-          <div className="text-center space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
+          {/* Hero Section - myUNO Logo */}
+          <motion.button
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.3 }}
+            className="w-full text-center space-y-3 p-4 rounded-2xl bg-gradient-to-br from-card via-card to-primary/5 border border-border/50 shadow-sm hover:shadow-md transition-shadow cursor-pointer group"
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium group-hover:bg-primary/20 transition-colors">
               <Shield className="w-3.5 h-3.5" />
               {t('home.trustBadge')}
             </div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground via-foreground to-primary bg-clip-text">
-              UNO
+            <h1 className="text-3xl font-bold">
+              <span className="text-muted-foreground">my</span>
+              <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">UNO</span>
             </h1>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto">
               {t('home.heroSubtitle')}
             </p>
-          </div>
+          </motion.button>
 
           {/* Search Bar */}
           <div 
