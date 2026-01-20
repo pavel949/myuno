@@ -1,3 +1,6 @@
+# myUNO Robots.txt
+# https://myuno.app
+
 User-agent: Googlebot
 Allow: /
 
@@ -12,3 +15,11 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+# Sitemap
+Sitemap: https://myuno.app/sitemap.xml
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /owner/

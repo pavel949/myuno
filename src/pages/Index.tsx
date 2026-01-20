@@ -11,6 +11,7 @@ import {
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { SEOHead, createOrganizationSchema } from '@/components/seo';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
@@ -137,6 +138,10 @@ const Index = () => {
 
   return (
     <AppLayout showFooter>
+      <SEOHead 
+        jsonLd={createOrganizationSchema()}
+      />
+      
       {/* Lazy Modals */}
       <Suspense fallback={null}>
         <OnboardingModal 
