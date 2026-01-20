@@ -7,6 +7,7 @@ import { MiniAppLayout, MiniAppQuickGrid, ItemCard, type MiniAppCategory } from 
 import { UniversalFilter, ActiveFilters, yachtFilterConfig, FilterValues } from '@/components/filters';
 import { ExperienceFilterChips } from '@/components/yachts/YachtExperienceSelect';
 import { useYachts } from '@/hooks/useYachts';
+import { matchesFilter, matchesPriceLevel } from '@/lib/filterUtils';
 
 const YACHT_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -53,13 +54,20 @@ export default function YachtsIndex() {
 
   const filteredYachts = useMemo(() => {
     return yachts.filter(y => {
+      // Category filter
       if (selectedCategory !== 'all' && y.yacht_type !== selectedCategory) return false;
       
+      // Search filter
       if (searchQuery) {
         const name = language === 'ru' ? y.name_ru : y.name_en;
         if (!name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       }
       
+      // Price level filter
+      const price = y.price_full_day || y.price_half_day || 0;
+      if (!matchesPriceLevel(price, filterValues.priceLevel as string)) return false;
+      
+      // Capacity filter
       if (filterValues.capacity) {
         const cap = y.capacity || 0;
         const capMap: Record<string, boolean> = {
@@ -71,9 +79,23 @@ export default function YachtsIndex() {
         if (!capMap[filterValues.capacity as string]) return false;
       }
       
+      // Amenities filter (matching against features_en)
+      const amenitiesFilter = Array.isArray(filterValues.amenities) ? filterValues.amenities : [];
+      if (!matchesFilter(y.features_en, amenitiesFilter)) return false;
+      
+      // Experience filter
+      if (selectedExperiences.length > 0) {
+        // Match experiences against yacht features or description
+        const yachtFeatures = [...(y.features_en || []), y.name_en || ''].join(' ').toLowerCase();
+        const hasExperience = selectedExperiences.some(exp => 
+          yachtFeatures.includes(exp.toLowerCase())
+        );
+        if (!hasExperience) return false;
+      }
+      
       return true;
     });
-  }, [yachts, selectedCategory, searchQuery, filterValues, language]);
+  }, [yachts, selectedCategory, searchQuery, filterValues, language, selectedExperiences]);
 
   return (
     <MiniAppLayout

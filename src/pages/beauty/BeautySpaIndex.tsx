@@ -5,6 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useSalons } from '@/hooks/useSalons';
 import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from '@/components/miniapp';
 import { beautyFilterConfig, FilterValues } from '@/components/filters';
+import { matchesFilter, matchesPriceLevel, isOpenNow } from '@/lib/filterUtils';
 
 const SERVICE_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -33,11 +34,8 @@ export default function BeautySpaIndex() {
       const name = language === 'ru' ? salon.name_ru : salon.name_en;
       const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
       
-      // Price filter
-      const minPrice = typeof filterValues.minPrice === 'number' ? filterValues.minPrice : undefined;
-      const maxPrice = typeof filterValues.maxPrice === 'number' ? filterValues.maxPrice : undefined;
-      const matchesPrice = (!minPrice || (salon.price_from ?? 0) >= minPrice) && 
-                          (!maxPrice || (salon.price_from ?? 0) <= maxPrice);
+      // Price level filter
+      const matchesPrice = matchesPriceLevel(salon.price_from, filterValues.priceLevel as string);
       
       // Rating filter
       const minRating = typeof filterValues.rating === 'number' ? filterValues.rating : undefined;
@@ -47,7 +45,23 @@ export default function BeautySpaIndex() {
       const verifiedOnly = typeof filterValues.verified === 'boolean' ? filterValues.verified : false;
       const matchesVerified = !verifiedOnly || salon.is_verified;
       
-      return matchesSearch && matchesPrice && matchesRating && matchesVerified;
+      // Services filter (multi-select)
+      const servicesFilter = Array.isArray(filterValues.services) ? filterValues.services : [];
+      const matchesServices = matchesFilter(salon.services, servicesFilter);
+      
+      // Features/amenities filter (multi-select)
+      const featuresFilter = Array.isArray(filterValues.features) ? filterValues.features : [];
+      const matchesFeatures = matchesFilter(salon.amenities, featuresFilter);
+      
+      // Availability filter
+      const availabilityFilter = Array.isArray(filterValues.availability) ? filterValues.availability : [];
+      let matchesAvailability = true;
+      if (availabilityFilter.includes('open-now')) {
+        matchesAvailability = isOpenNow(salon.working_hours);
+      }
+      
+      return matchesSearch && matchesPrice && matchesRating && matchesVerified && 
+             matchesServices && matchesFeatures && matchesAvailability;
     });
   }, [salons, searchQuery, language, filterValues]);
 
