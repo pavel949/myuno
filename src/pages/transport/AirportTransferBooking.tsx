@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Plane, MapPin, Clock, Users, Check, ArrowRight, Briefcase, Shield, Star, ChevronLeft, Loader2 } from 'lucide-react';
+import { Plane, MapPin, Clock, Users, Check, ArrowRight, Briefcase, Shield, Star, ChevronLeft, Loader2, User } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,7 +11,8 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useBooking } from '@/hooks/useBooking';
 import { useVehicleTypes, useTransportDestinations } from '@/hooks/useTransportConfig';
-import { cn } from '@/lib/utils';
+import { useProfile } from '@/hooks/useProfile';
+import { cn, transliterate } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 
 const terminals = [
@@ -31,6 +32,10 @@ export default function AirportTransferBooking() {
   const { vehicleTypes, isLoading: isLoadingVehicles } = useVehicleTypes('airport_transfer');
   const { destinations, isLoading: isLoadingDestinations } = useTransportDestinations('airport_transfer');
   const { createBooking, isSubmitting } = useBooking();
+  const { profile } = useProfile();
+
+  // Track if user manually edited the meeting sign name
+  const meetingSignManuallyEdited = useRef(false);
 
   const [step, setStep] = useState(1);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -50,6 +55,7 @@ export default function AirportTransferBooking() {
     phone: '',
     email: '',
     notes: '',
+    meetingSignName: '', // Name for meeting sign (transliterated)
   });
 
   // Set default vehicle type when loaded
@@ -58,6 +64,30 @@ export default function AirportTransferBooking() {
       setFormData(prev => ({ ...prev, vehicleType: vehicleTypes[0].id }));
     }
   }, [vehicleTypes, formData.vehicleType]);
+
+  // Prefill contact info from profile
+  useEffect(() => {
+    if (profile && !formData.name && !formData.phone && !formData.email) {
+      const fullName = profile.full_name || '';
+      setFormData(prev => ({
+        ...prev,
+        name: fullName,
+        phone: profile.phone || '',
+        email: profile.email || '',
+        meetingSignName: transliterate(fullName),
+      }));
+    }
+  }, [profile]);
+
+  // Auto-transliterate name for meeting sign (only if not manually edited)
+  useEffect(() => {
+    if (!meetingSignManuallyEdited.current && formData.name) {
+      setFormData(prev => ({
+        ...prev,
+        meetingSignName: transliterate(formData.name),
+      }));
+    }
+  }, [formData.name]);
 
   const selectedDestination = useMemo(() => 
     destinations.find(d => d.id === formData.destination),
@@ -122,6 +152,8 @@ export default function AirportTransferBooking() {
         vehicle_type: formData.vehicleType,
         passengers: parseInt(formData.passengers),
         luggage: parseInt(formData.luggage),
+        meeting_sign_name: formData.meetingSignName,
+        destination_address: destinationAddress,
       },
     });
 
@@ -135,6 +167,12 @@ export default function AirportTransferBooking() {
   
   const canProceedStep2 = formData.flightNumber && formData.arrivalDate && formData.arrivalTime && 
     formData.passengers && formData.vehicleType;
+
+  // Get destination address for display
+  const destinationAddressDisplay = useMemo(() => {
+    if (formData.destination === 'custom') return formData.customAddress;
+    return language === 'ru' ? selectedDestination?.name_ru : selectedDestination?.name_en;
+  }, [formData.destination, formData.customAddress, selectedDestination, language]);
 
   if (isSuccess) {
     return (
@@ -151,16 +189,45 @@ export default function AirportTransferBooking() {
               ? `Рейс ${formData.flightNumber} • ${formData.arrivalDate}`
               : `Flight ${formData.flightNumber} • ${formData.arrivalDate}`}
           </p>
-          <div className="flex items-center gap-2 mb-6">
+          <div className="flex items-center gap-2 mb-4">
             <Badge variant="secondary" className="bg-success/10 text-success">
               <Shield className="w-3 h-3 mr-1" />
               {language === 'ru' ? 'Подтверждено' : 'Confirmed'}
             </Badge>
           </div>
+          
+          {/* Meeting sign name and destination */}
+          {formData.direction === 'from-airport' && (
+            <div className="w-full max-w-sm p-4 rounded-xl bg-card border border-border/50 mb-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <User className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">
+                    {language === 'ru' ? 'Имя на табличке' : 'Name on sign'}
+                  </p>
+                  <p className="font-semibold text-lg">{formData.meetingSignName || formData.name}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                  <MapPin className="w-5 h-5 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">
+                    {language === 'ru' ? 'Адрес назначения' : 'Destination'}
+                  </p>
+                  <p className="font-medium">{destinationAddressDisplay}</p>
+                </div>
+              </div>
+            </div>
+          )}
+          
           <p className="text-muted-foreground text-center max-w-sm mb-8">
             {language === 'ru' 
-              ? 'Водитель встретит вас с табличкой с вашим именем.'
-              : 'Driver will meet you with a sign with your name.'}
+              ? 'Водитель встретит вас с табличкой у выхода из терминала.'
+              : 'Driver will meet you with a sign at the terminal exit.'}
           </p>
           <div className="flex gap-3">
             <Button variant="outline" onClick={() => navigate('/transport')}>
@@ -570,12 +637,19 @@ export default function AirportTransferBooking() {
                     <span>{formData.arrivalDate} {formData.arrivalTime}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">{language === 'ru' ? 'Маршрут' : 'Route'}</span>
-                    <span>{language === 'ru' ? selectedDestination?.name_ru : selectedDestination?.name_en}</span>
-                  </div>
-                  <div className="flex justify-between">
                     <span className="text-muted-foreground">{language === 'ru' ? 'Автомобиль' : 'Vehicle'}</span>
                     <span>{language === 'ru' ? selectedVehicle?.name_ru : selectedVehicle?.name_en}</span>
+                  </div>
+                  <div className="pt-2 border-t border-border/50">
+                    <div className="flex items-start gap-2">
+                      <MapPin className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">
+                          {language === 'ru' ? 'Адрес назначения' : 'Destination Address'}
+                        </p>
+                        <p className="font-medium">{destinationAddressDisplay}</p>
+                      </div>
+                    </div>
                   </div>
                   <div className="flex justify-between font-bold text-lg pt-2 border-t border-border/50">
                     <span>{language === 'ru' ? 'Итого' : 'Total'}</span>
@@ -605,6 +679,29 @@ export default function AirportTransferBooking() {
                   placeholder="Email"
                 />
               </div>
+
+              {/* Meeting Sign Name - only for 'from-airport' direction */}
+              {formData.direction === 'from-airport' && (
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    {language === 'ru' ? 'Имя для таблички встречающего' : 'Name for meeting sign'}
+                  </Label>
+                  <Input
+                    value={formData.meetingSignName}
+                    onChange={(e) => {
+                      meetingSignManuallyEdited.current = true;
+                      setFormData({ ...formData, meetingSignName: e.target.value });
+                    }}
+                    placeholder={language === 'ru' ? 'Имя латиницей, как в паспорте' : 'Name in Latin letters'}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {language === 'ru' 
+                      ? 'Водитель будет ждать вас с этим именем на табличке'
+                      : 'Driver will hold a sign with this name'}
+                  </p>
+                </div>
+              )}
 
               {/* Notes */}
               <div className="space-y-2">
