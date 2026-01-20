@@ -7,7 +7,8 @@ import {
   Shirt, 
   Zap,
   UtensilsCrossed,
-  Ship
+  Ship,
+  MessageSquare
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
@@ -27,6 +28,17 @@ interface QuickService {
 }
 
 const quickServices: QuickService[] = [
+  {
+    id: 'consultation',
+    icon: MessageSquare,
+    label: 'Consultation',
+    labelRu: 'Консультация',
+    description: 'Property experts',
+    descriptionRu: 'Эксперты по недвижимости',
+    path: '/property/consultation',
+    color: 'from-violet-500 to-purple-600',
+    popular: true,
+  },
   {
     id: 'restaurants',
     icon: UtensilsCrossed,
