@@ -100,6 +100,9 @@ export default function EventsIndex() {
       if (features?.length) {
         if (features.includes('hot') && !event.is_hot) return false;
         if (features.includes('featured') && !event.is_featured) return false;
+        if (features.includes('global') && !event.is_global) return false;
+        if (features.includes('recurring') && !event.is_recurring) return false;
+        if (features.includes('last-minute') && !event.is_last_minute) return false;
       }
       
       // Rating filter

@@ -43,6 +43,9 @@ export interface Event {
   is_active: boolean;
   is_featured: boolean;
   is_hot: boolean;
+  is_global: boolean;
+  is_recurring: boolean;
+  is_last_minute: boolean;
 }
 
 interface UseEventsOptions {

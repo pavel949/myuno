@@ -1239,7 +1239,10 @@ export type Database = {
           includes: Json | null
           is_active: boolean | null
           is_featured: boolean | null
+          is_global: boolean | null
           is_hot: boolean | null
+          is_last_minute: boolean | null
+          is_recurring: boolean | null
           itinerary: Json | null
           lat: number | null
           lng: number | null
@@ -1273,7 +1276,10 @@ export type Database = {
           includes?: Json | null
           is_active?: boolean | null
           is_featured?: boolean | null
+          is_global?: boolean | null
           is_hot?: boolean | null
+          is_last_minute?: boolean | null
+          is_recurring?: boolean | null
           itinerary?: Json | null
           lat?: number | null
           lng?: number | null
@@ -1307,7 +1313,10 @@ export type Database = {
           includes?: Json | null
           is_active?: boolean | null
           is_featured?: boolean | null
+          is_global?: boolean | null
           is_hot?: boolean | null
+          is_last_minute?: boolean | null
+          is_recurring?: boolean | null
           itinerary?: Json | null
           lat?: number | null
           lng?: number | null

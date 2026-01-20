@@ -16,6 +16,9 @@ export const eventCategoryOptions: FilterOption[] = [
 export const eventFeatureOptions: FilterOption[] = [
   { id: 'hot', labelEn: 'Hot & Trending', labelRu: 'Популярное', icon: '🔥' },
   { id: 'featured', labelEn: 'Featured', labelRu: 'Рекомендуем', icon: '⭐' },
+  { id: 'global', labelEn: 'Global Artists', labelRu: 'Мировые звёзды', icon: '🌍' },
+  { id: 'recurring', labelEn: 'Weekly Events', labelRu: 'Еженедельные', icon: '🔄' },
+  { id: 'last-minute', labelEn: 'Last Tickets!', labelRu: 'Последние билеты!', icon: '⚡' },
   { id: 'free', labelEn: 'Free Entry', labelRu: 'Бесплатный вход', icon: '🆓' },
   { id: 'family', labelEn: 'Family Friendly', labelRu: 'Для семьи', icon: '👨‍👩‍👧' },
   { id: '18+', labelEn: '18+ Only', labelRu: 'Только 18+', icon: '🔞' },
