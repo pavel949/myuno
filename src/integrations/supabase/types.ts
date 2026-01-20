@@ -2147,6 +2147,62 @@ export type Database = {
         }
         Relationships: []
       }
+      lookup_values: {
+        Row: {
+          color: string | null
+          created_at: string
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          lookup_type: string
+          metadata: Json | null
+          parent_id: string | null
+          sort_order: number | null
+          updated_at: string
+          value_en: string
+          value_key: string
+          value_ru: string | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          lookup_type: string
+          metadata?: Json | null
+          parent_id?: string | null
+          sort_order?: number | null
+          updated_at?: string
+          value_en: string
+          value_key: string
+          value_ru?: string | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          lookup_type?: string
+          metadata?: Json | null
+          parent_id?: string | null
+          sort_order?: number | null
+          updated_at?: string
+          value_en?: string
+          value_key?: string
+          value_ru?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lookup_values_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "lookup_values"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       medical_services: {
         Row: {
           category: string
