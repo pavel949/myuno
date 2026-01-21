@@ -9,3 +9,4 @@ export { PropertyRooms } from './PropertyRooms';
 export { PropertyCalendar } from './PropertyCalendar';
 export { SeasonalPricing } from './SeasonalPricing';
 export { PropertyHighlights } from './PropertyHighlights';
+export { PropertyPreviewCard } from './PropertyPreviewCard';
