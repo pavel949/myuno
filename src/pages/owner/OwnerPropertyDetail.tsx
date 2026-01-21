@@ -16,11 +16,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { 
   Home, MapPin, Bed, Bath, SquareStack, Settings, 
   Globe, ClipboardList, Wrench, Calendar, ExternalLink,
-  CheckCircle, Clock, AlertTriangle, Loader2, DollarSign, BookOpen
+  CheckCircle, Clock, AlertTriangle, Loader2, DollarSign, BookOpen,
+  FileText, Building2
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { PropertyDocumentsTab } from '@/components/owner/PropertyDocumentsTab';
+import { JuristicContactsCard } from '@/components/owner/JuristicContactsCard';
+import { usePropertyDocuments } from '@/hooks/usePropertyDocuments';
 
 export default function OwnerPropertyDetail() {
   const { id } = useParams<{ id: string }>();
@@ -31,6 +35,7 @@ export default function OwnerPropertyDetail() {
   const { data: property, isLoading } = useOwnerProperty(id);
   const { data: serviceRequests } = useServiceRequests(id);
   const { data: inspections } = usePropertyInspections(id);
+  const { documents } = usePropertyDocuments(id || '');
   const publishToMarketplace = usePublishToMarketplace();
 
   const [showPublishDialog, setShowPublishDialog] = useState(false);
@@ -272,18 +277,26 @@ export default function OwnerPropertyDetail() {
 
       {/* Tabs for activity */}
       <Tabs defaultValue="services" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="services">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="services" className="text-xs px-2">
             {isRu ? 'Услуги' : 'Services'}
             {(serviceRequests?.length || 0) > 0 && (
-              <Badge variant="secondary" className="ml-2">{serviceRequests?.length}</Badge>
+              <Badge variant="secondary" className="ml-1 text-[10px] px-1">{serviceRequests?.length}</Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="inspections">
+          <TabsTrigger value="inspections" className="text-xs px-2">
             {isRu ? 'Инспекции' : 'Inspections'}
-            {(inspections?.length || 0) > 0 && (
-              <Badge variant="secondary" className="ml-2">{inspections?.length}</Badge>
+          </TabsTrigger>
+          <TabsTrigger value="documents" className="text-xs px-2">
+            <FileText className="h-3 w-3 mr-1" />
+            {isRu ? 'Документы' : 'Docs'}
+            {(documents?.length || 0) > 0 && (
+              <Badge variant="secondary" className="ml-1 text-[10px] px-1">{documents?.length}</Badge>
             )}
+          </TabsTrigger>
+          <TabsTrigger value="juristic" className="text-xs px-2">
+            <Building2 className="h-3 w-3 mr-1" />
+            {isRu ? 'УК' : 'MC'}
           </TabsTrigger>
         </TabsList>
 
@@ -356,6 +369,39 @@ export default function OwnerPropertyDetail() {
                 </CardContent>
               </Card>
             ))
+          )}
+        </TabsContent>
+
+        <TabsContent value="documents" className="mt-4">
+          {id && <PropertyDocumentsTab propertyId={id} />}
+        </TabsContent>
+
+        <TabsContent value="juristic" className="mt-4 space-y-4">
+          {property?.project_id ? (
+            <>
+              <JuristicContactsCard projectId={property.project_id} />
+              <Button 
+                className="w-full"
+                onClick={() => navigate(`/owner/properties/${id}/juristic-requests`)}
+              >
+                <Building2 className="h-4 w-4 mr-2" />
+                {isRu ? 'Запросы к УК' : 'MC Requests'}
+              </Button>
+            </>
+          ) : (
+            <Card>
+              <CardContent className="p-6 text-center text-muted-foreground">
+                <Building2 className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p className="font-medium mb-1">
+                  {isRu ? 'Комплекс не привязан' : 'No project linked'}
+                </p>
+                <p className="text-sm">
+                  {isRu 
+                    ? 'Привяжите объект к комплексу для взаимодействия с УК' 
+                    : 'Link property to a project to interact with management company'}
+                </p>
+              </CardContent>
+            </Card>
           )}
         </TabsContent>
       </Tabs>

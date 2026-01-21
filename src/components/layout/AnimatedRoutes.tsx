@@ -257,6 +257,7 @@ const PropertyEditor = lazy(() => import('@/pages/owner/PropertyEditor'));
 const FullManagement = lazy(() => import('@/pages/owner/FullManagement'));
 const ChannelManager = lazy(() => import('@/pages/owner/ChannelManager'));
 const OwnerLanding = lazy(() => import('@/pages/owner/OwnerLanding'));
+const JuristicRequestsPage = lazy(() => import('@/pages/owner/JuristicRequestsPage'));
 
 // Property Consultation
 const PropertyConsultation = lazy(() => import('@/pages/property/PropertyConsultation'));
@@ -582,6 +583,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/owner/properties/:id/editor" element={<LazyPage><OwnerGuard><PropertyEditor /></OwnerGuard></LazyPage>} />
         <Route path="/owner/full-management" element={<LazyPage><OwnerGuard><FullManagement /></OwnerGuard></LazyPage>} />
         <Route path="/owner/channels" element={<LazyPage><OwnerGuard><ChannelManager /></OwnerGuard></LazyPage>} />
+        <Route path="/owner/properties/:id/juristic-requests" element={<LazyPage><OwnerGuard><JuristicRequestsPage /></OwnerGuard></LazyPage>} />
         
         {/* Demo Routes - No Auth Required */}
         <Route path="/demo" element={<LazyPage><DemoIndex /></LazyPage>} />
