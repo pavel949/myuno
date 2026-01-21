@@ -824,6 +824,75 @@ export type Database = {
         }
         Relationships: []
       }
+      cities: {
+        Row: {
+          country_code: string
+          country_en: string
+          country_ru: string | null
+          created_at: string | null
+          default_currency: string | null
+          flag: string
+          id: string
+          is_active: boolean | null
+          is_coming_soon: boolean | null
+          lat: number
+          launch_date: string | null
+          lng: number
+          mapbox_bounds: Json | null
+          name_en: string
+          name_ru: string | null
+          name_th: string | null
+          slug: string
+          sort_order: number | null
+          timezone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          country_code: string
+          country_en: string
+          country_ru?: string | null
+          created_at?: string | null
+          default_currency?: string | null
+          flag: string
+          id?: string
+          is_active?: boolean | null
+          is_coming_soon?: boolean | null
+          lat: number
+          launch_date?: string | null
+          lng: number
+          mapbox_bounds?: Json | null
+          name_en: string
+          name_ru?: string | null
+          name_th?: string | null
+          slug: string
+          sort_order?: number | null
+          timezone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          country_code?: string
+          country_en?: string
+          country_ru?: string | null
+          created_at?: string | null
+          default_currency?: string | null
+          flag?: string
+          id?: string
+          is_active?: boolean | null
+          is_coming_soon?: boolean | null
+          lat?: number
+          launch_date?: string | null
+          lng?: number
+          mapbox_bounds?: Json | null
+          name_en?: string
+          name_ru?: string | null
+          name_th?: string | null
+          slug?: string
+          sort_order?: number | null
+          timezone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       cleaning_services: {
         Row: {
           approval_status: string | null
@@ -2916,6 +2985,7 @@ export type Database = {
       }
       lookup_values: {
         Row: {
+          city_id: string | null
           color: string | null
           created_at: string
           icon: string | null
@@ -2931,6 +3001,7 @@ export type Database = {
           value_ru: string | null
         }
         Insert: {
+          city_id?: string | null
           color?: string | null
           created_at?: string
           icon?: string | null
@@ -2946,6 +3017,7 @@ export type Database = {
           value_ru?: string | null
         }
         Update: {
+          city_id?: string | null
           color?: string | null
           created_at?: string
           icon?: string | null
@@ -2961,6 +3033,13 @@ export type Database = {
           value_ru?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "lookup_values_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "lookup_values_parent_id_fkey"
             columns: ["parent_id"]
