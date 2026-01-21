@@ -1,4 +1,4 @@
-import { Home, MapPin, Upload, DollarSign, Settings, FileText } from 'lucide-react';
+import { Home, MapPin, Upload, DollarSign, Settings, FileText, Users } from 'lucide-react';
 
 export interface WizardStep {
   id: string;
@@ -10,6 +10,14 @@ export interface WizardStep {
 }
 
 export const propertyWizardSteps: WizardStep[] = [
+  {
+    id: 'ownership',
+    title: 'Ownership',
+    titleRu: 'Владение',
+    icon: <Users className="h-4 w-4" />,
+    description: 'Property ownership',
+    descriptionRu: 'Тип владения',
+  },
   {
     id: 'basic',
     title: 'Basic Info',
