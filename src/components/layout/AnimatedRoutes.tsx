@@ -247,6 +247,7 @@ const ServiceRequest = lazy(() => import('@/pages/owner/ServiceRequest'));
 const InspectionRequest = lazy(() => import('@/pages/owner/InspectionRequest'));
 const OwnerRentalTerms = lazy(() => import('@/pages/owner/OwnerRentalTerms'));
 const EditProperty = lazy(() => import('@/pages/owner/EditProperty'));
+const PropertyEditor = lazy(() => import('@/pages/owner/PropertyEditor'));
 const FullManagement = lazy(() => import('@/pages/owner/FullManagement'));
 
 // Property Consultation
@@ -552,6 +553,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/owner/service-request" element={<LazyPage><OwnerGuard><ServiceRequest /></OwnerGuard></LazyPage>} />
         <Route path="/owner/inspection" element={<LazyPage><OwnerGuard><InspectionRequest /></OwnerGuard></LazyPage>} />
         <Route path="/owner/properties/:id/guidebook" element={<LazyPage><OwnerGuard><OwnerGuidebookEdit /></OwnerGuard></LazyPage>} />
+        <Route path="/owner/properties/:id/editor" element={<LazyPage><OwnerGuard><PropertyEditor /></OwnerGuard></LazyPage>} />
         <Route path="/owner/full-management" element={<LazyPage><OwnerGuard><FullManagement /></OwnerGuard></LazyPage>} />
         
         {/* Demo Routes - No Auth Required */}
