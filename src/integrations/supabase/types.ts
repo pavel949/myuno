@@ -1116,6 +1116,48 @@ export type Database = {
           },
         ]
       }
+      cohort_analytics: {
+        Row: {
+          active_users: number | null
+          avg_revenue_per_user: number | null
+          cohort_month: string
+          created_at: string | null
+          id: string
+          paying_users: number | null
+          period_month: string
+          period_number: number
+          retention_rate: number | null
+          total_revenue: number | null
+          total_users: number | null
+        }
+        Insert: {
+          active_users?: number | null
+          avg_revenue_per_user?: number | null
+          cohort_month: string
+          created_at?: string | null
+          id?: string
+          paying_users?: number | null
+          period_month: string
+          period_number: number
+          retention_rate?: number | null
+          total_revenue?: number | null
+          total_users?: number | null
+        }
+        Update: {
+          active_users?: number | null
+          avg_revenue_per_user?: number | null
+          cohort_month?: string
+          created_at?: string | null
+          id?: string
+          paying_users?: number | null
+          period_month?: string
+          period_number?: number
+          retention_rate?: number | null
+          total_revenue?: number | null
+          total_users?: number | null
+        }
+        Relationships: []
+      }
       cohort_metrics: {
         Row: {
           cohort_date: string
@@ -1952,6 +1994,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      funnel_analytics: {
+        Row: {
+          conversion_1_2: number | null
+          conversion_2_3: number | null
+          conversion_3_4: number | null
+          conversion_4_5: number | null
+          created_at: string | null
+          date: string
+          funnel_name: string
+          id: string
+          overall_conversion: number | null
+          step_1_count: number | null
+          step_2_count: number | null
+          step_3_count: number | null
+          step_4_count: number | null
+          step_5_count: number | null
+        }
+        Insert: {
+          conversion_1_2?: number | null
+          conversion_2_3?: number | null
+          conversion_3_4?: number | null
+          conversion_4_5?: number | null
+          created_at?: string | null
+          date: string
+          funnel_name: string
+          id?: string
+          overall_conversion?: number | null
+          step_1_count?: number | null
+          step_2_count?: number | null
+          step_3_count?: number | null
+          step_4_count?: number | null
+          step_5_count?: number | null
+        }
+        Update: {
+          conversion_1_2?: number | null
+          conversion_2_3?: number | null
+          conversion_3_4?: number | null
+          conversion_4_5?: number | null
+          created_at?: string | null
+          date?: string
+          funnel_name?: string
+          id?: string
+          overall_conversion?: number | null
+          step_1_count?: number | null
+          step_2_count?: number | null
+          step_3_count?: number | null
+          step_4_count?: number | null
+          step_5_count?: number | null
+        }
+        Relationships: []
       }
       geographic_metrics: {
         Row: {
@@ -4394,6 +4487,50 @@ export type Database = {
           },
         ]
       }
+      page_views: {
+        Row: {
+          id: string
+          page_path: string
+          page_title: string | null
+          referrer_path: string | null
+          scroll_depth: number | null
+          session_id: string | null
+          time_on_page: number | null
+          user_id: string | null
+          viewed_at: string
+        }
+        Insert: {
+          id?: string
+          page_path: string
+          page_title?: string | null
+          referrer_path?: string | null
+          scroll_depth?: number | null
+          session_id?: string | null
+          time_on_page?: number | null
+          user_id?: string | null
+          viewed_at?: string
+        }
+        Update: {
+          id?: string
+          page_path?: string
+          page_title?: string | null
+          referrer_path?: string | null
+          scroll_depth?: number | null
+          session_id?: string | null
+          time_on_page?: number | null
+          user_id?: string | null
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_views_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "user_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_applications: {
         Row: {
           address: string | null
@@ -6816,6 +6953,39 @@ export type Database = {
         }
         Relationships: []
       }
+      realtime_stats: {
+        Row: {
+          active_sessions: number | null
+          id: string
+          new_users_today: number | null
+          online_users: number | null
+          orders_today: number | null
+          page_views_today: number | null
+          revenue_today: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          active_sessions?: number | null
+          id?: string
+          new_users_today?: number | null
+          online_users?: number | null
+          orders_today?: number | null
+          page_views_today?: number | null
+          revenue_today?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          active_sessions?: number | null
+          id?: string
+          new_users_today?: number | null
+          online_users?: number | null
+          orders_today?: number | null
+          page_views_today?: number | null
+          revenue_today?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       referral_codes: {
         Row: {
           code: string
@@ -8712,6 +8882,45 @@ export type Database = {
           },
         ]
       }
+      user_analytics_daily: {
+        Row: {
+          created_at: string | null
+          date: string
+          events: number | null
+          id: string
+          orders: number | null
+          page_views: number | null
+          revenue: number | null
+          sessions: number | null
+          time_spent: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          events?: number | null
+          id?: string
+          orders?: number | null
+          page_views?: number | null
+          revenue?: number | null
+          sessions?: number | null
+          time_spent?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          events?: number | null
+          id?: string
+          orders?: number | null
+          page_views?: number | null
+          revenue?: number | null
+          sessions?: number | null
+          time_spent?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_documents: {
         Row: {
           country: string | null
@@ -8762,6 +8971,50 @@ export type Database = {
           verified_at?: string | null
         }
         Relationships: []
+      }
+      user_events: {
+        Row: {
+          created_at: string
+          event_category: string | null
+          event_data: Json | null
+          event_name: string
+          event_type: string
+          id: string
+          page_path: string | null
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_category?: string | null
+          event_data?: Json | null
+          event_name: string
+          event_type: string
+          id?: string
+          page_path?: string | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_category?: string | null
+          event_data?: Json | null
+          event_name?: string
+          event_type?: string
+          id?: string
+          page_path?: string | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "user_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_loyalty_status: {
         Row: {
@@ -8855,6 +9108,156 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_segments: {
+        Row: {
+          acquisition_cohort: string | null
+          acquisition_source: string | null
+          avg_order_value: number | null
+          avg_session_duration: number | null
+          created_at: string | null
+          days_since_last_order: number | null
+          days_since_last_visit: number | null
+          engagement_level: string | null
+          first_order_at: string | null
+          first_seen_at: string | null
+          id: string
+          is_at_risk: boolean | null
+          is_vip: boolean | null
+          last_order_at: string | null
+          last_seen_at: string | null
+          lifecycle_stage: string | null
+          lifetime_value: number | null
+          preferred_device: string | null
+          preferred_vertical: string | null
+          total_orders: number | null
+          total_page_views: number | null
+          total_sessions: number | null
+          total_spent: number | null
+          updated_at: string | null
+          user_id: string
+          value_segment: string | null
+        }
+        Insert: {
+          acquisition_cohort?: string | null
+          acquisition_source?: string | null
+          avg_order_value?: number | null
+          avg_session_duration?: number | null
+          created_at?: string | null
+          days_since_last_order?: number | null
+          days_since_last_visit?: number | null
+          engagement_level?: string | null
+          first_order_at?: string | null
+          first_seen_at?: string | null
+          id?: string
+          is_at_risk?: boolean | null
+          is_vip?: boolean | null
+          last_order_at?: string | null
+          last_seen_at?: string | null
+          lifecycle_stage?: string | null
+          lifetime_value?: number | null
+          preferred_device?: string | null
+          preferred_vertical?: string | null
+          total_orders?: number | null
+          total_page_views?: number | null
+          total_sessions?: number | null
+          total_spent?: number | null
+          updated_at?: string | null
+          user_id: string
+          value_segment?: string | null
+        }
+        Update: {
+          acquisition_cohort?: string | null
+          acquisition_source?: string | null
+          avg_order_value?: number | null
+          avg_session_duration?: number | null
+          created_at?: string | null
+          days_since_last_order?: number | null
+          days_since_last_visit?: number | null
+          engagement_level?: string | null
+          first_order_at?: string | null
+          first_seen_at?: string | null
+          id?: string
+          is_at_risk?: boolean | null
+          is_vip?: boolean | null
+          last_order_at?: string | null
+          last_seen_at?: string | null
+          lifecycle_stage?: string | null
+          lifetime_value?: number | null
+          preferred_device?: string | null
+          preferred_vertical?: string | null
+          total_orders?: number | null
+          total_page_views?: number | null
+          total_sessions?: number | null
+          total_spent?: number | null
+          updated_at?: string | null
+          user_id?: string
+          value_segment?: string | null
+        }
+        Relationships: []
+      }
+      user_sessions: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country: string | null
+          device_type: string | null
+          ended_at: string | null
+          id: string
+          ip_address: unknown
+          is_active: boolean | null
+          last_activity_at: string
+          os: string | null
+          pages_viewed: number | null
+          referrer: string | null
+          session_token: string
+          started_at: string
+          user_id: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          device_type?: string | null
+          ended_at?: string | null
+          id?: string
+          ip_address?: unknown
+          is_active?: boolean | null
+          last_activity_at?: string
+          os?: string | null
+          pages_viewed?: number | null
+          referrer?: string | null
+          session_token: string
+          started_at?: string
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          device_type?: string | null
+          ended_at?: string | null
+          id?: string
+          ip_address?: unknown
+          is_active?: boolean | null
+          last_activity_at?: string
+          os?: string | null
+          pages_viewed?: number | null
+          referrer?: string | null
+          session_token?: string
+          started_at?: string
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
         }
         Relationships: []
       }
@@ -10241,6 +10644,7 @@ export type Database = {
           yearly_count: number
         }[]
       }
+      get_user_analytics_summary: { Args: { p_days?: number }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -10286,6 +10690,10 @@ export type Database = {
         }
         Returns: Json
       }
+      recalculate_user_segment: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
       recalculate_user_tier: { Args: { p_user_id: string }; Returns: Json }
       refund_wallet_booking: {
         Args: { p_booking_id: string; p_user_id: string }
@@ -10300,6 +10708,7 @@ export type Database = {
         Args: { _action: string; _user_id: string; _vertical: string }
         Returns: boolean
       }
+      update_realtime_stats: { Args: never; Returns: undefined }
       verify_user_pin: {
         Args: { p_pin: string; p_user_id: string }
         Returns: boolean
@@ -10370,7 +10779,13 @@ export type Database = {
         | "failed"
         | "refunded"
         | "cancelled"
-      user_type: "tourist" | "resident"
+      user_type:
+        | "tourist"
+        | "resident"
+        | "admin"
+        | "uno_team"
+        | "vendor"
+        | "owner"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -10569,7 +10984,14 @@ export const Constants = {
         "refunded",
         "cancelled",
       ],
-      user_type: ["tourist", "resident"],
+      user_type: [
+        "tourist",
+        "resident",
+        "admin",
+        "uno_team",
+        "vendor",
+        "owner",
+      ],
     },
   },
 } as const
