@@ -161,8 +161,8 @@ export default function VendorSubscription() {
                   </span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">{isRussian ? 'Комиссия:' : 'Commission:'}</span>
-                  <span className="ml-1 font-medium">{limits.commission_percent}%</span>
+                  <span className="text-muted-foreground">{isRussian ? 'Условия:' : 'Terms:'}</span>
+                  <span className="ml-1 font-medium">{isRussian ? 'Индивидуально' : 'Individual'}</span>
                 </div>
               </div>
             </CardContent>
@@ -254,7 +254,7 @@ export default function VendorSubscription() {
 
                   <div className="mt-4 pt-4 border-t flex gap-4 text-sm text-muted-foreground">
                     <span>
-                      {isRussian ? 'Комиссия:' : 'Fee:'} {plan.limits.commission_percent}%
+                      {isRussian ? 'Условия:' : 'Terms:'} {plan.slug === 'free' ? (isRussian ? 'Стандарт' : 'Standard') : (isRussian ? 'Улучшенные' : 'Improved')}
                     </span>
                     <span>
                       {isRussian ? 'Объявлений:' : 'Listings:'} {plan.limits.max_listings === -1 ? '∞' : plan.limits.max_listings}

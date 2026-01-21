@@ -98,10 +98,10 @@ const collaborationOptions = [
     badgeRu: 'Бесплатные инструменты',
     titleEn: 'Self Management',
     titleRu: 'Самостоятельное управление',
-    descEn: 'Free access to all tools. 10% platform commission per booking.',
-    descRu: 'Бесплатный доступ к инструментам. Комиссия 10% за бронирование.',
-    priceEn: '10%',
-    priceRu: '10%',
+    descEn: 'Free access to all tools. Competitive platform fee per booking.',
+    descRu: 'Бесплатный доступ к инструментам. Конкурентная комиссия за бронирование.',
+    priceEn: 'Low fee',
+    priceRu: 'Низкая комиссия',
     features: ['dashboard', 'calendar', 'reports']
   },
   {
@@ -110,10 +110,10 @@ const collaborationOptions = [
     badgeRu: 'Популярно',
     titleEn: 'myUNO Full Management',
     titleRu: 'Полное управление myUNO',
-    descEn: 'We handle everything. You receive 70% after expenses.',
-    descRu: 'Мы берём всё на себя. Вы получаете 70% после расходов.',
-    priceEn: '70/30',
-    priceRu: '70/30',
+    descEn: 'We handle everything. You receive the majority after expenses.',
+    descRu: 'Мы берём всё на себя. Вы получаете большую часть дохода после расходов.',
+    priceEn: 'Best value',
+    priceRu: 'Лучшие условия',
     features: ['everything', 'cleaning', 'guests', 'maintenance', 'pricing']
   },
   {
@@ -124,8 +124,8 @@ const collaborationOptions = [
     titleRu: 'Гибридный формат',
     descEn: 'Choose specific services. Pay only for what you need.',
     descRu: 'Выберите нужные услуги. Платите только за то, что используете.',
-    priceEn: 'custom',
-    priceRu: 'индивидуально',
+    priceEn: 'Custom',
+    priceRu: 'Индивидуально',
     features: ['selective', 'cleaning', 'checkin']
   }
 ];
@@ -354,7 +354,7 @@ export default function OwnerLanding() {
                       </div>
                       <div className="text-[10px] text-muted-foreground">
                         {option.type === 'full' 
-                          ? (isRu ? 'вам / нам' : 'you / us')
+                          ? (isRu ? 'условия' : 'terms')
                           : option.type === 'self'
                             ? (isRu ? 'за бронирование' : 'per booking')
                             : (isRu ? 'комиссия' : 'commission')}
@@ -397,8 +397,8 @@ export default function OwnerLanding() {
             </div>
             <p className="text-sm text-muted-foreground mb-4">
               {isRu 
-                ? 'Мы возьмём всё на себя: гостей, уборку, обслуживание, отчётность. Вы получаете 70% после расходов.'
-                : 'We handle everything: guests, cleaning, maintenance, reporting. You receive 70% after expenses.'}
+                ? 'Мы возьмём всё на себя: гостей, уборку, обслуживание, отчётность. Выгодные условия для владельцев.'
+                : 'We handle everything: guests, cleaning, maintenance, reporting. Favorable terms for owners.'}
             </p>
             <PremiumButton 
               className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"

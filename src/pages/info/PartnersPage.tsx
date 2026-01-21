@@ -76,12 +76,12 @@ export default function PartnersPage() {
     },
   ];
 
-  // Commission Structure
-  const commissionStructure = [
+  // Business Model Highlights (без конкретных процентов)
+  const businessHighlights = [
     {
       category: isRu ? 'Недвижимость' : 'Real Estate',
       icon: Building2,
-      commission: '5-10%',
+      highlight: isRu ? 'Выгодные условия' : 'Competitive Terms',
       features: [
         isRu ? 'Первый месяц бесплатно' : 'First month free',
         isRu ? 'Нет абонентской платы' : 'No subscription fee',
@@ -90,7 +90,7 @@ export default function PartnersPage() {
     {
       category: isRu ? 'Транспорт' : 'Transport',
       icon: Car,
-      commission: '10-15%',
+      highlight: isRu ? 'Гибкие условия' : 'Flexible Terms',
       features: [
         isRu ? 'Бесплатные лиды' : 'Free leads',
         isRu ? 'GPS-интеграция' : 'GPS integration',
@@ -99,7 +99,7 @@ export default function PartnersPage() {
     {
       category: isRu ? 'Туры и активности' : 'Tours & Activities',
       icon: Ship,
-      commission: '15-20%',
+      highlight: isRu ? 'Индивидуально' : 'Custom Rates',
       features: [
         isRu ? 'Маркетинговая поддержка' : 'Marketing support',
         isRu ? 'Продвижение в топ' : 'Top promotion',
@@ -108,7 +108,7 @@ export default function PartnersPage() {
     {
       category: isRu ? 'Рестораны и еда' : 'Restaurants & Food',
       icon: UtensilsCrossed,
-      commission: '10-15%',
+      highlight: isRu ? 'Гибкие условия' : 'Flexible Terms',
       features: [
         isRu ? 'Нет абонентской платы' : 'No subscription fee',
         isRu ? 'Интеграция с POS' : 'POS integration',
@@ -358,14 +358,27 @@ export default function PartnersPage() {
           </div>
         </div>
 
-        {/* Commission Structure */}
+        {/* Business Model - без конкретных процентов */}
         <div>
           <h2 className="font-semibold mb-3 flex items-center gap-2">
-            <Percent className="w-5 h-5 text-green-500" />
-            {isRu ? 'Комиссионная модель' : 'Commission Model'}
+            <Handshake className="w-5 h-5 text-green-500" />
+            {isRu ? 'Бизнес-модель' : 'Business Model'}
           </h2>
+          <SectionCard className="mb-4">
+            <p className="text-sm text-muted-foreground mb-3">
+              {isRu 
+                ? 'Мы предлагаем индивидуальные условия сотрудничества для каждой категории партнёров. Комиссия обсуждается лично и зависит от объёма, категории услуг и уровня верификации.'
+                : 'We offer individual partnership terms for each category. Commission is discussed personally and depends on volume, service category, and verification level.'}
+            </p>
+            <Link to="/provider/onboarding">
+              <Button variant="outline" size="sm" className="gap-2">
+                {isRu ? 'Узнать условия' : 'Get Terms'}
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </Link>
+          </SectionCard>
           <div className="grid grid-cols-2 gap-3">
-            {commissionStructure.map((item, index) => {
+            {businessHighlights.map((item, index) => {
               const Icon = item.icon;
               return (
                 <motion.div
@@ -379,7 +392,7 @@ export default function PartnersPage() {
                       <Icon className="w-5 h-5 text-muted-foreground" />
                       <span className="text-xs font-medium">{item.category}</span>
                     </div>
-                    <div className="text-2xl font-bold text-primary mb-2">{item.commission}</div>
+                    <div className="text-lg font-semibold text-primary mb-2">{item.highlight}</div>
                     <div className="space-y-1">
                       {item.features.map((feature, fIndex) => (
                         <div key={fIndex} className="flex items-center gap-1 text-xs text-muted-foreground">
