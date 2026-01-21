@@ -40,7 +40,8 @@ import {
   Pill,
   ShoppingBag,
   ClipboardCheck,
-  Wallet
+  Wallet,
+  Globe
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -160,6 +161,7 @@ export default function AdminDashboard() {
   ];
 
   const systemActions = [
+    { label: isRussian ? 'Города' : 'Cities', icon: Globe, path: '/admin/cities', color: 'bg-teal-500' },
     { label: isRussian ? 'Финансы' : 'Finance', icon: Wallet, path: '/admin/finance', color: 'bg-emerald-500' },
     { label: isRussian ? 'Заявки' : 'Consultations', icon: ClipboardCheck, path: '/admin/consultations', color: 'bg-green-500' },
     { label: isRussian ? 'UNO Team' : 'UNO Team', icon: Users, path: '/admin/uno-team', color: 'bg-emerald-500' },
