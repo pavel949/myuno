@@ -1195,6 +1195,101 @@ const translations: Record<Language, Record<string, string>> = {
     'time.today': 'วันนี้',
     'time.tomorrow': 'พรุ่งนี้',
     'time.yesterday': 'เมื่อวาน',
+    
+    // Home Services
+    'services.homeTitle': 'บริการบ้าน',
+    'services.professionals': 'ผู้เชี่ยวชาญ',
+    'services.heroTitle': 'บริการมืออาชีพ',
+    'services.heroSubtitle': 'ช่างประปา ช่างไฟฟ้า ทำความสะอาด และอื่นๆ',
+    'services.searchPlaceholder': 'ค้นหาบริการหรือช่าง...',
+    'services.notFound': 'ไม่พบผู้ให้บริการ',
+    
+    // Legal Services
+    'legal.businessTitle': 'บริการธุรกิจ',
+    'legal.providers': 'ผู้ให้บริการ',
+    'legal.heroTitle': 'บริการทางกฎหมายและธุรกิจ',
+    'legal.heroSubtitle': 'ผู้เชี่ยวชาญที่ได้รับการยืนยันสำหรับธุรกิจของคุณในประเทศไทย',
+    'legal.searchPlaceholder': 'ค้นหาบริการหรือบริษัท...',
+    'legal.notFound': 'ไม่พบผู้ให้บริการ',
+    'legal.tax': 'ภาษี',
+    'legal.business': 'ธุรกิจ',
+    
+    // Education extras
+    'education.heroTitle': 'การศึกษา',
+    'education.heroSubtitle': 'หลักสูตรและติวเตอร์สำหรับเด็กและผู้ใหญ่',
+    'education.searchPlaceholder': 'ค้นหาหลักสูตรและติวเตอร์...',
+    'education.tutor': 'ติวเตอร์',
+    'education.school': 'โรงเรียน',
+    'education.notFound': 'ไม่พบสิ่งที่ค้นหา',
+    'education.tutorsNotFound': 'ไม่พบติวเตอร์',
+    'education.aboutTutor': 'เกี่ยวกับติวเตอร์',
+    'education.teachingLanguages': 'ภาษาที่สอน',
+    'education.perHour': 'ชม.',
+    'education.all': 'ทั้งหมด',
+    'education.schoolsNotFound': 'ไม่พบโรงเรียน',
+    'education.studentAges': 'อายุนักเรียน',
+    'education.kids': 'เด็ก',
+    'education.adults': 'ผู้ใหญ่',
+    'education.bookLesson': 'จองบทเรียน',
+    'education.verified': 'ยืนยันแล้ว',
+    
+    // SOS extras
+    'sos.offlineMode': 'คุณออฟไลน์อยู่ — ใช้ข้อมูลแคช',
+    'sos.savedOffline': 'หน้า SOS ถูกบันทึกสำหรับการเข้าถึงแบบออฟไลน์',
+    'sos.saveFailed': 'บันทึกไม่ได้ ลองรีเฟรชหน้า',
+    'sos.saveError': 'บันทึกล้มเหลว',
+    'sos.unoAlert': 'ความปลอดภัยส่วนบุคคลและความช่วยเหลือฉุกเฉิน 24/7',
+    'sos.callUs': 'โทรหาเรา',
+    'sos.saveOffline': 'บันทึกออฟไลน์',
+    'sos.saved': 'บันทึกแล้ว',
+    'sos.quickActions': 'ติดต่อด่วน',
+    'sos.contacts': 'รายชื่อติดต่อ',
+    'sos.urgentServices': 'บริการเร่งด่วน',
+    'sos.survivalTips': 'เคล็ดลับการเอาตัวรอด',
+    
+    // VIP Concierge
+    'vip.title': 'VIP คอนเซียร์จ',
+    'vip.subtitle': 'บริการคอนเซียร์จระดับลักซ์ชัวรี่',
+    'vip.description': 'บริการระดับพรีเมียมพิเศษสำหรับลูกค้าพิถีพิถัน เฮลิคอปเตอร์ เครื่องบินส่วนตัว เชฟส่วนตัว เรือยอร์ช รถหรู และบริการ VIP ครบวงจร',
+    'vip.callUs': 'โทรหาเรา',
+    'vip.whyVip': 'ทำไมต้อง UNO VIP?',
+    'vip.support247': 'สนับสนุน 24/7 ตลอดเวลา',
+    'vip.personalManager': 'ผู้จัดการส่วนตัว',
+    'vip.exclusiveAccess': 'การเข้าถึงพิเศษ',
+    'vip.confidentiality': 'ความลับ',
+    'vip.ourServices': 'บริการของเรา',
+    'vip.readyForVip': 'พร้อมสำหรับประสบการณ์ VIP?',
+    'vip.contactUs': 'ติดต่อเราสำหรับข้อเสนอส่วนตัว',
+    'vip.messageWhatsApp': 'ส่งข้อความทาง WhatsApp',
+    
+    // Common booking extras
+    'booking.total': 'รวม',
+    'booking.maxPeople': 'สูงสุด {max} คน',
+    'booking.unavailable': 'ไม่พร้อมให้บริการ',
+    'booking.expires': 'หมดอายุ:',
+    'booking.allCategories': 'ทุกหมวดหมู่',
+    'booking.noBookings': 'ยังไม่มีการจอง',
+    'booking.noBookingsDesc': 'เริ่มสำรวจบริการเพื่อทำการจองครั้งแรก',
+    'booking.results': 'ผลลัพธ์',
+    'booking.found': 'พบ',
+    
+    // Wallet extras
+    'wallet.toppedUp': 'เติมเงินกระเป๋าสตังค์ {amount} สำเร็จ',
+    'wallet.paymentCanceled': 'ยกเลิกการชำระเงินแล้ว',
+    
+    // Quick services
+    'home.quickServices': 'บริการด่วน',
+    'home.quickListing': 'ลงประกาศเลย',
+    'home.quickListingTitle': 'เสนอบริการของคุณ',
+    'home.quickListingDesc': 'ลงประกาศใน 2 นาที — ฟรี!',
+    'home.quickListingBadge': 'ลงประกาศด่วน',
+    'badge.top': 'ยอดนิยม',
+    'badge.hot': 'ฮอต',
+    'badge.certified': 'ได้รับการรับรอง',
+    'badge.featured': 'แนะนำ',
+    
+    // Tours extras
+    'tours.noToursFound': 'ไม่พบทัวร์',
   },
 };
 
