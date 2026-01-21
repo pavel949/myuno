@@ -212,10 +212,11 @@ const MarketCategoryPage = () => {
           </div>
         )}
 
-        {/* Sticky Cart */}
-        {cartItemCount > 0 && (
-          <StickyCartBar checkoutPath="/market/checkout" />
-        )}
+        {/* Sticky Cart - filtered to show only product type items */}
+        <StickyCartBar 
+          itemType="product" 
+          checkoutPath="/market/checkout" 
+        />
       </PageContainer>
     </AppLayout>
   );

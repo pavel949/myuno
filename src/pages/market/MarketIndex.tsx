@@ -271,12 +271,11 @@ const MarketIndex = () => {
           </section>
         )}
 
-        {/* Sticky Cart Bar */}
-        {cartItemCount > 0 && (
-          <StickyCartBar
-            checkoutPath="/market/checkout"
-          />
-        )}
+        {/* Sticky Cart Bar - filtered to show only product type items */}
+        <StickyCartBar
+          itemType="product"
+          checkoutPath="/market/checkout"
+        />
       </PageContainer>
     </AppLayout>
   );
