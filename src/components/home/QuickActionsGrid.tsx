@@ -130,7 +130,7 @@ const quickActions: QuickAction[] = [
     icon: Droplets,
     label: 'Water Delivery',
     labelRu: 'Доставка воды',
-    path: '/delivery/water',
+    path: '/market?category=drinks',
     gradient: 'from-sky-500 to-blue-600',
     badge: 'Fast',
     badgeRu: 'Быстро',
