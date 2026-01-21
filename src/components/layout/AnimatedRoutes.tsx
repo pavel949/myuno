@@ -253,6 +253,7 @@ const EditProperty = lazy(() => import('@/pages/owner/EditProperty'));
 const PropertyEditor = lazy(() => import('@/pages/owner/PropertyEditor'));
 const FullManagement = lazy(() => import('@/pages/owner/FullManagement'));
 const ChannelManager = lazy(() => import('@/pages/owner/ChannelManager'));
+const OwnerLanding = lazy(() => import('@/pages/owner/OwnerLanding'));
 
 // Property Consultation
 const PropertyConsultation = lazy(() => import('@/pages/property/PropertyConsultation'));
@@ -553,6 +554,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/vendor/cleaning" element={<LazyPage><VendorGuard><VendorCleaning /></VendorGuard></LazyPage>} />
         <Route path="/vendor/babysitters" element={<LazyPage><VendorGuard><VendorBabysitters /></VendorGuard></LazyPage>} />
         <Route path="/vendor/flowers" element={<LazyPage><VendorGuard><VendorFlowers /></VendorGuard></LazyPage>} />
+        
+        {/* Owner Landing - Public */}
+        <Route path="/owner/landing" element={<LazyPage><OwnerLanding /></LazyPage>} />
         
         {/* Owner (Property Care) Routes - Protected */}
         <Route path="/owner" element={<LazyPage><OwnerGuard><OwnerDashboard /></OwnerGuard></LazyPage>} />

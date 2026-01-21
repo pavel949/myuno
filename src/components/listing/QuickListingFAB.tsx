@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { QuickListingModal } from './QuickListingModal';
 
 export function QuickListingFAB() {
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
   // Listen for open-quick-listing event from CTA buttons
   useEffect(() => {
-    const handleOpenQuickListing = () => setIsModalOpen(true);
+    const handleOpenQuickListing = () => navigate('/owner/landing');
     window.addEventListener('open-quick-listing', handleOpenQuickListing);
     return () => window.removeEventListener('open-quick-listing', handleOpenQuickListing);
-  }, []);
+  }, [navigate]);
 
   return (
     <>
@@ -25,7 +27,7 @@ export function QuickListingFAB() {
         whileTap={{ scale: 0.95 }}
         onHoverStart={() => setIsHovered(true)}
         onHoverEnd={() => setIsHovered(false)}
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => navigate('/owner/landing')}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
