@@ -25,7 +25,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAdminCheck } from '@/contexts/AuthContext';
+import { useAdminCheck } from '@/hooks/useAdmin';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   useUserAnalyticsDashboard,
