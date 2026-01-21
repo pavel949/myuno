@@ -14,7 +14,7 @@ import {
   CheckCircle, Clock, AlertTriangle, ArrowRight, 
   Key, Camera, Wrench, FileText, Users, Sparkles,
   ShoppingCart, TrendingUp, TrendingDown, CalendarDays,
-  LogIn, LogOut, Brush, Package, Link2
+  LogIn, LogOut, Brush, Package, Link2, Star
 } from 'lucide-react';
 import { FullManagementCard } from '@/components/owner/FullManagementCard';
 import { OwnershipInviteBanner } from '@/components/owner/OwnershipInviteBanner';
@@ -453,6 +453,47 @@ export default function OwnerDashboard() {
                 <p className="text-2xl font-bold">{stats?.pendingRequests || 0}</p>
                 <p className="text-xs text-muted-foreground">
                   {isRu ? 'Сообщений' : 'Messages'}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card 
+          className="bg-gradient-to-br from-yellow-500/10 to-yellow-500/5 cursor-pointer hover:shadow-md transition-shadow"
+          onClick={() => navigate('/owner/reviews')}
+        >
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-full bg-yellow-500/20">
+                <Star className="h-5 w-5 text-yellow-500" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold flex items-center gap-1">
+                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                  {isRu ? 'Отзывы' : 'Reviews'}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {isRu ? 'Управление' : 'Manage'}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card 
+          className="bg-gradient-to-br from-green-500/10 to-green-500/5 cursor-pointer hover:shadow-md transition-shadow"
+          onClick={() => navigate('/owner/financials')}
+        >
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-full bg-green-500/20">
+                <DollarSign className="h-5 w-5 text-green-500" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{isRu ? 'Финансы' : 'Finance'}</p>
+                <p className="text-xs text-muted-foreground">
+                  {isRu ? 'Отчёты' : 'Reports'}
                 </p>
               </div>
             </div>
