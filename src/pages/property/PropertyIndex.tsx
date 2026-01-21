@@ -5,7 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { FilterChip, FilterChipGroup } from '@/components/uno/FilterChip';
 import { UniversalFilter, ActiveFilters, FilterValues } from '@/components/filters/UniversalFilter';
-import { propertyFilterConfig } from '@/components/filters/PropertyFilters';
+import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
 import { useProperties, useInstantBookingProperties, Property } from '@/hooks/useProperties';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
@@ -144,14 +144,7 @@ const demoProperties = [
   },
 ];
 
-const propertyTypes = [
-  { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '🏠' },
-  { id: 'villa', labelEn: 'Villas', labelRu: 'Виллы', icon: '🏡' },
-  { id: 'apartment', labelEn: 'Apartments', labelRu: 'Апартаменты', icon: '🏢' },
-  { id: 'condo', labelEn: 'Condos', labelRu: 'Кондо', icon: '🏬' },
-  { id: 'house', labelEn: 'Houses', labelRu: 'Дома', icon: '🏘️' },
-  { id: 'studio', labelEn: 'Studios', labelRu: 'Студии', icon: '🛏️' },
-];
+// Removed static propertyTypes - now loaded dynamically from usePropertyFilterOptions
 
 export default function PropertyIndex() {
   const { language } = useLanguage();
@@ -165,6 +158,15 @@ export default function PropertyIndex() {
   const [selectedType, setSelectedType] = useState('all');
   const [filterValues, setFilterValues] = useState<FilterValues>({});
   const [hoveredProperty, setHoveredProperty] = useState<string | null>(null);
+
+  // Fetch dynamic filter options from lookup_values (editable in admin)
+  const { filterConfig, propertyTypes } = usePropertyFilterOptions();
+  
+  // Add "All" option to property types for the pills
+  const propertyTypePills = useMemo(() => [
+    { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '🏠' },
+    ...propertyTypes
+  ], [propertyTypes]);
 
   // Fetch instant booking properties
   const { data: instantBookingProperties, isLoading: isLoadingInstant } = useInstantBookingProperties(10);
@@ -284,7 +286,7 @@ export default function PropertyIndex() {
             <div className="flex items-center gap-2">
               <ScrollArea className="flex-1">
                 <div className="flex gap-2 pb-2">
-                  {propertyTypes.map((type) => (
+                  {propertyTypePills.map((type) => (
                     <button
                       key={type.id}
                       onClick={() => setSelectedType(type.id)}
@@ -305,7 +307,7 @@ export default function PropertyIndex() {
 
               {/* Filter Button */}
               <UniversalFilter
-                config={propertyFilterConfig}
+                config={filterConfig}
                 values={filterValues}
                 onChange={setFilterValues}
                 activeCount={activeFilterCount}
@@ -328,7 +330,7 @@ export default function PropertyIndex() {
         {activeFilterCount > 0 && (
           <div className="container max-w-7xl mx-auto px-4 py-3">
             <ActiveFilters
-              config={propertyFilterConfig}
+              config={filterConfig}
               values={filterValues}
               onRemove={handleRemoveFilter}
               onClearAll={() => setFilterValues({})}
