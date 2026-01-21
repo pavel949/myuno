@@ -1,13 +1,12 @@
 import React from 'react';
 import { Plus, Minus, Star } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { MarketProduct } from '@/data/marketplaceProducts';
+import { MarketplaceProduct } from '@/types/marketplace';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
 
 interface ProductCardProps {
-  product: MarketProduct;
+  product: MarketplaceProduct;
   quantity?: number;
   onAdd: () => void;
   onRemove: () => void;
@@ -25,12 +24,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   const { language } = useLanguage();
 
-  const name = language === 'ru' ? product.nameRu : product.nameEn;
-  const unit = language === 'ru' ? product.unitRu : product.unit;
-  const description = language === 'ru' ? product.descriptionRu : product.descriptionEn;
+  const name = language === 'ru' ? product.name_ru : product.name_en;
+  const unit = language === 'ru' ? product.unit_ru : product.unit;
 
-  const discount = product.originalPrice 
-    ? Math.round((1 - product.price / product.originalPrice) * 100) 
+  const discount = product.original_price 
+    ? Math.round((1 - product.price / product.original_price) * 100) 
     : 0;
 
   if (variant === 'horizontal') {
@@ -42,11 +40,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {/* Image */}
         <div className="relative w-24 h-24 shrink-0 rounded-lg overflow-hidden">
           <img
-            src={product.image}
+            src={product.cover_image || '/placeholder.svg'}
             alt={name}
             className="w-full h-full object-cover"
           />
-          {product.isNew && (
+          {product.is_new && (
             <Badge className="absolute top-1 left-1 bg-blue-500 text-[10px] px-1.5 py-0">
               NEW
             </Badge>
@@ -67,7 +65,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             <div className="flex items-center gap-1 mt-1">
               <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
               <span className="text-xs text-muted-foreground">
-                {product.rating} ({product.reviewCount})
+                {product.rating} ({product.review_count})
               </span>
             </div>
           )}
@@ -75,9 +73,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <div className="flex items-center justify-between mt-2">
             <div>
               <span className="font-bold">฿{product.price}</span>
-              {product.originalPrice && (
+              {product.original_price && (
                 <span className="text-xs text-muted-foreground line-through ml-1">
-                  ฿{product.originalPrice}
+                  ฿{product.original_price}
                 </span>
               )}
             </div>
@@ -126,19 +124,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         onClick={onClick}
       >
         <img
-          src={product.image}
+          src={product.cover_image || '/placeholder.svg'}
           alt={name}
           className="w-full h-full object-cover"
         />
         
         {/* Badges */}
         <div className="absolute top-2 left-2 flex flex-col gap-1">
-          {product.isNew && (
+          {product.is_new && (
             <Badge className="bg-blue-500 text-white text-[10px] px-1.5 py-0">
               NEW
             </Badge>
           )}
-          {product.isPopular && !product.isNew && (
+          {product.is_popular && !product.is_new && (
             <Badge className="bg-amber-500 text-white text-[10px] px-1.5 py-0">
               🔥 HIT
             </Badge>
@@ -171,9 +169,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         <div className="flex items-center justify-between mt-2">
           <div className="flex flex-col">
             <span className="font-bold text-base">฿{product.price}</span>
-            {product.originalPrice && (
+            {product.original_price && (
               <span className="text-xs text-muted-foreground line-through">
-                ฿{product.originalPrice}
+                ฿{product.original_price}
               </span>
             )}
           </div>

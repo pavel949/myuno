@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingBag, Search, SlidersHorizontal, Sparkles, TrendingUp } from 'lucide-react';
+import { ShoppingBag, Search, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -10,54 +10,76 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { StickyCartBar } from '@/components/cart/StickyCartBar';
-import { CategoryBannerGrid, ProductSection } from '@/components/market';
-import {
-  categoryBanners,
-  marketplaceProducts,
-  getPopularProducts,
-  getNewProducts,
-  searchProducts,
-  MarketProduct,
-} from '@/data/marketplaceProducts';
+import { CategoryBannerGrid, CategoryBannerData, ProductSection, ProductCard } from '@/components/market';
+import { 
+  useMarketplaceCategories, 
+  useMarketplaceProducts,
+  useDeliverySettings,
+} from '@/hooks/useMarketplace';
+import { MarketplaceProduct } from '@/types/marketplace';
 import { useCartToast } from '@/hooks/useCartToast';
 
 const MarketIndex = () => {
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { items, addItem, removeItem, getItemsByType } = useCart();
+  const { addItem, removeItem, getItemsByType } = useCart();
   const { showAddedToast } = useCartToast();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
+  // Fetch data from database
+  const { categories, isLoading: categoriesLoading } = useMarketplaceCategories();
+  const { products: allProducts, isLoading: productsLoading } = useMarketplaceProducts();
+  const { products: popularProducts, isLoading: popularLoading } = useMarketplaceProducts({ popularOnly: true, limit: 10 });
+  const { products: newProducts, isLoading: newLoading } = useMarketplaceProducts({ newOnly: true, limit: 8 });
+  const { freeDeliveryThreshold, amountToFreeDelivery } = useDeliverySettings();
+
   const cartItems = getItemsByType('product');
   const cartItemCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
   const cartTotal = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
-  const popularProducts = useMemo(() => getPopularProducts(), []);
-  const newProducts = useMemo(() => getNewProducts(), []);
-
+  // Search results
   const searchResults = useMemo(() => {
     if (searchQuery.length < 2) return [];
-    return searchProducts(searchQuery, language as 'en' | 'ru');
-  }, [searchQuery, language]);
+    const query = searchQuery.toLowerCase();
+    return allProducts.filter(p => 
+      p.name_en.toLowerCase().includes(query) ||
+      p.name_ru.toLowerCase().includes(query) ||
+      p.description_en?.toLowerCase().includes(query) ||
+      p.description_ru?.toLowerCase().includes(query) ||
+      p.tags?.some(t => t.toLowerCase().includes(query))
+    ).slice(0, 8);
+  }, [searchQuery, allProducts]);
+
+  // Map categories to banner format
+  const categoryBanners = useMemo(() => categories.map(cat => ({
+    id: cat.slug,
+    labelEn: cat.name_en,
+    labelRu: cat.name_ru,
+    descriptionEn: cat.description_en || '',
+    descriptionRu: cat.description_ru || '',
+    icon: cat.icon || '📦',
+    image: cat.image_url || '/placeholder.svg',
+    gradient: cat.gradient || 'from-primary/80 to-primary/40',
+  })), [categories]);
 
   const getQuantity = (productId: string) => {
     return cartItems.find(i => i.id === productId)?.quantity || 0;
   };
 
-  const handleAdd = (product: MarketProduct) => {
+  const handleAdd = (product: MarketplaceProduct) => {
     const item = {
       id: product.id,
       type: 'product' as const,
-      name: product.nameEn,
-      nameRu: product.nameRu,
+      name: product.name_en,
+      nameRu: product.name_ru,
       price: product.price,
       currency: '฿',
-      image: product.image,
-      providerId: product.vendorId || 'marketplace',
-      providerName: product.vendorName || 'myUNO Market',
-      providerNameRu: product.vendorNameRu || 'myUNO Маркет',
+      image: product.cover_image || undefined,
+      providerId: 'marketplace',
+      providerName: product.vendor_name || 'myUNO Market',
+      providerNameRu: product.vendor_name_ru || 'myUNO Маркет',
     };
     addItem(item);
     showAddedToast({ item, cartPath: '/market/checkout' });
@@ -70,6 +92,8 @@ const MarketIndex = () => {
   const handleCategoryClick = (categoryId: string) => {
     navigate(`/market/category/${categoryId}`);
   };
+
+  const isLoading = categoriesLoading || productsLoading;
 
   return (
     <AppLayout>
@@ -108,6 +132,14 @@ const MarketIndex = () => {
                 ? 'Продукты, косметика, сувениры и декор' 
                 : 'Groceries, cosmetics, souvenirs & decor'}
             </p>
+            {/* Free delivery banner */}
+            {freeDeliveryThreshold && (
+              <div className="mt-3 inline-flex items-center gap-1.5 bg-green-500/10 text-green-600 dark:text-green-400 px-3 py-1.5 rounded-full text-xs font-medium">
+                🚚 {language === 'ru' 
+                  ? `Бесплатная доставка от ฿${freeDeliveryThreshold}` 
+                  : `Free delivery from ฿${freeDeliveryThreshold}`}
+              </div>
+            )}
           </div>
         </div>
 
@@ -126,7 +158,7 @@ const MarketIndex = () => {
           {/* Search Results Dropdown */}
           {isSearchFocused && searchResults.length > 0 && (
             <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl shadow-lg z-50 max-h-80 overflow-y-auto">
-              {searchResults.slice(0, 8).map(product => (
+              {searchResults.map(product => (
                 <button
                   key={product.id}
                   className="w-full flex items-center gap-3 p-3 hover:bg-muted/50 text-left"
@@ -136,13 +168,13 @@ const MarketIndex = () => {
                   }}
                 >
                   <img
-                    src={product.image}
+                    src={product.cover_image || '/placeholder.svg'}
                     alt=""
                     className="w-12 h-12 rounded-lg object-cover"
                   />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium line-clamp-1">
-                      {language === 'ru' ? product.nameRu : product.nameEn}
+                      {language === 'ru' ? product.name_ru : product.name_en}
                     </p>
                     <p className="text-sm text-primary font-semibold">
                       ฿{product.price}
@@ -158,12 +190,14 @@ const MarketIndex = () => {
         </div>
 
         {/* Category Banners */}
-        <section className="mb-8">
-          <CategoryBannerGrid
-            banners={categoryBanners}
-            onCategoryClick={handleCategoryClick}
-          />
-        </section>
+        {!categoriesLoading && categoryBanners.length > 0 && (
+          <section className="mb-8">
+            <CategoryBannerGrid
+              banners={categoryBanners}
+              onCategoryClick={handleCategoryClick}
+            />
+          </section>
+        )}
 
         {/* Popular Products */}
         <div className="mb-8">
@@ -173,6 +207,7 @@ const MarketIndex = () => {
             products={popularProducts}
             variant="scroll"
             maxItems={10}
+            isLoading={popularLoading}
           />
         </div>
 
@@ -184,76 +219,57 @@ const MarketIndex = () => {
             products={newProducts}
             variant="scroll"
             maxItems={8}
+            isLoading={newLoading}
           />
         </div>
 
         {/* Categories Quick Links */}
-        <section className="mb-8">
-          <h2 className="text-lg font-bold mb-3">
-            {language === 'ru' ? 'Категории' : 'Categories'}
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {categoryBanners.map(cat => (
-              <Button
-                key={cat.id}
-                variant="outline"
-                size="sm"
-                className="rounded-full"
-                onClick={() => handleCategoryClick(cat.id)}
-              >
-                <span className="mr-1.5">{cat.icon}</span>
-                {language === 'ru' ? cat.labelRu : cat.labelEn}
-              </Button>
-            ))}
-          </div>
-        </section>
+        {categoryBanners.length > 0 && (
+          <section className="mb-8">
+            <h2 className="text-lg font-bold mb-3">
+              {language === 'ru' ? 'Категории' : 'Categories'}
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {categoryBanners.map(cat => (
+                <Button
+                  key={cat.id}
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full"
+                  onClick={() => handleCategoryClick(cat.id)}
+                >
+                  <span className="mr-1.5">{cat.icon}</span>
+                  {language === 'ru' ? cat.labelRu : cat.labelEn}
+                </Button>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* All Products Preview */}
-        <section>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold">
-              {language === 'ru' ? 'Все товары' : 'All Products'}
-            </h2>
-            <Badge variant="secondary">
-              {marketplaceProducts.length} {language === 'ru' ? 'товаров' : 'items'}
-            </Badge>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            {marketplaceProducts.slice(0, 6).map(product => (
-              <div key={product.id}>
-                <div className="bg-card rounded-xl border border-border overflow-hidden">
-                  <div className="relative aspect-square">
-                    <img
-                      src={product.image}
-                      alt={language === 'ru' ? product.nameRu : product.nameEn}
-                      className="w-full h-full object-cover"
-                    />
-                    {product.isPopular && (
-                      <Badge className="absolute top-2 left-2 bg-amber-500 text-[10px]">
-                        🔥 HIT
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="p-3">
-                    <h3 className="text-sm font-medium line-clamp-2 min-h-[2.5rem]">
-                      {language === 'ru' ? product.nameRu : product.nameEn}
-                    </h3>
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="font-bold">฿{product.price}</span>
-                      <Button
-                        size="icon"
-                        className="h-8 w-8 rounded-full"
-                        onClick={() => handleAdd(product)}
-                      >
-                        +
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+        {!productsLoading && allProducts.length > 0 && (
+          <section>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-lg font-bold">
+                {language === 'ru' ? 'Все товары' : 'All Products'}
+              </h2>
+              <Badge variant="secondary">
+                {allProducts.length} {language === 'ru' ? 'товаров' : 'items'}
+              </Badge>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {allProducts.slice(0, 6).map(product => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  quantity={getQuantity(product.id)}
+                  onAdd={() => handleAdd(product)}
+                  onRemove={() => handleRemove(product.id)}
+                />
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Sticky Cart Bar */}
         {cartItemCount > 0 && (
