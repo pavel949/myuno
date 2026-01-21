@@ -7,8 +7,15 @@ import { BackButton } from '@/components/uno/BackButton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Home, Plus, MapPin, Bed, Bath, SquareStack, Globe } from 'lucide-react';
+import { Home, Plus, MapPin, Bed, Bath, SquareStack, Globe, Copy } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { MoreVertical, Eye } from 'lucide-react';
 
 export default function OwnerProperties() {
   const { language } = useLanguage();
@@ -94,12 +101,14 @@ export default function OwnerProperties() {
           {properties.map((property) => (
             <Card 
               key={property.id}
-              className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => navigate(`/owner/properties/${property.id}`)}
+              className="overflow-hidden hover:shadow-md transition-shadow"
             >
               <CardContent className="p-0">
                 <div className="flex">
-                  <div className="w-28 h-28 bg-muted flex-shrink-0">
+                  <div 
+                    className="w-28 h-28 bg-muted flex-shrink-0 cursor-pointer"
+                    onClick={() => navigate(`/owner/properties/${property.id}`)}
+                  >
                     {property.cover_image ? (
                       <img 
                         src={property.cover_image} 
@@ -112,7 +121,10 @@ export default function OwnerProperties() {
                       </div>
                     )}
                   </div>
-                  <div className="flex-1 p-4">
+                  <div 
+                    className="flex-1 p-4 cursor-pointer"
+                    onClick={() => navigate(`/owner/properties/${property.id}`)}
+                  >
                     <div className="flex items-start justify-between gap-2 mb-1">
                       <h3 className="font-semibold line-clamp-1">
                         {isRu && property.title_ru ? property.title_ru : property.title}
@@ -157,6 +169,27 @@ export default function OwnerProperties() {
                         </span>
                       )}
                     </div>
+                  </div>
+                  
+                  {/* Actions dropdown */}
+                  <div className="p-2 flex items-start">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => navigate(`/owner/properties/${property.id}`)}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          {isRu ? 'Открыть' : 'View'}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate(`/owner/properties/new?cloneFrom=${property.id}`)}>
+                          <Copy className="h-4 w-4 mr-2" />
+                          {isRu ? 'Создать на основе' : 'Duplicate'}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
               </CardContent>
