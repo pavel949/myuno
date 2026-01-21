@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MessageSquarePlus, ChevronDown, ChevronUp, Zap, FileText } from 'lucide-react';
+import { Zap, FileText } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMessageTemplates, DEFAULT_QUICK_REPLIES, TEMPLATE_CATEGORIES, TemplateCategory } from '@/hooks/useMessageTemplates';
 import { Button } from '@/components/ui/button';

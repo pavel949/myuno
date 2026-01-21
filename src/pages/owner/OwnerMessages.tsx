@@ -45,7 +45,6 @@ export default function OwnerMessages() {
   }
 
   const bookingChats = chats?.filter(c => c.type === 'booking') || [];
-  const propertyChats = chats?.filter(c => c.type === 'property') || [];
 
   const displayChats = activeTab === 'bookings' 
     ? bookingChats 

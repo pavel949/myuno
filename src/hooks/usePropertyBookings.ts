@@ -87,14 +87,19 @@ export function usePropertyBookings(propertyId?: string) {
 
   const updateBooking = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<PropertyBooking> & { id: string }) => {
+      if (!user?.id) throw new Error('Not authenticated');
+      
+      // Update only if user owns this booking
       const { data, error } = await supabase
         .from('property_bookings')
         .update(updates)
         .eq('id', id)
+        .eq('owner_id', user.id) // Security: verify ownership
         .select()
         .single();
 
       if (error) throw error;
+      if (!data) throw new Error('Booking not found or access denied');
       return data as PropertyBooking;
     },
     onSuccess: () => {
@@ -104,12 +109,17 @@ export function usePropertyBookings(propertyId?: string) {
 
   const deleteBooking = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
+      if (!user?.id) throw new Error('Not authenticated');
+      
+      // Delete only if user owns this booking
+      const { error, count } = await supabase
         .from('property_bookings')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('owner_id', user.id); // Security: verify ownership
 
       if (error) throw error;
+      // Note: count may be null if not using .select(), but the query will simply not delete if not owner
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-bookings', user?.id] });
