@@ -53,3 +53,6 @@ verify_jwt = false
 
 [functions.send-order-email]
 verify_jwt = false
+
+[functions.image-resize]
+verify_jwt = false

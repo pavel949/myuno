@@ -4,6 +4,7 @@ import { Compass, ArrowRight, Star } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Badge } from '@/components/ui/badge';
 import { useTours } from '@/hooks/useTours';
+import { OptimizedImage } from '@/components/ui/optimized-image';
 
 export function ToursSection() {
   const { t, language } = useLanguage();
@@ -34,15 +35,18 @@ export function ToursSection() {
             onClick={() => navigate(`/tours/${tour.id}`)}
             className="flex-shrink-0 w-64 bg-card rounded-2xl overflow-hidden border hover:shadow-lg transition-all cursor-pointer group"
           >
-            <div className="relative h-36">
-              <img 
+            <div className="relative h-36 overflow-hidden">
+              <OptimizedImage 
                 src={tour.cover_image || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'} 
-                alt="" 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                loading="lazy"
+                alt={language === 'ru' ? tour.title_ru : tour.title_en}
+                width={256}
+                height={144}
+                className="w-full h-full group-hover:scale-105 transition-transform"
+                quality={75}
+                sizes="256px"
               />
               {tour.is_featured && (
-                <Badge className="absolute top-2 left-2 bg-amber-500 text-white text-[10px]">
+                <Badge className="absolute top-2 left-2 bg-amber-500 text-white text-[10px] z-10">
                   <Star className="w-3 h-3 mr-0.5" /> {t('badge.featured')}
                 </Badge>
               )}
