@@ -170,10 +170,10 @@ export function useUserTracking() {
           event_type: eventType,
           event_name: eventName,
           event_category: eventCategory,
-          event_data: eventData || {},
+          event_data: (eventData || {}) as unknown as import('@/integrations/supabase/types').Json,
           page_path: location.pathname,
           session_id: sessionIdRef.current,
-        });
+        }]);
     } catch (error) {
       console.error('Event tracking error:', error);
     }
