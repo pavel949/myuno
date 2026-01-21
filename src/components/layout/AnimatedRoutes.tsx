@@ -195,6 +195,10 @@ const AdminLookups = lazy(() => import('@/pages/admin/AdminLookups'));
 const AcquisitionMetrics = lazy(() => import('@/pages/admin/AcquisitionMetrics'));
 const AdminTickets = lazy(() => import('@/pages/admin/AdminTickets'));
 const AdminTicketDetail = lazy(() => import('@/pages/admin/AdminTicketDetail'));
+const AdminPharmacies = lazy(() => import('@/pages/admin/AdminPharmacies'));
+const AdminStores = lazy(() => import('@/pages/admin/AdminStores'));
+const AdminInsurance = lazy(() => import('@/pages/admin/AdminInsurance'));
+const AdminWaterActivities = lazy(() => import('@/pages/admin/AdminWaterActivities'));
 
 // Support pages (user tickets)
 const NewTicket = lazy(() => import('@/pages/support/NewTicket'));
@@ -490,6 +494,10 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/admin/acquisition-metrics" element={<LazyPage><AdminGuard><AcquisitionMetrics /></AdminGuard></LazyPage>} />
         <Route path="/admin/tickets" element={<LazyPage><AdminGuard><AdminTickets /></AdminGuard></LazyPage>} />
         <Route path="/admin/tickets/:ticketId" element={<LazyPage><AdminGuard><AdminTicketDetail /></AdminGuard></LazyPage>} />
+        <Route path="/admin/pharmacies" element={<LazyPage><AdminGuard><AdminPharmacies /></AdminGuard></LazyPage>} />
+        <Route path="/admin/stores" element={<LazyPage><AdminGuard><AdminStores /></AdminGuard></LazyPage>} />
+        <Route path="/admin/insurance" element={<LazyPage><AdminGuard><AdminInsurance /></AdminGuard></LazyPage>} />
+        <Route path="/admin/water-activities" element={<LazyPage><AdminGuard><AdminWaterActivities /></AdminGuard></LazyPage>} />
         
         {/* Staff Routes - Protected */}
         <Route path="/staff" element={<LazyPage><AdminGuard><StaffDashboard /></AdminGuard></LazyPage>} />
