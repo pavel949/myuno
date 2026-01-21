@@ -17,6 +17,7 @@ import {
   LogIn, LogOut, Brush, Package, Link2
 } from 'lucide-react';
 import { FullManagementCard } from '@/components/owner/FullManagementCard';
+import { OwnershipInviteBanner } from '@/components/owner/OwnershipInviteBanner';
 import { format, isToday, isTomorrow, addDays, differenceInDays, startOfMonth, endOfMonth } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
@@ -191,6 +192,9 @@ export default function OwnerDashboard() {
         showBack
         fallbackPath="/"
       />
+
+      {/* Ownership Invites Banner */}
+      <OwnershipInviteBanner />
 
       {/* Today's Activity */}
       {todayActivities.length > 0 && (
