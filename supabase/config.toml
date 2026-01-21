@@ -50,3 +50,6 @@ verify_jwt = false
 
 [functions.ai-translate]
 verify_jwt = false
+
+[functions.send-order-email]
+verify_jwt = false
