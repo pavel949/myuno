@@ -208,9 +208,12 @@ export default function FullManagement() {
                 : 'Trust your property management to the UNO team. We find guests, provide service, and maximize your income.'}
             </p>
 
-            <div className="flex items-center gap-2 text-sm">
+            <div className="flex items-center gap-2 text-sm flex-wrap">
               <Badge variant="secondary" className="bg-primary/20">
-                {isRu ? 'Комиссия от 15%' : 'From 15% commission'}
+                {isRu ? '70% вам / 30% нам' : '70% you / 30% us'}
+              </Badge>
+              <Badge variant="outline">
+                {isRu ? 'После расходов' : 'After expenses'}
               </Badge>
               <Badge variant="outline">
                 {isRu ? 'Без скрытых платежей' : 'No hidden fees'}

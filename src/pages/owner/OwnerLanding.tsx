@@ -110,10 +110,10 @@ const collaborationOptions = [
     badgeRu: 'Популярно',
     titleEn: 'UNO Full Management',
     titleRu: 'Полное управление UNO',
-    descEn: 'We handle everything. Sit back and receive passive income.',
-    descRu: 'Мы берём всё на себя. Получайте пассивный доход.',
-    priceEn: 'from 15%',
-    priceRu: 'от 15%',
+    descEn: 'We handle everything. You receive 70% after expenses.',
+    descRu: 'Мы берём всё на себя. Вы получаете 70% после расходов.',
+    priceEn: '70/30',
+    priceRu: '70/30',
     features: ['everything', 'cleaning', 'guests', 'maintenance', 'pricing']
   },
   {
@@ -353,7 +353,9 @@ export default function OwnerLanding() {
                         {isRu ? option.priceRu : option.priceEn}
                       </div>
                       <div className="text-[10px] text-muted-foreground">
-                        {isRu ? 'комиссия' : 'commission'}
+                        {option.type === 'full' 
+                          ? (isRu ? 'вам / нам' : 'you / us')
+                          : (isRu ? 'комиссия' : 'commission')}
                       </div>
                     </div>
                   </div>
@@ -370,11 +372,47 @@ export default function OwnerLanding() {
           </div>
         </motion.section>
 
+        {/* Full Management CTA */}
+        <motion.section
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.85 }}
+          className="py-6"
+        >
+          <Card className="p-5 bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-transparent border-amber-500/30">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2.5 rounded-xl bg-amber-500/20">
+                <Sparkles className="w-6 h-6 text-amber-600" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg">
+                  {isRu ? 'Хотите пассивный доход?' : 'Want Passive Income?'}
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  {isRu ? 'Полное управление от myUNO' : 'Full management by myUNO'}
+                </p>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              {isRu 
+                ? 'Мы возьмём всё на себя: гостей, уборку, обслуживание, отчётность. Вы получаете 70% после расходов.'
+                : 'We handle everything: guests, cleaning, maintenance, reporting. You receive 70% after expenses.'}
+            </p>
+            <PremiumButton 
+              className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+              onClick={handleFullManagement}
+            >
+              {isRu ? 'Оставить заявку на управление' : 'Request Full Management'}
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </PremiumButton>
+          </Card>
+        </motion.section>
+
         {/* Final CTA */}
         <motion.section
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.9 }}
+          transition={{ delay: 0.95 }}
           className="py-8"
         >
           <Card className="p-6 text-center bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
@@ -386,22 +424,14 @@ export default function OwnerLanding() {
                 ? 'Разместите объект бесплатно и начните получать бронирования уже сегодня'
                 : 'List your property for free and start receiving bookings today'}
             </p>
-            <div className="flex flex-col gap-2">
-              <PremiumButton 
-                size="lg" 
-                className="w-full"
-                onClick={handleListProperty}
-              >
-                {isRu ? 'Разместить объект бесплатно' : 'List Property for Free'}
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </PremiumButton>
-              <PremiumButton 
-                variant="ghost" 
-                onClick={handleFullManagement}
-              >
-                {isRu ? 'Узнать о полном управлении' : 'Learn About Full Management'}
-              </PremiumButton>
-            </div>
+            <PremiumButton 
+              size="lg" 
+              className="w-full"
+              onClick={handleListProperty}
+            >
+              {isRu ? 'Разместить объект бесплатно' : 'List Property for Free'}
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </PremiumButton>
           </Card>
         </motion.section>
       </PageContainer>

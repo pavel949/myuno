@@ -30,7 +30,7 @@ export function FullManagementCard() {
               </div>
             </div>
             <Badge variant="secondary" className="bg-primary/20 text-primary text-xs">
-              {isRu ? 'от 15%' : 'from 15%'}
+              {isRu ? '70/30' : '70/30'}
             </Badge>
           </div>
 
