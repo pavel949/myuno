@@ -3192,6 +3192,7 @@ export type Database = {
       }
       owner_properties: {
         Row: {
+          accessibility_features: string[] | null
           address: string
           area_sqm: number | null
           bathrooms: number | null
@@ -3230,6 +3231,7 @@ export type Database = {
           furnishing_level: string | null
           has_crib: boolean | null
           has_high_chair: boolean | null
+          highlights: string[] | null
           host_languages: string[] | null
           house_rules: string | null
           house_rules_ru: string | null
@@ -3257,6 +3259,7 @@ export type Database = {
           max_party_guests: number | null
           min_stay_nights: number | null
           monthly_discount: number | null
+          nearby_places: Json | null
           notes: string | null
           owner_id: string
           parking_included: boolean | null
@@ -3273,6 +3276,8 @@ export type Database = {
           quiet_hours_end: string | null
           quiet_hours_start: string | null
           rental_platform: string | null
+          rooms: Json | null
+          safety_features: string[] | null
           seasonal_pricing: Json | null
           smoking_penalty: number | null
           status: string | null
@@ -3294,6 +3299,7 @@ export type Database = {
           weekly_discount: number | null
         }
         Insert: {
+          accessibility_features?: string[] | null
           address: string
           area_sqm?: number | null
           bathrooms?: number | null
@@ -3332,6 +3338,7 @@ export type Database = {
           furnishing_level?: string | null
           has_crib?: boolean | null
           has_high_chair?: boolean | null
+          highlights?: string[] | null
           host_languages?: string[] | null
           house_rules?: string | null
           house_rules_ru?: string | null
@@ -3359,6 +3366,7 @@ export type Database = {
           max_party_guests?: number | null
           min_stay_nights?: number | null
           monthly_discount?: number | null
+          nearby_places?: Json | null
           notes?: string | null
           owner_id: string
           parking_included?: boolean | null
@@ -3375,6 +3383,8 @@ export type Database = {
           quiet_hours_end?: string | null
           quiet_hours_start?: string | null
           rental_platform?: string | null
+          rooms?: Json | null
+          safety_features?: string[] | null
           seasonal_pricing?: Json | null
           smoking_penalty?: number | null
           status?: string | null
@@ -3396,6 +3406,7 @@ export type Database = {
           weekly_discount?: number | null
         }
         Update: {
+          accessibility_features?: string[] | null
           address?: string
           area_sqm?: number | null
           bathrooms?: number | null
@@ -3434,6 +3445,7 @@ export type Database = {
           furnishing_level?: string | null
           has_crib?: boolean | null
           has_high_chair?: boolean | null
+          highlights?: string[] | null
           host_languages?: string[] | null
           house_rules?: string | null
           house_rules_ru?: string | null
@@ -3461,6 +3473,7 @@ export type Database = {
           max_party_guests?: number | null
           min_stay_nights?: number | null
           monthly_discount?: number | null
+          nearby_places?: Json | null
           notes?: string | null
           owner_id?: string
           parking_included?: boolean | null
@@ -3477,6 +3490,8 @@ export type Database = {
           quiet_hours_end?: string | null
           quiet_hours_start?: string | null
           rental_platform?: string | null
+          rooms?: Json | null
+          safety_features?: string[] | null
           seasonal_pricing?: Json | null
           smoking_penalty?: number | null
           status?: string | null
@@ -4621,6 +4636,60 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_availability: {
+        Row: {
+          booking_id: string | null
+          created_at: string | null
+          date: string
+          id: string
+          min_nights_override: number | null
+          note: string | null
+          price_override: number | null
+          property_id: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string | null
+          date: string
+          id?: string
+          min_nights_override?: number | null
+          note?: string | null
+          price_override?: number | null
+          property_id: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string | null
+          date?: string
+          id?: string
+          min_nights_override?: number | null
+          note?: string | null
+          price_override?: number | null
+          property_id?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_availability_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "property_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_availability_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
             referencedColumns: ["id"]
           },
         ]
