@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievement_definitions: {
+        Row: {
+          bonus_amount: number | null
+          category: string | null
+          code: string
+          created_at: string | null
+          description_en: string | null
+          description_ru: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name_en: string
+          name_ru: string
+          sort_order: number | null
+        }
+        Insert: {
+          bonus_amount?: number | null
+          category?: string | null
+          code: string
+          created_at?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name_en: string
+          name_ru: string
+          sort_order?: number | null
+        }
+        Update: {
+          bonus_amount?: number | null
+          category?: string | null
+          code?: string
+          created_at?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name_en?: string
+          name_ru?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
       admin_audit_logs: {
         Row: {
           action: string
@@ -1973,6 +2018,48 @@ export type Database = {
           },
         ]
       }
+      guest_loyalty_tiers: {
+        Row: {
+          benefits: Json | null
+          cashback_percent: number
+          color: string | null
+          created_at: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          min_gmv_thb: number
+          tier_name: string
+          tier_order: number
+          updated_at: string | null
+        }
+        Insert: {
+          benefits?: Json | null
+          cashback_percent?: number
+          color?: string | null
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          min_gmv_thb?: number
+          tier_name: string
+          tier_order: number
+          updated_at?: string | null
+        }
+        Update: {
+          benefits?: Json | null
+          cashback_percent?: number
+          color?: string | null
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          min_gmv_thb?: number
+          tier_name?: string
+          tier_order?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       gyms: {
         Row: {
           address: string | null
@@ -3761,6 +3848,93 @@ export type Database = {
           name_ru?: string | null
           org_type?: string
           phone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      owner_commission_tiers: {
+        Row: {
+          benefits: Json | null
+          commission_percent: number
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          min_gmv_thb: number
+          tier_name: string
+          tier_order: number
+        }
+        Insert: {
+          benefits?: Json | null
+          commission_percent?: number
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          min_gmv_thb?: number
+          tier_name: string
+          tier_order: number
+        }
+        Update: {
+          benefits?: Json | null
+          commission_percent?: number
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          min_gmv_thb?: number
+          tier_name?: string
+          tier_order?: number
+        }
+        Relationships: []
+      }
+      owner_performance_metrics: {
+        Row: {
+          avg_rating: number | null
+          avg_response_time_minutes: number | null
+          cancellation_rate: number | null
+          completed_bookings: number | null
+          created_at: string | null
+          id: string
+          is_superhost: boolean | null
+          last_evaluated_at: string | null
+          owner_id: string
+          response_rate: number | null
+          review_reply_rate: number | null
+          superhost_since: string | null
+          total_bookings: number | null
+          total_reviews: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          avg_rating?: number | null
+          avg_response_time_minutes?: number | null
+          cancellation_rate?: number | null
+          completed_bookings?: number | null
+          created_at?: string | null
+          id?: string
+          is_superhost?: boolean | null
+          last_evaluated_at?: string | null
+          owner_id: string
+          response_rate?: number | null
+          review_reply_rate?: number | null
+          superhost_since?: string | null
+          total_bookings?: number | null
+          total_reviews?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          avg_rating?: number | null
+          avg_response_time_minutes?: number | null
+          cancellation_rate?: number | null
+          completed_bookings?: number | null
+          created_at?: string | null
+          id?: string
+          is_superhost?: boolean | null
+          last_evaluated_at?: string | null
+          owner_id?: string
+          response_rate?: number | null
+          review_reply_rate?: number | null
+          superhost_since?: string | null
+          total_bookings?: number | null
+          total_reviews?: number | null
           updated_at?: string | null
         }
         Relationships: []
@@ -6922,6 +7096,48 @@ export type Database = {
           },
         ]
       }
+      returning_guests: {
+        Row: {
+          booking_count: number | null
+          created_at: string | null
+          first_booking_at: string | null
+          guest_id: string
+          id: string
+          last_booking_at: string | null
+          notes: string | null
+          owner_id: string
+          personal_discount_percent: number | null
+          total_spent: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          booking_count?: number | null
+          created_at?: string | null
+          first_booking_at?: string | null
+          guest_id: string
+          id?: string
+          last_booking_at?: string | null
+          notes?: string | null
+          owner_id: string
+          personal_discount_percent?: number | null
+          total_spent?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          booking_count?: number | null
+          created_at?: string | null
+          first_booking_at?: string | null
+          guest_id?: string
+          id?: string
+          last_booking_at?: string | null
+          notes?: string | null
+          owner_id?: string
+          personal_discount_percent?: number | null
+          total_spent?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       review_helpful: {
         Row: {
           created_at: string
@@ -8256,6 +8472,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_achievements: {
+        Row: {
+          achieved_at: string | null
+          achievement_code: string
+          bonus_awarded: number | null
+          id: string
+          metadata: Json | null
+          user_id: string
+        }
+        Insert: {
+          achieved_at?: string | null
+          achievement_code: string
+          bonus_awarded?: number | null
+          id?: string
+          metadata?: Json | null
+          user_id: string
+        }
+        Update: {
+          achieved_at?: string | null
+          achievement_code?: string
+          bonus_awarded?: number | null
+          id?: string
+          metadata?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_active_context: {
         Row: {
           active_org_id: string | null
@@ -8338,6 +8581,53 @@ export type Database = {
           verified_at?: string | null
         }
         Relationships: []
+      }
+      user_loyalty_status: {
+        Row: {
+          bookings_this_year: number | null
+          created_at: string | null
+          current_tier_id: string | null
+          gmv_this_year: number | null
+          id: string
+          tier_updated_at: string | null
+          total_bookings: number | null
+          total_gmv_thb: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          bookings_this_year?: number | null
+          created_at?: string | null
+          current_tier_id?: string | null
+          gmv_this_year?: number | null
+          id?: string
+          tier_updated_at?: string | null
+          total_bookings?: number | null
+          total_gmv_thb?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          bookings_this_year?: number | null
+          created_at?: string | null
+          current_tier_id?: string | null
+          gmv_this_year?: number | null
+          id?: string
+          tier_updated_at?: string | null
+          total_bookings?: number | null
+          total_gmv_thb?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_loyalty_status_current_tier_id_fkey"
+            columns: ["current_tier_id"]
+            isOneToOne: false
+            referencedRelation: "guest_loyalty_tiers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_pins: {
         Row: {
@@ -9564,6 +9854,10 @@ export type Database = {
         Args: { p_code: string; p_referred_id: string }
         Returns: boolean
       }
+      award_achievement: {
+        Args: { p_achievement_code: string; p_user_id: string }
+        Returns: Json
+      }
       calculate_daily_metrics: { Args: { p_date?: string }; Returns: undefined }
       calculate_distance_km: {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
@@ -9719,6 +10013,10 @@ export type Database = {
         }[]
       }
       generate_referral_code: { Args: { p_user_id: string }; Returns: string }
+      get_or_create_loyalty_status: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
       get_or_create_wallet: {
         Args: { p_user_id: string }
         Returns: {
@@ -9797,6 +10095,7 @@ export type Database = {
         }
         Returns: Json
       }
+      recalculate_user_tier: { Args: { p_user_id: string }; Returns: Json }
       refund_wallet_booking: {
         Args: { p_booking_id: string; p_user_id: string }
         Returns: boolean

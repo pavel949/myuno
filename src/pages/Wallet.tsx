@@ -28,14 +28,14 @@ import {
   CreditCard,
   TrendingUp,
   Loader2,
-  CheckCircle,
-  XCircle,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ru, enUS } from "date-fns/locale";
 import { toast } from "sonner";
 import { CashbackRatesCard } from "@/components/uno/CashbackBadge";
 import { ReferralCard } from "@/components/uno/ReferralCard";
+import { LoyaltyStatusCard } from "@/components/wallet/LoyaltyStatusCard";
+import { AchievementsCard } from "@/components/wallet/AchievementsCard";
 
 interface WalletData {
   id: string;
@@ -357,6 +357,12 @@ const Wallet = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Loyalty Status */}
+        <LoyaltyStatusCard />
+
+        {/* Achievements */}
+        <AchievementsCard />
 
         {/* Referral Program */}
         <ReferralCard />
