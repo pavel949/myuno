@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { StickyCartBar } from '@/components/cart/StickyCartBar';
-import { CategoryBannerGrid, CategoryBannerData, ProductSection, ProductCard } from '@/components/market';
+import { ProductSection, ProfessionalProductCard, ProfessionalCategoryBanner } from '@/components/market';
 import { 
   useMarketplaceCategories, 
   useMarketplaceProducts,
@@ -52,17 +52,11 @@ const MarketIndex = () => {
     ).slice(0, 8);
   }, [searchQuery, allProducts]);
 
-  // Map categories to banner format
-  const categoryBanners = useMemo(() => categories.map(cat => ({
-    id: cat.slug,
-    labelEn: cat.name_en,
-    labelRu: cat.name_ru,
-    descriptionEn: cat.description_en || '',
-    descriptionRu: cat.description_ru || '',
-    icon: cat.icon || '📦',
-    image: cat.image_url || '/placeholder.svg',
-    gradient: cat.gradient || 'from-primary/80 to-primary/40',
-  })), [categories]);
+  // Use categories directly with new component
+  const sortedCategories = useMemo(() => 
+    [...categories].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)),
+    [categories]
+  );
 
   const getQuantity = (productId: string) => {
     return cartItems.find(i => i.id === productId)?.quantity || 0;
@@ -190,10 +184,10 @@ const MarketIndex = () => {
         </div>
 
         {/* Category Banners */}
-        {!categoriesLoading && categoryBanners.length > 0 && (
+        {!categoriesLoading && sortedCategories.length > 0 && (
           <section className="mb-8">
-            <CategoryBannerGrid
-              banners={categoryBanners}
+            <ProfessionalCategoryBanner
+              categories={sortedCategories}
               onCategoryClick={handleCategoryClick}
             />
           </section>
@@ -224,22 +218,22 @@ const MarketIndex = () => {
         </div>
 
         {/* Categories Quick Links */}
-        {categoryBanners.length > 0 && (
+        {sortedCategories.length > 0 && (
           <section className="mb-8">
             <h2 className="text-lg font-bold mb-3">
               {language === 'ru' ? 'Категории' : 'Categories'}
             </h2>
             <div className="flex flex-wrap gap-2">
-              {categoryBanners.map(cat => (
+              {sortedCategories.map(cat => (
                 <Button
                   key={cat.id}
                   variant="outline"
                   size="sm"
                   className="rounded-full"
-                  onClick={() => handleCategoryClick(cat.id)}
+                  onClick={() => handleCategoryClick(cat.slug)}
                 >
                   <span className="mr-1.5">{cat.icon}</span>
-                  {language === 'ru' ? cat.labelRu : cat.labelEn}
+                  {language === 'ru' ? cat.name_ru : cat.name_en}
                 </Button>
               ))}
             </div>
@@ -259,7 +253,7 @@ const MarketIndex = () => {
             </div>
             <div className="grid grid-cols-2 gap-3">
               {allProducts.slice(0, 6).map(product => (
-                <ProductCard
+                <ProfessionalProductCard
                   key={product.id}
                   product={product}
                   quantity={getQuantity(product.id)}

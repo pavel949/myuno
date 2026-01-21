@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Search, ShoppingBag } from 'lucide-react';
+import { Search, ShoppingBag, LayoutGrid, List } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -9,12 +9,12 @@ import { PageHeader } from '@/components/uno/PageHeader';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { StickyCartBar } from '@/components/cart/StickyCartBar';
-import { ProductCard } from '@/components/market';
+import { ProfessionalProductCard, SubcategoryChips } from '@/components/market';
 import { useMarketplaceCategories, useMarketplaceProducts, useMarketplaceSubcategories } from '@/hooks/useMarketplace';
-import { MarketplaceProduct, toSubcategory } from '@/types/marketplace';
+import { MarketplaceProduct, MarketplaceSubcategory } from '@/types/marketplace';
 import { useCartToast } from '@/hooks/useCartToast';
-import { FilterChip, FilterChipGroup } from '@/components/uno/FilterChip';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 
 const MarketCategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
@@ -25,6 +25,7 @@ const MarketCategoryPage = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSubcategory, setSelectedSubcategory] = useState('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'horizontal'>('grid');
 
   // Fetch from database
   const { categories, isLoading: categoriesLoading } = useMarketplaceCategories();
@@ -34,8 +35,13 @@ const MarketCategoryPage = () => {
   });
 
   const category = categories.find(c => c.slug === categoryId);
-  // Convert DB subcategories to legacy format for FilterChip compatibility
-  const subcategories = useMemo(() => dbSubcategories.map(toSubcategory), [dbSubcategories]);
+  // Use subcategories directly for new chips component
+  const subcategoryChips = useMemo(() => dbSubcategories.map(sub => ({
+    id: sub.slug,
+    label_en: sub.name_en,
+    label_ru: sub.name_ru,
+    icon: sub.icon,
+  })), [dbSubcategories]);
   
   const cartItems = getItemsByType('product');
   const cartItemCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
@@ -161,32 +167,47 @@ const MarketCategoryPage = () => {
         </div>
 
         {/* Subcategory Chips */}
-        {subcategories.length > 1 && (
-          <FilterChipGroup scrollable className="mb-4">
-            {subcategories.map(sub => (
-              <FilterChip
-                key={sub.id}
-                label={language === 'ru' ? sub.label_ru : sub.label_en}
-                isActive={selectedSubcategory === sub.id}
-                onClick={() => setSelectedSubcategory(sub.id)}
-              />
-            ))}
-          </FilterChipGroup>
-        )}
+        <SubcategoryChips
+          subcategories={subcategoryChips}
+          selectedId={selectedSubcategory}
+          onSelect={setSelectedSubcategory}
+          className="mb-4"
+        />
 
-        {/* Results Count */}
+        {/* Results Count & View Toggle */}
         <div className="flex items-center justify-between mb-4">
           <p className="text-sm text-muted-foreground">
             {isLoading ? '...' : `${filteredProducts.length} ${language === 'ru' ? 'товаров' : 'products'}`}
           </p>
+          <div className="flex gap-1">
+            <Button
+              variant={viewMode === 'grid' ? 'default' : 'ghost'}
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setViewMode('grid')}
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === 'horizontal' ? 'default' : 'ghost'}
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setViewMode('horizontal')}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
-        {/* Products Grid */}
+        {/* Products */}
         {isLoading ? (
-          <div className="grid grid-cols-2 gap-3">
+          <div className={cn(
+            "gap-3",
+            viewMode === 'grid' ? "grid grid-cols-2" : "flex flex-col"
+          )}>
             {[1, 2, 3, 4].map(i => (
-              <div key={i} className="bg-card rounded-xl border border-border overflow-hidden">
-                <Skeleton className="aspect-square" />
+              <div key={i} className="bg-card rounded-2xl border border-border overflow-hidden">
+                <Skeleton className={viewMode === 'grid' ? "aspect-square" : "h-28 w-28"} />
                 <div className="p-3">
                   <Skeleton className="h-10 mb-2" />
                   <Skeleton className="h-4 w-16" />
@@ -201,14 +222,18 @@ const MarketCategoryPage = () => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className={cn(
+            "gap-3",
+            viewMode === 'grid' ? "grid grid-cols-2" : "flex flex-col"
+          )}>
             {filteredProducts.map(product => (
-              <ProductCard
+              <ProfessionalProductCard
                 key={product.id}
                 product={product}
                 quantity={getQuantity(product.id)}
                 onAdd={() => handleAdd(product)}
                 onRemove={() => handleRemove(product.id)}
+                variant={viewMode}
               />
             ))}
           </div>
