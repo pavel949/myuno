@@ -65,6 +65,7 @@ export type Database = {
           can_drive: boolean | null
           certifications: string[] | null
           created_at: string | null
+          created_by_uno_team: boolean | null
           currency: string | null
           experience_years: number | null
           first_aid_certified: boolean | null
@@ -85,6 +86,7 @@ export type Database = {
           review_count: number | null
           reviewed_at: string | null
           reviewed_by: string | null
+          uno_team_creator_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -98,6 +100,7 @@ export type Database = {
           can_drive?: boolean | null
           certifications?: string[] | null
           created_at?: string | null
+          created_by_uno_team?: boolean | null
           currency?: string | null
           experience_years?: number | null
           first_aid_certified?: boolean | null
@@ -118,6 +121,7 @@ export type Database = {
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          uno_team_creator_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -131,6 +135,7 @@ export type Database = {
           can_drive?: boolean | null
           certifications?: string[] | null
           created_at?: string | null
+          created_by_uno_team?: boolean | null
           currency?: string | null
           experience_years?: number | null
           first_aid_certified?: boolean | null
@@ -151,6 +156,7 @@ export type Database = {
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          uno_team_creator_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -779,6 +785,7 @@ export type Database = {
           areas_served: string[] | null
           cover_image: string | null
           created_at: string | null
+          created_by_uno_team: boolean | null
           currency: string | null
           description_en: string | null
           description_ru: string | null
@@ -800,6 +807,7 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           service_type: string | null
+          uno_team_creator_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -807,6 +815,7 @@ export type Database = {
           areas_served?: string[] | null
           cover_image?: string | null
           created_at?: string | null
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -828,6 +837,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           service_type?: string | null
+          uno_team_creator_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -835,6 +845,7 @@ export type Database = {
           areas_served?: string[] | null
           cover_image?: string | null
           created_at?: string | null
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -856,6 +867,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           service_type?: string | null
+          uno_team_creator_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -876,6 +888,7 @@ export type Database = {
           consultation_price: number | null
           cover_image: string | null
           created_at: string
+          created_by_uno_team: boolean | null
           currency: string | null
           description_en: string | null
           description_ru: string | null
@@ -900,6 +913,7 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           specialty: string[] | null
+          uno_team_creator_id: string | null
           updated_at: string
           website: string | null
           working_hours: Json | null
@@ -911,6 +925,7 @@ export type Database = {
           consultation_price?: number | null
           cover_image?: string | null
           created_at?: string
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -935,6 +950,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           specialty?: string[] | null
+          uno_team_creator_id?: string | null
           updated_at?: string
           website?: string | null
           working_hours?: Json | null
@@ -946,6 +962,7 @@ export type Database = {
           consultation_price?: number | null
           cover_image?: string | null
           created_at?: string
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -970,6 +987,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           specialty?: string[] | null
+          uno_team_creator_id?: string | null
           updated_at?: string
           website?: string | null
           working_hours?: Json | null
@@ -1301,6 +1319,7 @@ export type Database = {
           approval_status: string | null
           cover_image: string | null
           created_at: string | null
+          created_by_uno_team: boolean | null
           currency: string | null
           description_en: string | null
           description_ru: string | null
@@ -1329,6 +1348,7 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           subjects: string[] | null
+          uno_team_creator_id: string | null
           updated_at: string | null
           website: string | null
         }
@@ -1338,6 +1358,7 @@ export type Database = {
           approval_status?: string | null
           cover_image?: string | null
           created_at?: string | null
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -1366,6 +1387,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           subjects?: string[] | null
+          uno_team_creator_id?: string | null
           updated_at?: string | null
           website?: string | null
         }
@@ -1375,6 +1397,7 @@ export type Database = {
           approval_status?: string | null
           cover_image?: string | null
           created_at?: string | null
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -1403,6 +1426,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           subjects?: string[] | null
+          uno_team_creator_id?: string | null
           updated_at?: string | null
           website?: string | null
         }
@@ -1485,6 +1509,7 @@ export type Database = {
           category: string
           cover_image: string | null
           created_at: string
+          created_by_uno_team: boolean | null
           currency: string | null
           description_en: string | null
           description_ru: string | null
@@ -1518,6 +1543,7 @@ export type Database = {
           spots_left: number | null
           title_en: string
           title_ru: string
+          uno_team_creator_id: string | null
           updated_at: string
           venue_id: string | null
         }
@@ -1527,6 +1553,7 @@ export type Database = {
           category?: string
           cover_image?: string | null
           created_at?: string
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -1560,6 +1587,7 @@ export type Database = {
           spots_left?: number | null
           title_en: string
           title_ru: string
+          uno_team_creator_id?: string | null
           updated_at?: string
           venue_id?: string | null
         }
@@ -1569,6 +1597,7 @@ export type Database = {
           category?: string
           cover_image?: string | null
           created_at?: string
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -1602,6 +1631,7 @@ export type Database = {
           spots_left?: number | null
           title_en?: string
           title_ru?: string
+          uno_team_creator_id?: string | null
           updated_at?: string
           venue_id?: string | null
         }
@@ -1708,6 +1738,7 @@ export type Database = {
           approval_status: string | null
           cover_image: string | null
           created_at: string
+          created_by_uno_team: boolean | null
           delivery_available: boolean | null
           delivery_fee: number | null
           description_en: string | null
@@ -1730,6 +1761,7 @@ export type Database = {
           review_count: number | null
           reviewed_at: string | null
           reviewed_by: string | null
+          uno_team_creator_id: string | null
           updated_at: string
           working_hours: Json | null
         }
@@ -1738,6 +1770,7 @@ export type Database = {
           approval_status?: string | null
           cover_image?: string | null
           created_at?: string
+          created_by_uno_team?: boolean | null
           delivery_available?: boolean | null
           delivery_fee?: number | null
           description_en?: string | null
@@ -1760,6 +1793,7 @@ export type Database = {
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          uno_team_creator_id?: string | null
           updated_at?: string
           working_hours?: Json | null
         }
@@ -1768,6 +1802,7 @@ export type Database = {
           approval_status?: string | null
           cover_image?: string | null
           created_at?: string
+          created_by_uno_team?: boolean | null
           delivery_available?: boolean | null
           delivery_fee?: number | null
           description_en?: string | null
@@ -1790,6 +1825,7 @@ export type Database = {
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          uno_team_creator_id?: string | null
           updated_at?: string
           working_hours?: Json | null
         }
@@ -1945,6 +1981,7 @@ export type Database = {
           classes: string[] | null
           cover_image: string | null
           created_at: string | null
+          created_by_uno_team: boolean | null
           currency: string | null
           description_en: string | null
           description_ru: string | null
@@ -1970,6 +2007,7 @@ export type Database = {
           review_count: number | null
           reviewed_at: string | null
           reviewed_by: string | null
+          uno_team_creator_id: string | null
           updated_at: string | null
           website: string | null
           working_hours: Json | null
@@ -1981,6 +2019,7 @@ export type Database = {
           classes?: string[] | null
           cover_image?: string | null
           created_at?: string | null
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -2006,6 +2045,7 @@ export type Database = {
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          uno_team_creator_id?: string | null
           updated_at?: string | null
           website?: string | null
           working_hours?: Json | null
@@ -2017,6 +2057,7 @@ export type Database = {
           classes?: string[] | null
           cover_image?: string | null
           created_at?: string | null
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -2042,6 +2083,7 @@ export type Database = {
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          uno_team_creator_id?: string | null
           updated_at?: string | null
           website?: string | null
           working_hours?: Json | null
@@ -2145,6 +2187,7 @@ export type Database = {
           approval_status: string | null
           cover_image: string | null
           created_at: string | null
+          created_by_uno_team: boolean | null
           currency: string | null
           description_en: string | null
           description_ru: string | null
@@ -2173,6 +2216,7 @@ export type Database = {
           review_count: number | null
           reviewed_at: string | null
           reviewed_by: string | null
+          uno_team_creator_id: string | null
           updated_at: string | null
           website: string | null
           working_hours: Json | null
@@ -2182,6 +2226,7 @@ export type Database = {
           approval_status?: string | null
           cover_image?: string | null
           created_at?: string | null
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -2210,6 +2255,7 @@ export type Database = {
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          uno_team_creator_id?: string | null
           updated_at?: string | null
           website?: string | null
           working_hours?: Json | null
@@ -2219,6 +2265,7 @@ export type Database = {
           approval_status?: string | null
           cover_image?: string | null
           created_at?: string | null
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -2247,6 +2294,7 @@ export type Database = {
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          uno_team_creator_id?: string | null
           updated_at?: string | null
           website?: string | null
           working_hours?: Json | null
@@ -3692,6 +3740,7 @@ export type Database = {
           approval_status: string | null
           cover_image: string | null
           created_at: string | null
+          created_by_uno_team: boolean | null
           currency: string | null
           description_en: string | null
           description_ru: string | null
@@ -3717,6 +3766,7 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           service_type: string | null
+          uno_team_creator_id: string | null
           updated_at: string | null
           working_hours: Json | null
         }
@@ -3725,6 +3775,7 @@ export type Database = {
           approval_status?: string | null
           cover_image?: string | null
           created_at?: string | null
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -3750,6 +3801,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           service_type?: string | null
+          uno_team_creator_id?: string | null
           updated_at?: string | null
           working_hours?: Json | null
         }
@@ -3758,6 +3810,7 @@ export type Database = {
           approval_status?: string | null
           cover_image?: string | null
           created_at?: string | null
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -3783,6 +3836,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           service_type?: string | null
+          uno_team_creator_id?: string | null
           updated_at?: string | null
           working_hours?: Json | null
         }
@@ -4523,6 +4577,7 @@ export type Database = {
           bedrooms: number | null
           cover_image: string | null
           created_at: string
+          created_by_uno_team: boolean | null
           currency: string | null
           description_en: string | null
           description_ru: string | null
@@ -4555,6 +4610,7 @@ export type Database = {
           title_en: string
           title_ru: string
           unit_number: string | null
+          uno_team_creator_id: string | null
           updated_at: string
           view_type: string | null
         }
@@ -4568,6 +4624,7 @@ export type Database = {
           bedrooms?: number | null
           cover_image?: string | null
           created_at?: string
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -4600,6 +4657,7 @@ export type Database = {
           title_en: string
           title_ru: string
           unit_number?: string | null
+          uno_team_creator_id?: string | null
           updated_at?: string
           view_type?: string | null
         }
@@ -4613,6 +4671,7 @@ export type Database = {
           bedrooms?: number | null
           cover_image?: string | null
           created_at?: string
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -4645,6 +4704,7 @@ export type Database = {
           title_en?: string
           title_ru?: string
           unit_number?: string | null
+          uno_team_creator_id?: string | null
           updated_at?: string
           view_type?: string | null
         }
@@ -5880,6 +5940,7 @@ export type Database = {
           approval_status: string | null
           cover_image: string | null
           created_at: string
+          created_by_uno_team: boolean | null
           cuisine: string
           delivery_available: boolean | null
           delivery_fee: number | null
@@ -5907,6 +5968,7 @@ export type Database = {
           review_count: number | null
           reviewed_at: string | null
           reviewed_by: string | null
+          uno_team_creator_id: string | null
           updated_at: string
           website: string | null
           working_hours: Json | null
@@ -5916,6 +5978,7 @@ export type Database = {
           approval_status?: string | null
           cover_image?: string | null
           created_at?: string
+          created_by_uno_team?: boolean | null
           cuisine?: string
           delivery_available?: boolean | null
           delivery_fee?: number | null
@@ -5943,6 +6006,7 @@ export type Database = {
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          uno_team_creator_id?: string | null
           updated_at?: string
           website?: string | null
           working_hours?: Json | null
@@ -5952,6 +6016,7 @@ export type Database = {
           approval_status?: string | null
           cover_image?: string | null
           created_at?: string
+          created_by_uno_team?: boolean | null
           cuisine?: string
           delivery_available?: boolean | null
           delivery_fee?: number | null
@@ -5979,6 +6044,7 @@ export type Database = {
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          uno_team_creator_id?: string | null
           updated_at?: string
           website?: string | null
           working_hours?: Json | null
@@ -6154,6 +6220,7 @@ export type Database = {
           approval_status: string | null
           cover_image: string | null
           created_at: string | null
+          created_by_uno_team: boolean | null
           currency: string | null
           description_en: string | null
           description_ru: string | null
@@ -6179,6 +6246,7 @@ export type Database = {
           reviewed_by: string | null
           salon_type: string | null
           services: string[] | null
+          uno_team_creator_id: string | null
           updated_at: string | null
           website: string | null
           working_hours: Json | null
@@ -6189,6 +6257,7 @@ export type Database = {
           approval_status?: string | null
           cover_image?: string | null
           created_at?: string | null
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -6214,6 +6283,7 @@ export type Database = {
           reviewed_by?: string | null
           salon_type?: string | null
           services?: string[] | null
+          uno_team_creator_id?: string | null
           updated_at?: string | null
           website?: string | null
           working_hours?: Json | null
@@ -6224,6 +6294,7 @@ export type Database = {
           approval_status?: string | null
           cover_image?: string | null
           created_at?: string | null
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -6249,6 +6320,7 @@ export type Database = {
           reviewed_by?: string | null
           salon_type?: string | null
           services?: string[] | null
+          uno_team_creator_id?: string | null
           updated_at?: string | null
           website?: string | null
           working_hours?: Json | null
@@ -7023,6 +7095,7 @@ export type Database = {
           category: string | null
           cover_image: string | null
           created_at: string
+          created_by_uno_team: boolean | null
           currency: string | null
           description_en: string | null
           description_ru: string | null
@@ -7050,6 +7123,7 @@ export type Database = {
           start_times: string[] | null
           title_en: string
           title_ru: string
+          uno_team_creator_id: string | null
           updated_at: string
         }
         Insert: {
@@ -7058,6 +7132,7 @@ export type Database = {
           category?: string | null
           cover_image?: string | null
           created_at?: string
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -7085,6 +7160,7 @@ export type Database = {
           start_times?: string[] | null
           title_en: string
           title_ru: string
+          uno_team_creator_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -7093,6 +7169,7 @@ export type Database = {
           category?: string | null
           cover_image?: string | null
           created_at?: string
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -7120,6 +7197,7 @@ export type Database = {
           start_times?: string[] | null
           title_en?: string
           title_ru?: string
+          uno_team_creator_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -7276,6 +7354,45 @@ export type Database = {
         }
         Relationships: []
       }
+      uno_team_permissions: {
+        Row: {
+          can_create: boolean | null
+          can_delete: boolean | null
+          can_edit: boolean | null
+          can_submit_for_review: boolean | null
+          created_at: string
+          granted_by: string | null
+          id: string
+          updated_at: string
+          user_id: string
+          vertical: string
+        }
+        Insert: {
+          can_create?: boolean | null
+          can_delete?: boolean | null
+          can_edit?: boolean | null
+          can_submit_for_review?: boolean | null
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+          vertical: string
+        }
+        Update: {
+          can_create?: boolean | null
+          can_delete?: boolean | null
+          can_edit?: boolean | null
+          can_submit_for_review?: boolean | null
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+          vertical?: string
+        }
+        Relationships: []
+      }
       user_active_context: {
         Row: {
           active_org_id: string | null
@@ -7414,6 +7531,7 @@ export type Database = {
           color: string | null
           cover_image: string | null
           created_at: string | null
+          created_by_uno_team: boolean | null
           currency: string | null
           deposit_amount: number | null
           description_en: string | null
@@ -7447,6 +7565,7 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           transmission: string | null
+          uno_team_creator_id: string | null
           updated_at: string | null
           vehicle_type: string | null
           year_built: number | null
@@ -7457,6 +7576,7 @@ export type Database = {
           color?: string | null
           cover_image?: string | null
           created_at?: string | null
+          created_by_uno_team?: boolean | null
           currency?: string | null
           deposit_amount?: number | null
           description_en?: string | null
@@ -7490,6 +7610,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           transmission?: string | null
+          uno_team_creator_id?: string | null
           updated_at?: string | null
           vehicle_type?: string | null
           year_built?: number | null
@@ -7500,6 +7621,7 @@ export type Database = {
           color?: string | null
           cover_image?: string | null
           created_at?: string | null
+          created_by_uno_team?: boolean | null
           currency?: string | null
           deposit_amount?: number | null
           description_en?: string | null
@@ -7533,6 +7655,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           transmission?: string | null
+          uno_team_creator_id?: string | null
           updated_at?: string | null
           vehicle_type?: string | null
           year_built?: number | null
@@ -8186,6 +8309,7 @@ export type Database = {
           certification_details: string | null
           cover_image: string | null
           created_at: string
+          created_by_uno_team: boolean | null
           currency: string | null
           description_en: string | null
           description_ru: string | null
@@ -8216,6 +8340,7 @@ export type Database = {
           safety_briefing_required: boolean | null
           title_en: string
           title_ru: string
+          uno_team_creator_id: string | null
           updated_at: string
         }
         Insert: {
@@ -8227,6 +8352,7 @@ export type Database = {
           certification_details?: string | null
           cover_image?: string | null
           created_at?: string
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -8257,6 +8383,7 @@ export type Database = {
           safety_briefing_required?: boolean | null
           title_en: string
           title_ru: string
+          uno_team_creator_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -8268,6 +8395,7 @@ export type Database = {
           certification_details?: string | null
           cover_image?: string | null
           created_at?: string
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -8298,6 +8426,7 @@ export type Database = {
           safety_briefing_required?: boolean | null
           title_en?: string
           title_ru?: string
+          uno_team_creator_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -8384,6 +8513,7 @@ export type Database = {
           capacity: number | null
           cover_image: string | null
           created_at: string
+          created_by_uno_team: boolean | null
           cruising_speed: string | null
           currency: string | null
           description_en: string | null
@@ -8416,6 +8546,7 @@ export type Database = {
           review_count: number | null
           reviewed_at: string | null
           reviewed_by: string | null
+          uno_team_creator_id: string | null
           updated_at: string
           yacht_type: string | null
           year_built: number | null
@@ -8428,6 +8559,7 @@ export type Database = {
           capacity?: number | null
           cover_image?: string | null
           created_at?: string
+          created_by_uno_team?: boolean | null
           cruising_speed?: string | null
           currency?: string | null
           description_en?: string | null
@@ -8460,6 +8592,7 @@ export type Database = {
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          uno_team_creator_id?: string | null
           updated_at?: string
           yacht_type?: string | null
           year_built?: number | null
@@ -8472,6 +8605,7 @@ export type Database = {
           capacity?: number | null
           cover_image?: string | null
           created_at?: string
+          created_by_uno_team?: boolean | null
           cruising_speed?: string | null
           currency?: string | null
           description_en?: string | null
@@ -8504,6 +8638,7 @@ export type Database = {
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          uno_team_creator_id?: string | null
           updated_at?: string
           yacht_type?: string | null
           year_built?: number | null
@@ -8703,6 +8838,10 @@ export type Database = {
       }
       set_user_pin: {
         Args: { p_device_id?: string; p_pin: string; p_user_id: string }
+        Returns: boolean
+      }
+      uno_team_can: {
+        Args: { _action: string; _user_id: string; _vertical: string }
         Returns: boolean
       }
       verify_user_pin: {

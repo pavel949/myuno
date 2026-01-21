@@ -15,7 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { 
   Inbox, Clock, CheckCircle2, AlertTriangle, Phone, MessageCircle,
   Search, Filter, User, Calendar, MapPin, Banknote, Users, Palmtree,
-  Building, Eye, TrendingUp, PhoneCall
+  Building, Eye, TrendingUp, PhoneCall, Plus
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
@@ -101,6 +101,14 @@ export default function TeamDashboard() {
   return (
     <AppLayout title={isRu ? 'Панель UNO Team' : 'UNO Team Dashboard'}>
       <div className="container py-6 space-y-6">
+        {/* Quick Actions */}
+        <div className="flex gap-3">
+          <Button onClick={() => navigate('/team/content')} className="gap-2">
+            <Plus className="h-4 w-4" />
+            {isRu ? 'Добавить контент' : 'Add Content'}
+          </Button>
+        </div>
+
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200">
