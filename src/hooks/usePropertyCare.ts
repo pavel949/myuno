@@ -51,6 +51,12 @@ export interface OwnerProperty {
   house_rules_ru?: string;
   cancellation_policy?: string;
   instant_booking?: boolean;
+  // Extended property details
+  rooms?: Json;
+  highlights?: string[];
+  nearby_places?: Json;
+  safety_features?: string[];
+  accessibility_features?: string[];
   // Seasonality and discounts
   seasonal_pricing?: Json;
   weekly_discount?: number;
