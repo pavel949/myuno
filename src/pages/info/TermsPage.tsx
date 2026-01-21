@@ -18,7 +18,7 @@ export default function TermsPage() {
   const definitions = [
     { 
       term: isRu ? '«Платформа»' : '"Platform"', 
-      def: isRu ? 'Веб-сайт и мобильное приложение myUNO, управляемые myUNO Limited.' : 'The myUNO website and mobile application operated by myUNO Limited.' 
+      def: isRu ? 'Веб-сайт www.myuno.app и мобильное приложение myUNO, управляемые myUNO Pte. Ltd. (Сингапур).' : 'The website www.myuno.app and myUNO mobile application operated by myUNO Pte. Ltd. (Singapore).' 
     },
     { 
       term: isRu ? '«Пользователь»' : '"User"', 
@@ -573,10 +573,12 @@ export default function TermsPage() {
                 {isRu ? 'Юридические вопросы:' : 'Legal inquiries:'}
               </p>
               <p className="text-sm font-medium">legal@myuno.app</p>
-              <p className="text-xs text-muted-foreground mt-4">
-                myUNO Limited<br />
-                {isRu ? 'Регистрация: Таиланд / ОАЭ' : 'Registration: Thailand / UAE'}
-              </p>
+              <div className="mt-4 p-3 bg-muted rounded-lg text-xs text-muted-foreground">
+                <p className="font-medium text-foreground mb-1">myUNO Pte. Ltd.</p>
+                <p>{isRu ? 'Регистрация: Сингапур' : 'Incorporated in Singapore'}</p>
+                <p>{isRu ? 'Сервисное подразделение: Таиланд' : 'Service Operations: Thailand'}</p>
+                <p className="mt-1">www.myuno.app</p>
+              </div>
             </div>
           </CardContent>
         </Card>

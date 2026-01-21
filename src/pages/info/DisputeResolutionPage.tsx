@@ -367,8 +367,13 @@ export default function DisputeResolutionPage() {
           <CardContent>
             <p className="text-sm text-muted-foreground">
               {isRu 
-                ? 'Используя Платформу, вы соглашаетесь разрешать все споры только индивидуально. Вы отказываетесь от права на участие в коллективных исках, групповых арбитражах или любых объединённых процессах против myUNO Limited.'
-                : 'By using the Platform, you agree to resolve all disputes only individually. You waive the right to participate in class actions, group arbitrations, or any consolidated proceedings against myUNO Limited.'}
+                ? 'Используя Платформу, вы соглашаетесь разрешать все споры только индивидуально. Вы отказываетесь от права на участие в коллективных исках, групповых арбитражах или любых объединённых процессах против myUNO Pte. Ltd.'
+                : 'By using the Platform, you agree to resolve all disputes only individually. You waive the right to participate in class actions, group arbitrations, or any consolidated proceedings against myUNO Pte. Ltd.'}
+            </p>
+            <p className="text-xs text-muted-foreground mt-3 p-2 bg-muted rounded">
+              {isRu 
+                ? 'Применимое право: Сингапур | Арбитраж: SIAC (Singapore International Arbitration Centre) или THAC'
+                : 'Governing Law: Singapore | Arbitration: SIAC (Singapore International Arbitration Centre) or THAC'}
             </p>
           </CardContent>
         </Card>

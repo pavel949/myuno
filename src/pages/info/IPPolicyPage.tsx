@@ -371,8 +371,8 @@ export default function IPPolicyPage() {
           <CardContent>
             <p className="text-sm text-muted-foreground">
               {isRu 
-                ? 'Эта политика регулируется законодательством Королевства Таиланд и международными соглашениями об интеллектуальной собственности (Бернская конвенция, TRIPS). Споры подлежат разрешению в судах Таиланда или через арбитраж THAC.'
-                : 'This policy is governed by the laws of the Kingdom of Thailand and international intellectual property agreements (Berne Convention, TRIPS). Disputes are subject to resolution in Thai courts or through THAC arbitration.'}
+                ? 'Эта политика регулируется законодательством Республики Сингапур и международными соглашениями об интеллектуальной собственности (Бернская конвенция, TRIPS). Споры подлежат разрешению в судах Сингапура или через арбитраж SIAC.'
+                : 'This policy is governed by the laws of the Republic of Singapore and international intellectual property agreements (Berne Convention, TRIPS). Disputes are subject to resolution in Singapore courts or through SIAC arbitration.'}
             </p>
           </CardContent>
         </Card>
@@ -388,6 +388,11 @@ export default function IPPolicyPage() {
             <p className="text-xs text-muted-foreground mt-2">
               {isRu ? 'Пресс-запросы:' : 'Press inquiries:'} press@myuno.app
             </p>
+            <div className="mt-4 p-3 bg-muted rounded-lg text-xs text-muted-foreground">
+              <p className="font-medium text-foreground mb-1">myUNO Pte. Ltd.</p>
+              <p>{isRu ? 'Сингапур | Сервисное подразделение: Таиланд' : 'Singapore | Service Operations: Thailand'}</p>
+              <p className="mt-1">www.myuno.app</p>
+            </div>
           </CardContent>
         </Card>
 

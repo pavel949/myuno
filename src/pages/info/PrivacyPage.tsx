@@ -442,9 +442,11 @@ export default function PrivacyPage() {
               </p>
             </div>
             <div className="mt-4 p-3 bg-muted rounded-lg text-xs text-muted-foreground">
-              {isRu 
-                ? 'Вы имеете право подать жалобу в надзорный орган (PDPC для Таиланда, соответствующий DPA для ЕС).'
-                : 'You have the right to lodge a complaint with a supervisory authority (PDPC for Thailand, respective DPA for EU).'}
+              <p className="font-medium text-foreground mb-1">myUNO Pte. Ltd.</p>
+              <p>{isRu ? 'Регистрация: Сингапур | Операции: Таиланд' : 'Incorporated: Singapore | Operations: Thailand'}</p>
+              <p className="mt-1">{isRu 
+                ? 'Надзорный орган: PDPC (Сингапур), PDPA (Таиланд), соответствующий DPA для ЕС.'
+                : 'Supervisory authority: PDPC (Singapore), PDPA (Thailand), respective DPA for EU.'}</p>
             </div>
           </CardContent>
         </Card>

@@ -439,6 +439,11 @@ export default function PartnerAgreementPage() {
                 <span className="font-medium">finance@myuno.app</span>
               </p>
             </div>
+            <div className="mt-4 p-3 bg-muted rounded-lg text-xs text-muted-foreground">
+              <p className="font-medium text-foreground mb-1">myUNO Pte. Ltd.</p>
+              <p>{isRu ? 'Сингапур | Сервисное подразделение: Таиланд' : 'Singapore | Service Operations: Thailand'}</p>
+              <p className="mt-1">www.myuno.app</p>
+            </div>
           </CardContent>
         </Card>
 
