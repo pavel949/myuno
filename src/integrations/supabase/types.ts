@@ -10279,6 +10279,9 @@ export type Database = {
         | "vendor"
         | "property_owner"
         | "uno_team"
+        | "finance"
+        | "support"
+        | "sales"
       booking_status:
         | "draft"
         | "submitted"
@@ -10468,6 +10471,9 @@ export const Constants = {
         "vendor",
         "property_owner",
         "uno_team",
+        "finance",
+        "support",
+        "sales",
       ],
       booking_status: [
         "draft",
