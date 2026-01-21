@@ -133,53 +133,25 @@ export function useAdminPayouts() {
     },
   });
 
-  // Process a payout (mark as completed)
+  // Process a payout atomically using database function
   const processPayout = useMutation({
     mutationFn: async ({ payoutId, status, paymentReference }: {
       payoutId: string;
       status: 'completed' | 'failed';
       paymentReference?: string;
     }) => {
-      const { data: user } = await supabase.auth.getUser();
+      // Use atomic database function for transaction safety
+      const { data, error } = await supabase.rpc('process_payout', {
+        p_payout_id: payoutId,
+        p_new_status: status,
+        p_payment_reference: paymentReference || null,
+      });
+
+      if (error) throw error;
       
-      // Get payout details
-      const { data: payout, error: fetchError } = await supabase
-        .from('vendor_payouts')
-        .select('provider_id, amount')
-        .eq('id', payoutId)
-        .single();
-
-      if (fetchError) throw fetchError;
-
-      // Update payout status
-      const { error: updateError } = await supabase
-        .from('vendor_payouts')
-        .update({
-          status,
-          payment_reference: paymentReference,
-          processed_at: new Date().toISOString(),
-          processed_by: user.user?.id,
-        })
-        .eq('id', payoutId);
-
-      if (updateError) throw updateError;
-
-      // If completed, update provider's pending_payout
-      if (status === 'completed') {
-        const { data: provider } = await supabase
-          .from('providers')
-          .select('pending_payout')
-          .eq('id', payout.provider_id)
-          .single();
-
-        if (provider) {
-          await supabase
-            .from('providers')
-            .update({
-              pending_payout: Math.max(0, (Number(provider.pending_payout) || 0) - payout.amount),
-            })
-            .eq('id', payout.provider_id);
-        }
+      const result = data as { success: boolean; error?: string };
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to process payout');
       }
 
       return { payoutId, status };

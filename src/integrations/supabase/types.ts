@@ -8907,6 +8907,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_order_vertical: {
+        Args: { p_metadata: Json; p_order_type: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -8927,6 +8931,14 @@ export type Database = {
           p_reference_id?: string
           p_reference_type?: string
           p_user_id: string
+        }
+        Returns: Json
+      }
+      process_payout: {
+        Args: {
+          p_new_status: string
+          p_payment_reference?: string
+          p_payout_id: string
         }
         Returns: Json
       }

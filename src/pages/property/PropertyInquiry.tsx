@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
+import { useOrders } from '@/hooks/useOrders';
 import { usePropertyAvailability, usePropertyBlockedDates, usePropertyRentalTerms } from '@/hooks/usePropertyAvailability';
 import { useProfile } from '@/hooks/useProfile';
 import { usePropertyWithRentalTerms } from '@/hooks/useProperties';
@@ -30,9 +30,9 @@ export default function PropertyInquiry() {
   const { user } = useAuth();
   const { toast: toastHook } = useToast();
   const { profile } = useProfile();
+  const { createOrder, isCreating } = useOrders();
   const isRu = language === 'ru';
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [guests, setGuests] = useState(2);
@@ -145,48 +145,53 @@ export default function PropertyInquiry() {
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
-      // Determine if this is instant booking or requires confirmation
-      const status = rentalTerms?.instant_booking ? 'confirmed' : 'submitted';
+      const propertyTitle = isRu ? property?.title_ru : property?.title_en;
+      
+      const result = await createOrder({
+        order_type: 'property',
+        provider_org_id: undefined, // Property bookings don't have provider_org_id
+        start_at: dateRange.from,
+        total_amount: totalPrice || 0,
+        currency: currency,
+        notes: formData.message || undefined,
+        metadata: {
+          property_id: id,
+          check_in: format(dateRange.from, 'yyyy-MM-dd'),
+          check_out: format(dateRange.to, 'yyyy-MM-dd'),
+          guests_count: guests,
+          instant_booking: rentalTerms?.instant_booking || false,
+          property_title: propertyTitle,
+        },
+        items: [{
+          item_name: propertyTitle || 'Property Rental',
+          item_type: 'property',
+          qty: nights,
+          unit_price: pricePerNight,
+          amount: totalPrice,
+        }],
+        participants: [{
+          role: 'primary' as const,
+          name: formData.name,
+          phone: formData.phone || undefined,
+          email: formData.email || undefined,
+        }],
+        serviceName: propertyTitle,
+      });
 
-      // Create booking in the main bookings table
-      // The trigger sync_booking_to_owner_calendar will sync to property_bookings
-      const { error } = await supabase
-        .from('bookings')
-        .insert([{
-          user_id: user.id,
-          booking_type: 'property' as const,
-          provider_id: id,
-          scheduled_at: format(dateRange.from, 'yyyy-MM-dd'),
-          total_amount: totalPrice || null,
-          currency: currency,
-          status,
-          notes: JSON.stringify({
-            check_out: format(dateRange.to, 'yyyy-MM-dd'),
-            guests_count: guests,
-            guest_name: formData.name,
-            guest_email: formData.email,
-            guest_phone: formData.phone,
-            message: formData.message,
-            property_title: isRu ? property?.title_ru : property?.title_en,
-          }),
-        }]);
-
-      if (error) throw error;
-
-      setIsSuccess(true);
-      toast.success(
-        rentalTerms?.instant_booking 
-          ? (isRu ? 'Забронировано!' : 'Booked!')
-          : (isRu ? 'Запрос отправлен!' : 'Request Sent!')
-      );
+      if (result.success) {
+        setIsSuccess(true);
+        toast.success(
+          rentalTerms?.instant_booking 
+            ? (isRu ? 'Забронировано!' : 'Booked!')
+            : (isRu ? 'Запрос отправлен!' : 'Request Sent!')
+        );
+      } else {
+        toast.error(isRu ? 'Не удалось создать бронирование' : 'Failed to create booking');
+      }
     } catch (error) {
       console.error('Error submitting booking:', error);
       toast.error(isRu ? 'Не удалось создать бронирование' : 'Failed to create booking');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -526,9 +531,9 @@ export default function PropertyInquiry() {
             <Button
               onClick={handleSubmit}
               className="w-full h-12 text-base font-semibold gap-2"
-              disabled={isSubmitting || !formData.name || !dateRange?.from || !dateRange?.to || validationErrors.length > 0}
+              disabled={isCreating || !formData.name || !dateRange?.from || !dateRange?.to || validationErrors.length > 0}
             >
-              {isSubmitting ? (
+              {isCreating ? (
                 <span className="animate-pulse">{isRu ? 'Отправка...' : 'Sending...'}</span>
               ) : rentalTerms?.instant_booking ? (
                 <>
