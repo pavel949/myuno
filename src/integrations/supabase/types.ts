@@ -3989,6 +3989,8 @@ export type Database = {
           house_rules: string | null
           house_rules_ru: string | null
           ical_token: string | null
+          ical_token_expires_at: string | null
+          ical_token_refreshed_at: string | null
           id: string
           images: string[] | null
           included_services: Json | null
@@ -4104,6 +4106,8 @@ export type Database = {
           house_rules?: string | null
           house_rules_ru?: string | null
           ical_token?: string | null
+          ical_token_expires_at?: string | null
+          ical_token_refreshed_at?: string | null
           id?: string
           images?: string[] | null
           included_services?: Json | null
@@ -4219,6 +4223,8 @@ export type Database = {
           house_rules?: string | null
           house_rules_ru?: string | null
           ical_token?: string | null
+          ical_token_expires_at?: string | null
+          ical_token_refreshed_at?: string | null
           id?: string
           images?: string[] | null
           included_services?: Json | null
@@ -10100,6 +10106,7 @@ export type Database = {
         Args: { p_booking_id: string; p_user_id: string }
         Returns: boolean
       }
+      rotate_ical_token: { Args: { p_property_id: string }; Returns: string }
       set_user_pin: {
         Args: { p_device_id?: string; p_pin: string; p_user_id: string }
         Returns: boolean

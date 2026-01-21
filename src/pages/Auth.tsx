@@ -375,9 +375,9 @@ export default function Auth() {
                 {/* Forgot password */}
                 {isLogin && (
                   <div className="text-right">
-                    <button type="button" className="text-sm text-primary hover:underline">
+                    <Link to="/auth/forgot-password" className="text-sm text-primary hover:underline">
                       {t('auth.forgotPassword')}
-                    </button>
+                    </Link>
                   </div>
                 )}
 

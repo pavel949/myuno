@@ -13,6 +13,8 @@ import NotFound from '@/pages/NotFound';
 
 // Auth pages
 const AccountTypeSelection = lazy(() => import('@/pages/auth/AccountTypeSelection'));
+const ForgotPassword = lazy(() => import('@/pages/auth/ForgotPassword'));
+const ResetPassword = lazy(() => import('@/pages/auth/ResetPassword'));
 
 // Lazy load all other pages for code splitting
 const Discover = lazy(() => import('@/pages/Discover'));
@@ -323,6 +325,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/" element={<PageTransition><Index /></PageTransition>} />
         <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
         <Route path="/auth/account-type" element={<LazyPage><AccountTypeSelection /></LazyPage>} />
+        <Route path="/auth/forgot-password" element={<LazyPage><ForgotPassword /></LazyPage>} />
+        <Route path="/auth/reset-password" element={<LazyPage><ResetPassword /></LazyPage>} />
         
         {/* Lazy loaded routes */}
         <Route path="/discover" element={<LazyPage><Discover /></LazyPage>} />
