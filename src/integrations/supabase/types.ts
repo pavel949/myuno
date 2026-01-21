@@ -4440,6 +4440,72 @@ export type Database = {
           },
         ]
       }
+      pet_profiles: {
+        Row: {
+          age_months: number | null
+          age_years: number | null
+          allergies: string[] | null
+          breed: string | null
+          created_at: string
+          dietary_notes: string | null
+          gender: string | null
+          id: string
+          is_active: boolean | null
+          is_neutered: boolean | null
+          medical_notes: string | null
+          microchip_id: string | null
+          name: string
+          photo: string | null
+          species: string
+          updated_at: string
+          user_id: string
+          vaccinations: Json | null
+          weight_kg: number | null
+        }
+        Insert: {
+          age_months?: number | null
+          age_years?: number | null
+          allergies?: string[] | null
+          breed?: string | null
+          created_at?: string
+          dietary_notes?: string | null
+          gender?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_neutered?: boolean | null
+          medical_notes?: string | null
+          microchip_id?: string | null
+          name: string
+          photo?: string | null
+          species?: string
+          updated_at?: string
+          user_id: string
+          vaccinations?: Json | null
+          weight_kg?: number | null
+        }
+        Update: {
+          age_months?: number | null
+          age_years?: number | null
+          allergies?: string[] | null
+          breed?: string | null
+          created_at?: string
+          dietary_notes?: string | null
+          gender?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_neutered?: boolean | null
+          medical_notes?: string | null
+          microchip_id?: string | null
+          name?: string
+          photo?: string | null
+          species?: string
+          updated_at?: string
+          user_id?: string
+          vaccinations?: Json | null
+          weight_kg?: number | null
+        }
+        Relationships: []
+      }
       pet_services: {
         Row: {
           address: string | null
