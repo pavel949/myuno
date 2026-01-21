@@ -23,7 +23,7 @@ export function FullManagementCard() {
                 <Sparkles className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h3 className="font-bold text-base">UNO Full Management</h3>
+                <h3 className="font-bold text-base">myUNO Full Management</h3>
                 <p className="text-xs text-muted-foreground">
                   {isRu ? 'Полное управление' : 'Complete property care'}
                 </p>
