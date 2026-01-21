@@ -25,6 +25,8 @@ import { QuickActionsGrid } from '@/components/home/QuickActionsGrid';
 import { RecommendedCarousel } from '@/components/home/RecommendedCarousel';
 import { ForYouSection } from '@/components/recommendations/ForYouSection';
 import { PersonalizedOffersSection } from '@/components/notifications/PersonalizedOffersSection';
+import { ProductSection } from '@/components/market/ProductSection';
+import { useMarketplaceProducts } from '@/hooks/useMarketplace';
 import { supabase } from '@/integrations/supabase/client';
 import { QuickListingFAB } from '@/components/listing/QuickListingFAB';
 
@@ -58,6 +60,10 @@ const Index = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { products: popularProducts, isLoading: productsLoading } = useMarketplaceProducts({ 
+    popularOnly: true, 
+    limit: 8 
+  });
   const [refreshKey, setRefreshKey] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(() => {
     return !localStorage.getItem('myuno-onboarding-complete');
@@ -367,6 +373,20 @@ const Index = () => {
 
             {/* For You Section */}
             <ForYouSection />
+
+            {/* Popular Products Carousel */}
+            {(productsLoading || popularProducts.length > 0) && (
+              <ProductSection
+                title="Popular Products"
+                titleRu="Популярные товары"
+                products={popularProducts}
+                seeAllPath="/market"
+                maxItems={8}
+                variant="scroll"
+                isLoading={productsLoading}
+                icon="trending"
+              />
+            )}
 
             {/* Trust Footer */}
             <div className="flex items-center justify-center gap-6 py-3 border-t border-border/50">
