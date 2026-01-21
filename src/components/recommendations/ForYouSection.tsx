@@ -1,10 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Star, Clock, TrendingUp, ArrowRight } from 'lucide-react';
+import { Sparkles, Star, Clock, TrendingUp, ArrowRight, Compass } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useRecommendations } from '@/hooks/useRecommendations';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const reasonIcons = {
@@ -72,7 +73,42 @@ export function ForYouSection() {
     );
   }
 
-  if (recommendations.length === 0) return null;
+  // Show empty state with CTA instead of returning null
+  if (recommendations.length === 0) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg">
+            <Sparkles className="w-5 h-5 text-primary" />
+          </div>
+          <h2 className="text-lg font-semibold">
+            {language === 'ru' ? 'Для вас' : 'For You'}
+          </h2>
+        </div>
+        <div className="bg-gradient-to-br from-muted/50 to-muted/30 rounded-2xl p-6 text-center">
+          <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+            <Compass className="w-6 h-6 text-primary" />
+          </div>
+          <h3 className="font-semibold mb-1">
+            {language === 'ru' ? 'Начните изучать' : 'Start Exploring'}
+          </h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            {language === 'ru' 
+              ? 'Просмотрите туры и услуги, чтобы получить персональные рекомендации'
+              : 'Browse tours and services to get personalized recommendations'}
+          </p>
+          <Button 
+            onClick={() => navigate('/discover')}
+            variant="default"
+            size="sm"
+          >
+            <Compass className="w-4 h-4 mr-2" />
+            {language === 'ru' ? 'Открыть каталог' : 'Browse Catalog'}
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const handleItemClick = (item: typeof recommendations[0]) => {
     const baseRoute = typeRoutes[item.item_type] || '/discover';
