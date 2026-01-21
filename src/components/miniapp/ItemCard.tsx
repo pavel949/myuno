@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { triggerRipple } from '@/hooks/useRipple';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { iconSizes } from '@/lib/iconMap';
+import { OptimizedImage } from '@/components/ui/optimized-image';
 
 export interface ItemCardMeta {
   icon: LucideIcon;
@@ -89,10 +90,14 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
       >
         {/* Image */}
         <div className="relative aspect-square overflow-hidden">
-          <img
+          <OptimizedImage
             src={image || 'https://images.unsplash.com/photo-1537956965359-7573183d1f57?w=400'}
             alt={title}
-            className={cn("w-full h-full object-cover", !isAvailable && "grayscale")}
+            aspectRatio="1:1"
+            width={200}
+            quality={75}
+            sizes="(max-width: 640px) 50vw, 200px"
+            className={cn("w-full h-full", !isAvailable && "grayscale")}
           />
           
           {/* Badges overlay */}
@@ -176,11 +181,16 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
     >
       <div className="flex">
         {/* Image - larger on mobile for better tap targets */}
-        <div className="w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0 relative">
-          <img
+        <div className="w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0 relative overflow-hidden rounded-xl">
+          <OptimizedImage
             src={image || 'https://images.unsplash.com/photo-1537956965359-7573183d1f57?w=400'}
             alt={title}
-            className={cn("w-full h-full object-cover", !isAvailable && "grayscale")}
+            aspectRatio="1:1"
+            width={128}
+            quality={75}
+            sizes="128px"
+            className={cn("w-full h-full", !isAvailable && "grayscale")}
+          />
           />
           
           {/* Badges */}
