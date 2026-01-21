@@ -10,8 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { StickyCartBar } from '@/components/cart/StickyCartBar';
 import { ProductCard } from '@/components/market';
-import { useMarketplaceCategories, useMarketplaceProducts } from '@/hooks/useMarketplace';
-import { MarketplaceProduct, subcategoriesByCategory } from '@/types/marketplace';
+import { useMarketplaceCategories, useMarketplaceProducts, useMarketplaceSubcategories } from '@/hooks/useMarketplace';
+import { MarketplaceProduct, toSubcategory } from '@/types/marketplace';
 import { useCartToast } from '@/hooks/useCartToast';
 import { FilterChip, FilterChipGroup } from '@/components/uno/FilterChip';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -28,12 +28,14 @@ const MarketCategoryPage = () => {
 
   // Fetch from database
   const { categories, isLoading: categoriesLoading } = useMarketplaceCategories();
+  const { subcategories: dbSubcategories, isLoading: subcategoriesLoading } = useMarketplaceSubcategories(categoryId);
   const { products: categoryProducts, isLoading: productsLoading } = useMarketplaceProducts({
     category: categoryId,
   });
 
   const category = categories.find(c => c.slug === categoryId);
-  const subcategories = subcategoriesByCategory[categoryId || ''] || [];
+  // Convert DB subcategories to legacy format for FilterChip compatibility
+  const subcategories = useMemo(() => dbSubcategories.map(toSubcategory), [dbSubcategories]);
   
   const cartItems = getItemsByType('product');
   const cartItemCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
@@ -85,7 +87,7 @@ const MarketCategoryPage = () => {
     removeItem(productId);
   };
 
-  const isLoading = categoriesLoading || productsLoading;
+  const isLoading = categoriesLoading || productsLoading || subcategoriesLoading;
 
   if (!isLoading && !category) {
     return (
