@@ -179,7 +179,7 @@ export default function FullManagement() {
     return (
       <PageContainer>
         <PageHeader 
-          title={isRu ? 'UNO Full Management' : 'UNO Full Management'}
+          title="myUNO Full Management"
           subtitle={isRu ? 'Передайте управление профессионалам' : 'Leave it to the professionals'}
           showBack
           fallbackPath="/owner"
@@ -204,8 +204,8 @@ export default function FullManagement() {
             
             <p className="text-sm text-muted-foreground mb-4">
               {isRu 
-                ? 'Доверьте управление своей недвижимостью команде UNO. Мы найдём гостей, обеспечим сервис и максимизируем ваш доход.' 
-                : 'Trust your property management to the UNO team. We find guests, provide service, and maximize your income.'}
+                ? 'Доверьте управление своей недвижимостью команде myUNO. Мы найдём гостей, обеспечим сервис и максимизируем ваш доход.' 
+                : 'Trust your property management to the myUNO team. We find guests, provide service, and maximize your income.'}
             </p>
 
             <div className="flex items-center gap-2 text-sm flex-wrap">

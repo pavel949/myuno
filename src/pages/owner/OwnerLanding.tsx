@@ -108,8 +108,8 @@ const collaborationOptions = [
     type: 'full',
     badgeEn: 'Popular',
     badgeRu: 'Популярно',
-    titleEn: 'UNO Full Management',
-    titleRu: 'Полное управление UNO',
+    titleEn: 'myUNO Full Management',
+    titleRu: 'Полное управление myUNO',
     descEn: 'We handle everything. You receive 70% after expenses.',
     descRu: 'Мы берём всё на себя. Вы получаете 70% после расходов.',
     priceEn: '70/30',
@@ -182,7 +182,7 @@ export default function OwnerLanding() {
             {isRu 
               ? 'Управляйте недвижимостью эффективнее с ' 
               : 'Manage Your Property Smarter with '}
-            <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">UNO</span>
+            <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">myUNO</span>
           </h1>
           
           <p className="text-muted-foreground max-w-md mx-auto mb-6">
