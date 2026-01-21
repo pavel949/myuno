@@ -279,7 +279,7 @@ serve(async (req) => {
           .limit(1);
 
         if (!existingNotification || existingNotification.length === 0) {
-          await supabaseAdmin
+            await supabaseAdmin
             .from('notifications')
             .insert({
               user_id: order.customer_user_id,
@@ -289,6 +289,29 @@ serve(async (req) => {
               data: { order_id: orderId, order_type: order.order_type, session_id: session.id },
             });
           logStep("Notification created", { orderId });
+
+          // ===== SEND CONFIRMATION EMAIL =====
+          try {
+            const emailResponse = await fetch(
+              `${Deno.env.get('SUPABASE_URL')}/functions/v1/send-order-email`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+                },
+                body: JSON.stringify({
+                  type: 'order_confirmation',
+                  order_id: orderId,
+                  user_id: order.customer_user_id,
+                }),
+              }
+            );
+            const emailResult = await emailResponse.json();
+            logStep("Confirmation email sent", emailResult);
+          } catch (emailError) {
+            logStep("WARN", `Failed to send confirmation email: ${emailError}`);
+          }
         } else {
           logStep("IDEMPOTENCY: Notification already exists, skipping", { orderId });
         }
@@ -442,6 +465,31 @@ serve(async (req) => {
                 type: 'payment',
                 data: { amount, currency, session_id: session.id },
               });
+
+            // ===== SEND WALLET TOP-UP EMAIL =====
+            try {
+              const emailResponse = await fetch(
+                `${Deno.env.get('SUPABASE_URL')}/functions/v1/send-order-email`,
+                {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+                  },
+                  body: JSON.stringify({
+                    type: 'wallet_topup',
+                    user_id: userId,
+                    amount: amount,
+                    currency: currency.toUpperCase(),
+                    new_balance: newBalance,
+                  }),
+                }
+              );
+              const emailResult = await emailResponse.json();
+              logStep("Wallet top-up email sent", emailResult);
+            } catch (emailError) {
+              logStep("WARN", `Failed to send wallet top-up email: ${emailError}`);
+            }
           }
 
           logStep("Wallet top-up completed", { userId, newBalance });
@@ -535,6 +583,30 @@ serve(async (req) => {
                 data: { order_id: orderId, error: paymentIntent.last_payment_error?.message },
               });
             logStep("Failure notification created", { orderId });
+
+            // ===== SEND CANCELLATION EMAIL =====
+            try {
+              const emailResponse = await fetch(
+                `${Deno.env.get('SUPABASE_URL')}/functions/v1/send-order-email`,
+                {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+                  },
+                  body: JSON.stringify({
+                    type: 'order_cancellation',
+                    order_id: orderId,
+                    user_id: order.customer_user_id,
+                    reason: paymentIntent.last_payment_error?.message || 'Payment failed',
+                  }),
+                }
+              );
+              const emailResult = await emailResponse.json();
+              logStep("Cancellation email sent", emailResult);
+            } catch (emailError) {
+              logStep("WARN", `Failed to send cancellation email: ${emailError}`);
+            }
           } else {
             logStep("IDEMPOTENCY: Failure notification already exists, skipping", { orderId });
           }
