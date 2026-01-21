@@ -40,7 +40,7 @@ export function Footer() {
           <DownloadAppButton />
         </div>
 
-        {/* Become a Partner CTA */}
+        {/* Quick Listing CTA */}
         <div className="mb-8 p-4 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -49,21 +49,21 @@ export function Footer() {
               </div>
               <div>
                 <h3 className="font-semibold text-foreground">
-                  {language === 'ru' ? 'Станьте партнёром myUNO' : 'Become a myUNO Partner'}
+                  {language === 'ru' ? 'Предложите свою услугу' : 'Offer Your Service'}
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   {language === 'ru' 
-                    ? 'Предлагайте свои услуги и товары миллионам клиентов' 
-                    : 'Offer your services and products to millions of customers'}
+                    ? 'Разместите объявление за 2 минуты — бесплатно!' 
+                    : 'List in 2 minutes — free!'}
                 </p>
               </div>
             </div>
-            <Link 
-              to="/become-partner"
+            <button 
+              onClick={() => window.dispatchEvent(new CustomEvent('open-quick-listing'))}
               className="px-6 py-2.5 rounded-lg gradient-gold text-primary-foreground font-medium hover:opacity-90 transition-opacity whitespace-nowrap"
             >
-              {language === 'ru' ? 'Подать заявку' : 'Apply Now'}
-            </Link>
+              {language === 'ru' ? 'Разместить' : 'List Now'}
+            </button>
           </div>
         </div>
 

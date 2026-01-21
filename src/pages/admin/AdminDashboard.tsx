@@ -159,6 +159,7 @@ export default function AdminDashboard() {
   ];
 
   const systemActions = [
+    { label: isRussian ? 'Быстрые заявки' : 'Quick Listings', icon: Sparkles, path: '/admin/quick-listings', color: 'bg-amber-500' },
     { label: isRussian ? 'Модерация' : 'Moderation', icon: ClipboardCheck, path: '/admin/moderation', color: 'bg-yellow-500' },
     { label: isRussian ? 'Провайдеры' : 'Providers', icon: Building2, path: '/admin/providers', color: 'bg-blue-500' },
     { label: isRussian ? 'Услуги' : 'Services', icon: Package, path: '/admin/services', color: 'bg-purple-500' },
