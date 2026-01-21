@@ -3168,6 +3168,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          commission_rate_applied: number | null
           created_at: string | null
           currency: string | null
           customer_user_id: string
@@ -3178,6 +3179,7 @@ export type Database = {
           notes: string | null
           order_number: string | null
           order_type: string
+          platform_fee_amount: number | null
           provider_org_id: string | null
           start_at: string | null
           status: Database["public"]["Enums"]["order_status"] | null
@@ -3185,8 +3187,11 @@ export type Database = {
           tax_amount: number | null
           total_amount: number
           updated_at: string | null
+          vendor_payout_amount: number | null
+          vertical: string | null
         }
         Insert: {
+          commission_rate_applied?: number | null
           created_at?: string | null
           currency?: string | null
           customer_user_id: string
@@ -3197,6 +3202,7 @@ export type Database = {
           notes?: string | null
           order_number?: string | null
           order_type: string
+          platform_fee_amount?: number | null
           provider_org_id?: string | null
           start_at?: string | null
           status?: Database["public"]["Enums"]["order_status"] | null
@@ -3204,8 +3210,11 @@ export type Database = {
           tax_amount?: number | null
           total_amount: number
           updated_at?: string | null
+          vendor_payout_amount?: number | null
+          vertical?: string | null
         }
         Update: {
+          commission_rate_applied?: number | null
           created_at?: string | null
           currency?: string | null
           customer_user_id?: string
@@ -3216,6 +3225,7 @@ export type Database = {
           notes?: string | null
           order_number?: string | null
           order_type?: string
+          platform_fee_amount?: number | null
           provider_org_id?: string | null
           start_at?: string | null
           status?: Database["public"]["Enums"]["order_status"] | null
@@ -3223,6 +3233,8 @@ export type Database = {
           tax_amount?: number | null
           total_amount?: number
           updated_at?: string | null
+          vendor_payout_amount?: number | null
+          vertical?: string | null
         }
         Relationships: [
           {
@@ -8099,6 +8111,45 @@ export type Database = {
           updated_at?: string
           venue_type?: string
           website?: string | null
+        }
+        Relationships: []
+      }
+      vertical_commission_rules: {
+        Row: {
+          base_commission: number
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          max_commission_amount: number | null
+          min_commission_amount: number | null
+          notes: string | null
+          tiered_rates: Json | null
+          updated_at: string | null
+          vertical: string
+        }
+        Insert: {
+          base_commission?: number
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_commission_amount?: number | null
+          min_commission_amount?: number | null
+          notes?: string | null
+          tiered_rates?: Json | null
+          updated_at?: string | null
+          vertical: string
+        }
+        Update: {
+          base_commission?: number
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_commission_amount?: number | null
+          min_commission_amount?: number | null
+          notes?: string | null
+          tiered_rates?: Json | null
+          updated_at?: string | null
+          vertical?: string
         }
         Relationships: []
       }
