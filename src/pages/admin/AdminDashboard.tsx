@@ -38,7 +38,8 @@ import {
   Baby,
   Flower2,
   Pill,
-  ShoppingBag
+  ShoppingBag,
+  ClipboardCheck
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -158,6 +159,7 @@ export default function AdminDashboard() {
   ];
 
   const systemActions = [
+    { label: isRussian ? 'Модерация' : 'Moderation', icon: ClipboardCheck, path: '/admin/moderation', color: 'bg-yellow-500' },
     { label: isRussian ? 'Провайдеры' : 'Providers', icon: Building2, path: '/admin/providers', color: 'bg-blue-500' },
     { label: isRussian ? 'Услуги' : 'Services', icon: Package, path: '/admin/services', color: 'bg-purple-500' },
     { label: isRussian ? 'Справочники' : 'Lookups', icon: Settings, path: '/admin/lookups', color: 'bg-slate-500' },
