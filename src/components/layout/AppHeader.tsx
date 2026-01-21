@@ -7,6 +7,9 @@ import { PremiumButton } from '@/components/uno/PremiumButton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useCart } from '@/contexts/CartContext';
+import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
+import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
+import { CurrencySwitcher } from '@/components/uno/CurrencySwitcher';
 
 interface AppHeaderProps {
   title?: string;
@@ -49,10 +52,16 @@ export function AppHeader({ title, showBack, onMenuClick, className }: AppHeader
           <h1 className="text-base font-semibold truncate flex-1 text-center mx-4 max-w-[40%]">{title}</h1>
         )}
 
-        {/* Right side - Actions (simplified: Cart, Notifications, Profile) */}
+        {/* Right side - Actions */}
         <div className="flex items-center gap-1">
+          {/* Switchers */}
+          <div className="hidden sm:flex items-center gap-1 mr-1">
+            <LanguageSwitcher size="sm" />
+            <CurrencySwitcher size="sm" />
+            <ThemeSwitcher size="sm" />
+          </div>
           {/* Cart Button */}
-          <button 
+          <button
             onClick={() => navigate('/cart')}
             aria-label={t('nav.cart')}
             className="relative flex items-center justify-center w-10 h-10 rounded-xl hover:bg-secondary transition-colors"
