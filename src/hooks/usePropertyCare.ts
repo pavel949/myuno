@@ -238,6 +238,7 @@ export function useOwnerProperty(id: string | undefined) {
         .from('owner_properties')
         .select('*')
         .eq('id', id)
+        .eq('owner_id', user.id) // Security: verify ownership
         .single();
       
       if (error) throw error;
@@ -276,21 +277,27 @@ export function useCreateOwnerProperty() {
 
 export function useUpdateOwnerProperty() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   return useMutation({
     mutationFn: async ({ id, ...data }: Partial<OwnerProperty> & { id: string }) => {
+      if (!user) throw new Error('Not authenticated');
+      
       const { data: result, error } = await supabase
         .from('owner_properties')
         .update(data)
         .eq('id', id)
+        .eq('owner_id', user.id) // Security: verify ownership
         .select()
         .single();
       
       if (error) throw error;
+      if (!result) throw new Error('Property not found or access denied');
       return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['owner-properties'] });
+      queryClient.invalidateQueries({ queryKey: ['owner-property'] });
       toast.success('Объект обновлён!');
     },
   });
@@ -310,14 +317,15 @@ export function usePublishToMarketplace() {
     }) => {
       if (!user) throw new Error('Not authenticated');
 
-      // Get owner property data
+      // Get owner property data with ownership verification
       const { data: ownerProperty, error: fetchError } = await supabase
         .from('owner_properties')
         .select('*')
         .eq('id', data.ownerPropertyId)
+        .eq('owner_id', user.id) // Security: verify ownership
         .single();
 
-      if (fetchError || !ownerProperty) throw new Error('Property not found');
+      if (fetchError || !ownerProperty) throw new Error('Property not found or access denied');
 
       // Create marketplace listing
       const { data: marketplaceProperty, error: createError } = await supabase

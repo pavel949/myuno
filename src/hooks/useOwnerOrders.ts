@@ -31,6 +31,36 @@ interface Order {
   items: OrderItem[];
 }
 
+interface ResourceRow {
+  id: string;
+}
+
+interface OrderItemWithOrder {
+  id: string;
+  order_id: string;
+  product_id: string | null;
+  resource_id: string | null;
+  product_name: string | null;
+  qty: number;
+  unit_price: number;
+  amount: number;
+  status: string;
+  created_at: string;
+  orders: {
+    id: string;
+    order_number: string;
+    order_type: string;
+    customer_user_id: string;
+    status: string;
+    start_at: string | null;
+    end_at: string | null;
+    total_amount: number;
+    currency: string;
+    created_at: string;
+    metadata: Record<string, unknown> | null;
+  };
+}
+
 export function useOwnerOrders() {
   const { activeOrgId, activeRole } = useUserContext();
 
@@ -41,21 +71,22 @@ export function useOwnerOrders() {
         return [];
       }
 
-      // Use RPC or direct query with explicit types
-      const { data: resources, error: resourcesError } = await (supabase as any)
-        .from('resources')
+      // Query resources owned by this organization
+      // Note: These tables exist but may not be in auto-generated types
+      const { data: resources, error: resourcesError } = await supabase
+        .from('resources' as never)
         .select('id')
-        .eq('owner_org_id', activeOrgId);
+        .eq('owner_org_id', activeOrgId) as { data: ResourceRow[] | null; error: Error | null };
 
       if (resourcesError || !resources || resources.length === 0) {
         return [];
       }
 
-      const resourceIds = resources.map((r: any) => r.id);
+      const resourceIds = resources.map(r => r.id);
 
       // Get order items linked to owned resources
-      const { data: orderItems, error: itemsError } = await (supabase as any)
-        .from('order_items')
+      const { data: orderItems, error: itemsError } = await supabase
+        .from('order_items' as never)
         .select(`
           id,
           order_id,
@@ -82,13 +113,13 @@ export function useOwnerOrders() {
           )
         `)
         .in('resource_id', resourceIds)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false }) as { data: OrderItemWithOrder[] | null; error: Error | null };
 
       if (itemsError) throw itemsError;
 
       // Extract unique orders
       const ordersMap = new Map<string, Order>();
-      (orderItems || []).forEach((item: any) => {
+      (orderItems || []).forEach((item) => {
         const orderData = item.orders;
         if (orderData && !ordersMap.has(orderData.id)) {
           ordersMap.set(orderData.id, {

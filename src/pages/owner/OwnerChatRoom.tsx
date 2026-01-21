@@ -18,20 +18,21 @@ export default function OwnerChatRoom() {
   const navigate = useNavigate();
   const isRu = language === 'ru';
 
-  // Fetch booking details if type is booking
+  // Fetch booking details if type is booking (with ownership verification)
   const { data: booking } = useQuery({
-    queryKey: ['booking-detail', id],
+    queryKey: ['booking-detail', id, user?.id],
     queryFn: async () => {
-      if (type !== 'booking' || !id) return null;
+      if (type !== 'booking' || !id || !user) return null;
       const { data, error } = await supabase
         .from('property_bookings')
         .select('*, owner_properties(title, title_ru)')
         .eq('id', id)
+        .eq('owner_id', user.id) // Security: verify ownership
         .single();
       if (error) throw error;
       return data;
     },
-    enabled: type === 'booking' && !!id,
+    enabled: type === 'booking' && !!id && !!user,
   });
 
   // Fetch property details if type is property

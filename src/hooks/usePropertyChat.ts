@@ -36,6 +36,33 @@ export function usePropertyChat(options: { propertyId?: string; bookingId?: stri
     queryFn: async () => {
       if (!user) return [];
 
+      // First, verify ownership of the property/booking
+      if (bookingId) {
+        const { data: booking, error: bookingError } = await supabase
+          .from('property_bookings')
+          .select('id, owner_id')
+          .eq('id', bookingId)
+          .eq('owner_id', user.id) // Security: verify ownership
+          .single();
+        
+        if (bookingError || !booking) {
+          console.warn('Chat access denied: booking not found or not owned');
+          return [];
+        }
+      } else if (propertyId) {
+        const { data: property, error: propError } = await supabase
+          .from('owner_properties')
+          .select('id, owner_id')
+          .eq('id', propertyId)
+          .eq('owner_id', user.id) // Security: verify ownership
+          .single();
+        
+        if (propError || !property) {
+          console.warn('Chat access denied: property not found or not owned');
+          return [];
+        }
+      }
+
       let query = supabase
         .from('property_chat_messages')
         .select('*')
@@ -87,10 +114,15 @@ export function usePropertyChat(options: { propertyId?: string; bookingId?: stri
 
   const markAsRead = useMutation({
     mutationFn: async (messageIds: string[]) => {
+      if (!user) throw new Error('Not authenticated');
+      
+      // Only mark as read messages that user has access to
+      // The ownership check above already verified access, but we filter to be safe
       const { error } = await supabase
         .from('property_chat_messages')
         .update({ is_read: true })
-        .in('id', messageIds);
+        .in('id', messageIds)
+        .neq('sender_id', user.id); // Only mark others' messages as read
 
       if (error) throw error;
     },
@@ -137,13 +169,35 @@ export function usePropertyChat(options: { propertyId?: string; bookingId?: stri
   };
 }
 
+// Chat item interface for owner inbox
+export interface OwnerChatItem {
+  id: string;
+  type: 'property' | 'booking';
+  propertyId: string;
+  bookingId?: string;
+  title: string;
+  titleRu?: string;
+  propertyTitle?: string;
+  propertyTitleRu?: string;
+  coverImage?: string;
+  lastMessage?: string;
+  lastMessageTime?: string;
+  unreadCount: number;
+  // Booking details for guest chats
+  guestName?: string;
+  guestPhone?: string;
+  checkIn?: string;
+  checkOut?: string;
+  bookingStatus?: string;
+}
+
 // Hook for fetching all chats for owner
 export function useOwnerChats() {
   const { user } = useAuth();
 
-  const { data: chats, isLoading } = useQuery({
+  const { data: chats, isLoading, refetch } = useQuery({
     queryKey: ['owner-chats', user?.id],
-    queryFn: async () => {
+    queryFn: async (): Promise<OwnerChatItem[]> => {
       if (!user) return [];
 
       // Get properties with their latest messages
@@ -154,30 +208,33 @@ export function useOwnerChats() {
 
       if (propError) throw propError;
 
-      // Get latest message for each property/booking
+      if (!properties || properties.length === 0) return [];
+
+      const propertyIds = properties.map(p => p.id);
+
+      // Get latest messages for all owned properties
       const { data: messages, error: msgError } = await supabase
         .from('property_chat_messages')
         .select('property_id, booking_id, message, created_at, is_read, sender_type')
-        .in('property_id', properties?.map(p => p.id) || [])
+        .in('property_id', propertyIds)
         .order('created_at', { ascending: false });
 
       if (msgError) throw msgError;
 
-      // Group by property/booking
-      const chatMap = new Map<string, {
-        id: string;
-        type: 'property' | 'booking';
-        propertyId: string;
-        bookingId?: string;
-        title: string;
-        titleRu?: string;
-        coverImage?: string;
-        lastMessage?: string;
-        lastMessageTime?: string;
-        unreadCount: number;
-      }>();
+      // Get all bookings for these properties (including those without messages for complete view)
+      const { data: allBookings, error: bookingsError } = await supabase
+        .from('property_bookings')
+        .select('id, property_id, guest_name, guest_phone, check_in, check_out, status')
+        .in('property_id', propertyIds)
+        .order('check_in', { ascending: false });
 
-      properties?.forEach(prop => {
+      if (bookingsError) throw bookingsError;
+
+      // Create chat map
+      const chatMap = new Map<string, OwnerChatItem>();
+
+      // First, add property-level chats (general inquiries without booking)
+      properties.forEach(prop => {
         const propMessages = messages?.filter(m => m.property_id === prop.id && !m.booking_id) || [];
         const unreadCount = propMessages.filter(m => !m.is_read && m.sender_type !== 'owner').length;
         
@@ -187,8 +244,8 @@ export function useOwnerChats() {
             type: 'property',
             propertyId: prop.id,
             title: prop.title,
-            titleRu: prop.title_ru,
-            coverImage: prop.cover_image,
+            titleRu: prop.title_ru || undefined,
+            coverImage: prop.cover_image || undefined,
             lastMessage: propMessages[0]?.message,
             lastMessageTime: propMessages[0]?.created_at,
             unreadCount,
@@ -196,36 +253,41 @@ export function useOwnerChats() {
         }
       });
 
-      // Also group booking chats
-      const bookingMessages = messages?.filter(m => m.booking_id) || [];
-      const bookingIds = [...new Set(bookingMessages.map(m => m.booking_id))].filter(Boolean);
-      
-      if (bookingIds.length > 0) {
-        const { data: bookings } = await supabase
-          .from('property_bookings')
-          .select('id, property_id, guest_name, check_in, check_out')
-          .in('id', bookingIds);
+      // Add booking chats (guest conversations)
+      allBookings?.forEach(booking => {
+        const bMessages = messages?.filter(m => m.booking_id === booking.id) || [];
+        const unreadCount = bMessages.filter(m => !m.is_read && m.sender_type !== 'owner').length;
+        const property = properties.find(p => p.id === booking.property_id);
 
-        bookings?.forEach(booking => {
-          const bMessages = bookingMessages.filter(m => m.booking_id === booking.id);
-          const unreadCount = bMessages.filter(m => !m.is_read && m.sender_type !== 'owner').length;
-          const property = properties?.find(p => p.id === booking.property_id);
-
+        // Include booking if it has messages OR is active/upcoming (for easy access)
+        const hasMessages = bMessages.length > 0;
+        const isActiveOrUpcoming = ['confirmed', 'pending'].includes(booking.status || '');
+        
+        if (hasMessages || isActiveOrUpcoming) {
           chatMap.set(`booking-${booking.id}`, {
             id: booking.id,
             type: 'booking',
             propertyId: booking.property_id,
             bookingId: booking.id,
             title: booking.guest_name || 'Guest',
-            titleRu: booking.guest_name,
-            coverImage: property?.cover_image,
+            titleRu: booking.guest_name || undefined,
+            propertyTitle: property?.title,
+            propertyTitleRu: property?.title_ru || undefined,
+            coverImage: property?.cover_image || undefined,
             lastMessage: bMessages[0]?.message,
-            lastMessageTime: bMessages[0]?.created_at,
+            lastMessageTime: bMessages[0]?.created_at || booking.check_in,
             unreadCount,
+            // Booking details
+            guestName: booking.guest_name || undefined,
+            guestPhone: booking.guest_phone || undefined,
+            checkIn: booking.check_in || undefined,
+            checkOut: booking.check_out || undefined,
+            bookingStatus: booking.status || undefined,
           });
-        });
-      }
+        }
+      });
 
+      // Sort by last message time (most recent first)
       return Array.from(chatMap.values()).sort((a, b) => 
         new Date(b.lastMessageTime || 0).getTime() - new Date(a.lastMessageTime || 0).getTime()
       );
@@ -239,6 +301,7 @@ export function useOwnerChats() {
     chats,
     isLoading,
     totalUnread,
+    refetch,
   };
 }
 
@@ -252,7 +315,8 @@ export function useSupportChat() {
     queryFn: async () => {
       if (!user) return [];
 
-      const { data, error } = await supabase
+      // Get owner's own messages to support
+      const { data: ownMessages, error } = await supabase
         .from('property_chat_messages')
         .select('*')
         .eq('sender_id', user.id)
@@ -261,8 +325,7 @@ export function useSupportChat() {
         .is('booking_id', null)
         .order('created_at', { ascending: true });
 
-      // Also get support replies addressed to this user
-      // Filter by checking if metadata contains recipient_id or by thread matching
+      // Get support replies addressed to this user (via metadata.recipient_id)
       const { data: supportReplies, error: replyError } = await supabase
         .from('property_chat_messages')
         .select('*')
@@ -273,23 +336,15 @@ export function useSupportChat() {
 
       if (error || replyError) throw error || replyError;
 
-      // Filter support replies to only include those that are part of this user's conversation
-      // Match by checking if support message was created after user's first message
-      // and before user's next message gap (simple thread inference)
-      const userMessageTimes = (data || []).map(m => new Date(m.created_at).getTime());
+      // Filter support replies to only include those addressed to this user
       const filteredSupportReplies = (supportReplies || []).filter(reply => {
-        const replyTime = new Date(reply.created_at).getTime();
-        // Check if reply contains user.id in any metadata field (if exists)
-        const replyMetadata = reply.attachments as any;
-        if (replyMetadata?.recipient_id === user.id) return true;
-        // Fallback: only include if user has sent messages and reply is reasonably close
-        if (userMessageTimes.length === 0) return false;
-        // Include support replies that came within reasonable conversation window
-        return userMessageTimes.some(ut => Math.abs(replyTime - ut) < 24 * 60 * 60 * 1000);
+        // Check if reply has recipient_id in metadata/attachments
+        const metadata = reply.attachments as Record<string, unknown> | null;
+        return metadata?.recipient_id === user.id;
       });
 
-      // Merge and sort
-      const allMessages = [...(data || []), ...filteredSupportReplies].sort(
+      // Merge and sort by creation time
+      const allMessages = [...(ownMessages || []), ...filteredSupportReplies].sort(
         (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
       );
 
