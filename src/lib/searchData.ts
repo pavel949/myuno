@@ -85,6 +85,7 @@ export const searchDemoData: SearchItem[] = [
  * Category type configuration for search UI
  */
 export const searchTypeConfig: Record<string, TypeConfig> = {
+  category: { icon: Compass, label: { en: 'Category', ru: 'Категория' }, color: 'from-primary to-primary/70' },
   beauty: { icon: Sparkles, label: { en: 'Beauty', ru: 'Красота' }, color: 'from-pink-500 to-purple-500' },
   food: { icon: UtensilsCrossed, label: { en: 'Food', ru: 'Еда' }, color: 'from-orange-500 to-red-500' },
   fitness: { icon: Dumbbell, label: { en: 'Fitness', ru: 'Фитнес' }, color: 'from-blue-500 to-cyan-500' },
