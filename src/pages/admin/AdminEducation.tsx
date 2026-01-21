@@ -14,7 +14,7 @@ import { Plus, Pencil, Trash2, GraduationCap } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminEducation } from '@/hooks/useAdminContent';
 import { ProviderSelector } from '@/components/admin/ProviderSelector';
-import { ImageUpload } from '@/components/upload/ImageUpload';
+import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
 import { toast } from 'sonner';
 
 interface EducationFormData {
@@ -299,6 +299,15 @@ export default function AdminEducation() {
                   <ImageUpload
                     value={formData.cover_image}
                     onChange={(url) => setFormData({ ...formData, cover_image: url })}
+                  />
+                </div>
+
+                <div>
+                  <Label>{isRussian ? 'Галерея (до 5 фото)' : 'Gallery (up to 5 photos)'}</Label>
+                  <MultiImageUpload
+                    value={formData.images}
+                    onChange={(urls) => setFormData({ ...formData, images: urls })}
+                    maxImages={5}
                   />
                 </div>
 
