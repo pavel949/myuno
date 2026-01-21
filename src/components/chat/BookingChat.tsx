@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { SectionCard } from '@/components/uno/SectionCard';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
+import { ChatTransactionWarning } from './ChatTransactionWarning';
 import { cn } from '@/lib/utils';
 
 interface BookingChatProps {
@@ -82,6 +83,9 @@ export const BookingChat: React.FC<BookingChatProps> = ({
           )}
         </div>
       )}
+
+      {/* Transaction Warning */}
+      <ChatTransactionWarning variant="compact" />
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">

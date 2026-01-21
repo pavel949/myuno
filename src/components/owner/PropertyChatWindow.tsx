@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
+import { ChatTransactionWarning } from '@/components/chat/ChatTransactionWarning';
 import { cn } from '@/lib/utils';
 
 interface PropertyChatWindowProps {
@@ -137,6 +138,9 @@ export const PropertyChatWindow: React.FC<PropertyChatWindowProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Transaction Warning */}
+      <ChatTransactionWarning variant="compact" />
 
       {/* Messages */}
       <ScrollArea className="flex-1 p-4">
