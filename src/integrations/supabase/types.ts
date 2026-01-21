@@ -2309,6 +2309,213 @@ export type Database = {
           },
         ]
       }
+      juristic_contacts: {
+        Row: {
+          contact_type: string
+          created_at: string | null
+          email: string | null
+          id: string
+          is_primary: boolean | null
+          line_id: string | null
+          name: string
+          name_ru: string | null
+          notes: string | null
+          phone: string | null
+          position: string | null
+          position_ru: string | null
+          project_id: string | null
+          property_id: string | null
+          updated_at: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          contact_type: string
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_primary?: boolean | null
+          line_id?: string | null
+          name: string
+          name_ru?: string | null
+          notes?: string | null
+          phone?: string | null
+          position?: string | null
+          position_ru?: string | null
+          project_id?: string | null
+          property_id?: string | null
+          updated_at?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          contact_type?: string
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_primary?: boolean | null
+          line_id?: string | null
+          name?: string
+          name_ru?: string | null
+          notes?: string | null
+          phone?: string | null
+          position?: string | null
+          position_ru?: string | null
+          project_id?: string | null
+          property_id?: string | null
+          updated_at?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "juristic_contacts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "juristic_contacts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      juristic_requests: {
+        Row: {
+          assigned_to: string | null
+          attachments: string[] | null
+          completed_at: string | null
+          completion_notes: string | null
+          completion_photos: string[] | null
+          created_at: string | null
+          description: string
+          description_ru: string | null
+          feedback: string | null
+          id: string
+          juristic_response: string | null
+          juristic_response_at: string | null
+          owner_id: string
+          paid_at: string | null
+          payment_amount: number | null
+          payment_id: string | null
+          payment_period_end: string | null
+          payment_period_start: string | null
+          payment_receipt_url: string | null
+          payment_status: string | null
+          priority: string | null
+          project_id: string | null
+          property_id: string
+          rating: number | null
+          request_category: string
+          request_number: string | null
+          request_type: string
+          requires_payment: boolean | null
+          service_fee: number | null
+          service_fee_percent: number | null
+          status: string | null
+          subject: string
+          subject_ru: string | null
+          submitted_at: string | null
+          submitted_by: string
+          total_amount: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          attachments?: string[] | null
+          completed_at?: string | null
+          completion_notes?: string | null
+          completion_photos?: string[] | null
+          created_at?: string | null
+          description: string
+          description_ru?: string | null
+          feedback?: string | null
+          id?: string
+          juristic_response?: string | null
+          juristic_response_at?: string | null
+          owner_id: string
+          paid_at?: string | null
+          payment_amount?: number | null
+          payment_id?: string | null
+          payment_period_end?: string | null
+          payment_period_start?: string | null
+          payment_receipt_url?: string | null
+          payment_status?: string | null
+          priority?: string | null
+          project_id?: string | null
+          property_id: string
+          rating?: number | null
+          request_category: string
+          request_number?: string | null
+          request_type: string
+          requires_payment?: boolean | null
+          service_fee?: number | null
+          service_fee_percent?: number | null
+          status?: string | null
+          subject: string
+          subject_ru?: string | null
+          submitted_at?: string | null
+          submitted_by: string
+          total_amount?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          attachments?: string[] | null
+          completed_at?: string | null
+          completion_notes?: string | null
+          completion_photos?: string[] | null
+          created_at?: string | null
+          description?: string
+          description_ru?: string | null
+          feedback?: string | null
+          id?: string
+          juristic_response?: string | null
+          juristic_response_at?: string | null
+          owner_id?: string
+          paid_at?: string | null
+          payment_amount?: number | null
+          payment_id?: string | null
+          payment_period_end?: string | null
+          payment_period_start?: string | null
+          payment_receipt_url?: string | null
+          payment_status?: string | null
+          priority?: string | null
+          project_id?: string | null
+          property_id?: string
+          rating?: number | null
+          request_category?: string
+          request_number?: string | null
+          request_type?: string
+          requires_payment?: boolean | null
+          service_fee?: number | null
+          service_fee_percent?: number | null
+          status?: string | null
+          subject?: string
+          subject_ru?: string | null
+          submitted_at?: string | null
+          submitted_by?: string
+          total_amount?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "juristic_requests_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "juristic_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_activity_log: {
         Row: {
           activity_type: string
@@ -5353,6 +5560,86 @@ export type Database = {
           },
         ]
       }
+      property_documents: {
+        Row: {
+          access_code: string | null
+          access_instructions: string | null
+          access_instructions_ru: string | null
+          created_at: string | null
+          description: string | null
+          description_ru: string | null
+          document_type: string
+          expiry_date: string | null
+          file_name: string | null
+          file_url: string | null
+          id: string
+          is_sensitive: boolean | null
+          is_verified: boolean | null
+          issue_date: string | null
+          property_id: string
+          title: string
+          title_ru: string | null
+          updated_at: string | null
+          uploaded_by: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          access_code?: string | null
+          access_instructions?: string | null
+          access_instructions_ru?: string | null
+          created_at?: string | null
+          description?: string | null
+          description_ru?: string | null
+          document_type: string
+          expiry_date?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          is_sensitive?: boolean | null
+          is_verified?: boolean | null
+          issue_date?: string | null
+          property_id: string
+          title: string
+          title_ru?: string | null
+          updated_at?: string | null
+          uploaded_by?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          access_code?: string | null
+          access_instructions?: string | null
+          access_instructions_ru?: string | null
+          created_at?: string | null
+          description?: string | null
+          description_ru?: string | null
+          document_type?: string
+          expiry_date?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          is_sensitive?: boolean | null
+          is_verified?: boolean | null
+          issue_date?: string | null
+          property_id?: string
+          title?: string
+          title_ru?: string | null
+          updated_at?: string | null
+          uploaded_by?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_documents_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_external_calendars: {
         Row: {
           created_at: string
@@ -5753,6 +6040,9 @@ export type Database = {
         Row: {
           address: string | null
           amenities: string[] | null
+          cam_fee_per_sqm: number | null
+          cam_includes: string[] | null
+          cam_payment_day: number | null
           cover_image: string | null
           created_at: string | null
           created_by: string | null
@@ -5765,6 +6055,20 @@ export type Database = {
           infrastructure: string[] | null
           is_active: boolean | null
           is_featured: boolean | null
+          juristic_address: string | null
+          juristic_bank_account_name: string | null
+          juristic_bank_account_number: string | null
+          juristic_bank_name: string | null
+          juristic_contact_person: string | null
+          juristic_contact_position: string | null
+          juristic_email: string | null
+          juristic_line_id: string | null
+          juristic_office_hours: string | null
+          juristic_person_name: string | null
+          juristic_person_name_ru: string | null
+          juristic_phone: string | null
+          juristic_promptpay_id: string | null
+          juristic_whatsapp: string | null
           lat: number | null
           lng: number | null
           name_en: string
@@ -5777,6 +6081,9 @@ export type Database = {
         Insert: {
           address?: string | null
           amenities?: string[] | null
+          cam_fee_per_sqm?: number | null
+          cam_includes?: string[] | null
+          cam_payment_day?: number | null
           cover_image?: string | null
           created_at?: string | null
           created_by?: string | null
@@ -5789,6 +6096,20 @@ export type Database = {
           infrastructure?: string[] | null
           is_active?: boolean | null
           is_featured?: boolean | null
+          juristic_address?: string | null
+          juristic_bank_account_name?: string | null
+          juristic_bank_account_number?: string | null
+          juristic_bank_name?: string | null
+          juristic_contact_person?: string | null
+          juristic_contact_position?: string | null
+          juristic_email?: string | null
+          juristic_line_id?: string | null
+          juristic_office_hours?: string | null
+          juristic_person_name?: string | null
+          juristic_person_name_ru?: string | null
+          juristic_phone?: string | null
+          juristic_promptpay_id?: string | null
+          juristic_whatsapp?: string | null
           lat?: number | null
           lng?: number | null
           name_en: string
@@ -5801,6 +6122,9 @@ export type Database = {
         Update: {
           address?: string | null
           amenities?: string[] | null
+          cam_fee_per_sqm?: number | null
+          cam_includes?: string[] | null
+          cam_payment_day?: number | null
           cover_image?: string | null
           created_at?: string | null
           created_by?: string | null
@@ -5813,6 +6137,20 @@ export type Database = {
           infrastructure?: string[] | null
           is_active?: boolean | null
           is_featured?: boolean | null
+          juristic_address?: string | null
+          juristic_bank_account_name?: string | null
+          juristic_bank_account_number?: string | null
+          juristic_bank_name?: string | null
+          juristic_contact_person?: string | null
+          juristic_contact_position?: string | null
+          juristic_email?: string | null
+          juristic_line_id?: string | null
+          juristic_office_hours?: string | null
+          juristic_person_name?: string | null
+          juristic_person_name_ru?: string | null
+          juristic_phone?: string | null
+          juristic_promptpay_id?: string | null
+          juristic_whatsapp?: string | null
           lat?: number | null
           lng?: number | null
           name_en?: string
