@@ -31,7 +31,7 @@ const typeRoutes: Record<string, string> = {
   course: '/education',
   service: '/services/provider',
   salon: '/beauty/salon',
-  restaurant: '/food/restaurant',
+  restaurant: '/restaurants',
   pharmacy: '/pharmacy',
   legal: '/legal/provider',
   flower_shop: '/flowers/shop',

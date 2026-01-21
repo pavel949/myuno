@@ -32,10 +32,7 @@ const PropertyDetail = lazy(() => import('@/pages/property/PropertyDetail'));
 const PropertyInquiry = lazy(() => import('@/pages/property/PropertyInquiry'));
 const PropertyMap = lazy(() => import('@/pages/property/PropertyMap'));
 
-// Food & Delivery Mini-App (legacy)
-const FoodIndex = lazy(() => import('@/pages/food/FoodIndex'));
-const FoodRestaurantDetail = lazy(() => import('@/pages/food/RestaurantDetail'));
-const FoodCheckout = lazy(() => import('@/pages/food/FoodCheckout'));
+// Food & Delivery Mini-App (legacy - removed, redirects only)
 
 // Restaurants Mini-App
 const RestaurantsIndex = lazy(() => import('@/pages/restaurants/RestaurantsIndex'));
@@ -348,10 +345,10 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/property/:id/inquiry" element={<LazyPage><PropertyInquiry /></LazyPage>} />
         <Route path="/property/map" element={<LazyPage><PropertyMap /></LazyPage>} />
         
-        {/* Food & Delivery Mini-App Routes (legacy - redirects) */}
+        {/* Food & Delivery Mini-App Routes (legacy - all redirect to restaurants) */}
         <Route path="/food" element={<Navigate to="/restaurants" replace />} />
-        <Route path="/food/restaurant/:id" element={<LazyPage><FoodRestaurantDetail /></LazyPage>} />
-        <Route path="/food/checkout" element={<LazyPage><FoodCheckout /></LazyPage>} />
+        <Route path="/food/restaurant/:id" element={<Navigate to="/restaurants" replace />} />
+        <Route path="/food/checkout" element={<Navigate to="/restaurants" replace />} />
         
         {/* Restaurants Mini-App Routes */}
         <Route path="/restaurants" element={<LazyPage><RestaurantsIndex /></LazyPage>} />
