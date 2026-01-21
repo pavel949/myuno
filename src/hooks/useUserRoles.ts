@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-export type AppRole = 'guest' | 'user' | 'tourist' | 'resident' | 'partner' | 'owner' | 'property_owner' | 'vendor' | 'staff' | 'admin' | 'ombudsman';
+export type AppRole = 'guest' | 'user' | 'tourist' | 'resident' | 'partner' | 'owner' | 'property_owner' | 'vendor' | 'staff' | 'admin' | 'ombudsman' | 'uno_team';
 
 export interface UserRole {
   id: string;
@@ -111,6 +111,17 @@ export const ROLE_CONFIG: Record<AppRole, {
     icon: 'Scale',
     color: 'from-slate-400 to-slate-500',
     path: '/admin',
+  },
+  uno_team: {
+    labelEn: 'UNO Team',
+    labelRu: 'Команда UNO',
+    icon: 'Headphones',
+    color: 'from-emerald-400 to-emerald-500',
+    path: '/team',
+    description: {
+      en: 'Process leads, contact clients, coordinate with providers',
+      ru: 'Обработка заявок, связь с клиентами, координация с поставщиками',
+    },
   },
 };
 

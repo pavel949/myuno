@@ -4,7 +4,7 @@ import { AnimatePresence } from 'framer-motion';
 import { PageTransition } from './PageTransition';
 import { ScrollToTop } from './ScrollToTop';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
-import { AdminGuard, VendorGuard, OwnerGuard } from '@/components/auth/RoleGuard';
+import { AdminGuard, VendorGuard, OwnerGuard, TeamGuard } from '@/components/auth/RoleGuard';
 
 // Core pages - load eagerly for fast initial navigation
 import Index from '@/pages/Index';
@@ -265,6 +265,9 @@ const OwnerGuidebookEdit = lazy(() => import('@/pages/owner/OwnerGuidebookEdit')
 // Staff pages
 const StaffDashboard = lazy(() => import('@/pages/staff/StaffDashboard'));
 
+// Team (UNO Team) pages
+const TeamDashboard = lazy(() => import('@/pages/team/TeamDashboard'));
+
 // Demo pages
 const DemoIndex = lazy(() => import('@/pages/demo/DemoIndex'));
 const DemoHome = lazy(() => import('@/pages/demo/DemoHome'));
@@ -507,6 +510,9 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* Staff Routes - Protected */}
         <Route path="/staff" element={<LazyPage><AdminGuard><StaffDashboard /></AdminGuard></LazyPage>} />
+        
+        {/* UNO Team Routes - Protected */}
+        <Route path="/team" element={<LazyPage><TeamGuard><TeamDashboard /></TeamGuard></LazyPage>} />
         
         {/* Guest Routes */}
         <Route path="/my-stay" element={<LazyPage><MyStay /></LazyPage>} />

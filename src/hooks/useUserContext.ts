@@ -36,7 +36,7 @@ export interface UserActiveContext {
   updated_at: string;
 }
 
-export type AppRole = 'user' | 'vendor' | 'owner' | 'admin' | 'staff';
+export type AppRole = 'user' | 'vendor' | 'owner' | 'admin' | 'staff' | 'uno_team';
 
 /**
  * Hook for managing user's active context (role + org) stored in database
