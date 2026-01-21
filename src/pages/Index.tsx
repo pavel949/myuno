@@ -234,7 +234,7 @@ const Index = () => {
                 const settings = getFeedbackSettings();
                 if (settings.hapticEnabled) triggerHaptic('light');
                 if (settings.soundEnabled) playSound('click');
-                navigate('/owner');
+                navigate('/owner/landing');
               }}
               onMouseEnter={prefetchOwnerData}
               onTouchStart={prefetchOwnerData}
@@ -270,7 +270,7 @@ const Index = () => {
                 const settings = getFeedbackSettings();
                 if (settings.hapticEnabled) triggerHaptic('light');
                 if (settings.soundEnabled) playSound('click');
-                window.dispatchEvent(new CustomEvent('open-quick-listing'));
+                navigate('/owner/landing');
               }}
               className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 p-5 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 transition-all group text-left active:scale-95"
               aria-label={t('home.quickListing')}
