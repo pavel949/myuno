@@ -71,34 +71,6 @@ export const PropertyChatWindow: React.FC<PropertyChatWindowProps> = ({
     }
   };
 
-  const getSenderIcon = (senderType: string) => {
-    switch (senderType) {
-      case 'owner':
-        return <Building2 className="h-4 w-4" />;
-      case 'guest':
-        return <User className="h-4 w-4" />;
-      case 'manager':
-      case 'support':
-        return <Headphones className="h-4 w-4" />;
-      default:
-        return <User className="h-4 w-4" />;
-    }
-  };
-
-  const getSenderColor = (senderType: string) => {
-    switch (senderType) {
-      case 'owner':
-        return 'bg-primary text-primary-foreground';
-      case 'guest':
-        return 'bg-blue-500 text-white';
-      case 'manager':
-        return 'bg-purple-500 text-white';
-      case 'support':
-        return 'bg-green-500 text-white';
-      default:
-        return 'bg-muted';
-    }
-  };
 
   if (isLoading) {
     return (
