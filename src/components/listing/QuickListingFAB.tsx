@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -8,6 +8,13 @@ export function QuickListingFAB() {
   const { language } = useLanguage();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+
+  // Listen for open-quick-listing event from CTA buttons
+  useEffect(() => {
+    const handleOpenQuickListing = () => setIsModalOpen(true);
+    window.addEventListener('open-quick-listing', handleOpenQuickListing);
+    return () => window.removeEventListener('open-quick-listing', handleOpenQuickListing);
+  }, []);
 
   return (
     <>
