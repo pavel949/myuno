@@ -11,7 +11,8 @@ import {
   Plane,
   ShoppingBag,
   Utensils,
-  Anchor
+  Anchor,
+  Heart
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
@@ -35,6 +36,17 @@ interface QuickAction {
 }
 
 const quickActions: QuickAction[] = [
+  {
+    id: 'wellness',
+    icon: Heart,
+    label: 'Wellness',
+    labelRu: 'Гармония',
+    path: '/wellness',
+    gradient: 'from-purple-400 to-pink-500',
+    badge: 'New',
+    badgeRu: 'Новое',
+    isPopular: true,
+  },
   {
     id: 'yachts',
     icon: Anchor,
