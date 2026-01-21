@@ -202,6 +202,7 @@ const AdminQuickListings = lazy(() => import('@/pages/admin/AdminQuickListings')
 const AdminWaterActivities = lazy(() => import('@/pages/admin/AdminWaterActivities'));
 const AdminContentModeration = lazy(() => import('@/pages/admin/AdminContentModeration'));
 const AdminConsultations = lazy(() => import('@/pages/admin/AdminConsultations'));
+const AdminUnoTeam = lazy(() => import('@/pages/admin/AdminUnoTeam'));
 
 // Support pages (user tickets)
 const NewTicket = lazy(() => import('@/pages/support/NewTicket'));
@@ -267,6 +268,7 @@ const StaffDashboard = lazy(() => import('@/pages/staff/StaffDashboard'));
 
 // Team (UNO Team) pages
 const TeamDashboard = lazy(() => import('@/pages/team/TeamDashboard'));
+const TeamContentHub = lazy(() => import('@/pages/team/TeamContentHub'));
 
 // Demo pages
 const DemoIndex = lazy(() => import('@/pages/demo/DemoIndex'));
@@ -507,12 +509,14 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/admin/water-activities" element={<LazyPage><AdminGuard><AdminWaterActivities /></AdminGuard></LazyPage>} />
         <Route path="/admin/moderation" element={<LazyPage><AdminGuard><AdminContentModeration /></AdminGuard></LazyPage>} />
         <Route path="/admin/consultations" element={<LazyPage><AdminGuard><AdminConsultations /></AdminGuard></LazyPage>} />
+        <Route path="/admin/uno-team" element={<LazyPage><AdminGuard><AdminUnoTeam /></AdminGuard></LazyPage>} />
         
         {/* Staff Routes - Protected */}
         <Route path="/staff" element={<LazyPage><AdminGuard><StaffDashboard /></AdminGuard></LazyPage>} />
         
         {/* UNO Team Routes - Protected */}
         <Route path="/team" element={<LazyPage><TeamGuard><TeamDashboard /></TeamGuard></LazyPage>} />
+        <Route path="/team/content" element={<LazyPage><TeamGuard><TeamContentHub /></TeamGuard></LazyPage>} />
         
         {/* Guest Routes */}
         <Route path="/my-stay" element={<LazyPage><MyStay /></LazyPage>} />
