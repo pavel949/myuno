@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MessageCircle, User, Building2, Headphones, ArrowRight } from 'lucide-react';
+import { MessageCircle, User, Building2, Headphones, ArrowRight, FileText } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -63,6 +63,16 @@ export default function OwnerMessages() {
         }
         showBack
         fallbackPath="/owner"
+        actions={
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => navigate('/owner/message-templates')}
+          >
+            <FileText className="h-4 w-4 mr-2" />
+            {isRu ? 'Шаблоны' : 'Templates'}
+          </Button>
+        }
       />
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="mb-4">

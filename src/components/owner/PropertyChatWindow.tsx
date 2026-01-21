@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Paperclip, Image, FileText, User, Building2, Headphones } from 'lucide-react';
+import { Send, User, Building2, Headphones } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 import { ChatTransactionWarning } from '@/components/chat/ChatTransactionWarning';
+import { QuickReplies } from '@/components/chat/QuickReplies';
 import { cn } from '@/lib/utils';
 
 interface PropertyChatWindowProps {
@@ -166,6 +167,14 @@ export const PropertyChatWindow: React.FC<PropertyChatWindowProps> = ({
         )}
         <div ref={messagesEndRef} />
       </ScrollArea>
+
+      {/* Quick Replies */}
+      <div className="px-4 py-2 border-t bg-muted/30">
+        <QuickReplies 
+          onSelect={(message) => setNewMessage(message)} 
+          disabled={isSending}
+        />
+      </div>
 
       {/* Input */}
       <div className="p-4 border-t">
