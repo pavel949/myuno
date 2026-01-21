@@ -94,14 +94,14 @@ const ukBenefits = [
 const collaborationOptions = [
   {
     type: 'self',
-    badgeEn: 'Free',
-    badgeRu: 'Бесплатно',
+    badgeEn: 'Free tools',
+    badgeRu: 'Бесплатные инструменты',
     titleEn: 'Self Management',
     titleRu: 'Самостоятельное управление',
-    descEn: 'Free access to all tools. You handle bookings, cleaning and guests.',
-    descRu: 'Бесплатный доступ к инструментам. Вы сами управляете бронированиями и гостями.',
-    priceEn: '0%',
-    priceRu: '0%',
+    descEn: 'Free access to all tools. 10% platform commission per booking.',
+    descRu: 'Бесплатный доступ к инструментам. Комиссия 10% за бронирование.',
+    priceEn: '10%',
+    priceRu: '10%',
     features: ['dashboard', 'calendar', 'reports']
   },
   {
@@ -355,7 +355,9 @@ export default function OwnerLanding() {
                       <div className="text-[10px] text-muted-foreground">
                         {option.type === 'full' 
                           ? (isRu ? 'вам / нам' : 'you / us')
-                          : (isRu ? 'комиссия' : 'commission')}
+                          : option.type === 'self'
+                            ? (isRu ? 'за бронирование' : 'per booking')
+                            : (isRu ? 'комиссия' : 'commission')}
                       </div>
                     </div>
                   </div>
