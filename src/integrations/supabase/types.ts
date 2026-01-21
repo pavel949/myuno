@@ -5439,6 +5439,81 @@ export type Database = {
         }
         Relationships: []
       }
+      quick_listings: {
+        Row: {
+          admin_notes: string | null
+          category: string
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          converted_to_id: string | null
+          converted_to_type: string | null
+          created_at: string | null
+          currency: string | null
+          description: string | null
+          id: string
+          images: string[] | null
+          location: string | null
+          price: number | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+          subcategory: string | null
+          title: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          category: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          converted_to_id?: string | null
+          converted_to_type?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          location?: string | null
+          price?: number | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          subcategory?: string | null
+          title: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          category?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          converted_to_id?: string | null
+          converted_to_type?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          location?: string | null
+          price?: number | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          subcategory?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       referral_codes: {
         Row: {
           code: string
