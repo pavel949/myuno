@@ -261,7 +261,8 @@ export function useSupportChat() {
         .is('booking_id', null)
         .order('created_at', { ascending: true });
 
-      // Also get support replies
+      // Also get support replies addressed to this user
+      // Filter by checking if metadata contains recipient_id or by thread matching
       const { data: supportReplies, error: replyError } = await supabase
         .from('property_chat_messages')
         .select('*')
@@ -272,8 +273,23 @@ export function useSupportChat() {
 
       if (error || replyError) throw error || replyError;
 
+      // Filter support replies to only include those that are part of this user's conversation
+      // Match by checking if support message was created after user's first message
+      // and before user's next message gap (simple thread inference)
+      const userMessageTimes = (data || []).map(m => new Date(m.created_at).getTime());
+      const filteredSupportReplies = (supportReplies || []).filter(reply => {
+        const replyTime = new Date(reply.created_at).getTime();
+        // Check if reply contains user.id in any metadata field (if exists)
+        const replyMetadata = reply.attachments as any;
+        if (replyMetadata?.recipient_id === user.id) return true;
+        // Fallback: only include if user has sent messages and reply is reasonably close
+        if (userMessageTimes.length === 0) return false;
+        // Include support replies that came within reasonable conversation window
+        return userMessageTimes.some(ut => Math.abs(replyTime - ut) < 24 * 60 * 60 * 1000);
+      });
+
       // Merge and sort
-      const allMessages = [...(data || []), ...(supportReplies || [])].sort(
+      const allMessages = [...(data || []), ...filteredSupportReplies].sort(
         (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
       );
 
