@@ -1040,12 +1040,14 @@ export type Database = {
           bedrooms_min: number | null
           budget_max: number | null
           budget_min: number | null
+          children_count: number | null
           created_at: string
           currency: string | null
           current_occupancy: string | null
           districts: string[] | null
           email: string | null
           follow_up_date: string | null
+          guests_count: number | null
           id: string
           name: string
           notes: string | null
@@ -1072,12 +1074,14 @@ export type Database = {
           bedrooms_min?: number | null
           budget_max?: number | null
           budget_min?: number | null
+          children_count?: number | null
           created_at?: string
           currency?: string | null
           current_occupancy?: string | null
           districts?: string[] | null
           email?: string | null
           follow_up_date?: string | null
+          guests_count?: number | null
           id?: string
           name: string
           notes?: string | null
@@ -1104,12 +1108,14 @@ export type Database = {
           bedrooms_min?: number | null
           budget_max?: number | null
           budget_min?: number | null
+          children_count?: number | null
           created_at?: string
           currency?: string | null
           current_occupancy?: string | null
           districts?: string[] | null
           email?: string | null
           follow_up_date?: string | null
+          guests_count?: number | null
           id?: string
           name?: string
           notes?: string | null
