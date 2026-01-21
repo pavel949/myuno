@@ -14,7 +14,7 @@ import { Plus, Pencil, Trash2, Baby } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminBabysitters } from '@/hooks/useAdminContent';
 import { ProviderSelector } from '@/components/admin/ProviderSelector';
-import { ImageUpload } from '@/components/upload/ImageUpload';
+import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
 import { toast } from 'sonner';
 
 interface BabysitterFormData {
@@ -266,10 +266,19 @@ export default function AdminBabysitters() {
                 </div>
 
                 <div>
-                  <Label>{isRussian ? 'Фото' : 'Photo'}</Label>
+                  <Label>{isRussian ? 'Фото профиля' : 'Profile Photo'}</Label>
                   <ImageUpload
                     value={formData.photo}
                     onChange={(url) => setFormData({ ...formData, photo: url })}
+                  />
+                </div>
+
+                <div>
+                  <Label>{isRussian ? 'Галерея (до 5 фото)' : 'Gallery (up to 5 photos)'}</Label>
+                  <MultiImageUpload
+                    value={formData.images}
+                    onChange={(urls) => setFormData({ ...formData, images: urls })}
+                    maxImages={5}
                   />
                 </div>
 

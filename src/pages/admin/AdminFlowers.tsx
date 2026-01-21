@@ -14,7 +14,7 @@ import { Plus, Pencil, Trash2, Flower2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminFlowers } from '@/hooks/useAdminContent';
 import { ProviderSelector } from '@/components/admin/ProviderSelector';
-import { ImageUpload } from '@/components/upload/ImageUpload';
+import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
 import { toast } from 'sonner';
 
 interface FlowerShopFormData {
@@ -237,6 +237,15 @@ export default function AdminFlowers() {
                   <ImageUpload
                     value={formData.cover_image}
                     onChange={(url) => setFormData({ ...formData, cover_image: url })}
+                  />
+                </div>
+
+                <div>
+                  <Label>{isRussian ? 'Галерея (до 8 фото)' : 'Gallery (up to 8 photos)'}</Label>
+                  <MultiImageUpload
+                    value={formData.images}
+                    onChange={(urls) => setFormData({ ...formData, images: urls })}
+                    maxImages={8}
                   />
                 </div>
 
