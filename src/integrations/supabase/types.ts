@@ -6236,6 +6236,7 @@ export type Database = {
       }
       services: {
         Row: {
+          approval_status: string | null
           category_id: string | null
           created_at: string
           currency: string | null
@@ -6250,10 +6251,14 @@ export type Database = {
           name_ru: string
           price: number | null
           provider_id: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           tags: string[] | null
           updated_at: string
         }
         Insert: {
+          approval_status?: string | null
           category_id?: string | null
           created_at?: string
           currency?: string | null
@@ -6268,10 +6273,14 @@ export type Database = {
           name_ru: string
           price?: number | null
           provider_id: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           tags?: string[] | null
           updated_at?: string
         }
         Update: {
+          approval_status?: string | null
           category_id?: string | null
           created_at?: string
           currency?: string | null
@@ -6286,6 +6295,9 @@ export type Database = {
           name_ru?: string
           price?: number | null
           provider_id?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           tags?: string[] | null
           updated_at?: string
         }

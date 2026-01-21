@@ -49,6 +49,7 @@ import {
   Star
 } from 'lucide-react';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
+import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
 
 const gymTypes = [
   { value: 'gym', label: 'Gym', labelRu: 'Тренажёрный зал' },

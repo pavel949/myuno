@@ -307,6 +307,8 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
             const { data, error } = await supabase
               .from(config.table as any)
               .select(uniqueFields.join(','))
+              .eq('is_active', true)
+              .eq('approval_status', 'approved')
               .or(`${config.titleEn}.ilike.%${searchTerm}%,${config.titleRu}.ilike.%${searchTerm}%`)
               .limit(5);
 

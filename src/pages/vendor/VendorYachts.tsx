@@ -53,6 +53,7 @@ import {
   Bath
 } from 'lucide-react';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
+import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
 import {
   VendorFormWizard,
   WizardStepContent,
@@ -443,11 +444,10 @@ const VendorYachts = () => {
                             <Badge variant="secondary" className="text-xs">
                               {yachtTypes.find(t => t.value === yacht.yacht_type)?.[isRussian ? 'labelRu' : 'label']}
                             </Badge>
-                            {!yacht.is_verified && (
-                              <Badge variant="outline" className="text-xs text-amber-600">
-                                {isRussian ? 'На модерации' : 'Pending'}
-                              </Badge>
-                            )}
+                            <ApprovalStatusBadge 
+                              status={(yacht as any).approval_status} 
+                              rejectionReason={(yacht as any).rejection_reason}
+                            />
                             {yacht.is_featured && (
                               <Badge className="text-xs bg-primary">
                                 {isRussian ? 'Избранное' : 'Featured'}

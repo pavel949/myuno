@@ -51,6 +51,7 @@ import {
   MapPin
 } from 'lucide-react';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
+import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
 
 const vehicleTypes = [
   { value: 'sedan', label: 'Sedan', labelRu: 'Седан' },

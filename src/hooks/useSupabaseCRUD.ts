@@ -117,6 +117,11 @@ export function useSupabaseCRUD<T extends { id: string }>({
       if (providerId) {
         insertData[providerIdField] = providerId;
       }
+      
+      // Auto-set pending status for vendor-created content (moderation workflow)
+      if (providerId && !('approval_status' in insertData)) {
+        insertData.approval_status = 'pending';
+      }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: result, error: insertError } = await supabase
