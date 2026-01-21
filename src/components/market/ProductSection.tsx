@@ -3,18 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
-import { MarketProduct } from '@/data/marketplaceProducts';
+import { useCartToast } from '@/hooks/useCartToast';
+import { MarketplaceProduct } from '@/types/marketplace';
 import { ProductCard } from './ProductCard';
 import { Button } from '@/components/ui/button';
-import { useCartToast } from '@/hooks/useCartToast';
 
 interface ProductSectionProps {
   title: string;
   titleRu: string;
-  products: MarketProduct[];
+  products: MarketplaceProduct[];
   seeAllPath?: string;
   maxItems?: number;
   variant?: 'scroll' | 'grid';
+  isLoading?: boolean;
 }
 
 export const ProductSection: React.FC<ProductSectionProps> = ({
@@ -24,9 +25,10 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   seeAllPath,
   maxItems = 6,
   variant = 'scroll',
+  isLoading = false,
 }) => {
-  const { language } = useLanguage();
   const navigate = useNavigate();
+  const { language } = useLanguage();
   const { addItem, removeItem, getItemsByType } = useCart();
   const { showAddedToast } = useCartToast();
 
@@ -37,18 +39,18 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
     return cartItems.find(i => i.id === productId)?.quantity || 0;
   };
 
-  const handleAdd = (product: MarketProduct) => {
+  const handleAdd = (product: MarketplaceProduct) => {
     const item = {
       id: product.id,
       type: 'product' as const,
-      name: product.nameEn,
-      nameRu: product.nameRu,
+      name: product.name_en,
+      nameRu: product.name_ru,
       price: product.price,
       currency: '฿',
-      image: product.image,
-      providerId: product.vendorId || 'marketplace',
-      providerName: product.vendorName || 'myUNO Market',
-      providerNameRu: product.vendorNameRu || 'myUNO Маркет',
+      image: product.cover_image || undefined,
+      providerId: 'marketplace',
+      providerName: product.vendor_name || 'myUNO Market',
+      providerNameRu: product.vendor_name_ru || 'myUNO Маркет',
     };
     addItem(item);
     showAddedToast({ item, cartPath: '/market/checkout' });
@@ -58,7 +60,24 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
     removeItem(productId);
   };
 
-  if (products.length === 0) return null;
+  if (isLoading) {
+    return (
+      <section className="space-y-3">
+        <div className="h-6 w-32 bg-muted rounded animate-pulse" />
+        <div className="flex gap-3 overflow-hidden">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="w-[160px] shrink-0">
+              <div className="aspect-square bg-muted rounded-xl mb-2 animate-pulse" />
+              <div className="h-4 bg-muted rounded w-3/4 mb-1 animate-pulse" />
+              <div className="h-4 bg-muted rounded w-1/2 animate-pulse" />
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  if (displayProducts.length === 0) return null;
 
   return (
     <section className="space-y-3">

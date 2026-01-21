@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Search, SlidersHorizontal, ShoppingBag } from 'lucide-react';
+import { Search, ShoppingBag } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -8,18 +8,13 @@ import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { StickyCartBar } from '@/components/cart/StickyCartBar';
 import { ProductCard } from '@/components/market';
-import {
-  categoryBanners,
-  subcategories,
-  marketplaceProducts,
-  MarketProduct,
-  MarketCategory,
-} from '@/data/marketplaceProducts';
+import { useMarketplaceCategories, useMarketplaceProducts } from '@/hooks/useMarketplace';
+import { MarketplaceProduct, subcategoriesByCategory } from '@/types/marketplace';
 import { useCartToast } from '@/hooks/useCartToast';
 import { FilterChip, FilterChipGroup } from '@/components/uno/FilterChip';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const MarketCategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
@@ -31,15 +26,17 @@ const MarketCategoryPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSubcategory, setSelectedSubcategory] = useState('all');
 
-  const category = categoryBanners.find(c => c.id === categoryId);
-  const categorySubcategories = subcategories[categoryId as MarketCategory] || [];
+  // Fetch from database
+  const { categories, isLoading: categoriesLoading } = useMarketplaceCategories();
+  const { products: categoryProducts, isLoading: productsLoading } = useMarketplaceProducts({
+    category: categoryId,
+  });
+
+  const category = categories.find(c => c.slug === categoryId);
+  const subcategories = subcategoriesByCategory[categoryId || ''] || [];
   
   const cartItems = getItemsByType('product');
   const cartItemCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
-
-  const categoryProducts = useMemo(() => {
-    return marketplaceProducts.filter(p => p.category === categoryId);
-  }, [categoryId]);
 
   const filteredProducts = useMemo(() => {
     return categoryProducts.filter(product => {
@@ -51,8 +48,8 @@ const MarketCategoryPage = () => {
       // Search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
-        const name = language === 'ru' ? product.nameRu : product.nameEn;
-        const desc = language === 'ru' ? product.descriptionRu : product.descriptionEn;
+        const name = language === 'ru' ? product.name_ru : product.name_en;
+        const desc = language === 'ru' ? product.description_ru : product.description_en;
         if (!name.toLowerCase().includes(query) && 
             !(desc && desc.toLowerCase().includes(query))) {
           return false;
@@ -67,18 +64,18 @@ const MarketCategoryPage = () => {
     return cartItems.find(i => i.id === productId)?.quantity || 0;
   };
 
-  const handleAdd = (product: MarketProduct) => {
+  const handleAdd = (product: MarketplaceProduct) => {
     const item = {
       id: product.id,
       type: 'product' as const,
-      name: product.nameEn,
-      nameRu: product.nameRu,
+      name: product.name_en,
+      nameRu: product.name_ru,
       price: product.price,
       currency: '฿',
-      image: product.image,
-      providerId: product.vendorId || 'marketplace',
-      providerName: product.vendorName || 'myUNO Market',
-      providerNameRu: product.vendorNameRu || 'myUNO Маркет',
+      image: product.cover_image || undefined,
+      providerId: 'marketplace',
+      providerName: product.vendor_name || 'myUNO Market',
+      providerNameRu: product.vendor_name_ru || 'myUNO Маркет',
     };
     addItem(item);
     showAddedToast({ item, cartPath: '/market/checkout' });
@@ -88,7 +85,9 @@ const MarketCategoryPage = () => {
     removeItem(productId);
   };
 
-  if (!category) {
+  const isLoading = categoriesLoading || productsLoading;
+
+  if (!isLoading && !category) {
     return (
       <AppLayout>
         <PageContainer>
@@ -102,21 +101,15 @@ const MarketCategoryPage = () => {
     );
   }
 
-  const subcategoryChips = categorySubcategories.map(sub => ({
-    id: sub.id,
-    labelEn: sub.labelEn,
-    labelRu: sub.labelRu,
-  }));
-
   return (
     <AppLayout>
       <PageContainer className="pb-32">
         {/* Header */}
         <PageHeader
-          title={language === 'ru' ? category.labelRu : category.labelEn}
+          title={category ? (language === 'ru' ? category.name_ru : category.name_en) : '...'}
           fallbackPath="/market"
           showBack
-          badge={filteredProducts.length}
+          badge={!isLoading ? filteredProducts.length : undefined}
           actions={
             <Button variant="ghost" size="icon" onClick={() => navigate('/cart')} className="relative">
               <ShoppingBag className="w-5 h-5" />
@@ -130,27 +123,29 @@ const MarketCategoryPage = () => {
         />
 
         {/* Hero Banner */}
-        <div className="relative rounded-2xl overflow-hidden mb-6 h-32">
-          <img
-            src={category.image}
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-          <div className={`absolute inset-0 bg-gradient-to-r ${category.gradient}`} />
-          <div className="absolute inset-0 p-4 flex items-end text-white">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-2xl">{category.icon}</span>
-                <h1 className="text-xl font-bold">
-                  {language === 'ru' ? category.labelRu : category.labelEn}
-                </h1>
+        {category && (
+          <div className="relative rounded-2xl overflow-hidden mb-6 h-32">
+            <img
+              src={category.image_url || '/placeholder.svg'}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <div className={`absolute inset-0 bg-gradient-to-r ${category.gradient || 'from-primary/80 to-primary/40'}`} />
+            <div className="absolute inset-0 p-4 flex items-end text-white">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-2xl">{category.icon}</span>
+                  <h1 className="text-xl font-bold">
+                    {language === 'ru' ? category.name_ru : category.name_en}
+                  </h1>
+                </div>
+                <p className="text-sm text-white/80">
+                  {language === 'ru' ? category.description_ru : category.description_en}
+                </p>
               </div>
-              <p className="text-sm text-white/80">
-                {language === 'ru' ? category.descriptionRu : category.descriptionEn}
-              </p>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Search */}
         <div className="relative mb-4">
@@ -164,12 +159,12 @@ const MarketCategoryPage = () => {
         </div>
 
         {/* Subcategory Chips */}
-        {subcategoryChips.length > 1 && (
+        {subcategories.length > 1 && (
           <FilterChipGroup scrollable className="mb-4">
-            {subcategoryChips.map(sub => (
+            {subcategories.map(sub => (
               <FilterChip
                 key={sub.id}
-                label={language === 'ru' ? sub.labelRu : sub.labelEn}
+                label={language === 'ru' ? sub.label_ru : sub.label_en}
                 isActive={selectedSubcategory === sub.id}
                 onClick={() => setSelectedSubcategory(sub.id)}
               />
@@ -180,12 +175,24 @@ const MarketCategoryPage = () => {
         {/* Results Count */}
         <div className="flex items-center justify-between mb-4">
           <p className="text-sm text-muted-foreground">
-            {filteredProducts.length} {language === 'ru' ? 'товаров' : 'products'}
+            {isLoading ? '...' : `${filteredProducts.length} ${language === 'ru' ? 'товаров' : 'products'}`}
           </p>
         </div>
 
         {/* Products Grid */}
-        {filteredProducts.length === 0 ? (
+        {isLoading ? (
+          <div className="grid grid-cols-2 gap-3">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="bg-card rounded-xl border border-border overflow-hidden">
+                <Skeleton className="aspect-square" />
+                <div className="p-3">
+                  <Skeleton className="h-10 mb-2" />
+                  <Skeleton className="h-4 w-16" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredProducts.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground">
               {language === 'ru' ? 'Товары не найдены' : 'No products found'}

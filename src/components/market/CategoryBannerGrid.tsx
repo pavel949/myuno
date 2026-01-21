@@ -1,12 +1,22 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { CategoryBanner } from '@/data/marketplaceProducts';
 import { cn } from '@/lib/utils';
 import { ChevronRight } from 'lucide-react';
 
+export interface CategoryBannerData {
+  id: string;
+  labelEn: string;
+  labelRu: string;
+  descriptionEn: string;
+  descriptionRu: string;
+  icon: string;
+  image: string;
+  gradient: string;
+}
+
 interface CategoryBannerGridProps {
-  banners: CategoryBanner[];
+  banners: CategoryBannerData[];
   onCategoryClick?: (categoryId: string) => void;
 }
 
