@@ -28,6 +28,7 @@ const REQUEST_TYPE_CONFIG: Record<ConsultationRequestType, { icon: typeof Palmtr
   property_tour: { icon: MapPin, labelRu: 'Тур', labelEn: 'Tour', color: 'bg-purple-500' },
   investment_advice: { icon: TrendingUp, labelRu: 'Инвестиции', labelEn: 'Investment', color: 'bg-amber-500' },
   full_management: { icon: Home, labelRu: 'Управление', labelEn: 'Management', color: 'bg-slate-500' },
+  channel_management: { icon: TrendingUp, labelRu: 'Каналы OTA', labelEn: 'Channel Management', color: 'bg-indigo-500' },
 };
 
 const STATUS_CONFIG: Record<ConsultationStatus, { labelRu: string; labelEn: string; color: string; icon: typeof Clock }> = {
