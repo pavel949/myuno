@@ -54,15 +54,27 @@ export default function DisputeResolutionPage() {
     },
     {
       step: 4,
+      icon: Shield,
+      title: isRu ? 'Омбудсмен myUNO' : 'myUNO Ombudsman',
+      timeframe: '14 ' + (isRu ? 'дней' : 'days'),
+      description: isRu 
+        ? 'При несогласии с решением медиации — апелляция к независимому Омбудсмену myUNO. Омбудсмен — нейтральный эксперт, назначаемый платформой.'
+        : 'If you disagree with mediation — appeal to independent myUNO Ombudsman. The Ombudsman is a neutral expert appointed by the platform.',
+      actions: isRu 
+        ? ['Подайте апелляцию в течение 3 дней после решения медиации', 'Укажите основания для несогласия', 'Омбудсмен проведёт независимую проверку', 'Решение омбудсмена может быть обжаловано только в арбитраже']
+        : ['Submit appeal within 3 days of mediation decision', 'State grounds for disagreement', 'Ombudsman will conduct independent review', 'Ombudsman decision can only be appealed via arbitration'],
+    },
+    {
+      step: 5,
       icon: Gavel,
-      title: isRu ? 'Арбитраж (если необходимо)' : 'Arbitration (if necessary)',
+      title: isRu ? 'Арбитраж (финальная инстанция)' : 'Arbitration (Final Instance)',
       timeframe: '30 ' + (isRu ? 'дней' : 'days'),
       description: isRu 
-        ? 'Для споров свыше $1,000 или при несогласии с решением медиации — обязательный арбитраж THAC/HKIAC.'
-        : 'For disputes over $1,000 or if you disagree with mediation — mandatory THAC/HKIAC arbitration.',
+        ? 'Для споров свыше $1,000 или при несогласии с решением Омбудсмена — обязательный арбитраж THAC/HKIAC. Решение арбитра окончательное и обязательное.'
+        : 'For disputes over $1,000 or if you disagree with Ombudsman — mandatory THAC/HKIAC arbitration. Arbitrator\'s decision is final and binding.',
       actions: isRu 
-        ? ['Подайте заявку на арбитраж', 'Оплатите арбитражный сбор', 'Решение арбитра является окончательным']
-        : ['Submit arbitration request', 'Pay arbitration fee', 'Arbitrator\'s decision is final'],
+        ? ['Подайте заявку на арбитраж в течение 7 дней', 'Оплатите арбитражный сбор (возвращается при выигрыше)', 'Арбитраж проводится онлайн или очно', 'Решение арбитра является окончательным и не подлежит обжалованию']
+        : ['Submit arbitration request within 7 days', 'Pay arbitration fee (refunded if you win)', 'Arbitration conducted online or in person', 'Arbitrator\'s decision is final and non-appealable'],
     },
   ];
 
