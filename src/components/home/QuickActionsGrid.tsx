@@ -10,7 +10,8 @@ import {
   Ticket, 
   Plane,
   ShoppingBag,
-  Utensils
+  Utensils,
+  Anchor
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
@@ -35,14 +36,14 @@ interface QuickAction {
 
 const quickActions: QuickAction[] = [
   {
-    id: 'water-delivery',
-    icon: Droplets,
-    label: 'Water Delivery',
-    labelRu: 'Доставка воды',
-    path: '/delivery/water',
-    gradient: 'from-sky-500 to-blue-600',
-    badge: 'Fast',
-    badgeRu: 'Быстро',
+    id: 'yachts',
+    icon: Anchor,
+    label: 'Yachts & Boats',
+    labelRu: 'Яхты и катера',
+    path: '/yachts',
+    gradient: 'from-cyan-500 to-blue-600',
+    badge: 'Hot',
+    badgeRu: 'Хит',
     isPopular: true,
   },
   {
@@ -125,12 +126,15 @@ const quickActions: QuickAction[] = [
     isPopular: true,
   },
   {
-    id: 'shopping',
-    icon: ShoppingBag,
-    label: 'Shopping',
-    labelRu: 'Шоппинг',
-    path: '/market',
-    gradient: 'from-amber-500 to-yellow-500',
+    id: 'water-delivery',
+    icon: Droplets,
+    label: 'Water Delivery',
+    labelRu: 'Доставка воды',
+    path: '/delivery/water',
+    gradient: 'from-sky-500 to-blue-600',
+    badge: 'Fast',
+    badgeRu: 'Быстро',
+    isPopular: true,
   },
 ];
 

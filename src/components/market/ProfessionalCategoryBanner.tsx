@@ -70,12 +70,12 @@ export const ProfessionalCategoryBanner: React.FC<ProfessionalCategoryBannerProp
             <div className="flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-3xl drop-shadow-lg">{heroCategory.icon}</span>
-                  <h2 className="text-2xl font-bold drop-shadow-lg">
+                  <span className="text-2xl drop-shadow-lg">{heroCategory.icon}</span>
+                  <h2 className="text-xl font-bold drop-shadow-lg">
                     {language === 'ru' ? heroCategory.name_ru : heroCategory.name_en}
                   </h2>
                 </div>
-                <p className="text-white/90 text-sm max-w-xs leading-relaxed">
+                <p className="text-white/90 text-xs max-w-xs leading-relaxed">
                   {language === 'ru' ? heroCategory.description_ru : heroCategory.description_en}
                 </p>
               </div>
@@ -114,12 +114,12 @@ export const ProfessionalCategoryBanner: React.FC<ProfessionalCategoryBannerProp
               {/* Content */}
               <div className="absolute inset-0 p-3 flex flex-col justify-end text-white">
                 <div className="flex items-center gap-1.5 mb-0.5">
-                  <span className="text-xl drop-shadow">{category.icon}</span>
-                  <h3 className="font-bold text-sm drop-shadow line-clamp-1">
+                  <span className="text-lg drop-shadow">{category.icon}</span>
+                  <h3 className="font-semibold text-sm drop-shadow line-clamp-1">
                     {language === 'ru' ? category.name_ru : category.name_en}
                   </h3>
                 </div>
-                <p className="text-white/80 text-[11px] line-clamp-2 leading-tight">
+                <p className="text-white/80 text-[10px] line-clamp-2 leading-tight">
                   {language === 'ru' ? category.description_ru : category.description_en}
                 </p>
               </div>
