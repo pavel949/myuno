@@ -13,9 +13,25 @@ export interface SearchResult {
   locationRu: string | null;
   rating: number | null;
   path: string;
+  isCategory?: boolean; // For category results
 }
 
-const searchTables = [
+interface TableConfig {
+  table: string;
+  type: string;
+  titleEn: string;
+  titleRu: string;
+  image: string | null;
+  price: string | null;
+  locationEn: string | null;
+  locationRu: string | null;
+  rating: string | null;
+  pathPrefix: string;
+  idField: string;
+  hasApprovalStatus: boolean; // Not all tables have this
+}
+
+const searchTables: TableConfig[] = [
   {
     table: 'yachts',
     type: 'yachts',
@@ -27,7 +43,8 @@ const searchTables = [
     locationRu: 'location_ru',
     rating: 'rating',
     pathPrefix: '/yachts/',
-    idField: 'id'
+    idField: 'id',
+    hasApprovalStatus: true
   },
   {
     table: 'tours',
@@ -40,7 +57,8 @@ const searchTables = [
     locationRu: 'meeting_point',
     rating: 'rating',
     pathPrefix: '/tours/',
-    idField: 'id'
+    idField: 'id',
+    hasApprovalStatus: true
   },
   {
     table: 'properties',
@@ -53,7 +71,8 @@ const searchTables = [
     locationRu: 'district',
     rating: 'rating',
     pathPrefix: '/property/',
-    idField: 'id'
+    idField: 'id',
+    hasApprovalStatus: true
   },
   {
     table: 'restaurants',
@@ -66,7 +85,8 @@ const searchTables = [
     locationRu: 'district',
     rating: 'rating',
     pathPrefix: '/restaurants/',
-    idField: 'id'
+    idField: 'id',
+    hasApprovalStatus: true
   },
   {
     table: 'salons',
@@ -79,7 +99,8 @@ const searchTables = [
     locationRu: 'district',
     rating: 'rating',
     pathPrefix: '/beauty/salon/',
-    idField: 'id'
+    idField: 'id',
+    hasApprovalStatus: true
   },
   {
     table: 'clinics',
@@ -92,7 +113,8 @@ const searchTables = [
     locationRu: 'district',
     rating: 'rating',
     pathPrefix: '/medical/clinic/',
-    idField: 'id'
+    idField: 'id',
+    hasApprovalStatus: true
   },
   {
     table: 'gyms',
@@ -105,7 +127,8 @@ const searchTables = [
     locationRu: 'district',
     rating: 'rating',
     pathPrefix: '/fitness/gym/',
-    idField: 'id'
+    idField: 'id',
+    hasApprovalStatus: true
   },
   {
     table: 'vehicles',
@@ -118,7 +141,8 @@ const searchTables = [
     locationRu: null,
     rating: 'rating',
     pathPrefix: '/transport/vehicle/',
-    idField: 'id'
+    idField: 'id',
+    hasApprovalStatus: true
   },
   {
     table: 'events',
@@ -131,7 +155,8 @@ const searchTables = [
     locationRu: 'location_ru',
     rating: 'rating',
     pathPrefix: '/events/',
-    idField: 'id'
+    idField: 'id',
+    hasApprovalStatus: true
   },
   {
     table: 'water_activities',
@@ -144,7 +169,8 @@ const searchTables = [
     locationRu: 'location_name',
     rating: 'rating',
     pathPrefix: '/water/',
-    idField: 'id'
+    idField: 'id',
+    hasApprovalStatus: true
   },
   {
     table: 'education_providers',
@@ -157,7 +183,8 @@ const searchTables = [
     locationRu: 'district',
     rating: 'rating',
     pathPrefix: '/education/tutor/',
-    idField: 'id'
+    idField: 'id',
+    hasApprovalStatus: true
   },
   {
     table: 'legal_services',
@@ -170,7 +197,8 @@ const searchTables = [
     locationRu: 'district',
     rating: 'rating',
     pathPrefix: '/legal/provider/',
-    idField: 'id'
+    idField: 'id',
+    hasApprovalStatus: true
   },
   {
     table: 'pet_services',
@@ -183,7 +211,8 @@ const searchTables = [
     locationRu: 'district',
     rating: 'rating',
     pathPrefix: '/pets/service/',
-    idField: 'id'
+    idField: 'id',
+    hasApprovalStatus: true
   },
   {
     table: 'flower_shops',
@@ -196,7 +225,8 @@ const searchTables = [
     locationRu: 'address',
     rating: 'rating',
     pathPrefix: '/flowers/shop/',
-    idField: 'id'
+    idField: 'id',
+    hasApprovalStatus: true
   },
   {
     table: 'cleaning_services',
@@ -209,7 +239,8 @@ const searchTables = [
     locationRu: null,
     rating: 'rating',
     pathPrefix: '/cleaning/',
-    idField: 'id'
+    idField: 'id',
+    hasApprovalStatus: true
   },
   {
     table: 'babysitters',
@@ -222,7 +253,8 @@ const searchTables = [
     locationRu: null,
     rating: 'rating',
     pathPrefix: '/babysitter/',
-    idField: 'id'
+    idField: 'id',
+    hasApprovalStatus: true
   },
   {
     table: 'pharmacies',
@@ -235,7 +267,8 @@ const searchTables = [
     locationRu: 'address',
     rating: 'rating',
     pathPrefix: '/pharmacy/',
-    idField: 'id'
+    idField: 'id',
+    hasApprovalStatus: true
   },
   {
     table: 'stores',
@@ -248,7 +281,8 @@ const searchTables = [
     locationRu: 'address',
     rating: 'rating',
     pathPrefix: '/market/store/',
-    idField: 'id'
+    idField: 'id',
+    hasApprovalStatus: true
   },
   {
     table: 'services',
@@ -261,7 +295,8 @@ const searchTables = [
     locationRu: null,
     rating: null,
     pathPrefix: '/services/',
-    idField: 'id'
+    idField: 'id',
+    hasApprovalStatus: false // services table doesn't have approval_status
   }
 ];
 
@@ -286,7 +321,47 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
       const allResults: SearchResult[] = [];
 
       try {
-        // Search across all tables in parallel
+        // 1. Search categories first (instant suggestions)
+        const { data: categoryData } = await supabase
+          .from('categories')
+          .select('id, slug, name_en, name_ru, icon, color, mini_app_type')
+          .eq('is_active', true)
+          .or(`name_en.ilike.%${searchTerm}%,name_ru.ilike.%${searchTerm}%`)
+          .limit(4);
+
+        if (categoryData) {
+          categoryData.forEach((cat: any) => {
+            // Determine path based on mini_app_type or slug
+            let path = `/${cat.slug}`;
+            if (cat.mini_app_type) {
+              const typePathMap: Record<string, string> = {
+                'real-estate': '/property',
+                'beauty-spa': '/beauty',
+                'medical': '/medical',
+                'transport': '/transport',
+                'tours': '/tours',
+                'restaurants': '/restaurants',
+              };
+              path = typePathMap[cat.mini_app_type] || `/${cat.slug}`;
+            }
+
+            allResults.push({
+              id: `cat-${cat.id}`,
+              type: 'category',
+              titleEn: cat.name_en,
+              titleRu: cat.name_ru,
+              image: null,
+              price: null,
+              locationEn: null,
+              locationRu: null,
+              rating: null,
+              path,
+              isCategory: true
+            });
+          });
+        }
+
+        // 2. Search across all entity tables in parallel
         const searchPromises = searchTables.map(async (config) => {
           try {
             // Build select fields
@@ -304,13 +379,20 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
             // Deduplicate select fields
             const uniqueFields = [...new Set(selectFields)];
 
-            const { data, error } = await supabase
+            // Build query with proper filters
+            let queryBuilder = supabase
               .from(config.table as any)
               .select(uniqueFields.join(','))
               .eq('is_active', true)
-              .eq('approval_status', 'approved')
               .or(`${config.titleEn}.ilike.%${searchTerm}%,${config.titleRu}.ilike.%${searchTerm}%`)
               .limit(5);
+
+            // Only add approval_status filter for tables that have it
+            if (config.hasApprovalStatus) {
+              queryBuilder = queryBuilder.eq('approval_status', 'approved');
+            }
+
+            const { data, error } = await queryBuilder;
 
             if (error || !data) return [];
 
@@ -334,9 +416,16 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
         const tableResults = await Promise.all(searchPromises);
         tableResults.forEach(items => allResults.push(...items));
 
-        // Sort by rating and limit
-        allResults.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-        if (isMounted) setResults(allResults.slice(0, 12));
+        // Sort: categories first, then by rating
+        allResults.sort((a, b) => {
+          // Categories always first
+          if (a.isCategory && !b.isCategory) return -1;
+          if (!a.isCategory && b.isCategory) return 1;
+          // Then by rating
+          return (b.rating || 0) - (a.rating || 0);
+        });
+        
+        if (isMounted) setResults(allResults.slice(0, 15));
       } catch (error) {
         console.error('Search error:', error);
         if (isMounted) setResults([]);
