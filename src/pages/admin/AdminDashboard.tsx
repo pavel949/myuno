@@ -121,6 +121,7 @@ export default function AdminDashboard() {
         { label: isRussian ? 'Яхты' : 'Yachts', icon: Sailboat, path: '/admin/yachts', color: 'bg-sky-500' },
         { label: isRussian ? 'Туры' : 'Tours', icon: Palmtree, path: '/admin/tours', color: 'bg-green-500' },
         { label: isRussian ? 'Активности' : 'Activities', icon: Waves, path: '/admin/activities', color: 'bg-cyan-500' },
+        { label: isRussian ? 'Водные' : 'Water', icon: Ship, path: '/admin/water-activities', color: 'bg-blue-500' },
         { label: isRussian ? 'Мероприятия' : 'Events', icon: Calendar, path: '/admin/events', color: 'bg-pink-500' },
       ]
     },
@@ -149,6 +150,9 @@ export default function AdminDashboard() {
         { label: isRussian ? 'Недвижимость' : 'Properties', icon: Home, path: '/admin/properties', color: 'bg-orange-500' },
         { label: isRussian ? 'Транспорт' : 'Transport', icon: Car, path: '/admin/vehicles', color: 'bg-indigo-500' },
         { label: isRussian ? 'Клиники' : 'Clinics', icon: Stethoscope, path: '/admin/clinics', color: 'bg-teal-500' },
+        { label: isRussian ? 'Аптеки' : 'Pharmacies', icon: Pill, path: '/admin/pharmacies', color: 'bg-green-500' },
+        { label: isRussian ? 'Страхование' : 'Insurance', icon: Shield, path: '/admin/insurance', color: 'bg-purple-500' },
+        { label: isRussian ? 'Магазины' : 'Stores', icon: ShoppingBag, path: '/admin/stores', color: 'bg-amber-500' },
       ]
     },
   ];
