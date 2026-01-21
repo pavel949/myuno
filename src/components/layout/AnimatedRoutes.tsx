@@ -198,6 +198,7 @@ const AdminTicketDetail = lazy(() => import('@/pages/admin/AdminTicketDetail'));
 const AdminPharmacies = lazy(() => import('@/pages/admin/AdminPharmacies'));
 const AdminStores = lazy(() => import('@/pages/admin/AdminStores'));
 const AdminInsurance = lazy(() => import('@/pages/admin/AdminInsurance'));
+const AdminQuickListings = lazy(() => import('@/pages/admin/AdminQuickListings'));
 const AdminWaterActivities = lazy(() => import('@/pages/admin/AdminWaterActivities'));
 const AdminContentModeration = lazy(() => import('@/pages/admin/AdminContentModeration'));
 
@@ -557,6 +558,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/demo" element={<LazyPage><DemoIndex /></LazyPage>} />
         <Route path="/demo/home" element={<LazyPage><DemoHome /></LazyPage>} />
         <Route path="/demo/vendor" element={<LazyPage><VendorDemo /></LazyPage>} />
+        
+        {/* Admin Quick Listings */}
+        <Route path="/admin/quick-listings" element={<LazyPage><AdminGuard><AdminQuickListings /></AdminGuard></LazyPage>} />
         
         {/* Catch-all */}
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />

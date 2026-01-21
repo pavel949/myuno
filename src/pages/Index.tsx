@@ -26,6 +26,7 @@ import { RecommendedCarousel } from '@/components/home/RecommendedCarousel';
 import { ForYouSection } from '@/components/recommendations/ForYouSection';
 import { PersonalizedOffersSection } from '@/components/notifications/PersonalizedOffersSection';
 import { supabase } from '@/integrations/supabase/client';
+import { QuickListingFAB } from '@/components/listing/QuickListingFAB';
 
 // Lazy load only modals (opened by user action)
 const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
@@ -154,6 +155,9 @@ const Index = () => {
           onOpenChange={setShowSearch} 
         />
       </Suspense>
+
+      {/* Quick Listing FAB */}
+      <QuickListingFAB />
 
       <PullToRefresh onRefresh={handleRefresh} className="min-h-[calc(100vh-8rem)]">
         <div className="px-4 py-6 pb-24" key={refreshKey}>
