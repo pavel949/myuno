@@ -1,4 +1,5 @@
-// Unified marketplace types that work with both DB and mock data
+// Unified marketplace types that work with database
+
 export interface MarketplaceProduct {
   id: string;
   category_slug: string;
@@ -40,6 +41,17 @@ export interface MarketplaceCategory {
   is_active: boolean;
 }
 
+export interface MarketplaceSubcategory {
+  id: string;
+  category_slug: string;
+  slug: string;
+  name_en: string;
+  name_ru: string;
+  icon: string | null;
+  sort_order: number;
+  is_active: boolean;
+}
+
 export interface DeliverySetting {
   id: string;
   zone_name_en: string;
@@ -52,42 +64,20 @@ export interface DeliverySetting {
   is_active: boolean;
 }
 
-// Subcategory definition
+// For backward compatibility - maps subcategory to old format
 export interface Subcategory {
   id: string;
   label_en: string;
   label_ru: string;
+  icon?: string;
 }
 
-// Hardcoded subcategories (can be moved to DB later)
-export const subcategoriesByCategory: Record<string, Subcategory[]> = {
-  groceries: [
-    { id: 'all', label_en: 'All', label_ru: 'Все' },
-    { id: 'farm', label_en: 'Farm Products', label_ru: 'Фермерские' },
-    { id: 'russian', label_en: 'Russian Foods', label_ru: 'Русские продукты' },
-    { id: 'organic', label_en: 'Organic', label_ru: 'Органические' },
-    { id: 'dairy', label_en: 'Dairy', label_ru: 'Молочные' },
-    { id: 'meat', label_en: 'Meat & Fish', label_ru: 'Мясо и рыба' },
-  ],
-  cosmetics: [
-    { id: 'all', label_en: 'All', label_ru: 'Все' },
-    { id: 'skincare', label_en: 'Skincare', label_ru: 'Уход за кожей' },
-    { id: 'haircare', label_en: 'Haircare', label_ru: 'Уход за волосами' },
-    { id: 'bodycare', label_en: 'Body Care', label_ru: 'Уход за телом' },
-    { id: 'thai-herbs', label_en: 'Thai Herbs', label_ru: 'Тайские травы' },
-  ],
-  souvenirs: [
-    { id: 'all', label_en: 'All', label_ru: 'Все' },
-    { id: 'traditional', label_en: 'Traditional', label_ru: 'Традиционные' },
-    { id: 'handicrafts', label_en: 'Handicrafts', label_ru: 'Ремёсла' },
-    { id: 'textiles', label_en: 'Textiles', label_ru: 'Текстиль' },
-    { id: 'jewelry', label_en: 'Jewelry', label_ru: 'Украшения' },
-  ],
-  'home-decor': [
-    { id: 'all', label_en: 'All', label_ru: 'Все' },
-    { id: 'furniture', label_en: 'Furniture', label_ru: 'Мебель' },
-    { id: 'lighting', label_en: 'Lighting', label_ru: 'Освещение' },
-    { id: 'textiles', label_en: 'Textiles', label_ru: 'Текстиль' },
-    { id: 'decor', label_en: 'Decor', label_ru: 'Декор' },
-  ],
-};
+// Convert DB subcategory to legacy format
+export function toSubcategory(dbSub: MarketplaceSubcategory): Subcategory {
+  return {
+    id: dbSub.slug,
+    label_en: dbSub.name_en,
+    label_ru: dbSub.name_ru,
+    icon: dbSub.icon || undefined,
+  };
+}

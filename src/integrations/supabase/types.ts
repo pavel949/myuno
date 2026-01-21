@@ -2861,6 +2861,50 @@ export type Database = {
           },
         ]
       }
+      marketplace_subcategories: {
+        Row: {
+          category_slug: string
+          created_at: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name_en: string
+          name_ru: string
+          slug: string
+          sort_order: number | null
+        }
+        Insert: {
+          category_slug: string
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name_en: string
+          name_ru: string
+          slug: string
+          sort_order?: number | null
+        }
+        Update: {
+          category_slug?: string
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name_en?: string
+          name_ru?: string
+          slug?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_subcategories_category_slug_fkey"
+            columns: ["category_slug"]
+            isOneToOne: false
+            referencedRelation: "marketplace_categories"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
       medical_services: {
         Row: {
           category: string

@@ -15,6 +15,17 @@ export interface MarketplaceCategory {
   is_active: boolean;
 }
 
+export interface MarketplaceSubcategory {
+  id: string;
+  category_slug: string;
+  slug: string;
+  name_en: string;
+  name_ru: string;
+  icon: string | null;
+  sort_order: number;
+  is_active: boolean;
+}
+
 export interface MarketplaceProduct {
   id: string;
   category_slug: string;
@@ -81,6 +92,41 @@ export function useMarketplaceCategories() {
   }, []);
 
   return { categories, isLoading, error };
+}
+
+// Hook for fetching subcategories
+export function useMarketplaceSubcategories(categorySlug?: string) {
+  const [subcategories, setSubcategories] = useState<MarketplaceSubcategory[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const fetchSubcategories = async () => {
+      try {
+        let query = supabase
+          .from('marketplace_subcategories')
+          .select('*')
+          .order('sort_order', { ascending: true });
+
+        if (categorySlug) {
+          query = query.eq('category_slug', categorySlug);
+        }
+
+        const { data, error: queryError } = await query;
+
+        if (queryError) throw queryError;
+        setSubcategories((data || []) as MarketplaceSubcategory[]);
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error(String(err)));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSubcategories();
+  }, [categorySlug]);
+
+  return { subcategories, isLoading, error };
 }
 
 // Hook for fetching products with filters
