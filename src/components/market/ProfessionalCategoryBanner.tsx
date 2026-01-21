@@ -1,0 +1,137 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { cn } from '@/lib/utils';
+import { ChevronRight, ArrowRight } from 'lucide-react';
+import { MarketplaceCategory } from '@/types/marketplace';
+
+interface ProfessionalCategoryBannerProps {
+  categories: MarketplaceCategory[];
+  onCategoryClick?: (categorySlug: string) => void;
+}
+
+export const ProfessionalCategoryBanner: React.FC<ProfessionalCategoryBannerProps> = ({
+  categories,
+  onCategoryClick,
+}) => {
+  const { language } = useLanguage();
+  const navigate = useNavigate();
+
+  const handleClick = (categorySlug: string) => {
+    if (onCategoryClick) {
+      onCategoryClick(categorySlug);
+    } else {
+      navigate(`/market/category/${categorySlug}`);
+    }
+  };
+
+  // Default placeholder images by category type
+  const getCategoryImage = (slug: string) => {
+    const images: Record<string, string> = {
+      'groceries': 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=80',
+      'thai-fashion': 'https://images.unsplash.com/photo-1558171813-4c088753af8f?w=800&q=80',
+      'cosmetics': 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&q=80',
+      'souvenirs': 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800&q=80',
+      'home-decor': 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80',
+      'baby-kids': 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=800&q=80',
+      'health-pharmacy': 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&q=80',
+    };
+    return images[slug] || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80';
+  };
+
+  if (categories.length === 0) return null;
+
+  // Take first category as hero, rest as grid
+  const [heroCategory, ...gridCategories] = categories;
+
+  return (
+    <div className="space-y-3">
+      {/* Hero Category */}
+      <button
+        onClick={() => handleClick(heroCategory.slug)}
+        className="w-full relative overflow-hidden rounded-2xl text-left transition-all duration-300 hover:shadow-xl active:scale-[0.99] group"
+      >
+        <div className="aspect-[2.2/1] relative">
+          {/* Background Image */}
+          <img
+            src={heroCategory.image_url || getCategoryImage(heroCategory.slug)}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          />
+          
+          {/* Gradient Overlay */}
+          <div className={cn(
+            "absolute inset-0 bg-gradient-to-r opacity-90",
+            heroCategory.gradient || 'from-primary/90 to-primary/50'
+          )} />
+          
+          {/* Content */}
+          <div className="absolute inset-0 p-5 flex flex-col justify-end text-white">
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-3xl drop-shadow-lg">{heroCategory.icon}</span>
+                  <h2 className="text-2xl font-bold drop-shadow-lg">
+                    {language === 'ru' ? heroCategory.name_ru : heroCategory.name_en}
+                  </h2>
+                </div>
+                <p className="text-white/90 text-sm max-w-xs leading-relaxed">
+                  {language === 'ru' ? heroCategory.description_ru : heroCategory.description_en}
+                </p>
+              </div>
+              
+              {/* Arrow indicator */}
+              <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center transition-all duration-300 group-hover:bg-white/30 group-hover:scale-110">
+                <ArrowRight className="w-5 h-5 text-white transition-transform duration-300 group-hover:translate-x-0.5" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </button>
+
+      {/* Category Grid */}
+      <div className="grid grid-cols-2 gap-3">
+        {gridCategories.map((category) => (
+          <button
+            key={category.id}
+            onClick={() => handleClick(category.slug)}
+            className="relative overflow-hidden rounded-xl text-left transition-all duration-300 hover:shadow-lg active:scale-[0.98] group"
+          >
+            <div className="aspect-[1.3/1] relative">
+              {/* Background Image */}
+              <img
+                src={category.image_url || getCategoryImage(category.slug)}
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
+              
+              {/* Gradient Overlay */}
+              <div className={cn(
+                "absolute inset-0 bg-gradient-to-br opacity-85",
+                category.gradient || 'from-primary/85 to-primary/40'
+              )} />
+              
+              {/* Content */}
+              <div className="absolute inset-0 p-3 flex flex-col justify-end text-white">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <span className="text-xl drop-shadow">{category.icon}</span>
+                  <h3 className="font-bold text-sm drop-shadow line-clamp-1">
+                    {language === 'ru' ? category.name_ru : category.name_en}
+                  </h3>
+                </div>
+                <p className="text-white/80 text-[11px] line-clamp-2 leading-tight">
+                  {language === 'ru' ? category.description_ru : category.description_en}
+                </p>
+              </div>
+              
+              {/* Subtle arrow */}
+              <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <ChevronRight className="w-3 h-3 text-white" />
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};

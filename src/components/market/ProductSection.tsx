@@ -1,12 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Sparkles, TrendingUp } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 import { useCartToast } from '@/hooks/useCartToast';
 import { MarketplaceProduct } from '@/types/marketplace';
-import { ProductCard } from './ProductCard';
+import { ProfessionalProductCard } from './ProfessionalProductCard';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface ProductSectionProps {
   title: string;
@@ -16,6 +17,7 @@ interface ProductSectionProps {
   maxItems?: number;
   variant?: 'scroll' | 'grid';
   isLoading?: boolean;
+  icon?: 'sparkles' | 'trending';
 }
 
 export const ProductSection: React.FC<ProductSectionProps> = ({
@@ -26,6 +28,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   maxItems = 6,
   variant = 'scroll',
   isLoading = false,
+  icon,
 }) => {
   const navigate = useNavigate();
   const { language } = useLanguage();
@@ -62,14 +65,14 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
 
   if (isLoading) {
     return (
-      <section className="space-y-3">
-        <div className="h-6 w-32 bg-muted rounded animate-pulse" />
+      <section className="space-y-4">
+        <div className="h-7 w-40 bg-muted rounded-lg animate-pulse" />
         <div className="flex gap-3 overflow-hidden">
           {[1, 2, 3].map(i => (
-            <div key={i} className="w-[160px] shrink-0">
-              <div className="aspect-square bg-muted rounded-xl mb-2 animate-pulse" />
-              <div className="h-4 bg-muted rounded w-3/4 mb-1 animate-pulse" />
-              <div className="h-4 bg-muted rounded w-1/2 animate-pulse" />
+            <div key={i} className="w-[170px] shrink-0">
+              <div className="aspect-square bg-muted rounded-2xl mb-3 animate-pulse" />
+              <div className="h-4 bg-muted rounded w-3/4 mb-2 animate-pulse" />
+              <div className="h-5 bg-muted rounded w-1/2 animate-pulse" />
             </div>
           ))}
         </div>
@@ -79,36 +82,52 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
 
   if (displayProducts.length === 0) return null;
 
+  const IconComponent = icon === 'sparkles' ? Sparkles : icon === 'trending' ? TrendingUp : null;
+
   return (
-    <section className="space-y-3">
+    <section className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold">
-          {language === 'ru' ? titleRu : title}
-        </h2>
+        <div className="flex items-center gap-2">
+          {IconComponent && (
+            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <IconComponent className="w-4 h-4 text-primary" />
+            </div>
+          )}
+          <h2 className="text-xl font-bold text-foreground">
+            {language === 'ru' ? titleRu : title}
+          </h2>
+        </div>
         {seeAllPath && (
           <Button 
             variant="ghost" 
             size="sm" 
-            className="text-primary -mr-2"
+            className="text-primary hover:text-primary/80 font-medium -mr-2"
             onClick={() => navigate(seeAllPath)}
           >
             {language === 'ru' ? 'Все' : 'See all'}
-            <ChevronRight className="w-4 h-4 ml-1" />
+            <ChevronRight className="w-4 h-4 ml-0.5" />
           </Button>
         )}
       </div>
 
       {/* Products */}
       {variant === 'scroll' ? (
-        <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-          {displayProducts.map(product => (
-            <div key={product.id} className="w-[160px] shrink-0">
-              <ProductCard
+        <div className="flex gap-3 overflow-x-auto pb-3 -mx-4 px-4 scrollbar-hide snap-x snap-mandatory">
+          {displayProducts.map((product, index) => (
+            <div 
+              key={product.id} 
+              className={cn(
+                "shrink-0 snap-start",
+                index === 0 ? "w-[200px]" : "w-[170px]"
+              )}
+            >
+              <ProfessionalProductCard
                 product={product}
                 quantity={getQuantity(product.id)}
                 onAdd={() => handleAdd(product)}
                 onRemove={() => handleRemove(product.id)}
+                variant={index === 0 ? 'grid' : 'grid'}
               />
             </div>
           ))}
@@ -116,7 +135,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
       ) : (
         <div className="grid grid-cols-2 gap-3">
           {displayProducts.map(product => (
-            <ProductCard
+            <ProfessionalProductCard
               key={product.id}
               product={product}
               quantity={getQuantity(product.id)}
