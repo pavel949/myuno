@@ -1,24 +1,61 @@
+/**
+ * @module useAvailabilityCheck
+ * @description Universal availability checking hook for all verticals
+ * 
+ * This hook provides a unified interface for checking availability across
+ * different booking types (properties, tours, yachts, services, restaurants).
+ * It uses the `check_availability` database RPC function.
+ * 
+ * @example
+ * ```typescript
+ * const { checkAvailability, isChecking } = useAvailabilityCheck();
+ * 
+ * // Check tour availability
+ * const result = await checkAvailability({
+ *   vertical: 'tour',
+ *   entityId: tourId,
+ *   startDatetime: selectedDate,
+ *   participants: guestCount,
+ * });
+ * 
+ * if (!result.available) {
+ *   showError('This tour is fully booked');
+ * }
+ * ```
+ */
+
 import { useCallback, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export type VerticalType = 
   | 'yacht' | 'tour' | 'property' | 'service' 
   | 'beauty' | 'cleaning' | 'medical' | 'education' 
-  | 'legal' | 'fitness' | 'babysitter' | 'pet_service';
+  | 'legal' | 'fitness' | 'babysitter' | 'pet_service'
+  | 'restaurant';
 
 export interface AvailabilityResult {
+  /** Whether the slot/dates are available */
   available: boolean;
+  /** Remaining spots for capacity-limited bookings */
   spots_remaining?: number;
+  /** Error message if check failed */
   error?: string;
 }
 
 export interface CheckAvailabilityParams {
+  /** Vertical type being checked */
   vertical: VerticalType;
+  /** Entity ID (property, tour, yacht, etc.) */
   entityId: string;
+  /** Provider ID for service-based bookings */
   providerId?: string;
+  /** Start of booking period */
   startDatetime: Date | string;
+  /** End of booking period (optional for single slots) */
   endDatetime?: Date | string;
+  /** Number of participants/guests */
   participants?: number;
+  /** Order ID to exclude when editing */
   excludeOrderId?: string;
 }
 
