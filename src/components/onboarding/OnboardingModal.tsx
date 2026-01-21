@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useLocation } from '@/contexts/LocationContext';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const MotionDiv = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>((props, ref) => (
   <motion.div ref={ref} {...props} />
@@ -29,16 +31,9 @@ const texts = {
     ru: 'Все сервисы для жизни за рубежом — в одном приложении', 
     th: 'บริการทั้งหมดสำหรับการใช้ชีวิตในต่างประเทศ — ในแอปเดียว' 
   },
-  nowIn: { en: 'Phuket', ru: 'Пхукет', th: 'ภูเก็ต' },
   comingSoon: { en: 'Coming soon', ru: 'Скоро', th: 'เร็วๆ นี้' },
   getStarted: { en: 'Get Started', ru: 'Начать', th: 'เริ่มต้น' },
 };
-
-const futureLocations = [
-  { name: { en: 'Bali', ru: 'Бали', th: 'บาหลี' }, flag: '🇮🇩' },
-  { name: { en: 'Dubai', ru: 'Дубай', th: 'ดูไบ' }, flag: '🇦🇪' },
-  { name: { en: 'Da Nang', ru: 'Дананг', th: 'ดานัง' }, flag: '🇻🇳' },
-];
 
 const languageOptions = [
   { code: 'en' as const, flag: '🇬🇧', label: 'EN' },
@@ -49,13 +44,30 @@ const languageOptions = [
 export const OnboardingModal = memo(forwardRef<HTMLDivElement, OnboardingModalProps>(
   function OnboardingModal({ open, onComplete }, ref) {
   const { language, setLanguage } = useLanguage();
+  const { activeCities, comingSoonCities, isLoading, setCity } = useLocation();
   const lang = language as Language;
+
+  // Get the first active city for display
+  const activeCity = activeCities[0];
 
   const handleComplete = useCallback(() => {
     localStorage.setItem('myuno-onboarding-complete', 'true');
-    localStorage.setItem('myuno-user-location', 'phuket');
+    // Set the first active city as the user's location
+    if (activeCity) {
+      setCity(activeCity.slug);
+    }
     onComplete();
-  }, [onComplete]);
+  }, [onComplete, activeCity, setCity]);
+
+  // Get localized city name
+  const getCityName = (city: typeof activeCity, lang: Language) => {
+    if (!city) return '';
+    switch (lang) {
+      case 'ru': return city.name_ru || city.name_en;
+      case 'th': return city.name_th || city.name_en;
+      default: return city.name_en;
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
@@ -84,15 +96,23 @@ export const OnboardingModal = memo(forwardRef<HTMLDivElement, OnboardingModalPr
               <Sparkles className="w-10 h-10 text-primary-foreground" />
             </motion.div>
 
-            {/* Location badge */}
+            {/* Location badge - dynamic from database */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
               className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6"
             >
-              <span className="text-xl">🇹🇭</span>
-              <span className="font-semibold text-sm text-primary">{texts.nowIn[lang]}</span>
+              {isLoading ? (
+                <Skeleton className="h-5 w-24" />
+              ) : activeCity ? (
+                <>
+                  <span className="text-xl">{activeCity.flag}</span>
+                  <span className="font-semibold text-sm text-primary">
+                    {getCityName(activeCity, lang)}
+                  </span>
+                </>
+              ) : null}
             </motion.div>
             
             {/* Headline */}
@@ -115,19 +135,25 @@ export const OnboardingModal = memo(forwardRef<HTMLDivElement, OnboardingModalPr
               {texts.subtitle[lang]}
             </motion.p>
 
-            {/* Future locations */}
+            {/* Future locations - dynamic from database */}
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="flex items-center justify-center gap-3 text-xs text-muted-foreground/60 mb-8"
+              className="flex items-center justify-center gap-3 text-xs text-muted-foreground/60 mb-8 flex-wrap"
             >
-              <span>{texts.comingSoon[lang]}:</span>
-              {futureLocations.map((loc, idx) => (
-                <span key={idx} className="flex items-center gap-1">
-                  {loc.flag} {loc.name[lang]}
-                </span>
-              ))}
+              {isLoading ? (
+                <Skeleton className="h-4 w-48" />
+              ) : comingSoonCities.length > 0 ? (
+                <>
+                  <span>{texts.comingSoon[lang]}:</span>
+                  {comingSoonCities.slice(0, 4).map((city) => (
+                    <span key={city.id} className="flex items-center gap-1">
+                      {city.flag} {getCityName(city, lang)}
+                    </span>
+                  ))}
+                </>
+              ) : null}
             </motion.div>
 
             {/* Language Selection */}
@@ -164,6 +190,7 @@ export const OnboardingModal = memo(forwardRef<HTMLDivElement, OnboardingModalPr
               <Button 
                 className="w-full h-12 text-base font-semibold rounded-xl" 
                 onClick={handleComplete}
+                disabled={isLoading}
               >
                 {texts.getStarted[lang]}
                 <ChevronRight className="w-5 h-5 ml-1" />

@@ -6,6 +6,7 @@ import { BrowserRouter } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
+import { LocationProvider } from "@/contexts/LocationContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
@@ -21,20 +22,22 @@ const App = () => (
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <LanguageProvider>
-            <CurrencyProvider>
-              <AuthProvider>
-                <CartProvider>
-                  <TooltipProvider>
-                    <Toaster />
-                    <Sonner />
-                    <BrowserRouter>
-                      <AnimatedRoutes />
-                      <UnifiedChatFAB />
-                    </BrowserRouter>
-                  </TooltipProvider>
-                </CartProvider>
-              </AuthProvider>
-            </CurrencyProvider>
+            <LocationProvider>
+              <CurrencyProvider>
+                <AuthProvider>
+                  <CartProvider>
+                    <TooltipProvider>
+                      <Toaster />
+                      <Sonner />
+                      <BrowserRouter>
+                        <AnimatedRoutes />
+                        <UnifiedChatFAB />
+                      </BrowserRouter>
+                    </TooltipProvider>
+                  </CartProvider>
+                </AuthProvider>
+              </CurrencyProvider>
+            </LocationProvider>
           </LanguageProvider>
         </ThemeProvider>
       </QueryClientProvider>
