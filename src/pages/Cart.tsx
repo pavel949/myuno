@@ -58,11 +58,11 @@ const Cart = () => {
     
     switch (firstType) {
       case 'food':
-        // Food checkout - use provider ID if available
+        // Food checkout - always use restaurants flow
         if (firstItem.providerId) {
           navigate(`/restaurants/${firstItem.providerId}/delivery`);
         } else {
-          navigate('/food/checkout');
+          navigate('/restaurants');
         }
         break;
       case 'flowers':

@@ -33,10 +33,10 @@ export const searchDemoData: SearchItem[] = [
   { id: 'salon-2', type: 'beauty', title_en: 'Lotus Nail Studio', title_ru: 'Лотус Маникюр Студио', image: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=400', price: 800, location: 'Patong', location_ru: 'Патонг', rating: 4.7, path: '/beauty/salon/2' },
   { id: 'salon-3', type: 'beauty', title_en: 'Thai Massage Center', title_ru: 'Тайский массажный центр', image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400', price: 500, location: 'Rawai', location_ru: 'Равай', rating: 4.8, path: '/beauty/salon/3' },
   
-  // Food & Restaurants
-  { id: 'rest-1', type: 'food', title_en: 'Ocean View Restaurant', title_ru: 'Ресторан с видом на океан', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400', price: 500, location: 'Rawai', location_ru: 'Равай', rating: 4.8, path: '/food/restaurant/1' },
-  { id: 'rest-2', type: 'food', title_en: 'Thai Street Kitchen', title_ru: 'Тайская уличная кухня', image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400', price: 200, location: 'Phuket Town', location_ru: 'Пхукет Таун', rating: 4.6, path: '/food/restaurant/2' },
-  { id: 'rest-3', type: 'food', title_en: 'Seafood Paradise', title_ru: 'Рай морепродуктов', image: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=400', price: 800, location: 'Patong', location_ru: 'Патонг', rating: 4.9, path: '/food/restaurant/3' },
+  // Food & Restaurants (updated to /restaurants paths)
+  { id: 'rest-1', type: 'food', title_en: 'Ocean View Restaurant', title_ru: 'Ресторан с видом на океан', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400', price: 500, location: 'Rawai', location_ru: 'Равай', rating: 4.8, path: '/restaurants/rest-1' },
+  { id: 'rest-2', type: 'food', title_en: 'Thai Street Kitchen', title_ru: 'Тайская уличная кухня', image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400', price: 200, location: 'Phuket Town', location_ru: 'Пхукет Таун', rating: 4.6, path: '/restaurants/rest-2' },
+  { id: 'rest-3', type: 'food', title_en: 'Seafood Paradise', title_ru: 'Рай морепродуктов', image: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=400', price: 800, location: 'Patong', location_ru: 'Патонг', rating: 4.9, path: '/restaurants/rest-3' },
   
   // Fitness
   { id: 'gym-1', type: 'fitness', title_en: 'Tiger Muay Thai', title_ru: 'Тигр Муай Тай', image: 'https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?w=400', price: 800, location: 'Chalong', location_ru: 'Чалонг', rating: 4.9, path: '/fitness/gym/1' },

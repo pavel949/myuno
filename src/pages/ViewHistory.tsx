@@ -41,7 +41,7 @@ const typeLabels: Record<string, { en: string; ru: string }> = {
 const typeRoutes: Record<string, string> = {
   salon: '/beauty/salon',
   property: '/property',
-  restaurant: '/food/restaurant',
+  restaurant: '/restaurants',
   vehicle: '/transport/vehicle',
   gym: '/fitness/gym',
   clinic: '/medical/clinic',
