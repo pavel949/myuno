@@ -128,11 +128,27 @@ export function FavoriteCollections({
     toast.success(language === 'ru' ? 'Коллекция переименована' : 'Collection renamed');
   };
 
-  // Calculate counts
-  const collectionsWithCounts = collections.map(c => ({
-    ...c,
-    count: c.id === 'all' ? favorites.length : 0, // TODO: implement proper counting per collection
-  }));
+  // Calculate counts based on item types mapping to collections
+  const collectionTypeMap: Record<string, string[]> = {
+    all: [], // All items
+    places: ['attraction', 'venue', 'beach'],
+    food: ['restaurant', 'food', 'cafe'],
+    stay: ['property', 'hotel', 'villa'],
+    activities: ['tour', 'activity', 'yacht', 'event', 'water_activity'],
+  };
+
+  const collectionsWithCounts = collections.map(c => {
+    let count = 0;
+    if (c.id === 'all') {
+      count = favorites.length;
+    } else {
+      const types = collectionTypeMap[c.id] || [];
+      count = favorites.filter(fav => 
+        types.some(t => fav.item_type?.toLowerCase().includes(t))
+      ).length;
+    }
+    return { ...c, count };
+  });
 
   return (
     <div className="space-y-3">
