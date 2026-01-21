@@ -1,14 +1,16 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminConsultations, type ConsultationFilters } from '@/hooks/useAdminConsultations';
 import type { ConsultationRequest, ConsultationStatus, ConsultationRequestType } from '@/hooks/useConsultationRequests';
+import { LeadActivityTimeline } from '@/components/admin/LeadActivityTimeline';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -16,7 +18,8 @@ import { format } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import {
   Search, Phone, Mail, MessageCircle, Calendar, Users, Home,
-  Clock, CheckCircle, XCircle, AlertCircle, Palmtree, TrendingUp, MapPin
+  Clock, CheckCircle, XCircle, AlertCircle, Palmtree, TrendingUp, MapPin,
+  BarChart3
 } from 'lucide-react';
 
 const REQUEST_TYPE_CONFIG: Record<ConsultationRequestType, { icon: typeof Palmtree; labelRu: string; labelEn: string; color: string }> = {
@@ -158,7 +161,7 @@ function ConsultationCard({
                   {isRu ? 'Детали' : 'Details'}
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-lg">
+              <DialogContent className="max-w-2xl max-h-[85vh] overflow-auto">
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-2">
                     <TypeIcon className="w-5 h-5" />
@@ -166,7 +169,13 @@ function ConsultationCard({
                   </DialogTitle>
                 </DialogHeader>
                 
-                <div className="space-y-4">
+                <Tabs defaultValue="details" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="details">{isRu ? 'Детали' : 'Details'}</TabsTrigger>
+                    <TabsTrigger value="activity">{isRu ? 'Активность' : 'Activity'}</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="details" className="space-y-4 mt-4">
                   {/* Contact */}
                   <div>
                     <h4 className="text-sm font-medium mb-2">{isRu ? 'Контакты' : 'Contact'}</h4>
@@ -266,7 +275,12 @@ function ConsultationCard({
                       {isRu ? 'Сохранить' : 'Save'}
                     </Button>
                   </div>
-                </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="activity" className="mt-4">
+                    <LeadActivityTimeline leadId={consultation.id} />
+                  </TabsContent>
+                </Tabs>
               </DialogContent>
             </Dialog>
 
@@ -314,6 +328,8 @@ export default function AdminConsultations() {
     updateNotes.mutate({ id, admin_notes: notes });
   };
 
+  const navigate = useNavigate();
+
   return (
     <PageContainer>
       <PageHeader 
@@ -321,6 +337,12 @@ export default function AdminConsultations() {
         subtitle={isRu ? 'Управление заявками на аренду и покупку' : 'Manage rental and purchase inquiries'}
         showBack
         fallbackPath="/admin"
+        actions={
+          <Button variant="outline" onClick={() => navigate('/admin/leads')} className="gap-2">
+            <BarChart3 className="h-4 w-4" />
+            {isRu ? 'Аналитика' : 'Analytics'}
+          </Button>
+        }
       />
 
       {/* Stats */}
