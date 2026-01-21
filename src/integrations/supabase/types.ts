@@ -2309,6 +2309,53 @@ export type Database = {
           },
         ]
       }
+      lead_activity_log: {
+        Row: {
+          activity_type: string
+          call_duration_seconds: number | null
+          call_result: string | null
+          created_at: string
+          id: string
+          lead_id: string
+          notes: string | null
+          status_from: string | null
+          status_to: string | null
+          user_id: string | null
+        }
+        Insert: {
+          activity_type: string
+          call_duration_seconds?: number | null
+          call_result?: string | null
+          created_at?: string
+          id?: string
+          lead_id: string
+          notes?: string | null
+          status_from?: string | null
+          status_to?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          activity_type?: string
+          call_duration_seconds?: number | null
+          call_result?: string | null
+          created_at?: string
+          id?: string
+          lead_id?: string
+          notes?: string | null
+          status_from?: string | null
+          status_to?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_activity_log_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "consultation_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ledger_accounts: {
         Row: {
           account_type: string
