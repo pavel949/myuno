@@ -18,6 +18,12 @@ export type ConsultationStatus =
   | 'completed'
   | 'cancelled';
 
+// Flexible type for preferred_dates - can be tour dates or rental dates
+export type PreferredDates = 
+  | { date: string; time: string }[] 
+  | { check_in: string; check_out: string }
+  | null;
+
 export interface ConsultationRequest {
   id: string;
   user_id: string | null;
@@ -40,9 +46,13 @@ export interface ConsultationRequest {
   bedrooms_max: number | null;
   purpose: string | null;
   
-  // Tours
-  preferred_dates: { date: string; time: string }[] | null;
+  // Tours / Vacation rental dates
+  preferred_dates: PreferredDates;
   property_ids: string[] | null;
+  
+  // Vacation rental specific
+  guests_count: number | null;
+  children_count: number | null;
   
   // Full management
   owner_property_id: string | null;
@@ -104,7 +114,7 @@ export function useConsultationRequests() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as ConsultationRequest[];
+      return (data || []) as unknown as ConsultationRequest[];
     },
     enabled: !!user,
   });
@@ -122,10 +132,11 @@ export function useConsultationRequests() {
         .single();
 
       if (error) throw error;
-      return data as ConsultationRequest;
+      return data as unknown as ConsultationRequest;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['consultation-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-consultations'] });
     },
   });
 
