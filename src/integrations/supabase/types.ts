@@ -8765,6 +8765,18 @@ export type Database = {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
         Returns: number
       }
+      calculate_order_cashback: {
+        Args: { p_category?: string; p_order_id: string }
+        Returns: number
+      }
+      calculate_order_totals: {
+        Args: {
+          p_base_amount: number
+          p_provider_id?: string
+          p_vertical?: string
+        }
+        Returns: Json
+      }
       calculate_sla_deadline: {
         Args: { created_at: string; request_type: string }
         Returns: string
@@ -8910,6 +8922,15 @@ export type Database = {
       get_order_vertical: {
         Args: { p_metadata: Json; p_order_type: string }
         Returns: string
+      }
+      get_subscription_revenue: {
+        Args: { p_days?: number }
+        Returns: {
+          active_count: number
+          monthly_count: number
+          total_revenue: number
+          yearly_count: number
+        }[]
       }
       has_role: {
         Args: {

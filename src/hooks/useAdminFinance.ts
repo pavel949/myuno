@@ -94,16 +94,16 @@ export function useAdminFinance(days: number = 30) {
 
       const pendingPayouts = providers?.reduce((sum, p) => sum + (Number(p.pending_payout) || 0), 0) || 0;
 
-      // Get subscription revenue
-      const { data: subscriptions, error: subError } = await supabase
-        .from('vendor_subscriptions')
-        .select('*')
-        .eq('status', 'active');
+      // Get subscription revenue using RPC function for accurate calculation
+      const { data: subRevenue, error: subError } = await supabase
+        .rpc('get_subscription_revenue', { p_days: days });
 
-      if (subError) throw subError;
+      if (subError) {
+        console.error('Subscription revenue error:', subError);
+      }
 
-      // Approximate monthly revenue from active subscriptions
-      const subscriptionRevenue = (subscriptions?.length || 0) * 500;
+      // Extract monthly revenue from RPC result
+      const subscriptionRevenue = subRevenue?.[0]?.total_revenue || 0;
 
       const averageTakeRate = totalGmv > 0 ? (platformRevenue / totalGmv) * 100 : 0;
 
