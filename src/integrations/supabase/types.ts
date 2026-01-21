@@ -56,6 +56,7 @@ export type Database = {
       babysitters: {
         Row: {
           age_groups: string[] | null
+          approval_status: string | null
           availability: Json | null
           background_checked: boolean | null
           bio_en: string | null
@@ -80,11 +81,15 @@ export type Database = {
           price_per_hour: number | null
           provider_id: string | null
           rating: number | null
+          rejection_reason: string | null
           review_count: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           updated_at: string | null
         }
         Insert: {
           age_groups?: string[] | null
+          approval_status?: string | null
           availability?: Json | null
           background_checked?: boolean | null
           bio_en?: string | null
@@ -109,11 +114,15 @@ export type Database = {
           price_per_hour?: number | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           updated_at?: string | null
         }
         Update: {
           age_groups?: string[] | null
+          approval_status?: string | null
           availability?: Json | null
           background_checked?: boolean | null
           bio_en?: string | null
@@ -138,7 +147,10 @@ export type Database = {
           price_per_hour?: number | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -763,6 +775,7 @@ export type Database = {
       }
       cleaning_services: {
         Row: {
+          approval_status: string | null
           areas_served: string[] | null
           cover_image: string | null
           created_at: string | null
@@ -782,11 +795,15 @@ export type Database = {
           price_per_hour: number | null
           provider_id: string | null
           rating: number | null
+          rejection_reason: string | null
           review_count: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           service_type: string | null
           updated_at: string | null
         }
         Insert: {
+          approval_status?: string | null
           areas_served?: string[] | null
           cover_image?: string | null
           created_at?: string | null
@@ -806,11 +823,15 @@ export type Database = {
           price_per_hour?: number | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           service_type?: string | null
           updated_at?: string | null
         }
         Update: {
+          approval_status?: string | null
           areas_served?: string[] | null
           cover_image?: string | null
           created_at?: string | null
@@ -830,7 +851,10 @@ export type Database = {
           price_per_hour?: number | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           service_type?: string | null
           updated_at?: string | null
         }
@@ -847,6 +871,7 @@ export type Database = {
       clinics: {
         Row: {
           address: string | null
+          approval_status: string | null
           clinic_type: string
           consultation_price: number | null
           cover_image: string | null
@@ -870,7 +895,10 @@ export type Database = {
           phone: string | null
           provider_id: string | null
           rating: number | null
+          rejection_reason: string | null
           review_count: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           specialty: string[] | null
           updated_at: string
           website: string | null
@@ -878,6 +906,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          approval_status?: string | null
           clinic_type?: string
           consultation_price?: number | null
           cover_image?: string | null
@@ -901,7 +930,10 @@ export type Database = {
           phone?: string | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           specialty?: string[] | null
           updated_at?: string
           website?: string | null
@@ -909,6 +941,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          approval_status?: string | null
           clinic_type?: string
           consultation_price?: number | null
           cover_image?: string | null
@@ -932,7 +965,10 @@ export type Database = {
           phone?: string | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           specialty?: string[] | null
           updated_at?: string
           website?: string | null
@@ -1230,6 +1266,7 @@ export type Database = {
         Row: {
           address: string | null
           age_groups: string[] | null
+          approval_status: string | null
           cover_image: string | null
           created_at: string | null
           currency: string | null
@@ -1255,7 +1292,10 @@ export type Database = {
           provider_type: string | null
           qualifications: string[] | null
           rating: number | null
+          rejection_reason: string | null
           review_count: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           subjects: string[] | null
           updated_at: string | null
           website: string | null
@@ -1263,6 +1303,7 @@ export type Database = {
         Insert: {
           address?: string | null
           age_groups?: string[] | null
+          approval_status?: string | null
           cover_image?: string | null
           created_at?: string | null
           currency?: string | null
@@ -1288,7 +1329,10 @@ export type Database = {
           provider_type?: string | null
           qualifications?: string[] | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           subjects?: string[] | null
           updated_at?: string | null
           website?: string | null
@@ -1296,6 +1340,7 @@ export type Database = {
         Update: {
           address?: string | null
           age_groups?: string[] | null
+          approval_status?: string | null
           cover_image?: string | null
           created_at?: string | null
           currency?: string | null
@@ -1321,7 +1366,10 @@ export type Database = {
           provider_type?: string | null
           qualifications?: string[] | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           subjects?: string[] | null
           updated_at?: string | null
           website?: string | null
@@ -1401,6 +1449,7 @@ export type Database = {
       events: {
         Row: {
           address: string | null
+          approval_status: string | null
           category: string
           cover_image: string | null
           created_at: string
@@ -1430,7 +1479,10 @@ export type Database = {
           price: number | null
           provider_id: string | null
           rating: number | null
+          rejection_reason: string | null
           review_count: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           spots_left: number | null
           title_en: string
           title_ru: string
@@ -1439,6 +1491,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          approval_status?: string | null
           category?: string
           cover_image?: string | null
           created_at?: string
@@ -1468,7 +1521,10 @@ export type Database = {
           price?: number | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           spots_left?: number | null
           title_en: string
           title_ru: string
@@ -1477,6 +1533,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          approval_status?: string | null
           category?: string
           cover_image?: string | null
           created_at?: string
@@ -1506,7 +1563,10 @@ export type Database = {
           price?: number | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           spots_left?: number | null
           title_en?: string
           title_ru?: string
@@ -1634,7 +1694,10 @@ export type Database = {
           phone: string | null
           provider_id: string | null
           rating: number | null
+          rejection_reason: string | null
           review_count: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           updated_at: string
           working_hours: Json | null
         }
@@ -1661,7 +1724,10 @@ export type Database = {
           phone?: string | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           updated_at?: string
           working_hours?: Json | null
         }
@@ -1688,7 +1754,10 @@ export type Database = {
           phone?: string | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           updated_at?: string
           working_hours?: Json | null
         }
@@ -1840,6 +1909,7 @@ export type Database = {
         Row: {
           address: string | null
           amenities: string[] | null
+          approval_status: string | null
           classes: string[] | null
           cover_image: string | null
           created_at: string | null
@@ -1864,7 +1934,10 @@ export type Database = {
           price_week_pass: number | null
           provider_id: string | null
           rating: number | null
+          rejection_reason: string | null
           review_count: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           updated_at: string | null
           website: string | null
           working_hours: Json | null
@@ -1872,6 +1945,7 @@ export type Database = {
         Insert: {
           address?: string | null
           amenities?: string[] | null
+          approval_status?: string | null
           classes?: string[] | null
           cover_image?: string | null
           created_at?: string | null
@@ -1896,7 +1970,10 @@ export type Database = {
           price_week_pass?: number | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           updated_at?: string | null
           website?: string | null
           working_hours?: Json | null
@@ -1904,6 +1981,7 @@ export type Database = {
         Update: {
           address?: string | null
           amenities?: string[] | null
+          approval_status?: string | null
           classes?: string[] | null
           cover_image?: string | null
           created_at?: string | null
@@ -1928,7 +2006,10 @@ export type Database = {
           price_week_pass?: number | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           updated_at?: string | null
           website?: string | null
           working_hours?: Json | null
@@ -2029,6 +2110,7 @@ export type Database = {
       insurance_providers: {
         Row: {
           address: string | null
+          approval_status: string | null
           cover_image: string | null
           created_at: string | null
           currency: string | null
@@ -2055,13 +2137,17 @@ export type Database = {
           phone: string | null
           provider_id: string | null
           rating: number | null
+          rejection_reason: string | null
           review_count: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           updated_at: string | null
           website: string | null
           working_hours: Json | null
         }
         Insert: {
           address?: string | null
+          approval_status?: string | null
           cover_image?: string | null
           created_at?: string | null
           currency?: string | null
@@ -2088,13 +2174,17 @@ export type Database = {
           phone?: string | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           updated_at?: string | null
           website?: string | null
           working_hours?: Json | null
         }
         Update: {
           address?: string | null
+          approval_status?: string | null
           cover_image?: string | null
           created_at?: string | null
           currency?: string | null
@@ -2121,7 +2211,10 @@ export type Database = {
           phone?: string | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           updated_at?: string | null
           website?: string | null
           working_hours?: Json | null
@@ -2251,6 +2344,7 @@ export type Database = {
       legal_services: {
         Row: {
           address: string | null
+          approval_status: string | null
           cover_image: string | null
           created_at: string | null
           currency: string | null
@@ -2272,7 +2366,10 @@ export type Database = {
           price_consultation: number | null
           provider_id: string | null
           rating: number | null
+          rejection_reason: string | null
           review_count: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           service_type: string | null
           specializations: string[] | null
           updated_at: string | null
@@ -2281,6 +2378,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          approval_status?: string | null
           cover_image?: string | null
           created_at?: string | null
           currency?: string | null
@@ -2302,7 +2400,10 @@ export type Database = {
           price_consultation?: number | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           service_type?: string | null
           specializations?: string[] | null
           updated_at?: string | null
@@ -2311,6 +2412,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          approval_status?: string | null
           cover_image?: string | null
           created_at?: string | null
           currency?: string | null
@@ -2332,7 +2434,10 @@ export type Database = {
           price_consultation?: number | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           service_type?: string | null
           specializations?: string[] | null
           updated_at?: string | null
@@ -3537,6 +3642,7 @@ export type Database = {
       pet_services: {
         Row: {
           address: string | null
+          approval_status: string | null
           cover_image: string | null
           created_at: string | null
           currency: string | null
@@ -3559,13 +3665,17 @@ export type Database = {
           price_from: number | null
           provider_id: string | null
           rating: number | null
+          rejection_reason: string | null
           review_count: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           service_type: string | null
           updated_at: string | null
           working_hours: Json | null
         }
         Insert: {
           address?: string | null
+          approval_status?: string | null
           cover_image?: string | null
           created_at?: string | null
           currency?: string | null
@@ -3588,13 +3698,17 @@ export type Database = {
           price_from?: number | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           service_type?: string | null
           updated_at?: string | null
           working_hours?: Json | null
         }
         Update: {
           address?: string | null
+          approval_status?: string | null
           cover_image?: string | null
           created_at?: string | null
           currency?: string | null
@@ -3617,7 +3731,10 @@ export type Database = {
           price_from?: number | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           service_type?: string | null
           updated_at?: string | null
           working_hours?: Json | null
@@ -3635,6 +3752,7 @@ export type Database = {
       pharmacies: {
         Row: {
           address: string | null
+          approval_status: string | null
           cover_image: string | null
           created_at: string
           delivery_available: boolean | null
@@ -3658,13 +3776,17 @@ export type Database = {
           phone: string | null
           provider_id: string | null
           rating: number | null
+          rejection_reason: string | null
           review_count: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           updated_at: string
           website: string | null
           working_hours: Json | null
         }
         Insert: {
           address?: string | null
+          approval_status?: string | null
           cover_image?: string | null
           created_at?: string
           delivery_available?: boolean | null
@@ -3688,13 +3810,17 @@ export type Database = {
           phone?: string | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           updated_at?: string
           website?: string | null
           working_hours?: Json | null
         }
         Update: {
           address?: string | null
+          approval_status?: string | null
           cover_image?: string | null
           created_at?: string
           delivery_available?: boolean | null
@@ -3718,7 +3844,10 @@ export type Database = {
           phone?: string | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           updated_at?: string
           website?: string | null
           working_hours?: Json | null
@@ -4340,6 +4469,7 @@ export type Database = {
         Row: {
           address: string | null
           amenities: string[] | null
+          approval_status: string | null
           area_sqm: number | null
           available_from: string | null
           bathrooms: number | null
@@ -4371,7 +4501,10 @@ export type Database = {
           property_type: string
           provider_id: string | null
           rating: number | null
+          rejection_reason: string | null
           review_count: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           title_en: string
           title_ru: string
           unit_number: string | null
@@ -4381,6 +4514,7 @@ export type Database = {
         Insert: {
           address?: string | null
           amenities?: string[] | null
+          approval_status?: string | null
           area_sqm?: number | null
           available_from?: string | null
           bathrooms?: number | null
@@ -4412,7 +4546,10 @@ export type Database = {
           property_type: string
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           title_en: string
           title_ru: string
           unit_number?: string | null
@@ -4422,6 +4559,7 @@ export type Database = {
         Update: {
           address?: string | null
           amenities?: string[] | null
+          approval_status?: string | null
           area_sqm?: number | null
           available_from?: string | null
           bathrooms?: number | null
@@ -4453,7 +4591,10 @@ export type Database = {
           property_type?: string
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           title_en?: string
           title_ru?: string
           unit_number?: string | null
@@ -5560,6 +5701,7 @@ export type Database = {
       restaurants: {
         Row: {
           address: string | null
+          approval_status: string | null
           cover_image: string | null
           created_at: string
           cuisine: string
@@ -5585,13 +5727,17 @@ export type Database = {
           price_range: number | null
           provider_id: string | null
           rating: number | null
+          rejection_reason: string | null
           review_count: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           updated_at: string
           website: string | null
           working_hours: Json | null
         }
         Insert: {
           address?: string | null
+          approval_status?: string | null
           cover_image?: string | null
           created_at?: string
           cuisine?: string
@@ -5617,13 +5763,17 @@ export type Database = {
           price_range?: number | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           updated_at?: string
           website?: string | null
           working_hours?: Json | null
         }
         Update: {
           address?: string | null
+          approval_status?: string | null
           cover_image?: string | null
           created_at?: string
           cuisine?: string
@@ -5649,7 +5799,10 @@ export type Database = {
           price_range?: number | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           updated_at?: string
           website?: string | null
           working_hours?: Json | null
@@ -5822,6 +5975,7 @@ export type Database = {
         Row: {
           address: string | null
           amenities: string[] | null
+          approval_status: string | null
           cover_image: string | null
           created_at: string | null
           currency: string | null
@@ -5843,7 +5997,10 @@ export type Database = {
           price_from: number | null
           provider_id: string | null
           rating: number | null
+          rejection_reason: string | null
           review_count: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           salon_type: string | null
           services: string[] | null
           updated_at: string | null
@@ -5853,6 +6010,7 @@ export type Database = {
         Insert: {
           address?: string | null
           amenities?: string[] | null
+          approval_status?: string | null
           cover_image?: string | null
           created_at?: string | null
           currency?: string | null
@@ -5874,7 +6032,10 @@ export type Database = {
           price_from?: number | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           salon_type?: string | null
           services?: string[] | null
           updated_at?: string | null
@@ -5884,6 +6045,7 @@ export type Database = {
         Update: {
           address?: string | null
           amenities?: string[] | null
+          approval_status?: string | null
           cover_image?: string | null
           created_at?: string | null
           currency?: string | null
@@ -5905,7 +6067,10 @@ export type Database = {
           price_from?: number | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           salon_type?: string | null
           services?: string[] | null
           updated_at?: string | null
@@ -6291,7 +6456,10 @@ export type Database = {
           phone: string | null
           provider_id: string | null
           rating: number | null
+          rejection_reason: string | null
           review_count: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           updated_at: string
           working_hours: Json | null
         }
@@ -6318,7 +6486,10 @@ export type Database = {
           phone?: string | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           updated_at?: string
           working_hours?: Json | null
         }
@@ -6345,7 +6516,10 @@ export type Database = {
           phone?: string | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           updated_at?: string
           working_hours?: Json | null
         }
@@ -6656,6 +6830,7 @@ export type Database = {
       }
       tours: {
         Row: {
+          approval_status: string | null
           available_days: string[] | null
           category: string | null
           cover_image: string | null
@@ -6680,13 +6855,17 @@ export type Database = {
           price: number | null
           provider_id: string | null
           rating: number | null
+          rejection_reason: string | null
           review_count: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           start_times: string[] | null
           title_en: string
           title_ru: string
           updated_at: string
         }
         Insert: {
+          approval_status?: string | null
           available_days?: string[] | null
           category?: string | null
           cover_image?: string | null
@@ -6711,13 +6890,17 @@ export type Database = {
           price?: number | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           start_times?: string[] | null
           title_en: string
           title_ru: string
           updated_at?: string
         }
         Update: {
+          approval_status?: string | null
           available_days?: string[] | null
           category?: string | null
           cover_image?: string | null
@@ -6742,7 +6925,10 @@ export type Database = {
           price?: number | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           start_times?: string[] | null
           title_en?: string
           title_ru?: string
@@ -7035,6 +7221,7 @@ export type Database = {
       }
       vehicles: {
         Row: {
+          approval_status: string | null
           capacity: number | null
           color: string | null
           cover_image: string | null
@@ -7067,13 +7254,17 @@ export type Database = {
           price_per_hour: number | null
           provider_id: string | null
           rating: number | null
+          rejection_reason: string | null
           review_count: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           transmission: string | null
           updated_at: string | null
           vehicle_type: string | null
           year_built: number | null
         }
         Insert: {
+          approval_status?: string | null
           capacity?: number | null
           color?: string | null
           cover_image?: string | null
@@ -7106,13 +7297,17 @@ export type Database = {
           price_per_hour?: number | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           transmission?: string | null
           updated_at?: string | null
           vehicle_type?: string | null
           year_built?: number | null
         }
         Update: {
+          approval_status?: string | null
           capacity?: number | null
           color?: string | null
           cover_image?: string | null
@@ -7145,7 +7340,10 @@ export type Database = {
           price_per_hour?: number | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           transmission?: string | null
           updated_at?: string | null
           vehicle_type?: string | null
@@ -7793,6 +7991,7 @@ export type Database = {
       water_activities: {
         Row: {
           age_restriction: number | null
+          approval_status: string | null
           available_days: string[] | null
           available_times: string[] | null
           category: string
@@ -7821,8 +8020,11 @@ export type Database = {
           price_per: string | null
           provider_id: string | null
           rating: number | null
+          rejection_reason: string | null
           requirements: string[] | null
           review_count: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           safety_briefing_required: boolean | null
           title_en: string
           title_ru: string
@@ -7830,6 +8032,7 @@ export type Database = {
         }
         Insert: {
           age_restriction?: number | null
+          approval_status?: string | null
           available_days?: string[] | null
           available_times?: string[] | null
           category?: string
@@ -7858,8 +8061,11 @@ export type Database = {
           price_per?: string | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           requirements?: string[] | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           safety_briefing_required?: boolean | null
           title_en: string
           title_ru: string
@@ -7867,6 +8073,7 @@ export type Database = {
         }
         Update: {
           age_restriction?: number | null
+          approval_status?: string | null
           available_days?: string[] | null
           available_times?: string[] | null
           category?: string
@@ -7895,8 +8102,11 @@ export type Database = {
           price_per?: string | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           requirements?: string[] | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           safety_briefing_required?: boolean | null
           title_en?: string
           title_ru?: string
@@ -8014,7 +8224,10 @@ export type Database = {
           price_half_day: number | null
           provider_id: string | null
           rating: number | null
+          rejection_reason: string | null
           review_count: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           updated_at: string
           yacht_type: string | null
           year_built: number | null
@@ -8055,7 +8268,10 @@ export type Database = {
           price_half_day?: number | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           updated_at?: string
           yacht_type?: string | null
           year_built?: number | null
@@ -8096,7 +8312,10 @@ export type Database = {
           price_half_day?: number | null
           provider_id?: string | null
           rating?: number | null
+          rejection_reason?: string | null
           review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           updated_at?: string
           yacht_type?: string | null
           year_built?: number | null
