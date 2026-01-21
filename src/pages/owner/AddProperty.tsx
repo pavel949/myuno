@@ -2,9 +2,12 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCreateOwnerProperty } from '@/hooks/usePropertyCare';
+import { useSendOwnershipInvite } from '@/hooks/usePropertyOwnership';
+import { useUserContext } from '@/hooks/useUserContext';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { PropertyWizard } from '@/components/owner/PropertyWizard';
+import { OwnershipTypeStep, OwnershipType } from '@/components/owner/OwnershipTypeStep';
 import { toast } from 'sonner';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,8 +30,20 @@ export default function AddProperty() {
   const isRu = language === 'ru';
   
   const createProperty = useCreateOwnerProperty();
+  const sendInvite = useSendOwnershipInvite();
+  const { activeOrgId } = useUserContext();
 
   const [selectedProject, setSelectedProject] = useState<PropertyProject | null>(null);
+  
+  // Ownership data
+  const [ownershipData, setOwnershipData] = useState({
+    ownership_type: 'own' as OwnershipType,
+    actual_owner_email: '',
+    actual_owner_name: '',
+    actual_owner_phone: '',
+    send_invite_immediately: true,
+  });
+
   const [formData, setFormData] = useState({
     title: '',
     title_ru: '',
@@ -84,6 +99,19 @@ export default function AddProperty() {
 
   const validateStep = (stepId: string): boolean => {
     switch (stepId) {
+      case 'ownership':
+        // Validate owner info if not own property
+        if (ownershipData.ownership_type !== 'own') {
+          if (!ownershipData.actual_owner_email.trim()) {
+            toast.error(isRu ? 'Введите email собственника' : 'Enter owner email');
+            return false;
+          }
+          if (!ownershipData.actual_owner_name.trim()) {
+            toast.error(isRu ? 'Введите имя собственника' : 'Enter owner name');
+            return false;
+          }
+        }
+        return true;
       case 'basic':
         if (!formData.title.trim()) {
           toast.error(isRu ? 'Введите название объекта' : 'Enter property title');
@@ -102,12 +130,38 @@ export default function AddProperty() {
   };
 
   const handleSubmit = async () => {
-    await createProperty.mutateAsync({
+    // Create property with ownership data
+    const isOnBehalf = ownershipData.ownership_type !== 'own';
+    
+    const property = await createProperty.mutateAsync({
       ...formData,
       area_sqm: formData.area_sqm ? Number(formData.area_sqm) : undefined,
       price_per_night: formData.price_per_night ? Number(formData.price_per_night) : undefined,
       deposit_amount: formData.deposit_amount ? Number(formData.deposit_amount) : undefined,
+      // Add ownership fields
+      created_on_behalf: isOnBehalf,
+      ownership_type: ownershipData.ownership_type,
+      actual_owner_email: isOnBehalf ? ownershipData.actual_owner_email : undefined,
+      actual_owner_name: isOnBehalf ? ownershipData.actual_owner_name : undefined,
+      actual_owner_phone: isOnBehalf ? ownershipData.actual_owner_phone : undefined,
+      managed_by_org_id: ownershipData.ownership_type === 'client' ? activeOrgId : undefined,
     });
+
+    // Send ownership invite if needed
+    if (isOnBehalf && ownershipData.send_invite_immediately && property?.id) {
+      try {
+        await sendInvite.mutateAsync({
+          propertyId: property.id,
+          inviteeEmail: ownershipData.actual_owner_email,
+          inviteeName: ownershipData.actual_owner_name,
+          inviteType: 'ownership_transfer',
+        });
+        toast.success(isRu ? 'Приглашение отправлено собственнику' : 'Invitation sent to owner');
+      } catch (error) {
+        console.error('Failed to send invite:', error);
+        // Don't fail the whole operation, property is already created
+      }
+    }
 
     navigate('/owner/properties');
   };
@@ -122,6 +176,13 @@ export default function AddProperty() {
 
   const renderStep = (stepId: string) => {
     switch (stepId) {
+      case 'ownership':
+        return (
+          <OwnershipTypeStep
+            data={ownershipData}
+            onChange={(updates) => setOwnershipData(prev => ({ ...prev, ...updates }))}
+          />
+        );
       case 'basic':
         return (
           <div className="space-y-6">

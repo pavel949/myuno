@@ -127,6 +127,14 @@ export interface OwnerProperty {
   emergency_contact_name?: string;
   emergency_contact_phone?: string;
   host_languages?: string[];
+  // Ownership/delegation fields
+  created_on_behalf?: boolean;
+  actual_owner_email?: string;
+  actual_owner_name?: string;
+  actual_owner_phone?: string;
+  managed_by_org_id?: string;
+  ownership_type?: 'own' | 'client' | 'poa';
+  ownership_transferred_at?: string;
 }
 
 export interface PropertyInspection {

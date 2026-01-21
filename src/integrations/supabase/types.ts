@@ -3561,6 +3561,9 @@ export type Database = {
       owner_properties: {
         Row: {
           accessibility_features: string[] | null
+          actual_owner_email: string | null
+          actual_owner_name: string | null
+          actual_owner_phone: string | null
           address: string
           area_sqm: number | null
           bathrooms: number | null
@@ -3575,6 +3578,7 @@ export type Database = {
           cleaning_included: boolean | null
           cover_image: string | null
           created_at: string
+          created_on_behalf: boolean | null
           deposit_amount: number | null
           deposit_currency: string | null
           deposit_type: string | null
@@ -3619,6 +3623,7 @@ export type Database = {
           linen_change_price: number | null
           lng: number | null
           managed_by: string | null
+          managed_by_org_id: string | null
           management_type: string | null
           manager_line_id: string | null
           manager_name: string | null
@@ -3631,6 +3636,8 @@ export type Database = {
           nearby_places: Json | null
           notes: string | null
           owner_id: string
+          ownership_transferred_at: string | null
+          ownership_type: string | null
           parking_included: boolean | null
           parking_notes: string | null
           parking_spaces: number | null
@@ -3669,6 +3676,9 @@ export type Database = {
         }
         Insert: {
           accessibility_features?: string[] | null
+          actual_owner_email?: string | null
+          actual_owner_name?: string | null
+          actual_owner_phone?: string | null
           address: string
           area_sqm?: number | null
           bathrooms?: number | null
@@ -3683,6 +3693,7 @@ export type Database = {
           cleaning_included?: boolean | null
           cover_image?: string | null
           created_at?: string
+          created_on_behalf?: boolean | null
           deposit_amount?: number | null
           deposit_currency?: string | null
           deposit_type?: string | null
@@ -3727,6 +3738,7 @@ export type Database = {
           linen_change_price?: number | null
           lng?: number | null
           managed_by?: string | null
+          managed_by_org_id?: string | null
           management_type?: string | null
           manager_line_id?: string | null
           manager_name?: string | null
@@ -3739,6 +3751,8 @@ export type Database = {
           nearby_places?: Json | null
           notes?: string | null
           owner_id: string
+          ownership_transferred_at?: string | null
+          ownership_type?: string | null
           parking_included?: boolean | null
           parking_notes?: string | null
           parking_spaces?: number | null
@@ -3777,6 +3791,9 @@ export type Database = {
         }
         Update: {
           accessibility_features?: string[] | null
+          actual_owner_email?: string | null
+          actual_owner_name?: string | null
+          actual_owner_phone?: string | null
           address?: string
           area_sqm?: number | null
           bathrooms?: number | null
@@ -3791,6 +3808,7 @@ export type Database = {
           cleaning_included?: boolean | null
           cover_image?: string | null
           created_at?: string
+          created_on_behalf?: boolean | null
           deposit_amount?: number | null
           deposit_currency?: string | null
           deposit_type?: string | null
@@ -3835,6 +3853,7 @@ export type Database = {
           linen_change_price?: number | null
           lng?: number | null
           managed_by?: string | null
+          managed_by_org_id?: string | null
           management_type?: string | null
           manager_line_id?: string | null
           manager_name?: string | null
@@ -3847,6 +3866,8 @@ export type Database = {
           nearby_places?: Json | null
           notes?: string | null
           owner_id?: string
+          ownership_transferred_at?: string | null
+          ownership_type?: string | null
           parking_included?: boolean | null
           parking_notes?: string | null
           parking_spaces?: number | null
@@ -3889,6 +3910,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_properties_managed_by_org_id_fkey"
+            columns: ["managed_by_org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
             referencedColumns: ["id"]
           },
           {
@@ -5661,6 +5689,59 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "property_inspections_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_ownership_invites: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          delegate_role: string | null
+          expires_at: string | null
+          id: string
+          invite_type: string
+          invitee_email: string
+          invitee_name: string | null
+          inviter_id: string
+          message: string | null
+          property_id: string
+          status: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          delegate_role?: string | null
+          expires_at?: string | null
+          id?: string
+          invite_type: string
+          invitee_email: string
+          invitee_name?: string | null
+          inviter_id: string
+          message?: string | null
+          property_id: string
+          status?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          delegate_role?: string | null
+          expires_at?: string | null
+          id?: string
+          invite_type?: string
+          invitee_email?: string
+          invitee_name?: string | null
+          inviter_id?: string
+          message?: string | null
+          property_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_ownership_invites_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "owner_properties"

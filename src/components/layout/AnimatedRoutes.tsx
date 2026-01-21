@@ -11,6 +11,9 @@ import Index from '@/pages/Index';
 import Auth from '@/pages/Auth';
 import NotFound from '@/pages/NotFound';
 
+// Auth pages
+const AccountTypeSelection = lazy(() => import('@/pages/auth/AccountTypeSelection'));
+
 // Lazy load all other pages for code splitting
 const Discover = lazy(() => import('@/pages/Discover'));
 const MapView = lazy(() => import('@/pages/MapView'));
@@ -313,6 +316,7 @@ export const AnimatedRoutes: React.FC = () => {
         {/* Core routes - eagerly loaded */}
         <Route path="/" element={<PageTransition><Index /></PageTransition>} />
         <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
+        <Route path="/auth/account-type" element={<LazyPage><AccountTypeSelection /></LazyPage>} />
         
         {/* Lazy loaded routes */}
         <Route path="/discover" element={<LazyPage><Discover /></LazyPage>} />
