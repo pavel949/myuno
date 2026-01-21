@@ -213,6 +213,9 @@ const NewTicket = lazy(() => import('@/pages/support/NewTicket'));
 const MyTickets = lazy(() => import('@/pages/support/MyTickets'));
 const TicketDetail = lazy(() => import('@/pages/support/TicketDetail'));
 
+// Provider onboarding (public)
+const ProviderOnboarding = lazy(() => import('@/pages/provider/ProviderOnboarding'));
+
 // Vendor pages
 const VendorDashboard = lazy(() => import('@/pages/vendor/VendorDashboard'));
 const VendorOnboarding = lazy(() => import('@/pages/vendor/VendorOnboarding'));
@@ -537,6 +540,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/guest/check-in/:bookingId" element={<LazyPage><GuestCheckIn /></LazyPage>} />
         <Route path="/guest/guidebook/:propertyId" element={<LazyPage><GuestGuidebook /></LazyPage>} />
         
+        {/* Provider Onboarding - Public */}
+        <Route path="/provider/onboarding" element={<LazyPage><ProviderOnboarding /></LazyPage>} />
+
         {/* Vendor Routes - Protected */}
         <Route path="/vendor" element={<LazyPage><VendorGuard><VendorDashboard /></VendorGuard></LazyPage>} />
         <Route path="/vendor/onboarding" element={<LazyPage><VendorOnboarding /></LazyPage>} />

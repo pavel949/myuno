@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { DownloadAppButton } from '@/components/pwa/DownloadAppButton';
 import { 
@@ -16,6 +16,7 @@ import {
 
 export function Footer() {
   const { t, language } = useLanguage();
+  const navigate = useNavigate();
 
   const infoLinks = [
     { to: '/about', icon: Info, label: language === 'ru' ? 'О нас' : 'About Us' },
@@ -40,7 +41,7 @@ export function Footer() {
           <DownloadAppButton />
         </div>
 
-        {/* Quick Listing CTA */}
+        {/* Quick Listing CTA - Provider Onboarding */}
         <div className="mb-8 p-4 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -53,16 +54,16 @@ export function Footer() {
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   {language === 'ru' 
-                    ? 'Разместите объявление за 2 минуты — бесплатно!' 
-                    : 'List in 2 minutes — free!'}
+                    ? 'Станьте партнёром myUNO' 
+                    : 'Become a myUNO partner'}
                 </p>
               </div>
             </div>
             <button 
-              onClick={() => window.dispatchEvent(new CustomEvent('open-quick-listing'))}
+              onClick={() => navigate('/provider/onboarding')}
               className="px-6 py-2.5 rounded-lg gradient-gold text-primary-foreground font-medium hover:opacity-90 transition-opacity whitespace-nowrap"
             >
-              {language === 'ru' ? 'Разместить' : 'List Now'}
+              {language === 'ru' ? 'Оставить заявку' : 'Apply Now'}
             </button>
           </div>
         </div>
