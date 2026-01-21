@@ -10,7 +10,9 @@ import {
   ClipboardCheck, FileCheck, Home, Car, Compass, Waves, Sparkles, 
   UtensilsCrossed, Dumbbell, Stethoscope, GraduationCap, Ticket, 
   Flower2, ShoppingBag, Wrench, Scale, Ship, ArrowRight, Building2,
-  MapPin, Phone, Mail, TrendingUp, Zap, Clock, Star
+  MapPin, Phone, Mail, TrendingUp, Zap, Clock, Star, Laptop,
+  PhoneCall, Users2, Briefcase, AlertTriangle, Hammer, LineChart,
+  Headphones, MapPinned, Smartphone, HandshakeIcon
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -35,19 +37,19 @@ export default function AboutPage() {
       icon: Users,
       title: isRu ? 'Сообщество' : isTh ? 'ชุมชน' : 'Community',
       description: isRu 
-        ? 'Объединяем туристов, экспатов, владельцев недвижимости и местных предпринимателей в единую экосистему.'
+        ? 'Объединяем путешественников, экспатов, владельцев недвижимости и местных предпринимателей в единую экосистему.'
         : isTh 
         ? 'เชื่อมต่อนักท่องเที่ยว ชาวต่างชาติ เจ้าของทรัพย์สิน และผู้ประกอบการท้องถิ่นในระบบนิเวศเดียว'
-        : 'Connecting tourists, expats, property owners and local entrepreneurs in a unified ecosystem.',
+        : 'Connecting travelers, expats, property owners and local entrepreneurs in a unified ecosystem.',
     },
     {
       icon: Globe,
       title: isRu ? 'Доступность' : isTh ? 'การเข้าถึง' : 'Accessibility',
       description: isRu 
-        ? 'Все сервисы на русском, английском и тайском. Локальная поддержка понимает ваш контекст.'
+        ? 'Все сервисы на нескольких языках. Локальная поддержка понимает ваш контекст и культуру.'
         : isTh 
-        ? 'บริการทั้งหมดเป็นภาษารัสเซีย อังกฤษ และไทย ฝ่ายสนับสนุนท้องถิ่นเข้าใจบริบทของคุณ'
-        : 'All services in Russian, English and Thai. Local support understands your context.',
+        ? 'บริการทั้งหมดหลายภาษา ฝ่ายสนับสนุนท้องถิ่นเข้าใจบริบทและวัฒนธรรมของคุณ'
+        : 'All services in multiple languages. Local support understands your context and culture.',
     },
     {
       icon: Heart,
@@ -66,6 +68,171 @@ export default function AboutPage() {
     { value: '50K+', label: isRu ? 'Активных пользователей' : isTh ? 'ผู้ใช้งานที่ใช้งานอยู่' : 'Active Users' },
     { value: '100K+', label: isRu ? 'Успешных бронирований' : isTh ? 'การจองที่สำเร็จ' : 'Successful Bookings' },
     { value: '15+', label: isRu ? 'Категорий услуг' : isTh ? 'หมวดหมู่บริการ' : 'Service Categories' },
+  ];
+
+  // What is myUNO - Three Pillars
+  const infrastructurePillars = [
+    {
+      icon: Smartphone,
+      title: isRu ? 'Цифровая платформа' : isTh ? 'แพลตฟอร์มดิจิทัล' : 'Digital Platform',
+      features: isRu 
+        ? ['15+ категорий сервисов', 'Онлайн бронирование 24/7', 'Управление объектами', 'Финансовая аналитика']
+        : isTh 
+        ? ['15+ หมวดหมู่บริการ', 'จองออนไลน์ 24/7', 'จัดการทรัพย์สิน', 'การวิเคราะห์ทางการเงิน']
+        : ['15+ service categories', 'Online booking 24/7', 'Property management', 'Financial analytics'],
+      color: 'from-blue-500 to-cyan-500'
+    },
+    {
+      icon: Users2,
+      title: isRu ? 'Оффлайн поддержка' : isTh ? 'การสนับสนุนออฟไลน์' : 'Offline Support',
+      features: isRu 
+        ? ['Команда на местах', 'SOS-выезд 24/7', 'Личная помощь', 'Решение задач вживую']
+        : isTh 
+        ? ['ทีมในท้องถิ่น', 'SOS ออกบริการ 24/7', 'ช่วยเหลือส่วนตัว', 'แก้ปัญหาด้วยตนเอง']
+        : ['Local team on-site', 'SOS dispatch 24/7', 'Personal assistance', 'Real-world problem solving'],
+      color: 'from-green-500 to-emerald-500'
+    },
+    {
+      icon: HandshakeIcon,
+      title: isRu ? 'Экспертная сеть' : isTh ? 'เครือข่ายผู้เชี่ยวชาญ' : 'Expert Network',
+      features: isRu 
+        ? ['500+ проверенных партнёров', 'Все проверены G-Trust', 'Многоязычная поддержка', 'Локальная экспертиза']
+        : isTh 
+        ? ['500+ พันธมิตรที่ได้รับการยืนยัน', 'ทุกคนผ่าน G-Trust', 'สนับสนุนหลายภาษา', 'ความเชี่ยวชาญท้องถิ่น']
+        : ['500+ verified partners', 'All G-Trust certified', 'Multilingual support', 'Local expertise'],
+      color: 'from-amber-500 to-orange-500'
+    },
+  ];
+
+  // User segments (updated - no Russian-specific focus)
+  const userSegments = [
+    {
+      icon: Compass,
+      title: isRu ? 'Путешественники' : isTh ? 'นักเดินทาง' : 'Travelers',
+      description: isRu 
+        ? 'Краткосрочный визит в страну — отпуск, бизнес-поездка, транзит'
+        : isTh 
+        ? 'การเยือนระยะสั้น — วันหยุด, ธุรกิจ, การเดินทาง'
+        : 'Short-term visits — vacation, business trip, transit',
+      tasks: isRu 
+        ? ['Жильё на отпуск', 'Туры и экскурсии', 'Трансфер из аэропорта', 'Рестораны и развлечения']
+        : isTh 
+        ? ['ที่พักวันหยุด', 'ทัวร์และทริป', 'รับส่งสนามบิน', 'ร้านอาหารและความบันเทิง']
+        : ['Vacation rental', 'Tours & excursions', 'Airport transfer', 'Restaurants & entertainment'],
+      color: 'bg-blue-500/10 border-blue-500/20',
+      iconColor: 'text-blue-600'
+    },
+    {
+      icon: Home,
+      title: isRu ? 'Резиденты и экспаты' : isTh ? 'ผู้อยู่อาศัยและชาวต่างชาติ' : 'Residents & Expats',
+      description: isRu 
+        ? 'Живут за рубежом постоянно или длительный срок'
+        : isTh 
+        ? 'อาศัยอยู่ต่างประเทศอย่างถาวรหรือระยะยาว'
+        : 'Living abroad permanently or long-term',
+      tasks: isRu 
+        ? ['Медицина и клиники', 'Визовые услуги', 'Образование для детей', 'Бытовые услуги']
+        : isTh 
+        ? ['การแพทย์และคลินิก', 'บริการวีซ่า', 'การศึกษาสำหรับเด็ก', 'บริการบ้าน']
+        : ['Medical care', 'Visa services', 'Kids education', 'Home services'],
+      color: 'bg-green-500/10 border-green-500/20',
+      iconColor: 'text-green-600'
+    },
+    {
+      icon: Building2,
+      title: isRu ? 'Владельцы недвижимости' : isTh ? 'เจ้าของทรัพย์สิน' : 'Property Owners',
+      description: isRu 
+        ? 'Объект за границей, сами там не живут — сложности с управлением'
+        : isTh 
+        ? 'ทรัพย์สินในต่างประเทศ ไม่ได้อาศัยอยู่ — ความยากลำบากในการจัดการ'
+        : 'Property abroad, don\'t live there — management challenges',
+      tasks: isRu 
+        ? ['Управление арендой', 'Уборка и ремонт', 'Контроль расходов', 'Юридическое сопровождение']
+        : isTh 
+        ? ['การจัดการเช่า', 'ทำความสะอาดและซ่อมแซม', 'การควบคุมค่าใช้จ่าย', 'การสนับสนุนทางกฎหมาย']
+        : ['Rental management', 'Cleaning & repairs', 'Expense control', 'Legal support'],
+      color: 'bg-purple-500/10 border-purple-500/20',
+      iconColor: 'text-purple-600'
+    },
+    {
+      icon: Laptop,
+      title: isRu ? 'Digital Nomads' : isTh ? 'Digital Nomads' : 'Digital Nomads',
+      description: isRu 
+        ? 'Работают удалённо из разных стран мира'
+        : isTh 
+        ? 'ทำงานระยะไกลจากประเทศต่างๆ ทั่วโลก'
+        : 'Working remotely from different countries',
+      tasks: isRu 
+        ? ['Коворкинги', 'Связь и интернет', 'Банкинг', 'Нетворкинг']
+        : isTh 
+        ? ['พื้นที่ทำงานร่วม', 'การเชื่อมต่อ', 'ธนาคาร', 'เครือข่าย']
+        : ['Coworking spaces', 'Connectivity', 'Banking', 'Networking'],
+      color: 'bg-amber-500/10 border-amber-500/20',
+      iconColor: 'text-amber-600'
+    },
+  ];
+
+  // Task spectrum - from simple to complex
+  const taskSpectrum = [
+    {
+      icon: Car,
+      title: isRu ? 'Спустило колесо' : isTh ? 'ยางแบน' : 'Flat tire',
+      time: isRu ? '30 мин' : isTh ? '30 นาที' : '30 min',
+      description: isRu ? 'SOS-вызов помощи' : isTh ? 'เรียก SOS' : 'SOS call',
+      complexity: 1
+    },
+    {
+      icon: Flower2,
+      title: isRu ? 'Доставка цветов' : isTh ? 'ส่งดอกไม้' : 'Flower delivery',
+      time: isRu ? '2 часа' : isTh ? '2 ชั่วโมง' : '2 hours',
+      description: isRu ? 'Выбор и доставка' : isTh ? 'เลือกและจัดส่ง' : 'Selection & delivery',
+      complexity: 2
+    },
+    {
+      icon: Sparkles,
+      title: isRu ? 'Уборка квартиры' : isTh ? 'ทำความสะอาดอพาร์ตเมนต์' : 'Apartment cleaning',
+      time: isRu ? '1 день' : isTh ? '1 วัน' : '1 day',
+      description: isRu ? 'Регулярный сервис' : isTh ? 'บริการประจำ' : 'Regular service',
+      complexity: 3
+    },
+    {
+      icon: Hammer,
+      title: isRu ? 'Ремонт и обслуживание' : isTh ? 'ซ่อมแซมและบำรุงรักษา' : 'Repairs & maintenance',
+      time: isRu ? '1-7 дней' : isTh ? '1-7 วัน' : '1-7 days',
+      description: isRu ? 'Мелкий и капитальный' : isTh ? 'เล็กและใหญ่' : 'Minor and major',
+      complexity: 4
+    },
+    {
+      icon: Home,
+      title: isRu ? 'Долгосрочная аренда' : isTh ? 'เช่าระยะยาว' : 'Long-term rental',
+      time: isRu ? 'Сезон' : isTh ? 'ฤดูกาล' : 'Season',
+      description: isRu ? 'Поиск и проверка' : isTh ? 'ค้นหาและตรวจสอบ' : 'Search & verification',
+      complexity: 5
+    },
+    {
+      icon: LineChart,
+      title: isRu ? 'Инвест. портфель' : isTh ? 'พอร์ตการลงทุน' : 'Investment portfolio',
+      time: isRu ? 'Годы' : isTh ? 'ปี' : 'Years',
+      description: isRu ? 'Консалтинг + управление' : isTh ? 'ที่ปรึกษา + การจัดการ' : 'Consulting + management',
+      complexity: 6
+    },
+  ];
+
+  // Property owner pain points
+  const propertyOwnerPains = [
+    { text: isRu ? 'Сложно найти надёжного управляющего' : isTh ? 'หาผู้จัดการที่เชื่อถือได้ยาก' : 'Hard to find reliable property manager' },
+    { text: isRu ? 'Не понимаете особенности местного рынка' : isTh ? 'ไม่เข้าใจตลาดท้องถิ่น' : 'Don\'t understand local market specifics' },
+    { text: isRu ? 'Языковой барьер с подрядчиками' : isTh ? 'อุปสรรคด้านภาษากับผู้รับเหมา' : 'Language barrier with contractors' },
+    { text: isRu ? 'Нет контроля, когда вы далеко' : isTh ? 'ไม่มีการควบคุมเมื่อคุณอยู่ไกล' : 'No control when you\'re far away' },
+    { text: isRu ? 'Непрозрачные расходы и комиссии' : isTh ? 'ค่าใช้จ่ายและค่าคอมมิชชั่นไม่โปร่งใส' : 'Opaque expenses and commissions' },
+  ];
+
+  const propertyOwnerSolutions = [
+    { text: isRu ? 'Верифицированные партнёры (G-Trust)' : isTh ? 'พันธมิตรที่ได้รับการยืนยัน (G-Trust)' : 'Verified partners (G-Trust)' },
+    { text: isRu ? 'Единый кабинет управления' : isTh ? 'แดชบอร์ดการจัดการเดียว' : 'Unified management dashboard' },
+    { text: isRu ? 'Прозрачная финансовая аналитика' : isTh ? 'การวิเคราะห์ทางการเงินที่โปร่งใส' : 'Transparent financial analytics' },
+    { text: isRu ? 'Команда на месте для оперативных задач' : isTh ? 'ทีมในพื้นที่สำหรับงานเร่งด่วน' : 'On-site team for urgent tasks' },
+    { text: isRu ? 'Мультиязычная поддержка 24/7' : isTh ? 'สนับสนุนหลายภาษา 24/7' : 'Multilingual support 24/7' },
   ];
 
   // Ecosystem verticals
@@ -127,52 +294,6 @@ export default function AboutPage() {
     },
   ];
 
-  // User types
-  const userTypes = [
-    {
-      icon: Compass,
-      title: isRu ? 'Для туристов' : isTh ? 'สำหรับนักท่องเที่ยว' : 'For Tourists',
-      description: isRu 
-        ? 'Всё для отдыха в одном приложении: жильё, туры, транспорт, рестораны. Бронируйте за минуты.'
-        : isTh 
-        ? 'ทุกอย่างสำหรับการพักผ่อนในแอปเดียว: ที่พัก ทัวร์ ขนส่ง ร้านอาหาร จองได้ในไม่กี่นาที'
-        : 'Everything for vacation in one app: housing, tours, transport, restaurants. Book in minutes.',
-      features: [
-        isRu ? 'Верифицированные партнёры' : isTh ? 'พันธมิตรที่ได้รับการยืนยัน' : 'Verified partners',
-        isRu ? 'Кэшбек до 10%' : isTh ? 'คืนเงินสูงสุด 10%' : 'Up to 10% cashback',
-        isRu ? 'SOS-кнопка 24/7' : isTh ? 'ปุ่ม SOS 24/7' : '24/7 SOS button',
-      ],
-    },
-    {
-      icon: Home,
-      title: isRu ? 'Для экспатов' : isTh ? 'สำหรับชาวต่างชาติ' : 'For Expats',
-      description: isRu 
-        ? 'Инфраструктура для комфортной жизни: медицина, визы, образование, домашний сервис.'
-        : isTh 
-        ? 'โครงสร้างพื้นฐานสำหรับชีวิตที่สะดวกสบาย: การแพทย์ วีซ่า การศึกษา บริการบ้าน'
-        : 'Infrastructure for comfortable life: medical, visas, education, home services.',
-      features: [
-        isRu ? 'Поддержка на русском' : isTh ? 'การสนับสนุนเป็นภาษารัสเซีย' : 'Russian support',
-        isRu ? 'Проверенные специалисты' : isTh ? 'ผู้เชี่ยวชาญที่ได้รับการตรวจสอบ' : 'Verified specialists',
-        isRu ? 'История бронирований' : isTh ? 'ประวัติการจอง' : 'Booking history',
-      ],
-    },
-    {
-      icon: Building2,
-      title: isRu ? 'Для владельцев недвижимости' : isTh ? 'สำหรับเจ้าของทรัพย์สิน' : 'For Property Owners',
-      description: isRu 
-        ? 'Управляйте объектами, бронированиями и финансами в едином кабинете. Делегируйте уход.'
-        : isTh 
-        ? 'จัดการทรัพย์สิน การจอง และการเงินในแดชบอร์ดเดียว มอบหมายการดูแล'
-        : 'Manage properties, bookings and finances in one dashboard. Delegate care.',
-      features: [
-        isRu ? 'Синхронизация с Airbnb' : isTh ? 'ซิงค์กับ Airbnb' : 'Airbnb sync',
-        isRu ? 'Управление командой' : isTh ? 'การจัดการทีม' : 'Team management',
-        isRu ? 'Аналитика и отчёты' : isTh ? 'การวิเคราะห์และรายงาน' : 'Analytics & reports',
-      ],
-    },
-  ];
-
   // Roadmap
   const roadmap = [
     {
@@ -215,7 +336,7 @@ export default function AboutPage() {
           showBack 
         />
 
-        {/* Hero Section */}
+        {/* Hero Section - New Positioning */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -223,17 +344,17 @@ export default function AboutPage() {
         >
           <SectionCard className="text-center bg-gradient-to-br from-primary/10 via-background to-accent/10 border-primary/20">
             <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg">
-              <Target className="w-10 h-10 text-primary-foreground" />
+              <Globe className="w-10 h-10 text-primary-foreground" />
             </div>
             <h1 className="text-2xl md:text-3xl font-display font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              {isRu ? 'UNO — Дом там, где UNO' : isTh ? 'UNO — บ้านอยู่ที่ไหน UNO อยู่ที่นั่น' : 'UNO — Home is where UNO is'}
+              {isRu ? 'Чувствуйте себя дома — где бы вы ни были' : isTh ? 'รู้สึกเหมือนอยู่บ้าน — ไม่ว่าคุณจะอยู่ที่ไหน' : 'Feel at Home — Wherever You Are'}
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-6">
               {isRu 
-                ? 'Единая экосистема из 15+ категорий сервисов для комфортной жизни за рубежом. Всё проверено, прозрачно и удобно.'
+                ? 'Единая инфраструктура для жизни за рубежом. От бытовых задач до управления инвестициями — онлайн и оффлайн.'
                 : isTh 
-                ? 'ระบบนิเวศเดียวที่มี 15+ หมวดหมู่บริการสำหรับชีวิตที่สะดวกสบายในต่างประเทศ ทุกอย่างได้รับการตรวจสอบ โปร่งใส และสะดวก'
-                : 'A unified ecosystem of 15+ service categories for comfortable life abroad. Everything verified, transparent and convenient.'}
+                ? 'โครงสร้างพื้นฐานเดียวสำหรับการใช้ชีวิตในต่างประเทศ จากงานประจำวันไปจนถึงการจัดการการลงทุน — ออนไลน์และออฟไลน์'
+                : 'A unified infrastructure for living abroad. From everyday tasks to investment management — online and offline.'}
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <Button onClick={() => navigate('/')} className="gap-2">
@@ -262,68 +383,72 @@ export default function AboutPage() {
           ))}
         </motion.div>
 
-        {/* Mission */}
+        {/* What is myUNO - Three Pillars */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.15 }}
+        >
+          <SectionCard>
+            <div className="text-center mb-6">
+              <h2 className="text-xl font-bold mb-2">
+                {isRu ? 'Что такое myUNO?' : isTh ? 'myUNO คืออะไร?' : 'What is myUNO?'}
+              </h2>
+              <p className="text-muted-foreground">
+                {isRu 
+                  ? 'myUNO — это не просто приложение. Это инфраструктура для комфортной жизни за рубежом.'
+                  : isTh 
+                  ? 'myUNO ไม่ใช่แค่แอป มันคือโครงสร้างพื้นฐานสำหรับชีวิตที่สะดวกสบายในต่างประเทศ'
+                  : 'myUNO is not just an app. It\'s an infrastructure for comfortable life abroad.'}
+              </p>
+            </div>
+            <div className="grid md:grid-cols-3 gap-4">
+              {infrastructurePillars.map((pillar, index) => {
+                const Icon = pillar.icon;
+                return (
+                  <div key={index} className="p-4 rounded-xl border bg-card hover:shadow-md transition-shadow">
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${pillar.color} flex items-center justify-center mb-3`}>
+                      <Icon className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="font-semibold mb-2">{pillar.title}</h3>
+                    <ul className="space-y-1">
+                      {pillar.features.map((feature, i) => (
+                        <li key={i} className="text-xs text-muted-foreground flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3 h-3 text-green-500 shrink-0" />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })}
+            </div>
+          </SectionCard>
+        </motion.div>
+
+        {/* Who is myUNO for - User Segments */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <SectionCard>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Award className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold">{isRu ? 'Наша миссия' : isTh ? 'ภารกิจของเรา' : 'Our Mission'}</h2>
-                <p className="text-sm text-muted-foreground">
-                  {isRu ? 'Быть рядом, когда вы далеко от дома' : isTh ? 'อยู่เคียงข้างคุณเมื่อคุณอยู่ห่างบ้าน' : 'Be there when you\'re far from home'}
-                </p>
-              </div>
-            </div>
-            <p className="text-muted-foreground mb-4">
-              {isRu 
-                ? 'Мы создаём инфраструктуру доверия для русскоязычного сообщества в Таиланде. UNO — это не просто приложение, это экосистема, которая объединяет все аспекты жизни: от поиска жилья до юридических услуг, от бронирования яхты до вызова сантехника. Каждый партнёр проходит верификацию, каждая транзакция защищена.'
-                : isTh 
-                ? 'เราสร้างโครงสร้างพื้นฐานความไว้วางใจสำหรับชุมชนที่พูดภาษารัสเซียในประเทศไทย UNO ไม่ใช่แค่แอป แต่เป็นระบบนิเวศที่รวมทุกแง่มุมของชีวิต: จากการหาที่พักไปจนถึงบริการทางกฎหมาย จากการจองเรือยอร์ชไปจนถึงการเรียกช่างประปา พันธมิตรทุกรายได้รับการตรวจสอบ ทุกธุรกรรมได้รับการคุ้มครอง'
-                : 'We build a trust infrastructure for the Russian-speaking community in Thailand. UNO is not just an app, it\'s an ecosystem that unites all aspects of life: from finding housing to legal services, from booking a yacht to calling a plumber. Every partner is verified, every transaction is protected.'}
-            </p>
-            <div className="p-4 rounded-xl bg-muted/50 border border-border/50">
-              <p className="text-sm italic text-muted-foreground">
-                🇹🇭 {isRu 
-                  ? 'Сегодня — Пхукет. Завтра — весь Таиланд. Наша цель — стать главной платформой для экспатов и туристов в Юго-Восточной Азии.'
-                  : isTh 
-                  ? 'วันนี้ — ภูเก็ต พรุ่งนี้ — ทั่วประเทศไทย เป้าหมายของเราคือการเป็นแพลตฟอร์มหลักสำหรับชาวต่างชาติและนักท่องเที่ยวในเอเชียตะวันออกเฉียงใต้'
-                  : 'Today — Phuket. Tomorrow — all of Thailand. Our goal is to become the main platform for expats and tourists in Southeast Asia.'}
-              </p>
-            </div>
-          </SectionCard>
-        </motion.div>
-
-        {/* User Types */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
-          <h2 className="text-lg font-semibold mb-4">{isRu ? 'Для кого UNO?' : isTh ? 'UNO สำหรับใคร?' : 'Who is UNO for?'}</h2>
-          <div className="space-y-4">
-            {userTypes.map((type, index) => {
-              const Icon = type.icon;
+          <h2 className="text-lg font-semibold mb-4">{isRu ? 'Для кого myUNO?' : isTh ? 'myUNO สำหรับใคร?' : 'Who is myUNO for?'}</h2>
+          <div className="grid md:grid-cols-2 gap-4">
+            {userSegments.map((segment, index) => {
+              const Icon = segment.icon;
               return (
-                <SectionCard key={index} className="relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/5 to-transparent rounded-bl-full" />
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                      <Icon className="w-6 h-6 text-primary" />
+                <SectionCard key={index} className={`${segment.color} border`}>
+                  <div className="flex items-start gap-3">
+                    <div className={`w-10 h-10 rounded-lg bg-background flex items-center justify-center shrink-0`}>
+                      <Icon className={`w-5 h-5 ${segment.iconColor}`} />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-semibold mb-1">{type.title}</h3>
-                      <p className="text-sm text-muted-foreground mb-3">{type.description}</p>
-                      <div className="flex flex-wrap gap-2">
-                        {type.features.map((feature, i) => (
-                          <span key={i} className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-xs text-primary">
-                            <CheckCircle2 className="w-3 h-3" />
-                            {feature}
+                      <h3 className="font-semibold mb-1">{segment.title}</h3>
+                      <p className="text-xs text-muted-foreground mb-2">{segment.description}</p>
+                      <div className="flex flex-wrap gap-1">
+                        {segment.tasks.map((task, i) => (
+                          <span key={i} className="px-2 py-0.5 rounded-full bg-background text-[10px] text-muted-foreground">
+                            {task}
                           </span>
                         ))}
                       </div>
@@ -335,11 +460,129 @@ export default function AboutPage() {
           </div>
         </motion.div>
 
+        {/* Task Spectrum - Simple to Complex */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.25 }}
+        >
+          <SectionCard>
+            <div className="flex items-center gap-2 mb-4">
+              <Zap className="w-5 h-5 text-primary" />
+              <h2 className="text-lg font-semibold">
+                {isRu ? 'Задачи любого масштаба' : isTh ? 'งานทุกขนาด' : 'Tasks of Any Scale'}
+              </h2>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              {isRu 
+                ? 'От экстренной помощи на дороге до формирования инвестиционного портфеля — мы решаем задачи любой сложности.'
+                : isTh 
+                ? 'ตั้งแต่ความช่วยเหลือฉุกเฉินบนถนนไปจนถึงการสร้างพอร์ตการลงทุน — เราแก้ปัญหาทุกความซับซ้อน'
+                : 'From roadside emergency assistance to building an investment portfolio — we solve tasks of any complexity.'}
+            </p>
+            
+            {/* Complexity gradient */}
+            <div className="relative mb-4">
+              <div className="flex justify-between text-[10px] text-muted-foreground mb-2">
+                <span>{isRu ? 'ПРОСТЫЕ' : isTh ? 'ง่าย' : 'SIMPLE'}</span>
+                <span>{isRu ? 'СЛОЖНЫЕ' : isTh ? 'ซับซ้อน' : 'COMPLEX'}</span>
+              </div>
+              <div className="h-1.5 rounded-full bg-gradient-to-r from-green-500 via-amber-500 to-purple-500" />
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
+              {taskSpectrum.map((task, index) => {
+                const Icon = task.icon;
+                const bgOpacity = 10 + (task.complexity * 5);
+                return (
+                  <div 
+                    key={index}
+                    className="p-3 rounded-xl border bg-card hover:shadow-sm transition-shadow text-center"
+                  >
+                    <Icon className="w-6 h-6 mx-auto mb-2 text-primary" />
+                    <h4 className="text-xs font-medium mb-0.5 line-clamp-1">{task.title}</h4>
+                    <p className="text-[10px] text-muted-foreground mb-1">{task.description}</p>
+                    <span className="inline-block px-2 py-0.5 rounded-full bg-primary/10 text-[10px] text-primary font-medium">
+                      {task.time}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </SectionCard>
+        </motion.div>
+
+        {/* Property Owner Pain Points */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <SectionCard className="bg-gradient-to-br from-purple-500/5 to-purple-500/10 border-purple-500/20">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                <Building2 className="w-6 h-6 text-purple-600" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">
+                  {isRu ? 'Владеете недвижимостью за рубежом?' : isTh ? 'เป็นเจ้าของอสังหาริมทรัพย์ในต่างประเทศ?' : 'Own property abroad?'}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {isRu ? 'Мы понимаем ваши сложности' : isTh ? 'เราเข้าใจความท้าทายของคุณ' : 'We understand your challenges'}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              {/* Pain points */}
+              <div className="p-4 rounded-xl bg-red-500/5 border border-red-500/20">
+                <h3 className="font-medium text-sm mb-3 flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-red-500" />
+                  {isRu ? 'Знакомые проблемы?' : isTh ? 'ปัญหาที่คุ้นเคย?' : 'Familiar problems?'}
+                </h3>
+                <ul className="space-y-2">
+                  {propertyOwnerPains.map((pain, i) => (
+                    <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                      <span className="text-red-500 mt-0.5">✗</span>
+                      {pain.text}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Solutions */}
+              <div className="p-4 rounded-xl bg-green-500/5 border border-green-500/20">
+                <h3 className="font-medium text-sm mb-3 flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-500" />
+                  {isRu ? 'myUNO решает эти задачи' : isTh ? 'myUNO แก้ปัญหาเหล่านี้' : 'myUNO solves these'}
+                </h3>
+                <ul className="space-y-2">
+                  {propertyOwnerSolutions.map((solution, i) => (
+                    <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                      <span className="text-green-500 mt-0.5">✓</span>
+                      {solution.text}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            <Button 
+              variant="outline" 
+              className="w-full mt-4 gap-2 border-purple-500/30 hover:bg-purple-500/10"
+              onClick={() => navigate('/owner')}
+            >
+              <Home className="w-4 h-4" />
+              {isRu ? 'Узнать о Property Care' : isTh ? 'เรียนรู้เกี่ยวกับ Property Care' : 'Learn about Property Care'}
+            </Button>
+          </SectionCard>
+        </motion.div>
+
         {/* Ecosystem Verticals */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
+          transition={{ duration: 0.5, delay: 0.35 }}
         >
           <SectionCard>
             <div className="flex items-center gap-2 mb-4">
@@ -376,7 +619,7 @@ export default function AboutPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
         >
           <SectionCard className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
             <div className="flex items-center gap-3 mb-4">
@@ -422,7 +665,7 @@ export default function AboutPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.6 }}
+          transition={{ duration: 0.5, delay: 0.45 }}
         >
           <h2 className="text-lg font-semibold mb-4">{isRu ? 'Наши ценности' : isTh ? 'คุณค่าของเรา' : 'Our Values'}</h2>
           <div className="grid grid-cols-2 gap-3">
@@ -443,7 +686,7 @@ export default function AboutPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.7 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
         >
           <SectionCard>
             <div className="flex items-center gap-2 mb-4">
@@ -500,19 +743,19 @@ export default function AboutPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.8 }}
+          transition={{ duration: 0.5, delay: 0.55 }}
         >
           <SectionCard className="text-center bg-gradient-to-br from-primary/10 to-accent/10 border-primary/20">
             <Star className="w-12 h-12 text-primary mx-auto mb-4" />
             <h2 className="text-xl font-bold mb-2">
-              {isRu ? 'Присоединяйтесь к UNO' : isTh ? 'เข้าร่วม UNO' : 'Join UNO'}
+              {isRu ? 'Присоединяйтесь к myUNO' : isTh ? 'เข้าร่วม myUNO' : 'Join myUNO'}
             </h2>
             <p className="text-sm text-muted-foreground mb-4">
               {isRu 
-                ? 'Станьте частью экосистемы, которая меняет жизнь экспатов в Таиланде'
+                ? 'Станьте частью экосистемы, которая делает жизнь за рубежом комфортной и безопасной'
                 : isTh 
-                ? 'เป็นส่วนหนึ่งของระบบนิเวศที่เปลี่ยนชีวิตชาวต่างชาติในประเทศไทย'
-                : 'Become part of the ecosystem that is changing expat life in Thailand'}
+                ? 'เป็นส่วนหนึ่งของระบบนิเวศที่ทำให้ชีวิตในต่างประเทศสะดวกสบายและปลอดภัย'
+                : 'Become part of the ecosystem that makes life abroad comfortable and safe'}
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <Button onClick={() => navigate('/')}>
