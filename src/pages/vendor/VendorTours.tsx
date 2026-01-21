@@ -44,6 +44,7 @@ import {
   Settings
 } from 'lucide-react';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
+import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
 import {
   CardPreview,
   CardPreviewSection,
@@ -398,10 +399,14 @@ const VendorTours = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between">
                         <div>
-                          <div className="flex items-center gap-2 mb-1">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <h3 className="font-medium truncate">
                               {isRussian ? tour.title_ru : tour.title_en}
                             </h3>
+                            <ApprovalStatusBadge 
+                              status={(tour as any).approval_status} 
+                              rejectionReason={(tour as any).rejection_reason}
+                            />
                             {!tour.is_active && (
                               <Badge variant="outline" className="text-xs">
                                 {isRussian ? 'Неактивен' : 'Inactive'}

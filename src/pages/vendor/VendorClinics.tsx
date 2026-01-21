@@ -50,6 +50,7 @@ import {
   Clock
 } from 'lucide-react';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
+import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
 
 const clinicTypes = [
   { value: 'general', label: 'General Clinic', labelRu: 'Общая клиника' },

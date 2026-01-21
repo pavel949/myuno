@@ -44,6 +44,7 @@ import {
   Shield
 } from 'lucide-react';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
+import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
 
 const activityCategories = [
   { id: 'diving', label: 'Diving', labelRu: 'Дайвинг' },
@@ -313,13 +314,17 @@ const VendorActivities = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between">
                         <div>
-                          <div className="flex items-center gap-2 mb-1">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <h3 className="font-medium truncate">
                               {isRussian ? activity.title_ru : activity.title_en}
                             </h3>
                             {activity.is_certified && (
                               <Shield className="h-4 w-4 text-green-500" />
                             )}
+                            <ApprovalStatusBadge 
+                              status={(activity as any).approval_status} 
+                              rejectionReason={(activity as any).rejection_reason}
+                            />
                             {!activity.is_active && (
                               <Badge variant="outline" className="text-xs">
                                 {isRussian ? 'Неактивна' : 'Inactive'}

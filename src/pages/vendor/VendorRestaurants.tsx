@@ -42,6 +42,7 @@ import {
   Star
 } from 'lucide-react';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
+import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
 
 const cuisineTypes = [
   { value: 'thai', label: 'Thai', labelRu: 'Тайская' },
@@ -256,9 +257,10 @@ const VendorRestaurants = () => {
                             <Badge variant="secondary" className="text-xs">
                               {cuisineTypes.find(t => t.value === item.cuisine_type)?.[isRussian ? 'labelRu' : 'label']}
                             </Badge>
-                            {!item.is_verified && (
-                              <Badge variant="outline" className="text-xs text-amber-600">{isRussian ? 'На модерации' : 'Pending'}</Badge>
-                            )}
+                            <ApprovalStatusBadge 
+                              status={(item as any).approval_status} 
+                              rejectionReason={(item as any).rejection_reason}
+                            />
                           </div>
                           {item.address && (
                             <p className="text-sm text-muted-foreground flex items-center gap-1">

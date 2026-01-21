@@ -19,6 +19,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { toast } from 'sonner';
 import { Sparkles, Plus, MoreVertical, Edit, Trash2, Loader2, Star, Clock } from 'lucide-react';
 import { ImageUpload } from '@/components/upload/ImageUpload';
+import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
 
 const serviceTypes = [
   { value: 'regular', label: 'Regular Cleaning', labelRu: 'Обычная уборка' },

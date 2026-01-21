@@ -49,6 +49,7 @@ import {
   Settings
 } from 'lucide-react';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
+import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
 import {
   VendorFormWizard,
   WizardStepContent,
@@ -490,6 +491,10 @@ const VendorProperties = () => {
                                 {isRussian ? 'Мгновенно' : 'Instant'}
                               </Badge>
                             )}
+                            <ApprovalStatusBadge 
+                              status={(property as any).approval_status} 
+                              rejectionReason={(property as any).rejection_reason}
+                            />
                             {!property.is_active && (
                               <Badge variant="outline" className="text-xs">
                                 {isRussian ? 'Неактивен' : 'Inactive'}

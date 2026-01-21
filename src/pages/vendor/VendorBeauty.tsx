@@ -50,6 +50,7 @@ import {
   Clock
 } from 'lucide-react';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
+import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
 
 const salonTypes = [
   { value: 'beauty_salon', label: 'Beauty Salon', labelRu: 'Салон красоты' },
