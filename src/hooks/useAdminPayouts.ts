@@ -166,6 +166,12 @@ export function useAdminPayouts() {
 
       // If completed, update provider's pending_payout
       if (status === 'completed') {
+        const { data: provider } = await supabase
+          .from('providers')
+          .select('pending_payout')
+          .eq('id', payout.provider_id)
+          .single();
+
         if (provider) {
           await supabase
             .from('providers')
@@ -173,11 +179,6 @@ export function useAdminPayouts() {
               pending_payout: Math.max(0, (Number(provider.pending_payout) || 0) - payout.amount),
             })
             .eq('id', payout.provider_id);
-        }
-                pending_payout: Math.max(0, (Number(provider.pending_payout) || 0) - payout.amount),
-              })
-              .eq('id', payout.provider_id);
-          }
         }
       }
 
