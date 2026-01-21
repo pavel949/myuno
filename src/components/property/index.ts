@@ -5,3 +5,7 @@ export { CheckInDetails } from './CheckInDetails';
 export { HouseRules } from './HouseRules';
 export { PropertyPriceBreakdown } from './PropertyPriceBreakdown';
 export { PropertyBookingCard } from './PropertyBookingCard';
+export { PropertyRooms } from './PropertyRooms';
+export { PropertyCalendar } from './PropertyCalendar';
+export { SeasonalPricing } from './SeasonalPricing';
+export { PropertyHighlights } from './PropertyHighlights';
