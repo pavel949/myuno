@@ -134,7 +134,7 @@ export default function HowItWorksPage() {
         : isTh 
         ? 'ติดตามรายได้ อัตราการเข้าพัก รีวิวในแดชบอร์ดเดียว รับเงินโอนเข้าบัญชีธนาคารหรือกระเป๋าคริปโต'
         : 'Track income, occupancy, reviews in one dashboard. Receive payouts to bank account or crypto wallet.',
-      tip: isRu ? 'Комиссия платформы от 10% — ниже Airbnb' : isTh ? 'ค่าคอมมิชชั่นแพลตฟอร์มจาก 10% — ต่ำกว่า Airbnb' : 'Platform commission from 10% — lower than Airbnb',
+      tip: isRu ? 'Конкурентные условия — выгоднее Airbnb' : isTh ? 'เงื่อนไขการแข่งขัน — ดีกว่า Airbnb' : 'Competitive terms — better than Airbnb',
     },
   ];
 

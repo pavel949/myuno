@@ -21,13 +21,15 @@ export interface OrderTotals {
 export async function calculateOrderTotals(
   baseAmount: number,
   vertical: string = 'service',
-  providerId?: string
+  providerId?: string,
+  productId?: string
 ): Promise<OrderTotals> {
   try {
     const { data, error } = await supabase.rpc('calculate_order_totals', {
       p_base_amount: baseAmount,
       p_vertical: vertical,
       p_provider_id: providerId || null,
+      p_product_id: productId || null,
     });
 
     if (error) {

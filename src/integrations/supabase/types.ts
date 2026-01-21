@@ -3235,6 +3235,7 @@ export type Database = {
       marketplace_products: {
         Row: {
           category_slug: string
+          commission_rate: number | null
           cover_image: string | null
           created_at: string | null
           currency: string | null
@@ -3263,6 +3264,7 @@ export type Database = {
         }
         Insert: {
           category_slug: string
+          commission_rate?: number | null
           cover_image?: string | null
           created_at?: string | null
           currency?: string | null
@@ -3291,6 +3293,7 @@ export type Database = {
         }
         Update: {
           category_slug?: string
+          commission_rate?: number | null
           cover_image?: string | null
           created_at?: string | null
           currency?: string | null
@@ -5563,6 +5566,7 @@ export type Database = {
           available_from: string | null
           bathrooms: number | null
           bedrooms: number | null
+          commission_rate: number | null
           cover_image: string | null
           created_at: string
           created_by_uno_team: boolean | null
@@ -5610,6 +5614,7 @@ export type Database = {
           available_from?: string | null
           bathrooms?: number | null
           bedrooms?: number | null
+          commission_rate?: number | null
           cover_image?: string | null
           created_at?: string
           created_by_uno_team?: boolean | null
@@ -5657,6 +5662,7 @@ export type Database = {
           available_from?: string | null
           bathrooms?: number | null
           bedrooms?: number | null
+          commission_rate?: number | null
           cover_image?: string | null
           created_at?: string
           created_by_uno_team?: boolean | null
@@ -7916,6 +7922,7 @@ export type Database = {
         Row: {
           approval_status: string | null
           category_id: string | null
+          commission_rate: number | null
           created_at: string
           currency: string | null
           description_en: string | null
@@ -7938,6 +7945,7 @@ export type Database = {
         Insert: {
           approval_status?: string | null
           category_id?: string | null
+          commission_rate?: number | null
           created_at?: string
           currency?: string | null
           description_en?: string | null
@@ -7960,6 +7968,7 @@ export type Database = {
         Update: {
           approval_status?: string | null
           category_id?: string | null
+          commission_rate?: number | null
           created_at?: string
           currency?: string | null
           description_en?: string | null
@@ -8523,6 +8532,7 @@ export type Database = {
           approval_status: string | null
           available_days: string[] | null
           category: string | null
+          commission_rate: number | null
           cover_image: string | null
           created_at: string
           created_by_uno_team: boolean | null
@@ -8560,6 +8570,7 @@ export type Database = {
           approval_status?: string | null
           available_days?: string[] | null
           category?: string | null
+          commission_rate?: number | null
           cover_image?: string | null
           created_at?: string
           created_by_uno_team?: boolean | null
@@ -8597,6 +8608,7 @@ export type Database = {
           approval_status?: string | null
           available_days?: string[] | null
           category?: string | null
+          commission_rate?: number | null
           cover_image?: string | null
           created_at?: string
           created_by_uno_team?: boolean | null
@@ -9266,6 +9278,7 @@ export type Database = {
           approval_status: string | null
           capacity: number | null
           color: string | null
+          commission_rate: number | null
           cover_image: string | null
           created_at: string | null
           created_by_uno_team: boolean | null
@@ -9311,6 +9324,7 @@ export type Database = {
           approval_status?: string | null
           capacity?: number | null
           color?: string | null
+          commission_rate?: number | null
           cover_image?: string | null
           created_at?: string | null
           created_by_uno_team?: boolean | null
@@ -9356,6 +9370,7 @@ export type Database = {
           approval_status?: string | null
           capacity?: number | null
           color?: string | null
+          commission_rate?: number | null
           cover_image?: string | null
           created_at?: string | null
           created_by_uno_team?: boolean | null
@@ -10451,14 +10466,24 @@ export type Database = {
         Args: { p_category?: string; p_order_id: string }
         Returns: number
       }
-      calculate_order_totals: {
-        Args: {
-          p_base_amount: number
-          p_provider_id?: string
-          p_vertical?: string
-        }
-        Returns: Json
-      }
+      calculate_order_totals:
+        | {
+            Args: {
+              p_base_amount: number
+              p_provider_id?: string
+              p_vertical?: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_base_amount: number
+              p_product_id?: string
+              p_provider_id?: string
+              p_vertical?: string
+            }
+            Returns: Json
+          }
       calculate_sla_deadline: {
         Args: { created_at: string; request_type: string }
         Returns: string
@@ -10630,6 +10655,10 @@ export type Database = {
       get_order_vertical: {
         Args: { p_metadata: Json; p_order_type: string }
         Returns: string
+      }
+      get_product_commission: {
+        Args: { p_product_id: string; p_vertical: string }
+        Returns: number
       }
       get_property_user_role: {
         Args: { p_property_id: string; p_user_id: string }

@@ -49,18 +49,13 @@ export default function PartnerAgreementPage() {
     },
   ];
 
-  const commissionTable = [
-    { vertical: isRu ? 'Яхты и катера' : 'Yachts & Boats', commission: '12%', type: 'Escrow', deposit: '50%' },
-    { vertical: isRu ? 'Туры и экскурсии' : 'Tours & Excursions', commission: '10%', type: 'Escrow', deposit: '100%' },
-    { vertical: isRu ? 'Аренда недвижимости (short)' : 'Property Rentals (short)', commission: '8%', type: 'Partial', deposit: '30%' },
-    { vertical: isRu ? 'Аренда недвижимости (long)' : 'Property Rentals (long)', commission: '₿2,999', type: 'Lead', deposit: '₿499' },
-    { vertical: isRu ? 'Рестораны' : 'Restaurants', commission: '5%', type: 'Partial', deposit: '₿500' },
-    { vertical: isRu ? 'Красота и СПА' : 'Beauty & SPA', commission: '15%', type: 'Escrow', deposit: '20%' },
-    { vertical: isRu ? 'Медицинские услуги' : 'Medical Services', commission: '10%', type: 'Partial', deposit: '₿1,000' },
-    { vertical: isRu ? 'Транспорт' : 'Transport', commission: '10%', type: 'Escrow', deposit: '100%' },
-    { vertical: isRu ? 'Визовые услуги' : 'Visa Services', commission: '20%', type: 'Lead', deposit: '₿199' },
-    { vertical: isRu ? 'Маркетплейс' : 'Marketplace', commission: '15%', type: 'Escrow', deposit: '100%' },
-  ];
+  // Комиссии определяются индивидуально - таблица убрана
+  const commissionInfo = {
+    title: isRu ? 'Индивидуальные условия' : 'Individual Terms',
+    description: isRu 
+      ? 'Комиссия и условия сотрудничества определяются индивидуально для каждого партнёра и фиксируются в договоре. Ставка зависит от категории услуг, объёма и уровня верификации.'
+      : 'Commission and partnership terms are determined individually for each partner and fixed in the contract. Rate depends on service category, volume, and verification level.',
+  };
 
   const penalties = [
     {
@@ -210,42 +205,37 @@ export default function PartnerAgreementPage() {
           ))}
         </div>
 
-        {/* Commission Table */}
+        {/* Commission Terms - без конкретных процентов */}
         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <Percent className="h-5 w-5 text-primary" />
-          {isRu ? '2. Комиссии по вертикалям' : '2. Commission by Vertical'}
+          {isRu ? '2. Комиссия платформы' : '2. Platform Commission'}
         </h2>
-        <Card className="mb-8 overflow-hidden">
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-muted">
-                  <tr>
-                    <th className="text-left p-3 font-medium">{isRu ? 'Вертикаль' : 'Vertical'}</th>
-                    <th className="text-center p-3 font-medium">{isRu ? 'Комиссия' : 'Commission'}</th>
-                    <th className="text-center p-3 font-medium">{isRu ? 'Тип' : 'Type'}</th>
-                    <th className="text-center p-3 font-medium">{isRu ? 'Депозит' : 'Deposit'}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {commissionTable.map((row, index) => (
-                    <tr key={index} className="border-t">
-                      <td className="p-3">{row.vertical}</td>
-                      <td className="p-3 text-center font-semibold text-primary">{row.commission}</td>
-                      <td className="p-3 text-center">
-                        <span className={`text-xs px-2 py-1 rounded ${
-                          row.type === 'Escrow' ? 'bg-green-500/10 text-green-600' :
-                          row.type === 'Partial' ? 'bg-yellow-500/10 text-yellow-600' :
-                          'bg-orange-500/10 text-orange-600'
-                        }`}>
-                          {row.type}
-                        </span>
-                      </td>
-                      <td className="p-3 text-center text-muted-foreground">{row.deposit}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        <Card className="mb-8">
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-4">
+              <div className="p-3 rounded-full bg-primary/10">
+                <Scale className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold mb-2">{commissionInfo.title}</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {commissionInfo.description}
+                </p>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>{isRu ? 'Escrow-защита платежей' : 'Escrow payment protection'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>{isRu ? 'Еженедельные выплаты' : 'Weekly payouts'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>{isRu ? 'Прозрачная отчётность' : 'Transparent reporting'}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
