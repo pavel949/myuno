@@ -73,9 +73,9 @@ export const ProfessionalProductCard: React.FC<ProfessionalProductCardProps> = (
           
           {/* Bottom content overlay */}
           <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-            <h3 className="font-bold text-lg line-clamp-2 mb-1">{name}</h3>
+            <h3 className="font-semibold text-base line-clamp-2 mb-1">{name}</h3>
             {vendorName && (
-              <p className="text-white/70 text-sm">{vendorName}</p>
+              <p className="text-white/70 text-xs">{vendorName}</p>
             )}
           </div>
         </div>
@@ -84,7 +84,7 @@ export const ProfessionalProductCard: React.FC<ProfessionalProductCardProps> = (
         <div className="p-4 flex items-center justify-between bg-card">
           <div>
             <div className="flex items-baseline gap-2">
-              <span className="text-xl font-bold text-foreground">฿{product.price.toLocaleString()}</span>
+              <span className="text-lg font-bold text-foreground">฿{product.price.toLocaleString()}</span>
               {product.original_price && (
                 <span className="text-sm text-muted-foreground line-through">
                   ฿{product.original_price.toLocaleString()}

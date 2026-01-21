@@ -94,7 +94,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
               <IconComponent className="w-4 h-4 text-primary" />
             </div>
           )}
-          <h2 className="text-xl font-bold text-foreground">
+          <h2 className="text-lg font-bold text-foreground">
             {language === 'ru' ? titleRu : title}
           </h2>
         </div>
