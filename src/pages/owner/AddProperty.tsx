@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useCreateOwnerProperty } from '@/hooks/usePropertyCare';
+import { useCreateOwnerProperty, useOwnerProperty } from '@/hooks/usePropertyCare';
 import { useSendOwnershipInvite } from '@/hooks/usePropertyOwnership';
 import { useUserContext } from '@/hooks/useUserContext';
 import { PageContainer } from '@/components/uno/PageContainer';
@@ -17,23 +17,30 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { Home, MapPin, Bed, Bath, SquareStack, Upload, DollarSign, Clock, Users } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Home, MapPin, Bed, Bath, SquareStack, Upload, DollarSign, Clock, Users, Copy } from 'lucide-react';
 import { ImageUpload } from '@/components/upload/ImageUpload';
 import { ProjectSelector } from '@/components/property/ProjectSelector';
 import { UnitFields } from '@/components/property/UnitFields';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
 import { ProjectLocationPicker } from '@/components/property/ProjectLocationPicker';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AddProperty() {
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isRu = language === 'ru';
+  
+  const cloneFromId = searchParams.get('cloneFrom');
+  const { data: sourceProperty, isLoading: isLoadingSource } = useOwnerProperty(cloneFromId || undefined);
   
   const createProperty = useCreateOwnerProperty();
   const sendInvite = useSendOwnershipInvite();
   const { activeOrgId } = useUserContext();
 
   const [selectedProject, setSelectedProject] = useState<PropertyProject | null>(null);
+  const [isCloneDataApplied, setIsCloneDataApplied] = useState(false);
   
   // Ownership data
   const [ownershipData, setOwnershipData] = useState({
@@ -77,6 +84,48 @@ export default function AddProperty() {
     check_out_time: '12:00',
     instant_booking: false,
   });
+
+  // Apply cloned property data when loaded
+  useEffect(() => {
+    if (sourceProperty && !isCloneDataApplied) {
+      setFormData({
+        title: sourceProperty.title || '',
+        title_ru: sourceProperty.title_ru || '',
+        address: sourceProperty.address || '',
+        district: sourceProperty.district || '',
+        lat: sourceProperty.lat ?? undefined,
+        lng: sourceProperty.lng ?? undefined,
+        property_type: sourceProperty.property_type || 'apartment',
+        bedrooms: sourceProperty.bedrooms || 1,
+        bathrooms: sourceProperty.bathrooms || 1,
+        area_sqm: sourceProperty.area_sqm?.toString() || '',
+        description: sourceProperty.description || '',
+        description_ru: sourceProperty.description_ru || '',
+        cover_image: sourceProperty.cover_image || '',
+        images: sourceProperty.images || [],
+        management_type: sourceProperty.management_type || 'full',
+        is_rented: sourceProperty.is_rented || false,
+        rental_platforms: sourceProperty.rental_platform ? [sourceProperty.rental_platform] : [],
+        custom_platform: '',
+        project_id: sourceProperty.project_id ?? undefined,
+        // These fields are intentionally left empty for the user to fill
+        floor: undefined,
+        unit_number: '',
+        view_type: sourceProperty.view_type || '',
+        furnishing_level: sourceProperty.furnishing_level || '',
+        equipment: sourceProperty.equipment || [],
+        price_per_night: sourceProperty.price_per_night?.toString() || '',
+        min_stay_nights: sourceProperty.min_stay_nights || 1,
+        max_guests: sourceProperty.max_guests || 2,
+        deposit_amount: sourceProperty.deposit_amount?.toString() || '',
+        check_in_time: sourceProperty.check_in_time || '14:00',
+        check_out_time: sourceProperty.check_out_time || '12:00',
+        instant_booking: sourceProperty.instant_booking || false,
+      });
+      setIsCloneDataApplied(true);
+      toast.success(isRu ? 'Данные объекта загружены. Заполните этаж и номер квартиры.' : 'Property data loaded. Fill in floor and unit number.');
+    }
+  }, [sourceProperty, isCloneDataApplied, isRu]);
 
   const districts = [
     'Patong', 'Kata', 'Karon', 'Rawai', 'Nai Harn', 
@@ -691,14 +740,49 @@ export default function AddProperty() {
     }
   };
 
+  // Show loading state when fetching source property for cloning
+  if (cloneFromId && isLoadingSource) {
+    return (
+      <PageContainer>
+        <PageHeader 
+          title={isRu ? 'Загрузка...' : 'Loading...'}
+          showBack
+          fallbackPath="/owner/properties"
+        />
+        <div className="space-y-4">
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-32 w-full" />
+        </div>
+      </PageContainer>
+    );
+  }
+
   return (
     <PageContainer>
       <PageHeader 
-        title={isRu ? 'Добавить объект' : 'Add Property'}
+        title={cloneFromId 
+          ? (isRu ? 'Создать на основе' : 'Duplicate Property')
+          : (isRu ? 'Добавить объект' : 'Add Property')
+        }
         showBack
         fallbackPath="/owner/properties"
-        subtitle={isRu ? 'Зарегистрируйте недвижимость' : 'Register your property'}
+        subtitle={cloneFromId 
+          ? (isRu ? 'Заполните этаж и номер квартиры' : 'Fill in floor and unit number')
+          : (isRu ? 'Зарегистрируйте недвижимость' : 'Register your property')
+        }
       />
+
+      {cloneFromId && (
+        <div className="mb-4 p-3 rounded-lg bg-primary/10 border border-primary/20 flex items-center gap-2">
+          <Copy className="h-4 w-4 text-primary" />
+          <span className="text-sm">
+            {isRu 
+              ? 'Данные скопированы. Этаж и номер квартиры нужно указать заново.' 
+              : 'Data copied. Floor and unit number need to be filled in.'}
+          </span>
+        </div>
+      )}
 
       <PropertyWizard
         onSubmit={handleSubmit}
