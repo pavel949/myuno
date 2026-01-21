@@ -21,7 +21,7 @@ export function QuickListingFAB() {
   return (
     <>
       <motion.button
-        className="fixed bottom-24 right-4 z-40 flex items-center gap-2 rounded-full gradient-gold text-primary-foreground shadow-lg"
+        className="fixed bottom-36 right-4 z-40 flex items-center gap-2 rounded-full gradient-gold text-primary-foreground shadow-lg md:bottom-20"
         style={{ padding: isHovered ? '12px 20px' : '14px' }}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
