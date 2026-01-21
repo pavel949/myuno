@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useLocation as useLocationContext } from '@/contexts/LocationContext';
 import { Loader2, Navigation, MapPin, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,8 +17,8 @@ interface LocationPickerMapProps {
   initialLocation?: { lat: number; lng: number } | null;
 }
 
-// Popular locations in Phuket
-const popularLocations = [
+// Default popular locations (Phuket fallback)
+const defaultPopularLocations = [
   { id: 'patong', nameEn: 'Patong Beach', nameRu: 'Пляж Патонг', lat: 7.8965, lng: 98.3008 },
   { id: 'kata', nameEn: 'Kata Beach', nameRu: 'Пляж Ката', lat: 7.8205, lng: 98.2988 },
   { id: 'karon', nameEn: 'Karon Beach', nameRu: 'Пляж Карон', lat: 7.8468, lng: 98.2947 },
@@ -27,6 +28,38 @@ const popularLocations = [
   { id: 'central', nameEn: 'Central Festival', nameRu: 'Централ Фестиваль', lat: 7.8917, lng: 98.3648 },
   { id: 'jungceylon', nameEn: 'Jungceylon', nameRu: 'Джангцейлон', lat: 7.8889, lng: 98.2962 },
 ];
+
+// Popular locations by city
+const cityPopularLocations: Record<string, typeof defaultPopularLocations> = {
+  phuket: defaultPopularLocations,
+  dubai: [
+    { id: 'dubai-mall', nameEn: 'Dubai Mall', nameRu: 'Дубай Молл', lat: 25.1972, lng: 55.2744 },
+    { id: 'marina', nameEn: 'Dubai Marina', nameRu: 'Дубай Марина', lat: 25.0805, lng: 55.1403 },
+    { id: 'palm', nameEn: 'Palm Jumeirah', nameRu: 'Пальма Джумейра', lat: 25.1124, lng: 55.1390 },
+    { id: 'jbr', nameEn: 'JBR Beach', nameRu: 'Пляж JBR', lat: 25.0763, lng: 55.1328 },
+    { id: 'downtown', nameEn: 'Downtown Dubai', nameRu: 'Даунтаун Дубай', lat: 25.1977, lng: 55.2744 },
+    { id: 'dxb-airport', nameEn: 'Dubai Airport', nameRu: 'Аэропорт Дубая', lat: 25.2532, lng: 55.3657 },
+  ],
+  bali: [
+    { id: 'seminyak', nameEn: 'Seminyak', nameRu: 'Семиньяк', lat: -8.6913, lng: 115.1685 },
+    { id: 'canggu', nameEn: 'Canggu', nameRu: 'Чангу', lat: -8.6478, lng: 115.1385 },
+    { id: 'ubud', nameEn: 'Ubud', nameRu: 'Убуд', lat: -8.5069, lng: 115.2625 },
+    { id: 'kuta', nameEn: 'Kuta Beach', nameRu: 'Пляж Кута', lat: -8.7181, lng: 115.1691 },
+    { id: 'ngurah', nameEn: 'Ngurah Rai Airport', nameRu: 'Аэропорт Нгурах Рай', lat: -8.7467, lng: 115.1672 },
+  ],
+  danang: [
+    { id: 'my-khe', nameEn: 'My Khe Beach', nameRu: 'Пляж Ми Кхе', lat: 16.0471, lng: 108.2468 },
+    { id: 'son-tra', nameEn: 'Son Tra District', nameRu: 'Район Сон Тра', lat: 16.1065, lng: 108.2772 },
+    { id: 'hoi-an', nameEn: 'Hoi An', nameRu: 'Хой Ан', lat: 15.8801, lng: 108.3380 },
+    { id: 'danang-airport', nameEn: 'Da Nang Airport', nameRu: 'Аэропорт Дананга', lat: 16.0439, lng: 108.1999 },
+  ],
+  hongkong: [
+    { id: 'central', nameEn: 'Central', nameRu: 'Централ', lat: 22.2800, lng: 114.1588 },
+    { id: 'tst', nameEn: 'Tsim Sha Tsui', nameRu: 'Цим Ша Цуй', lat: 22.2988, lng: 114.1722 },
+    { id: 'wan-chai', nameEn: 'Wan Chai', nameRu: 'Ван Чай', lat: 22.2780, lng: 114.1733 },
+    { id: 'hk-airport', nameEn: 'Hong Kong Airport', nameRu: 'Аэропорт Гонконга', lat: 22.3080, lng: 113.9185 },
+  ],
+};
 
 const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
   isOpen,
@@ -39,13 +72,26 @@ const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
   const map = useRef<mapboxgl.Map | null>(null);
   const markerRef = useRef<mapboxgl.Marker | null>(null);
   const { language } = useLanguage();
+  const { getCityConfig, currentCity } = useLocationContext();
   
   const [mapboxToken, setMapboxToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLocation, setSelectedLocation] = useState<{ address: string; lat: number; lng: number } | null>(null);
-  const [mapCenter, setMapCenter] = useState<[number, number]>([98.3923, 7.8804]); // Default to Phuket
+  
+  // Get city config for dynamic center
+  const cityConfig = getCityConfig();
+  const mapCenter: [number, number] = useMemo(() => 
+    cityConfig ? [cityConfig.lng, cityConfig.lat] : [98.3923, 7.8804],
+    [cityConfig]
+  );
+  
+  // Get popular locations for current city
+  const popularLocations = useMemo(() => {
+    const citySlug = currentCity?.slug || 'phuket';
+    return cityPopularLocations[citySlug] || defaultPopularLocations;
+  }, [currentCity]);
 
   // Fetch Mapbox token
   useEffect(() => {
@@ -236,8 +282,12 @@ const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
     if (!searchQuery.trim() || !mapboxToken) return;
     
     try {
+      // Use dynamic city config for proximity and country
+      const countryCode = cityConfig?.countryCode || 'TH';
+      const proximity = `${mapCenter[0]},${mapCenter[1]}`;
+      
       const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?access_token=${mapboxToken}&proximity=98.3923,7.8804&country=TH`
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?access_token=${mapboxToken}&proximity=${proximity}&country=${countryCode}`
       );
       const data = await response.json();
       

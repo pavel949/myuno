@@ -3,6 +3,7 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useLocation as useLocationContext } from '@/contexts/LocationContext';
 import { Loader2 } from 'lucide-react';
 import { createMapPopupHtml, escapeHtml } from '@/lib/sanitize';
 
@@ -36,6 +37,7 @@ const SalonMap: React.FC<SalonMapProps> = ({
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const { language } = useLanguage();
+  const { getCityConfig } = useLocationContext();
   const [mapboxToken, setMapboxToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -103,8 +105,11 @@ const SalonMap: React.FC<SalonMapProps> = ({
 
     mapboxgl.accessToken = mapboxToken;
 
-    // Default center to Phuket
-    const defaultCenter: [number, number] = [98.3923, 7.8804];
+    // Get city config for dynamic center
+    const cityConfig = getCityConfig();
+    const defaultCenter: [number, number] = cityConfig 
+      ? [cityConfig.lng, cityConfig.lat] 
+      : [98.3923, 7.8804]; // Fallback to Phuket
     const center = userLocation 
       ? [userLocation.lng, userLocation.lat] as [number, number]
       : defaultCenter;
