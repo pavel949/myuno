@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCategories } from '@/hooks/useCategories';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -13,38 +14,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { 
-  Car, Flower2, Waves, Home, UtensilsCrossed, Compass, 
-  Sparkles, Stethoscope, Scale, Shield, Dumbbell, ShoppingBag,
-  GraduationCap, Ticket, Wrench, Baby, Shirt, Pill, Building2,
-  Plane, Check, ArrowRight, ArrowLeft, Loader2, Phone, Mail,
-  User, MessageSquare, Store
+  Check, ArrowRight, ArrowLeft, Loader2, Phone, Mail,
+  User, MessageSquare, Store, Building2, Package
 } from 'lucide-react';
-
-// All service categories with icons
-const serviceCategories = [
-  { id: 'transport', icon: Car, labelEn: 'Transport & Rental', labelRu: 'Транспорт и аренда', color: 'from-indigo-500 to-blue-500' },
-  { id: 'flowers', icon: Flower2, labelEn: 'Flowers & Gifts', labelRu: 'Цветы и подарки', color: 'from-rose-500 to-pink-500' },
-  { id: 'water', icon: Waves, labelEn: 'Water Activities', labelRu: 'Водные активности', color: 'from-cyan-500 to-blue-500' },
-  { id: 'property', icon: Home, labelEn: 'Real Estate', labelRu: 'Недвижимость', color: 'from-teal-500 to-emerald-500' },
-  { id: 'restaurants', icon: UtensilsCrossed, labelEn: 'Food & Restaurants', labelRu: 'Еда и рестораны', color: 'from-orange-500 to-red-500' },
-  { id: 'tours', icon: Compass, labelEn: 'Tours & Excursions', labelRu: 'Туры и экскурсии', color: 'from-amber-500 to-orange-500' },
-  { id: 'beauty', icon: Sparkles, labelEn: 'Beauty & Spa', labelRu: 'Красота и спа', color: 'from-pink-500 to-purple-500' },
-  { id: 'medical', icon: Stethoscope, labelEn: 'Medical & Health', labelRu: 'Медицина и здоровье', color: 'from-emerald-500 to-green-500' },
-  { id: 'legal', icon: Scale, labelEn: 'Legal Services', labelRu: 'Юридические услуги', color: 'from-indigo-500 to-blue-600' },
-  { id: 'insurance', icon: Shield, labelEn: 'Insurance', labelRu: 'Страхование', color: 'from-violet-500 to-purple-500' },
-  { id: 'fitness', icon: Dumbbell, labelEn: 'Fitness & Sports', labelRu: 'Фитнес и спорт', color: 'from-blue-500 to-cyan-500' },
-  { id: 'market', icon: ShoppingBag, labelEn: 'Shopping & Stores', labelRu: 'Магазины', color: 'from-amber-500 to-yellow-500' },
-  { id: 'education', icon: GraduationCap, labelEn: 'Education', labelRu: 'Образование', color: 'from-yellow-500 to-orange-500' },
-  { id: 'events', icon: Ticket, labelEn: 'Events & Entertainment', labelRu: 'Мероприятия', color: 'from-purple-500 to-pink-500' },
-  { id: 'services', icon: Wrench, labelEn: 'Home Services', labelRu: 'Бытовые услуги', color: 'from-slate-500 to-zinc-600' },
-  { id: 'babysitting', icon: Baby, labelEn: 'Babysitting', labelRu: 'Няни', color: 'from-pink-400 to-rose-400' },
-  { id: 'laundry', icon: Shirt, labelEn: 'Laundry & Dry Cleaning', labelRu: 'Прачечная и химчистка', color: 'from-sky-500 to-blue-500' },
-  { id: 'pharmacy', icon: Pill, labelEn: 'Pharmacy', labelRu: 'Аптеки', color: 'from-green-500 to-emerald-500' },
-  { id: 'concierge', icon: Building2, labelEn: 'Concierge Services', labelRu: 'Консьерж-сервис', color: 'from-gray-500 to-slate-600' },
-  { id: 'travel', icon: Plane, labelEn: 'Travel & Visa', labelRu: 'Путешествия и визы', color: 'from-blue-500 to-indigo-500' },
-];
 
 type Step = 'category' | 'details' | 'contact' | 'success';
 
@@ -52,6 +27,7 @@ const ProviderOnboarding = () => {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { user } = useAuth();
+  const { flatCategories, getName, isLoading: categoriesLoading } = useCategories();
   const isRu = language === 'ru';
 
   const [step, setStep] = useState<Step>('category');
@@ -178,44 +154,48 @@ const ProviderOnboarding = () => {
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                {serviceCategories.map((cat) => {
-                  const Icon = cat.icon;
-                  const isSelected = selectedCategories.includes(cat.id);
-                  return (
-                    <motion.button
-                      key={cat.id}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => toggleCategory(cat.id)}
-                      className={cn(
-                        "flex items-center gap-3 p-4 rounded-xl border-2 transition-all relative text-left",
-                        isSelected 
-                          ? "border-primary bg-primary/10" 
-                          : "border-border hover:border-primary/50 bg-card"
-                      )}
-                    >
-                      <div className={cn(
-                        "w-10 h-10 rounded-lg bg-gradient-to-br flex items-center justify-center shrink-0",
-                        cat.color
-                      )}>
-                        <Icon className="w-5 h-5 text-white" />
-                      </div>
-                      <span className="text-sm font-medium line-clamp-2">
-                        {isRu ? cat.labelRu : cat.labelEn}
-                      </span>
-                      {isSelected && (
-                        <div className="absolute top-2 right-2">
-                          <Check className="w-4 h-4 text-primary" />
+              {categoriesLoading ? (
+                <div className="grid grid-cols-2 gap-3">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <Skeleton key={i} className="h-16 rounded-xl" />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  {flatCategories.map((cat) => {
+                    const Icon = cat.icon || Package;
+                    const isSelected = selectedCategories.includes(cat.slug);
+                    return (
+                      <motion.button
+                        key={cat.id}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => toggleCategory(cat.slug)}
+                        className={cn(
+                          "flex items-center gap-3 p-4 rounded-xl border-2 transition-all relative text-left",
+                          isSelected 
+                            ? "border-primary bg-primary/10" 
+                            : "border-border hover:border-primary/50 bg-card"
+                        )}
+                      >
+                        <div className={cn(
+                          "w-10 h-10 rounded-lg bg-gradient-to-br flex items-center justify-center shrink-0",
+                          cat.color
+                        )}>
+                          <Icon className="w-5 h-5 text-white" />
                         </div>
-                      )}
-                    </motion.button>
-                  );
-                })}
-              </div>
-
-              <p className="text-center text-sm text-muted-foreground">
-                {isRu ? `Выбрано: ${selectedCategories.length}` : `Selected: ${selectedCategories.length}`}
-              </p>
+                        <span className="text-sm font-medium line-clamp-2">
+                          {getName(cat)}
+                      </span>
+                        {isSelected && (
+                          <div className="absolute top-2 right-2">
+                            <Check className="w-4 h-4 text-primary" />
+                          </div>
+                        )}
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              )}
             </motion.div>
           )}
 
@@ -273,15 +253,15 @@ const ProviderOnboarding = () => {
                       {isRu ? 'Выбранные категории:' : 'Selected categories:'}
                     </Label>
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {selectedCategories.map(catId => {
-                        const cat = serviceCategories.find(c => c.id === catId);
+                      {selectedCategories.map(catSlug => {
+                        const cat = flatCategories.find(c => c.slug === catSlug);
                         if (!cat) return null;
                         return (
                           <span 
-                            key={catId}
+                            key={catSlug}
                             className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-primary text-xs"
                           >
-                            {isRu ? cat.labelRu : cat.labelEn}
+                            {getName(cat)}
                           </span>
                         );
                       })}
@@ -412,9 +392,9 @@ const ProviderOnboarding = () => {
                     </p>
                     <p className="text-sm text-muted-foreground">
                       <span className="font-medium">{isRu ? 'Категории: ' : 'Categories: '}</span>
-                      {selectedCategories.map(catId => {
-                        const cat = serviceCategories.find(c => c.id === catId);
-                        return isRu ? cat?.labelRu : cat?.labelEn;
+                      {selectedCategories.map(catSlug => {
+                        const cat = flatCategories.find(c => c.slug === catSlug);
+                        return cat ? getName(cat) : catSlug;
                       }).join(', ')}
                     </p>
                   </CardContent>
