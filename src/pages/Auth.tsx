@@ -14,8 +14,9 @@ import { usePinAuth } from '@/hooks/usePinAuth';
 import { PinLogin } from '@/components/auth/PinLogin';
 import { PinSetup } from '@/components/auth/PinSetup';
 
-const emailSchema = z.string().email('Invalid email address');
-const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
+// Validation schemas with localized messages handled in validateForm
+const emailSchema = z.string().email();
+const passwordSchema = z.string().min(6);
 
 type AuthView = 'pin-login' | 'email-auth' | 'pin-setup';
 
@@ -68,12 +69,13 @@ export default function Auth() {
 
   const validateForm = () => {
     const newErrors: typeof errors = {};
+    const isRu = language === 'ru';
     
     try {
       emailSchema.parse(email);
     } catch (e) {
       if (e instanceof z.ZodError) {
-        newErrors.email = e.errors[0].message;
+        newErrors.email = isRu ? 'Неверный формат email' : 'Invalid email address';
       }
     }
     
@@ -81,12 +83,12 @@ export default function Auth() {
       passwordSchema.parse(password);
     } catch (e) {
       if (e instanceof z.ZodError) {
-        newErrors.password = e.errors[0].message;
+        newErrors.password = isRu ? 'Пароль должен быть не менее 6 символов' : 'Password must be at least 6 characters';
       }
     }
     
     if (!isLogin && !fullName.trim()) {
-      newErrors.fullName = 'Name is required';
+      newErrors.fullName = isRu ? 'Имя обязательно' : 'Name is required';
     }
     
     setErrors(newErrors);
@@ -101,20 +103,21 @@ export default function Auth() {
     setIsLoading(true);
     
     try {
+      const isRu = language === 'ru';
       if (isLogin) {
         const { error } = await signIn(email, password);
         if (error) {
           toast({
-            title: 'Error',
+            title: isRu ? 'Ошибка' : 'Error',
             description: error.message === 'Invalid login credentials' 
-              ? 'Invalid email or password' 
+              ? (isRu ? 'Неверный email или пароль' : 'Invalid email or password')
               : error.message,
             variant: 'destructive',
           });
         } else {
           toast({
             title: t('auth.welcomeBack'),
-            description: 'Successfully logged in',
+            description: isRu ? 'Вход выполнен успешно' : 'Successfully logged in',
           });
           // Don't navigate here - let the useEffect handle it
         }
@@ -122,9 +125,9 @@ export default function Auth() {
         const { error, data } = await signUp(email, password, fullName);
         if (error) {
           toast({
-            title: 'Error',
+            title: isRu ? 'Ошибка' : 'Error',
             description: error.message.includes('already registered')
-              ? 'This email is already registered. Please log in instead.'
+              ? (isRu ? 'Этот email уже зарегистрирован. Войдите в аккаунт.' : 'This email is already registered. Please log in instead.')
               : error.message,
             variant: 'destructive',
           });
@@ -152,8 +155,8 @@ export default function Auth() {
       }
     } catch (error) {
       toast({
-        title: 'Error',
-        description: 'An unexpected error occurred',
+        title: language === 'ru' ? 'Ошибка' : 'Error',
+        description: language === 'ru' ? 'Произошла непредвиденная ошибка' : 'An unexpected error occurred',
         variant: 'destructive',
       });
     } finally {
@@ -231,8 +234,8 @@ export default function Auth() {
                 </h1>
                 <p className="text-muted-foreground">
                   {isLogin 
-                    ? 'Enter your credentials to continue' 
-                    : 'Create an account to get started'}
+                    ? (language === 'ru' ? 'Введите данные для входа' : 'Enter your credentials to continue')
+                    : (language === 'ru' ? 'Создайте аккаунт для начала' : 'Create an account to get started')}
                 </p>
               </div>
 
@@ -280,7 +283,7 @@ export default function Auth() {
                         type="text"
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
-                        placeholder="John Doe"
+                        placeholder={language === 'ru' ? 'Иван Иванов' : 'John Doe'}
                         className={cn(
                           "w-full h-12 pl-10 pr-4 rounded-xl bg-secondary border transition-colors",
                           "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
@@ -416,7 +419,11 @@ export default function Auth() {
 
       {/* Footer */}
       <footer className="relative z-10 p-4 text-center text-sm text-muted-foreground">
-        <p>By continuing, you agree to our Terms of Service</p>
+        <p>
+          {language === 'ru' 
+            ? 'Продолжая, вы соглашаетесь с Условиями использования' 
+            : 'By continuing, you agree to our Terms of Service'}
+        </p>
       </footer>
     </div>
   );
