@@ -191,7 +191,6 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
             sizes="128px"
             className={cn("w-full h-full", !isAvailable && "grayscale")}
           />
-          />
           
           {/* Badges */}
           <div className="absolute top-2 left-2 flex flex-col gap-1">
