@@ -31,6 +31,9 @@ export function Footer() {
     { to: '/privacy', icon: Shield, label: language === 'ru' ? 'Конфиденциальность' : 'Privacy' },
     { to: '/cookies', icon: FileText, label: 'Cookie' },
     { to: '/refund-policy', icon: FileText, label: language === 'ru' ? 'Возврат' : 'Refunds' },
+    { to: '/ip-policy', icon: FileText, label: language === 'ru' ? 'ИС' : 'IP Policy' },
+    { to: '/partner-agreement', icon: Handshake, label: language === 'ru' ? 'Партнёрам' : 'Partners' },
+    { to: '/dispute-resolution', icon: Shield, label: language === 'ru' ? 'Споры' : 'Disputes' },
   ];
 
   return (

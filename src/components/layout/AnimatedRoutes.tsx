@@ -170,6 +170,9 @@ const CookiePolicyPage = lazy(() => import('@/pages/info/CookiePolicyPage'));
 const RefundPolicyPage = lazy(() => import('@/pages/info/RefundPolicyPage'));
 const ContactPage = lazy(() => import('@/pages/info/ContactPage'));
 const GTrustPage = lazy(() => import('@/pages/info/GTrustPage'));
+const IPPolicyPage = lazy(() => import('@/pages/info/IPPolicyPage'));
+const PartnerAgreementPage = lazy(() => import('@/pages/info/PartnerAgreementPage'));
+const DisputeResolutionPage = lazy(() => import('@/pages/info/DisputeResolutionPage'));
 
 // Admin pages
 const PartnerApplicationsAdmin = lazy(() => import('@/pages/admin/PartnerApplicationsAdmin'));
@@ -492,6 +495,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/refund-policy" element={<LazyPage><RefundPolicyPage /></LazyPage>} />
         <Route path="/contact" element={<LazyPage><ContactPage /></LazyPage>} />
         <Route path="/g-trust" element={<LazyPage><GTrustPage /></LazyPage>} />
+        <Route path="/ip-policy" element={<LazyPage><IPPolicyPage /></LazyPage>} />
+        <Route path="/partner-agreement" element={<LazyPage><PartnerAgreementPage /></LazyPage>} />
+        <Route path="/dispute-resolution" element={<LazyPage><DisputeResolutionPage /></LazyPage>} />
         <Route path="/view-history" element={<LazyPage><ViewHistory /></LazyPage>} />
         
         {/* Admin Routes - Protected */}
