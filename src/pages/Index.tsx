@@ -160,10 +160,10 @@ const Index = () => {
       <QuickListingFAB />
 
       <PullToRefresh onRefresh={handleRefresh} className="min-h-[calc(100vh-8rem)]">
-        <div className="px-4 py-6 pb-24" key={refreshKey}>
+        <div className="px-4 py-5 pb-24 space-y-6" key={refreshKey}>
           
           {/* ===== GROUP 1: Hero & Search ===== */}
-          <div className="space-y-4 mb-8">
+          <div className="space-y-3">
             {/* Hero Section - myUNO Logo */}
             <motion.button
               onClick={(e) => {
@@ -215,16 +215,16 @@ const Index = () => {
           </div>
 
           {/* ===== GROUP 2: Smart Widget & Quick Actions ===== */}
-          <div className="space-y-4 mb-8">
+          <div className="space-y-3">
             <SmartWidget />
             <QuickActionsGrid />
           </div>
 
           {/* Visual Divider */}
-          <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent mb-8" />
+          <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
           {/* ===== GROUP 3: Promotions & Owner CTA ===== */}
-          <div className="space-y-4 mb-8">
+          <div className="space-y-3">
             <PromoBanner />
 
             {/* Property Owner CTA */}
@@ -238,28 +238,28 @@ const Index = () => {
               }}
               onMouseEnter={prefetchOwnerData}
               onTouchStart={prefetchOwnerData}
-              className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 p-5 shadow-lg shadow-teal-500/20 hover:shadow-teal-500/30 transition-all group text-left active:scale-95"
+              className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 p-4 shadow-lg shadow-teal-500/20 hover:shadow-teal-500/30 transition-all group text-left active:scale-95"
               aria-label={t('home.listProperty')}
             >
               <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOCAxOC04LjA1OSAxOC0xOC04LjA1OS0xOC0xOC0xOHptMCAzMmMtNy43MzIgMC0xNC02LjI2OC0xNC0xNHM2LjI2OC0xNCAxNC0xNCAxNCA2LjI2OCAxNCAxNC02LjI2OCAxNC0xNCAxNHoiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iLjA1Ii8+PC9nPjwvc3ZnPg==')] opacity-30 pointer-events-none" aria-hidden="true" />
-              <div className="relative flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                  <Building2 className="w-7 h-7 text-white" aria-hidden="true" />
+              <div className="relative flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                  <Building2 className="w-6 h-6 text-white" aria-hidden="true" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-2 mb-0.5">
                     <span className="text-[10px] font-semibold uppercase tracking-wider text-white/80 bg-white/20 px-2 py-0.5 rounded-full">
                       {t('home.forOwners')}
                     </span>
                   </div>
-                  <h3 className="font-bold text-white text-lg leading-tight">
+                  <h3 className="font-bold text-white text-base leading-tight">
                     {t('home.listProperty')}
                   </h3>
                   <p className="text-xs text-white/80 line-clamp-1">
                     {t('home.listPropertyDesc')}
                   </p>
                 </div>
-                <ArrowRight className="w-6 h-6 text-white flex-shrink-0 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
+                <ArrowRight className="w-5 h-5 text-white flex-shrink-0 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
               </div>
             </button>
 
@@ -272,38 +272,38 @@ const Index = () => {
                 if (settings.soundEnabled) playSound('click');
                 navigate('/provider/onboarding');
               }}
-              className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 p-5 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 transition-all group text-left active:scale-95"
+              className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 p-4 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 transition-all group text-left active:scale-95"
               aria-label={t('home.quickListing')}
             >
               <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOCAxOC04LjA1OSAxOC0xOC04LjA1OS0xOC0xOC0xOHptMCAzMmMtNy43MzIgMC0xNC02LjI2OC0xNC0xNHM2LjI2OC0xNCAxNC0xNCAxNCA2LjI2OCAxNCAxNC02LjI2OCAxNC0xNCAxNHoiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iLjA1Ii8+PC9nPjwvc3ZnPg==')] opacity-30 pointer-events-none" aria-hidden="true" />
-              <div className="relative flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                  <Sparkles className="w-7 h-7 text-white" aria-hidden="true" />
+              <div className="relative flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                  <Sparkles className="w-6 h-6 text-white" aria-hidden="true" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-2 mb-0.5">
                     <span className="text-[10px] font-semibold uppercase tracking-wider text-white/80 bg-white/20 px-2 py-0.5 rounded-full">
                       {t('home.quickListingBadge')}
                     </span>
                   </div>
-                  <h3 className="font-bold text-white text-lg leading-tight">
+                  <h3 className="font-bold text-white text-base leading-tight">
                     {t('home.quickListingTitle')}
                   </h3>
                   <p className="text-xs text-white/80 line-clamp-1">
                     {t('home.quickListingDesc')}
                   </p>
                 </div>
-                <ArrowRight className="w-6 h-6 text-white flex-shrink-0 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
+                <ArrowRight className="w-5 h-5 text-white flex-shrink-0 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
               </div>
             </button>
           </div>
 
           {/* Visual Divider */}
-          <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent mb-8" />
+          <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
           {/* ===== GROUP 4: All Services ===== */}
-          <div className="mb-8" data-tour="categories">
-            <div className="flex items-center justify-between mb-3">
+          <div data-tour="categories">
+            <div className="flex items-center justify-between mb-2">
               <h2 className="text-base font-semibold">{t('home.allServices')}</h2>
               <button 
                 onClick={(e) => {
@@ -337,7 +337,7 @@ const Index = () => {
                     aria-label={t(`category.${cat.id}`)}
                   >
                     <div className={cn(
-                      "w-11 h-11 rounded-xl flex items-center justify-center mb-1.5 bg-gradient-to-br",
+                      "w-10 h-10 rounded-xl flex items-center justify-center mb-1 bg-gradient-to-br",
                       cat.color,
                       "group-hover:scale-110 transition-transform"
                     )}>
@@ -353,10 +353,10 @@ const Index = () => {
           </div>
 
           {/* Visual Divider */}
-          <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent mb-8" />
+          <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
           {/* ===== GROUP 5: Recommendations ===== */}
-          <div className="space-y-6">
+          <div className="space-y-5">
             {/* Recommended Carousel */}
             <div data-tour="recommended">
               <RecommendedCarousel />
@@ -369,7 +369,7 @@ const Index = () => {
             <ForYouSection />
 
             {/* Trust Footer */}
-            <div className="flex items-center justify-center gap-6 py-4 border-t border-border/50">
+            <div className="flex items-center justify-center gap-6 py-3 border-t border-border/50">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Shield className="w-4 h-4 text-primary" aria-hidden="true" />
                 <span>{t('home.verifiedPartners')}</span>
