@@ -14,7 +14,7 @@ import {
   CheckCircle, Clock, AlertTriangle, ArrowRight, 
   Key, Camera, Wrench, FileText, Users, Sparkles,
   ShoppingCart, TrendingUp, TrendingDown, CalendarDays,
-  LogIn, LogOut, Brush, Package
+  LogIn, LogOut, Brush, Package, Link2
 } from 'lucide-react';
 import { FullManagementCard } from '@/components/owner/FullManagementCard';
 import { format, isToday, isTomorrow, addDays, differenceInDays, startOfMonth, endOfMonth } from 'date-fns';
@@ -240,14 +240,24 @@ export default function OwnerDashboard() {
             <Users className="h-4 w-4" />
             {isRu ? 'Бронирования' : 'Bookings'}
           </CardTitle>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => navigate('/owner/calendar')}
-          >
-            <Calendar className="h-4 w-4 mr-1" />
-            {isRu ? 'Календарь' : 'Calendar'}
-          </Button>
+          <div className="flex gap-1">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => navigate('/owner/channels')}
+            >
+              <Link2 className="h-4 w-4 mr-1" />
+              {isRu ? 'Каналы' : 'Channels'}
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => navigate('/owner/calendar')}
+            >
+              <Calendar className="h-4 w-4 mr-1" />
+              {isRu ? 'Календарь' : 'Calendar'}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="pt-0">
           {/* Active (current guests) - from canonical orders */}
