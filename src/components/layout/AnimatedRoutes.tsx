@@ -150,6 +150,7 @@ const Wallet = lazy(() => import('@/pages/Wallet'));
 const SOS = lazy(() => import('@/pages/SOS'));
 const VipConcierge = lazy(() => import('@/pages/VipConcierge'));
 const Support = lazy(() => import('@/pages/Support'));
+const OrderTracking = lazy(() => import('@/pages/orders/OrderTracking'));
 
 // Info pages
 const AboutPage = lazy(() => import('@/pages/info/AboutPage'));
@@ -315,6 +316,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/map" element={<LazyPage><MapView /></LazyPage>} />
         <Route path="/bookings" element={<LazyPage><Bookings /></LazyPage>} />
         <Route path="/bookings/:id" element={<LazyPage><BookingDetail /></LazyPage>} />
+        <Route path="/orders/:id/tracking" element={<LazyPage><OrderTracking /></LazyPage>} />
         <Route path="/profile" element={<LazyPage><Profile /></LazyPage>} />
         <Route path="/profile/edit" element={<LazyPage><EditProfile /></LazyPage>} />
         <Route path="/favorites" element={<LazyPage><Favorites /></LazyPage>} />
