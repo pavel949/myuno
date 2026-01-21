@@ -89,6 +89,10 @@ const translations: Record<Language, Record<string, string>> = {
     'home.allServices': 'Все сервисы',
     'home.verifiedPartners': 'Проверенные партнёры',
     'home.realReviews': 'Реальные отзывы',
+    'home.quickListing': 'Разместить объявление',
+    'home.quickListingTitle': 'Предложите свою услугу',
+    'home.quickListingDesc': 'Разместите объявление за 2 минуты — бесплатно!',
+    'home.quickListingBadge': 'Быстрое размещение',
     
     // Tours
     'tours.title': 'Экскурсии и туры',
@@ -410,6 +414,10 @@ const translations: Record<Language, Record<string, string>> = {
     'home.allServices': 'All Services',
     'home.verifiedPartners': 'Verified partners',
     'home.realReviews': 'Real reviews',
+    'home.quickListing': 'List Now',
+    'home.quickListingTitle': 'Offer Your Service',
+    'home.quickListingDesc': 'List in 2 minutes — free!',
+    'home.quickListingBadge': 'Quick Listing',
     
     // Tours
     'tours.title': 'Tours & Excursions',

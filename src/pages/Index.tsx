@@ -262,6 +262,40 @@ const Index = () => {
                 <ArrowRight className="w-6 h-6 text-white flex-shrink-0 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
               </div>
             </button>
+
+            {/* Quick Listing CTA */}
+            <button 
+              onClick={(e) => {
+                triggerRipple(e);
+                const settings = getFeedbackSettings();
+                if (settings.hapticEnabled) triggerHaptic('light');
+                if (settings.soundEnabled) playSound('click');
+                window.dispatchEvent(new CustomEvent('open-quick-listing'));
+              }}
+              className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 p-5 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 transition-all group text-left active:scale-95"
+              aria-label={t('home.quickListing')}
+            >
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOCAxOC04LjA1OSAxOC0xOC04LjA1OS0xOC0xOC0xOHptMCAzMmMtNy43MzIgMC0xNC02LjI2OC0xNC0xNHM2LjI2OC0xNCAxNC0xNCAxNCA2LjI2OCAxNCAxNC02LjI2OCAxNC0xNCAxNHoiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iLjA1Ii8+PC9nPjwvc3ZnPg==')] opacity-30 pointer-events-none" aria-hidden="true" />
+              <div className="relative flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                  <Sparkles className="w-7 h-7 text-white" aria-hidden="true" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-white/80 bg-white/20 px-2 py-0.5 rounded-full">
+                      {t('home.quickListingBadge')}
+                    </span>
+                  </div>
+                  <h3 className="font-bold text-white text-lg leading-tight">
+                    {t('home.quickListingTitle')}
+                  </h3>
+                  <p className="text-xs text-white/80 line-clamp-1">
+                    {t('home.quickListingDesc')}
+                  </p>
+                </div>
+                <ArrowRight className="w-6 h-6 text-white flex-shrink-0 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
+              </div>
+            </button>
           </div>
 
           {/* Visual Divider */}
