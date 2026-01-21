@@ -2676,6 +2676,191 @@ export type Database = {
           },
         ]
       }
+      marketplace_categories: {
+        Row: {
+          created_at: string | null
+          description_en: string | null
+          description_ru: string | null
+          gradient: string | null
+          icon: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          name_en: string
+          name_ru: string
+          slug: string
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          gradient?: string | null
+          icon?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name_en: string
+          name_ru: string
+          slug: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          gradient?: string | null
+          icon?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name_en?: string
+          name_ru?: string
+          slug?: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      marketplace_delivery_settings: {
+        Row: {
+          base_fee: number
+          created_at: string | null
+          estimated_time_minutes: number | null
+          free_delivery_threshold: number | null
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          min_order_amount: number | null
+          updated_at: string | null
+          zone_name_en: string
+          zone_name_ru: string
+        }
+        Insert: {
+          base_fee?: number
+          created_at?: string | null
+          estimated_time_minutes?: number | null
+          free_delivery_threshold?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          min_order_amount?: number | null
+          updated_at?: string | null
+          zone_name_en: string
+          zone_name_ru: string
+        }
+        Update: {
+          base_fee?: number
+          created_at?: string | null
+          estimated_time_minutes?: number | null
+          free_delivery_threshold?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          min_order_amount?: number | null
+          updated_at?: string | null
+          zone_name_en?: string
+          zone_name_ru?: string
+        }
+        Relationships: []
+      }
+      marketplace_products: {
+        Row: {
+          category_slug: string
+          cover_image: string | null
+          created_at: string | null
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          id: string
+          images: string[] | null
+          in_stock: boolean | null
+          is_active: boolean | null
+          is_new: boolean | null
+          is_popular: boolean | null
+          name_en: string
+          name_ru: string
+          original_price: number | null
+          price: number
+          rating: number | null
+          review_count: number | null
+          sort_order: number | null
+          subcategory: string | null
+          tags: string[] | null
+          unit: string | null
+          unit_ru: string | null
+          updated_at: string | null
+          vendor_name: string | null
+          vendor_name_ru: string | null
+        }
+        Insert: {
+          category_slug: string
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          id?: string
+          images?: string[] | null
+          in_stock?: boolean | null
+          is_active?: boolean | null
+          is_new?: boolean | null
+          is_popular?: boolean | null
+          name_en: string
+          name_ru: string
+          original_price?: number | null
+          price: number
+          rating?: number | null
+          review_count?: number | null
+          sort_order?: number | null
+          subcategory?: string | null
+          tags?: string[] | null
+          unit?: string | null
+          unit_ru?: string | null
+          updated_at?: string | null
+          vendor_name?: string | null
+          vendor_name_ru?: string | null
+        }
+        Update: {
+          category_slug?: string
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          id?: string
+          images?: string[] | null
+          in_stock?: boolean | null
+          is_active?: boolean | null
+          is_new?: boolean | null
+          is_popular?: boolean | null
+          name_en?: string
+          name_ru?: string
+          original_price?: number | null
+          price?: number
+          rating?: number | null
+          review_count?: number | null
+          sort_order?: number | null
+          subcategory?: string | null
+          tags?: string[] | null
+          unit?: string | null
+          unit_ru?: string | null
+          updated_at?: string | null
+          vendor_name?: string | null
+          vendor_name_ru?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_products_category_slug_fkey"
+            columns: ["category_slug"]
+            isOneToOne: false
+            referencedRelation: "marketplace_categories"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
       medical_services: {
         Row: {
           category: string
