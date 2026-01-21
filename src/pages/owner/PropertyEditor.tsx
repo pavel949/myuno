@@ -24,11 +24,12 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Home, MapPin, Bed, Bath, SquareStack, Upload, Loader2, DollarSign, Clock, Users,
   Zap, Droplets, Sparkles, Car, PawPrint, Baby, Volume2, PartyPopper, Key, FileText,
-  Settings, Calendar, Eye
+  Settings, Calendar, Eye, UsersRound
 } from 'lucide-react';
 import { ImageUpload } from '@/components/upload/ImageUpload';
 import { ProjectLocationPicker } from '@/components/property/ProjectLocationPicker';
 import { useToast } from '@/hooks/use-toast';
+import { PropertyTeamTab } from '@/components/owner/PropertyTeamTab';
 
 // Extended wizard steps
 const editorSteps = [
@@ -40,6 +41,7 @@ const editorSteps = [
   { id: 'calendar', title: 'Calendar', titleRu: 'Календарь', icon: <Calendar className="h-4 w-4" /> },
   { id: 'utilities', title: 'Utilities', titleRu: 'Услуги', icon: <Zap className="h-4 w-4" /> },
   { id: 'rules', title: 'Rules', titleRu: 'Правила', icon: <FileText className="h-4 w-4" /> },
+  { id: 'team', title: 'Team', titleRu: 'Команда', icon: <UsersRound className="h-4 w-4" /> },
 ];
 
 // Static data
@@ -1067,6 +1069,11 @@ export default function PropertyEditor() {
               </CardContent>
             </Card>
           </div>
+        );
+
+      case 'team':
+        return (
+          <PropertyTeamTab propertyId={id || ''} />
         );
 
       default:

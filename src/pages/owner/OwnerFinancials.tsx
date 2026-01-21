@@ -59,7 +59,15 @@ export default function OwnerFinancials() {
 
   const [selectedProperty, setSelectedProperty] = useState<string>('all');
   const [activeTab, setActiveTab] = useState<'all' | 'income' | 'expense'>('all');
+  const [viewMode, setViewMode] = useState<'list' | 'charts'>('list');
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  
+  // Date filter state
+  const [datePreset, setDatePreset] = useState<DatePreset>('all_time');
+  const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
+    from: undefined,
+    to: undefined,
+  });
 
   const { data: properties } = useOwnerProperties();
   const { data: financials, isLoading } = usePropertyFinancialsFull(
@@ -70,10 +78,24 @@ export default function OwnerFinancials() {
   );
   const deleteFinancial = useDeleteFinancial();
 
-  const filteredFinancials = financials?.filter(f => {
-    if (activeTab === 'all') return true;
-    return f.transaction_type === activeTab;
-  });
+  // Filter financials by date range and type
+  const filteredFinancials = useMemo(() => {
+    if (!financials) return [];
+    
+    return financials.filter(f => {
+      // Filter by transaction type
+      if (activeTab !== 'all' && f.transaction_type !== activeTab) return false;
+      
+      // Filter by date range
+      if (dateRange.from || dateRange.to) {
+        const txDate = parseISO(f.transaction_date);
+        if (dateRange.from && txDate < dateRange.from) return false;
+        if (dateRange.to && txDate > dateRange.to) return false;
+      }
+      
+      return true;
+    });
+  }, [financials, activeTab, dateRange]);
 
   const getCategoryLabel = (category: string | undefined, type: string) => {
     if (!category) return isRu ? 'Без категории' : 'Uncategorized';
@@ -102,10 +124,10 @@ export default function OwnerFinancials() {
         subtitle={isRu ? 'Доходы и расходы по недвижимости' : 'Property income and expenses'}
       />
 
-      {/* Property Filter */}
-      <div className="mb-4">
+      {/* Filters Row */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <Select value={selectedProperty} onValueChange={setSelectedProperty}>
-          <SelectTrigger>
+          <SelectTrigger className="flex-1">
             <Building className="h-4 w-4 mr-2" />
             <SelectValue placeholder={isRu ? 'Все объекты' : 'All properties'} />
           </SelectTrigger>
@@ -118,6 +140,33 @@ export default function OwnerFinancials() {
             ))}
           </SelectContent>
         </Select>
+        
+        <FinancialDateFilter
+          dateRange={dateRange}
+          onDateRangeChange={setDateRange}
+          preset={datePreset}
+          onPresetChange={setDatePreset}
+        />
+      </div>
+
+      {/* View Toggle */}
+      <div className="flex gap-2 mb-4">
+        <Button
+          variant={viewMode === 'list' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setViewMode('list')}
+        >
+          <Receipt className="h-4 w-4 mr-2" />
+          {isRu ? 'Список' : 'List'}
+        </Button>
+        <Button
+          variant={viewMode === 'charts' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setViewMode('charts')}
+        >
+          <BarChart3 className="h-4 w-4 mr-2" />
+          {isRu ? 'Графики' : 'Charts'}
+        </Button>
       </div>
 
       {/* Stats Cards */}
@@ -195,50 +244,57 @@ export default function OwnerFinancials() {
         {isRu ? 'Добавить транзакцию' : 'Add Transaction'}
       </Button>
 
-      {/* Transactions List */}
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
-        <TabsList className="w-full mb-4">
-          <TabsTrigger value="all" className="flex-1">
-            {isRu ? 'Все' : 'All'}
-          </TabsTrigger>
-          <TabsTrigger value="income" className="flex-1">
-            <ArrowUpCircle className="h-4 w-4 mr-1" />
-            {isRu ? 'Доходы' : 'Income'}
-          </TabsTrigger>
-          <TabsTrigger value="expense" className="flex-1">
-            <ArrowDownCircle className="h-4 w-4 mr-1" />
-            {isRu ? 'Расходы' : 'Expenses'}
-          </TabsTrigger>
-        </TabsList>
+      {/* Charts View */}
+      {viewMode === 'charts' && financials && (
+        <FinancialCharts financials={financials} dateRange={dateRange.from && dateRange.to ? { from: dateRange.from, to: dateRange.to } : undefined} />
+      )}
 
-        <TabsContent value={activeTab} className="space-y-3">
-          {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">
-              {isRu ? 'Загрузка...' : 'Loading...'}
-            </div>
-          ) : !filteredFinancials?.length ? (
-            <Card>
-              <CardContent className="py-8 text-center">
-                <Receipt className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground">
-                  {isRu ? 'Нет транзакций' : 'No transactions'}
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            filteredFinancials.map((item) => (
-              <TransactionCard 
-                key={item.id} 
-                item={item} 
-                isRu={isRu}
-                getCategoryLabel={getCategoryLabel}
-                onEdit={() => navigate(`/owner/financials/${item.id}`)}
-                onDelete={() => setDeleteId(item.id)}
-              />
-            ))
-          )}
-        </TabsContent>
-      </Tabs>
+      {/* Transactions List View */}
+      {viewMode === 'list' && (
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
+          <TabsList className="w-full mb-4">
+            <TabsTrigger value="all" className="flex-1">
+              {isRu ? 'Все' : 'All'}
+            </TabsTrigger>
+            <TabsTrigger value="income" className="flex-1">
+              <ArrowUpCircle className="h-4 w-4 mr-1" />
+              {isRu ? 'Доходы' : 'Income'}
+            </TabsTrigger>
+            <TabsTrigger value="expense" className="flex-1">
+              <ArrowDownCircle className="h-4 w-4 mr-1" />
+              {isRu ? 'Расходы' : 'Expenses'}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value={activeTab} className="space-y-3">
+            {isLoading ? (
+              <div className="text-center py-8 text-muted-foreground">
+                {isRu ? 'Загрузка...' : 'Loading...'}
+              </div>
+            ) : !filteredFinancials?.length ? (
+              <Card>
+                <CardContent className="py-8 text-center">
+                  <Receipt className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-muted-foreground">
+                    {isRu ? 'Нет транзакций' : 'No transactions'}
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              filteredFinancials.map((item) => (
+                <TransactionCard 
+                  key={item.id} 
+                  item={item} 
+                  isRu={isRu}
+                  getCategoryLabel={getCategoryLabel}
+                  onEdit={() => navigate(`/owner/financials/${item.id}`)}
+                  onDelete={() => setDeleteId(item.id)}
+                />
+              ))
+            )}
+          </TabsContent>
+        </Tabs>
+      )}
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
