@@ -7565,6 +7565,36 @@ export type Database = {
           },
         ]
       }
+      security_audit_log: {
+        Row: {
+          created_at: string
+          details: Json | null
+          event_type: string
+          id: string
+          ip_address: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       service_order_status_history: {
         Row: {
           changed_by: string | null
@@ -10226,6 +10256,16 @@ export type Database = {
       is_verified_purchase: {
         Args: { p_item_id: string; p_item_type: string; p_user_id: string }
         Returns: boolean
+      }
+      log_security_event: {
+        Args: {
+          p_details?: Json
+          p_event_type: string
+          p_ip_address?: string
+          p_user_agent?: string
+          p_user_id?: string
+        }
+        Returns: string
       }
       pay_from_wallet_atomic: {
         Args: {
