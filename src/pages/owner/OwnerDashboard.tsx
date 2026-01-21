@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { usePropertyCareStats, useOwnerProperties, useServiceRequests, usePropertyInspections } from '@/hooks/usePropertyCare';
 import { useOwnerOrders } from '@/hooks/useOwnerOrders';
+import { useOwnerChats } from '@/hooks/usePropertyChat';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,6 +32,7 @@ export default function OwnerDashboard() {
   const { data: properties } = useOwnerProperties();
   const { data: requests } = useServiceRequests();
   const { data: inspections } = usePropertyInspections();
+  const { totalUnread: totalUnreadMessages } = useOwnerChats();
   // Use canonical orders from the new unified order system
   const { 
     orders, 
@@ -446,13 +448,18 @@ export default function OwnerDashboard() {
         >
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-orange-500/20">
+              <div className="p-2 rounded-full bg-orange-500/20 relative">
                 <FileText className="h-5 w-5 text-orange-500" />
+                {totalUnreadMessages > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                    {totalUnreadMessages > 9 ? '9+' : totalUnreadMessages}
+                  </span>
+                )}
               </div>
               <div>
-                <p className="text-2xl font-bold">{stats?.pendingRequests || 0}</p>
+                <p className="text-2xl font-bold">{totalUnreadMessages}</p>
                 <p className="text-xs text-muted-foreground">
-                  {isRu ? 'Сообщений' : 'Messages'}
+                  {isRu ? 'Непрочитано' : 'Unread'}
                 </p>
               </div>
             </div>

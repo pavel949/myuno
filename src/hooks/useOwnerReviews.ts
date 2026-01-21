@@ -123,6 +123,29 @@ export function useOwnerReviews() {
 
   const respondToReview = useMutation({
     mutationFn: async ({ reviewId, response }: { reviewId: string; response: string }) => {
+      if (!user) throw new Error('Not authenticated');
+      
+      // Verify ownership: check that this review belongs to owner's property
+      const { data: properties } = await supabase
+        .from('owner_properties')
+        .select('id')
+        .eq('owner_id', user.id);
+      
+      const propertyIds = properties?.map(p => p.id) || [];
+      
+      // Check if review is for owner's property
+      const { data: review, error: reviewError } = await supabase
+        .from('reviews')
+        .select('item_id')
+        .eq('id', reviewId)
+        .eq('item_type', 'property')
+        .single();
+      
+      if (reviewError || !review) throw new Error('Review not found');
+      if (!propertyIds.includes(review.item_id)) {
+        throw new Error('Unauthorized: You can only respond to reviews on your properties');
+      }
+      
       const { data, error } = await supabase
         .from('reviews')
         .update({
@@ -148,6 +171,28 @@ export function useOwnerReviews() {
 
   const deleteResponse = useMutation({
     mutationFn: async (reviewId: string) => {
+      if (!user) throw new Error('Not authenticated');
+      
+      // Verify ownership before deleting response
+      const { data: properties } = await supabase
+        .from('owner_properties')
+        .select('id')
+        .eq('owner_id', user.id);
+      
+      const propertyIds = properties?.map(p => p.id) || [];
+      
+      const { data: review, error: reviewError } = await supabase
+        .from('reviews')
+        .select('item_id')
+        .eq('id', reviewId)
+        .eq('item_type', 'property')
+        .single();
+      
+      if (reviewError || !review) throw new Error('Review not found');
+      if (!propertyIds.includes(review.item_id)) {
+        throw new Error('Unauthorized');
+      }
+      
       const { error } = await supabase
         .from('reviews')
         .update({
