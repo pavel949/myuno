@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { useExternalCalendars, useICalExportUrl } from '@/hooks/useExternalCalendars';
 import { useOwnerProperties } from '@/hooks/usePropertyCare';
 import { usePropertyBookings } from '@/hooks/usePropertyBookings';
+import { ChannelManagementCTA } from '@/components/owner/ChannelManagementCTA';
 import { 
   RefreshCw, 
   Plus, 
@@ -214,6 +215,9 @@ export default function ChannelManager() {
             </ul>
           </CardContent>
         </Card>
+
+        {/* Channel Management CTA */}
+        <ChannelManagementCTA />
 
         {/* Connected Channels */}
         <div>

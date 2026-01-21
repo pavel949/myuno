@@ -8,7 +8,8 @@ export type ConsultationRequestType =
   | 'property_consultation'
   | 'property_tour'
   | 'full_management'
-  | 'investment_advice';
+  | 'investment_advice'
+  | 'channel_management';
 
 export type ConsultationStatus = 
   | 'pending'
@@ -220,6 +221,22 @@ export function useConsultationRequests() {
     },
   });
 
+  // Request channel management
+  const requestChannelManagement = useMutation({
+    mutationFn: async (input: Omit<CreateConsultationInput, 'request_type'>) => {
+      return createConsultation.mutateAsync({
+        ...input,
+        request_type: 'channel_management',
+      });
+    },
+    onSuccess: () => {
+      toast.success('Заявка на управление каналами отправлена! Мы свяжемся с вами.');
+    },
+    onError: () => {
+      toast.error('Ошибка при отправке заявки.');
+    },
+  });
+
   return {
     requests,
     isLoading,
@@ -229,5 +246,6 @@ export function useConsultationRequests() {
     requestFullManagement,
     requestInvestmentAdvice,
     requestVacationRental,
+    requestChannelManagement,
   };
 }
