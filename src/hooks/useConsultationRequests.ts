@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 export type ConsultationRequestType = 
+  | 'vacation_rental'
   | 'property_consultation'
   | 'property_tour'
   | 'full_management'
@@ -76,12 +77,14 @@ export interface CreateConsultationInput {
   bedrooms_min?: number;
   bedrooms_max?: number;
   purpose?: string;
-  preferred_dates?: { date: string; time: string }[];
+  preferred_dates?: { date: string; time: string }[] | { check_in: string; check_out: string };
   property_ids?: string[];
   owner_property_id?: string;
   services_requested?: string[];
   current_occupancy?: string;
   notes?: string;
+  guests_count?: number;
+  children_count?: number;
 }
 
 export function useConsultationRequests() {
@@ -190,6 +193,22 @@ export function useConsultationRequests() {
     },
   });
 
+  // Request vacation rental
+  const requestVacationRental = useMutation({
+    mutationFn: async (input: Omit<CreateConsultationInput, 'request_type'>) => {
+      return createConsultation.mutateAsync({
+        ...input,
+        request_type: 'vacation_rental',
+      });
+    },
+    onSuccess: () => {
+      toast.success('Заявка на аренду отправлена! Мы подберём лучшие варианты.');
+    },
+    onError: () => {
+      toast.error('Ошибка при отправке заявки.');
+    },
+  });
+
   return {
     requests,
     isLoading,
@@ -198,5 +217,6 @@ export function useConsultationRequests() {
     requestPropertyTour,
     requestFullManagement,
     requestInvestmentAdvice,
+    requestVacationRental,
   };
 }

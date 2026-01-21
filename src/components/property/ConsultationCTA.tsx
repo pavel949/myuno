@@ -7,13 +7,48 @@ import { cn } from '@/lib/utils';
 
 interface ConsultationCTAProps {
   variant?: 'banner' | 'compact' | 'sticky';
+  context?: 'rental' | 'purchase' | 'general';
   className?: string;
 }
 
-export function ConsultationCTA({ variant = 'banner', className }: ConsultationCTAProps) {
+export function ConsultationCTA({ variant = 'banner', context = 'general', className }: ConsultationCTAProps) {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const isRu = language === 'ru';
+
+  // Context-aware text
+  const getText = () => {
+    if (context === 'rental') {
+      return {
+        title: isRu ? 'Планируете отпуск?' : 'Planning a vacation?',
+        subtitle: isRu 
+          ? 'Оставьте заявку — подберём идеальную виллу или апартаменты' 
+          : "Leave a request — we'll find the perfect villa or apartment",
+        button: isRu ? 'Найти жильё' : 'Find Property',
+        compactButton: isRu ? 'Заявка на аренду' : 'Rental Request',
+      };
+    }
+    if (context === 'purchase') {
+      return {
+        title: isRu ? 'Хотите купить недвижимость?' : 'Want to buy property?',
+        subtitle: isRu 
+          ? 'Наш эксперт подберёт лучшие варианты под ваш бюджет' 
+          : "Our expert will find the best options for your budget",
+        button: isRu ? 'Консультация' : 'Consultation',
+        compactButton: isRu ? 'Запросить подбор' : 'Request Consultation',
+      };
+    }
+    return {
+      title: isRu ? 'Не нашли подходящий?' : "Can't find the right one?",
+      subtitle: isRu 
+        ? 'Наш эксперт подберёт идеальный вариант для вас' 
+        : 'Our expert will find the perfect option for you',
+      button: isRu ? 'Заявка' : 'Request',
+      compactButton: isRu ? 'Запросить подбор' : 'Request Consultation',
+    };
+  };
+
+  const text = getText();
 
   if (variant === 'compact') {
     return (
@@ -21,10 +56,10 @@ export function ConsultationCTA({ variant = 'banner', className }: ConsultationC
         variant="outline" 
         onClick={() => navigate('/property/consultation')}
         className={cn("w-full", className)}
-        aria-label={isRu ? 'Запросить консультацию по подбору недвижимости' : 'Request property consultation'}
+        aria-label={text.compactButton}
       >
         <MessageCircle className="w-4 h-4 mr-2" />
-        {isRu ? 'Запросить подбор' : 'Request Consultation'}
+        {text.compactButton}
       </Button>
     );
   }
@@ -50,12 +85,10 @@ export function ConsultationCTA({ variant = 'banner', className }: ConsultationC
           
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-sm mb-0.5">
-              {isRu ? 'Не нашли подходящий?' : "Can't find the right one?"}
+              {text.title}
             </h3>
             <p className="text-xs text-muted-foreground">
-              {isRu 
-                ? 'Наш эксперт подберёт идеальный вариант для вас' 
-                : 'Our expert will find the perfect option for you'}
+              {text.subtitle}
             </p>
           </div>
           
@@ -63,12 +96,12 @@ export function ConsultationCTA({ variant = 'banner', className }: ConsultationC
             size="sm"
             onClick={() => navigate('/property/consultation')}
             className="flex-shrink-0 relative overflow-hidden group"
-            aria-label={isRu ? 'Оставить заявку на подбор недвижимости' : 'Submit property search request'}
+            aria-label={text.button}
           >
             {/* Pulse animation ring */}
             <span className="absolute inset-0 rounded-md animate-ping bg-primary/30 opacity-75" style={{ animationDuration: '2s' }} />
             <span className="relative flex items-center">
-              {isRu ? 'Заявка' : 'Request'}
+              {text.button}
               <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-0.5 transition-transform" />
             </span>
           </Button>
