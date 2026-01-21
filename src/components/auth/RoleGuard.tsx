@@ -101,6 +101,17 @@ export function OwnerGuard({ children }: { children: React.ReactNode }) {
 }
 
 /**
+ * UNO Team route guard - requires uno_team or admin role
+ */
+export function TeamGuard({ children }: { children: React.ReactNode }) {
+  return (
+    <RoleGuard allowedRoles={['uno_team', 'admin']} fallbackPath="/">
+      {children}
+    </RoleGuard>
+  );
+}
+
+/**
  * Auth guard - just requires authentication, no specific role
  */
 export function AuthGuard({ children }: { children: React.ReactNode }) {

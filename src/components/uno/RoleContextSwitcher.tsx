@@ -64,6 +64,13 @@ const ROLE_CONFIG: Record<AppRole, {
     color: 'bg-orange-500',
     path: '/admin',
   },
+  uno_team: {
+    labelEn: 'UNO Team',
+    labelRu: 'Команда UNO',
+    icon: UserCog,
+    color: 'bg-emerald-500',
+    path: '/team',
+  },
 };
 
 interface RoleContextSwitcherProps {

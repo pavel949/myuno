@@ -1041,14 +1041,19 @@ export type Database = {
           budget_max: number | null
           budget_min: number | null
           children_count: number | null
+          contact_attempts: number | null
+          conversion_order_id: string | null
           created_at: string
           currency: string | null
           current_occupancy: string | null
           districts: string[] | null
           email: string | null
+          first_contact_at: string | null
           follow_up_date: string | null
           guests_count: number | null
           id: string
+          last_contact_at: string | null
+          lead_source: string | null
           name: string
           notes: string | null
           outcome: string | null
@@ -1063,6 +1068,7 @@ export type Database = {
           purpose: string | null
           request_type: string
           services_requested: string[] | null
+          sla_deadline: string | null
           status: string | null
           updated_at: string
           user_id: string | null
@@ -1075,14 +1081,19 @@ export type Database = {
           budget_max?: number | null
           budget_min?: number | null
           children_count?: number | null
+          contact_attempts?: number | null
+          conversion_order_id?: string | null
           created_at?: string
           currency?: string | null
           current_occupancy?: string | null
           districts?: string[] | null
           email?: string | null
+          first_contact_at?: string | null
           follow_up_date?: string | null
           guests_count?: number | null
           id?: string
+          last_contact_at?: string | null
+          lead_source?: string | null
           name: string
           notes?: string | null
           outcome?: string | null
@@ -1097,6 +1108,7 @@ export type Database = {
           purpose?: string | null
           request_type: string
           services_requested?: string[] | null
+          sla_deadline?: string | null
           status?: string | null
           updated_at?: string
           user_id?: string | null
@@ -1109,14 +1121,19 @@ export type Database = {
           budget_max?: number | null
           budget_min?: number | null
           children_count?: number | null
+          contact_attempts?: number | null
+          conversion_order_id?: string | null
           created_at?: string
           currency?: string | null
           current_occupancy?: string | null
           districts?: string[] | null
           email?: string | null
+          first_contact_at?: string | null
           follow_up_date?: string | null
           guests_count?: number | null
           id?: string
+          last_contact_at?: string | null
+          lead_source?: string | null
           name?: string
           notes?: string | null
           outcome?: string | null
@@ -1131,11 +1148,20 @@ export type Database = {
           purpose?: string | null
           request_type?: string
           services_requested?: string[] | null
+          sla_deadline?: string | null
           status?: string | null
           updated_at?: string
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "consultation_requests_conversion_order_id_fkey"
+            columns: ["conversion_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cross_sell_metrics: {
         Row: {
@@ -8506,6 +8532,10 @@ export type Database = {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
         Returns: number
       }
+      calculate_sla_deadline: {
+        Args: { created_at: string; request_type: string }
+        Returns: string
+      }
       check_availability: {
         Args: {
           p_end_datetime?: string
@@ -8693,6 +8723,7 @@ export type Database = {
         | "ombudsman"
         | "vendor"
         | "property_owner"
+        | "uno_team"
       booking_status:
         | "draft"
         | "submitted"
@@ -8881,6 +8912,7 @@ export const Constants = {
         "ombudsman",
         "vendor",
         "property_owner",
+        "uno_team",
       ],
       booking_status: [
         "draft",
