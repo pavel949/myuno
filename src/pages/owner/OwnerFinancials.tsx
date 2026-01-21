@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -36,11 +36,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { 
-  DollarSign, TrendingUp, TrendingDown, Plus, Filter,
+  DollarSign, TrendingUp, TrendingDown, Plus,
   ArrowUpCircle, ArrowDownCircle, Receipt, Calendar,
-  MoreVertical, Trash2, Edit, Building
+  MoreVertical, Trash2, Edit, Building, BarChart3
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import {
   DropdownMenu,
@@ -48,6 +48,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { FinancialDateFilter, DatePreset } from '@/components/owner/FinancialDateFilter';
+import { FinancialCharts } from '@/components/owner/FinancialCharts';
 
 export default function OwnerFinancials() {
   const { language } = useLanguage();
