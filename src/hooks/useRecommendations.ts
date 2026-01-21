@@ -40,15 +40,15 @@ export function useRecommendations() {
         viewedTypes = [...new Set((historyData || []).map(h => h.item_type))];
       }
 
-      // Fetch popular tours
+      // Fetch popular tours - increase limit to ensure we have data
       const { data: tours } = await supabase
         .from('tours')
         .select('id, title_en, title_ru, cover_image, rating, price')
         .eq('is_active', true)
         .order('rating', { ascending: false })
-        .limit(5);
+        .limit(8);
 
-      if (tours) {
+      if (tours && tours.length > 0) {
         tours.forEach(tour => {
           items.push({
             id: tour.id,
@@ -63,15 +63,15 @@ export function useRecommendations() {
         });
       }
 
-      // Fetch popular properties
+      // Fetch popular properties - increase limit
       const { data: properties } = await supabase
         .from('properties')
         .select('id, title_en, title_ru, cover_image, rating, price, district')
         .eq('is_active', true)
         .order('rating', { ascending: false })
-        .limit(5);
+        .limit(8);
 
-      if (properties) {
+      if (properties && properties.length > 0) {
         properties.forEach(prop => {
           items.push({
             id: prop.id,
@@ -87,15 +87,15 @@ export function useRecommendations() {
         });
       }
 
-      // Fetch popular events
+      // Fetch popular events - increase limit
       const { data: events } = await supabase
         .from('events')
         .select('id, title_en, title_ru, cover_image, rating, price, location_name')
         .eq('is_active', true)
         .order('rating', { ascending: false })
-        .limit(5);
+        .limit(8);
 
-      if (events) {
+      if (events && events.length > 0) {
         events.forEach(event => {
           items.push({
             id: event.id,
@@ -111,15 +111,15 @@ export function useRecommendations() {
         });
       }
 
-      // Fetch water activities
+      // Fetch water activities - increase limit
       const { data: waterActivities } = await supabase
         .from('water_activities')
         .select('id, title_en, title_ru, cover_image, rating, price, location_name')
         .eq('is_active', true)
         .order('rating', { ascending: false })
-        .limit(5);
+        .limit(8);
 
-      if (waterActivities) {
+      if (waterActivities && waterActivities.length > 0) {
         waterActivities.forEach(activity => {
           items.push({
             id: activity.id,
@@ -142,7 +142,10 @@ export function useRecommendations() {
       // Shuffle other items
       const shuffled = [...historyItems, ...otherItems.sort(() => Math.random() - 0.5)];
       
+      // Always show at least some items (up to 12)
       setRecommendations(shuffled.slice(0, 12));
+      
+      // If still empty, we'll let the component handle the fallback UI
     } catch (error) {
       console.error('Error fetching recommendations:', error);
     } finally {
