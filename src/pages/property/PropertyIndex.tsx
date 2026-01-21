@@ -15,6 +15,8 @@ import { BackButton } from '@/components/uno/BackButton';
 import { AirbnbSearchBar, SearchParams } from '@/components/property/AirbnbSearchBar';
 import { cn } from '@/lib/utils';
 import { ConsultationCTA } from '@/components/property/ConsultationCTA';
+import { PopularFiltersCards } from '@/components/property/PopularFiltersCards';
+import { matchesFilter, matchesSingleFilter } from '@/lib/filterUtils';
 
 // Demo properties as fallback when DB is empty
 const demoProperties = [
@@ -189,11 +191,35 @@ export default function PropertyIndex() {
       const matchesType = selectedType === 'all' || prop.property_type === selectedType;
       const matchesGuests = !searchParams.guests || (prop.max_guests || 0) >= searchParams.guests;
       
+      // Bedroom filter - now supports multi-select
       if (filterValues.bedrooms) {
-        const bedroomFilter = filterValues.bedrooms as string;
-        if (bedroomFilter === 'studio' && prop.bedrooms !== 0) return false;
-        if (bedroomFilter === '4+' && (prop.bedrooms || 0) < 4) return false;
-        if (bedroomFilter !== '4+' && bedroomFilter !== 'studio' && prop.bedrooms !== parseInt(bedroomFilter)) return false;
+        const bedroomFilters = Array.isArray(filterValues.bedrooms) 
+          ? filterValues.bedrooms as string[]
+          : [filterValues.bedrooms as string];
+        
+        const propBedrooms = prop.bedrooms ?? 0;
+        const matchesBedrooms = bedroomFilters.some(filter => {
+          if (filter === 'studio') return propBedrooms === 0;
+          if (filter === '4+') return propBedrooms >= 4;
+          return propBedrooms === parseInt(filter);
+        });
+        if (!matchesBedrooms) return false;
+      }
+
+      // District filter - multi-select
+      if (filterValues.district) {
+        const districtFilters = Array.isArray(filterValues.district)
+          ? filterValues.district as string[]
+          : [filterValues.district as string];
+        if (!matchesSingleFilter(prop.district, districtFilters)) return false;
+      }
+
+      // Amenities filter - multi-select (must have ALL selected)
+      if (filterValues.amenities) {
+        const amenityFilters = Array.isArray(filterValues.amenities)
+          ? filterValues.amenities as string[]
+          : [filterValues.amenities as string];
+        if (!matchesFilter(prop.amenities, amenityFilters)) return false;
       }
       
       return matchesLocation && matchesType && matchesGuests;
@@ -314,6 +340,16 @@ export default function PropertyIndex() {
         <div className="container max-w-7xl mx-auto px-4 py-2">
           <ConsultationCTA />
         </div>
+
+        {/* Popular Filter Cards */}
+        {activeFilterCount === 0 && (
+          <div className="container max-w-7xl mx-auto px-4 py-3">
+            <PopularFiltersCards 
+              values={filterValues}
+              onChange={setFilterValues}
+            />
+          </div>
+        )}
 
         {/* Results Count */}
         <div className="container max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
