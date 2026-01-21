@@ -1,7 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useViewHistory } from './useViewHistory';
 
 interface RecommendedItem {
   id: string;
@@ -15,24 +14,32 @@ interface RecommendedItem {
   reason: 'history' | 'popular' | 'similar' | 'new';
 }
 
+// Default fallback image for items without cover_image
+const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400';
+
 export function useRecommendations() {
   const { user } = useAuth();
-  const { history } = useViewHistory();
   const [recommendations, setRecommendations] = useState<RecommendedItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const hasFetchedRef = useRef(false);
-  const historyRef = useRef(history);
 
-  // Update ref when history changes
-  historyRef.current = history;
-
-  const fetchRecommendations = useCallback(async (isMounted?: () => boolean) => {
-    const checkMounted = isMounted || (() => true);
-    if (checkMounted()) setIsLoading(true);
+  const fetchRecommendations = useCallback(async () => {
+    setIsLoading(true);
     const items: RecommendedItem[] = [];
-    const viewedTypes = [...new Set(historyRef.current.slice(0, 10).map(h => h.item_type))];
 
     try {
+      // Fetch user's view history for personalization
+      let viewedTypes: string[] = [];
+      if (user) {
+        const { data: historyData } = await supabase
+          .from('view_history')
+          .select('item_type')
+          .eq('user_id', user.id)
+          .order('viewed_at', { ascending: false })
+          .limit(10);
+        
+        viewedTypes = [...new Set((historyData || []).map(h => h.item_type))];
+      }
+
       // Fetch popular tours
       const { data: tours } = await supabase
         .from('tours')
@@ -48,7 +55,7 @@ export function useRecommendations() {
             item_type: 'tour',
             title_en: tour.title_en,
             title_ru: tour.title_ru,
-            image: tour.cover_image || '',
+            image: tour.cover_image || DEFAULT_IMAGE,
             rating: tour.rating || 0,
             price: tour.price || 0,
             reason: 'popular'
@@ -71,7 +78,7 @@ export function useRecommendations() {
             item_type: 'property',
             title_en: prop.title_en,
             title_ru: prop.title_ru,
-            image: prop.cover_image || '',
+            image: prop.cover_image || DEFAULT_IMAGE,
             rating: prop.rating || 0,
             price: prop.price || 0,
             location: prop.district || undefined,
@@ -95,7 +102,7 @@ export function useRecommendations() {
             item_type: 'event',
             title_en: event.title_en,
             title_ru: event.title_ru,
-            image: event.cover_image || '',
+            image: event.cover_image || DEFAULT_IMAGE,
             rating: event.rating || 0,
             price: event.price || 0,
             location: event.location_name || undefined,
@@ -119,7 +126,7 @@ export function useRecommendations() {
             item_type: 'water_activity',
             title_en: activity.title_en,
             title_ru: activity.title_ru,
-            image: activity.cover_image || '',
+            image: activity.cover_image || DEFAULT_IMAGE,
             rating: activity.rating || 0,
             price: activity.price || 0,
             location: activity.location_name || undefined,
@@ -128,36 +135,28 @@ export function useRecommendations() {
         });
       }
 
-      if (!checkMounted()) return;
-
       // Shuffle and prioritize by history
       const historyItems = items.filter(i => i.reason === 'history');
       const otherItems = items.filter(i => i.reason !== 'history');
       
-      // Shuffle
+      // Shuffle other items
       const shuffled = [...historyItems, ...otherItems.sort(() => Math.random() - 0.5)];
       
       setRecommendations(shuffled.slice(0, 12));
     } catch (error) {
       console.error('Error fetching recommendations:', error);
     } finally {
-      if (checkMounted()) setIsLoading(false);
+      setIsLoading(false);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
-    // Only fetch once on mount to avoid infinite loops
-    if (hasFetchedRef.current) return;
-    hasFetchedRef.current = true;
-    
-    let isMounted = true;
-    fetchRecommendations(() => isMounted);
-    return () => { isMounted = false; };
+    fetchRecommendations();
   }, [fetchRecommendations]);
 
   return {
     recommendations,
     isLoading,
-    refetch: () => fetchRecommendations()
+    refetch: fetchRecommendations
   };
 }

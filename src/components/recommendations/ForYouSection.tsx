@@ -46,12 +46,26 @@ export function ForYouSection() {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-primary" />
-          <Skeleton className="h-6 w-32" />
+          <div className="p-1.5 bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg">
+            <Sparkles className="w-5 h-5 text-primary" />
+          </div>
+          <span className="text-lg font-semibold">
+            {language === 'ru' ? 'Для вас' : 'For You'}
+          </span>
         </div>
-        <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4">
+        <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
           {[1, 2, 3].map(i => (
-            <Skeleton key={i} className="flex-shrink-0 w-64 h-48 rounded-2xl" />
+            <div key={i} className="flex-shrink-0 w-64 bg-card rounded-2xl overflow-hidden border">
+              <Skeleton className="h-36 w-full" />
+              <div className="p-3 space-y-2">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-1/2" />
+                <div className="flex justify-between">
+                  <Skeleton className="h-3 w-12" />
+                  <Skeleton className="h-4 w-16" />
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </div>
@@ -101,9 +115,12 @@ export function ForYouSection() {
             >
               <div className="relative h-36">
                 <img
-                  src={item.image || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'}
+                  src={item.image && item.image.trim() !== '' ? item.image : 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'}
                   alt=""
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400';
+                  }}
                 />
                 <Badge 
                   className="absolute top-2 left-2 bg-background/80 backdrop-blur-sm text-foreground text-[10px] gap-1"
