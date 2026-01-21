@@ -79,7 +79,7 @@ export const propertyFilterConfig: FilterConfig = {
       id: 'bedrooms',
       titleEn: 'Bedrooms',
       titleRu: 'Спальни',
-      type: 'single',
+      type: 'multi',
       options: bedroomOptions,
     },
     {
