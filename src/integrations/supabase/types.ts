@@ -5877,6 +5877,53 @@ export type Database = {
           },
         ]
       }
+      restaurant_availability: {
+        Row: {
+          booked_covers: number
+          created_at: string | null
+          date: string
+          id: string
+          is_blocked: boolean | null
+          max_covers: number
+          notes: string | null
+          restaurant_id: string
+          time_slot: string
+          updated_at: string | null
+        }
+        Insert: {
+          booked_covers?: number
+          created_at?: string | null
+          date: string
+          id?: string
+          is_blocked?: boolean | null
+          max_covers?: number
+          notes?: string | null
+          restaurant_id: string
+          time_slot: string
+          updated_at?: string | null
+        }
+        Update: {
+          booked_covers?: number
+          created_at?: string | null
+          date?: string
+          id?: string
+          is_blocked?: boolean | null
+          max_covers?: number
+          notes?: string | null
+          restaurant_id?: string
+          time_slot?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_availability_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       restaurant_menu_categories: {
         Row: {
           created_at: string
@@ -8801,6 +8848,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      check_restaurant_availability: {
+        Args: {
+          p_covers?: number
+          p_date: string
+          p_restaurant_id: string
+          p_time: string
+        }
+        Returns: Json
+      }
       check_service_slot_availability: {
         Args: {
           p_datetime: string
@@ -8919,6 +8975,15 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_order_timeline: {
+        Args: { p_order_id: string }
+        Returns: {
+          actor_name: string
+          created_at: string
+          reason: string
+          status: string
+        }[]
+      }
       get_order_vertical: {
         Args: { p_metadata: Json; p_order_type: string }
         Returns: string
@@ -8944,6 +9009,10 @@ export type Database = {
         Returns: undefined
       }
       is_org_owner: { Args: { check_org_id: string }; Returns: boolean }
+      is_verified_purchase: {
+        Args: { p_item_id: string; p_item_type: string; p_user_id: string }
+        Returns: boolean
+      }
       pay_from_wallet_atomic: {
         Args: {
           p_amount: number
