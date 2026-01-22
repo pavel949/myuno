@@ -255,6 +255,78 @@ export type Database = {
           },
         ]
       }
+      booking_inventory_reports: {
+        Row: {
+          booking_id: string
+          created_at: string | null
+          currency: string | null
+          current_condition: string
+          damage_description: string | null
+          estimated_damage_cost: number | null
+          id: string
+          inventory_item_id: string
+          linked_to_deposit: boolean | null
+          photos: string[] | null
+          previous_condition: string | null
+          report_type: string
+          reported_at: string | null
+          reported_by: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string | null
+          currency?: string | null
+          current_condition: string
+          damage_description?: string | null
+          estimated_damage_cost?: number | null
+          id?: string
+          inventory_item_id: string
+          linked_to_deposit?: boolean | null
+          photos?: string[] | null
+          previous_condition?: string | null
+          report_type: string
+          reported_at?: string | null
+          reported_by?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string | null
+          currency?: string | null
+          current_condition?: string
+          damage_description?: string | null
+          estimated_damage_cost?: number | null
+          id?: string
+          inventory_item_id?: string
+          linked_to_deposit?: boolean | null
+          photos?: string[] | null
+          previous_condition?: string | null
+          report_type?: string
+          reported_at?: string | null
+          reported_by?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_inventory_reports_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "property_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_inventory_reports_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "property_inventory_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking_items: {
         Row: {
           booking_id: string
@@ -334,6 +406,60 @@ export type Database = {
           },
         ]
       }
+      booking_meter_readings: {
+        Row: {
+          booking_id: string
+          created_at: string | null
+          id: string
+          meter_id: string
+          notes: string | null
+          photo_url: string | null
+          reading_date: string | null
+          reading_type: string
+          reading_value: number
+          recorded_by: string | null
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string | null
+          id?: string
+          meter_id: string
+          notes?: string | null
+          photo_url?: string | null
+          reading_date?: string | null
+          reading_type: string
+          reading_value: number
+          recorded_by?: string | null
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string | null
+          id?: string
+          meter_id?: string
+          notes?: string | null
+          photo_url?: string | null
+          reading_date?: string | null
+          reading_type?: string
+          reading_value?: number
+          recorded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_meter_readings_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "property_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_meter_readings_meter_id_fkey"
+            columns: ["meter_id"]
+            isOneToOne: false
+            referencedRelation: "property_meters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking_notifications_log: {
         Row: {
           body: string | null
@@ -382,6 +508,107 @@ export type Database = {
             foreignKeyName: "booking_notifications_log_booking_id_fkey"
             columns: ["booking_id"]
             isOneToOne: false
+            referencedRelation: "property_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      booking_operations: {
+        Row: {
+          actual_check_in_at: string | null
+          actual_check_out_at: string | null
+          booking_id: string
+          check_in_notes: string | null
+          check_in_photos: string[] | null
+          check_out_notes: string | null
+          check_out_photos: string[] | null
+          checked_in_by: string | null
+          checked_out_by: string | null
+          cleaning_completed_at: string | null
+          cleaning_notes: string | null
+          cleaning_required: boolean | null
+          created_at: string | null
+          deposit_amount: number | null
+          deposit_currency: string | null
+          deposit_deduction_amount: number | null
+          deposit_deduction_photos: string[] | null
+          deposit_deduction_reason: string | null
+          deposit_method: string | null
+          deposit_receipt_url: string | null
+          deposit_received_at: string | null
+          deposit_received_by: string | null
+          deposit_return_status: string | null
+          deposit_returned_amount: number | null
+          deposit_returned_at: string | null
+          deposit_returned_by: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          actual_check_in_at?: string | null
+          actual_check_out_at?: string | null
+          booking_id: string
+          check_in_notes?: string | null
+          check_in_photos?: string[] | null
+          check_out_notes?: string | null
+          check_out_photos?: string[] | null
+          checked_in_by?: string | null
+          checked_out_by?: string | null
+          cleaning_completed_at?: string | null
+          cleaning_notes?: string | null
+          cleaning_required?: boolean | null
+          created_at?: string | null
+          deposit_amount?: number | null
+          deposit_currency?: string | null
+          deposit_deduction_amount?: number | null
+          deposit_deduction_photos?: string[] | null
+          deposit_deduction_reason?: string | null
+          deposit_method?: string | null
+          deposit_receipt_url?: string | null
+          deposit_received_at?: string | null
+          deposit_received_by?: string | null
+          deposit_return_status?: string | null
+          deposit_returned_amount?: number | null
+          deposit_returned_at?: string | null
+          deposit_returned_by?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          actual_check_in_at?: string | null
+          actual_check_out_at?: string | null
+          booking_id?: string
+          check_in_notes?: string | null
+          check_in_photos?: string[] | null
+          check_out_notes?: string | null
+          check_out_photos?: string[] | null
+          checked_in_by?: string | null
+          checked_out_by?: string | null
+          cleaning_completed_at?: string | null
+          cleaning_notes?: string | null
+          cleaning_required?: boolean | null
+          created_at?: string | null
+          deposit_amount?: number | null
+          deposit_currency?: string | null
+          deposit_deduction_amount?: number | null
+          deposit_deduction_photos?: string[] | null
+          deposit_deduction_reason?: string | null
+          deposit_method?: string | null
+          deposit_receipt_url?: string | null
+          deposit_received_at?: string | null
+          deposit_received_by?: string | null
+          deposit_return_status?: string | null
+          deposit_returned_amount?: number | null
+          deposit_returned_at?: string | null
+          deposit_returned_by?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_operations_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
             referencedRelation: "property_bookings"
             referencedColumns: ["id"]
           },
@@ -1387,6 +1614,97 @@ export type Database = {
           symbol?: string
         }
         Relationships: []
+      }
+      damage_reports: {
+        Row: {
+          actual_cost: number | null
+          booking_id: string | null
+          created_at: string
+          currency: string | null
+          damage_type: string | null
+          deducted_from_deposit: boolean | null
+          description: string | null
+          estimated_cost: number | null
+          id: string
+          inventory_item_id: string | null
+          notes: string | null
+          owner_id: string
+          photos: string[] | null
+          property_id: string
+          reported_at: string
+          resolved_at: string | null
+          severity: string | null
+          status: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          actual_cost?: number | null
+          booking_id?: string | null
+          created_at?: string
+          currency?: string | null
+          damage_type?: string | null
+          deducted_from_deposit?: boolean | null
+          description?: string | null
+          estimated_cost?: number | null
+          id?: string
+          inventory_item_id?: string | null
+          notes?: string | null
+          owner_id: string
+          photos?: string[] | null
+          property_id: string
+          reported_at?: string
+          resolved_at?: string | null
+          severity?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          actual_cost?: number | null
+          booking_id?: string | null
+          created_at?: string
+          currency?: string | null
+          damage_type?: string | null
+          deducted_from_deposit?: boolean | null
+          description?: string | null
+          estimated_cost?: number | null
+          id?: string
+          inventory_item_id?: string | null
+          notes?: string | null
+          owner_id?: string
+          photos?: string[] | null
+          property_id?: string
+          reported_at?: string
+          resolved_at?: string | null
+          severity?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "damage_reports_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "property_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "damage_reports_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "property_inventory_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "damage_reports_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       doctors: {
         Row: {
@@ -3474,6 +3792,75 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      meter_readings: {
+        Row: {
+          booking_id: string
+          created_at: string
+          electricity_photo_url: string | null
+          electricity_reading: number | null
+          gas_photo_url: string | null
+          gas_reading: number | null
+          id: string
+          notes: string | null
+          owner_id: string
+          property_id: string
+          reading_type: string
+          recorded_at: string
+          recorded_by: string | null
+          water_photo_url: string | null
+          water_reading: number | null
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          electricity_photo_url?: string | null
+          electricity_reading?: number | null
+          gas_photo_url?: string | null
+          gas_reading?: number | null
+          id?: string
+          notes?: string | null
+          owner_id: string
+          property_id: string
+          reading_type: string
+          recorded_at?: string
+          recorded_by?: string | null
+          water_photo_url?: string | null
+          water_reading?: number | null
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          electricity_photo_url?: string | null
+          electricity_reading?: number | null
+          gas_photo_url?: string | null
+          gas_reading?: number | null
+          id?: string
+          notes?: string | null
+          owner_id?: string
+          property_id?: string
+          reading_type?: string
+          recorded_at?: string
+          recorded_by?: string | null
+          water_photo_url?: string | null
+          water_reading?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meter_readings_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "property_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meter_readings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notification_preferences: {
         Row: {
@@ -6193,6 +6580,81 @@ export type Database = {
           },
         ]
       }
+      property_deposits: {
+        Row: {
+          amount: number
+          booking_id: string
+          collected_at: string | null
+          collected_by: string | null
+          created_at: string
+          currency: string | null
+          deduction_amount: number | null
+          deduction_reason: string | null
+          id: string
+          notes: string | null
+          owner_id: string
+          payment_method: string | null
+          property_id: string
+          returned_amount: number | null
+          returned_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          booking_id: string
+          collected_at?: string | null
+          collected_by?: string | null
+          created_at?: string
+          currency?: string | null
+          deduction_amount?: number | null
+          deduction_reason?: string | null
+          id?: string
+          notes?: string | null
+          owner_id: string
+          payment_method?: string | null
+          property_id: string
+          returned_amount?: number | null
+          returned_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          booking_id?: string
+          collected_at?: string | null
+          collected_by?: string | null
+          created_at?: string
+          currency?: string | null
+          deduction_amount?: number | null
+          deduction_reason?: string | null
+          id?: string
+          notes?: string | null
+          owner_id?: string
+          payment_method?: string | null
+          property_id?: string
+          returned_amount?: number | null
+          returned_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_deposits_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "property_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_deposits_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_documents: {
         Row: {
           access_code: string | null
@@ -6609,6 +7071,202 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "property_inspections_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_inventory_items: {
+        Row: {
+          category: string
+          condition: string | null
+          created_at: string
+          currency: string | null
+          description: string | null
+          estimated_value: number | null
+          id: string
+          is_active: boolean | null
+          location_in_property: string | null
+          name: string
+          name_ru: string | null
+          owner_id: string
+          photos: string[] | null
+          property_id: string
+          purchase_date: string | null
+          quantity: number | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          condition?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          estimated_value?: number | null
+          id?: string
+          is_active?: boolean | null
+          location_in_property?: string | null
+          name: string
+          name_ru?: string | null
+          owner_id: string
+          photos?: string[] | null
+          property_id: string
+          purchase_date?: string | null
+          quantity?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          condition?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          estimated_value?: number | null
+          id?: string
+          is_active?: boolean | null
+          location_in_property?: string | null
+          name?: string
+          name_ru?: string | null
+          owner_id?: string
+          photos?: string[] | null
+          property_id?: string
+          purchase_date?: string | null
+          quantity?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_inventory_items_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_meters: {
+        Row: {
+          created_at: string | null
+          currency: string | null
+          id: string
+          is_active: boolean | null
+          location: string | null
+          meter_name: string
+          meter_name_ru: string | null
+          meter_type: string
+          property_id: string
+          rate_per_unit: number | null
+          unit: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          is_active?: boolean | null
+          location?: string | null
+          meter_name: string
+          meter_name_ru?: string | null
+          meter_type: string
+          property_id: string
+          rate_per_unit?: number | null
+          unit?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          is_active?: boolean | null
+          location?: string | null
+          meter_name?: string
+          meter_name_ru?: string | null
+          meter_type?: string
+          property_id?: string
+          rate_per_unit?: number | null
+          unit?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_meters_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_operational_tasks: {
+        Row: {
+          assigned_to: string | null
+          booking_id: string | null
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          notes: string | null
+          priority: string | null
+          property_id: string
+          scheduled_date: string
+          scheduled_time: string | null
+          status: string | null
+          task_type: string
+          title: string
+          title_ru: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          booking_id?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          notes?: string | null
+          priority?: string | null
+          property_id: string
+          scheduled_date: string
+          scheduled_time?: string | null
+          status?: string | null
+          task_type: string
+          title: string
+          title_ru?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          booking_id?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          notes?: string | null
+          priority?: string | null
+          property_id?: string
+          scheduled_date?: string
+          scheduled_time?: string | null
+          status?: string | null
+          task_type?: string
+          title?: string
+          title_ru?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_operational_tasks_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "property_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_operational_tasks_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "owner_properties"
