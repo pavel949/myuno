@@ -1,15 +1,14 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Bell, CheckCheck, Settings, BellOff } from 'lucide-react';
-import { isToday, isYesterday, parseISO } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { ContentSkeleton } from '@/components/ui/ContentSkeleton';
 import { NotificationFilters, NotificationFilterType } from './NotificationFilters';
-import { NotificationGroup } from './NotificationGroup';
-import { NotificationItem, NotificationItemData } from './NotificationItem';
+import { NotificationItemData } from './NotificationItem';
+import { VirtualNotificationList } from './VirtualNotificationList';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -78,26 +77,6 @@ export function NotificationInbox({
     return notifications.filter(n => n.type === activeFilter);
   }, [notifications, activeFilter]);
 
-  // Group by date
-  const groupedNotifications = useMemo(() => {
-    const today: NotificationItemData[] = [];
-    const yesterday: NotificationItemData[] = [];
-    const earlier: NotificationItemData[] = [];
-
-    filteredNotifications.forEach(notification => {
-      const date = parseISO(notification.created_at);
-      if (isToday(date)) {
-        today.push(notification);
-      } else if (isYesterday(date)) {
-        yesterday.push(notification);
-      } else {
-        earlier.push(notification);
-      }
-    });
-
-    return { today, yesterday, earlier };
-  }, [filteredNotifications]);
-
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -145,7 +124,7 @@ export function NotificationInbox({
         )}
       </div>
 
-      {/* Grouped notifications */}
+      {/* Notifications list with virtualization for large lists */}
       <AnimatePresence mode="popLayout">
         {filteredNotifications.length === 0 ? (
           <motion.div
@@ -162,46 +141,16 @@ export function NotificationInbox({
             />
           </motion.div>
         ) : (
-          <div className="space-y-4">
-            {groupedNotifications.today.length > 0 && (
-              <NotificationGroup label="Today" labelRu="Сегодня">
-                {groupedNotifications.today.map(notification => (
-                  <NotificationItem
-                    key={notification.id}
-                    notification={notification}
-                    onMarkRead={onMarkRead}
-                    onDelete={onDelete}
-                  />
-                ))}
-              </NotificationGroup>
-            )}
-
-            {groupedNotifications.yesterday.length > 0 && (
-              <NotificationGroup label="Yesterday" labelRu="Вчера">
-                {groupedNotifications.yesterday.map(notification => (
-                  <NotificationItem
-                    key={notification.id}
-                    notification={notification}
-                    onMarkRead={onMarkRead}
-                    onDelete={onDelete}
-                  />
-                ))}
-              </NotificationGroup>
-            )}
-
-            {groupedNotifications.earlier.length > 0 && (
-              <NotificationGroup label="Earlier" labelRu="Ранее">
-                {groupedNotifications.earlier.map(notification => (
-                  <NotificationItem
-                    key={notification.id}
-                    notification={notification}
-                    onMarkRead={onMarkRead}
-                    onDelete={onDelete}
-                  />
-                ))}
-              </NotificationGroup>
-            )}
-          </div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <VirtualNotificationList
+              notifications={filteredNotifications}
+              onMarkRead={onMarkRead}
+              onDelete={onDelete}
+            />
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
