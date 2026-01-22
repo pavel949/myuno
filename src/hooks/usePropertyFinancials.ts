@@ -57,6 +57,7 @@ export const INCOME_CATEGORIES = [
 export const EXPENSE_CATEGORIES = [
   { value: 'cleaning', labelEn: 'Cleaning', labelRu: 'Уборка' },
   { value: 'maintenance', labelEn: 'Maintenance', labelRu: 'Ремонт и обслуживание' },
+  { value: 'repair', labelEn: 'Repair', labelRu: 'Ремонт' },
   { value: 'utilities', labelEn: 'Utilities', labelRu: 'Коммунальные услуги' },
   { value: 'electricity', labelEn: 'Electricity', labelRu: 'Электричество' },
   { value: 'water', labelEn: 'Water', labelRu: 'Вода' },
@@ -67,12 +68,14 @@ export const EXPENSE_CATEGORIES = [
   { value: 'management_fee', labelEn: 'Management Fee', labelRu: 'Комиссия управляющего' },
   { value: 'platform_fee', labelEn: 'Platform Commission', labelRu: 'Комиссия платформы' },
   { value: 'supplies', labelEn: 'Supplies & Amenities', labelRu: 'Расходники и амениту' },
+  { value: 'shopping', labelEn: 'Shopping', labelRu: 'Закупки' },
   { value: 'furniture', labelEn: 'Furniture', labelRu: 'Мебель' },
   { value: 'appliances', labelEn: 'Appliances', labelRu: 'Бытовая техника' },
   { value: 'depreciation', labelEn: 'Depreciation', labelRu: 'Амортизация' },
   { value: 'loan_payment', labelEn: 'Loan/Mortgage', labelRu: 'Кредит/Ипотека' },
   { value: 'legal', labelEn: 'Legal Fees', labelRu: 'Юридические услуги' },
   { value: 'advertising', labelEn: 'Advertising', labelRu: 'Реклама' },
+  { value: 'other', labelEn: 'Other', labelRu: 'Прочее' },
   { value: 'other_expense', labelEn: 'Other Expense', labelRu: 'Прочие расходы' },
 ];
 

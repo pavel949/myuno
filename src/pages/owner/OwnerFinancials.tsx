@@ -38,7 +38,8 @@ import {
 import { 
   DollarSign, TrendingUp, TrendingDown, Plus,
   ArrowUpCircle, ArrowDownCircle, Receipt, Calendar,
-  MoreVertical, Trash2, Edit, Building, BarChart3
+  MoreVertical, Trash2, Edit, Building, BarChart3,
+  Paperclip, Zap
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -50,6 +51,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { FinancialDateFilter, DatePreset } from '@/components/owner/FinancialDateFilter';
 import { FinancialCharts } from '@/components/owner/FinancialCharts';
+import { ReceiptViewer } from '@/components/owner/ReceiptViewer';
 
 export default function OwnerFinancials() {
   const { language } = useLanguage();
@@ -61,6 +63,7 @@ export default function OwnerFinancials() {
   const [activeTab, setActiveTab] = useState<'all' | 'income' | 'expense'>('all');
   const [viewMode, setViewMode] = useState<'list' | 'charts'>('list');
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [viewReceiptUrl, setViewReceiptUrl] = useState<string | null>(null);
   
   // Date filter state
   const [datePreset, setDatePreset] = useState<DatePreset>('all_time');
@@ -235,14 +238,25 @@ export default function OwnerFinancials() {
         </Card>
       </div>
 
-      {/* Add Transaction Button */}
-      <Button 
-        className="w-full mb-6" 
-        onClick={() => navigate('/owner/financials/new')}
-      >
-        <Plus className="h-4 w-4 mr-2" />
-        {isRu ? 'Добавить транзакцию' : 'Add Transaction'}
-      </Button>
+      {/* Action Buttons */}
+      <div className="flex gap-2 mb-6">
+        <Button 
+          variant="default"
+          className="flex-1" 
+          onClick={() => navigate('/owner/expenses/quick')}
+        >
+          <Zap className="h-4 w-4 mr-2" />
+          {isRu ? 'Быстрый расход' : 'Quick Expense'}
+        </Button>
+        <Button 
+          variant="outline"
+          className="flex-1" 
+          onClick={() => navigate('/owner/financials/new')}
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          {isRu ? 'Добавить' : 'Add'}
+        </Button>
+      </div>
 
       {/* Charts View */}
       {viewMode === 'charts' && financials && (
@@ -289,6 +303,7 @@ export default function OwnerFinancials() {
                   getCategoryLabel={getCategoryLabel}
                   onEdit={() => navigate(`/owner/financials/${item.id}`)}
                   onDelete={() => setDeleteId(item.id)}
+                  onViewReceipt={item.receipt_url ? () => setViewReceiptUrl(item.receipt_url!) : undefined}
                 />
               ))
             )}
@@ -317,6 +332,13 @@ export default function OwnerFinancials() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Receipt Viewer */}
+      <ReceiptViewer
+        open={!!viewReceiptUrl}
+        onOpenChange={() => setViewReceiptUrl(null)}
+        receiptUrl={viewReceiptUrl || ''}
+      />
     </PageContainer>
   );
 }
@@ -326,15 +348,18 @@ function TransactionCard({
   isRu, 
   getCategoryLabel,
   onEdit,
-  onDelete
+  onDelete,
+  onViewReceipt
 }: { 
   item: PropertyFinancialFull; 
   isRu: boolean;
   getCategoryLabel: (cat: string | undefined, type: string) => string;
   onEdit: () => void;
   onDelete: () => void;
+  onViewReceipt?: () => void;
 }) {
   const isIncome = item.transaction_type === 'income';
+  const hasReceipt = !!item.receipt_url;
 
   return (
     <Card>
@@ -351,8 +376,17 @@ function TransactionCard({
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <p className="font-medium text-sm">
+                <p className="font-medium text-sm flex items-center gap-1.5">
                   {getCategoryLabel(item.category, item.transaction_type)}
+                  {hasReceipt && (
+                    <button
+                      onClick={onViewReceipt}
+                      className="text-primary hover:text-primary/80 transition-colors"
+                      title={isRu ? 'Посмотреть чек' : 'View receipt'}
+                    >
+                      <Paperclip className="h-3.5 w-3.5" />
+                    </button>
+                  )}
                 </p>
                 {item.description && (
                   <p className="text-xs text-muted-foreground line-clamp-1">
@@ -398,6 +432,12 @@ function TransactionCard({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              {hasReceipt && (
+                <DropdownMenuItem onClick={onViewReceipt}>
+                  <Paperclip className="h-4 w-4 mr-2" />
+                  {isRu ? 'Посмотреть чек' : 'View Receipt'}
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={onEdit}>
                 <Edit className="h-4 w-4 mr-2" />
                 {isRu ? 'Редактировать' : 'Edit'}

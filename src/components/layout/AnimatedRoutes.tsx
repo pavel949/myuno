@@ -285,6 +285,7 @@ const ChannelManager = lazy(() => import('@/pages/owner/ChannelManager'));
 const OwnerLanding = lazy(() => import('@/pages/owner/OwnerLanding'));
 const JuristicRequestsPage = lazy(() => import('@/pages/owner/JuristicRequestsPage'));
 const MessageTemplates = lazy(() => import('@/pages/owner/MessageTemplates'));
+const QuickExpense = lazy(() => import('@/pages/owner/QuickExpense'));
 const OwnerReviews = lazy(() => import('@/pages/owner/OwnerReviews'));
 
 // Property Consultation
@@ -619,6 +620,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/owner/financials" element={<LazyPage><OwnerGuard><OwnerFinancials /></OwnerGuard></LazyPage>} />
         <Route path="/owner/financials/new" element={<LazyPage><OwnerGuard><OwnerFinancialForm /></OwnerGuard></LazyPage>} />
         <Route path="/owner/financials/:id" element={<LazyPage><OwnerGuard><OwnerFinancialForm /></OwnerGuard></LazyPage>} />
+        <Route path="/owner/expenses/quick" element={<LazyPage><OwnerGuard><QuickExpense /></OwnerGuard></LazyPage>} />
         <Route path="/owner/messages" element={<LazyPage><OwnerGuard><OwnerMessages /></OwnerGuard></LazyPage>} />
         <Route path="/owner/chat/:type/:id" element={<LazyPage><OwnerGuard><OwnerChatRoom /></OwnerGuard></LazyPage>} />
         <Route path="/owner/support-chat" element={<LazyPage><OwnerGuard><OwnerSupportChat /></OwnerGuard></LazyPage>} />
