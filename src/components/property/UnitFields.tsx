@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -363,7 +363,7 @@ const amenityCategories: AmenityCategory[] = [
   },
 ];
 
-export function UnitFields({
+function UnitFieldsInner({
   propertyType = 'apartment',
   floor,
   unitNumber,
@@ -735,3 +735,5 @@ export function UnitFields({
     </Card>
   );
 }
+
+export const UnitFields = memo(UnitFieldsInner);

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useRef, useEffect, memo, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePropertyProjects, useCreatePropertyProject, PropertyProject } from '@/hooks/usePropertyProjects';
 import { Button } from '@/components/ui/button';
@@ -22,7 +22,7 @@ interface ProjectSelectorProps {
   selectedProject?: PropertyProject | null;
 }
 
-export function ProjectSelector({ value, onChange, selectedProject }: ProjectSelectorProps) {
+function ProjectSelectorInner({ value, onChange, selectedProject }: ProjectSelectorProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { data: projects, isLoading } = usePropertyProjects();
@@ -61,29 +61,38 @@ export function ProjectSelector({ value, onChange, selectedProject }: ProjectSel
 
   // Close dropdown when clicking outside
   useEffect(() => {
+    if (!isOpen) return; // Only add listener when dropdown is open
+    
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    // Use setTimeout to avoid immediate triggering
+    const timeoutId = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+    }, 0);
+    
+    return () => {
+      clearTimeout(timeoutId);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
-  const handleSelectProject = (project: PropertyProject) => {
+  const handleSelectProject = useCallback((project: PropertyProject) => {
     onChange(project.id, project);
     setSearchQuery('');
     setIsOpen(false);
-  };
+  }, [onChange]);
 
-  const handleClearProject = (e: React.MouseEvent) => {
+  const handleClearProject = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     onChange(undefined, undefined);
     setSearchQuery('');
-  };
+  }, [onChange]);
 
-  const handleCreateNewProject = async () => {
+  const handleCreateNewProject = useCallback(async () => {
     if (!newProjectName.trim()) return;
 
     const trimmedName = newProjectName.trim();
@@ -103,19 +112,19 @@ export function ProjectSelector({ value, onChange, selectedProject }: ProjectSel
     } catch (error) {
       console.error('Failed to create project:', error);
     }
-  };
+  }, [newProjectName, createProject, onChange]);
 
-  const handleInitiateCreate = () => {
+  const handleInitiateCreate = useCallback(() => {
     setNewProjectName(searchQuery);
     setIsCreatingNew(true);
     setIsOpen(false);
-  };
+  }, [searchQuery]);
 
-  const handleProjectCardClick = () => {
+  const handleProjectCardClick = useCallback(() => {
     if (selectedProject) {
       setShowProjectDetails(true);
     }
-  };
+  }, [selectedProject]);
 
   return (
     <div className="space-y-3">
@@ -388,3 +397,5 @@ export function ProjectSelector({ value, onChange, selectedProject }: ProjectSel
     </div>
   );
 }
+
+export const ProjectSelector = memo(ProjectSelectorInner);

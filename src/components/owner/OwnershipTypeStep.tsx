@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -75,7 +76,7 @@ const ownershipOptions: OwnershipOption[] = [
   },
 ];
 
-export function OwnershipTypeStep({ data, onChange }: OwnershipTypeStepProps) {
+function OwnershipTypeStepInner({ data, onChange }: OwnershipTypeStepProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
@@ -363,3 +364,5 @@ export function OwnershipTypeStep({ data, onChange }: OwnershipTypeStepProps) {
     </div>
   );
 }
+
+export const OwnershipTypeStep = memo(OwnershipTypeStepInner);

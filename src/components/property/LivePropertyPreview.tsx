@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -84,7 +84,7 @@ const parkingTypeLabels: Record<string, { en: string; ru: string }> = {
 
 const STANDALONE_TYPES = ['villa', 'house', 'townhouse'];
 
-export function LivePropertyPreview({ data, className, collapsed, onToggle }: LivePropertyPreviewProps) {
+function LivePropertyPreviewInner({ data, className, collapsed, onToggle }: LivePropertyPreviewProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
@@ -340,3 +340,5 @@ export function LivePropertyPreview({ data, className, collapsed, onToggle }: Li
     </Card>
   );
 }
+
+export const LivePropertyPreview = memo(LivePropertyPreviewInner);
