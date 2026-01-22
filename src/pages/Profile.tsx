@@ -1,16 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Settings, HelpCircle, LogOut, ChevronRight, Shield, Bell, CreditCard, Heart, Clock, Wallet, Palette, Gift, Info, FileText, Handshake, MessageCircle, ShieldCheck, MapPin, Mail, Globe, Coins } from 'lucide-react';
+import { User, Settings, HelpCircle, LogOut, ChevronRight, Shield, Bell, CreditCard, Heart, Clock, Wallet, Gift, Info, FileText, Handshake, MessageCircle, ShieldCheck } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { PremiumButton } from '@/components/uno/PremiumButton';
-import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
-import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
-import { CurrencySwitcher } from '@/components/uno/CurrencySwitcher';
-import { LocationSwitcher } from '@/components/uno/LocationSwitcher';
 import { PageContainer } from '@/components/uno/PageContainer';
-import { SectionCard, SectionTitle } from '@/components/uno/SectionCard';
+import { SectionCard } from '@/components/uno/SectionCard';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { ReferralCard } from '@/components/uno/ReferralCard';
 import { EmailVerificationBadge } from '@/components/profile/EmailVerificationBadge';
@@ -71,6 +67,7 @@ export default function Profile() {
 
   const menuItems = [
     { icon: User, label: language === 'ru' ? 'Редактировать профиль' : 'Edit Profile', onClick: () => navigate('/profile/edit') },
+    { icon: Settings, label: language === 'ru' ? 'Настройки и данные' : 'Settings & Data', onClick: () => navigate('/profile/settings') },
     { icon: MessageCircle, label: language === 'ru' ? 'Чат поддержки' : 'Support Chat', onClick: () => navigate('/support') },
     { icon: Wallet, label: language === 'ru' ? 'Кошелёк' : 'Wallet', onClick: () => navigate('/wallet') },
     { icon: Heart, label: language === 'ru' ? 'Избранное' : 'Favorites', onClick: () => navigate('/favorites') },
@@ -130,47 +127,6 @@ export default function Profile() {
 
         {/* Role Switcher */}
         <RoleSwitcher />
-
-        {/* Compact Settings Card */}
-        <SectionCard>
-          <div className="space-y-4">
-            {/* Theme */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Palette className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm">{language === 'ru' ? 'Тема' : 'Theme'}</span>
-              </div>
-              <ThemeSwitcher variant="cards" />
-            </div>
-            
-            {/* Language */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Globe className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm">{language === 'ru' ? 'Язык' : 'Language'}</span>
-              </div>
-              <LanguageSwitcher variant="toggle" size="sm" />
-            </div>
-            
-            {/* Currency */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Coins className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm">{language === 'ru' ? 'Валюта' : 'Currency'}</span>
-              </div>
-              <CurrencySwitcher size="sm" />
-            </div>
-            
-            {/* Location */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm">{language === 'ru' ? 'Город' : 'Location'}</span>
-              </div>
-              <LocationSwitcher />
-            </div>
-          </div>
-        </SectionCard>
 
         {/* Referral program */}
         <ReferralCard variant="compact" />
