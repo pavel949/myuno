@@ -16,6 +16,7 @@ import {
   Link2, MessageSquare
 } from 'lucide-react';
 import { FullManagementCard } from '@/components/owner/FullManagementCard';
+import { HostListingsPanel } from '@/components/owner/HostListingsPanel';
 import { OwnershipInviteBanner } from '@/components/owner/OwnershipInviteBanner';
 import { OwnerKPICard } from '@/components/owner/OwnerKPICard';
 import { OwnerAlertPanel } from '@/components/owner/OwnerAlertPanel';
@@ -279,74 +280,10 @@ export default function OwnerDashboard() {
         </CardContent>
       </Card>
 
-      {/* My Properties */}
-      <Card className="mb-4">
-        <CardHeader className="pb-2 flex flex-row items-center justify-between">
-          <CardTitle className="text-base">
-            {isRu ? 'Мои объекты' : 'My Properties'}
-          </CardTitle>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => navigate('/owner/properties')}
-          >
-            {isRu ? 'Все' : 'All'}
-            <ArrowRight className="h-4 w-4 ml-1" />
-          </Button>
-        </CardHeader>
-        <CardContent className="pt-0">
-          {!properties?.length ? (
-            <div className="text-center py-6">
-              <Home className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
-              <p className="text-muted-foreground text-sm mb-3">
-                {isRu ? 'У вас пока нет объектов' : 'No properties yet'}
-              </p>
-              <Button size="sm" onClick={() => navigate('/owner/properties/new')}>
-                <Plus className="h-4 w-4 mr-2" />
-                {isRu ? 'Добавить' : 'Add'}
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {properties.slice(0, 3).map((property) => (
-                <div 
-                  key={property.id}
-                  onClick={() => navigate(`/owner/properties/${property.id}`)}
-                  className="flex items-center gap-3 p-2 rounded-xl bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
-                >
-                  <div className="w-10 h-10 rounded-lg bg-muted overflow-hidden flex-shrink-0">
-                    {property.cover_image ? (
-                      <img 
-                        src={property.cover_image} 
-                        alt={property.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Home className="h-4 w-4 text-muted-foreground" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">
-                      {isRu && property.title_ru ? property.title_ru : property.title}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {property.district || property.address}
-                    </p>
-                  </div>
-                  <Badge variant={property.marketplace_property_id ? 'default' : 'secondary'} className="text-xs">
-                    {property.marketplace_property_id 
-                      ? (isRu ? 'Онлайн' : 'Live')
-                      : (isRu ? 'Черновик' : 'Draft')
-                    }
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* My Listings - Airbnb Style */}
+      <div className="mb-4">
+        <HostListingsPanel />
+      </div>
 
       {/* Full Management CTA */}
       <FullManagementCard />
