@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Home, MapPin, Bed, Bath, SquareStack, Upload, DollarSign, Clock, Users, Copy } from 'lucide-react';
+import { Home, MapPin, Bed, Bath, SquareStack, Upload, DollarSign, Clock, Users, Copy, BadgeDollarSign, Building2, Landmark, Briefcase } from 'lucide-react';
 import { ImageUpload } from '@/components/upload/ImageUpload';
 import { ProjectSelector } from '@/components/property/ProjectSelector';
 import { UnitFields } from '@/components/property/UnitFields';
@@ -100,6 +100,10 @@ export default function AddProperty() {
     check_in_time: '14:00',
     check_out_time: '12:00',
     instant_booking: false,
+    // Ownership & Sale fields
+    ownership_form: undefined as 'freehold' | 'leasehold' | 'company' | 'foreign_company' | undefined,
+    is_for_sale: false,
+    sale_price: '',
   });
 
   // Apply cloned property data when loaded
@@ -146,6 +150,10 @@ export default function AddProperty() {
         check_in_time: sourceProperty.check_in_time || '14:00',
         check_out_time: sourceProperty.check_out_time || '12:00',
         instant_booking: sourceProperty.instant_booking || false,
+        // Ownership & Sale fields
+        ownership_form: (sourceProperty as any).ownership_form as 'freehold' | 'leasehold' | 'company' | 'foreign_company' | undefined,
+        is_for_sale: (sourceProperty as any).is_for_sale || false,
+        sale_price: (sourceProperty as any).sale_price?.toString() || '',
       });
       setIsCloneDataApplied(true);
       toast.success(isRu ? 'Данные объекта загружены. Заполните этаж и номер квартиры.' : 'Property data loaded. Fill in floor and unit number.');
@@ -226,6 +234,7 @@ export default function AddProperty() {
       area_sqm: formData.area_sqm ? Number(formData.area_sqm) : undefined,
       price_per_night: formData.price_per_night ? Number(formData.price_per_night) : undefined,
       deposit_amount: formData.deposit_amount ? Number(formData.deposit_amount) : undefined,
+      sale_price: formData.sale_price ? Number(formData.sale_price) : undefined,
       // Add ownership fields
       created_on_behalf: isOnBehalf,
       ownership_type: ownershipData.ownership_type,
@@ -566,97 +575,205 @@ export default function AddProperty() {
 
       case 'pricing':
         return (
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <DollarSign className="h-4 w-4" />
-                {isRu ? 'Базовые условия аренды' : 'Basic Rental Terms'}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>{isRu ? 'Цена за ночь (THB)' : 'Price per night (THB)'}</Label>
-                  <Input
-                    type="number"
-                    min={0}
-                    value={formData.price_per_night}
-                    onChange={(e) => setFormData(prev => ({ ...prev, price_per_night: e.target.value }))}
-                    placeholder="2500"
-                  />
+          <div className="space-y-6">
+            {/* Ownership Form - Legal Structure */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Landmark className="h-4 w-4" />
+                  {isRu ? 'Форма собственности' : 'Ownership Structure'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  {isRu 
+                    ? 'Укажите юридическую форму владения недвижимостью' 
+                    : 'Specify the legal ownership structure of the property'}
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { value: 'freehold', labelEn: 'Freehold (Chanote)', labelRu: 'Фрихолд (Чанот)', icon: <Landmark className="h-4 w-4" />, desc: isRu ? 'Полная собственность' : 'Full ownership' },
+                    { value: 'leasehold', labelEn: 'Leasehold', labelRu: 'Лизхолд', icon: <Clock className="h-4 w-4" />, desc: isRu ? 'Аренда земли' : 'Land lease' },
+                    { value: 'company', labelEn: 'Thai Company', labelRu: 'Тайская компания', icon: <Building2 className="h-4 w-4" />, desc: isRu ? 'Владение через ООО' : 'LLC ownership' },
+                    { value: 'foreign_company', labelEn: 'Foreign Company', labelRu: 'Иностранная компания', icon: <Briefcase className="h-4 w-4" />, desc: isRu ? 'Офшор / иностранное ООО' : 'Offshore / foreign LLC' },
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, ownership_form: option.value as 'freehold' | 'leasehold' | 'company' | 'foreign_company' }))}
+                      className={`p-3 rounded-xl border-2 text-left transition-colors ${
+                        formData.ownership_form === option.value
+                          ? 'border-primary bg-primary/5'
+                          : 'border-muted hover:border-muted-foreground/30'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-muted-foreground">{option.icon}</span>
+                        <span className="font-medium text-sm">{isRu ? option.labelRu : option.labelEn}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{option.desc}</p>
+                    </button>
+                  ))}
                 </div>
-                <div className="space-y-2">
-                  <Label>{isRu ? 'Депозит (THB)' : 'Deposit (THB)'}</Label>
-                  <Input
-                    type="number"
-                    min={0}
-                    value={formData.deposit_amount}
-                    onChange={(e) => setFormData(prev => ({ ...prev, deposit_amount: e.target.value }))}
-                    placeholder="10000"
-                  />
-                </div>
-              </div>
+              </CardContent>
+            </Card>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {isRu ? 'Мин. срок (ночей)' : 'Min stay (nights)'}
-                  </Label>
-                  <Input
-                    type="number"
-                    min={1}
-                    value={formData.min_stay_nights}
-                    onChange={(e) => setFormData(prev => ({ ...prev, min_stay_nights: Number(e.target.value) }))}
-                  />
+            {/* Rental Terms */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <DollarSign className="h-4 w-4" />
+                  {isRu ? 'Условия аренды' : 'Rental Terms'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>{isRu ? 'Цена за ночь (THB)' : 'Price per night (THB)'}</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={formData.price_per_night}
+                      onChange={(e) => setFormData(prev => ({ ...prev, price_per_night: e.target.value }))}
+                      placeholder="2500"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{isRu ? 'Депозит (THB)' : 'Deposit (THB)'}</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={formData.deposit_amount}
+                      onChange={(e) => setFormData(prev => ({ ...prev, deposit_amount: e.target.value }))}
+                      placeholder="10000"
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-1">
-                    <Users className="h-3 w-3" />
-                    {isRu ? 'Макс. гостей' : 'Max guests'}
-                  </Label>
-                  <Input
-                    type="number"
-                    min={1}
-                    value={formData.max_guests}
-                    onChange={(e) => setFormData(prev => ({ ...prev, max_guests: Number(e.target.value) }))}
-                  />
-                </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>{isRu ? 'Заезд' : 'Check-in'}</Label>
-                  <Input
-                    type="time"
-                    value={formData.check_in_time}
-                    onChange={(e) => setFormData(prev => ({ ...prev, check_in_time: e.target.value }))}
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {isRu ? 'Мин. срок (ночей)' : 'Min stay (nights)'}
+                    </Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      value={formData.min_stay_nights}
+                      onChange={(e) => setFormData(prev => ({ ...prev, min_stay_nights: Number(e.target.value) }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-1">
+                      <Users className="h-3 w-3" />
+                      {isRu ? 'Макс. гостей' : 'Max guests'}
+                    </Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      value={formData.max_guests}
+                      onChange={(e) => setFormData(prev => ({ ...prev, max_guests: Number(e.target.value) }))}
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>{isRu ? 'Выезд' : 'Check-out'}</Label>
-                  <Input
-                    type="time"
-                    value={formData.check_out_time}
-                    onChange={(e) => setFormData(prev => ({ ...prev, check_out_time: e.target.value }))}
-                  />
-                </div>
-              </div>
 
-              <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-                <div>
-                  <p className="font-medium">{isRu ? 'Мгновенное бронирование' : 'Instant Booking'}</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>{isRu ? 'Заезд' : 'Check-in'}</Label>
+                    <Input
+                      type="time"
+                      value={formData.check_in_time}
+                      onChange={(e) => setFormData(prev => ({ ...prev, check_in_time: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{isRu ? 'Выезд' : 'Check-out'}</Label>
+                    <Input
+                      type="time"
+                      value={formData.check_out_time}
+                      onChange={(e) => setFormData(prev => ({ ...prev, check_out_time: e.target.value }))}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+                  <div>
+                    <p className="font-medium">{isRu ? 'Мгновенное бронирование' : 'Instant Booking'}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {isRu ? 'Гости могут бронировать без подтверждения' : 'Guests can book without approval'}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={formData.instant_booking}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, instant_booking: checked }))}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Sale Option */}
+            <Card className={formData.is_for_sale ? 'border-green-500/50 bg-green-500/5' : ''}>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <BadgeDollarSign className="h-4 w-4" />
+                    {isRu ? 'Готов к продаже' : 'Available for Sale'}
+                  </CardTitle>
+                  <Switch
+                    checked={formData.is_for_sale}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_for_sale: checked }))}
+                  />
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {formData.is_for_sale ? (
+                  <>
+                    <div className="space-y-2">
+                      <Label>{isRu ? 'Цена продажи (THB)' : 'Sale Price (THB)'}</Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        value={formData.sale_price}
+                        onChange={(e) => setFormData(prev => ({ ...prev, sale_price: e.target.value }))}
+                        placeholder="5000000"
+                        className="text-lg"
+                      />
+                      {formData.sale_price && Number(formData.sale_price) > 0 && (
+                        <p className="text-sm text-muted-foreground">
+                          ≈ ${(Number(formData.sale_price) / 35).toLocaleString('en-US', { maximumFractionDigits: 0 })} USD
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg space-y-2">
+                      <p className="text-sm font-medium text-green-700 dark:text-green-400">
+                        🏷️ {isRu ? 'Комиссия платформы: 5%' : 'Platform Commission: 5%'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {isRu 
+                          ? 'При успешной продаже через UNO. Объект также появится в разделе "Продажа" на маркетплейсе.' 
+                          : 'On successful sale through UNO. Property will also appear in the "For Sale" marketplace section.'}
+                      </p>
+                    </div>
+
+                    {!formData.ownership_form && (
+                      <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                        <p className="text-sm text-amber-700 dark:text-amber-400">
+                          ⚠️ {isRu ? 'Укажите форму собственности выше для публикации в разделе продажи' : 'Please specify ownership structure above to list in sales section'}
+                        </p>
+                      </div>
+                    )}
+                  </>
+                ) : (
                   <p className="text-sm text-muted-foreground">
-                    {isRu ? 'Гости могут бронировать без подтверждения' : 'Guests can book without approval'}
+                    {isRu 
+                      ? 'Включите эту опцию, если готовы рассмотреть продажу объекта. Карточка появится в разделе "Продажа" на маркетплейсе.' 
+                      : 'Enable this option if you\'re open to selling the property. It will appear in the "For Sale" marketplace section.'}
                   </p>
-                </div>
-                <Switch
-                  checked={formData.instant_booking}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, instant_booking: checked }))}
-                />
-              </div>
-            </CardContent>
-          </Card>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         );
 
       case 'management':

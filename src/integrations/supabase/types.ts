@@ -4175,6 +4175,7 @@ export type Database = {
           instant_booking: boolean | null
           internet_provider: string | null
           internet_speed: string | null
+          is_for_sale: boolean | null
           is_rented: boolean | null
           key_handover: string | null
           lat: number | null
@@ -4199,6 +4200,7 @@ export type Database = {
           nearby_places: Json | null
           notes: string | null
           owner_id: string
+          ownership_form: string | null
           ownership_transferred_at: string | null
           ownership_type: string | null
           ownership_verification_notes: string | null
@@ -4224,6 +4226,8 @@ export type Database = {
           rental_platform: string | null
           rooms: Json | null
           safety_features: string[] | null
+          sale_currency: string | null
+          sale_price: number | null
           seasonal_pricing: Json | null
           smoking_penalty: number | null
           status: string | null
@@ -4305,6 +4309,7 @@ export type Database = {
           instant_booking?: boolean | null
           internet_provider?: string | null
           internet_speed?: string | null
+          is_for_sale?: boolean | null
           is_rented?: boolean | null
           key_handover?: string | null
           lat?: number | null
@@ -4329,6 +4334,7 @@ export type Database = {
           nearby_places?: Json | null
           notes?: string | null
           owner_id: string
+          ownership_form?: string | null
           ownership_transferred_at?: string | null
           ownership_type?: string | null
           ownership_verification_notes?: string | null
@@ -4354,6 +4360,8 @@ export type Database = {
           rental_platform?: string | null
           rooms?: Json | null
           safety_features?: string[] | null
+          sale_currency?: string | null
+          sale_price?: number | null
           seasonal_pricing?: Json | null
           smoking_penalty?: number | null
           status?: string | null
@@ -4435,6 +4443,7 @@ export type Database = {
           instant_booking?: boolean | null
           internet_provider?: string | null
           internet_speed?: string | null
+          is_for_sale?: boolean | null
           is_rented?: boolean | null
           key_handover?: string | null
           lat?: number | null
@@ -4459,6 +4468,7 @@ export type Database = {
           nearby_places?: Json | null
           notes?: string | null
           owner_id?: string
+          ownership_form?: string | null
           ownership_transferred_at?: string | null
           ownership_type?: string | null
           ownership_verification_notes?: string | null
@@ -4484,6 +4494,8 @@ export type Database = {
           rental_platform?: string | null
           rooms?: Json | null
           safety_features?: string[] | null
+          sale_currency?: string | null
+          sale_price?: number | null
           seasonal_pricing?: Json | null
           smoking_penalty?: number | null
           status?: string | null
@@ -5637,6 +5649,7 @@ export type Database = {
           location_id: string | null
           max_guests: number | null
           min_stay_nights: number | null
+          ownership_form: string | null
           price: number | null
           price_period: string | null
           project_id: string | null
@@ -5685,6 +5698,7 @@ export type Database = {
           location_id?: string | null
           max_guests?: number | null
           min_stay_nights?: number | null
+          ownership_form?: string | null
           price?: number | null
           price_period?: string | null
           project_id?: string | null
@@ -5733,6 +5747,7 @@ export type Database = {
           location_id?: string | null
           max_guests?: number | null
           min_stay_nights?: number | null
+          ownership_form?: string | null
           price?: number | null
           price_period?: string | null
           project_id?: string | null
