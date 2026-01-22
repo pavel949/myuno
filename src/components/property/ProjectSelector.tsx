@@ -6,8 +6,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Building2, Plus, MapPin, Calendar, Loader2, Search, X, Clock } from 'lucide-react';
+import { Building2, Plus, MapPin, Calendar, Loader2, Search, X, Clock, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { ProjectInfoCard } from './ProjectInfoCard';
 
 interface ProjectSelectorProps {
   value?: string;
@@ -25,6 +32,7 @@ export function ProjectSelector({ value, onChange, selectedProject }: ProjectSel
   const [isOpen, setIsOpen] = useState(false);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
+  const [showProjectDetails, setShowProjectDetails] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -69,7 +77,8 @@ export function ProjectSelector({ value, onChange, selectedProject }: ProjectSel
     setIsOpen(false);
   };
 
-  const handleClearProject = () => {
+  const handleClearProject = (e: React.MouseEvent) => {
+    e.stopPropagation();
     onChange(undefined, undefined);
     setSearchQuery('');
   };
@@ -102,13 +111,22 @@ export function ProjectSelector({ value, onChange, selectedProject }: ProjectSel
     setIsOpen(false);
   };
 
+  const handleProjectCardClick = () => {
+    if (selectedProject) {
+      setShowProjectDetails(true);
+    }
+  };
+
   return (
     <div className="space-y-3">
       <Label>{isRu ? 'Проект / ЖК' : 'Project / Complex'}</Label>
       
-      {/* Selected project display */}
+      {/* Selected project display - clickable */}
       {selectedProject ? (
-        <Card className="bg-muted/30">
+        <Card 
+          className="bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
+          onClick={handleProjectCardClick}
+        >
           <CardContent className="p-3">
             <div className="flex gap-3">
               {selectedProject.cover_image ? (
@@ -125,9 +143,12 @@ export function ProjectSelector({ value, onChange, selectedProject }: ProjectSel
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <h4 className="font-medium text-sm truncate">
-                      {isRu ? selectedProject.name_ru : selectedProject.name_en}
-                    </h4>
+                    <div className="flex items-center gap-1.5">
+                      <h4 className="font-medium text-sm truncate">
+                        {isRu ? selectedProject.name_ru : selectedProject.name_en}
+                      </h4>
+                      <ExternalLink className="h-3 w-3 text-muted-foreground shrink-0" />
+                    </div>
                     {selectedProject.address ? (
                       <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                         <MapPin className="h-3 w-3" />
@@ -347,6 +368,23 @@ export function ProjectSelector({ value, onChange, selectedProject }: ProjectSel
           </CardContent>
         </Card>
       )}
+
+      {/* Project details modal */}
+      <Dialog open={showProjectDetails} onOpenChange={setShowProjectDetails}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto p-0">
+          <DialogHeader className="sr-only">
+            <DialogTitle>
+              {selectedProject && (isRu ? selectedProject.name_ru : selectedProject.name_en)}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedProject && (
+            <ProjectInfoCard 
+              project={selectedProject as any} 
+              className="border-0 shadow-none"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
