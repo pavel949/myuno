@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Star, MapPin, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -18,7 +18,7 @@ interface CarouselItem {
   path: string;
 }
 
-export function RecommendedCarousel() {
+export const RecommendedCarousel = memo(function RecommendedCarousel() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -27,34 +27,35 @@ export function RecommendedCarousel() {
 
   const { tours, isLoading: toursLoading } = useTours({ category: undefined });
 
-  // Tours only
-  const items: CarouselItem[] = tours.slice(0, 8).map(tour => ({
-    id: tour.id,
-    type: 'tour' as const,
-    image: tour.cover_image || 'https://images.unsplash.com/photo-1537956965359-7573183d1f57?w=400',
-    title: tour.title_en,
-    titleRu: tour.title_ru,
-    rating: tour.rating ?? undefined,
-    price: tour.price ?? undefined,
-    location: tour.meeting_point ?? undefined,
-    locationRu: tour.meeting_point ?? undefined,
-    duration: tour.duration_hours ? `${tour.duration_hours}h` : undefined,
-    path: `/tours/${tour.id}`,
-  }));
+  // Memoize items transformation
+  const items: CarouselItem[] = useMemo(() => 
+    tours.slice(0, 8).map(tour => ({
+      id: tour.id,
+      type: 'tour' as const,
+      image: tour.cover_image || 'https://images.unsplash.com/photo-1537956965359-7573183d1f57?w=400',
+      title: tour.title_en,
+      titleRu: tour.title_ru,
+      rating: tour.rating ?? undefined,
+      price: tour.price ?? undefined,
+      location: tour.meeting_point ?? undefined,
+      locationRu: tour.meeting_point ?? undefined,
+      duration: tour.duration_hours ? `${tour.duration_hours}h` : undefined,
+      path: `/tours/${tour.id}`,
+    })), [tours]);
 
-  const checkScroll = () => {
+  const checkScroll = useCallback(() => {
     if (scrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
       setCanScrollLeft(scrollLeft > 0);
       setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
     }
-  };
+  }, []);
 
   useEffect(() => {
     checkScroll();
-  }, [items]);
+  }, [items, checkScroll]);
 
-  const scroll = (direction: 'left' | 'right') => {
+  const scroll = useCallback((direction: 'left' | 'right') => {
     if (scrollRef.current) {
       const scrollAmount = 280;
       scrollRef.current.scrollBy({
@@ -62,7 +63,7 @@ export function RecommendedCarousel() {
         behavior: 'smooth',
       });
     }
-  };
+  }, []);
 
   if (toursLoading) {
     return (
@@ -182,4 +183,4 @@ export function RecommendedCarousel() {
       </div>
     </div>
   );
-}
+});

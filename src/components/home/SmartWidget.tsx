@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, memo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sun, Cloud, CloudRain, Calendar, Thermometer, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -6,7 +6,8 @@ import { useWeather } from '@/hooks/useWeather';
 import { useTodayEvents, useSmartRecommendations } from '@/hooks/useTodayEvents';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const WeatherIcon = ({ condition, isLoading }: { condition: string; isLoading?: boolean }) => {
+// Memoized weather icon component
+const WeatherIcon = memo(function WeatherIcon({ condition, isLoading }: { condition: string; isLoading?: boolean }) {
   if (isLoading) {
     return <Skeleton className="w-8 h-8 rounded-full" />;
   }
@@ -21,23 +22,31 @@ const WeatherIcon = ({ condition, isLoading }: { condition: string; isLoading?: 
     default:
       return <Sun className="w-8 h-8 text-amber-400" />;
   }
-};
+});
 
-export function SmartWidget() {
+export const SmartWidget = memo(function SmartWidget() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const { data: weather, isLoading: isWeatherLoading } = useWeather();
   const { data: todayEvents, isLoading: isEventsLoading } = useTodayEvents();
   const { data: recommendations, isLoading: isRecsLoading } = useSmartRecommendations();
   
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentHour, setCurrentHour] = useState(() => new Date().getHours());
 
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+    // Only update when hour changes (affects greeting)
+    const checkHour = () => {
+      const hour = new Date().getHours();
+      if (hour !== currentHour) {
+        setCurrentHour(hour);
+      }
+    };
+    
+    const timer = setInterval(checkHour, 60000);
     return () => clearInterval(timer);
-  }, []);
+  }, [currentHour]);
 
-  // Get one random recommendation
+  // Get one random recommendation - only recalculate when recommendations change
   const recommendation = useMemo(() => {
     if (!recommendations || recommendations.length === 0) return null;
     return recommendations[Math.floor(Math.random() * recommendations.length)];
@@ -46,14 +55,21 @@ export function SmartWidget() {
   // Get first event of the day
   const todayEvent = todayEvents?.[0] || null;
 
-  const greeting = () => {
-    const hour = currentTime.getHours();
-    if (hour < 12) return language === 'ru' ? 'Доброе утро' : 'Good morning';
-    if (hour < 17) return language === 'ru' ? 'Добрый день' : 'Good afternoon';
+  const greeting = useMemo(() => {
+    if (currentHour < 12) return language === 'ru' ? 'Доброе утро' : 'Good morning';
+    if (currentHour < 17) return language === 'ru' ? 'Добрый день' : 'Good afternoon';
     return language === 'ru' ? 'Добрый вечер' : 'Good evening';
-  };
+  }, [currentHour, language]);
 
   const isRu = language === 'ru';
+  
+  const handleEventClick = useCallback(() => {
+    navigate(todayEvent ? `/events/${todayEvent.id}` : '/events');
+  }, [navigate, todayEvent]);
+  
+  const handleRecClick = useCallback(() => {
+    if (recommendation) navigate(recommendation.path);
+  }, [navigate, recommendation]);
 
   return (
     <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 via-card to-primary/10 border border-border">
@@ -65,7 +81,7 @@ export function SmartWidget() {
         {/* Header with greeting and weather */}
         <div className="flex items-start justify-between mb-4">
           <div>
-            <p className="text-xs text-muted-foreground mb-1">{greeting()}</p>
+            <p className="text-xs text-muted-foreground mb-1">{greeting}</p>
             <h2 className="text-lg font-semibold text-foreground">
               {isRu ? 'Пхукет сегодня' : 'Phuket Today'}
             </h2>
@@ -97,7 +113,7 @@ export function SmartWidget() {
         <div className="grid grid-cols-2 gap-3">
           {/* Today's Event */}
           <button
-            onClick={() => navigate(todayEvent ? `/events/${todayEvent.id}` : '/events')}
+            onClick={handleEventClick}
             className="flex flex-col p-3 rounded-xl bg-background/50 backdrop-blur-sm border border-border/50 hover:border-primary/30 transition-all group text-left"
           >
             <div className="flex items-center gap-2 mb-2">
@@ -136,7 +152,7 @@ export function SmartWidget() {
 
           {/* Daily Recommendation */}
           <button
-            onClick={() => recommendation && navigate(recommendation.path)}
+            onClick={handleRecClick}
             className="flex flex-col p-3 rounded-xl bg-background/50 backdrop-blur-sm border border-border/50 hover:border-primary/30 transition-all group text-left"
           >
             <div className="flex items-center gap-2 mb-2">
@@ -180,4 +196,4 @@ export function SmartWidget() {
       </div>
     </div>
   );
-}
+});

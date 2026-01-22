@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Car, 
@@ -139,17 +139,17 @@ const quickActions: QuickAction[] = [
   },
 ];
 
-export function QuickActionsGrid() {
+export const QuickActionsGrid = memo(function QuickActionsGrid() {
   const navigate = useNavigate();
   const { language } = useLanguage();
 
-  const handleClick = (action: QuickAction, e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = useCallback((action: QuickAction, e: React.MouseEvent<HTMLButtonElement>) => {
     triggerRipple(e);
     const settings = getFeedbackSettings();
     if (settings.hapticEnabled) triggerHaptic(action.isUrgent ? 'medium' : 'light');
     if (settings.soundEnabled) playSound('click');
     navigate(action.path);
-  };
+  }, [navigate]);
 
   return (
     <div className="grid grid-cols-5 gap-2">
@@ -205,4 +205,4 @@ export function QuickActionsGrid() {
       })}
     </div>
   );
-}
+});

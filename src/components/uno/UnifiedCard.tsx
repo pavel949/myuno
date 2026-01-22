@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import { Star, MapPin, Clock, BadgeCheck, Palmtree } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -27,7 +27,7 @@ interface UnifiedCardProps {
   variant?: CardVariant;
 }
 
-export function UnifiedCard({
+export const UnifiedCard = memo(function UnifiedCard({
   image,
   title,
   subtitle,
@@ -48,10 +48,10 @@ export function UnifiedCard({
 }: UnifiedCardProps) {
   const { t } = useLanguage();
 
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     triggerRipple(e);
     onClick?.();
-  };
+  }, [onClick]);
 
   // Compact variant - minimal info, small image
   if (variant === 'compact') {
@@ -386,4 +386,4 @@ export function UnifiedCard({
       </div>
     </div>
   );
-}
+});
