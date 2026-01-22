@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle2, Shield, CreditCard, Globe } from 'lucide-react';
+import { Smartphone, Shield, Users, Globe, Headphones, CreditCard } from 'lucide-react';
 import { PitchSlide, SlideTitle, SlideContent } from '../PitchSlide';
 
 interface SolutionSlideProps {
@@ -9,40 +9,58 @@ interface SolutionSlideProps {
 
 const solutions = [
   {
-    icon: CheckCircle2,
-    title: '15+ Verified Verticals',
-    titleRu: '15+ проверенных категорий',
-    description: 'Transport, tours, property, medical, legal, and more - all in one app',
-    descriptionRu: 'Транспорт, туры, недвижимость, медицина, юридические услуги - всё в одном приложении',
-    color: 'bg-green-500/20',
-    iconColor: 'text-green-400',
+    icon: Smartphone,
+    title: '15+ Verticals in One App',
+    titleRu: '15+ вертикалей в одном приложении',
+    description: 'Transport, tours, property, medical, legal — all verified and accessible',
+    descriptionRu: 'Транспорт, туры, недвижимость, медицина, юридические услуги — всё проверено',
+    color: 'from-blue-500 to-cyan-500',
+    bgColor: 'bg-blue-500/20',
   },
   {
     icon: Shield,
-    title: 'Trust Scores & Reviews',
-    titleRu: 'Рейтинги и отзывы',
-    description: 'Verified vendors with transparent ratings and dispute resolution',
-    descriptionRu: 'Проверенные поставщики с прозрачными рейтингами и разрешением споров',
-    color: 'bg-blue-500/20',
-    iconColor: 'text-blue-400',
+    title: 'G-Trust Partner Network',
+    titleRu: 'Сеть G-Trust партнёров',
+    description: 'Verified vendors with ratings, reviews & dispute resolution',
+    descriptionRu: 'Проверенные поставщики с рейтингами, отзывами и защитой',
+    color: 'from-green-500 to-emerald-500',
+    bgColor: 'bg-green-500/20',
+  },
+  {
+    icon: Headphones,
+    title: 'UNO Team On Ground',
+    titleRu: 'UNO Team на месте',
+    description: '24/7 real human support in your language when you need it',
+    descriptionRu: 'Реальная поддержка 24/7 на вашем языке, когда она нужна',
+    color: 'from-purple-500 to-pink-500',
+    bgColor: 'bg-purple-500/20',
   },
   {
     icon: CreditCard,
     title: 'Unified Digital Payments',
     titleRu: 'Единые цифровые платежи',
-    description: 'One wallet for all services, no more cash-only hassles',
-    descriptionRu: 'Один кошелёк для всех услуг, никаких проблем с наличными',
-    color: 'bg-purple-500/20',
-    iconColor: 'text-purple-400',
+    description: 'One wallet for all services, cashback rewards, no cash hassles',
+    descriptionRu: 'Один кошелёк для всех услуг, кэшбэк, никаких проблем с наличными',
+    color: 'from-amber-500 to-orange-500',
+    bgColor: 'bg-amber-500/20',
   },
   {
     icon: Globe,
     title: 'Multi-Language Support',
     titleRu: 'Многоязычная поддержка',
-    description: 'English, Russian, Thai - serving expats and tourists alike',
-    descriptionRu: 'Английский, русский, тайский - для экспатов и туристов',
-    color: 'bg-cyan-500/20',
-    iconColor: 'text-cyan-400',
+    description: 'English, Russian, Thai — serving expats and tourists alike',
+    descriptionRu: 'Английский, русский, тайский — для экспатов и туристов',
+    color: 'from-cyan-500 to-blue-500',
+    bgColor: 'bg-cyan-500/20',
+  },
+  {
+    icon: Users,
+    title: 'Property Owner Tools',
+    titleRu: 'Инструменты для владельцев',
+    description: 'Full management, booking calendar, analytics, guest services',
+    descriptionRu: 'Полное управление, календарь, аналитика, услуги для гостей',
+    color: 'from-indigo-500 to-purple-500',
+    bgColor: 'bg-indigo-500/20',
   },
 ];
 
@@ -53,36 +71,51 @@ export function SolutionSlide({ isRussian }: SolutionSlideProps) {
         {isRussian ? 'Решение' : 'The Solution'}
       </SlideTitle>
 
-      <motion.p
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="text-xl md:text-2xl text-primary font-semibold text-center mb-8"
+        transition={{ delay: 0.2 }}
+        className="text-center mb-8"
       >
-        UNO - {isRussian ? 'Единая платформа для всех услуг' : 'One Platform for All Services'}
-      </motion.p>
+        <p className="text-2xl md:text-3xl font-bold">
+          <span className="bg-gradient-to-r from-primary to-cyan-400 bg-clip-text text-transparent">
+            myUNO
+          </span>
+          <span className="text-white">
+            {isRussian ? ' — Единая платформа' : ' — One Platform'}
+          </span>
+        </p>
+        <p className="text-lg text-slate-400 mt-2">
+          {isRussian 
+            ? 'Цифровая + офлайн инфраструктура для всех задач'
+            : 'Digital + offline infrastructure for all your needs'}
+        </p>
+      </motion.div>
 
       <SlideContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {solutions.map((solution, index) => (
             <motion.div
               key={solution.title}
-              initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 + index * 0.15 }}
-              className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6"
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: 0.3 + index * 0.08 }}
+              className="group relative"
             >
-              <div className="flex items-start gap-4">
-                <div className={`p-3 ${solution.color} rounded-xl`}>
-                  <solution.icon className={`w-6 h-6 ${solution.iconColor}`} />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-white mb-2">
-                    {isRussian ? solution.titleRu : solution.title}
-                  </h3>
-                  <p className="text-sm text-slate-400">
-                    {isRussian ? solution.descriptionRu : solution.description}
-                  </p>
+              <div className={`absolute inset-0 bg-gradient-to-br ${solution.color} rounded-2xl blur-xl opacity-0 group-hover:opacity-20 transition-opacity`} />
+              <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-5 hover:border-white/20 transition-colors h-full">
+                <div className="flex items-start gap-3">
+                  <div className={`p-2.5 ${solution.bgColor} rounded-xl`}>
+                    <solution.icon className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-semibold text-white mb-1">
+                      {isRussian ? solution.titleRu : solution.title}
+                    </h3>
+                    <p className="text-sm text-slate-400 leading-relaxed">
+                      {isRussian ? solution.descriptionRu : solution.description}
+                    </p>
+                  </div>
                 </div>
               </div>
             </motion.div>
