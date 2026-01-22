@@ -317,17 +317,12 @@ const DemoIndex = lazy(() => import('@/pages/demo/DemoIndex'));
 const DemoHome = lazy(() => import('@/pages/demo/DemoHome'));
 const VendorDemo = lazy(() => import('@/pages/demo/VendorDemo'));
 
-// Suspense wrapper for lazy loaded components - wrapped in div for AnimatePresence ref compatibility
-const LazyPage = React.forwardRef<HTMLDivElement, { children: React.ReactNode }>(
-  ({ children }, ref) => (
-    <div ref={ref}>
-      <Suspense fallback={<LoadingState />}>
-        <PageTransition>{children}</PageTransition>
-      </Suspense>
-    </div>
-  )
+// Suspense wrapper for lazy loaded components
+const LazyPage = ({ children }: { children: React.ReactNode }) => (
+  <Suspense fallback={<LoadingState />}>
+    <PageTransition>{children}</PageTransition>
+  </Suspense>
 );
-LazyPage.displayName = 'LazyPage';
 
 // Prefetch popular routes on idle
 const prefetchRoutes = () => {

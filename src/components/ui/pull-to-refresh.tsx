@@ -91,11 +91,10 @@ export function PullToRefresh({
   return (
     <div 
       ref={containerRef}
-      className={cn("relative overflow-auto overscroll-contain", className)}
+      className={cn("relative", className)}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      style={{ WebkitOverflowScrolling: 'touch' }}
     >
       {/* Pull indicator */}
       {showIndicator && (
