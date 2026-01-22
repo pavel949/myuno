@@ -1,8 +1,6 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAdminCheck, useAdminProviders, useAdminServices } from '@/hooks/useAdmin';
+import { useAdminProviders, useAdminServices } from '@/hooks/useAdmin';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -47,27 +45,14 @@ import {
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
-  const { isAdmin, isLoading: adminLoading } = useAdminCheck();
-  const { providers } = useAdminProviders();
-  const { services } = useAdminServices();
+  const { providers, isLoading: providersLoading } = useAdminProviders();
+  const { services, isLoading: servicesLoading } = useAdminServices();
 
   const isRussian = language === 'ru';
+  const isLoading = providersLoading || servicesLoading;
 
-  React.useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/auth');
-    }
-  }, [user, authLoading, navigate]);
-
-  React.useEffect(() => {
-    if (!adminLoading && !isAdmin && user) {
-      navigate('/');
-    }
-  }, [isAdmin, adminLoading, user, navigate]);
-
-  if (authLoading || adminLoading) {
+  if (isLoading) {
     return (
       <AppLayout>
         <PageContainer>
@@ -83,8 +68,6 @@ export default function AdminDashboard() {
       </AppLayout>
     );
   }
-
-  if (!isAdmin) return null;
 
   const stats = [
     {
