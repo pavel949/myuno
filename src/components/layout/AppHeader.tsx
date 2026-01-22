@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Bell, ShoppingBag } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -18,7 +18,7 @@ interface AppHeaderProps {
   className?: string;
 }
 
-export function AppHeader({ title, showBack, onMenuClick, className }: AppHeaderProps) {
+export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick, className }: AppHeaderProps) {
   const { user } = useAuth();
   const { t } = useLanguage();
   const { unreadCount } = useNotifications();
@@ -115,4 +115,4 @@ export function AppHeader({ title, showBack, onMenuClick, className }: AppHeader
       </div>
     </header>
   );
-}
+});

@@ -54,18 +54,33 @@ export function useSmartRecommendations() {
   return useQuery({
     queryKey: ['smart-recommendations'],
     queryFn: async (): Promise<SmartRecommendation[]> => {
+      // Parallel fetch all data sources for better performance
+      const [toursResult, restaurantsResult, salonsResult] = await Promise.all([
+        supabase
+          .from('tours')
+          .select('id, title_en, title_ru, cover_image, rating, price, duration_hours')
+          .eq('is_active', true)
+          .order('rating', { ascending: false })
+          .limit(2),
+        supabase
+          .from('restaurants')
+          .select('id, name_en, name_ru, cover_image, rating, price_range')
+          .eq('is_active', true)
+          .order('rating', { ascending: false })
+          .limit(1),
+        supabase
+          .from('salons')
+          .select('id, name_en, name_ru, cover_image, rating')
+          .eq('is_active', true)
+          .order('rating', { ascending: false })
+          .limit(1),
+      ]);
+
       const recommendations: SmartRecommendation[] = [];
 
-      // Fetch top-rated tour
-      const { data: tours } = await supabase
-        .from('tours')
-        .select('id, title_en, title_ru, cover_image, rating, price, duration_hours')
-        .eq('is_active', true)
-        .order('rating', { ascending: false })
-        .limit(2);
-
-      if (tours && tours.length > 0) {
-        tours.forEach(tour => {
+      // Process tours
+      if (toursResult.data && toursResult.data.length > 0) {
+        toursResult.data.forEach(tour => {
           recommendations.push({
             id: tour.id,
             type: 'tour',
@@ -82,16 +97,9 @@ export function useSmartRecommendations() {
         });
       }
 
-      // Fetch top restaurant
-      const { data: restaurants } = await supabase
-        .from('restaurants')
-        .select('id, name_en, name_ru, cover_image, rating, price_range')
-        .eq('is_active', true)
-        .order('rating', { ascending: false })
-        .limit(1);
-
-      if (restaurants && restaurants.length > 0) {
-        const restaurant = restaurants[0];
+      // Process restaurants
+      if (restaurantsResult.data && restaurantsResult.data.length > 0) {
+        const restaurant = restaurantsResult.data[0];
         recommendations.push({
           id: restaurant.id,
           type: 'restaurant',
@@ -107,16 +115,9 @@ export function useSmartRecommendations() {
         });
       }
 
-      // Fetch top salon/spa
-      const { data: salons } = await supabase
-        .from('salons')
-        .select('id, name_en, name_ru, cover_image, rating')
-        .eq('is_active', true)
-        .order('rating', { ascending: false })
-        .limit(1);
-
-      if (salons && salons.length > 0) {
-        const salon = salons[0];
+      // Process salons
+      if (salonsResult.data && salonsResult.data.length > 0) {
+        const salon = salonsResult.data[0];
         recommendations.push({
           id: salon.id,
           type: 'beauty',
