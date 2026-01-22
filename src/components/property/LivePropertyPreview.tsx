@@ -142,10 +142,17 @@ export function LivePropertyPreview({ data, className, collapsed, onToggle }: Li
   return (
     <Card className={cn("overflow-hidden", className)}>
       <CardHeader className="py-2 px-3 flex flex-row items-center justify-between border-b bg-muted/30">
-        <CardTitle className="text-xs font-medium flex items-center gap-2">
-          <Eye className="h-3.5 w-3.5" />
-          {isRu ? 'Превью листинга' : 'Listing Preview'}
-        </CardTitle>
+        <div>
+          <CardTitle className="text-xs font-medium flex items-center gap-2">
+            <Eye className="h-3.5 w-3.5" />
+            {isRu ? 'Превью листинга' : 'Listing Preview'}
+          </CardTitle>
+          <p className="text-[10px] text-muted-foreground mt-0.5">
+            {isRu 
+              ? 'Так будет выглядеть карточка (обновляется автоматически)' 
+              : 'How your listing will appear (updates automatically)'}
+          </p>
+        </div>
         <div className="flex items-center gap-2">
           <Badge variant={completeness === 100 ? 'default' : 'secondary'} className="text-[10px]">
             {completeness}% {isRu ? 'готово' : 'complete'}
@@ -161,7 +168,7 @@ export function LivePropertyPreview({ data, className, collapsed, onToggle }: Li
         </div>
       </CardHeader>
 
-      <CardContent className="p-0">
+      <CardContent className="p-0 pointer-events-none select-none">
         {/* Image */}
         <div className="relative aspect-[4/3] bg-muted">
           <AnimatePresence mode="wait">

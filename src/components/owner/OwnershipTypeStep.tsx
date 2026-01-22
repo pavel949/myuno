@@ -202,7 +202,7 @@ export function OwnershipTypeStep({ data, onChange }: OwnershipTypeStepProps) {
 
       {/* Document Upload for Management Agreement */}
       {showDocumentUpload && (
-        <Card className="border-blue-500/30">
+        <Card className="border-muted">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <Upload className="h-4 w-4" />
@@ -210,10 +210,13 @@ export function OwnershipTypeStep({ data, onChange }: OwnershipTypeStepProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-              <p className="text-sm text-blue-700 dark:text-blue-400">
-                📄 {isRu ? selectedOption?.verificationNoteRu : selectedOption?.verificationNoteEn}
-              </p>
+            <div className="p-3 bg-muted/50 rounded-lg">
+              <div className="flex items-start gap-2">
+                <FileSignature className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-muted-foreground">
+                  {isRu ? selectedOption?.verificationNoteRu : selectedOption?.verificationNoteEn}
+                </p>
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -252,17 +255,19 @@ export function OwnershipTypeStep({ data, onChange }: OwnershipTypeStepProps) {
 
       {/* Verbal Agreement Warning */}
       {isVerbalAgreement && (
-        <Card className="border-amber-500/30">
+        <Card className="border-muted">
           <CardContent className="pt-4">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-medium text-sm text-amber-700 dark:text-amber-400">
-                  {isRu ? 'Требуется подтверждение от собственника' : 'Owner confirmation required'}
-                </p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {isRu ? selectedOption?.verificationNoteRu : selectedOption?.verificationNoteEn}
-                </p>
+            <div className="p-3 bg-muted/50 rounded-lg">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-medium text-sm">
+                    {isRu ? 'Требуется подтверждение от собственника' : 'Owner confirmation required'}
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {isRu ? selectedOption?.verificationNoteRu : selectedOption?.verificationNoteEn}
+                  </p>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -271,11 +276,16 @@ export function OwnershipTypeStep({ data, onChange }: OwnershipTypeStepProps) {
 
       {/* Owner Contact Fields */}
       {showOwnerFields && (
-        <Card className="border-primary/30">
+        <Card className="border-muted">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <User className="h-4 w-4" />
               {isRu ? 'Контактные данные собственника' : 'Owner Contact Information'}
+              {!isVerbalAgreement && (
+                <span className="text-xs font-normal text-muted-foreground">
+                  ({isRu ? 'опционально' : 'optional'})
+                </span>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -285,8 +295,8 @@ export function OwnershipTypeStep({ data, onChange }: OwnershipTypeStepProps) {
                     ? 'Обязательно укажите контакты собственника для подтверждения ваших полномочий' 
                     : 'Owner contact details are required to verify your management rights')
                 : (isRu 
-                    ? 'Укажите контакты собственника для приглашения на платформу (опционально)' 
-                    : "Enter owner's contact details to invite them to the platform (optional)")
+                    ? 'Укажите контакты собственника для приглашения на платформу' 
+                    : "Enter owner's contact details to invite them to the platform")
               }
             </p>
 
