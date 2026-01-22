@@ -11,6 +11,9 @@ export interface UserProfile {
   avatar_url: string | null;
   preferred_language: string | null;
   email: string | null;
+  emergency_contact_name: string | null;
+  emergency_contact_phone: string | null;
+  emergency_contact_relationship: string | null;
 }
 
 export interface UpdateProfileData {
@@ -18,6 +21,9 @@ export interface UpdateProfileData {
   phone?: string | null;
   avatar_url?: string | null;
   preferred_language?: string | null;
+  emergency_contact_name?: string | null;
+  emergency_contact_phone?: string | null;
+  emergency_contact_relationship?: string | null;
 }
 
 export function useProfile() {
@@ -32,7 +38,7 @@ export function useProfile() {
 
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, full_name, phone, avatar_url, preferred_language, email')
+        .select('id, full_name, phone, avatar_url, preferred_language, email, emergency_contact_name, emergency_contact_phone, emergency_contact_relationship')
         .eq('id', user.id)
         .single();
 
