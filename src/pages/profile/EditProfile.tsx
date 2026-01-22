@@ -11,18 +11,23 @@ import { AvatarUpload } from '@/components/profile/AvatarUpload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useProfile } from '@/hooks/useProfile';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { cn } from '@/lib/utils';
+import { AlertTriangle } from 'lucide-react';
 
 const profileSchema = z.object({
   full_name: z.string().min(1, 'Введите имя').max(100, 'Слишком длинное имя'),
   phone: z.string().optional(),
   avatar_url: z.string().nullable().optional(),
   preferred_language: z.enum(['ru', 'en', 'th']),
+  emergency_contact_name: z.string().max(100).optional(),
+  emergency_contact_phone: z.string().max(20).optional(),
+  emergency_contact_relationship: z.string().optional(),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -46,6 +51,9 @@ export default function EditProfile() {
       phone: '',
       avatar_url: null,
       preferred_language: language,
+      emergency_contact_name: '',
+      emergency_contact_phone: '',
+      emergency_contact_relationship: '',
     },
   });
 
@@ -64,6 +72,9 @@ export default function EditProfile() {
         phone: profile.phone || '',
         avatar_url: profile.avatar_url,
         preferred_language: (profile.preferred_language as 'ru' | 'en' | 'th') || language,
+        emergency_contact_name: profile.emergency_contact_name || '',
+        emergency_contact_phone: profile.emergency_contact_phone || '',
+        emergency_contact_relationship: profile.emergency_contact_relationship || '',
       });
     }
   }, [profile, form, language]);
@@ -75,6 +86,9 @@ export default function EditProfile() {
         phone: data.phone || null,
         avatar_url: data.avatar_url,
         preferred_language: data.preferred_language,
+        emergency_contact_name: data.emergency_contact_name || null,
+        emergency_contact_phone: data.emergency_contact_phone || null,
+        emergency_contact_relationship: data.emergency_contact_relationship || null,
       });
       navigate('/profile');
     } catch (error) {
@@ -216,6 +230,84 @@ export default function EditProfile() {
                   </FormItem>
                 )}
               />
+            </SectionCard>
+
+            {/* Emergency Contact Section */}
+            <SectionCard>
+              <div className="flex items-center gap-2 mb-4">
+                <AlertTriangle className="w-4 h-4 text-amber-500" />
+                <SectionTitle className="mb-0">
+                  {language === 'ru' ? 'Экстренный контакт' : 'Emergency Contact'}
+                </SectionTitle>
+              </div>
+              <p className="text-xs text-muted-foreground mb-4">
+                {language === 'ru' 
+                  ? 'Этот контакт будет использован в случае чрезвычайной ситуации'
+                  : 'This contact will be used in case of emergency'}
+              </p>
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="emergency_contact_name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{language === 'ru' ? 'Имя контакта' : 'Contact Name'}</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={language === 'ru' ? 'Иван Иванов' : 'John Doe'}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="emergency_contact_phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{language === 'ru' ? 'Телефон' : 'Phone'}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="tel"
+                          placeholder="+7 (999) 123-45-67"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="emergency_contact_relationship"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{language === 'ru' ? 'Кем приходится' : 'Relationship'}</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={language === 'ru' ? 'Выберите' : 'Select'} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="spouse">{language === 'ru' ? 'Супруг(а)' : 'Spouse'}</SelectItem>
+                          <SelectItem value="parent">{language === 'ru' ? 'Родитель' : 'Parent'}</SelectItem>
+                          <SelectItem value="child">{language === 'ru' ? 'Ребёнок' : 'Child'}</SelectItem>
+                          <SelectItem value="sibling">{language === 'ru' ? 'Брат/Сестра' : 'Sibling'}</SelectItem>
+                          <SelectItem value="friend">{language === 'ru' ? 'Друг' : 'Friend'}</SelectItem>
+                          <SelectItem value="colleague">{language === 'ru' ? 'Коллега' : 'Colleague'}</SelectItem>
+                          <SelectItem value="other">{language === 'ru' ? 'Другое' : 'Other'}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </SectionCard>
 
             {/* Submit Button */}
