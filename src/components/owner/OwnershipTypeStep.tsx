@@ -18,6 +18,8 @@ interface OwnershipData {
   management_document_url?: string;
   management_document_name?: string;
   commercial_terms_redacted?: boolean;
+  ownership_document_url?: string;
+  ownership_document_name?: string;
 }
 
 interface OwnershipTypeStepProps {
@@ -46,6 +48,8 @@ const ownershipOptions: OwnershipOption[] = [
     descEn: 'I am the legal owner of this property',
     descRu: 'Я являюсь законным собственником',
     requiresVerification: false,
+    verificationNoteEn: 'myUNO reserves the right to verify ownership with the Juristic Person. You may upload a supporting document (title deed, Chanote, etc.) to expedite verification.',
+    verificationNoteRu: 'myUNO оставляет за собой право верифицировать право собственности через юридическое лицо здания. Вы можете загрузить подтверждающий документ (свидетельство о собственности, Chanote и т.д.) для ускорения верификации.',
   },
   {
     id: 'management_agreement',
@@ -76,6 +80,7 @@ export function OwnershipTypeStep({ data, onChange }: OwnershipTypeStepProps) {
   const isRu = language === 'ru';
 
   const selectedOption = ownershipOptions.find(o => o.id === data.ownership_type);
+  const showOwnershipDocUpload = data.ownership_type === 'own';
   const showDocumentUpload = data.ownership_type === 'management_agreement';
   const showOwnerFields = data.ownership_type === 'management_agreement' || data.ownership_type === 'verbal';
   const isVerbalAgreement = data.ownership_type === 'verbal';
@@ -154,6 +159,46 @@ export function OwnershipTypeStep({ data, onChange }: OwnershipTypeStepProps) {
           ))}
         </CardContent>
       </Card>
+
+      {/* Ownership Document Upload for Own Property */}
+      {showOwnershipDocUpload && (
+        <Card className="border-muted">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Upload className="h-4 w-4" />
+              {isRu ? 'Подтверждение права собственности' : 'Ownership Verification'}
+              <span className="text-xs font-normal text-muted-foreground ml-1">
+                ({isRu ? 'опционально' : 'optional'})
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="p-3 bg-muted/50 border border-muted rounded-lg">
+              <p className="text-sm text-muted-foreground">
+                ℹ️ {isRu ? selectedOption?.verificationNoteRu : selectedOption?.verificationNoteEn}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>{isRu ? 'Документ о праве собственности' : 'Ownership document'}</Label>
+              <ImageUpload
+                value={data.ownership_document_url}
+                onChange={(url) => onChange({ 
+                  ownership_document_url: url,
+                  ownership_document_name: 'ownership-document'
+                })}
+                folder="ownership-documents"
+                placeholder={isRu ? 'Загрузить документ (Chanote, свидетельство и т.д.)' : 'Upload document (Chanote, title deed, etc.)'}
+              />
+              {data.ownership_document_url && (
+                <p className="text-sm text-green-600">
+                  ✓ {isRu ? 'Документ загружен' : 'Document uploaded'}
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Document Upload for Management Agreement */}
       {showDocumentUpload && (

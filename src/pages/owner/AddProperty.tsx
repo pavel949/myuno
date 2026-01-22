@@ -52,6 +52,8 @@ export default function AddProperty() {
     management_document_url: '',
     management_document_name: '',
     commercial_terms_redacted: false,
+    ownership_document_url: '',
+    ownership_document_name: '',
   });
 
   const [formData, setFormData] = useState({
