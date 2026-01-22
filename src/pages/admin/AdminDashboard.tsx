@@ -41,7 +41,8 @@ import {
   ShoppingBag,
   ClipboardCheck,
   Wallet,
-  Globe
+  Globe,
+  Handshake
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -161,17 +162,32 @@ export default function AdminDashboard() {
   ];
 
   const systemActions = [
-    { label: isRussian ? 'Города' : 'Cities', icon: Globe, path: '/admin/cities', color: 'bg-teal-500' },
+    // Analytics & Insights
+    { label: isRussian ? 'Аналитика' : 'Analytics', icon: BarChart3, path: '/admin/analytics', color: 'bg-indigo-500' },
+    { label: isRussian ? 'Пользователи' : 'Users', icon: Users, path: '/admin/users', color: 'bg-blue-500' },
+    { label: isRussian ? 'Метрики M&A' : 'Acquisition Metrics', icon: BarChart3, path: '/admin/acquisition-metrics', color: 'bg-violet-500' },
+    
+    // Operations & CRM
+    { label: isRussian ? 'Операции' : 'Operations', icon: ClipboardCheck, path: '/admin/operations', color: 'bg-cyan-500' },
+    { label: isRussian ? 'Лиды' : 'Leads', icon: Users, path: '/admin/leads', color: 'bg-green-500' },
+    { label: isRussian ? 'Заявки' : 'Consultations', icon: ClipboardCheck, path: '/admin/consultations', color: 'bg-teal-500' },
+    { label: isRussian ? 'Тикеты' : 'Tickets', icon: FileCheck, path: '/admin/tickets', color: 'bg-orange-500' },
+    
+    // Content & Moderation
+    { label: isRussian ? 'Модерация' : 'Moderation', icon: Shield, path: '/admin/moderation', color: 'bg-yellow-500' },
+    { label: isRussian ? 'Заявки партнёров' : 'Partner Apps', icon: Handshake, path: '/admin/partner-applications', color: 'bg-pink-500' },
+    
+    // Finance & Business
     { label: isRussian ? 'Финансы' : 'Finance', icon: Wallet, path: '/admin/finance', color: 'bg-emerald-500' },
-    { label: isRussian ? 'Заявки' : 'Consultations', icon: ClipboardCheck, path: '/admin/consultations', color: 'bg-green-500' },
-    { label: isRussian ? 'UNO Team' : 'UNO Team', icon: Users, path: '/admin/uno-team', color: 'bg-emerald-500' },
-    { label: isRussian ? 'Быстрые заявки' : 'Quick Listings', icon: Sparkles, path: '/admin/quick-listings', color: 'bg-amber-500' },
-    { label: isRussian ? 'Модерация' : 'Moderation', icon: ClipboardCheck, path: '/admin/moderation', color: 'bg-yellow-500' },
+    { label: isRussian ? 'Питч-дек' : 'Pitch Deck', icon: Presentation, path: '/admin/pitch-deck', color: 'bg-amber-500' },
+    
+    // System Configuration
+    { label: isRussian ? 'Города' : 'Cities', icon: Globe, path: '/admin/cities', color: 'bg-teal-500' },
     { label: isRussian ? 'Провайдеры' : 'Providers', icon: Building2, path: '/admin/providers', color: 'bg-blue-500' },
     { label: isRussian ? 'Услуги' : 'Services', icon: Package, path: '/admin/services', color: 'bg-purple-500' },
+    { label: isRussian ? 'UNO Team' : 'UNO Team', icon: Users, path: '/admin/uno-team', color: 'bg-emerald-500' },
     { label: isRussian ? 'Справочники' : 'Lookups', icon: Settings, path: '/admin/lookups', color: 'bg-slate-500' },
-    { label: isRussian ? 'Аналитика' : 'Analytics', icon: BarChart3, path: '/admin/analytics', color: 'bg-indigo-500' },
-    { label: isRussian ? 'Питч-дек' : 'Pitch Deck', icon: Presentation, path: '/admin/pitch-deck', color: 'bg-amber-500' },
+    { label: isRussian ? 'Быстрые заявки' : 'Quick Listings', icon: Sparkles, path: '/admin/quick-listings', color: 'bg-amber-500' },
   ];
 
   return (
