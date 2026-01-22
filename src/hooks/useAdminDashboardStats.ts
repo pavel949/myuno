@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { CACHE_PROFILES } from '@/lib/queryConfig';
 
 export interface DashboardStats {
   providers: number;
@@ -105,7 +106,6 @@ export function useAdminDashboardStats() {
         pendingContent: totalPendingContent,
       };
     },
-    staleTime: 60 * 1000, // 1 minute
-    refetchOnWindowFocus: false,
+    ...CACHE_PROFILES.ADMIN,
   });
 }

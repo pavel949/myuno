@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { CACHE_PROFILES } from '@/lib/queryConfig';
 
 export interface AuditLogEntry {
   id: string;
@@ -70,7 +71,7 @@ export function useAdminAuditLogs(limit: number = 10) {
         admin_email: log.admin_id ? adminMap[log.admin_id]?.email : null,
       }));
     },
-    staleTime: 30 * 1000, // 30 seconds
+    ...CACHE_PROFILES.REALTIME,
     refetchInterval: 60 * 1000, // Refetch every minute
   });
 }
