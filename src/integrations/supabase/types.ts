@@ -4132,6 +4132,7 @@ export type Database = {
           children_friendly: boolean | null
           cleaning_frequency: string | null
           cleaning_included: boolean | null
+          commercial_terms_redacted: boolean | null
           cover_image: string | null
           created_at: string
           created_on_behalf: boolean | null
@@ -4182,6 +4183,8 @@ export type Database = {
           lng: number | null
           managed_by: string | null
           managed_by_org_id: string | null
+          management_document_name: string | null
+          management_document_url: string | null
           management_type: string | null
           manager_line_id: string | null
           manager_name: string | null
@@ -4196,6 +4199,10 @@ export type Database = {
           owner_id: string
           ownership_transferred_at: string | null
           ownership_type: string | null
+          ownership_verification_notes: string | null
+          ownership_verification_status: string | null
+          ownership_verified_at: string | null
+          ownership_verified_by: string | null
           parking_included: boolean | null
           parking_notes: string | null
           parking_spaces: number | null
@@ -4249,6 +4256,7 @@ export type Database = {
           children_friendly?: boolean | null
           cleaning_frequency?: string | null
           cleaning_included?: boolean | null
+          commercial_terms_redacted?: boolean | null
           cover_image?: string | null
           created_at?: string
           created_on_behalf?: boolean | null
@@ -4299,6 +4307,8 @@ export type Database = {
           lng?: number | null
           managed_by?: string | null
           managed_by_org_id?: string | null
+          management_document_name?: string | null
+          management_document_url?: string | null
           management_type?: string | null
           manager_line_id?: string | null
           manager_name?: string | null
@@ -4313,6 +4323,10 @@ export type Database = {
           owner_id: string
           ownership_transferred_at?: string | null
           ownership_type?: string | null
+          ownership_verification_notes?: string | null
+          ownership_verification_status?: string | null
+          ownership_verified_at?: string | null
+          ownership_verified_by?: string | null
           parking_included?: boolean | null
           parking_notes?: string | null
           parking_spaces?: number | null
@@ -4366,6 +4380,7 @@ export type Database = {
           children_friendly?: boolean | null
           cleaning_frequency?: string | null
           cleaning_included?: boolean | null
+          commercial_terms_redacted?: boolean | null
           cover_image?: string | null
           created_at?: string
           created_on_behalf?: boolean | null
@@ -4416,6 +4431,8 @@ export type Database = {
           lng?: number | null
           managed_by?: string | null
           managed_by_org_id?: string | null
+          management_document_name?: string | null
+          management_document_url?: string | null
           management_type?: string | null
           manager_line_id?: string | null
           manager_name?: string | null
@@ -4430,6 +4447,10 @@ export type Database = {
           owner_id?: string
           ownership_transferred_at?: string | null
           ownership_type?: string | null
+          ownership_verification_notes?: string | null
+          ownership_verification_status?: string | null
+          ownership_verified_at?: string | null
+          ownership_verified_by?: string | null
           parking_included?: boolean | null
           parking_notes?: string | null
           parking_spaces?: number | null

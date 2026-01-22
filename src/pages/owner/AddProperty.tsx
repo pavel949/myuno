@@ -49,6 +49,9 @@ export default function AddProperty() {
     actual_owner_name: '',
     actual_owner_phone: '',
     send_invite_immediately: true,
+    management_document_url: '',
+    management_document_name: '',
+    commercial_terms_redacted: false,
   });
 
   const [formData, setFormData] = useState({
@@ -149,14 +152,25 @@ export default function AddProperty() {
   const validateStep = (stepId: string): boolean => {
     switch (stepId) {
       case 'ownership':
-        // Validate owner info if not own property
-        if (ownershipData.ownership_type !== 'own') {
+        // Verbal agreement requires all owner contact fields
+        if (ownershipData.ownership_type === 'verbal') {
+          if (!ownershipData.actual_owner_name.trim()) {
+            toast.error(isRu ? 'Введите имя собственника' : 'Enter owner name');
+            return false;
+          }
           if (!ownershipData.actual_owner_email.trim()) {
             toast.error(isRu ? 'Введите email собственника' : 'Enter owner email');
             return false;
           }
-          if (!ownershipData.actual_owner_name.trim()) {
-            toast.error(isRu ? 'Введите имя собственника' : 'Enter owner name');
+          if (!ownershipData.actual_owner_phone.trim()) {
+            toast.error(isRu ? 'Введите телефон собственника' : 'Enter owner phone');
+            return false;
+          }
+        }
+        // Management agreement requires document upload
+        if (ownershipData.ownership_type === 'management_agreement') {
+          if (!ownershipData.management_document_url) {
+            toast.error(isRu ? 'Загрузите договор управления или доверенность' : 'Upload management agreement or POA');
             return false;
           }
         }
@@ -193,7 +207,12 @@ export default function AddProperty() {
       actual_owner_email: isOnBehalf ? ownershipData.actual_owner_email : undefined,
       actual_owner_name: isOnBehalf ? ownershipData.actual_owner_name : undefined,
       actual_owner_phone: isOnBehalf ? ownershipData.actual_owner_phone : undefined,
-      managed_by_org_id: ownershipData.ownership_type === 'client' ? activeOrgId : undefined,
+      managed_by_org_id: ownershipData.ownership_type === 'management_agreement' ? activeOrgId : undefined,
+      // New verification fields
+      management_document_url: ownershipData.management_document_url || undefined,
+      management_document_name: ownershipData.management_document_name || undefined,
+      commercial_terms_redacted: ownershipData.commercial_terms_redacted,
+      ownership_verification_status: isOnBehalf ? 'pending' : 'verified',
     });
 
     // Send ownership invite if needed

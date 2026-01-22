@@ -3,9 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Home, Building2, FileText, Mail, Phone, User } from 'lucide-react';
+import { Home, FileSignature, MessageCircle, Mail, Phone, User, Upload, Shield, AlertTriangle } from 'lucide-react';
+import { ImageUpload } from '@/components/upload/ImageUpload';
+import { Checkbox } from '@/components/ui/checkbox';
 
-export type OwnershipType = 'own' | 'client' | 'poa';
+export type OwnershipType = 'own' | 'management_agreement' | 'verbal';
 
 interface OwnershipData {
   ownership_type: OwnershipType;
@@ -13,6 +15,9 @@ interface OwnershipData {
   actual_owner_name: string;
   actual_owner_phone: string;
   send_invite_immediately: boolean;
+  management_document_url?: string;
+  management_document_name?: string;
+  commercial_terms_redacted?: boolean;
 }
 
 interface OwnershipTypeStepProps {
@@ -27,6 +32,9 @@ interface OwnershipOption {
   titleRu: string;
   descEn: string;
   descRu: string;
+  requiresVerification: boolean;
+  verificationNoteEn?: string;
+  verificationNoteRu?: string;
 }
 
 const ownershipOptions: OwnershipOption[] = [
@@ -35,24 +43,31 @@ const ownershipOptions: OwnershipOption[] = [
     icon: <Home className="h-5 w-5" />,
     titleEn: 'My own property',
     titleRu: 'Мой объект',
-    descEn: 'I am the legal owner',
-    descRu: 'Я являюсь собственником',
+    descEn: 'I am the legal owner of this property',
+    descRu: 'Я являюсь законным собственником',
+    requiresVerification: false,
   },
   {
-    id: 'client',
-    icon: <Building2 className="h-5 w-5" />,
-    titleEn: "Client's property",
-    titleRu: 'Объект клиента',
-    descEn: 'I manage this property for a client (MC / Agent)',
-    descRu: 'Я управляю этим объектом для клиента (УК / Агент)',
+    id: 'management_agreement',
+    icon: <FileSignature className="h-5 w-5" />,
+    titleEn: 'Management Agreement / POA',
+    titleRu: 'Договор управления / Доверенность',
+    descEn: 'I manage this property under a formal contract or Power of Attorney',
+    descRu: 'Управление по договору или доверенности',
+    requiresVerification: true,
+    verificationNoteEn: 'We need a copy of the management agreement or POA to verify your right to list this property. Commercial terms can be redacted.',
+    verificationNoteRu: 'Нам потребуется копия договора управления или доверенности для верификации права на размещение. Коммерческие условия можно скрыть.',
   },
   {
-    id: 'poa',
-    icon: <FileText className="h-5 w-5" />,
-    titleEn: 'Power of Attorney',
-    titleRu: 'По доверенности',
-    descEn: 'I act on behalf of the owner under POA',
-    descRu: 'Действую от имени собственника по доверенности',
+    id: 'verbal',
+    icon: <MessageCircle className="h-5 w-5" />,
+    titleEn: 'Verbal Agreement',
+    titleRu: 'Устные договорённости',
+    descEn: 'I manage this property based on a verbal arrangement with the owner',
+    descRu: 'Управляю на основании устных договорённостей с собственником',
+    requiresVerification: true,
+    verificationNoteEn: 'We will need to contact the property owner to verify this arrangement. Please provide their contact details.',
+    verificationNoteRu: 'Нам потребуется связаться с собственником для подтверждения договорённости. Укажите его контактные данные.',
   },
 ];
 
@@ -60,14 +75,37 @@ export function OwnershipTypeStep({ data, onChange }: OwnershipTypeStepProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
-  const showOwnerFields = data.ownership_type === 'client' || data.ownership_type === 'poa';
+  const selectedOption = ownershipOptions.find(o => o.id === data.ownership_type);
+  const showDocumentUpload = data.ownership_type === 'management_agreement';
+  const showOwnerFields = data.ownership_type === 'management_agreement' || data.ownership_type === 'verbal';
+  const isVerbalAgreement = data.ownership_type === 'verbal';
 
   return (
     <div className="space-y-6">
+      {/* Verification Purpose Banner */}
+      <Card className="border-primary/30 bg-primary/5">
+        <CardContent className="pt-4 pb-4">
+          <div className="flex items-start gap-3">
+            <Shield className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="font-medium text-sm">
+                {isRu ? 'Верификация прав на управление' : 'Management Rights Verification'}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {isRu 
+                  ? 'Мы проверяем право на управление и сдачу в аренду для защиты всех участников' 
+                  : 'We verify management and listing rights to protect all parties involved'}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Ownership Type Selection */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base">
-            {isRu ? 'Чей это объект?' : 'Whose property is this?'}
+            {isRu ? 'На каком основании вы управляете объектом?' : 'What is your management basis?'}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -75,28 +113,35 @@ export function OwnershipTypeStep({ data, onChange }: OwnershipTypeStepProps) {
             <div
               key={option.id}
               onClick={() => onChange({ ownership_type: option.id })}
-              className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+              className={`flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
                 data.ownership_type === option.id
                   ? 'border-primary bg-primary/5'
                   : 'border-muted hover:border-muted-foreground/30'
               }`}
             >
-              <div className={`p-2 rounded-lg ${
+              <div className={`p-2 rounded-lg flex-shrink-0 ${
                 data.ownership_type === option.id 
                   ? 'bg-primary text-primary-foreground' 
                   : 'bg-muted'
               }`}>
                 {option.icon}
               </div>
-              <div className="flex-1">
-                <p className="font-medium">
-                  {isRu ? option.titleRu : option.titleEn}
-                </p>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="font-medium">
+                    {isRu ? option.titleRu : option.titleEn}
+                  </p>
+                  {option.requiresVerification && (
+                    <span className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full">
+                      {isRu ? 'Верификация' : 'Verification'}
+                    </span>
+                  )}
+                </div>
                 <p className="text-sm text-muted-foreground">
                   {isRu ? option.descRu : option.descEn}
                 </p>
               </div>
-              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-1 ${
                 data.ownership_type === option.id
                   ? 'border-primary bg-primary'
                   : 'border-muted-foreground/30'
@@ -110,26 +155,101 @@ export function OwnershipTypeStep({ data, onChange }: OwnershipTypeStepProps) {
         </CardContent>
       </Card>
 
-      {/* Owner contact fields */}
+      {/* Document Upload for Management Agreement */}
+      {showDocumentUpload && (
+        <Card className="border-blue-500/30">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Upload className="h-4 w-4" />
+              {isRu ? 'Документ управления' : 'Management Document'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-400">
+                📄 {isRu ? selectedOption?.verificationNoteRu : selectedOption?.verificationNoteEn}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>{isRu ? 'Загрузите договор или доверенность' : 'Upload agreement or POA'}</Label>
+              <ImageUpload
+                value={data.management_document_url}
+                onChange={(url) => onChange({ 
+                  management_document_url: url,
+                  management_document_name: 'document'
+                })}
+                folder="management-documents"
+                placeholder={isRu ? 'Загрузить документ' : 'Upload document'}
+              />
+              {data.management_document_url && (
+                <p className="text-sm text-green-600">
+                  ✓ {isRu ? 'Документ загружен' : 'Document uploaded'}
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="redacted"
+                checked={data.commercial_terms_redacted}
+                onCheckedChange={(checked) => onChange({ commercial_terms_redacted: !!checked })}
+              />
+              <label htmlFor="redacted" className="text-sm text-muted-foreground cursor-pointer">
+                {isRu 
+                  ? 'Коммерческие условия в документе скрыты' 
+                  : 'Commercial terms are redacted in this document'}
+              </label>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Verbal Agreement Warning */}
+      {isVerbalAgreement && (
+        <Card className="border-amber-500/30">
+          <CardContent className="pt-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="font-medium text-sm text-amber-700 dark:text-amber-400">
+                  {isRu ? 'Требуется подтверждение от собственника' : 'Owner confirmation required'}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {isRu ? selectedOption?.verificationNoteRu : selectedOption?.verificationNoteEn}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Owner Contact Fields */}
       {showOwnerFields && (
         <Card className="border-primary/30">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <User className="h-4 w-4" />
-              {isRu ? 'Данные собственника' : 'Owner Information'}
+              {isRu ? 'Контактные данные собственника' : 'Owner Contact Information'}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              {isRu 
-                ? 'Укажите контактные данные реального собственника для приглашения на платформу' 
-                : "Enter the actual owner's contact details to invite them to the platform"}
+              {isVerbalAgreement
+                ? (isRu 
+                    ? 'Обязательно укажите контакты собственника для подтверждения ваших полномочий' 
+                    : 'Owner contact details are required to verify your management rights')
+                : (isRu 
+                    ? 'Укажите контакты собственника для приглашения на платформу (опционально)' 
+                    : "Enter owner's contact details to invite them to the platform (optional)")
+              }
             </p>
 
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
                 <User className="h-3 w-3" />
                 {isRu ? 'Имя собственника' : 'Owner Name'}
+                {isVerbalAgreement && <span className="text-destructive">*</span>}
               </Label>
               <Input
                 value={data.actual_owner_name}
@@ -142,6 +262,7 @@ export function OwnershipTypeStep({ data, onChange }: OwnershipTypeStepProps) {
               <Label className="flex items-center gap-2">
                 <Mail className="h-3 w-3" />
                 {isRu ? 'Email собственника' : 'Owner Email'}
+                {isVerbalAgreement && <span className="text-destructive">*</span>}
               </Label>
               <Input
                 type="email"
@@ -154,7 +275,8 @@ export function OwnershipTypeStep({ data, onChange }: OwnershipTypeStepProps) {
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
                 <Phone className="h-3 w-3" />
-                {isRu ? 'Телефон собственника' : 'Owner Phone'} ({isRu ? 'опционально' : 'optional'})
+                {isRu ? 'Телефон собственника' : 'Owner Phone'}
+                {isVerbalAgreement && <span className="text-destructive">*</span>}
               </Label>
               <Input
                 type="tel"
@@ -167,12 +289,12 @@ export function OwnershipTypeStep({ data, onChange }: OwnershipTypeStepProps) {
             <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
               <div>
                 <p className="font-medium text-sm">
-                  {isRu ? 'Отправить приглашение сразу' : 'Send invitation immediately'}
+                  {isRu ? 'Отправить приглашение собственнику' : 'Send invitation to owner'}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {isRu 
-                    ? 'Собственник получит email с приглашением' 
-                    : 'Owner will receive an email invitation'}
+                    ? 'Собственник получит email с приглашением на платформу' 
+                    : 'Owner will receive an email invitation to join the platform'}
                 </p>
               </div>
               <Switch
@@ -180,26 +302,6 @@ export function OwnershipTypeStep({ data, onChange }: OwnershipTypeStepProps) {
                 onCheckedChange={(checked) => onChange({ send_invite_immediately: checked })}
               />
             </div>
-
-            {data.ownership_type === 'poa' && (
-              <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
-                <p className="text-sm text-amber-700 dark:text-amber-400">
-                  📋 {isRu 
-                    ? 'После регистрации собственника на платформе вы сможете передать ему владение объектом' 
-                    : 'Once the owner registers on the platform, you can transfer ownership to them'}
-                </p>
-              </div>
-            )}
-
-            {data.ownership_type === 'client' && (
-              <div className="p-3 bg-primary/10 border border-primary/30 rounded-lg">
-                <p className="text-sm">
-                  🏢 {isRu 
-                    ? 'Вы останетесь управляющей компанией для этого объекта. Собственник получит доступ к просмотру отчётов' 
-                    : "You'll remain the management company for this property. The owner will get access to view reports"}
-                </p>
-              </div>
-            )}
           </CardContent>
         </Card>
       )}
