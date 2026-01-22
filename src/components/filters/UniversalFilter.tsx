@@ -341,15 +341,15 @@ export function QuickFilterBar({ options, value, onChange, className }: QuickFil
             key={option.id}
             onClick={() => onChange(option.id)}
             className={cn(
-              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap",
+              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
               "border flex-shrink-0",
               isActive
                 ? "bg-primary text-primary-foreground border-primary"
                 : "bg-secondary text-secondary-foreground border-border hover:border-primary/50"
             )}
           >
-            {option.icon && <span>{option.icon}</span>}
-            <span>{language === 'ru' ? option.labelRu : option.labelEn}</span>
+            {option.icon && <span className="flex-shrink-0">{option.icon}</span>}
+            <span className="truncate max-w-[100px]">{language === 'ru' ? option.labelRu : option.labelEn}</span>
           </button>
         );
       })}
@@ -420,20 +420,20 @@ export function ActiveFilters({
         <button
           key={`${filter.sectionId}-${filter.optionId}-${idx}`}
           onClick={() => onRemove(filter.sectionId, filter.optionId)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-primary/10 text-primary border border-primary/30 whitespace-nowrap flex-shrink-0"
+          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/30 flex-shrink-0"
         >
-          <span>{filter.label}</span>
-          <X className="w-3.5 h-3.5" />
+          <span className="truncate max-w-[80px]">{filter.label}</span>
+          <X className="w-3 h-3 flex-shrink-0" />
         </button>
       ))}
       
       {activeFilters.length > 1 && (
         <button
           onClick={onClearAll}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-destructive/10 text-destructive border border-destructive/30 whitespace-nowrap flex-shrink-0"
+          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium bg-destructive/10 text-destructive border border-destructive/30 flex-shrink-0"
         >
-          <RotateCcw className="w-3.5 h-3.5" />
-          {language === 'ru' ? 'Сбросить' : 'Clear all'}
+          <RotateCcw className="w-3 h-3" />
+          <span>{language === 'ru' ? 'Сброс' : 'Clear'}</span>
         </button>
       )}
     </div>

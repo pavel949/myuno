@@ -86,25 +86,25 @@ function PropertyCard({ property, isRu, onEdit, onView }: PropertyCardProps) {
           </div>
         </div>
         
-        <div className="flex-1 p-3 flex flex-col justify-between">
-          <div>
-            <h3 className="font-semibold line-clamp-1 mb-1 group-hover:text-primary transition-colors">
+        <div className="flex-1 p-2.5 flex flex-col justify-between min-w-0">
+          <div className="min-w-0">
+            <h3 className="font-semibold text-sm line-clamp-2 leading-snug mb-1 group-hover:text-primary transition-colors">
               {isRu && property.title_ru ? property.title_ru : property.title || (isRu ? 'Без названия' : 'Untitled')}
             </h3>
             
             {property.district && (
-              <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                <MapPin className="h-3 w-3" />
-                <span className="line-clamp-1">{property.district}</span>
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <MapPin className="h-3 w-3 flex-shrink-0" />
+                <span className="truncate">{property.district}</span>
               </div>
             )}
             
             <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
               {property.property_type && (
-                <span className="capitalize">{property.property_type}</span>
+                <span className="capitalize truncate max-w-[60px]">{property.property_type}</span>
               )}
               {property.bedrooms && (
-                <span className="flex items-center gap-0.5">
+                <span className="flex items-center gap-0.5 flex-shrink-0">
                   <Bed className="h-3 w-3" />
                   {property.bedrooms}
                 </span>
@@ -112,15 +112,15 @@ function PropertyCard({ property, isRu, onEdit, onView }: PropertyCardProps) {
             </div>
           </div>
           
-          <div className="flex items-center gap-2 mt-2">
+          <div className="flex items-center gap-1.5 mt-2">
             <Button 
               size="sm" 
               variant="outline" 
-              className="h-7 text-xs"
+              className="h-7 text-xs px-2"
               onClick={() => onEdit(property.id)}
             >
-              <Pencil className="h-3 w-3 mr-1" />
-              {isRu ? 'Редактировать' : 'Edit'}
+              <Pencil className="h-3 w-3" />
+              <span className="hidden sm:inline ml-1">{isRu ? 'Ред.' : 'Edit'}</span>
             </Button>
             <Button 
               size="sm" 
