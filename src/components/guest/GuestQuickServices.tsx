@@ -39,14 +39,6 @@ const quickServices: QuickService[] = [
     color: 'text-info'
   },
   { 
-    id: 'wellness',
-    icon: Sparkles, 
-    title: 'Wellness', 
-    titleRu: 'Красота',
-    href: '/wellness',
-    color: 'text-pink-500'
-  },
-  { 
     id: 'health',
     icon: Stethoscope, 
     title: 'Health', 
