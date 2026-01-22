@@ -16,9 +16,10 @@ import {
   MoneyBlock, 
   PropertiesBlock, 
   RisksBlock, 
-  ActivityBlock 
+  ActivityBlock,
+  MessagesBlock,
+  BookingsSection,
 } from '@/components/owner/dashboard';
-import { BookingsSection } from '@/components/owner/dashboard/BookingsSection';
 
 export default function OwnerDashboard() {
   const { language } = useLanguage();
@@ -103,10 +104,13 @@ export default function OwnerDashboard() {
         {/* Row 2: Money (full width - key metric) */}
         <MoneyBlock />
 
-        {/* Row 3: Properties (full width portfolio view) */}
+        {/* Row 3: Messages (full width - communication hub) */}
+        <MessagesBlock />
+
+        {/* Row 4: Properties (full width portfolio view) */}
         <PropertiesBlock />
 
-        {/* Row 4: Activity (secondary info) */}
+        {/* Row 5: Activity (secondary info) */}
         <ActivityBlock />
       </div>
 
