@@ -4158,7 +4158,9 @@ export type Database = {
           extra_services: Json | null
           floor: number | null
           furnishing_level: string | null
+          garden_type: string | null
           has_crib: boolean | null
+          has_elevator: boolean | null
           has_high_chair: boolean | null
           highlights: string[] | null
           host_languages: string[] | null
@@ -4206,11 +4208,14 @@ export type Database = {
           parking_included: boolean | null
           parking_notes: string | null
           parking_spaces: number | null
+          parking_type: string | null
           parties_allowed: boolean | null
           pet_deposit: number | null
           pet_notes: string | null
           pet_notes_ru: string | null
           pets_allowed: boolean | null
+          plot_size_sqm: number | null
+          pool_type: string | null
           price_per_night: number | null
           project_id: string | null
           property_type: string
@@ -4224,6 +4229,7 @@ export type Database = {
           status: string | null
           title: string
           title_ru: string | null
+          total_floors: number | null
           transfer_airport_price: number | null
           transfer_available: boolean | null
           transfer_notes: string | null
@@ -4282,7 +4288,9 @@ export type Database = {
           extra_services?: Json | null
           floor?: number | null
           furnishing_level?: string | null
+          garden_type?: string | null
           has_crib?: boolean | null
+          has_elevator?: boolean | null
           has_high_chair?: boolean | null
           highlights?: string[] | null
           host_languages?: string[] | null
@@ -4330,11 +4338,14 @@ export type Database = {
           parking_included?: boolean | null
           parking_notes?: string | null
           parking_spaces?: number | null
+          parking_type?: string | null
           parties_allowed?: boolean | null
           pet_deposit?: number | null
           pet_notes?: string | null
           pet_notes_ru?: string | null
           pets_allowed?: boolean | null
+          plot_size_sqm?: number | null
+          pool_type?: string | null
           price_per_night?: number | null
           project_id?: string | null
           property_type?: string
@@ -4348,6 +4359,7 @@ export type Database = {
           status?: string | null
           title: string
           title_ru?: string | null
+          total_floors?: number | null
           transfer_airport_price?: number | null
           transfer_available?: boolean | null
           transfer_notes?: string | null
@@ -4406,7 +4418,9 @@ export type Database = {
           extra_services?: Json | null
           floor?: number | null
           furnishing_level?: string | null
+          garden_type?: string | null
           has_crib?: boolean | null
+          has_elevator?: boolean | null
           has_high_chair?: boolean | null
           highlights?: string[] | null
           host_languages?: string[] | null
@@ -4454,11 +4468,14 @@ export type Database = {
           parking_included?: boolean | null
           parking_notes?: string | null
           parking_spaces?: number | null
+          parking_type?: string | null
           parties_allowed?: boolean | null
           pet_deposit?: number | null
           pet_notes?: string | null
           pet_notes_ru?: string | null
           pets_allowed?: boolean | null
+          plot_size_sqm?: number | null
+          pool_type?: string | null
           price_per_night?: number | null
           project_id?: string | null
           property_type?: string
@@ -4472,6 +4489,7 @@ export type Database = {
           status?: string | null
           title?: string
           title_ru?: string | null
+          total_floors?: number | null
           transfer_airport_price?: number | null
           transfer_available?: boolean | null
           transfer_notes?: string | null

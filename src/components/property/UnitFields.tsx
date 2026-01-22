@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Switch } from '@/components/ui/switch';
 import { 
   Layers, Eye, Sofa, ChevronDown, ChevronUp,
   Tv, WashingMachine, Refrigerator, Microwave, Coffee,
@@ -15,18 +16,42 @@ import {
   Baby, Briefcase, Gamepad2, Dumbbell, Thermometer,
   Lock, ShieldCheck, Flame, Waves, Sun, TreePine,
   Music, Monitor, Printer, Fan, Snowflake, Heater,
-  Cigarette, Dog, Accessibility, PartyPopper
+  Cigarette, Dog, Accessibility, PartyPopper,
+  Building2, Home, Ruler, ArrowUpDown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+// Property type categories
+const STANDALONE_TYPES = ['villa', 'house', 'townhouse'];
+const MULTI_UNIT_TYPES = ['apartment', 'condo', 'studio', 'penthouse'];
+
 interface UnitFieldsProps {
+  propertyType?: string;
+  // Multi-unit fields
   floor?: number;
   unitNumber?: string;
+  // Standalone fields
+  totalFloors?: number;
+  plotSizeSqm?: number;
+  hasElevator?: boolean;
+  parkingType?: string;
+  poolType?: string;
+  gardenType?: string;
+  // Common fields
   viewType?: string;
   furnishingLevel?: string;
   equipment?: string[];
-  onFloorChange: (floor: number | undefined) => void;
-  onUnitNumberChange: (unitNumber: string) => void;
+  // Multi-unit handlers
+  onFloorChange?: (floor: number | undefined) => void;
+  onUnitNumberChange?: (unitNumber: string) => void;
+  // Standalone handlers
+  onTotalFloorsChange?: (floors: number | undefined) => void;
+  onPlotSizeChange?: (size: number | undefined) => void;
+  onHasElevatorChange?: (hasElevator: boolean) => void;
+  onParkingTypeChange?: (type: string) => void;
+  onPoolTypeChange?: (type: string) => void;
+  onGardenTypeChange?: (type: string) => void;
+  // Common handlers
   onViewTypeChange: (viewType: string) => void;
   onFurnishingLevelChange: (level: string) => void;
   onEquipmentChange: (equipment: string[]) => void;
@@ -40,6 +65,9 @@ const viewTypes = [
   { id: 'city', labelEn: 'City View', labelRu: 'Вид на город' },
   { id: 'parking', labelEn: 'Parking View', labelRu: 'Вид на парковку' },
   { id: 'interior', labelEn: 'Interior View', labelRu: 'Внутренний вид' },
+  // Additional views for standalone properties
+  { id: 'panoramic', labelEn: 'Panoramic View', labelRu: 'Панорамный вид' },
+  { id: 'jungle', labelEn: 'Jungle / Forest View', labelRu: 'Вид на джунгли' },
 ];
 
 const furnishingLevels = [
@@ -47,6 +75,32 @@ const furnishingLevels = [
   { id: 'partially', labelEn: 'Partially Furnished', labelRu: 'Частичная меблировка' },
   { id: 'fully', labelEn: 'Fully Furnished', labelRu: 'Полная меблировка' },
   { id: 'luxury', labelEn: 'Luxury Furnished', labelRu: 'Люкс меблировка' },
+];
+
+// Options for standalone property characteristics
+const parkingTypes = [
+  { id: 'garage', labelEn: 'Private Garage', labelRu: 'Частный гараж' },
+  { id: 'carport', labelEn: 'Carport', labelRu: 'Навес для авто' },
+  { id: 'open', labelEn: 'Open Parking', labelRu: 'Открытая парковка' },
+  { id: 'street', labelEn: 'Street Parking', labelRu: 'Уличная парковка' },
+  { id: 'none', labelEn: 'No Parking', labelRu: 'Нет парковки' },
+];
+
+const poolTypes = [
+  { id: 'private', labelEn: 'Private Pool', labelRu: 'Частный бассейн' },
+  { id: 'infinity', labelEn: 'Infinity Pool', labelRu: 'Инфинити-бассейн' },
+  { id: 'plunge', labelEn: 'Plunge Pool', labelRu: 'Плунж-бассейн' },
+  { id: 'shared', labelEn: 'Shared Pool', labelRu: 'Общий бассейн' },
+  { id: 'none', labelEn: 'No Pool', labelRu: 'Нет бассейна' },
+];
+
+const gardenTypes = [
+  { id: 'private', labelEn: 'Private Garden', labelRu: 'Частный сад' },
+  { id: 'tropical', labelEn: 'Tropical Garden', labelRu: 'Тропический сад' },
+  { id: 'shared', labelEn: 'Shared Garden', labelRu: 'Общий сад' },
+  { id: 'rooftop', labelEn: 'Rooftop Terrace', labelRu: 'Терраса на крыше' },
+  { id: 'courtyard', labelEn: 'Courtyard', labelRu: 'Внутренний двор' },
+  { id: 'none', labelEn: 'No Garden', labelRu: 'Нет сада' },
 ];
 
 // Airbnb-style amenity categories
@@ -310,13 +364,26 @@ const amenityCategories: AmenityCategory[] = [
 ];
 
 export function UnitFields({
+  propertyType = 'apartment',
   floor,
   unitNumber,
+  totalFloors,
+  plotSizeSqm,
+  hasElevator,
+  parkingType,
+  poolType,
+  gardenType,
   viewType,
   furnishingLevel,
   equipment = [],
   onFloorChange,
   onUnitNumberChange,
+  onTotalFloorsChange,
+  onPlotSizeChange,
+  onHasElevatorChange,
+  onParkingTypeChange,
+  onPoolTypeChange,
+  onGardenTypeChange,
   onViewTypeChange,
   onFurnishingLevelChange,
   onEquipmentChange,
@@ -324,6 +391,9 @@ export function UnitFields({
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const [expandedCategories, setExpandedCategories] = useState<string[]>(['essentials', 'kitchen']);
+
+  const isStandalone = STANDALONE_TYPES.includes(propertyType);
+  const isMultiUnit = MULTI_UNIT_TYPES.includes(propertyType);
 
   const handleEquipmentToggle = (equipmentId: string) => {
     if (equipment.includes(equipmentId)) {
@@ -347,39 +417,172 @@ export function UnitFields({
 
   const totalSelected = equipment.length;
 
+  // Get property type label for header
+  const getPropertyTypeLabel = () => {
+    if (isStandalone) {
+      return isRu ? 'Характеристики объекта' : 'Property Details';
+    }
+    return isRu ? 'Характеристики юнита' : 'Unit Details';
+  };
+
+  // Get header icon based on property type
+  const HeaderIcon = isStandalone ? Home : Layers;
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2">
-          <Layers className="h-4 w-4" />
-          {isRu ? 'Характеристики юнита' : 'Unit Details'}
+          <HeaderIcon className="h-4 w-4" />
+          {getPropertyTypeLabel()}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Floor and Unit Number */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>{isRu ? 'Этаж' : 'Floor'}</Label>
-            <Input
-              type="number"
-              min={-2}
-              max={100}
-              value={floor ?? ''}
-              onChange={(e) => onFloorChange(e.target.value ? parseInt(e.target.value) : undefined)}
-              placeholder="5"
-            />
+        {/* Multi-Unit Fields: Floor and Unit Number */}
+        {isMultiUnit && (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                {isRu ? 'Этаж' : 'Floor'}
+              </Label>
+              <Input
+                type="number"
+                min={-2}
+                max={100}
+                value={floor ?? ''}
+                onChange={(e) => onFloorChange?.(e.target.value ? parseInt(e.target.value) : undefined)}
+                placeholder="5"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>{isRu ? 'Номер квартиры' : 'Unit Number'}</Label>
+              <Input
+                value={unitNumber ?? ''}
+                onChange={(e) => onUnitNumberChange?.(e.target.value)}
+                placeholder="A-501"
+              />
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label>{isRu ? 'Номер квартиры' : 'Unit Number'}</Label>
-            <Input
-              value={unitNumber ?? ''}
-              onChange={(e) => onUnitNumberChange(e.target.value)}
-              placeholder="A-501"
-            />
-          </div>
-        </div>
+        )}
 
-        {/* View Type */}
+        {/* Standalone Fields: Building characteristics */}
+        {isStandalone && (
+          <>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
+                  {isRu ? 'Этажей в здании' : 'Number of Floors'}
+                </Label>
+                <Input
+                  type="number"
+                  min={1}
+                  max={10}
+                  value={totalFloors ?? ''}
+                  onChange={(e) => onTotalFloorsChange?.(e.target.value ? parseInt(e.target.value) : undefined)}
+                  placeholder="2"
+                />
+                <p className="text-xs text-muted-foreground">
+                  {isRu ? 'Сколько этажей в вилле/доме' : 'How many floors in the building'}
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Ruler className="h-3.5 w-3.5 text-muted-foreground" />
+                  {isRu ? 'Участок (м²)' : 'Plot Size (m²)'}
+                </Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={plotSizeSqm ?? ''}
+                  onChange={(e) => onPlotSizeChange?.(e.target.value ? parseFloat(e.target.value) : undefined)}
+                  placeholder="500"
+                />
+                <p className="text-xs text-muted-foreground">
+                  {isRu ? 'Площадь земельного участка' : 'Land plot area'}
+                </p>
+              </div>
+            </div>
+
+            {/* Elevator for multi-story villas */}
+            {(totalFloors ?? 0) > 1 && (
+              <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
+                <div className="space-y-0.5">
+                  <Label className="font-medium">{isRu ? 'Есть лифт' : 'Has Elevator'}</Label>
+                  <p className="text-xs text-muted-foreground">
+                    {isRu ? 'Лифт в многоэтажной вилле' : 'Elevator in multi-story villa'}
+                  </p>
+                </div>
+                <Switch
+                  checked={hasElevator ?? false}
+                  onCheckedChange={(checked) => onHasElevatorChange?.(checked)}
+                />
+              </div>
+            )}
+
+            {/* Standalone property characteristics */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Car className="h-3.5 w-3.5 text-muted-foreground" />
+                  {isRu ? 'Паркинг' : 'Parking'}
+                </Label>
+                <Select value={parkingType || ''} onValueChange={(v) => onParkingTypeChange?.(v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={isRu ? 'Выберите' : 'Select'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {parkingTypes.map((type) => (
+                      <SelectItem key={type.id} value={type.id}>
+                        {isRu ? type.labelRu : type.labelEn}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Waves className="h-3.5 w-3.5 text-muted-foreground" />
+                  {isRu ? 'Бассейн' : 'Pool'}
+                </Label>
+                <Select value={poolType || ''} onValueChange={(v) => onPoolTypeChange?.(v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={isRu ? 'Выберите' : 'Select'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {poolTypes.map((type) => (
+                      <SelectItem key={type.id} value={type.id}>
+                        {isRu ? type.labelRu : type.labelEn}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <TreePine className="h-3.5 w-3.5 text-muted-foreground" />
+                  {isRu ? 'Сад / Территория' : 'Garden / Grounds'}
+                </Label>
+                <Select value={gardenType || ''} onValueChange={(v) => onGardenTypeChange?.(v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={isRu ? 'Выберите' : 'Select'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {gardenTypes.map((type) => (
+                      <SelectItem key={type.id} value={type.id}>
+                        {isRu ? type.labelRu : type.labelEn}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* View Type - Common for all */}
         <div className="space-y-2">
           <Label className="flex items-center gap-2">
             <Eye className="h-4 w-4" />
@@ -399,7 +602,7 @@ export function UnitFields({
           </Select>
         </div>
 
-        {/* Furnishing Level */}
+        {/* Furnishing Level - Common for all */}
         <div className="space-y-2">
           <Label className="flex items-center gap-2">
             <Sofa className="h-4 w-4" />
