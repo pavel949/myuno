@@ -101,7 +101,7 @@ export function useUserContext() {
   });
 
   // Fetch user roles from user_roles table (legacy support)
-  const { data: userRoles } = useQuery({
+  const { data: userRoles, isLoading: rolesLoading } = useQuery({
     queryKey: ['user-roles', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
@@ -195,8 +195,8 @@ export function useUserContext() {
     switchContext: switchContext.mutateAsync,
     isSwitching: switchContext.isPending,
     
-    // Loading state
-    isLoading: contextLoading || membershipsLoading,
+    // Loading state - MUST include rolesLoading to prevent premature redirects
+    isLoading: contextLoading || membershipsLoading || rolesLoading,
   };
 }
 
