@@ -26,6 +26,7 @@ import { PropertyProject } from '@/hooks/usePropertyProjects';
 import { ProjectLocationPicker } from '@/components/property/ProjectLocationPicker';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TranslatableInput } from '@/components/forms/TranslatableInput';
+import { LivePropertyPreview } from '@/components/property/LivePropertyPreview';
 
 export default function AddProperty() {
   const { language } = useLanguage();
@@ -42,6 +43,7 @@ export default function AddProperty() {
 
   const [selectedProject, setSelectedProject] = useState<PropertyProject | null>(null);
   const [isCloneDataApplied, setIsCloneDataApplied] = useState(false);
+  const [isPreviewCollapsed, setIsPreviewCollapsed] = useState(false);
   
   // Ownership data
   const [ownershipData, setOwnershipData] = useState({
@@ -794,6 +796,33 @@ export default function AddProperty() {
     }
   };
 
+  // Preview data mapped from formData
+  const previewData = {
+    title: formData.title,
+    titleRu: formData.title_ru,
+    coverImage: formData.cover_image,
+    images: formData.images,
+    propertyType: formData.property_type,
+    district: formData.district,
+    address: formData.address,
+    bedrooms: formData.bedrooms,
+    bathrooms: formData.bathrooms,
+    maxGuests: formData.max_guests,
+    areaSqm: formData.area_sqm,
+    pricePerNight: formData.price_per_night,
+    instantBooking: formData.instant_booking,
+    totalFloors: formData.total_floors,
+    plotSizeSqm: formData.plot_size_sqm,
+    poolType: formData.pool_type,
+    gardenType: formData.garden_type,
+    parkingType: formData.parking_type,
+    floor: formData.floor,
+    unitNumber: formData.unit_number,
+    viewType: formData.view_type,
+    furnishingLevel: formData.furnishing_level,
+    equipment: formData.equipment,
+  };
+
   // Show loading state when fetching source property for cloning
   if (cloneFromId && isLoadingSource) {
     return (
@@ -837,14 +866,31 @@ export default function AddProperty() {
           </span>
         </div>
       )}
+      {/* Live Preview - sticky on desktop, collapsible on mobile */}
+      <div className="lg:hidden mb-4">
+        <LivePropertyPreview 
+          data={previewData}
+          collapsed={isPreviewCollapsed}
+          onToggle={() => setIsPreviewCollapsed(!isPreviewCollapsed)}
+        />
+      </div>
 
-      <PropertyWizard
-        onSubmit={handleSubmit}
-        isSubmitting={createProperty.isPending}
-        validateStep={validateStep}
-      >
-        {renderStep}
-      </PropertyWizard>
+      <div className="lg:grid lg:grid-cols-[1fr,320px] lg:gap-6">
+        <PropertyWizard
+          onSubmit={handleSubmit}
+          isSubmitting={createProperty.isPending}
+          validateStep={validateStep}
+        >
+          {renderStep}
+        </PropertyWizard>
+
+        {/* Desktop preview sidebar */}
+        <div className="hidden lg:block">
+          <div className="sticky top-4">
+            <LivePropertyPreview data={previewData} />
+          </div>
+        </div>
+      </div>
     </PageContainer>
   );
 }
