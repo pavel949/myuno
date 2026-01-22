@@ -35,7 +35,7 @@ function formatPercent(value: number): string {
 
 export default function AdminFinance() {
   const [days, setDays] = useState(30);
-  const { summary, byVertical, byProvider, dailyData, isLoading } = useAdminFinance(days);
+  const { summary, byVertical, byProvider, dailyData, isLoading, refetchProviders } = useAdminFinance(days);
 
   const periodOptions = [
     { label: '7 дней', value: 7 },
@@ -355,7 +355,7 @@ export default function AdminFinance() {
 
           {/* Providers Tab */}
           <TabsContent value="providers">
-            <ProviderFinanceTable providers={byProvider} isLoading={isLoading} />
+            <ProviderFinanceTable providers={byProvider} isLoading={isLoading} onRefresh={refetchProviders} />
           </TabsContent>
 
           {/* Commissions Tab */}

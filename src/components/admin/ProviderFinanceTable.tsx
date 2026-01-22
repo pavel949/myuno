@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Building2, Search, ArrowUpDown, ExternalLink } from 'lucide-react';
+import { Building2, Search, ArrowUpDown, Pencil, Check, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { ProviderFinancials, getVerticalLabel } from '@/hooks/useAdminFinance';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface ProviderFinanceTableProps {
   providers: ProviderFinancials[];
   isLoading: boolean;
+  onRefresh?: () => void;
 }
 
 function formatCurrency(amount: number, currency = 'THB'): string {
@@ -24,10 +27,13 @@ function formatCurrency(amount: number, currency = 'THB'): string {
 type SortField = 'gmv' | 'platformRevenue' | 'pendingPayout' | 'orderCount';
 type SortDirection = 'asc' | 'desc';
 
-export function ProviderFinanceTable({ providers, isLoading }: ProviderFinanceTableProps) {
+export function ProviderFinanceTable({ providers, isLoading, onRefresh }: ProviderFinanceTableProps) {
   const [search, setSearch] = useState('');
   const [sortField, setSortField] = useState<SortField>('gmv');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [editingProvider, setEditingProvider] = useState<string | null>(null);
+  const [editingRate, setEditingRate] = useState<string>('');
+  const [saving, setSaving] = useState(false);
 
   const filteredProviders = providers.filter(p => 
     p.providerName.toLowerCase().includes(search.toLowerCase())
@@ -45,6 +51,47 @@ export function ProviderFinanceTable({ providers, isLoading }: ProviderFinanceTa
     } else {
       setSortField(field);
       setSortDirection('desc');
+    }
+  };
+
+  const handleEditClick = (providerId: string, currentRate: number) => {
+    setEditingProvider(providerId);
+    setEditingRate(currentRate.toString());
+  };
+
+  const handleCancelEdit = () => {
+    setEditingProvider(null);
+    setEditingRate('');
+  };
+
+  const handleSaveCommission = async (providerId: string) => {
+    const rate = parseFloat(editingRate);
+    if (isNaN(rate) || rate < 0 || rate > 100) {
+      toast.error('Комиссия должна быть от 0 до 100%');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('providers')
+        .update({ 
+          commission_rate: rate,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', providerId);
+
+      if (error) throw error;
+
+      toast.success(`Комиссия обновлена: ${rate}%`);
+      setEditingProvider(null);
+      setEditingRate('');
+      onRefresh?.();
+    } catch (error) {
+      console.error('Error updating commission:', error);
+      toast.error('Ошибка при сохранении комиссии');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -155,9 +202,51 @@ export function ProviderFinanceTable({ providers, isLoading }: ProviderFinanceTa
                       {provider.orderCount}
                     </td>
                     <td className="text-right py-3 px-4">
-                      <span className="px-2 py-1 bg-blue-500/10 text-blue-600 rounded-md text-sm">
-                        {provider.commissionRate}%
-                      </span>
+                      {editingProvider === provider.providerId ? (
+                        <div className="flex items-center justify-end gap-1">
+                          <Input
+                            type="number"
+                            value={editingRate}
+                            onChange={(e) => setEditingRate(e.target.value)}
+                            className="w-16 h-7 text-sm text-right"
+                            min="0"
+                            max="100"
+                            step="0.5"
+                            autoFocus
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleSaveCommission(provider.providerId);
+                              if (e.key === 'Escape') handleCancelEdit();
+                            }}
+                          />
+                          <span className="text-sm text-muted-foreground">%</span>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7 text-emerald-600"
+                            onClick={() => handleSaveCommission(provider.providerId)}
+                            disabled={saving}
+                          >
+                            <Check className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7 text-destructive"
+                            onClick={handleCancelEdit}
+                            disabled={saving}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => handleEditClick(provider.providerId, provider.commissionRate)}
+                          className="inline-flex items-center gap-1.5 px-2 py-1 bg-blue-500/10 text-blue-600 rounded-md text-sm hover:bg-blue-500/20 transition-colors group"
+                        >
+                          {provider.commissionRate}%
+                          <Pencil className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </button>
+                      )}
                     </td>
                   </motion.tr>
                 ))}
