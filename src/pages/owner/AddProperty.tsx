@@ -19,7 +19,7 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Home, MapPin, Bed, Bath, SquareStack, Upload, DollarSign, Clock, Users, Copy, BadgeDollarSign, Building2, Landmark, Briefcase } from 'lucide-react';
-import { ImageUpload } from '@/components/upload/ImageUpload';
+import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
 import { ProjectSelector } from '@/components/property/ProjectSelector';
 import { UnitFields } from '@/components/property/UnitFields';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
@@ -302,13 +302,6 @@ export default function AddProperty() {
     navigate('/owner/properties');
   };
 
-  const handleImageUpload = (url: string) => {
-    if (!formData.cover_image) {
-      setFormData(prev => ({ ...prev, cover_image: url }));
-    } else {
-      setFormData(prev => ({ ...prev, images: [...prev.images, url] }));
-    }
-  };
 
   const renderStep = (stepId: string) => {
     switch (stepId) {
@@ -539,35 +532,30 @@ export default function AddProperty() {
                 {isRu ? 'Фотографии' : 'Photos'}
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <ImageUpload
+            <CardContent className="space-y-4">
+              <MultiImageUpload
+                value={formData.cover_image 
+                  ? [formData.cover_image, ...formData.images] 
+                  : formData.images}
+                onChange={(urls) => {
+                  if (urls.length === 0) {
+                    setFormData(prev => ({ ...prev, cover_image: '', images: [] }));
+                  } else {
+                    setFormData(prev => ({ 
+                      ...prev, 
+                      cover_image: urls[0], 
+                      images: urls.slice(1) 
+                    }));
+                  }
+                }}
                 folder="property-care"
-                onChange={handleImageUpload}
-                placeholder={isRu ? 'Загрузить фото' : 'Upload Photo'}
+                maxImages={20}
               />
-              
-              {(formData.cover_image || formData.images.length > 0) && (
-                <div className="grid grid-cols-3 md:grid-cols-4 gap-2 mt-4">
-                  {formData.cover_image && (
-                    <div className="relative aspect-square rounded-lg overflow-hidden border-2 border-primary">
-                      <img src={formData.cover_image} alt="Cover" className="w-full h-full object-cover" />
-                      <span className="absolute bottom-0 left-0 right-0 bg-primary text-primary-foreground text-xs text-center py-0.5">
-                        {isRu ? 'Обложка' : 'Cover'}
-                      </span>
-                    </div>
-                  )}
-                  {formData.images.map((img, idx) => (
-                    <div key={idx} className="aspect-square rounded-lg overflow-hidden">
-                      <img src={img} alt={`Photo ${idx + 1}`} className="w-full h-full object-cover" />
-                    </div>
-                  ))}
-                </div>
-              )}
 
-              <p className="text-xs text-muted-foreground mt-4">
+              <p className="text-xs text-muted-foreground">
                 {isRu 
-                  ? '💡 Первое фото станет обложкой. Рекомендуем загрузить 5-10 качественных снимков.' 
-                  : '💡 First photo becomes the cover. We recommend 5-10 quality images.'}
+                  ? '💡 Первое фото станет обложкой. Можно выбрать несколько фото сразу. Рекомендуем 5-15 качественных снимков.' 
+                  : '💡 First photo becomes the cover. You can select multiple photos at once. We recommend 5-15 quality images.'}
               </p>
             </CardContent>
           </Card>
