@@ -53,18 +53,18 @@ export function EmailVerificationBadge({ variant = 'inline' }: EmailVerification
 
   if (variant === 'inline') {
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
         {isVerified ? (
           <>
-            <CheckCircle className="w-4 h-4 text-green-500" />
-            <span className="text-sm text-green-600 dark:text-green-400">
+            <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500 shrink-0" />
+            <span className="text-xs sm:text-sm text-green-600 dark:text-green-400">
               {language === 'ru' ? 'Email подтверждён' : 'Email verified'}
             </span>
           </>
         ) : (
           <>
-            <AlertCircle className="w-4 h-4 text-amber-500" />
-            <span className="text-sm text-amber-600 dark:text-amber-400">
+            <AlertCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 shrink-0" />
+            <span className="text-xs sm:text-sm text-amber-600 dark:text-amber-400">
               {language === 'ru' ? 'Email не подтверждён' : 'Email not verified'}
             </span>
             <PremiumButton
@@ -72,7 +72,7 @@ export function EmailVerificationBadge({ variant = 'inline' }: EmailVerification
               size="sm"
               onClick={handleResendVerification}
               disabled={isResending}
-              className="h-6 px-2 text-xs"
+              className="h-5 sm:h-6 px-1.5 sm:px-2 text-[10px] sm:text-xs"
             >
               {isResending ? (
                 <Loader2 className="w-3 h-3 animate-spin" />
