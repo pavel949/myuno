@@ -3,7 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useOperationalTasks } from '@/hooks/useOperationalTasks';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AlertTriangle, Wrench, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { AlertTriangle, Wrench, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function RisksBlock() {
@@ -11,10 +11,9 @@ export function RisksBlock() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   
-  // Get all pending maintenance tasks
+  // Get all pending/in-progress tasks that represent risks (maintenance, urgent items)
   const { tasks, isLoading } = useOperationalTasks({
     status: ['pending', 'in_progress'],
-    taskType: 'maintenance'
   });
 
   if (isLoading) {
@@ -29,9 +28,17 @@ export function RisksBlock() {
     );
   }
 
-  const maintenanceTasks = tasks || [];
-  const urgentTasks = maintenanceTasks.filter(t => t.priority === 'urgent');
-  const totalIssues = maintenanceTasks.length;
+  // Filter for actual risks: maintenance tasks + any urgent priority tasks
+  const maintenanceTasks = (tasks || []).filter(t => t.task_type === 'maintenance');
+  const urgentTasks = (tasks || []).filter(t => t.priority === 'urgent');
+  const overdueTasks = (tasks || []).filter(t => {
+    const taskDate = new Date(t.scheduled_date);
+    return taskDate < new Date() && t.status === 'pending';
+  });
+  
+  // Combine unique risks
+  const allRisks = [...new Set([...maintenanceTasks, ...urgentTasks, ...overdueTasks])];
+  const totalIssues = allRisks.length;
 
   // All clear state
   if (totalIssues === 0) {
@@ -96,10 +103,18 @@ export function RisksBlock() {
               <span>{urgentTasks.length} {isRu ? 'срочно' : 'urgent'}</span>
             </div>
           )}
-          <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-warning/10 text-warning">
-            <Wrench className="h-3 w-3" />
-            <span>{maintenanceTasks.length}</span>
-          </div>
+          {overdueTasks.length > 0 && (
+            <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-orange-500/10 text-orange-500">
+              <AlertCircle className="h-3 w-3" />
+              <span>{overdueTasks.length} {isRu ? 'просрочено' : 'overdue'}</span>
+            </div>
+          )}
+          {maintenanceTasks.length > 0 && (
+            <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-warning/10 text-warning">
+              <Wrench className="h-3 w-3" />
+              <span>{maintenanceTasks.length} {isRu ? 'ремонт' : 'repairs'}</span>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
