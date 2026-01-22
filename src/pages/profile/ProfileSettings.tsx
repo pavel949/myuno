@@ -222,21 +222,39 @@ export default function ProfileSettings() {
             </SectionCard>
           </motion.div>
 
-          {/* Contact Information */}
+          {/* Verified Identity Data */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
             <div className="flex items-center gap-2 mb-3 text-sm font-medium text-muted-foreground">
-              <Mail className="w-4 h-4" />
-              {isRu ? 'Контактные данные' : 'Contact Information'}
+              <Shield className="w-4 h-4" />
+              {isRu ? 'Верифицированные данные' : 'Verified Identity'}
             </div>
-            <SectionCard className="space-y-4">
-              <p className="text-xs text-muted-foreground -mt-2 mb-2">
-                {isRu 
-                  ? 'Контактные данные используются для связи по вашим бронированиям и важных уведомлений.'
-                  : 'Contact information is used for booking communications and important notifications.'}
-              </p>
+            <SectionCard className="space-y-4 border-primary/20">
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-primary/5 -mt-2 mb-2">
+                <Lock className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {isRu 
+                    ? 'Эти данные являются частью вашей верифицированной личности и защищены от изменений. Для обновления обратитесь в службу поддержки.'
+                    : 'This data is part of your verified identity and protected from changes. Contact support to update.'}
+                </p>
+              </div>
               
               <div>
-                <Label className="text-xs">Email</Label>
+                <Label className="text-xs flex items-center gap-1">
+                  {isRu ? 'Полное имя' : 'Full Name'}
+                  <ShieldCheck className="w-3 h-3 text-primary" />
+                </Label>
+                <Input 
+                  value={profile?.full_name || ''} 
+                  disabled 
+                  className="mt-1 bg-muted"
+                />
+              </div>
+
+              <div>
+                <Label className="text-xs flex items-center gap-1">
+                  Email
+                  <ShieldCheck className="w-3 h-3 text-primary" />
+                </Label>
                 <Input 
                   value={profile?.email || user?.email || ''} 
                   disabled 
@@ -245,20 +263,26 @@ export default function ProfileSettings() {
               </div>
 
               <div>
-                <Label className="text-xs">{isRu ? 'Телефон' : 'Phone'}</Label>
+                <Label className="text-xs flex items-center gap-1">
+                  {isRu ? 'Телефон' : 'Phone'}
+                  <ShieldCheck className="w-3 h-3 text-primary" />
+                </Label>
                 <Input 
-                  value={profile?.phone || ''} 
+                  value={profile?.phone || (isRu ? 'Не указан' : 'Not provided')} 
                   disabled 
                   className="mt-1 bg-muted"
                 />
-                <button 
-                  type="button"
-                  onClick={() => navigate('/profile/edit')}
-                  className="text-xs text-primary hover:underline mt-1"
-                >
-                  {isRu ? 'Изменить в профиле →' : 'Edit in profile →'}
-                </button>
               </div>
+
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full text-xs"
+                onClick={() => navigate('/support')}
+              >
+                <MessageCircle className="w-3 h-3 mr-1" />
+                {isRu ? 'Запросить изменение данных' : 'Request Data Change'}
+              </Button>
             </SectionCard>
           </motion.div>
 
