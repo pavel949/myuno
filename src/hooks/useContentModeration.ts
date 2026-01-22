@@ -168,6 +168,23 @@ export function useContentModeration() {
     }
   }, [toast]);
 
+  const sendPropertyModerationEmail = useCallback(async (
+    propertyId: string,
+    action: 'approved' | 'rejected',
+    rejectionReason?: string
+  ) => {
+    try {
+      const { error } = await supabase.functions.invoke('property-moderation-email', {
+        body: { propertyId, action, rejectionReason }
+      });
+      if (error) {
+        console.error('Failed to send moderation email:', error);
+      }
+    } catch (err) {
+      console.error('Email send error:', err);
+    }
+  }, []);
+
   const approveContent = useCallback(async (
     contentType: ContentType,
     contentId: string,
@@ -186,6 +203,11 @@ export function useContentModeration() {
 
       if (error) throw error;
 
+      // Send email notification for owner properties
+      if (contentType === 'owner_properties') {
+        sendPropertyModerationEmail(contentId, 'approved');
+      }
+
       toast({
         title: '✅ Approved',
         description: 'Content has been approved and is now visible to users',
@@ -201,7 +223,7 @@ export function useContentModeration() {
       });
       return false;
     }
-  }, [toast]);
+  }, [toast, sendPropertyModerationEmail]);
 
   const rejectContent = useCallback(async (
     contentType: ContentType,
@@ -222,6 +244,11 @@ export function useContentModeration() {
 
       if (error) throw error;
 
+      // Send email notification for owner properties
+      if (contentType === 'owner_properties') {
+        sendPropertyModerationEmail(contentId, 'rejected', rejectionReason);
+      }
+
       toast({
         title: '❌ Rejected',
         description: 'Content has been rejected. Vendor will be notified.',
@@ -237,7 +264,7 @@ export function useContentModeration() {
       });
       return false;
     }
-  }, [toast]);
+  }, [toast, sendPropertyModerationEmail]);
 
   const getContentDetails = useCallback(async (
     contentType: ContentType,

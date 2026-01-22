@@ -56,3 +56,6 @@ verify_jwt = false
 
 [functions.image-resize]
 verify_jwt = false
+
+[functions.property-moderation-email]
+verify_jwt = false
