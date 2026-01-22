@@ -321,14 +321,47 @@ export function CalendarSyncManager({ propertyId }: CalendarSyncManagerProps) {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              <Calendar className="h-12 w-12 mx-auto mb-2 opacity-50" />
-              <p>{isRu ? 'Нет подключённых календарей' : 'No calendars connected'}</p>
-              <p className="text-sm">
-                {isRu 
-                  ? 'Добавьте календари с Airbnb или Booking.com для синхронизации'
-                  : 'Add calendars from Airbnb or Booking.com to sync'}
-              </p>
+            <div className="py-8 space-y-6">
+              <div className="text-center">
+                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <Calendar className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="font-semibold mb-2">
+                  {isRu ? 'Синхронизируйте бронирования' : 'Sync Your Bookings'}
+                </h3>
+                <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                  {isRu 
+                    ? 'Подключите календари с других платформ, чтобы избежать двойных бронирований'
+                    : 'Connect calendars from other platforms to avoid double bookings'}
+                </p>
+              </div>
+
+              <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                <p className="text-sm font-medium">
+                  {isRu ? '📋 Как найти iCal-ссылку:' : '📋 How to find iCal link:'}
+                </p>
+                <div className="space-y-2 text-sm text-muted-foreground">
+                  <div className="flex gap-2">
+                    <span className="font-medium text-foreground">Airbnb:</span>
+                    <span>{isRu ? 'Календарь → Доступность → Экспорт календаря' : 'Calendar → Availability → Export Calendar'}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="font-medium text-foreground">Booking:</span>
+                    <span>{isRu ? 'Объект → Цены и доступность → Синхронизация' : 'Property → Rates & Availability → Sync'}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="font-medium text-foreground">VRBO:</span>
+                    <span>{isRu ? 'Календарь → Импорт/Экспорт → Экспорт' : 'Calendar → Import/Export → Export'}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-center">
+                <Button onClick={() => setIsAddDialogOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  {isRu ? 'Добавить первый канал' : 'Add First Channel'}
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>
