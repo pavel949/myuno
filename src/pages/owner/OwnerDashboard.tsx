@@ -24,6 +24,7 @@ import { OwnerAlertPanel } from '@/components/owner/OwnerAlertPanel';
 import { OwnerRevenueChart } from '@/components/owner/OwnerRevenueChart';
 import { OwnerQuickActions } from '@/components/owner/OwnerQuickActions';
 import { SuperhostStatusCompact } from '@/components/owner/SuperhostStatusCard';
+import { TodayOperationsPanel } from '@/components/owner/TodayOperationsPanel';
 import { format, isToday, isTomorrow, differenceInDays, subDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
@@ -188,6 +189,11 @@ export default function OwnerDashboard() {
       {/* Quick Actions */}
       <div className="mb-4">
         <OwnerQuickActions />
+      </div>
+
+      {/* Today's Operations */}
+      <div className="mb-4">
+        <TodayOperationsPanel />
       </div>
 
       {/* Current & Upcoming Bookings */}

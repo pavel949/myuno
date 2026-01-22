@@ -4,6 +4,7 @@ import { PageHeader } from '@/components/uno/PageHeader';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { UnifiedPropertyCalendar } from '@/components/owner/UnifiedPropertyCalendar';
 import { BookingCalendar } from '@/components/owner/BookingCalendar';
 import { CalendarSyncManager } from '@/components/owner/CalendarSyncManager';
 import { PropertyThumbnailSelector } from '@/components/owner/PropertyThumbnailSelector';
@@ -11,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { useOwnerProperties } from '@/hooks/usePropertyCare';
-import { CalendarDays, RefreshCw } from 'lucide-react';
+import { CalendarDays, RefreshCw, ClipboardList } from 'lucide-react';
 
 export default function OwnerCalendar() {
   const { language } = useLanguage();
@@ -75,18 +76,29 @@ export default function OwnerCalendar() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="calendar" className="gap-2">
               <CalendarDays className="h-4 w-4" />
               {isRu ? 'Календарь' : 'Calendar'}
             </TabsTrigger>
+            <TabsTrigger value="operations" className="gap-2">
+              <ClipboardList className="h-4 w-4" />
+              {isRu ? 'Задачи' : 'Tasks'}
+            </TabsTrigger>
             <TabsTrigger value="sync" className="gap-2">
               <RefreshCw className="h-4 w-4" />
-              {isRu ? 'Синхронизация' : 'Sync'}
+              {isRu ? 'Синхр.' : 'Sync'}
             </TabsTrigger>
           </TabsList>
           
           <TabsContent value="calendar" className="mt-4">
+            <UnifiedPropertyCalendar 
+              propertyId={selectedPropertyId || undefined}
+              properties={properties || []}
+            />
+          </TabsContent>
+
+          <TabsContent value="operations" className="mt-4">
             <BookingCalendar 
               propertyId={selectedPropertyId || undefined} 
               showPropertySelector={false} 

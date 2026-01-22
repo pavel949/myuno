@@ -290,6 +290,7 @@ const OwnerReviews = lazy(() => import('@/pages/owner/OwnerReviews'));
 const PropertyQuickSetup = lazy(() => import('@/pages/owner/PropertyQuickSetup'));
 const OwnerPortfolio = lazy(() => import('@/pages/owner/OwnerPortfolio'));
 const OwnerSuperhost = lazy(() => import('@/pages/owner/OwnerSuperhost'));
+const OwnerOperations = lazy(() => import('@/pages/owner/OwnerOperations'));
 
 // Property Consultation
 const PropertyConsultation = lazy(() => import('@/pages/property/PropertyConsultation'));
@@ -623,6 +624,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/owner/properties/:id/setup" element={<LazyPage><OwnerGuard><PropertyQuickSetup /></OwnerGuard></LazyPage>} />
         <Route path="/owner/properties/:id/edit" element={<LazyPage><OwnerGuard><EditProperty /></OwnerGuard></LazyPage>} />
         <Route path="/owner/calendar" element={<LazyPage><OwnerGuard><OwnerCalendar /></OwnerGuard></LazyPage>} />
+        <Route path="/owner/operations" element={<LazyPage><OwnerGuard><OwnerOperations /></OwnerGuard></LazyPage>} />
         <Route path="/owner/financials" element={<LazyPage><OwnerGuard><OwnerFinancials /></OwnerGuard></LazyPage>} />
         <Route path="/owner/financials/new" element={<LazyPage><OwnerGuard><OwnerFinancialForm /></OwnerGuard></LazyPage>} />
         <Route path="/owner/financials/:id" element={<LazyPage><OwnerGuard><OwnerFinancialForm /></OwnerGuard></LazyPage>} />
