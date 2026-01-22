@@ -164,7 +164,7 @@ export function useAdminFinance(days: number = 30) {
   });
 
   // Fetch by provider
-  const { data: byProvider, isLoading: providerLoading } = useQuery({
+  const { data: byProvider, isLoading: providerLoading, refetch: refetchProviders } = useQuery({
     queryKey: ['admin-finance-by-provider', days],
     queryFn: async (): Promise<ProviderFinancials[]> => {
       const { data: orders, error } = await supabase
@@ -257,5 +257,6 @@ export function useAdminFinance(days: number = 30) {
     byProvider: byProvider || [],
     dailyData: dailyData || [],
     isLoading: summaryLoading || verticalLoading || providerLoading || dailyLoading,
+    refetchProviders,
   };
 }
