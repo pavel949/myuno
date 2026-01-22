@@ -22,6 +22,8 @@ import {
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
+const QUICK_AMOUNTS = [500, 1000, 2000, 5000, 10000];
+
 const QUICK_PAYMENT_METHODS = [
   { value: 'cash', icon: Banknote, labelRu: 'Наличные', labelEn: 'Cash' },
   { value: 'card', icon: CreditCard, labelRu: 'Карта', labelEn: 'Card' },
@@ -152,6 +154,23 @@ export default function QuickExpense() {
             <Label className="text-sm font-medium mb-2 block">
               {isRu ? 'Сумма (THB)' : 'Amount (THB)'}
             </Label>
+            
+            {/* Quick Amount Buttons */}
+            <div className="flex gap-2 flex-wrap mb-3">
+              {QUICK_AMOUNTS.map(amt => (
+                <Button
+                  key={amt}
+                  type="button"
+                  variant={amount === String(amt) ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setAmount(String(amt))}
+                  className="h-9"
+                >
+                  ฿{amt.toLocaleString()}
+                </Button>
+              ))}
+            </div>
+            
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xl text-muted-foreground">฿</span>
               <Input

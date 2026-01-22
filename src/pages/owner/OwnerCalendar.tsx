@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -6,13 +6,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { BookingCalendar } from '@/components/owner/BookingCalendar';
 import { CalendarSyncManager } from '@/components/owner/CalendarSyncManager';
+import { PropertyThumbnailSelector } from '@/components/owner/PropertyThumbnailSelector';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { useOwnerProperties } from '@/hooks/usePropertyCare';
-import { CalendarDays, RefreshCw, Home } from 'lucide-react';
+import { CalendarDays, RefreshCw } from 'lucide-react';
 
 export default function OwnerCalendar() {
   const { language } = useLanguage();
@@ -23,7 +22,14 @@ export default function OwnerCalendar() {
   const [selectedPropertyId, setSelectedPropertyId] = useState('');
   const [activeTab, setActiveTab] = useState('calendar');
   
-  const { data: properties } = useOwnerProperties();
+  const { data: properties, isLoading: propertiesLoading } = useOwnerProperties();
+
+  // Auto-select first property when properties load
+  useEffect(() => {
+    if (properties?.length && !selectedPropertyId) {
+      setSelectedPropertyId(properties[0].id);
+    }
+  }, [properties, selectedPropertyId]);
 
   if (!user) {
     return (
@@ -55,31 +61,18 @@ export default function OwnerCalendar() {
       />
       
       <div className="mt-4 space-y-4">
-        {/* Property Selector - shared between tabs */}
-        {properties && properties.length > 0 && (
-          <Card>
-            <CardContent className="pt-4">
-              <Label className="mb-2 block">
-                {isRu ? 'Выберите объект' : 'Select Property'}
-              </Label>
-              <Select value={selectedPropertyId} onValueChange={setSelectedPropertyId}>
-                <SelectTrigger>
-                  <SelectValue placeholder={isRu ? 'Выберите объект' : 'Select property'} />
-                </SelectTrigger>
-                <SelectContent>
-                  {properties.map((property) => (
-                    <SelectItem key={property.id} value={property.id}>
-                      <div className="flex items-center gap-2">
-                        <Home className="w-4 h-4" />
-                        {isRu ? property.title_ru || property.title : property.title}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </CardContent>
-          </Card>
-        )}
+        {/* Property Thumbnail Selector - shared between tabs */}
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-muted-foreground">
+            {isRu ? 'Выберите объект' : 'Select Property'}
+          </p>
+          <PropertyThumbnailSelector
+            properties={properties || []}
+            selectedId={selectedPropertyId}
+            onSelect={setSelectedPropertyId}
+            isLoading={propertiesLoading}
+          />
+        </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
