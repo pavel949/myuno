@@ -17,8 +17,9 @@ import {
   Home, MapPin, Bed, Bath, SquareStack, Settings, 
   Globe, ClipboardList, Wrench, Calendar, ExternalLink,
   CheckCircle, Clock, AlertTriangle, Loader2, DollarSign, BookOpen,
-  FileText, Building2
+  FileText, Building2, Sparkles, Shield
 } from 'lucide-react';
+import { differenceInHours } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -45,7 +46,22 @@ export default function OwnerPropertyDetail() {
     price_period: 'night',
   });
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string, approvalStatus?: string) => {
+    if (approvalStatus === 'pending') {
+      return (
+        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 gap-1">
+          <Clock className="h-3 w-3" />
+          {isRu ? 'На рассмотрении' : 'Under Review'}
+        </Badge>
+      );
+    }
+    if (approvalStatus === 'rejected') {
+      return (
+        <Badge variant="destructive" className="gap-1">
+          {isRu ? 'Требует доработки' : 'Needs Revision'}
+        </Badge>
+      );
+    }
     switch (status) {
       case 'active':
         return <Badge className="bg-green-500">{isRu ? 'Активен' : 'Active'}</Badge>;
@@ -55,6 +71,13 @@ export default function OwnerPropertyDetail() {
         return <Badge variant="outline">{isRu ? 'Неактивен' : 'Inactive'}</Badge>;
     }
   };
+
+  // Calculate protection period
+  const instantBookingEnabledAt = (property as any)?.instant_booking_enabled_at;
+  const protectionEndTime = instantBookingEnabledAt ? new Date(instantBookingEnabledAt) : null;
+  const isInProtectionPeriod = protectionEndTime && protectionEndTime > new Date();
+  const hoursRemaining = protectionEndTime ? Math.max(0, differenceInHours(protectionEndTime, new Date())) : 0;
+  const isRecentlyApproved = (property as any)?.approval_status === 'approved' && isInProtectionPeriod;
 
   const getServiceStatusIcon = (status: string) => {
     switch (status) {
@@ -152,10 +175,47 @@ export default function OwnerPropertyDetail() {
                 {property.district || property.address}
               </p>
             </div>
-            {getStatusBadge(property.status)}
+            {getStatusBadge(property.status, (property as any).approval_status)}
           </div>
         </div>
       </div>
+
+      {/* Recently approved alert - prompt to setup */}
+      {isRecentlyApproved && (
+        <Card className="mb-6 border-green-200 bg-green-50">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <Sparkles className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="font-medium text-green-900">
+                  {isRu ? 'Объект одобрен! 🎉' : 'Property Approved! 🎉'}
+                </p>
+                <p className="text-sm text-green-700 mt-1">
+                  {isRu 
+                    ? 'Настройте календарь и цены, чтобы начать принимать бронирования' 
+                    : 'Set up calendar and pricing to start accepting bookings'}
+                </p>
+                <div className="flex items-center gap-2 mt-3">
+                  <Button 
+                    size="sm" 
+                    className="bg-green-600 hover:bg-green-700"
+                    onClick={() => navigate(`/owner/properties/${id}/setup`)}
+                  >
+                    <Sparkles className="h-4 w-4 mr-1" />
+                    {isRu ? 'Настроить' : 'Set Up Now'}
+                  </Button>
+                  {isInProtectionPeriod && (
+                    <Badge variant="secondary" className="text-xs gap-1">
+                      <Shield className="h-3 w-3" />
+                      {isRu ? `Защита: ${hoursRemaining}ч` : `Protection: ${hoursRemaining}h`}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Property specs */}
       <Card className="mb-6">
