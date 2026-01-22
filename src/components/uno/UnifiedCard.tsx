@@ -89,10 +89,10 @@ export function UnifiedCard({
             </span>
           )}
         </div>
-        <div className="p-2.5 space-y-1">
-          <h3 className="font-medium text-sm text-foreground line-clamp-1">{title}</h3>
+        <div className="p-2 space-y-0.5">
+          <h3 className="font-medium text-xs text-foreground line-clamp-2 leading-tight">{title}</h3>
           {price !== undefined && (
-            <span className="text-sm font-semibold text-primary">
+            <span className="text-xs font-semibold text-primary">
               {currency}{price.toLocaleString()}
             </span>
           )}
@@ -325,44 +325,41 @@ export function UnifiedCard({
       </div>
 
       {/* Content */}
-      <div className="p-4 space-y-3">
+      <div className="p-3 space-y-2">
         {/* Title row */}
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-foreground truncate flex items-center gap-1.5">
-              {title}
+            <h3 className="font-semibold text-sm text-foreground line-clamp-2 leading-snug flex items-start gap-1.5">
+              <span className="break-words">{title}</span>
               {isVerified && (
-                <BadgeCheck className="w-4 h-4 text-primary flex-shrink-0" />
+                <BadgeCheck className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
               )}
             </h3>
             {subtitle && (
-              <p className="text-sm text-muted-foreground truncate mt-0.5">{subtitle}</p>
+              <p className="text-xs text-muted-foreground line-clamp-1 mt-1">{subtitle}</p>
             )}
           </div>
           
           {/* Rating */}
           {rating !== undefined && (
             <div className="flex items-center gap-1 flex-shrink-0">
-              <Star className="w-4 h-4 fill-primary text-primary" />
-              <span className="text-sm font-medium">{rating.toFixed(1)}</span>
-              {reviewCount !== undefined && (
-                <span className="text-xs text-muted-foreground">({reviewCount})</span>
-              )}
+              <Star className="w-3.5 h-3.5 fill-primary text-primary" />
+              <span className="text-xs font-medium">{rating.toFixed(1)}</span>
             </div>
           )}
         </div>
 
         {/* Meta info */}
-        <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           {location && (
-            <div className="flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5" />
+            <div className="flex items-center gap-1 max-w-[140px]">
+              <MapPin className="w-3 h-3 flex-shrink-0" />
               <span className="truncate">{location}</span>
             </div>
           )}
           {duration && (
             <div className="flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5" />
+              <Clock className="w-3 h-3 flex-shrink-0" />
               <span>{duration}</span>
             </div>
           )}

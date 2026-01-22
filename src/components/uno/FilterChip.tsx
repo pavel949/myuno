@@ -59,7 +59,7 @@ export const FilterChip = forwardRef<HTMLButtonElement, FilterChipProps>(
         className={cn(
           "relative overflow-hidden inline-flex items-center rounded-full font-medium transition-all duration-200",
           "border focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background",
-          "active:scale-95 active:opacity-90 flex-shrink-0 whitespace-nowrap",
+          "active:scale-[0.98] flex-shrink-0",
           sizeClasses[size],
           isActive
             ? "bg-primary text-primary-foreground border-primary"
@@ -69,7 +69,7 @@ export const FilterChip = forwardRef<HTMLButtonElement, FilterChipProps>(
         {...props}
       >
         {renderIcon()}
-        <span className="truncate max-w-[120px]">{label}</span>
+        <span className="truncate max-w-[100px]">{label}</span>
         {onRemove && isActive && (
           <X
             className={cn(iconSizeClasses[size], "ml-1 hover:text-destructive cursor-pointer flex-shrink-0")}
