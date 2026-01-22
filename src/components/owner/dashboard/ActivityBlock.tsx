@@ -31,9 +31,9 @@ export function ActivityBlock() {
   if (isLoading) {
     return (
       <Card className="overflow-hidden">
-        <CardContent className="p-4">
-          <Skeleton className="h-6 w-32 mb-3" />
-          <Skeleton className="h-20 w-full" />
+        <CardContent className="p-3">
+          <Skeleton className="h-5 w-32 mb-2" />
+          <Skeleton className="h-16 w-full" />
         </CardContent>
       </Card>
     );
@@ -48,15 +48,13 @@ export function ActivityBlock() {
   if (recentTasks.length === 0) {
     return (
       <Card className="overflow-hidden">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-muted-foreground" />
-              <span className="font-semibold">{isRu ? 'Активность' : 'Activity'}</span>
-            </div>
+        <CardContent className="p-3">
+          <div className="flex items-center gap-1.5 mb-2">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <span className="text-xs font-medium text-muted-foreground">{isRu ? 'АКТИВНОСТЬ' : 'ACTIVITY'}</span>
           </div>
           
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             {isRu ? 'Нет недавних действий' : 'No recent activity'}
           </p>
         </CardContent>
@@ -66,21 +64,21 @@ export function ActivityBlock() {
 
   return (
     <Card 
-      className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+      className="overflow-hidden cursor-pointer hover:shadow-md transition-all"
       onClick={() => navigate('/owner/operations?tab=completed')}
     >
-      <CardContent className="p-4">
+      <CardContent className="p-3">
         {/* Header */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-muted-foreground" />
-            <span className="font-semibold">{isRu ? 'Активность' : 'Activity'}</span>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-1.5">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <span className="text-xs font-medium text-muted-foreground">{isRu ? 'АКТИВНОСТЬ' : 'ACTIVITY'}</span>
           </div>
-          <ArrowRight className="h-4 w-4 text-muted-foreground" />
+          <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
         </div>
 
-        {/* Activity list */}
-        <div className="space-y-2">
+        {/* Activity list - compact */}
+        <div className="space-y-1.5">
           {recentTasks.map((task) => {
             const config = ACTIVITY_ICONS[task.task_type as keyof typeof ACTIVITY_ICONS] 
               || { icon: CheckCircle2, color: 'text-muted-foreground', bg: 'bg-muted' };
@@ -93,19 +91,19 @@ export function ActivityBlock() {
             return (
               <div 
                 key={task.id}
-                className="flex items-center gap-3 py-1.5"
+                className="flex items-center gap-2 py-1"
               >
-                <div className={cn("p-1.5 rounded-full shrink-0", config.bg)}>
-                  <Icon className={cn("h-3.5 w-3.5", config.color)} />
+                <div className={cn("p-1 rounded-full shrink-0", config.bg)}>
+                  <Icon className={cn("h-3 w-3", config.color)} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">
+                  <p className="text-xs font-medium truncate">
                     {isRu ? task.title_ru || task.title : task.title}
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    {task.property?.title || ''} • {timeAgo}
-                  </p>
                 </div>
+                <span className="text-[10px] text-muted-foreground shrink-0">
+                  {timeAgo}
+                </span>
               </div>
             );
           })}

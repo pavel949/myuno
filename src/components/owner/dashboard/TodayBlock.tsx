@@ -2,7 +2,6 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTodayOperations } from '@/hooks/useOperationalTasks';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { 
   CalendarCheck, LogIn, LogOut, Sparkles, Wrench, 
@@ -32,9 +31,10 @@ export function TodayBlock() {
   if (isLoading) {
     return (
       <Card className="overflow-hidden">
-        <CardContent className="p-4">
-          <Skeleton className="h-6 w-32 mb-3" />
-          <Skeleton className="h-16 w-full" />
+        <CardContent className="p-3">
+          <Skeleton className="h-5 w-24 mb-2" />
+          <Skeleton className="h-8 w-16 mb-2" />
+          <Skeleton className="h-6 w-full" />
         </CardContent>
       </Card>
     );
@@ -44,28 +44,23 @@ export function TodayBlock() {
   if (pendingTasks.length === 0) {
     return (
       <Card 
-        className="overflow-hidden border-success/20 bg-gradient-to-br from-success/5 to-transparent cursor-pointer hover:shadow-md transition-shadow"
+        className="overflow-hidden border-success/20 bg-gradient-to-br from-success/5 to-transparent cursor-pointer hover:shadow-md transition-all"
         onClick={() => navigate('/owner/operations')}
       >
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <CalendarCheck className="h-5 w-5 text-muted-foreground" />
-              <span className="font-semibold">{isRu ? 'Сегодня' : 'Today'}</span>
+        <CardContent className="p-3">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-1.5">
+              <CalendarCheck className="h-4 w-4 text-muted-foreground" />
+              <span className="text-xs font-medium text-muted-foreground">{isRu ? 'СЕГОДНЯ' : 'TODAY'}</span>
             </div>
-            <ArrowRight className="h-4 w-4 text-muted-foreground" />
+            <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
           </div>
           
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-full bg-success/10">
-              <CheckCircle2 className="h-5 w-5 text-success" />
-            </div>
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 text-success" />
             <div>
-              <p className="font-medium text-success">
-                {isRu ? 'Все задачи выполнены!' : 'All tasks completed!'}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {isRu ? 'Можно отдыхать' : 'Time to relax'}
+              <p className="text-sm font-semibold text-success">
+                {isRu ? 'Всё готово' : 'All done'}
               </p>
             </div>
           </div>
@@ -76,28 +71,29 @@ export function TodayBlock() {
 
   return (
     <Card 
-      className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+      className="overflow-hidden cursor-pointer hover:shadow-md transition-all"
       onClick={() => navigate('/owner/operations')}
     >
-      <CardContent className="p-4">
+      <CardContent className="p-3">
         {/* Header */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <CalendarCheck className="h-5 w-5 text-muted-foreground" />
-            <span className="font-semibold">{isRu ? 'Сегодня' : 'Today'}</span>
+        <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center gap-1.5">
+            <CalendarCheck className="h-4 w-4 text-muted-foreground" />
+            <span className="text-xs font-medium text-muted-foreground">{isRu ? 'СЕГОДНЯ' : 'TODAY'}</span>
           </div>
-          <ArrowRight className="h-4 w-4 text-muted-foreground" />
+          <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
         </div>
 
-        {/* Task count summary */}
-        <p className="text-2xl font-bold mb-3">
-          {pendingTasks.length} {isRu 
-            ? (pendingTasks.length === 1 ? 'задача' : 'задач') 
-            : (pendingTasks.length === 1 ? 'task' : 'tasks')}
+        {/* Task count - large number */}
+        <p className="text-2xl font-bold mb-2">
+          {pendingTasks.length}
+          <span className="text-sm font-normal text-muted-foreground ml-1.5">
+            {isRu ? 'задач' : 'tasks'}
+          </span>
         </p>
 
-        {/* Task type pills */}
-        <div className="flex flex-wrap gap-2 mb-4">
+        {/* Task type pills - compact */}
+        <div className="flex flex-wrap gap-1.5">
           {taskCounts.map(([type, tasks]) => {
             const config = TASK_ICONS[type as keyof typeof TASK_ICONS] || TASK_ICONS.maintenance;
             const Icon = config.icon;
@@ -108,27 +104,16 @@ export function TodayBlock() {
               <div 
                 key={type}
                 className={cn(
-                  "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-sm font-medium",
+                  "flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium",
                   config.bg, config.color
                 )}
               >
-                <Icon className="h-3.5 w-3.5" />
+                <Icon className="h-3 w-3" />
                 <span>{count}</span>
               </div>
             );
           })}
         </div>
-
-        {/* Main action */}
-        <Button 
-          className="w-full"
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate('/owner/operations');
-          }}
-        >
-          {isRu ? 'Открыть задачи' : 'Open tasks'}
-        </Button>
       </CardContent>
     </Card>
   );

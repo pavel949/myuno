@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -6,16 +5,20 @@ import { useOwnerOrders } from '@/hooks/useOwnerOrders';
 import { useOwnerChats } from '@/hooks/usePropertyChat';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
-  Home, Calendar, Users, CalendarDays, Link2, MessageCircle
+  Home, MessageCircle
 } from 'lucide-react';
 import { OwnershipInviteBanner } from '@/components/owner/OwnershipInviteBanner';
-import { TodayBlock, MoneyBlock, PropertiesBlock, RisksBlock, ActivityBlock } from '@/components/owner/dashboard';
-import { format, isToday, isTomorrow, differenceInDays } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { 
+  TodayBlock, 
+  MoneyBlock, 
+  PropertiesBlock, 
+  RisksBlock, 
+  ActivityBlock 
+} from '@/components/owner/dashboard';
+import { BookingsSection } from '@/components/owner/dashboard/BookingsSection';
 
 export default function OwnerDashboard() {
   const { language } = useLanguage();
@@ -61,10 +64,9 @@ export default function OwnerDashboard() {
   }
 
   return (
-    <PageContainer>
+    <PageContainer className="space-y-4">
       <PageHeader 
         title={isRu ? 'Управление' : 'Dashboard'}
-        subtitle={isRu ? 'Ваши объекты на Пхукете' : 'Manage your property'}
         showBack
         fallbackPath="/"
         actions={
@@ -90,127 +92,39 @@ export default function OwnerDashboard() {
       {/* Ownership Invites Banner */}
       <OwnershipInviteBanner />
 
-      {/* 5 Main Dashboard Blocks */}
-      <div className="space-y-4 mb-4">
-        <TodayBlock />
-        <RisksBlock />
+      {/* Stripe-like Dashboard Grid */}
+      <div className="space-y-3">
+        {/* Row 1: Priority - Today + Risks (side by side on larger screens) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <TodayBlock />
+          <RisksBlock />
+        </div>
+
+        {/* Row 2: Money (full width - key metric) */}
         <MoneyBlock />
+
+        {/* Row 3: Properties (full width portfolio view) */}
         <PropertiesBlock />
+
+        {/* Row 4: Activity (secondary info) */}
         <ActivityBlock />
       </div>
 
-      {/* Bookings (compact version) */}
+      {/* Bookings Section */}
       {(activeOrders.length > 0 || upcomingOrders.length > 0) && (
-        <Card className="mb-4">
-          <CardHeader className="pb-2 flex flex-row items-center justify-between">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              {isRu ? 'Бронирования' : 'Bookings'}
-            </CardTitle>
-            <div className="flex gap-1">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => navigate('/owner/channels')}
-              >
-                <Link2 className="h-4 w-4 mr-1" />
-                {isRu ? 'Каналы' : 'Channels'}
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => navigate('/owner/calendar')}
-              >
-                <CalendarDays className="h-4 w-4 mr-1" />
-                {isRu ? 'Календарь' : 'Calendar'}
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-0">
-            {/* Active (current guests) */}
-            {activeOrders.length > 0 && (
-              <div className="mb-3">
-                <p className="text-xs font-medium text-muted-foreground mb-2">
-                  {isRu ? 'Сейчас проживают' : 'Currently staying'}
-                </p>
-                <div className="space-y-2">
-                  {activeOrders.slice(0, 2).map((order) => {
-                    const guestName = (order.metadata as any)?.guest_name || (isRu ? 'Гость' : 'Guest');
-                    return (
-                      <div 
-                        key={order.id}
-                        className="flex items-center gap-3 p-3 rounded-xl bg-success/10 border border-success/20"
-                      >
-                        <div className="p-2 rounded-full bg-success/20">
-                          <Users className="h-4 w-4 text-success" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm truncate">{guestName}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {order.items?.[0]?.product_name || order.order_number} • 
-                            {isRu ? ' до ' : ' until '}
-                            {order.end_at && format(new Date(order.end_at), 'd MMM', { locale: isRu ? ru : undefined })}
-                          </p>
-                        </div>
-                        <Badge variant="secondary" className="bg-success/20 text-success">
-                          {isRu ? 'Активно' : 'Active'}
-                        </Badge>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Upcoming */}
-            {upcomingOrders.length > 0 && (
-              <div>
-                <p className="text-xs font-medium text-muted-foreground mb-2">
-                  {isRu ? 'Предстоящие' : 'Upcoming'}
-                </p>
-                <div className="space-y-2">
-                  {upcomingOrders.slice(0, 3).map((order) => {
-                    const checkIn = order.start_at ? new Date(order.start_at) : new Date();
-                    const daysUntil = differenceInDays(checkIn, new Date());
-                    const guestName = (order.metadata as any)?.guest_name || (isRu ? 'Гость' : 'Guest');
-                    
-                    return (
-                      <div 
-                        key={order.id}
-                        className="flex items-center gap-3 p-3 rounded-xl bg-muted/50"
-                      >
-                        <div className="p-2 rounded-full bg-primary/20">
-                          <Calendar className="h-4 w-4 text-primary" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm truncate">{guestName}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {order.items?.[0]?.product_name || order.order_number} • 
-                            {format(checkIn, 'd MMM', { locale: isRu ? ru : undefined })}
-                          </p>
-                        </div>
-                        <Badge variant="outline">
-                          {isToday(checkIn) ? (isRu ? 'Сегодня' : 'Today') :
-                           isTomorrow(checkIn) ? (isRu ? 'Завтра' : 'Tomorrow') :
-                           `${daysUntil} ${isRu ? 'дн' : 'd'}`}
-                        </Badge>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <BookingsSection 
+          activeOrders={activeOrders} 
+          upcomingOrders={upcomingOrders} 
+        />
       )}
 
       {/* Floating Help Button */}
       <Button 
-        className="fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg z-50"
+        className="fixed bottom-20 right-4 h-12 w-12 rounded-full shadow-lg z-50"
         size="icon"
         onClick={() => navigate('/owner/support-chat')}
       >
-        <MessageCircle className="h-6 w-6" />
+        <MessageCircle className="h-5 w-5" />
       </Button>
     </PageContainer>
   );
