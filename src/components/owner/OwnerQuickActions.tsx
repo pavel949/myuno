@@ -9,7 +9,8 @@ import {
   Key, 
   LogOut, 
   Camera,
-  Zap
+  Zap,
+  Receipt
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -23,6 +24,14 @@ interface QuickAction {
 }
 
 const quickActions: QuickAction[] = [
+  { 
+    id: 'expense',
+    icon: Receipt, 
+    title: 'Expense', 
+    titleRu: 'Расход',
+    type: 'expense',
+    color: 'text-orange-500'
+  },
   { 
     id: 'cleaning',
     icon: Brush, 
@@ -56,14 +65,6 @@ const quickActions: QuickAction[] = [
     color: 'text-success'
   },
   { 
-    id: 'check-out',
-    icon: LogOut, 
-    title: 'Check-out', 
-    titleRu: 'Check-out',
-    type: 'check_out',
-    color: 'text-amber-500'
-  },
-  { 
     id: 'inspection',
     icon: Camera, 
     title: 'Inspect', 
@@ -79,7 +80,9 @@ export function OwnerQuickActions() {
   const isRu = language === 'ru';
 
   const handleAction = (action: QuickAction) => {
-    if (action.type === 'inspection') {
+    if (action.type === 'expense') {
+      navigate('/owner/expenses/quick');
+    } else if (action.type === 'inspection') {
       navigate('/owner/inspection');
     } else {
       navigate(`/owner/service-request?type=${action.type}`);
