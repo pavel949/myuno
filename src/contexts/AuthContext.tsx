@@ -7,11 +7,18 @@ interface SignUpResult {
   data?: { user: User | null };
 }
 
+interface SignUpData {
+  email: string;
+  password: string;
+  fullName?: string;
+  phone?: string;
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   isLoading: boolean;
-  signUp: (email: string, password: string, fullName?: string) => Promise<SignUpResult>;
+  signUp: (data: SignUpData) => Promise<SignUpResult>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: Error | null }>;
@@ -45,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, fullName?: string): Promise<SignUpResult> => {
+  const signUp = async ({ email, password, fullName, phone }: SignUpData): Promise<SignUpResult> => {
     const redirectUrl = `${window.location.origin}/`;
     
     const { data, error } = await supabase.auth.signUp({
@@ -55,9 +62,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         emailRedirectTo: redirectUrl,
         data: {
           full_name: fullName || '',
+          phone: phone || '',
         },
       },
     });
+
+    // If signup successful and we have phone, update profile
+    if (!error && data?.user && phone) {
+      await supabase
+        .from('profiles')
+        .update({ phone })
+        .eq('id', data.user.id);
+    }
     
     return { 
       error: error as Error | null,
