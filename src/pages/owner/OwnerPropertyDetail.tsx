@@ -1,22 +1,16 @@
-import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useOwnerProperty, usePublishToMarketplace, useServiceRequests, usePropertyInspections } from '@/hooks/usePropertyCare';
+import { useOwnerProperty, useServiceRequests, usePropertyInspections } from '@/hooks/usePropertyCare';
 import { PageContainer } from '@/components/uno/PageContainer';
-import { PageHeader } from '@/components/uno/PageHeader';
 import { BackButton } from '@/components/uno/BackButton';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Home, MapPin, Bed, Bath, SquareStack, Settings, 
   Globe, ClipboardList, Wrench, Calendar, ExternalLink,
-  CheckCircle, Clock, AlertTriangle, Loader2, DollarSign, BookOpen,
+  CheckCircle, Clock, AlertTriangle, DollarSign, BookOpen,
   FileText, Building2, Sparkles, Shield
 } from 'lucide-react';
 import { differenceInHours } from 'date-fns';
@@ -37,14 +31,6 @@ export default function OwnerPropertyDetail() {
   const { data: serviceRequests } = useServiceRequests(id);
   const { data: inspections } = usePropertyInspections(id);
   const { documents } = usePropertyDocuments(id || '');
-  const publishToMarketplace = usePublishToMarketplace();
-
-  const [showPublishDialog, setShowPublishDialog] = useState(false);
-  const [publishData, setPublishData] = useState({
-    listing_type: 'rent',
-    price: '',
-    price_period: 'night',
-  });
 
   const getStatusBadge = (status: string, approvalStatus?: string) => {
     if (approvalStatus === 'pending') {
@@ -112,18 +98,6 @@ export default function OwnerPropertyDetail() {
     emergency: { en: 'Emergency', ru: 'Экстренная помощь' },
   };
 
-  const handlePublish = async () => {
-    if (!property) return;
-    
-    await publishToMarketplace.mutateAsync({
-      ownerPropertyId: property.id,
-      listingType: publishData.listing_type as 'rent' | 'sale',
-      price: Number(publishData.price),
-      pricePeriod: publishData.price_period,
-    });
-
-    setShowPublishDialog(false);
-  };
 
   if (isLoading) {
     return (
@@ -248,7 +222,7 @@ export default function OwnerPropertyDetail() {
         </CardContent>
       </Card>
 
-      {/* Marketplace integration */}
+      {/* Marketplace integration - now automatic on approval */}
       <Card className="mb-6 border-primary/20 bg-primary/5">
         <CardContent className="p-4">
           {property.marketplace_property_id ? (
@@ -271,21 +245,41 @@ export default function OwnerPropertyDetail() {
                 {isRu ? 'Открыть' : 'View'}
               </Button>
             </div>
-          ) : (
+          ) : (property as any).approval_status === 'pending' ? (
+            <div className="flex items-center gap-3">
+              <Clock className="h-5 w-5 text-amber-500" />
+              <div>
+                <p className="font-medium">{isRu ? 'На модерации' : 'Under Review'}</p>
+                <p className="text-sm text-muted-foreground">
+                  {isRu ? 'После одобрения объект автоматически появится на маркетплейсе' : 'Property will be published automatically after approval'}
+                </p>
+              </div>
+            </div>
+          ) : (property as any).approval_status === 'rejected' ? (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Globe className="h-5 w-5 text-muted-foreground" />
+                <AlertTriangle className="h-5 w-5 text-destructive" />
                 <div>
-                  <p className="font-medium">{isRu ? 'Опубликуйте на маркетплейсе' : 'Publish on Marketplace'}</p>
+                  <p className="font-medium">{isRu ? 'Требуется доработка' : 'Revision Required'}</p>
                   <p className="text-sm text-muted-foreground">
-                    {isRu ? 'Сдавайте или продавайте через UNO' : 'Rent or sell through UNO'}
+                    {(property as any).rejection_reason || (isRu ? 'Внесите изменения и отправьте на повторную проверку' : 'Make changes and resubmit for review')}
                   </p>
                 </div>
               </div>
-              <Button size="sm" onClick={() => setShowPublishDialog(true)}>
-                <Globe className="h-4 w-4 mr-1" />
-                {isRu ? 'Опубликовать' : 'Publish'}
+              <Button size="sm" onClick={() => navigate(`/owner/properties/${id}/edit`)}>
+                <Settings className="h-4 w-4 mr-1" />
+                {isRu ? 'Редактировать' : 'Edit'}
               </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <Globe className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="font-medium">{isRu ? 'Ожидает отправки на модерацию' : 'Awaiting Submission'}</p>
+                <p className="text-sm text-muted-foreground">
+                  {isRu ? 'Заполните все обязательные поля и отправьте на проверку' : 'Complete all required fields and submit for review'}
+                </p>
+              </div>
             </div>
           )}
         </CardContent>
@@ -477,88 +471,6 @@ export default function OwnerPropertyDetail() {
       </Button>
 
       {/* Publish Dialog */}
-      <Dialog open={showPublishDialog} onOpenChange={setShowPublishDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{isRu ? 'Опубликовать на маркетплейсе' : 'Publish on Marketplace'}</DialogTitle>
-            <DialogDescription>
-              {isRu 
-                ? 'Ваш объект будет доступен для бронирования или покупки через UNO'
-                : 'Your property will be available for booking or purchase through UNO'
-              }
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>{isRu ? 'Тип листинга' : 'Listing Type'}</Label>
-              <Select 
-                value={publishData.listing_type}
-                onValueChange={(value) => setPublishData(prev => ({ ...prev, listing_type: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="rent">{isRu ? 'Аренда' : 'Rent'}</SelectItem>
-                  <SelectItem value="sale">{isRu ? 'Продажа' : 'Sale'}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>{isRu ? 'Цена' : 'Price'}</Label>
-              <Input
-                type="number"
-                value={publishData.price}
-                onChange={(e) => setPublishData(prev => ({ ...prev, price: e.target.value }))}
-                placeholder={publishData.listing_type === 'sale' ? '5000000' : '3500'}
-              />
-            </div>
-
-            {publishData.listing_type === 'rent' && (
-              <div className="space-y-2">
-                <Label>{isRu ? 'Период' : 'Period'}</Label>
-                <Select 
-                  value={publishData.price_period}
-                  onValueChange={(value) => setPublishData(prev => ({ ...prev, price_period: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="night">{isRu ? 'За ночь' : 'Per night'}</SelectItem>
-                    <SelectItem value="week">{isRu ? 'За неделю' : 'Per week'}</SelectItem>
-                    <SelectItem value="month">{isRu ? 'За месяц' : 'Per month'}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowPublishDialog(false)}>
-              {isRu ? 'Отмена' : 'Cancel'}
-            </Button>
-            <Button 
-              onClick={handlePublish}
-              disabled={!publishData.price || publishToMarketplace.isPending}
-            >
-              {publishToMarketplace.isPending ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  {isRu ? 'Публикация...' : 'Publishing...'}
-                </>
-              ) : (
-                <>
-                  <Globe className="h-4 w-4 mr-2" />
-                  {isRu ? 'Опубликовать' : 'Publish'}
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </PageContainer>
   );
 }

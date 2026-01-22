@@ -24,7 +24,7 @@ export default function OwnerProperties() {
   
   const { data: properties, isLoading } = useOwnerProperties();
 
-  const getApprovalBadge = (approvalStatus?: string, status?: string) => {
+  const getApprovalBadge = (approvalStatus?: string, status?: string, marketplaceId?: string | null) => {
     // First check approval status
     if (approvalStatus === 'pending') {
       return (
@@ -42,16 +42,25 @@ export default function OwnerProperties() {
         </Badge>
       );
     }
-    // If approved, show based on status
-    if (approvalStatus === 'approved' || status === 'active') {
+    // If approved and published
+    if (approvalStatus === 'approved' && marketplaceId) {
       return (
         <Badge className="bg-green-500 gap-1">
           <CheckCircle className="h-3 w-3" />
-          {isRu ? 'Активен' : 'Active'}
+          {isRu ? 'Опубликован' : 'Published'}
         </Badge>
       );
     }
-    return <Badge variant="outline">{isRu ? 'Неактивен' : 'Inactive'}</Badge>;
+    // If approved but not yet published (edge case)
+    if (approvalStatus === 'approved') {
+      return (
+        <Badge className="bg-blue-500 gap-1">
+          <CheckCircle className="h-3 w-3" />
+          {isRu ? 'Одобрен' : 'Approved'}
+        </Badge>
+      );
+    }
+    return <Badge variant="outline">{isRu ? 'Черновик' : 'Draft'}</Badge>;
   };
 
   const isInProtectionPeriod = (instantBookingEnabledAt?: string | null) => {
@@ -165,7 +174,7 @@ export default function OwnerProperties() {
                             <Globe className="h-3 w-3" />
                           </Badge>
                         )}
-                        {getApprovalBadge((property as any).approval_status, property.status)}
+                        {getApprovalBadge((property as any).approval_status, property.status, property.marketplace_property_id)}
                       </div>
                     </div>
                     

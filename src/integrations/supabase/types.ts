@@ -11045,6 +11045,10 @@ export type Database = {
         }
         Returns: Json
       }
+      publish_property_to_marketplace: {
+        Args: { p_owner_property_id: string }
+        Returns: string
+      }
       recalculate_user_segment: {
         Args: { p_user_id: string }
         Returns: undefined
