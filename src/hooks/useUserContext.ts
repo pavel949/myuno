@@ -150,23 +150,29 @@ export function useUserContext() {
   // Determine available roles based on memberships and user_roles
   const availableRoles: AppRole[] = ['user'];
   
+  // Normalize userRoles to string array (handle both object and string formats due to caching)
+  const normalizedRoles: string[] = (userRoles || []).map((r: unknown) => 
+    typeof r === 'string' ? r : (r as { role?: string })?.role || ''
+  ).filter(Boolean);
+  
   // Debug logging
-  console.log('[useUserContext] userRoles:', userRoles);
+  console.log('[useUserContext] userRoles raw:', userRoles);
+  console.log('[useUserContext] normalizedRoles:', normalizedRoles);
   console.log('[useUserContext] rolesLoading:', rolesLoading);
   
-  if (vendorOrgs.length > 0 || userRoles?.includes('vendor')) {
+  if (vendorOrgs.length > 0 || normalizedRoles.includes('vendor')) {
     availableRoles.push('vendor');
   }
-  if (ownerOrgs.length > 0 || userRoles?.includes('property_owner') || userRoles?.includes('owner')) {
+  if (ownerOrgs.length > 0 || normalizedRoles.includes('property_owner') || normalizedRoles.includes('owner')) {
     availableRoles.push('owner');
   }
-  if (userRoles?.includes('admin')) {
+  if (normalizedRoles.includes('admin')) {
     availableRoles.push('admin');
   }
-  if (userRoles?.includes('staff')) {
+  if (normalizedRoles.includes('staff')) {
     availableRoles.push('staff');
   }
-  if (userRoles?.includes('uno_team')) {
+  if (normalizedRoles.includes('uno_team')) {
     availableRoles.push('uno_team');
   }
   
