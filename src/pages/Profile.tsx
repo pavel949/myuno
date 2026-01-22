@@ -8,11 +8,11 @@ import { PremiumButton } from '@/components/uno/PremiumButton';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { CurrencySwitcher } from '@/components/uno/CurrencySwitcher';
+import { LocationSwitcher } from '@/components/uno/LocationSwitcher';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { SectionCard, SectionTitle } from '@/components/uno/SectionCard';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { ReferralCard } from '@/components/uno/ReferralCard';
-import { UserPreferences } from '@/components/profile/UserPreferences';
 import { EmailVerificationBadge } from '@/components/profile/EmailVerificationBadge';
 import { RoleSwitcher } from '@/components/uno/RoleSwitcher';
 import { supabase } from '@/integrations/supabase/client';
@@ -131,51 +131,46 @@ export default function Profile() {
         {/* Role Switcher */}
         <RoleSwitcher />
 
-        {/* Appearance & Settings */}
-        <div className="text-xs font-medium text-muted-foreground mb-2 mt-4 flex items-center gap-1">
-          <Settings className="w-3 h-3" />
-          {language === 'ru' ? 'Оформление' : 'Appearance'}
-        </div>
-        
-        {/* Theme switcher */}
+        {/* Compact Settings Card */}
         <SectionCard>
-          <div className="flex items-center gap-2 mb-3">
-            <Palette className="w-5 h-5 text-muted-foreground" />
-            <span className="font-medium">
-              {language === 'ru' ? 'Тема оформления' : 'Theme'}
-            </span>
+          <div className="space-y-4">
+            {/* Theme */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Palette className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm">{language === 'ru' ? 'Тема' : 'Theme'}</span>
+              </div>
+              <ThemeSwitcher variant="cards" />
+            </div>
+            
+            {/* Language */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Globe className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm">{language === 'ru' ? 'Язык' : 'Language'}</span>
+              </div>
+              <LanguageSwitcher variant="toggle" size="sm" />
+            </div>
+            
+            {/* Currency */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Coins className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm">{language === 'ru' ? 'Валюта' : 'Currency'}</span>
+              </div>
+              <CurrencySwitcher size="sm" />
+            </div>
+            
+            {/* Location */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm">{language === 'ru' ? 'Город' : 'Location'}</span>
+              </div>
+              <LocationSwitcher />
+            </div>
           </div>
-          <ThemeSwitcher variant="cards" />
         </SectionCard>
-
-        {/* Language switcher */}
-        <SectionCard className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Globe className="w-5 h-5 text-muted-foreground" />
-            <span className="font-medium">
-              {language === 'ru' ? 'Язык' : 'Language'}
-            </span>
-          </div>
-          <LanguageSwitcher variant="toggle" size="sm" />
-        </SectionCard>
-
-        {/* Currency switcher */}
-        <SectionCard className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Coins className="w-5 h-5 text-muted-foreground" />
-            <span className="font-medium">
-              {language === 'ru' ? 'Валюта' : 'Currency'}
-            </span>
-          </div>
-          <CurrencySwitcher size="sm" />
-        </SectionCard>
-
-        {/* User Preferences */}
-        <div className="text-xs font-medium text-muted-foreground mb-2 mt-4 flex items-center gap-1">
-          <MapPin className="w-3 h-3" />
-          {language === 'ru' ? 'Настройки' : 'Preferences'}
-        </div>
-        <UserPreferences />
 
         {/* Referral program */}
         <ReferralCard variant="compact" />
