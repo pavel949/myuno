@@ -143,6 +143,11 @@ export interface OwnerProperty {
   ownership_verification_notes?: string;
   ownership_verified_at?: string;
   ownership_verified_by?: string;
+  // Ownership form & Sale fields
+  ownership_form?: 'freehold' | 'leasehold' | 'company' | 'foreign_company';
+  is_for_sale?: boolean;
+  sale_price?: number;
+  sale_currency?: string;
 }
 
 export interface PropertyInspection {
@@ -322,6 +327,7 @@ export function usePublishToMarketplace() {
       listingType: 'rent' | 'sale';
       price: number;
       pricePeriod?: string;
+      ownershipForm?: string;
     }) => {
       if (!user) throw new Error('Not authenticated');
 
@@ -353,9 +359,10 @@ export function usePublishToMarketplace() {
           cover_image: ownerProperty.cover_image,
           images: ownerProperty.images,
           price: data.price,
-          price_period: data.listingType === 'rent' ? data.pricePeriod : null,
+          price_period: data.listingType === 'rent' ? data.pricePeriod : 'total',
           currency: 'THB',
           is_active: true,
+          ownership_form: data.listingType === 'sale' ? (data.ownershipForm || (ownerProperty as any).ownership_form) : null,
         } as any)
         .select()
         .single();
