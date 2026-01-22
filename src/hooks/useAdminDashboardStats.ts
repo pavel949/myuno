@@ -22,6 +22,9 @@ export interface DashboardStats {
   // Orders/Bookings
   totalBookings: number;
   pendingBookings: number;
+  // Moderation
+  pendingProperties: number;
+  pendingContent: number;
 }
 
 export function useAdminDashboardStats() {
@@ -61,12 +64,24 @@ export function useAdminDashboardStats() {
         supabase.from('bookings').select('id, status', { count: 'exact', head: true }),
       ]);
 
+      // Get pending moderation counts
+      const [pendingPropertiesRes, pendingYachtsRes, pendingToursRes] = await Promise.all([
+        supabase.from('owner_properties').select('id', { count: 'exact', head: true }).eq('approval_status', 'pending'),
+        supabase.from('yachts').select('id', { count: 'exact', head: true }).eq('approval_status', 'pending'),
+        supabase.from('tours').select('id', { count: 'exact', head: true }).eq('approval_status', 'pending'),
+      ]);
+
       // Get active/pending providers counts
       const [activeProvidersRes, pendingProvidersRes, pendingBookingsRes] = await Promise.all([
         supabase.from('providers').select('id', { count: 'exact', head: true }).eq('is_active', true),
         supabase.from('providers').select('id', { count: 'exact', head: true }).eq('is_verified', false),
         supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('status', 'submitted'),
       ]);
+
+      const pendingProperties = pendingPropertiesRes.count || 0;
+      const pendingYachts = pendingYachtsRes.count || 0;
+      const pendingTours = pendingToursRes.count || 0;
+      const totalPendingContent = pendingProperties + pendingYachts + pendingTours + (pendingProvidersRes.count || 0);
 
       return {
         providers: providersRes.count || 0,
@@ -86,6 +101,8 @@ export function useAdminDashboardStats() {
         unoTeamMembers: unoTeamRes.count || 0,
         totalBookings: bookingsRes.count || 0,
         pendingBookings: pendingBookingsRes.count || 0,
+        pendingProperties,
+        pendingContent: totalPendingContent,
       };
     },
     staleTime: 60 * 1000, // 1 minute
