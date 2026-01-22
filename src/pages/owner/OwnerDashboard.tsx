@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { usePropertyCareStats, useOwnerProperties, useServiceRequests } from '@/hooks/usePropertyCare';
 import { useOwnerOrders } from '@/hooks/useOwnerOrders';
 import { useOwnerChats } from '@/hooks/usePropertyChat';
+import { usePropertyFinancialsFull } from '@/hooks/usePropertyFinancials';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -43,24 +44,35 @@ export default function OwnerDashboard() {
     stats: orderStats 
   } = useOwnerOrders();
 
-  // Generate chart data for last 14 days
+  // Fetch real financial data
+  const { data: financials } = usePropertyFinancialsFull();
+
+  // Generate chart data for last 14 days from REAL financial data
   const chartData = useMemo(() => {
     const days: Array<{ date: string; income: number; expenses: number }> = [];
+    
     for (let i = 13; i >= 0; i--) {
       const date = subDays(new Date(), i);
-      days.push({
-        date: format(date, 'yyyy-MM-dd'),
-        income: Math.floor(Math.random() * 50000) + 10000, // Placeholder - should come from real data
-        expenses: Math.floor(Math.random() * 15000) + 3000,
-      });
+      const dateStr = format(date, 'yyyy-MM-dd');
+      
+      // Filter financials for this specific day
+      const dayFinancials = financials?.filter(f => 
+        f.transaction_date === dateStr
+      ) || [];
+      
+      const income = dayFinancials
+        .filter(f => f.transaction_type === 'income')
+        .reduce((sum, f) => sum + Number(f.amount), 0);
+        
+      const expenses = dayFinancials
+        .filter(f => f.transaction_type === 'expense')
+        .reduce((sum, f) => sum + Number(f.amount), 0);
+      
+      days.push({ date: dateStr, income, expenses });
     }
-    // Use real monthly data for last entry
-    if (days.length > 0) {
-      days[days.length - 1].income = orderStats.monthlyRevenue || 0;
-      days[days.length - 1].expenses = stats?.totalExpenses || 0;
-    }
+    
     return days;
-  }, [orderStats.monthlyRevenue, stats?.totalExpenses]);
+  }, [financials]);
 
   const pendingRequestsCount = requests?.filter(r => 
     ['pending', 'confirmed', 'in_progress'].includes(r.status)

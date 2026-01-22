@@ -39,7 +39,7 @@ import {
   DollarSign, TrendingUp, TrendingDown, Plus,
   ArrowUpCircle, ArrowDownCircle, Receipt, Calendar,
   MoreVertical, Trash2, Edit, Building, BarChart3,
-  Paperclip, Zap
+  Paperclip, Zap, Download
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -112,6 +112,46 @@ export default function OwnerFinancials() {
       await deleteFinancial.mutateAsync(deleteId);
       setDeleteId(null);
     }
+  };
+
+  // CSV Export functionality
+  const handleExportCSV = () => {
+    if (!filteredFinancials.length) return;
+    
+    const headers = [
+      isRu ? 'Дата' : 'Date',
+      isRu ? 'Тип' : 'Type',
+      isRu ? 'Категория' : 'Category',
+      isRu ? 'Сумма' : 'Amount',
+      isRu ? 'Объект' : 'Property',
+      isRu ? 'Описание' : 'Description',
+      isRu ? 'Статус' : 'Status',
+    ];
+    
+    const rows = filteredFinancials.map(f => [
+      f.transaction_date,
+      f.transaction_type === 'income' ? (isRu ? 'Доход' : 'Income') : (isRu ? 'Расход' : 'Expense'),
+      getCategoryLabel(f.category, f.transaction_type),
+      f.amount,
+      f.property?.title || '',
+      f.description || '',
+      f.status || '',
+    ]);
+    
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+    
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `financials_${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   if (!user) {
@@ -255,6 +295,15 @@ export default function OwnerFinancials() {
         >
           <Plus className="h-4 w-4 mr-2" />
           {isRu ? 'Добавить' : 'Add'}
+        </Button>
+        <Button 
+          variant="outline"
+          size="icon"
+          onClick={handleExportCSV}
+          disabled={!filteredFinancials.length}
+          title={isRu ? 'Экспорт CSV' : 'Export CSV'}
+        >
+          <Download className="h-4 w-4" />
         </Button>
       </div>
 
