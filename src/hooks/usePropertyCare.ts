@@ -133,8 +133,16 @@ export interface OwnerProperty {
   actual_owner_name?: string;
   actual_owner_phone?: string;
   managed_by_org_id?: string;
-  ownership_type?: 'own' | 'client' | 'poa';
+  ownership_type?: 'own' | 'management_agreement' | 'verbal';
   ownership_transferred_at?: string;
+  // Verification fields
+  management_document_url?: string;
+  management_document_name?: string;
+  commercial_terms_redacted?: boolean;
+  ownership_verification_status?: 'pending' | 'in_progress' | 'verified' | 'rejected';
+  ownership_verification_notes?: string;
+  ownership_verified_at?: string;
+  ownership_verified_by?: string;
 }
 
 export interface PropertyInspection {
