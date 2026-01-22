@@ -242,9 +242,6 @@ export default function ProfileSettings() {
                   disabled 
                   className="mt-1 bg-muted"
                 />
-                <p className="text-xs text-muted-foreground mt-1">
-                  {isRu ? 'Подтверждённый email нельзя изменить' : 'Verified email cannot be changed'}
-                </p>
               </div>
 
               <div>
@@ -253,8 +250,14 @@ export default function ProfileSettings() {
                   value={profile?.phone || ''} 
                   disabled 
                   className="mt-1 bg-muted"
-                  placeholder={isRu ? 'Указан в основном профиле' : 'Set in main profile'}
                 />
+                <button 
+                  type="button"
+                  onClick={() => navigate('/profile/edit')}
+                  className="text-xs text-primary hover:underline mt-1"
+                >
+                  {isRu ? 'Изменить в профиле →' : 'Edit in profile →'}
+                </button>
               </div>
             </SectionCard>
           </motion.div>
