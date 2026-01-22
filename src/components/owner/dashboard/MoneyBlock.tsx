@@ -3,10 +3,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useFinancialStats } from '@/hooks/usePropertyFinancials';
 import { useDepositStats } from '@/hooks/useDepositStats';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Progress } from '@/components/ui/progress';
-import { Wallet, ArrowRight, TrendingUp, TrendingDown, Receipt, Shield } from 'lucide-react';
+import { Wallet, ArrowRight, TrendingUp, TrendingDown, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function MoneyBlock() {
@@ -25,9 +23,14 @@ export function MoneyBlock() {
   if (isLoading || depositsLoading) {
     return (
       <Card className="overflow-hidden">
-        <CardContent className="p-4">
-          <Skeleton className="h-6 w-32 mb-3" />
-          <Skeleton className="h-20 w-full" />
+        <CardContent className="p-3">
+          <Skeleton className="h-5 w-24 mb-2" />
+          <Skeleton className="h-10 w-32 mb-3" />
+          <div className="grid grid-cols-3 gap-3">
+            <Skeleton className="h-14" />
+            <Skeleton className="h-14" />
+            <Skeleton className="h-14" />
+          </div>
         </CardContent>
       </Card>
     );
@@ -36,92 +39,69 @@ export function MoneyBlock() {
   const income = stats?.thisMonthIncome || 0;
   const expenses = stats?.thisMonthExpenses || 0;
   const netProfit = income - expenses;
-  const maxValue = Math.max(income, expenses) || 1;
-  const incomePercent = (income / maxValue) * 100;
-  const expensePercent = (expenses / maxValue) * 100;
 
   return (
     <Card 
-      className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+      className="overflow-hidden cursor-pointer hover:shadow-md transition-all"
       onClick={() => navigate('/owner/financials')}
     >
-      <CardContent className="p-4">
+      <CardContent className="p-3">
         {/* Header */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <Wallet className="h-5 w-5 text-muted-foreground" />
-            <span className="font-semibold">{isRu ? 'Деньги' : 'Money'}</span>
+        <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center gap-1.5">
+            <Wallet className="h-4 w-4 text-muted-foreground" />
+            <span className="text-xs font-medium text-muted-foreground">{isRu ? 'ФИНАНСЫ' : 'FINANCES'}</span>
           </div>
-          <ArrowRight className="h-4 w-4 text-muted-foreground" />
+          <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
         </div>
 
-        {/* Net profit */}
-        <div className="mb-4">
+        {/* Net profit - hero metric */}
+        <div className="mb-3">
           <p className={cn(
-            "text-2xl font-bold",
+            "text-3xl font-bold tracking-tight",
             netProfit >= 0 ? "text-success" : "text-destructive"
           )}>
             {netProfit >= 0 ? '+' : ''}{formatCurrency(netProfit)}
           </p>
           <p className="text-xs text-muted-foreground">
-            {isRu ? 'чистая прибыль за месяц' : 'net profit this month'}
+            {isRu ? 'чистая прибыль' : 'net profit'}
           </p>
         </div>
 
-        {/* Income/Expense bars */}
-        <div className="space-y-2 mb-4">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="h-3.5 w-3.5 text-success shrink-0" />
-            <div className="flex-1">
-              <Progress value={incomePercent} className="h-2 bg-muted [&>div]:bg-success" />
+        {/* Stats grid - 3 columns */}
+        <div className="grid grid-cols-3 gap-2">
+          {/* Income */}
+          <div className="p-2 rounded-lg bg-success/5 border border-success/10">
+            <div className="flex items-center gap-1 mb-0.5">
+              <TrendingUp className="h-3 w-3 text-success" />
+              <span className="text-[10px] text-muted-foreground uppercase">{isRu ? 'Доход' : 'Income'}</span>
             </div>
-            <span className="text-xs font-medium w-16 text-right text-success">
-              {formatCurrency(income)}
-            </span>
+            <p className="text-sm font-semibold text-success">{formatCurrency(income)}</p>
           </div>
-          <div className="flex items-center gap-2">
-            <TrendingDown className="h-3.5 w-3.5 text-destructive shrink-0" />
-            <div className="flex-1">
-              <Progress value={expensePercent} className="h-2 bg-muted [&>div]:bg-destructive" />
-            </div>
-            <span className="text-xs font-medium w-16 text-right text-destructive">
-              {formatCurrency(expenses)}
-            </span>
-          </div>
-        </div>
 
-        {/* Deposits indicator */}
-        {depositStats && depositStats.totalHeld > 0 && (
-          <div className="flex items-center gap-2 mb-4 p-2 rounded-lg bg-muted/50">
-            <Shield className="h-4 w-4 text-info shrink-0" />
-            <div className="flex-1">
-              <span className="text-xs text-muted-foreground">
-                {isRu ? 'Депозиты' : 'Deposits held'}
-              </span>
+          {/* Expenses */}
+          <div className="p-2 rounded-lg bg-destructive/5 border border-destructive/10">
+            <div className="flex items-center gap-1 mb-0.5">
+              <TrendingDown className="h-3 w-3 text-destructive" />
+              <span className="text-[10px] text-muted-foreground uppercase">{isRu ? 'Расход' : 'Expenses'}</span>
             </div>
-            <span className="text-sm font-medium">
-              {formatCurrency(depositStats.totalHeld)}
-            </span>
-            {depositStats.pendingReturn > 0 && (
-              <span className="text-xs text-warning">
-                ({depositStats.pendingReturn} {isRu ? 'к возврату' : 'pending'})
-              </span>
+            <p className="text-sm font-semibold text-destructive">{formatCurrency(expenses)}</p>
+          </div>
+
+          {/* Deposits */}
+          <div className="p-2 rounded-lg bg-info/5 border border-info/10">
+            <div className="flex items-center gap-1 mb-0.5">
+              <Shield className="h-3 w-3 text-info" />
+              <span className="text-[10px] text-muted-foreground uppercase">{isRu ? 'Депозит' : 'Deposits'}</span>
+            </div>
+            <p className="text-sm font-semibold">
+              {depositStats ? formatCurrency(depositStats.totalHeld) : '฿0'}
+            </p>
+            {depositStats && depositStats.pendingReturn > 0 && (
+              <p className="text-[10px] text-warning">{depositStats.pendingReturn} pending</p>
             )}
           </div>
-        )}
-
-        {/* Main action */}
-        <Button 
-          variant="outline"
-          className="w-full"
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate('/owner/expenses/quick');
-          }}
-        >
-          <Receipt className="h-4 w-4 mr-2" />
-          {isRu ? 'Записать расход' : 'Record expense'}
-        </Button>
+        </div>
       </CardContent>
     </Card>
   );
