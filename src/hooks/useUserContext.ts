@@ -103,7 +103,7 @@ export function useUserContext() {
   // Fetch user roles from user_roles table (legacy support)
   const { data: userRoles, isLoading: rolesLoading } = useQuery({
     queryKey: ['user-roles', user?.id],
-    queryFn: async () => {
+    queryFn: async (): Promise<string[]> => {
       if (!user?.id) return [];
       
       const { data, error } = await supabase
@@ -112,7 +112,8 @@ export function useUserContext() {
         .eq('user_id', user.id);
       
       if (error) throw error;
-      return data?.map(r => r.role) || [];
+      // Explicitly extract role as string to ensure proper type
+      return (data || []).map(r => String(r.role));
     },
     enabled: !!user?.id,
     staleTime: 60000, // Cache for 1 minute
