@@ -55,7 +55,7 @@ export function AppHeader({ title, showBack, onMenuClick, className }: AppHeader
         {/* Right side - Actions */}
         <div className="flex items-center gap-1">
           {/* Switchers */}
-          <div className="hidden sm:flex items-center gap-1 mr-1">
+          <div className="flex items-center gap-0.5 sm:gap-1 mr-0.5 sm:mr-1">
             <LanguageSwitcher size="sm" />
             <CurrencySwitcher size="sm" />
             <ThemeSwitcher size="sm" />
