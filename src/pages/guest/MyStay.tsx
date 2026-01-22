@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGuestServiceOrders, CreateServiceOrderInput } from '@/hooks/useServiceOrders';
-import { useAllPropertyBookings } from '@/hooks/usePropertyBookings';
+import { useGuestPropertyBookings } from '@/hooks/usePropertyBookings';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -77,7 +77,7 @@ export default function MyStay() {
   const [rating, setRating] = useState(5);
   const [reviewText, setReviewText] = useState('');
 
-  const { activeBookings } = useAllPropertyBookings();
+  const { activeBookings, upcomingBookings, pastBookings, isLoading: bookingsLoading } = useGuestPropertyBookings();
   const { 
     orders, 
     activeOrders, 
@@ -171,7 +171,11 @@ export default function MyStay() {
         </TabsList>
 
         <TabsContent value="stay">
-          {!currentBooking ? (
+          {bookingsLoading ? (
+            <div className="text-center py-8 text-muted-foreground">
+              {language === 'ru' ? 'Загрузка...' : 'Loading...'}
+            </div>
+          ) : activeBookings.length === 0 && upcomingBookings.length === 0 ? (
             <Card>
               <CardContent className="p-8 text-center">
                 <Home className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -188,7 +192,7 @@ export default function MyStay() {
                 </Button>
               </CardContent>
             </Card>
-          ) : (
+          ) : currentBooking ? (
             <>
               {/* Current Stay Card */}
               <Card className="mb-6 border-primary">
@@ -316,7 +320,59 @@ export default function MyStay() {
                 </>
               )}
             </>
-          )}
+          ) : upcomingBookings.length > 0 ? (
+            <>
+              {/* Upcoming Bookings */}
+              <h3 className="font-semibold mb-3">
+                {language === 'ru' ? 'Предстоящие бронирования' : 'Upcoming Bookings'}
+              </h3>
+              {upcomingBookings.map(booking => (
+                <Card key={booking.id} className="mb-3">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <div className="font-medium">
+                          {booking.owner_properties?.title || 'Property'}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {booking.owner_properties?.address}
+                        </div>
+                      </div>
+                      <Badge className="bg-info/20 text-info">
+                        {language === 'ru' ? 'Скоро' : 'Upcoming'}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Calendar className="w-4 h-4" />
+                      <span>
+                        {format(new Date(booking.check_in), 'dd MMM', { locale: language === 'ru' ? ru : undefined })}
+                        {' — '}
+                        {format(new Date(booking.check_out), 'dd MMM yyyy', { locale: language === 'ru' ? ru : undefined })}
+                      </span>
+                    </div>
+                    <div className="flex gap-2 mt-3">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => navigate(`/guest/check-in/${booking.id}`)}
+                      >
+                        <FileCheck className="w-4 h-4 mr-1" />
+                        {language === 'ru' ? 'Чек-ин' : 'Check-in'}
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => navigate(`/guest/guidebook/${booking.property_id}`)}
+                      >
+                        <BookOpen className="w-4 h-4 mr-1" />
+                        {language === 'ru' ? 'Гайд' : 'Guide'}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </>
+          ) : null}
         </TabsContent>
 
         <TabsContent value="orders" className="space-y-4">

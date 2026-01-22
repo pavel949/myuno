@@ -5874,6 +5874,7 @@ export type Database = {
           currency: string | null
           external_id: string | null
           guest_email: string | null
+          guest_id: string | null
           guest_name: string | null
           guest_phone: string | null
           guests_count: number | null
@@ -5895,6 +5896,7 @@ export type Database = {
           currency?: string | null
           external_id?: string | null
           guest_email?: string | null
+          guest_id?: string | null
           guest_name?: string | null
           guest_phone?: string | null
           guests_count?: number | null
@@ -5916,6 +5918,7 @@ export type Database = {
           currency?: string | null
           external_id?: string | null
           guest_email?: string | null
+          guest_id?: string | null
           guest_name?: string | null
           guest_phone?: string | null
           guests_count?: number | null

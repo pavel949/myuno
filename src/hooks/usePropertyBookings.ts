@@ -226,3 +226,60 @@ export function useAllPropertyBookings() {
     isLoading,
   };
 }
+
+// Hook for guest's bookings (where user is the guest)
+export function useGuestPropertyBookings() {
+  const { user } = useAuth();
+
+  const { data: bookings, isLoading } = useQuery({
+    queryKey: ['guest-property-bookings', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+
+      const { data, error } = await supabase
+        .from('property_bookings')
+        .select(`
+          *,
+          owner_properties (
+            id,
+            title,
+            title_ru,
+            address,
+            cover_image,
+            check_in_time,
+            check_out_time
+          )
+        `)
+        .eq('guest_id', user.id)
+        .order('check_in', { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user?.id,
+  });
+
+  // Upcoming bookings
+  const upcomingBookings = bookings?.filter(b => 
+    new Date(b.check_in) >= new Date() && b.status !== 'cancelled'
+  ) || [];
+
+  // Active bookings (currently checked in)
+  const activeBookings = bookings?.filter(b => {
+    const today = new Date().toISOString().split('T')[0];
+    return b.check_in <= today && b.check_out > today && b.status !== 'cancelled';
+  }) || [];
+
+  // Past bookings
+  const pastBookings = bookings?.filter(b => 
+    new Date(b.check_out) < new Date()
+  ) || [];
+
+  return {
+    bookings,
+    upcomingBookings,
+    activeBookings,
+    pastBookings,
+    isLoading,
+  };
+}
