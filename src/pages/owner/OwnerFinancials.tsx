@@ -162,10 +162,22 @@ export default function OwnerFinancials() {
   return (
     <PageContainer>
       <BackButton fallbackPath="/owner" />
-      <PageHeader 
-        title={isRu ? 'Финансы' : 'Financials'}
-        subtitle={isRu ? 'Доходы и расходы по недвижимости' : 'Property income and expenses'}
-      />
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h1 className="text-2xl font-bold">{isRu ? 'Финансы' : 'Financials'}</h1>
+          <p className="text-sm text-muted-foreground">
+            {isRu ? 'Доходы и расходы по недвижимости' : 'Property income and expenses'}
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate('/owner/portfolio')}
+        >
+          <BarChart3 className="h-4 w-4 mr-1" />
+          {isRu ? 'Портфель' : 'Portfolio'}
+        </Button>
+      </div>
 
       {/* Filters Row */}
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
