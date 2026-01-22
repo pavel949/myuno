@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { AdminSidebar } from './AdminSidebar';
 import { AdminHeader } from './AdminHeader';
+import { AdminCommandPalette, useAdminCommandPalette } from './AdminCommandPalette';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface AdminLayoutProps {
@@ -11,6 +12,7 @@ interface AdminLayoutProps {
 
 export function AdminLayout({ children }: AdminLayoutProps) {
   const isMobile = useIsMobile();
+  const { open: commandPaletteOpen, setOpen: setCommandPaletteOpen } = useAdminCommandPalette();
 
   // Keyboard shortcut Ctrl+B to toggle sidebar
   useEffect(() => {
@@ -32,12 +34,18 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       <div className="min-h-screen flex w-full bg-background">
         <AdminSidebar />
         <SidebarInset className="flex-1 flex flex-col">
-          <AdminHeader />
+          <AdminHeader onOpenCommandPalette={() => setCommandPaletteOpen(true)} />
           <main className="flex-1 overflow-auto">
             {children || <Outlet />}
           </main>
         </SidebarInset>
       </div>
+      
+      {/* Command Palette */}
+      <AdminCommandPalette 
+        open={commandPaletteOpen} 
+        onOpenChange={setCommandPaletteOpen} 
+      />
     </SidebarProvider>
   );
 }

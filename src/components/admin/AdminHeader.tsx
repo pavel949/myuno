@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Bell, Search, ChevronRight, Home } from 'lucide-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -15,6 +14,10 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
+
+interface AdminHeaderProps {
+  onOpenCommandPalette?: () => void;
+}
 
 // Route to breadcrumb mapping
 const routeLabels: Record<string, { en: string; ru: string }> = {
@@ -56,7 +59,7 @@ const routeLabels: Record<string, { en: string; ru: string }> = {
   '/admin/partner-applications': { en: 'Partner Apps', ru: 'Заявки партнеров' },
 };
 
-export function AdminHeader() {
+export function AdminHeader({ onOpenCommandPalette }: AdminHeaderProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { language } = useLanguage();
@@ -132,18 +135,17 @@ export function AdminHeader() {
       {/* Spacer */}
       <div className="flex-1" />
 
-      {/* Search */}
-      <div className="hidden lg:flex relative w-64">
-        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          type="search"
-          placeholder={isRussian ? 'Поиск...' : 'Search...'}
-          className="pl-8 h-9 bg-muted/50 border-0 focus-visible:ring-1"
-        />
-        <kbd className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+      {/* Search - Opens Command Palette */}
+      <button
+        onClick={onOpenCommandPalette}
+        className="hidden lg:flex items-center gap-2 w-64 h-9 px-3 rounded-md bg-muted/50 text-muted-foreground text-sm hover:bg-muted transition-colors"
+      >
+        <Search className="h-4 w-4" />
+        <span className="flex-1 text-left">{isRussian ? 'Поиск...' : 'Search...'}</span>
+        <kbd className="pointer-events-none hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-background px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
           ⌘K
         </kbd>
-      </div>
+      </button>
 
       {/* Actions */}
       <div className="flex items-center gap-1">
