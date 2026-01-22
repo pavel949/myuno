@@ -36,6 +36,7 @@ import { CashbackRatesCard } from "@/components/uno/CashbackBadge";
 import { ReferralCard } from "@/components/uno/ReferralCard";
 import { LoyaltyStatusCard } from "@/components/wallet/LoyaltyStatusCard";
 import { AchievementsCard } from "@/components/wallet/AchievementsCard";
+import { PaymentMethodsSection } from "@/components/wallet/PaymentMethodsSection";
 
 interface WalletData {
   id: string;
@@ -218,13 +219,13 @@ const Wallet = () => {
       icon: CreditCard, 
       label: language === 'ru' ? 'Карты' : 'Cards',
       color: 'bg-blue-500',
-      onClick: () => {} // TODO: Implement cards management
+      onClick: () => navigate('/wallet/cards')
     },
     { 
       icon: Clock, 
       label: language === 'ru' ? 'История' : 'History',
       color: 'bg-purple-500',
-      onClick: () => {} // TODO: Full history
+      onClick: () => navigate('/wallet/history')
     },
   ];
 
@@ -357,6 +358,9 @@ const Wallet = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Payment Methods */}
+        <PaymentMethodsSection />
 
         {/* Loyalty Status */}
         <LoyaltyStatusCard />

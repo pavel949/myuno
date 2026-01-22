@@ -158,6 +158,8 @@ const Notifications = lazy(() => import('@/pages/Notifications'));
 const ViewHistory = lazy(() => import('@/pages/ViewHistory'));
 const Cart = lazy(() => import('@/pages/Cart'));
 const Wallet = lazy(() => import('@/pages/Wallet'));
+const TransactionHistory = lazy(() => import('@/pages/wallet/TransactionHistory'));
+const WalletCards = lazy(() => import('@/pages/wallet/WalletCards'));
 const SOS = lazy(() => import('@/pages/SOS'));
 const VipConcierge = lazy(() => import('@/pages/VipConcierge'));
 const Support = lazy(() => import('@/pages/Support'));
@@ -369,6 +371,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/history" element={<LazyPage><ViewHistory /></LazyPage>} />
         <Route path="/cart" element={<LazyPage><Cart /></LazyPage>} />
         <Route path="/wallet" element={<LazyPage><Wallet /></LazyPage>} />
+        <Route path="/wallet/history" element={<LazyPage><TransactionHistory /></LazyPage>} />
+        <Route path="/wallet/cards" element={<LazyPage><WalletCards /></LazyPage>} />
         <Route path="/sos" element={<LazyPage><SOS /></LazyPage>} />
         <Route path="/vip-concierge" element={<LazyPage><VipConcierge /></LazyPage>} />
         <Route path="/support" element={<LazyPage><Support /></LazyPage>} />
