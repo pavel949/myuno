@@ -4121,6 +4121,9 @@ export type Database = {
           actual_owner_name: string | null
           actual_owner_phone: string | null
           address: string
+          approval_status: string | null
+          approved_at: string | null
+          approved_by: string | null
           area_sqm: number | null
           bathrooms: number | null
           bedrooms: number | null
@@ -4173,6 +4176,7 @@ export type Database = {
           images: string[] | null
           included_services: Json | null
           instant_booking: boolean | null
+          instant_booking_enabled_at: string | null
           internet_provider: string | null
           internet_speed: string | null
           is_for_sale: boolean | null
@@ -4223,6 +4227,7 @@ export type Database = {
           property_type: string
           quiet_hours_end: string | null
           quiet_hours_start: string | null
+          rejection_reason: string | null
           rental_platform: string | null
           rooms: Json | null
           safety_features: string[] | null
@@ -4255,6 +4260,9 @@ export type Database = {
           actual_owner_name?: string | null
           actual_owner_phone?: string | null
           address: string
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           area_sqm?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
@@ -4307,6 +4315,7 @@ export type Database = {
           images?: string[] | null
           included_services?: Json | null
           instant_booking?: boolean | null
+          instant_booking_enabled_at?: string | null
           internet_provider?: string | null
           internet_speed?: string | null
           is_for_sale?: boolean | null
@@ -4357,6 +4366,7 @@ export type Database = {
           property_type?: string
           quiet_hours_end?: string | null
           quiet_hours_start?: string | null
+          rejection_reason?: string | null
           rental_platform?: string | null
           rooms?: Json | null
           safety_features?: string[] | null
@@ -4389,6 +4399,9 @@ export type Database = {
           actual_owner_name?: string | null
           actual_owner_phone?: string | null
           address?: string
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           area_sqm?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
@@ -4441,6 +4454,7 @@ export type Database = {
           images?: string[] | null
           included_services?: Json | null
           instant_booking?: boolean | null
+          instant_booking_enabled_at?: string | null
           internet_provider?: string | null
           internet_speed?: string | null
           is_for_sale?: boolean | null
@@ -4491,6 +4505,7 @@ export type Database = {
           property_type?: string
           quiet_hours_end?: string | null
           quiet_hours_start?: string | null
+          rejection_reason?: string | null
           rental_platform?: string | null
           rooms?: Json | null
           safety_features?: string[] | null

@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 export type ContentType = 
-  | 'tours' | 'water_activities' | 'restaurants' | 'salons' | 'clinics' 
+  | 'owner_properties' | 'tours' | 'water_activities' | 'restaurants' | 'salons' | 'clinics' 
   | 'gyms' | 'vehicles' | 'properties' | 'yachts' | 'events'
   | 'babysitters' | 'cleaning_services' | 'legal_services' | 'pet_services'
   | 'education_providers' | 'pharmacies' | 'insurance_providers' 
@@ -23,6 +23,7 @@ export interface PendingContent {
 }
 
 const contentTypeLabels: Record<ContentType, { en: string; ru: string }> = {
+  owner_properties: { en: 'Owner Properties', ru: 'Объекты собственников' },
   tours: { en: 'Tours', ru: 'Туры' },
   water_activities: { en: 'Water Activities', ru: 'Водные развлечения' },
   restaurants: { en: 'Restaurants', ru: 'Рестораны' },
@@ -49,7 +50,7 @@ export const getContentTypeLabel = (type: ContentType, language: string) => {
 };
 
 export const allContentTypes: ContentType[] = [
-  'tours', 'water_activities', 'restaurants', 'salons', 'clinics',
+  'owner_properties', 'tours', 'water_activities', 'restaurants', 'salons', 'clinics',
   'gyms', 'vehicles', 'properties', 'yachts', 'events',
   'babysitters', 'cleaning_services', 'legal_services', 'pet_services',
   'education_providers', 'pharmacies', 'insurance_providers',
@@ -72,6 +73,42 @@ export function useContentModeration() {
 
     try {
       for (const table of tablesToFetch) {
+        // Special handling for owner_properties - different structure
+        if (table === 'owner_properties') {
+          const { data, error } = await supabase
+            .from('owner_properties')
+            .select(`
+              id,
+              title,
+              owner_id,
+              created_at,
+              cover_image,
+              approval_status
+            `)
+            .eq('approval_status', statusFilter)
+            .order('created_at', { ascending: false });
+
+          if (error) {
+            console.error(`Error fetching owner_properties:`, error);
+            continue;
+          }
+
+          if (data) {
+            const mapped = data.map((item: any) => ({
+              id: item.id,
+              content_type: 'owner_properties' as ContentType,
+              title: item.title || 'Untitled',
+              provider_name: 'Owner',
+              provider_id: item.owner_id,
+              created_at: item.created_at,
+              cover_image: item.cover_image,
+              approval_status: item.approval_status as ApprovalStatus,
+            }));
+            allContent.push(...mapped);
+          }
+          continue;
+        }
+
         // Determine title column based on table
         const titleColumn = ['tours', 'water_activities', 'properties', 'events'].includes(table)
           ? 'title_en'
@@ -137,8 +174,8 @@ export function useContentModeration() {
     reviewerId: string
   ) => {
     try {
-      const { error } = await supabase
-        .from(contentType)
+      // Use 'as any' to avoid TypeScript union type complexity with dynamic table names
+      const { error } = await (supabase.from(contentType) as any)
         .update({
           approval_status: 'approved',
           reviewed_by: reviewerId,
@@ -173,8 +210,8 @@ export function useContentModeration() {
     rejectionReason: string
   ) => {
     try {
-      const { error } = await supabase
-        .from(contentType)
+      // Use 'as any' to avoid TypeScript union type complexity with dynamic table names
+      const { error } = await (supabase.from(contentType) as any)
         .update({
           approval_status: 'rejected',
           rejection_reason: rejectionReason,
@@ -205,13 +242,17 @@ export function useContentModeration() {
   const getContentDetails = useCallback(async (
     contentType: ContentType,
     contentId: string
-  ) => {
+  ): Promise<Record<string, any> | null> => {
     try {
-      const { data, error } = await supabase
-        .from(contentType)
-        .select('*, providers:provider_id (*)')
-        .eq('id', contentId)
-        .single();
+      // Use 'as any' to avoid TypeScript union type complexity with dynamic table names
+      const query = (supabase.from(contentType) as any).select('*');
+      
+      // Only add provider join for non-owner_properties tables
+      if (contentType !== 'owner_properties') {
+        query.select('*, providers:provider_id (*)');
+      }
+      
+      const { data, error } = await query.eq('id', contentId).single();
 
       if (error) throw error;
       return data;

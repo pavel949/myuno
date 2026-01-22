@@ -7,7 +7,7 @@ import { BackButton } from '@/components/uno/BackButton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Home, Plus, MapPin, Bed, Bath, SquareStack, Globe, Copy } from 'lucide-react';
+import { Home, Plus, MapPin, Bed, Bath, SquareStack, Globe, Copy, Clock, CheckCircle, XCircle, Shield } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   DropdownMenu,
@@ -24,15 +24,39 @@ export default function OwnerProperties() {
   
   const { data: properties, isLoading } = useOwnerProperties();
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'active':
-        return <Badge className="bg-green-500">{isRu ? 'Активен' : 'Active'}</Badge>;
-      case 'pending':
-        return <Badge variant="secondary">{isRu ? 'На проверке' : 'Pending'}</Badge>;
-      default:
-        return <Badge variant="outline">{isRu ? 'Неактивен' : 'Inactive'}</Badge>;
+  const getApprovalBadge = (approvalStatus?: string, status?: string) => {
+    // First check approval status
+    if (approvalStatus === 'pending') {
+      return (
+        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-300 gap-1">
+          <Clock className="h-3 w-3" />
+          {isRu ? 'На рассмотрении' : 'Under Review'}
+        </Badge>
+      );
     }
+    if (approvalStatus === 'rejected') {
+      return (
+        <Badge variant="destructive" className="gap-1">
+          <XCircle className="h-3 w-3" />
+          {isRu ? 'Требует доработки' : 'Needs Revision'}
+        </Badge>
+      );
+    }
+    // If approved, show based on status
+    if (approvalStatus === 'approved' || status === 'active') {
+      return (
+        <Badge className="bg-green-500 gap-1">
+          <CheckCircle className="h-3 w-3" />
+          {isRu ? 'Активен' : 'Active'}
+        </Badge>
+      );
+    }
+    return <Badge variant="outline">{isRu ? 'Неактивен' : 'Inactive'}</Badge>;
+  };
+
+  const isInProtectionPeriod = (instantBookingEnabledAt?: string | null) => {
+    if (!instantBookingEnabledAt) return false;
+    return new Date(instantBookingEnabledAt) > new Date();
   };
 
   const getPropertyTypeLabel = (type: string) => {
@@ -130,12 +154,18 @@ export default function OwnerProperties() {
                         {isRu && property.title_ru ? property.title_ru : property.title}
                       </h3>
                       <div className="flex items-center gap-1">
+                        {(property as any).instant_booking_enabled_at && 
+                         isInProtectionPeriod((property as any).instant_booking_enabled_at) && (
+                          <Badge variant="outline" className="text-xs gap-1 border-blue-300 text-blue-700">
+                            <Shield className="h-3 w-3" />
+                          </Badge>
+                        )}
                         {property.marketplace_property_id && (
                           <Badge variant="outline" className="text-xs gap-1">
                             <Globe className="h-3 w-3" />
                           </Badge>
                         )}
-                        {getStatusBadge(property.status)}
+                        {getApprovalBadge((property as any).approval_status, property.status)}
                       </div>
                     </div>
                     
