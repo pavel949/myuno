@@ -153,13 +153,14 @@ export function GuideIntegration() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="mb-4">
-                <span className="text-2xl font-bold text-primary">
-                  {isRu ? 'Бесплатно' : 'Free'}
+              <div className="mb-4 flex flex-col">
+                <span className="text-2xl font-bold text-primary">10%</span>
+                <span className="text-xs text-muted-foreground">
+                  {isRu ? 'с бронирований через myUNO' : 'on bookings via myUNO'}
                 </span>
               </div>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>✓ {isRu ? 'Личный кабинет и инструменты' : 'Dashboard and tools'}</li>
+                <li>✓ {isRu ? 'Инструменты — бесплатно' : 'Tools — free'}</li>
                 <li>✓ {isRu ? 'Channel Manager' : 'Channel Manager'}</li>
                 <li>✓ {isRu ? 'Финансовая отчётность' : 'Financial reporting'}</li>
                 <li>✓ {isRu ? 'Заказ услуг по необходимости' : 'Order services as needed'}</li>
@@ -176,10 +177,15 @@ export function GuideIntegration() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="mb-4 flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-primary">70/30</span>
-                <span className="text-sm text-muted-foreground">
-                  {isRu ? '(вам / UNO)' : '(you / UNO)'}
+              <div className="mb-4 flex flex-col">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-bold text-primary">70%</span>
+                  <span className="text-sm text-muted-foreground">
+                    {isRu ? 'вам после расходов' : 'to you after expenses'}
+                  </span>
+                </div>
+                <span className="text-xs text-muted-foreground mt-1">
+                  {isRu ? '30% остаётся myUNO за управление' : '30% goes to myUNO for management'}
                 </span>
               </div>
               <ul className="space-y-2 text-sm text-muted-foreground">

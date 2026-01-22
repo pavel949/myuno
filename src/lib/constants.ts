@@ -84,3 +84,27 @@ export const CASHBACK = {
   DEFAULT_PERCENTAGE: 5,
   MAX_PERCENTAGE: 20,
 } as const;
+
+export const OWNER_COMMISSION = {
+  SELF_MANAGEMENT: {
+    rate: 10,
+    labelEn: '10%',
+    labelRu: '10%',
+    descEn: 'on bookings via myUNO',
+    descRu: 'с бронирований через myUNO',
+    toolsFreeEn: 'Free tools',
+    toolsFreeRu: 'Бесплатные инструменты',
+  },
+  FULL_MANAGEMENT: {
+    ownerShare: 70,
+    platformShare: 30,
+    labelEn: '70/30',
+    labelRu: '70/30',
+    descEn: 'to you after expenses',
+    descRu: 'вам после расходов',
+  },
+  CHANNEL_MANAGER: {
+    basic: 5,
+    premium: 10,
+  },
+} as const;
