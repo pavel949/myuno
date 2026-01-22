@@ -284,13 +284,39 @@ export function useCreateOwnerProperty() {
     mutationFn: async (data: Partial<OwnerProperty>) => {
       if (!user) throw new Error('Not authenticated');
       
+      // Get user profile for owner info
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, email')
+        .eq('id', user.id)
+        .single();
+      
+      // Ensure approval_status is 'pending' for moderation workflow
+      const insertData = { 
+        ...data, 
+        owner_id: user.id,
+        approval_status: data.approval_status || 'pending',
+      };
+      
       const { data: result, error } = await supabase
         .from('owner_properties')
-        .insert({ ...data, owner_id: user.id } as any)
+        .insert(insertData as any)
         .select()
         .single();
       
       if (error) throw error;
+      
+      // Trigger email notification to admins (fire and forget)
+      supabase.functions.invoke('notify-admin-property-submission', {
+        body: {
+          property_id: result.id,
+          property_title: result.title || result.title_ru || 'Без названия',
+          owner_id: user.id,
+          owner_name: profile?.full_name || undefined,
+          owner_email: profile?.email || user.email || undefined,
+        },
+      }).catch(err => console.error('Failed to send admin notification email:', err));
+      
       return result as OwnerProperty;
     },
     onSuccess: () => {
