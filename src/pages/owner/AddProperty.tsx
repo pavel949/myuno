@@ -77,8 +77,17 @@ export default function AddProperty() {
     rental_platforms: [] as string[],
     custom_platform: '',
     project_id: undefined as string | undefined,
+    // Multi-unit fields
     floor: undefined as number | undefined,
     unit_number: '',
+    // Standalone fields (villa, house, townhouse)
+    total_floors: undefined as number | undefined,
+    plot_size_sqm: undefined as number | undefined,
+    has_elevator: false,
+    parking_type: '',
+    pool_type: '',
+    garden_type: '',
+    // Common fields
     view_type: '',
     furnishing_level: '',
     equipment: [] as string[],
@@ -114,9 +123,17 @@ export default function AddProperty() {
         rental_platforms: sourceProperty.rental_platform ? [sourceProperty.rental_platform] : [],
         custom_platform: '',
         project_id: sourceProperty.project_id ?? undefined,
-        // These fields are intentionally left empty for the user to fill
+        // Multi-unit fields - intentionally left empty for the user to fill
         floor: undefined,
         unit_number: '',
+        // Standalone fields
+        total_floors: (sourceProperty as any).total_floors ?? undefined,
+        plot_size_sqm: (sourceProperty as any).plot_size_sqm ?? undefined,
+        has_elevator: (sourceProperty as any).has_elevator ?? false,
+        parking_type: (sourceProperty as any).parking_type || '',
+        pool_type: (sourceProperty as any).pool_type || '',
+        garden_type: (sourceProperty as any).garden_type || '',
+        // Common fields
         view_type: sourceProperty.view_type || '',
         furnishing_level: sourceProperty.furnishing_level || '',
         equipment: sourceProperty.equipment || [],
@@ -141,9 +158,12 @@ export default function AddProperty() {
 
   const propertyTypes = [
     { value: 'villa', labelEn: 'Villa', labelRu: 'Вилла' },
+    { value: 'house', labelEn: 'House', labelRu: 'Дом' },
+    { value: 'townhouse', labelEn: 'Townhouse', labelRu: 'Таунхаус' },
     { value: 'apartment', labelEn: 'Apartment', labelRu: 'Квартира' },
     { value: 'condo', labelEn: 'Condo', labelRu: 'Кондо' },
-    { value: 'house', labelEn: 'House', labelRu: 'Дом' },
+    { value: 'studio', labelEn: 'Studio', labelRu: 'Студия' },
+    { value: 'penthouse', labelEn: 'Penthouse', labelRu: 'Пентхаус' },
   ];
 
   const managementTypes = [
@@ -283,16 +303,32 @@ export default function AddProperty() {
               </CardContent>
             </Card>
 
-            {/* Unit-specific fields */}
-            {formData.project_id && (
+            {/* Unit/Property-specific fields - show based on property type or when project is selected */}
+            {(formData.project_id || ['villa', 'house', 'townhouse'].includes(formData.property_type)) && (
               <UnitFields
+                propertyType={formData.property_type}
+                // Multi-unit fields
                 floor={formData.floor}
                 unitNumber={formData.unit_number}
+                onFloorChange={(floor) => setFormData(prev => ({ ...prev, floor }))}
+                onUnitNumberChange={(unit_number) => setFormData(prev => ({ ...prev, unit_number }))}
+                // Standalone fields
+                totalFloors={formData.total_floors}
+                plotSizeSqm={formData.plot_size_sqm}
+                hasElevator={formData.has_elevator}
+                parkingType={formData.parking_type}
+                poolType={formData.pool_type}
+                gardenType={formData.garden_type}
+                onTotalFloorsChange={(total_floors) => setFormData(prev => ({ ...prev, total_floors }))}
+                onPlotSizeChange={(plot_size_sqm) => setFormData(prev => ({ ...prev, plot_size_sqm }))}
+                onHasElevatorChange={(has_elevator) => setFormData(prev => ({ ...prev, has_elevator }))}
+                onParkingTypeChange={(parking_type) => setFormData(prev => ({ ...prev, parking_type }))}
+                onPoolTypeChange={(pool_type) => setFormData(prev => ({ ...prev, pool_type }))}
+                onGardenTypeChange={(garden_type) => setFormData(prev => ({ ...prev, garden_type }))}
+                // Common fields
                 viewType={formData.view_type}
                 furnishingLevel={formData.furnishing_level}
                 equipment={formData.equipment}
-                onFloorChange={(floor) => setFormData(prev => ({ ...prev, floor }))}
-                onUnitNumberChange={(unit_number) => setFormData(prev => ({ ...prev, unit_number }))}
                 onViewTypeChange={(view_type) => setFormData(prev => ({ ...prev, view_type }))}
                 onFurnishingLevelChange={(furnishing_level) => setFormData(prev => ({ ...prev, furnishing_level }))}
                 onEquipmentChange={(equipment) => setFormData(prev => ({ ...prev, equipment }))}

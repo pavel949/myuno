@@ -3,17 +3,31 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Badge } from '@/components/ui/badge';
 import { 
   Layers, Eye, Sofa, Tv, WashingMachine, Refrigerator, 
-  Microwave, Coffee, Wind, LockKeyhole
+  Microwave, Coffee, Wind, LockKeyhole, Car, Waves, TreePine,
+  ArrowUpDown, Ruler, Building2
 } from 'lucide-react';
 
 interface UnitSpecsProps {
+  // Multi-unit fields
   floor?: number;
   unitNumber?: string;
+  // Standalone fields
+  totalFloors?: number;
+  plotSizeSqm?: number;
+  hasElevator?: boolean;
+  parkingType?: string;
+  poolType?: string;
+  gardenType?: string;
+  // Common fields
   viewType?: string;
   furnishingLevel?: string;
   equipment?: string[];
+  propertyType?: string;
   className?: string;
 }
+
+// Property type categories
+const STANDALONE_TYPES = ['villa', 'house', 'townhouse'];
 
 const viewTypeLabels: Record<string, { en: string; ru: string }> = {
   sea: { en: 'Sea View', ru: 'Вид на море' },
@@ -23,6 +37,8 @@ const viewTypeLabels: Record<string, { en: string; ru: string }> = {
   city: { en: 'City View', ru: 'Вид на город' },
   parking: { en: 'Parking View', ru: 'Вид на парковку' },
   interior: { en: 'Interior View', ru: 'Внутренний вид' },
+  panoramic: { en: 'Panoramic View', ru: 'Панорамный вид' },
+  jungle: { en: 'Jungle View', ru: 'Вид на джунгли' },
 };
 
 const furnishingLabels: Record<string, { en: string; ru: string }> = {
@@ -30,6 +46,31 @@ const furnishingLabels: Record<string, { en: string; ru: string }> = {
   partially: { en: 'Partially Furnished', ru: 'Частичная меблировка' },
   fully: { en: 'Fully Furnished', ru: 'Полная меблировка' },
   luxury: { en: 'Luxury Furnished', ru: 'Люкс меблировка' },
+};
+
+const parkingTypeLabels: Record<string, { en: string; ru: string }> = {
+  garage: { en: 'Garage', ru: 'Гараж' },
+  carport: { en: 'Carport', ru: 'Навес' },
+  open: { en: 'Open Parking', ru: 'Открытая парковка' },
+  street: { en: 'Street Parking', ru: 'Уличная' },
+  none: { en: 'No Parking', ru: 'Нет' },
+};
+
+const poolTypeLabels: Record<string, { en: string; ru: string }> = {
+  private: { en: 'Private Pool', ru: 'Частный бассейн' },
+  infinity: { en: 'Infinity Pool', ru: 'Инфинити' },
+  plunge: { en: 'Plunge Pool', ru: 'Плунж' },
+  shared: { en: 'Shared Pool', ru: 'Общий бассейн' },
+  none: { en: 'No Pool', ru: 'Нет' },
+};
+
+const gardenTypeLabels: Record<string, { en: string; ru: string }> = {
+  private: { en: 'Private Garden', ru: 'Частный сад' },
+  tropical: { en: 'Tropical Garden', ru: 'Тропический' },
+  shared: { en: 'Shared Garden', ru: 'Общий сад' },
+  rooftop: { en: 'Rooftop', ru: 'Крыша' },
+  courtyard: { en: 'Courtyard', ru: 'Двор' },
+  none: { en: 'No Garden', ru: 'Нет' },
 };
 
 const equipmentIcons: Record<string, React.ReactNode> = {
@@ -60,9 +101,16 @@ const equipmentLabels: Record<string, { en: string; ru: string }> = {
 export function UnitSpecs({ 
   floor, 
   unitNumber, 
+  totalFloors,
+  plotSizeSqm,
+  hasElevator,
+  parkingType,
+  poolType,
+  gardenType,
   viewType, 
   furnishingLevel, 
   equipment,
+  propertyType,
   className 
 }: UnitSpecsProps) {
   const { language } = useLanguage();
@@ -70,26 +118,72 @@ export function UnitSpecs({
   
   // Handle null/undefined equipment from database
   const safeEquipment = equipment ?? [];
+  const isStandalone = STANDALONE_TYPES.includes(propertyType || '');
 
-  const hasAnyData = floor !== undefined || unitNumber || viewType || furnishingLevel || safeEquipment.length > 0;
+  const hasAnyData = floor !== undefined || unitNumber || viewType || furnishingLevel || 
+    safeEquipment.length > 0 || totalFloors !== undefined || plotSizeSqm !== undefined ||
+    parkingType || poolType || gardenType;
   
   if (!hasAnyData) return null;
 
   return (
     <div className={className}>
-      {/* Unit identifier */}
+      {/* Unit/Property identifier */}
       <div className="flex flex-wrap items-center gap-2 mb-3">
-        {floor !== undefined && (
+        {/* Multi-unit: Floor and Unit Number */}
+        {!isStandalone && floor !== undefined && (
           <Badge variant="outline" className="gap-1">
-            <Layers className="h-3 w-3" />
+            <Building2 className="h-3 w-3" />
             {isRu ? `${floor} этаж` : `Floor ${floor}`}
           </Badge>
         )}
-        {unitNumber && (
+        {!isStandalone && unitNumber && (
           <Badge variant="outline">
             {isRu ? `Кв. ${unitNumber}` : `Unit ${unitNumber}`}
           </Badge>
         )}
+
+        {/* Standalone: Building characteristics */}
+        {isStandalone && totalFloors !== undefined && (
+          <Badge variant="outline" className="gap-1">
+            <ArrowUpDown className="h-3 w-3" />
+            {isRu ? `${totalFloors} этаж${totalFloors > 1 ? 'а' : ''}` : `${totalFloors} floor${totalFloors > 1 ? 's' : ''}`}
+          </Badge>
+        )}
+        {isStandalone && plotSizeSqm !== undefined && (
+          <Badge variant="outline" className="gap-1">
+            <Ruler className="h-3 w-3" />
+            {plotSizeSqm} {isRu ? 'м² участок' : 'm² plot'}
+          </Badge>
+        )}
+        {isStandalone && hasElevator && (
+          <Badge variant="outline" className="gap-1">
+            <Layers className="h-3 w-3" />
+            {isRu ? 'Лифт' : 'Elevator'}
+          </Badge>
+        )}
+
+        {/* Standalone: Pool, Parking, Garden */}
+        {isStandalone && poolType && poolType !== 'none' && poolTypeLabels[poolType] && (
+          <Badge variant="secondary" className="gap-1">
+            <Waves className="h-3 w-3" />
+            {isRu ? poolTypeLabels[poolType].ru : poolTypeLabels[poolType].en}
+          </Badge>
+        )}
+        {isStandalone && parkingType && parkingType !== 'none' && parkingTypeLabels[parkingType] && (
+          <Badge variant="secondary" className="gap-1">
+            <Car className="h-3 w-3" />
+            {isRu ? parkingTypeLabels[parkingType].ru : parkingTypeLabels[parkingType].en}
+          </Badge>
+        )}
+        {isStandalone && gardenType && gardenType !== 'none' && gardenTypeLabels[gardenType] && (
+          <Badge variant="secondary" className="gap-1">
+            <TreePine className="h-3 w-3" />
+            {isRu ? gardenTypeLabels[gardenType].ru : gardenTypeLabels[gardenType].en}
+          </Badge>
+        )}
+
+        {/* Common: View and Furnishing */}
         {viewType && viewTypeLabels[viewType] && (
           <Badge variant="secondary" className="gap-1">
             <Eye className="h-3 w-3" />
