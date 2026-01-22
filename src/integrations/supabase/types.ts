@@ -3826,6 +3826,75 @@ export type Database = {
           },
         ]
       }
+      order_payment_stages: {
+        Row: {
+          amount: number
+          created_at: string | null
+          currency: string | null
+          due_date: string | null
+          id: string
+          notes: string | null
+          order_id: string
+          paid_at: string | null
+          payment_intent_id: string | null
+          refund_amount: number | null
+          refunded_at: string | null
+          reminder_sent_at: string | null
+          stage_type: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          currency?: string | null
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          order_id: string
+          paid_at?: string | null
+          payment_intent_id?: string | null
+          refund_amount?: number | null
+          refunded_at?: string | null
+          reminder_sent_at?: string | null
+          stage_type: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          currency?: string | null
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          order_id?: string
+          paid_at?: string | null
+          payment_intent_id?: string | null
+          refund_amount?: number | null
+          refunded_at?: string | null
+          reminder_sent_at?: string | null
+          stage_type?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_payment_stages_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_payment_stages_payment_intent_id_fkey"
+            columns: ["payment_intent_id"]
+            isOneToOne: false
+            referencedRelation: "payment_intents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_status_history: {
         Row: {
           actor_user_id: string | null
@@ -4125,6 +4194,7 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           area_sqm: number | null
+          balance_due_days: number | null
           bathrooms: number | null
           bedrooms: number | null
           cancellation_policy: string | null
@@ -4216,12 +4286,14 @@ export type Database = {
           parking_spaces: number | null
           parking_type: string | null
           parties_allowed: boolean | null
+          payment_model: string | null
           pet_deposit: number | null
           pet_notes: string | null
           pet_notes_ru: string | null
           pets_allowed: boolean | null
           plot_size_sqm: number | null
           pool_type: string | null
+          prepay_percent: number | null
           price_per_night: number | null
           project_id: string | null
           property_type: string
@@ -4234,6 +4306,8 @@ export type Database = {
           sale_currency: string | null
           sale_price: number | null
           seasonal_pricing: Json | null
+          security_deposit_collection: string | null
+          security_deposit_required: boolean | null
           smoking_penalty: number | null
           status: string | null
           title: string
@@ -4264,6 +4338,7 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           area_sqm?: number | null
+          balance_due_days?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
           cancellation_policy?: string | null
@@ -4355,12 +4430,14 @@ export type Database = {
           parking_spaces?: number | null
           parking_type?: string | null
           parties_allowed?: boolean | null
+          payment_model?: string | null
           pet_deposit?: number | null
           pet_notes?: string | null
           pet_notes_ru?: string | null
           pets_allowed?: boolean | null
           plot_size_sqm?: number | null
           pool_type?: string | null
+          prepay_percent?: number | null
           price_per_night?: number | null
           project_id?: string | null
           property_type?: string
@@ -4373,6 +4450,8 @@ export type Database = {
           sale_currency?: string | null
           sale_price?: number | null
           seasonal_pricing?: Json | null
+          security_deposit_collection?: string | null
+          security_deposit_required?: boolean | null
           smoking_penalty?: number | null
           status?: string | null
           title: string
@@ -4403,6 +4482,7 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           area_sqm?: number | null
+          balance_due_days?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
           cancellation_policy?: string | null
@@ -4494,12 +4574,14 @@ export type Database = {
           parking_spaces?: number | null
           parking_type?: string | null
           parties_allowed?: boolean | null
+          payment_model?: string | null
           pet_deposit?: number | null
           pet_notes?: string | null
           pet_notes_ru?: string | null
           pets_allowed?: boolean | null
           plot_size_sqm?: number | null
           pool_type?: string | null
+          prepay_percent?: number | null
           price_per_night?: number | null
           project_id?: string | null
           property_type?: string
@@ -4512,6 +4594,8 @@ export type Database = {
           sale_currency?: string | null
           sale_price?: number | null
           seasonal_pricing?: Json | null
+          security_deposit_collection?: string | null
+          security_deposit_required?: boolean | null
           smoking_penalty?: number | null
           status?: string | null
           title?: string
