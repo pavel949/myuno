@@ -128,12 +128,20 @@ export function PropertiesBlock() {
                         src={property.cover_image} 
                         alt={title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        loading="lazy"
+                        onError={(e) => {
+                          // Hide broken image and show fallback
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                        }}
                       />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
-                        <Home className="h-5 w-5 text-muted-foreground" />
-                      </div>
-                    )}
+                    ) : null}
+                    <div className={cn(
+                      "w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5",
+                      property.cover_image ? "hidden" : ""
+                    )}>
+                      <Home className="h-5 w-5 text-muted-foreground" />
+                    </div>
                   </div>
                   
                   {/* Status dot */}
