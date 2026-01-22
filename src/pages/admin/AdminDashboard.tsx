@@ -13,7 +13,7 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminDashboardStats } from '@/hooks/useAdminDashboardStats';
 import { useAdminAnalytics } from '@/hooks/useAdminAnalytics';
-import { AdminLayout } from '@/components/admin/AdminLayout';
+
 import { AdminKPICard } from '@/components/admin/AdminKPICard';
 import { AdminRevenueChart } from '@/components/admin/AdminRevenueChart';
 import { AdminVerticalChart } from '@/components/admin/AdminVerticalChart';
@@ -45,8 +45,7 @@ export default function AdminDashboard() {
   })) || [];
 
   return (
-    <AdminLayout>
-      <div className="p-4 md:p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-6">
         <div>
           <h1 className="text-2xl font-bold">
             {isRussian ? 'Панель управления' : 'Dashboard'}
@@ -78,7 +77,6 @@ export default function AdminDashboard() {
             <AdminKPICard title={isRussian ? 'Салоны' : 'Salons'} value={data?.salons || 0} icon={Scissors} iconColor="text-purple-500" href="/admin/salons" loading={isLoading} />
           </div>
         </div>
-      </div>
-    </AdminLayout>
+    </div>
   );
 }
