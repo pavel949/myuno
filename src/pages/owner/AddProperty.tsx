@@ -25,6 +25,7 @@ import { UnitFields } from '@/components/property/UnitFields';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
 import { ProjectLocationPicker } from '@/components/property/ProjectLocationPicker';
 import { Skeleton } from '@/components/ui/skeleton';
+import { TranslatableInput } from '@/components/forms/TranslatableInput';
 
 export default function AddProperty() {
   const { language } = useLanguage();
@@ -307,24 +308,21 @@ export default function AddProperty() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>{isRu ? 'Название (EN)' : 'Title (EN)'} *</Label>
-                    <Input
-                      value={formData.title}
-                      onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                      placeholder="Modern Villa with Pool"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{isRu ? 'Название (RU)' : 'Title (RU)'}</Label>
-                    <Input
-                      value={formData.title_ru}
-                      onChange={(e) => setFormData(prev => ({ ...prev, title_ru: e.target.value }))}
-                      placeholder="Современная вилла с бассейном"
-                    />
-                  </div>
-                </div>
+                <TranslatableInput
+                  label={isRu ? 'Название' : 'Title'}
+                  value={isRu ? formData.title_ru : formData.title}
+                  translatedValue={isRu ? formData.title : formData.title_ru}
+                  onChange={(val) => setFormData(prev => ({ 
+                    ...prev, 
+                    [isRu ? 'title_ru' : 'title']: val 
+                  }))}
+                  onTranslatedChange={(val) => setFormData(prev => ({ 
+                    ...prev, 
+                    [isRu ? 'title' : 'title_ru']: val 
+                  }))}
+                  placeholder={isRu ? 'Современная вилла с бассейном' : 'Modern Villa with Pool'}
+                  translatedPlaceholder={isRu ? 'Modern Villa with Pool' : 'Современная вилла с бассейном'}
+                />
 
                 <div className="space-y-2">
                   <Label>{isRu ? 'Тип недвижимости' : 'Property Type'} *</Label>
@@ -726,24 +724,23 @@ export default function AddProperty() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>{isRu ? 'Описание (EN)' : 'Description (EN)'}</Label>
-                <Textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Describe your property..."
-                  rows={4}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>{isRu ? 'Описание (RU)' : 'Description (RU)'}</Label>
-                <Textarea
-                  value={formData.description_ru}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description_ru: e.target.value }))}
-                  placeholder="Опишите вашу недвижимость..."
-                  rows={4}
-                />
-              </div>
+              <TranslatableInput
+                label={isRu ? 'Описание' : 'Description'}
+                value={isRu ? formData.description_ru : formData.description}
+                translatedValue={isRu ? formData.description : formData.description_ru}
+                onChange={(val) => setFormData(prev => ({ 
+                  ...prev, 
+                  [isRu ? 'description_ru' : 'description']: val 
+                }))}
+                onTranslatedChange={(val) => setFormData(prev => ({ 
+                  ...prev, 
+                  [isRu ? 'description' : 'description_ru']: val 
+                }))}
+                placeholder={isRu ? 'Опишите вашу недвижимость...' : 'Describe your property...'}
+                translatedPlaceholder={isRu ? 'Describe your property...' : 'Опишите вашу недвижимость...'}
+                multiline
+                rows={4}
+              />
 
               <div className="p-4 bg-muted rounded-lg">
                 <p className="text-sm text-muted-foreground">
