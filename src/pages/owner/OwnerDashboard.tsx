@@ -13,9 +13,7 @@ import {
   Home, Calendar, Users, CalendarDays, Link2, MessageCircle
 } from 'lucide-react';
 import { OwnershipInviteBanner } from '@/components/owner/OwnershipInviteBanner';
-import { TodayBlock } from '@/components/owner/dashboard/TodayBlock';
-import { MoneyBlock } from '@/components/owner/dashboard/MoneyBlock';
-import { PropertiesBlock } from '@/components/owner/dashboard/PropertiesBlock';
+import { TodayBlock, MoneyBlock, PropertiesBlock, RisksBlock, ActivityBlock } from '@/components/owner/dashboard';
 import { format, isToday, isTomorrow, differenceInDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
@@ -92,11 +90,13 @@ export default function OwnerDashboard() {
       {/* Ownership Invites Banner */}
       <OwnershipInviteBanner />
 
-      {/* 3 Main Stripe-like Blocks */}
+      {/* 5 Main Dashboard Blocks */}
       <div className="space-y-4 mb-4">
         <TodayBlock />
+        <RisksBlock />
         <MoneyBlock />
         <PropertiesBlock />
+        <ActivityBlock />
       </div>
 
       {/* Bookings (compact version) */}
