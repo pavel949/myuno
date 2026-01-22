@@ -3,10 +3,8 @@ import { Lock, User, KeyRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PinInput } from './PinInput';
 import { usePinAuth } from '@/hooks/usePinAuth';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { cn } from '@/lib/utils';
 
 interface PinLoginProps {
   onSuccess: () => void;
@@ -56,28 +54,20 @@ export const PinLogin: React.FC<PinLoginProps> = ({ onSuccess, onSwitchToEmail }
     setError(false);
 
     try {
-      const isValid = await verifyPin(pin);
+      await verifyPin(pin);
+      toast.success(language === 'en' ? 'Welcome back!' : 'С возвращением!');
+      onSuccess();
+    } catch (err: any) {
+      console.error('PIN verification error:', err);
+      setError(true);
       
-      if (!isValid) {
-        throw new Error('Invalid PIN');
-      }
-
-      // PIN verified - now we need to refresh the session
-      // The user should already have a valid refresh token stored
-      const { data, error: refreshError } = await supabase.auth.refreshSession();
-      
-      if (refreshError || !data.session) {
-        // Session expired, need to login with password
-        toast.error(texts.error);
+      // Check if session expired
+      if (err?.message?.includes('Session expired') || err?.message?.includes('expired')) {
+        toast.error(language === 'en' ? 'Session expired. Please login with password.' : 'Сессия истекла. Войдите с паролем.');
         onSwitchToEmail();
         return;
       }
-
-      toast.success(language === 'en' ? 'Welcome back!' : 'С возвращением!');
-      onSuccess();
-    } catch (err) {
-      console.error('PIN verification error:', err);
-      setError(true);
+      
       setAttempts(prev => prev + 1);
       
       if (attempts + 1 >= MAX_ATTEMPTS) {

@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const PIN_USER_KEY = 'uno_pin_user_id';
 const PIN_EMAIL_KEY = 'uno_pin_email';
+const PIN_REFRESH_TOKEN_KEY = 'uno_pin_refresh_token';
 
 export function usePinAuth() {
   const { user, session } = useAuth();
@@ -76,6 +77,7 @@ export function usePinAuth() {
   // Set up PIN for current user
   const setupPin = useCallback(async (pin: string) => {
     if (!user) throw new Error('Not authenticated');
+    if (!session?.refresh_token) throw new Error('No session available');
 
     const deviceId = getDeviceId();
     
@@ -87,21 +89,26 @@ export function usePinAuth() {
 
     if (error) throw error;
 
-    // Save user info for PIN login
+    // Save user info and refresh token for PIN login
     localStorage.setItem(PIN_USER_KEY, user.id);
     localStorage.setItem(PIN_EMAIL_KEY, user.email || '');
+    localStorage.setItem(PIN_REFRESH_TOKEN_KEY, session.refresh_token);
     setSavedUserId(user.id);
     setSavedEmail(user.email || '');
     setHasPin(true);
 
     return data;
-  }, [user]);
+  }, [user, session]);
 
-  // Verify PIN and return session token
+  // Verify PIN and restore session
   const verifyPin = useCallback(async (pin: string) => {
     const userId = localStorage.getItem(PIN_USER_KEY);
+    const refreshToken = localStorage.getItem(PIN_REFRESH_TOKEN_KEY);
+    
     if (!userId) throw new Error('No saved user for PIN login');
+    if (!refreshToken) throw new Error('No saved session for PIN login');
 
+    // First verify PIN
     const { data, error } = await supabase.rpc('verify_user_pin', {
       p_user_id: userId,
       p_pin: pin
@@ -110,6 +117,22 @@ export function usePinAuth() {
     if (error) throw error;
     if (!data) throw new Error('Invalid PIN');
 
+    // PIN is valid - restore session using saved refresh token
+    const { data: sessionData, error: sessionError } = await supabase.auth.refreshSession({
+      refresh_token: refreshToken
+    });
+
+    if (sessionError || !sessionData.session) {
+      // Refresh token expired, clear PIN data
+      clearPinData();
+      throw new Error('Session expired. Please login with password.');
+    }
+
+    // Update stored refresh token with the new one
+    if (sessionData.session.refresh_token) {
+      localStorage.setItem(PIN_REFRESH_TOKEN_KEY, sessionData.session.refresh_token);
+    }
+
     return true;
   }, []);
 
@@ -117,6 +140,7 @@ export function usePinAuth() {
   const clearPinData = useCallback(() => {
     localStorage.removeItem(PIN_USER_KEY);
     localStorage.removeItem(PIN_EMAIL_KEY);
+    localStorage.removeItem(PIN_REFRESH_TOKEN_KEY);
     setSavedUserId(null);
     setSavedEmail(null);
   }, []);
