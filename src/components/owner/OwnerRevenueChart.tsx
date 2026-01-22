@@ -1,7 +1,9 @@
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, BarChart3 } from 'lucide-react';
 import {
   AreaChart,
   Area,
@@ -25,6 +27,7 @@ interface OwnerRevenueChartProps {
 
 export function OwnerRevenueChart({ data, loading }: OwnerRevenueChartProps) {
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const isRu = language === 'ru';
 
   if (loading) {
@@ -66,9 +69,20 @@ export function OwnerRevenueChart({ data, loading }: OwnerRevenueChartProps) {
             <TrendingUp className="h-4 w-4 text-success" />
             {isRu ? 'Финансы за месяц' : 'Monthly Finances'}
           </CardTitle>
-          <div className="text-right">
-            <p className="text-lg font-bold text-success">{formatCurrency(netProfit)}</p>
-            <p className="text-xs text-muted-foreground">{isRu ? 'Чистая прибыль' : 'Net Profit'}</p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/owner/portfolio')}
+              className="h-7 px-2 text-xs"
+            >
+              <BarChart3 className="h-3.5 w-3.5 mr-1" />
+              {isRu ? 'Портфель' : 'Portfolio'}
+            </Button>
+            <div className="text-right">
+              <p className="text-lg font-bold text-success">{formatCurrency(netProfit)}</p>
+              <p className="text-xs text-muted-foreground">{isRu ? 'Чистая прибыль' : 'Net Profit'}</p>
+            </div>
           </div>
         </div>
       </CardHeader>
