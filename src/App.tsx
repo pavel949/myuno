@@ -13,6 +13,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AnimatedRoutes } from "@/components/layout/AnimatedRoutes";
 import { UnifiedChatFAB } from "@/components/chat/UnifiedChatFAB";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { PrefetchProvider } from "@/components/providers/PrefetchProvider";
 import { defaultQueryClientOptions } from "@/lib/queryConfig";
 
 const queryClient = new QueryClient({
@@ -30,12 +31,14 @@ const App = () => (
                 <AuthProvider>
                   <CartProvider>
                     <TooltipProvider>
-                      <Toaster />
-                      <Sonner />
-                      <BrowserRouter>
-                        <AnimatedRoutes />
-                        <UnifiedChatFAB />
-                      </BrowserRouter>
+                      <PrefetchProvider>
+                        <Toaster />
+                        <Sonner />
+                        <BrowserRouter>
+                          <AnimatedRoutes />
+                          <UnifiedChatFAB />
+                        </BrowserRouter>
+                      </PrefetchProvider>
                     </TooltipProvider>
                   </CartProvider>
                 </AuthProvider>

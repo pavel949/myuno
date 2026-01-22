@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useCallback } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { 
   Home, 
@@ -22,6 +22,7 @@ import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { triggerRipple } from '@/hooks/useRipple';
 import { playSound } from '@/hooks/useSoundEffects';
 import { getFeedbackSettings } from '@/hooks/useFeedbackSettings';
+import { usePrefetchRoute } from '@/hooks/usePrefetch';
 
 type NavItem = {
   path: string;
@@ -87,6 +88,7 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
   (props, ref) => {
     const { language } = useLanguage();
     const location = useLocation();
+    const { prefetchRoute } = usePrefetchRoute();
 
     const navItems = getNavItemsForPath(location.pathname);
 
@@ -100,6 +102,11 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
         playSound('click');
       }
     };
+
+    // Prefetch route data on hover/touch
+    const handlePrefetch = useCallback((path: string) => {
+      prefetchRoute(path);
+    }, [prefetchRoute]);
 
     // Check if current path matches nav item (handles nested routes)
     const isActive = (itemPath: string) => {
@@ -123,6 +130,8 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
                 key={path}
                 to={path}
                 onClick={handleNavClick}
+                onMouseEnter={() => handlePrefetch(path)}
+                onTouchStart={() => handlePrefetch(path)}
                 className={cn(
                   "relative overflow-hidden flex flex-col items-center justify-center flex-1 h-full gap-0.5 transition-colors active:scale-95",
                   active ? "text-primary" : "text-muted-foreground"
