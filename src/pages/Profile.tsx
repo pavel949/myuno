@@ -10,7 +10,7 @@ import { SectionCard } from '@/components/uno/SectionCard';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { ReferralCard } from '@/components/uno/ReferralCard';
 import { EmailVerificationBadge } from '@/components/profile/EmailVerificationBadge';
-import { RoleSwitcher } from '@/components/uno/RoleSwitcher';
+import { RoleSwitchMenu } from '@/components/profile/RoleSwitchMenu';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
 
@@ -129,8 +129,8 @@ export default function Profile() {
           <EmailVerificationBadge variant="inline" />
         </SectionCard>
 
-        {/* Role Switcher */}
-        <RoleSwitcher />
+        {/* Switch to Hosting/Admin/Vendor Menu */}
+        <RoleSwitchMenu />
 
         {/* Referral program */}
         <ReferralCard variant="compact" />
