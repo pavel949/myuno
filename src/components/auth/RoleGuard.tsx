@@ -12,7 +12,8 @@ interface RoleGuardProps {
 
 /**
  * Route guard component that checks authentication and role permissions.
- * Redirects to auth page if not authenticated, or fallback path if role not allowed.
+ * Uses Airbnb-style "soft" navigation - checks if user HAS the role, not active role.
+ * This allows users with multiple roles to freely navigate between dashboards.
  */
 export function RoleGuard({ 
   children, 
@@ -21,7 +22,7 @@ export function RoleGuard({
 }: RoleGuardProps) {
   const location = useLocation();
   const { user, isLoading: authLoading } = useAuth();
-  const { activeRole, hasRole, isLoading: contextLoading } = useUserContext();
+  const { hasRole, isLoading: contextLoading } = useUserContext();
 
   // Show loading while checking auth/context
   if (authLoading || contextLoading) {
@@ -37,13 +38,10 @@ export function RoleGuard({
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
-  // Check if user has any of the allowed roles
+  // Check if user has any of the allowed roles (Airbnb-style: check ownership, not active role)
   const hasAllowedRole = allowedRoles.some(role => hasRole(role));
-  
-  // Also check if active role is in allowed roles
-  const isActiveRoleAllowed = allowedRoles.includes(activeRole);
 
-  if (!hasAllowedRole && !isActiveRoleAllowed) {
+  if (!hasAllowedRole) {
     return <Navigate to={fallbackPath} replace />;
   }
 
@@ -68,18 +66,18 @@ export function withRoleGuard<P extends object>(
 }
 
 /**
- * Admin route guard - requires admin role
+ * Admin route guard - requires admin, staff, or uno_team role
  */
 export function AdminGuard({ children }: { children: React.ReactNode }) {
   return (
-    <RoleGuard allowedRoles={['admin', 'staff']} fallbackPath="/">
+    <RoleGuard allowedRoles={['admin', 'staff', 'uno_team']} fallbackPath="/">
       {children}
     </RoleGuard>
   );
 }
 
 /**
- * Vendor route guard - requires vendor role
+ * Vendor route guard - requires vendor or admin role
  */
 export function VendorGuard({ children }: { children: React.ReactNode }) {
   return (
@@ -90,11 +88,11 @@ export function VendorGuard({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * Owner route guard - requires owner role
+ * Owner route guard - requires owner or admin role
  */
 export function OwnerGuard({ children }: { children: React.ReactNode }) {
   return (
-    <RoleGuard allowedRoles={['owner', 'admin']} fallbackPath="/">
+    <RoleGuard allowedRoles={['owner', 'admin']} fallbackPath="/owner/onboarding">
       {children}
     </RoleGuard>
   );
