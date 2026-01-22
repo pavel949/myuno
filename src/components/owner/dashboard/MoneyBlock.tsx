@@ -1,11 +1,12 @@
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useFinancialStats } from '@/hooks/usePropertyFinancials';
+import { useDepositStats } from '@/hooks/useDepositStats';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
-import { Wallet, ArrowRight, TrendingUp, TrendingDown, Receipt } from 'lucide-react';
+import { Wallet, ArrowRight, TrendingUp, TrendingDown, Receipt, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function MoneyBlock() {
@@ -13,6 +14,7 @@ export function MoneyBlock() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { data: stats, isLoading } = useFinancialStats();
+  const { data: depositStats, isLoading: depositsLoading } = useDepositStats();
 
   const formatCurrency = (value: number) => {
     if (value >= 1000000) return `฿${(value / 1000000).toFixed(1)}M`;
@@ -20,7 +22,7 @@ export function MoneyBlock() {
     return `฿${value.toFixed(0)}`;
   };
 
-  if (isLoading) {
+  if (isLoading || depositsLoading) {
     return (
       <Card className="overflow-hidden">
         <CardContent className="p-4">
@@ -87,6 +89,26 @@ export function MoneyBlock() {
             </span>
           </div>
         </div>
+
+        {/* Deposits indicator */}
+        {depositStats && depositStats.totalHeld > 0 && (
+          <div className="flex items-center gap-2 mb-4 p-2 rounded-lg bg-muted/50">
+            <Shield className="h-4 w-4 text-info shrink-0" />
+            <div className="flex-1">
+              <span className="text-xs text-muted-foreground">
+                {isRu ? 'Депозиты' : 'Deposits held'}
+              </span>
+            </div>
+            <span className="text-sm font-medium">
+              {formatCurrency(depositStats.totalHeld)}
+            </span>
+            {depositStats.pendingReturn > 0 && (
+              <span className="text-xs text-warning">
+                ({depositStats.pendingReturn} {isRu ? 'к возврату' : 'pending'})
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Main action */}
         <Button 
