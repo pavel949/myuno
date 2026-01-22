@@ -8,6 +8,7 @@ import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { PropertyWizard } from '@/components/owner/PropertyWizard';
 import { OwnershipTypeStep, OwnershipType } from '@/components/owner/OwnershipTypeStep';
+import { PropertySubmissionSuccess } from '@/components/owner/PropertySubmissionSuccess';
 import { toast } from 'sonner';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -44,6 +45,11 @@ export default function AddProperty() {
   const [selectedProject, setSelectedProject] = useState<PropertyProject | null>(null);
   const [isCloneDataApplied, setIsCloneDataApplied] = useState(false);
   const [isPreviewCollapsed, setIsPreviewCollapsed] = useState(false);
+  
+  // Success screen state
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [createdPropertyId, setCreatedPropertyId] = useState<string>();
+  const [createdPropertyTitle, setCreatedPropertyTitle] = useState<string>();
   
   // Ownership data
   const [ownershipData, setOwnershipData] = useState({
@@ -299,8 +305,21 @@ export default function AddProperty() {
       }
     }
 
-    navigate('/owner/properties');
+    // Show success screen instead of navigating
+    setCreatedPropertyId(property?.id);
+    setCreatedPropertyTitle(formData.title || formData.title_ru);
+    setShowSuccess(true);
   };
+
+  // Show success screen after submission
+  if (showSuccess) {
+    return (
+      <PropertySubmissionSuccess
+        propertyId={createdPropertyId}
+        propertyTitle={createdPropertyTitle}
+      />
+    );
+  }
 
 
   const renderStep = (stepId: string) => {
