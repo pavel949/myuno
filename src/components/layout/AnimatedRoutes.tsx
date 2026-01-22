@@ -293,6 +293,7 @@ const PropertyQuickSetup = lazy(() => import('@/pages/owner/PropertyQuickSetup')
 const OwnerPortfolio = lazy(() => import('@/pages/owner/OwnerPortfolio'));
 const OwnerSuperhost = lazy(() => import('@/pages/owner/OwnerSuperhost'));
 const OwnerOperations = lazy(() => import('@/pages/owner/OwnerOperations'));
+const OwnerGuidePage = lazy(() => import('@/pages/owner/OwnerGuidePage'));
 
 // Property Consultation
 const PropertyConsultation = lazy(() => import('@/pages/property/PropertyConsultation'));
@@ -619,6 +620,7 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* Owner (Property Care) Routes - Protected */}
         <Route path="/owner" element={<LazyPage><OwnerGuard><OwnerDashboard /></OwnerGuard></LazyPage>} />
+        <Route path="/owner/guide" element={<LazyPage><OwnerGuidePage /></LazyPage>} />
         <Route path="/owner/portfolio" element={<LazyPage><OwnerGuard><OwnerPortfolio /></OwnerGuard></LazyPage>} />
         <Route path="/owner/superhost" element={<LazyPage><OwnerGuard><OwnerSuperhost /></OwnerGuard></LazyPage>} />
         <Route path="/owner/properties" element={<LazyPage><OwnerGuard><OwnerProperties /></OwnerGuard></LazyPage>} />
