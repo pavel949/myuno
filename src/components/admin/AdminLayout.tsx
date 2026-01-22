@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { AdminSidebar } from './AdminSidebar';
 import { AdminHeader } from './AdminHeader';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface AdminLayoutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export function AdminLayout({ children }: AdminLayoutProps) {
@@ -34,7 +34,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         <SidebarInset className="flex-1 flex flex-col">
           <AdminHeader />
           <main className="flex-1 overflow-auto">
-            {children}
+            {children || <Outlet />}
           </main>
         </SidebarInset>
       </div>

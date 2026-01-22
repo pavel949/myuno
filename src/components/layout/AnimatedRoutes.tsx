@@ -1,10 +1,11 @@
 import React, { lazy, Suspense } from 'react';
-import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { Routes, Route, useLocation, Navigate, Outlet } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { PageTransition } from './PageTransition';
 import { ScrollToTop } from './ScrollToTop';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { AdminGuard, VendorGuard, OwnerGuard, TeamGuard } from '@/components/auth/RoleGuard';
+import { AdminLayout } from '@/components/admin/AdminLayout';
 
 // Core pages - load eagerly for fast initial navigation
 import Index from '@/pages/Index';
@@ -216,6 +217,18 @@ const AdminUnoTeam = lazy(() => import('@/pages/admin/AdminUnoTeam'));
 const AdminLeadsDashboard = lazy(() => import('@/pages/admin/AdminLeadsDashboard'));
 const AdminFinance = lazy(() => import('@/pages/admin/AdminFinance'));
 const AdminCities = lazy(() => import('@/pages/admin/AdminCities'));
+const UserAnalyticsDashboard = lazy(() => import('@/pages/admin/UserAnalyticsDashboard'));
+
+// Admin route wrapper with layout
+const AdminRouteLayout = () => (
+  <AdminGuard>
+    <AdminLayout>
+      <Suspense fallback={<LoadingState />}>
+        <Outlet />
+      </Suspense>
+    </AdminLayout>
+  </AdminGuard>
+);
 
 // Support pages (user tickets)
 const NewTicket = lazy(() => import('@/pages/support/NewTicket'));
@@ -507,45 +520,48 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/dispute-resolution" element={<LazyPage><DisputeResolutionPage /></LazyPage>} />
         <Route path="/view-history" element={<LazyPage><ViewHistory /></LazyPage>} />
         
-        {/* Admin Routes - Protected */}
-        <Route path="/admin" element={<LazyPage><AdminGuard><AdminDashboard /></AdminGuard></LazyPage>} />
-        <Route path="/admin/analytics" element={<LazyPage><AdminGuard><AdminAnalytics /></AdminGuard></LazyPage>} />
-        <Route path="/admin/providers" element={<LazyPage><AdminGuard><AdminProviders /></AdminGuard></LazyPage>} />
-        <Route path="/admin/services" element={<LazyPage><AdminGuard><AdminServices /></AdminGuard></LazyPage>} />
-        <Route path="/admin/partner-applications" element={<LazyPage><AdminGuard><PartnerApplicationsAdmin /></AdminGuard></LazyPage>} />
-        <Route path="/admin/pitch-deck" element={<LazyPage><AdminGuard><InvestorPitchDeck /></AdminGuard></LazyPage>} />
-        <Route path="/admin/operations" element={<LazyPage><AdminGuard><OperationsHub /></AdminGuard></LazyPage>} />
-        {/* Admin management routes */}
-        <Route path="/admin/yachts" element={<LazyPage><AdminGuard><AdminYachts /></AdminGuard></LazyPage>} />
-        <Route path="/admin/tours" element={<LazyPage><AdminGuard><AdminTours /></AdminGuard></LazyPage>} />
-        <Route path="/admin/activities" element={<LazyPage><AdminGuard><AdminActivities /></AdminGuard></LazyPage>} />
-        <Route path="/admin/properties" element={<LazyPage><AdminGuard><AdminProperties /></AdminGuard></LazyPage>} />
-        <Route path="/admin/restaurants" element={<LazyPage><AdminGuard><AdminRestaurants /></AdminGuard></LazyPage>} />
-        <Route path="/admin/salons" element={<LazyPage><AdminGuard><AdminSalons /></AdminGuard></LazyPage>} />
-        <Route path="/admin/clinics" element={<LazyPage><AdminGuard><AdminClinics /></AdminGuard></LazyPage>} />
-        <Route path="/admin/gyms" element={<LazyPage><AdminGuard><AdminGyms /></AdminGuard></LazyPage>} />
-        <Route path="/admin/vehicles" element={<LazyPage><AdminGuard><AdminVehicles /></AdminGuard></LazyPage>} />
-        <Route path="/admin/events" element={<LazyPage><AdminGuard><AdminEvents /></AdminGuard></LazyPage>} />
-        <Route path="/admin/education" element={<LazyPage><AdminGuard><AdminEducation /></AdminGuard></LazyPage>} />
-        <Route path="/admin/legal" element={<LazyPage><AdminGuard><AdminLegal /></AdminGuard></LazyPage>} />
-        <Route path="/admin/pets" element={<LazyPage><AdminGuard><AdminPets /></AdminGuard></LazyPage>} />
-        <Route path="/admin/cleaning" element={<LazyPage><AdminGuard><AdminCleaning /></AdminGuard></LazyPage>} />
-        <Route path="/admin/babysitters" element={<LazyPage><AdminGuard><AdminBabysitters /></AdminGuard></LazyPage>} />
-        <Route path="/admin/flowers" element={<LazyPage><AdminGuard><AdminFlowers /></AdminGuard></LazyPage>} />
-        <Route path="/admin/lookups" element={<LazyPage><AdminGuard><AdminLookups /></AdminGuard></LazyPage>} />
-        <Route path="/admin/acquisition-metrics" element={<LazyPage><AdminGuard><AcquisitionMetrics /></AdminGuard></LazyPage>} />
-        <Route path="/admin/tickets" element={<LazyPage><AdminGuard><AdminTickets /></AdminGuard></LazyPage>} />
-        <Route path="/admin/tickets/:ticketId" element={<LazyPage><AdminGuard><AdminTicketDetail /></AdminGuard></LazyPage>} />
-        <Route path="/admin/pharmacies" element={<LazyPage><AdminGuard><AdminPharmacies /></AdminGuard></LazyPage>} />
-        <Route path="/admin/stores" element={<LazyPage><AdminGuard><AdminStores /></AdminGuard></LazyPage>} />
-        <Route path="/admin/insurance" element={<LazyPage><AdminGuard><AdminInsurance /></AdminGuard></LazyPage>} />
-        <Route path="/admin/water-activities" element={<LazyPage><AdminGuard><AdminWaterActivities /></AdminGuard></LazyPage>} />
-        <Route path="/admin/moderation" element={<LazyPage><AdminGuard><AdminContentModeration /></AdminGuard></LazyPage>} />
-        <Route path="/admin/consultations" element={<LazyPage><AdminGuard><AdminConsultations /></AdminGuard></LazyPage>} />
-        <Route path="/admin/uno-team" element={<LazyPage><AdminGuard><AdminUnoTeam /></AdminGuard></LazyPage>} />
-        <Route path="/admin/leads" element={<LazyPage><AdminGuard><AdminLeadsDashboard /></AdminGuard></LazyPage>} />
-        <Route path="/admin/finance" element={<LazyPage><AdminGuard><AdminFinance /></AdminGuard></LazyPage>} />
-        <Route path="/admin/cities" element={<LazyPage><AdminGuard><AdminCities /></AdminGuard></LazyPage>} />
+        {/* Admin Routes - Protected with AdminLayout */}
+        <Route element={<AdminRouteLayout />}>
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/analytics" element={<AdminAnalytics />} />
+          <Route path="/admin/providers" element={<AdminProviders />} />
+          <Route path="/admin/services" element={<AdminServices />} />
+          <Route path="/admin/partner-applications" element={<PartnerApplicationsAdmin />} />
+          <Route path="/admin/pitch-deck" element={<InvestorPitchDeck />} />
+          <Route path="/admin/operations" element={<OperationsHub />} />
+          <Route path="/admin/yachts" element={<AdminYachts />} />
+          <Route path="/admin/tours" element={<AdminTours />} />
+          <Route path="/admin/activities" element={<AdminActivities />} />
+          <Route path="/admin/properties" element={<AdminProperties />} />
+          <Route path="/admin/restaurants" element={<AdminRestaurants />} />
+          <Route path="/admin/salons" element={<AdminSalons />} />
+          <Route path="/admin/clinics" element={<AdminClinics />} />
+          <Route path="/admin/gyms" element={<AdminGyms />} />
+          <Route path="/admin/vehicles" element={<AdminVehicles />} />
+          <Route path="/admin/events" element={<AdminEvents />} />
+          <Route path="/admin/education" element={<AdminEducation />} />
+          <Route path="/admin/legal" element={<AdminLegal />} />
+          <Route path="/admin/pets" element={<AdminPets />} />
+          <Route path="/admin/cleaning" element={<AdminCleaning />} />
+          <Route path="/admin/babysitters" element={<AdminBabysitters />} />
+          <Route path="/admin/flowers" element={<AdminFlowers />} />
+          <Route path="/admin/lookups" element={<AdminLookups />} />
+          <Route path="/admin/acquisition-metrics" element={<AcquisitionMetrics />} />
+          <Route path="/admin/tickets" element={<AdminTickets />} />
+          <Route path="/admin/tickets/:ticketId" element={<AdminTicketDetail />} />
+          <Route path="/admin/pharmacies" element={<AdminPharmacies />} />
+          <Route path="/admin/stores" element={<AdminStores />} />
+          <Route path="/admin/insurance" element={<AdminInsurance />} />
+          <Route path="/admin/water-activities" element={<AdminWaterActivities />} />
+          <Route path="/admin/moderation" element={<AdminContentModeration />} />
+          <Route path="/admin/consultations" element={<AdminConsultations />} />
+          <Route path="/admin/uno-team" element={<AdminUnoTeam />} />
+          <Route path="/admin/leads" element={<AdminLeadsDashboard />} />
+          <Route path="/admin/finance" element={<AdminFinance />} />
+          <Route path="/admin/cities" element={<AdminCities />} />
+          <Route path="/admin/quick-listings" element={<AdminQuickListings />} />
+          <Route path="/admin/user-analytics" element={<UserAnalyticsDashboard />} />
+        </Route>
         
         {/* Staff Routes - Protected */}
         <Route path="/staff" element={<LazyPage><AdminGuard><StaffDashboard /></AdminGuard></LazyPage>} />
