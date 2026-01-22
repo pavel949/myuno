@@ -124,7 +124,7 @@ export function useContentModeration() {
             cover_image,
             approval_status,
             providers:provider_id (
-              business_name
+              name
             )
           `)
           .eq('approval_status', statusFilter)
@@ -140,7 +140,7 @@ export function useContentModeration() {
             id: item.id,
             content_type: table as ContentType,
             title: item[titleColumn] || 'Untitled',
-            provider_name: item.providers?.business_name || 'Unknown',
+            provider_name: item.providers?.name || 'Unknown',
             provider_id: item.provider_id,
             created_at: item.created_at,
             cover_image: item.cover_image,
