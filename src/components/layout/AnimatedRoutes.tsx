@@ -24,6 +24,7 @@ const Bookings = lazy(() => import('@/pages/Bookings'));
 const BookingDetail = lazy(() => import('@/pages/BookingDetail'));
 const Profile = lazy(() => import('@/pages/Profile'));
 const EditProfile = lazy(() => import('@/pages/profile/EditProfile'));
+const ProfileSettings = lazy(() => import('@/pages/profile/ProfileSettings'));
 
 // Beauty & Spa Mini-App
 const BeautySpaIndex = lazy(() => import('@/pages/beauty/BeautySpaIndex'));
@@ -356,6 +357,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/orders/:id/tracking" element={<LazyPage><OrderTracking /></LazyPage>} />
         <Route path="/profile" element={<LazyPage><Profile /></LazyPage>} />
         <Route path="/profile/edit" element={<LazyPage><EditProfile /></LazyPage>} />
+        <Route path="/profile/settings" element={<LazyPage><ProfileSettings /></LazyPage>} />
         <Route path="/favorites" element={<LazyPage><Favorites /></LazyPage>} />
         <Route path="/search" element={<LazyPage><Search /></LazyPage>} />
         <Route path="/notifications" element={<LazyPage><Notifications /></LazyPage>} />
