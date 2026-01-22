@@ -23,6 +23,7 @@ import { OwnerKPICard } from '@/components/owner/OwnerKPICard';
 import { OwnerAlertPanel } from '@/components/owner/OwnerAlertPanel';
 import { OwnerRevenueChart } from '@/components/owner/OwnerRevenueChart';
 import { OwnerQuickActions } from '@/components/owner/OwnerQuickActions';
+import { SuperhostStatusCompact } from '@/components/owner/SuperhostStatusCard';
 import { format, isToday, isTomorrow, differenceInDays, subDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
@@ -117,6 +118,11 @@ export default function OwnerDashboard() {
         showBack
         fallbackPath="/"
       />
+
+      {/* Superhost Status */}
+      <div className="mb-4">
+        <SuperhostStatusCompact />
+      </div>
 
       {/* Ownership Invites Banner */}
       <OwnershipInviteBanner />
