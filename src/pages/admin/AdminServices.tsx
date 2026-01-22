@@ -301,11 +301,12 @@ export default function AdminServices() {
         {!providerId && (
           <div className="mb-4">
             <Select
-              value={filterProviderId}
+              value={filterProviderId || 'all'}
               onValueChange={(value) => {
-                setFilterProviderId(value);
-                if (value) {
-                  navigate(`/admin/services?provider=${value}`);
+                const actualValue = value === 'all' ? '' : value;
+                setFilterProviderId(actualValue);
+                if (actualValue) {
+                  navigate(`/admin/services?provider=${actualValue}`);
                 } else {
                   navigate('/admin/services');
                 }
@@ -315,9 +316,9 @@ export default function AdminServices() {
                 <SelectValue placeholder={isRussian ? 'Фильтр по провайдеру' : 'Filter by provider'} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">{isRussian ? 'Все провайдеры' : 'All providers'}</SelectItem>
+                <SelectItem value="all">{isRussian ? 'Все провайдеры' : 'All providers'}</SelectItem>
                 {providers.map((provider) => (
-                  <SelectItem key={provider.id} value={provider.id}>
+                  <SelectItem key={provider.id} value={provider.id || 'unknown'}>
                     {isRussian ? (provider.business_name_ru || provider.business_name) : provider.business_name}
                   </SelectItem>
                 ))}
