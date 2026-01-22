@@ -149,6 +149,10 @@ export function useUserContext() {
   // Determine available roles based on memberships and user_roles
   const availableRoles: AppRole[] = ['user'];
   
+  // Debug logging
+  console.log('[useUserContext] userRoles:', userRoles);
+  console.log('[useUserContext] rolesLoading:', rolesLoading);
+  
   if (vendorOrgs.length > 0 || userRoles?.includes('vendor')) {
     availableRoles.push('vendor');
   }
@@ -161,6 +165,11 @@ export function useUserContext() {
   if (userRoles?.includes('staff')) {
     availableRoles.push('staff');
   }
+  if (userRoles?.includes('uno_team')) {
+    availableRoles.push('uno_team');
+  }
+  
+  console.log('[useUserContext] availableRoles:', availableRoles);
 
   // Get current active org
   const activeOrg = memberships?.find(m => m.org_id === context?.active_org_id)?.org || null;
