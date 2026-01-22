@@ -1,27 +1,55 @@
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAdminAuditLogs, ACTION_CONFIG } from '@/hooks/useAdminAuditLogs';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Activity, UserPlus, ShoppingCart, FileCheck, ChevronRight } from 'lucide-react';
+import { Activity, ChevronRight, ShoppingCart, UserPlus, FileCheck, Settings, Package, Home, Ship, Calendar, CreditCard, TicketCheck, AlertCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
-// Mock recent activity - in production this would come from admin_audit_logs
-const MOCK_ACTIVITY = [
-  { id: '1', type: 'booking', icon: ShoppingCart, label: 'New booking', labelRu: 'Новый заказ', time: new Date(Date.now() - 1000 * 60 * 30), color: 'text-success' },
-  { id: '2', type: 'provider', icon: UserPlus, label: 'Provider registered', labelRu: 'Провайдер зарегистрирован', time: new Date(Date.now() - 1000 * 60 * 120), color: 'text-info' },
-  { id: '3', type: 'moderation', icon: FileCheck, label: 'Content approved', labelRu: 'Контент одобрен', time: new Date(Date.now() - 1000 * 60 * 180), color: 'text-primary' },
-];
+// Map entity types to icons
+const ENTITY_ICONS: Record<string, React.ElementType> = {
+  booking: ShoppingCart,
+  order: ShoppingCart,
+  provider: UserPlus,
+  content: FileCheck,
+  property: Home,
+  yacht: Ship,
+  tour: Calendar,
+  user: UserPlus,
+  payout: CreditCard,
+  ticket: TicketCheck,
+  settings: Settings,
+  default: Package,
+};
+
+function getActionIcon(action: string, entityType: string | null): React.ElementType {
+  // First check by action
+  const actionBase = action.split('.')[0];
+  if (ENTITY_ICONS[actionBase]) {
+    return ENTITY_ICONS[actionBase];
+  }
+  // Then by entity type
+  if (entityType && ENTITY_ICONS[entityType]) {
+    return ENTITY_ICONS[entityType];
+  }
+  return ENTITY_ICONS.default;
+}
+
+function getActionConfig(action: string) {
+  return ACTION_CONFIG[action] || {
+    labelEn: action.replace(/[._]/g, ' '),
+    labelRu: action.replace(/[._]/g, ' '),
+    color: 'text-muted-foreground',
+  };
+}
 
 export function AdminActivityBlock() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
-
-  // In production, replace with actual hook
-  const isLoading = false;
-  const activities = MOCK_ACTIVITY;
+  const { data: logs, isLoading } = useAdminAuditLogs(5);
 
   if (isLoading) {
     return (
@@ -38,6 +66,8 @@ export function AdminActivityBlock() {
       </Card>
     );
   }
+
+  const activities = logs || [];
 
   return (
     <Card 
@@ -58,27 +88,42 @@ export function AdminActivityBlock() {
       {/* Activity list */}
       <div className="space-y-2">
         {activities.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-4">
-            {isRu ? 'Нет недавней активности' : 'No recent activity'}
-          </p>
+          <div className="flex flex-col items-center justify-center py-6 text-center">
+            <div className="p-2 rounded-full bg-muted mb-2">
+              <AlertCircle className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {isRu ? 'Нет недавней активности' : 'No recent activity'}
+            </p>
+            <p className="text-xs text-muted-foreground/70 mt-1">
+              {isRu ? 'Действия будут отображаться здесь' : 'Actions will appear here'}
+            </p>
+          </div>
         ) : (
-          activities.map((activity) => {
-            const Icon = activity.icon;
+          activities.map((log) => {
+            const Icon = getActionIcon(log.action, log.entity_type);
+            const config = getActionConfig(log.action);
+            
             return (
               <div 
-                key={activity.id}
+                key={log.id}
                 className="flex items-center gap-2.5 p-2 rounded-lg bg-muted/30"
               >
-                <div className={cn("p-1.5 rounded-lg bg-muted", activity.color)}>
+                <div className={cn("p-1.5 rounded-lg bg-muted", config.color)}>
                   <Icon className="h-3.5 w-3.5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">
-                    {isRu ? activity.labelRu : activity.label}
+                    {isRu ? config.labelRu : config.labelEn}
                   </p>
+                  {log.admin_name && (
+                    <p className="text-xs text-muted-foreground truncate">
+                      {log.admin_name}
+                    </p>
+                  )}
                 </div>
                 <span className="text-xs text-muted-foreground flex-shrink-0">
-                  {formatDistanceToNow(activity.time, { 
+                  {formatDistanceToNow(new Date(log.created_at), { 
                     addSuffix: false, 
                     locale: isRu ? ru : undefined 
                   })}

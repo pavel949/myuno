@@ -1,40 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sun, Cloud, CloudRain, Calendar, Thermometer } from 'lucide-react';
+import { Sun, Cloud, CloudRain, Calendar, Thermometer, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useWeather } from '@/hooks/useWeather';
+import { useTodayEvents, useSmartRecommendations } from '@/hooks/useTodayEvents';
 import { Skeleton } from '@/components/ui/skeleton';
-
-interface TodayEvent {
-  id: string;
-  title: string;
-  titleRu: string;
-  time: string;
-  path: string;
-}
-
-interface DailyRecommendation {
-  title: string;
-  titleRu: string;
-  subtitle: string;
-  subtitleRu: string;
-  path: string;
-  icon: string;
-}
-
-const mockEvent: TodayEvent = {
-  id: '1',
-  title: 'Patong Night Market',
-  titleRu: 'Ночной рынок Патонг',
-  time: '18:00',
-  path: '/events',
-};
-
-const dailyRecommendations: DailyRecommendation[] = [
-  { title: 'Island Hopping', titleRu: 'По островам', subtitle: 'Perfect weather today', subtitleRu: 'Отличная погода сегодня', path: '/tours', icon: '🏝️' },
-  { title: 'Sunset Dinner', titleRu: 'Ужин на закате', subtitle: 'Book a table with a view', subtitleRu: 'Столик с видом', path: '/restaurants', icon: '🌅' },
-  { title: 'Spa Day', titleRu: 'День в СПА', subtitle: 'Treat yourself', subtitleRu: 'Побалуй себя', path: '/beauty', icon: '💆' },
-];
 
 const WeatherIcon = ({ condition, isLoading }: { condition: string; isLoading?: boolean }) => {
   if (isLoading) {
@@ -57,9 +27,9 @@ export function SmartWidget() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const { data: weather, isLoading: isWeatherLoading } = useWeather();
-  const [recommendation] = useState(() => 
-    dailyRecommendations[Math.floor(Math.random() * dailyRecommendations.length)]
-  );
+  const { data: todayEvents, isLoading: isEventsLoading } = useTodayEvents();
+  const { data: recommendations, isLoading: isRecsLoading } = useSmartRecommendations();
+  
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -67,12 +37,23 @@ export function SmartWidget() {
     return () => clearInterval(timer);
   }, []);
 
+  // Get one random recommendation
+  const recommendation = useMemo(() => {
+    if (!recommendations || recommendations.length === 0) return null;
+    return recommendations[Math.floor(Math.random() * recommendations.length)];
+  }, [recommendations]);
+
+  // Get first event of the day
+  const todayEvent = todayEvents?.[0] || null;
+
   const greeting = () => {
     const hour = currentTime.getHours();
     if (hour < 12) return language === 'ru' ? 'Доброе утро' : 'Good morning';
     if (hour < 17) return language === 'ru' ? 'Добрый день' : 'Good afternoon';
     return language === 'ru' ? 'Добрый вечер' : 'Good evening';
   };
+
+  const isRu = language === 'ru';
 
   return (
     <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 via-card to-primary/10 border border-border">
@@ -86,7 +67,7 @@ export function SmartWidget() {
           <div>
             <p className="text-xs text-muted-foreground mb-1">{greeting()}</p>
             <h2 className="text-lg font-semibold text-foreground">
-              {language === 'ru' ? 'Пхукет сегодня' : 'Phuket Today'}
+              {isRu ? 'Пхукет сегодня' : 'Phuket Today'}
             </h2>
           </div>
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-background/50 backdrop-blur-sm border border-border/50">
@@ -104,7 +85,7 @@ export function SmartWidget() {
                     {weather?.temp || 31}°C
                   </p>
                   <p className="text-[10px] text-muted-foreground">
-                    {language === 'ru' ? weather?.descriptionRu : weather?.description}
+                    {isRu ? weather?.descriptionRu : weather?.description}
                   </p>
                 </>
               )}
@@ -116,7 +97,7 @@ export function SmartWidget() {
         <div className="grid grid-cols-2 gap-3">
           {/* Today's Event */}
           <button
-            onClick={() => navigate(mockEvent.path)}
+            onClick={() => navigate(todayEvent ? `/events/${todayEvent.id}` : '/events')}
             className="flex flex-col p-3 rounded-xl bg-background/50 backdrop-blur-sm border border-border/50 hover:border-primary/30 transition-all group text-left"
           >
             <div className="flex items-center gap-2 mb-2">
@@ -124,34 +105,76 @@ export function SmartWidget() {
                 <Calendar className="w-4 h-4 text-purple-500" />
               </div>
               <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
-                {language === 'ru' ? 'Сегодня' : 'Today'}
+                {isRu ? 'Сегодня' : 'Today'}
               </span>
             </div>
-            <p className="text-sm font-medium text-foreground line-clamp-1">
-              {language === 'ru' ? mockEvent.titleRu : mockEvent.title}
-            </p>
-            <p className="text-xs text-primary mt-0.5">{mockEvent.time}</p>
+            {isEventsLoading ? (
+              <>
+                <Skeleton className="h-4 w-3/4 mb-1" />
+                <Skeleton className="h-3 w-1/2" />
+              </>
+            ) : todayEvent ? (
+              <>
+                <p className="text-sm font-medium text-foreground line-clamp-1">
+                  {isRu ? todayEvent.title_ru || todayEvent.title_en : todayEvent.title_en}
+                </p>
+                <p className="text-xs text-primary mt-0.5">
+                  {todayEvent.event_time || (isRu ? 'Весь день' : 'All day')}
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-medium text-foreground line-clamp-1">
+                  {isRu ? 'Нет событий' : 'No events'}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {isRu ? 'Посмотреть все →' : 'Browse all →'}
+                </p>
+              </>
+            )}
           </button>
 
           {/* Daily Recommendation */}
           <button
-            onClick={() => navigate(recommendation.path)}
+            onClick={() => recommendation && navigate(recommendation.path)}
             className="flex flex-col p-3 rounded-xl bg-background/50 backdrop-blur-sm border border-border/50 hover:border-primary/30 transition-all group text-left"
           >
             <div className="flex items-center gap-2 mb-2">
               <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-lg">
-                {recommendation.icon}
+                {isRecsLoading ? (
+                  <Skeleton className="w-5 h-5 rounded" />
+                ) : (
+                  recommendation?.icon || <Sparkles className="w-4 h-4 text-primary" />
+                )}
               </div>
               <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
-                {language === 'ru' ? 'Рекомендуем' : 'For You'}
+                {isRu ? 'Рекомендуем' : 'For You'}
               </span>
             </div>
-            <p className="text-sm font-medium text-foreground line-clamp-1">
-              {language === 'ru' ? recommendation.titleRu : recommendation.title}
-            </p>
-            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
-              {language === 'ru' ? recommendation.subtitleRu : recommendation.subtitle}
-            </p>
+            {isRecsLoading ? (
+              <>
+                <Skeleton className="h-4 w-3/4 mb-1" />
+                <Skeleton className="h-3 w-1/2" />
+              </>
+            ) : recommendation ? (
+              <>
+                <p className="text-sm font-medium text-foreground line-clamp-1">
+                  {isRu ? recommendation.title_ru || recommendation.title_en : recommendation.title_en}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                  {isRu ? recommendation.subtitle_ru : recommendation.subtitle_en}
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-medium text-foreground line-clamp-1">
+                  {isRu ? 'Откройте для себя' : 'Discover'}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {isRu ? 'Лучшее на острове' : 'Best on the island'}
+                </p>
+              </>
+            )}
           </button>
         </div>
       </div>
