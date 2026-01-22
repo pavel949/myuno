@@ -11778,6 +11778,14 @@ export type Database = {
         Returns: boolean
       }
       update_realtime_stats: { Args: never; Returns: undefined }
+      user_has_org_property_access: {
+        Args: { org_uuid: string }
+        Returns: boolean
+      }
+      user_has_property_delegate_access: {
+        Args: { property_uuid: string }
+        Returns: boolean
+      }
       verify_user_pin: {
         Args: { p_pin: string; p_user_id: string }
         Returns: boolean
