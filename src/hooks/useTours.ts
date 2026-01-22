@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { CACHE_PROFILES } from '@/lib/queryConfig';
 
 interface ItineraryItem {
   time: string;
@@ -91,8 +92,7 @@ export const useTours = (options: UseToursOptions = {}) => {
   const { data, isLoading, refetch } = useQuery({
     queryKey,
     queryFn: () => fetchTours(options),
-    staleTime: 60 * 1000, // 1 minute cache
-    gcTime: 5 * 60 * 1000, // 5 minutes garbage collection
+    ...CACHE_PROFILES.SEMI_STATIC,
   });
 
   return { tours: data || [], isLoading, refetch };
@@ -103,8 +103,7 @@ export const useTour = (tourId: string | undefined) => {
     queryKey: ['tour', tourId],
     queryFn: () => fetchTourById(tourId!),
     enabled: !!tourId,
-    staleTime: 60 * 1000,
-    gcTime: 5 * 60 * 1000,
+    ...CACHE_PROFILES.SEMI_STATIC,
   });
 
   return { tour: data, isLoading, error };

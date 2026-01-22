@@ -129,6 +129,11 @@ export const queryKeys = {
     list: (filters?: Record<string, unknown>) => ['salons', filters] as const,
     detail: (id: string) => ['salon', id] as const,
   },
+  flowerShops: {
+    all: ['flower-shops'] as const,
+    list: (filters?: Record<string, unknown>) => ['flower-shops', filters] as const,
+    detail: (id: string) => ['flower-shop', id] as const,
+  },
   
   // Admin
   admin: {

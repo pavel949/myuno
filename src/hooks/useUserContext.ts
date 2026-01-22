@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { CACHE_PROFILES } from '@/lib/queryConfig';
 
 export interface Org {
   id: string;
@@ -75,7 +76,7 @@ export function useUserContext() {
       return data as UserActiveContext;
     },
     enabled: !!user?.id,
-    staleTime: 60000, // Cache for 1 minute
+    ...CACHE_PROFILES.DYNAMIC,
   });
 
   // Fetch user's org memberships
@@ -97,7 +98,7 @@ export function useUserContext() {
       return (data || []) as OrgMember[];
     },
     enabled: !!user?.id,
-    staleTime: 60000, // Cache for 1 minute
+    ...CACHE_PROFILES.DYNAMIC,
   });
 
   // Fetch user roles from user_roles table (legacy support)
@@ -116,7 +117,7 @@ export function useUserContext() {
       return (data || []).map(r => String(r.role));
     },
     enabled: !!user?.id,
-    staleTime: 60000, // Cache for 1 minute
+    ...CACHE_PROFILES.DYNAMIC,
   });
 
   // Switch active role and optionally org

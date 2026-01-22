@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import { CACHE_PROFILES } from '@/lib/queryConfig';
 
 export interface TodayEvent {
   id: string;
@@ -45,7 +46,7 @@ export function useTodayEvents() {
       if (error) throw error;
       return data || [];
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    ...CACHE_PROFILES.STATIC,
   });
 }
 
@@ -178,6 +179,6 @@ export function useSmartRecommendations() {
 
       return recommendations;
     },
-    staleTime: 10 * 60 * 1000, // 10 minutes
+    ...CACHE_PROFILES.SEMI_STATIC,
   });
 }

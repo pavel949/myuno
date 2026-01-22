@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { CACHE_PROFILES } from '@/lib/queryConfig';
 
 export interface WeatherData {
   temp: number;
@@ -32,10 +33,7 @@ export function useWeather() {
   return useQuery({
     queryKey: ['weather', 'phuket'],
     queryFn: fetchWeather,
-    staleTime: 30 * 60 * 1000, // 30 minutes
-    gcTime: 60 * 60 * 1000, // 1 hour
-    refetchOnWindowFocus: false,
-    retry: 2,
+    ...CACHE_PROFILES.WEATHER,
     placeholderData: fallbackWeather,
   });
 }
