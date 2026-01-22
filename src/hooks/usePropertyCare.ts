@@ -148,6 +148,21 @@ export interface OwnerProperty {
   is_for_sale?: boolean;
   sale_price?: number;
   sale_currency?: string;
+  // Moderation/Approval fields
+  approval_status?: 'draft' | 'pending' | 'approved' | 'rejected';
+  approved_at?: string;
+  approved_by?: string;
+  rejection_reason?: string;
+  reviewed_at?: string;
+  reviewed_by?: string;
+  instant_booking_enabled_at?: string;
+  // iCal sync
+  ical_token?: string;
+  // Payment settings
+  payment_model?: 'cash' | 'prepay' | 'full_prepay';
+  prepay_percent?: number;
+  balance_due_days?: number;
+  security_deposit_required?: boolean;
 }
 
 export interface PropertyInspection {
