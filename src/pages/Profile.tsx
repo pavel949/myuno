@@ -80,7 +80,11 @@ export default function Profile() {
   ];
 
   const adminItems = [
+    { icon: Shield, label: language === 'ru' ? 'Панель управления' : 'Admin Dashboard', onClick: () => navigate('/admin') },
     { icon: ShieldCheck, label: language === 'ru' ? 'Заявки партнёров' : 'Partner Applications', onClick: () => navigate('/admin/partner-applications') },
+    { icon: Settings, label: language === 'ru' ? 'Пользователи' : 'User Analytics', onClick: () => navigate('/admin/users') },
+    { icon: CreditCard, label: language === 'ru' ? 'Финансы' : 'Finance', onClick: () => navigate('/admin/finance') },
+    { icon: FileText, label: language === 'ru' ? 'Модерация контента' : 'Content Moderation', onClick: () => navigate('/admin/moderation') },
   ];
 
   const infoItems = [
