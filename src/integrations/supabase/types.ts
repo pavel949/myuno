@@ -3565,10 +3565,12 @@ export type Database = {
           is_active: boolean | null
           is_new: boolean | null
           is_popular: boolean | null
+          markup_amount: number | null
           name_en: string
           name_ru: string
           original_price: number | null
           price: number
+          pricing_type: string | null
           rating: number | null
           review_count: number | null
           sort_order: number | null
@@ -3594,10 +3596,12 @@ export type Database = {
           is_active?: boolean | null
           is_new?: boolean | null
           is_popular?: boolean | null
+          markup_amount?: number | null
           name_en: string
           name_ru: string
           original_price?: number | null
           price: number
+          pricing_type?: string | null
           rating?: number | null
           review_count?: number | null
           sort_order?: number | null
@@ -3623,10 +3627,12 @@ export type Database = {
           is_active?: boolean | null
           is_new?: boolean | null
           is_popular?: boolean | null
+          markup_amount?: number | null
           name_en?: string
           name_ru?: string
           original_price?: number | null
           price?: number
+          pricing_type?: string | null
           rating?: number | null
           review_count?: number | null
           sort_order?: number | null
