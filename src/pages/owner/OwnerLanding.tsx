@@ -98,10 +98,10 @@ const collaborationOptions = [
     badgeRu: 'Бесплатные инструменты',
     titleEn: 'Self Management',
     titleRu: 'Самостоятельное управление',
-    descEn: 'Free access to all tools. Competitive platform fee per booking.',
-    descRu: 'Бесплатный доступ к инструментам. Конкурентная комиссия за бронирование.',
-    priceEn: 'Low fee',
-    priceRu: 'Низкая комиссия',
+    descEn: 'Free tools. 10% platform fee on bookings via myUNO.',
+    descRu: 'Бесплатные инструменты. 10% с бронирований через myUNO.',
+    priceEn: '10%',
+    priceRu: '10%',
     features: ['dashboard', 'calendar', 'reports']
   },
   {
@@ -110,10 +110,10 @@ const collaborationOptions = [
     badgeRu: 'Популярно',
     titleEn: 'myUNO Full Management',
     titleRu: 'Полное управление myUNO',
-    descEn: 'We handle everything. You receive the majority after expenses.',
-    descRu: 'Мы берём всё на себя. Вы получаете большую часть дохода после расходов.',
-    priceEn: 'Best value',
-    priceRu: 'Лучшие условия',
+    descEn: 'We handle everything. You keep 70% after expenses.',
+    descRu: 'Мы берём всё на себя. Вы получаете 70% после расходов.',
+    priceEn: '70/30',
+    priceRu: '70/30',
     features: ['everything', 'cleaning', 'guests', 'maintenance', 'pricing']
   },
   {
