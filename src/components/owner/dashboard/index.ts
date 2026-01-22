@@ -4,3 +4,4 @@ export { PropertiesBlock } from './PropertiesBlock';
 export { RisksBlock } from './RisksBlock';
 export { ActivityBlock } from './ActivityBlock';
 export { BookingsSection } from './BookingsSection';
+export { MessagesBlock } from './MessagesBlock';
