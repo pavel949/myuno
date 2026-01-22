@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef, memo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -100,12 +100,8 @@ export function TranslatableInput({
     setIsEditingTranslation(false);
   };
 
-  // Reset auto-translated flag when source changes
-  useEffect(() => {
-    if (isAutoTranslated && translatedValue) {
-      // Keep the auto-translated flag
-    }
-  }, [value, isAutoTranslated, translatedValue]);
+  // Track if the auto-translated content is stale (source changed after translation)
+  // This is intentionally a no-op effect kept for potential future enhancement
 
   const InputComponent = multiline ? Textarea : Input;
 

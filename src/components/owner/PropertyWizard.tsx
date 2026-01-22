@@ -1,4 +1,4 @@
-import { useState, ReactNode } from 'react';
+import { useState, ReactNode, useCallback, memo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -13,7 +13,7 @@ interface PropertyWizardProps {
   validateStep?: (stepId: string) => boolean;
 }
 
-export function PropertyWizard({ 
+function PropertyWizardInner({ 
   children, 
   onSubmit, 
   isSubmitting,
@@ -22,6 +22,7 @@ export function PropertyWizard({
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const [currentStep, setCurrentStep] = useState(0);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const steps = propertyWizardSteps;
   const currentStepData = steps[currentStep];
@@ -29,26 +30,34 @@ export function PropertyWizard({
   const isLastStep = currentStep === steps.length - 1;
   const isFirstStep = currentStep === 0;
 
-  const handleNext = async () => {
+  const handleNext = useCallback(async () => {
+    if (isNavigating) return; // Prevent double clicks
+    
     if (validateStep && !validateStep(currentStepData.id)) {
       return;
     }
     
     if (isLastStep) {
-      await onSubmit();
+      setIsNavigating(true);
+      try {
+        await onSubmit();
+      } finally {
+        setIsNavigating(false);
+      }
     } else {
       setCurrentStep(prev => Math.min(prev + 1, steps.length - 1));
     }
-  };
+  }, [validateStep, currentStepData.id, isLastStep, onSubmit, steps.length, isNavigating]);
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     setCurrentStep(prev => Math.max(prev - 1, 0));
-  };
+  }, []);
 
-  const handleStepClick = (index: number) => {
+  const handleStepClick = useCallback((index: number) => {
     // Allow going back to any previous step
     if (index < currentStep) {
       setCurrentStep(index);
+      return;
     }
     // Allow going forward only if validation passes
     if (index > currentStep && validateStep) {
@@ -62,7 +71,7 @@ export function PropertyWizard({
     } else if (index > currentStep) {
       setCurrentStep(index);
     }
-  };
+  }, [currentStep, validateStep, steps]);
 
   return (
     <div className="space-y-6">
@@ -168,3 +177,5 @@ export function PropertyWizard({
     </div>
   );
 }
+
+export const PropertyWizard = memo(PropertyWizardInner);
