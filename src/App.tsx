@@ -13,8 +13,11 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AnimatedRoutes } from "@/components/layout/AnimatedRoutes";
 import { UnifiedChatFAB } from "@/components/chat/UnifiedChatFAB";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { defaultQueryClientOptions } from "@/lib/queryConfig";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: defaultQueryClientOptions,
+});
 
 const App = () => (
   <ErrorBoundary>
