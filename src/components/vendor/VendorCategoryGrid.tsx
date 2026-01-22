@@ -34,7 +34,7 @@ interface CategoryItem {
 const categories: CategoryItem[] = [
   { id: '1', slug: 'restaurants', icon: Utensils, title: 'Restaurants', titleRu: 'Рестораны', color: 'text-warning' },
   { id: '2', slug: 'transport', icon: Car, title: 'Transport', titleRu: 'Транспорт', color: 'text-info' },
-  { id: '3', slug: 'wellness', icon: Sparkles, title: 'Wellness', titleRu: 'Красота', color: 'text-pink-500' },
+  
   { id: '4', slug: 'health', icon: Stethoscope, title: 'Health', titleRu: 'Здоровье', color: 'text-success' },
   { id: '5', slug: 'education', icon: GraduationCap, title: 'Education', titleRu: 'Образование', color: 'text-purple-500' },
   { id: '6', slug: 'cleaning', icon: Brush, title: 'Cleaning', titleRu: 'Клининг', color: 'text-cyan-500' },

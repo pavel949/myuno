@@ -148,8 +148,7 @@ const MarketCategoryPage = lazy(() => import('@/pages/market/MarketCategoryPage'
 const StoreDetail = lazy(() => import('@/pages/market/StoreDetail'));
 const MarketCheckout = lazy(() => import('@/pages/market/MarketCheckout'));
 
-// Wellness Mini-App
-const WellnessIndex = lazy(() => import('@/pages/wellness/WellnessIndex'));
+// Other pages
 
 // Other pages
 const Favorites = lazy(() => import('@/pages/Favorites'));
@@ -487,8 +486,6 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/pets/:id/booking" element={<LazyPage><PetServiceBooking /></LazyPage>} />
         <Route path="/pharmacy/:id" element={<LazyPage><PharmacyDetail /></LazyPage>} />
         
-        {/* Wellness Mini-App Routes */}
-        <Route path="/wellness" element={<LazyPage><WellnessIndex /></LazyPage>} />
         
         {/* Yachts Mini-App Routes */}
         <Route path="/yachts" element={<LazyPage><YachtsIndex /></LazyPage>} />

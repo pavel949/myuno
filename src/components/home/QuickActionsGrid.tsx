@@ -37,17 +37,6 @@ interface QuickAction {
 
 const quickActions: QuickAction[] = [
   {
-    id: 'wellness',
-    icon: Heart,
-    label: 'Wellness',
-    labelRu: 'Гармония',
-    path: '/wellness',
-    gradient: 'from-purple-400 to-pink-500',
-    badge: 'New',
-    badgeRu: 'Новое',
-    isPopular: true,
-  },
-  {
     id: 'yachts',
     icon: Anchor,
     label: 'Yachts & Boats',
