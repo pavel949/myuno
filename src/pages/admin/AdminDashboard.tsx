@@ -68,7 +68,7 @@ export default function AdminDashboard() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <AdminAlertPanel pendingBookings={data?.pendingBookings || 0} pendingLeads={0} openTickets={0} pendingModeration={data?.pendingProviders || 0} loading={isLoading} />
+          <AdminAlertPanel pendingBookings={data?.pendingBookings || 0} pendingLeads={0} openTickets={0} pendingModeration={data?.pendingContent || 0} loading={isLoading} />
           <AdminQuickActions />
           <div className="grid grid-cols-2 gap-2">
             <AdminKPICard title={isRussian ? 'Яхты' : 'Yachts'} value={data?.yachts || 0} icon={Ship} iconColor="text-info" href="/admin/yachts" loading={isLoading} />
