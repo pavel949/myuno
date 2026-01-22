@@ -11720,6 +11720,7 @@ export type Database = {
         Args: { review_id_param: string }
         Returns: undefined
       }
+      is_admin_or_uno_team: { Args: never; Returns: boolean }
       is_org_owner: { Args: { check_org_id: string }; Returns: boolean }
       is_verified_purchase: {
         Args: { p_item_id: string; p_item_type: string; p_user_id: string }
