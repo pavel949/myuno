@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Bell, CheckCheck, Settings, BellOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -9,8 +9,6 @@ import { ContentSkeleton } from '@/components/ui/ContentSkeleton';
 import { NotificationFilters, NotificationFilterType } from './NotificationFilters';
 import { NotificationItemData } from './NotificationItem';
 import { VirtualNotificationList } from './VirtualNotificationList';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
 
 interface NotificationInboxProps {
   notifications: NotificationItemData[];
@@ -19,9 +17,13 @@ interface NotificationInboxProps {
   onMarkRead: (id: string) => void;
   onMarkAllRead: () => void;
   onDelete: (id: string) => void;
-  onRefetch?: () => void;
 }
 
+/**
+ * NotificationInbox component displays notifications with filtering.
+ * Note: Real-time subscription is handled by useNotificationActions hook,
+ * so we don't duplicate it here.
+ */
 export function NotificationInbox({
   notifications,
   isLoading,
@@ -29,39 +31,12 @@ export function NotificationInbox({
   onMarkRead,
   onMarkAllRead,
   onDelete,
-  onRefetch,
 }: NotificationInboxProps) {
   const { language } = useLanguage();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const isRu = language === 'ru';
 
   const [activeFilter, setActiveFilter] = useState<NotificationFilterType>('all');
-
-  // Real-time subscription
-  useEffect(() => {
-    if (!user?.id) return;
-
-    const channel = supabase
-      .channel('notifications-realtime')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${user.id}`,
-        },
-        () => {
-          onRefetch?.();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user?.id, onRefetch]);
 
   // Calculate filter counts
   const counts = useMemo(() => ({

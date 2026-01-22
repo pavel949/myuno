@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { motion } from 'framer-motion';
 
 interface AnimatedListProps {
@@ -69,6 +69,7 @@ export const AnimatedList: React.FC<AnimatedListProps> = ({
     </motion.div>
   );
 };
+AnimatedList.displayName = 'AnimatedList';
 
 export const AnimatedItem: React.FC<AnimatedItemProps> = ({ 
   children, 
@@ -83,6 +84,7 @@ export const AnimatedItem: React.FC<AnimatedItemProps> = ({
     </motion.div>
   );
 };
+AnimatedItem.displayName = 'AnimatedItem';
 
 // Grid variant for card grids
 export const AnimatedGrid: React.FC<AnimatedListProps> = ({ 
@@ -91,7 +93,7 @@ export const AnimatedGrid: React.FC<AnimatedListProps> = ({
   staggerDelay = 0.06,
 }) => {
   const gridVariants = {
-    hidden: { opacity: 1 }, // Changed from 0 to 1 to prevent flash
+    hidden: { opacity: 1 },
     visible: {
       opacity: 1,
       transition: {
@@ -112,6 +114,7 @@ export const AnimatedGrid: React.FC<AnimatedListProps> = ({
     </motion.div>
   );
 };
+AnimatedGrid.displayName = 'AnimatedGrid';
 
 // Card variant with scale effect
 const cardVariants = {
@@ -139,7 +142,7 @@ export const AnimatedCard: React.FC<AnimatedItemProps> = ({
   return (
     <motion.div
       variants={cardVariants}
-      initial="visible" // Start visible to prevent flash
+      initial="visible"
       animate="visible"
       className={className}
     >
@@ -147,16 +150,16 @@ export const AnimatedCard: React.FC<AnimatedItemProps> = ({
     </motion.div>
   );
 };
+AnimatedCard.displayName = 'AnimatedCard';
 
-// Fade in from different directions
-export const FadeInUp: React.FC<AnimatedItemProps & { delay?: number; 'data-tour'?: string }> = ({ 
-  children, 
-  className = '',
-  delay = 0,
-  ...props
-}) => {
+// Fade in from different directions with forwardRef support
+export const FadeInUp = forwardRef<
+  HTMLDivElement, 
+  AnimatedItemProps & { delay?: number; 'data-tour'?: string }
+>(({ children, className = '', delay = 0, ...props }, ref) => {
   return (
     <motion.div
+      ref={ref}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ 
@@ -170,15 +173,16 @@ export const FadeInUp: React.FC<AnimatedItemProps & { delay?: number; 'data-tour
       {children}
     </motion.div>
   );
-};
+});
+FadeInUp.displayName = 'FadeInUp';
 
-export const FadeInScale: React.FC<AnimatedItemProps & { delay?: number }> = ({ 
-  children, 
-  className = '',
-  delay = 0,
-}) => {
+export const FadeInScale = forwardRef<
+  HTMLDivElement,
+  AnimatedItemProps & { delay?: number }
+>(({ children, className = '', delay = 0 }, ref) => {
   return (
     <motion.div
+      ref={ref}
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ 
@@ -191,4 +195,5 @@ export const FadeInScale: React.FC<AnimatedItemProps & { delay?: number }> = ({
       {children}
     </motion.div>
   );
-};
+});
+FadeInScale.displayName = 'FadeInScale';

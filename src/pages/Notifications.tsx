@@ -89,7 +89,6 @@ export default function Notifications() {
           onMarkRead={(id) => markAsRead(id)}
           onMarkAllRead={markAllAsRead}
           onDelete={deleteNotification}
-          onRefetch={refresh}
         />
       </PageContainer>
     </AppLayout>
