@@ -136,6 +136,7 @@ const navigationGroups: NavGroup[] = [
       { title: 'Consultations', titleRu: 'Консультации', path: '/admin/consultations', icon: MessageSquare },
       { title: 'Tickets', titleRu: 'Тикеты', path: '/admin/tickets', icon: ClipboardList },
       { title: 'Moderation', titleRu: 'Модерация', path: '/admin/moderation', icon: FileText },
+      { title: 'Quick Listings', titleRu: 'Быстрые листинги', path: '/admin/quick-listings', icon: ClipboardList },
       { title: 'Operations Hub', titleRu: 'Центр операций', path: '/admin/operations', icon: Building2 },
     ],
   },
@@ -145,6 +146,7 @@ const navigationGroups: NavGroup[] = [
     defaultOpen: false,
     items: [
       { title: 'Overview', titleRu: 'Обзор', path: '/admin/analytics', icon: BarChart3 },
+      { title: 'User Analytics', titleRu: 'Пользователи', path: '/admin/user-analytics', icon: Users },
       { title: 'Acquisition', titleRu: 'Привлечение', path: '/admin/acquisition-metrics', icon: Flag },
       { title: 'Pitch Deck', titleRu: 'Презентация', path: '/admin/pitch-deck', icon: Presentation },
     ],
