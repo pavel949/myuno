@@ -97,32 +97,36 @@ export default function Profile() {
     <AppLayout>
       <PageContainer>
         {/* Profile header */}
-        <SectionCard className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center overflow-hidden">
-            {profile?.avatar_url ? (
-              <img 
-                src={profile.avatar_url} 
-                alt="Avatar" 
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <span className="text-2xl font-bold text-primary-foreground">
-                {profile?.full_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
-              </span>
-            )}
+        <SectionCard className="space-y-3">
+          {/* Profile header row */}
+          <div className="flex items-center gap-3">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center overflow-hidden shrink-0">
+              {profile?.avatar_url ? (
+                <img 
+                  src={profile.avatar_url} 
+                  alt="Avatar" 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-xl sm:text-2xl font-bold text-primary-foreground">
+                  {profile?.full_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
+                </span>
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-base sm:text-lg font-semibold truncate">
+                {profile?.full_name || user.email}
+              </h2>
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                {profile?.full_name ? user.email : (language === 'ru' ? 'Аккаунт туриста' : 'Tourist Account')}
+              </p>
+            </div>
+            <PremiumButton variant="outline" size="sm" onClick={() => navigate('/profile/edit')} className="shrink-0">
+              {t('action.edit')}
+            </PremiumButton>
           </div>
-          <div className="flex-1 min-w-0">
-            <h2 className="text-lg font-semibold truncate">
-              {profile?.full_name || user.email}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {profile?.full_name ? user.email : (language === 'ru' ? 'Аккаунт туриста' : 'Tourist Account')}
-            </p>
-            <EmailVerificationBadge variant="inline" />
-          </div>
-          <PremiumButton variant="outline" size="sm" onClick={() => navigate('/profile/edit')}>
-            {t('action.edit')}
-          </PremiumButton>
+          {/* Verification badge - separate row */}
+          <EmailVerificationBadge variant="inline" />
         </SectionCard>
 
         {/* Role Switcher */}
