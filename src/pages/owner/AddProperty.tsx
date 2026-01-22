@@ -240,6 +240,40 @@ export default function AddProperty() {
       ownership_verification_status: isOnBehalf ? 'pending' : 'verified',
     });
 
+    // Save documents to property_documents table for profile access
+    if (property?.id) {
+      const { supabase } = await import('@/integrations/supabase/client');
+      const userId = (await supabase.auth.getUser()).data.user?.id;
+
+      // Save management document
+      if (ownershipData.management_document_url) {
+        await supabase.from('property_documents').insert({
+          property_id: property.id,
+          document_type: 'power_of_attorney',
+          title: 'Management Agreement / POA',
+          title_ru: 'Договор управления / Доверенность',
+          file_url: ownershipData.management_document_url,
+          file_name: ownershipData.management_document_name || 'management-document',
+          is_sensitive: true,
+          uploaded_by: userId,
+        });
+      }
+
+      // Save ownership document
+      if (ownershipData.ownership_document_url) {
+        await supabase.from('property_documents').insert({
+          property_id: property.id,
+          document_type: 'ownership_title',
+          title: 'Ownership Document',
+          title_ru: 'Документ о праве собственности',
+          file_url: ownershipData.ownership_document_url,
+          file_name: ownershipData.ownership_document_name || 'ownership-document',
+          is_sensitive: true,
+          uploaded_by: userId,
+        });
+      }
+    }
+
     // Send ownership invite if needed
     if (isOnBehalf && ownershipData.send_invite_immediately && property?.id) {
       try {
@@ -877,15 +911,6 @@ export default function AddProperty() {
           </span>
         </div>
       )}
-      {/* Live Preview - sticky on desktop, collapsible on mobile */}
-      <div className="lg:hidden mb-4">
-        <LivePropertyPreview 
-          data={previewData}
-          collapsed={isPreviewCollapsed}
-          onToggle={() => setIsPreviewCollapsed(!isPreviewCollapsed)}
-        />
-      </div>
-
       <div className="lg:grid lg:grid-cols-[1fr,320px] lg:gap-6">
         <PropertyWizard
           onSubmit={handleSubmit}
@@ -901,6 +926,15 @@ export default function AddProperty() {
             <LivePropertyPreview data={previewData} />
           </div>
         </div>
+      </div>
+
+      {/* Mobile preview - moved below the form */}
+      <div className="lg:hidden mt-6">
+        <LivePropertyPreview 
+          data={previewData}
+          collapsed={isPreviewCollapsed}
+          onToggle={() => setIsPreviewCollapsed(!isPreviewCollapsed)}
+        />
       </div>
     </PageContainer>
   );
