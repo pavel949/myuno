@@ -129,7 +129,7 @@ export default function Discover() {
 
   return (
     <AppLayout title={t('nav.discover')}>
-      <PullToRefresh onRefresh={handleRefresh} className="h-[calc(100vh-8rem)]">
+      <PullToRefresh onRefresh={handleRefresh} className="min-h-0 flex-1 h-[calc(100vh-8rem)]">
         <div className="p-4 space-y-4" key={refreshKey}>
           {/* Search & Filter Bar */}
           <div className="flex gap-2">

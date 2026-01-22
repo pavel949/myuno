@@ -93,7 +93,7 @@ export default function ViewHistory() {
 
   return (
     <AppLayout>
-      <PullToRefresh onRefresh={handleRefresh} className="h-[calc(100vh-8rem)]">
+      <PullToRefresh onRefresh={handleRefresh} className="min-h-0 flex-1 h-[calc(100vh-8rem)]">
         <PageContainer>
           <PageHeader
             title={language === 'ru' ? 'История просмотров' : 'View History'}
