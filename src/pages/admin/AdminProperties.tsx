@@ -93,7 +93,14 @@ export default function AdminProperties() {
   const [filterProviderId, setFilterProviderId] = useState<string>('');
   const { properties, isLoading: propertiesLoading, createProperty, updateProperty, deleteProperty } = useAdminProperties(filterProviderId || undefined);
   
-  const [isDialogOpen, setIsDialogOpen] = useState(searchParams.get('action') === 'new');
+  // Redirect to unified property creation wizard instead of opening dialog
+  React.useEffect(() => {
+    if (searchParams.get('action') === 'new') {
+      navigate('/owner/properties/new?context=admin&return=/admin/properties');
+    }
+  }, [searchParams, navigate]);
+  
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProperty, setEditingProperty] = useState<VendorProperty | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
