@@ -351,7 +351,7 @@ export default function AdminAnalytics() {
                         #{index + 1}
                       </span>
                       <div>
-                        <p className="font-medium">{provider.business_name}</p>
+                        <p className="font-medium">{provider.name}</p>
                         <p className="text-xs text-muted-foreground capitalize">
                           {provider.business_category}
                         </p>

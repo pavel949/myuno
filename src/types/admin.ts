@@ -6,8 +6,7 @@
 export interface Provider {
   id: string;
   user_id?: string;
-  name_en: string;
-  name_ru: string;
+  name: string; // Single name field in DB (not localized)
   business_category: string;
   email?: string;
   phone?: string;
@@ -21,8 +20,12 @@ export interface Provider {
   rating: number | null;
   review_count: number | null;
   pending_payout: number;
+  total_earnings?: number;
   commission_rate?: number;
   website?: string;
+  trust_score?: number;
+  lat?: number;
+  lng?: number;
   created_at: string;
   updated_at: string;
 }
@@ -69,8 +72,7 @@ export interface Category {
 
 export interface TopProvider {
   id: string;
-  name_en: string;
-  name_ru: string;
+  name: string; // Single name field in DB
   business_category: string;
   rating: number | null;
   review_count: number | null;
