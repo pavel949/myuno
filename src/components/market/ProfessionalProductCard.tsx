@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { Plus, Minus, Star, Heart, ShoppingBag, Check } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { MarketplaceProduct } from '@/types/marketplace';
@@ -15,14 +15,14 @@ interface ProfessionalProductCardProps {
   variant?: 'grid' | 'horizontal' | 'featured';
 }
 
-export const ProfessionalProductCard: React.FC<ProfessionalProductCardProps> = ({
+export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalProductCardProps>(({
   product,
   quantity = 0,
   onAdd,
   onRemove,
   onClick,
   variant = 'grid',
-}) => {
+}, ref) => {
   const { language } = useLanguage();
 
   const name = language === 'ru' ? product.name_ru : product.name_en;
@@ -346,4 +346,6 @@ export const ProfessionalProductCard: React.FC<ProfessionalProductCardProps> = (
       </div>
     </div>
   );
-};
+});
+
+ProfessionalProductCard.displayName = 'ProfessionalProductCard';
