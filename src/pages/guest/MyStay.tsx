@@ -4,8 +4,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGuestServiceOrders, CreateServiceOrderInput } from '@/hooks/useServiceOrders';
 import { useGuestPropertyBookings } from '@/hooks/usePropertyBookings';
-import { PageContainer } from '@/components/uno/PageContainer';
-import { PageHeader } from '@/components/uno/PageHeader';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -56,10 +54,10 @@ export default function MyStay() {
   const currentBooking = activeBookings[0];
   const isLoading = bookingsLoading || ordersLoading;
 
-  // Auth gate
+  // Auth gate - now handled by GuestLayout, but keep for safety
   if (!user) {
     return (
-      <PageContainer>
+      <div className="p-4">
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
           <div className="p-4 rounded-full bg-muted">
             <User className="w-12 h-12 text-muted-foreground" />
@@ -71,7 +69,7 @@ export default function MyStay() {
             {isRu ? 'Войти' : 'Login'}
           </Button>
         </div>
-      </PageContainer>
+      </div>
     );
   }
 
@@ -119,8 +117,7 @@ export default function MyStay() {
     : null;
 
   return (
-    <PageContainer className="space-y-3">
-      <PageHeader title={isRu ? 'Мой визит' : 'My Stay'} showBack />
+    <div className="p-4 space-y-3">
 
       {/* Row 1: Stay + Orders (side by side on larger screens) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -219,6 +216,6 @@ export default function MyStay() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </PageContainer>
+    </div>
   );
 }
