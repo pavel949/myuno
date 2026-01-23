@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { format } from 'date-fns';
-import { Anchor, Users, Clock, Loader2 } from 'lucide-react';
+import { Anchor, Users, Clock, Loader2, AlertCircle } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBooking } from '@/hooks/useBooking';
 import { useYacht } from '@/hooks/useYachts';
+import { useAvailabilityCheck } from '@/hooks/useAvailabilityCheck';
 import { supabase } from '@/integrations/supabase/client';
 import { BookingDateTimeSelect } from '@/components/booking/BookingDateTimeSelect';
 import { BookingParticipants } from '@/components/booking/BookingParticipants';
@@ -18,6 +19,7 @@ import { BookingBottomBar } from '@/components/booking/BookingBottomBar';
 import { BookingConfirmation } from '@/components/booking/BookingConfirmation';
 import { BackButton } from '@/components/uno/BackButton';
 import { YachtExperienceSelect, YACHT_EXPERIENCES } from '@/components/yachts/YachtExperienceSelect';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function YachtBooking() {
   const { id } = useParams();
@@ -27,6 +29,9 @@ export default function YachtBooking() {
   const { user, isLoading: authLoading } = useAuth();
   const { createBooking, isSubmitting } = useBooking();
   const { yacht, isLoading } = useYacht(id || '');
+  const { checkYachtAvailability, isChecking, lastResult } = useAvailabilityCheck();
+
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
 
   // Auth redirect
   if (!authLoading && !user) {
@@ -97,10 +102,28 @@ export default function YachtBooking() {
     : (yacht.location_name || '');
 
   const handleSubmit = async () => {
-    if (!date || !time || !contactData.name || !contactData.phone) return;
+    if (!date || !time || !contactData.name || !contactData.phone || !yacht) return;
 
+    // Check availability before booking
     const scheduledAt = new Date(date);
     const [hours, minutes] = time.split(':').map(Number);
+    scheduledAt.setHours(hours, minutes);
+    
+    const endAt = new Date(scheduledAt);
+    endAt.setHours(endAt.getHours() + (isHalfDay ? 4 : 8));
+
+    const availability = await checkYachtAvailability(yacht.id, scheduledAt, endAt);
+    
+    if (!availability.available) {
+      setAvailabilityError(
+        language === 'ru' 
+          ? 'Яхта недоступна на выбранную дату. Пожалуйста, выберите другое время.'
+          : 'Yacht is not available for the selected date. Please choose another time.'
+      );
+      return;
+    }
+    
+    setAvailabilityError(null);
     scheduledAt.setHours(hours, minutes);
 
     // Build experiences list for notes
@@ -247,6 +270,14 @@ export default function YachtBooking() {
             </div>
           </div>
         </div>
+
+        {/* Availability Warning */}
+        {availabilityError && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{availabilityError}</AlertDescription>
+          </Alert>
+        )}
 
         <div className="space-y-6">
           {/* Date & Time */}

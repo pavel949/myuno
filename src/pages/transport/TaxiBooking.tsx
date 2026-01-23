@@ -245,7 +245,25 @@ export default function TaxiBooking() {
       },
     });
 
-    if (result.success) {
+    if (result.success && result.booking_id) {
+      // Save transport-specific details to order_item_transport_details
+      const { data: orderItems } = await supabase
+        .from('order_items')
+        .select('id')
+        .eq('order_id', result.booking_id)
+        .limit(1);
+
+      if (orderItems && orderItems.length > 0) {
+        await supabase
+          .from('order_item_transport_details')
+          .insert({
+            order_item_id: orderItems[0].id,
+            vehicle_type: formData.vehicleType,
+            passenger_count: formData.passengers,
+            is_round_trip: false,
+          });
+      }
+
       setIsSuccess(true);
     }
   };

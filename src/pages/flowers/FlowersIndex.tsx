@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Flower, Heart, SlidersHorizontal, ShoppingCart } from 'lucide-react';
+import { Flower, Heart, SlidersHorizontal, ShoppingCart, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { MiniAppLayout, ItemCard, type MiniAppCategory } from '@/components/mini
 import { UniversalFilter, ActiveFilters, flowerFilterConfig, FilterValues } from '@/components/filters';
 import { toast } from 'sonner';
 import { matchesFilter, matchesSingleFilter } from '@/lib/filterUtils';
+import { useBouquets, Bouquet } from '@/hooks/useBouquets';
 
 const FLOWER_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -19,130 +20,75 @@ const FLOWER_CATEGORIES: MiniAppCategory[] = [
   { id: 'premium', labelEn: 'Premium', labelRu: 'Премиум', icon: '✨' },
 ];
 
-export const bouquets = [
+// Fallback data when database is empty
+const FALLBACK_BOUQUETS = [
   {
     id: 'bouquet-1',
-    name: 'Romantic Red Roses',
-    nameRu: 'Романтические красные розы',
+    name_en: 'Romantic Red Roses',
+    name_ru: 'Романтические красные розы',
     image: 'https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?w=600',
     price: 1800,
-    originalPrice: 2200,
-    rating: 4.9,
-    reviewCount: 156,
     category: 'roses',
-    tags: ['Bestseller', 'Romantic'],
-    tagsRu: ['Хит продаж', 'Романтика'],
-    flowersCount: 25,
-    description: 'A stunning arrangement of 25 premium red roses.',
-    descriptionRu: 'Великолепная композиция из 25 премиальных красных роз.',
+    size: 'medium',
+    is_popular: true,
+    shop_id: '',
   },
   {
     id: 'bouquet-2',
-    name: 'Gentle Pink Peonies',
-    nameRu: 'Нежные розовые пионы',
+    name_en: 'Gentle Pink Peonies',
+    name_ru: 'Нежные розовые пионы',
     image: 'https://images.unsplash.com/photo-1562690868-60bbe7293e94?w=600',
     price: 2500,
-    rating: 4.8,
-    reviewCount: 98,
     category: 'peonies',
-    tags: ['Seasonal', 'Premium'],
-    tagsRu: ['Сезонные', 'Премиум'],
-    flowersCount: 15,
-    description: 'Luxurious bouquet of 15 fresh pink peonies.',
-    descriptionRu: 'Роскошный букет из 15 свежих розовых пионов.',
+    size: 'medium',
+    is_popular: true,
+    shop_id: '',
   },
   {
     id: 'bouquet-3',
-    name: 'Spring Mix',
-    nameRu: 'Весенний микс',
+    name_en: 'Spring Mix',
+    name_ru: 'Весенний микс',
     image: 'https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=600',
     price: 1200,
-    rating: 4.7,
-    reviewCount: 234,
     category: 'mixed',
-    tags: ['Popular', 'Colorful'],
-    tagsRu: ['Популярный', 'Яркий'],
-    flowersCount: 30,
-    description: 'Vibrant mix of seasonal spring flowers.',
-    descriptionRu: 'Яркий микс сезонных весенних цветов.',
+    size: 'large',
+    is_popular: false,
+    shop_id: '',
   },
   {
     id: 'bouquet-4',
-    name: 'White Orchid Elegance',
-    nameRu: 'Белые орхидеи элегант',
+    name_en: 'White Orchid Elegance',
+    name_ru: 'Белые орхидеи элегант',
     image: 'https://images.unsplash.com/photo-1563241527-3004b7be0ffd?w=600',
     price: 3500,
-    rating: 4.9,
-    reviewCount: 67,
     category: 'orchids',
-    tags: ['Premium', 'Exotic'],
-    tagsRu: ['Премиум', 'Экзотика'],
-    flowersCount: 7,
-    description: 'Elegant arrangement of 7 white phalaenopsis orchids.',
-    descriptionRu: 'Элегантная композиция из 7 белых орхидей.',
+    size: 'medium',
+    is_popular: true,
+    shop_id: '',
   },
   {
     id: 'bouquet-5',
-    name: 'Sunny Tulips',
-    nameRu: 'Солнечные тюльпаны',
+    name_en: 'Sunny Tulips',
+    name_ru: 'Солнечные тюльпаны',
     image: 'https://images.unsplash.com/photo-1520763185298-1b434c919102?w=600',
     price: 950,
-    rating: 4.6,
-    reviewCount: 189,
     category: 'tulips',
-    tags: ['Budget', 'Fresh'],
-    tagsRu: ['Бюджетный', 'Свежие'],
-    flowersCount: 21,
-    description: 'Cheerful bouquet of 21 yellow tulips.',
-    descriptionRu: 'Жизнерадостный букет из 21 желтого тюльпана.',
+    size: 'medium',
+    is_popular: false,
+    shop_id: '',
   },
   {
     id: 'bouquet-6',
-    name: 'Luxury Rose Box',
-    nameRu: 'Люкс розы в коробке',
+    name_en: 'Luxury Rose Box',
+    name_ru: 'Люкс розы в коробке',
     image: 'https://images.unsplash.com/photo-1455659817273-f96807779a8a?w=600',
     price: 4500,
-    originalPrice: 5000,
-    rating: 5.0,
-    reviewCount: 45,
     category: 'premium',
-    tags: ['Gift Box', 'VIP'],
-    tagsRu: ['Подарочная коробка', 'VIP'],
-    flowersCount: 51,
-    description: '51 premium roses in an elegant gift box.',
-    descriptionRu: '51 премиальная роза в элегантной подарочной коробке.',
+    size: 'xl',
+    is_popular: true,
+    shop_id: '',
   },
-  {
-    id: 'bouquet-7',
-    name: 'Pastel Dreams',
-    nameRu: 'Пастельные мечты',
-    image: 'https://images.unsplash.com/photo-1508610048659-a06b669e3321?w=600',
-    price: 1650,
-    rating: 4.7,
-    reviewCount: 123,
-    category: 'mixed',
-    tags: ['Tender', 'Elegant'],
-    tagsRu: ['Нежный', 'Элегантный'],
-    flowersCount: 25,
-    description: 'Delicate arrangement in soft pastel shades.',
-    descriptionRu: 'Нежная композиция в мягких пастельных тонах.',
-  },
-  {
-    id: 'bouquet-8',
-    name: 'Red & White Classic',
-    nameRu: 'Красно-белая классика',
-    image: 'https://images.unsplash.com/photo-1522057384400-681b421cfebc?w=600',
-    price: 2100,
-    rating: 4.8,
-    reviewCount: 87,
-    category: 'roses',
-    tags: ['Classic', 'Wedding'],
-    tagsRu: ['Классика', 'Свадебный'],
-    flowersCount: 35,
-    description: 'Timeless combination of red and white roses.',
-    descriptionRu: 'Вечная классика из красных и белых роз.',
-  },
-];
+] as Partial<Bouquet>[];
 
 const FlowersIndex = () => {
   const navigate = useNavigate();
@@ -151,6 +97,15 @@ const FlowersIndex = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterValues, setFilterValues] = useState<FilterValues>({});
+
+  // Fetch bouquets from database
+  const { bouquets: dbBouquets, isLoading } = useBouquets({
+    category: selectedCategory !== 'all' ? selectedCategory : undefined,
+    onlyActive: true,
+  });
+
+  // Use database data or fallback
+  const bouquets = dbBouquets.length > 0 ? dbBouquets : FALLBACK_BOUQUETS as Bouquet[];
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -176,6 +131,7 @@ const FlowersIndex = () => {
 
   const filteredBouquets = useMemo(() => {
     return bouquets.filter((bouquet) => {
+      // Category filter is already applied at API level, but keep for fallback data
       if (selectedCategory !== 'all' && bouquet.category !== selectedCategory) return false;
       
       // Price level filter
@@ -194,42 +150,32 @@ const FlowersIndex = () => {
       
       // Search filter
       if (searchQuery) {
-        const name = language === 'ru' ? bouquet.nameRu : bouquet.name;
+        const name = language === 'ru' ? bouquet.name_ru : bouquet.name_en;
         if (!name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       }
       
-      // Occasion filter - match against tags
-      const occasionFilter = filterValues.occasion as string[] | undefined;
-      if (occasionFilter?.length) {
-        if (!matchesFilter(bouquet.tags || [], occasionFilter)) return false;
-      }
-      
-      // Color filter - match against name or tags
+      // Color filter - match against colors array or name
       const colorFilter = filterValues.color as string[] | undefined;
       if (colorFilter?.length) {
-        const bouquetName = (bouquet.name + ' ' + bouquet.nameRu).toLowerCase();
-        const hasColor = colorFilter.some(c => bouquetName.includes(c.toLowerCase()));
+        const bouquetName = ((bouquet.name_en || '') + ' ' + (bouquet.name_ru || '')).toLowerCase();
+        const bouquetColors = bouquet.colors || [];
+        const hasColor = colorFilter.some(c => 
+          bouquetName.includes(c.toLowerCase()) || 
+          bouquetColors.some(bc => bc.toLowerCase().includes(c.toLowerCase()))
+        );
         if (!hasColor) return false;
       }
       
       // Flower type filter - match against category
       const flowerTypeFilter = filterValues.flowerType as string[] | undefined;
       if (flowerTypeFilter?.length) {
-        if (!matchesSingleFilter(bouquet.category, flowerTypeFilter)) return false;
+        if (!matchesSingleFilter(bouquet.category || '', flowerTypeFilter)) return false;
       }
       
-      // Size filter - match against flowersCount
+      // Size filter
       const sizeFilter = filterValues.size as string | undefined;
-      if (sizeFilter) {
-        const count = bouquet.flowersCount || 0;
-        const sizeRanges: Record<string, [number, number]> = {
-          'small': [1, 15],
-          'medium': [15, 30],
-          'large': [30, 50],
-          'xl': [50, Infinity],
-        };
-        const range = sizeRanges[sizeFilter];
-        if (range && (count < range[0] || count >= range[1])) return false;
+      if (sizeFilter && bouquet.size !== sizeFilter) {
+        return false;
       }
       
       return true;
@@ -293,22 +239,25 @@ const FlowersIndex = () => {
       )}
 
       {/* Bouquets Grid - Vertical cards for flowers */}
-      <div className="grid grid-cols-2 gap-3">
-        {filteredBouquets.map((bouquet) => (
-          <ItemCard
-            key={bouquet.id}
-            title={language === 'ru' ? bouquet.nameRu : bouquet.name}
-            image={bouquet.image}
-            price={bouquet.price}
-            originalPrice={bouquet.originalPrice}
-            rating={bouquet.rating}
-            reviewCount={bouquet.reviewCount}
-            tags={language === 'ru' ? bouquet.tagsRu : bouquet.tags}
-            variant="vertical"
-            onClick={() => navigate(`/flowers/bouquet/${bouquet.id}`)}
-          />
-        ))}
-      </div>
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3">
+          {filteredBouquets.map((bouquet) => (
+            <ItemCard
+              key={bouquet.id}
+              title={language === 'ru' ? bouquet.name_ru : bouquet.name_en}
+              image={bouquet.image || undefined}
+              price={bouquet.price}
+              tags={bouquet.is_popular ? [language === 'ru' ? 'Хит' : 'Popular'] : undefined}
+              variant="vertical"
+              onClick={() => navigate(`/flowers/bouquet/${bouquet.id}`)}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Floating Cart Button */}
       {totalItems > 0 && (
