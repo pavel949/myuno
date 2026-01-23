@@ -7,7 +7,7 @@ export type ContentType =
   | 'gyms' | 'vehicles' | 'properties' | 'yachts' | 'events'
   | 'babysitters' | 'cleaning_services' | 'legal_services' | 'pet_services'
   | 'education_providers' | 'pharmacies' | 'insurance_providers' 
-  | 'flower_shops' | 'stores';
+  | 'flower_shops' | 'stores' | 'vendor_locations';
 
 // Column mappings for tables with different column names
 const COLUMN_MAPPINGS: Record<string, { imageColumn: string; titleColumn: string }> = {
@@ -17,6 +17,7 @@ const COLUMN_MAPPINGS: Record<string, { imageColumn: string; titleColumn: string
   events: { imageColumn: 'cover_image', titleColumn: 'title_en' },
   water_activities: { imageColumn: 'cover_image', titleColumn: 'title_en' },
   owner_properties: { imageColumn: 'cover_image', titleColumn: 'title' },
+  vendor_locations: { imageColumn: 'cover_image', titleColumn: 'name' },
   // Default for others: cover_image and name_en
 };
 
@@ -55,6 +56,7 @@ const contentTypeLabels: Record<ContentType, { en: string; ru: string }> = {
   insurance_providers: { en: 'Insurance', ru: 'Страхование' },
   flower_shops: { en: 'Flowers', ru: 'Цветы' },
   stores: { en: 'Stores', ru: 'Магазины' },
+  vendor_locations: { en: 'Vendor Locations', ru: 'Локации поставщиков' },
 };
 
 export const getContentTypeLabel = (type: ContentType, language: string) => {
@@ -66,7 +68,7 @@ export const allContentTypes: ContentType[] = [
   'gyms', 'vehicles', 'properties', 'yachts', 'events',
   'babysitters', 'cleaning_services', 'legal_services', 'pet_services',
   'education_providers', 'pharmacies', 'insurance_providers',
-  'flower_shops', 'stores'
+  'flower_shops', 'stores', 'vendor_locations'
 ];
 
 export function useContentModeration() {

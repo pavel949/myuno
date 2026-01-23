@@ -21,7 +21,8 @@ import {
   UtensilsCrossed,
   Calendar,
   Scale,
-  Baby
+  Baby,
+  MapPin
 } from 'lucide-react';
 import {
   Sidebar,
@@ -65,6 +66,7 @@ const navigationGroups: NavGroup[] = [
       { title: 'Dashboard', titleRu: 'Обзор', path: '/vendor', icon: LayoutDashboard },
       { title: 'Bookings', titleRu: 'Заказы', path: '/vendor/bookings', icon: CalendarDays },
       { title: 'Services', titleRu: 'Услуги', path: '/vendor/services', icon: Package },
+      { title: 'Locations', titleRu: 'Локации', path: '/vendor/locations', icon: MapPin },
     ],
   },
   {
