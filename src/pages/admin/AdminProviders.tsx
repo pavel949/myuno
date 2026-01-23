@@ -81,16 +81,14 @@ export default function AdminProviders() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const [formData, setFormData] = useState({
-    business_name: '',
-    business_name_ru: '',
-    description: '',
+    name: '',
+    description_en: '',
     description_ru: '',
     business_category: '',
     phone: '',
     email: '',
     website: '',
     address: '',
-    district: '',
     is_active: true,
     is_verified: false,
   });
@@ -118,16 +116,14 @@ export default function AdminProviders() {
 
   const resetForm = () => {
     setFormData({
-      business_name: '',
-      business_name_ru: '',
-      description: '',
+      name: '',
+      description_en: '',
       description_ru: '',
       business_category: '',
       phone: '',
       email: '',
       website: '',
       address: '',
-      district: '',
       is_active: true,
       is_verified: false,
     });
@@ -137,24 +133,22 @@ export default function AdminProviders() {
   const openEditDialog = (provider: Provider) => {
     setEditingProvider(provider);
     setFormData({
-      business_name: provider.business_name,
-      business_name_ru: provider.business_name_ru || '',
-      description: provider.description || '',
+      name: provider.name || '',
+      description_en: provider.description_en || '',
       description_ru: provider.description_ru || '',
-      business_category: provider.business_category,
+      business_category: provider.business_category || '',
       phone: provider.phone || '',
       email: provider.email || '',
       website: provider.website || '',
       address: provider.address || '',
-      district: provider.district || '',
-      is_active: provider.is_active,
-      is_verified: provider.is_verified,
+      is_active: provider.is_active ?? true,
+      is_verified: provider.is_verified ?? false,
     });
     setIsDialogOpen(true);
   };
 
   const handleSubmit = async () => {
-    if (!formData.business_name || !formData.business_category) {
+    if (!formData.name || !formData.business_category) {
       toast.error(isRussian ? 'Заполните обязательные поля' : 'Please fill required fields');
       return;
     }
@@ -162,16 +156,14 @@ export default function AdminProviders() {
     setIsSubmitting(true);
     try {
       const providerData = {
-        business_name: formData.business_name,
-        business_name_ru: formData.business_name_ru || undefined,
-        description: formData.description || undefined,
+        name: formData.name,
+        description_en: formData.description_en || undefined,
         description_ru: formData.description_ru || undefined,
         business_category: formData.business_category,
         phone: formData.phone || undefined,
         email: formData.email || undefined,
         website: formData.website || undefined,
         address: formData.address || undefined,
-        district: formData.district || undefined,
         is_active: formData.is_active,
         is_verified: formData.is_verified,
       };
@@ -209,9 +201,9 @@ export default function AdminProviders() {
   };
 
   const filteredProviders = providers.filter(p => 
-    p.business_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.business_name_ru?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.business_category.toLowerCase().includes(searchQuery.toLowerCase())
+    p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.description_en?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.business_category?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (authLoading || adminLoading) {
@@ -287,7 +279,7 @@ export default function AdminProviders() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-medium">
-                          {isRussian ? (provider.business_name_ru || provider.business_name) : provider.business_name}
+                          {provider.name}
                         </h3>
                         {provider.is_verified && (
                           <CheckCircle className="h-4 w-4 text-green-500" />
@@ -352,20 +344,11 @@ export default function AdminProviders() {
 
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label>{isRussian ? 'Название (EN) *' : 'Name (EN) *'}</Label>
+                <Label>{isRussian ? 'Название *' : 'Name *'}</Label>
                 <Input
-                  value={formData.business_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, business_name: e.target.value }))}
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="Thai Massage & Spa"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>{isRussian ? 'Название (RU)' : 'Name (RU)'}</Label>
-                <Input
-                  value={formData.business_name_ru}
-                  onChange={(e) => setFormData(prev => ({ ...prev, business_name_ru: e.target.value }))}
-                  placeholder="Тайский массаж и спа"
                 />
               </div>
 
@@ -391,8 +374,8 @@ export default function AdminProviders() {
               <div className="space-y-2">
                 <Label>{isRussian ? 'Описание (EN)' : 'Description (EN)'}</Label>
                 <Textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  value={formData.description_en}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description_en: e.target.value }))}
                   rows={2}
                 />
               </div>
@@ -425,21 +408,12 @@ export default function AdminProviders() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label>{isRussian ? 'Адрес' : 'Address'}</Label>
-                <Input
-                  value={formData.address}
-                  onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-                />
-              </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>{isRussian ? 'Район' : 'District'}</Label>
+                  <Label>{isRussian ? 'Адрес' : 'Address'}</Label>
                   <Input
-                    value={formData.district}
-                    onChange={(e) => setFormData(prev => ({ ...prev, district: e.target.value }))}
-                    placeholder="Patong"
+                    value={formData.address}
+                    onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
                   />
                 </div>
                 <div className="space-y-2">
