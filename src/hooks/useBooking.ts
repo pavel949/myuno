@@ -70,7 +70,24 @@ export interface BookingResult {
 }
 
 // Map legacy booking types to new order types
-const mapBookingTypeToOrderType = (bookingType: BookingType): CreateOrderInput['order_type'] => {
+const mapBookingTypeToOrderType = (bookingType: BookingType, metadata?: Record<string, unknown>): CreateOrderInput['order_type'] => {
+  // Special handling for product type - check metadata for specific product type
+  if (bookingType === 'product') {
+    // Check if this is a flowers order based on metadata or item types
+    if (metadata?.delivery_slot || metadata?.message_card !== undefined || metadata?.gift_wrap !== undefined) {
+      return 'flowers';
+    }
+    return 'service'; // fallback for generic products
+  }
+
+  // Special handling for transport - check if it's a yacht
+  if (bookingType === 'transport') {
+    if (metadata?.yacht_id || metadata?.charter_type) {
+      return 'yacht';
+    }
+    return 'vehicle';
+  }
+
   const mapping: Record<string, CreateOrderInput['order_type']> = {
     'service': 'service',
     'tour': 'tour',
@@ -88,7 +105,6 @@ const mapBookingTypeToOrderType = (bookingType: BookingType): CreateOrderInput['
     'pet_service': 'pet_service',
     'flowers': 'flowers',
     'food': 'food',
-    'transport': 'vehicle',
     'rental': 'property',
     'restaurant': 'food',
   };
@@ -136,7 +152,7 @@ export function useBooking() {
     try {
       // Convert legacy booking params to new order input
       const orderInput: CreateOrderInput = {
-        order_type: mapBookingTypeToOrderType(params.booking_type),
+        order_type: mapBookingTypeToOrderType(params.booking_type, params.metadata),
         provider_org_id: params.provider_id,
         start_at: params.scheduled_at,
         total_amount: params.total_amount,

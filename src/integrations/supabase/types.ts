@@ -3972,6 +3972,53 @@ export type Database = {
           },
         ]
       }
+      order_item_flower_details: {
+        Row: {
+          created_at: string | null
+          delivery_address: string | null
+          delivery_slot: string | null
+          gift_wrap: boolean | null
+          id: string
+          message_card: string | null
+          order_item_id: string
+          recipient_name: string | null
+          recipient_phone: string | null
+          special_instructions: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          delivery_address?: string | null
+          delivery_slot?: string | null
+          gift_wrap?: boolean | null
+          id?: string
+          message_card?: string | null
+          order_item_id: string
+          recipient_name?: string | null
+          recipient_phone?: string | null
+          special_instructions?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          delivery_address?: string | null
+          delivery_slot?: string | null
+          gift_wrap?: boolean | null
+          id?: string
+          message_card?: string | null
+          order_item_id?: string
+          recipient_name?: string | null
+          recipient_phone?: string | null
+          special_instructions?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_item_flower_details_order_item_id_fkey"
+            columns: ["order_item_id"]
+            isOneToOne: true
+            referencedRelation: "order_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_item_property_details: {
         Row: {
           check_in_date: string | null
