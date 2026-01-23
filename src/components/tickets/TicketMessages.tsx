@@ -42,10 +42,13 @@ export function TicketMessages({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Real-time subscription
+  // Real-time subscription with proper cleanup
   useEffect(() => {
+    let isSubscribed = true;
+    const channelName = `ticket-messages-${ticketId}`;
+    
     const channel = supabase
-      .channel(`ticket-messages-${ticketId}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -55,6 +58,7 @@ export function TicketMessages({
           filter: `ticket_id=eq.${ticketId}`,
         },
         (payload) => {
+          if (!isSubscribed) return;
           const newMsg = payload.new as unknown as TicketMessage;
           // Don't show internal messages to non-admins
           if (!isAdmin && newMsg.is_internal) return;
@@ -64,7 +68,10 @@ export function TicketMessages({
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      isSubscribed = false;
+      channel.unsubscribe().then(() => {
+        supabase.removeChannel(channel);
+      });
     };
   }, [ticketId, isAdmin]);
 

@@ -77,12 +77,9 @@ export function useProfile() {
       if (data?.preferred_language) {
         setLanguage(data.preferred_language as 'ru' | 'en' | 'th');
       }
-      
-      toast.success('Профиль обновлён');
     },
     onError: (error) => {
       console.error('Profile update error:', error);
-      toast.error('Ошибка при обновлении профиля');
     },
   });
 
