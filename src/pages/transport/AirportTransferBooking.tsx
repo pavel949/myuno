@@ -14,6 +14,7 @@ import { useVehicleTypes, useTransportDestinations } from '@/hooks/useTransportC
 import { useProfile } from '@/hooks/useProfile';
 import { cn, transliterate } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
 
 const terminals = [
   { id: 'domestic', nameEn: 'Domestic Terminal', nameRu: 'Внутренний терминал', icon: '🏠' },
@@ -157,7 +158,28 @@ export default function AirportTransferBooking() {
       },
     });
 
-    if (result.success) {
+    if (result.success && result.booking_id) {
+      // Save transport-specific details to order_item_transport_details
+      const { data: orderItems } = await supabase
+        .from('order_items')
+        .select('id')
+        .eq('order_id', result.booking_id)
+        .limit(1);
+
+      if (orderItems && orderItems.length > 0) {
+        await supabase
+          .from('order_item_transport_details')
+          .insert({
+            order_item_id: orderItems[0].id,
+            vehicle_type: formData.vehicleType,
+            flight_number: formData.flightNumber,
+            passenger_count: parseInt(formData.passengers),
+            luggage_count: parseInt(formData.luggage),
+            is_round_trip: false,
+            meeting_sign_name: formData.meetingSignName,
+          });
+      }
+
       setIsSuccess(true);
     }
   };
