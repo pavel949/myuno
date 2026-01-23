@@ -7,7 +7,7 @@ export interface VendorRestaurant {
   name_ru: string;
   description_en?: string;
   description_ru?: string;
-  cuisine_type?: string;
+  cuisine?: string;
   address?: string;
   district?: string;
   phone?: string;
