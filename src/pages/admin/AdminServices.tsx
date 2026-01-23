@@ -316,8 +316,8 @@ export default function AdminServices() {
               <SelectContent>
                 <SelectItem value="all">{isRussian ? 'Все провайдеры' : 'All providers'}</SelectItem>
                 {providers.map((provider) => (
-                  <SelectItem key={provider.id} value={provider.id || 'unknown'}>
-                    {isRussian ? (provider.business_name_ru || provider.business_name) : provider.business_name}
+                <SelectItem key={provider.id} value={provider.id || 'unknown'}>
+                    {provider.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -482,7 +482,7 @@ export default function AdminServices() {
                     <SelectContent>
                       {providers.map((provider) => (
                         <SelectItem key={provider.id} value={provider.id}>
-                          {isRussian ? (provider.business_name_ru || provider.business_name) : provider.business_name}
+                          {provider.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
