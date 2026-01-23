@@ -230,14 +230,24 @@ export function useContentModeration() {
     reviewerId: string
   ) => {
     try {
+      // Build update payload based on table structure
+      // owner_properties uses approved_by/approved_at, others use reviewed_by/reviewed_at
+      const updatePayload = contentType === 'owner_properties' 
+        ? {
+            approval_status: 'approved',
+            approved_by: reviewerId,
+            approved_at: new Date().toISOString(),
+          }
+        : {
+            approval_status: 'approved',
+            reviewed_by: reviewerId,
+            reviewed_at: new Date().toISOString(),
+            is_verified: true,
+          };
+
       // Use 'as any' to avoid TypeScript union type complexity with dynamic table names
       const { error } = await (supabase.from(contentType) as any)
-        .update({
-          approval_status: 'approved',
-          reviewed_by: reviewerId,
-          reviewed_at: new Date().toISOString(),
-          is_verified: true,
-        })
+        .update(updatePayload)
         .eq('id', contentId);
 
       if (error) throw error;
@@ -271,14 +281,25 @@ export function useContentModeration() {
     rejectionReason: string
   ) => {
     try {
+      // Build update payload based on table structure
+      // owner_properties uses approved_by/approved_at, others use reviewed_by/reviewed_at
+      const updatePayload = contentType === 'owner_properties'
+        ? {
+            approval_status: 'rejected',
+            rejection_reason: rejectionReason,
+            approved_by: reviewerId,
+            approved_at: new Date().toISOString(),
+          }
+        : {
+            approval_status: 'rejected',
+            rejection_reason: rejectionReason,
+            reviewed_by: reviewerId,
+            reviewed_at: new Date().toISOString(),
+          };
+
       // Use 'as any' to avoid TypeScript union type complexity with dynamic table names
       const { error } = await (supabase.from(contentType) as any)
-        .update({
-          approval_status: 'rejected',
-          rejection_reason: rejectionReason,
-          reviewed_by: reviewerId,
-          reviewed_at: new Date().toISOString(),
-        })
+        .update(updatePayload)
         .eq('id', contentId);
 
       if (error) throw error;
