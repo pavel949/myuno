@@ -368,8 +368,8 @@ const prefetchRoutes = () => {
 export const AnimatedRoutes: React.FC = () => {
   const location = useLocation();
   
-  // Track navigation direction for tab animations
-  useNavigationDirection();
+  // Track navigation direction for tab animations - call on every render
+  const direction = useNavigationDirection();
 
   // Prefetch on mount
   React.useEffect(() => {

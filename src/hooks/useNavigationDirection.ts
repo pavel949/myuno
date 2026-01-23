@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 
 // Define tab order for bottom navigation
@@ -30,34 +30,10 @@ const tabOrder: Record<string, number> = {
 
 export type NavigationDirection = 'left' | 'right' | 'none';
 
-// Global state for direction (accessible outside React)
-let currentDirection: NavigationDirection = 'none';
-
-export const getNavigationDirection = (): NavigationDirection => currentDirection;
-
-export const useNavigationDirection = (): NavigationDirection => {
-  const location = useLocation();
-  const prevPathRef = useRef<string>(location.pathname);
-  
-  useEffect(() => {
-    const prevPath = prevPathRef.current;
-    const currentPath = location.pathname;
-    
-    if (prevPath !== currentPath) {
-      const prevIndex = getTabIndex(prevPath);
-      const currentIndex = getTabIndex(currentPath);
-      
-      if (prevIndex !== -1 && currentIndex !== -1) {
-        currentDirection = currentIndex > prevIndex ? 'right' : 'left';
-      } else {
-        currentDirection = 'none';
-      }
-      
-      prevPathRef.current = currentPath;
-    }
-  }, [location.pathname]);
-  
-  return currentDirection;
+// Store for tracking previous path across renders
+const navigationStore = {
+  prevPath: '',
+  direction: 'none' as NavigationDirection,
 };
 
 function getTabIndex(path: string): number {
@@ -76,3 +52,40 @@ function getTabIndex(path: string): number {
   
   return -1;
 }
+
+export const getNavigationDirection = (): NavigationDirection => navigationStore.direction;
+
+export const updateNavigationDirection = (newPath: string): NavigationDirection => {
+  const prevPath = navigationStore.prevPath;
+  
+  if (prevPath && prevPath !== newPath) {
+    const prevIndex = getTabIndex(prevPath);
+    const currentIndex = getTabIndex(newPath);
+    
+    if (prevIndex !== -1 && currentIndex !== -1) {
+      navigationStore.direction = currentIndex > prevIndex ? 'right' : 'left';
+    } else {
+      navigationStore.direction = 'none';
+    }
+  }
+  
+  navigationStore.prevPath = newPath;
+  return navigationStore.direction;
+};
+
+export const useNavigationDirection = (): NavigationDirection => {
+  const location = useLocation();
+  const isFirstRender = useRef(true);
+  
+  // Calculate direction on path change
+  const direction = useMemo(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      navigationStore.prevPath = location.pathname;
+      return 'none' as NavigationDirection;
+    }
+    return updateNavigationDirection(location.pathname);
+  }, [location.pathname]);
+  
+  return direction;
+};
