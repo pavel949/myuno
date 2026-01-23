@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVendorProfile } from '@/hooks/useVendor';
+import { useUserContext } from '@/hooks/useUserContext';
 import { OnboardingLayout } from '@/components/layout/OnboardingLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -45,6 +46,7 @@ const VendorOnboarding = () => {
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
   const { profile, createProfile, isLoading: profileLoading } = useVendorProfile();
+  const { vendorOrgs, isLoading: contextLoading } = useUserContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isRussian = language === 'ru';
@@ -68,12 +70,12 @@ const VendorOnboarding = () => {
     }
   }, [user, authLoading, navigate]);
 
-  // Redirect if already has profile
+  // Redirect if already has vendor org (use same check as VendorDashboard)
   React.useEffect(() => {
-    if (!profileLoading && profile) {
+    if (!contextLoading && vendorOrgs.length > 0) {
       navigate('/vendor');
     }
-  }, [profile, profileLoading, navigate]);
+  }, [vendorOrgs, contextLoading, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({
@@ -120,7 +122,7 @@ const VendorOnboarding = () => {
     }
   };
 
-  if (authLoading || profileLoading) {
+  if (authLoading || contextLoading) {
     return (
       <OnboardingLayout>
         <PageContainer>

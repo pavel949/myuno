@@ -75,7 +75,7 @@ export function usePrefetchPopularData() {
       queryFn: async () => {
         const { data } = await supabase
           .from('tours')
-          .select('id, title_en, title_ru, cover_image, price, rating, tour_type')
+          .select('id, title_en, title_ru, cover_image, price, rating, category')
           .eq('is_active', true)
           .eq('is_featured', true)
           .limit(6);
