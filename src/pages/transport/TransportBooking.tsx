@@ -58,7 +58,7 @@ export default function TransportBooking() {
   // Show loading while checking auth
   if (authLoading) {
     return (
-      <AppLayout showBottomNav={false}>
+      <AppLayout>
         <PageContainer className="flex items-center justify-center min-h-screen">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </PageContainer>
@@ -88,7 +88,7 @@ export default function TransportBooking() {
   // Success state
   if (bookingResult?.success && bookingResult.bookingId) {
     return (
-      <AppLayout showBottomNav={false}>
+      <AppLayout>
         <BookingConfirmation
           bookingId={bookingResult.bookingId}
           title={vehicleName}
@@ -145,7 +145,7 @@ export default function TransportBooking() {
   };
 
   return (
-    <AppLayout showBottomNav={false}>
+    <AppLayout>
       <PageContainer className="pb-32">
         <PageHeader 
           title={language === 'ru' ? 'Бронирование' : 'Booking'} 

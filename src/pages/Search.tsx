@@ -25,7 +25,7 @@ export default function Search() {
   const popularCategories = getSearchCategories();
 
   return (
-    <AppLayout showBottomNav={false}>
+    <AppLayout>
       <div className="min-h-screen bg-background">
         {/* Search Header */}
         <div className="sticky top-0 z-20 bg-background border-b border-border p-4">

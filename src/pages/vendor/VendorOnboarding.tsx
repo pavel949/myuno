@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVendorProfile } from '@/hooks/useVendor';
-import { AppLayout } from '@/components/layout/AppLayout';
+import { OnboardingLayout } from '@/components/layout/OnboardingLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -122,18 +122,18 @@ const VendorOnboarding = () => {
 
   if (authLoading || profileLoading) {
     return (
-      <AppLayout>
+      <OnboardingLayout>
         <PageContainer>
           <div className="flex items-center justify-center min-h-[60vh]">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         </PageContainer>
-      </AppLayout>
+      </OnboardingLayout>
     );
   }
 
   return (
-    <AppLayout>
+    <OnboardingLayout>
       <PageContainer>
         <PageHeader 
           title={isRussian ? 'Стать партнёром' : 'Become a Partner'}
@@ -331,7 +331,7 @@ const VendorOnboarding = () => {
           </p>
         </form>
       </PageContainer>
-    </AppLayout>
+    </OnboardingLayout>
   );
 };
 

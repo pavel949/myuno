@@ -66,7 +66,7 @@ export default function PetServiceBooking() {
   // Success state
   if (bookingResult?.success && bookingResult.bookingId) {
     return (
-      <AppLayout showBottomNav={false}>
+      <AppLayout>
         <BookingConfirmation
           bookingId={bookingResult.bookingId}
           title={language === 'ru' ? service.nameRu : service.name}
@@ -123,7 +123,7 @@ export default function PetServiceBooking() {
   const isValid = date && time && contactData.name && contactData.phone && petName;
 
   return (
-    <AppLayout showBottomNav={false}>
+    <AppLayout>
       <PageContainer className="pb-32">
         <PageHeader 
           title={language === 'ru' ? 'Запись на услугу' : 'Book Service'} 

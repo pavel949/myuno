@@ -149,7 +149,7 @@ export default function PetServiceDetail() {
   };
 
   return (
-    <AppLayout showBottomNav={false}>
+    <AppLayout>
       {/* Hero Image */}
       <div className="relative h-64">
         <BackButton fallbackPath="/pets" variant="overlay" className="absolute top-4 left-4 z-10" />

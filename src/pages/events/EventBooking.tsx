@@ -61,7 +61,7 @@ export default function EventBooking() {
   // Loading state
   if (isLoading || authLoading) {
     return (
-      <AppLayout showBottomNav={false}>
+      <AppLayout>
         <div className="flex items-center justify-center min-h-screen">
           <LoadingSpinner size="lg" />
         </div>
@@ -91,7 +91,7 @@ export default function EventBooking() {
   // Success state
   if (bookingResult?.success && bookingResult.bookingId) {
     return (
-      <AppLayout showBottomNav={false}>
+      <AppLayout>
         <BookingConfirmation
           bookingId={bookingResult.bookingId}
           title={eventTitle}
@@ -147,7 +147,7 @@ export default function EventBooking() {
   };
 
   return (
-    <AppLayout showBottomNav={false}>
+    <AppLayout>
       <PageContainer className="pb-32">
         <PageHeader 
           title={language === 'ru' ? 'Оформление билетов' : 'Book Tickets'} 

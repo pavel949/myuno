@@ -64,7 +64,7 @@ export default function BabysitterBooking() {
   // Success state
   if (bookingResult?.success && bookingResult.bookingId) {
     return (
-      <AppLayout showBottomNav={false}>
+      <AppLayout>
         <BookingConfirmation
           bookingId={bookingResult.bookingId}
           title={language === 'ru' ? babysitter.nameRu : babysitter.nameEn}
@@ -136,7 +136,7 @@ export default function BabysitterBooking() {
   };
 
   return (
-    <AppLayout showBottomNav={false}>
+    <AppLayout>
       <PageContainer className="pb-32">
         <PageHeader 
           title={language === 'ru' ? 'Бронирование няни' : 'Book Babysitter'} 

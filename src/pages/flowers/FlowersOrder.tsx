@@ -212,7 +212,7 @@ const FlowersOrder = () => {
   // If cart is empty, show empty state
   if (flowersInCart.length === 0) {
     return (
-      <AppLayout showBottomNav={false}>
+      <AppLayout>
         <div className="min-h-screen bg-background">
           <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border">
             <div className="flex items-center gap-3 p-4">
@@ -242,7 +242,7 @@ const FlowersOrder = () => {
   }
 
   return (
-    <AppLayout showBottomNav={false}>
+    <AppLayout>
       <div className="min-h-screen bg-background">
         {/* Header */}
         <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border">

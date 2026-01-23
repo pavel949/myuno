@@ -137,7 +137,7 @@ export default function RestaurantMap() {
     : null;
 
   return (
-    <AppLayout showBottomNav={false}>
+    <AppLayout>
       <div className="h-screen flex flex-col">
         {/* Header */}
         <div className="absolute top-0 left-0 right-0 z-20 p-4 flex items-center justify-between">

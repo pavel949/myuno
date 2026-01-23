@@ -78,6 +78,9 @@ const teamNavItems: NavItem[] = [
 ];
 
 function getNavItemsForPath(pathname: string): NavItem[] {
+  // Onboarding pages should show guest navigation (user doesn't have role profile yet)
+  if (pathname.includes('/onboarding')) return guestNavItems;
+  
   if (pathname.startsWith('/admin')) return adminNavItems;
   if (pathname.startsWith('/owner')) return ownerNavItems;
   if (pathname.startsWith('/vendor')) return vendorNavItems;

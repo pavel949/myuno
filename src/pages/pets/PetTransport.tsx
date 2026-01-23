@@ -89,7 +89,7 @@ export default function PetTransport() {
   };
 
   return (
-    <AppLayout showBottomNav={false}>
+    <AppLayout>
       <PageContainer className="pb-32">
         <PageHeader title={language === 'ru' ? 'Перевозка питомцев' : 'Pet Transport'} showBack fallbackPath="/pets" />
         {/* Hero */}

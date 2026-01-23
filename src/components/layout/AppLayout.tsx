@@ -1,7 +1,6 @@
 import React, { ReactNode, forwardRef } from 'react';
 import { cn } from '@/lib/utils';
 import { AppHeader } from './AppHeader';
-import { AdaptiveBottomNav } from './AdaptiveBottomNav';
 import { Footer } from './Footer';
 
 interface AppLayoutProps {
@@ -42,7 +41,6 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
         </main>
         
         {showFooter && <Footer />}
-        {showBottomNav && <AdaptiveBottomNav />}
       </div>
     );
   }

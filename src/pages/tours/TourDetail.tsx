@@ -18,13 +18,13 @@ export default function TourDetail() {
   const { language, t } = useLanguage();
   const { tour, isLoading, error } = useTour(id);
 
-  if (isLoading) return <AppLayout showBottomNav={false}><div className="flex items-center justify-center min-h-screen"><LoadingSpinner size="lg" /></div></AppLayout>;
+  if (isLoading) return <AppLayout><div className="flex items-center justify-center min-h-screen"><LoadingSpinner size="lg" /></div></AppLayout>;
   if (error || !tour) return <AppLayout><PageContainer><div className="text-center py-12"><p>{t('tours.notFound')}</p><Button onClick={() => navigate('/tours')} className="mt-4">{t('action.back')}</Button></div></PageContainer></AppLayout>;
 
   const tourName = language === 'ru' ? tour.title_ru : tour.title_en;
 
   return (
-    <AppLayout showBottomNav={false}>
+    <AppLayout>
       <div className="min-h-screen bg-background">
         {/* Hero Image */}
         <div className="relative h-72">
