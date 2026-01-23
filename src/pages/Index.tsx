@@ -150,17 +150,23 @@ const Index = () => {
         jsonLd={createOrganizationSchema()}
       />
       
-      {/* Lazy Modals */}
-      <Suspense fallback={null}>
-        <OnboardingModal 
-          open={showOnboarding} 
-          onComplete={() => setShowOnboarding(false)} 
-        />
-        <GlobalSearchModal 
-          open={showSearch} 
-          onOpenChange={setShowSearch} 
-        />
-      </Suspense>
+      {/* Lazy Modals - only render when open to prevent overlay blocking */}
+      {showOnboarding && (
+        <Suspense fallback={null}>
+          <OnboardingModal 
+            open={showOnboarding} 
+            onComplete={() => setShowOnboarding(false)} 
+          />
+        </Suspense>
+      )}
+      {showSearch && (
+        <Suspense fallback={null}>
+          <GlobalSearchModal 
+            open={showSearch} 
+            onOpenChange={setShowSearch} 
+          />
+        </Suspense>
+      )}
 
       {/* Quick Listing FAB */}
       <QuickListingFAB />
