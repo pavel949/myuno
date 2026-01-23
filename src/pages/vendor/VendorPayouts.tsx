@@ -3,9 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVendorProfile, useVendorPayouts } from '@/hooks/useVendor';
-import { AppLayout } from '@/components/layout/AppLayout';
-import { PageContainer } from '@/components/uno/PageContainer';
-import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -148,31 +145,26 @@ const VendorPayouts = () => {
     }
   };
 
+  // Safe values with fallback to 0
+  const pendingPayout = profile?.pending_payout ?? 0;
+  const totalEarnings = profile?.total_earnings ?? 0;
+
   if (authLoading || profileLoading) {
     return (
-      <AppLayout>
-        <PageContainer>
-          <div className="space-y-4">
-            <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-32" />
-            {[1, 2, 3].map(i => (
-              <Skeleton key={i} className="h-20" />
-            ))}
-          </div>
-        </PageContainer>
-      </AppLayout>
+      <div className="p-4 space-y-4">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-32" />
+        {[1, 2, 3].map(i => (
+          <Skeleton key={i} className="h-20" />
+        ))}
+      </div>
     );
   }
 
   if (!profile) return null;
 
   return (
-    <AppLayout>
-      <PageContainer>
-        <PageHeader 
-          title={isRussian ? 'Выплаты' : 'Payouts'}
-          showBack
-        />
+    <div className="p-4 space-y-6">
 
         {/* Balance Card */}
         <Card className="mb-6 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
@@ -185,7 +177,7 @@ const VendorPayouts = () => {
                 <p className="text-sm text-muted-foreground">
                   {isRussian ? 'Доступно к выводу' : 'Available for payout'}
                 </p>
-                <p className="text-3xl font-bold">{profile.pending_payout.toLocaleString()} ₽</p>
+                <p className="text-3xl font-bold">{pendingPayout.toLocaleString()} ₽</p>
               </div>
             </div>
             
@@ -193,7 +185,7 @@ const VendorPayouts = () => {
               className="w-full" 
               size="lg"
               onClick={() => setIsDialogOpen(true)}
-              disabled={profile.pending_payout <= 0}
+              disabled={pendingPayout <= 0}
             >
               <ArrowDownToLine className="h-4 w-4 mr-2" />
               {isRussian ? 'Вывести средства' : 'Withdraw Funds'}
@@ -205,7 +197,7 @@ const VendorPayouts = () => {
         <div className="grid grid-cols-2 gap-4 mb-6">
           <Card>
             <CardContent className="p-4 text-center">
-              <p className="text-2xl font-bold">{profile.total_earnings.toLocaleString()} ₽</p>
+              <p className="text-2xl font-bold">{totalEarnings.toLocaleString()} ₽</p>
               <p className="text-xs text-muted-foreground">
                 {isRussian ? 'Всего заработано' : 'Total Earned'}
               </p>
@@ -288,7 +280,7 @@ const VendorPayouts = () => {
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {isRussian ? 'Доступно:' : 'Available:'} {profile.pending_payout.toLocaleString()} ₽
+                  {isRussian ? 'Доступно:' : 'Available:'} {pendingPayout.toLocaleString()} ₽
                 </p>
               </div>
 
@@ -345,8 +337,7 @@ const VendorPayouts = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </PageContainer>
-    </AppLayout>
+    </div>
   );
 };
 

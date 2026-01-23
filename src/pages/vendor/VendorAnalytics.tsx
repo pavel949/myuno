@@ -3,9 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVendorProfile, useVendorAnalytics } from '@/hooks/useVendor';
-import { AppLayout } from '@/components/layout/AppLayout';
-import { PageContainer } from '@/components/uno/PageContainer';
-import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -60,24 +57,22 @@ const VendorAnalytics = () => {
 
   if (authLoading || profileLoading) {
     return (
-      <AppLayout>
-        <PageContainer>
-          <div className="space-y-4">
-            <Skeleton className="h-8 w-48" />
-            <div className="grid grid-cols-2 gap-4">
-              {[1, 2, 3, 4].map(i => (
-                <Skeleton key={i} className="h-24" />
-              ))}
-            </div>
-            <Skeleton className="h-64" />
-          </div>
-        </PageContainer>
-      </AppLayout>
+      <div className="p-4 space-y-4">
+        <Skeleton className="h-8 w-48" />
+        <div className="grid grid-cols-2 gap-4">
+          {[1, 2, 3, 4].map(i => (
+            <Skeleton key={i} className="h-24" />
+          ))}
+        </div>
+        <Skeleton className="h-64" />
+      </div>
     );
   }
 
-  if (!profile) return null;
+  // Safe values with fallback
+  const profileRating = profile?.rating ?? 0;
 
+  if (!profile) return null;
   // Calculate trends (mock data for now)
   const revenueTrend = 12.5;
   const bookingsTrend = 8.3;
@@ -132,7 +127,7 @@ const VendorAnalytics = () => {
     },
     {
       label: isRussian ? 'Рейтинг' : 'Rating',
-      value: profile.rating.toFixed(1),
+      value: profileRating.toFixed(1),
       icon: Star,
       color: 'text-yellow-500',
       bgColor: 'bg-yellow-500/10',
@@ -140,15 +135,9 @@ const VendorAnalytics = () => {
   ];
 
   return (
-    <AppLayout>
-      <PageContainer>
-        <PageHeader 
-          title={isRussian ? 'Аналитика' : 'Analytics'}
-          showBack
-        />
-
-        {/* Period Selector */}
-        <div className="flex gap-2 mb-6">
+    <div className="p-4 space-y-6">
+      {/* Period Selector */}
+      <div className="flex gap-2">
           {[7, 30, 90].map(days => (
             <Button
               key={days}
@@ -159,7 +148,7 @@ const VendorAnalytics = () => {
               {days} {isRussian ? 'дн' : 'days'}
             </Button>
           ))}
-        </div>
+      </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-4 mb-6">
@@ -326,8 +315,7 @@ const VendorAnalytics = () => {
             </CardContent>
           </Card>
         )}
-      </PageContainer>
-    </AppLayout>
+    </div>
   );
 };
 
