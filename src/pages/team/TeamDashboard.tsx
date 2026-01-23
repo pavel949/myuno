@@ -76,18 +76,8 @@ export default function TeamDashboard() {
 
   const { data: platformStats, isLoading: platformLoading } = useAdminDashboardStats();
 
-  // Access control
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/auth');
-    }
-  }, [user, authLoading, navigate]);
-
-  useEffect(() => {
-    if (!rolesLoading && user && !hasRole('uno_team') && !hasRole('admin')) {
-      navigate('/');
-    }
-  }, [rolesLoading, user, hasRole, navigate]);
+  // Note: Access control is handled by TeamGuard wrapper in AnimatedRoutes
+  // No need for duplicate redirect logic here
 
   if (authLoading || rolesLoading) {
     return (
