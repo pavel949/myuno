@@ -8,6 +8,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBooking } from '@/hooks/useBooking';
 import { useYacht } from '@/hooks/useYachts';
+import { supabase } from '@/integrations/supabase/client';
 import { BookingDateTimeSelect } from '@/components/booking/BookingDateTimeSelect';
 import { BookingParticipants } from '@/components/booking/BookingParticipants';
 import { BookingContactForm, ContactFormData } from '@/components/booking/BookingContactForm';
@@ -108,11 +109,14 @@ export default function YachtBooking() {
       return exp ? (language === 'ru' ? exp.labelRu : exp.labelEn) : '';
     }).filter(Boolean).join(', ');
 
+    const charterType = isHalfDay ? 'half_day' : 'full_day';
+
     const result = await createBooking({
-      booking_type: 'transport',
+      booking_type: 'transport', // Maps to 'yacht' order_type via metadata
       scheduled_at: scheduledAt.toISOString(),
       total_amount: total,
       currency: yacht.currency || 'THB',
+      provider_id: yacht.provider_id || undefined,
       notes: `Yacht: ${yacht.name_en}. ${isHalfDay ? 'Half day' : 'Full day'} charter. ${guests} guests.${experienceNames ? ` Experiences: ${experienceNames}.` : ''} ${contactData.notes || ''}`,
       items: [
         {
@@ -145,9 +149,40 @@ export default function YachtBooking() {
         status: 'pending',
       },
       addresses: [],
+      metadata: {
+        yacht_id: yacht.id,
+        charter_type: charterType,
+        guests_count: guests,
+        crew_included: yacht.has_crew || false,
+        catering_included: yacht.has_catering || false,
+        experiences: selectedExperiences,
+      },
+      serviceName: yachtName,
+      providerName: yacht.provider_id ? undefined : 'UNO Yachts',
+      openWhatsAppOnCash: true,
     });
 
     if (result.booking_id) {
+      // Save yacht-specific details to order_item_yacht_details
+      const { data: orderItems } = await supabase
+        .from('order_items')
+        .select('id')
+        .eq('order_id', result.booking_id)
+        .eq('item_type', 'yacht-rental')
+        .limit(1);
+
+      if (orderItems && orderItems.length > 0) {
+        await supabase
+          .from('order_item_yacht_details')
+          .insert({
+            order_item_id: orderItems[0].id,
+            charter_type: charterType,
+            guests_count: guests,
+            crew_included: yacht.has_crew || false,
+            catering_included: yacht.has_catering || false,
+          });
+      }
+
       setBookingResult({ bookingId: result.booking_id });
     }
   };

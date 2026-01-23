@@ -34,6 +34,7 @@ export interface Yacht {
   cabins: number | null;
   bathrooms: number | null;
   has_crew: boolean | null;
+  has_catering: boolean | null;
   provider_id?: string | null;
 }
 

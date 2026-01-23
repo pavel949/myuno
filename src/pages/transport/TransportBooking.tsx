@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBooking } from "@/hooks/useBooking";
+import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageContainer } from "@/components/uno/PageContainer";
 import { PageHeader } from "@/components/uno/PageHeader";
@@ -108,6 +109,7 @@ export default function TransportBooking() {
     if (!contactData.name || !contactData.phone) return;
 
     const scheduledAt = new Date(pickupDate);
+    const endAt = returnDate ? new Date(returnDate) : undefined;
 
     const result = await createBooking({
       booking_type: 'transport',
@@ -137,9 +139,39 @@ export default function TransportBooking() {
         amount: totalAmount,
         payment_method: paymentMethod,
       },
+      metadata: {
+        vehicle_id: id,
+        rental_days: days,
+        pickup_date: pickupDate,
+        return_date: returnDate,
+        vehicle_type: vehicle.vehicle_type || 'car',
+      },
+      serviceName: vehicleName,
+      openWhatsAppOnCash: true,
     });
 
-    if (result.success) {
+    if (result.success && result.booking_id) {
+      // Save transport-specific details to order_item_transport_details
+      const { data: orderItems } = await supabase
+        .from('order_items')
+        .select('id')
+        .eq('order_id', result.booking_id)
+        .eq('item_type', 'vehicle_rental')
+        .limit(1);
+
+      if (orderItems && orderItems.length > 0) {
+        await supabase
+          .from('order_item_transport_details')
+          .insert({
+            order_item_id: orderItems[0].id,
+            vehicle_type: vehicle.vehicle_type || 'car',
+            pickup_time: pickupDate,
+            passenger_count: 1,
+            luggage_count: 0,
+            is_round_trip: false,
+          });
+      }
+
       setBookingResult({ success: true, bookingId: result.booking_id });
     }
   };
