@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Flower2, Plus, Edit, Trash2, Image, Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Plus, Edit, Trash2, Image, Loader2 } from 'lucide-react';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -11,10 +11,19 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAdminBouquets, BouquetFormData } from '@/hooks/useAdminBouquets';
+import { useAdminBouquets, AdminBouquet, BouquetFormData } from '@/hooks/useAdminBouquets';
 import { useAdminFlowers } from '@/hooks/useAdminContent';
 import { ImageUpload } from '@/components/upload/ImageUpload';
 import { toast } from 'sonner';
+
+interface FlowerShop {
+  id: string;
+  name_en: string;
+  name_ru: string;
+  delivery_fee: number | null;
+  min_order_amount: number | null;
+  provider_id: string | null;
+}
 
 const CATEGORIES = [
   { id: 'roses', labelEn: 'Roses', labelRu: 'Розы' },
@@ -58,7 +67,7 @@ export default function AdminBouquets() {
   const { items: shops, isLoading: shopsLoading } = useAdminFlowers();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<any>(null);
+  const [editingItem, setEditingItem] = useState<AdminBouquet | null>(null);
   const [formData, setFormData] = useState<BouquetFormData>(defaultFormData);
 
   const handleCreate = () => {
@@ -67,7 +76,7 @@ export default function AdminBouquets() {
     setIsDialogOpen(true);
   };
 
-  const handleEdit = (item: any) => {
+  const handleEdit = (item: AdminBouquet) => {
     setEditingItem(item);
     setFormData({
       shop_id: item.shop_id || '',
@@ -218,7 +227,7 @@ export default function AdminBouquets() {
                   <SelectValue placeholder={isRussian ? 'Выберите магазин' : 'Select shop'} />
                 </SelectTrigger>
                 <SelectContent>
-                  {shops.map((shop: any) => (
+                  {(shops as FlowerShop[]).map((shop) => (
                     <SelectItem key={shop.id} value={shop.id}>
                       {isRussian ? shop.name_ru : shop.name_en}
                     </SelectItem>
