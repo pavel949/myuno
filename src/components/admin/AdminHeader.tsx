@@ -52,6 +52,7 @@ const routeLabels: Record<string, { en: string; ru: string }> = {
   '/admin/operations': { en: 'Operations Hub', ru: 'Центр операций' },
   '/admin/acquisition-metrics': { en: 'Acquisition', ru: 'Привлечение' },
   '/admin/pitch-deck': { en: 'Pitch Deck', ru: 'Презентация' },
+  '/admin/investor-demo': { en: 'Investor Demo', ru: 'Демо для инвестора' },
   '/admin/finance': { en: 'Finance', ru: 'Финансы' },
   '/admin/uno-team': { en: 'UNO Team', ru: 'Команда UNO' },
   '/admin/cities': { en: 'Cities', ru: 'Города' },
