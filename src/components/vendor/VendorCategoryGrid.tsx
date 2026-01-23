@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useUserContext } from '@/hooks/useUserContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,11 +14,16 @@ import {
   Stethoscope,
   GraduationCap,
   Brush,
-  Wrench,
   Baby,
   Flower2,
-  Gift,
-  LayoutGrid
+  Ship,
+  Home,
+  Calendar,
+  Dumbbell,
+  Scale,
+  PawPrint,
+  LayoutGrid,
+  AlertCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -28,20 +34,26 @@ interface CategoryItem {
   title: string;
   titleRu: string;
   color: string;
-  serviceCount?: number;
+  path: string;
 }
 
-const categories: CategoryItem[] = [
-  { id: '1', slug: 'restaurants', icon: Utensils, title: 'Restaurants', titleRu: 'Рестораны', color: 'text-warning' },
-  { id: '2', slug: 'transport', icon: Car, title: 'Transport', titleRu: 'Транспорт', color: 'text-info' },
-  
-  { id: '4', slug: 'health', icon: Stethoscope, title: 'Health', titleRu: 'Здоровье', color: 'text-success' },
-  { id: '5', slug: 'education', icon: GraduationCap, title: 'Education', titleRu: 'Образование', color: 'text-purple-500' },
-  { id: '6', slug: 'cleaning', icon: Brush, title: 'Cleaning', titleRu: 'Клининг', color: 'text-cyan-500' },
-  { id: '7', slug: 'repairs', icon: Wrench, title: 'Repairs', titleRu: 'Ремонт', color: 'text-amber-500' },
-  { id: '8', slug: 'childcare', icon: Baby, title: 'Childcare', titleRu: 'Няни', color: 'text-rose-500' },
-  { id: '9', slug: 'flowers', icon: Flower2, title: 'Flowers', titleRu: 'Цветы', color: 'text-fuchsia-500' },
-  { id: '10', slug: 'gifts', icon: Gift, title: 'Gifts', titleRu: 'Подарки', color: 'text-red-500' },
+// All available verticals - must match onboarding options
+const allCategories: CategoryItem[] = [
+  { id: '1', slug: 'beauty', icon: Sparkles, title: 'Beauty & Spa', titleRu: 'Красота и спа', color: 'text-pink-500', path: '/vendor/beauty' },
+  { id: '2', slug: 'fitness', icon: Dumbbell, title: 'Fitness', titleRu: 'Фитнес', color: 'text-orange-500', path: '/vendor/fitness' },
+  { id: '3', slug: 'restaurants', icon: Utensils, title: 'Restaurants', titleRu: 'Рестораны', color: 'text-amber-500', path: '/vendor/restaurants' },
+  { id: '4', slug: 'tours', icon: Calendar, title: 'Tours', titleRu: 'Туры', color: 'text-blue-500', path: '/vendor/tours' },
+  { id: '5', slug: 'yachts', icon: Ship, title: 'Yachts', titleRu: 'Яхты', color: 'text-cyan-500', path: '/vendor/yachts' },
+  { id: '6', slug: 'transport', icon: Car, title: 'Transport', titleRu: 'Транспорт', color: 'text-indigo-500', path: '/vendor/transport' },
+  { id: '7', slug: 'health', icon: Stethoscope, title: 'Health', titleRu: 'Здоровье', color: 'text-green-500', path: '/vendor/clinics' },
+  { id: '8', slug: 'education', icon: GraduationCap, title: 'Education', titleRu: 'Образование', color: 'text-purple-500', path: '/vendor/education' },
+  { id: '9', slug: 'properties', icon: Home, title: 'Properties', titleRu: 'Недвижимость', color: 'text-emerald-500', path: '/vendor/properties' },
+  { id: '10', slug: 'cleaning', icon: Brush, title: 'Cleaning', titleRu: 'Клининг', color: 'text-teal-500', path: '/vendor/cleaning' },
+  { id: '11', slug: 'childcare', icon: Baby, title: 'Childcare', titleRu: 'Няни', color: 'text-rose-500', path: '/vendor/babysitters' },
+  { id: '12', slug: 'flowers', icon: Flower2, title: 'Flowers', titleRu: 'Цветы', color: 'text-fuchsia-500', path: '/vendor/flowers' },
+  { id: '13', slug: 'events', icon: Calendar, title: 'Events', titleRu: 'Мероприятия', color: 'text-violet-500', path: '/vendor/events' },
+  { id: '14', slug: 'legal', icon: Scale, title: 'Legal', titleRu: 'Юридические', color: 'text-slate-500', path: '/vendor/legal' },
+  { id: '15', slug: 'pets', icon: PawPrint, title: 'Pets', titleRu: 'Питомцы', color: 'text-yellow-600', path: '/vendor/pets' },
 ];
 
 interface VendorCategoryGridProps {
@@ -51,18 +63,50 @@ interface VendorCategoryGridProps {
 export function VendorCategoryGrid({ serviceCounts = {} }: VendorCategoryGridProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { activeOrg } = useUserContext();
   const isRu = language === 'ru';
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const visibleCategories = isExpanded ? categories : categories.slice(0, 6);
-  const hasMore = categories.length > 6;
+  // Get verticals from org metadata
+  const orgMetadata = activeOrg?.metadata as { verticals?: string[] } | null;
+  const vendorVerticals = orgMetadata?.verticals || [];
+
+  // Filter categories based on vendor's selected verticals
+  const vendorCategories = vendorVerticals.length > 0
+    ? allCategories.filter(cat => vendorVerticals.includes(cat.slug))
+    : allCategories; // Fallback to all if none selected (shouldn't happen)
+
+  const visibleCategories = isExpanded ? vendorCategories : vendorCategories.slice(0, 6);
+  const hasMore = vendorCategories.length > 6;
+
+  if (vendorCategories.length === 0) {
+    return (
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <LayoutGrid className="h-4 w-4 text-primary" />
+            {isRu ? 'Ваши категории' : 'Your Categories'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-2 text-muted-foreground text-sm">
+            <AlertCircle className="h-4 w-4" />
+            {isRu ? 'Категории не выбраны' : 'No categories selected'}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-base flex items-center gap-2">
           <LayoutGrid className="h-4 w-4 text-primary" />
-          {isRu ? 'Категории услуг' : 'Service Categories'}
+          {isRu ? 'Ваши категории' : 'Your Categories'}
+          <Badge variant="secondary" className="ml-auto text-xs">
+            {vendorCategories.length}
+          </Badge>
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0">
@@ -74,7 +118,7 @@ export function VendorCategoryGrid({ serviceCounts = {} }: VendorCategoryGridPro
                 key={category.id}
                 variant="ghost"
                 className="h-auto flex-col gap-1.5 py-3 hover:bg-muted relative"
-                onClick={() => navigate(`/vendor/services?category=${category.slug}`)}
+                onClick={() => navigate(category.path)}
               >
                 <div className={cn(
                   "p-2 rounded-full bg-muted",
@@ -82,7 +126,7 @@ export function VendorCategoryGrid({ serviceCounts = {} }: VendorCategoryGridPro
                 )}>
                   <category.icon className="h-4 w-4" />
                 </div>
-                <span className="text-xs font-medium">
+                <span className="text-xs font-medium text-center leading-tight">
                   {isRu ? category.titleRu : category.title}
                 </span>
                 {count > 0 && (
@@ -113,7 +157,7 @@ export function VendorCategoryGrid({ serviceCounts = {} }: VendorCategoryGridPro
             ) : (
               <>
                 <ChevronDown className="h-4 w-4 mr-1" />
-                {isRu ? 'Показать все' : 'Show All'} ({categories.length - 6})
+                {isRu ? 'Показать все' : 'Show All'} ({vendorCategories.length - 6})
               </>
             )}
           </Button>
