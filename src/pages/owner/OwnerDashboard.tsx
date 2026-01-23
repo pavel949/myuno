@@ -1,24 +1,17 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { useOwnerOrders } from '@/hooks/useOwnerOrders';
-import { useOwnerChats } from '@/hooks/usePropertyChat';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Home, MessageCircle
-} from 'lucide-react';
+import { Home, MessageCircle, HelpCircle } from 'lucide-react';
 import { OwnershipInviteBanner } from '@/components/owner/OwnershipInviteBanner';
 import { 
-  TodayBlock, 
-  MoneyBlock, 
-  PropertiesBlock, 
-  RisksBlock, 
-  ActivityBlock,
-  MessagesBlock,
-  BookingsSection,
+  QuickActionsBar,
+  PortfolioSection,
+  OperationsSection,
+  FinancesSummary,
+  CommunicationsSection,
 } from '@/components/owner/dashboard';
 
 export default function OwnerDashboard() {
@@ -26,12 +19,6 @@ export default function OwnerDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const isRu = language === 'ru';
-
-  const { 
-    activeOrders, 
-    upcomingOrders, 
-  } = useOwnerOrders();
-  const { totalUnread: totalUnreadMessages } = useOwnerChats();
 
   if (!user) {
     return (
@@ -41,22 +28,24 @@ export default function OwnerDashboard() {
           showBack
           fallbackPath="/"
         />
-        <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
-          <Home className="h-16 w-16 text-muted-foreground mb-4" />
-          <h2 className="text-xl font-bold mb-2">
-            {isRu ? 'Добро пожаловать в UNO Property Care' : 'Welcome to UNO Property Care'}
+        <div className="flex flex-col items-center justify-center min-h-[50vh] text-center px-4">
+          <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
+            <Home className="h-10 w-10 text-primary" />
+          </div>
+          <h2 className="text-2xl font-bold mb-2">
+            {isRu ? 'UNO Property Care' : 'UNO Property Care'}
           </h2>
-          <p className="text-muted-foreground mb-6 max-w-sm">
+          <p className="text-muted-foreground mb-8 max-w-sm">
             {isRu 
-              ? 'Войдите или зарегистрируйтесь, чтобы управлять своей недвижимостью на Пхукете' 
-              : 'Sign in or register to manage your property in Phuket'}
+              ? 'Управляйте своей недвижимостью на Пхукете профессионально' 
+              : 'Manage your Phuket property professionally'}
           </p>
           <div className="flex flex-col gap-3 w-full max-w-xs">
-            <Button onClick={() => navigate('/auth')} size="lg">
+            <Button onClick={() => navigate('/auth')} size="lg" className="h-12">
               {isRu ? 'Войти' : 'Sign In'}
             </Button>
-            <Button variant="outline" onClick={() => navigate('/auth?mode=signup')} size="lg">
-              {isRu ? 'Зарегистрироваться как собственник' : 'Register as Owner'}
+            <Button variant="outline" onClick={() => navigate('/auth?mode=signup')} size="lg" className="h-12">
+              {isRu ? 'Создать аккаунт' : 'Create Account'}
             </Button>
           </div>
         </div>
@@ -65,70 +54,39 @@ export default function OwnerDashboard() {
   }
 
   return (
-    <PageContainer className="space-y-4">
+    <PageContainer className="space-y-6">
+      {/* Header */}
       <PageHeader 
-        title={isRu ? 'Управление' : 'Dashboard'}
+        title={isRu ? 'Мой дом' : 'My Home'}
         showBack
         fallbackPath="/"
-        actions={
-          totalUnreadMessages > 0 ? (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative"
-              onClick={() => navigate('/owner/messages')}
-            >
-              <MessageCircle className="h-5 w-5" />
-              <Badge 
-                variant="destructive" 
-                className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]"
-              >
-                {totalUnreadMessages > 9 ? '9+' : totalUnreadMessages}
-              </Badge>
-            </Button>
-          ) : undefined
-        }
       />
 
       {/* Ownership Invites Banner */}
       <OwnershipInviteBanner />
 
-      {/* Stripe-like Dashboard Grid */}
-      <div className="space-y-3">
-        {/* Row 1: Priority - Today + Risks (side by side on larger screens) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <TodayBlock />
-          <RisksBlock />
-        </div>
+      {/* Quick Actions - horizontal scroll */}
+      <QuickActionsBar />
 
-        {/* Row 2: Money (full width - key metric) */}
-        <MoneyBlock />
+      {/* Portfolio Section - Hero with properties */}
+      <PortfolioSection />
 
-        {/* Row 3: Messages (full width - communication hub) */}
-        <MessagesBlock />
+      {/* Operations Section - Today's tasks */}
+      <OperationsSection />
 
-        {/* Row 4: Properties (full width portfolio view) */}
-        <PropertiesBlock />
+      {/* Finances Summary */}
+      <FinancesSummary />
 
-        {/* Row 5: Activity (secondary info) */}
-        <ActivityBlock />
-      </div>
+      {/* Communications Section */}
+      <CommunicationsSection />
 
-      {/* Bookings Section */}
-      {(activeOrders.length > 0 || upcomingOrders.length > 0) && (
-        <BookingsSection 
-          activeOrders={activeOrders} 
-          upcomingOrders={upcomingOrders} 
-        />
-      )}
-
-      {/* Floating Help Button */}
+      {/* Help FAB */}
       <Button 
-        className="fixed bottom-20 right-4 h-12 w-12 rounded-full shadow-lg z-50"
+        className="fixed bottom-20 right-4 h-12 w-12 rounded-full shadow-lg z-40"
         size="icon"
         onClick={() => navigate('/owner/support-chat')}
       >
-        <MessageCircle className="h-5 w-5" />
+        <HelpCircle className="h-5 w-5" />
       </Button>
     </PageContainer>
   );
