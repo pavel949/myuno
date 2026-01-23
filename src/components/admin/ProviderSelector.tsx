@@ -56,7 +56,7 @@ export function ProviderSelector({
             <SelectItem key={provider.id} value={provider.id}>
               <div className="flex items-center gap-2">
                 <Building2 className="h-4 w-4 text-muted-foreground" />
-                <span>{isRussian ? provider.name_ru || provider.name_en : provider.name_en}</span>
+                <span>{provider.name}</span>
                 {!provider.is_verified && (
                   <span className="text-xs text-amber-500">
                     ({isRussian ? 'не верифицирован' : 'unverified'})

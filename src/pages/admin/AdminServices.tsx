@@ -75,9 +75,9 @@ export default function AdminServices() {
   const [formData, setFormData] = useState({
     provider_id: providerId || '',
     category_id: '',
-    name: '',
+    name_en: '',
     name_ru: '',
-    description: '',
+    description_en: '',
     description_ru: '',
     price: '',
     duration_minutes: '',
@@ -111,9 +111,9 @@ export default function AdminServices() {
     setFormData({
       provider_id: providerId || '',
       category_id: '',
-      name: '',
+      name_en: '',
       name_ru: '',
-      description: '',
+      description_en: '',
       description_ru: '',
       price: '',
       duration_minutes: '',
@@ -129,15 +129,15 @@ export default function AdminServices() {
     setFormData({
       provider_id: service.provider_id,
       category_id: service.category_id || '',
-      name: service.name,
+      name_en: service.name_en || '',
       name_ru: service.name_ru || '',
-      description: service.description || '',
+      description_en: service.description_en || '',
       description_ru: service.description_ru || '',
-      price: service.price.toString(),
+      price: service.price?.toString() || '',
       duration_minutes: service.duration_minutes?.toString() || '',
-      max_capacity: service.max_capacity.toString(),
-      is_active: service.is_active,
-      is_featured: service.is_featured,
+      max_capacity: service.max_capacity?.toString() || '1',
+      is_active: service.is_active ?? true,
+      is_featured: service.is_featured ?? false,
     });
     setIsDialogOpen(true);
   };
@@ -149,14 +149,14 @@ export default function AdminServices() {
     setEditingService(null);
     setFormData(prev => ({
       ...prev,
-      name: `${prev.name} (copy)`,
+      name_en: `${prev.name_en} (copy)`,
       name_ru: prev.name_ru ? `${prev.name_ru} (копия)` : '',
     }));
     toast.info(isRussian ? 'Создание копии...' : 'Creating a copy...');
   }, [editingService, isRussian]);
 
   const handleSubmit = async () => {
-    if (!formData.name || !formData.price || !formData.provider_id) {
+    if (!formData.name_en || !formData.price || !formData.provider_id) {
       toast.error(isRussian ? 'Заполните обязательные поля' : 'Please fill required fields');
       return;
     }
@@ -166,9 +166,9 @@ export default function AdminServices() {
       const serviceData = {
         provider_id: formData.provider_id,
         category_id: formData.category_id || undefined,
-        name: formData.name,
-        name_ru: formData.name_ru || undefined,
-        description: formData.description || undefined,
+        name_en: formData.name_en,
+        name_ru: formData.name_ru || formData.name_en,
+        description_en: formData.description_en || undefined,
         description_ru: formData.description_ru || undefined,
         price: parseFloat(formData.price),
         currency: 'THB',
@@ -216,11 +216,11 @@ export default function AdminServices() {
   const handleAutoTranslate = async () => {
     const fieldsToTranslate: Record<string, string> = {};
     
-    if (formData.name && !formData.name_ru) {
-      fieldsToTranslate.name = formData.name;
+    if (formData.name_en && !formData.name_ru) {
+      fieldsToTranslate.name = formData.name_en;
     }
-    if (formData.description && !formData.description_ru) {
-      fieldsToTranslate.description = formData.description;
+    if (formData.description_en && !formData.description_ru) {
+      fieldsToTranslate.description = formData.description_en;
     }
     
     if (Object.keys(fieldsToTranslate).length === 0) {
@@ -243,8 +243,8 @@ export default function AdminServices() {
 
   // Form progress tracking
   const { progress, filled, total } = useFormProgress(formData, 
-    ['provider_id', 'name', 'price'],
-    ['name_ru', 'description', 'description_ru', 'duration_minutes']
+    ['provider_id', 'name_en', 'price'],
+    ['name_ru', 'description_en', 'description_ru', 'duration_minutes']
   );
 
   // Hotkeys
@@ -256,15 +256,13 @@ export default function AdminServices() {
   });
 
   const filteredServices = services.filter(s => 
-    s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    s.name_en?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     s.name_ru?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const getProviderName = (providerId: string) => {
-    const provider = providers.find(p => p.id === providerId);
-    return isRussian 
-      ? (provider?.business_name_ru || provider?.business_name || 'Unknown')
-      : (provider?.business_name || 'Unknown');
+  const getProviderName = (providerIdValue: string) => {
+    const provider = providers.find(p => p.id === providerIdValue);
+    return provider?.name || 'Unknown';
   };
 
   if (authLoading || adminLoading) {
@@ -375,7 +373,7 @@ export default function AdminServices() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-medium">
-                          {isRussian ? (service.name_ru || service.name) : service.name}
+                          {isRussian ? (service.name_ru || service.name_en) : service.name_en}
                         </h3>
                         {service.is_featured && (
                           <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
@@ -389,15 +387,15 @@ export default function AdminServices() {
                         </div>
                       )}
 
-                      {service.description && (
+                      {service.description_en && (
                         <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                          {isRussian ? (service.description_ru || service.description) : service.description}
+                          {isRussian ? (service.description_ru || service.description_en) : service.description_en}
                         </p>
                       )}
                       
                       <div className="flex items-center gap-4 text-sm">
                         <span className="font-bold text-primary">
-                          ฿{service.price.toLocaleString()}
+                          ฿{service.price?.toLocaleString()}
                         </span>
                         {service.duration_minutes && (
                           <span className="flex items-center gap-1 text-muted-foreground">
@@ -513,8 +511,8 @@ export default function AdminServices() {
               <div className="space-y-2">
                 <Label>{isRussian ? 'Название (EN) *' : 'Name (EN) *'}</Label>
                 <Input
-                  value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  value={formData.name_en}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name_en: e.target.value }))}
                   placeholder="Thai Massage"
                 />
               </div>
@@ -531,8 +529,8 @@ export default function AdminServices() {
               <div className="space-y-2">
                 <Label>{isRussian ? 'Описание (EN)' : 'Description (EN)'}</Label>
                 <Textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  value={formData.description_en}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description_en: e.target.value }))}
                   rows={2}
                 />
               </div>
