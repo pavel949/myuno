@@ -62,8 +62,8 @@ const vendorNavItems: NavItem[] = [
 const adminNavItems: NavItem[] = [
   { path: '/admin', icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
   { path: '/admin/moderation', icon: FileCheck, labelEn: 'Moderation', labelRu: 'Модерация' },
-  { path: '/admin/users', icon: Users, labelEn: 'Users', labelRu: 'Юзеры' },
-  { path: '/admin/settings', icon: Settings, labelEn: 'Settings', labelRu: 'Настройки' },
+  { path: '/admin/analytics', icon: BarChart3, labelEn: 'Analytics', labelRu: 'Аналитика' },
+  { path: '/admin/providers', icon: Users, labelEn: 'Providers', labelRu: 'Провайдеры' },
   { path: '/profile', icon: User, labelEn: 'Profile', labelRu: 'Профиль' },
 ];
 
