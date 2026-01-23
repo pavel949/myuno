@@ -266,6 +266,7 @@ export function useVendorProfile() {
     description?: string;
     description_ru?: string;
     business_category: string;
+    verticals?: string[]; // Multiple selected verticals
     phone?: string;
     email?: string;
     website?: string;
@@ -299,7 +300,7 @@ export function useVendorProfile() {
 
       if (providerError) throw providerError;
 
-      // 2. Create org in new Clean Core system
+      // 2. Create org in new Clean Core system with verticals in metadata
       const { data: orgData, error: orgError } = await supabase
         .from('orgs')
         .insert({
@@ -311,7 +312,10 @@ export function useVendorProfile() {
           address: profileData.address || null,
           is_verified: false,
           is_active: true,
-          metadata: { legacy_provider_id: providerData.id },
+          metadata: { 
+            legacy_provider_id: providerData.id,
+            verticals: profileData.verticals || [profileData.business_category],
+          },
         })
         .select()
         .single();

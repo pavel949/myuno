@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { 
   Store, 
@@ -22,23 +22,41 @@ import {
   Mail,
   Globe,
   MapPin,
-  Loader2
+  Loader2,
+  Utensils,
+  Car,
+  Sparkles,
+  Stethoscope,
+  GraduationCap,
+  Brush,
+  Baby,
+  Flower2,
+  Ship,
+  Home,
+  Calendar,
+  Dumbbell,
+  Scale,
+  PawPrint
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-const businessCategories = [
-  { value: 'beauty', labelEn: 'Beauty & Spa', labelRu: 'Красота и спа' },
-  { value: 'fitness', labelEn: 'Fitness & Sports', labelRu: 'Фитнес и спорт' },
-  { value: 'food', labelEn: 'Food & Restaurant', labelRu: 'Еда и рестораны' },
-  { value: 'tours', labelEn: 'Tours & Excursions', labelRu: 'Туры и экскурсии' },
-  { value: 'water', labelEn: 'Water Activities', labelRu: 'Водные активности' },
-  { value: 'medical', labelEn: 'Medical & Health', labelRu: 'Медицина и здоровье' },
-  { value: 'education', labelEn: 'Education', labelRu: 'Образование' },
-  { value: 'transport', labelEn: 'Transport', labelRu: 'Транспорт' },
-  { value: 'property', labelEn: 'Property', labelRu: 'Недвижимость' },
-  { value: 'services', labelEn: 'Home Services', labelRu: 'Бытовые услуги' },
-  { value: 'flowers', labelEn: 'Flowers & Gifts', labelRu: 'Цветы и подарки' },
-  { value: 'events', labelEn: 'Events', labelRu: 'Мероприятия' },
-  { value: 'other', labelEn: 'Other', labelRu: 'Другое' },
+// All available verticals for vendor selection
+const availableVerticals = [
+  { value: 'beauty', labelEn: 'Beauty & Spa', labelRu: 'Красота и спа', icon: Sparkles, color: 'text-pink-500' },
+  { value: 'fitness', labelEn: 'Fitness & Sports', labelRu: 'Фитнес и спорт', icon: Dumbbell, color: 'text-orange-500' },
+  { value: 'restaurants', labelEn: 'Restaurants', labelRu: 'Рестораны', icon: Utensils, color: 'text-amber-500' },
+  { value: 'tours', labelEn: 'Tours & Excursions', labelRu: 'Туры и экскурсии', icon: Calendar, color: 'text-blue-500' },
+  { value: 'yachts', labelEn: 'Yachts & Water', labelRu: 'Яхты и водные', icon: Ship, color: 'text-cyan-500' },
+  { value: 'transport', labelEn: 'Transport', labelRu: 'Транспорт', icon: Car, color: 'text-indigo-500' },
+  { value: 'health', labelEn: 'Medical & Health', labelRu: 'Медицина и здоровье', icon: Stethoscope, color: 'text-green-500' },
+  { value: 'education', labelEn: 'Education', labelRu: 'Образование', icon: GraduationCap, color: 'text-purple-500' },
+  { value: 'properties', labelEn: 'Properties', labelRu: 'Недвижимость', icon: Home, color: 'text-emerald-500' },
+  { value: 'cleaning', labelEn: 'Cleaning', labelRu: 'Клининг', icon: Brush, color: 'text-teal-500' },
+  { value: 'childcare', labelEn: 'Childcare', labelRu: 'Няни и уход', icon: Baby, color: 'text-rose-500' },
+  { value: 'flowers', labelEn: 'Flowers & Gifts', labelRu: 'Цветы и подарки', icon: Flower2, color: 'text-fuchsia-500' },
+  { value: 'events', labelEn: 'Events', labelRu: 'Мероприятия', icon: Calendar, color: 'text-violet-500' },
+  { value: 'legal', labelEn: 'Legal Services', labelRu: 'Юридические услуги', icon: Scale, color: 'text-slate-500' },
+  { value: 'pets', labelEn: 'Pet Services', labelRu: 'Услуги для питомцев', icon: PawPrint, color: 'text-yellow-600' },
 ];
 
 const VendorOnboarding = () => {
@@ -56,7 +74,7 @@ const VendorOnboarding = () => {
     business_name_ru: '',
     description: '',
     description_ru: '',
-    business_category: '',
+    selected_verticals: [] as string[],
     phone: '',
     email: user?.email || '',
     website: '',
@@ -84,11 +102,20 @@ const VendorOnboarding = () => {
     }));
   };
 
+  const handleVerticalToggle = (vertical: string) => {
+    setFormData(prev => ({
+      ...prev,
+      selected_verticals: prev.selected_verticals.includes(vertical)
+        ? prev.selected_verticals.filter(v => v !== vertical)
+        : [...prev.selected_verticals, vertical],
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.business_name || !formData.business_category) {
-      toast.error(isRussian ? 'Заполните обязательные поля' : 'Please fill required fields');
+    if (!formData.business_name || formData.selected_verticals.length === 0) {
+      toast.error(isRussian ? 'Заполните название и выберите хотя бы одну категорию' : 'Please fill business name and select at least one category');
       return;
     }
 
@@ -100,7 +127,8 @@ const VendorOnboarding = () => {
         business_name_ru: formData.business_name_ru || undefined,
         description: formData.description || undefined,
         description_ru: formData.description_ru || undefined,
-        business_category: formData.business_category,
+        business_category: formData.selected_verticals[0], // Primary category for legacy
+        verticals: formData.selected_verticals, // All selected verticals
         phone: formData.phone || undefined,
         email: formData.email || undefined,
         website: formData.website || undefined,
@@ -195,25 +223,49 @@ const VendorOnboarding = () => {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="business_category">
-                  {isRussian ? 'Категория *' : 'Category *'}
+              <div className="space-y-3">
+                <Label>
+                  {isRussian ? 'Выберите категории услуг *' : 'Select service categories *'}
                 </Label>
-                <Select
-                  value={formData.business_category}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, business_category: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={isRussian ? 'Выберите категорию' : 'Select category'} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {businessCategories.map(cat => (
-                      <SelectItem key={cat.value} value={cat.value}>
-                        {isRussian ? cat.labelRu : cat.labelEn}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {isRussian 
+                    ? 'Отметьте все категории, в которых вы предоставляете услуги' 
+                    : 'Check all categories in which you provide services'}
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {availableVerticals.map((vertical) => {
+                    const Icon = vertical.icon;
+                    const isSelected = formData.selected_verticals.includes(vertical.value);
+                    return (
+                      <div
+                        key={vertical.value}
+                        className={cn(
+                          "flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer transition-all",
+                          isSelected 
+                            ? "border-primary bg-primary/5" 
+                            : "border-border hover:border-primary/50"
+                        )}
+                        onClick={() => handleVerticalToggle(vertical.value)}
+                      >
+                        <Checkbox
+                          checked={isSelected}
+                          onCheckedChange={() => handleVerticalToggle(vertical.value)}
+                        />
+                        <Icon className={cn("h-4 w-4", vertical.color)} />
+                        <span className="text-xs font-medium flex-1">
+                          {isRussian ? vertical.labelRu : vertical.labelEn}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                {formData.selected_verticals.length > 0 && (
+                  <p className="text-xs text-primary">
+                    {isRussian 
+                      ? `Выбрано: ${formData.selected_verticals.length}` 
+                      : `Selected: ${formData.selected_verticals.length}`}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
