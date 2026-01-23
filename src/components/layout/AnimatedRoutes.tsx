@@ -4,10 +4,12 @@ import { AnimatePresence } from 'framer-motion';
 import { PageTransition } from './PageTransition';
 import { ScrollToTop } from './ScrollToTop';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
-import { AdminGuard, VendorGuard, OwnerGuard, TeamGuard } from '@/components/auth/RoleGuard';
+import { AdminGuard, VendorGuard, OwnerGuard, TeamGuard, AuthGuard } from '@/components/auth/RoleGuard';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { AdaptiveBottomNav } from './AdaptiveBottomNav';
 import { OwnerLayout } from '@/components/owner/OwnerLayout';
+import { VendorLayout } from '@/components/vendor/VendorLayout';
+import { GuestLayout } from '@/components/guest/GuestLayout';
 
 // Core pages - load eagerly for fast initial navigation
 import Index from '@/pages/Index';
@@ -232,6 +234,28 @@ const AdminRouteLayout = () => (
       </Suspense>
     </AdminLayout>
   </AdminGuard>
+);
+
+// Vendor route wrapper with layout
+const VendorRouteLayout = () => (
+  <VendorGuard>
+    <VendorLayout>
+      <Suspense fallback={<LoadingState />}>
+        <Outlet />
+      </Suspense>
+    </VendorLayout>
+  </VendorGuard>
+);
+
+// Guest route wrapper with layout
+const GuestRouteLayout = () => (
+  <AuthGuard>
+    <GuestLayout>
+      <Suspense fallback={<LoadingState />}>
+        <Outlet />
+      </Suspense>
+    </GuestLayout>
+  </AuthGuard>
 );
 
 // Support pages (user tickets)
@@ -581,38 +605,44 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/team" element={<LazyPage><TeamGuard><TeamDashboard /></TeamGuard></LazyPage>} />
         <Route path="/team/content" element={<LazyPage><TeamGuard><TeamContentHub /></TeamGuard></LazyPage>} />
         
-        {/* Guest Routes */}
-        <Route path="/my-stay" element={<LazyPage><MyStay /></LazyPage>} />
-        <Route path="/guest/check-in/:bookingId" element={<LazyPage><GuestCheckIn /></LazyPage>} />
-        <Route path="/guest/guidebook/:propertyId" element={<LazyPage><GuestGuidebook /></LazyPage>} />
+        {/* Guest Routes - Protected with GuestLayout */}
+        <Route element={<GuestRouteLayout />}>
+          <Route path="/my-stay" element={<MyStay />} />
+          <Route path="/guest/check-in/:bookingId" element={<GuestCheckIn />} />
+          <Route path="/guest/guidebook/:propertyId" element={<GuestGuidebook />} />
+        </Route>
         
         {/* Provider Onboarding - Public */}
         <Route path="/provider/onboarding" element={<LazyPage><ProviderOnboarding /></LazyPage>} />
 
-        {/* Vendor Routes - Protected */}
-        <Route path="/vendor" element={<LazyPage><VendorGuard><VendorDashboard /></VendorGuard></LazyPage>} />
+        {/* Vendor Onboarding - Public */}
         <Route path="/vendor/onboarding" element={<LazyPage><VendorOnboarding /></LazyPage>} />
-        <Route path="/vendor/bookings" element={<LazyPage><VendorGuard><VendorBookings /></VendorGuard></LazyPage>} />
-        <Route path="/vendor/services" element={<LazyPage><VendorGuard><VendorServices /></VendorGuard></LazyPage>} />
-        <Route path="/vendor/analytics" element={<LazyPage><VendorGuard><VendorAnalytics /></VendorGuard></LazyPage>} />
-        <Route path="/vendor/payouts" element={<LazyPage><VendorGuard><VendorPayouts /></VendorGuard></LazyPage>} />
-        <Route path="/vendor/properties" element={<LazyPage><VendorGuard><VendorProperties /></VendorGuard></LazyPage>} />
-        <Route path="/vendor/tours" element={<LazyPage><VendorGuard><VendorTours /></VendorGuard></LazyPage>} />
-        <Route path="/vendor/activities" element={<LazyPage><VendorGuard><VendorActivities /></VendorGuard></LazyPage>} />
-        <Route path="/vendor/yachts" element={<LazyPage><VendorGuard><VendorYachts /></VendorGuard></LazyPage>} />
-        <Route path="/vendor/transport" element={<LazyPage><VendorGuard><VendorTransport /></VendorGuard></LazyPage>} />
-        <Route path="/vendor/beauty" element={<LazyPage><VendorGuard><VendorBeauty /></VendorGuard></LazyPage>} />
-        <Route path="/vendor/fitness" element={<LazyPage><VendorGuard><VendorFitness /></VendorGuard></LazyPage>} />
-        <Route path="/vendor/clinics" element={<LazyPage><VendorGuard><VendorClinics /></VendorGuard></LazyPage>} />
-        <Route path="/vendor/subscription" element={<LazyPage><VendorGuard><VendorSubscription /></VendorGuard></LazyPage>} />
-        <Route path="/vendor/restaurants" element={<LazyPage><VendorGuard><VendorRestaurants /></VendorGuard></LazyPage>} />
-        <Route path="/vendor/events" element={<LazyPage><VendorGuard><VendorEvents /></VendorGuard></LazyPage>} />
-        <Route path="/vendor/education" element={<LazyPage><VendorGuard><VendorEducation /></VendorGuard></LazyPage>} />
-        <Route path="/vendor/legal" element={<LazyPage><VendorGuard><VendorLegal /></VendorGuard></LazyPage>} />
-        <Route path="/vendor/pets" element={<LazyPage><VendorGuard><VendorPets /></VendorGuard></LazyPage>} />
-        <Route path="/vendor/cleaning" element={<LazyPage><VendorGuard><VendorCleaning /></VendorGuard></LazyPage>} />
-        <Route path="/vendor/babysitters" element={<LazyPage><VendorGuard><VendorBabysitters /></VendorGuard></LazyPage>} />
-        <Route path="/vendor/flowers" element={<LazyPage><VendorGuard><VendorFlowers /></VendorGuard></LazyPage>} />
+        
+        {/* Vendor Routes - Protected with VendorLayout */}
+        <Route element={<VendorRouteLayout />}>
+          <Route path="/vendor" element={<VendorDashboard />} />
+          <Route path="/vendor/bookings" element={<VendorBookings />} />
+          <Route path="/vendor/services" element={<VendorServices />} />
+          <Route path="/vendor/analytics" element={<VendorAnalytics />} />
+          <Route path="/vendor/payouts" element={<VendorPayouts />} />
+          <Route path="/vendor/properties" element={<VendorProperties />} />
+          <Route path="/vendor/tours" element={<VendorTours />} />
+          <Route path="/vendor/activities" element={<VendorActivities />} />
+          <Route path="/vendor/yachts" element={<VendorYachts />} />
+          <Route path="/vendor/transport" element={<VendorTransport />} />
+          <Route path="/vendor/beauty" element={<VendorBeauty />} />
+          <Route path="/vendor/fitness" element={<VendorFitness />} />
+          <Route path="/vendor/clinics" element={<VendorClinics />} />
+          <Route path="/vendor/subscription" element={<VendorSubscription />} />
+          <Route path="/vendor/restaurants" element={<VendorRestaurants />} />
+          <Route path="/vendor/events" element={<VendorEvents />} />
+          <Route path="/vendor/education" element={<VendorEducation />} />
+          <Route path="/vendor/legal" element={<VendorLegal />} />
+          <Route path="/vendor/pets" element={<VendorPets />} />
+          <Route path="/vendor/cleaning" element={<VendorCleaning />} />
+          <Route path="/vendor/babysitters" element={<VendorBabysitters />} />
+          <Route path="/vendor/flowers" element={<VendorFlowers />} />
+        </Route>
         
         {/* Owner Landing - Public */}
         <Route path="/owner/landing" element={<LazyPage><OwnerLanding /></LazyPage>} />
