@@ -10475,6 +10475,156 @@ export type Database = {
           },
         ]
       }
+      vendor_location_services: {
+        Row: {
+          created_at: string
+          currency_override: string | null
+          duration_override: number | null
+          id: string
+          is_active: boolean | null
+          location_id: string
+          price_override: number | null
+          service_id: string
+        }
+        Insert: {
+          created_at?: string
+          currency_override?: string | null
+          duration_override?: number | null
+          id?: string
+          is_active?: boolean | null
+          location_id: string
+          price_override?: number | null
+          service_id: string
+        }
+        Update: {
+          created_at?: string
+          currency_override?: string | null
+          duration_override?: number | null
+          id?: string
+          is_active?: boolean | null
+          location_id?: string
+          price_override?: number | null
+          service_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_location_services_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_location_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_locations: {
+        Row: {
+          address: string
+          address_ru: string | null
+          approval_status: string | null
+          city_id: string | null
+          cover_image: string | null
+          created_at: string
+          description: string | null
+          description_ru: string | null
+          district: string | null
+          email: string | null
+          id: string
+          images: string[] | null
+          is_active: boolean | null
+          lat: number | null
+          lng: number | null
+          name: string
+          name_ru: string | null
+          org_id: string
+          phone: string | null
+          rating: number | null
+          rejection_reason: string | null
+          review_count: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          updated_at: string
+          working_hours: Json | null
+        }
+        Insert: {
+          address: string
+          address_ru?: string | null
+          approval_status?: string | null
+          city_id?: string | null
+          cover_image?: string | null
+          created_at?: string
+          description?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          name: string
+          name_ru?: string | null
+          org_id: string
+          phone?: string | null
+          rating?: number | null
+          rejection_reason?: string | null
+          review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          updated_at?: string
+          working_hours?: Json | null
+        }
+        Update: {
+          address?: string
+          address_ru?: string | null
+          approval_status?: string | null
+          city_id?: string | null
+          cover_image?: string | null
+          created_at?: string
+          description?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          name?: string
+          name_ru?: string | null
+          org_id?: string
+          phone?: string | null
+          rating?: number | null
+          rejection_reason?: string | null
+          review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          updated_at?: string
+          working_hours?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_locations_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_locations_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendor_payouts: {
         Row: {
           amount: number
