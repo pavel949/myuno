@@ -276,30 +276,72 @@ export function useVendorProfile() {
   }) => {
     if (!user) return { error: new Error('Not authenticated') };
 
-    // Map to providers table structure
-    const { data, error } = await supabase
-      .from('providers')
-      .insert({
-        user_id: user.id,
-        name: profileData.business_name,
-        description_en: profileData.description,
-        description_ru: profileData.description_ru,
-        business_category: profileData.business_category,
-        phone: profileData.phone,
-        email: profileData.email,
-        website: profileData.website,
-        address: profileData.address,
-        commission_rate: profileData.commission_rate || 10,
-        is_verified: profileData.is_verified || false,
-        is_active: profileData.is_active !== false,
-      })
-      .select()
-      .single();
+    try {
+      // 1. Create provider in legacy table
+      const { data: providerData, error: providerError } = await supabase
+        .from('providers')
+        .insert({
+          user_id: user.id,
+          name: profileData.business_name,
+          description_en: profileData.description,
+          description_ru: profileData.description_ru,
+          business_category: profileData.business_category,
+          phone: profileData.phone,
+          email: profileData.email,
+          website: profileData.website,
+          address: profileData.address,
+          commission_rate: profileData.commission_rate || 10,
+          is_verified: profileData.is_verified || false,
+          is_active: profileData.is_active !== false,
+        })
+        .select()
+        .single();
 
-    if (!error && data) {
+      if (providerError) throw providerError;
+
+      // 2. Create org in new Clean Core system
+      const { data: orgData, error: orgError } = await supabase
+        .from('orgs')
+        .insert({
+          org_type: 'vendor',
+          name: profileData.business_name,
+          name_ru: profileData.business_name_ru || profileData.business_name,
+          phone: profileData.phone || null,
+          email: profileData.email || null,
+          address: profileData.address || null,
+          is_verified: false,
+          is_active: true,
+          metadata: { legacy_provider_id: providerData.id },
+        })
+        .select()
+        .single();
+
+      if (orgError) throw orgError;
+
+      // 3. Add current user as org owner
+      const { error: memberError } = await supabase
+        .from('org_members')
+        .insert({
+          org_id: orgData.id,
+          user_id: user.id,
+          role: 'owner',
+          is_active: true,
+        });
+
+      if (memberError) throw memberError;
+
+      // 4. Add vendor role to user if not exists
+      await supabase
+        .from('user_roles')
+        .upsert({ user_id: user.id, role: 'vendor' }, { onConflict: 'user_id,role' })
+        .select();
+
       await fetchProfile();
+      return { data: providerData, error: null };
+    } catch (error) {
+      console.error('Error creating vendor profile:', error);
+      return { data: null, error: error as Error };
     }
-    return { data, error };
   };
 
   return { profile, isLoading, error, updateProfile, createProfile, refetch: fetchProfile };
