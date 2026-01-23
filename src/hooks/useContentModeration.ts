@@ -28,6 +28,7 @@ export interface PendingContent {
   title: string;
   provider_name: string;
   provider_id: string | null;
+  owner_user_id: string | null; // The user ID to send notifications to
   created_at: string;
   cover_image: string | null;
   approval_status: ApprovalStatus;
@@ -111,6 +112,7 @@ export function useContentModeration() {
               title: item.title || 'Untitled',
               provider_name: 'Owner',
               provider_id: item.owner_id,
+              owner_user_id: item.owner_id, // For owner_properties, owner_id IS the user_id
               created_at: item.created_at,
               cover_image: item.cover_image,
               approval_status: item.approval_status as ApprovalStatus,
@@ -132,7 +134,8 @@ export function useContentModeration() {
           created_at,
           approval_status,
           providers:provider_id (
-            name
+            name,
+            user_id
           )
         `;
         
@@ -146,7 +149,8 @@ export function useContentModeration() {
             photo,
             approval_status,
             providers:provider_id (
-              name
+              name,
+              user_id
             )
           `;
         } else {
@@ -158,7 +162,8 @@ export function useContentModeration() {
             cover_image,
             approval_status,
             providers:provider_id (
-              name
+              name,
+              user_id
             )
           `;
         }
@@ -181,6 +186,7 @@ export function useContentModeration() {
             title: item[titleColumn] || 'Untitled',
             provider_name: item.providers?.name || 'Unknown',
             provider_id: item.provider_id,
+            owner_user_id: item.providers?.user_id || null, // Get user_id from provider
             created_at: item.created_at,
             cover_image: item.cover_image || item.photo || null,
             approval_status: item.approval_status as ApprovalStatus,
@@ -224,10 +230,74 @@ export function useContentModeration() {
     }
   }, []);
 
+  // Send in-app notification to content owner/provider
+  const sendModerationNotification = useCallback(async (
+    contentType: ContentType,
+    contentId: string,
+    action: 'approved' | 'rejected' | 'info_requested',
+    contentTitle: string,
+    recipientId: string | null,
+    message?: string
+  ) => {
+    if (!recipientId) {
+      console.warn('No recipient ID for notification');
+      return;
+    }
+
+    const typeLabel = getContentTypeLabel(contentType, 'ru');
+    
+    let title: string;
+    let body: string;
+    let notificationType: string;
+
+    switch (action) {
+      case 'approved':
+        title = '✅ Ваш контент одобрен';
+        body = `${typeLabel} "${contentTitle}" успешно прошёл модерацию и теперь доступен пользователям.`;
+        notificationType = 'content_approved';
+        break;
+      case 'rejected':
+        title = '❌ Контент отклонён';
+        body = `${typeLabel} "${contentTitle}" не прошёл модерацию. Причина: ${message || 'Не указана'}`;
+        notificationType = 'content_rejected';
+        break;
+      case 'info_requested':
+        title = '📋 Требуется дополнительная информация';
+        body = `По вашему ${typeLabel.toLowerCase()} "${contentTitle}" запрошена информация: ${message || ''}`;
+        notificationType = 'content_info_requested';
+        break;
+    }
+
+    try {
+      const { error } = await supabase.from('notifications').insert({
+        user_id: recipientId,
+        title,
+        body,
+        type: notificationType,
+        data: {
+          content_type: contentType,
+          content_id: contentId,
+          content_title: contentTitle,
+          action,
+          message
+        },
+        is_read: false
+      });
+
+      if (error) {
+        console.error('Failed to send notification:', error);
+      }
+    } catch (err) {
+      console.error('Notification error:', err);
+    }
+  }, []);
+
   const approveContent = useCallback(async (
     contentType: ContentType,
     contentId: string,
-    reviewerId: string
+    reviewerId: string,
+    contentTitle?: string,
+    ownerId?: string | null
   ) => {
     try {
       // Build update payload based on table structure
@@ -257,6 +327,17 @@ export function useContentModeration() {
         sendPropertyModerationEmail(contentId, 'approved');
       }
 
+      // Send in-app notification to owner/provider
+      if (ownerId && contentTitle) {
+        sendModerationNotification(
+          contentType,
+          contentId,
+          'approved',
+          contentTitle,
+          ownerId
+        );
+      }
+
       toast({
         title: '✅ Approved',
         description: 'Content has been approved and is now visible to users',
@@ -272,15 +353,20 @@ export function useContentModeration() {
       });
       return false;
     }
-  }, [toast, sendPropertyModerationEmail]);
+  }, [toast, sendPropertyModerationEmail, sendModerationNotification]);
 
   const rejectContent = useCallback(async (
     contentType: ContentType,
     contentId: string,
     reviewerId: string,
-    rejectionReason: string
+    rejectionReason: string,
+    contentTitle?: string,
+    ownerId?: string | null
   ) => {
     try {
+      // Determine if this is an info request or rejection
+      const isInfoRequest = rejectionReason.startsWith('[ЗАПРОС ИНФОРМАЦИИ / INFO REQUEST]:');
+      
       // Build update payload based on table structure
       // owner_properties uses approved_by/approved_at, others use reviewed_by/reviewed_at
       const updatePayload = contentType === 'owner_properties'
@@ -309,9 +395,27 @@ export function useContentModeration() {
         sendPropertyModerationEmail(contentId, 'rejected', rejectionReason);
       }
 
+      // Send in-app notification to owner/provider
+      if (ownerId && contentTitle) {
+        const cleanMessage = isInfoRequest 
+          ? rejectionReason.replace('[ЗАПРОС ИНФОРМАЦИИ / INFO REQUEST]: ', '')
+          : rejectionReason;
+        
+        sendModerationNotification(
+          contentType,
+          contentId,
+          isInfoRequest ? 'info_requested' : 'rejected',
+          contentTitle,
+          ownerId,
+          cleanMessage
+        );
+      }
+
       toast({
-        title: '❌ Rejected',
-        description: 'Content has been rejected. Vendor will be notified.',
+        title: isInfoRequest ? '📋 Info Requested' : '❌ Rejected',
+        description: isInfoRequest 
+          ? 'Request sent to vendor for additional information.'
+          : 'Content has been rejected. Vendor will be notified.',
       });
 
       return true;
@@ -324,7 +428,7 @@ export function useContentModeration() {
       });
       return false;
     }
-  }, [toast, sendPropertyModerationEmail]);
+  }, [toast, sendPropertyModerationEmail, sendModerationNotification]);
 
   const getContentDetails = useCallback(async (
     contentType: ContentType,

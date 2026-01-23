@@ -87,7 +87,13 @@ export default function AdminContentModeration() {
   const handleApprove = async (item: PendingContent) => {
     if (!user) return;
     setIsProcessing(true);
-    const success = await approveContent(item.content_type, item.id, user.id);
+    const success = await approveContent(
+      item.content_type, 
+      item.id, 
+      user.id,
+      item.title,
+      item.owner_user_id
+    );
     if (success) {
       fetchPendingContent(activeTab, typeFilter === 'all' ? undefined : typeFilter);
       setIsViewDialogOpen(false);
@@ -117,7 +123,9 @@ export default function AdminContentModeration() {
       selectedItem.content_type,
       selectedItem.id,
       user.id,
-      `[ЗАПРОС ИНФОРМАЦИИ / INFO REQUEST]: ${requestInfoMessage}`
+      `[ЗАПРОС ИНФОРМАЦИИ / INFO REQUEST]: ${requestInfoMessage}`,
+      selectedItem.title,
+      selectedItem.owner_user_id
     );
     
     if (success) {
@@ -135,7 +143,9 @@ export default function AdminContentModeration() {
       selectedItem.content_type, 
       selectedItem.id, 
       user.id, 
-      rejectionReason
+      rejectionReason,
+      selectedItem.title,
+      selectedItem.owner_user_id
     );
     if (success) {
       fetchPendingContent(activeTab, typeFilter === 'all' ? undefined : typeFilter);
