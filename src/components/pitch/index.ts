@@ -1,6 +1,7 @@
 export * from './PitchSlide';
 export * from './DemoModeControls';
 export * from './SlideIndicators';
+export * from './MobilePitchDeck';
 export * from './slides/HeroSlide';
 export * from './slides/ProblemSlide';
 export * from './slides/SolutionSlide';
@@ -11,3 +12,6 @@ export * from './slides/CompetitorSlide';
 export * from './slides/BusinessModelSlide';
 export * from './slides/FinancialsSlide';
 export * from './slides/TeamAskSlide';
+
+// Re-export slides for convenience
+export * as slides from './slides';
