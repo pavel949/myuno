@@ -1,0 +1,126 @@
+import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { 
+  Plus, UserPlus, Home, Ship, Utensils, FileText, 
+  BarChart3, Settings, Users, DollarSign, Ticket,
+  MessageSquare
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+const QUICK_ACTIONS = [
+  { 
+    id: 'moderation', 
+    icon: FileText, 
+    label: 'Moderation', 
+    labelRu: 'Модерация', 
+    href: '/admin/moderation',
+    variant: 'primary' as const,
+  },
+  { 
+    id: 'leads', 
+    icon: MessageSquare, 
+    label: 'Leads', 
+    labelRu: 'Лиды', 
+    href: '/admin/leads',
+    variant: 'primary' as const,
+  },
+  { 
+    id: 'add-provider', 
+    icon: UserPlus, 
+    label: 'Add Provider', 
+    labelRu: '+ Провайдер', 
+    href: '/admin/providers?action=new',
+  },
+  { 
+    id: 'add-property', 
+    icon: Home, 
+    label: 'Add Property', 
+    labelRu: '+ Объект', 
+    href: '/admin/properties?action=new',
+  },
+  { 
+    id: 'add-yacht', 
+    icon: Ship, 
+    label: 'Add Yacht', 
+    labelRu: '+ Яхта', 
+    href: '/admin/yachts?action=new',
+  },
+  { 
+    id: 'add-restaurant', 
+    icon: Utensils, 
+    label: 'Add Restaurant', 
+    labelRu: '+ Ресторан', 
+    href: '/admin/restaurants?action=new',
+  },
+  { 
+    id: 'analytics', 
+    icon: BarChart3, 
+    label: 'Analytics', 
+    labelRu: 'Аналитика', 
+    href: '/admin/analytics',
+  },
+  { 
+    id: 'finance', 
+    icon: DollarSign, 
+    label: 'Finance', 
+    labelRu: 'Финансы', 
+    href: '/admin/finance',
+  },
+  { 
+    id: 'tickets', 
+    icon: Ticket, 
+    label: 'Tickets', 
+    labelRu: 'Тикеты', 
+    href: '/admin/tickets',
+  },
+  { 
+    id: 'team', 
+    icon: Users, 
+    label: 'Team', 
+    labelRu: 'Команда', 
+    href: '/admin/uno-team',
+  },
+];
+
+export function AdminQuickActionsGrid() {
+  const navigate = useNavigate();
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
+
+  return (
+    <Card className="p-4">
+      <div className="flex items-center gap-2 mb-3">
+        <Plus className="h-4 w-4 text-muted-foreground" />
+        <h3 className="text-sm font-medium">
+          {isRu ? 'Быстрые действия' : 'Quick Actions'}
+        </h3>
+      </div>
+      <div className="grid grid-cols-5 gap-2">
+        {QUICK_ACTIONS.map((action) => {
+          const Icon = action.icon;
+          const isPrimary = action.variant === 'primary';
+          
+          return (
+            <Button
+              key={action.id}
+              variant={isPrimary ? 'default' : 'outline'}
+              size="sm"
+              className={cn(
+                "h-auto py-2.5 px-2 flex flex-col items-center gap-1.5",
+                isPrimary && "bg-primary hover:bg-primary/90"
+              )}
+              onClick={() => navigate(action.href)}
+            >
+              <Icon className="h-4 w-4" />
+              <span className="text-[10px] font-medium leading-tight text-center">
+                {isRu ? action.labelRu : action.label}
+              </span>
+            </Button>
+          );
+        })}
+      </div>
+    </Card>
+  );
+}

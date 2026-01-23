@@ -1,10 +1,11 @@
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { 
-  AdminTodayBlock,
-  AdminAlertsBlock,
+  AdminKPIGrid,
+  AdminQuickActionsGrid,
+  AdminOperationalAlerts,
+  AdminAllVerticalsGrid,
   AdminRevenueBlock,
-  AdminVerticalsBlock,
   AdminActivityBlock,
 } from '@/components/admin/dashboard';
 
@@ -13,7 +14,7 @@ export default function AdminDashboard() {
   const isRussian = language === 'ru';
 
   return (
-    <div className="p-4 md:p-6 space-y-3">
+    <div className="p-4 md:p-6 space-y-4">
       {/* Header */}
       <div className="mb-2">
         <h1 className="text-xl font-bold">
@@ -24,19 +25,22 @@ export default function AdminDashboard() {
         </p>
       </div>
 
-      {/* Row 1: Today + Alerts (side by side) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <AdminTodayBlock />
-        <AdminAlertsBlock />
+      {/* Row 1: KPI Metrics */}
+      <AdminKPIGrid />
+
+      {/* Row 2: Quick Actions */}
+      <AdminQuickActionsGrid />
+
+      {/* Row 3: Alerts + Revenue side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <AdminOperationalAlerts />
+        <AdminRevenueBlock />
       </div>
 
-      {/* Row 2: Revenue (full width) */}
-      <AdminRevenueBlock />
+      {/* Row 4: All Verticals */}
+      <AdminAllVerticalsGrid />
 
-      {/* Row 3: Verticals (full width) */}
-      <AdminVerticalsBlock />
-
-      {/* Row 4: Activity (full width) */}
+      {/* Row 5: Activity */}
       <AdminActivityBlock />
     </div>
   );
