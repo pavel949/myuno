@@ -245,7 +245,7 @@ export default function PropertyDetail() {
 
   if (isLoading) {
     return (
-      <AppLayout showBottomNav={false}>
+      <AppLayout>
         <div className="flex items-center justify-center min-h-screen">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
@@ -257,7 +257,7 @@ export default function PropertyDetail() {
   const viewLabel = property.view_type ? viewTypeLabels[property.view_type] : null;
 
   return (
-    <AppLayout showBottomNav={false}>
+    <AppLayout>
       <div className="pb-28">
         {/* Sticky Header */}
         <div className="sticky top-0 z-50 flex items-center justify-between p-4 bg-background/95 backdrop-blur-md border-b border-border/30">

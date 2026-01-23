@@ -58,7 +58,7 @@ export default function TourBooking() {
   // Loading state
   if (isLoading || authLoading) {
     return (
-      <AppLayout showBottomNav={false}>
+      <AppLayout>
         <div className="flex items-center justify-center min-h-screen">
           <LoadingSpinner size="lg" />
         </div>
@@ -85,7 +85,7 @@ export default function TourBooking() {
   // Success state
   if (bookingResult?.success && bookingResult.bookingId) {
     return (
-      <AppLayout showBottomNav={false}>
+      <AppLayout>
         <BookingConfirmation
           bookingId={bookingResult.bookingId}
           title={tourTitle}
@@ -145,7 +145,7 @@ export default function TourBooking() {
   };
 
   return (
-    <AppLayout showBottomNav={false}>
+    <AppLayout>
       <PageContainer className="pb-32">
         <PageHeader 
           title={language === 'ru' ? 'Бронирование тура' : 'Book Tour'} 

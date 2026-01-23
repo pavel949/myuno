@@ -50,7 +50,7 @@ export default function VehicleDetail() {
 
   if (isLoading) {
     return (
-      <AppLayout showBottomNav={false}>
+      <AppLayout>
         <div className="pb-24">
           <div className="sticky top-0 z-20 flex items-center justify-between p-4 bg-background/80 backdrop-blur-sm border-b border-border/50">
             <BackButton fallbackPath="/transport" variant="ghost" />
@@ -70,7 +70,7 @@ export default function VehicleDetail() {
 
   if (!vehicle) {
     return (
-      <AppLayout showBottomNav={false}>
+      <AppLayout>
         <div className="p-8 text-center">
           <h2 className="text-xl font-semibold mb-2">
             {isRussian ? 'Транспорт не найден' : 'Vehicle not found'}
@@ -96,7 +96,7 @@ export default function VehicleDetail() {
   const fuelType = vehicle.fuel_type || 'petrol';
 
   return (
-    <AppLayout showBottomNav={false}>
+    <AppLayout>
       <div className="pb-24">
         {/* Header */}
         <div className="sticky top-0 z-20 flex items-center justify-between p-4 bg-background/80 backdrop-blur-sm border-b border-border/50">

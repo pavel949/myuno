@@ -110,7 +110,7 @@ export default function BabysitterDetail() {
   const babysitter = babysitters.find(bs => bs.id === id) || babysitters[0];
 
   return (
-    <AppLayout showBottomNav={false}>
+    <AppLayout>
       <PageContainer className="pb-28">
         <PageHeader title="" showBack />
         

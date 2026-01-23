@@ -51,7 +51,7 @@ export default function FitnessBooking() {
   // Success state
   if (bookingResult?.success && bookingResult.bookingId) {
     return (
-      <AppLayout showBottomNav={false}>
+      <AppLayout>
         <BookingConfirmation
           bookingId={bookingResult.bookingId}
           title={language === 'ru' ? membership.labelRu : membership.labelEn}
@@ -102,7 +102,7 @@ export default function FitnessBooking() {
   };
 
   return (
-    <AppLayout showBottomNav={false}>
+    <AppLayout>
       <PageContainer className="pb-32">
         <PageHeader 
           title={language === 'ru' ? 'Оформление записи' : 'Book Membership'} 

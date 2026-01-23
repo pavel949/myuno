@@ -135,7 +135,7 @@ const MarketCheckout = () => {
   // Success state
   if (bookingResult?.success && bookingResult.bookingId) {
     return (
-      <AppLayout showBottomNav={false}>
+      <AppLayout>
         <BookingConfirmation
           bookingId={bookingResult.bookingId}
           title={language === 'ru' 
@@ -224,7 +224,7 @@ const MarketCheckout = () => {
   }
 
   return (
-    <AppLayout showBottomNav={false}>
+    <AppLayout>
       <PageContainer className="pb-32">
         <PageHeader 
           title={language === 'ru' ? 'Оформление заказа' : 'Checkout'} 

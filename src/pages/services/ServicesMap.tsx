@@ -139,7 +139,7 @@ export default function ServicesMap() {
   };
 
   return (
-    <AppLayout showBottomNav={false}>
+    <AppLayout>
       <div className="h-[calc(100vh-60px)] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 bg-background/80 backdrop-blur-sm border-b border-border/50">

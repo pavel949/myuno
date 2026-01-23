@@ -63,7 +63,7 @@ export default function MedicalAppointment() {
 
   if (authLoading || clinicLoading) {
     return (
-      <AppLayout showBottomNav={false}>
+      <AppLayout>
         <PageContainer className="pb-32">
           <Skeleton className="h-8 w-1/2 mb-4" />
           <Skeleton className="h-32 w-full mb-4" />
@@ -84,7 +84,7 @@ export default function MedicalAppointment() {
         : (language === 'ru' ? 'Запись к врачу' : 'Medical Appointment');
 
     return (
-      <AppLayout showBottomNav={false}>
+      <AppLayout>
         <BookingConfirmation
           bookingId={bookingResult.bookingId}
           title={bookingTitle}
@@ -150,7 +150,7 @@ export default function MedicalAppointment() {
   ];
 
   return (
-    <AppLayout showBottomNav={false}>
+    <AppLayout>
       <PageContainer className="pb-32">
         <PageHeader 
           title={language === 'ru' ? 'Запись на приём' : 'Book Appointment'} 

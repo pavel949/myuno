@@ -50,7 +50,7 @@ export default function RestaurantDetail() {
 
   if (isLoading) {
     return (
-      <AppLayout showBottomNav={false}>
+      <AppLayout>
         <div className="p-4 space-y-4">
           <SkeletonCard />
           <SkeletonCard />
@@ -62,7 +62,7 @@ export default function RestaurantDetail() {
 
   if (!restaurant) {
     return (
-      <AppLayout showBottomNav={false}>
+      <AppLayout>
         <div className="flex items-center justify-center min-h-screen">
           <p className="text-muted-foreground">
             {language === 'ru' ? 'Ресторан не найден' : 'Restaurant not found'}
@@ -117,7 +117,7 @@ export default function RestaurantDetail() {
   const uncategorizedItems = menuItems.filter(item => !item.category_id);
 
   return (
-    <AppLayout showBottomNav={false}>
+    <AppLayout>
       <div className="pb-24">
         {/* Header with Image */}
         <div className="relative h-48">

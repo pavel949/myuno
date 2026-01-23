@@ -101,7 +101,7 @@ const LegalProviderDetail = () => {
   };
 
   return (
-    <AppLayout showBottomNav={false}>
+    <AppLayout>
       <div className="pb-24">
         {/* Hero Image */}
         <div className="relative h-48">

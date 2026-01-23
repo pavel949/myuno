@@ -118,7 +118,7 @@ export default function CleaningDetail() {
   const service = cleaningServices.find(s => s.id === id) || cleaningServices[0];
 
   return (
-    <AppLayout showBottomNav={false}>
+    <AppLayout>
       <PageContainer className="pb-28">
         <PageHeader title="" showBack />
         

@@ -193,7 +193,7 @@ export default function BookingDetail() {
 
   if (authLoading || isLoading) {
     return (
-      <AppLayout showBottomNav={false}>
+      <AppLayout>
         <LoadingState />
       </AppLayout>
     );
@@ -201,7 +201,7 @@ export default function BookingDetail() {
 
   if (!booking) {
     return (
-      <AppLayout showBottomNav={false}>
+      <AppLayout>
         <div className="p-4 text-center">
           <p className="text-muted-foreground">
             {language === 'ru' ? 'Бронирование не найдено' : 'Booking not found'}
@@ -225,7 +225,7 @@ export default function BookingDetail() {
   const canCheckIn = isPropertyBooking && isConfirmed && checkInDate && isBefore(new Date(), addDays(checkInDate, 1));
 
   return (
-    <AppLayout showBottomNav={false}>
+    <AppLayout>
       <div className="min-h-screen bg-background">
         {/* Header */}
         <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border">

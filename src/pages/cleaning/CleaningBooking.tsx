@@ -70,7 +70,7 @@ export default function CleaningBooking() {
   // Success state
   if (bookingResult?.success && bookingResult.bookingId) {
     return (
-      <AppLayout showBottomNav={false}>
+      <AppLayout>
         <BookingConfirmation
           bookingId={bookingResult.bookingId}
           title={language === 'ru' ? service.nameRu : service.nameEn}
@@ -142,7 +142,7 @@ export default function CleaningBooking() {
   };
 
   return (
-    <AppLayout showBottomNav={false}>
+    <AppLayout>
       <PageContainer className="pb-32">
         <PageHeader 
           title={language === 'ru' ? 'Бронирование' : 'Booking'} 

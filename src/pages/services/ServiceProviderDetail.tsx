@@ -160,7 +160,7 @@ const ServiceProviderDetail = () => {
   };
 
   return (
-    <AppLayout showBottomNav={false}>
+    <AppLayout>
       <div className="pb-32">
         {/* Header */}
         <div className="relative">

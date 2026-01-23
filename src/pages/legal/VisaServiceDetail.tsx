@@ -28,7 +28,7 @@ export default function VisaServiceDetail() {
 
   if (isLoading) {
     return (
-      <AppLayout showBottomNav={false}>
+      <AppLayout>
         <div className="p-4 space-y-4">
           <div className="h-48 bg-muted animate-pulse rounded-xl" />
           <div className="h-8 bg-muted animate-pulse rounded" />
@@ -40,7 +40,7 @@ export default function VisaServiceDetail() {
 
   if (!visa) {
     return (
-      <AppLayout showBottomNav={false}>
+      <AppLayout>
         <div className="p-4 text-center">
           <p>{language === 'ru' ? 'Услуга не найдена' : 'Service not found'}</p>
           <Button onClick={() => navigate('/legal')} className="mt-4">
@@ -56,7 +56,7 @@ export default function VisaServiceDetail() {
   const process = (visa.process_steps as { en?: string[]; ru?: string[] }) || {};
 
   return (
-    <AppLayout showBottomNav={false}>
+    <AppLayout>
       <div className="pb-24">
         {/* Hero */}
         <div className="relative bg-gradient-to-br from-indigo-600 via-blue-600 to-purple-700 p-6 pt-16">
