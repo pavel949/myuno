@@ -6,6 +6,7 @@ import { ScrollToTop } from './ScrollToTop';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { AdminGuard, VendorGuard, OwnerGuard, TeamGuard } from '@/components/auth/RoleGuard';
 import { AdminLayout } from '@/components/admin/AdminLayout';
+import { AdaptiveBottomNav } from './AdaptiveBottomNav';
 
 // Core pages - load eagerly for fast initial navigation
 import Index from '@/pages/Index';
@@ -657,6 +658,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
       </Routes>
     </AnimatePresence>
+    
+    {/* Global Bottom Navigation for Mobile */}
+    <AdaptiveBottomNav />
     </>
   );
 };
