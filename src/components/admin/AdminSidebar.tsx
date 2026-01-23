@@ -33,6 +33,7 @@ import {
   FileText,
   ClipboardList,
   Presentation,
+  Rocket,
   Flag,
   ChevronDown,
   LogOut
@@ -140,6 +141,7 @@ const navigationGroups: NavGroup[] = [
       { title: 'Finance', titleRu: 'Финансы', path: '/admin/finance', icon: DollarSign },
       { title: 'Acquisition', titleRu: 'Привлечение', path: '/admin/acquisition-metrics', icon: Flag },
       { title: 'Pitch Deck', titleRu: 'Презентация', path: '/admin/pitch-deck', icon: Presentation },
+      { title: 'Investor Demo', titleRu: 'Демо для инвестора', path: '/admin/investor-demo', icon: Rocket },
     ],
   },
   // 4. SYSTEM
