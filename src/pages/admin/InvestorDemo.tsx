@@ -22,6 +22,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { InvestorLiveMetrics } from '@/components/investor/InvestorLiveMetrics';
 import { InvestorPlatformTour } from '@/components/investor/InvestorPlatformTour';
+import { MobilePitchDeck } from '@/components/pitch';
 import { useInvestorMetrics } from '@/hooks/useInvestorMetrics';
 
 export default function InvestorDemo() {
@@ -32,6 +33,7 @@ export default function InvestorDemo() {
   const { tractionMetrics, isLoading: metricsLoading } = useInvestorMetrics();
   const isRussian = language === 'ru';
   const [activeTab, setActiveTab] = useState('overview');
+  const [showPitchDeck, setShowPitchDeck] = useState(false);
 
   // Auth redirects
   React.useEffect(() => {
@@ -100,11 +102,11 @@ export default function InvestorDemo() {
       id: 'pitch-deck',
       title: isRussian ? 'Питч-презентация' : 'Pitch Deck',
       description: isRussian 
-        ? '10 слайдов с ключевыми метриками, рынком и финансами'
-        : '10 slides with key metrics, market analysis, and financials',
+        ? '10 слайдов со свайп-навигацией, оптимизировано для мобильных'
+        : '10 slides with swipe navigation, optimized for mobile',
       icon: Presentation,
       color: 'from-primary to-primary/60',
-      action: () => navigate('/admin/pitch-deck'),
+      action: () => setShowPitchDeck(true),
     },
     {
       id: 'live-metrics',
@@ -129,7 +131,16 @@ export default function InvestorDemo() {
   ];
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <>
+      {/* Mobile Pitch Deck Overlay */}
+      {showPitchDeck && (
+        <MobilePitchDeck 
+          isRussian={isRussian} 
+          onExit={() => setShowPitchDeck(false)} 
+        />
+      )}
+      
+      <div className="p-4 md:p-6 space-y-6">
       {/* Hero Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -292,5 +303,6 @@ export default function InvestorDemo() {
         </AnimatePresence>
       </Tabs>
     </div>
+    </>
   );
 }
