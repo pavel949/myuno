@@ -152,7 +152,14 @@ const VendorOnboarding = () => {
 
   if (authLoading || contextLoading) {
     return (
-      <OnboardingLayout>
+      <OnboardingLayout
+        currentStep={1}
+        totalSteps={1}
+        title="Loading"
+        titleRu="Загрузка"
+        showBack={false}
+        showClose={false}
+      >
         <PageContainer>
           <div className="flex items-center justify-center min-h-[60vh]">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -163,12 +170,15 @@ const VendorOnboarding = () => {
   }
 
   return (
-    <OnboardingLayout>
+    <OnboardingLayout
+      currentStep={1}
+      totalSteps={1}
+      title="Become a Partner"
+      titleRu="Стать партнёром"
+      role="vendor"
+      exitPath="/"
+    >
       <PageContainer>
-        <PageHeader 
-          title={isRussian ? 'Стать партнёром' : 'Become a Partner'}
-          showBack
-        />
 
         {/* Hero */}
         <Card className="mb-6 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
