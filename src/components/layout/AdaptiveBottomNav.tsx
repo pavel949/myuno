@@ -9,12 +9,13 @@ import {
   LayoutDashboard,
   Building2,
   CalendarDays,
-  Settings,
   Package,
   Users,
-  Shield,
   FileCheck,
-  BarChart3
+  Wallet,
+  UserCheck,
+  MessageSquare,
+  Plus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -40,39 +41,39 @@ const guestNavItems: NavItem[] = [
   { path: '/profile', icon: User, labelEn: 'Profile', labelRu: 'Профиль' },
 ];
 
-// Owner/Host navigation
+// Owner/Host navigation - с Messages вместо несуществующего Bookings
 const ownerNavItems: NavItem[] = [
   { path: '/owner', icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
   { path: '/owner/properties', icon: Building2, labelEn: 'Properties', labelRu: 'Объекты' },
   { path: '/owner/calendar', icon: CalendarDays, labelEn: 'Calendar', labelRu: 'Календарь' },
-  { path: '/owner/bookings', icon: Calendar, labelEn: 'Bookings', labelRu: 'Брони' },
+  { path: '/owner/messages', icon: MessageCircle, labelEn: 'Messages', labelRu: 'Чаты' },
   { path: '/profile', icon: User, labelEn: 'Profile', labelRu: 'Профиль' },
 ];
 
-// Vendor navigation
+// Vendor navigation - исправленные пути
 const vendorNavItems: NavItem[] = [
   { path: '/vendor', icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
   { path: '/vendor/services', icon: Package, labelEn: 'Services', labelRu: 'Услуги' },
-  { path: '/vendor/orders', icon: Calendar, labelEn: 'Orders', labelRu: 'Заказы' },
-  { path: '/vendor/analytics', icon: BarChart3, labelEn: 'Analytics', labelRu: 'Аналитика' },
+  { path: '/vendor/bookings', icon: Calendar, labelEn: 'Bookings', labelRu: 'Заказы' },
+  { path: '/vendor/payouts', icon: Wallet, labelEn: 'Payouts', labelRu: 'Выплаты' },
   { path: '/profile', icon: User, labelEn: 'Profile', labelRu: 'Профиль' },
 ];
 
-// Admin navigation
+// Admin navigation - по приоритету операций
 const adminNavItems: NavItem[] = [
   { path: '/admin', icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
+  { path: '/admin/leads', icon: UserCheck, labelEn: 'Leads', labelRu: 'Лиды' },
+  { path: '/admin/tickets', icon: MessageSquare, labelEn: 'Tickets', labelRu: 'Тикеты' },
   { path: '/admin/moderation', icon: FileCheck, labelEn: 'Moderation', labelRu: 'Модерация' },
-  { path: '/admin/analytics', icon: BarChart3, labelEn: 'Analytics', labelRu: 'Аналитика' },
-  { path: '/admin/providers', icon: Users, labelEn: 'Providers', labelRu: 'Провайдеры' },
   { path: '/profile', icon: User, labelEn: 'Profile', labelRu: 'Профиль' },
 ];
 
-// Team navigation
+// Team navigation - рабочие маршруты
 const teamNavItems: NavItem[] = [
   { path: '/team', icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
-  { path: '/team/leads', icon: Users, labelEn: 'Leads', labelRu: 'Лиды' },
-  { path: '/team/tasks', icon: FileCheck, labelEn: 'Tasks', labelRu: 'Задачи' },
-  { path: '/team/analytics', icon: BarChart3, labelEn: 'Analytics', labelRu: 'Аналитика' },
+  { path: '/team/content', icon: Plus, labelEn: 'Content', labelRu: 'Создать' },
+  { path: '/admin/moderation', icon: FileCheck, labelEn: 'Review', labelRu: 'Проверка' },
+  { path: '/admin/leads', icon: Users, labelEn: 'Leads', labelRu: 'Лиды' },
   { path: '/profile', icon: User, labelEn: 'Profile', labelRu: 'Профиль' },
 ];
 
