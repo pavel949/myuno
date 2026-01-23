@@ -259,7 +259,8 @@ const VendorOnboarding = () => {
                       >
                         <Checkbox
                           checked={isSelected}
-                          onCheckedChange={() => handleVerticalToggle(vertical.value)}
+                          onCheckedChange={() => {}}
+                          onClick={(e) => e.stopPropagation()}
                         />
                         <Icon className={cn("h-4 w-4", vertical.color)} />
                         <span className="text-xs font-medium flex-1">
