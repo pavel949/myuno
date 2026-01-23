@@ -7,6 +7,7 @@ import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { AdminGuard, VendorGuard, OwnerGuard, TeamGuard } from '@/components/auth/RoleGuard';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { AdaptiveBottomNav } from './AdaptiveBottomNav';
+import { OwnerLayout } from '@/components/owner/OwnerLayout';
 
 // Core pages - load eagerly for fast initial navigation
 import Index from '@/pages/Index';
@@ -615,36 +616,38 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* Owner Landing - Public */}
         <Route path="/owner/landing" element={<LazyPage><OwnerLanding /></LazyPage>} />
-        
-        {/* Owner (Property Care) Routes - Protected */}
-        <Route path="/owner" element={<LazyPage><OwnerGuard><OwnerDashboard /></OwnerGuard></LazyPage>} />
         <Route path="/owner/guide" element={<LazyPage><OwnerGuidePage /></LazyPage>} />
-        <Route path="/owner/portfolio" element={<LazyPage><OwnerGuard><OwnerPortfolio /></OwnerGuard></LazyPage>} />
-        <Route path="/owner/superhost" element={<LazyPage><OwnerGuard><OwnerSuperhost /></OwnerGuard></LazyPage>} />
-        <Route path="/owner/properties" element={<LazyPage><OwnerGuard><OwnerProperties /></OwnerGuard></LazyPage>} />
-        <Route path="/owner/properties/new" element={<LazyPage><OwnerGuard><AddProperty /></OwnerGuard></LazyPage>} />
-        <Route path="/owner/properties/:id" element={<LazyPage><OwnerGuard><OwnerPropertyDetail /></OwnerGuard></LazyPage>} />
-        <Route path="/owner/properties/:id/terms" element={<LazyPage><OwnerGuard><OwnerRentalTerms /></OwnerGuard></LazyPage>} />
-        <Route path="/owner/properties/:id/setup" element={<LazyPage><OwnerGuard><PropertyQuickSetup /></OwnerGuard></LazyPage>} />
-        <Route path="/owner/properties/:id/edit" element={<LazyPage><OwnerGuard><EditProperty /></OwnerGuard></LazyPage>} />
-        <Route path="/owner/calendar" element={<LazyPage><OwnerGuard><OwnerCalendar /></OwnerGuard></LazyPage>} />
-        <Route path="/owner/operations" element={<LazyPage><OwnerGuard><OwnerOperations /></OwnerGuard></LazyPage>} />
-        <Route path="/owner/financials" element={<LazyPage><OwnerGuard><OwnerFinancials /></OwnerGuard></LazyPage>} />
-        <Route path="/owner/financials/new" element={<LazyPage><OwnerGuard><OwnerFinancialForm /></OwnerGuard></LazyPage>} />
-        <Route path="/owner/financials/:id" element={<LazyPage><OwnerGuard><OwnerFinancialForm /></OwnerGuard></LazyPage>} />
-        <Route path="/owner/expenses/quick" element={<LazyPage><OwnerGuard><QuickExpense /></OwnerGuard></LazyPage>} />
-        <Route path="/owner/messages" element={<LazyPage><OwnerGuard><OwnerMessages /></OwnerGuard></LazyPage>} />
-        <Route path="/owner/chat/:type/:id" element={<LazyPage><OwnerGuard><OwnerChatRoom /></OwnerGuard></LazyPage>} />
-        <Route path="/owner/support-chat" element={<LazyPage><OwnerGuard><OwnerSupportChat /></OwnerGuard></LazyPage>} />
-        <Route path="/owner/message-templates" element={<LazyPage><OwnerGuard><MessageTemplates /></OwnerGuard></LazyPage>} />
-        <Route path="/owner/reviews" element={<LazyPage><OwnerGuard><OwnerReviews /></OwnerGuard></LazyPage>} />
-        <Route path="/owner/service-request" element={<LazyPage><OwnerGuard><ServiceRequest /></OwnerGuard></LazyPage>} />
-        <Route path="/owner/inspection" element={<LazyPage><OwnerGuard><InspectionRequest /></OwnerGuard></LazyPage>} />
-        <Route path="/owner/properties/:id/guidebook" element={<LazyPage><OwnerGuard><OwnerGuidebookEdit /></OwnerGuard></LazyPage>} />
-        <Route path="/owner/properties/:id/editor" element={<LazyPage><OwnerGuard><PropertyEditor /></OwnerGuard></LazyPage>} />
-        <Route path="/owner/full-management" element={<LazyPage><OwnerGuard><FullManagement /></OwnerGuard></LazyPage>} />
-        <Route path="/owner/channels" element={<LazyPage><OwnerGuard><ChannelManager /></OwnerGuard></LazyPage>} />
-        <Route path="/owner/properties/:id/juristic-requests" element={<LazyPage><OwnerGuard><JuristicRequestsPage /></OwnerGuard></LazyPage>} />
+        
+        {/* Owner (Property Care) Routes - Protected with OwnerLayout */}
+        <Route path="/owner" element={<OwnerGuard><OwnerLayout /></OwnerGuard>}>
+          <Route index element={<LazyPage><OwnerDashboard /></LazyPage>} />
+          <Route path="portfolio" element={<LazyPage><OwnerPortfolio /></LazyPage>} />
+          <Route path="superhost" element={<LazyPage><OwnerSuperhost /></LazyPage>} />
+          <Route path="properties" element={<LazyPage><OwnerProperties /></LazyPage>} />
+          <Route path="properties/new" element={<LazyPage><AddProperty /></LazyPage>} />
+          <Route path="properties/:id" element={<LazyPage><OwnerPropertyDetail /></LazyPage>} />
+          <Route path="properties/:id/terms" element={<LazyPage><OwnerRentalTerms /></LazyPage>} />
+          <Route path="properties/:id/setup" element={<LazyPage><PropertyQuickSetup /></LazyPage>} />
+          <Route path="properties/:id/edit" element={<LazyPage><EditProperty /></LazyPage>} />
+          <Route path="properties/:id/guidebook" element={<LazyPage><OwnerGuidebookEdit /></LazyPage>} />
+          <Route path="properties/:id/editor" element={<LazyPage><PropertyEditor /></LazyPage>} />
+          <Route path="properties/:id/juristic-requests" element={<LazyPage><JuristicRequestsPage /></LazyPage>} />
+          <Route path="calendar" element={<LazyPage><OwnerCalendar /></LazyPage>} />
+          <Route path="operations" element={<LazyPage><OwnerOperations /></LazyPage>} />
+          <Route path="financials" element={<LazyPage><OwnerFinancials /></LazyPage>} />
+          <Route path="financials/new" element={<LazyPage><OwnerFinancialForm /></LazyPage>} />
+          <Route path="financials/:id" element={<LazyPage><OwnerFinancialForm /></LazyPage>} />
+          <Route path="expenses/quick" element={<LazyPage><QuickExpense /></LazyPage>} />
+          <Route path="messages" element={<LazyPage><OwnerMessages /></LazyPage>} />
+          <Route path="chat/:type/:id" element={<LazyPage><OwnerChatRoom /></LazyPage>} />
+          <Route path="support-chat" element={<LazyPage><OwnerSupportChat /></LazyPage>} />
+          <Route path="message-templates" element={<LazyPage><MessageTemplates /></LazyPage>} />
+          <Route path="reviews" element={<LazyPage><OwnerReviews /></LazyPage>} />
+          <Route path="service-request" element={<LazyPage><ServiceRequest /></LazyPage>} />
+          <Route path="inspection" element={<LazyPage><InspectionRequest /></LazyPage>} />
+          <Route path="full-management" element={<LazyPage><FullManagement /></LazyPage>} />
+          <Route path="channels" element={<LazyPage><ChannelManager /></LazyPage>} />
+        </Route>
         
         {/* Demo Routes - No Auth Required */}
         <Route path="/demo" element={<LazyPage><DemoIndex /></LazyPage>} />
