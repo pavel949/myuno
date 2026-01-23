@@ -71,94 +71,78 @@ interface NavGroup {
 }
 
 const navigationGroups: NavGroup[] = [
+  // 1. OPERATIONS - Daily work (always open)
   {
-    label: 'Dashboard',
-    labelRu: 'Панель управления',
+    label: 'Operations',
+    labelRu: 'Операции',
     defaultOpen: true,
     items: [
-      { title: 'Overview', titleRu: 'Обзор', path: '/admin', icon: LayoutDashboard },
+      { title: 'Dashboard', titleRu: 'Дашборд', path: '/admin', icon: LayoutDashboard },
+      { title: 'Moderation', titleRu: 'Модерация', path: '/admin/moderation', icon: FileText },
+      { title: 'Leads', titleRu: 'Лиды', path: '/admin/leads', icon: UserCheck },
+      { title: 'Tickets', titleRu: 'Тикеты', path: '/admin/tickets', icon: ClipboardList },
+      { title: 'Consultations', titleRu: 'Консультации', path: '/admin/consultations', icon: MessageSquare },
+      { title: 'Operations Hub', titleRu: 'Центр операций', path: '/admin/operations', icon: Building2 },
     ],
   },
+  // 2. CATALOG - All verticals grouped logically
   {
-    label: 'Travel & Leisure',
-    labelRu: 'Путешествия',
+    label: 'Catalog',
+    labelRu: 'Каталог',
     defaultOpen: false,
     items: [
-      { title: 'Yachts', titleRu: 'Яхты', path: '/admin/yachts', icon: Ship },
-      { title: 'Tours', titleRu: 'Туры', path: '/admin/tours', icon: Compass },
-      { title: 'Activities', titleRu: 'Активности', path: '/admin/activities', icon: Calendar },
+      // Travel & Leisure
       { title: 'Properties', titleRu: 'Недвижимость', path: '/admin/properties', icon: Home },
-      { title: 'Water Activities', titleRu: 'Вода', path: '/admin/water-activities', icon: Waves },
+      { title: 'Yachts', titleRu: 'Яхты', path: '/admin/yachts', icon: Ship },
+      { title: 'Tours & Activities', titleRu: 'Туры', path: '/admin/tours', icon: Compass },
+      { title: 'Water Sports', titleRu: 'Вода', path: '/admin/water-activities', icon: Waves },
       { title: 'Events', titleRu: 'События', path: '/admin/events', icon: Calendar },
-    ],
-  },
-  {
-    label: 'Lifestyle',
-    labelRu: 'Стиль жизни',
-    defaultOpen: false,
-    items: [
+      // Food & Beauty
       { title: 'Restaurants', titleRu: 'Рестораны', path: '/admin/restaurants', icon: Utensils },
       { title: 'Salons', titleRu: 'Салоны', path: '/admin/salons', icon: Scissors },
-      { title: 'Clinics', titleRu: 'Клиники', path: '/admin/clinics', icon: Stethoscope },
       { title: 'Gyms', titleRu: 'Фитнес', path: '/admin/gyms', icon: Dumbbell },
       { title: 'Flowers', titleRu: 'Цветы', path: '/admin/flowers', icon: Flower2 },
     ],
   },
   {
-    label: 'Services',
+    label: 'Health & Home',
+    labelRu: 'Здоровье и дом',
+    defaultOpen: false,
+    items: [
+      // Health
+      { title: 'Clinics', titleRu: 'Клиники', path: '/admin/clinics', icon: Stethoscope },
+      { title: 'Pharmacies', titleRu: 'Аптеки', path: '/admin/pharmacies', icon: Pill },
+      { title: 'Pets', titleRu: 'Питомцы', path: '/admin/pets', icon: PawPrint },
+      // Home
+      { title: 'Cleaning', titleRu: 'Уборка', path: '/admin/cleaning', icon: SprayCan },
+      { title: 'Babysitters', titleRu: 'Няни', path: '/admin/babysitters', icon: Baby },
+    ],
+  },
+  {
+    label: 'Services & Shops',
     labelRu: 'Сервисы',
     defaultOpen: false,
     items: [
       { title: 'Transport', titleRu: 'Транспорт', path: '/admin/vehicles', icon: Car },
       { title: 'Education', titleRu: 'Образование', path: '/admin/education', icon: GraduationCap },
       { title: 'Legal', titleRu: 'Юридические', path: '/admin/legal', icon: Scale },
-      { title: 'Pets', titleRu: 'Питомцы', path: '/admin/pets', icon: PawPrint },
-      { title: 'Cleaning', titleRu: 'Уборка', path: '/admin/cleaning', icon: SprayCan },
-      { title: 'Babysitters', titleRu: 'Няни', path: '/admin/babysitters', icon: Baby },
-    ],
-  },
-  {
-    label: 'Infrastructure',
-    labelRu: 'Инфраструктура',
-    defaultOpen: false,
-    items: [
-      { title: 'Pharmacies', titleRu: 'Аптеки', path: '/admin/pharmacies', icon: Pill },
-      { title: 'Stores', titleRu: 'Магазины', path: '/admin/stores', icon: Store },
       { title: 'Insurance', titleRu: 'Страхование', path: '/admin/insurance', icon: Shield },
+      { title: 'Stores', titleRu: 'Магазины', path: '/admin/stores', icon: Store },
     ],
   },
+  // 3. ANALYTICS & FINANCE
   {
-    label: 'Operations',
-    labelRu: 'Операции',
+    label: 'Analytics & Finance',
+    labelRu: 'Аналитика и Финансы',
     defaultOpen: false,
     items: [
-      { title: 'Leads', titleRu: 'Лиды', path: '/admin/leads', icon: UserCheck },
-      { title: 'Consultations', titleRu: 'Консультации', path: '/admin/consultations', icon: MessageSquare },
-      { title: 'Tickets', titleRu: 'Тикеты', path: '/admin/tickets', icon: ClipboardList },
-      { title: 'Moderation', titleRu: 'Модерация', path: '/admin/moderation', icon: FileText },
-      { title: 'Quick Listings', titleRu: 'Быстрые листинги', path: '/admin/quick-listings', icon: ClipboardList },
-      { title: 'Operations Hub', titleRu: 'Центр операций', path: '/admin/operations', icon: Building2 },
-    ],
-  },
-  {
-    label: 'Analytics',
-    labelRu: 'Аналитика',
-    defaultOpen: false,
-    items: [
-      { title: 'Overview', titleRu: 'Обзор', path: '/admin/analytics', icon: BarChart3 },
-      { title: 'User Analytics', titleRu: 'Пользователи', path: '/admin/user-analytics', icon: Users },
+      { title: 'Analytics', titleRu: 'Аналитика', path: '/admin/analytics', icon: BarChart3 },
+      { title: 'Finance', titleRu: 'Финансы', path: '/admin/finance', icon: DollarSign },
       { title: 'Acquisition', titleRu: 'Привлечение', path: '/admin/acquisition-metrics', icon: Flag },
       { title: 'Pitch Deck', titleRu: 'Презентация', path: '/admin/pitch-deck', icon: Presentation },
     ],
   },
-  {
-    label: 'Finance',
-    labelRu: 'Финансы',
-    defaultOpen: false,
-    items: [
-      { title: 'Finance', titleRu: 'Финансы', path: '/admin/finance', icon: DollarSign },
-    ],
-  },
+  // 4. SYSTEM
   {
     label: 'System',
     labelRu: 'Система',
