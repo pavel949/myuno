@@ -25,7 +25,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Check, X, Eye, Clock, CheckCircle, XCircle, 
-  Filter, RefreshCw, Building2, Calendar
+  Filter, RefreshCw, Building2, Calendar, MessageSquare, AlertTriangle
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -49,7 +49,9 @@ export default function AdminContentModeration() {
   const [itemDetails, setItemDetails] = useState<any>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
+  const [isRequestInfoDialogOpen, setIsRequestInfoDialogOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
+  const [requestInfoMessage, setRequestInfoMessage] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
   const isRu = language === 'ru';
@@ -97,6 +99,33 @@ export default function AdminContentModeration() {
     setSelectedItem(item);
     setRejectionReason('');
     setIsRejectDialogOpen(true);
+  };
+
+  const handleOpenRequestInfoDialog = (item: PendingContent) => {
+    setSelectedItem(item);
+    setRequestInfoMessage('');
+    setIsRequestInfoDialogOpen(true);
+  };
+
+  const handleRequestInfo = async () => {
+    if (!user || !selectedItem || !requestInfoMessage.trim()) return;
+    setIsProcessing(true);
+    
+    // Set status to "needs_info" with the request message stored in rejection_reason field
+    // This allows the vendor to see what info is needed
+    const success = await rejectContent(
+      selectedItem.content_type,
+      selectedItem.id,
+      user.id,
+      `[ЗАПРОС ИНФОРМАЦИИ / INFO REQUEST]: ${requestInfoMessage}`
+    );
+    
+    if (success) {
+      fetchPendingContent(activeTab, typeFilter === 'all' ? undefined : typeFilter);
+      setIsRequestInfoDialogOpen(false);
+      setIsViewDialogOpen(false);
+    }
+    setIsProcessing(false);
   };
 
   const handleReject = async () => {
@@ -407,35 +436,50 @@ export default function AdminContentModeration() {
               )}
             </ScrollArea>
 
-            {selectedItem?.approval_status === 'pending' && (
-              <DialogFooter>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setIsViewDialogOpen(false)}
-                >
-                  {isRu ? 'Закрыть' : 'Close'}
-                </Button>
-                <Button 
-                  variant="destructive"
-                  onClick={() => {
-                    setIsViewDialogOpen(false);
-                    handleOpenRejectDialog(selectedItem);
-                  }}
-                  disabled={isProcessing}
-                >
-                  <X className="w-4 h-4 mr-1" />
-                  {isRu ? 'Отклонить' : 'Reject'}
-                </Button>
-                <Button 
-                  className="bg-green-600 hover:bg-green-700"
-                  onClick={() => handleApprove(selectedItem)}
-                  disabled={isProcessing}
-                >
-                  <Check className="w-4 h-4 mr-1" />
-                  {isRu ? 'Одобрить' : 'Approve'}
-                </Button>
-              </DialogFooter>
-            )}
+            <DialogFooter className="flex-wrap gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setIsViewDialogOpen(false)}
+              >
+                {isRu ? 'Закрыть' : 'Close'}
+              </Button>
+              
+              {selectedItem?.approval_status === 'pending' && (
+                <>
+                  <Button 
+                    variant="secondary"
+                    onClick={() => {
+                      if (selectedItem) handleOpenRequestInfoDialog(selectedItem);
+                    }}
+                    disabled={isProcessing}
+                  >
+                    <MessageSquare className="w-4 h-4 mr-1" />
+                    {isRu ? 'Запросить инфо' : 'Request Info'}
+                  </Button>
+                  <Button 
+                    variant="destructive"
+                    onClick={() => {
+                      if (selectedItem) {
+                        setIsViewDialogOpen(false);
+                        handleOpenRejectDialog(selectedItem);
+                      }
+                    }}
+                    disabled={isProcessing}
+                  >
+                    <X className="w-4 h-4 mr-1" />
+                    {isRu ? 'Отклонить' : 'Reject'}
+                  </Button>
+                  <Button 
+                    className="bg-green-600 hover:bg-green-700"
+                    onClick={() => selectedItem && handleApprove(selectedItem)}
+                    disabled={isProcessing}
+                  >
+                    <Check className="w-4 h-4 mr-1" />
+                    {isRu ? 'Одобрить' : 'Approve'}
+                  </Button>
+                </>
+              )}
+            </DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -469,6 +513,47 @@ export default function AdminContentModeration() {
               >
                 <X className="w-4 h-4 mr-1" />
                 {isRu ? 'Отклонить' : 'Reject'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Request Info Dialog */}
+        <Dialog open={isRequestInfoDialogOpen} onOpenChange={setIsRequestInfoDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-amber-500" />
+                {isRu ? 'Запросить информацию' : 'Request Additional Information'}
+              </DialogTitle>
+              <DialogDescription>
+                {isRu 
+                  ? 'Опишите, какая информация или исправления необходимы. Поставщик получит уведомление и сможет внести изменения.'
+                  : 'Describe what information or corrections are needed. The vendor will be notified and can make changes.'}
+              </DialogDescription>
+            </DialogHeader>
+
+            <Textarea
+              placeholder={isRu 
+                ? 'Например: Добавьте больше фотографий, уточните адрес, исправьте описание...' 
+                : 'E.g.: Add more photos, clarify the address, fix the description...'}
+              value={requestInfoMessage}
+              onChange={(e) => setRequestInfoMessage(e.target.value)}
+              rows={5}
+            />
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsRequestInfoDialogOpen(false)}>
+                {isRu ? 'Отмена' : 'Cancel'}
+              </Button>
+              <Button 
+                variant="default"
+                className="bg-amber-500 hover:bg-amber-600"
+                onClick={handleRequestInfo}
+                disabled={!requestInfoMessage.trim() || isProcessing}
+              >
+                <MessageSquare className="w-4 h-4 mr-1" />
+                {isRu ? 'Отправить запрос' : 'Send Request'}
               </Button>
             </DialogFooter>
           </DialogContent>
