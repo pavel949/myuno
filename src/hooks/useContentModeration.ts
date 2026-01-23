@@ -9,6 +9,17 @@ export type ContentType =
   | 'education_providers' | 'pharmacies' | 'insurance_providers' 
   | 'flower_shops' | 'stores';
 
+// Column mappings for tables with different column names
+const COLUMN_MAPPINGS: Record<string, { imageColumn: string; titleColumn: string }> = {
+  babysitters: { imageColumn: 'photo', titleColumn: 'name_en' },
+  tours: { imageColumn: 'cover_image', titleColumn: 'title_en' },
+  properties: { imageColumn: 'cover_image', titleColumn: 'title_en' },
+  events: { imageColumn: 'cover_image', titleColumn: 'title_en' },
+  water_activities: { imageColumn: 'cover_image', titleColumn: 'title_en' },
+  owner_properties: { imageColumn: 'cover_image', titleColumn: 'title' },
+  // Default for others: cover_image and name_en
+};
+
 export type ApprovalStatus = 'pending' | 'approved' | 'rejected';
 
 export interface PendingContent {
@@ -109,14 +120,37 @@ export function useContentModeration() {
           continue;
         }
 
-        // Determine title column based on table
-        const titleColumn = ['tours', 'water_activities', 'properties', 'events'].includes(table)
-          ? 'title_en'
-          : 'name_en';
+        // Get column mappings for this table
+        const mapping = COLUMN_MAPPINGS[table] || { imageColumn: 'cover_image', titleColumn: 'name_en' };
+        const { imageColumn, titleColumn } = mapping;
 
-        const { data, error } = await supabase
-          .from(table)
-          .select(`
+        // Build dynamic select query based on table structure
+        let selectQuery = `
+          id,
+          ${titleColumn},
+          provider_id,
+          created_at,
+          approval_status,
+          providers:provider_id (
+            name
+          )
+        `;
+        
+        // Add image column - handle special cases
+        if (imageColumn === 'photo') {
+          selectQuery = `
+            id,
+            ${titleColumn},
+            provider_id,
+            created_at,
+            photo,
+            approval_status,
+            providers:provider_id (
+              name
+            )
+          `;
+        } else {
+          selectQuery = `
             id,
             ${titleColumn},
             provider_id,
@@ -126,7 +160,12 @@ export function useContentModeration() {
             providers:provider_id (
               name
             )
-          `)
+          `;
+        }
+
+        const { data, error } = await supabase
+          .from(table)
+          .select(selectQuery)
           .eq('approval_status', statusFilter)
           .order('created_at', { ascending: false });
 
@@ -143,7 +182,7 @@ export function useContentModeration() {
             provider_name: item.providers?.name || 'Unknown',
             provider_id: item.provider_id,
             created_at: item.created_at,
-            cover_image: item.cover_image,
+            cover_image: item.cover_image || item.photo || null,
             approval_status: item.approval_status as ApprovalStatus,
           }));
           allContent.push(...mapped);

@@ -127,7 +127,7 @@ const VendorRestaurants = () => {
       name_ru: item.name_ru || '',
       description_en: item.description_en || '',
       description_ru: item.description_ru || '',
-      cuisine_type: item.cuisine_type || 'thai',
+      cuisine_type: item.cuisine || 'thai',
       address: item.address || '',
       district: item.district || '',
       phone: item.phone || '',
@@ -255,7 +255,7 @@ const VendorRestaurants = () => {
                           <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <h3 className="font-medium">{isRussian ? item.name_ru : item.name_en}</h3>
                             <Badge variant="secondary" className="text-xs">
-                              {cuisineTypes.find(t => t.value === item.cuisine_type)?.[isRussian ? 'labelRu' : 'label']}
+                              {cuisineTypes.find(t => t.value === item.cuisine)?.[isRussian ? 'labelRu' : 'label']}
                             </Badge>
                             <ApprovalStatusBadge 
                               status={(item as any).approval_status} 

@@ -45,7 +45,7 @@ export function usePrefetchPopularData() {
       queryFn: async () => {
         const { data } = await supabase
           .from('restaurants')
-          .select('id, name_en, name_ru, cover_image, rating, cuisine_type')
+          .select('id, name_en, name_ru, cover_image, rating, cuisine')
           .eq('is_active', true)
           .eq('is_featured', true)
           .limit(6);
@@ -60,7 +60,7 @@ export function usePrefetchPopularData() {
       queryFn: async () => {
         const { data } = await supabase
           .from('properties')
-          .select('id, title_en, title_ru, images, price_per_night, rating, district')
+          .select('id, title_en, title_ru, images, price, rating, district')
           .eq('is_active', true)
           .eq('is_featured', true)
           .limit(6);
@@ -75,7 +75,7 @@ export function usePrefetchPopularData() {
       queryFn: async () => {
         const { data } = await supabase
           .from('tours')
-          .select('id, name_en, name_ru, cover_image, price, rating, tour_type')
+          .select('id, title_en, title_ru, cover_image, price, rating, tour_type')
           .eq('is_active', true)
           .eq('is_featured', true)
           .limit(6);
