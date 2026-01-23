@@ -1,0 +1,140 @@
+import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Bell, ChevronRight, Home, HelpCircle } from 'lucide-react';
+import { SidebarTrigger } from '@/components/ui/sidebar';
+import { Button } from '@/components/ui/button';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
+import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
+
+// Route to breadcrumb mapping
+const routeLabels: Record<string, { en: string; ru: string }> = {
+  '/owner': { en: 'Dashboard', ru: 'Обзор' },
+  '/owner/properties': { en: 'My Properties', ru: 'Мои объекты' },
+  '/owner/properties/new': { en: 'Add Property', ru: 'Добавить объект' },
+  '/owner/calendar': { en: 'Calendar', ru: 'Календарь' },
+  '/owner/messages': { en: 'Messages', ru: 'Сообщения' },
+  '/owner/operations': { en: 'Tasks', ru: 'Задачи' },
+  '/owner/financials': { en: 'Financials', ru: 'Финансы' },
+  '/owner/financials/new': { en: 'New Entry', ru: 'Новая запись' },
+  '/owner/expenses/quick': { en: 'Quick Expense', ru: 'Быстрый расход' },
+  '/owner/portfolio': { en: 'Portfolio', ru: 'Портфолио' },
+  '/owner/reviews': { en: 'Reviews', ru: 'Отзывы' },
+  '/owner/superhost': { en: 'Superhost', ru: 'Суперхозяин' },
+  '/owner/channels': { en: 'Channel Manager', ru: 'Каналы' },
+  '/owner/full-management': { en: 'Full Management', ru: 'Полное управление' },
+  '/owner/service-request': { en: 'Service Request', ru: 'Заявка на услугу' },
+  '/owner/inspection': { en: 'Inspection', ru: 'Осмотр' },
+  '/owner/support-chat': { en: 'Support', ru: 'Поддержка' },
+  '/owner/message-templates': { en: 'Templates', ru: 'Шаблоны' },
+  '/owner/guide': { en: 'Guide', ru: 'Руководство' },
+};
+
+export function OwnerHeader() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { language } = useLanguage();
+  const isRussian = language === 'ru';
+  
+  // Build breadcrumb from current path
+  const pathSegments = location.pathname.split('/').filter(Boolean);
+  const breadcrumbs: { path: string; label: string; isLast: boolean }[] = [];
+  
+  let currentPath = '';
+  pathSegments.forEach((segment, index) => {
+    currentPath += `/${segment}`;
+    const isLast = index === pathSegments.length - 1;
+    const routeLabel = routeLabels[currentPath];
+    
+    if (routeLabel) {
+      breadcrumbs.push({
+        path: currentPath,
+        label: isRussian ? routeLabel.ru : routeLabel.en,
+        isLast,
+      });
+    }
+  });
+
+  // Current page title
+  const currentRoute = routeLabels[location.pathname];
+  const pageTitle = currentRoute 
+    ? (isRussian ? currentRoute.ru : currentRoute.en) 
+    : (isRussian ? 'Мой дом' : 'My Home');
+
+  return (
+    <header className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
+      {/* Sidebar trigger */}
+      <SidebarTrigger data-sidebar="trigger" className="-ml-1" />
+      
+      {/* Breadcrumbs */}
+      <Breadcrumb className="hidden md:flex">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink 
+              onClick={() => navigate('/owner')}
+              className="flex items-center gap-1 cursor-pointer hover:text-foreground"
+            >
+              <Home className="h-3.5 w-3.5" />
+              <span className="sr-only">Home</span>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          {breadcrumbs.map((crumb) => (
+            <React.Fragment key={crumb.path}>
+              <BreadcrumbSeparator>
+                <ChevronRight className="h-3.5 w-3.5" />
+              </BreadcrumbSeparator>
+              <BreadcrumbItem>
+                {crumb.isLast ? (
+                  <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                ) : (
+                  <BreadcrumbLink 
+                    onClick={() => navigate(crumb.path)}
+                    className="cursor-pointer hover:text-foreground"
+                  >
+                    {crumb.label}
+                  </BreadcrumbLink>
+                )}
+              </BreadcrumbItem>
+            </React.Fragment>
+          ))}
+        </BreadcrumbList>
+      </Breadcrumb>
+
+      {/* Mobile title */}
+      <h1 className="md:hidden font-semibold text-lg">{pageTitle}</h1>
+
+      {/* Spacer */}
+      <div className="flex-1" />
+
+      {/* Actions */}
+      <div className="flex items-center gap-1">
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={() => navigate('/owner/support-chat')}
+          title={isRussian ? 'Поддержка' : 'Support'}
+        >
+          <HelpCircle className="h-4 w-4" />
+        </Button>
+        <ThemeSwitcher />
+        <LanguageSwitcher />
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="relative"
+          onClick={() => navigate('/notifications')}
+        >
+          <Bell className="h-4 w-4" />
+        </Button>
+      </div>
+    </header>
+  );
+}
