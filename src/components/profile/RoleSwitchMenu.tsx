@@ -44,7 +44,7 @@ export function RoleSwitchMenu({ compact = false, className }: RoleSwitchMenuPro
     {
       key: 'vendor',
       icon: Store,
-      labelEn: 'Selling',
+      labelEn: 'Provider',
       labelRu: 'Продавец',
       path: '/vendor',
       available: hasRole('vendor') || hasRole('admin'),
