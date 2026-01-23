@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
 // Define tab order for bottom navigation
@@ -30,19 +30,15 @@ const tabOrder: Record<string, number> = {
 
 export type NavigationDirection = 'left' | 'right' | 'none';
 
-// Store for tracking previous path across renders
-const navigationStore = {
-  prevPath: '',
-  direction: 'none' as NavigationDirection,
-};
+// Simple module-level store
+let storedDirection: NavigationDirection = 'none';
+let storedPrevPath = '';
 
 function getTabIndex(path: string): number {
-  // Exact match first
   if (tabOrder[path] !== undefined) {
     return tabOrder[path];
   }
   
-  // Find matching prefix for nested routes
   const keys = Object.keys(tabOrder).sort((a, b) => b.length - a.length);
   for (const key of keys) {
     if (path.startsWith(key) && key !== '/') {
@@ -53,39 +49,34 @@ function getTabIndex(path: string): number {
   return -1;
 }
 
-export const getNavigationDirection = (): NavigationDirection => navigationStore.direction;
-
-export const updateNavigationDirection = (newPath: string): NavigationDirection => {
-  const prevPath = navigationStore.prevPath;
-  
-  if (prevPath && prevPath !== newPath) {
-    const prevIndex = getTabIndex(prevPath);
-    const currentIndex = getTabIndex(newPath);
-    
-    if (prevIndex !== -1 && currentIndex !== -1) {
-      navigationStore.direction = currentIndex > prevIndex ? 'right' : 'left';
-    } else {
-      navigationStore.direction = 'none';
-    }
-  }
-  
-  navigationStore.prevPath = newPath;
-  return navigationStore.direction;
-};
+export const getNavigationDirection = (): NavigationDirection => storedDirection;
 
 export const useNavigationDirection = (): NavigationDirection => {
   const location = useLocation();
-  const isFirstRender = useRef(true);
+  const hasInitialized = useRef(false);
   
-  // Calculate direction on path change
-  const direction = useMemo(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      navigationStore.prevPath = location.pathname;
-      return 'none' as NavigationDirection;
+  useEffect(() => {
+    const currentPath = location.pathname;
+    
+    if (!hasInitialized.current) {
+      hasInitialized.current = true;
+      storedPrevPath = currentPath;
+      return;
     }
-    return updateNavigationDirection(location.pathname);
+    
+    if (storedPrevPath !== currentPath) {
+      const prevIndex = getTabIndex(storedPrevPath);
+      const currentIndex = getTabIndex(currentPath);
+      
+      if (prevIndex !== -1 && currentIndex !== -1 && prevIndex !== currentIndex) {
+        storedDirection = currentIndex > prevIndex ? 'right' : 'left';
+      } else {
+        storedDirection = 'none';
+      }
+      
+      storedPrevPath = currentPath;
+    }
   }, [location.pathname]);
   
-  return direction;
+  return storedDirection;
 };
