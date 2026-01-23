@@ -10,6 +10,7 @@ import { AdaptiveBottomNav } from './AdaptiveBottomNav';
 import { OwnerLayout } from '@/components/owner/OwnerLayout';
 import { VendorLayout } from '@/components/vendor/VendorLayout';
 import { GuestLayout } from '@/components/guest/GuestLayout';
+import { useNavigationDirection } from '@/hooks/useNavigationDirection';
 
 // Core pages - load eagerly for fast initial navigation
 import Index from '@/pages/Index';
@@ -366,6 +367,9 @@ const prefetchRoutes = () => {
 
 export const AnimatedRoutes: React.FC = () => {
   const location = useLocation();
+  
+  // Track navigation direction for tab animations
+  useNavigationDirection();
 
   // Prefetch on mount
   React.useEffect(() => {
