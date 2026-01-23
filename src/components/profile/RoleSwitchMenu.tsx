@@ -26,8 +26,8 @@ export function RoleSwitchMenu({ compact = false, className }: RoleSwitchMenuPro
     {
       key: 'guest',
       icon: Home,
-      labelEn: 'Guest Mode',
-      labelRu: 'Режим гостя',
+      labelEn: 'Guest',
+      labelRu: 'Гость',
       path: '/',
       available: true, // Always available
       color: 'bg-blue-500',
@@ -35,8 +35,8 @@ export function RoleSwitchMenu({ compact = false, className }: RoleSwitchMenuPro
     {
       key: 'owner',
       icon: Building2,
-      labelEn: 'Switch to Hosting',
-      labelRu: 'Режим владельца',
+      labelEn: 'Hosting',
+      labelRu: 'Владелец',
       path: '/owner',
       available: hasRole('owner') || hasRole('admin'),
       color: 'bg-teal-500',
@@ -44,8 +44,8 @@ export function RoleSwitchMenu({ compact = false, className }: RoleSwitchMenuPro
     {
       key: 'vendor',
       icon: Store,
-      labelEn: 'Switch to Selling',
-      labelRu: 'Режим продавца',
+      labelEn: 'Selling',
+      labelRu: 'Продавец',
       path: '/vendor',
       available: hasRole('vendor') || hasRole('admin'),
       color: 'bg-purple-500',
@@ -53,8 +53,8 @@ export function RoleSwitchMenu({ compact = false, className }: RoleSwitchMenuPro
     {
       key: 'team',
       icon: Users,
-      labelEn: 'UNO Team',
-      labelRu: 'Команда UNO',
+      labelEn: 'Team',
+      labelRu: 'Команда',
       path: '/team',
       available: hasRole('uno_team') || hasRole('admin'),
       color: 'bg-emerald-500',
@@ -62,8 +62,8 @@ export function RoleSwitchMenu({ compact = false, className }: RoleSwitchMenuPro
     {
       key: 'admin',
       icon: Shield,
-      labelEn: 'Admin Panel',
-      labelRu: 'Панель админа',
+      labelEn: 'Admin',
+      labelRu: 'Админ',
       path: '/admin',
       available: hasRole('admin') || hasRole('staff') || hasRole('uno_team'),
       color: 'bg-red-500',
