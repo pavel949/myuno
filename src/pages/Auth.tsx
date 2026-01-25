@@ -58,11 +58,16 @@ export default function Auth() {
   }, [canUsePinLogin, pinLoading]);
 
   useEffect(() => {
+    // Don't do anything while PIN status is loading
+    if (pinLoading) return;
+    
     if (user && !showPinSetup) {
-      if (!hasPin && !pinLoading) {
+      if (!hasPin) {
+        // User is authenticated but has no PIN - show setup
         setShowPinSetup(true);
         setView('pin-setup');
-      } else if (hasPin || pinLoading === false) {
+      } else {
+        // User has PIN - redirect to intended destination
         navigate(redirectPath, { replace: true });
       }
     }
@@ -204,6 +209,15 @@ export default function Auth() {
           variant: 'destructive',
         });
       } else {
+        // Update refresh_token in localStorage if PIN is already set up
+        const { data: sessionData } = await supabase.auth.getSession();
+        const refreshToken = sessionData.session?.refresh_token;
+        const savedUserId = localStorage.getItem('uno_pin_user_id');
+        
+        if (savedUserId && refreshToken) {
+          localStorage.setItem('uno_pin_refresh_token', refreshToken);
+        }
+        
         toast({
           title: t('auth.welcomeBack'),
           description: isRu ? 'Вход выполнен успешно' : 'Successfully logged in',

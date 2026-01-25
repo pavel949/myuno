@@ -12,13 +12,17 @@ export function usePinAuth() {
   const [isLoading, setIsLoading] = useState(true);
   const [savedUserId, setSavedUserId] = useState<string | null>(null);
   const [savedEmail, setSavedEmail] = useState<string | null>(null);
+  const [hasRefreshToken, setHasRefreshToken] = useState(false);
 
   // Check for saved PIN login data on mount
   useEffect(() => {
     const userId = localStorage.getItem(PIN_USER_KEY);
     const email = localStorage.getItem(PIN_EMAIL_KEY);
+    const refreshToken = localStorage.getItem(PIN_REFRESH_TOKEN_KEY);
+    
     setSavedUserId(userId);
     setSavedEmail(email);
+    setHasRefreshToken(!!refreshToken);
   }, []);
 
   // Check if user has PIN when authenticated
@@ -74,6 +78,17 @@ export function usePinAuth() {
     }
   }, [user]);
 
+  // Clear saved PIN data (for logout or switching users)
+  // IMPORTANT: Declared BEFORE verifyPin to fix closure issues
+  const clearPinData = useCallback(() => {
+    localStorage.removeItem(PIN_USER_KEY);
+    localStorage.removeItem(PIN_EMAIL_KEY);
+    localStorage.removeItem(PIN_REFRESH_TOKEN_KEY);
+    setSavedUserId(null);
+    setSavedEmail(null);
+    setHasRefreshToken(false);
+  }, []);
+
   // Set up PIN for current user
   const setupPin = useCallback(async (pin: string) => {
     if (!user) throw new Error('Not authenticated');
@@ -95,6 +110,7 @@ export function usePinAuth() {
     localStorage.setItem(PIN_REFRESH_TOKEN_KEY, session.refresh_token);
     setSavedUserId(user.id);
     setSavedEmail(user.email || '');
+    setHasRefreshToken(true);
     setHasPin(true);
 
     return data;
@@ -106,7 +122,10 @@ export function usePinAuth() {
     const refreshToken = localStorage.getItem(PIN_REFRESH_TOKEN_KEY);
     
     if (!userId) throw new Error('No saved user for PIN login');
-    if (!refreshToken) throw new Error('No saved session for PIN login');
+    if (!refreshToken) {
+      clearPinData();
+      throw new Error('Session expired. Please login with password.');
+    }
 
     // First verify PIN
     const { data, error } = await supabase.rpc('verify_user_pin', {
@@ -131,22 +150,14 @@ export function usePinAuth() {
     // Update stored refresh token with the new one
     if (sessionData.session.refresh_token) {
       localStorage.setItem(PIN_REFRESH_TOKEN_KEY, sessionData.session.refresh_token);
+      setHasRefreshToken(true);
     }
 
     return true;
-  }, []);
+  }, [clearPinData]);
 
-  // Clear saved PIN data (for logout or switching users)
-  const clearPinData = useCallback(() => {
-    localStorage.removeItem(PIN_USER_KEY);
-    localStorage.removeItem(PIN_EMAIL_KEY);
-    localStorage.removeItem(PIN_REFRESH_TOKEN_KEY);
-    setSavedUserId(null);
-    setSavedEmail(null);
-  }, []);
-
-  // Check if PIN login is available for this device
-  const canUsePinLogin = savedUserId !== null;
+  // Check if PIN login is available - requires BOTH user_id AND refresh_token
+  const canUsePinLogin = savedUserId !== null && hasRefreshToken;
 
   return {
     hasPin,
