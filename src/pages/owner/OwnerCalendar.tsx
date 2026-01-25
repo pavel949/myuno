@@ -6,11 +6,12 @@ import { UnifiedPropertyCalendar } from '@/components/owner/UnifiedPropertyCalen
 import { BookingCalendar } from '@/components/owner/BookingCalendar';
 import { CalendarSyncManager } from '@/components/owner/CalendarSyncManager';
 import { PropertyThumbnailSelector } from '@/components/owner/PropertyThumbnailSelector';
+import { CreateServiceTaskDialog } from '@/components/owner/CreateServiceTaskDialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { useOwnerProperties } from '@/hooks/usePropertyCare';
-import { CalendarDays, RefreshCw, ClipboardList } from 'lucide-react';
+import { CalendarDays, RefreshCw, ClipboardList, Plus } from 'lucide-react';
 
 export default function OwnerCalendar() {
   const { language } = useLanguage();
@@ -20,6 +21,7 @@ export default function OwnerCalendar() {
   
   const [selectedPropertyId, setSelectedPropertyId] = useState('');
   const [activeTab, setActiveTab] = useState('calendar');
+  const [showCreateTaskDialog, setShowCreateTaskDialog] = useState(false);
   
   const { data: properties, isLoading: propertiesLoading } = useOwnerProperties();
 
@@ -51,17 +53,29 @@ export default function OwnerCalendar() {
 
   return (
     <div className="p-4 space-y-4">
-      {/* Property Thumbnail Selector - shared between tabs */}
-      <div className="space-y-2">
-        <p className="text-sm font-medium text-muted-foreground">
-          {isRu ? 'Выберите объект' : 'Select Property'}
-        </p>
-        <PropertyThumbnailSelector
-          properties={properties || []}
-          selectedId={selectedPropertyId}
-          onSelect={setSelectedPropertyId}
-          isLoading={propertiesLoading}
-        />
+      {/* Header with Property Selector and Add Task Button */}
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1 space-y-2">
+          <p className="text-sm font-medium text-muted-foreground">
+            {isRu ? 'Выберите объект' : 'Select Property'}
+          </p>
+          <PropertyThumbnailSelector
+            properties={properties || []}
+            selectedId={selectedPropertyId}
+            onSelect={setSelectedPropertyId}
+            isLoading={propertiesLoading}
+          />
+        </div>
+        
+        {/* Quick Add Task Button */}
+        <Button 
+          onClick={() => setShowCreateTaskDialog(true)}
+          className="gap-2 shrink-0"
+          disabled={!selectedPropertyId}
+        >
+          <Plus className="h-4 w-4" />
+          {isRu ? 'Создать задачу' : 'Add Task'}
+        </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -107,6 +121,15 @@ export default function OwnerCalendar() {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Create Task Dialog */}
+      <CreateServiceTaskDialog
+        open={showCreateTaskDialog}
+        onOpenChange={setShowCreateTaskDialog}
+        properties={properties || []}
+        defaultPropertyId={selectedPropertyId}
+        defaultDate={new Date()}
+      />
     </div>
   );
 }
