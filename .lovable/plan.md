@@ -1,177 +1,76 @@
 
-# План: CMS для редактирования текстов SuperApp
+# План: Исправление страницы /support
 
-## Текущая ситуация
+## Обнаруженная проблема
 
-Все тексты приложения хранятся в одном файле `src/contexts/LanguageContext.tsx`:
-- **~1330 строк** кода
-- **3 языка**: русский, английский, тайский
-- **~300+ ключей** переводов
-- Для изменения любого текста нужно редактировать код
-
----
-
-## Решение: Административная CMS для текстов
-
-### Архитектура
-
-```text
-┌─────────────────────────────────────────────────────────┐
-│                    Admin Panel                          │
-│  /admin/translations                                    │
-│  ┌───────────────────────────────────────────────────┐ │
-│  │ 🔍 Поиск по ключу или тексту                      │ │
-│  ├───────────────────────────────────────────────────┤ │
-│  │ Категория: [Navigation ▼]                         │ │
-│  ├───────────────────────────────────────────────────┤ │
-│  │ Key: nav.home                                     │ │
-│  │ ┌─────────────┬─────────────┬─────────────┐      │ │
-│  │ │ RU: Главная │ EN: Home    │ TH: หน้าแรก │      │ │
-│  │ └─────────────┴─────────────┴─────────────┘      │ │
-│  │                                    [💾 Save]      │ │
-│  └───────────────────────────────────────────────────┘ │
-└────────────────────────────┬────────────────────────────┘
-                             │
-                             ▼
-                   ┌─────────────────┐
-                   │   Supabase DB   │
-                   │  translations   │
-                   │ table + cache   │
-                   └─────────────────┘
-                             │
-                             ▼
-              ┌──────────────────────────┐
-              │   LanguageContext.tsx    │
-              │ Загружает из DB + кеш    │
-              │ Fallback на статику      │
-              └──────────────────────────┘
+**Ошибка в консоли:**
+```
+Warning: Function components cannot be given refs.
+Check the render method of `Support`.
+at WhatsAppIcon
 ```
 
----
+**Причина:** Компонент `WhatsAppIcon` — это простая функция, возвращающая SVG. Когда он используется внутри `PremiumButton`, React пытается передать ему ref (для правильной работы анимаций и фокуса), но функциональный компонент без `forwardRef` не может принять ref.
 
-## Этапы реализации
+## Почему страница "не грузится"
 
-### Этап 1: Создание таблицы в БД
+На самом деле страница **рендерится**, но:
+1. Warning в консоли может указывать на проблемы с производительностью
+2. Возможна задержка из-за запроса к таблице `translations` в `LanguageContext`
 
-```sql
-CREATE TABLE public.translations (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  key TEXT NOT NULL,              -- 'nav.home'
-  category TEXT,                  -- 'navigation', 'auth', 'booking'
-  value_ru TEXT NOT NULL,
-  value_en TEXT NOT NULL,
-  value_th TEXT,
-  is_custom BOOLEAN DEFAULT true, -- отличается от дефолта?
-  updated_at TIMESTAMPTZ DEFAULT now(),
-  updated_by UUID REFERENCES auth.users(id),
-  UNIQUE(key)
-);
+## Решение
 
--- RLS: только админы могут редактировать
-CREATE POLICY "Admins can manage translations"
-  ON translations FOR ALL
-  USING (is_admin(auth.uid()));
-
--- Публичное чтение для всех
-CREATE POLICY "Anyone can read translations"
-  ON translations FOR SELECT
-  USING (true);
-```
-
-### Этап 2: Миграция существующих переводов
-
-Edge-функция для импорта текущих ~300 ключей в таблицу:
-- Парсинг категорий из ключей (`nav.`, `auth.`, `booking.`)
-- Автоматическое заполнение всех языков
-
-### Этап 3: Обновление LanguageContext
+### Шаг 1: Обернуть WhatsAppIcon в forwardRef
 
 ```typescript
-// Новая логика загрузки
-const [customTranslations, setCustomTranslations] = useState({});
+// src/pages/Support.tsx
 
-useEffect(() => {
-  // Загрузка кастомных переводов из БД
-  supabase
-    .from('translations')
-    .select('key, value_ru, value_en, value_th')
-    .then(({ data }) => {
-      const map = {};
-      data?.forEach(row => {
-        map[row.key] = {
-          ru: row.value_ru,
-          en: row.value_en,
-          th: row.value_th
-        };
-      });
-      setCustomTranslations(map);
-    });
-}, []);
-
-const t = (key: string): string => {
-  // Приоритет: кастомные → статичные → fallback
-  const custom = customTranslations[key]?.[language];
-  if (custom) return custom;
-  return translations[language][key] || translations['en'][key] || key;
-};
+const WhatsAppIcon = React.forwardRef<SVGSVGElement, { className?: string }>(
+  ({ className }, ref) => (
+    <svg ref={ref} className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M17.472 14.382c-..."/>
+    </svg>
+  )
+);
+WhatsAppIcon.displayName = 'WhatsAppIcon';
 ```
 
-### Этап 4: Админ-страница /admin/translations
+### Файлы для изменения
 
-**Компоненты:**
-
-| Компонент | Функция |
-|-----------|---------|
-| TranslationsTable | Таблица всех ключей с фильтрами |
-| TranslationEditor | Редактирование одного ключа (все языки) |
-| CategoryFilter | Фильтр по категориям (nav, auth, booking...) |
-| SearchBar | Поиск по ключу и тексту |
-| ImportExport | Экспорт/импорт JSON |
-
-**Функции:**
-- Поиск и фильтрация по категориям
-- Inline-редактирование с автосохранением
-- AI-перевод одной кнопкой (использует существующий `ai-translate`)
-- История изменений (кто, когда)
-- Экспорт в JSON для бэкапа
-
-### Этап 5: Кеширование
-
-- **LocalStorage**: кеш переводов на 1 час
-- **Realtime**: подписка на изменения таблицы
-- **Versioning**: хеш версии для инвалидации кеша
+| Файл | Изменение |
+|------|-----------|
+| `src/pages/Support.tsx` | Обернуть `WhatsAppIcon` в `React.forwardRef` |
 
 ---
 
-## Файлы для создания/изменения
+## Техническая секция
 
-| Файл | Действие |
-|------|----------|
-| `migrations/xxx_translations_table.sql` | Создать таблицу |
-| `src/pages/admin/AdminTranslations.tsx` | Новая страница CMS |
-| `src/components/admin/TranslationsTable.tsx` | Таблица переводов |
-| `src/components/admin/TranslationEditor.tsx` | Редактор ключа |
-| `src/contexts/LanguageContext.tsx` | Добавить загрузку из БД |
-| `src/hooks/useTranslations.ts` | Хук для работы с переводами |
-| `supabase/functions/import-translations/` | Импорт начальных данных |
+### Почему это происходит
 
----
+`PremiumButton` использует `Slot` из Radix UI, который пытается передать ref дочернему элементу. Когда первым child является `WhatsAppIcon` (строка 188), React выдаёт warning, потому что обычные функциональные компоненты не принимают ref.
 
-## Дополнительные возможности
+### Исправление (полный код)
 
-1. **AI-перевод**: кнопка "Перевести на все языки" рядом с каждым ключом
-2. **Версионирование**: история изменений каждого ключа
-3. **Предпросмотр**: увидеть текст в контексте UI
-4. **Bulk-редактирование**: массовое изменение категории
-5. **Добавление новых ключей**: создание новых текстов без кода
+```typescript
+// Было:
+const WhatsAppIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="..."/>
+  </svg>
+);
 
----
+// Станет:
+const WhatsAppIcon = React.forwardRef<SVGSVGElement, { className?: string }>(
+  ({ className }, ref) => (
+    <svg ref={ref} className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+    </svg>
+  )
+);
+WhatsAppIcon.displayName = 'WhatsAppIcon';
+```
 
-## Ожидаемый результат
-
-После реализации:
-- Все тексты редактируются через админ-панель
-- Изменения применяются мгновенно (realtime)
-- AI автоматически переводит на другие языки
-- Сохраняется история изменений
-- Работает fallback на статические тексты при ошибках БД
+После этого исправления:
+- Warning исчезнет из консоли
+- Страница будет рендериться без проблем
+- Ref будет корректно передаваться для анимаций
