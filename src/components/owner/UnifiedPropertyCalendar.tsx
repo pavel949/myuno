@@ -2,25 +2,22 @@ import { useState, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePropertyBookings, PropertyBooking } from '@/hooks/usePropertyBookings';
 import { useOperationalTasks, OperationalTask } from '@/hooks/useOperationalTasks';
+import { usePropertyAvailabilityManagement } from '@/hooks/usePropertyAvailabilityManagement';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { CalendarDayEventsSheet } from './CalendarDayEventsSheet';
 import { CreateServiceTaskDialog } from './CreateServiceTaskDialog';
-import { format, addDays, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
+import { AddBookingFromCalendarDialog } from './AddBookingFromCalendarDialog';
+import { BlockDatesDialog } from './BlockDatesDialog';
+import { format, addDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { 
   CalendarDays, 
   Plus, 
-  LogIn, 
-  LogOut, 
-  Sparkles, 
-  Wrench,
-  User
+  CalendarPlus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { DateRange } from 'react-day-picker';
 
 interface OwnerProperty {
   id: string;
@@ -34,7 +31,7 @@ interface UnifiedPropertyCalendarProps {
 }
 
 interface DayEvent {
-  type: 'booking' | 'check_in' | 'check_out' | 'cleaning' | 'maintenance' | 'other_task';
+  type: 'booking' | 'check_in' | 'check_out' | 'cleaning' | 'maintenance' | 'other_task' | 'blocked';
   booking?: PropertyBooking;
   task?: OperationalTask;
 }
@@ -47,12 +44,16 @@ export function UnifiedPropertyCalendar({ propertyId, properties = [] }: Unified
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showEventsSheet, setShowEventsSheet] = useState(false);
   const [showCreateTaskDialog, setShowCreateTaskDialog] = useState(false);
+  const [showAddBookingDialog, setShowAddBookingDialog] = useState(false);
+  const [showBlockDatesDialog, setShowBlockDatesDialog] = useState(false);
+  const [blockDialogMode, setBlockDialogMode] = useState<'block' | 'unblock'>('block');
   const [selectedBooking, setSelectedBooking] = useState<PropertyBooking | null>(null);
 
   const { bookings, getBookingForDate } = usePropertyBookings(propertyId);
   const { tasks, completeTask } = useOperationalTasks({ 
     propertyId: propertyId || undefined,
   });
+  const { availability } = usePropertyAvailabilityManagement(propertyId);
 
   // Build event map for calendar
   const eventMap = useMemo(() => {
@@ -83,6 +84,15 @@ export function UnifiedPropertyCalendar({ propertyId, properties = [] }: Unified
       map.get(checkOutKey)!.push({ type: 'check_out', booking });
     });
     
+    // Add blocked dates
+    availability?.forEach(entry => {
+      if (entry.status === 'blocked') {
+        const key = format(entry.date, 'yyyy-MM-dd');
+        if (!map.has(key)) map.set(key, []);
+        map.get(key)!.push({ type: 'blocked' });
+      }
+    });
+    
     // Add tasks
     tasks?.forEach(task => {
       const key = task.scheduled_date;
@@ -98,20 +108,26 @@ export function UnifiedPropertyCalendar({ propertyId, properties = [] }: Unified
     });
     
     return map;
-  }, [bookings, tasks]);
+  }, [bookings, tasks, availability]);
 
   // Get events for selected date
   const selectedDateEvents = useMemo(() => {
-    if (!selectedDate) return { bookings: [], tasks: [] };
+    if (!selectedDate) return { bookings: [], tasks: [], availability: undefined };
     
     const dateKey = format(selectedDate, 'yyyy-MM-dd');
     const events = eventMap.get(dateKey) || [];
     
+    // Find availability entry for the selected date
+    const availabilityEntry = availability?.find(a => 
+      format(a.date, 'yyyy-MM-dd') === dateKey
+    );
+    
     return {
       bookings: events.filter(e => e.booking).map(e => e.booking!),
       tasks: events.filter(e => e.task).map(e => e.task!),
+      availability: availabilityEntry,
     };
-  }, [selectedDate, eventMap]);
+  }, [selectedDate, eventMap, availability]);
 
   // Calendar day modifiers
   const modifiers = useMemo(() => {
@@ -120,6 +136,7 @@ export function UnifiedPropertyCalendar({ propertyId, properties = [] }: Unified
     const checkOut: Date[] = [];
     const cleaning: Date[] = [];
     const maintenance: Date[] = [];
+    const blocked: Date[] = [];
     
     eventMap.forEach((events, dateStr) => {
       const date = new Date(dateStr);
@@ -129,10 +146,11 @@ export function UnifiedPropertyCalendar({ propertyId, properties = [] }: Unified
         else if (event.type === 'check_out') checkOut.push(date);
         else if (event.type === 'cleaning') cleaning.push(date);
         else if (event.type === 'maintenance') maintenance.push(date);
+        else if (event.type === 'blocked') blocked.push(date);
       });
     });
     
-    return { booked, checkIn, checkOut, cleaning, maintenance };
+    return { booked, checkIn, checkOut, cleaning, maintenance, blocked };
   }, [eventMap]);
 
   const modifiersClassNames = {
@@ -141,6 +159,7 @@ export function UnifiedPropertyCalendar({ propertyId, properties = [] }: Unified
     checkOut: 'ring-2 ring-warning ring-inset',
     cleaning: '',
     maintenance: '',
+    blocked: 'bg-destructive/15 text-destructive',
   };
 
   const handleDayClick = (day: Date) => {
@@ -153,6 +172,23 @@ export function UnifiedPropertyCalendar({ propertyId, properties = [] }: Unified
     setShowCreateTaskDialog(true);
   };
 
+  const handleAddBooking = () => {
+    setShowEventsSheet(false);
+    setShowAddBookingDialog(true);
+  };
+
+  const handleBlockDate = () => {
+    setBlockDialogMode('block');
+    setShowEventsSheet(false);
+    setShowBlockDatesDialog(true);
+  };
+
+  const handleUnblockDate = () => {
+    setBlockDialogMode('unblock');
+    setShowEventsSheet(false);
+    setShowBlockDatesDialog(true);
+  };
+
   const handleCompleteTask = (taskId: string) => {
     completeTask.mutate(taskId);
   };
@@ -162,18 +198,19 @@ export function UnifiedPropertyCalendar({ propertyId, properties = [] }: Unified
     const dateKey = format(date, 'yyyy-MM-dd');
     const events = eventMap.get(dateKey) || [];
     
-    const hasBooking = events.some(e => e.type === 'booking' || e.type === 'check_in' || e.type === 'check_out');
+    const hasCheckIn = events.some(e => e.type === 'check_in');
+    const hasCheckOut = events.some(e => e.type === 'check_out');
     const hasCleaning = events.some(e => e.type === 'cleaning');
     const hasMaintenance = events.some(e => e.type === 'maintenance');
     const hasOtherTask = events.some(e => e.type === 'other_task');
-    const hasCheckIn = events.some(e => e.type === 'check_in');
-    const hasCheckOut = events.some(e => e.type === 'check_out');
+    const isBlocked = events.some(e => e.type === 'blocked');
     
     return (
       <div className="relative w-full h-full flex flex-col items-center justify-center">
         <span>{date.getDate()}</span>
         {events.length > 0 && (
           <div className="absolute bottom-0.5 flex gap-0.5">
+            {isBlocked && <div className="w-1.5 h-1.5 rounded-full bg-destructive" />}
             {hasCheckIn && <div className="w-1.5 h-1.5 rounded-full bg-success" />}
             {hasCheckOut && <div className="w-1.5 h-1.5 rounded-full bg-warning" />}
             {hasCleaning && <div className="w-1.5 h-1.5 rounded-full bg-info" />}
@@ -194,10 +231,30 @@ export function UnifiedPropertyCalendar({ propertyId, properties = [] }: Unified
               <CalendarDays className="w-5 h-5" />
               {isRu ? 'Операционный календарь' : 'Operations Calendar'}
             </CardTitle>
-            <Button size="sm" variant="outline" onClick={() => setShowCreateTaskDialog(true)} className="gap-1">
-              <Plus className="w-4 h-4" />
-              {isRu ? 'Задача' : 'Task'}
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={() => {
+                  setSelectedDate(new Date());
+                  setShowAddBookingDialog(true);
+                }} 
+                className="gap-1"
+                disabled={!propertyId}
+              >
+                <CalendarPlus className="w-4 h-4" />
+                <span className="hidden sm:inline">{isRu ? 'Брон.' : 'Book'}</span>
+              </Button>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={() => setShowCreateTaskDialog(true)} 
+                className="gap-1"
+              >
+                <Plus className="w-4 h-4" />
+                <span className="hidden sm:inline">{isRu ? 'Задача' : 'Task'}</span>
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -232,6 +289,10 @@ export function UnifiedPropertyCalendar({ propertyId, properties = [] }: Unified
                   <span>{isRu ? 'Выезд' : 'Check-out'}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-destructive" />
+                  <span>{isRu ? 'Закрыто' : 'Blocked'}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-info" />
                   <span>{isRu ? 'Уборка' : 'Cleaning'}</span>
                 </div>
@@ -256,12 +317,16 @@ export function UnifiedPropertyCalendar({ propertyId, properties = [] }: Unified
         date={selectedDate}
         bookings={selectedDateEvents.bookings}
         tasks={selectedDateEvents.tasks}
+        availability={selectedDateEvents.availability}
         onAddTask={handleAddTask}
         onViewBooking={(booking) => {
           setSelectedBooking(booking);
           // Could open booking details dialog here
         }}
         onCompleteTask={handleCompleteTask}
+        onAddBooking={propertyId ? handleAddBooking : undefined}
+        onBlockDate={propertyId ? handleBlockDate : undefined}
+        onUnblockDate={propertyId ? handleUnblockDate : undefined}
       />
 
       <CreateServiceTaskDialog
@@ -271,6 +336,27 @@ export function UnifiedPropertyCalendar({ propertyId, properties = [] }: Unified
         defaultPropertyId={propertyId}
         defaultDate={selectedDate || new Date()}
       />
+
+      {propertyId && (
+        <>
+          <AddBookingFromCalendarDialog
+            open={showAddBookingDialog}
+            onOpenChange={setShowAddBookingDialog}
+            propertyId={propertyId}
+            initialDate={selectedDate || new Date()}
+            onSuccess={() => setShowAddBookingDialog(false)}
+          />
+
+          <BlockDatesDialog
+            open={showBlockDatesDialog}
+            onOpenChange={setShowBlockDatesDialog}
+            propertyId={propertyId}
+            initialDate={selectedDate || new Date()}
+            mode={blockDialogMode}
+            onSuccess={() => setShowBlockDatesDialog(false)}
+          />
+        </>
+      )}
     </>
   );
 }

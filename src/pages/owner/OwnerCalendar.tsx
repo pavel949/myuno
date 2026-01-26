@@ -7,11 +7,12 @@ import { BookingCalendar } from '@/components/owner/BookingCalendar';
 import { CalendarSyncManager } from '@/components/owner/CalendarSyncManager';
 import { PropertyThumbnailSelector } from '@/components/owner/PropertyThumbnailSelector';
 import { CreateServiceTaskDialog } from '@/components/owner/CreateServiceTaskDialog';
+import { AddBookingFromCalendarDialog } from '@/components/owner/AddBookingFromCalendarDialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { useOwnerProperties } from '@/hooks/usePropertyCare';
-import { CalendarDays, RefreshCw, ClipboardList, Plus } from 'lucide-react';
+import { CalendarDays, RefreshCw, ClipboardList, Plus, CalendarPlus } from 'lucide-react';
 
 export default function OwnerCalendar() {
   const { language } = useLanguage();
@@ -22,6 +23,7 @@ export default function OwnerCalendar() {
   const [selectedPropertyId, setSelectedPropertyId] = useState('');
   const [activeTab, setActiveTab] = useState('calendar');
   const [showCreateTaskDialog, setShowCreateTaskDialog] = useState(false);
+  const [showAddBookingDialog, setShowAddBookingDialog] = useState(false);
   
   const { data: properties, isLoading: propertiesLoading } = useOwnerProperties();
 
@@ -66,15 +68,27 @@ export default function OwnerCalendar() {
         />
       </div>
       
-      {/* Quick Add Task Button - Full width on mobile */}
-      <Button 
-        onClick={() => setShowCreateTaskDialog(true)}
-        className="w-full gap-2"
-        disabled={!selectedPropertyId}
-      >
-        <Plus className="h-4 w-4" />
-        {isRu ? 'Создать задачу' : 'Add Task'}
-      </Button>
+      {/* Quick Action Buttons - Full width on mobile */}
+      <div className="grid grid-cols-2 gap-2">
+        <Button 
+          onClick={() => setShowAddBookingDialog(true)}
+          variant="default"
+          className="gap-2"
+          disabled={!selectedPropertyId}
+        >
+          <CalendarPlus className="h-4 w-4" />
+          {isRu ? 'Бронирование' : 'Add Booking'}
+        </Button>
+        <Button 
+          onClick={() => setShowCreateTaskDialog(true)}
+          variant="outline"
+          className="gap-2"
+          disabled={!selectedPropertyId}
+        >
+          <Plus className="h-4 w-4" />
+          {isRu ? 'Задача' : 'Add Task'}
+        </Button>
+      </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
@@ -128,6 +142,17 @@ export default function OwnerCalendar() {
         defaultPropertyId={selectedPropertyId}
         defaultDate={new Date()}
       />
+
+      {/* Add Booking Dialog */}
+      {selectedPropertyId && (
+        <AddBookingFromCalendarDialog
+          open={showAddBookingDialog}
+          onOpenChange={setShowAddBookingDialog}
+          propertyId={selectedPropertyId}
+          initialDate={new Date()}
+          onSuccess={() => setShowAddBookingDialog(false)}
+        />
+      )}
     </div>
   );
 }
