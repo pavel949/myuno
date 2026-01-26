@@ -36,6 +36,8 @@ export interface Yacht {
   has_crew: boolean | null;
   has_catering: boolean | null;
   provider_id?: string | null;
+  approval_status?: string | null;
+  is_active?: boolean;
 }
 
 export function useYachts(yachtType?: string) {
