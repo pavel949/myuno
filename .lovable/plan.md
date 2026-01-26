@@ -1,114 +1,177 @@
 
+# План: CMS для редактирования текстов SuperApp
 
-# План: Исправление touch-событий календаря на мобильных устройствах
+## Текущая ситуация
 
-## Обнаруженные проблемы
-
-### 1. Отсутствие `touch-manipulation` на Calendar
-
-**Проблема**: Компонент `Calendar` и кнопки дней не используют CSS-класс `touch-manipulation`, который критически важен для мобильных устройств:
-- Без него браузер ждёт 300мс перед обработкой tap для проверки double-tap zoom
-- Это делает клики "залипающими" или не отзывчивыми
-
-**Сравнение**: Другие интерактивные элементы (BackButton, BookingBottomBar) уже используют `touch-manipulation`
-
-### 2. Z-index конфликт между Sheet и BottomNav
-
-| Компонент | Z-index | Позиция |
-|-----------|---------|---------|
-| BottomNav | z-50 | fixed bottom-0 |
-| SheetOverlay | z-50 | fixed inset-0 |
-| SheetContent | z-50 | fixed bottom-0 |
-
-**Результат**: Sheet может появляться "под" навигацией или конкурировать за touch-события
-
-### 3. Отсутствие safe-area padding
-
-Календарь не учитывает высоту BottomNav, из-за чего нижние даты могут быть визуально доступны, но клики по ним перехватываются навигацией
+Все тексты приложения хранятся в одном файле `src/contexts/LanguageContext.tsx`:
+- **~1330 строк** кода
+- **3 языка**: русский, английский, тайский
+- **~300+ ключей** переводов
+- Для изменения любого текста нужно редактировать код
 
 ---
 
-## Решение
+## Решение: Административная CMS для текстов
 
-### 1. Добавить `touch-manipulation` в Calendar UI
+### Архитектура
 
-**Файл**: `src/components/ui/calendar.tsx`
-
-```typescript
-classNames={{
-  // ... existing classes
-  day: cn(
-    buttonVariants({ variant: "ghost" }), 
-    "h-9 w-9 p-0 font-normal aria-selected:opacity-100 touch-manipulation"
-  ),
-  // ...
-}}
-```
-
-### 2. Увеличить z-index для Sheet
-
-**Файл**: `src/components/ui/sheet.tsx`
-
-Увеличить z-index для SheetOverlay и SheetContent до `z-[100]`, чтобы гарантированно показывать поверх всех элементов:
-
-```typescript
-// SheetOverlay
-"fixed inset-0 z-[100] bg-black/80 ..."
-
-// sheetVariants
-"fixed z-[100] gap-4 bg-background ..."
-```
-
-### 3. Добавить padding-bottom для контента страницы
-
-**Файл**: `src/pages/owner/OwnerCalendar.tsx`
-
-Добавить отступ снизу для учёта высоты BottomNav:
-
-```typescript
-<div className="p-4 pb-24 space-y-4">
-```
-
-### 4. Добавить touch-manipulation в UnifiedPropertyCalendar
-
-**Файл**: `src/components/owner/UnifiedPropertyCalendar.tsx`
-
-Явно добавить `touch-manipulation` к контейнеру календаря:
-
-```typescript
-<Calendar
-  ...
-  className="pointer-events-auto touch-manipulation"
-/>
+```text
+┌─────────────────────────────────────────────────────────┐
+│                    Admin Panel                          │
+│  /admin/translations                                    │
+│  ┌───────────────────────────────────────────────────┐ │
+│  │ 🔍 Поиск по ключу или тексту                      │ │
+│  ├───────────────────────────────────────────────────┤ │
+│  │ Категория: [Navigation ▼]                         │ │
+│  ├───────────────────────────────────────────────────┤ │
+│  │ Key: nav.home                                     │ │
+│  │ ┌─────────────┬─────────────┬─────────────┐      │ │
+│  │ │ RU: Главная │ EN: Home    │ TH: หน้าแรก │      │ │
+│  │ └─────────────┴─────────────┴─────────────┘      │ │
+│  │                                    [💾 Save]      │ │
+│  └───────────────────────────────────────────────────┘ │
+└────────────────────────────┬────────────────────────────┘
+                             │
+                             ▼
+                   ┌─────────────────┐
+                   │   Supabase DB   │
+                   │  translations   │
+                   │ table + cache   │
+                   └─────────────────┘
+                             │
+                             ▼
+              ┌──────────────────────────┐
+              │   LanguageContext.tsx    │
+              │ Загружает из DB + кеш    │
+              │ Fallback на статику      │
+              └──────────────────────────┘
 ```
 
 ---
 
-## Порядок исправлений
+## Этапы реализации
 
-1. **`src/components/ui/calendar.tsx`** — добавить `touch-manipulation` к классу `day`
-2. **`src/components/ui/sheet.tsx`** — увеличить z-index до `z-[100]`
-3. **`src/components/owner/UnifiedPropertyCalendar.tsx`** — добавить `touch-manipulation`
-4. **`src/pages/owner/OwnerCalendar.tsx`** — добавить `pb-24` для safe-area
+### Этап 1: Создание таблицы в БД
+
+```sql
+CREATE TABLE public.translations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  key TEXT NOT NULL,              -- 'nav.home'
+  category TEXT,                  -- 'navigation', 'auth', 'booking'
+  value_ru TEXT NOT NULL,
+  value_en TEXT NOT NULL,
+  value_th TEXT,
+  is_custom BOOLEAN DEFAULT true, -- отличается от дефолта?
+  updated_at TIMESTAMPTZ DEFAULT now(),
+  updated_by UUID REFERENCES auth.users(id),
+  UNIQUE(key)
+);
+
+-- RLS: только админы могут редактировать
+CREATE POLICY "Admins can manage translations"
+  ON translations FOR ALL
+  USING (is_admin(auth.uid()));
+
+-- Публичное чтение для всех
+CREATE POLICY "Anyone can read translations"
+  ON translations FOR SELECT
+  USING (true);
+```
+
+### Этап 2: Миграция существующих переводов
+
+Edge-функция для импорта текущих ~300 ключей в таблицу:
+- Парсинг категорий из ключей (`nav.`, `auth.`, `booking.`)
+- Автоматическое заполнение всех языков
+
+### Этап 3: Обновление LanguageContext
+
+```typescript
+// Новая логика загрузки
+const [customTranslations, setCustomTranslations] = useState({});
+
+useEffect(() => {
+  // Загрузка кастомных переводов из БД
+  supabase
+    .from('translations')
+    .select('key, value_ru, value_en, value_th')
+    .then(({ data }) => {
+      const map = {};
+      data?.forEach(row => {
+        map[row.key] = {
+          ru: row.value_ru,
+          en: row.value_en,
+          th: row.value_th
+        };
+      });
+      setCustomTranslations(map);
+    });
+}, []);
+
+const t = (key: string): string => {
+  // Приоритет: кастомные → статичные → fallback
+  const custom = customTranslations[key]?.[language];
+  if (custom) return custom;
+  return translations[language][key] || translations['en'][key] || key;
+};
+```
+
+### Этап 4: Админ-страница /admin/translations
+
+**Компоненты:**
+
+| Компонент | Функция |
+|-----------|---------|
+| TranslationsTable | Таблица всех ключей с фильтрами |
+| TranslationEditor | Редактирование одного ключа (все языки) |
+| CategoryFilter | Фильтр по категориям (nav, auth, booking...) |
+| SearchBar | Поиск по ключу и тексту |
+| ImportExport | Экспорт/импорт JSON |
+
+**Функции:**
+- Поиск и фильтрация по категориям
+- Inline-редактирование с автосохранением
+- AI-перевод одной кнопкой (использует существующий `ai-translate`)
+- История изменений (кто, когда)
+- Экспорт в JSON для бэкапа
+
+### Этап 5: Кеширование
+
+- **LocalStorage**: кеш переводов на 1 час
+- **Realtime**: подписка на изменения таблицы
+- **Versioning**: хеш версии для инвалидации кеша
 
 ---
 
-## Файлы для изменения
+## Файлы для создания/изменения
 
-| Файл | Изменения |
-|------|-----------|
-| `src/components/ui/calendar.tsx` | Добавить `touch-manipulation` к day кнопкам |
-| `src/components/ui/sheet.tsx` | Z-index `z-50` → `z-[100]` |
-| `src/components/owner/UnifiedPropertyCalendar.tsx` | Добавить `touch-manipulation` |
-| `src/pages/owner/OwnerCalendar.tsx` | Добавить `pb-24` для BottomNav spacing |
+| Файл | Действие |
+|------|----------|
+| `migrations/xxx_translations_table.sql` | Создать таблицу |
+| `src/pages/admin/AdminTranslations.tsx` | Новая страница CMS |
+| `src/components/admin/TranslationsTable.tsx` | Таблица переводов |
+| `src/components/admin/TranslationEditor.tsx` | Редактор ключа |
+| `src/contexts/LanguageContext.tsx` | Добавить загрузку из БД |
+| `src/hooks/useTranslations.ts` | Хук для работы с переводами |
+| `supabase/functions/import-translations/` | Импорт начальных данных |
+
+---
+
+## Дополнительные возможности
+
+1. **AI-перевод**: кнопка "Перевести на все языки" рядом с каждым ключом
+2. **Версионирование**: история изменений каждого ключа
+3. **Предпросмотр**: увидеть текст в контексте UI
+4. **Bulk-редактирование**: массовое изменение категории
+5. **Добавление новых ключей**: создание новых текстов без кода
 
 ---
 
 ## Ожидаемый результат
 
-После исправлений:
-- Tap на дату календаря моментально откроет Sheet-меню
-- Sheet гарантированно отобразится поверх BottomNav
-- Нижние даты календаря не будут перекрываться навигацией
-- Улучшенная отзывчивость touch-событий на всех мобильных устройствах
-
+После реализации:
+- Все тексты редактируются через админ-панель
+- Изменения применяются мгновенно (realtime)
+- AI автоматически переводит на другие языки
+- Сохраняется история изменений
+- Работает fallback на статические тексты при ошибках БД
