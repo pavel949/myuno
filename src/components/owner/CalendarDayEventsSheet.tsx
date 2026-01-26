@@ -1,10 +1,12 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PropertyBooking } from '@/hooks/usePropertyBookings';
 import { OperationalTask } from '@/hooks/useOperationalTasks';
+import { AvailabilityEntry } from '@/components/property/PropertyCalendar';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import { format, differenceInDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -18,8 +20,10 @@ import {
   Search, 
   Gauge,
   CheckCircle2,
-  Clock,
-  CalendarDays
+  CalendarDays,
+  Lock,
+  Unlock,
+  CalendarPlus
 } from 'lucide-react';
 
 interface CalendarDayEventsSheetProps {
@@ -28,9 +32,13 @@ interface CalendarDayEventsSheetProps {
   date: Date | null;
   bookings: PropertyBooking[];
   tasks: OperationalTask[];
+  availability?: AvailabilityEntry;
   onAddTask: () => void;
   onViewBooking: (booking: PropertyBooking) => void;
   onCompleteTask: (taskId: string) => void;
+  onAddBooking?: () => void;
+  onBlockDate?: () => void;
+  onUnblockDate?: () => void;
 }
 
 const TASK_CONFIG: Record<OperationalTask['task_type'], {
@@ -54,9 +62,13 @@ export function CalendarDayEventsSheet({
   date,
   bookings,
   tasks,
+  availability,
   onAddTask,
   onViewBooking,
   onCompleteTask,
+  onAddBooking,
+  onBlockDate,
+  onUnblockDate,
 }: CalendarDayEventsSheetProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -64,6 +76,8 @@ export function CalendarDayEventsSheet({
   if (!date) return null;
 
   const hasEvents = bookings.length > 0 || tasks.length > 0;
+  const isBlocked = availability?.status === 'blocked';
+  const hasBookingOnDate = bookings.length > 0;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -72,24 +86,29 @@ export function CalendarDayEventsSheet({
           <SheetTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <CalendarDays className="h-5 w-5" />
-              {format(date, 'd MMMM yyyy', { locale: isRu ? ru : undefined })}
+              <span>{format(date, 'd MMMM yyyy', { locale: isRu ? ru : undefined })}</span>
+              {isBlocked && (
+                <Badge variant="destructive" className="gap-1">
+                  <Lock className="h-3 w-3" />
+                  {isRu ? 'Закрыто' : 'Blocked'}
+                </Badge>
+              )}
             </div>
-            <Button size="sm" onClick={onAddTask} className="gap-1">
-              <Plus className="h-4 w-4" />
-              {isRu ? 'Задача' : 'Task'}
-            </Button>
           </SheetTitle>
         </SheetHeader>
 
-        <div className="space-y-4 pb-6 overflow-y-auto">
-          {!hasEvents ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <CalendarDays className="h-12 w-12 mx-auto mb-2 opacity-50" />
+        <div className="space-y-4 pb-4 overflow-y-auto">
+          {/* Status Banner for blocked dates */}
+          {isBlocked && availability?.note && (
+            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+              <p className="text-sm text-muted-foreground">{availability.note}</p>
+            </div>
+          )}
+
+          {!hasEvents && !isBlocked ? (
+            <div className="text-center py-6 text-muted-foreground">
+              <CalendarDays className="h-10 w-10 mx-auto mb-2 opacity-50" />
               <p>{isRu ? 'Нет событий на этот день' : 'No events for this day'}</p>
-              <Button variant="outline" className="mt-4" onClick={onAddTask}>
-                <Plus className="h-4 w-4 mr-1" />
-                {isRu ? 'Добавить задачу' : 'Add Task'}
-              </Button>
             </div>
           ) : (
             <>
@@ -206,6 +225,73 @@ export function CalendarDayEventsSheet({
                 </div>
               )}
             </>
+          )}
+        </div>
+        
+        <Separator className="my-2" />
+        
+        {/* Action Buttons */}
+        <div className="grid grid-cols-3 gap-2 pb-6">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="gap-1.5"
+            onClick={() => {
+              onOpenChange(false);
+              onAddTask();
+            }}
+          >
+            <Plus className="h-4 w-4" />
+            {isRu ? 'Задача' : 'Task'}
+          </Button>
+          
+          {onAddBooking && !hasBookingOnDate && !isBlocked && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-1.5"
+              onClick={() => {
+                onOpenChange(false);
+                onAddBooking();
+              }}
+            >
+              <CalendarPlus className="h-4 w-4" />
+              {isRu ? 'Брон.' : 'Book'}
+            </Button>
+          )}
+          
+          {!hasBookingOnDate && (
+            isBlocked ? (
+              onUnblockDate && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="gap-1.5 text-success border-success/30 hover:bg-success/10"
+                  onClick={() => {
+                    onOpenChange(false);
+                    onUnblockDate();
+                  }}
+                >
+                  <Unlock className="h-4 w-4" />
+                  {isRu ? 'Открыть' : 'Unblock'}
+                </Button>
+              )
+            ) : (
+              onBlockDate && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10"
+                  onClick={() => {
+                    onOpenChange(false);
+                    onBlockDate();
+                  }}
+                >
+                  <Lock className="h-4 w-4" />
+                  {isRu ? 'Закрыть' : 'Block'}
+                </Button>
+              )
+            )
           )}
         </div>
       </SheetContent>
