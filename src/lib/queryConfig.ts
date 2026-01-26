@@ -106,6 +106,34 @@ export const queryKeys = {
     detail: (id: string) => ['order', id] as const,
   },
   
+  // Home page recommendations
+  recommendations: {
+    all: ['recommendations'] as const,
+    user: (userId: string) => ['recommendations', userId] as const,
+  },
+  
+  // Home page coordinated data
+  home: {
+    all: ['home'] as const,
+    featuredTours: ['home', 'featured-tours'] as const,
+    featuredProperties: ['home', 'featured-properties'] as const,
+    featuredEvents: ['home', 'featured-events'] as const,
+    featuredWaterActivities: ['home', 'featured-water-activities'] as const,
+  },
+  
+  // View history for personalization
+  viewHistory: {
+    all: ['view-history'] as const,
+    user: (userId: string) => ['view-history', userId] as const,
+  },
+  
+  // Vehicles
+  vehicles: {
+    all: ['vehicles'] as const,
+    list: (filters?: Record<string, unknown>) => ['vehicles', filters] as const,
+    detail: (id: string) => ['vehicle', id] as const,
+  },
+  
   // Categories & Reference Data
   categories: {
     all: ['categories'] as const,

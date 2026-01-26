@@ -1,5 +1,6 @@
 import React, { useCallback, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { 
   Car, 
   Stethoscope, 
@@ -21,6 +22,7 @@ import { triggerRipple } from '@/hooks/useRipple';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { playSound } from '@/hooks/useSoundEffects';
 import { getFeedbackSettings } from '@/hooks/useFeedbackSettings';
+import { prefetchRoute } from '@/lib/routePrefetch';
 
 interface QuickAction {
   id: string;
@@ -142,6 +144,7 @@ const quickActions: QuickAction[] = [
 export const QuickActionsGrid = memo(function QuickActionsGrid() {
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const queryClient = useQueryClient();
 
   const handleClick = useCallback((action: QuickAction, e: React.MouseEvent<HTMLButtonElement>) => {
     triggerRipple(e);
@@ -150,6 +153,11 @@ export const QuickActionsGrid = memo(function QuickActionsGrid() {
     if (settings.soundEnabled) playSound('click');
     navigate(action.path);
   }, [navigate]);
+
+  // Prefetch route on hover/touch for faster navigation
+  const handlePrefetch = useCallback((path: string) => {
+    prefetchRoute(path, queryClient);
+  }, [queryClient]);
 
   return (
     <div className="grid grid-cols-5 gap-2">
@@ -162,6 +170,8 @@ export const QuickActionsGrid = memo(function QuickActionsGrid() {
           <button
             key={action.id}
             onClick={(e) => handleClick(action, e)}
+            onMouseEnter={() => handlePrefetch(action.path)}
+            onTouchStart={() => handlePrefetch(action.path)}
             className={cn(
               "relative flex flex-col items-center p-2 rounded-xl",
               "hover:bg-card/80 transition-all group active:scale-95",
