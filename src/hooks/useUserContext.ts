@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -144,40 +145,49 @@ export function useUserContext() {
     },
   });
 
-  // Get orgs by type
-  const vendorOrgs = memberships?.filter(m => m.org?.org_type === 'vendor') || [];
-  const ownerOrgs = memberships?.filter(m => m.org?.org_type === 'owner') || [];
+  // Get orgs by type - memoized to prevent infinite re-render loops
+  const vendorOrgs = useMemo(
+    () => memberships?.filter(m => m.org?.org_type === 'vendor') || [],
+    [memberships]
+  );
+  const ownerOrgs = useMemo(
+    () => memberships?.filter(m => m.org?.org_type === 'owner') || [],
+    [memberships]
+  );
 
-  // Determine available roles based on memberships and user_roles
-  const availableRoles: AppRole[] = ['user'];
+  // Normalize userRoles to string array - memoized
+  const normalizedRoles = useMemo(() => 
+    (userRoles || []).map((r: unknown) => 
+      typeof r === 'string' ? r : (r as { role?: string })?.role || ''
+    ).filter(Boolean),
+    [userRoles]
+  );
+
+  // Determine available roles based on memberships and user_roles - memoized
+  const availableRoles = useMemo(() => {
+    const roles: AppRole[] = ['user'];
+    
+    if (vendorOrgs.length > 0 || normalizedRoles.includes('vendor')) {
+      roles.push('vendor');
+    }
+    if (ownerOrgs.length > 0 || normalizedRoles.includes('property_owner') || normalizedRoles.includes('owner')) {
+      roles.push('owner');
+    }
+    if (normalizedRoles.includes('admin')) {
+      roles.push('admin');
+    }
+    if (normalizedRoles.includes('staff')) {
+      roles.push('staff');
+    }
+    if (normalizedRoles.includes('uno_team')) {
+      roles.push('uno_team');
+    }
+    
+    return roles;
+  }, [vendorOrgs.length, ownerOrgs.length, normalizedRoles]);
   
-  // Normalize userRoles to string array (handle both object and string formats due to caching)
-  const normalizedRoles: string[] = (userRoles || []).map((r: unknown) => 
-    typeof r === 'string' ? r : (r as { role?: string })?.role || ''
-  ).filter(Boolean);
-  
-  // Debug logging
-  console.log('[useUserContext] userRoles raw:', userRoles);
-  console.log('[useUserContext] normalizedRoles:', normalizedRoles);
-  console.log('[useUserContext] rolesLoading:', rolesLoading);
-  
-  if (vendorOrgs.length > 0 || normalizedRoles.includes('vendor')) {
-    availableRoles.push('vendor');
-  }
-  if (ownerOrgs.length > 0 || normalizedRoles.includes('property_owner') || normalizedRoles.includes('owner')) {
-    availableRoles.push('owner');
-  }
-  if (normalizedRoles.includes('admin')) {
-    availableRoles.push('admin');
-  }
-  if (normalizedRoles.includes('staff')) {
-    availableRoles.push('staff');
-  }
-  if (normalizedRoles.includes('uno_team')) {
-    availableRoles.push('uno_team');
-  }
-  
-  console.log('[useUserContext] availableRoles:', availableRoles);
+  // Debug logging - only log when values actually change
+  // console.log('[useUserContext] availableRoles:', availableRoles);
 
   // Get current active org
   const activeOrg = memberships?.find(m => m.org_id === context?.active_org_id)?.org || null;
