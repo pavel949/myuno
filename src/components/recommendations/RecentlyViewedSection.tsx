@@ -62,14 +62,14 @@ export function RecentlyViewedSection() {
         </div>
         <button 
           onClick={() => navigate('/history')}
-          className="text-sm text-primary flex items-center gap-1"
+          className="text-sm text-primary flex items-center gap-1 min-h-[44px] min-w-[44px] px-2 touch-manipulation"
         >
           {language === 'ru' ? 'Всё' : 'All'}
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>
 
-      <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+      <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide touch-pan-x">
         {recentItems.map((item) => {
           const data = item.item_data || {};
           const title = language === 'ru' 
@@ -77,12 +77,12 @@ export function RecentlyViewedSection() {
             : (data.name_en || data.name || 'Untitled');
           
           return (
-            <div
+            <button
               key={item.id}
               onClick={() => handleItemClick(item)}
               className={cn(
                 "flex-shrink-0 w-36 bg-card rounded-xl overflow-hidden border",
-                "hover:shadow-md transition-all cursor-pointer group"
+                "hover:shadow-md transition-all cursor-pointer group touch-manipulation"
               )}
             >
               <div className="relative h-24">
@@ -109,7 +109,7 @@ export function RecentlyViewedSection() {
                   {formatTime(item.viewed_at)}
                 </p>
               </div>
-            </div>
+            </button>
           );
         })}
       </div>
