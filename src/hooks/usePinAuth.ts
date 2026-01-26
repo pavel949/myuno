@@ -13,6 +13,7 @@ export function usePinAuth() {
   const [savedUserId, setSavedUserId] = useState<string | null>(null);
   const [savedEmail, setSavedEmail] = useState<string | null>(null);
   const [hasRefreshToken, setHasRefreshToken] = useState(false);
+  const [pinCheckComplete, setPinCheckComplete] = useState(false);
 
   // Check for saved PIN login data on mount
   useEffect(() => {
@@ -20,9 +21,16 @@ export function usePinAuth() {
     const email = localStorage.getItem(PIN_EMAIL_KEY);
     const refreshToken = localStorage.getItem(PIN_REFRESH_TOKEN_KEY);
     
+    console.log('[usePinAuth] Init from localStorage:', { userId: !!userId, email: !!email, refreshToken: !!refreshToken });
+    
     setSavedUserId(userId);
     setSavedEmail(email);
     setHasRefreshToken(!!refreshToken);
+    
+    // If no user in localStorage, we can skip PIN check quickly
+    if (!userId) {
+      setIsLoading(false);
+    }
   }, []);
 
   // Check if user has PIN when authenticated
@@ -30,26 +38,51 @@ export function usePinAuth() {
     let isMounted = true;
     
     const checkPinStatus = async () => {
-      if (!user) {
+      // If no user and no saved user, finish loading immediately
+      if (!user && !savedUserId) {
         if (isMounted) {
           setHasPin(false);
           setIsLoading(false);
+          setPinCheckComplete(true);
+        }
+        return;
+      }
+
+      // Prioritize current logged in user
+      const userIdToCheck = user?.id || savedUserId;
+      
+      if (!userIdToCheck) {
+        if (isMounted) {
+          setHasPin(false);
+          setIsLoading(false);
+          setPinCheckComplete(true);
         }
         return;
       }
 
       try {
+        console.log('[usePinAuth] Checking PIN status for user:', userIdToCheck);
+        
         const { data, error } = await supabase
           .from('user_pins')
           .select('id')
-          .eq('user_id', user.id)
+          .eq('user_id', userIdToCheck)
           .maybeSingle();
 
         if (error) throw error;
-        if (isMounted) setHasPin(!!data);
+        
+        console.log('[usePinAuth] PIN check result:', { hasPin: !!data });
+        
+        if (isMounted) {
+          setHasPin(!!data);
+          setPinCheckComplete(true);
+        }
       } catch (error) {
-        console.error('Error checking PIN:', error);
-        if (isMounted) setHasPin(false);
+        console.error('[usePinAuth] Error checking PIN:', error);
+        if (isMounted) {
+          setHasPin(false);
+          setPinCheckComplete(true);
+        }
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -57,7 +90,7 @@ export function usePinAuth() {
     
     checkPinStatus();
     return () => { isMounted = false; };
-  }, [user]);
+  }, [user, savedUserId]);
 
   // Manual check function for external use
   const checkHasPin = useCallback(async () => {

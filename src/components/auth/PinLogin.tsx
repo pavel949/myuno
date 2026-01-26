@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Lock, User, KeyRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PinInput } from './PinInput';
@@ -17,6 +17,7 @@ export const PinLogin: React.FC<PinLoginProps> = ({ onSuccess, onSwitchToEmail }
   const [error, setError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [attempts, setAttempts] = useState(0);
+  const [inputKey, setInputKey] = useState(0);
 
   const t = {
     en: {
@@ -44,7 +45,7 @@ export const PinLogin: React.FC<PinLoginProps> = ({ onSuccess, onSwitchToEmail }
   const texts = t[language];
   const MAX_ATTEMPTS = 5;
 
-  const handlePinComplete = async (pin: string) => {
+  const handlePinComplete = useCallback(async (pin: string) => {
     if (attempts >= MAX_ATTEMPTS) {
       toast.error(texts.tooManyAttempts);
       return;
@@ -54,11 +55,13 @@ export const PinLogin: React.FC<PinLoginProps> = ({ onSuccess, onSwitchToEmail }
     setError(false);
 
     try {
+      console.log('[PinLogin] Verifying PIN...');
       await verifyPin(pin);
+      console.log('[PinLogin] PIN verified successfully');
       toast.success(language === 'en' ? 'Welcome back!' : 'С возвращением!');
       onSuccess();
     } catch (err: any) {
-      console.error('PIN verification error:', err);
+      console.error('[PinLogin] PIN verification error:', err);
       setError(true);
       
       // Check if session expired
@@ -68,9 +71,16 @@ export const PinLogin: React.FC<PinLoginProps> = ({ onSuccess, onSwitchToEmail }
         return;
       }
       
-      setAttempts(prev => prev + 1);
+      const newAttempts = attempts + 1;
+      setAttempts(newAttempts);
       
-      if (attempts + 1 >= MAX_ATTEMPTS) {
+      // Reset PIN input for retry
+      setTimeout(() => {
+        setInputKey(prev => prev + 1);
+        setError(false);
+      }, 600);
+      
+      if (newAttempts >= MAX_ATTEMPTS) {
         toast.error(texts.tooManyAttempts);
         onSwitchToEmail();
       } else {
@@ -79,12 +89,12 @@ export const PinLogin: React.FC<PinLoginProps> = ({ onSuccess, onSwitchToEmail }
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [attempts, texts, verifyPin, language, onSuccess, onSwitchToEmail]);
 
-  const handleSwitchUser = () => {
+  const handleSwitchUser = useCallback(() => {
     clearPinData();
     onSwitchToEmail();
-  };
+  }, [clearPinData, onSwitchToEmail]);
 
   // Mask email for display
   const maskedEmail = savedEmail 
@@ -114,6 +124,7 @@ export const PinLogin: React.FC<PinLoginProps> = ({ onSuccess, onSwitchToEmail }
 
       <div className="w-full max-w-sm">
         <PinInput
+          key={inputKey}
           onComplete={handlePinComplete}
           disabled={isLoading || attempts >= MAX_ATTEMPTS}
           error={error}
@@ -145,7 +156,7 @@ export const PinLogin: React.FC<PinLoginProps> = ({ onSuccess, onSwitchToEmail }
         
         <button
           onClick={handleSwitchUser}
-          className="text-sm text-muted-foreground hover:text-foreground"
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           disabled={isLoading}
         >
           {texts.notYou}
