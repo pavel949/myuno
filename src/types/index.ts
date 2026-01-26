@@ -7,8 +7,12 @@
  * @example
  * ```typescript
  * import { Order, OrderStatus, AvailabilityResult } from '@/types';
+ * import { OwnerProperty, VendorProperty, PropertyReference } from '@/types';
  * ```
  */
+
+// Property types (centralized)
+export * from './property';
 
 // Vendor types
 export * from './vendor';

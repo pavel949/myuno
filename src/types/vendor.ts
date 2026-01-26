@@ -11,7 +11,8 @@ export type { VendorFlowerShop } from '@/hooks/useVendorFlowers';
 export type { VendorGym } from '@/hooks/useVendorGyms';
 export type { VendorLegalService } from '@/hooks/useVendorLegal';
 export type { VendorPetService } from '@/hooks/useVendorPets';
-export type { VendorProperty } from '@/hooks/useVendorProperties';
+// VendorProperty is now defined in ./property.ts - re-export for backward compatibility
+// export type { VendorProperty } from '@/hooks/useVendorProperties';
 export type { VendorRestaurant } from '@/hooks/useVendorRestaurants';
 export type { VendorSalon } from '@/hooks/useVendorSalons';
 export type { VendorTour } from '@/hooks/useVendorTours';

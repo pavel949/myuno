@@ -22,17 +22,12 @@ import {
   Clock
 } from 'lucide-react';
 import { toast } from 'sonner';
-
-interface OwnerProperty {
-  id: string;
-  title: string;
-  title_ru?: string | null;
-}
+import type { PropertyReference } from '@/types/property';
 
 interface CreateServiceTaskDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  properties: OwnerProperty[];
+  properties: PropertyReference[];
   defaultPropertyId?: string;
   defaultDate?: Date;
 }

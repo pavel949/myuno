@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
@@ -65,8 +66,10 @@ export function useOperationalTasks(options?: {
   
   const t = (en: string, ru: string) => language === 'ru' ? ru : en;
 
+  const queryKey = ['operational-tasks', user?.id, options];
+  
   const { data: tasks = [], isLoading, refetch } = useQuery({
-    queryKey: ['operational-tasks', user?.id, options],
+    queryKey,
     queryFn: async () => {
       if (!user?.id) return [];
 
@@ -128,6 +131,31 @@ export function useOperationalTasks(options?: {
     },
     enabled: !!user?.id,
   });
+
+  // Realtime subscription for operational tasks
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const channel = supabase
+      .channel('operational-tasks-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'property_operational_tasks',
+        },
+        (payload) => {
+          // Invalidate and refetch on any change
+          queryClient.invalidateQueries({ queryKey: ['operational-tasks'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, queryClient]);
 
   // Today's tasks helper
   const todayTasks = tasks.filter(task => {

@@ -5,30 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { 
-  LogIn, 
-  LogOut, 
-  Sparkles, 
-  Wrench, 
-  Search, 
-  Gauge,
-  CheckCircle2
-} from 'lucide-react';
-
-const TASK_CONFIG: Record<OperationalTask['task_type'], {
-  icon: React.ElementType;
-  color: string;
-  bgColor: string;
-  label: string;
-  labelRu: string;
-}> = {
-  check_in: { icon: LogIn, color: 'text-success', bgColor: 'bg-success/10', label: 'Check-in', labelRu: 'Заезд' },
-  check_out: { icon: LogOut, color: 'text-warning', bgColor: 'bg-warning/10', label: 'Check-out', labelRu: 'Выезд' },
-  cleaning: { icon: Sparkles, color: 'text-info', bgColor: 'bg-info/10', label: 'Cleaning', labelRu: 'Уборка' },
-  maintenance: { icon: Wrench, color: 'text-orange-500', bgColor: 'bg-orange-500/10', label: 'Maintenance', labelRu: 'Ремонт' },
-  inspection: { icon: Search, color: 'text-purple-500', bgColor: 'bg-purple-500/10', label: 'Inspection', labelRu: 'Осмотр' },
-  meter_reading: { icon: Gauge, color: 'text-cyan-500', bgColor: 'bg-cyan-500/10', label: 'Meters', labelRu: 'Счётчики' },
-};
+import { CheckCircle2 } from 'lucide-react';
+import { TASK_TYPE_CONFIG, getTaskConfig } from '@/config/taskColors';
 
 interface OperationalTaskCardProps {
   task: OperationalTask;
@@ -49,7 +27,7 @@ export function OperationalTaskCard({
   compact, 
   completed 
 }: OperationalTaskCardProps) {
-  const config = TASK_CONFIG[task.task_type];
+  const config = TASK_TYPE_CONFIG[task.task_type] || getTaskConfig(task.task_type);
   const Icon = config.icon;
   
   return (
@@ -124,4 +102,4 @@ export function OperationalTaskCard({
   );
 }
 
-export { TASK_CONFIG };
+export { TASK_TYPE_CONFIG };
