@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
-import { Shield, Check, ArrowLeft } from 'lucide-react';
+import React, { useState, useCallback } from 'react';
+import { Shield, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PinInput } from './PinInput';
 import { usePinAuth } from '@/hooks/usePinAuth';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { cn } from '@/lib/utils';
 
 interface PinSetupProps {
   onComplete: () => void;
@@ -19,6 +18,7 @@ export const PinSetup: React.FC<PinSetupProps> = ({ onComplete, onSkip }) => {
   const [firstPin, setFirstPin] = useState('');
   const [error, setError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [inputKey, setInputKey] = useState(0); // Force remount PinInput
 
   const t = {
     en: {
@@ -27,6 +27,7 @@ export const PinSetup: React.FC<PinSetupProps> = ({ onComplete, onSkip }) => {
       enterPin: 'Enter your PIN',
       confirmPin: 'Confirm your PIN',
       skip: 'Skip for now',
+      back: 'Back',
       pinMismatch: 'PINs do not match. Try again.',
       success: 'PIN set up successfully!',
       error: 'Failed to set up PIN. Please try again.'
@@ -37,6 +38,7 @@ export const PinSetup: React.FC<PinSetupProps> = ({ onComplete, onSkip }) => {
       enterPin: 'Введите PIN',
       confirmPin: 'Подтвердите PIN',
       skip: 'Пропустить',
+      back: 'Назад',
       pinMismatch: 'PIN-коды не совпадают. Попробуйте снова.',
       success: 'PIN успешно установлен!',
       error: 'Не удалось установить PIN. Попробуйте снова.'
@@ -45,42 +47,57 @@ export const PinSetup: React.FC<PinSetupProps> = ({ onComplete, onSkip }) => {
 
   const texts = t[language];
 
-  const handleFirstPin = (pin: string) => {
+  const handleFirstPin = useCallback((pin: string) => {
+    console.log('[PinSetup] First PIN entered, moving to confirm step');
     setFirstPin(pin);
     setStep('confirm');
     setError(false);
-  };
+    setInputKey(prev => prev + 1); // Force remount
+  }, []);
 
-  const handleConfirmPin = async (pin: string) => {
+  const handleConfirmPin = useCallback(async (pin: string) => {
+    console.log('[PinSetup] Confirm PIN entered, checking match');
+    
     if (pin !== firstPin) {
+      console.log('[PinSetup] PIN mismatch');
       setError(true);
       toast.error(texts.pinMismatch);
-      setStep('enter');
-      setFirstPin('');
+      // Reset to enter step
+      setTimeout(() => {
+        setStep('enter');
+        setFirstPin('');
+        setInputKey(prev => prev + 1);
+      }, 500);
       return;
     }
 
+    console.log('[PinSetup] PINs match, saving...');
     setIsLoading(true);
+    
     try {
       await setupPin(pin);
       toast.success(texts.success);
       onComplete();
     } catch (err) {
-      console.error('Error setting up PIN:', err);
+      console.error('[PinSetup] Error setting up PIN:', err);
       toast.error(texts.error);
       setError(true);
-      setStep('enter');
-      setFirstPin('');
+      setTimeout(() => {
+        setStep('enter');
+        setFirstPin('');
+        setInputKey(prev => prev + 1);
+      }, 500);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [firstPin, texts, setupPin, onComplete]);
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     setStep('enter');
     setFirstPin('');
     setError(false);
-  };
+    setInputKey(prev => prev + 1);
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[400px] p-6">
@@ -103,15 +120,16 @@ export const PinSetup: React.FC<PinSetupProps> = ({ onComplete, onSkip }) => {
         {step === 'confirm' && (
           <button
             onClick={handleBack}
-            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4 mx-auto"
+            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4 mx-auto transition-colors"
+            disabled={isLoading}
           >
             <ArrowLeft className="w-4 h-4" />
-            Back
+            {texts.back}
           </button>
         )}
 
         <PinInput
-          key={step}
+          key={inputKey}
           onComplete={step === 'enter' ? handleFirstPin : handleConfirmPin}
           disabled={isLoading}
           error={error}
@@ -120,7 +138,7 @@ export const PinSetup: React.FC<PinSetupProps> = ({ onComplete, onSkip }) => {
         {isLoading && (
           <div className="flex items-center justify-center gap-2 mt-6 text-primary">
             <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-            <span className="text-sm">Setting up...</span>
+            <span className="text-sm">{language === 'en' ? 'Setting up...' : 'Настройка...'}</span>
           </div>
         )}
       </div>
