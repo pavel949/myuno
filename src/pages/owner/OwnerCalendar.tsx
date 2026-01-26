@@ -54,7 +54,7 @@ export default function OwnerCalendar() {
   }
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-4 pb-24 space-y-4">
       {/* Property Selector */}
       <div className="space-y-2">
         <p className="text-sm font-medium text-muted-foreground">
