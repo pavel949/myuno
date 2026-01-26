@@ -1,329 +1,230 @@
 
-# Аудит производительности и стабильности загрузки мини-приложений
+# План: Исправление кнопки "Заказать воду" и реализация кросс-селлинга
 
-## Резюме
+## Обнаруженные проблемы
 
-Проведён комплексный анализ системы загрузки мини-приложений с главной страницы. Выявлены **критические проблемы производительности** и зоны для оптимизации.
+### 1. Путаница с понятием "Water"
+Платформа имеет **две разные вертикали**, связанные с водой:
+- **Water Activities** (`/water`) — водный спорт (дайвинг, снорклинг, серфинг)
+- **Water Delivery** (`/services?category=water-delivery`) — доставка питьевой воды
 
----
+Кнопка "Заказать" на странице Water Activities ведёт на бронирование активностей, что корректно. Текст кнопки: `Забронировать` / `Book Now` — это правильно для водного спорта.
 
-## 📊 Текущие метрики Web Vitals
-
-| Метрика | Значение | Статус | Целевое значение |
-|---------|----------|--------|------------------|
-| **FCP** (First Contentful Paint) | 5280-6680 ms | ❌ POOR | < 1800 ms |
-| **LCP** (Largest Contentful Paint) | 6680 ms | ❌ POOR | < 2500 ms |
-| **TTFB** (Time to First Byte) | 575-1046 ms | ⚠️ NEEDS IMPROVEMENT | < 800 ms |
-| **CLS** (Cumulative Layout Shift) | 0.039 | ✅ GOOD | < 0.1 |
-| **INP** (Interaction to Next Paint) | 592 ms | ❌ POOR | < 200 ms |
+### 2. Отсутствие кросс-селлинга
+На страницах мини-приложений нет переходов в смежные сервисы для увеличения среднего чека.
 
 ---
 
-## 🔍 Выявленные проблемы
+## Решение: Универсальная система кросс-селлинга
 
-### 1. КРИТИЧЕСКАЯ: Избыточные сетевые запросы ("Query Storm")
-
-**Проблема**: При загрузке главной страницы происходит 30+ параллельных запросов к базе данных, включая дублирующиеся запросы:
-- `tours` — запрашивается 4-5 раз
-- `properties` — запрашивается 3-4 раза  
-- `events` — запрашивается 3-4 раза
-- `water_activities` — запрашивается 3 раза
-- `cities` — запрашивается 3 раза
-
-**Время запросов**: 200-1400 ms на каждый запрос (суммарная задержка до 5+ секунд)
-
-**Причина**: Разные компоненты на главной странице независимо запрашивают одни и те же данные:
-- `RecommendedCarousel` → tours
-- `useRecommendations` → tours, properties, events, water_activities
-- `ForYouSection` → tours, properties
-- `SmartWidget` → events
-- `PrefetchProvider` → categories, cities, featured content
-
-### 2. КРИТИЧЕСКАЯ: Предупреждение о forwardRef
-
-**Проблема**: В консоли появляется предупреждение:
-```
-Warning: Function components cannot be given refs.
-Check the render method of `ItemCard` → OptimizedImage
-```
-
-**Последствие**: Потенциальная нестабильность анимаций и передачи ref между компонентами.
-
-### 3. УМЕРЕННАЯ: Отсутствие приоритизации запросов
-
-**Проблема**: Все запросы выполняются параллельно без приоритизации критического контента:
-- Hero-изображения загружаются с тем же приоритетом, что и второстепенные данные
-- Нет staggered loading для карточек ниже fold
-
-### 4. УМЕРЕННАЯ: Неоптимизированный код-сплиттинг для мини-приложений
-
-**Текущее состояние**: 
-- Все страницы мини-приложений используют `React.lazy` ✅
-- Но при переходе происходит загрузка JS-чанка + данных последовательно, а не параллельно
-
-### 5. НИЗКАЯ: Консольные предупреждения
-
-- Deprecated `apple-mobile-web-app-capable` meta tag
-- CORS warnings от postMessage
-- Manifest.json не загружается
-
----
-
-## 🏗 Архитектурный анализ
-
-### Текущая архитектура загрузки данных
+### Архитектура
 
 ```text
-┌──────────────────────────────────────────────────────────────┐
-│                        Index.tsx                              │
-│  ┌─────────────────────────────────────────────────────────┐ │
-│  │ useMarketplaceProducts() → marketplace_products (8)     │ │
-│  │ SmartWidget → events, user context                      │ │
-│  │ RecommendedCarousel → useTours() → tours                │ │
-│  │ ForYouSection → useRecommendations()                    │ │
-│  │   └── tours, properties, events, water_activities       │ │
-│  │ PrefetchProvider (idle) → categories, cities, featured  │ │
-│  └─────────────────────────────────────────────────────────┘ │
-└──────────────────────────────────────────────────────────────┘
-                              ↓
-        30+ параллельных запросов к Supabase
+┌─────────────────────────────────────────────────────────────────┐
+│                    CrossSellSection                              │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │  "Также может понравиться" / "You Might Also Like"        │  │
+│  │  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐      │  │
+│  │  │ 🛥 Яхты │  │ 🛒 Маркет│  │ 🍽 Еда  │  │ 🏠 Жильё│      │  │
+│  │  └─────────┘  └─────────┘  └─────────┘  └─────────┘      │  │
+│  └───────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-### Паттерны, требующие улучшения
+### Матрица кросс-продаж
 
-| Компонент | Проблема |
-|-----------|----------|
-| `useRecommendations` | Жёстко закодированные запросы к 4 таблицам без учёта кеша |
-| `RecommendedCarousel` | Дублирует запрос к tours, который уже есть в recommendations |
-| `usePrefetch` | Запросы во время idle-time не координируются с основными запросами |
-| `useSupabaseQuery` | Не использует TanStack Query (работает напрямую с useState) |
+Логические связи между вертикалями на основе пользовательского контекста:
+
+| Текущая страница | Смежные предложения |
+|------------------|---------------------|
+| **Water Activities** | Яхты, Рестораны (ужин после дайвинга), Транспорт (трансфер) |
+| **Yachts** | Water Activities, Рестораны, Цветы (романтический круиз) |
+| **Property** | Home Services (уборка), Legal (договор), Insurance |
+| **Tours** | Транспорт, Рестораны, Events |
+| **Restaurants** | Delivery (доставка), Events, Beauty/SPA |
+| **Market** | Delivery, Restaurants, Flowers |
+| **Flowers** | Restaurants, Beauty/SPA, Events |
+| **Medical** | Pharmacy, Insurance, Home Services |
+| **Beauty/SPA** | Fitness, Medical, Flowers |
+| **Transport** | Tours, Property, Water Activities |
+| **Services (Home)** | Property, Market (бытовая химия), Repair |
+| **Events** | Restaurants, Transport, Flowers |
+| **Fitness** | Beauty/SPA, Medical, Tours |
 
 ---
 
-## ✅ Положительные аспекты текущей реализации
+## Технические изменения
 
-1. **Lazy Loading страниц** — все мини-приложения используют `React.lazy`
-2. **Централизованные профили кеширования** — `CACHE_PROFILES` в queryConfig.ts
-3. **OptimizedImage** — ленивая загрузка изображений с IntersectionObserver
-4. **Мемоизация** — фильтрация данных использует `useMemo`
-5. **Skeleton-плейсхолдеры** — есть состояния загрузки
-6. **requestIdleCallback** — префетч выполняется во время простоя
+### Этап 1: Создание компонента CrossSellSection
 
----
+**Файл:** `src/components/crosssell/CrossSellSection.tsx`
 
-## 📋 План оптимизации
+Универсальный компонент для отображения смежных сервисов:
 
-### Этап 1: Устранение Query Storm (Приоритет: ВЫСОКИЙ)
-
-**1.1. Миграция хуков на TanStack Query**
-
-Переписать ключевые хуки для использования централизованного кеша:
-
-| Хук | Изменение |
-|-----|-----------|
-| `useRecommendations` | Использовать `useQuery` с `queryKeys.recommendations` |
-| `useTours` | Использовать `useQuery` с `queryKeys.tours` |
-| `useVehicles` | Аналогично |
-
-**Пример преобразования**:
 ```typescript
-// До (useState + useEffect)
-export function useVehicles() {
-  const [data, setData] = useState([]);
-  useEffect(() => { fetch... }, []);
-  return { vehicles: data };
+interface CrossSellLink {
+  id: string;
+  icon: string;        // Эмодзи
+  path: string;
+  labelEn: string;
+  labelRu: string;
+  description?: string;
 }
 
-// После (TanStack Query)
-export function useVehicles() {
-  const { data, isLoading } = useQuery({
-    queryKey: queryKeys.vehicles.list(),
-    queryFn: fetchVehicles,
-    ...CACHE_PROFILES.SEMI_STATIC,
-  });
-  return { vehicles: data ?? [], isLoading };
+interface CrossSellSectionProps {
+  currentVertical: string;  // 'water' | 'yachts' | 'property' | etc.
+  variant?: 'grid' | 'scroll';
+  maxItems?: number;
 }
 ```
 
-**1.2. Дедупликация запросов на главной странице**
+**Логика:**
+- Принимает ID текущей вертикали
+- Возвращает массив связанных вертикалей из конфигурации
+- Отображает карточки с иконками и кнопками перехода
 
-Создать единый хук `useHomePageData` для координированной загрузки:
+### Этап 2: Конфигурация связей
+
+**Файл:** `src/lib/crossSellConfig.ts`
 
 ```typescript
-export function useHomePageData() {
-  const queries = useQueries({
-    queries: [
-      { queryKey: ['featured-tours'], queryFn: fetchFeaturedTours },
-      { queryKey: ['featured-properties'], queryFn: fetchFeaturedProperties },
-      { queryKey: ['upcoming-events'], queryFn: fetchUpcomingEvents },
-    ],
-  });
-  // Возвращает объединённый результат
-}
+export const CROSS_SELL_MATRIX: Record<string, CrossSellLink[]> = {
+  'water': [
+    { id: 'yachts', icon: '🛥️', path: '/yachts', labelEn: 'Yacht Rentals', labelRu: 'Аренда яхт' },
+    { id: 'restaurants', icon: '🍽️', path: '/restaurants', labelEn: 'Dinner After', labelRu: 'Ужин после' },
+    { id: 'transport', icon: '🚗', path: '/transport', labelEn: 'Get a Ride', labelRu: 'Заказать трансфер' },
+  ],
+  'yachts': [
+    { id: 'water', icon: '🤿', path: '/water', labelEn: 'Water Sports', labelRu: 'Водный спорт' },
+    { id: 'restaurants', icon: '🍾', path: '/restaurants', labelEn: 'Celebrate Ashore', labelRu: 'Отпразднуйте на берегу' },
+    { id: 'flowers', icon: '💐', path: '/flowers', labelEn: 'Romantic Touch', labelRu: 'Романтический штрих' },
+  ],
+  // ... остальные вертикали
+};
 ```
 
-### Этап 2: Оптимизация LCP (Приоритет: ВЫСОКИЙ)
+### Этап 3: Интеграция в страницы мини-приложений
 
-**2.1. Priority hints для Hero-изображений**
+Добавить `<CrossSellSection>` в конец следующих страниц:
+
+| Страница | Файл |
+|----------|------|
+| Water Activities Index | `src/pages/water/WaterActivitiesIndex.tsx` |
+| Water Activity Detail | `src/pages/water/WaterActivityDetail.tsx` |
+| Yachts Index | `src/pages/yachts/YachtsIndex.tsx` |
+| Yacht Detail | `src/pages/yachts/YachtDetail.tsx` |
+| Property Index | `src/pages/property/PropertyIndex.tsx` |
+| Tours Index | `src/pages/tours/ToursIndex.tsx` |
+| Restaurants Index | `src/pages/restaurants/RestaurantsIndex.tsx` |
+| Market Index | `src/pages/market/MarketIndex.tsx` |
+| Beauty Index | `src/pages/beauty/BeautyIndex.tsx` |
+| Services Index | `src/pages/services/ServicesIndex.tsx` |
+| Events Index | `src/pages/events/EventsIndex.tsx` |
+| Fitness Index | `src/pages/fitness/FitnessIndex.tsx` |
+| Flowers Index | `src/pages/flowers/FlowersIndex.tsx` |
+
+### Этап 4: Добавление секции "Маркет" на страницу Water
+
+На странице Water Activities добавить быстрый доступ к маркету:
 
 ```typescript
-// В MiniAppHero.tsx
-<OptimizedImage
-  src={heroImage}
-  priority={true}  // ← уже поддерживается, но не везде используется
-  fetchPriority="high"
+// В WaterActivitiesIndex.tsx после списка активностей
+<CrossSellSection 
+  currentVertical="water" 
+  variant="scroll"
+  title={{ en: "Complete Your Adventure", ru: "Дополните приключение" }}
 />
 ```
 
-**2.2. Preload критических изображений**
+---
 
-```typescript
-// В Index.tsx
-useCriticalImagePreload([
-  'https://images.unsplash.com/photo-1537956965359-7573183d1f57?w=800',
-]);
+## Новые файлы
+
+| Файл | Описание |
+|------|----------|
+| `src/components/crosssell/CrossSellSection.tsx` | Основной UI-компонент |
+| `src/components/crosssell/CrossSellCard.tsx` | Карточка одного предложения |
+| `src/components/crosssell/index.ts` | Экспорт компонентов |
+| `src/lib/crossSellConfig.ts` | Матрица связей между вертикалями |
+
+## Изменяемые файлы
+
+| Файл | Изменение |
+|------|-----------|
+| `src/pages/water/WaterActivitiesIndex.tsx` | Добавить CrossSellSection |
+| `src/pages/water/WaterActivityDetail.tsx` | Добавить CrossSellSection перед кнопкой |
+| `src/pages/yachts/YachtsIndex.tsx` | Добавить CrossSellSection |
+| `src/pages/property/PropertyIndex.tsx` | Добавить CrossSellSection |
+| `src/pages/restaurants/RestaurantsIndex.tsx` | Добавить CrossSellSection |
+| `src/pages/tours/ToursIndex.tsx` | Добавить CrossSellSection |
+| `src/pages/market/MarketIndex.tsx` | Добавить CrossSellSection |
+| `src/pages/services/ServicesIndex.tsx` | Добавить CrossSellSection |
+| `src/pages/beauty/BeautyIndex.tsx` | Добавить CrossSellSection |
+| `src/pages/events/EventsIndex.tsx` | Добавить CrossSellSection |
+| `src/pages/fitness/FitnessIndex.tsx` | Добавить CrossSellSection |
+| `src/pages/flowers/FlowersIndex.tsx` | Добавить CrossSellSection |
+
+---
+
+## UI-дизайн CrossSellSection
+
+```text
+┌────────────────────────────────────────────────────────────────┐
+│  ✨ Дополните приключение                            Все →    │
+├────────────────────────────────────────────────────────────────┤
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐       │
+│  │   🛥️    │  │   🍽️    │  │   🚗    │  │   💐    │       │
+│  │  Яхты   │  │ Рестораны│  │ Трансфер │  │  Цветы  │       │
+│  │  ----   │  │  ----    │  │   ----   │  │  ----   │       │
+│  │ Аренда  │  │ Ужин     │  │ Заказать │  │ Букет   │       │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘       │
+└────────────────────────────────────────────────────────────────┘
 ```
 
-### Этап 3: Исправление forwardRef (Приоритет: СРЕДНИЙ)
+**Стиль карточки:**
+- Размер: 120x120px
+- Иконка-эмодзи: 32px
+- Заголовок: font-medium, truncate
+- Подзаголовок: text-muted-foreground, text-xs
+- Hover-эффект: scale + shadow
+- Border: card border с rounded-xl
 
-**Исправить OptimizedImage для поддержки ref:**
+---
 
-```typescript
-// optimized-image.tsx
-export const OptimizedImage = memo(forwardRef<HTMLDivElement, Props>(
-  function OptimizedImage(props, ref) {
-    return (
-      <div ref={ref} ...>
-        ...
-      </div>
-    );
-  }
-));
-```
+## Аналитика кросс-селлинга
 
-### Этап 4: Оптимизация INP (Приоритет: СРЕДНИЙ)
-
-**4.1. Добавить `React.memo` для карточек в списках**
+Добавить отслеживание кликов для метрик:
 
 ```typescript
-const MemoizedItemCard = React.memo(ItemCard);
-```
-
-**4.2. Использовать виртуализацию для длинных списков**
-
-Проект уже имеет `@tanstack/react-virtual` — внедрить для списков > 20 элементов.
-
-### Этап 5: Улучшение навигации к мини-приложениям (Приоритет: НИЗКИЙ)
-
-**5.1. Параллельный prefetch кода и данных при hover**
-
-```typescript
-// В QuickActionsGrid.tsx
-onMouseEnter={() => {
-  // Prefetch код
-  import('@/pages/yachts/YachtsIndex');
-  // Prefetch данные
-  prefetchRoute('/yachts');
-}}
+// При клике на CrossSellCard
+const trackCrossSell = (fromVertical: string, toVertical: string) => {
+  // Можно использовать существующую таблицу cross_sell_metrics
+  // или добавить custom event
+};
 ```
 
 ---
 
-## 📁 Файлы для изменения
+## Ожидаемый результат
 
-| Файл | Тип изменения | Сложность |
-|------|---------------|-----------|
-| `src/hooks/useRecommendations.ts` | Рефакторинг на useQuery | Средняя |
-| `src/hooks/useTours.ts` | Рефакторинг на useQuery | Низкая |
-| `src/hooks/useVehicles.ts` | Рефакторинг на useQuery | Низкая |
-| `src/hooks/usePetServices.ts` | Рефакторинг на useQuery | Низкая |
-| `src/hooks/useSupabaseQuery.ts` | Добавить обёртку для useQuery | Средняя |
-| `src/components/ui/optimized-image.tsx` | Добавить forwardRef | Низкая |
-| `src/pages/Index.tsx` | Добавить useHomePageData | Средняя |
-| `src/components/miniapp/MiniAppHero.tsx` | Priority image loading | Низкая |
-| `src/components/home/QuickActionsGrid.tsx` | Prefetch при hover | Низкая |
+1. **На странице Water Activities** появятся карточки:
+   - 🛥️ "Яхты" → `/yachts`
+   - 🍽️ "Рестораны" → `/restaurants`
+   - 🚗 "Транспорт" → `/transport`
+   - 🛒 "Маркет" → `/market`
+
+2. **На всех страницах мини-приложений** будет секция с релевантными смежными сервисами
+
+3. **Увеличение cross-sell rate** за счёт удобной навигации между вертикалями
 
 ---
 
-## 📈 Ожидаемые улучшения
+## Оценка времени
 
-После внедрения оптимизаций:
-
-| Метрика | Текущее | Ожидаемое | Улучшение |
-|---------|---------|-----------|-----------|
-| FCP | 5280-6680 ms | < 2000 ms | ~70% |
-| LCP | 6680 ms | < 2500 ms | ~65% |
-| INP | 592 ms | < 200 ms | ~65% |
-| Сетевых запросов (главная) | 30+ | 8-12 | ~70% |
-| Время загрузки мини-приложения | 800-1400 ms | 200-400 ms | ~70% |
-
----
-
-## 🔧 Технические детали
-
-### Новый хук useHomePageData
-
-```typescript
-// src/hooks/useHomePageData.ts
-export function useHomePageData() {
-  const featuredTours = useQuery({
-    queryKey: ['home', 'featured-tours'],
-    queryFn: () => supabase.from('tours')
-      .select('id, title_en, title_ru, cover_image, rating, price')
-      .eq('is_active', true)
-      .eq('is_featured', true)
-      .limit(8),
-    ...CACHE_PROFILES.SEMI_STATIC,
-  });
-
-  const recommendations = useQuery({
-    queryKey: ['home', 'recommendations'],
-    queryFn: fetchRecommendations,
-    ...CACHE_PROFILES.SEMI_STATIC,
-  });
-
-  return {
-    tours: featuredTours.data ?? [],
-    recommendations: recommendations.data ?? [],
-    isLoading: featuredTours.isLoading || recommendations.isLoading,
-  };
-}
-```
-
-### Миграция useSupabaseQuery на TanStack Query
-
-```typescript
-// Обёртка для совместимости
-export function useSupabaseQuery<T>(options: QueryOptions<T>) {
-  return useQuery({
-    queryKey: [options.table, options.filters],
-    queryFn: () => executeSupabaseQuery(options),
-    staleTime: options.staleTime ?? TIME.MINUTES(1),
-  });
-}
-```
-
----
-
-## ⏱ Оценка времени
-
-| Этап | Время |
-|------|-------|
-| Этап 1: Query Storm | 2-3 часа |
-| Этап 2: LCP оптимизация | 30 мин |
-| Этап 3: forwardRef | 15 мин |
-| Этап 4: INP оптимизация | 1 час |
-| Этап 5: Prefetch навигации | 30 мин |
-| **Итого** | **4-5 часов** |
-
----
-
-## Рекомендуемый порядок действий
-
-1. ✅ Исправить forwardRef в OptimizedImage (быстрый fix)
-2. ✅ Миграция useRecommendations на useQuery
-3. ✅ Создать useHomePageData для координации запросов
-4. ✅ Добавить priority loading для Hero-изображений
-5. ✅ Добавить prefetch при hover на категории
-6. ⏳ Виртуализация длинных списков (отложенно)
-
+| Задача | Время |
+|--------|-------|
+| Создание CrossSellSection | 30 мин |
+| Конфигурация матрицы связей | 20 мин |
+| Интеграция в 12+ страниц | 40 мин |
+| Тестирование | 15 мин |
+| **Итого** | **~1.5 часа** |
