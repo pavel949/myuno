@@ -132,30 +132,9 @@ export function useOperationalTasks(options?: {
     enabled: !!user?.id,
   });
 
-  // Realtime subscription for operational tasks
-  useEffect(() => {
-    if (!user?.id) return;
-
-    const channel = supabase
-      .channel('operational-tasks-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'property_operational_tasks',
-        },
-        (payload) => {
-          // Invalidate and refetch on any change
-          queryClient.invalidateQueries({ queryKey: ['operational-tasks'] });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user?.id, queryClient]);
+  // Note: Realtime subscription removed to prevent infinite query loops.
+  // The dashboard uses pull-to-refresh and React Query staleTime for data freshness.
+  // For real-time updates on specific pages (like Operations), use a separate subscription there.
 
   // Today's tasks helper
   const todayTasks = tasks.filter(task => {
