@@ -9,6 +9,7 @@ import { UniversalFilter, ActiveFilters, flowerFilterConfig, FilterValues } from
 import { toast } from 'sonner';
 import { matchesFilter, matchesSingleFilter } from '@/lib/filterUtils';
 import { useBouquets, Bouquet } from '@/hooks/useBouquets';
+import { CrossSellSection } from '@/components/crosssell';
 
 const FLOWER_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -258,6 +259,8 @@ const FlowersIndex = () => {
           ))}
         </div>
       )}
+
+      <CrossSellSection currentVertical="flowers" className="mb-20" />
 
       {/* Floating Cart Button */}
       {totalItems > 0 && (

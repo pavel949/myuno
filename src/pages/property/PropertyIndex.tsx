@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { ConsultationCTA } from '@/components/property/ConsultationCTA';
 import { PopularFiltersCards } from '@/components/property/PopularFiltersCards';
 import { matchesFilter, matchesSingleFilter } from '@/lib/filterUtils';
+import { CrossSellSection } from '@/components/crosssell';
 
 // Demo properties as fallback when DB is empty
 const demoProperties = [
@@ -484,6 +485,8 @@ export default function PropertyIndex() {
               )}
             </div>
           )}
+
+          <CrossSellSection currentVertical="property" className="mt-8 px-4" />
         </main>
       </div>
     </AppLayout>

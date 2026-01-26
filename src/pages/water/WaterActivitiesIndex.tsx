@@ -5,6 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useWaterActivities } from "@/hooks/useWaterActivities";
 import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from "@/components/miniapp";
 import { waterFilterConfig, FilterValues } from "@/components/filters";
+import { CrossSellSection } from "@/components/crosssell";
 
 const CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All Activities', labelRu: 'Все активности' },
@@ -103,6 +104,11 @@ export default function WaterActivitiesIndex() {
           />
         ))}
       </div>
+
+      <CrossSellSection 
+        currentVertical="water" 
+        title={{ en: "Complete Your Adventure", ru: "Дополните приключение" }}
+      />
     </MiniAppLayout>
   );
 }

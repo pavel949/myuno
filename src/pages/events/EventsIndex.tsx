@@ -7,6 +7,7 @@ import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type Q
 import { eventsFilterConfig, FilterValues } from '@/components/filters';
 import { Badge } from '@/components/ui/badge';
 import { matchesFilter, matchesPriceLevel } from '@/lib/filterUtils';
+import { CrossSellSection } from '@/components/crosssell';
 
 // Entertainment-focused categories (no tours/excursions)
 const EVENT_CATEGORIES: MiniAppCategory[] = [
@@ -281,6 +282,8 @@ export default function EventsIndex() {
           />
         ))}
       </div>
+
+      <CrossSellSection currentVertical="events" />
     </MiniAppLayout>
   );
 }

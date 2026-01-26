@@ -7,6 +7,7 @@ import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory } from 
 import { UniversalFilter, ActiveFilters, fitnessFilterConfig, FilterValues } from '@/components/filters';
 import { useGyms } from '@/hooks/useGyms';
 import { matchesFilter, matchesPriceLevel, matchesMembership, isOpenNow } from '@/lib/filterUtils';
+import { CrossSellSection } from '@/components/crosssell';
 
 const GYM_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -170,11 +171,13 @@ export default function FitnessIndex() {
               location={gym.district ?? undefined}
               tags={gym.amenities?.slice(0, 3) || []}
               isVerified={gym.is_verified}
-              onClick={() => navigate(`/fitness/gym/${gym.id}`)}
+            onClick={() => navigate(`/fitness/gym/${gym.id}`)}
             />
           );
         })}
       </div>
+
+      <CrossSellSection currentVertical="fitness" />
     </MiniAppLayout>
   );
 }

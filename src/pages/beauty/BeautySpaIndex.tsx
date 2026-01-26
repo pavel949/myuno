@@ -6,6 +6,7 @@ import { useSalons } from '@/hooks/useSalons';
 import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from '@/components/miniapp';
 import { beautyFilterConfig, FilterValues } from '@/components/filters';
 import { matchesFilter, matchesPriceLevel, isOpenNow } from '@/lib/filterUtils';
+import { CrossSellSection } from '@/components/crosssell';
 
 const SERVICE_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -119,6 +120,8 @@ export default function BeautySpaIndex() {
           />
         ))}
       </div>
+
+      <CrossSellSection currentVertical="beauty" />
     </MiniAppLayout>
   );
 }

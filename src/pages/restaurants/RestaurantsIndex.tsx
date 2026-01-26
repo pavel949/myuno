@@ -13,6 +13,7 @@ import {
   reservationFilterConfig,
   type FilterValues 
 } from '@/components/filters';
+import { CrossSellSection } from '@/components/crosssell';
 import { matchesFilter, matchesPriceLevel, isOpenNow } from '@/lib/filterUtils';
 
 type Mode = 'delivery' | 'reservation';
@@ -267,6 +268,8 @@ export default function RestaurantsIndex() {
           </div>
         ))}
       </div>
+
+      <CrossSellSection currentVertical="restaurants" />
     </MiniAppLayout>
   );
 }

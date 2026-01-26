@@ -8,6 +8,7 @@ import { UniversalFilter, ActiveFilters, yachtFilterConfig, FilterValues } from 
 import { ExperienceFilterChips } from '@/components/yachts/YachtExperienceSelect';
 import { useYachts } from '@/hooks/useYachts';
 import { matchesFilter, matchesPriceLevel } from '@/lib/filterUtils';
+import { CrossSellSection } from '@/components/crosssell';
 
 const YACHT_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -200,6 +201,8 @@ export default function YachtsIndex() {
           />
         ))}
       </div>
+
+      <CrossSellSection currentVertical="yachts" />
     </MiniAppLayout>
   );
 }

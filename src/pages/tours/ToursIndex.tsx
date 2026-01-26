@@ -6,6 +6,7 @@ import { useTours } from "@/hooks/useTours";
 import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from "@/components/miniapp";
 import { tourFilterConfig, FilterValues } from "@/components/filters";
 import { matchesFilter, matchesPriceLevel, matchesGroupSize } from "@/lib/filterUtils";
+import { CrossSellSection } from "@/components/crosssell";
 
 const TOUR_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All Tours', labelRu: 'Все туры' },
@@ -116,6 +117,8 @@ export default function ToursIndex() {
           />
         ))}
       </div>
+
+      <CrossSellSection currentVertical="tours" />
     </MiniAppLayout>
   );
 }
