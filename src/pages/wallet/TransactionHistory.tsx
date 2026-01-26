@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { TransactionList } from '@/components/wallet/TransactionList';
@@ -32,55 +33,57 @@ export default function TransactionHistory() {
   };
 
   return (
-    <PageContainer>
-      <PageHeader 
-        title={isRu ? 'История транзакций' : 'Transaction History'} 
-        showBack 
-      />
-
-      {/* Stats Summary */}
-      <div className="grid grid-cols-3 gap-3 mb-4">
-        <div className="p-3 rounded-lg bg-green-500/10 text-center">
-          <p className="text-lg font-bold text-green-600">
-            +{stats.totalIncome.toLocaleString()}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {isRu ? 'Доход' : 'Income'}
-          </p>
-        </div>
-        <div className="p-3 rounded-lg bg-red-500/10 text-center">
-          <p className="text-lg font-bold text-foreground">
-            -{stats.totalSpent.toLocaleString()}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {isRu ? 'Расход' : 'Spent'}
-          </p>
-        </div>
-        <div className="p-3 rounded-lg bg-muted text-center">
-          <p className="text-lg font-bold">
-            {stats.transactionCount}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {isRu ? 'Операций' : 'Operations'}
-          </p>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="mb-4">
-        <TransactionFiltersComponent
-          filters={filters}
-          onFiltersChange={setFilters}
-          onExport={handleExport}
+    <AppLayout>
+      <PageContainer>
+        <PageHeader 
+          title={isRu ? 'История транзакций' : 'Transaction History'} 
+          showBack 
         />
-      </div>
 
-      {/* Transaction List */}
-      {isLoading ? (
-        <ContentSkeleton variant="list" count={5} />
-      ) : (
-        <TransactionList transactions={transactions} showStatus />
-      )}
-    </PageContainer>
+        {/* Stats Summary */}
+        <div className="grid grid-cols-3 gap-3 mb-4">
+          <div className="p-3 rounded-lg bg-green-500/10 text-center">
+            <p className="text-lg font-bold text-green-600">
+              +{stats.totalIncome.toLocaleString()}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {isRu ? 'Доход' : 'Income'}
+            </p>
+          </div>
+          <div className="p-3 rounded-lg bg-red-500/10 text-center">
+            <p className="text-lg font-bold text-foreground">
+              -{stats.totalSpent.toLocaleString()}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {isRu ? 'Расход' : 'Spent'}
+            </p>
+          </div>
+          <div className="p-3 rounded-lg bg-muted text-center">
+            <p className="text-lg font-bold">
+              {stats.transactionCount}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {isRu ? 'Операций' : 'Operations'}
+            </p>
+          </div>
+        </div>
+
+        {/* Filters */}
+        <div className="mb-4">
+          <TransactionFiltersComponent
+            filters={filters}
+            onFiltersChange={setFilters}
+            onExport={handleExport}
+          />
+        </div>
+
+        {/* Transaction List */}
+        {isLoading ? (
+          <ContentSkeleton variant="list" count={5} />
+        ) : (
+          <TransactionList transactions={transactions} showStatus />
+        )}
+      </PageContainer>
+    </AppLayout>
   );
 }

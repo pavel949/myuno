@@ -14,6 +14,7 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
+import { CurrencySwitcher } from '@/components/uno/CurrencySwitcher';
 
 const routeLabels: Record<string, { en: string; ru: string }> = {
   '/my-stay': { en: 'Dashboard', ru: 'Обзор' },
@@ -109,6 +110,7 @@ export function GuestHeader() {
         >
           <HelpCircle className="h-4 w-4" />
         </Button>
+        <CurrencySwitcher size="sm" />
         <ThemeSwitcher />
         <LanguageSwitcher />
         <Button 
