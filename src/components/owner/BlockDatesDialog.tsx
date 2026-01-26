@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import { usePropertyAvailabilityManagement } from '@/hooks/usePropertyAvailabilityManagement';
@@ -34,14 +34,29 @@ export function BlockDatesDialog({
   const { toast } = useToast();
   const isRu = language === 'ru';
   
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(
-    initialDate ? { from: initialDate, to: initialDate } : undefined
-  );
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [note, setNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const { upsertAvailability, deleteAvailability, availability } = usePropertyAvailabilityManagement(propertyId);
+  const { upsertAvailability, deleteAvailability, availability, isSaving } = usePropertyAvailabilityManagement(propertyId);
   const { bookings } = usePropertyBookings(propertyId);
+  
+  // Sync dateRange with initialDate when dialog opens
+  useEffect(() => {
+    if (open && initialDate) {
+      setDateRange({ from: initialDate, to: initialDate });
+      setNote('');
+    }
+  }, [open, initialDate]);
+  
+  // Reset state when dialog closes
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      setDateRange(undefined);
+      setNote('');
+    }
+    onOpenChange(isOpen);
+  };
   
   // Check if any date in range has a booking
   const conflictingBookings = useMemo(() => {
@@ -132,7 +147,7 @@ export function BlockDatesDialog({
   }, [availability]);
   
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

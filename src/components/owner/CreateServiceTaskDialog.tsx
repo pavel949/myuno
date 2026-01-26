@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useOperationalTasks, CreateTaskInput } from '@/hooks/useOperationalTasks';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -79,6 +79,17 @@ export function CreateServiceTaskDialog({
   });
 
   const [datePickerOpen, setDatePickerOpen] = useState(false);
+  
+  // Sync formData with defaultPropertyId and defaultDate when dialog opens
+  useEffect(() => {
+    if (open) {
+      setFormData(f => ({
+        ...f,
+        property_id: defaultPropertyId || f.property_id || '',
+        scheduled_date: defaultDate || new Date(),
+      }));
+    }
+  }, [open, defaultPropertyId, defaultDate]);
 
   const handleSubmit = async () => {
     if (!formData.property_id) {
