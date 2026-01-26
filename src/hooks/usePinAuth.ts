@@ -33,24 +33,15 @@ export function usePinAuth() {
     }
   }, []);
 
-  // Check if user has PIN when authenticated
+  // Check if user has PIN - prioritize savedUserId for returning users
   useEffect(() => {
     let isMounted = true;
     
     const checkPinStatus = async () => {
-      // If no user and no saved user, finish loading immediately
-      if (!user && !savedUserId) {
-        if (isMounted) {
-          setHasPin(false);
-          setIsLoading(false);
-          setPinCheckComplete(true);
-        }
-        return;
-      }
-
-      // Prioritize current logged in user
-      const userIdToCheck = user?.id || savedUserId;
+      // Determine which user ID to check - prioritize savedUserId for PIN login flow
+      const userIdToCheck = savedUserId || user?.id;
       
+      // If no user ID available, finish loading immediately
       if (!userIdToCheck) {
         if (isMounted) {
           setHasPin(false);
@@ -71,7 +62,7 @@ export function usePinAuth() {
 
         if (error) throw error;
         
-        console.log('[usePinAuth] PIN check result:', { hasPin: !!data });
+        console.log('[usePinAuth] PIN check result:', { hasPin: !!data, userIdToCheck });
         
         if (isMounted) {
           setHasPin(!!data);
@@ -90,7 +81,7 @@ export function usePinAuth() {
     
     checkPinStatus();
     return () => { isMounted = false; };
-  }, [user, savedUserId]);
+  }, [user?.id, savedUserId]);
 
   // Manual check function for external use
   const checkHasPin = useCallback(async () => {
