@@ -117,8 +117,8 @@ export const RecommendedCarousel = memo(function RecommendedCarousel() {
         <div
           ref={scrollRef}
           onScroll={checkScroll}
-          className="flex gap-3 sm:gap-4 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4"
-          style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
+          className="flex gap-3 sm:gap-4 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 touch-pan-x"
+          style={{ scrollSnapType: 'x mandatory' }}
         >
           {items.map((item) => (
             <button

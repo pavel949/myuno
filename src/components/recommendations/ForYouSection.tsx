@@ -135,18 +135,18 @@ export function ForYouSection() {
         </button>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+      <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide touch-pan-x">
         {recommendations.map((item) => {
           const ReasonIcon = reasonIcons[item.reason];
           const reasonLabel = reasonLabels[item.reason][language];
           
           return (
-            <div
+            <button
               key={`${item.item_type}-${item.id}`}
               onClick={() => handleItemClick(item)}
               className={cn(
-                "flex-shrink-0 w-64 bg-card rounded-2xl overflow-hidden border",
-                "hover:shadow-lg transition-all cursor-pointer group"
+                "flex-shrink-0 w-64 bg-card rounded-2xl overflow-hidden border text-left",
+                "hover:shadow-lg transition-all cursor-pointer group touch-manipulation"
               )}
             >
               <div className="relative h-36">
@@ -185,7 +185,7 @@ export function ForYouSection() {
                   </p>
                 </div>
               </div>
-            </div>
+            </button>
           );
         })}
       </div>
