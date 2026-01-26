@@ -311,23 +311,25 @@ export function UnifiedPropertyCalendar({ propertyId, properties = [] }: Unified
         </CardContent>
       </Card>
 
-      <CalendarDayEventsSheet
-        open={showEventsSheet}
-        onOpenChange={setShowEventsSheet}
-        date={selectedDate}
-        bookings={selectedDateEvents.bookings}
-        tasks={selectedDateEvents.tasks}
-        availability={selectedDateEvents.availability}
-        onAddTask={handleAddTask}
-        onViewBooking={(booking) => {
-          setSelectedBooking(booking);
-          // Could open booking details dialog here
-        }}
-        onCompleteTask={handleCompleteTask}
-        onAddBooking={propertyId ? handleAddBooking : undefined}
-        onBlockDate={propertyId ? handleBlockDate : undefined}
-        onUnblockDate={propertyId ? handleUnblockDate : undefined}
-      />
+      {selectedDate && (
+        <CalendarDayEventsSheet
+          open={showEventsSheet}
+          onOpenChange={setShowEventsSheet}
+          date={selectedDate}
+          bookings={selectedDateEvents.bookings}
+          tasks={selectedDateEvents.tasks}
+          availability={selectedDateEvents.availability}
+          onAddTask={handleAddTask}
+          onViewBooking={(booking) => {
+            setSelectedBooking(booking);
+            // Could open booking details dialog here
+          }}
+          onCompleteTask={handleCompleteTask}
+          onAddBooking={propertyId ? handleAddBooking : undefined}
+          onBlockDate={propertyId ? handleBlockDate : undefined}
+          onUnblockDate={propertyId ? handleUnblockDate : undefined}
+        />
+      )}
 
       <CreateServiceTaskDialog
         open={showCreateTaskDialog}
