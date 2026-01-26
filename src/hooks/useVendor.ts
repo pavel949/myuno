@@ -109,12 +109,15 @@ export function useVendorProfile() {
 
     try {
       setIsLoading(true);
-      // Use the real providers table
-      const { data, error } = await supabase
+      // Use the real providers table - use limit(1) to handle duplicate records
+      const { data: records, error } = await supabase
         .from('providers')
         .select('*')
         .eq('user_id', user.id)
-        .maybeSingle();
+        .order('created_at', { ascending: false })
+        .limit(1);
+      
+      const data = records?.[0] || null;
 
       if (error) throw error;
       
@@ -169,11 +172,15 @@ export function useVendorProfile() {
 
       try {
         setIsLoading(true);
-        const { data, error } = await supabase
+        // Use limit(1) to handle duplicate records gracefully
+        const { data: records, error } = await supabase
           .from('providers')
           .select('*')
           .eq('user_id', user.id)
-          .maybeSingle();
+          .order('created_at', { ascending: false })
+          .limit(1);
+        
+        const data = records?.[0] || null;
 
         if (error) throw error;
         
