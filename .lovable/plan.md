@@ -1,172 +1,180 @@
 
-# План исправления нестабильной работы PIN-аутентификации
+# План: Добавление бронирования и закрытия дат из календаря
 
-## Корневые причины проблемы
-
-### Проблема 1: Рассинхронизация состояний
-Система имеет **два независимых источника правды**:
-- **База данных**: Проверяет наличие PIN через `user_pins` таблицу (`hasPin`)
-- **LocalStorage**: Проверяет наличие сохраненных данных устройства (`canUsePinLogin`)
-
-Когда refresh_token истекает или не сохраняется, `canUsePinLogin = true` (есть `user_id` в localStorage), но `refresh_token` отсутствует, что приводит к ошибке.
-
-### Проблема 2: Race Condition в Auth.tsx
-```typescript
-// Строки 60-69: Эффект проверяет hasPin ДО того, как проверка завершилась
-useEffect(() => {
-  if (user && !showPinSetup) {
-    if (!hasPin && !pinLoading) {  // hasPin может быть false пока идет загрузка
-      setShowPinSetup(true);       // Показывает setup, хотя PIN уже есть
-      setView('pin-setup');
-    }
-  }
-}, [user, hasPin, pinLoading, ...]);
-```
-
-### Проблема 3: clearPinData не вызывается внутри useCallback
-В `verifyPin` функции `clearPinData` вызывается напрямую, но сама функция объявлена позже, что может вызвать проблемы с замыканием.
-
-### Проблема 4: Отсутствие валидации refresh_token
-Система не проверяет наличие `refresh_token` при определении `canUsePinLogin`.
+## Цель
+Сделать календарь Uno основным источником управления доступностью объекта, добавив возможность:
+1. **Вручную добавлять бронирования** прямо из выбранной даты
+2. **Закрывать/открывать даты** (блокировка без гостя)
 
 ---
 
-## План исправлений
+## Текущая архитектура
 
-### Шаг 1: Исправить определение canUsePinLogin
+### Существующие компоненты:
+- **`UnifiedPropertyCalendar`** — операционный календарь с задачами и бронированиями
+- **`CalendarDayEventsSheet`** — выезжающий снизу лист при клике на день (показывает события дня)
+- **`BookingCalendar`** — отдельный компонент для добавления бронирований (на вкладке "Задачи")
 
-**Файл:** `src/hooks/usePinAuth.ts`
+### Существующие хуки:
+- **`usePropertyBookings`** — создание/редактирование бронирований
+- **`usePropertyAvailabilityManagement`** — управление статусом дат (available/blocked/booked)
 
-Изменить логику проверки доступности PIN-логина - требовать наличие И user_id, И refresh_token:
+---
 
-```typescript
-// Было:
-const canUsePinLogin = savedUserId !== null;
+## Что нужно добавить
 
-// Будет:
-const [hasRefreshToken, setHasRefreshToken] = useState(false);
+### 1. Расширить CalendarDayEventsSheet
+Добавить две новые кнопки действий:
+- **"Добавить бронирование"** — открывает диалог создания бронирования
+- **"Закрыть дату"** / **"Открыть дату"** — переключает статус blocked/available
 
-useEffect(() => {
-  const userId = localStorage.getItem(PIN_USER_KEY);
-  const email = localStorage.getItem(PIN_EMAIL_KEY);
-  const refreshToken = localStorage.getItem(PIN_REFRESH_TOKEN_KEY);
-  
-  setSavedUserId(userId);
-  setSavedEmail(email);
-  setHasRefreshToken(!!refreshToken);
-}, []);
+### 2. Создать новый компонент AddBookingDialog
+Мобильно-оптимизированный диалог для быстрого добавления бронирования:
+- Выбор диапазона дат (с предзаполненной начальной датой)
+- Имя гостя
+- Контакты (телефон, email)
+- Количество гостей
+- Сумма
+- Источник (Manual, Airbnb, Booking, Direct)
+- Заметки
 
-const canUsePinLogin = savedUserId !== null && hasRefreshToken;
+### 3. Создать компонент BlockDatesDialog
+Диалог для закрытия диапазона дат:
+- Выбор диапазона (от выбранной даты)
+- Причина блокировки (опционально)
+- Автоматическая проверка на пересечение с существующими бронированиями
+
+### 4. Обновить UnifiedPropertyCalendar
+- Добавить визуальный индикатор заблокированных дат (красная/серая точка)
+- Интегрировать `usePropertyAvailabilityManagement` для отображения blocked статусов
+
+---
+
+## Детали реализации
+
+### Файлы для создания:
+1. **`src/components/owner/AddBookingFromCalendarDialog.tsx`**
+   - Диалог добавления бронирования с мини-календарём для выбора check-out
+   - Использует `usePropertyBookings.createBooking`
+   - Проверяет пересечения с существующими бронированиями
+
+2. **`src/components/owner/BlockDatesDialog.tsx`**
+   - Диалог для блокировки/разблокировки дат
+   - Использует `usePropertyAvailabilityManagement.upsertAvailability`
+   - Показывает причину блокировки
+
+### Файлы для изменения:
+
+**`src/components/owner/CalendarDayEventsSheet.tsx`**:
+- Добавить props: `propertyId`, `onAddBooking`, `onBlockDates`
+- Добавить две новые кнопки в интерфейс
+- Показывать статус "Закрыто" если дата заблокирована
+
+**`src/components/owner/UnifiedPropertyCalendar.tsx`**:
+- Подключить `usePropertyAvailabilityManagement`
+- Добавить blocked даты в eventMap и modifiers
+- Передать новые handlers в CalendarDayEventsSheet
+- Добавить AddBookingFromCalendarDialog и BlockDatesDialog
+
+**`src/pages/owner/OwnerCalendar.tsx`**:
+- Добавить кнопку "Добавить бронирование" рядом с "Создать задачу"
+
+---
+
+## Интерфейс пользователя
+
+### При клике на день в календаре:
+```
+┌─────────────────────────────────────┐
+│  25 января 2026                  [+]│
+│  ─────────────────────────────────  │
+│                                     │
+│  🟢 Бронирования                    │
+│  ┌─────────────────────────────┐   │
+│  │ 👤 Иван Петров              │   │
+│  │    3 ночи • Заезд           │   │
+│  └─────────────────────────────┘   │
+│                                     │
+│  📋 Задачи                          │
+│  ┌─────────────────────────────┐   │
+│  │ 🧹 Уборка после выезда   ✓  │   │
+│  └─────────────────────────────┘   │
+│                                     │
+│  ─────────────────────────────────  │
+│  [+ Бронирование] [🔒 Закрыть]      │
+│                                     │
+└─────────────────────────────────────┘
 ```
 
-### Шаг 2: Исправить Race Condition в Auth.tsx
-
-**Файл:** `src/pages/Auth.tsx`
-
-Добавить дополнительную проверку для предотвращения показа PIN setup, когда пользователь уже авторизован через PIN:
-
-```typescript
-// Новая логика для useEffect
-useEffect(() => {
-  // Не показывать PIN setup если пользователь уже показал PIN login
-  if (user && !showPinSetup) {
-    // Важно: проверяем hasPin только когда pinLoading === false
-    if (pinLoading) return; // Ждем завершения проверки
-    
-    if (!hasPin) {
-      setShowPinSetup(true);
-      setView('pin-setup');
-    } else {
-      navigate(redirectPath, { replace: true });
-    }
-  }
-}, [user, hasPin, pinLoading, navigate, showPinSetup, redirectPath]);
+### При добавлении бронирования:
 ```
-
-### Шаг 3: Исправить clearPinData closure
-
-**Файл:** `src/hooks/usePinAuth.ts`
-
-Вынести `clearPinData` выше `verifyPin` и добавить её в зависимости:
-
-```typescript
-// Объявить clearPinData ДО verifyPin
-const clearPinData = useCallback(() => {
-  localStorage.removeItem(PIN_USER_KEY);
-  localStorage.removeItem(PIN_EMAIL_KEY);
-  localStorage.removeItem(PIN_REFRESH_TOKEN_KEY);
-  setSavedUserId(null);
-  setSavedEmail(null);
-  setHasRefreshToken(false);
-}, []);
-
-// Теперь verifyPin может безопасно использовать clearPinData
-const verifyPin = useCallback(async (pin: string) => {
-  // ... логика
-  if (sessionError || !sessionData.session) {
-    clearPinData(); // Теперь работает корректно
-    throw new Error('Session expired. Please login with password.');
-  }
-  // ...
-}, [clearPinData]); // Добавить в зависимости
-```
-
-### Шаг 4: Обновить refresh_token после успешного входа по паролю
-
-**Файл:** `src/pages/Auth.tsx`
-
-После успешного входа через email/password, обновлять сохраненный refresh_token:
-
-```typescript
-const handleLogin = async (e: React.FormEvent) => {
-  // ... существующая логика
-  
-  if (!error) {
-    // Обновить refresh_token в localStorage если PIN уже настроен
-    const refreshToken = (await supabase.auth.getSession()).data.session?.refresh_token;
-    const savedUserId = localStorage.getItem('uno_pin_user_id');
-    
-    if (savedUserId && refreshToken) {
-      localStorage.setItem('uno_pin_refresh_token', refreshToken);
-    }
-  }
-};
-```
-
-### Шаг 5: Добавить синхронизацию после PIN setup
-
-**Файл:** `src/components/auth/PinSetup.tsx`
-
-Обеспечить обновление состояния `hasRefreshToken` после успешной настройки:
-
-```typescript
-// В setupPin уже сохраняется refresh_token
-// Нужно убедиться, что состояние обновляется
+┌─────────────────────────────────────┐
+│  Новое бронирование             [X] │
+│  ─────────────────────────────────  │
+│                                     │
+│  📅 Заезд: 25 января 2026           │
+│  📅 Выезд: [Выбрать дату]           │
+│                                     │
+│  👤 Имя гостя                       │
+│  ┌─────────────────────────────┐   │
+│  │                             │   │
+│  └─────────────────────────────┘   │
+│                                     │
+│  📱 Телефон        📧 Email         │
+│  ┌─────────┐      ┌─────────┐      │
+│  │         │      │         │      │
+│  └─────────┘      └─────────┘      │
+│                                     │
+│  👥 Гостей  💰 Сумма                │
+│  ┌─────────┐      ┌─────────┐      │
+│  │ 2       │      │ 15000   │      │
+│  └─────────┘      └─────────┘      │
+│                                     │
+│  📍 Источник                        │
+│  [Manual ▼]                         │
+│                                     │
+│  [    Добавить бронирование    ]    │
+└─────────────────────────────────────┘
 ```
 
 ---
 
-## Техническая реализация
+## Легенда календаря (обновлённая)
 
-### Изменения в usePinAuth.ts:
-1. Добавить `hasRefreshToken` state
-2. Обновить проверку в useEffect при монтировании
-3. Изменить `canUsePinLogin` на проверку обоих условий
-4. Переместить `clearPinData` выше `verifyPin`
-5. Добавить `clearPinData` в зависимости `verifyPin`
-6. Обновлять `hasRefreshToken` в `clearPinData` и `setupPin`
-
-### Изменения в Auth.tsx:
-1. Упростить логику useEffect для PIN setup
-2. Добавить явную проверку `pinLoading` перед принятием решения
-3. Обновлять refresh_token после успешного входа по паролю
+| Индикатор | Значение |
+|-----------|----------|
+| 🔵 Фон    | Гость проживает |
+| 🟢 Точка  | Заезд |
+| 🟡 Точка  | Выезд |
+| 🔴 Точка  | Закрыто (blocked) |
+| 🔷 Точка  | Уборка |
+| 🟠 Точка  | Ремонт |
 
 ---
 
-## Ожидаемый результат
+## Технические детали
 
-После исправлений:
-- PIN login будет показываться ТОЛЬКО если есть И user_id, И refresh_token
-- PIN setup будет показываться ТОЛЬКО после полной проверки hasPin в базе
-- При истечении сессии пользователь корректно перенаправляется на вход по паролю
-- После входа по паролю refresh_token обновляется для следующего PIN входа
+### Валидация при добавлении бронирования:
+1. Проверка на пересечение с существующими бронированиями
+2. Проверка на заблокированные даты в диапазоне
+3. Check-out должен быть после check-in
+
+### Валидация при блокировке:
+1. Нельзя заблокировать даты с существующими бронированиями
+2. При блокировке диапазона — все даты должны быть свободны
+
+### Автоматическая синхронизация:
+- После добавления бронирования — инвалидация кэша bookings
+- После блокировки/разблокировки — инвалидация кэша availability
+- Обе операции обновляют отображение календаря
+
+---
+
+## Порядок реализации
+
+1. Создать `BlockDatesDialog` — простой компонент блокировки
+2. Создать `AddBookingFromCalendarDialog` — диалог добавления бронирования  
+3. Обновить `CalendarDayEventsSheet` — добавить кнопки действий
+4. Обновить `UnifiedPropertyCalendar` — интегрировать availability и новые диалоги
+5. Добавить индикатор blocked в легенду календаря
+6. Обновить `OwnerCalendar` — добавить кнопку быстрого добавления бронирования
