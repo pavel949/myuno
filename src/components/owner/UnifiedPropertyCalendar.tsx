@@ -268,7 +268,7 @@ export function UnifiedPropertyCalendar({ propertyId, properties = [] }: Unified
                 onMonthChange={setMonth}
                 modifiers={modifiers}
                 modifiersClassNames={modifiersClassNames}
-                className="pointer-events-auto"
+                className="pointer-events-auto touch-manipulation"
                 components={{
                   DayContent: ({ date }) => <DayContent date={date} />,
                 }}
