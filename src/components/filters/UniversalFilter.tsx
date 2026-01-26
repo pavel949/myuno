@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Filter, X, Check, ChevronDown, RotateCcw } from 'lucide-react';
+import { Filter, X, Check, ChevronDown, RotateCcw, type LucideIcon } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
+import { InlineIcon } from '@/components/ui/IconBadge';
 
 // ====== UNIVERSAL FILTER TYPES ======
 
@@ -14,7 +15,7 @@ export interface FilterOption {
   id: string;
   labelEn: string;
   labelRu: string;
-  icon?: string; // emoji or icon name
+  icon?: string | LucideIcon; // emoji string OR Lucide icon component
   count?: number; // optional count of items
 }
 
@@ -123,7 +124,7 @@ function MultiSelectChips({ options, value, onChange }: MultiSelectChipsProps) {
                 : "bg-secondary text-secondary-foreground border-border hover:border-primary/50"
             )}
           >
-            {option.icon && <span>{option.icon}</span>}
+            {option.icon && <InlineIcon icon={option.icon} size="sm" />}
             <span>{language === 'ru' ? option.labelRu : option.labelEn}</span>
             {isActive && <Check className="w-3.5 h-3.5" />}
           </button>
@@ -159,7 +160,7 @@ function SingleSelectList({ options, value, onChange }: SingleSelectListProps) {
                 : "bg-secondary hover:bg-secondary/80"
             )}
           >
-            {option.icon && <span className="text-lg">{option.icon}</span>}
+            {option.icon && <InlineIcon icon={option.icon} size="lg" />}
             <span className="flex-1 font-medium">
               {language === 'ru' ? option.labelRu : option.labelEn}
             </span>
@@ -348,7 +349,7 @@ export function QuickFilterBar({ options, value, onChange, className }: QuickFil
                 : "bg-secondary text-secondary-foreground border-border hover:border-primary/50"
             )}
           >
-            {option.icon && <span className="flex-shrink-0">{option.icon}</span>}
+            {option.icon && <InlineIcon icon={option.icon} size="sm" className="flex-shrink-0" />}
             <span className="truncate max-w-[100px]">{language === 'ru' ? option.labelRu : option.labelEn}</span>
           </button>
         );

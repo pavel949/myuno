@@ -7,6 +7,19 @@ import {
   Anchor, Ship, Crown, Gem, Sun, Camera, Fish, Shell, Flower2, Gift, Calendar,
   Star, Dumbbell, PawPrint, Home, Building2, BedDouble, MapPin, Phone,
   HandMetal, Footprints, SprayCan, Smile, Wrench, Key, Briefcase,
+  // New imports for extended coverage
+  Brain, Wind, Palette, PenTool, Moon, Flame, AlertCircle, CheckCircle, Video,
+  Croissant, Activity, Bandage, Microscope, FlaskConical, ParkingCircle, Mic,
+  Tent, Martini, Volume2, ShoppingCart, Wifi, Coffee, CircleUserRound, CircleDollarSign,
+  RefreshCw, Shirt, Package as Box, CalendarDays, CircleDot, Sunrise,
+  Pizza, Soup, Utensils, ChefHat, CupSoda, Wine, Salad, Sandwich,
+  Beef, Cookie, Apple, Wheat,
+  Trophy, Globe, BookOpen, Laptop,
+  Backpack, PersonStanding, User, UsersRound, MessageSquare,
+  Send, Lock, ShieldCheck, Receipt, Infinity,
+  Armchair, Hammer, Plug, TreePine, Cat,
+  Flower, SunMedium, CloudSun,
+  Church, Bird, CircleHelp, UserRound, Bell,
   type LucideIcon
 } from 'lucide-react';
 
@@ -19,15 +32,38 @@ export const emojiToIconMap: Record<string, LucideIcon> = {
   '🏔️': Mountain,
   '🌿': Leaf,
   '🌳': TreeDeciduous,
+  '🌲': TreePine,
+  '⛰️': Mountain,
   
   // Food & Dining
   '🍴': UtensilsCrossed,
   '🍽️': UtensilsCrossed,
+  '🥢': Utensils,
+  '🍣': Fish,
+  '🍕': Pizza,
+  '🍔': Sandwich,
+  '🍛': Soup,
+  '🥡': Box,
+  '🥐': Croissant,
+  '🌮': Utensils,
+  '🫒': Leaf, // Olive → Leaf fallback
+  '🍜': Soup,
+  '🍷': Wine,
+  '🍸': Martini,
+  '🍾': Wine,
+  '🥤': CupSoda,
+  '🧀': Utensils,
+  '🦐': Fish, // Shrimp → Fish fallback
+  '🥗': Salad,
+  '🌱': Leaf,
+  '🍖': Beef,
+  '🌾': Wheat,
   
   // Beauty & Personal
   '✂️': Scissors,
   '💇': Scissors,
   '💇‍♀️': Scissors,
+  '💇‍♂️': Scissors,
   '✨': Sparkles,
   '💎': Gem,
   '💅': HandMetal,
@@ -36,6 +72,16 @@ export const emojiToIconMap: Record<string, LucideIcon> = {
   '🧖': Sparkles,
   '🧖‍♀️': Sparkles,
   '💄': SprayCan,
+  '🦶': Footprints,
+  '🪨': Gem,
+  '💧': Droplets,
+  '🌸': Flower2,
+  '💨': Wind,
+  '🎨': Palette,
+  '🖌️': PenTool,
+  '👰': Crown,
+  '🌙': Moon,
+  '🌃': Moon,
   
   // Medical & Health
   '🏥': Hospital,
@@ -46,10 +92,16 @@ export const emojiToIconMap: Record<string, LucideIcon> = {
   '👁️': Eye,
   '👂': Ear,
   '👩‍⚕️': Stethoscope,
+  '👨‍⚕️': Stethoscope,
   '🦷': Stethoscope,
   '🧴': Droplets,
   '💉': Syringe,
-  '👨‍⚕️': Stethoscope,
+  '🩺': Stethoscope,
+  '🧠': Brain,
+  '🩹': Bandage,
+  '🔬': Microscope,
+  '🧪': FlaskConical,
+  '🧘': Activity,
   
   // Accommodation
   '🏨': Hotel,
@@ -59,6 +111,8 @@ export const emojiToIconMap: Record<string, LucideIcon> = {
   '🏬': Building2,
   '🏘️': Home,
   '🛏️': BedDouble,
+  '🌆': Building2,
+  '🛋️': Armchair,
   
   // Transport
   '✈️': Plane,
@@ -68,20 +122,37 @@ export const emojiToIconMap: Record<string, LucideIcon> = {
   '🚐': Van,
   '🏎️': Car,
   '⚡': Zap,
+  '🚚': Truck,
+  '🛵': Bike,
+  '🚤': Ship,
+  '🛥️': Ship,
+  '🛳️': Ship,
   
   // Education
   '🎓': GraduationCap,
+  '📚': BookOpen,
+  '💻': Laptop,
+  '🌍': Globe,
+  '⚽': Activity,
+  '📖': BookOpen,
+  '🗣️': MessageSquare,
   
   // Entertainment & Events
   '🎵': Music,
   '🎉': PartyPopper,
   '🎭': Theater,
+  '🎤': Mic,
+  '🎪': Tent,
+  '🎬': Camera,
+  '🔥': Flame,
+  '🎊': PartyPopper,
+  '🥊': Activity,
+  '🥋': Activity,
+  '🔞': Lock,
+  '👑': Crown,
   
   // Water & Boats
   '⛵': Sailboat,
-  '🚤': Ship,
-  '🛳️': Ship,
-  '🛥️': Ship,
   '⚓': Anchor,
   '🏄': Waves,
   '🏄‍♂️': Waves,
@@ -90,50 +161,154 @@ export const emojiToIconMap: Record<string, LucideIcon> = {
   '🐠': Fish,
   '🐬': Fish,
   '🪸': Shell,
-  '🎬': Camera,
+  '🤿': Waves,
+  '🥽': Eye,
+  '🛶': Sailboat,
+  '🪂': Wind,
+  '🏂': Activity,
+  '🎣': Fish,
+  '🔊': Volume2,
   
   // Pets
   '🐾': PawPrint,
   '🐕': Dog,
   '🐶': Dog,
+  '🐱': Cat,
+  '🦜': PawPrint,
+  '🦎': PawPrint,
   
-  // Services
+  // Services & Cleaning
   '🧹': Brush,
   '🧺': Package,
   '🔧': Wrench,
+  '🔨': Hammer,
   '🚿': Droplets,
   '❄️': Snowflake,
   '🐜': Bug,
   '🔑': Key,
+  '👔': Shirt,
+  '🧥': Shirt,
+  '📦': Box,
   
   // Business & Legal
   '⚖️': Scale,
   '📊': BarChart3,
   '💰': Wallet,
+  '💵': CircleDollarSign,
   '🛂': Stamp,
   '🛡️': Shield,
   '👥': Users,
+  '💼': Briefcase,
+  '💯': CheckCircle,
   
   // Time & Scheduling
   '🕐': Clock,
   '📅': Calendar,
-  '🚚': Truck,
+  '🗓️': CalendarDays,
+  '📆': CalendarDays,
+  '⏰': Clock,
+  '⏱️': Clock,
+  '🌅': Sunrise,
+  '🌤️': SunMedium,
+  '☀️': Sun,
   
-  // Flowers
-  '🌸': Flower2,
+  // Flowers & Gifts
   '💐': Flower2,
+  '🌹': Flower2,
+  '🌷': Flower2,
+  '🪻': Flower2,
+  '🌺': Flower2,
+  '🌻': Sun,
   '🎁': Gift,
+  '🎂': Gift,
+  '💑': Users,
+  '💒': Church,
+  '🕊️': Bird,
+  '🙏': Heart,
+  '🏺': Box,
+  '⏳': Clock,
   
-  // Ratings
+  // Ratings & Status
   '⭐': Star,
+  '🏆': Trophy,
+  '🚨': AlertCircle,
+  '✅': CheckCircle,
+  '📹': Video,
+  '📸': Camera,
+  '🆓': Gift,
+  '🟢': CircleDot,
+  '🟡': CircleDot,
+  '🟠': CircleDot,
+  '🔴': CircleDot,
+  '🔵': CircleDot,
+  '⚪': CircleDot,
+  '🩷': Heart,
+  '🟣': CircleDot,
+  '🌈': Sparkles,
   
-  // Fitness
+  // Fitness & Sports
   '🏋️': Dumbbell,
   '💪': Dumbbell,
+  '🏊': Waves,
+  '🤸': Activity,
+  '💃': Music,
+  '👨‍🏫': User,
+  '🏃': PersonStanding,
   
-  // Location
+  // Location & Navigation
   '📍': MapPin,
   '📞': Phone,
+  '📶': Wifi,
+  '🚀': Send,
+  '🌐': Globe,
+  '♿': CircleUserRound,
+  
+  // Parking & Infrastructure
+  '🅿️': ParkingCircle,
+  '🔒': Lock,
+  '🛎️': Bell,
+  '🚪': Key,
+  '🎠': Activity,
+  '🍳': ChefHat,
+  '🛁': Droplets,
+  
+  // People & Groups
+  '👤': User,
+  '👨‍👩‍👧': UsersRound,
+  '👨‍👩‍👧‍👦': UsersRound,
+  '👨‍✈️': User,
+  '👧': User,
+  '🧑': User,
+  '👨': User,
+  '🧒': Baby,
+  '🎒': Backpack,
+  
+  // Misc
+  '🔄': RefreshCw,
+  '1️⃣': CircleDot,
+  '2️⃣': CircleDot,
+  '3️⃣': CircleDot,
+  '4️⃣': CircleDot,
+  '☕': Coffee,
+  '∞': Infinity,
+  '🎛️': Activity,
+  '🛕': Building,
+  '🧗': Mountain,
+  '🏙️': Building2,
+  '🗺️': MapPin,
+  '🇬🇧': Globe,
+  '🇷🇺': Globe,
+  '🇹🇭': Globe,
+  '🇨🇳': Globe,
+  
+  // Property specific
+  '🐢': PawPrint,
+  '⛱️': Sun,
+  '🏌️': Activity,
+  '🐚': Shell,
+  '🛫': Plane,
+  '🏷️': Receipt,
+  '🔐': Lock,
 };
 
 // Get Lucide icon for an emoji, with fallback
