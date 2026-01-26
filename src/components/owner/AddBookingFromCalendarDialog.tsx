@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import { usePropertyBookings } from '@/hooks/usePropertyBookings';
@@ -56,9 +56,26 @@ export function AddBookingFromCalendarDialog({
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCheckOutPicker, setShowCheckOutPicker] = useState(false);
+  const [showCheckInPicker, setShowCheckInPicker] = useState(false);
   
   const { createBooking, bookings, isCreating } = usePropertyBookings(propertyId);
   const { availability } = usePropertyAvailabilityManagement(propertyId);
+  
+  // Sync checkIn with initialDate when dialog opens
+  useEffect(() => {
+    if (open && initialDate) {
+      setCheckIn(initialDate);
+      setCheckOut(undefined);
+    }
+  }, [open, initialDate]);
+  
+  // Reset form when dialog closes
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      resetForm();
+    }
+    onOpenChange(isOpen);
+  };
   
   // Check for conflicts with existing bookings
   const conflictingBookings = useMemo(() => {
@@ -184,17 +201,12 @@ export function AddBookingFromCalendarDialog({
     setTotalAmount('');
     setSource('manual');
     setNotes('');
+    setShowCheckInPicker(false);
+    setShowCheckOutPicker(false);
   };
   
-  // Update checkIn when initialDate changes
-  useState(() => {
-    if (initialDate) {
-      setCheckIn(initialDate);
-    }
-  });
-  
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -208,9 +220,48 @@ export function AddBookingFromCalendarDialog({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label className="text-xs text-muted-foreground">{isRu ? 'Заезд' : 'Check-in'}</Label>
-              <div className="p-2.5 bg-muted rounded-lg text-sm font-medium">
-                {checkIn ? format(checkIn, 'd MMM', { locale: isRu ? ru : undefined }) : '—'}
-              </div>
+              <Popover open={showCheckInPicker} onOpenChange={setShowCheckInPicker}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-medium",
+                      !checkIn && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {checkIn 
+                      ? format(checkIn, 'd MMM', { locale: isRu ? ru : undefined })
+                      : isRu ? 'Выбрать' : 'Select'
+                    }
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={checkIn}
+                    onSelect={(date) => {
+                      setCheckIn(date);
+                      // Reset checkout if it's before or equal to new checkin
+                      if (date && checkOut && checkOut <= date) {
+                        setCheckOut(undefined);
+                      }
+                      setShowCheckInPicker(false);
+                    }}
+                    disabled={(date) => {
+                      // Disable past dates
+                      if (date < new Date(new Date().setHours(0, 0, 0, 0))) return true;
+                      // Disable already booked dates
+                      return disabledDates.some(d => 
+                        format(d, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
+                      );
+                    }}
+                    locale={isRu ? ru : undefined}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
             <div>
               <Label className="text-xs text-muted-foreground">{isRu ? 'Выезд' : 'Check-out'}</Label>
