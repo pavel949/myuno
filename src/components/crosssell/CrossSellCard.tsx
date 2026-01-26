@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { IconBadge } from '@/components/ui/IconBadge';
 import type { CrossSellLink } from '@/lib/crossSellConfig';
 
 interface CrossSellCardProps {
@@ -34,7 +35,13 @@ export const CrossSellCard = memo(function CrossSellCard({
       onClick={handleClick}
       className="flex flex-col items-center justify-center p-4 bg-card border border-border rounded-xl hover:shadow-lg hover:border-primary/30 transition-all duration-200 min-w-[100px] w-full"
     >
-      <span className="text-3xl mb-2">{link.icon}</span>
+      <IconBadge
+        icon={link.icon}
+        size="lg"
+        variant={link.gradient ? 'gradient' : 'primary'}
+        gradient={link.gradient}
+        className="mb-2"
+      />
       <span className="font-medium text-sm text-foreground truncate w-full text-center">
         {language === 'ru' ? link.labelRu : link.labelEn}
       </span>

@@ -298,7 +298,11 @@ export default function PropertyIndex() {
                           : "border-transparent hover:border-border text-muted-foreground hover:text-foreground"
                       )}
                     >
-                      <span className="text-lg">{type.icon}</span>
+                      {type.icon && (
+                        typeof type.icon === 'string' 
+                          ? <span className="text-lg">{type.icon}</span>
+                          : <type.icon className="w-5 h-5" />
+                      )}
                       <span className="text-xs">{language === 'ru' ? type.labelRu : type.labelEn}</span>
                     </button>
                   ))}
