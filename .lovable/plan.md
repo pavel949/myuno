@@ -1,149 +1,95 @@
 
-# План: Исправление ошибок управления календарём
+
+# План: Исправление touch-событий календаря на мобильных устройствах
 
 ## Обнаруженные проблемы
 
-Проведён детальный анализ кода управления календарём. Выявлены следующие баги:
+### 1. Отсутствие `touch-manipulation` на Calendar
 
-### Критические баги
+**Проблема**: Компонент `Calendar` и кнопки дней не используют CSS-класс `touch-manipulation`, который критически важен для мобильных устройств:
+- Без него браузер ждёт 300мс перед обработкой tap для проверки double-tap zoom
+- Это делает клики "залипающими" или не отзывчивыми
 
-| Компонент | Проблема | Влияние |
-|-----------|----------|---------|
-| `AddBookingFromCalendarDialog` | Некорректная синхронизация `initialDate` с состоянием | При повторном открытии диалога с другой датой — показывается старая дата |
-| `BlockDatesDialog` | Состояние `dateRange` не обновляется при изменении `initialDate` | Блокировка привязывается к неправильной дате |
-| `CreateServiceTaskDialog` | `defaultDate` и `defaultPropertyId` игнорируются после первого рендера | Задачи создаются не на тех объектах/датах |
+**Сравнение**: Другие интерактивные элементы (BackButton, BookingBottomBar) уже используют `touch-manipulation`
 
-### UX-проблемы
+### 2. Z-index конфликт между Sheet и BottomNav
 
-- Жёстко закодированные сообщения на английском в хуке доступности
-- Нет возможности изменить дату заезда в диалоге бронирования
-- Отсутствует индикатор загрузки при блокировке/разблокировке дат
+| Компонент | Z-index | Позиция |
+|-----------|---------|---------|
+| BottomNav | z-50 | fixed bottom-0 |
+| SheetOverlay | z-50 | fixed inset-0 |
+| SheetContent | z-50 | fixed bottom-0 |
+
+**Результат**: Sheet может появляться "под" навигацией или конкурировать за touch-события
+
+### 3. Отсутствие safe-area padding
+
+Календарь не учитывает высоту BottomNav, из-за чего нижние даты могут быть визуально доступны, но клики по ним перехватываются навигацией
 
 ---
 
 ## Решение
 
-### 1. AddBookingFromCalendarDialog — синхронизация props
+### 1. Добавить `touch-manipulation` в Calendar UI
 
-**Проблема**: `useState` с функцией-инициализатором не реагирует на изменение props
-
-**Исправление**:
-- Добавить `useEffect` для синхронизации `checkIn` с `initialDate` при изменении `open` или `initialDate`
-- Удалить некорректный блок `useState(() => {...})`
-- Сбрасывать форму при закрытии диалога
+**Файл**: `src/components/ui/calendar.tsx`
 
 ```typescript
-// Добавить useEffect для синхронизации
-useEffect(() => {
-  if (open && initialDate) {
-    setCheckIn(initialDate);
-    setCheckOut(undefined);
-  }
-}, [open, initialDate]);
-
-// При закрытии диалога — сбросить форму
-const handleClose = (isOpen: boolean) => {
-  if (!isOpen) {
-    resetForm();
-  }
-  onOpenChange(isOpen);
-};
+classNames={{
+  // ... existing classes
+  day: cn(
+    buttonVariants({ variant: "ghost" }), 
+    "h-9 w-9 p-0 font-normal aria-selected:opacity-100 touch-manipulation"
+  ),
+  // ...
+}}
 ```
 
----
+### 2. Увеличить z-index для Sheet
 
-### 2. BlockDatesDialog — синхронизация dateRange
+**Файл**: `src/components/ui/sheet.tsx`
 
-**Проблема**: Состояние инициализируется один раз и не обновляется
-
-**Исправление**:
-- Добавить `useEffect` для установки `dateRange` при открытии диалога
-- Сбрасывать состояние при закрытии
+Увеличить z-index для SheetOverlay и SheetContent до `z-[100]`, чтобы гарантированно показывать поверх всех элементов:
 
 ```typescript
-useEffect(() => {
-  if (open && initialDate) {
-    setDateRange({ from: initialDate, to: initialDate });
-    setNote('');
-  }
-}, [open, initialDate]);
+// SheetOverlay
+"fixed inset-0 z-[100] bg-black/80 ..."
 
-const handleClose = (isOpen: boolean) => {
-  if (!isOpen) {
-    setDateRange(undefined);
-    setNote('');
-  }
-  onOpenChange(isOpen);
-};
+// sheetVariants
+"fixed z-[100] gap-4 bg-background ..."
 ```
 
----
+### 3. Добавить padding-bottom для контента страницы
 
-### 3. CreateServiceTaskDialog — синхронизация formData
+**Файл**: `src/pages/owner/OwnerCalendar.tsx`
 
-**Проблема**: `defaultPropertyId` и `defaultDate` игнорируются после первого рендера
-
-**Исправление**:
-- Добавить `useEffect` для синхронизации при открытии диалога
-- Корректно сбрасывать форму с актуальными значениями по умолчанию
+Добавить отступ снизу для учёта высоты BottomNav:
 
 ```typescript
-useEffect(() => {
-  if (open) {
-    setFormData(f => ({
-      ...f,
-      property_id: defaultPropertyId || f.property_id || '',
-      scheduled_date: defaultDate || new Date(),
-    }));
-  }
-}, [open, defaultPropertyId, defaultDate]);
+<div className="p-4 pb-24 space-y-4">
 ```
 
----
+### 4. Добавить touch-manipulation в UnifiedPropertyCalendar
 
-### 4. Локализация сообщений
+**Файл**: `src/components/owner/UnifiedPropertyCalendar.tsx`
 
-**Файл**: `usePropertyAvailabilityManagement.ts`
-
-**Исправление**: Добавить хук `useLanguage` и локализовать toast-сообщения
+Явно добавить `touch-manipulation` к контейнеру календаря:
 
 ```typescript
-const { language } = useLanguage();
-const isRu = language === 'ru';
-
-// В onSuccess:
-toast({
-  title: isRu ? 'Сохранено' : 'Saved',
-  description: isRu ? 'Доступность обновлена' : 'Availability updated successfully',
-});
+<Calendar
+  ...
+  className="pointer-events-auto touch-manipulation"
+/>
 ```
-
----
-
-### 5. Возможность изменить дату заезда
-
-**Файл**: `AddBookingFromCalendarDialog.tsx`
-
-**Исправление**: Сделать дату заезда редактируемой через `Popover` с календарём (аналогично дате выезда)
-
----
-
-### 6. Индикатор загрузки в CalendarDayEventsSheet
-
-**Файл**: `CalendarDayEventsSheet.tsx`
-
-**Исправление**: Передать `isLoading` prop и показывать spinner на кнопках блокировки
 
 ---
 
 ## Порядок исправлений
 
-1. **AddBookingFromCalendarDialog** — добавить `useEffect` для синхронизации `initialDate`
-2. **BlockDatesDialog** — добавить `useEffect` для синхронизации `initialDate` 
-3. **CreateServiceTaskDialog** — добавить `useEffect` для синхронизации `defaultDate` и `defaultPropertyId`
-4. **usePropertyAvailabilityManagement** — локализация сообщений
-5. **AddBookingFromCalendarDialog** — сделать дату заезда редактируемой
-6. **CalendarDayEventsSheet** — добавить индикатор загрузки
+1. **`src/components/ui/calendar.tsx`** — добавить `touch-manipulation` к классу `day`
+2. **`src/components/ui/sheet.tsx`** — увеличить z-index до `z-[100]`
+3. **`src/components/owner/UnifiedPropertyCalendar.tsx`** — добавить `touch-manipulation`
+4. **`src/pages/owner/OwnerCalendar.tsx`** — добавить `pb-24` для safe-area
 
 ---
 
@@ -151,19 +97,18 @@ toast({
 
 | Файл | Изменения |
 |------|-----------|
-| `src/components/owner/AddBookingFromCalendarDialog.tsx` | useEffect для синхронизации, редактируемый check-in, сброс формы |
-| `src/components/owner/BlockDatesDialog.tsx` | useEffect для синхронизации, обработка закрытия |
-| `src/components/owner/CreateServiceTaskDialog.tsx` | useEffect для синхронизации props |
-| `src/hooks/usePropertyAvailabilityManagement.ts` | Локализация toast-сообщений |
-| `src/components/owner/CalendarDayEventsSheet.tsx` | Индикатор загрузки на кнопках |
+| `src/components/ui/calendar.tsx` | Добавить `touch-manipulation` к day кнопкам |
+| `src/components/ui/sheet.tsx` | Z-index `z-50` → `z-[100]` |
+| `src/components/owner/UnifiedPropertyCalendar.tsx` | Добавить `touch-manipulation` |
+| `src/pages/owner/OwnerCalendar.tsx` | Добавить `pb-24` для BottomNav spacing |
 
 ---
 
 ## Ожидаемый результат
 
 После исправлений:
-- ✅ Диалоги всегда открываются с актуальной выбранной датой
-- ✅ Формы корректно сбрасываются при закрытии
-- ✅ Сообщения отображаются на языке пользователя
-- ✅ Дата заезда редактируема
-- ✅ Пользователь видит индикатор загрузки при операциях
+- Tap на дату календаря моментально откроет Sheet-меню
+- Sheet гарантированно отобразится поверх BottomNav
+- Нижние даты календаря не будут перекрываться навигацией
+- Улучшенная отзывчивость touch-событий на всех мобильных устройствах
+
