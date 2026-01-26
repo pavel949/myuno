@@ -1,3 +1,4 @@
+import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { PaymentMethodsSection } from '@/components/wallet/PaymentMethodsSection';
@@ -8,12 +9,14 @@ export default function WalletCards() {
   const isRu = language === 'ru';
 
   return (
-    <PageContainer>
-      <PageHeader 
-        title={isRu ? 'Мои карты' : 'My Cards'} 
-        showBack 
-      />
-      <PaymentMethodsSection />
-    </PageContainer>
+    <AppLayout>
+      <PageContainer>
+        <PageHeader 
+          title={isRu ? 'Мои карты' : 'My Cards'} 
+          showBack 
+        />
+        <PaymentMethodsSection />
+      </PageContainer>
+    </AppLayout>
   );
 }

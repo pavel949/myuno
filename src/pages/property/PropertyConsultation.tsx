@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useConsultationRequests } from '@/hooks/useConsultationRequests';
+import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
@@ -15,12 +16,12 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { format, addDays } from 'date-fns';
+import { format, addDays, differenceInDays } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { 
   Home, Search, MapPin, TrendingUp, Calendar as CalendarIcon,
   Phone, MessageCircle, CheckCircle, ArrowRight, Palmtree,
-  Users, Minus, Plus
+  Users, Minus, Plus, Moon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -139,6 +140,7 @@ export default function PropertyConsultation() {
     check_out: undefined as Date | undefined,
     guests_count: 2,
     children_count: 0,
+    total_budget: '',
   });
 
   const handlePropertyTypeToggle = (value: string) => {
@@ -222,55 +224,66 @@ export default function PropertyConsultation() {
     return format(date, 'd MMM yyyy', { locale: isRu ? ru : enUS });
   };
 
+  // Calculate number of nights when dates are selected
+  const nightsCount = useMemo(() => {
+    if (formData.check_in && formData.check_out) {
+      return differenceInDays(formData.check_out, formData.check_in);
+    }
+    return 0;
+  }, [formData.check_in, formData.check_out]);
+
   if (isSuccess) {
     return (
-      <PageContainer>
-        <PageHeader 
-          title={isRu ? 'Заявка отправлена' : 'Request Sent'}
-          showBack
-          fallbackPath="/property"
-        />
-        
-        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
-          <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mb-6">
-            <CheckCircle className="w-10 h-10 text-green-500" />
+      <AppLayout>
+        <PageContainer>
+          <PageHeader 
+            title={isRu ? 'Заявка отправлена' : 'Request Sent'}
+            showBack
+            fallbackPath="/property"
+          />
+          
+          <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+            <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mb-6">
+              <CheckCircle className="w-10 h-10 text-green-500" />
+            </div>
+            
+            <h2 className="text-2xl font-bold mb-2">
+              {isRu ? 'Спасибо за заявку!' : 'Thank you!'}
+            </h2>
+            
+            <p className="text-muted-foreground mb-8 max-w-sm">
+              {requestType === 'vacation_rental' 
+                ? (isRu 
+                    ? 'Мы подберём лучшие варианты и свяжемся с вами в течение 2 часов.' 
+                    : 'We will find the best options and contact you within 2 hours.')
+                : (isRu 
+                    ? 'Наш менеджер свяжется с вами в ближайшее время для обсуждения ваших пожеланий.' 
+                    : 'Our manager will contact you shortly to discuss your requirements.')}
+            </p>
+            
+            <div className="flex flex-col gap-3 w-full max-w-xs">
+              <Button onClick={() => navigate('/property')} size="lg">
+                {isRu ? 'Смотреть объекты' : 'Browse Properties'}
+              </Button>
+              <Button variant="outline" onClick={() => navigate('/')} size="lg">
+                {isRu ? 'На главную' : 'Go Home'}
+              </Button>
+            </div>
           </div>
-          
-          <h2 className="text-2xl font-bold mb-2">
-            {isRu ? 'Спасибо за заявку!' : 'Thank you!'}
-          </h2>
-          
-          <p className="text-muted-foreground mb-8 max-w-sm">
-            {requestType === 'vacation_rental' 
-              ? (isRu 
-                  ? 'Мы подберём лучшие варианты и свяжемся с вами в течение 2 часов.' 
-                  : 'We will find the best options and contact you within 2 hours.')
-              : (isRu 
-                  ? 'Наш менеджер свяжется с вами в ближайшее время для обсуждения ваших пожеланий.' 
-                  : 'Our manager will contact you shortly to discuss your requirements.')}
-          </p>
-          
-          <div className="flex flex-col gap-3 w-full max-w-xs">
-            <Button onClick={() => navigate('/property')} size="lg">
-              {isRu ? 'Смотреть объекты' : 'Browse Properties'}
-            </Button>
-            <Button variant="outline" onClick={() => navigate('/')} size="lg">
-              {isRu ? 'На главную' : 'Go Home'}
-            </Button>
-          </div>
-        </div>
-      </PageContainer>
+        </PageContainer>
+      </AppLayout>
     );
   }
 
   return (
-    <PageContainer>
-      <PageHeader 
-        title={isRu ? 'Консультация' : 'Consultation'}
-        subtitle={isRu ? 'Поможем найти идеальный вариант' : 'We help you find the perfect option'}
-        showBack
-        fallbackPath="/property"
-      />
+    <AppLayout>
+      <PageContainer>
+        <PageHeader 
+          title={isRu ? 'Консультация' : 'Consultation'}
+          subtitle={isRu ? 'Поможем найти идеальный вариант' : 'We help you find the perfect option'}
+          showBack
+          fallbackPath="/property"
+        />
 
       {/* Progress */}
       <div className="flex items-center gap-2 mb-6">
@@ -470,6 +483,18 @@ export default function PropertyConsultation() {
                     </PopoverContent>
                   </Popover>
                 </div>
+                
+                {/* Nights count badge */}
+                {nightsCount > 0 && (
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/10 border border-primary/20">
+                    <Moon className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-medium">
+                      {nightsCount} {isRu 
+                        ? (nightsCount === 1 ? 'ночь' : nightsCount < 5 ? 'ночи' : 'ночей')
+                        : (nightsCount === 1 ? 'night' : 'nights')}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Guests */}
@@ -493,6 +518,20 @@ export default function PropertyConsultation() {
                   />
                 </CardContent>
               </Card>
+
+              {/* Total Budget */}
+              <div className="space-y-3">
+                <Label>{isRu ? `Общий бюджет (${currencyInfo.symbol})` : `Total Budget (${currencyInfo.symbol})`}</Label>
+                <Input
+                  type="number"
+                  placeholder={isRu ? 'Введите общий бюджет на проживание' : 'Enter total budget for stay'}
+                  value={formData.total_budget}
+                  onChange={(e) => setFormData(prev => ({ ...prev, total_budget: e.target.value }))}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {isRu ? 'Укажите сумму, которую вы готовы потратить на всё проживание' : 'Enter the amount you are willing to spend for the entire stay'}
+                </p>
+              </div>
 
               {/* Budget per night */}
               <div className="space-y-3">
@@ -728,10 +767,16 @@ export default function PropertyConsultation() {
                 </span>
               </div>
               {requestType === 'vacation_rental' && formData.check_in && formData.check_out && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">{isRu ? 'Даты' : 'Dates'}:</span>
-                  <span>{formatDateDisplay(formData.check_in)} — {formatDateDisplay(formData.check_out)}</span>
-                </div>
+                <>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{isRu ? 'Даты' : 'Dates'}:</span>
+                    <span>{formatDateDisplay(formData.check_in)} — {formatDateDisplay(formData.check_out)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{isRu ? 'Ночей' : 'Nights'}:</span>
+                    <span className="font-medium">{nightsCount}</span>
+                  </div>
+                </>
               )}
               {requestType === 'vacation_rental' && (
                 <div className="flex justify-between">
@@ -740,6 +785,12 @@ export default function PropertyConsultation() {
                     {formData.guests_count} {isRu ? 'взр.' : 'adults'}
                     {formData.children_count > 0 && `, ${formData.children_count} ${isRu ? 'дет.' : 'child.'}`}
                   </span>
+                </div>
+              )}
+              {requestType === 'vacation_rental' && formData.total_budget && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{isRu ? 'Общий бюджет' : 'Total Budget'}:</span>
+                  <span className="font-medium">{currencyInfo.symbol}{Number(formData.total_budget).toLocaleString()}</span>
                 </div>
               )}
               {formData.property_types.length > 0 && (
@@ -783,6 +834,7 @@ export default function PropertyConsultation() {
           </div>
         </div>
       )}
-    </PageContainer>
+      </PageContainer>
+    </AppLayout>
   );
 }
