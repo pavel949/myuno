@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, forwardRef } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import { usePropertyBookings } from '@/hooks/usePropertyBookings';
@@ -34,14 +34,13 @@ const BOOKING_SOURCES = [
   { value: 'other', labelEn: 'Other', labelRu: 'Другое' },
 ];
 
-export const AddBookingFromCalendarDialog = forwardRef<HTMLDivElement, AddBookingFromCalendarDialogProps>(
-  function AddBookingFromCalendarDialog({
-    open,
-    onOpenChange,
-    propertyId,
-    initialDate,
-    onSuccess,
-  }, ref) {
+export function AddBookingFromCalendarDialog({
+  open,
+  onOpenChange,
+  propertyId,
+  initialDate,
+  onSuccess,
+}: AddBookingFromCalendarDialogProps) {
   const { language } = useLanguage();
   const { toast } = useToast();
   const isRu = language === 'ru';
@@ -452,6 +451,4 @@ export const AddBookingFromCalendarDialog = forwardRef<HTMLDivElement, AddBookin
       </DialogContent>
     </Dialog>
   );
-});
-
-AddBookingFromCalendarDialog.displayName = 'AddBookingFromCalendarDialog';
+}
