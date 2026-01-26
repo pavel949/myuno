@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVendorYachts } from '@/hooks/useVendorYachts';
+import { useVendorProfile } from '@/hooks/useVendor';
 import { Yacht } from '@/hooks/useYachts';
 import { useFormDraft } from '@/hooks/useFormDraft';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -134,7 +135,8 @@ const VendorYachts = () => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
-  const { yachts, isLoading: yachtsLoading, createYacht, updateYacht, deleteYacht } = useVendorYachts();
+  const { profile, isLoading: profileLoading } = useVendorProfile();
+  const { yachts, isLoading: yachtsLoading, createYacht, updateYacht, deleteYacht } = useVendorYachts(profile?.id);
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingYacht, setEditingYacht] = useState<Yacht | null>(null);
@@ -309,7 +311,7 @@ const VendorYachts = () => {
         if (error) throw error;
         toast.success(isRussian ? 'Яхта обновлена' : 'Yacht updated');
       } else {
-        const { error } = await createYacht(yachtData);
+        const { error } = await createYacht({ ...yachtData, provider_id: profile?.id });
         if (error) throw error;
         toast.success(isRussian ? 'Яхта добавлена' : 'Yacht added');
       }
@@ -348,7 +350,7 @@ const VendorYachts = () => {
     maxCapacity: formData.capacity ? parseInt(formData.capacity) : undefined,
   };
 
-  if (authLoading) {
+  if (authLoading || profileLoading) {
     return (
       <AppLayout>
         <PageContainer>
@@ -358,6 +360,26 @@ const VendorYachts = () => {
               <Skeleton key={i} className="h-24" />
             ))}
           </div>
+        </PageContainer>
+      </AppLayout>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <AppLayout>
+        <PageContainer>
+          <Card>
+            <CardContent className="p-8 text-center">
+              <Sailboat className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+              <h3 className="font-medium mb-1">
+                {isRussian ? 'Профиль не найден' : 'Profile not found'}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {isRussian ? 'Пожалуйста, настройте ваш профиль вендора' : 'Please set up your vendor profile first'}
+              </p>
+            </CardContent>
+          </Card>
         </PageContainer>
       </AppLayout>
     );
