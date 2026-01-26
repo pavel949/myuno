@@ -53,29 +53,32 @@ export default function OwnerCalendar() {
 
   return (
     <div className="p-4 space-y-4">
-      {/* Header with Property Selector and Add Task Button */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 space-y-2">
+      {/* Header with Property Selector */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
           <p className="text-sm font-medium text-muted-foreground">
             {isRu ? 'Выберите объект' : 'Select Property'}
           </p>
-          <PropertyThumbnailSelector
-            properties={properties || []}
-            selectedId={selectedPropertyId}
-            onSelect={setSelectedPropertyId}
-            isLoading={propertiesLoading}
-          />
+          
+          {/* Quick Add Task Button - visible on all screens */}
+          <Button 
+            onClick={() => setShowCreateTaskDialog(true)}
+            size="sm"
+            className="gap-1.5"
+            disabled={!selectedPropertyId}
+          >
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">{isRu ? 'Создать задачу' : 'Add Task'}</span>
+            <span className="sm:hidden">{isRu ? 'Задача' : 'Task'}</span>
+          </Button>
         </div>
         
-        {/* Quick Add Task Button */}
-        <Button 
-          onClick={() => setShowCreateTaskDialog(true)}
-          className="gap-2 shrink-0"
-          disabled={!selectedPropertyId}
-        >
-          <Plus className="h-4 w-4" />
-          {isRu ? 'Создать задачу' : 'Add Task'}
-        </Button>
+        <PropertyThumbnailSelector
+          properties={properties || []}
+          selectedId={selectedPropertyId}
+          onSelect={setSelectedPropertyId}
+          isLoading={propertiesLoading}
+        />
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
