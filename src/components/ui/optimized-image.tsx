@@ -3,7 +3,7 @@
  * Features: lazy loading, srcset for responsive images, WebP format, skeleton placeholder
  */
 
-import { useState, useRef, useEffect, memo } from 'react';
+import { useState, useRef, useEffect, memo, forwardRef, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -57,26 +57,37 @@ const aspectRatioClasses = {
   'auto': '',
 };
 
-export const OptimizedImage = memo(function OptimizedImage({
-  src,
-  alt,
-  width,
-  height,
-  className,
-  style,
-  aspectRatio = 'auto',
-  priority = false,
-  quality = 80,
-  sizes = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw',
-  onLoad,
-  onError,
-  fallback = 'https://images.unsplash.com/photo-1557683316-973673baf926?w=400&q=60',
-}: OptimizedImageProps) {
+export const OptimizedImage = memo(forwardRef<HTMLDivElement, OptimizedImageProps>(
+  function OptimizedImage({
+    src,
+    alt,
+    width,
+    height,
+    className,
+    style,
+    aspectRatio = 'auto',
+    priority = false,
+    quality = 80,
+    sizes = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw',
+    onLoad,
+    onError,
+    fallback = 'https://images.unsplash.com/photo-1557683316-973673baf926?w=400&q=60',
+  }: OptimizedImageProps, forwardedRef) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [isInView, setIsInView] = useState(priority);
   const imgRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Combine refs for container
+  const setRefs = useCallback((node: HTMLDivElement | null) => {
+    containerRef.current = node;
+    if (typeof forwardedRef === 'function') {
+      forwardedRef(node);
+    } else if (forwardedRef) {
+      forwardedRef.current = node;
+    }
+  }, [forwardedRef]);
 
   // Intersection Observer for lazy loading
   useEffect(() => {
@@ -117,7 +128,7 @@ export const OptimizedImage = memo(function OptimizedImage({
 
   return (
     <div 
-      ref={containerRef}
+      ref={setRefs}
       className={cn(
         'relative overflow-hidden bg-muted',
         aspectRatioClasses[aspectRatio],
@@ -153,7 +164,7 @@ export const OptimizedImage = memo(function OptimizedImage({
       )}
     </div>
   );
-});
+}));
 
 // Simplified version for thumbnails
 export const OptimizedThumbnail = memo(function OptimizedThumbnail({
