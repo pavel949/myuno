@@ -9528,6 +9528,45 @@ export type Database = {
           },
         ]
       }
+      translations: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          id: string
+          is_custom: boolean | null
+          key: string
+          updated_at: string | null
+          updated_by: string | null
+          value_en: string
+          value_ru: string
+          value_th: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          is_custom?: boolean | null
+          key: string
+          updated_at?: string | null
+          updated_by?: string | null
+          value_en: string
+          value_ru: string
+          value_th?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          is_custom?: boolean | null
+          key?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          value_en?: string
+          value_ru?: string
+          value_th?: string | null
+        }
+        Relationships: []
+      }
       transport_destinations: {
         Row: {
           base_price: number

@@ -225,6 +225,7 @@ const AdminUnoTeam = lazy(() => import('@/pages/admin/AdminUnoTeam'));
 const AdminLeadsDashboard = lazy(() => import('@/pages/admin/AdminLeadsDashboard'));
 const AdminFinance = lazy(() => import('@/pages/admin/AdminFinance'));
 const AdminCities = lazy(() => import('@/pages/admin/AdminCities'));
+const AdminTranslations = lazy(() => import('@/pages/admin/AdminTranslations'));
 const UserAnalyticsDashboard = lazy(() => import('@/pages/admin/UserAnalyticsDashboard'));
 
 // Admin route wrapper with layout
@@ -601,6 +602,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/admin/leads" element={<AdminLeadsDashboard />} />
           <Route path="/admin/finance" element={<AdminFinance />} />
           <Route path="/admin/cities" element={<AdminCities />} />
+          <Route path="/admin/translations" element={<AdminTranslations />} />
           <Route path="/admin/quick-listings" element={<AdminQuickListings />} />
           <Route path="/admin/user-analytics" element={<UserAnalyticsDashboard />} />
         </Route>

@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 type Language = 'ru' | 'en' | 'th';
 
@@ -6,6 +7,7 @@ interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (key: string) => string;
+  isLoadingTranslations: boolean;
 }
 
 const translations: Record<Language, Record<string, string>> = {
@@ -1295,27 +1297,115 @@ const translations: Record<Language, Record<string, string>> = {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+// Cache key and duration
+const TRANSLATIONS_CACHE_KEY = 'myuno-translations-cache';
+const TRANSLATIONS_CACHE_TIMESTAMP = 'myuno-translations-timestamp';
+const CACHE_DURATION = 60 * 60 * 1000; // 1 hour
+
+interface CachedTranslations {
+  [key: string]: { ru: string; en: string; th: string | null };
+}
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => {
     const saved = localStorage.getItem('myuno-language');
     return (saved as Language) || 'ru';
   });
+  const [customTranslations, setCustomTranslations] = useState<CachedTranslations>({});
+  const [isLoadingTranslations, setIsLoadingTranslations] = useState(true);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
     localStorage.setItem('myuno-language', lang);
   };
 
+  // Load translations from DB with caching
+  useEffect(() => {
+    const loadTranslations = async () => {
+      // Check cache first
+      const cachedTimestamp = localStorage.getItem(TRANSLATIONS_CACHE_TIMESTAMP);
+      const cachedData = localStorage.getItem(TRANSLATIONS_CACHE_KEY);
+      
+      if (cachedTimestamp && cachedData) {
+        const timestamp = parseInt(cachedTimestamp, 10);
+        if (Date.now() - timestamp < CACHE_DURATION) {
+          try {
+            setCustomTranslations(JSON.parse(cachedData));
+            setIsLoadingTranslations(false);
+            return;
+          } catch (e) {
+            // Invalid cache, continue to fetch
+          }
+        }
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('translations')
+          .select('key, value_ru, value_en, value_th');
+
+        if (error) throw error;
+
+        const map: CachedTranslations = {};
+        data?.forEach(row => {
+          map[row.key] = {
+            ru: row.value_ru,
+            en: row.value_en,
+            th: row.value_th,
+          };
+        });
+
+        setCustomTranslations(map);
+        
+        // Cache the results
+        localStorage.setItem(TRANSLATIONS_CACHE_KEY, JSON.stringify(map));
+        localStorage.setItem(TRANSLATIONS_CACHE_TIMESTAMP, Date.now().toString());
+      } catch (err) {
+        console.error('Failed to load translations from DB:', err);
+        // Fallback to static translations (already in the component)
+      } finally {
+        setIsLoadingTranslations(false);
+      }
+    };
+
+    loadTranslations();
+
+    // Subscribe to realtime changes
+    const channel = supabase
+      .channel('translations_realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'translations' },
+        () => {
+          // Invalidate cache and reload
+          localStorage.removeItem(TRANSLATIONS_CACHE_KEY);
+          localStorage.removeItem(TRANSLATIONS_CACHE_TIMESTAMP);
+          loadTranslations();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
 
-  const t = (key: string): string => {
+  const t = useCallback((key: string): string => {
+    // Priority: DB translations -> static translations -> fallback to English -> key
+    const custom = customTranslations[key];
+    if (custom) {
+      const value = custom[language];
+      if (value) return value;
+    }
     return translations[language][key] || translations['en'][key] || key;
-  };
+  }, [language, customTranslations]);
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t, isLoadingTranslations }}>
       {children}
     </LanguageContext.Provider>
   );
