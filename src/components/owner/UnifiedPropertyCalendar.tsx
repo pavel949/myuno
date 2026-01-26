@@ -18,16 +18,11 @@ import {
   CalendarPlus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-interface OwnerProperty {
-  id: string;
-  title: string;
-  title_ru?: string | null;
-}
+import type { PropertyReference } from '@/types/property';
 
 interface UnifiedPropertyCalendarProps {
   propertyId?: string;
-  properties?: OwnerProperty[];
+  properties?: PropertyReference[];
 }
 
 interface DayEvent {

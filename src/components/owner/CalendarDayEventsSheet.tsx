@@ -13,18 +13,15 @@ import { cn } from '@/lib/utils';
 import { 
   Plus, 
   User, 
-  LogIn, 
-  LogOut, 
-  Sparkles, 
-  Wrench, 
-  Search, 
-  Gauge,
   CheckCircle2,
   CalendarDays,
   Lock,
   Unlock,
-  CalendarPlus
+  CalendarPlus,
+  LogIn,
+  LogOut
 } from 'lucide-react';
+import { TASK_TYPE_CONFIG, getTaskConfig } from '@/config/taskColors';
 
 interface CalendarDayEventsSheetProps {
   open: boolean;
@@ -40,21 +37,6 @@ interface CalendarDayEventsSheetProps {
   onBlockDate?: () => void;
   onUnblockDate?: () => void;
 }
-
-const TASK_CONFIG: Record<OperationalTask['task_type'], {
-  icon: React.ElementType;
-  color: string;
-  bgColor: string;
-  label: string;
-  labelRu: string;
-}> = {
-  check_in: { icon: LogIn, color: 'text-success', bgColor: 'bg-success/10', label: 'Check-in', labelRu: 'Заезд' },
-  check_out: { icon: LogOut, color: 'text-warning', bgColor: 'bg-warning/10', label: 'Check-out', labelRu: 'Выезд' },
-  cleaning: { icon: Sparkles, color: 'text-info', bgColor: 'bg-info/10', label: 'Cleaning', labelRu: 'Уборка' },
-  maintenance: { icon: Wrench, color: 'text-orange-500', bgColor: 'bg-orange-500/10', label: 'Maintenance', labelRu: 'Ремонт' },
-  inspection: { icon: Search, color: 'text-purple-500', bgColor: 'bg-purple-500/10', label: 'Inspection', labelRu: 'Осмотр' },
-  meter_reading: { icon: Gauge, color: 'text-cyan-500', bgColor: 'bg-cyan-500/10', label: 'Meters', labelRu: 'Счётчики' },
-};
 
 export function CalendarDayEventsSheet({
   open,
@@ -174,7 +156,7 @@ export function CalendarDayEventsSheet({
                   </h4>
                   <div className="space-y-2">
                     {tasks.map((task) => {
-                      const config = TASK_CONFIG[task.task_type];
+                      const config = getTaskConfig(task.task_type);
                       const Icon = config.icon;
                       const isCompleted = task.status === 'completed';
                       

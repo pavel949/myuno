@@ -3,23 +3,12 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useTodayOperations } from '@/hooks/useOperationalTasks';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  CalendarCheck, LogIn, LogOut, Sparkles, Wrench, 
-  CheckCircle2, ArrowRight, Camera
-} from 'lucide-react';
+import { CalendarCheck, CheckCircle2, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { TASK_TYPE_CONFIG, TASK_TYPE_ALT_ICONS } from '@/config/taskColors';
 
-const TASK_ICONS = {
-  check_in: { icon: LogIn, color: 'text-success', bg: 'bg-success/10', label: 'Check-in', labelRu: 'Заезд' },
-  check_out: { icon: LogOut, color: 'text-warning', bg: 'bg-warning/10', label: 'Check-out', labelRu: 'Выезд' },
-  cleaning: { icon: Sparkles, color: 'text-info', bg: 'bg-info/10', label: 'Cleaning', labelRu: 'Уборка' },
-  maintenance: { icon: Wrench, color: 'text-orange-500', bg: 'bg-orange-500/10', label: 'Maintenance', labelRu: 'Ремонт' },
-  inspection: { icon: Camera, color: 'text-purple-500', bg: 'bg-purple-500/10', label: 'Inspection', labelRu: 'Осмотр' },
-  meter_reading: { icon: CalendarCheck, color: 'text-blue-500', bg: 'bg-blue-500/10', label: 'Meters', labelRu: 'Счётчики' },
-};
-
-// Map from tasksByType keys to task_type values for TASK_ICONS lookup
-const TYPE_KEY_MAP: Record<string, keyof typeof TASK_ICONS> = {
+// Map from tasksByType keys to task_type values
+const TYPE_KEY_MAP: Record<string, string> = {
   checkIns: 'check_in',
   checkOuts: 'check_out',
   cleaning: 'cleaning',
@@ -106,7 +95,7 @@ export function TodayBlock() {
         <div className="flex flex-wrap gap-1.5">
           {taskCounts.map(([typeKey, tasks]) => {
             const taskType = TYPE_KEY_MAP[typeKey] || 'maintenance';
-            const config = TASK_ICONS[taskType];
+            const config = TASK_TYPE_CONFIG[taskType] || { icon: CalendarCheck, color: 'text-muted-foreground', bgColor: 'bg-muted', label: taskType, labelRu: taskType };
             const Icon = config.icon;
             const count = tasks.filter(t => t.status !== 'completed').length;
             if (count === 0) return null;
@@ -116,7 +105,7 @@ export function TodayBlock() {
                 key={typeKey}
                 className={cn(
                   "flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium",
-                  config.bg, config.color
+                  config.bgColor, config.color
                 )}
               >
                 <Icon className="h-3 w-3" />

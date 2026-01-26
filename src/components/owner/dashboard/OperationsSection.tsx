@@ -4,21 +4,15 @@ import { useTodayOperations } from '@/hooks/useOperationalTasks';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  CalendarCheck, LogIn, LogOut, Sparkles, Wrench, 
-  CheckCircle2, ChevronRight, AlertTriangle
-} from 'lucide-react';
+import { CalendarCheck, CheckCircle2, ChevronRight, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { TASK_TYPE_CONFIG } from '@/config/taskColors';
 
-const TASK_CONFIG = {
-  check_in: { icon: LogIn, color: 'text-success', bg: 'bg-success/10', label: 'Check-in', labelRu: 'Заезд' },
-  check_out: { icon: LogOut, color: 'text-warning', bg: 'bg-warning/10', label: 'Check-out', labelRu: 'Выезд' },
-  cleaning: { icon: Sparkles, color: 'text-info', bg: 'bg-info/10', label: 'Cleaning', labelRu: 'Уборка' },
-  maintenance: { icon: Wrench, color: 'text-orange-500', bg: 'bg-orange-500/10', label: 'Maintenance', labelRu: 'Ремонт' },
-};
+// Subset of task types for dashboard display
+const DASHBOARD_TASK_TYPES = ['check_in', 'check_out', 'cleaning', 'maintenance'] as const;
 
 // Map hook keys to task_type values
-const TYPE_KEY_MAP: Record<string, keyof typeof TASK_CONFIG> = {
+const TYPE_KEY_MAP: Record<string, string> = {
   checkIns: 'check_in',
   checkOuts: 'check_out',
   cleaning: 'cleaning',
@@ -106,7 +100,7 @@ export function OperationsSection() {
       {/* Task type cards - grid layout */}
       <div className="grid grid-cols-2 gap-2">
         {taskCounts.map(({ type, count }) => {
-          const config = TASK_CONFIG[type];
+          const config = TASK_TYPE_CONFIG[type] || { icon: CalendarCheck, color: 'text-muted-foreground', bgColor: 'bg-muted', label: type, labelRu: type };
           const Icon = config.icon;
           
           return (
@@ -123,7 +117,7 @@ export function OperationsSection() {
               onClick={() => navigate(`/owner/operations?type=${type}`)}
             >
               <div className="flex items-center gap-2">
-                <div className={cn("p-1.5 rounded-lg", config.bg)}>
+                <div className={cn("p-1.5 rounded-lg", config.bgColor)}>
                   <Icon className={cn("h-4 w-4", config.color)} />
                 </div>
                 <div>
