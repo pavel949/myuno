@@ -18,6 +18,7 @@ import {
 } from '@/hooks/useMarketplace';
 import { MarketplaceProduct } from '@/types/marketplace';
 import { useCartToast } from '@/hooks/useCartToast';
+import { CrossSellSection } from '@/components/crosssell';
 
 const MarketIndex = () => {
   const navigate = useNavigate();
@@ -264,6 +265,8 @@ const MarketIndex = () => {
             </div>
           </section>
         )}
+
+        <CrossSellSection currentVertical="market" className="mt-8" />
 
         {/* Sticky Cart Bar - filtered to show only product type items */}
         <StickyCartBar

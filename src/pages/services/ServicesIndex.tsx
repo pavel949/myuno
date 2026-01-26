@@ -6,6 +6,7 @@ import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type Q
 import { servicesFilterConfig, FilterValues } from "@/components/filters";
 import { useHomeServices } from "@/hooks/useHomeServices";
 import { matchesFilter, matchesPriceLevel, isOpenNow } from '@/lib/filterUtils';
+import { CrossSellSection } from '@/components/crosssell';
 
 const categories = [
   { id: "water-delivery", icon: '💧', name: 'Water', nameRu: 'Вода' },
@@ -131,6 +132,8 @@ export default function ServicesIndex() {
           />
         ))}
       </div>
+
+      <CrossSellSection currentVertical="services" />
     </MiniAppLayout>
   );
 }
