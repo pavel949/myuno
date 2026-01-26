@@ -10,7 +10,11 @@ Drawer.displayName = "Drawer";
 
 const DrawerTrigger = DrawerPrimitive.Trigger;
 
-const DrawerPortal = DrawerPrimitive.Portal;
+// Wrap Portal to avoid ref warning - Portal doesn't need refs
+const DrawerPortal = ({ children, ...props }: React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Portal>) => (
+  <DrawerPrimitive.Portal {...props}>{children}</DrawerPrimitive.Portal>
+);
+DrawerPortal.displayName = "DrawerPortal";
 
 const DrawerClose = DrawerPrimitive.Close;
 
