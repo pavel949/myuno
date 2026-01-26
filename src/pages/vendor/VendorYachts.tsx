@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useUserContext } from '@/hooks/useUserContext';
 import { useVendorYachts } from '@/hooks/useVendorYachts';
 import { useVendorProfile } from '@/hooks/useVendor';
 import { Yacht } from '@/hooks/useYachts';
@@ -135,8 +136,11 @@ const VendorYachts = () => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
+  const { hasRole } = useUserContext();
   const { profile, isLoading: profileLoading } = useVendorProfile();
   const { yachts, isLoading: yachtsLoading, createYacht, updateYacht, deleteYacht } = useVendorYachts(profile?.id);
+  
+  const isAdmin = hasRole('admin');
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingYacht, setEditingYacht] = useState<Yacht | null>(null);
@@ -307,13 +311,26 @@ const VendorYachts = () => {
       };
 
       if (editingYacht) {
-        const { error } = await updateYacht(editingYacht.id, yachtData);
+        // If non-admin edits, reset to pending for re-moderation
+        const updateData = isAdmin 
+          ? yachtData 
+          : { ...yachtData, approval_status: 'pending' };
+        const { error } = await updateYacht(editingYacht.id, updateData);
         if (error) throw error;
-        toast.success(isRussian ? 'Яхта обновлена' : 'Yacht updated');
+        toast.success(isRussian 
+          ? (isAdmin ? 'Яхта обновлена' : 'Яхта обновлена и отправлена на модерацию') 
+          : (isAdmin ? 'Yacht updated' : 'Yacht updated and sent for moderation'));
       } else {
-        const { error } = await createYacht({ ...yachtData, provider_id: profile?.id });
+        // New listings always start as pending
+        const { error } = await createYacht({ 
+          ...yachtData, 
+          provider_id: profile?.id,
+          approval_status: isAdmin ? 'approved' : 'pending'
+        });
         if (error) throw error;
-        toast.success(isRussian ? 'Яхта добавлена' : 'Yacht added');
+        toast.success(isRussian 
+          ? (isAdmin ? 'Яхта добавлена' : 'Яхта добавлена и отправлена на модерацию') 
+          : (isAdmin ? 'Yacht added' : 'Yacht added and sent for moderation'));
       }
 
       setIsDialogOpen(false);
