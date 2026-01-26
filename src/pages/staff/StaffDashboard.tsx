@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { StaffTaskCalendar } from '@/components/staff/StaffTaskCalendar';
 import { 
   ClipboardList, 
   Play, 
@@ -280,19 +281,14 @@ export default function StaffDashboard() {
         </TabsContent>
 
         <TabsContent value="calendar">
-          <Card>
-            <CardContent className="p-8 text-center">
-              <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="font-semibold mb-2">
-                {language === 'ru' ? 'Календарь заданий' : 'Task Calendar'}
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                {language === 'ru' 
-                  ? 'Скоро будет доступен просмотр заданий на календаре' 
-                  : 'Calendar view coming soon'}
-              </p>
-            </CardContent>
-          </Card>
+          <StaffTaskCalendar
+            orders={orders}
+            isLoading={isLoading}
+            onStartOrder={handleStartOrder}
+            onCompleteOrder={handleCompleteOrder}
+            isStarting={startOrder.isPending}
+            isCompleting={completeOrder.isPending}
+          />
         </TabsContent>
       </Tabs>
     </PageContainer>
