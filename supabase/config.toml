@@ -42,10 +42,10 @@ verify_jwt = false
 [functions.calculate-metrics]
 verify_jwt = false
 
-[functions.ical-export]
+[functions.ical-sync]
 verify_jwt = false
 
-[functions.ical-sync]
+[functions.calendar-export]
 verify_jwt = false
 
 [functions.ai-translate]
