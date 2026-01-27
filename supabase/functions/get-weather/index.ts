@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -50,6 +51,15 @@ serve(async (req) => {
   }
 
   try {
+    // Rate limiting - public read endpoints (100/min)
+    const rateLimitResponse = await withRateLimit(
+      req,
+      'get-weather',
+      RATE_LIMITS.publicRead,
+      corsHeaders
+    );
+    if (rateLimitResponse) return rateLimitResponse;
+
     console.log('Fetching weather data for Phuket...');
     
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${PHUKET_LAT}&longitude=${PHUKET_LON}&current=temperature_2m,weather_code&timezone=Asia/Bangkok`;

@@ -53,7 +53,7 @@ export function CalendarSyncManager({ propertyId }: CalendarSyncManagerProps) {
     isSyncing,
   } = useExternalCalendars(propertyId);
 
-  const { exportUrl } = useICalExportUrl(propertyId);
+  const { exportUrl, expiresAt, isExpiringSoon, rotateToken, isRotating } = useICalExportUrl(propertyId);
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newCalendarSource, setNewCalendarSource] = useState('');
@@ -64,6 +64,15 @@ export function CalendarSyncManager({ propertyId }: CalendarSyncManagerProps) {
     if (exportUrl) {
       navigator.clipboard.writeText(exportUrl);
       toast.success(isRu ? 'Ссылка скопирована' : 'Link copied');
+    }
+  };
+
+  const handleRotateToken = async () => {
+    try {
+      await rotateToken(propertyId);
+      toast.success(isRu ? 'Ссылка обновлена. Старая ссылка больше не работает.' : 'Link regenerated. Old link no longer works.');
+    } catch (error) {
+      toast.error(isRu ? 'Ошибка обновления ссылки' : 'Failed to regenerate link');
     }
   };
 
@@ -150,7 +159,25 @@ export function CalendarSyncManager({ propertyId }: CalendarSyncManagerProps) {
             <Button variant="outline" onClick={handleCopyExportUrl} disabled={!exportUrl}>
               <Copy className="h-4 w-4" />
             </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleRotateToken}
+              disabled={isRotating || !exportUrl}
+              title={isRu ? 'Обновить ссылку (старая перестанет работать)' : 'Regenerate link (old one will stop working)'}
+            >
+              <RefreshCw className={`h-4 w-4 ${isRotating ? 'animate-spin' : ''}`} />
+            </Button>
           </div>
+          {isExpiringSoon && expiresAt && (
+            <div className="flex items-center gap-2 mt-2 p-2 bg-amber-500/10 border border-amber-500/20 rounded text-amber-600 dark:text-amber-400">
+              <AlertCircle className="h-4 w-4 flex-shrink-0" />
+              <p className="text-xs">
+                {isRu 
+                  ? `Ссылка истекает ${new Date(expiresAt).toLocaleDateString('ru')}. Обновите её и замените на платформах.`
+                  : `Link expires ${new Date(expiresAt).toLocaleDateString('en')}. Regenerate and update on platforms.`}
+              </p>
+            </div>
+          )}
           <p className="text-xs text-muted-foreground mt-2">
             {isRu 
               ? '⚠️ Не делитесь этой ссылкой публично — она даёт доступ к данным бронирований'

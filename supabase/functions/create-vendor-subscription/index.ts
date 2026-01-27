@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -37,6 +38,16 @@ serve(async (req) => {
     const user = userData.user;
     if (!user?.email) throw new Error("User not authenticated");
     logStep("User authenticated", { userId: user.id, email: user.email });
+
+    // Rate limiting - payment endpoints (20/min)
+    const rateLimitResponse = await withRateLimit(
+      req,
+      'create-vendor-subscription',
+      RATE_LIMITS.payment,
+      corsHeaders,
+      user.id
+    );
+    if (rateLimitResponse) return rateLimitResponse;
 
     const { planId, billingCycle = 'monthly' } = await req.json();
     if (!planId) throw new Error("Plan ID is required");
