@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home, BedDouble, Bath, Users, SlidersHorizontal, Zap, MapPin, Star, Heart } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { Button } from '@/components/ui/button';
 import { FilterChip, FilterChipGroup } from '@/components/uno/FilterChip';
 import { UniversalFilter, ActiveFilters, FilterValues } from '@/components/filters/UniversalFilter';
@@ -159,6 +160,7 @@ export default function PropertyIndex() {
   const [selectedType, setSelectedType] = useState('all');
   const [filterValues, setFilterValues] = useState<FilterValues>({});
   const [hoveredProperty, setHoveredProperty] = useState<string | null>(null);
+  const { formatPrice } = useCurrency();
 
   // Fetch dynamic filter options from lookup_values (editable in admin)
   const { filterConfig, propertyTypes } = usePropertyFilterOptions();
@@ -460,7 +462,7 @@ export default function PropertyIndex() {
 
                     {/* Price */}
                     <p className="pt-1">
-                      <span className="font-semibold">฿{property.price?.toLocaleString()}</span>
+                      <span className="font-semibold">{formatPrice(property.price || 0)}</span>
                       <span className="text-muted-foreground">{formatPriceLabel(property.price_period)}</span>
                     </p>
                   </div>

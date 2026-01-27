@@ -190,7 +190,7 @@ export default function TransportBooking() {
             title={vehicleName}
             subtitle={`${days} ${language === 'ru' ? 'дней' : 'days'} × ฿${pricePerDay.toLocaleString()}`}
             price={totalAmount}
-            currency="THB"
+            sourceCurrency="THB"
             image={vehicle.image}
           />
         </div>

@@ -170,7 +170,7 @@ export default function EventBooking() {
             time={event.event_time || undefined}
             participants={participants}
             price={event.price || 0}
-            currency={event.currency || 'THB'}
+            sourceCurrency={event.currency || 'THB'}
           />
         </div>
 

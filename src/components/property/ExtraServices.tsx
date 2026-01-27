@@ -61,7 +61,7 @@ export function ExtraServices({ services, currency = 'THB', className }: ExtraSe
               </div>
               <PriceDisplay 
                 price={service.price} 
-                currency={service.currency || currency} 
+                sourceCurrency={service.currency || currency} 
                 size="sm"
               />
             </div>

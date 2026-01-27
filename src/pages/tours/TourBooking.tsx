@@ -168,7 +168,7 @@ export default function TourBooking() {
             time={time}
             participants={participants}
             price={tour.price || 0}
-            currency={tour.currency || 'THB'}
+            sourceCurrency={tour.currency || 'THB'}
           />
         </div>
 

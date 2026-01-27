@@ -143,7 +143,7 @@ export default function EducationBooking() {
             date={date}
             time={time}
             price={price}
-            currency="THB"
+            sourceCurrency="THB"
           />
         </div>
 

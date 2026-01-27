@@ -169,7 +169,7 @@ export default function MedicalAppointment() {
             date={date}
             time={time}
             price={price}
-            currency="THB"
+            sourceCurrency="THB"
           />
         </div>
 

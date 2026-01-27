@@ -127,7 +127,7 @@ export function CheckInDetails({
                 <span className="font-medium">{isRu ? 'Трансфер из аэропорта' : 'Airport Transfer'}</span>
               </div>
               {transfer.airportPrice && (
-                <PriceDisplay price={transfer.airportPrice} currency={currency} size="sm" />
+                <PriceDisplay price={transfer.airportPrice} sourceCurrency={currency} size="sm" />
               )}
             </div>
             {(transfer.notes || transfer.notes_ru) && (
