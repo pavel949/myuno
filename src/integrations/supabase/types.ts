@@ -4379,6 +4379,8 @@ export type Database = {
           created_at: string | null
           currency: string | null
           customer_user_id: string
+          deleted_at: string | null
+          deleted_by: string | null
           discount_amount: number | null
           end_at: string | null
           id: string
@@ -4402,6 +4404,8 @@ export type Database = {
           created_at?: string | null
           currency?: string | null
           customer_user_id: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           discount_amount?: number | null
           end_at?: string | null
           id?: string
@@ -4425,6 +4429,8 @@ export type Database = {
           created_at?: string | null
           currency?: string | null
           customer_user_id?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           discount_amount?: number | null
           end_at?: string | null
           id?: string
@@ -7832,6 +7838,33 @@ export type Database = {
           title?: string
           updated_at?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      rate_limit_log: {
+        Row: {
+          created_at: string | null
+          endpoint: string
+          id: string
+          identifier: string
+          request_count: number | null
+          window_start: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          endpoint: string
+          id?: string
+          identifier: string
+          request_count?: number | null
+          window_start?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          endpoint?: string
+          id?: string
+          identifier?: string
+          request_count?: number | null
+          window_start?: string | null
         }
         Relationships: []
       }
@@ -11622,6 +11655,15 @@ export type Database = {
         Args: { p_permission: string; p_property_id: string; p_user_id: string }
         Returns: boolean
       }
+      check_rate_limit: {
+        Args: {
+          p_endpoint: string
+          p_identifier: string
+          p_max_requests?: number
+          p_window_seconds?: number
+        }
+        Returns: Json
+      }
       check_restaurant_availability: {
         Args: {
           p_covers?: number
@@ -11848,6 +11890,7 @@ export type Database = {
         Args: { p_device_id?: string; p_pin: string; p_user_id: string }
         Returns: boolean
       }
+      soft_delete_order: { Args: { p_order_id: string }; Returns: boolean }
       uno_team_can: {
         Args: { _action: string; _user_id: string; _vertical: string }
         Returns: boolean
@@ -11860,6 +11903,10 @@ export type Database = {
       user_has_property_delegate_access: {
         Args: { property_uuid: string }
         Returns: boolean
+      }
+      validate_ical_token: {
+        Args: { p_property_id: string; p_token: string }
+        Returns: Json
       }
       verify_user_pin: {
         Args: { p_pin: string; p_user_id: string }
