@@ -18,6 +18,7 @@ import { triggerRipple } from '@/hooks/useRipple';
 import { supabase } from '@/integrations/supabase/client';
 import { BackButton } from '@/components/uno/BackButton';
 import { AddressPickerInput, BookingStepProgress, deliveryBookingSteps } from '@/components/booking';
+import { useStripeFlowersCheckout } from '@/hooks/useStripeFlowersCheckout';
 
 const deliverySlots = [
   { id: 'morning', timeEn: '9:00 - 12:00', timeRu: '9:00 - 12:00', labelEn: 'Morning', labelRu: 'Утро' },
@@ -32,6 +33,7 @@ const FlowersOrder = () => {
   const { balance, payFromWallet, hasEnoughBalance, isLoading: isWalletLoading } = useWallet();
   const { getItemsByType, clearByType } = useCart();
   const { createBooking, isSubmitting } = useBooking();
+  const { createFlowersCheckout, isProcessing: isStripeProcessing } = useStripeFlowersCheckout();
   
   // Get flowers from global cart
   const flowersInCart = getItemsByType('flowers');
@@ -85,8 +87,43 @@ const FlowersOrder = () => {
       return;
     }
 
+    // Get first provider from cart items
+    const firstProvider = cartItems.find(item => item.providerId);
+
     try {
-      // If paying with wallet, deduct balance first
+      // For card payments, redirect to Stripe Checkout
+      if (formData.paymentMethod === 'card') {
+        const success = await createFlowersCheckout({
+          items: cartItems.map(item => ({
+            id: item.id,
+            name: language === 'ru' ? item.nameRu : item.name,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+          delivery_fee: deliveryFee,
+          gift_wrap_fee: giftWrapFee,
+          total_amount: finalTotal,
+          currency: 'THB',
+          recipient_name: formData.recipientName,
+          recipient_phone: formData.recipientPhone,
+          delivery_address: formData.address,
+          delivery_date: formData.deliveryDate,
+          delivery_slot: formData.deliverySlot,
+          message: formData.message,
+          gift_wrap: formData.giftWrap,
+          provider_id: firstProvider?.providerId,
+          provider_name: firstProvider?.providerName,
+        });
+        
+        // If redirect is successful, Stripe will handle the rest
+        // The page will redirect, so we don't need to do anything else here
+        if (!success) {
+          toast.error(language === 'ru' ? 'Ошибка при создании платежа' : 'Failed to create payment');
+        }
+        return;
+      }
+
+      // For wallet payments, deduct balance first
       if (formData.paymentMethod === 'wallet') {
         const result = await payFromWallet(
           finalTotal,
@@ -110,10 +147,7 @@ const FlowersOrder = () => {
         scheduledAt.setHours(parseInt(hours), 0, 0);
       }
 
-      // Get first provider from cart items (for provider_id)
-      const firstProvider = cartItems.find(item => item.providerId);
-
-      // Build items array
+      // Build items array for booking
       const items = cartItems.map(item => ({
         item_type: 'flower',
         item_id: item.id,
@@ -145,9 +179,9 @@ const FlowersOrder = () => {
         });
       }
 
-      // Create booking using the unified system
+      // Create booking using the unified system (for wallet/cash)
       const result = await createBooking({
-        booking_type: 'product', // Maps to 'flowers' order_type via metadata
+        booking_type: 'product',
         scheduled_at: scheduledAt.toISOString(),
         total_amount: finalTotal,
         currency: 'THB',
@@ -165,7 +199,7 @@ const FlowersOrder = () => {
         }],
         payment: {
           amount: finalTotal,
-          payment_method: formData.paymentMethod as 'cash' | 'card' | 'wallet',
+          payment_method: formData.paymentMethod as 'cash' | 'wallet',
           status: formData.paymentMethod === 'wallet' ? 'paid' : 'pending',
         },
         metadata: {
@@ -182,7 +216,6 @@ const FlowersOrder = () => {
 
       if (result.success && result.booking_id) {
         // Save flower-specific details to order_item_flower_details
-        // First get the order items for this order
         const { data: orderItems } = await supabase
           .from('order_items')
           .select('id')
@@ -520,12 +553,14 @@ const FlowersOrder = () => {
           <Button 
             type="submit" 
             className="w-full h-14 text-lg"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isStripeProcessing}
           >
-            {isSubmitting ? (
+            {(isSubmitting || isStripeProcessing) ? (
               <Loader2 className="w-5 h-5 animate-spin mr-2" />
             ) : null}
-            {language === 'ru' ? 'Оформить заказ' : 'Place Order'}
+            {formData.paymentMethod === 'card'
+              ? (language === 'ru' ? 'Перейти к оплате' : 'Proceed to Payment')
+              : (language === 'ru' ? 'Оформить заказ' : 'Place Order')}
           </Button>
         </form>
       </div>
