@@ -58,7 +58,7 @@ export function useLegalService(id: string) {
     
     if (!id) return;
     const fetchService = async () => {
-      const { data, error } = await supabase.from('legal_services').select('*').eq('id', id).single();
+      const { data, error } = await supabase.from('legal_services').select('*').eq('id', id).maybeSingle();
       if (isMounted) {
         if (!error && data) setService(data as LegalService);
         setIsLoading(false);

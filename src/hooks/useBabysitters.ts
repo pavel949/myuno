@@ -60,7 +60,7 @@ export function useBabysitter(id: string) {
     
     if (!id) return;
     const fetchBabysitter = async () => {
-      const { data, error } = await supabase.from('babysitters').select('*').eq('id', id).single();
+      const { data, error } = await supabase.from('babysitters').select('*').eq('id', id).maybeSingle();
       if (isMounted) {
         if (!error && data) setBabysitter(data as Babysitter);
         setIsLoading(false);

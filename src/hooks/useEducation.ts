@@ -58,7 +58,7 @@ export function useEducationProvider(id: string) {
     
     if (!id) return;
     const fetchProvider = async () => {
-      const { data, error } = await supabase.from('education_providers').select('*').eq('id', id).single();
+      const { data, error } = await supabase.from('education_providers').select('*').eq('id', id).maybeSingle();
       if (isMounted) {
         if (!error && data) setProvider(data as EducationProvider);
         setIsLoading(false);

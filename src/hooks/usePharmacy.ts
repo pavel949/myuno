@@ -101,7 +101,7 @@ export const usePharmacy = (pharmacyId: string | undefined) => {
           .from('pharmacies')
           .select('*')
           .eq('id', pharmacyId)
-          .single();
+          .maybeSingle();
         if (isMounted && data) {
           setPharmacy({
             ...data,

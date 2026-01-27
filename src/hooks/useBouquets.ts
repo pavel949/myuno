@@ -129,7 +129,7 @@ export function useBouquet(id: string) {
             )
           `)
           .eq('id', id)
-          .single();
+          .maybeSingle();
 
         if (error) throw error;
         setBouquet(data as unknown as Bouquet);

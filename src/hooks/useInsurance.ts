@@ -112,7 +112,7 @@ export function useInsuranceProvider(id: string) {
         .from('insurance_providers')
         .select('*')
         .eq('id', id)
-        .single();
+        .maybeSingle();
       if (isMounted) {
         if (!error && data) setProvider(data as InsuranceProvider);
         setIsLoading(false);

@@ -254,14 +254,10 @@ export function useProperty(id?: string) {
         .from('properties')
         .select('*')
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
-      if (error) {
-        // If not found in DB, return null (component will use fallback)
-        if (error.code === 'PGRST116') return null;
-        throw error;
-      }
-      return data as Property;
+      if (error) throw error;
+      return data as Property | null;
     },
     enabled: !!id,
   });

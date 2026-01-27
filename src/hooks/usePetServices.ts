@@ -57,7 +57,7 @@ export function usePetService(id: string) {
     
     if (!id) return;
     const fetchService = async () => {
-      const { data, error } = await supabase.from('pet_services').select('*').eq('id', id).single();
+      const { data, error } = await supabase.from('pet_services').select('*').eq('id', id).maybeSingle();
       if (isMounted) {
         if (!error && data) setService(data as PetService);
         setIsLoading(false);
