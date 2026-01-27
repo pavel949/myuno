@@ -64,8 +64,19 @@ export const PinLogin: React.FC<PinLoginProps> = ({ onSuccess, onSwitchToEmail }
       console.error('[PinLogin] PIN verification error:', err);
       setError(true);
       
-      // Check if session expired
-      if (err?.message?.includes('Session expired') || err?.message?.includes('expired')) {
+      const errorMessage = err?.message || '';
+      
+      // Check for session-related errors (expired, invalid, not found)
+      const isSessionError = 
+        errorMessage.includes('Session expired') || 
+        errorMessage.includes('expired') ||
+        errorMessage.includes('Refresh Token') ||
+        errorMessage.includes('refresh_token') ||
+        errorMessage.includes('Invalid') ||
+        errorMessage.includes('Not Found');
+      
+      if (isSessionError) {
+        console.log('[PinLogin] Session error detected, switching to email login');
         toast.error(language === 'en' ? 'Session expired. Please login with password.' : 'Сессия истекла. Войдите с паролем.');
         onSwitchToEmail();
         return;
