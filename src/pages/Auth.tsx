@@ -62,6 +62,13 @@ export default function Auth() {
     if (pinLoading) return;
     
     if (user && !showPinSetup) {
+      // If user came from PIN login (canUsePinLogin was true), they already have a PIN
+      // Don't show setup again - redirect them directly
+      if (canUsePinLogin) {
+        navigate(redirectPath, { replace: true });
+        return;
+      }
+      
       if (!hasPin) {
         // User is authenticated but has no PIN - show setup
         setShowPinSetup(true);
@@ -71,7 +78,7 @@ export default function Auth() {
         navigate(redirectPath, { replace: true });
       }
     }
-  }, [user, hasPin, pinLoading, navigate, showPinSetup, redirectPath]);
+  }, [user, hasPin, pinLoading, navigate, showPinSetup, redirectPath, canUsePinLogin]);
 
   const validateStep = (step: SignupStep) => {
     const newErrors: typeof errors = {};
