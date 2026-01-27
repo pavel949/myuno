@@ -39,12 +39,42 @@ export function useStripeFlowersCheckout() {
     setIsProcessing(true);
     
     try {
+      // Check if user is authenticated before calling the edge function
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        console.error('No active session found');
+        toast.error(
+          language === 'ru' 
+            ? 'Пожалуйста, войдите в аккаунт для оплаты картой' 
+            : 'Please sign in to pay by card'
+        );
+        return false;
+      }
+
+      console.log('Creating flowers checkout with session:', session.user.id);
+      
       const response = await supabase.functions.invoke('create-flowers-checkout', {
         body: params,
       });
 
       if (response.error) {
-        throw new Error(response.error.message);
+        console.error('Edge function error:', response.error);
+        // Check for specific error types
+        if (response.error.message?.includes('Unauthorized') || response.error.message?.includes('authorization')) {
+          toast.error(
+            language === 'ru' 
+              ? 'Сессия истекла. Пожалуйста, войдите снова.' 
+              : 'Session expired. Please sign in again.'
+          );
+        } else {
+          toast.error(
+            language === 'ru' 
+              ? 'Ошибка при создании платежа' 
+              : 'Error creating payment'
+          );
+        }
+        return false;
       }
 
       if (response.data?.url) {

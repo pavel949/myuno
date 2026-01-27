@@ -35,6 +35,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log("create-flowers-checkout: Starting request processing");
+    
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? ""
@@ -42,19 +44,34 @@ serve(async (req) => {
 
     // Authenticate user
     const authHeader = req.headers.get("Authorization");
+    console.log("create-flowers-checkout: Auth header present:", !!authHeader);
+    
     if (!authHeader) {
-      throw new Error("No authorization header");
+      console.error("create-flowers-checkout: No authorization header");
+      return new Response(
+        JSON.stringify({ error: "Please sign in to continue" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 401,
+        }
+      );
     }
 
     const token = authHeader.replace("Bearer ", "");
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
     
     if (userError || !user) {
-      console.error("User authentication failed:", userError);
-      throw new Error("Unauthorized");
+      console.error("create-flowers-checkout: User authentication failed:", userError);
+      return new Response(
+        JSON.stringify({ error: "Session expired. Please sign in again." }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 401,
+        }
+      );
     }
 
-    console.log("Creating flowers checkout for user:", user.id);
+    console.log("create-flowers-checkout: User authenticated:", user.id);
 
     const body: FlowersCheckoutRequest = await req.json();
     const { 
