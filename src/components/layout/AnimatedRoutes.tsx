@@ -88,6 +88,7 @@ const FlowersIndex = lazy(() => import('@/pages/flowers/FlowersIndex'));
 const FlowerShopDetail = lazy(() => import('@/pages/flowers/FlowerShopDetail'));
 const FlowersOrder = lazy(() => import('@/pages/flowers/FlowersOrder'));
 const BouquetDetail = lazy(() => import('@/pages/flowers/BouquetDetail'));
+const FlowersSuccess = lazy(() => import('@/pages/flowers/FlowersSuccess'));
 
 // Home Services Mini-App
 const ServicesIndex = lazy(() => import('@/pages/services/ServicesIndex'));
@@ -480,6 +481,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/flowers/shop/:id" element={<LazyPage><FlowerShopDetail /></LazyPage>} />
         <Route path="/flowers/order" element={<LazyPage><FlowersOrder /></LazyPage>} />
         <Route path="/flowers/order/:id" element={<LazyPage><FlowersOrder /></LazyPage>} />
+        <Route path="/flowers/success" element={<LazyPage><FlowersSuccess /></LazyPage>} />
         
         {/* Home Services Mini-App Routes */}
         <Route path="/services" element={<LazyPage><ServicesIndex /></LazyPage>} />
