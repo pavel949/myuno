@@ -1,352 +1,218 @@
 
-# План: Профессиональная визуальная модернизация приложения
+# P1 Implementation Plan: Rate Limiting, iCal Token Rotation, and Soft Delete
 
-## Обзор
-
-Комплексная замена всех эмодзи на Lucide-иконки во всём приложении, улучшение типографики и стандартизация визуальных компонентов для создания профессионального, современного интерфейса уровня SuperApp.
-
----
-
-## Текущее состояние
-
-### Проблемы
-| Область | Статус | Описание |
-|---------|--------|----------|
-| **Кросс-селлинг** | ❌ Эмодзи | Все 50+ ссылок используют эмодзи (`🛥️`, `🍽️`, `💐`) |
-| **Фильтры** | ❌ Эмодзи | 20+ конфигурационных файлов с 200+ эмодзи-иконками |
-| **Категории услуг** | ❌ Эмодзи | Beauty, Yachts, Events — все категории на эмодзи |
-| **Детальные страницы** | ❌ Эмодзи | Property extras, Yacht experiences, SOS tips |
-| **Email-шаблоны** | ⚠️ Эмодзи | Допустимо для email, но можно унифицировать |
-
-### Уже сделано хорошо
-- **QuickActionsGrid** — полностью на Lucide-иконках ✅
-- **iconMap.ts** — есть mapping эмодзи → Lucide (139 записей) ✅
-- **Шрифты Inter + Playfair Display** — уже подключены ✅
+## Executive Summary
+All three P1 items have **partial implementations** that need completion:
+- **P1-1**: Rate limiting infrastructure exists but only 3 of 20+ edge functions use it
+- **P1-2**: Backend token rotation is complete but frontend lacks the "Regenerate" button
+- **P1-3**: Soft delete columns and RLS exist - **FULLY COMPLETE**, no changes needed
 
 ---
 
-## Архитектура решения
+## P1-1: Rate Limiting — Add to Remaining Edge Functions
 
-### Универсальный IconBadge компонент
+### Current State
+| Protected | Not Protected |
+|-----------|---------------|
+| `ai-support-chat` | `create-checkout-session` |
+| `ai-translate` | `create-flowers-checkout` |
+| `calendar-export` | `create-order-checkout` |
+| | `create-restaurant-checkout` |
+| | `create-vendor-subscription` |
+| | `check-vendor-subscription` |
+| | `generate-booking-voucher` |
+| | `get-mapbox-token` |
+| | `get-weather` |
+| | `ical-sync` |
+| | `vendor-portal` |
+
+### Implementation
+Add `withRateLimit` middleware to each unprotected function with appropriate limits:
 
 ```text
-┌────────────────────────────────────────────────────────────────┐
-│                        IconBadge                                │
-│  ┌────────────────────────────────────────────────────────────┐│
-│  │  Входные параметры:                                        ││
-│  │  - icon: string (эмодзи) | LucideIcon (компонент)          ││
-│  │  - size: 'xs' | 'sm' | 'md' | 'lg' | 'xl'                  ││
-│  │  - variant: 'default' | 'primary' | 'muted' | 'gradient'   ││
-│  │  - gradient?: string (Tailwind gradient classes)           ││
-│  └────────────────────────────────────────────────────────────┘│
-│                                                                 │
-│  Логика:                                                        │
-│  1. Если icon — строка эмодзи → ищем в emojiToIconMap          │
-│  2. Если найден LucideIcon → рендерим иконку                   │
-│  3. Иначе fallback на Sparkles или переданную иконку           │
-└────────────────────────────────────────────────────────────────┘
+Payment endpoints (RATE_LIMITS.payment - 20/min):
+- create-checkout-session
+- create-flowers-checkout  
+- create-order-checkout
+- create-restaurant-checkout
+- create-vendor-subscription
+- stripe-webhook (skip - has signature validation)
+
+Auth/Subscription endpoints (RATE_LIMITS.auth - 5/min):
+- check-vendor-subscription
+- vendor-portal
+
+Public read endpoints (RATE_LIMITS.publicRead - 100/min):
+- get-mapbox-token
+- get-weather
+- generate-booking-voucher
+- ical-sync
 ```
 
-### Расширенная карта эмодзи → Lucide
-
-Добавляем недостающие маппинги для покрытия всех use cases:
-
-| Эмодзи | Lucide Icon | Контекст |
-|--------|-------------|----------|
-| `🧠` | `Brain` | Психология |
-| `🦶` | `Footprints` | Педикюр/массаж |
-| `🪨` | `Gem` | Камни (массаж) |
-| `🌸` | `Flower2` | Ароматерапия |
-| `💨` | `Wind` | Укладка/фен |
-| `🎨` | `Palette` | Окрашивание |
-| `🖌️` | `PenTool` | Стайлинг |
-| `👰` | `Crown` | Свадебный |
-| `🌙` | `Moon` | Вечерний/ночной |
-| `🔥` | `Flame` | Популярное |
-| `🆓` | `Gift` | Бесплатно |
-| `📅`/`🗓️` | `Calendar` | Расписание |
-| `🚨` | `AlertCircle` | Экстренно |
-| `✅` | `CheckCircle` | Подтверждено |
-| `📹` | `Video` | Вебкамера |
-| `🥐` | `Croissant` | Выпечка |
-| `🧊` | `Snowflake` | Заморозка |
-| `🏊` | `Waves` | Плавание |
-| `💃` | `Music` | Танцы |
-| `🤸` | `Activity` | Пилатес |
-| `🩹` | `Bandage` | Первая помощь |
-| `🔬` | `Microscope` | Диагностика |
-| `🧪` | `FlaskConical` | Лаборатория |
-| `🅿️` | `ParkingCircle` | Парковка |
-| `🎤` | `Mic` | Караоке/концерты |
-| `🎪` | `Tent` | Фестивали |
-| `🍸` | `Martini` | Клубы/бары |
-| `🛶` | `Sailboat` | Каяк |
-| `🔊` | `Volume2` | Аудиосистема |
-| `🎣` | `Fish` | Рыбалка |
-
----
-
-## Этапы реализации
-
-### Этап 1: Расширение IconBadge и iconMap
-
-**Файлы:**
-- `src/lib/iconMap.ts` — добавить 30+ новых маппингов
-- `src/components/ui/IconBadge.tsx` — создать универсальный компонент
-
-**IconBadge API:**
+### Code Pattern for Each Function
 ```typescript
-interface IconBadgeProps {
-  icon: string | LucideIcon;
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
-  variant?: 'default' | 'primary' | 'muted' | 'gradient';
-  gradient?: string;
-  className?: string;
-}
+import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
+
+// Inside handler, after CORS check:
+const rateLimitResponse = await withRateLimit(
+  req,
+  'function-name',
+  RATE_LIMITS.payment, // or .auth, .publicRead
+  corsHeaders,
+  userId // if authenticated
+);
+if (rateLimitResponse) return rateLimitResponse;
 ```
 
 ---
 
-### Этап 2: Модернизация CrossSell системы
+## P1-2: iCal Token Rotation — Add Frontend UI
 
-**Файлы:**
-- `src/lib/crossSellConfig.ts` — заменить `icon: '🛥️'` на `icon: Anchor`
-- `src/components/crosssell/CrossSellCard.tsx` — использовать IconBadge
+### Current State
+- **Database**: `rotate_ical_token()` RPC exists and works
+- **Validation**: `validate_ical_token()` RPC enforces expiration
+- **Frontend**: Missing "Regenerate Link" button
 
-**До:**
+### Implementation
+
+**Step 1: Extend `useICalExportUrl` hook** with rotation mutation:
 ```typescript
-{ id: 'yachts', icon: '🛥️', path: '/yachts', ... }
-```
-
-**После:**
-```typescript
-{ id: 'yachts', icon: Anchor, path: '/yachts', gradient: 'from-cyan-500 to-blue-600', ... }
-```
-
----
-
-### Этап 3: Модернизация всех фильтров
-
-**Подход:** Обновить тип `FilterOption` для поддержки LucideIcon
-
-**Файлы для изменения (21 файл):**
-
-| Файл | Количество опций с эмодзи |
-|------|---------------------------|
-| `BeautyFilters.tsx` | 8 |
-| `CleaningFilters.tsx` | 6 |
-| `EventsFilters.tsx` | 8 |
-| `FitnessFilters.tsx` | 8 |
-| `FlowersFilters.tsx` | ~6 |
-| `LegalFilters.tsx` | 7 |
-| `MarketFilters.tsx` | 20 |
-| `MedicalFilters.tsx` | 20 |
-| `PetsFilters.tsx` | 11 |
-| `PharmacyFilters.tsx` | 6 |
-| `ToursFilters.tsx` | 8 |
-| `YachtsFilters.tsx` | 30 |
-| `RestaurantFilters.tsx` | ~15 |
-| `PropertyFilters.tsx` | ~15 |
-| `ServicesFilters.tsx` | ~10 |
-| `TransportFilters.tsx` | ~8 |
-| `WaterFilters.tsx` | ~10 |
-| `EducationFilters.tsx` | ~6 |
-| `BabysitterFilters.tsx` | ~6 |
-
-**Изменение типа FilterOption:**
-```typescript
-export interface FilterOption {
-  id: string;
-  labelEn: string;
-  labelRu: string;
-  icon?: string | LucideIcon; // Поддержка обоих форматов
-  count?: number;
-}
-```
-
----
-
-### Этап 4: Модернизация UniversalFilter
-
-**Файл:** `src/components/filters/UniversalFilter.tsx`
-
-**Изменения:**
-- `MultiSelectChips` → использовать IconBadge вместо `<span>{option.icon}</span>`
-- `SingleSelectList` → аналогично
-- `QuickFilterBar` → аналогично
-
----
-
-### Этап 5: Модернизация страницы BeautyServices
-
-**Файл:** `src/pages/beauty/BeautyServices.tsx`
-
-**Изменения:**
-- Заменить эмодзи в `allServices` на Lucide-иконки
-- Заменить эмодзи в `categories` на Lucide-иконки
-- Обновить `ServiceCard` для рендеринга иконок через IconBadge
-
----
-
-### Этап 6: Property и Yacht детальные страницы
-
-**Файлы:**
-- `src/components/property/ExtraServices.tsx`
-- `src/components/property/IncludedServices.tsx`
-- `src/components/yachts/YachtExperienceSelect.tsx`
-
----
-
-### Этап 7: SOS и информационные страницы
-
-**Файлы:**
-- `src/pages/SOS.tsx` — emergency categories
-- `src/pages/info/TermsPage.tsx` — trust badges
-
----
-
-## Технические детали
-
-### Новый файл: IconBadge.tsx
-
-```typescript
-// src/components/ui/IconBadge.tsx
-import { memo } from 'react';
-import { Sparkles, type LucideIcon } from 'lucide-react';
-import { getIconForEmoji, iconSizes, type IconSize } from '@/lib/iconMap';
-import { cn } from '@/lib/utils';
-
-interface IconBadgeProps {
-  icon: string | LucideIcon;
-  size?: IconSize;
-  variant?: 'default' | 'primary' | 'muted' | 'gradient';
-  gradient?: string;
-  className?: string;
-}
-
-export const IconBadge = memo(function IconBadge({
-  icon,
-  size = 'md',
-  variant = 'default',
-  gradient,
-  className,
-}: IconBadgeProps) {
-  // Resolve icon
-  let IconComponent: LucideIcon | null = null;
-  
-  if (typeof icon === 'string') {
-    IconComponent = getIconForEmoji(icon);
-  } else {
-    IconComponent = icon;
-  }
-
-  // Fallback
-  if (!IconComponent) {
-    IconComponent = Sparkles;
-  }
-
-  const sizeClass = iconSizes[size];
-  
-  const containerStyles = {
-    default: 'bg-muted text-foreground',
-    primary: 'bg-primary/10 text-primary',
-    muted: 'bg-muted/50 text-muted-foreground',
-    gradient: gradient ? `bg-gradient-to-br ${gradient} text-white` : '',
-  };
-
-  const containerSizes = {
-    xs: 'w-6 h-6',
-    sm: 'w-8 h-8',
-    md: 'w-10 h-10',
-    lg: 'w-12 h-12',
-    xl: 'w-14 h-14',
-    '2xl': 'w-16 h-16',
-    '3xl': 'w-20 h-20',
-  };
-
-  return (
-    <div
-      className={cn(
-        'rounded-xl flex items-center justify-center flex-shrink-0',
-        containerSizes[size],
-        containerStyles[variant],
-        className
-      )}
-    >
-      <IconComponent className={sizeClass} />
-    </div>
-  );
+// Add to useExternalCalendars.ts
+const rotateToken = useMutation({
+  mutationFn: async (propertyId: string) => {
+    const { data, error } = await supabase.rpc('rotate_ical_token', {
+      p_property_id: propertyId
+    });
+    if (error) throw error;
+    return data;
+  },
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['ical-export-url'] });
+  },
 });
+
+return { 
+  exportUrl, 
+  isLoading, 
+  rotateToken: rotateToken.mutateAsync,
+  isRotating: rotateToken.isPending 
+};
 ```
 
-### Расширение iconMap.ts
+**Step 2: Add "Regenerate Link" button** to `CalendarSyncManager.tsx`:
+```typescript
+// In the Calendar Export card, after the copy button:
+<Button 
+  variant="outline" 
+  onClick={handleRotateToken}
+  disabled={isRotating}
+>
+  <RefreshCw className={cn("h-4 w-4", isRotating && "animate-spin")} />
+</Button>
 
-Добавить ~50 новых маппингов для полного покрытия всех эмодзи в приложении.
+// Handler:
+const handleRotateToken = async () => {
+  try {
+    await rotateToken(propertyId);
+    toast.success(isRu ? 'Ссылка обновлена' : 'Link regenerated');
+  } catch (error) {
+    toast.error(isRu ? 'Ошибка обновления' : 'Failed to regenerate');
+  }
+};
+```
+
+**Step 3: Add expiration warning** when token is about to expire:
+```typescript
+// Fetch ical_token_expires_at along with token
+const { data } = await supabase
+  .from('owner_properties')
+  .select('ical_token, ical_token_expires_at')
+  .eq('id', propertyId)
+  .single();
+
+// Show warning if expires within 30 days
+if (expiresAt && new Date(expiresAt) < new Date(Date.now() + 30*24*60*60*1000)) {
+  // Render warning badge
+}
+```
 
 ---
 
-## Файлы для изменения
+## P1-3: Soft Delete for Orders — COMPLETE
 
-| Категория | Файлы | Количество |
-|-----------|-------|------------|
-| **Core UI** | `iconMap.ts`, `IconBadge.tsx` (новый) | 2 |
-| **CrossSell** | `crossSellConfig.ts`, `CrossSellCard.tsx` | 2 |
-| **Filters** | Все файлы в `src/components/filters/` | 21 |
-| **UniversalFilter** | `UniversalFilter.tsx` | 1 |
-| **Pages** | `BeautyServices.tsx`, `SOS.tsx`, `TermsPage.tsx` | 3 |
-| **Property** | `ExtraServices.tsx`, `IncludedServices.tsx` | 2 |
-| **Yachts** | `YachtExperienceSelect.tsx` | 1 |
-| **Итого** | | **~32 файла** |
+### Verification
+| Component | Status |
+|-----------|--------|
+| `deleted_at` column | ✅ Exists |
+| `deleted_by` column | ✅ Exists |
+| `soft_delete_order()` RPC | ✅ Admin-only |
+| RLS filters `deleted_at IS NULL` | ✅ Enforced |
+| Audit trail in `order_status_history` | ✅ Logged |
 
----
-
-## Визуальный результат
-
-### До (текущее состояние)
-```
-┌──────────┐  ┌──────────┐  ┌──────────┐
-│   🛥️    │  │   🍽️    │  │   💐    │
-│  Яхты   │  │  Рестор. │  │  Цветы  │
-└──────────┘  └──────────┘  └──────────┘
-```
-
-### После (профессиональный вид)
-```
-┌──────────┐  ┌──────────┐  ┌──────────┐
-│  ⚓     │  │  🍴     │  │  🌸     │
-│  (cyan→ │  │(orange→ │  │ (rose→  │
-│  blue)  │  │  red)   │  │  pink)  │
-│  Яхты   │  │  Рестор. │  │  Цветы  │
-└──────────┘  └──────────┘  └──────────┘
-```
-
-**Характеристики:**
-- Монохромные SVG-иконки Lucide
-- Градиентные фоны для акцентных категорий
-- Консистентные размеры (12-48px scale)
-- Единый визуальный язык
+**No changes required** — P1-3 is fully implemented.
 
 ---
 
-## Оценка времени
+## Technical Details
 
-| Этап | Время | Приоритет |
-|------|-------|-----------|
-| Этап 1: IconBadge + iconMap | 20 мин | Высокий |
-| Этап 2: CrossSell | 15 мин | Высокий |
-| Этап 3: Все фильтры | 45 мин | Высокий |
-| Этап 4: UniversalFilter | 10 мин | Высокий |
-| Этап 5: BeautyServices | 15 мин | Средний |
-| Этап 6: Property/Yachts | 15 мин | Средний |
-| Этап 7: SOS/Terms | 10 мин | Низкий |
-| **Итого** | **~2 часа** | |
+### Files to Modify
+
+**P1-1 Rate Limiting (10 edge functions):**
+- `supabase/functions/create-checkout-session/index.ts`
+- `supabase/functions/create-flowers-checkout/index.ts`
+- `supabase/functions/create-order-checkout/index.ts`
+- `supabase/functions/create-restaurant-checkout/index.ts`
+- `supabase/functions/create-vendor-subscription/index.ts`
+- `supabase/functions/check-vendor-subscription/index.ts`
+- `supabase/functions/generate-booking-voucher/index.ts`
+- `supabase/functions/get-mapbox-token/index.ts`
+- `supabase/functions/get-weather/index.ts`
+- `supabase/functions/ical-sync/index.ts`
+- `supabase/functions/vendor-portal/index.ts`
+
+**P1-2 Token Rotation UI (2 files):**
+- `src/hooks/useExternalCalendars.ts` — Add `rotateToken` mutation
+- `src/components/owner/CalendarSyncManager.tsx` — Add regenerate button + expiration warning
 
 ---
 
-## Ожидаемый результат
+## Verification Steps
 
-1. **Профессиональный внешний вид** — единый стиль иконок Lucide
-2. **Консистентность** — все компоненты используют IconBadge
-3. **Гибкость** — поддержка градиентов, размеров, вариантов
-4. **Производительность** — SVG-иконки оптимизированы для tree-shaking
-5. **Maintainability** — централизованный маппинг в iconMap.ts
+### P1-1 Verification
+```bash
+# Test rate limiting by making 6 rapid requests
+for i in {1..6}; do curl -s -o /dev/null -w "%{http_code}\n" \
+  "https://kakkwibljrjsawxgnupk.supabase.co/functions/v1/get-weather"; done
+# Expected: First 5 return 200, 6th returns 429
+```
+
+### P1-2 Verification
+1. Navigate to Owner → Properties → Calendar Sync
+2. Click "Regenerate Link" button
+3. Copy new URL and verify old URL returns 401
+4. Confirm new URL works
+
+### P1-3 Verification
+```sql
+-- As admin, soft delete an order
+SELECT soft_delete_order('some-order-uuid');
+
+-- Verify user can't see it
+SELECT * FROM orders WHERE id = 'some-order-uuid'; -- Empty for user
+
+-- Verify admin can see it
+SELECT * FROM orders WHERE id = 'some-order-uuid'; -- Shows with deleted_at set
+```
+
+---
+
+## Implementation Order
+1. **P1-3**: Already complete — verify only
+2. **P1-2**: Add frontend rotation UI (2 files)
+3. **P1-1**: Add rate limiting to remaining edge functions (10 files)
+
+## Estimated Changes
+- **SQL migrations**: None required
+- **Edge functions**: 10 files (add import + middleware call)
+- **Frontend**: 2 files (hook extension + UI button)
+- **Total lines changed**: ~150-200 lines
