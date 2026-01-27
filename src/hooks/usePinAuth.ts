@@ -33,6 +33,20 @@ export function usePinAuth() {
     }
   }, []);
 
+  // CRITICAL: Update stored refresh token when session changes (e.g., after password login)
+  // This keeps PIN login working after the user logs in with password
+  useEffect(() => {
+    if (session?.refresh_token && savedUserId && user?.id === savedUserId) {
+      const currentStoredToken = localStorage.getItem(PIN_REFRESH_TOKEN_KEY);
+      // Only update if token is different to avoid unnecessary writes
+      if (currentStoredToken && currentStoredToken !== session.refresh_token) {
+        console.log('[usePinAuth] Updating stored refresh token after session change');
+        localStorage.setItem(PIN_REFRESH_TOKEN_KEY, session.refresh_token);
+        setHasRefreshToken(true);
+      }
+    }
+  }, [session?.refresh_token, savedUserId, user?.id]);
+
   // Check if user has PIN - prioritize savedUserId for returning users
   useEffect(() => {
     let isMounted = true;
