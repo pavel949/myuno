@@ -3,6 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
 };
 
 // Generate iCal format date
@@ -25,6 +26,8 @@ function escapeICalText(text: string): string {
 }
 
 Deno.serve(async (req) => {
+  console.log('Calendar export request received');
+  
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -37,7 +40,10 @@ Deno.serve(async (req) => {
 
     if (!token || !propertyId) {
       console.error('Missing token or property parameter');
-      return new Response('Missing required parameters', { status: 400 });
+      return new Response('Missing required parameters', { 
+        status: 400,
+        headers: corsHeaders 
+      });
     }
 
     // Initialize Supabase client with service role for public access
@@ -55,7 +61,10 @@ Deno.serve(async (req) => {
 
     if (propertyError || !property) {
       console.error('Invalid token or property not found:', propertyError);
-      return new Response('Unauthorized', { status: 401 });
+      return new Response('Unauthorized', { 
+        status: 401,
+        headers: corsHeaders 
+      });
     }
 
     console.log(`Generating iCal for property: ${property.title || property.title_ru}`);
@@ -70,7 +79,10 @@ Deno.serve(async (req) => {
 
     if (bookingsError) {
       console.error('Error fetching bookings:', bookingsError);
-      return new Response('Error fetching bookings', { status: 500 });
+      return new Response('Error fetching bookings', { 
+        status: 500,
+        headers: corsHeaders 
+      });
     }
 
     // Generate iCal content
@@ -78,7 +90,7 @@ Deno.serve(async (req) => {
     const propertyName = property.title || property.title_ru || 'Property';
     const calendarName = `UNO - ${propertyName}`;
 
-    let icalContent = [
+    const icalContent = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
       'PRODID:-//UNO//Property Calendar//EN',
@@ -89,8 +101,6 @@ Deno.serve(async (req) => {
     ];
 
     for (const booking of bookings || []) {
-      const checkIn = new Date(booking.check_in);
-      const checkOut = new Date(booking.check_out);
       const created = new Date(booking.created_at);
       const updated = new Date(booking.updated_at);
 
@@ -138,6 +148,9 @@ Deno.serve(async (req) => {
     });
   } catch (error) {
     console.error('Error generating iCal:', error);
-    return new Response('Internal server error', { status: 500 });
+    return new Response('Internal server error', { 
+      status: 500,
+      headers: corsHeaders 
+    });
   }
 });

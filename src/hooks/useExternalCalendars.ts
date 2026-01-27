@@ -168,7 +168,7 @@ export function useICalExportUrl(propertyId?: string) {
       if (error) throw error;
 
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      return `${supabaseUrl}/functions/v1/ical-export?property=${propertyId}&token=${data.ical_token}`;
+      return `${supabaseUrl}/functions/v1/calendar-export?property=${propertyId}&token=${data.ical_token}`;
     },
     enabled: !!propertyId && !!user?.id,
   });
