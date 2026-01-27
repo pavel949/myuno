@@ -77,6 +77,27 @@ const teamNavItems: NavItem[] = [
   { path: '/profile', icon: User, labelEn: 'Profile', labelRu: 'Профиль' },
 ];
 
+// Routes that have their own fixed bottom bar and should hide the global nav
+const routesWithOwnBottomBar = [
+  '/flowers/',      // Bouquet detail pages
+  '/yachts/',       // Yacht detail and booking pages  
+  '/tours/',        // Tour detail and booking pages
+  '/property/',     // Property detail and inquiry pages
+  '/beauty/',       // Beauty service booking
+  '/cleaning/',     // Cleaning service booking
+  '/fitness/booking', // Fitness booking
+  '/medical/appointment', // Medical appointments
+  '/restaurants/',  // Restaurant detail and booking
+  '/pets/',         // Pet service booking
+  '/cart',          // Cart page
+  '/checkout',      // Checkout pages
+  '/auth',          // Auth page
+];
+
+function shouldHideBottomNav(pathname: string): boolean {
+  return routesWithOwnBottomBar.some(route => pathname.includes(route));
+}
+
 function getNavItemsForPath(pathname: string): NavItem[] {
   // Onboarding pages should show guest navigation (user doesn't have role profile yet)
   if (pathname.includes('/onboarding')) return guestNavItems;
@@ -94,6 +115,16 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
     const location = useLocation();
     const { prefetchRoute } = usePrefetchRoute();
 
+    // All hooks must be called before any conditional returns
+    const handlePrefetch = useCallback((path: string) => {
+      prefetchRoute(path);
+    }, [prefetchRoute]);
+
+    // Hide nav on pages that have their own fixed bottom bar
+    if (shouldHideBottomNav(location.pathname)) {
+      return null;
+    }
+
     const navItems = getNavItemsForPath(location.pathname);
 
     const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -106,11 +137,6 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
         playSound('click');
       }
     };
-
-    // Prefetch route data on hover/touch
-    const handlePrefetch = useCallback((path: string) => {
-      prefetchRoute(path);
-    }, [prefetchRoute]);
 
     // Check if current path matches nav item (handles nested routes)
     const isActive = (itemPath: string) => {
