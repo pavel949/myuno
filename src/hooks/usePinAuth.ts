@@ -38,14 +38,28 @@ export function usePinAuth() {
   useEffect(() => {
     if (session?.refresh_token && savedUserId && user?.id === savedUserId) {
       const currentStoredToken = localStorage.getItem(PIN_REFRESH_TOKEN_KEY);
-      // Only update if token is different to avoid unnecessary writes
-      if (currentStoredToken && currentStoredToken !== session.refresh_token) {
-        console.log('[usePinAuth] Updating stored refresh token after session change');
+      // Update if token is missing OR different - this fixes the issue where token wasn't being saved
+      if (!currentStoredToken || currentStoredToken !== session.refresh_token) {
+        console.log('[usePinAuth] Syncing refresh token to localStorage for PIN login');
         localStorage.setItem(PIN_REFRESH_TOKEN_KEY, session.refresh_token);
         setHasRefreshToken(true);
       }
     }
   }, [session?.refresh_token, savedUserId, user?.id]);
+
+  // Also sync token when user logs in with password but doesn't have savedUserId yet
+  // This happens when user has PIN in DB but localStorage was cleared
+  useEffect(() => {
+    if (session?.refresh_token && user?.id && hasPin && !savedUserId) {
+      console.log('[usePinAuth] User has PIN but no saved session - storing for next PIN login');
+      localStorage.setItem(PIN_USER_KEY, user.id);
+      localStorage.setItem(PIN_EMAIL_KEY, user.email || '');
+      localStorage.setItem(PIN_REFRESH_TOKEN_KEY, session.refresh_token);
+      setSavedUserId(user.id);
+      setSavedEmail(user.email || '');
+      setHasRefreshToken(true);
+    }
+  }, [session?.refresh_token, user?.id, user?.email, hasPin, savedUserId]);
 
   // Check if user has PIN - prioritize savedUserId for returning users
   useEffect(() => {
