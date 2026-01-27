@@ -1,4 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,6 +13,29 @@ serve(async (req) => {
   }
 
   try {
+    // P1-1: Extract user ID from auth header if available
+    let userId: string | undefined;
+    const authHeader = req.headers.get("authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.slice(7);
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_ANON_KEY")!
+      );
+      const { data: { user } } = await supabase.auth.getUser(token);
+      userId = user?.id;
+    }
+
+    // P1-1: Apply rate limiting for AI translation endpoint
+    const rateLimitResponse = await withRateLimit(
+      req,
+      'ai-translate',
+      RATE_LIMITS.ai,
+      corsHeaders,
+      userId
+    );
+    if (rateLimitResponse) return rateLimitResponse;
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");

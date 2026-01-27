@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -34,6 +35,15 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // P1-1: Apply rate limiting
+    const rateLimitResponse = await withRateLimit(
+      req,
+      'calendar-export',
+      RATE_LIMITS.publicRead,
+      corsHeaders
+    );
+    if (rateLimitResponse) return rateLimitResponse;
+
     const url = new URL(req.url);
     const token = url.searchParams.get('token');
     const propertyId = url.searchParams.get('property');
@@ -51,18 +61,49 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Verify token matches property
+    // P1-2: Validate token WITH expiration check using backend function
+    const { data: validationResult, error: validationError } = await supabase.rpc(
+      'validate_ical_token',
+      { p_property_id: propertyId, p_token: token }
+    );
+
+    if (validationError) {
+      console.error('Token validation error:', validationError);
+      return new Response('Token validation failed', { 
+        status: 500,
+        headers: corsHeaders 
+      });
+    }
+
+    if (!validationResult?.valid) {
+      const errorMsg = validationResult?.error || 'invalid_token';
+      console.error('Invalid token:', errorMsg);
+      
+      // Return specific error for expired tokens
+      if (errorMsg === 'token_expired') {
+        return new Response('Token expired. Please regenerate the calendar link.', { 
+          status: 401,
+          headers: corsHeaders 
+        });
+      }
+      
+      return new Response('Unauthorized', { 
+        status: 401,
+        headers: corsHeaders 
+      });
+    }
+
+    // Fetch property details for calendar name
     const { data: property, error: propertyError } = await supabase
       .from('owner_properties')
-      .select('id, title, title_ru, address, ical_token, owner_id')
+      .select('id, title, title_ru, address')
       .eq('id', propertyId)
-      .eq('ical_token', token)
       .single();
 
     if (propertyError || !property) {
-      console.error('Invalid token or property not found:', propertyError);
-      return new Response('Unauthorized', { 
-        status: 401,
+      console.error('Property not found:', propertyError);
+      return new Response('Property not found', { 
+        status: 404,
         headers: corsHeaders 
       });
     }
