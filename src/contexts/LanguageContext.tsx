@@ -314,6 +314,14 @@ const translations: Record<Language, Record<string, string>> = {
     'wallet.toppedUp': 'Кошелёк успешно пополнен на {amount}',
     'wallet.paymentCanceled': 'Оплата отменена',
     
+    // Cart
+    'cart.title': 'Корзина',
+    'cart.empty': 'Корзина пуста',
+    'cart.checkout': 'Оформить заказ',
+    'cart.subtotal': 'Подытог',
+    'cart.total': 'Итого',
+    'cart.remove': 'Удалить',
+    
     // Quick services
     'home.quickServices': 'Быстрые услуги',
     'badge.top': 'ТОП',
@@ -638,6 +646,14 @@ const translations: Record<Language, Record<string, string>> = {
     'wallet.title': 'Wallet',
     'wallet.toppedUp': 'Wallet topped up with {amount}',
     'wallet.paymentCanceled': 'Payment canceled',
+    
+    // Cart
+    'cart.title': 'Cart',
+    'cart.empty': 'Cart is empty',
+    'cart.checkout': 'Checkout',
+    'cart.subtotal': 'Subtotal',
+    'cart.total': 'Total',
+    'cart.remove': 'Remove',
     
     // Quick services
     'home.quickServices': 'Quick Services',
