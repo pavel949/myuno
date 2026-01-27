@@ -57,7 +57,7 @@ export function useStore(id: string) {
     
     if (!id) return;
     const fetchStore = async () => {
-      const { data, error } = await supabase.from('stores').select('*').eq('id', id).single();
+      const { data, error } = await supabase.from('stores').select('*').eq('id', id).maybeSingle();
       if (isMounted) {
         if (!error && data) setStore(data as Store);
         setIsLoading(false);

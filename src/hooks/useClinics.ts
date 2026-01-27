@@ -224,7 +224,7 @@ export function useClinic(id: string | undefined) {
           .from('clinics')
           .select('*')
           .eq('id', id)
-          .single();
+          .maybeSingle();
 
         if (fetchError) throw fetchError;
         if (isMounted) setClinic(data as Clinic);

@@ -56,7 +56,7 @@ export function useCleaningService(id: string) {
     
     if (!id) return;
     const fetchService = async () => {
-      const { data, error } = await supabase.from('cleaning_services').select('*').eq('id', id).single();
+      const { data, error } = await supabase.from('cleaning_services').select('*').eq('id', id).maybeSingle();
       if (isMounted) {
         if (!error && data) setService(data as CleaningService);
         setIsLoading(false);

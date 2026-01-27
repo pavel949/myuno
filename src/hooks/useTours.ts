@@ -80,7 +80,7 @@ const fetchTourById = async (id: string): Promise<Tour | null> => {
     .from('tours')
     .select('*')
     .eq('id', id)
-    .single();
+    .maybeSingle();
 
   if (error) throw error;
   return data ? transformTour(data) : null;
