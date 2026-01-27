@@ -150,28 +150,57 @@ export function useExternalCalendars(propertyId?: string) {
   };
 }
 
-// Hook to get iCal export URL for a property
+// Hook to get iCal export URL for a property with token rotation
 export function useICalExportUrl(propertyId?: string) {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
-  const { data: exportUrl, isLoading } = useQuery({
+  const { data: exportData, isLoading } = useQuery({
     queryKey: ['ical-export-url', propertyId],
     queryFn: async () => {
       if (!propertyId) return null;
 
       const { data, error } = await supabase
         .from('owner_properties')
-        .select('ical_token')
+        .select('ical_token, ical_token_expires_at')
         .eq('id', propertyId)
         .single();
 
       if (error) throw error;
 
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      return `${supabaseUrl}/functions/v1/calendar-export?property=${propertyId}&token=${data.ical_token}`;
+      return {
+        url: `${supabaseUrl}/functions/v1/calendar-export?property=${propertyId}&token=${data.ical_token}`,
+        expiresAt: data.ical_token_expires_at,
+      };
     },
     enabled: !!propertyId && !!user?.id,
   });
 
-  return { exportUrl, isLoading };
+  const rotateToken = useMutation({
+    mutationFn: async (propId: string) => {
+      const { data, error } = await supabase.rpc('rotate_ical_token', {
+        p_property_id: propId,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ical-export-url', propertyId] });
+    },
+  });
+
+  // Check if token expires within 30 days
+  const isExpiringSoon = exportData?.expiresAt 
+    ? new Date(exportData.expiresAt) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+    : false;
+
+  return { 
+    exportUrl: exportData?.url, 
+    expiresAt: exportData?.expiresAt,
+    isExpiringSoon,
+    isLoading, 
+    rotateToken: rotateToken.mutateAsync,
+    isRotating: rotateToken.isPending,
+  };
 }

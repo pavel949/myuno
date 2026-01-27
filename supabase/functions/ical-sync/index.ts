@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -89,6 +90,15 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Rate limiting - public read endpoints (100/min)
+    const rateLimitResponse = await withRateLimit(
+      req,
+      'ical-sync',
+      RATE_LIMITS.publicRead,
+      corsHeaders
+    );
+    if (rateLimitResponse) return rateLimitResponse;
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);

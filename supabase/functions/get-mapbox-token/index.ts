@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,6 +12,15 @@ serve(async (req) => {
   }
 
   try {
+    // Rate limiting - public read endpoints (100/min)
+    const rateLimitResponse = await withRateLimit(
+      req,
+      'get-mapbox-token',
+      RATE_LIMITS.publicRead,
+      corsHeaders
+    );
+    if (rateLimitResponse) return rateLimitResponse;
+
     const mapboxToken = Deno.env.get("MAPBOX_PUBLIC_TOKEN");
     
     if (!mapboxToken) {
