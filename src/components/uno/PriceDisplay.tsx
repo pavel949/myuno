@@ -1,25 +1,23 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 type PriceUnit = 'hour' | 'day' | 'night' | 'person' | 'item' | 'session' | null;
 
 interface PriceDisplayProps {
+  /** Price value - if sourceCurrency is not specified, treated as THB */
   price: number;
   originalPrice?: number;
-  currency?: string;
+  /** Source currency of the price data (default: THB). Will be converted to user's selected currency */
+  sourceCurrency?: string;
   unit?: PriceUnit;
   showFrom?: boolean;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
+  /** If true, skip conversion and display as-is with user's selected currency symbol */
+  skipConversion?: boolean;
 }
-
-const currencySymbols: Record<string, string> = {
-  THB: '฿',
-  USD: '$',
-  EUR: '€',
-  RUB: '₽',
-};
 
 const sizeClasses = {
   sm: { price: 'text-sm', original: 'text-xs', unit: 'text-xs' },
@@ -40,21 +38,30 @@ const unitLabels: Record<PriceUnit & string, { ru: string; en: string }> = {
 export function PriceDisplay({
   price,
   originalPrice,
-  currency = 'THB',
+  sourceCurrency = 'THB',
   unit,
   showFrom = false,
   size = 'md',
   className,
+  skipConversion = false,
 }: PriceDisplayProps) {
   const { language, t } = useLanguage();
+  const { currencyInfo, convertPrice } = useCurrency();
   const sizes = sizeClasses[size];
-  const symbol = currencySymbols[currency] || currency;
-  const hasDiscount = originalPrice !== undefined && originalPrice > price;
+  
+  // Convert prices from source currency to user's selected currency
+  const displayPrice = skipConversion ? price : convertPrice(price);
+  const displayOriginalPrice = originalPrice !== undefined && !skipConversion 
+    ? convertPrice(originalPrice) 
+    : originalPrice;
+  
+  const symbol = currencyInfo.symbol;
+  const hasDiscount = displayOriginalPrice !== undefined && displayOriginalPrice > displayPrice;
   const discountPercent = hasDiscount
-    ? Math.round(((originalPrice - price) / originalPrice) * 100)
+    ? Math.round(((displayOriginalPrice - displayPrice) / displayOriginalPrice) * 100)
     : 0;
 
-  const formatPrice = (value: number) => {
+  const formatPriceValue = (value: number) => {
     return value.toLocaleString(language === 'ru' ? 'ru-RU' : 'en-US');
   };
 
@@ -70,13 +77,13 @@ export function PriceDisplay({
       {/* Original price (if discounted) */}
       {hasDiscount && (
         <span className={cn("text-muted-foreground line-through", sizes.original)}>
-          {symbol}{formatPrice(originalPrice)}
+          {symbol}{formatPriceValue(displayOriginalPrice!)}
         </span>
       )}
 
       {/* Main price */}
       <span className={cn("font-bold text-foreground", sizes.price)}>
-        {symbol}{formatPrice(price)}
+        {symbol}{formatPriceValue(displayPrice)}
       </span>
 
       {/* Unit label */}

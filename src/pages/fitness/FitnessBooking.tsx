@@ -116,7 +116,7 @@ export default function FitnessBooking() {
             title={language === 'ru' ? membership.labelRu : membership.labelEn}
             date={date}
             price={membership.price}
-            currency="THB"
+            sourceCurrency="THB"
           />
         </div>
 

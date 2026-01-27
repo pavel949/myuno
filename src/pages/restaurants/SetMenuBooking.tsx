@@ -199,7 +199,7 @@ export default function SetMenuBooking() {
             subtitle={language === 'ru' ? restaurant.nameRu : restaurant.nameEn}
             price={setMenu.price}
             originalPrice={setMenu.originalPrice}
-            currency="฿"
+            sourceCurrency="THB"
             duration={setMenu.duration}
             maxParticipants={setMenu.maxGuests}
             location={restaurant.address}

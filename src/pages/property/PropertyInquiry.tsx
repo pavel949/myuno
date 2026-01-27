@@ -4,6 +4,7 @@ import { Calendar, Users, MessageCircle, Check, AlertCircle, Clock, Shield, Zap,
 import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +28,7 @@ export default function PropertyInquiry() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { formatPrice } = useCurrency();
   const { user } = useAuth();
   const { toast: toastHook } = useToast();
   const { profile } = useProfile();
@@ -74,8 +76,7 @@ export default function PropertyInquiry() {
   }, [dateRange]);
 
   const pricePerNight = rentalTerms?.price_per_night || property?.price || 0;
-  const currency = rentalTerms?.deposit_currency || 'THB';
-  const currencySymbol = currency === 'THB' ? '฿' : currency === 'USD' ? '$' : '€';
+  // Currency info now comes from useCurrency context - conversion happens automatically
 
   const totalPrice = useMemo(() => {
     if (!pricePerNight || nights <= 0) return 0;
@@ -153,7 +154,7 @@ export default function PropertyInquiry() {
         provider_org_id: undefined, // Property bookings don't have provider_org_id
         start_at: dateRange.from,
         total_amount: totalPrice || 0,
-        currency: currency,
+        currency: 'THB', // Prices stored in THB
         notes: formData.message || undefined,
         metadata: {
           property_id: id,
@@ -237,7 +238,7 @@ export default function PropertyInquiry() {
             <Separator className="my-2" />
             <div className="flex justify-between font-semibold">
               <span>{isRu ? 'Итого' : 'Total'}</span>
-              <span>{currencySymbol}{totalPrice.toLocaleString()}</span>
+              <span>{formatPrice(totalPrice)}</span>
             </div>
           </div>
           
@@ -276,7 +277,7 @@ export default function PropertyInquiry() {
           {/* Price & Instant Booking Badge */}
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-2xl font-bold">{currencySymbol}{pricePerNight.toLocaleString()}</span>
+              <span className="text-2xl font-bold">{formatPrice(pricePerNight)}</span>
               <span className="text-muted-foreground ml-1">/ {isRu ? 'ночь' : 'night'}</span>
             </div>
             {rentalTerms?.instant_booking && (
@@ -522,9 +523,9 @@ export default function PropertyInquiry() {
             {nights > 0 && (
               <div className="flex justify-between items-center mb-3 text-sm">
                 <span className="text-muted-foreground">
-                  {currencySymbol}{pricePerNight.toLocaleString()} × {nights} {isRu ? 'ночей' : 'nights'}
+                  {formatPrice(pricePerNight)} × {nights} {isRu ? 'ночей' : 'nights'}
                 </span>
-                <span className="text-xl font-bold">{currencySymbol}{totalPrice.toLocaleString()}</span>
+                <span className="text-xl font-bold">{formatPrice(totalPrice)}</span>
               </div>
             )}
             

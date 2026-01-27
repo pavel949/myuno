@@ -229,7 +229,7 @@ export default function LegalBooking() {
                 : (language === 'ru' ? 'Онлайн' : 'Online')
               }
               price={consultationPrice}
-              currency="THB"
+              sourceCurrency="THB"
             />
 
             {/* Service Selection */}
@@ -291,7 +291,7 @@ export default function LegalBooking() {
               date={date}
               time={time}
               price={consultationPrice}
-              currency="THB"
+              sourceCurrency="THB"
             />
 
             {/* Contact Info */}

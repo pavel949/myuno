@@ -1,5 +1,6 @@
 import { Clock, Users, MapPin, Calendar, CreditCard } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
@@ -15,7 +16,8 @@ interface BookingSummaryProps {
   participants?: number;
   price: number;
   originalPrice?: number;
-  currency?: string;
+  /** Source currency of prices (default THB). Will be converted to user's selected currency. */
+  sourceCurrency?: string;
   items?: { name: string; quantity: number; price: number }[];
   serviceFee?: number;
 }
@@ -32,13 +34,13 @@ export function BookingSummary({
   participants = 1,
   price,
   originalPrice,
-  currency = 'THB',
+  sourceCurrency = 'THB',
   items,
   serviceFee = 0,
 }: BookingSummaryProps) {
   const { language } = useLanguage();
+  const { formatPrice } = useCurrency();
 
-  const currencySymbol = currency === 'THB' ? '฿' : currency === 'USD' ? '$' : currency === 'EUR' ? '€' : '₽';
   const total = items ? items.reduce((sum, i) => sum + i.price * i.quantity, 0) + serviceFee : price * participants;
   const hasDiscount = originalPrice && originalPrice > price;
 
@@ -130,7 +132,7 @@ export function BookingSummary({
               <span className="text-muted-foreground">
                 {item.name} {item.quantity > 1 && `×${item.quantity}`}
               </span>
-              <span>{currencySymbol}{(item.price * item.quantity).toLocaleString()}</span>
+              <span>{formatPrice(item.price * item.quantity)}</span>
             </div>
           ))}
           {serviceFee > 0 && (
@@ -138,7 +140,7 @@ export function BookingSummary({
               <span className="text-muted-foreground">
                 {language === 'ru' ? 'Сервисный сбор' : 'Service fee'}
               </span>
-              <span>{currencySymbol}{serviceFee.toLocaleString()}</span>
+              <span>{formatPrice(serviceFee)}</span>
             </div>
           )}
         </div>
@@ -153,17 +155,17 @@ export function BookingSummary({
           <div className="text-right">
             {hasDiscount && (
               <span className="text-sm text-muted-foreground line-through mr-2">
-                {currencySymbol}{(originalPrice * participants).toLocaleString()}
+                {formatPrice(originalPrice! * participants)}
               </span>
             )}
             <span className="text-xl font-bold text-primary">
-              {currencySymbol}{total.toLocaleString()}
+              {formatPrice(total)}
             </span>
           </div>
         </div>
         {!items && participants > 1 && (
           <p className="text-xs text-muted-foreground mt-1 text-right">
-            {currencySymbol}{price.toLocaleString()} × {participants} {language === 'ru' ? 'чел.' : 'people'}
+            {formatPrice(price)} × {participants} {language === 'ru' ? 'чел.' : 'people'}
           </p>
         )}
       </div>

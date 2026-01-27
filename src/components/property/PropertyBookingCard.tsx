@@ -7,6 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { usePropertyBlockedDates } from '@/hooks/usePropertyAvailability';
 import { PropertyRentalTerms } from '@/hooks/useProperties';
 import { format, differenceInDays, isBefore, startOfDay } from 'date-fns';
@@ -31,6 +32,7 @@ export function PropertyBookingCard({
 }: PropertyBookingCardProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { formatPrice, currencyInfo } = useCurrency();
   const isRu = language === 'ru';
   
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
@@ -39,7 +41,7 @@ export function PropertyBookingCard({
   
   const { data: blockedDates } = usePropertyBlockedDates(propertyId);
   
-  const currencySymbol = currency === 'THB' ? '฿' : currency === 'USD' ? '$' : '€';
+  const currencySymbol = currencyInfo.symbol;
   
   // Calculate nights and pricing
   const nights = useMemo(() => {
@@ -114,7 +116,7 @@ export function PropertyBookingCard({
         {/* Price Header */}
         <div className="flex items-baseline gap-1">
           <span className="text-2xl font-bold">
-            {currencySymbol}{pricePerNight.toLocaleString()}
+            {formatPrice(pricePerNight)}
           </span>
           <span className="text-muted-foreground">
             /{isRu ? 'ночь' : 'night'}
@@ -289,10 +291,10 @@ export function PropertyBookingCard({
                 onClick={() => setShowPriceDetails(!showPriceDetails)}
               >
                 <span className="underline">
-                  {currencySymbol}{pricePerNight.toLocaleString()} × {nights} {isRu ? 'ночей' : 'nights'}
+                  {formatPrice(pricePerNight)} × {nights} {isRu ? 'ночей' : 'nights'}
                 </span>
                 <div className="flex items-center gap-2">
-                  <span>{currencySymbol}{pricing.subtotal.toLocaleString()}</span>
+                  <span>{formatPrice(pricing.subtotal)}</span>
                   {showPriceDetails ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                 </div>
               </button>
@@ -306,7 +308,7 @@ export function PropertyBookingCard({
                       : ` (${isRu ? 'неделя' : 'weekly'})`
                     }
                   </span>
-                  <span>-{currencySymbol}{pricing.discount.toLocaleString()}</span>
+                  <span>-{formatPrice(pricing.discount)}</span>
                 </div>
               )}
               
@@ -314,7 +316,7 @@ export function PropertyBookingCard({
               
               <div className="flex items-center justify-between font-semibold">
                 <span>{isRu ? 'Итого' : 'Total'}</span>
-                <span>{currencySymbol}{pricing.total.toLocaleString()}</span>
+                <span>{formatPrice(pricing.total)}</span>
               </div>
             </div>
           </>

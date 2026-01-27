@@ -148,7 +148,7 @@ export default function WaterActivityBooking() {
             time={time}
             participants={participants}
             price={activity.price || 0}
-            currency={activity.currency || 'THB'}
+            sourceCurrency={activity.currency || 'THB'}
           />
         </div>
 

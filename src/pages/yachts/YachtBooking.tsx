@@ -369,7 +369,7 @@ export default function YachtBooking() {
                 price: serviceFee,
               },
             ]}
-            currency={yacht.currency || 'THB'}
+            sourceCurrency={yacht.currency || 'THB'}
           />
         </div>
       </PageContainer>

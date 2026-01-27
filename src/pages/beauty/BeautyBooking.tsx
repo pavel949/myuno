@@ -149,7 +149,7 @@ export default function BeautyBooking() {
             date={date}
             time={time}
             price={totalPrice}
-            currency="THB"
+            sourceCurrency="THB"
           />
         </div>
 
