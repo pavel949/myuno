@@ -159,9 +159,9 @@ export const ReviewsSection = ({
             </Badge>
           )}
         </div>
-        <Button onClick={() => setIsWriteModalOpen(true)} size="sm" className="w-full sm:w-auto touch-manipulation">
+        <Button onClick={() => setShowAll(true)} size="sm" variant="outline" className="w-full sm:w-auto touch-manipulation">
           <MessageSquare className="w-4 h-4 mr-2" />
-          {language === 'ru' ? 'Написать отзыв' : 'Write Review'}
+          {language === 'ru' ? 'Читать отзывы' : 'Read Reviews'}
         </Button>
       </div>
 
