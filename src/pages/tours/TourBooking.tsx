@@ -33,7 +33,7 @@ export default function TourBooking() {
   const { createBooking, isSubmitting } = useBooking();
 
   // Form state
-  const [date, setDate] = useState<Date | undefined>(addDays(new Date(), 1));
+  const [date, setDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState<string>("");
   const [participants, setParticipants] = useState(1);
   const [contactData, setContactData] = useState<ContactFormData>({ name: "", phone: "" });
