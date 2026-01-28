@@ -1,218 +1,278 @@
 
-# P1 Implementation Plan: Rate Limiting, iCal Token Rotation, and Soft Delete
+# План: Playwright E2E Тесты для myUNO SuperApp
 
-## Executive Summary
-All three P1 items have **partial implementations** that need completion:
-- **P1-1**: Rate limiting infrastructure exists but only 3 of 20+ edge functions use it
-- **P1-2**: Backend token rotation is complete but frontend lacks the "Regenerate" button
-- **P1-3**: Soft delete columns and RLS exist - **FULLY COMPLETE**, no changes needed
+## Обзор
+Настройка Playwright и создание E2E тестов для критических пользовательских сценариев SuperApp.
 
 ---
 
-## P1-1: Rate Limiting — Add to Remaining Edge Functions
-
-### Current State
-| Protected | Not Protected |
-|-----------|---------------|
-| `ai-support-chat` | `create-checkout-session` |
-| `ai-translate` | `create-flowers-checkout` |
-| `calendar-export` | `create-order-checkout` |
-| | `create-restaurant-checkout` |
-| | `create-vendor-subscription` |
-| | `check-vendor-subscription` |
-| | `generate-booking-voucher` |
-| | `get-mapbox-token` |
-| | `get-weather` |
-| | `ical-sync` |
-| | `vendor-portal` |
-
-### Implementation
-Add `withRateLimit` middleware to each unprotected function with appropriate limits:
+## Файловая структура
 
 ```text
-Payment endpoints (RATE_LIMITS.payment - 20/min):
-- create-checkout-session
-- create-flowers-checkout  
-- create-order-checkout
-- create-restaurant-checkout
-- create-vendor-subscription
-- stripe-webhook (skip - has signature validation)
-
-Auth/Subscription endpoints (RATE_LIMITS.auth - 5/min):
-- check-vendor-subscription
-- vendor-portal
-
-Public read endpoints (RATE_LIMITS.publicRead - 100/min):
-- get-mapbox-token
-- get-weather
-- generate-booking-voucher
-- ical-sync
-```
-
-### Code Pattern for Each Function
-```typescript
-import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
-
-// Inside handler, after CORS check:
-const rateLimitResponse = await withRateLimit(
-  req,
-  'function-name',
-  RATE_LIMITS.payment, // or .auth, .publicRead
-  corsHeaders,
-  userId // if authenticated
-);
-if (rateLimitResponse) return rateLimitResponse;
+e2e/
+├── playwright.config.ts
+├── fixtures/
+│   └── auth.fixture.ts
+├── pages/
+│   ├── AuthPage.ts
+│   ├── HomePage.ts
+│   ├── BookingPage.ts
+│   ├── WalletPage.ts
+│   └── VendorPage.ts
+└── tests/
+    ├── auth/
+    │   ├── login.spec.ts
+    │   ├── signup.spec.ts
+    │   └── pin.spec.ts
+    ├── booking/
+    │   ├── tour-booking.spec.ts
+    │   ├── yacht-booking.spec.ts
+    │   └── booking-flow.spec.ts
+    ├── wallet/
+    │   └── wallet.spec.ts
+    ├── vendor/
+    │   └── vendor-dashboard.spec.ts
+    └── navigation/
+        └── home.spec.ts
 ```
 
 ---
 
-## P1-2: iCal Token Rotation — Add Frontend UI
+## Покрываемые сценарии
 
-### Current State
-- **Database**: `rotate_ical_token()` RPC exists and works
-- **Validation**: `validate_ical_token()` RPC enforces expiration
-- **Frontend**: Missing "Regenerate Link" button
+### 1. Аутентификация (Критичность: Высокая)
+| Тест | Описание |
+|------|----------|
+| Email Login | Вход email + пароль → редирект на главную |
+| Signup Flow | 3-шаговая регистрация → создание аккаунта |
+| PIN Login | Ввод 4-значного PIN → успешный вход |
+| PIN Setup | После первого входа → настройка PIN |
+| Password Reset | Запрос сброса пароля → проверка toast |
 
-### Implementation
+### 2. Бронирование (Критичность: Высокая)
+| Тест | Описание |
+|------|----------|
+| Tour Booking | Выбор даты/времени → участники → оплата → подтверждение |
+| Yacht Booking | Выбор яхты → дата → контакты → успех |
+| Validation | Проверка обязательных полей |
+| Payment Methods | Cash / Card / Wallet переключение |
 
-**Step 1: Extend `useICalExportUrl` hook** with rotation mutation:
+### 3. Кошелёк (Критичность: Средняя)
+| Тест | Описание |
+|------|----------|
+| Balance Display | Отображение баланса |
+| TopUp Modal | Открытие → выбор суммы → Stripe редирект |
+| Transaction History | Загрузка истории операций |
+
+### 4. Vendor Dashboard (Критичность: Средняя)
+| Тест | Описание |
+|------|----------|
+| Auth Redirect | Неавторизованный → /auth |
+| Onboarding Redirect | Нет орг → /vendor/onboarding |
+| KPI Display | Загрузка и отображение метрик |
+| Orders List | Отображение последних заказов |
+
+### 5. Навигация (Критичность: Базовая)
+| Тест | Описание |
+|------|----------|
+| Home Load | Главная загружается без ошибок |
+| Categories | Клик по категории → переход |
+| Search Modal | Открытие поиска |
+| Language Switch | RU/EN переключение |
+
+---
+
+## Технические детали
+
+### Конфигурация Playwright
+
 ```typescript
-// Add to useExternalCalendars.ts
-const rotateToken = useMutation({
-  mutationFn: async (propertyId: string) => {
-    const { data, error } = await supabase.rpc('rotate_ical_token', {
-      p_property_id: propertyId
-    });
-    if (error) throw error;
-    return data;
+// playwright.config.ts
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+  testDir: './e2e/tests',
+  timeout: 30000,
+  retries: 1,
+  reporter: [['html'], ['list']],
+  use: {
+    baseURL: 'http://localhost:5173',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+    trace: 'retain-on-failure',
   },
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['ical-export-url'] });
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'mobile', use: { ...devices['iPhone 14'] } },
+  ],
+  webServer: {
+    command: 'npm run dev',
+    port: 5173,
+    reuseExistingServer: !process.env.CI,
   },
 });
-
-return { 
-  exportUrl, 
-  isLoading, 
-  rotateToken: rotateToken.mutateAsync,
-  isRotating: rotateToken.isPending 
-};
 ```
 
-**Step 2: Add "Regenerate Link" button** to `CalendarSyncManager.tsx`:
-```typescript
-// In the Calendar Export card, after the copy button:
-<Button 
-  variant="outline" 
-  onClick={handleRotateToken}
-  disabled={isRotating}
->
-  <RefreshCw className={cn("h-4 w-4", isRotating && "animate-spin")} />
-</Button>
+### Page Object Model
 
-// Handler:
-const handleRotateToken = async () => {
-  try {
-    await rotateToken(propertyId);
-    toast.success(isRu ? 'Ссылка обновлена' : 'Link regenerated');
-  } catch (error) {
-    toast.error(isRu ? 'Ошибка обновления' : 'Failed to regenerate');
+```typescript
+// e2e/pages/AuthPage.ts
+export class AuthPage {
+  readonly page: Page;
+  readonly emailInput: Locator;
+  readonly passwordInput: Locator;
+  readonly loginButton: Locator;
+  readonly pinInput: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.emailInput = page.locator('input[type="email"]');
+    this.passwordInput = page.locator('input[type="password"]');
+    this.loginButton = page.locator('button:has-text("Login"), button:has-text("Войти")');
+    this.pinInput = page.locator('[data-testid="pin-input"]');
   }
-};
+
+  async login(email: string, password: string) {
+    await this.emailInput.fill(email);
+    await this.passwordInput.fill(password);
+    await this.loginButton.click();
+  }
+
+  async enterPin(pin: string) {
+    for (const digit of pin) {
+      await this.pinInput.locator(`input`).nth(parseInt(digit)).focus();
+      await this.page.keyboard.type(digit);
+    }
+  }
+}
 ```
 
-**Step 3: Add expiration warning** when token is about to expire:
-```typescript
-// Fetch ical_token_expires_at along with token
-const { data } = await supabase
-  .from('owner_properties')
-  .select('ical_token, ical_token_expires_at')
-  .eq('id', propertyId)
-  .single();
+### Пример теста
 
-// Show warning if expires within 30 days
-if (expiresAt && new Date(expiresAt) < new Date(Date.now() + 30*24*60*60*1000)) {
-  // Render warning badge
+```typescript
+// e2e/tests/auth/login.spec.ts
+import { test, expect } from '@playwright/test';
+import { AuthPage } from '../../pages/AuthPage';
+
+test.describe('Authentication', () => {
+  test('should login with email and password', async ({ page }) => {
+    const authPage = new AuthPage(page);
+    await page.goto('/auth');
+    
+    await authPage.login('test@example.com', 'password123');
+    
+    await expect(page).toHaveURL('/');
+    await expect(page.locator('text=myUNO')).toBeVisible();
+  });
+
+  test('should show validation errors', async ({ page }) => {
+    await page.goto('/auth');
+    await page.click('button:has-text("Login")');
+    
+    await expect(page.locator('text=Invalid email')).toBeVisible();
+  });
+});
+```
+
+### Booking Flow Test
+
+```typescript
+// e2e/tests/booking/tour-booking.spec.ts
+import { test, expect } from '@playwright/test';
+
+test.describe('Tour Booking', () => {
+  test.beforeEach(async ({ page }) => {
+    // Login first
+    await page.goto('/auth');
+    await page.fill('input[type="email"]', 'test@example.com');
+    await page.fill('input[type="password"]', 'password123');
+    await page.click('button:has-text("Login")');
+    await page.waitForURL('/');
+  });
+
+  test('should complete tour booking flow', async ({ page }) => {
+    await page.goto('/tours');
+    await page.click('.tour-card >> nth=0');
+    await page.click('button:has-text("Book")');
+    
+    // Select date
+    await page.click('[data-date="tomorrow"]');
+    
+    // Select time
+    await page.click('button:has-text("09:00")');
+    
+    // Fill contact info
+    await page.fill('input[name="name"]', 'Test User');
+    await page.fill('input[name="phone"]', '+66123456789');
+    
+    // Select payment
+    await page.click('button:has-text("Cash")');
+    
+    // Submit
+    await page.click('button:has-text("Confirm")');
+    
+    // Verify confirmation
+    await expect(page.locator('text=Booking Confirmed')).toBeVisible();
+  });
+});
+```
+
+---
+
+## Зависимости для установки
+
+```json
+{
+  "devDependencies": {
+    "@playwright/test": "^1.48.0"
+  }
 }
 ```
 
 ---
 
-## P1-3: Soft Delete for Orders — COMPLETE
+## Порядок реализации
 
-### Verification
-| Component | Status |
+1. **Конфигурация** — `playwright.config.ts` + установка зависимостей
+2. **Page Objects** — AuthPage, HomePage, BookingPage, WalletPage, VendorPage
+3. **Auth тесты** — login, signup, PIN flow
+4. **Booking тесты** — tours, yachts
+5. **Wallet тесты** — balance, topup
+6. **Vendor тесты** — dashboard, orders
+7. **Navigation тесты** — home, categories
+
+---
+
+## Добавление data-testid
+
+Для надёжных селекторов добавим `data-testid` к ключевым элементам:
+
+| Компонент | testid |
 |-----------|--------|
-| `deleted_at` column | ✅ Exists |
-| `deleted_by` column | ✅ Exists |
-| `soft_delete_order()` RPC | ✅ Admin-only |
-| RLS filters `deleted_at IS NULL` | ✅ Enforced |
-| Audit trail in `order_status_history` | ✅ Logged |
-
-**No changes required** — P1-3 is fully implemented.
-
----
-
-## Technical Details
-
-### Files to Modify
-
-**P1-1 Rate Limiting (10 edge functions):**
-- `supabase/functions/create-checkout-session/index.ts`
-- `supabase/functions/create-flowers-checkout/index.ts`
-- `supabase/functions/create-order-checkout/index.ts`
-- `supabase/functions/create-restaurant-checkout/index.ts`
-- `supabase/functions/create-vendor-subscription/index.ts`
-- `supabase/functions/check-vendor-subscription/index.ts`
-- `supabase/functions/generate-booking-voucher/index.ts`
-- `supabase/functions/get-mapbox-token/index.ts`
-- `supabase/functions/get-weather/index.ts`
-- `supabase/functions/ical-sync/index.ts`
-- `supabase/functions/vendor-portal/index.ts`
-
-**P1-2 Token Rotation UI (2 files):**
-- `src/hooks/useExternalCalendars.ts` — Add `rotateToken` mutation
-- `src/components/owner/CalendarSyncManager.tsx` — Add regenerate button + expiration warning
+| PIN Input | `pin-input` |
+| Login Button | `login-button` |
+| Signup Button | `signup-button` |
+| Booking Submit | `booking-submit` |
+| Wallet Balance | `wallet-balance` |
+| TopUp Button | `topup-button` |
 
 ---
 
-## Verification Steps
+## Команды запуска
 
-### P1-1 Verification
 ```bash
-# Test rate limiting by making 6 rapid requests
-for i in {1..6}; do curl -s -o /dev/null -w "%{http_code}\n" \
-  "https://kakkwibljrjsawxgnupk.supabase.co/functions/v1/get-weather"; done
-# Expected: First 5 return 200, 6th returns 429
+# Установка браузеров
+npx playwright install
+
+# Запуск всех тестов
+npx playwright test
+
+# UI режим
+npx playwright test --ui
+
+# Только auth тесты
+npx playwright test auth/
+
+# С отчётом
+npx playwright show-report
 ```
-
-### P1-2 Verification
-1. Navigate to Owner → Properties → Calendar Sync
-2. Click "Regenerate Link" button
-3. Copy new URL and verify old URL returns 401
-4. Confirm new URL works
-
-### P1-3 Verification
-```sql
--- As admin, soft delete an order
-SELECT soft_delete_order('some-order-uuid');
-
--- Verify user can't see it
-SELECT * FROM orders WHERE id = 'some-order-uuid'; -- Empty for user
-
--- Verify admin can see it
-SELECT * FROM orders WHERE id = 'some-order-uuid'; -- Shows with deleted_at set
-```
-
----
-
-## Implementation Order
-1. **P1-3**: Already complete — verify only
-2. **P1-2**: Add frontend rotation UI (2 files)
-3. **P1-1**: Add rate limiting to remaining edge functions (10 files)
-
-## Estimated Changes
-- **SQL migrations**: None required
-- **Edge functions**: 10 files (add import + middleware call)
-- **Frontend**: 2 files (hook extension + UI button)
-- **Total lines changed**: ~150-200 lines
