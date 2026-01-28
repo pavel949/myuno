@@ -73,7 +73,7 @@ export const PinInput: React.FC<PinInputProps> = ({
   ];
 
   return (
-    <div className={cn('flex flex-col items-center gap-8', className)}>
+    <div className={cn('flex flex-col items-center gap-8', className)} data-testid="pin-input">
       {/* PIN dots display */}
       <div className="flex gap-3 justify-center">
         {Array.from({ length }).map((_, index) => (

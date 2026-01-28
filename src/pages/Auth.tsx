@@ -403,7 +403,7 @@ export default function Auth() {
                       </Link>
                     </div>
 
-                    <PremiumButton type="submit" className="w-full" size="lg" isLoading={isLoading}>
+                    <PremiumButton type="submit" className="w-full" size="lg" isLoading={isLoading} data-testid="login-button">
                       {t('auth.login')}
                       <ArrowRight className="w-4 h-4 ml-1" />
                     </PremiumButton>
@@ -650,6 +650,7 @@ export default function Auth() {
                             className="flex-1" 
                             size="lg" 
                             isLoading={isLoading}
+                            data-testid="signup-button"
                           >
                             {t('auth.createAccount')}
                             <ArrowRight className="w-4 h-4 ml-1" />
