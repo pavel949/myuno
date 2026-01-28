@@ -252,7 +252,7 @@ const Wallet = () => {
                     {language === 'ru' ? 'Баланс' : 'Balance'}
                   </span>
                 </div>
-                <div className="text-4xl font-bold mb-4">
+                <div className="text-4xl font-bold mb-4" data-testid="wallet-balance">
                   {wallet?.balance.toLocaleString() || 0} ₽
                 </div>
                 <div className="text-sm opacity-75">
@@ -273,6 +273,7 @@ const Wallet = () => {
               <button
                 key={idx}
                 onClick={action.onClick}
+                data-testid={idx === 0 ? 'topup-button' : undefined}
                 className="flex flex-col items-center gap-2 p-4 bg-card rounded-xl border border-border hover:border-primary/50 transition-colors"
               >
                 <div className={`w-12 h-12 rounded-full ${action.color} flex items-center justify-center`}>
@@ -396,7 +397,7 @@ const Wallet = () => {
 
       {/* Top Up Dialog */}
       <Dialog open={isTopUpOpen} onOpenChange={setIsTopUpOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md" data-testid="topup-modal">
           <DialogHeader>
             <DialogTitle>
               {language === 'ru' ? 'Пополнить кошелёк' : 'Top Up Wallet'}
@@ -451,6 +452,7 @@ const Wallet = () => {
               onClick={handleTopUp}
               disabled={isProcessing || topUpAmount < 100}
               className="w-full h-14 text-lg font-semibold gap-2"
+              data-testid="confirm-topup"
             >
               {isProcessing ? (
                 <>
