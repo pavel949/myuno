@@ -44,7 +44,7 @@ export default function MedicalAppointment() {
   const selectedService = services.find(s => s.id === serviceId);
 
   // Form state
-  const [date, setDate] = useState<Date | undefined>(addDays(new Date(), 1));
+  const [date, setDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState<string>("");
   const [contactData, setContactData] = useState<ContactFormData>({ name: "", phone: "" });
   const [symptoms, setSymptoms] = useState<string>("");
