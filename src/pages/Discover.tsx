@@ -2,12 +2,14 @@ import React, { useState, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Search, SlidersHorizontal, X, Sparkles, Package, 
-  TrendingUp, ArrowDown, ArrowUp, Star, Clock, Check, ChevronRight
+  TrendingUp, ArrowDown, ArrowUp, Star, Clock, Check, ChevronRight,
+  History, Crown, Flame
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { UnifiedCard } from '@/components/uno/UnifiedCard';
 import { SkeletonGrid } from '@/components/uno/SkeletonCard';
@@ -15,11 +17,14 @@ import { EmptyState } from '@/components/uno/EmptyState';
 import { AnimatedGrid, FadeInUp } from '@/components/layout/AnimatedList';
 import { useServices, Service, SortOption, useCategories as useServiceCategories } from '@/hooks/useServices';
 import { useCategories, CategoryGroup, Category } from '@/hooks/useCategories';
+import { useViewHistory, ViewHistoryItem } from '@/hooks/useViewHistory';
+import { useFeaturedCategories } from '@/hooks/useFeaturedCategories';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 type TabValue = 'all' | 'categories' | 'providers';
@@ -56,8 +61,11 @@ export default function Discover() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   // Hooks
+  const { user } = useAuth();
   const { groups, getName, isLoading: categoriesLoading, refetch: refetchCategories } = useCategories();
   const { categories: serviceCategories, isLoading: serviceCategoriesLoading } = useServiceCategories();
+  const { history, isLoading: historyLoading } = useViewHistory();
+  const { isFeatured, getFeaturedPackage } = useFeaturedCategories();
   const { services, isLoading: servicesLoading, refetch: refetchServices } = useServices({
     categoryId: selectedCategory || undefined,
     searchQuery: debouncedSearch || undefined,
@@ -65,6 +73,13 @@ export default function Discover() {
     priceMax: priceRange?.max === Infinity ? undefined : priceRange?.max,
     sortBy,
   });
+
+  // Recent categories from view history (last 4)
+  const recentCategories = useMemo(() => {
+    return history
+      .filter(h => h.item_type === 'category' || h.item_type === 'tour' || h.item_type === 'property')
+      .slice(0, 4);
+  }, [history]);
 
   // Debounce search
   const searchTimerRef = useRef<NodeJS.Timeout>();
@@ -164,7 +179,15 @@ export default function Discover() {
           {/* Tab: All - Category cards grouped */}
           <TabsContent value="all" className="mt-0">
             <PullToRefresh onRefresh={handleRefresh} className="min-h-0">
-              <div key={refreshKey}>
+              <div key={refreshKey} className="space-y-6">
+                {/* Recently Viewed Section */}
+                {user && recentCategories.length > 0 && (
+                  <RecentlyViewedCompact 
+                    items={recentCategories} 
+                    language={language} 
+                  />
+                )}
+                
                 {categoriesLoading ? (
                   <AllTabSkeleton />
                 ) : (
@@ -173,6 +196,7 @@ export default function Discover() {
                     getName={getName} 
                     language={language}
                     onCategoryClick={handleCategoryClick}
+                    isFeatured={isFeatured}
                   />
                 )}
               </div>
@@ -227,14 +251,82 @@ export default function Discover() {
 
 // ============ Tab Components ============
 
+// Recently Viewed Compact Section for Catalog
+interface RecentlyViewedCompactProps {
+  items: ViewHistoryItem[];
+  language: string;
+}
+
+function RecentlyViewedCompact({ items, language }: RecentlyViewedCompactProps) {
+  const navigate = useNavigate();
+  
+  const typeRoutes: Record<string, string> = {
+    tour: '/tours',
+    property: '/property',
+    event: '/events',
+    category: '/discover',
+  };
+
+  const handleClick = (item: ViewHistoryItem) => {
+    const baseRoute = typeRoutes[item.item_type] || '/discover';
+    navigate(`${baseRoute}/${item.item_id}`);
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <div className="p-1.5 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg">
+          <History className="w-4 h-4 text-primary" />
+        </div>
+        <h3 className="text-sm font-semibold">
+          {language === 'ru' ? 'Недавние' : 'Recent'}
+        </h3>
+      </div>
+      <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+        {items.map((item) => {
+          const data = item.item_data || {};
+          const title = language === 'ru' 
+            ? (data.name_ru || data.name || 'Без названия')
+            : (data.name_en || data.name || 'Untitled');
+          
+          return (
+            <button
+              key={item.id}
+              onClick={() => handleClick(item)}
+              className={cn(
+                "flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl",
+                "bg-card border border-border/50",
+                "hover:border-primary/40 hover:shadow-sm",
+                "active:scale-95 transition-all"
+              )}
+            >
+              {data.image && (
+                <img 
+                  src={data.image} 
+                  alt="" 
+                  className="w-8 h-8 rounded-lg object-cover"
+                />
+              )}
+              <span className="text-xs font-medium whitespace-nowrap max-w-[100px] truncate">
+                {title}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 interface AllCategoriesViewProps {
   groups: CategoryGroup[];
   getName: (item: Category | CategoryGroup) => string;
   language: string;
   onCategoryClick: (cat: Category) => void;
+  isFeatured?: (entityId: string, entityType?: string) => boolean;
 }
 
-function AllCategoriesView({ groups, getName, language, onCategoryClick }: AllCategoriesViewProps) {
+function AllCategoriesView({ groups, getName, language, onCategoryClick, isFeatured }: AllCategoriesViewProps) {
   if (groups.length === 0) {
     return (
       <EmptyState
@@ -256,20 +348,32 @@ function AllCategoriesView({ groups, getName, language, onCategoryClick }: AllCa
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {(group.categories || []).map((cat) => {
               const Icon = cat.icon || Package;
+              const featured = isFeatured?.(cat.id, 'category');
               return (
                 <button
                   key={cat.id}
                   onClick={() => onCategoryClick(cat)}
                   className={cn(
                     "relative flex items-center gap-3 p-4 rounded-2xl",
-                    "bg-card border border-border/50",
+                    "bg-card border",
+                    featured 
+                      ? "border-amber-400/60 bg-gradient-to-br from-amber-50/50 to-transparent dark:from-amber-950/20" 
+                      : "border-border/50",
                     "hover:border-primary/40 hover:shadow-md hover:scale-[1.02]",
                     "active:scale-95 transition-all duration-200",
                     "group text-left"
                   )}
                 >
-                  {/* Badge */}
-                  {(cat.isNew || cat.isHot) && (
+                  {/* Featured Badge */}
+                  {featured && (
+                    <span className="absolute -top-1.5 -left-1.5 text-[9px] px-1.5 py-0.5 rounded-full font-semibold shadow-sm bg-gradient-to-r from-amber-400 to-amber-500 text-white flex items-center gap-0.5">
+                      <Crown className="w-2.5 h-2.5" />
+                      PRO
+                    </span>
+                  )}
+                  
+                  {/* New/Hot Badge */}
+                  {!featured && (cat.isNew || cat.isHot) && (
                     <span className={cn(
                       "absolute -top-1.5 -right-1.5 text-[9px] px-1.5 py-0.5 rounded-full font-semibold shadow-sm",
                       cat.isNew ? "bg-primary text-primary-foreground" : "bg-amber-500 text-white"
@@ -615,6 +719,8 @@ function ProvidersView({
                   image={service.images?.[0]}
                   price={service.price ?? undefined}
                   currency={service.currency}
+                  rating={service.rating ?? undefined}
+                  reviewCount={service.review_count ?? undefined}
                   isVerified={service.provider?.is_verified}
                   onClick={() => onServiceClick(service)}
                 />
