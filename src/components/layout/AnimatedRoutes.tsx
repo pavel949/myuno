@@ -304,6 +304,7 @@ const VendorCleaning = lazy(() => import('@/pages/vendor/VendorCleaning'));
 const VendorBabysitters = lazy(() => import('@/pages/vendor/VendorBabysitters'));
 const VendorFlowers = lazy(() => import('@/pages/vendor/VendorFlowers'));
 const VendorLocations = lazy(() => import('@/pages/vendor/VendorLocations'));
+const VendorProducts = lazy(() => import('@/pages/vendor/VendorProducts'));
 
 // Owner (Property Care) pages
 const OwnerDashboard = lazy(() => import('@/pages/owner/OwnerDashboard'));
@@ -673,6 +674,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/vendor/babysitters" element={<VendorBabysitters />} />
           <Route path="/vendor/flowers" element={<VendorFlowers />} />
           <Route path="/vendor/locations" element={<VendorLocations />} />
+          <Route path="/vendor/products" element={<VendorProducts />} />
         </Route>
         
         {/* Owner Landing - Public */}

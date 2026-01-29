@@ -8165,6 +8165,7 @@ export type Database = {
           lat: number | null
           lng: number | null
           logo_url: string | null
+          marketplace_vendor_id: string | null
           name: string
           pending_payout: number | null
           phone: string | null
@@ -8191,6 +8192,7 @@ export type Database = {
           lat?: number | null
           lng?: number | null
           logo_url?: string | null
+          marketplace_vendor_id?: string | null
           name: string
           pending_payout?: number | null
           phone?: string | null
@@ -8217,6 +8219,7 @@ export type Database = {
           lat?: number | null
           lng?: number | null
           logo_url?: string | null
+          marketplace_vendor_id?: string | null
           name?: string
           pending_payout?: number | null
           phone?: string | null
@@ -8228,7 +8231,15 @@ export type Database = {
           user_id?: string | null
           website?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "providers_marketplace_vendor_id_fkey"
+            columns: ["marketplace_vendor_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_vendors"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       push_subscriptions: {
         Row: {
