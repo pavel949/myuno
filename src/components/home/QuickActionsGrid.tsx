@@ -1,4 +1,4 @@
-import React, { useCallback, memo } from 'react';
+import React, { useCallback, memo, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { 
@@ -11,9 +11,16 @@ import {
   Stethoscope,
   AlertTriangle,
   ShoppingBag,
-  MoreHorizontal
+  MoreHorizontal,
+  Scale,
+  Shield,
+  Sparkles,
+  Car,
+  GraduationCap,
+  Briefcase
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useProfile, type UserType } from '@/hooks/useProfile';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { triggerRipple } from '@/hooks/useRipple';
@@ -35,11 +42,265 @@ interface QuickAction {
   isUrgent?: boolean;
 }
 
-// 10 essential services optimized for 3 target audiences:
-// Row 1: Tourists (Yachts, Transfer, Tours, Food, Events)
-// Row 2: Residents (Property, Medical, Legal, Insurance) + More
-const quickActions: QuickAction[] = [
-  // Row 1 - Туристам
+// ============================================
+// ACTIONS BY USER TYPE
+// ============================================
+
+// Tourist-focused actions (leisure, exploration)
+const TOURIST_ACTIONS: QuickAction[] = [
+  {
+    id: 'yachts',
+    icon: Anchor,
+    label: 'Yachts',
+    labelRu: 'Яхты',
+    path: '/yachts',
+    iconColor: 'text-cyan-600',
+    bgColor: 'bg-cyan-500/10',
+  },
+  {
+    id: 'tours',
+    icon: Compass,
+    label: 'Tours',
+    labelRu: 'Туры',
+    path: '/tours',
+    iconColor: 'text-amber-600',
+    bgColor: 'bg-amber-500/10',
+  },
+  {
+    id: 'transfer',
+    icon: Plane,
+    label: 'Transfer',
+    labelRu: 'Трансфер',
+    path: '/transport/airport',
+    iconColor: 'text-indigo-600',
+    bgColor: 'bg-indigo-500/10',
+  },
+  {
+    id: 'restaurants',
+    icon: Utensils,
+    label: 'Food',
+    labelRu: 'Еда',
+    path: '/restaurants',
+    iconColor: 'text-orange-500',
+    bgColor: 'bg-orange-500/10',
+  },
+  {
+    id: 'beauty',
+    icon: Sparkles,
+    label: 'Beauty',
+    labelRu: 'Красота',
+    path: '/beauty',
+    iconColor: 'text-pink-500',
+    bgColor: 'bg-pink-500/10',
+  },
+  {
+    id: 'flowers',
+    icon: Flower2,
+    label: 'Flowers',
+    labelRu: 'Цветы',
+    path: '/flowers',
+    iconColor: 'text-rose-500',
+    bgColor: 'bg-rose-500/10',
+  },
+  {
+    id: 'transport',
+    icon: Car,
+    label: 'Transport',
+    labelRu: 'Транспорт',
+    path: '/transport',
+    iconColor: 'text-blue-600',
+    bgColor: 'bg-blue-500/10',
+  },
+  {
+    id: 'medical',
+    icon: Stethoscope,
+    label: 'Medical',
+    labelRu: 'Медицина',
+    path: '/medical',
+    iconColor: 'text-emerald-600',
+    bgColor: 'bg-emerald-500/10',
+  },
+];
+
+// Resident-focused actions (long-term living infrastructure)
+const RESIDENT_ACTIONS: QuickAction[] = [
+  {
+    id: 'property',
+    icon: Home,
+    label: 'Property',
+    labelRu: 'Жильё',
+    path: '/property',
+    iconColor: 'text-teal-600',
+    bgColor: 'bg-teal-500/10',
+  },
+  {
+    id: 'legal',
+    icon: Scale,
+    label: 'Legal',
+    labelRu: 'Юрист',
+    path: '/legal',
+    iconColor: 'text-indigo-600',
+    bgColor: 'bg-indigo-500/10',
+  },
+  {
+    id: 'visa',
+    icon: Briefcase,
+    label: 'Visa',
+    labelRu: 'Визы',
+    path: '/visa',
+    iconColor: 'text-purple-600',
+    bgColor: 'bg-purple-500/10',
+  },
+  {
+    id: 'insurance',
+    icon: Shield,
+    label: 'Insurance',
+    labelRu: 'Страховка',
+    path: '/insurance',
+    iconColor: 'text-sky-600',
+    bgColor: 'bg-sky-500/10',
+  },
+  {
+    id: 'medical',
+    icon: Stethoscope,
+    label: 'Medical',
+    labelRu: 'Медицина',
+    path: '/medical',
+    iconColor: 'text-emerald-600',
+    bgColor: 'bg-emerald-500/10',
+  },
+  {
+    id: 'education',
+    icon: GraduationCap,
+    label: 'Education',
+    labelRu: 'Обучение',
+    path: '/education',
+    iconColor: 'text-violet-600',
+    bgColor: 'bg-violet-500/10',
+  },
+  {
+    id: 'restaurants',
+    icon: Utensils,
+    label: 'Food',
+    labelRu: 'Еда',
+    path: '/restaurants',
+    iconColor: 'text-orange-500',
+    bgColor: 'bg-orange-500/10',
+  },
+  {
+    id: 'transport',
+    icon: Car,
+    label: 'Transport',
+    labelRu: 'Транспорт',
+    path: '/transport',
+    iconColor: 'text-blue-600',
+    bgColor: 'bg-blue-500/10',
+  },
+];
+
+// Owner-focused actions (property management)
+const OWNER_ACTIONS: QuickAction[] = [
+  {
+    id: 'property',
+    icon: Home,
+    label: 'Property',
+    labelRu: 'Жильё',
+    path: '/property',
+    iconColor: 'text-teal-600',
+    bgColor: 'bg-teal-500/10',
+  },
+  {
+    id: 'legal',
+    icon: Scale,
+    label: 'Legal',
+    labelRu: 'Юрист',
+    path: '/legal',
+    iconColor: 'text-indigo-600',
+    bgColor: 'bg-indigo-500/10',
+  },
+  {
+    id: 'insurance',
+    icon: Shield,
+    label: 'Insurance',
+    labelRu: 'Страховка',
+    path: '/insurance',
+    iconColor: 'text-sky-600',
+    bgColor: 'bg-sky-500/10',
+  },
+  {
+    id: 'services',
+    icon: Sparkles,
+    label: 'Services',
+    labelRu: 'Услуги',
+    path: '/services',
+    iconColor: 'text-amber-600',
+    bgColor: 'bg-amber-500/10',
+  },
+  {
+    id: 'visa',
+    icon: Briefcase,
+    label: 'Visa',
+    labelRu: 'Визы',
+    path: '/visa',
+    iconColor: 'text-purple-600',
+    bgColor: 'bg-purple-500/10',
+  },
+  {
+    id: 'medical',
+    icon: Stethoscope,
+    label: 'Medical',
+    labelRu: 'Медицина',
+    path: '/medical',
+    iconColor: 'text-emerald-600',
+    bgColor: 'bg-emerald-500/10',
+  },
+  {
+    id: 'restaurants',
+    icon: Utensils,
+    label: 'Food',
+    labelRu: 'Еда',
+    path: '/restaurants',
+    iconColor: 'text-orange-500',
+    bgColor: 'bg-orange-500/10',
+  },
+  {
+    id: 'transport',
+    icon: Car,
+    label: 'Transport',
+    labelRu: 'Транспорт',
+    path: '/transport',
+    iconColor: 'text-blue-600',
+    bgColor: 'bg-blue-500/10',
+  },
+];
+
+// Fixed actions (always last 2 slots)
+const FIXED_ACTIONS: QuickAction[] = [
+  {
+    id: 'sos',
+    icon: AlertTriangle,
+    label: 'SOS',
+    labelRu: 'SOS',
+    path: '/sos',
+    iconColor: 'text-red-500',
+    bgColor: 'bg-red-500/10',
+    badge: '24/7',
+    badgeRu: '24/7',
+    isUrgent: true,
+  },
+  {
+    id: 'more',
+    icon: MoreHorizontal,
+    label: 'More',
+    labelRu: 'Ещё',
+    path: '/discover',
+    iconColor: 'text-muted-foreground',
+    bgColor: 'bg-muted',
+  },
+];
+
+// Default actions for guests (not logged in)
+const DEFAULT_ACTIONS: QuickAction[] = [
   {
     id: 'yachts',
     icon: Anchor,
@@ -85,7 +346,6 @@ const quickActions: QuickAction[] = [
     iconColor: 'text-rose-500',
     bgColor: 'bg-rose-500/10',
   },
-  // Row 2 - Резидентам и владельцам
   {
     id: 'property',
     icon: Home,
@@ -105,18 +365,6 @@ const quickActions: QuickAction[] = [
     bgColor: 'bg-emerald-500/10',
   },
   {
-    id: 'sos',
-    icon: AlertTriangle,
-    label: 'SOS',
-    labelRu: 'SOS',
-    path: '/sos',
-    iconColor: 'text-red-500',
-    bgColor: 'bg-red-500/10',
-    badge: '24/7',
-    badgeRu: '24/7',
-    isUrgent: true,
-  },
-  {
     id: 'market',
     icon: ShoppingBag,
     label: 'Market',
@@ -125,21 +373,37 @@ const quickActions: QuickAction[] = [
     iconColor: 'text-violet-600',
     bgColor: 'bg-violet-500/10',
   },
-  {
-    id: 'more',
-    icon: MoreHorizontal,
-    label: 'More',
-    labelRu: 'Ещё',
-    path: '/discover',
-    iconColor: 'text-muted-foreground',
-    bgColor: 'bg-muted',
-  },
 ];
+
+function getActionsForUserType(userType: UserType | null | undefined): QuickAction[] {
+  switch (userType) {
+    case 'tourist':
+      return TOURIST_ACTIONS;
+    case 'resident':
+      return RESIDENT_ACTIONS;
+    case 'owner':
+      return OWNER_ACTIONS;
+    case 'vendor':
+    case 'admin':
+    case 'uno_team':
+      return RESIDENT_ACTIONS; // Business users see resident view
+    default:
+      return DEFAULT_ACTIONS;
+  }
+}
 
 export const QuickActionsGrid = memo(function QuickActionsGrid() {
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { profile } = useProfile();
   const queryClient = useQueryClient();
+
+  // Get personalized actions based on user type
+  const quickActions = useMemo(() => {
+    const userActions = getActionsForUserType(profile?.user_type);
+    // Take first 8 user-specific actions + 2 fixed actions (SOS + More)
+    return [...userActions.slice(0, 8), ...FIXED_ACTIONS];
+  }, [profile?.user_type]);
 
   const handleClick = useCallback((action: QuickAction, e: React.MouseEvent<HTMLButtonElement>) => {
     triggerRipple(e);

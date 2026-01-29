@@ -4,6 +4,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 
+export type UserType = 'tourist' | 'resident' | 'owner' | 'vendor' | 'admin' | 'uno_team';
+
 export interface UserProfile {
   id: string;
   full_name: string | null;
@@ -11,6 +13,7 @@ export interface UserProfile {
   avatar_url: string | null;
   preferred_language: string | null;
   email: string | null;
+  user_type: UserType | null;
   emergency_contact_name: string | null;
   emergency_contact_phone: string | null;
   emergency_contact_relationship: string | null;
@@ -38,7 +41,7 @@ export function useProfile() {
 
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, full_name, phone, avatar_url, preferred_language, email, emergency_contact_name, emergency_contact_phone, emergency_contact_relationship')
+        .select('id, full_name, phone, avatar_url, preferred_language, email, user_type, emergency_contact_name, emergency_contact_phone, emergency_contact_relationship')
         .eq('id', user.id)
         .single();
 
