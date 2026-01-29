@@ -3737,6 +3737,44 @@ export type Database = {
           },
         ]
       }
+      marketplace_product_attributes: {
+        Row: {
+          attribute_key: string
+          attribute_value: string
+          attribute_value_ru: string | null
+          created_at: string | null
+          id: string
+          product_id: string | null
+          sort_order: number | null
+        }
+        Insert: {
+          attribute_key: string
+          attribute_value: string
+          attribute_value_ru?: string | null
+          created_at?: string | null
+          id?: string
+          product_id?: string | null
+          sort_order?: number | null
+        }
+        Update: {
+          attribute_key?: string
+          attribute_value?: string
+          attribute_value_ru?: string | null
+          created_at?: string | null
+          id?: string
+          product_id?: string | null
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_product_attributes_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marketplace_products: {
         Row: {
           category_slug: string
