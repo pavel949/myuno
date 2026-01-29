@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Search, 
   ChevronRight,
-  Truck,
-  Clock,
   Flame,
   Sparkles,
   ArrowRight,
+  TrendingUp,
+  Truck,
+  Clock,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
@@ -18,6 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { StickyCartBar } from '@/components/cart/StickyCartBar';
 import { ProfessionalProductCard, CategoryRibbon } from '@/components/market';
+import { MarketHero } from '@/components/market/MarketHero';
 import { 
   useMarketplaceCategories, 
   useMarketplaceProducts,
@@ -203,40 +205,45 @@ const MarketIndex = () => {
           </div>
         </div>
 
+        {/* Hero Banner */}
+        <MarketHero 
+          totalProducts={allProducts.length}
+          totalCategories={activeCategories.length}
+          freeDeliveryThreshold={freeDeliveryThreshold}
+        />
+
         {/* 2-Row Category Ribbon - Ozon Style */}
         <CategoryRibbon />
 
-        {/* Promo Banners */}
-        <div className="px-4 py-4 max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 gap-3">
+        {/* Promo Banners - Compact */}
+        <div className="px-4 py-3 max-w-7xl mx-auto">
+          <div className="grid grid-cols-2 gap-2">
             {/* Free Delivery Banner */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 p-4 text-white">
-              <Truck className="absolute -right-2 -bottom-2 w-16 h-16 opacity-20" />
-              <div className="relative z-10">
-                <p className="text-[10px] uppercase tracking-wide opacity-80 mb-1">
-                  {language === 'ru' ? 'Доставка' : 'Delivery'}
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200/50 dark:border-emerald-800/50">
+              <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
+                <Truck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                  {language === 'ru' ? 'Бесплатно' : 'Free delivery'}
                 </p>
-                <p className="text-lg font-bold leading-tight">
-                  {language === 'ru' ? 'Бесплатно' : 'Free'}
-                </p>
-                <p className="text-xs opacity-90 mt-1">
+                <p className="text-[10px] text-emerald-600/80 dark:text-emerald-400/80">
                   {language === 'ru' ? `от ฿${freeDeliveryThreshold}` : `from ฿${freeDeliveryThreshold}`}
                 </p>
               </div>
             </div>
 
             {/* Fast Delivery Banner */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 p-4 text-white">
-              <Clock className="absolute -right-2 -bottom-2 w-16 h-16 opacity-20" />
-              <div className="relative z-10">
-                <p className="text-[10px] uppercase tracking-wide opacity-80 mb-1">
-                  {language === 'ru' ? 'Время' : 'Time'}
-                </p>
-                <p className="text-lg font-bold leading-tight">
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200/50 dark:border-blue-800/50">
+              <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
+                <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-blue-700 dark:text-blue-300">
                   {defaultZone?.estimated_time_minutes || 45} {language === 'ru' ? 'мин' : 'min'}
                 </p>
-                <p className="text-xs opacity-90 mt-1">
-                  {language === 'ru' ? 'экспресс' : 'express'}
+                <p className="text-[10px] text-blue-600/80 dark:text-blue-400/80">
+                  {language === 'ru' ? 'экспресс' : 'express delivery'}
                 </p>
               </div>
             </div>
