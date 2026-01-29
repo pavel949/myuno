@@ -250,13 +250,13 @@ export function useCategories() {
   const { language } = useLanguage();
 
   const groupsQuery = useQuery({
-    queryKey: ['category-groups', 'v2'], // Invalidate cache
+    queryKey: ['category-groups', 'v3'], // Force cache invalidation
     queryFn: fetchCategoryGroups,
     ...CACHE_PROFILES.STATIC,
   });
 
   const allCategoriesQuery = useQuery({
-    queryKey: ['all-categories', 'v2'], // Invalidate cache
+    queryKey: ['all-categories', 'v3'], // Force cache invalidation
     queryFn: fetchAllCategories,
     ...CACHE_PROFILES.STATIC,
   });
