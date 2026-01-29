@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ShieldCheck, Layers, Languages, HeartHandshake } from 'lucide-react';
+import { ShieldCheck, Layers, Languages, HeartHandshake, MapPin } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 
@@ -46,6 +46,12 @@ export function HeroBanner() {
       transition={{ duration: 0.4, ease: 'easeOut' }}
       className="text-center space-y-2 py-2"
     >
+      {/* Location indicator */}
+      <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
+        <MapPin className="w-3 h-3 text-primary" />
+        <span className="font-medium">{isRu ? 'Пхукет, Таиланд' : 'Phuket, Thailand'}</span>
+      </div>
+
       {/* Unified brand logo */}
       <div className="flex items-center justify-center gap-1.5 mb-1">
         <span className="text-sm font-medium text-muted-foreground">my</span>
