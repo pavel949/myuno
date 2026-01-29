@@ -128,7 +128,7 @@ const quickActions: QuickAction[] = [
     icon: MoreHorizontal,
     label: 'More',
     labelRu: 'Ещё',
-    path: '/categories',
+    path: '/discover',
     iconColor: 'text-muted-foreground',
     bgColor: 'bg-muted',
   },
