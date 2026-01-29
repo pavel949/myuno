@@ -26,6 +26,8 @@ import { StickyCartBar } from '@/components/cart/StickyCartBar';
 import { useCartToast } from '@/hooks/useCartToast';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { VendorInfo } from '@/components/market/VendorInfo';
+import { useVendorById } from '@/hooks/useMarketplaceVendors';
 import { cn } from '@/lib/utils';
 
 const ProductDetailPage = () => {
@@ -52,6 +54,9 @@ const ProductDetailPage = () => {
     },
     enabled: !!productId,
   });
+
+  // Fetch vendor data if product has vendor_id
+  const { vendor, isLoading: vendorLoading } = useVendorById(product?.vendor_id);
 
   const cartItems = getItemsByType('product');
   const quantity = useMemo(() => {
@@ -291,6 +296,16 @@ const ProductDetailPage = () => {
               <span className="text-sm text-muted-foreground">/ {unit}</span>
             )}
           </div>
+
+          {/* Vendor Info Card */}
+          {(vendor || vendorLoading) && (
+            <div className="mb-6">
+              <h3 className="font-semibold mb-3">
+                {language === 'ru' ? 'Продавец' : 'Seller'}
+              </h3>
+              <VendorInfo vendor={vendor} isLoading={vendorLoading} />
+            </div>
+          )}
           
           {/* Description */}
           {description && (

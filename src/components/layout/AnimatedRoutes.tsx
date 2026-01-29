@@ -157,6 +157,7 @@ const DeliveryIndex = lazy(() => import('@/pages/delivery/DeliveryIndex'));
 const MarketIndex = lazy(() => import('@/pages/market/MarketIndex'));
 const MarketCategoryPage = lazy(() => import('@/pages/market/MarketCategoryPage'));
 const ProductDetailPage = lazy(() => import('@/pages/market/ProductDetailPage'));
+const VendorPage = lazy(() => import('@/pages/market/VendorPage'));
 const StoreDetail = lazy(() => import('@/pages/market/StoreDetail'));
 const MarketCheckout = lazy(() => import('@/pages/market/MarketCheckout'));
 
@@ -556,6 +557,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/market" element={<LazyPage><MarketIndex /></LazyPage>} />
         <Route path="/market/category/:categoryId" element={<LazyPage><MarketCategoryPage /></LazyPage>} />
         <Route path="/market/product/:productId" element={<LazyPage><ProductDetailPage /></LazyPage>} />
+        <Route path="/market/vendor/:slug" element={<LazyPage><VendorPage /></LazyPage>} />
         <Route path="/market/store/:id" element={<LazyPage><StoreDetail /></LazyPage>} />
         <Route path="/market/checkout" element={<LazyPage><MarketCheckout /></LazyPage>} />
         

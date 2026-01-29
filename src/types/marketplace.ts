@@ -83,6 +83,35 @@ export interface InternationalShippingZone {
 
 export type DeliveryType = 'local' | 'international';
 
+// Vendor interface for professional vendor registry
+export interface MarketplaceVendor {
+  id: string;
+  slug: string;
+  name_en: string;
+  name_ru: string;
+  description_en: string | null;
+  description_ru: string | null;
+  logo_url: string | null;
+  cover_image: string | null;
+  phone: string | null;
+  email: string | null;
+  website: string | null;
+  address: string | null;
+  address_ru: string | null;
+  rating: number | null;
+  review_count: number;
+  verified: boolean;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// Product with vendor relationship
+export interface MarketplaceProductWithVendor extends MarketplaceProduct {
+  vendor_id: string | null;
+  vendor?: MarketplaceVendor | null;
+}
+
 // For backward compatibility - maps subcategory to old format
 export interface Subcategory {
   id: string;
