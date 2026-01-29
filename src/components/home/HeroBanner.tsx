@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ShieldCheck, Users, Globe } from 'lucide-react';
+import { ShieldCheck, Layers, Languages, HeartHandshake } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 
@@ -10,7 +10,7 @@ interface TrustBadgeProps {
 }
 
 const TrustBadge = ({ icon, label }: TrustBadgeProps) => (
-  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+  <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-medium">
     {icon}
     <span>{label}</span>
   </div>
@@ -22,16 +22,20 @@ export function HeroBanner() {
 
   const badges = [
     {
-      icon: <ShieldCheck className="w-3.5 h-3.5" />,
-      label: isRu ? 'G-Trust Партнёры' : 'G-Trust Partners',
+      icon: <ShieldCheck className="w-3 h-3" />,
+      label: isRu ? 'Верифицировано' : 'Verified',
     },
     {
-      icon: <Users className="w-3.5 h-3.5" />,
-      label: isRu ? 'Команда 24/7' : '24/7 Team',
+      icon: <Layers className="w-3 h-3" />,
+      label: isRu ? 'Всё в одном' : 'All-in-one',
     },
     {
-      icon: <Globe className="w-3.5 h-3.5" />,
-      label: 'RU + EN',
+      icon: <Languages className="w-3 h-3" />,
+      label: 'RU / EN',
+    },
+    {
+      icon: <HeartHandshake className="w-3 h-3" />,
+      label: isRu ? 'Поддержка 24/7' : '24/7 Support',
     },
   ];
 
@@ -40,22 +44,24 @@ export function HeroBanner() {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="text-center space-y-3 py-3"
+      className="text-center space-y-2 py-2"
     >
+      {/* Unified brand logo */}
+      <div className="flex items-center justify-center gap-1.5 mb-1">
+        <span className="text-sm font-medium text-muted-foreground">my</span>
+        <div className="w-7 h-7 rounded-lg gradient-gold flex items-center justify-center">
+          <span className="text-xs font-bold text-primary-foreground">U</span>
+        </div>
+        <span className="text-lg font-display font-bold text-gradient-gold">UNO</span>
+      </div>
+
       {/* Main tagline */}
-      <h1 className="text-xl sm:text-2xl font-bold text-foreground">
-        {isRu ? 'Дом там, где myUNO' : 'Home is where myUNO is'}
+      <h1 className="text-lg sm:text-xl font-bold text-foreground">
+        {isRu ? 'Экосистема для жизни за рубежом' : 'Ecosystem for life abroad'}
       </h1>
 
-      {/* Positioning statement */}
-      <p className="text-sm text-muted-foreground max-w-xs mx-auto leading-relaxed">
-        {isRu
-          ? 'Верифицированная инфраструктура для комфортной жизни за рубежом'
-          : 'Verified infrastructure for comfortable life abroad'}
-      </p>
-
-      {/* Trust badges */}
-      <div className="flex flex-wrap justify-center gap-2 pt-1">
+      {/* Trust badges - all 4 values */}
+      <div className="flex flex-wrap justify-center gap-1.5">
         {badges.map((badge, index) => (
           <TrustBadge key={index} icon={badge.icon} label={badge.label} />
         ))}

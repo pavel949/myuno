@@ -1,7 +1,7 @@
 import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { Star, Shield, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -171,16 +171,11 @@ const Index = () => {
               />
             )}
 
-            {/* Trust Footer */}
-            <div className="flex items-center justify-center gap-6 py-3 border-t border-border/50">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Shield className="w-4 h-4 text-primary" aria-hidden="true" />
-                <span>{t('home.verifiedPartners')}</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Star className="w-4 h-4 text-amber-500" aria-hidden="true" />
-                <span>{t('home.realReviews')}</span>
-              </div>
+            {/* Footer - minimal */}
+            <div className="text-center py-3 border-t border-border/50">
+              <p className="text-xs text-muted-foreground">
+                © 2025 myUNO · {t('home.verifiedPartners')}
+              </p>
             </div>
           </div>
         </div>
