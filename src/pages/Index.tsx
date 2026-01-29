@@ -19,6 +19,7 @@ import { ProductSection } from '@/components/market/ProductSection';
 import { useMarketplaceProducts } from '@/hooks/useMarketplace';
 import { supabase } from '@/integrations/supabase/client';
 import { QuickListingFAB } from '@/components/listing/QuickListingFAB';
+import { HeroBanner } from '@/components/home/HeroBanner';
 
 // Lazy load only modals (opened by user action)
 const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
@@ -107,6 +108,9 @@ const Index = () => {
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="px-4 py-4 pb-24 space-y-4" key={refreshKey}>
           
+          {/* Hero Banner - Platform positioning */}
+          <HeroBanner />
+
           {/* Search Bar */}
           <div 
             onClick={() => setShowSearch(true)}
