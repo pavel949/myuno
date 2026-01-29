@@ -72,12 +72,8 @@ export const SmartWidget = memo(function SmartWidget() {
   }, [navigate, recommendation]);
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 via-card to-primary/10 border border-border">
-      {/* Background decoration */}
-      <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full blur-3xl opacity-50" />
-      <div className="absolute bottom-0 left-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl opacity-50" />
-      
-      <div className="relative z-10 p-4">
+    <div className="relative overflow-hidden rounded-xl bg-card border border-border">
+      <div className="p-3">
         {/* Header with greeting and weather */}
         <div className="flex items-start justify-between mb-4">
           <div>

@@ -2,18 +2,16 @@ import React, { useCallback, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { 
-  Car, 
-  Stethoscope, 
-  Home, 
-  AlertTriangle, 
+  Anchor, 
+  Plane, 
   Flower2, 
-  Droplets, 
-  Ticket, 
-  Plane,
+  Home, 
+  Utensils, 
+  Compass,
+  Stethoscope,
+  AlertTriangle,
   ShoppingBag,
-  Utensils,
-  Anchor,
-  Heart
+  MoreHorizontal
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
@@ -30,86 +28,70 @@ interface QuickAction {
   label: string;
   labelRu: string;
   path: string;
-  gradient: string;
+  iconColor: string;
+  bgColor: string;
   badge?: string;
   badgeRu?: string;
   isUrgent?: boolean;
-  isPopular?: boolean;
 }
 
+// 10 essential services in 2x5 grid - clean SuperApp style
 const quickActions: QuickAction[] = [
+  // Row 1
   {
     id: 'yachts',
     icon: Anchor,
-    label: 'Yachts & Boats',
-    labelRu: 'Яхты и катера',
+    label: 'Yachts',
+    labelRu: 'Яхты',
     path: '/yachts',
-    gradient: 'from-cyan-500 to-blue-600',
-    badge: 'Hot',
-    badgeRu: 'Хит',
-    isPopular: true,
+    iconColor: 'text-cyan-600',
+    bgColor: 'bg-cyan-500/10',
   },
   {
     id: 'transfer',
     icon: Plane,
-    label: 'Airport Transfer',
+    label: 'Transfer',
     labelRu: 'Трансфер',
     path: '/transport/airport',
-    gradient: 'from-indigo-500 to-blue-500',
-    badge: 'Popular',
-    badgeRu: 'Популярно',
-    isPopular: true,
+    iconColor: 'text-indigo-600',
+    bgColor: 'bg-indigo-500/10',
   },
   {
     id: 'flowers',
     icon: Flower2,
-    label: 'Flower Delivery',
-    labelRu: 'Доставка цветов',
+    label: 'Flowers',
+    labelRu: 'Цветы',
     path: '/flowers',
-    gradient: 'from-rose-500 to-pink-500',
-    isPopular: true,
-  },
-  {
-    id: 'sos',
-    icon: AlertTriangle,
-    label: 'Emergency',
-    labelRu: 'Экстренная помощь',
-    path: '/sos',
-    gradient: 'from-red-500 to-orange-500',
-    badge: '24/7',
-    badgeRu: '24/7',
-    isUrgent: true,
-  },
-  {
-    id: 'car-rental',
-    icon: Car,
-    label: 'Car Rental',
-    labelRu: 'Аренда авто',
-    path: '/transport',
-    gradient: 'from-slate-600 to-zinc-700',
-    isPopular: true,
+    iconColor: 'text-rose-500',
+    bgColor: 'bg-rose-500/10',
   },
   {
     id: 'property',
     icon: Home,
-    label: 'Property Rental',
-    labelRu: 'Аренда жилья',
+    label: 'Property',
+    labelRu: 'Жильё',
     path: '/property',
-    gradient: 'from-teal-500 to-emerald-500',
-    badge: 'Hot',
-    badgeRu: 'Хит',
-    isPopular: true,
+    iconColor: 'text-teal-600',
+    bgColor: 'bg-teal-500/10',
   },
   {
-    id: 'tickets',
-    icon: Ticket,
-    label: 'Shows & Concerts',
-    labelRu: 'Шоу и концерты',
-    path: '/events',
-    gradient: 'from-purple-500 to-violet-600',
-    badge: 'New',
-    badgeRu: 'Новое',
-    isPopular: true,
+    id: 'restaurants',
+    icon: Utensils,
+    label: 'Food',
+    labelRu: 'Еда',
+    path: '/restaurants',
+    iconColor: 'text-orange-500',
+    bgColor: 'bg-orange-500/10',
+  },
+  // Row 2
+  {
+    id: 'tours',
+    icon: Compass,
+    label: 'Tours',
+    labelRu: 'Туры',
+    path: '/tours',
+    iconColor: 'text-amber-600',
+    bgColor: 'bg-amber-500/10',
   },
   {
     id: 'medical',
@@ -117,27 +99,38 @@ const quickActions: QuickAction[] = [
     label: 'Medical',
     labelRu: 'Медицина',
     path: '/medical',
-    gradient: 'from-emerald-500 to-green-500',
+    iconColor: 'text-emerald-600',
+    bgColor: 'bg-emerald-500/10',
   },
   {
-    id: 'food',
-    icon: Utensils,
-    label: 'Food Delivery',
-    labelRu: 'Доставка еды',
-    path: '/restaurants',
-    gradient: 'from-orange-500 to-red-500',
-    isPopular: true,
+    id: 'sos',
+    icon: AlertTriangle,
+    label: 'SOS',
+    labelRu: 'SOS',
+    path: '/sos',
+    iconColor: 'text-red-500',
+    bgColor: 'bg-red-500/10',
+    badge: '24/7',
+    badgeRu: '24/7',
+    isUrgent: true,
   },
   {
-    id: 'water-delivery',
-    icon: Droplets,
-    label: 'Water Delivery',
-    labelRu: 'Доставка воды',
-    path: '/market/category/drinks',
-    gradient: 'from-sky-500 to-blue-600',
-    badge: 'Fast',
-    badgeRu: 'Быстро',
-    isPopular: true,
+    id: 'market',
+    icon: ShoppingBag,
+    label: 'Market',
+    labelRu: 'Маркет',
+    path: '/market',
+    iconColor: 'text-violet-600',
+    bgColor: 'bg-violet-500/10',
+  },
+  {
+    id: 'more',
+    icon: MoreHorizontal,
+    label: 'More',
+    labelRu: 'Ещё',
+    path: '/discover',
+    iconColor: 'text-muted-foreground',
+    bgColor: 'bg-muted',
   },
 ];
 
@@ -154,7 +147,6 @@ export const QuickActionsGrid = memo(function QuickActionsGrid() {
     navigate(action.path);
   }, [navigate]);
 
-  // Prefetch route on hover/touch for faster navigation
   const handlePrefetch = useCallback((path: string) => {
     prefetchRoute(path, queryClient);
   }, [queryClient]);
@@ -178,34 +170,27 @@ export const QuickActionsGrid = memo(function QuickActionsGrid() {
               action.isUrgent && "ring-1 ring-red-500/30"
             )}
           >
-            {/* Badge */}
+            {/* Badge - only for SOS */}
             {badge && (
               <Badge 
-                className={cn(
-                  "absolute -top-1 -right-1 text-[8px] px-1.5 py-0.5 border-0 z-10",
-                  action.isUrgent 
-                    ? "bg-red-500 text-white animate-pulse" 
-                    : action.isPopular 
-                      ? "bg-amber-500 text-white"
-                      : "bg-primary text-primary-foreground"
-                )}
+                className="absolute -top-1 -right-1 text-[8px] px-1.5 py-0.5 border-0 z-10 bg-red-500 text-white animate-pulse"
               >
                 {badge}
               </Badge>
             )}
             
-            {/* Icon Container */}
+            {/* Icon Container - clean monochrome style */}
             <div className={cn(
-              "w-11 h-11 rounded-xl flex items-center justify-center mb-1.5 bg-gradient-to-br",
-              action.gradient,
-              "group-hover:scale-110 transition-transform shadow-sm"
+              "w-12 h-12 rounded-xl flex items-center justify-center mb-1.5",
+              action.bgColor,
+              "group-hover:scale-110 transition-transform"
             )}>
-              <Icon className="w-5 h-5 text-white" />
+              <Icon className={cn("w-6 h-6", action.iconColor)} />
             </div>
             
-            {/* Label */}
+            {/* Label - single line */}
             <span className={cn(
-              "text-[10px] font-medium text-center leading-tight line-clamp-2",
+              "text-[10px] font-medium text-center leading-tight truncate w-full",
               "text-muted-foreground group-hover:text-foreground transition-colors"
             )}>
               {label}
