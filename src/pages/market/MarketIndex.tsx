@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, forwardRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Search, 
@@ -6,7 +6,6 @@ import {
   Flame,
   Sparkles,
   ArrowRight,
-  TrendingUp,
   Truck,
   Clock,
 } from 'lucide-react';
@@ -20,12 +19,8 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { StickyCartBar } from '@/components/cart/StickyCartBar';
 import { ProfessionalProductCard, CategoryRibbon } from '@/components/market';
 import { MarketHero } from '@/components/market/MarketHero';
-import { 
-  useMarketplaceCategories, 
-  useMarketplaceProducts,
-  useDeliverySettings,
-} from '@/hooks/useMarketplace';
-import { useVendors } from '@/hooks/useMarketplaceVendors';
+import { useDeliverySettings } from '@/hooks/useMarketplace';
+import { useMarketIndexData } from '@/hooks/useMarketIndexData';
 import { MarketplaceProduct } from '@/types/marketplace';
 import { useCartToast } from '@/hooks/useCartToast';
 import { cn } from '@/lib/utils';
@@ -53,37 +48,47 @@ const getCategoryFallbackIcon = (slug: string) => {
   return icons[slug] || '📦';
 };
 
-// Category Image Component
-const CategoryImage = ({ category, size = 'md' }: { 
+// Category Image Component - with forwardRef to avoid React warnings
+interface CategoryImageProps {
   category: { slug: string; image_url: string | null; icon: string | null }; 
   size?: 'sm' | 'md' | 'lg';
-}) => {
-  const sizeClasses = {
-    sm: 'w-10 h-10',
-    md: 'w-12 h-12',
-    lg: 'w-16 h-16',
-  };
-  
-  if (category.image_url) {
+}
+
+const CategoryImage = forwardRef<HTMLDivElement, CategoryImageProps>(
+  ({ category, size = 'md' }, ref) => {
+    const sizeClasses = {
+      sm: 'w-10 h-10',
+      md: 'w-12 h-12',
+      lg: 'w-16 h-16',
+    };
+    
+    if (category.image_url) {
+      return (
+        <div ref={ref}>
+          <img 
+            src={category.image_url} 
+            alt="" 
+            className={cn(sizeClasses[size], "rounded-xl object-cover")}
+          />
+        </div>
+      );
+    }
+    
+    // Fallback to icon or emoji
     return (
-      <img 
-        src={category.image_url} 
-        alt="" 
-        className={cn(sizeClasses[size], "rounded-xl object-cover")}
-      />
+      <div 
+        ref={ref}
+        className={cn(
+          sizeClasses[size],
+          "rounded-xl bg-muted/50 flex items-center justify-center text-2xl"
+        )}
+      >
+        {category.icon || getCategoryFallbackIcon(category.slug)}
+      </div>
     );
   }
-  
-  // Fallback to icon or emoji
-  return (
-    <div className={cn(
-      sizeClasses[size],
-      "rounded-xl bg-muted/50 flex items-center justify-center text-2xl"
-    )}>
-      {category.icon || getCategoryFallbackIcon(category.slug)}
-    </div>
-  );
-};
+);
+CategoryImage.displayName = 'CategoryImage';
 
 const MarketIndex = () => {
   const navigate = useNavigate();
@@ -94,13 +99,15 @@ const MarketIndex = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
-  // Fetch data
-  const { categories, isLoading: categoriesLoading } = useMarketplaceCategories();
-  const { products: allProducts, isLoading: productsLoading } = useMarketplaceProducts();
-  const { products: popularProducts } = useMarketplaceProducts({ popularOnly: true, limit: 20 });
-  const { products: newProducts } = useMarketplaceProducts({ newOnly: true, limit: 12 });
+  // Fetch data - optimized: single fetch for products, derive popular/new client-side
+  const { 
+    allProducts, 
+    popularProducts, 
+    newProducts, 
+    categories, 
+    isLoading: dataLoading 
+  } = useMarketIndexData();
   const { freeDeliveryThreshold, defaultZone } = useDeliverySettings();
-  const { vendors } = useVendors();
 
   const cartItems = getItemsByType('product');
 
