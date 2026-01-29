@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingBag, Search, Sparkles } from 'lucide-react';
+import { ShoppingBag, Search, Sparkles, UtensilsCrossed, ShoppingBasket, Truck, Clock } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -9,16 +9,19 @@ import { PageHeader } from '@/components/uno/PageHeader';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StickyCartBar } from '@/components/cart/StickyCartBar';
 import { ProductSection, ProfessionalProductCard, ProfessionalCategoryBanner } from '@/components/market';
 import { 
   useMarketplaceCategories, 
   useMarketplaceProducts,
   useDeliverySettings,
+  MarketplaceCategory,
 } from '@/hooks/useMarketplace';
 import { MarketplaceProduct } from '@/types/marketplace';
 import { useCartToast } from '@/hooks/useCartToast';
 import { CrossSellSection } from '@/components/crosssell';
+import { cn } from '@/lib/utils';
 
 const MarketIndex = () => {
   const navigate = useNavigate();
@@ -28,17 +31,41 @@ const MarketIndex = () => {
   
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [activeTab, setActiveTab] = useState<'all' | 'food' | 'non-food'>('all');
 
   // Fetch data from database
   const { categories, isLoading: categoriesLoading } = useMarketplaceCategories();
   const { products: allProducts, isLoading: productsLoading } = useMarketplaceProducts();
   const { products: popularProducts, isLoading: popularLoading } = useMarketplaceProducts({ popularOnly: true, limit: 10 });
   const { products: newProducts, isLoading: newLoading } = useMarketplaceProducts({ newOnly: true, limit: 8 });
-  const { freeDeliveryThreshold, amountToFreeDelivery } = useDeliverySettings();
+  const { freeDeliveryThreshold, defaultZone } = useDeliverySettings();
 
   const cartItems = getItemsByType('product');
   const cartItemCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
   const cartTotal = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+
+  // Filter categories by group and hide empty ones
+  const { foodCategories, nonFoodCategories, filteredCategories } = useMemo(() => {
+    const withProducts = categories.filter(cat => {
+      const productCount = allProducts.filter(p => p.category_slug === cat.slug).length;
+      return productCount > 0;
+    });
+    
+    const food = withProducts
+      .filter(c => c.category_group === 'food')
+      .sort((a, b) => a.sort_order - b.sort_order);
+    
+    const nonFood = withProducts
+      .filter(c => c.category_group === 'non-food')
+      .sort((a, b) => a.sort_order - b.sort_order);
+    
+    let filtered: MarketplaceCategory[] = [];
+    if (activeTab === 'all') filtered = [...food, ...nonFood];
+    else if (activeTab === 'food') filtered = food;
+    else filtered = nonFood;
+    
+    return { foodCategories: food, nonFoodCategories: nonFood, filteredCategories: filtered };
+  }, [categories, allProducts, activeTab]);
 
   // Search results
   const searchResults = useMemo(() => {
@@ -53,11 +80,12 @@ const MarketIndex = () => {
     ).slice(0, 8);
   }, [searchQuery, allProducts]);
 
-  // Use categories directly with new component
-  const sortedCategories = useMemo(() => 
-    [...categories].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)),
-    [categories]
-  );
+  // Products filtered by active tab
+  const filteredProducts = useMemo(() => {
+    if (activeTab === 'all') return allProducts;
+    const categorySlugs = (activeTab === 'food' ? foodCategories : nonFoodCategories).map(c => c.slug);
+    return allProducts.filter(p => categorySlugs.includes(p.category_slug));
+  }, [allProducts, activeTab, foodCategories, nonFoodCategories]);
 
   const getQuantity = (productId: string) => {
     return cartItems.find(i => i.id === productId)?.quantity || 0;
@@ -84,11 +112,22 @@ const MarketIndex = () => {
     removeItem(productId);
   };
 
-  const handleCategoryClick = (categoryId: string) => {
-    navigate(`/market/category/${categoryId}`);
+  const handleCategoryClick = (categorySlug: string) => {
+    navigate(`/market/category/${categorySlug}`);
   };
 
   const isLoading = categoriesLoading || productsLoading;
+
+  // Stats for display
+  const foodProductCount = useMemo(() => {
+    const slugs = foodCategories.map(c => c.slug);
+    return allProducts.filter(p => slugs.includes(p.category_slug)).length;
+  }, [allProducts, foodCategories]);
+
+  const nonFoodProductCount = useMemo(() => {
+    const slugs = nonFoodCategories.map(c => c.slug);
+    return allProducts.filter(p => slugs.includes(p.category_slug)).length;
+  }, [allProducts, nonFoodCategories]);
 
   return (
     <AppLayout>
@@ -111,35 +150,65 @@ const MarketIndex = () => {
         />
 
         {/* Hero Section */}
-        <div className="relative rounded-2xl overflow-hidden mb-6 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-5">
+        <div className="relative rounded-2xl overflow-hidden mb-4 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-4">
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="w-5 h-5 text-primary" />
-              <span className="text-sm font-medium text-primary">
-                {language === 'ru' ? 'Онлайн магазин' : 'Online Shop'}
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-xs font-medium text-primary">
+                {language === 'ru' ? 'Доставка по Пхукету' : 'Phuket Delivery'}
               </span>
             </div>
-            <h1 className="text-2xl font-bold mb-1">
-              {language === 'ru' ? 'Доставка по Пхукету' : 'Phuket Delivery'}
+            <h1 className="text-xl font-bold mb-2">
+              {language === 'ru' ? 'Свежие продукты и товары' : 'Fresh Food & Goods'}
             </h1>
-            <p className="text-sm text-muted-foreground">
-              {language === 'ru' 
-                ? 'Продукты, косметика, сувениры и декор' 
-                : 'Groceries, cosmetics, souvenirs & decor'}
-            </p>
-            {/* Free delivery banner */}
-            {freeDeliveryThreshold && (
-              <div className="mt-3 inline-flex items-center gap-1.5 bg-green-500/10 text-green-600 dark:text-green-400 px-3 py-1.5 rounded-full text-xs font-medium">
-                🚚 {language === 'ru' 
-                  ? `Бесплатная доставка от ฿${freeDeliveryThreshold}` 
-                  : `Free delivery from ฿${freeDeliveryThreshold}`}
-              </div>
-            )}
+            
+            {/* Quick stats */}
+            <div className="flex flex-wrap gap-3 mt-3">
+              {freeDeliveryThreshold && (
+                <div className="flex items-center gap-1.5 bg-green-500/10 text-green-600 dark:text-green-400 px-2.5 py-1 rounded-full text-xs font-medium">
+                  <Truck className="w-3.5 h-3.5" />
+                  {language === 'ru' ? `Бесплатно от ฿${freeDeliveryThreshold}` : `Free from ฿${freeDeliveryThreshold}`}
+                </div>
+              )}
+              {defaultZone?.estimated_time_minutes && (
+                <div className="flex items-center gap-1.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2.5 py-1 rounded-full text-xs font-medium">
+                  <Clock className="w-3.5 h-3.5" />
+                  {defaultZone.estimated_time_minutes} {language === 'ru' ? 'мин' : 'min'}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
+        {/* Category Tabs */}
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="mb-4">
+          <TabsList className="w-full grid grid-cols-3 h-11">
+            <TabsTrigger value="all" className="text-xs sm:text-sm gap-1.5">
+              <ShoppingBasket className="w-4 h-4" />
+              {language === 'ru' ? 'Все' : 'All'}
+              <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">
+                {allProducts.length}
+              </Badge>
+            </TabsTrigger>
+            <TabsTrigger value="food" className="text-xs sm:text-sm gap-1.5">
+              <UtensilsCrossed className="w-4 h-4" />
+              {language === 'ru' ? 'Еда' : 'Food'}
+              <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">
+                {foodProductCount}
+              </Badge>
+            </TabsTrigger>
+            <TabsTrigger value="non-food" className="text-xs sm:text-sm gap-1.5">
+              <ShoppingBag className="w-4 h-4" />
+              {language === 'ru' ? 'Товары' : 'Goods'}
+              <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">
+                {nonFoodProductCount}
+              </Badge>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
         {/* Search */}
-        <div className="relative mb-6">
+        <div className="relative mb-5">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder={language === 'ru' ? 'Поиск товаров...' : 'Search products...'}
@@ -147,7 +216,7 @@ const MarketIndex = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setIsSearchFocused(true)}
             onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-            className="pl-10 pr-4 h-12 rounded-xl bg-muted/50"
+            className="pl-10 pr-4 h-11 rounded-xl bg-muted/50"
           />
           
           {/* Search Results Dropdown */}
@@ -184,76 +253,106 @@ const MarketIndex = () => {
           )}
         </div>
 
-        {/* Category Banners */}
-        {!categoriesLoading && sortedCategories.length > 0 && (
-          <section className="mb-8">
+        {/* Category Banners - Filtered by tab */}
+        {!categoriesLoading && filteredCategories.length > 0 && (
+          <section className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-base font-bold">
+                {activeTab === 'food' 
+                  ? (language === 'ru' ? '🍽️ Продукты питания' : '🍽️ Food & Groceries')
+                  : activeTab === 'non-food'
+                  ? (language === 'ru' ? '🛍️ Непродовольственные' : '🛍️ Non-Food Items')
+                  : (language === 'ru' ? 'Категории' : 'Categories')
+                }
+              </h2>
+              <Badge variant="outline" className="text-xs">
+                {filteredCategories.length} {language === 'ru' ? 'кат.' : 'cat.'}
+              </Badge>
+            </div>
             <ProfessionalCategoryBanner
-              categories={sortedCategories}
+              categories={filteredCategories}
               onCategoryClick={handleCategoryClick}
             />
           </section>
         )}
 
         {/* Popular Products */}
-        <div className="mb-8">
-          <ProductSection
-            title="Popular"
-            titleRu="Популярное"
-            products={popularProducts}
-            variant="scroll"
-            maxItems={10}
-            isLoading={popularLoading}
-          />
-        </div>
+        {popularProducts.length > 0 && (
+          <div className="mb-6">
+            <ProductSection
+              title="🔥 Popular"
+              titleRu="🔥 Популярное"
+              products={popularProducts}
+              variant="scroll"
+              maxItems={10}
+              isLoading={popularLoading}
+            />
+          </div>
+        )}
 
         {/* New Arrivals */}
-        <div className="mb-8">
-          <ProductSection
-            title="New Arrivals"
-            titleRu="Новинки"
-            products={newProducts}
-            variant="scroll"
-            maxItems={8}
-            isLoading={newLoading}
-          />
-        </div>
+        {newProducts.length > 0 && (
+          <div className="mb-6">
+            <ProductSection
+              title="✨ New Arrivals"
+              titleRu="✨ Новинки"
+              products={newProducts}
+              variant="scroll"
+              maxItems={8}
+              isLoading={newLoading}
+            />
+          </div>
+        )}
 
-        {/* Categories Quick Links */}
-        {sortedCategories.length > 0 && (
-          <section className="mb-8">
-            <h2 className="text-lg font-bold mb-3">
-              {language === 'ru' ? 'Категории' : 'Categories'}
+        {/* Category Quick Links */}
+        {filteredCategories.length > 0 && (
+          <section className="mb-6">
+            <h2 className="text-base font-bold mb-3">
+              {language === 'ru' ? 'Быстрый доступ' : 'Quick Access'}
             </h2>
             <div className="flex flex-wrap gap-2">
-              {sortedCategories.map(cat => (
-                <Button
-                  key={cat.id}
-                  variant="outline"
-                  size="sm"
-                  className="rounded-full"
-                  onClick={() => handleCategoryClick(cat.slug)}
-                >
-                  <span className="mr-1.5">{cat.icon}</span>
-                  {language === 'ru' ? cat.name_ru : cat.name_en}
-                </Button>
-              ))}
+              {filteredCategories.map(cat => {
+                const count = allProducts.filter(p => p.category_slug === cat.slug).length;
+                return (
+                  <Button
+                    key={cat.id}
+                    variant="outline"
+                    size="sm"
+                    className="rounded-full h-9 gap-1.5"
+                    onClick={() => handleCategoryClick(cat.slug)}
+                  >
+                    <span>{cat.icon}</span>
+                    <span className="max-w-[100px] truncate">
+                      {language === 'ru' ? cat.name_ru : cat.name_en}
+                    </span>
+                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0 ml-0.5">
+                      {count}
+                    </Badge>
+                  </Button>
+                );
+              })}
             </div>
           </section>
         )}
 
-        {/* All Products Preview */}
-        {!productsLoading && allProducts.length > 0 && (
+        {/* Products Grid - Filtered */}
+        {!productsLoading && filteredProducts.length > 0 && (
           <section>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-bold">
-                {language === 'ru' ? 'Все товары' : 'All Products'}
+              <h2 className="text-base font-bold">
+                {activeTab === 'food' 
+                  ? (language === 'ru' ? 'Продукты' : 'Food Products')
+                  : activeTab === 'non-food'
+                  ? (language === 'ru' ? 'Товары' : 'Products')
+                  : (language === 'ru' ? 'Все товары' : 'All Products')
+                }
               </h2>
               <Badge variant="secondary">
-                {allProducts.length} {language === 'ru' ? 'товаров' : 'items'}
+                {filteredProducts.length} {language === 'ru' ? 'шт.' : 'items'}
               </Badge>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              {allProducts.slice(0, 6).map(product => (
+              {filteredProducts.slice(0, 8).map(product => (
                 <ProfessionalProductCard
                   key={product.id}
                   product={product}
@@ -263,12 +362,24 @@ const MarketIndex = () => {
                 />
               ))}
             </div>
+            
+            {filteredProducts.length > 8 && (
+              <Button 
+                variant="outline" 
+                className="w-full mt-4 rounded-xl"
+                onClick={() => navigate('/market/all')}
+              >
+                {language === 'ru' 
+                  ? `Показать все ${filteredProducts.length} товаров` 
+                  : `View all ${filteredProducts.length} products`}
+              </Button>
+            )}
           </section>
         )}
 
         <CrossSellSection currentVertical="market" className="mt-8" />
 
-        {/* Sticky Cart Bar - filtered to show only product type items */}
+        {/* Sticky Cart Bar */}
         <StickyCartBar
           itemType="product"
           checkoutPath="/market/checkout"

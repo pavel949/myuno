@@ -3560,6 +3560,7 @@ export type Database = {
       }
       marketplace_categories: {
         Row: {
+          category_group: string | null
           created_at: string | null
           description_en: string | null
           description_ru: string | null
@@ -3575,6 +3576,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          category_group?: string | null
           created_at?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -3590,6 +3592,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          category_group?: string | null
           created_at?: string | null
           description_en?: string | null
           description_ru?: string | null
