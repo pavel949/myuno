@@ -6,3 +6,6 @@ export { ProfessionalProductCard } from './ProfessionalProductCard';
 export { ProfessionalCategoryBanner } from './ProfessionalCategoryBanner';
 export { SubcategoryChips } from './SubcategoryChips';
 export { ProductAttributes } from './ProductAttributes';
+export { CategoryGrid } from './CategoryGrid';
+export { FeaturedBanner } from './FeaturedBanner';
+export { QuickSubcategories } from './QuickSubcategories';
