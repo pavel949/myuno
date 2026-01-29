@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Search, SlidersHorizontal, X, Sparkles, Package, 
   TrendingUp, ArrowDown, ArrowUp, Star, Clock, Check, ChevronRight,
-  History, Crown, Flame
+  History, Crown, Flame, Layers, Users
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
@@ -19,6 +19,7 @@ import { useServices, Service, SortOption, useCategories as useServiceCategories
 import { useCategories, CategoryGroup, Category } from '@/hooks/useCategories';
 import { useViewHistory, ViewHistoryItem } from '@/hooks/useViewHistory';
 import { useFeaturedCategories } from '@/hooks/useFeaturedCategories';
+import { useCategoryCounts } from '@/hooks/useCategoryCounts';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -66,6 +67,7 @@ export default function Discover() {
   const { categories: serviceCategories, isLoading: serviceCategoriesLoading } = useServiceCategories();
   const { history, isLoading: historyLoading } = useViewHistory();
   const { isFeatured, getFeaturedPackage } = useFeaturedCategories();
+  const { getCount } = useCategoryCounts();
   const { services, isLoading: servicesLoading, refetch: refetchServices } = useServices({
     categoryId: selectedCategory || undefined,
     searchQuery: debouncedSearch || undefined,
@@ -197,6 +199,7 @@ export default function Discover() {
                     language={language}
                     onCategoryClick={handleCategoryClick}
                     isFeatured={isFeatured}
+                    getCount={getCount}
                   />
                 )}
               </div>
@@ -215,6 +218,7 @@ export default function Discover() {
                     getName={getName} 
                     language={language}
                     onCategoryClick={handleCategoryClick}
+                    getCount={getCount}
                   />
                 )}
               </div>
@@ -324,9 +328,10 @@ interface AllCategoriesViewProps {
   language: string;
   onCategoryClick: (cat: Category) => void;
   isFeatured?: (entityId: string, entityType?: string) => boolean;
+  getCount?: (slugOrType: string) => number | undefined;
 }
 
-function AllCategoriesView({ groups, getName, language, onCategoryClick, isFeatured }: AllCategoriesViewProps) {
+function AllCategoriesView({ groups, getName, language, onCategoryClick, isFeatured, getCount }: AllCategoriesViewProps) {
   if (groups.length === 0) {
     return (
       <EmptyState
@@ -349,6 +354,8 @@ function AllCategoriesView({ groups, getName, language, onCategoryClick, isFeatu
             {(group.categories || []).map((cat) => {
               const Icon = cat.icon || Package;
               const featured = isFeatured?.(cat.id, 'category');
+              const itemCount = getCount?.(cat.slug) ?? getCount?.(cat.miniAppType || '');
+              
               return (
                 <button
                   key={cat.id}
@@ -358,7 +365,9 @@ function AllCategoriesView({ groups, getName, language, onCategoryClick, isFeatu
                     "bg-card border",
                     featured 
                       ? "border-amber-400/60 bg-gradient-to-br from-amber-50/50 to-transparent dark:from-amber-950/20" 
-                      : "border-border/50",
+                      : cat.hasMiniApp
+                        ? "border-primary/20 bg-gradient-to-br from-primary/5 to-transparent"
+                        : "border-border/50",
                     "hover:border-primary/40 hover:shadow-md hover:scale-[1.02]",
                     "active:scale-95 transition-all duration-200",
                     "group text-left"
@@ -372,8 +381,16 @@ function AllCategoriesView({ groups, getName, language, onCategoryClick, isFeatu
                     </span>
                   )}
                   
+                  {/* Mini-App Badge */}
+                  {!featured && cat.hasMiniApp && (
+                    <span className="absolute -top-1.5 -left-1.5 text-[9px] px-1.5 py-0.5 rounded-full font-semibold shadow-sm bg-gradient-to-r from-primary to-primary/80 text-primary-foreground flex items-center gap-0.5">
+                      <Layers className="w-2.5 h-2.5" />
+                      APP
+                    </span>
+                  )}
+                  
                   {/* New/Hot Badge */}
-                  {!featured && (cat.isNew || cat.isHot) && (
+                  {!featured && !cat.hasMiniApp && (cat.isNew || cat.isHot) && (
                     <span className={cn(
                       "absolute -top-1.5 -right-1.5 text-[9px] px-1.5 py-0.5 rounded-full font-semibold shadow-sm",
                       cat.isNew ? "bg-primary text-primary-foreground" : "bg-amber-500 text-white"
@@ -392,11 +409,17 @@ function AllCategoriesView({ groups, getName, language, onCategoryClick, isFeatu
                     <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   </div>
                   
-                  {/* Text */}
+                  {/* Text & Count */}
                   <div className="flex-1 min-w-0">
-                    <span className="text-sm font-medium line-clamp-2">
+                    <span className="text-sm font-medium line-clamp-1">
                       {getName(cat)}
                     </span>
+                    {itemCount !== undefined && itemCount > 0 && (
+                      <span className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                        <Users className="w-3 h-3" />
+                        {itemCount} {language === 'ru' ? 'услуг' : 'items'}
+                      </span>
+                    )}
                   </div>
                   
                   <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
@@ -415,9 +438,10 @@ interface CategoryTreeViewProps {
   getName: (item: Category | CategoryGroup) => string;
   language: string;
   onCategoryClick: (cat: Category) => void;
+  getCount?: (slugOrType: string) => number | undefined;
 }
 
-function CategoryTreeView({ groups, getName, language, onCategoryClick }: CategoryTreeViewProps) {
+function CategoryTreeView({ groups, getName, language, onCategoryClick, getCount }: CategoryTreeViewProps) {
   if (groups.length === 0) {
     return (
       <EmptyState
@@ -444,6 +468,8 @@ function CategoryTreeView({ groups, getName, language, onCategoryClick }: Catego
           <div className="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-5 gap-2 sm:gap-3">
             {(group.categories || []).map((cat) => {
               const Icon = cat.icon || Package;
+              const itemCount = getCount?.(cat.slug) ?? getCount?.(cat.miniAppType || '');
+              
               return (
                 <button
                   key={cat.id}
@@ -451,14 +477,25 @@ function CategoryTreeView({ groups, getName, language, onCategoryClick }: Catego
                   className={cn(
                     "relative flex flex-col items-center justify-center",
                     "rounded-2xl p-2 py-3",
-                    "bg-card border border-border/50",
+                    "bg-card border",
+                    cat.hasMiniApp 
+                      ? "border-primary/20 bg-gradient-to-br from-primary/5 to-transparent" 
+                      : "border-border/50",
                     "hover:border-primary/40 hover:shadow-md hover:scale-[1.02]",
                     "active:scale-95 transition-all duration-200",
                     "group"
                   )}
                 >
-                  {/* Badges */}
-                  {(cat.isNew || cat.isHot) && (
+                  {/* APP Badge */}
+                  {cat.hasMiniApp && (
+                    <span className="absolute -top-1.5 -left-1.5 text-[8px] px-1 py-0.5 rounded-full font-bold shadow-sm bg-gradient-to-r from-primary to-primary/80 text-primary-foreground flex items-center gap-0.5">
+                      <Layers className="w-2 h-2" />
+                      APP
+                    </span>
+                  )}
+                  
+                  {/* New/Hot Badge */}
+                  {!cat.hasMiniApp && (cat.isNew || cat.isHot) && (
                     <span className={cn(
                       "absolute -top-1.5 -right-1.5 text-[9px] px-1.5 py-0.5 rounded-full font-semibold shadow-sm",
                       cat.isNew ? "bg-primary text-primary-foreground" : "bg-amber-500 text-white"
@@ -469,7 +506,7 @@ function CategoryTreeView({ groups, getName, language, onCategoryClick }: Catego
                   
                   {/* Icon */}
                   <div className={cn(
-                    "w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center mb-2",
+                    "w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center mb-1",
                     "bg-gradient-to-br shadow-sm",
                     cat.color || "from-primary/20 to-primary/10",
                     "group-hover:scale-110 transition-transform"
@@ -481,6 +518,13 @@ function CategoryTreeView({ groups, getName, language, onCategoryClick }: Catego
                   <span className="text-[10px] sm:text-[11px] font-medium text-center leading-tight line-clamp-2 px-1 break-words hyphens-auto">
                     {getName(cat)}
                   </span>
+                  
+                  {/* Item Count */}
+                  {itemCount !== undefined && itemCount > 0 && (
+                    <span className="text-[9px] text-muted-foreground mt-0.5">
+                      {itemCount}
+                    </span>
+                  )}
                 </button>
               );
             })}
