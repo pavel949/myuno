@@ -4,6 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { MarketplaceProduct } from '@/types/marketplace';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { formatProductUnit, formatPricePerUnit } from '@/utils/formatProductUnit';
 
 interface ProductCardProps {
   product: MarketplaceProduct;
@@ -25,7 +26,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const { language } = useLanguage();
 
   const name = language === 'ru' ? product.name_ru : product.name_en;
-  const unit = language === 'ru' ? product.unit_ru : product.unit;
+  // Use new precise unit formatting
+  const unitDisplay = formatProductUnit(product, language as 'en' | 'ru');
+  const pricePerUnit = formatPricePerUnit(product, language as 'en' | 'ru');
 
   const discount = product.original_price 
     ? Math.round((1 - product.price / product.original_price) * 100) 
@@ -56,10 +59,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           )}
         </div>
 
-        {/* Content */}
         <div className="flex-1 min-w-0">
           <h3 className="font-medium text-sm line-clamp-2">{name}</h3>
-          <p className="text-xs text-muted-foreground mt-0.5">{unit}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{unitDisplay}</p>
           
           {product.rating && (
             <div className="flex items-center gap-1 mt-1">
@@ -155,7 +157,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         <h3 className="text-sm font-medium line-clamp-2 min-h-[2.5rem]">
           {name}
         </h3>
-        <p className="text-xs text-muted-foreground mt-0.5">{unit}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">{unitDisplay}</p>
         
         {product.rating && (
           <div className="flex items-center gap-1 mt-1">
@@ -169,7 +171,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         <div className="flex items-center justify-between mt-2">
           <div className="flex flex-col">
             <span className="font-bold text-base">฿{product.price}</span>
-            {product.original_price && (
+            {pricePerUnit && (
+              <span className="text-[10px] text-muted-foreground">
+                {pricePerUnit}
+              </span>
+            )}
+            {product.original_price && !pricePerUnit && (
               <span className="text-xs text-muted-foreground line-through">
                 ฿{product.original_price}
               </span>

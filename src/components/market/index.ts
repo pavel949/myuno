@@ -12,3 +12,4 @@ export { ProductAttributes } from './ProductAttributes';
 export { CategoryGrid } from './CategoryGrid';
 export { FeaturedBanner } from './FeaturedBanner';
 export { QuickSubcategories } from './QuickSubcategories';
+export { ProductUnitDisplay, ProductUnitBadge } from './ProductUnitDisplay';

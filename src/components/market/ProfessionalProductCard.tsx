@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { ShippableBadge } from './ShippableBadge';
+import { formatProductUnit, formatPricePerUnit } from '@/utils/formatProductUnit';
 interface ProductRecipe {
   dish: string;
   dish_ru: string;
@@ -115,7 +116,9 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
 
   const name = language === 'ru' ? product.name_ru : product.name_en;
   const description = language === 'ru' ? product.description_ru : product.description_en;
-  const unit = language === 'ru' ? product.unit_ru : product.unit;
+  // Use new precise unit formatting
+  const unitDisplay = formatProductUnit(product, language as 'en' | 'ru');
+  const pricePerUnit = formatPricePerUnit(product, language as 'en' | 'ru');
   const vendorName = language === 'ru' ? (product.vendor_name_ru || product.vendor_name) : product.vendor_name;
   const recipe = product.recipe as ProductRecipe | null;
 
@@ -181,7 +184,8 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
                 </span>
               )}
             </div>
-            {unit && <span className="text-xs text-muted-foreground">{unit}</span>}
+            {unitDisplay && <span className="text-xs text-muted-foreground">{unitDisplay}</span>}
+            {pricePerUnit && <span className="text-[10px] text-muted-foreground opacity-70">{pricePerUnit}</span>}
           </div>
           
           {quantity === 0 ? (
@@ -251,7 +255,7 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
             {vendorName && (
               <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{vendorName}</p>
             )}
-            {unit && <p className="text-xs text-muted-foreground">{unit}</p>}
+            {unitDisplay && <p className="text-xs text-muted-foreground">{unitDisplay}</p>}
           </div>
           
           {product.rating && (
@@ -399,8 +403,11 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
           </p>
         )}
         
-        {unit && !compact && (
-          <p className="text-xs text-muted-foreground mt-0.5">{unit}</p>
+        {unitDisplay && !compact && (
+          <p className="text-xs text-muted-foreground mt-0.5">{unitDisplay}</p>
+        )}
+        {pricePerUnit && !compact && (
+          <p className="text-[10px] text-muted-foreground opacity-70">{pricePerUnit}</p>
         )}
         
         {/* Rating - simplified in compact mode */}

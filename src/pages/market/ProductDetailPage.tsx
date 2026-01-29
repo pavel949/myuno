@@ -11,7 +11,9 @@ import {
   Plane,
   Plus,
   Minus,
-  Package
+  Package,
+  Scale,
+  Ruler
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
@@ -30,6 +32,7 @@ import { ReviewList } from '@/components/market/reviews/ReviewList';
 import { ReviewForm } from '@/components/market/reviews/ReviewForm';
 import { ProductAttributes } from '@/components/market/ProductAttributes';
 import { cn } from '@/lib/utils';
+import { formatProductUnit, formatPricePerUnit } from '@/utils/formatProductUnit';
 
 const ProductDetailPage = () => {
   const { productId } = useParams<{ productId: string }>();
@@ -66,14 +69,20 @@ const ProductDetailPage = () => {
 
   const name = product ? (language === 'ru' ? product.name_ru : product.name_en) : '';
   const description = product ? (language === 'ru' ? product.description_ru : product.description_en) : '';
-  const unit = product ? (language === 'ru' ? product.unit_ru : product.unit) : '';
   const vendorName = product ? (language === 'ru' ? (product.vendor_name_ru || product.vendor_name) : product.vendor_name) : '';
+  
+  // Precise unit formatting
+  const unitDisplay = product ? formatProductUnit(product, language as 'en' | 'ru') : '';
+  const pricePerUnit = product ? formatPricePerUnit(product, language as 'en' | 'ru') : null;
 
-  // Create image gallery (cover + additional images if available)
+  // Create image gallery (cover + additional images)
   const images = useMemo(() => {
     if (!product) return [];
     const gallery = product.cover_image ? [product.cover_image] : ['/placeholder.svg'];
-    // Add placeholder images for gallery effect (in real app, these would come from product.images array)
+    // Add additional images from product.images array if available
+    if (product.images && Array.isArray(product.images)) {
+      gallery.push(...product.images);
+    }
     return gallery;
   }, [product]);
 
@@ -285,10 +294,45 @@ const ProductDetailPage = () => {
                 ฿{product.original_price.toLocaleString()}
               </span>
             )}
-            {unit && (
-              <span className="text-sm text-muted-foreground">/ {unit}</span>
+            {unitDisplay && (
+              <span className="text-sm text-muted-foreground">/ {unitDisplay}</span>
+            )}
+            {pricePerUnit && (
+              <span className="text-xs text-muted-foreground ml-2">({pricePerUnit})</span>
             )}
           </div>
+
+          {/* Product Specifications */}
+          {(product.unit_value || product.weight_kg) && (
+            <div className="bg-muted/30 rounded-xl p-4 mb-4">
+              <h3 className="font-semibold mb-3 flex items-center gap-2">
+                <Ruler className="h-4 w-4" />
+                {language === 'ru' ? 'Характеристики' : 'Specifications'}
+              </h3>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                {unitDisplay && (
+                  <div className="flex items-center gap-2">
+                    <Scale className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">{language === 'ru' ? 'Объём:' : 'Size:'}</span>
+                    <span className="font-medium">{unitDisplay}</span>
+                  </div>
+                )}
+                {product.weight_kg && (
+                  <div className="flex items-center gap-2">
+                    <Package className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">{language === 'ru' ? 'Вес:' : 'Weight:'}</span>
+                    <span className="font-medium">{product.weight_kg} {language === 'ru' ? 'кг' : 'kg'}</span>
+                  </div>
+                )}
+                {pricePerUnit && (
+                  <div className="flex items-center gap-2 col-span-2">
+                    <span className="text-muted-foreground">{language === 'ru' ? 'Цена за ед.:' : 'Price per unit:'}</span>
+                    <span className="font-medium">{pricePerUnit}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Vendor Info Card */}
           {(vendor || vendorLoading) && (
@@ -364,14 +408,8 @@ const ProductDetailPage = () => {
             )}
           </div>
           
-          {/* Weight info for international */}
-          {product.weight_kg && (
-            <div className="text-sm text-muted-foreground mb-6">
-              <span className="font-medium">{language === 'ru' ? 'Вес: ' : 'Weight: '}</span>
-              {product.weight_kg} {language === 'ru' ? 'кг' : 'kg'}
-            </div>
-          )}
-
+          {/* Weight info for international - moved to specifications section */}
+          
           {/* Reviews Section */}
           <div className="mb-8">
             <h3 className="text-lg font-semibold mb-4">
@@ -408,7 +446,7 @@ const ProductDetailPage = () => {
                   </span>
                 )}
               </div>
-              {unit && <span className="text-xs text-muted-foreground">{unit}</span>}
+              {unitDisplay && <span className="text-xs text-muted-foreground">{unitDisplay}</span>}
             </div>
             
             {/* Cart Controls */}
