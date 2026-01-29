@@ -280,12 +280,12 @@ function AllCategoriesView({ groups, getName, language, onCategoryClick }: AllCa
                   
                   {/* Icon */}
                   <div className={cn(
-                    "w-12 h-12 rounded-xl flex items-center justify-center shrink-0",
+                    "w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0",
                     "bg-gradient-to-br shadow-sm",
                     cat.color || "from-primary/20 to-primary/10",
                     "group-hover:scale-110 transition-transform"
                   )}>
-                    <Icon className="w-6 h-6 text-white" />
+                    <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   </div>
                   
                   {/* Text */}
@@ -336,8 +336,8 @@ function CategoryTreeView({ groups, getName, language, onCategoryClick }: Catego
             </span>
           </h2>
           
-          {/* Category grid - 4 columns */}
-          <div className="grid grid-cols-4 gap-3">
+          {/* Category grid - responsive columns */}
+          <div className="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-5 gap-2 sm:gap-3">
             {(group.categories || []).map((cat) => {
               const Icon = cat.icon || Package;
               return (
@@ -346,7 +346,7 @@ function CategoryTreeView({ groups, getName, language, onCategoryClick }: Catego
                   onClick={() => onCategoryClick(cat)}
                   className={cn(
                     "relative flex flex-col items-center justify-center",
-                    "aspect-square rounded-2xl p-2",
+                    "rounded-2xl p-2 py-3",
                     "bg-card border border-border/50",
                     "hover:border-primary/40 hover:shadow-md hover:scale-[1.02]",
                     "active:scale-95 transition-all duration-200",
@@ -365,16 +365,16 @@ function CategoryTreeView({ groups, getName, language, onCategoryClick }: Catego
                   
                   {/* Icon */}
                   <div className={cn(
-                    "w-12 h-12 rounded-xl flex items-center justify-center mb-2",
+                    "w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center mb-2",
                     "bg-gradient-to-br shadow-sm",
                     cat.color || "from-primary/20 to-primary/10",
                     "group-hover:scale-110 transition-transform"
                   )}>
-                    <Icon className="w-6 h-6 text-white" />
+                    <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   </div>
                   
                   {/* Name */}
-                  <span className="text-[11px] font-medium text-center leading-tight line-clamp-2 px-1">
+                  <span className="text-[10px] sm:text-[11px] font-medium text-center leading-tight line-clamp-2 px-1 break-words hyphens-auto">
                     {getName(cat)}
                   </span>
                 </button>
