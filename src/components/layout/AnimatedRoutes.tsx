@@ -101,6 +101,7 @@ const LegalServicesIndex = lazy(() => import('@/pages/legal/LegalServicesIndex')
 const LegalProviderDetail = lazy(() => import('@/pages/legal/LegalProviderDetail'));
 const LegalBooking = lazy(() => import('@/pages/legal/LegalBooking'));
 const VisaServiceDetail = lazy(() => import('@/pages/legal/VisaServiceDetail'));
+const VisaImmigrationPage = lazy(() => import('@/pages/legal/VisaImmigrationPage'));
 
 // Insurance Mini-App
 const InsuranceIndex = lazy(() => import('@/pages/insurance/InsuranceIndex'));
@@ -495,6 +496,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/legal/provider/:id" element={<LazyPage><LegalProviderDetail /></LazyPage>} />
         <Route path="/legal/visa/:id" element={<LazyPage><VisaServiceDetail /></LazyPage>} />
         <Route path="/legal/booking/:id" element={<LazyPage><LegalBooking /></LazyPage>} />
+        <Route path="/visa" element={<LazyPage><VisaImmigrationPage /></LazyPage>} />
         
         {/* Insurance Mini-App Routes */}
         <Route path="/insurance" element={<LazyPage><InsuranceIndex /></LazyPage>} />
