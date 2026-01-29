@@ -35,6 +35,9 @@ export const ProfessionalCategoryBanner: React.FC<ProfessionalCategoryBannerProp
       'home-decor': 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80',
       'baby-kids': 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=800&q=80',
       'health-pharmacy': 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&q=80',
+      'seafood': 'https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?w=800&q=80',
+      'organic': 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=800&q=80',
+      'meat': 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=800&q=80',
     };
     return images[slug] || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80';
   };
