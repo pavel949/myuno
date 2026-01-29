@@ -1,19 +1,105 @@
-import React, { forwardRef } from 'react';
-import { Plus, Minus, Star, Heart, ShoppingBag, Check } from 'lucide-react';
+import React, { forwardRef, useState } from 'react';
+import { Plus, Minus, Star, Heart, ShoppingBag, Check, ChefHat, Clock, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { MarketplaceProduct } from '@/types/marketplace';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
+interface ProductRecipe {
+  dish: string;
+  dish_ru: string;
+  time_mins: number;
+  difficulty: 'easy' | 'medium' | 'hard';
+  image: string;
+  tip: string;
+  tip_ru: string;
+}
+
+interface ExtendedMarketplaceProduct extends MarketplaceProduct {
+  recipe?: ProductRecipe | null;
+}
+
 interface ProfessionalProductCardProps {
-  product: MarketplaceProduct;
+  product: ExtendedMarketplaceProduct;
   quantity?: number;
   onAdd: () => void;
   onRemove: () => void;
   onClick?: () => void;
   variant?: 'grid' | 'horizontal' | 'featured';
 }
+
+// Recipe tooltip component
+const RecipeBadge = ({ recipe, language }: { recipe: ProductRecipe; language: string }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  
+  const difficultyColors = {
+    easy: 'bg-green-500',
+    medium: 'bg-amber-500', 
+    hard: 'bg-red-500',
+  };
+  
+  const difficultyLabels = {
+    easy: language === 'ru' ? 'Легко' : 'Easy',
+    medium: language === 'ru' ? 'Средне' : 'Medium',
+    hard: language === 'ru' ? 'Сложно' : 'Hard',
+  };
+
+  return (
+    <div className="relative">
+      <button
+        onClick={(e) => { e.stopPropagation(); setShowTooltip(!showTooltip); }}
+        className="flex items-center gap-1 bg-emerald-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-md hover:bg-emerald-600 transition-colors"
+      >
+        <ChefHat className="w-3 h-3" />
+        <span>{language === 'ru' ? recipe.dish_ru : recipe.dish}</span>
+      </button>
+      
+      {showTooltip && (
+        <div 
+          className="absolute z-50 top-full left-0 mt-2 w-64 bg-card border border-border rounded-xl shadow-xl p-3 animate-in fade-in slide-in-from-top-2 duration-200"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button 
+            onClick={() => setShowTooltip(false)}
+            className="absolute top-2 right-2 text-muted-foreground hover:text-foreground"
+          >
+            <X className="w-4 h-4" />
+          </button>
+          
+          <div className="flex gap-3">
+            <img 
+              src={recipe.image} 
+              alt={recipe.dish}
+              className="w-16 h-16 rounded-lg object-cover shrink-0"
+            />
+            <div className="min-w-0">
+              <h4 className="font-bold text-sm text-foreground">
+                {language === 'ru' ? recipe.dish_ru : recipe.dish}
+              </h4>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Clock className="w-3 h-3" />
+                  {recipe.time_mins} {language === 'ru' ? 'мин' : 'min'}
+                </span>
+                <span className={cn(
+                  "text-[10px] px-1.5 py-0.5 rounded-full text-white",
+                  difficultyColors[recipe.difficulty]
+                )}>
+                  {difficultyLabels[recipe.difficulty]}
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          <p className="mt-2 text-xs text-muted-foreground border-t border-border pt-2">
+            💡 {language === 'ru' ? recipe.tip_ru : recipe.tip}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalProductCardProps>(({
   product,
@@ -26,8 +112,10 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
   const { language } = useLanguage();
 
   const name = language === 'ru' ? product.name_ru : product.name_en;
+  const description = language === 'ru' ? product.description_ru : product.description_en;
   const unit = language === 'ru' ? product.unit_ru : product.unit;
   const vendorName = language === 'ru' ? (product.vendor_name_ru || product.vendor_name) : product.vendor_name;
+  const recipe = product.recipe as ProductRecipe | null;
 
   const discount = product.original_price 
     ? Math.round((1 - product.price / product.original_price) * 100) 
@@ -243,13 +331,16 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
         <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-black/20 to-transparent pointer-events-none" />
         
         {/* Badges Container */}
-        <div className="absolute top-2 left-2 flex flex-col gap-1">
-          {product.is_new && (
+        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+          {recipe && (
+            <RecipeBadge recipe={recipe} language={language} />
+          )}
+          {product.is_new && !recipe && (
             <Badge className="bg-blue-500 text-white text-[10px] font-semibold px-2 py-0.5 shadow-md">
               NEW
             </Badge>
           )}
-          {product.is_popular && !product.is_new && (
+          {product.is_popular && !product.is_new && !recipe && (
             <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-semibold px-2 py-0.5 shadow-md">
               🔥 HIT
             </Badge>
@@ -278,6 +369,13 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
         <h3 className="text-sm font-semibold line-clamp-2 min-h-[2.5rem] text-foreground leading-tight">
           {name}
         </h3>
+        
+        {/* Description */}
+        {description && (
+          <p className="text-[11px] text-muted-foreground line-clamp-2 mt-1 leading-snug">
+            {description}
+          </p>
+        )}
         
         {unit && (
           <p className="text-xs text-muted-foreground mt-0.5">{unit}</p>
