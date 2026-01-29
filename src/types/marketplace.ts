@@ -25,6 +25,9 @@ export interface MarketplaceProduct {
   vendor_name_ru: string | null;
   tags: string[] | null;
   sort_order: number;
+  // International shipping fields
+  is_shippable_international: boolean;
+  weight_kg: number;
 }
 
 export interface MarketplaceCategory {
@@ -64,6 +67,21 @@ export interface DeliverySetting {
   is_default: boolean;
   is_active: boolean;
 }
+
+export interface InternationalShippingZone {
+  id: string;
+  zone_code: string;
+  zone_name_en: string;
+  zone_name_ru: string;
+  base_fee: number;
+  per_kg_fee: number;
+  estimated_days_min: number;
+  estimated_days_max: number;
+  min_order_amount: number;
+  is_active: boolean;
+}
+
+export type DeliveryType = 'local' | 'international';
 
 // For backward compatibility - maps subcategory to old format
 export interface Subcategory {

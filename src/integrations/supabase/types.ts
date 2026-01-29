@@ -3651,6 +3651,51 @@ export type Database = {
         }
         Relationships: []
       }
+      marketplace_international_shipping: {
+        Row: {
+          base_fee: number
+          created_at: string
+          estimated_days_max: number
+          estimated_days_min: number
+          id: string
+          is_active: boolean
+          min_order_amount: number
+          per_kg_fee: number
+          sort_order: number | null
+          zone_code: string
+          zone_name_en: string
+          zone_name_ru: string
+        }
+        Insert: {
+          base_fee?: number
+          created_at?: string
+          estimated_days_max?: number
+          estimated_days_min?: number
+          id?: string
+          is_active?: boolean
+          min_order_amount?: number
+          per_kg_fee?: number
+          sort_order?: number | null
+          zone_code: string
+          zone_name_en: string
+          zone_name_ru: string
+        }
+        Update: {
+          base_fee?: number
+          created_at?: string
+          estimated_days_max?: number
+          estimated_days_min?: number
+          id?: string
+          is_active?: boolean
+          min_order_amount?: number
+          per_kg_fee?: number
+          sort_order?: number | null
+          zone_code?: string
+          zone_name_en?: string
+          zone_name_ru?: string
+        }
+        Relationships: []
+      }
       marketplace_products: {
         Row: {
           category_slug: string
@@ -3666,6 +3711,7 @@ export type Database = {
           is_active: boolean | null
           is_new: boolean | null
           is_popular: boolean | null
+          is_shippable_international: boolean | null
           markup_amount: number | null
           name_en: string
           name_ru: string
@@ -3683,6 +3729,7 @@ export type Database = {
           updated_at: string | null
           vendor_name: string | null
           vendor_name_ru: string | null
+          weight_kg: number | null
         }
         Insert: {
           category_slug: string
@@ -3698,6 +3745,7 @@ export type Database = {
           is_active?: boolean | null
           is_new?: boolean | null
           is_popular?: boolean | null
+          is_shippable_international?: boolean | null
           markup_amount?: number | null
           name_en: string
           name_ru: string
@@ -3715,6 +3763,7 @@ export type Database = {
           updated_at?: string | null
           vendor_name?: string | null
           vendor_name_ru?: string | null
+          weight_kg?: number | null
         }
         Update: {
           category_slug?: string
@@ -3730,6 +3779,7 @@ export type Database = {
           is_active?: boolean | null
           is_new?: boolean | null
           is_popular?: boolean | null
+          is_shippable_international?: boolean | null
           markup_amount?: number | null
           name_en?: string
           name_ru?: string
@@ -3747,6 +3797,7 @@ export type Database = {
           updated_at?: string | null
           vendor_name?: string | null
           vendor_name_ru?: string | null
+          weight_kg?: number | null
         }
         Relationships: [
           {
