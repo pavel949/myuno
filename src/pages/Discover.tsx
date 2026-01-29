@@ -343,14 +343,23 @@ function AllCategoriesView({ groups, getName, language, onCategoryClick, isFeatu
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {groups.map((group) => (
         <div key={group.id}>
-          <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
-            {getName(group)}
-            <span className="text-xs font-normal">({group.categories?.length || 0})</span>
-          </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {/* Group Header - Enhanced */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent" />
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+              {getName(group)}
+              <span className="text-[10px] font-normal px-1.5 py-0.5 rounded-full bg-muted">
+                {group.categories?.length || 0}
+              </span>
+            </h3>
+            <div className="h-px flex-1 bg-gradient-to-l from-border to-transparent" />
+          </div>
+          
+          {/* Category Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {(group.categories || []).map((cat) => {
               const Icon = cat.icon || Package;
               const featured = isFeatured?.(cat.id, 'category');
@@ -361,68 +370,108 @@ function AllCategoriesView({ groups, getName, language, onCategoryClick, isFeatu
                   key={cat.id}
                   onClick={() => onCategoryClick(cat)}
                   className={cn(
-                    "relative flex items-center gap-3 p-4 rounded-2xl",
-                    "bg-card border",
+                    "relative flex items-center gap-4 p-4 rounded-2xl overflow-hidden",
+                    "bg-card/80 backdrop-blur-sm",
+                    "border transition-all duration-300",
                     featured 
-                      ? "border-amber-400/60 bg-gradient-to-br from-amber-50/50 to-transparent dark:from-amber-950/20" 
+                      ? "border-amber-400/50 shadow-[0_0_20px_rgba(251,191,36,0.15)]" 
                       : cat.hasMiniApp
-                        ? "border-primary/20 bg-gradient-to-br from-primary/5 to-transparent"
-                        : "border-border/50",
-                    "hover:border-primary/40 hover:shadow-md hover:scale-[1.02]",
-                    "active:scale-95 transition-all duration-200",
+                        ? "border-primary/30 shadow-[0_0_15px_rgba(var(--primary),0.08)]"
+                        : "border-border/40 hover:border-border",
+                    "hover:shadow-lg hover:-translate-y-0.5",
+                    "active:scale-[0.98] active:shadow-md",
                     "group text-left"
                   )}
                 >
-                  {/* Featured Badge */}
+                  {/* Background Gradient Decoration */}
+                  <div className={cn(
+                    "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300",
+                    featured 
+                      ? "bg-gradient-to-br from-amber-500/5 via-transparent to-amber-500/5"
+                      : cat.hasMiniApp
+                        ? "bg-gradient-to-br from-primary/5 via-transparent to-primary/5"
+                        : "bg-gradient-to-br from-muted/50 via-transparent to-muted/30"
+                  )} />
+                  
+                  {/* Featured/PRO Badge */}
                   {featured && (
-                    <span className="absolute -top-1.5 -left-1.5 text-[9px] px-1.5 py-0.5 rounded-full font-semibold shadow-sm bg-gradient-to-r from-amber-400 to-amber-500 text-white flex items-center gap-0.5">
-                      <Crown className="w-2.5 h-2.5" />
+                    <div className="absolute top-2 right-2 flex items-center gap-1 text-[10px] px-2 py-1 rounded-full font-bold bg-gradient-to-r from-amber-400 to-amber-500 text-white shadow-md">
+                      <Crown className="w-3 h-3" />
                       PRO
-                    </span>
+                    </div>
                   )}
                   
                   {/* Mini-App Badge */}
                   {!featured && cat.hasMiniApp && (
-                    <span className="absolute -top-1.5 -left-1.5 text-[9px] px-1.5 py-0.5 rounded-full font-semibold shadow-sm bg-gradient-to-r from-primary to-primary/80 text-primary-foreground flex items-center gap-0.5">
-                      <Layers className="w-2.5 h-2.5" />
+                    <div className="absolute top-2 right-2 flex items-center gap-1 text-[10px] px-2 py-1 rounded-full font-bold bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-md">
+                      <Layers className="w-3 h-3" />
                       APP
-                    </span>
+                    </div>
                   )}
                   
                   {/* New/Hot Badge */}
                   {!featured && !cat.hasMiniApp && (cat.isNew || cat.isHot) && (
-                    <span className={cn(
-                      "absolute -top-1.5 -right-1.5 text-[9px] px-1.5 py-0.5 rounded-full font-semibold shadow-sm",
-                      cat.isNew ? "bg-primary text-primary-foreground" : "bg-amber-500 text-white"
+                    <div className={cn(
+                      "absolute top-2 right-2 flex items-center gap-1 text-[10px] px-2 py-1 rounded-full font-bold shadow-md",
+                      cat.isNew 
+                        ? "bg-gradient-to-r from-emerald-400 to-emerald-500 text-white" 
+                        : "bg-gradient-to-r from-orange-400 to-red-500 text-white"
                     )}>
-                      {cat.isNew ? 'NEW' : (language === 'ru' ? 'ТОП' : 'HOT')}
-                    </span>
+                      {cat.isNew ? (
+                        <>
+                          <Sparkles className="w-3 h-3" />
+                          NEW
+                        </>
+                      ) : (
+                        <>
+                          <Flame className="w-3 h-3" />
+                          {language === 'ru' ? 'ТОП' : 'HOT'}
+                        </>
+                      )}
+                    </div>
                   )}
                   
-                  {/* Icon */}
+                  {/* Icon Container */}
                   <div className={cn(
-                    "w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0",
-                    "bg-gradient-to-br shadow-sm",
-                    cat.color || "from-primary/20 to-primary/10",
-                    "group-hover:scale-110 transition-transform"
+                    "relative w-14 h-14 rounded-2xl flex items-center justify-center shrink-0",
+                    "bg-gradient-to-br shadow-lg",
+                    cat.color || "from-primary/80 to-primary",
+                    "group-hover:scale-105 group-hover:shadow-xl transition-all duration-300"
                   )}>
-                    <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                    {/* Shine effect */}
+                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-white/20 to-transparent" />
+                    <Icon className="w-7 h-7 text-white drop-shadow-sm relative z-10" />
                   </div>
                   
-                  {/* Text & Count */}
-                  <div className="flex-1 min-w-0">
-                    <span className="text-sm font-medium line-clamp-1">
+                  {/* Content */}
+                  <div className="flex-1 min-w-0 relative z-10">
+                    <h4 className="text-sm font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
                       {getName(cat)}
-                    </span>
-                    {itemCount !== undefined && itemCount > 0 && (
-                      <span className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
-                        <Users className="w-3 h-3" />
-                        {itemCount} {language === 'ru' ? 'услуг' : 'items'}
-                      </span>
-                    )}
+                    </h4>
+                    
+                    {/* Meta info */}
+                    <div className="flex items-center gap-2 mt-1">
+                      {itemCount !== undefined && itemCount > 0 ? (
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Users className="w-3.5 h-3.5" />
+                          {itemCount} {language === 'ru' ? 'услуг' : 'services'}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground/60">
+                          {language === 'ru' ? 'Открыть каталог' : 'Browse catalog'}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   
-                  <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                  {/* Arrow */}
+                  <div className={cn(
+                    "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
+                    "bg-muted/50 group-hover:bg-primary/10 transition-colors",
+                    "group-hover:translate-x-0.5 transition-transform"
+                  )}>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                  </div>
                 </button>
               );
             })}
@@ -456,16 +505,17 @@ function CategoryTreeView({ groups, getName, language, onCategoryClick, getCount
     <div className="space-y-8">
       {groups.map((group) => (
         <div key={group.id}>
-          {/* Group header */}
-          <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-            {getName(group)}
-            <span className="text-sm font-normal text-muted-foreground">
-              ({group.categories?.length || 0})
+          {/* Group Header - Minimal */}
+          <div className="flex items-center gap-3 mb-4">
+            <h2 className="text-base font-bold">{getName(group)}</h2>
+            <div className="h-px flex-1 bg-border/50" />
+            <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+              {group.categories?.length || 0}
             </span>
-          </h2>
+          </div>
           
-          {/* Category grid - responsive columns */}
-          <div className="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-5 gap-2 sm:gap-3">
+          {/* Category Grid - Compact Icons */}
+          <div className="grid grid-cols-4 xs:grid-cols-5 sm:grid-cols-6 gap-3">
             {(group.categories || []).map((cat) => {
               const Icon = cat.icon || Package;
               const itemCount = getCount?.(cat.slug) ?? getCount?.(cat.miniAppType || '');
@@ -475,53 +525,54 @@ function CategoryTreeView({ groups, getName, language, onCategoryClick, getCount
                   key={cat.id}
                   onClick={() => onCategoryClick(cat)}
                   className={cn(
-                    "relative flex flex-col items-center justify-center",
-                    "rounded-2xl p-2 py-3",
-                    "bg-card border",
+                    "relative flex flex-col items-center justify-start",
+                    "rounded-2xl p-3 min-h-[90px]",
+                    "bg-card/60 backdrop-blur-sm border",
                     cat.hasMiniApp 
-                      ? "border-primary/20 bg-gradient-to-br from-primary/5 to-transparent" 
-                      : "border-border/50",
-                    "hover:border-primary/40 hover:shadow-md hover:scale-[1.02]",
-                    "active:scale-95 transition-all duration-200",
+                      ? "border-primary/20 bg-gradient-to-b from-primary/5 to-transparent" 
+                      : "border-border/30",
+                    "hover:border-primary/40 hover:bg-card hover:shadow-lg hover:-translate-y-1",
+                    "active:scale-95",
+                    "transition-all duration-200",
                     "group"
                   )}
                 >
-                  {/* APP Badge */}
+                  {/* APP Badge - Subtle dot */}
                   {cat.hasMiniApp && (
-                    <span className="absolute -top-1.5 -left-1.5 text-[8px] px-1 py-0.5 rounded-full font-bold shadow-sm bg-gradient-to-r from-primary to-primary/80 text-primary-foreground flex items-center gap-0.5">
-                      <Layers className="w-2 h-2" />
-                      APP
-                    </span>
+                    <div className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary shadow-sm shadow-primary/50" />
                   )}
                   
                   {/* New/Hot Badge */}
                   {!cat.hasMiniApp && (cat.isNew || cat.isHot) && (
-                    <span className={cn(
-                      "absolute -top-1.5 -right-1.5 text-[9px] px-1.5 py-0.5 rounded-full font-semibold shadow-sm",
-                      cat.isNew ? "bg-primary text-primary-foreground" : "bg-amber-500 text-white"
+                    <div className={cn(
+                      "absolute -top-1 -right-1 text-[8px] px-1.5 py-0.5 rounded-full font-bold",
+                      cat.isNew 
+                        ? "bg-emerald-500 text-white" 
+                        : "bg-gradient-to-r from-orange-400 to-red-500 text-white"
                     )}>
-                      {cat.isNew ? 'NEW' : (language === 'ru' ? 'ТОП' : 'HOT')}
-                    </span>
+                      {cat.isNew ? 'NEW' : '🔥'}
+                    </div>
                   )}
                   
                   {/* Icon */}
                   <div className={cn(
-                    "w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center mb-1",
-                    "bg-gradient-to-br shadow-sm",
-                    cat.color || "from-primary/20 to-primary/10",
-                    "group-hover:scale-110 transition-transform"
+                    "w-11 h-11 rounded-xl flex items-center justify-center mb-2",
+                    "bg-gradient-to-br shadow-md",
+                    cat.color || "from-primary/80 to-primary",
+                    "group-hover:scale-110 group-hover:shadow-lg transition-all duration-200"
                   )}>
-                    <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-tr from-white/15 to-transparent" />
+                    <Icon className="w-5 h-5 text-white drop-shadow-sm relative z-10" />
                   </div>
                   
                   {/* Name */}
-                  <span className="text-[10px] sm:text-[11px] font-medium text-center leading-tight line-clamp-2 px-1 break-words hyphens-auto">
+                  <span className="text-[10px] sm:text-[11px] font-medium text-center leading-tight line-clamp-2 px-0.5 text-foreground/80 group-hover:text-foreground transition-colors">
                     {getName(cat)}
                   </span>
                   
-                  {/* Item Count */}
+                  {/* Item Count - Minimal */}
                   {itemCount !== undefined && itemCount > 0 && (
-                    <span className="text-[9px] text-muted-foreground mt-0.5">
+                    <span className="text-[9px] text-muted-foreground mt-auto pt-1">
                       {itemCount}
                     </span>
                   )}
