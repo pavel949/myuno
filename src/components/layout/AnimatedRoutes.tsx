@@ -109,6 +109,10 @@ const InsuranceDetail = lazy(() => import('@/pages/insurance/InsuranceDetail'));
 const InsuranceQuote = lazy(() => import('@/pages/insurance/InsuranceQuote'));
 const InsurancePlanDetail = lazy(() => import('@/pages/insurance/InsurancePlanDetail'));
 
+// Expat Services
+const BankingPage = lazy(() => import('@/pages/expat/BankingPage'));
+const VeterinaryPage = lazy(() => import('@/pages/expat/VeterinaryPage'));
+
 // Install Page
 const Install = lazy(() => import('@/pages/Install'));
 // Tours Mini-App
@@ -503,6 +507,10 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/insurance/plan/:planId" element={<LazyPage><InsurancePlanDetail /></LazyPage>} />
         <Route path="/insurance/:id" element={<LazyPage><InsuranceDetail /></LazyPage>} />
         <Route path="/insurance/:id/quote" element={<LazyPage><InsuranceQuote /></LazyPage>} />
+        
+        {/* Expat Services Routes */}
+        <Route path="/banking" element={<LazyPage><BankingPage /></LazyPage>} />
+        <Route path="/veterinary" element={<LazyPage><VeterinaryPage /></LazyPage>} />
         
         {/* Tours Mini-App Routes */}
         <Route path="/tours" element={<LazyPage><ToursIndex /></LazyPage>} />

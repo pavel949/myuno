@@ -42,6 +42,8 @@ const iconMap: Record<string, LucideIcon> = {
   Shield: LucideIcons.Shield,         // Insurance
   Landmark: LucideIcons.Landmark,     // Banking
   Warehouse: LucideIcons.Warehouse,   // Storage
+  Stamp: LucideIcons.Stamp,           // Visa
+  Globe: LucideIcons.Globe,           // Expat Services
 };
 
 export interface CategoryGroup {
@@ -149,10 +151,10 @@ function getPath(category: RawCategory): string {
     'handyman': '/services?category=handyman',
     'locksmith': '/services?category=locksmith',
     'road-assistance': '/services?category=road-assistance',
-    // New routes for expat services
     'insurance': '/insurance',
     'banking': '/banking',
     'storage': '/storage',
+    'veterinary': '/veterinary',
   };
   return pathMap[type] || pathMap[category.slug] || `/${category.slug}`;
 }
