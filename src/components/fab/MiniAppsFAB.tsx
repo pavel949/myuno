@@ -113,7 +113,7 @@ export function MiniAppsFAB() {
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className={cn(
-              "fixed bottom-24 right-4 z-50",
+              "fixed bottom-28 left-4 z-[60]",
               "bg-card rounded-2xl shadow-2xl border p-4",
               "w-[calc(100vw-2rem)] max-w-[320px]"
             )}
@@ -231,12 +231,12 @@ export function MiniAppsFAB() {
         )}
       </AnimatePresence>
 
-      {/* FAB Button */}
+      {/* FAB Button - positioned above bottom nav */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
         whileTap={{ scale: 0.9 }}
         className={cn(
-          "fixed bottom-20 right-4 z-50",
+          "fixed bottom-24 left-4 z-[60]",
           "w-14 h-14 rounded-full",
           "bg-gradient-to-br from-primary to-primary/80",
           "shadow-lg shadow-primary/25",
