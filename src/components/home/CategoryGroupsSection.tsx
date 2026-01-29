@@ -47,7 +47,7 @@ export function CategoryGroupsSection({ expanded = false, showAll = false }: Cat
             "grid gap-2",
             expanded ? "grid-cols-3 sm:grid-cols-4 md:grid-cols-5" : "grid-cols-4"
           )}>
-            {group.categories.map((cat) => {
+            {(group.categories || []).map((cat) => {
               const Icon = cat.icon || Package;
               return (
                 <button
