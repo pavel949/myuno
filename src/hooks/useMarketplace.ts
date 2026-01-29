@@ -54,6 +54,10 @@ export interface MarketplaceProduct {
   sort_order: number;
   is_shippable_international: boolean;
   weight_kg: number;
+  // Precise unit fields
+  unit_value: number | null;
+  unit_measure: string | null;
+  pack_quantity: number | null;
 }
 
 export interface DeliverySetting {

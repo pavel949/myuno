@@ -17,6 +17,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, Search, MoreHorizontal, Pencil, Trash2, Package } from 'lucide-react';
 import type { MarketplaceProduct } from '@/types/marketplace';
+import { getUnitMeasureOptions } from '@/utils/formatProductUnit';
 
 export default function AdminMarketplaceProducts() {
   const { language } = useLanguage();
@@ -53,6 +54,10 @@ export default function AdminMarketplaceProducts() {
     currency: 'THB',
     unit: 'piece',
     unit_ru: 'шт',
+    // New precise unit fields
+    unit_value: null as number | null,
+    unit_measure: '',
+    pack_quantity: null as number | null,
     in_stock: true,
     is_popular: false,
     is_new: false,
@@ -76,6 +81,9 @@ export default function AdminMarketplaceProducts() {
       currency: 'THB',
       unit: 'piece',
       unit_ru: 'шт',
+      unit_value: null,
+      unit_measure: '',
+      pack_quantity: null,
       in_stock: true,
       is_popular: false,
       is_new: false,
@@ -107,6 +115,9 @@ export default function AdminMarketplaceProducts() {
       currency: product.currency,
       unit: product.unit,
       unit_ru: product.unit_ru,
+      unit_value: product.unit_value,
+      unit_measure: product.unit_measure || '',
+      pack_quantity: product.pack_quantity,
       in_stock: product.in_stock,
       is_popular: product.is_popular,
       is_new: product.is_new,
@@ -124,6 +135,9 @@ export default function AdminMarketplaceProducts() {
       ...formData,
       original_price: formData.original_price || null,
       vendor_id: formData.vendor_id || null,
+      unit_value: formData.unit_value || null,
+      unit_measure: formData.unit_measure || null,
+      pack_quantity: formData.pack_quantity || null,
     };
 
     if (editingProduct) {
@@ -443,6 +457,7 @@ export default function AdminMarketplaceProducts() {
                 <Input
                   value={formData.unit}
                   onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+                  placeholder="e.g., pack, bottle"
                 />
               </div>
               <div className="space-y-2">
@@ -450,16 +465,68 @@ export default function AdminMarketplaceProducts() {
                 <Input
                   value={formData.unit_ru}
                   onChange={(e) => setFormData({ ...formData, unit_ru: e.target.value })}
+                  placeholder="напр., уп, бут"
                 />
               </div>
               <div className="space-y-2">
                 <Label>{isRu ? 'Вес (кг)' : 'Weight (kg)'}</Label>
                 <Input
                   type="number"
-                  step="0.1"
+                  step="0.01"
                   value={formData.weight_kg}
                   onChange={(e) => setFormData({ ...formData, weight_kg: Number(e.target.value) })}
                 />
+              </div>
+            </div>
+
+            {/* Precise Unit Section */}
+            <div className="border border-border rounded-lg p-4 space-y-4">
+              <h4 className="font-medium text-sm">
+                {isRu ? 'Точные единицы измерения' : 'Precise Unit Specification'}
+              </h4>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>{isRu ? 'Значение' : 'Value'}</Label>
+                  <Input
+                    type="number"
+                    placeholder="e.g., 500"
+                    value={formData.unit_value ?? ''}
+                    onChange={(e) => setFormData({ ...formData, unit_value: e.target.value ? Number(e.target.value) : null })}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {isRu ? 'напр. 500 (для 500г)' : 'e.g., 500 (for 500g)'}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label>{isRu ? 'Единица' : 'Measure'}</Label>
+                  <Select
+                    value={formData.unit_measure}
+                    onValueChange={(v) => setFormData({ ...formData, unit_measure: v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={isRu ? 'Выберите' : 'Select'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {getUnitMeasureOptions(isRu ? 'ru' : 'en').map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>{isRu ? 'Кол-во в уп.' : 'Pack Qty'}</Label>
+                  <Input
+                    type="number"
+                    placeholder="e.g., 6"
+                    value={formData.pack_quantity ?? ''}
+                    onChange={(e) => setFormData({ ...formData, pack_quantity: e.target.value ? Number(e.target.value) : null })}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {isRu ? 'напр. 6 (для 6 шт)' : 'e.g., 6 (for 6 pcs)'}
+                  </p>
+                </div>
               </div>
             </div>
 

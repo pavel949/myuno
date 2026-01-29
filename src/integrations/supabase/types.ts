@@ -3795,6 +3795,7 @@ export type Database = {
           name_en: string
           name_ru: string
           original_price: number | null
+          pack_quantity: number | null
           price: number
           pricing_type: string | null
           rating: number | null
@@ -3804,7 +3805,9 @@ export type Database = {
           subcategory: string | null
           tags: string[] | null
           unit: string | null
+          unit_measure: string | null
           unit_ru: string | null
+          unit_value: number | null
           updated_at: string | null
           vendor_id: string | null
           vendor_name: string | null
@@ -3830,6 +3833,7 @@ export type Database = {
           name_en: string
           name_ru: string
           original_price?: number | null
+          pack_quantity?: number | null
           price: number
           pricing_type?: string | null
           rating?: number | null
@@ -3839,7 +3843,9 @@ export type Database = {
           subcategory?: string | null
           tags?: string[] | null
           unit?: string | null
+          unit_measure?: string | null
           unit_ru?: string | null
+          unit_value?: number | null
           updated_at?: string | null
           vendor_id?: string | null
           vendor_name?: string | null
@@ -3865,6 +3871,7 @@ export type Database = {
           name_en?: string
           name_ru?: string
           original_price?: number | null
+          pack_quantity?: number | null
           price?: number
           pricing_type?: string | null
           rating?: number | null
@@ -3874,7 +3881,9 @@ export type Database = {
           subcategory?: string | null
           tags?: string[] | null
           unit?: string | null
+          unit_measure?: string | null
           unit_ru?: string | null
+          unit_value?: number | null
           updated_at?: string | null
           vendor_id?: string | null
           vendor_name?: string | null
