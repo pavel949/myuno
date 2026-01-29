@@ -104,7 +104,7 @@ const Index = () => {
       {/* Quick Listing FAB */}
       <QuickListingFAB />
 
-      <PullToRefresh onRefresh={handleRefresh} className="min-h-[calc(100vh-8rem)]">
+      <PullToRefresh onRefresh={handleRefresh}>
         <div className="px-4 py-4 pb-24 space-y-4" key={refreshKey}>
           
           {/* Search Bar */}
