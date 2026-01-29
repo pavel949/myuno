@@ -214,6 +214,104 @@ export type Database = {
           },
         ]
       }
+      banks: {
+        Row: {
+          accepts_foreigners: boolean | null
+          bank_type: string | null
+          cover_image: string | null
+          created_at: string | null
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          email: string | null
+          features: string[] | null
+          id: string
+          is_active: boolean | null
+          is_featured: boolean | null
+          languages: string[] | null
+          logo: string | null
+          min_deposit: number | null
+          mobile_app: boolean | null
+          name_en: string
+          name_ru: string
+          online_banking: boolean | null
+          phone: string | null
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          services: string[] | null
+          swift_code: string | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          accepts_foreigners?: boolean | null
+          bank_type?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          email?: string | null
+          features?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          languages?: string[] | null
+          logo?: string | null
+          min_deposit?: number | null
+          mobile_app?: boolean | null
+          name_en: string
+          name_ru: string
+          online_banking?: boolean | null
+          phone?: string | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          services?: string[] | null
+          swift_code?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          accepts_foreigners?: boolean | null
+          bank_type?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          email?: string | null
+          features?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          languages?: string[] | null
+          logo?: string | null
+          min_deposit?: number | null
+          mobile_app?: boolean | null
+          name_en?: string
+          name_ru?: string
+          online_banking?: boolean | null
+          phone?: string | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          services?: string[] | null
+          swift_code?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "banks_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking_addresses: {
         Row: {
           address: string
@@ -11039,6 +11137,116 @@ export type Database = {
           vertical?: string
         }
         Relationships: []
+      }
+      veterinary_clinics: {
+        Row: {
+          address: string | null
+          cover_image: string | null
+          created_at: string | null
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          district: string | null
+          email: string | null
+          has_emergency: boolean | null
+          home_visits: boolean | null
+          id: string
+          images: string[] | null
+          is_24h: boolean | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          languages: string[] | null
+          lat: number | null
+          lng: number | null
+          name_en: string
+          name_ru: string
+          phone: string | null
+          price_consultation: number | null
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          services: string[] | null
+          specializations: string[] | null
+          updated_at: string | null
+          website: string | null
+          working_hours: Json | null
+        }
+        Insert: {
+          address?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          has_emergency?: boolean | null
+          home_visits?: boolean | null
+          id?: string
+          images?: string[] | null
+          is_24h?: boolean | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          name_en: string
+          name_ru: string
+          phone?: string | null
+          price_consultation?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          services?: string[] | null
+          specializations?: string[] | null
+          updated_at?: string | null
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Update: {
+          address?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          has_emergency?: boolean | null
+          home_visits?: boolean | null
+          id?: string
+          images?: string[] | null
+          is_24h?: boolean | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          name_en?: string
+          name_ru?: string
+          phone?: string | null
+          price_consultation?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          services?: string[] | null
+          specializations?: string[] | null
+          updated_at?: string | null
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "veterinary_clinics_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       view_history: {
         Row: {
