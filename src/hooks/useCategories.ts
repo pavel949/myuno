@@ -205,22 +205,13 @@ async function fetchCategoryGroups(): Promise<CategoryGroup[]> {
     }
   });
 
-  // Build nested structure (parent-child within groups)
+  // Build structure - show all categories in each group
   const result: CategoryGroup[] = groups.map(group => {
     const groupCategories = categoryMap.get(group.id) || [];
-    
-    // Separate top-level categories from subcategories
-    const topLevel = groupCategories.filter(c => !c.parentId);
-    const subCategories = groupCategories.filter(c => c.parentId);
-    
-    // Attach subcategories to their parents
-    topLevel.forEach(parent => {
-      parent.subcategories = subCategories.filter(sub => sub.parentId === parent.id);
-    });
 
     return {
       ...group,
-      categories: topLevel.sort((a, b) => a.sortOrder - b.sortOrder),
+      categories: groupCategories.sort((a, b) => a.sortOrder - b.sortOrder),
     };
   });
 
@@ -259,13 +250,13 @@ export function useCategories() {
   const { language } = useLanguage();
 
   const groupsQuery = useQuery({
-    queryKey: ['category-groups'],
+    queryKey: ['category-groups', 'v2'], // Invalidate cache
     queryFn: fetchCategoryGroups,
     ...CACHE_PROFILES.STATIC,
   });
 
   const allCategoriesQuery = useQuery({
-    queryKey: ['all-categories'],
+    queryKey: ['all-categories', 'v2'], // Invalidate cache
     queryFn: fetchAllCategories,
     ...CACHE_PROFILES.STATIC,
   });
