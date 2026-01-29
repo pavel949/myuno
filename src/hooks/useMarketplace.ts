@@ -52,6 +52,8 @@ export interface MarketplaceProduct {
   vendor_name_ru: string | null;
   tags: string[] | null;
   sort_order: number;
+  is_shippable_international: boolean;
+  weight_kg: number;
 }
 
 export interface DeliverySetting {

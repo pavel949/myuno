@@ -1,11 +1,11 @@
 import React, { forwardRef, useState } from 'react';
-import { Plus, Minus, Star, Heart, ShoppingBag, Check, ChefHat, Clock, X } from 'lucide-react';
+import { Plus, Minus, Star, Heart, ShoppingBag, Check, ChefHat, Clock, X, Plane } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { MarketplaceProduct } from '@/types/marketplace';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-
+import { ShippableBadge } from './ShippableBadge';
 interface ProductRecipe {
   dish: string;
   dish_ru: string;
@@ -335,23 +335,37 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
           {recipe && (
             <RecipeBadge recipe={recipe} language={language} />
           )}
-          {product.is_new && !recipe && (
+          {product.is_shippable_international && !recipe && (
+            <ShippableBadge />
+          )}
+          {product.is_new && !recipe && !product.is_shippable_international && (
             <Badge className="bg-blue-500 text-white text-[10px] font-semibold px-2 py-0.5 shadow-md">
               NEW
             </Badge>
           )}
-          {product.is_popular && !product.is_new && !recipe && (
+          {product.is_popular && !product.is_new && !recipe && !product.is_shippable_international && (
             <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-semibold px-2 py-0.5 shadow-md">
               🔥 HIT
             </Badge>
           )}
         </div>
         
-        {discount > 0 && (
-          <Badge className="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 shadow-md">
-            -{discount}%
-          </Badge>
-        )}
+        {/* Right side badges */}
+        <div className="absolute top-2 right-2 flex flex-col gap-1 z-10">
+          {discount > 0 && (
+            <Badge className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 shadow-md">
+              -{discount}%
+            </Badge>
+          )}
+          {product.is_shippable_international && (product.is_new || product.is_popular) && (
+            <Badge className={cn(
+              "text-white text-[10px] font-semibold px-2 py-0.5 shadow-md",
+              product.is_new ? "bg-blue-500" : "bg-gradient-to-r from-amber-500 to-orange-500"
+            )}>
+              {product.is_new ? 'NEW' : '🔥 HIT'}
+            </Badge>
+          )}
+        </div>
 
         {/* Quick add overlay on hover (desktop) */}
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none" />
