@@ -8,8 +8,9 @@ import {
 } from '@/hooks/useMarketplace';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
-import { Search, ArrowLeft, ChevronRight } from 'lucide-react';
+import { Search, ArrowLeft, ChevronRight, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { CategoryDrawer } from '@/components/market/CategoryDrawer';
 
 // Fallback icons
 const getCategoryIcon = (slug: string): string => {
@@ -86,7 +87,7 @@ const MarketCatalogPage = () => {
               <ArrowLeft className="w-5 h-5" />
             </Button>
             
-            <div>
+            <div className="flex-1">
               <h1 className="text-xl font-bold">
                 {language === 'ru' ? 'Каталог' : 'Catalog'}
               </h1>
@@ -94,6 +95,15 @@ const MarketCatalogPage = () => {
                 {sortedCategories.length} {language === 'ru' ? 'категорий' : 'categories'}
               </p>
             </div>
+            
+            {/* Drawer Trigger */}
+            <CategoryDrawer 
+              trigger={
+                <Button variant="outline" size="icon" className="shrink-0">
+                  <Menu className="w-5 h-5" />
+                </Button>
+              }
+            />
           </div>
           
           {/* Search */}

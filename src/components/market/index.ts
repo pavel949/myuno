@@ -1,5 +1,6 @@
 export { CategoryBannerGrid } from './CategoryBannerGrid';
 export type { CategoryBannerData } from './CategoryBannerGrid';
+export { CategoryDrawer } from './CategoryDrawer';
 export { ProductCard } from './ProductCard';
 export { ProductSection } from './ProductSection';
 export { ProfessionalProductCard } from './ProfessionalProductCard';
