@@ -13,6 +13,8 @@ export interface Service {
   images: string[] | null;
   category_id: string | null;
   provider_id: string;
+  rating: number | null;
+  review_count: number | null;
   provider?: {
     name: string;
     logo_url: string | null;
@@ -59,6 +61,8 @@ const demoServices: Service[] = [
     images: ['https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600'],
     category_id: 'beauty',
     provider_id: 'demo-provider',
+    rating: 4.8,
+    review_count: 124,
     provider: { name: 'Orchid Spa', logo_url: null, is_verified: true },
     category: { name_en: 'Beauty & Spa', name_ru: 'Красота и СПА', slug: 'beauty-spa' },
   },
@@ -74,6 +78,8 @@ const demoServices: Service[] = [
     images: ['https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600'],
     category_id: 'fitness',
     provider_id: 'demo-provider',
+    rating: 4.9,
+    review_count: 87,
     provider: { name: 'Fitness First', logo_url: null, is_verified: true },
     category: { name_en: 'Fitness', name_ru: 'Фитнес', slug: 'fitness' },
   },
@@ -89,6 +95,8 @@ const demoServices: Service[] = [
     images: ['https://images.unsplash.com/photo-1559339352-11d035aa65de?w=600'],
     category_id: 'food',
     provider_id: 'demo-provider',
+    rating: 4.5,
+    review_count: 56,
     provider: { name: 'Ocean View', logo_url: null, is_verified: false },
     category: { name_en: 'Restaurants', name_ru: 'Рестораны', slug: 'restaurants' },
   },
@@ -104,6 +112,8 @@ const demoServices: Service[] = [
     images: ['https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=600'],
     category_id: 'medical',
     provider_id: 'demo-provider',
+    rating: 4.7,
+    review_count: 203,
     provider: { name: 'Phuket Dental', logo_url: null, is_verified: true },
     category: { name_en: 'Medical', name_ru: 'Медицина', slug: 'medical' },
   },
@@ -119,6 +129,8 @@ const demoServices: Service[] = [
     images: ['https://images.unsplash.com/photo-1502877338535-766e1452684a?w=600'],
     category_id: 'transport',
     provider_id: 'demo-provider',
+    rating: 4.6,
+    review_count: 312,
     provider: { name: 'Phuket Cars', logo_url: null, is_verified: true },
     category: { name_en: 'Transport', name_ru: 'Транспорт', slug: 'transport' },
   },
@@ -134,6 +146,8 @@ const demoServices: Service[] = [
     images: ['https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600'],
     category_id: 'events',
     provider_id: 'demo-provider',
+    rating: 4.9,
+    review_count: 445,
     provider: { name: 'Phuket Tours', logo_url: null, is_verified: true },
     category: { name_en: 'Events & Tickets', name_ru: 'Мероприятия', slug: 'events' },
   },
@@ -234,7 +248,7 @@ export const useServices = (options: UseServicesOptions = {}) => {
         }
         setServices(filteredDemo);
       } else {
-        setServices(data as Service[]);
+        setServices(data.map(s => ({ ...s, rating: null, review_count: null })) as Service[]);
       }
     } catch (err) {
       console.error('Error loading services:', err);
@@ -338,7 +352,7 @@ export const useServices = (options: UseServicesOptions = {}) => {
           }
           setServices(filteredDemo);
         } else {
-          setServices(data as Service[]);
+          setServices(data.map(s => ({ ...s, rating: null, review_count: null })) as Service[]);
         }
       } catch (err) {
         console.error('Error loading services:', err);
