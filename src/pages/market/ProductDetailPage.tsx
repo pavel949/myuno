@@ -4,7 +4,6 @@ import {
   ChevronLeft, 
   ChevronRight, 
   ShoppingBag, 
-  Heart, 
   Share2, 
   Star, 
   Truck, 
@@ -12,7 +11,6 @@ import {
   Plane,
   Plus,
   Minus,
-  Check,
   Package
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -22,12 +20,14 @@ import { PageContainer } from '@/components/uno/PageContainer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { StickyCartBar } from '@/components/cart/StickyCartBar';
 import { useCartToast } from '@/hooks/useCartToast';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { VendorInfo } from '@/components/market/VendorInfo';
 import { useVendorById } from '@/hooks/useMarketplaceVendors';
+import { WishlistButton } from '@/components/market/WishlistButton';
+import { ReviewList } from '@/components/market/reviews/ReviewList';
+import { ReviewForm } from '@/components/market/reviews/ReviewForm';
 import { cn } from '@/lib/utils';
 
 const ProductDetailPage = () => {
@@ -37,7 +37,7 @@ const ProductDetailPage = () => {
   const { addItem, removeItem, getItemsByType } = useCart();
   const { showAddedToast } = useCartToast();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(false);
 
   // Fetch product from database
   const { data: product, isLoading } = useQuery({
@@ -178,15 +178,7 @@ const ProductDetailPage = () => {
           
           {/* Action buttons */}
           <div className="absolute top-4 right-4 flex gap-2">
-            <button
-              onClick={() => setIsFavorite(!isFavorite)}
-              className={cn(
-                "w-10 h-10 rounded-full backdrop-blur-sm flex items-center justify-center shadow-lg transition-colors",
-                isFavorite ? "bg-red-500 text-white" : "bg-background/80"
-              )}
-            >
-              <Heart className={cn("h-5 w-5", isFavorite && "fill-current")} />
-            </button>
+            <WishlistButton productId={productId!} />
             <button
               onClick={handleShare}
               className="w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center shadow-lg"
@@ -373,7 +365,29 @@ const ProductDetailPage = () => {
               {product.weight_kg} {language === 'ru' ? 'кг' : 'kg'}
             </div>
           )}
+
+          {/* Reviews Section */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold mb-4">
+              {language === 'ru' ? 'Отзывы покупателей' : 'Customer Reviews'}
+            </h3>
+            <ReviewList 
+              productId={productId!} 
+              onWriteReview={() => setShowReviewForm(true)} 
+            />
+          </div>
         </div>
+
+        {/* Review Form Dialog */}
+        <ReviewForm
+          productId={productId!}
+          productName={name}
+          isOpen={showReviewForm}
+          onClose={() => setShowReviewForm(false)}
+          onSuccess={() => {
+            // Refresh reviews would happen automatically via re-render
+          }}
+        />
 
         {/* Fixed Bottom Bar */}
         <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4 z-50">
