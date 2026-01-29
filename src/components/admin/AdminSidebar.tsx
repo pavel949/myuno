@@ -36,7 +36,11 @@ import {
   Rocket,
   Flag,
   ChevronDown,
-  LogOut
+  LogOut,
+  ShoppingCart,
+  Grid3X3,
+  List,
+  BadgeCheck
 } from 'lucide-react';
 import {
   Sidebar,
@@ -129,6 +133,18 @@ const navigationGroups: NavGroup[] = [
       { title: 'Legal', titleRu: 'Юридические', path: '/admin/legal', icon: Scale },
       { title: 'Insurance', titleRu: 'Страхование', path: '/admin/insurance', icon: Shield },
       { title: 'Stores', titleRu: 'Магазины', path: '/admin/stores', icon: Store },
+    ],
+  },
+  // Marketplace Management
+  {
+    label: 'Marketplace',
+    labelRu: 'Маркетплейс',
+    defaultOpen: false,
+    items: [
+      { title: 'Products', titleRu: 'Товары', path: '/admin/marketplace/products', icon: ShoppingCart },
+      { title: 'Categories', titleRu: 'Категории', path: '/admin/marketplace/categories', icon: Grid3X3 },
+      { title: 'Subcategories', titleRu: 'Подкатегории', path: '/admin/marketplace/subcategories', icon: List },
+      { title: 'Vendors', titleRu: 'Продавцы', path: '/admin/marketplace/vendors', icon: BadgeCheck },
     ],
   },
   // 3. ANALYTICS & FINANCE
