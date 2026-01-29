@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { MessageCircle, X, Send, Phone, HelpCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { MessageCircle, X } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useSupportChat } from '@/hooks/useChat';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
+import { triggerHaptic } from '@/hooks/useHapticFeedback';
 
 // WhatsApp icon component
 const WhatsAppIcon = ({ className }: { className?: string }) => (
@@ -13,88 +13,122 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+const TelegramIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+  </svg>
+);
+
 interface SupportFABProps {
   className?: string;
 }
 
+const HIDDEN_ROUTES = ['/auth'];
+const PHONE_NUMBER = '66922407355';
+
 export const SupportFAB: React.FC<SupportFABProps> = ({ className }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { language } = useLanguage();
-  const navigate = useNavigate();
-  const { startSupportChat, openWhatsApp } = useSupportChat();
+  const location = useLocation();
   const isRu = language === 'ru';
 
-  const actions = [
-    {
-      icon: WhatsAppIcon,
-      label: 'WhatsApp',
-      color: 'bg-green-500 hover:bg-green-600',
-      onClick: () => {
-        openWhatsApp();
-        setIsOpen(false);
-      }
-    },
-    {
-      icon: HelpCircle,
-      label: isRu ? 'FAQ' : 'FAQ',
-      color: 'bg-primary hover:bg-primary/90',
-      onClick: () => {
-        navigate('/faq');
-        setIsOpen(false);
-      }
-    },
-    {
-      icon: MessageCircle,
-      label: isRu ? 'Поддержка' : 'Support',
-      color: 'bg-primary hover:bg-primary/90',
-      onClick: () => {
-        navigate('/support');
-        setIsOpen(false);
-      }
-    }
-  ];
+  const handleWhatsApp = () => {
+    triggerHaptic('light');
+    window.open(`https://wa.me/${PHONE_NUMBER}`, '_blank');
+    setIsOpen(false);
+  };
+
+  const handleTelegram = () => {
+    triggerHaptic('light');
+    window.open(`https://t.me/+${PHONE_NUMBER}`, '_blank');
+    setIsOpen(false);
+  };
+
+  const handleToggle = () => {
+    triggerHaptic('light');
+    setIsOpen(!isOpen);
+  };
+
+  // Hide on auth page
+  if (HIDDEN_ROUTES.includes(location.pathname)) {
+    return null;
+  }
 
   return (
-    <div className={cn('fixed bottom-20 right-4 z-40 md:bottom-6', className)}>
-      {/* Action buttons */}
-      <div className={cn(
-        'flex flex-col gap-2 mb-2 transition-all duration-200',
-        isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
-      )}>
-        {actions.map((action, index) => (
-          <button
-            key={index}
-            onClick={action.onClick}
-            className={cn(
-              'flex items-center gap-2 px-4 py-2 rounded-full text-white shadow-lg transition-transform',
-              action.color,
-              isOpen ? 'scale-100' : 'scale-0'
-            )}
-            style={{ transitionDelay: `${index * 50}ms` }}
+    <>
+      {/* Backdrop */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsOpen(false)}
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Chat buttons popup */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="fixed bottom-36 right-4 z-50 flex flex-col gap-3 md:bottom-20"
           >
-            <action.icon className="w-5 h-5" />
-            <span className="text-sm font-medium whitespace-nowrap">{action.label}</span>
-          </button>
-        ))}
-      </div>
+            {/* WhatsApp */}
+            <motion.button
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0, transition: { delay: 0.05 } }}
+              onClick={handleWhatsApp}
+              className="flex items-center gap-3 px-4 py-3 rounded-full bg-[#25D366] text-white shadow-lg hover:bg-[#20bd5a] transition-colors"
+            >
+              <WhatsAppIcon className="w-6 h-6" />
+              <span className="font-medium text-sm">WhatsApp</span>
+            </motion.button>
+
+            {/* Telegram */}
+            <motion.button
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0, transition: { delay: 0.1 } }}
+              onClick={handleTelegram}
+              className="flex items-center gap-3 px-4 py-3 rounded-full bg-[#0088cc] text-white shadow-lg hover:bg-[#0077b5] transition-colors"
+            >
+              <TelegramIcon className="w-6 h-6" />
+              <span className="font-medium text-sm">Telegram</span>
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Main FAB */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
+      <motion.button
+        onClick={handleToggle}
+        whileTap={{ scale: 0.9 }}
         className={cn(
-          'w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all',
+          'fixed bottom-20 right-4 z-50 w-14 h-14 rounded-full shadow-lg',
+          'flex items-center justify-center',
+          'transition-colors md:bottom-6',
           isOpen 
             ? 'bg-muted text-foreground' 
-            : 'bg-primary text-primary-foreground'
+            : 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground',
+          className
         )}
+        aria-label={isRu ? 'Связаться с нами' : 'Contact us'}
       >
         {isOpen ? (
           <X className="w-6 h-6" />
         ) : (
-          <MessageCircle className="w-6 h-6" />
+          <>
+            <MessageCircle className="w-6 h-6" />
+            <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-background" />
+          </>
         )}
-      </button>
-    </div>
+      </motion.button>
+    </>
   );
 };
 
