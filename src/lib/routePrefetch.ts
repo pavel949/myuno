@@ -35,7 +35,7 @@ const routeDataQueries: Record<string, (queryClient: QueryClient) => void> = {
       queryFn: async () => {
         const { data } = await supabase
           .from('yachts')
-          .select('id, name_en, name_ru, cover_image, rating, price_per_day')
+          .select('id, name_en, name_ru, cover_image, rating, price_full_day')
           .eq('is_active', true)
           .eq('approval_status', 'approved')
           .order('rating', { ascending: false })
