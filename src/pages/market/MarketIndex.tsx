@@ -271,6 +271,7 @@ const MarketIndex = () => {
             </div>
             <ProfessionalCategoryBanner
               categories={filteredCategories}
+              products={allProducts}
               onCategoryClick={handleCategoryClick}
             />
           </section>
