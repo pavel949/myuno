@@ -1,46 +1,28 @@
 import React, { useState, useCallback, useMemo, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
-  Search, SlidersHorizontal, X, Sparkles, UtensilsCrossed, 
-  Dumbbell, Stethoscope, GraduationCap, Building, Car, 
-  Ticket, ShoppingBag, Wrench, Clock, MapPin, Star, Check,
-  ArrowUpDown, TrendingUp, ArrowDown, ArrowUp
+  Search, SlidersHorizontal, X, Sparkles, Package, 
+  TrendingUp, ArrowDown, ArrowUp, Star, Clock, Check, ChevronRight
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { PageContainer } from '@/components/uno/PageContainer';
+import { PageHeader } from '@/components/uno/PageHeader';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { UnifiedCard } from '@/components/uno/UnifiedCard';
-import { FilterChip } from '@/components/uno/FilterChip';
 import { SkeletonGrid } from '@/components/uno/SkeletonCard';
 import { EmptyState } from '@/components/uno/EmptyState';
-import { AnimatedGrid, AnimatedCard, FadeInUp } from '@/components/layout/AnimatedList';
-import { useServices, useCategories, Service, SortOption } from '@/hooks/useServices';
+import { AnimatedGrid, FadeInUp } from '@/components/layout/AnimatedList';
+import { useServices, Service, SortOption, useCategories as useServiceCategories } from '@/hooks/useServices';
+import { useCategories, CategoryGroup, Category } from '@/hooks/useCategories';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
-const iconMap: Record<string, React.ElementType> = {
-  Sparkles,
-  UtensilsCrossed,
-  Dumbbell,
-  Stethoscope,
-  GraduationCap,
-  Building,
-  Car,
-  Ticket,
-  ShoppingBag,
-  Wrench,
-};
-
-const PRICE_RANGES = [
-  { label: 'Any', labelRu: 'Любая', min: 0, max: Infinity },
-  { label: '< 1000 ฿', labelRu: '< 1000 ฿', min: 0, max: 1000 },
-  { label: '1000-2000 ฿', labelRu: '1000-2000 ฿', min: 1000, max: 2000 },
-  { label: '2000-5000 ฿', labelRu: '2000-5000 ฿', min: 2000, max: 5000 },
-  { label: '> 5000 ฿', labelRu: '> 5000 ฿', min: 5000, max: Infinity },
-];
+type TabValue = 'all' | 'categories' | 'providers';
 
 const SORT_OPTIONS: { value: SortOption; label: string; labelRu: string; icon: React.ElementType }[] = [
   { value: 'popular', label: 'Popular', labelRu: 'Популярные', icon: TrendingUp },
@@ -50,10 +32,21 @@ const SORT_OPTIONS: { value: SortOption; label: string; labelRu: string; icon: R
   { value: 'newest', label: 'Newest', labelRu: 'Новые', icon: Clock },
 ];
 
+const PRICE_RANGES = [
+  { label: 'Any', labelRu: 'Любая', min: 0, max: Infinity },
+  { label: '< 1000 ฿', labelRu: '< 1000 ฿', min: 0, max: 1000 },
+  { label: '1000-2000 ฿', labelRu: '1000-2000 ฿', min: 1000, max: 2000 },
+  { label: '2000-5000 ฿', labelRu: '2000-5000 ฿', min: 2000, max: 5000 },
+  { label: '> 5000 ฿', labelRu: '> 5000 ฿', min: 5000, max: Infinity },
+];
+
 export default function Discover() {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   
+  const initialTab = (searchParams.get('tab') as TabValue) || 'all';
+  const [activeTab, setActiveTab] = useState<TabValue>(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -62,8 +55,10 @@ export default function Discover() {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const { categories, isLoading: categoriesLoading } = useCategories();
-  const { services, isLoading: servicesLoading, refetch } = useServices({
+  // Hooks
+  const { groups, getName, isLoading: categoriesLoading, refetch: refetchCategories } = useCategories();
+  const { categories: serviceCategories, isLoading: serviceCategoriesLoading } = useServiceCategories();
+  const { services, isLoading: servicesLoading, refetch: refetchServices } = useServices({
     categoryId: selectedCategory || undefined,
     searchQuery: debouncedSearch || undefined,
     priceMin: priceRange?.min,
@@ -81,18 +76,23 @@ export default function Discover() {
     searchTimerRef.current = setTimeout(() => setDebouncedSearch(value), 300);
   }, []);
 
+  const handleTabChange = useCallback((value: string) => {
+    setActiveTab(value as TabValue);
+    setSearchParams({ tab: value });
+  }, [setSearchParams]);
+
   const handleRefresh = useCallback(async () => {
     await new Promise(resolve => setTimeout(resolve, 500));
-    refetch();
+    refetchCategories();
+    refetchServices();
     setRefreshKey(prev => prev + 1);
-  }, [refetch]);
+  }, [refetchCategories, refetchServices]);
 
-  const handleCategorySelect = useCallback((categoryId: string | null) => {
-    setSelectedCategory(prev => prev === categoryId ? null : categoryId);
-  }, []);
+  const handleCategoryClick = useCallback((cat: Category) => {
+    navigate(cat.path);
+  }, [navigate]);
 
   const handleServiceClick = useCallback((service: Service) => {
-    // Navigate based on category
     const slug = service.category?.slug || 'services';
     const pathMap: Record<string, string> = {
       'beauty-spa': '/beauty',
@@ -123,343 +123,542 @@ export default function Discover() {
     setDebouncedSearch('');
   }, []);
 
-  const currentSort = SORT_OPTIONS.find(s => s.value === sortBy) || SORT_OPTIONS[0];
-
   const isLoading = categoriesLoading || servicesLoading;
 
   return (
-    <AppLayout title={t('nav.discover')}>
-      <PullToRefresh onRefresh={handleRefresh} className="min-h-0 flex-1 h-[calc(100vh-8rem)]">
-        <div className="p-4 space-y-4" key={refreshKey}>
-          {/* Search & Filter Bar */}
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <Input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                placeholder={language === 'ru' ? 'Поиск услуг...' : 'Search services...'}
-                className="pl-10 pr-10"
-              />
-              {searchQuery && (
+    <AppLayout showBottomNav>
+      <PageContainer className="pb-24">
+        <PageHeader 
+          title={language === 'ru' ? 'Каталог' : 'Catalog'}
+          showBack
+          fallbackPath="/"
+        />
+        
+        {/* Search bar */}
+        <div 
+          className="relative cursor-pointer mt-4 mb-4"
+          onClick={() => navigate('/search')}
+        >
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          <Input 
+            placeholder={language === 'ru' ? 'Поиск сервисов...' : 'Search services...'}
+            className="pl-11 h-12 text-base rounded-xl bg-muted/50 border-0 cursor-pointer"
+            readOnly
+          />
+        </div>
+
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+          <TabsList className="w-full grid grid-cols-3 mb-4">
+            <TabsTrigger value="all">
+              {language === 'ru' ? 'Все' : 'All'}
+            </TabsTrigger>
+            <TabsTrigger value="categories">
+              {language === 'ru' ? 'Категории' : 'Categories'}
+            </TabsTrigger>
+            <TabsTrigger value="providers">
+              {language === 'ru' ? 'Провайдеры' : 'Providers'}
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Tab: All - Category cards grouped */}
+          <TabsContent value="all" className="mt-0">
+            <PullToRefresh onRefresh={handleRefresh} className="min-h-0">
+              <div key={refreshKey}>
+                {categoriesLoading ? (
+                  <AllTabSkeleton />
+                ) : (
+                  <AllCategoriesView 
+                    groups={groups} 
+                    getName={getName} 
+                    language={language}
+                    onCategoryClick={handleCategoryClick}
+                  />
+                )}
+              </div>
+            </PullToRefresh>
+          </TabsContent>
+
+          {/* Tab: Categories - Tree view */}
+          <TabsContent value="categories" className="mt-0">
+            <PullToRefresh onRefresh={handleRefresh} className="min-h-0">
+              <div key={refreshKey}>
+                {categoriesLoading ? (
+                  <CategoriesTabSkeleton />
+                ) : (
+                  <CategoryTreeView 
+                    groups={groups} 
+                    getName={getName} 
+                    language={language}
+                    onCategoryClick={handleCategoryClick}
+                  />
+                )}
+              </div>
+            </PullToRefresh>
+          </TabsContent>
+
+          {/* Tab: Providers - Services list with filters */}
+          <TabsContent value="providers" className="mt-0">
+            <ProvidersView 
+              services={services}
+              categories={serviceCategories}
+              isLoading={servicesLoading}
+              language={language}
+              selectedCategory={selectedCategory}
+              setSelectedCategory={setSelectedCategory}
+              priceRange={priceRange}
+              setPriceRange={setPriceRange}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
+              activeFiltersCount={activeFiltersCount}
+              clearFilters={clearFilters}
+              isFiltersOpen={isFiltersOpen}
+              setIsFiltersOpen={setIsFiltersOpen}
+              onServiceClick={handleServiceClick}
+              onRefresh={handleRefresh}
+              refreshKey={refreshKey}
+            />
+          </TabsContent>
+        </Tabs>
+      </PageContainer>
+    </AppLayout>
+  );
+}
+
+// ============ Tab Components ============
+
+interface AllCategoriesViewProps {
+  groups: CategoryGroup[];
+  getName: (item: Category | CategoryGroup) => string;
+  language: string;
+  onCategoryClick: (cat: Category) => void;
+}
+
+function AllCategoriesView({ groups, getName, language, onCategoryClick }: AllCategoriesViewProps) {
+  if (groups.length === 0) {
+    return (
+      <EmptyState
+        icon={Package}
+        title={language === 'ru' ? 'Категории не найдены' : 'No categories found'}
+        description={language === 'ru' ? 'Попробуйте обновить страницу' : 'Try refreshing the page'}
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {groups.map((group) => (
+        <div key={group.id}>
+          <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
+            {getName(group)}
+            <span className="text-xs font-normal">({group.categories?.length || 0})</span>
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {(group.categories || []).map((cat) => {
+              const Icon = cat.icon || Package;
+              return (
                 <button
-                  onClick={() => { setSearchQuery(''); setDebouncedSearch(''); }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  key={cat.id}
+                  onClick={() => onCategoryClick(cat)}
+                  className={cn(
+                    "relative flex items-center gap-3 p-4 rounded-2xl",
+                    "bg-card border border-border/50",
+                    "hover:border-primary/40 hover:shadow-md hover:scale-[1.02]",
+                    "active:scale-95 transition-all duration-200",
+                    "group text-left"
+                  )}
                 >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-            <Sheet open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="relative">
-                  <SlidersHorizontal className="w-5 h-5" />
-                  {activeFiltersCount > 0 && (
-                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
-                      {activeFiltersCount}
+                  {/* Badge */}
+                  {(cat.isNew || cat.isHot) && (
+                    <span className={cn(
+                      "absolute -top-1.5 -right-1.5 text-[9px] px-1.5 py-0.5 rounded-full font-semibold shadow-sm",
+                      cat.isNew ? "bg-primary text-primary-foreground" : "bg-amber-500 text-white"
+                    )}>
+                      {cat.isNew ? 'NEW' : (language === 'ru' ? 'ТОП' : 'HOT')}
                     </span>
                   )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="flex flex-col h-full max-h-screen overflow-hidden">
-                <SheetHeader className="flex-shrink-0">
-                  <SheetTitle>
-                    {language === 'ru' ? 'Фильтры' : 'Filters'}
-                  </SheetTitle>
-                </SheetHeader>
-                <div className="flex-1 overflow-y-auto py-6 space-y-6 -mx-6 px-6">
-                  {/* Sort options */}
-                  <div>
-                    <h4 className="font-medium mb-3">
-                      {language === 'ru' ? 'Сортировка' : 'Sort by'}
-                    </h4>
-                    <div className="space-y-2">
-                      {SORT_OPTIONS.map((option) => {
-                        const Icon = option.icon;
-                        return (
-                          <button
-                            key={option.value}
-                            onClick={() => setSortBy(option.value)}
-                            className={cn(
-                              "w-full flex items-center gap-3 p-3 rounded-lg border transition-colors",
-                              sortBy === option.value
-                                ? "bg-primary text-primary-foreground border-primary"
-                                : "bg-secondary border-border hover:border-primary/50"
-                            )}
-                          >
-                            <Icon className="w-5 h-5" />
-                            <span className="flex-1 text-left">
-                              {language === 'ru' ? option.labelRu : option.label}
-                            </span>
-                            {sortBy === option.value && <Check className="w-4 h-4" />}
-                          </button>
-                        );
-                      })}
-                    </div>
+                  
+                  {/* Icon */}
+                  <div className={cn(
+                    "w-12 h-12 rounded-xl flex items-center justify-center shrink-0",
+                    "bg-gradient-to-br shadow-sm",
+                    cat.color || "from-primary/20 to-primary/10",
+                    "group-hover:scale-110 transition-transform"
+                  )}>
+                    <Icon className="w-6 h-6 text-white" />
                   </div>
+                  
+                  {/* Text */}
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm font-medium line-clamp-2">
+                      {getName(cat)}
+                    </span>
+                  </div>
+                  
+                  <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
-                  {/* Price filter */}
-                  <div>
-                    <h4 className="font-medium mb-3">
-                      {language === 'ru' ? 'Цена' : 'Price'}
-                    </h4>
-                    <div className="grid grid-cols-2 gap-2">
-                      {PRICE_RANGES.map((range, idx) => (
+interface CategoryTreeViewProps {
+  groups: CategoryGroup[];
+  getName: (item: Category | CategoryGroup) => string;
+  language: string;
+  onCategoryClick: (cat: Category) => void;
+}
+
+function CategoryTreeView({ groups, getName, language, onCategoryClick }: CategoryTreeViewProps) {
+  if (groups.length === 0) {
+    return (
+      <EmptyState
+        icon={Package}
+        title={language === 'ru' ? 'Категории не найдены' : 'No categories found'}
+        description={language === 'ru' ? 'Попробуйте обновить страницу' : 'Try refreshing the page'}
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-8">
+      {groups.map((group) => (
+        <div key={group.id}>
+          {/* Group header */}
+          <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+            {getName(group)}
+            <span className="text-sm font-normal text-muted-foreground">
+              ({group.categories?.length || 0})
+            </span>
+          </h2>
+          
+          {/* Category grid - 4 columns */}
+          <div className="grid grid-cols-4 gap-3">
+            {(group.categories || []).map((cat) => {
+              const Icon = cat.icon || Package;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => onCategoryClick(cat)}
+                  className={cn(
+                    "relative flex flex-col items-center justify-center",
+                    "aspect-square rounded-2xl p-2",
+                    "bg-card border border-border/50",
+                    "hover:border-primary/40 hover:shadow-md hover:scale-[1.02]",
+                    "active:scale-95 transition-all duration-200",
+                    "group"
+                  )}
+                >
+                  {/* Badges */}
+                  {(cat.isNew || cat.isHot) && (
+                    <span className={cn(
+                      "absolute -top-1.5 -right-1.5 text-[9px] px-1.5 py-0.5 rounded-full font-semibold shadow-sm",
+                      cat.isNew ? "bg-primary text-primary-foreground" : "bg-amber-500 text-white"
+                    )}>
+                      {cat.isNew ? 'NEW' : (language === 'ru' ? 'ТОП' : 'HOT')}
+                    </span>
+                  )}
+                  
+                  {/* Icon */}
+                  <div className={cn(
+                    "w-12 h-12 rounded-xl flex items-center justify-center mb-2",
+                    "bg-gradient-to-br shadow-sm",
+                    cat.color || "from-primary/20 to-primary/10",
+                    "group-hover:scale-110 transition-transform"
+                  )}>
+                    <Icon className="w-6 h-6 text-white" />
+                  </div>
+                  
+                  {/* Name */}
+                  <span className="text-[11px] font-medium text-center leading-tight line-clamp-2 px-1">
+                    {getName(cat)}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+interface ProvidersViewProps {
+  services: Service[];
+  categories: { id: string; name_en: string; name_ru: string; icon?: string }[];
+  isLoading: boolean;
+  language: string;
+  selectedCategory: string | null;
+  setSelectedCategory: (id: string | null) => void;
+  priceRange: { min: number; max: number } | null;
+  setPriceRange: (range: { min: number; max: number } | null) => void;
+  sortBy: SortOption;
+  setSortBy: (sort: SortOption) => void;
+  activeFiltersCount: number;
+  clearFilters: () => void;
+  isFiltersOpen: boolean;
+  setIsFiltersOpen: (open: boolean) => void;
+  onServiceClick: (service: Service) => void;
+  onRefresh: () => Promise<void>;
+  refreshKey: number;
+}
+
+function ProvidersView({
+  services,
+  categories,
+  isLoading,
+  language,
+  selectedCategory,
+  setSelectedCategory,
+  priceRange,
+  setPriceRange,
+  sortBy,
+  setSortBy,
+  activeFiltersCount,
+  clearFilters,
+  isFiltersOpen,
+  setIsFiltersOpen,
+  onServiceClick,
+  onRefresh,
+  refreshKey,
+}: ProvidersViewProps) {
+  const currentSort = SORT_OPTIONS.find(s => s.value === sortBy) || SORT_OPTIONS[0];
+
+  return (
+    <PullToRefresh onRefresh={onRefresh} className="min-h-0">
+      <div className="space-y-4" key={refreshKey}>
+        {/* Filters button */}
+        <div className="flex items-center gap-2">
+          <Sheet open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="sm" className="relative gap-2">
+                <SlidersHorizontal className="w-4 h-4" />
+                {language === 'ru' ? 'Фильтры' : 'Filters'}
+                {activeFiltersCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
+                    {activeFiltersCount}
+                  </span>
+                )}
+              </Button>
+            </SheetTrigger>
+            <SheetContent className="flex flex-col h-full max-h-screen overflow-hidden">
+              <SheetHeader className="flex-shrink-0">
+                <SheetTitle>
+                  {language === 'ru' ? 'Фильтры' : 'Filters'}
+                </SheetTitle>
+              </SheetHeader>
+              <div className="flex-1 overflow-y-auto py-6 space-y-6 -mx-6 px-6">
+                {/* Sort options */}
+                <div>
+                  <h4 className="font-medium mb-3">
+                    {language === 'ru' ? 'Сортировка' : 'Sort by'}
+                  </h4>
+                  <div className="space-y-2">
+                    {SORT_OPTIONS.map((option) => {
+                      const Icon = option.icon;
+                      return (
                         <button
-                          key={idx}
-                          onClick={() => setPriceRange(
-                            priceRange?.min === range.min && priceRange?.max === range.max 
-                              ? null 
-                              : { min: range.min, max: range.max }
-                          )}
+                          key={option.value}
+                          onClick={() => setSortBy(option.value)}
                           className={cn(
-                            "p-3 rounded-lg border text-sm transition-colors",
-                            priceRange?.min === range.min && priceRange?.max === range.max
+                            "w-full flex items-center gap-3 p-3 rounded-lg border transition-colors",
+                            sortBy === option.value
                               ? "bg-primary text-primary-foreground border-primary"
                               : "bg-secondary border-border hover:border-primary/50"
                           )}
                         >
-                          {language === 'ru' ? range.labelRu : range.label}
+                          <Icon className="w-5 h-5" />
+                          <span className="flex-1 text-left">
+                            {language === 'ru' ? option.labelRu : option.label}
+                          </span>
+                          {sortBy === option.value && <Check className="w-4 h-4" />}
                         </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Category filter */}
-                  <div>
-                    <h4 className="font-medium mb-3">
-                      {language === 'ru' ? 'Категория' : 'Category'}
-                    </h4>
-                    <div className="space-y-2">
-                      {categories.map((cat) => {
-                        const Icon = iconMap[cat.icon || ''] || Sparkles;
-                        return (
-                          <button
-                            key={cat.id}
-                            onClick={() => handleCategorySelect(cat.id)}
-                            className={cn(
-                              "w-full flex items-center gap-3 p-3 rounded-lg border transition-colors",
-                              selectedCategory === cat.id
-                                ? "bg-primary text-primary-foreground border-primary"
-                                : "bg-secondary border-border hover:border-primary/50"
-                            )}
-                          >
-                            <Icon className="w-5 h-5" />
-                            <span className="flex-1 text-left">
-                              {language === 'ru' ? cat.name_ru : cat.name_en}
-                            </span>
-                            {selectedCategory === cat.id && <Check className="w-4 h-4" />}
-                          </button>
-                        );
-                      })}
-                    </div>
+                      );
+                    })}
                   </div>
                 </div>
 
-                {/* Clear filters - sticky at bottom */}
-                {activeFiltersCount > 0 && (
-                  <div className="flex-shrink-0 pt-4 border-t">
-                    <Button 
-                      variant="outline" 
-                      className="w-full"
-                      onClick={() => {
-                        clearFilters();
-                        setIsFiltersOpen(false);
-                      }}
-                    >
-                      {language === 'ru' ? 'Сбросить фильтры' : 'Clear filters'}
-                    </Button>
+                {/* Price filter */}
+                <div>
+                  <h4 className="font-medium mb-3">
+                    {language === 'ru' ? 'Цена' : 'Price'}
+                  </h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {PRICE_RANGES.map((range, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setPriceRange(
+                          priceRange?.min === range.min && priceRange?.max === range.max 
+                            ? null 
+                            : { min: range.min, max: range.max }
+                        )}
+                        className={cn(
+                          "p-3 rounded-lg border text-sm transition-colors",
+                          priceRange?.min === range.min && priceRange?.max === range.max
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-secondary border-border hover:border-primary/50"
+                        )}
+                      >
+                        {language === 'ru' ? range.labelRu : range.label}
+                      </button>
+                    ))}
                   </div>
-                )}
-              </SheetContent>
-            </Sheet>
-          </div>
+                </div>
 
-          {/* Sort & Category chips (horizontal scroll) */}
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
-            {/* Sort button */}
-            <button
-              onClick={() => setIsFiltersOpen(true)}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors border",
-                "bg-secondary border-border hover:border-primary/50"
+                {/* Category filter */}
+                <div>
+                  <h4 className="font-medium mb-3">
+                    {language === 'ru' ? 'Категория' : 'Category'}
+                  </h4>
+                  <div className="space-y-2">
+                    {categories.map((cat) => (
+                      <button
+                        key={cat.id}
+                        onClick={() => setSelectedCategory(selectedCategory === cat.id ? null : cat.id)}
+                        className={cn(
+                          "w-full flex items-center gap-3 p-3 rounded-lg border transition-colors",
+                          selectedCategory === cat.id
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-secondary border-border hover:border-primary/50"
+                        )}
+                      >
+                        <span className="flex-1 text-left">
+                          {language === 'ru' ? cat.name_ru : cat.name_en}
+                        </span>
+                        {selectedCategory === cat.id && <Check className="w-4 h-4" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Clear filters */}
+              {activeFiltersCount > 0 && (
+                <div className="flex-shrink-0 pt-4 border-t">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => {
+                      clearFilters();
+                      setIsFiltersOpen(false);
+                    }}
+                  >
+                    {language === 'ru' ? 'Сбросить фильтры' : 'Clear filters'}
+                  </Button>
+                </div>
               )}
-            >
-              <currentSort.icon className="w-4 h-4" />
-              {language === 'ru' ? currentSort.labelRu : currentSort.label}
-            </button>
-            
-            <div className="w-px h-6 bg-border self-center" />
-            
-            <FilterChip
-              label={language === 'ru' ? 'Все' : 'All'}
-              isActive={!selectedCategory}
-              onToggle={() => setSelectedCategory(null)}
-            />
-            {categories.slice(0, 6).map((cat) => {
-              const Icon = iconMap[cat.icon || ''] || Sparkles;
-              return (
-                <FilterChip
-                  key={cat.id}
-                  label={language === 'ru' ? cat.name_ru : cat.name_en}
-                  isActive={selectedCategory === cat.id}
-                  onToggle={() => handleCategorySelect(cat.id)}
-                  icon={<Icon className="w-4 h-4" />}
-                />
-              );
-            })}
-          </div>
+            </SheetContent>
+          </Sheet>
 
-          {/* Active filters display */}
+          {/* Sort chip */}
+          <button
+            onClick={() => setIsFiltersOpen(true)}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors border",
+              "bg-secondary border-border hover:border-primary/50"
+            )}
+          >
+            <currentSort.icon className="w-4 h-4" />
+            {language === 'ru' ? currentSort.labelRu : currentSort.label}
+          </button>
+
           {activeFiltersCount > 0 && (
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm text-muted-foreground">
-                {language === 'ru' ? 'Активные фильтры:' : 'Active filters:'}
-              </span>
-              {selectedCategory && (
-                <button
-                  onClick={() => setSelectedCategory(null)}
-                  className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-primary text-sm"
-                >
-                  {categories.find(c => c.id === selectedCategory)?.[language === 'ru' ? 'name_ru' : 'name_en']}
-                  <X className="w-3 h-3" />
-                </button>
-              )}
-              {priceRange && (
-                <button
-                  onClick={() => setPriceRange(null)}
-                  className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-primary text-sm"
-                >
-                  {PRICE_RANGES.find(r => r.min === priceRange.min && r.max === priceRange.max)?.[language === 'ru' ? 'labelRu' : 'label']}
-                  <X className="w-3 h-3" />
-                </button>
-              )}
-              <button
-                onClick={clearFilters}
-                className="text-sm text-destructive hover:underline"
-              >
-                {language === 'ru' ? 'Сбросить все' : 'Clear all'}
-              </button>
-            </div>
-          )}
-
-          {/* Results count */}
-          {!isLoading && services.length > 0 && (
-            <p className="text-sm text-muted-foreground">
-              {language === 'ru' 
-                ? `Найдено: ${services.length}` 
-                : `Found: ${services.length}`}
-            </p>
-          )}
-
-          {/* Services Grid */}
-          {isLoading ? (
-            <SkeletonGrid count={6} />
-          ) : services.length === 0 ? (
-            <EmptyState
-              icon={Search}
-              title={language === 'ru' ? 'Ничего не найдено' : 'Nothing found'}
-              description={
-                language === 'ru' 
-                  ? 'Попробуйте изменить параметры поиска или сбросить фильтры' 
-                  : 'Try changing your search or clearing filters'
-              }
-              action={
-                <Button variant="outline" onClick={clearFilters}>
-                  {language === 'ru' ? 'Сбросить фильтры' : 'Clear filters'}
-                </Button>
-              }
-            />
-          ) : (
-            <FadeInUp>
-              <AnimatedGrid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" staggerDelay={0.05}>
-                {services.map((service) => {
-                  // Get fallback image based on category - using category-specific Unsplash URLs
-                  const getCategoryImage = (slug: string, idx: number): string => {
-                    const imagesByCategory: Record<string, string[]> = {
-                      'beauty-spa': [
-                        'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600&q=80',
-                        'https://images.unsplash.com/photo-1540555700478-4be289fbec6c?w=600&q=80',
-                        'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?w=600&q=80',
-                      ],
-                      'fitness': [
-                        'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80',
-                        'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&q=80',
-                        'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&q=80',
-                      ],
-                      'restaurants': [
-                        'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&q=80',
-                        'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=600&q=80',
-                        'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=600&q=80',
-                      ],
-                      'medical': [
-                        'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=600&q=80',
-                        'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=600&q=80',
-                        'https://images.unsplash.com/photo-1666214280557-f1b5022eb634?w=600&q=80',
-                      ],
-                      'transport': [
-                        'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=600&q=80',
-                        'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600&q=80',
-                        'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&q=80',
-                      ],
-                      'real-estate': [
-                        'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=80',
-                        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=80',
-                        'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=600&q=80',
-                      ],
-                      'kids-education': [
-                        'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&q=80',
-                        'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600&q=80',
-                        'https://images.unsplash.com/photo-1588072432836-e10032774350?w=600&q=80',
-                      ],
-                      'events': [
-                        'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&q=80',
-                        'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&q=80',
-                        'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=600&q=80',
-                      ],
-                      'shopping': [
-                        'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80',
-                        'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=600&q=80',
-                      ],
-                      'services': [
-                        'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=600&q=80',
-                        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80',
-                        'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&q=80',
-                      ],
-                    };
-                    const categoryImages = imagesByCategory[slug] || imagesByCategory['services']!;
-                    return categoryImages[idx % categoryImages.length]!;
-                  };
-                  
-                  const categorySlug = service.category?.slug || 'services';
-                  const serviceIndex = services.indexOf(service);
-                  const imageUrl = (service.images && service.images.length > 0 && service.images[0]) 
-                    ? service.images[0] 
-                    : getCategoryImage(categorySlug, serviceIndex);
-                  
-                  return (
-                    <AnimatedCard key={service.id}>
-                      <UnifiedCard
-                        id={service.id}
-                        image={imageUrl}
-                        title={language === 'ru' ? service.name_ru : service.name_en}
-                        subtitle={service.provider?.name}
-                        price={service.price || 0}
-                        priceLabel={t('label.from')}
-                        duration={service.duration_minutes ? `${service.duration_minutes} ${language === 'ru' ? 'мин' : 'min'}` : undefined}
-                        location={service.category?.[language === 'ru' ? 'name_ru' : 'name_en']}
-                        isVerified={service.provider?.is_verified}
-                        onClick={() => handleServiceClick(service)}
-                      />
-                    </AnimatedCard>
-                  );
-                })}
-              </AnimatedGrid>
-            </FadeInUp>
+            <button
+              onClick={clearFilters}
+              className="text-sm text-destructive hover:underline"
+            >
+              {language === 'ru' ? 'Сбросить' : 'Clear'}
+            </button>
           )}
         </div>
-      </PullToRefresh>
-    </AppLayout>
+
+        {/* Results count */}
+        {!isLoading && services.length > 0 && (
+          <p className="text-sm text-muted-foreground">
+            {language === 'ru' 
+              ? `Найдено: ${services.length}` 
+              : `Found: ${services.length}`}
+          </p>
+        )}
+
+        {/* Services Grid */}
+        {isLoading ? (
+          <SkeletonGrid count={6} />
+        ) : services.length === 0 ? (
+          <EmptyState
+            icon={Search}
+            title={language === 'ru' ? 'Ничего не найдено' : 'Nothing found'}
+            description={
+              language === 'ru' 
+                ? 'Попробуйте изменить параметры поиска или сбросить фильтры' 
+                : 'Try changing your search or clearing filters'
+            }
+            action={
+              <Button variant="outline" onClick={clearFilters}>
+                {language === 'ru' ? 'Сбросить фильтры' : 'Clear filters'}
+              </Button>
+            }
+          />
+        ) : (
+          <FadeInUp>
+            <AnimatedGrid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" staggerDelay={0.05}>
+              {services.map((service) => (
+                <UnifiedCard
+                  key={service.id}
+                  id={service.id}
+                  title={language === 'ru' ? service.name_ru : service.name_en}
+                  subtitle={service.category?.[language === 'ru' ? 'name_ru' : 'name_en']}
+                  image={service.images?.[0]}
+                  price={service.price ?? undefined}
+                  currency={service.currency}
+                  isVerified={service.provider?.is_verified}
+                  onClick={() => onServiceClick(service)}
+                />
+              ))}
+            </AnimatedGrid>
+          </FadeInUp>
+        )}
+      </div>
+    </PullToRefresh>
+  );
+}
+
+// ============ Skeletons ============
+
+function AllTabSkeleton() {
+  return (
+    <div className="space-y-6">
+      {Array.from({ length: 3 }).map((_, gi) => (
+        <div key={gi}>
+          <Skeleton className="h-4 w-32 mb-3" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {Array.from({ length: 4 }).map((_, ci) => (
+              <Skeleton key={ci} className="h-20 rounded-2xl" />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function CategoriesTabSkeleton() {
+  return (
+    <div className="space-y-8">
+      {Array.from({ length: 3 }).map((_, gi) => (
+        <div key={gi}>
+          <Skeleton className="h-5 w-40 mb-4" />
+          <div className="grid grid-cols-4 gap-3">
+            {Array.from({ length: 8 }).map((_, ci) => (
+              <Skeleton key={ci} className="aspect-square rounded-2xl" />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
