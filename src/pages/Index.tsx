@@ -15,8 +15,9 @@ import { QuickAccessChips } from '@/components/home/QuickAccessChips';
 import { RecommendedCarousel } from '@/components/home/RecommendedCarousel';
 import { ForYouSection } from '@/components/recommendations/ForYouSection';
 import { PersonalizedOffersSection } from '@/components/notifications/PersonalizedOffersSection';
-import { ProductSection } from '@/components/market/ProductSection';
-import { useMarketplaceProducts } from '@/hooks/useMarketplace';
+import { ContentModeToggle, ContentMode } from '@/components/home/ContentModeToggle';
+import { HomeCategoryRibbon } from '@/components/home/HomeCategoryRibbon';
+import { HomeProductsSection } from '@/components/home/HomeProductsSection';
 import { supabase } from '@/integrations/supabase/client';
 import { HeroBanner } from '@/components/home/HeroBanner';
 
@@ -29,15 +30,14 @@ const Index = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const { products: popularProducts, isLoading: productsLoading } = useMarketplaceProducts({ 
-    popularOnly: true, 
-    limit: 8 
-  });
   const [refreshKey, setRefreshKey] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(() => {
     return !localStorage.getItem('myuno-onboarding-complete');
   });
   const [showSearch, setShowSearch] = useState(false);
+  const [contentMode, setContentMode] = useState<ContentMode>(() => {
+    return (localStorage.getItem('myuno-content-mode') as ContentMode) || 'services';
+  });
 
   const handleRefresh = useCallback(async () => {
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -126,53 +126,70 @@ const Index = () => {
             />
           </div>
 
-          {/* Smart Widget & Quick Actions */}
-          <div className="space-y-3">
-            <SmartWidget />
-            <QuickActionsGrid />
-          </div>
+          {/* Content Mode Toggle */}
+          <ContentModeToggle 
+            value={contentMode} 
+            onChange={setContentMode} 
+          />
 
-          {/* Visual Divider */}
-          <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+          {/* Conditional Content based on mode */}
+          {contentMode === 'services' ? (
+            /* Services Mode Content */
+            <>
+              {/* Smart Widget & Quick Actions */}
+              <div className="space-y-3">
+                <SmartWidget />
+                <QuickActionsGrid />
+              </div>
 
-          {/* Promotions */}
-          <PromoBanner />
+              {/* Visual Divider */}
+              <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
-          {/* Quick Access Chips - Owner/Partner/Wallet */}
-          <QuickAccessChips />
+              {/* Promotions */}
+              <PromoBanner />
 
-          {/* Visual Divider */}
-          <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+              {/* Quick Access Chips - Owner/Partner/Wallet */}
+              <QuickAccessChips />
 
-          {/* Recommendations */}
-          <div className="space-y-5">
-            <div data-tour="recommended">
-              <RecommendedCarousel />
-            </div>
+              {/* Visual Divider */}
+              <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
-            <PersonalizedOffersSection />
+              {/* Recommendations */}
+              <div className="space-y-5">
+                <div data-tour="recommended">
+                  <RecommendedCarousel />
+                </div>
 
-            <ForYouSection />
+                <PersonalizedOffersSection />
 
-            {(productsLoading || popularProducts.length > 0) && (
-              <ProductSection
-                title="Popular Products"
-                titleRu="Популярные товары"
-                products={popularProducts}
-                seeAllPath="/market"
-                maxItems={8}
-                variant="scroll"
-                isLoading={productsLoading}
-                icon="trending"
-              />
-            )}
+                <ForYouSection />
+              </div>
+            </>
+          ) : (
+            /* Products Mode Content */
+            <>
+              {/* Category Ribbon for products */}
+              <HomeCategoryRibbon />
 
-            {/* Footer - minimal */}
-            <div className="text-center py-3 border-t border-border/50">
-              <p className="text-xs text-muted-foreground">
-                © 2025 myUNO · {t('home.verifiedPartners')}
-              </p>
-            </div>
+              {/* Visual Divider */}
+              <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
+              {/* Quick Access Chips */}
+              <QuickAccessChips />
+
+              {/* Visual Divider */}
+              <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
+              {/* Product Sections */}
+              <HomeProductsSection />
+            </>
+          )}
+
+          {/* Footer - minimal */}
+          <div className="text-center py-3 border-t border-border/50">
+            <p className="text-xs text-muted-foreground">
+              © 2025 myUNO · {t('home.verifiedPartners')}
+            </p>
           </div>
         </div>
       </PullToRefresh>
