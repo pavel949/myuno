@@ -238,6 +238,12 @@ const AdminCities = lazy(() => import('@/pages/admin/AdminCities'));
 const AdminTranslations = lazy(() => import('@/pages/admin/AdminTranslations'));
 const UserAnalyticsDashboard = lazy(() => import('@/pages/admin/UserAnalyticsDashboard'));
 
+// Admin Marketplace pages
+const AdminMarketplaceProducts = lazy(() => import('@/pages/admin/AdminMarketplaceProducts'));
+const AdminMarketplaceCategories = lazy(() => import('@/pages/admin/AdminMarketplaceCategories'));
+const AdminMarketplaceSubcategories = lazy(() => import('@/pages/admin/AdminMarketplaceSubcategories'));
+const AdminMarketplaceVendors = lazy(() => import('@/pages/admin/AdminMarketplaceVendors'));
+
 // Admin route wrapper with layout
 const AdminRouteLayout = () => (
   <AdminGuard>
@@ -627,6 +633,11 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/admin/translations" element={<AdminTranslations />} />
           <Route path="/admin/quick-listings" element={<AdminQuickListings />} />
           <Route path="/admin/user-analytics" element={<UserAnalyticsDashboard />} />
+          {/* Marketplace Management */}
+          <Route path="/admin/marketplace/products" element={<AdminMarketplaceProducts />} />
+          <Route path="/admin/marketplace/categories" element={<AdminMarketplaceCategories />} />
+          <Route path="/admin/marketplace/subcategories" element={<AdminMarketplaceSubcategories />} />
+          <Route path="/admin/marketplace/vendors" element={<AdminMarketplaceVendors />} />
         </Route>
         
         {/* Staff Routes - Protected */}
