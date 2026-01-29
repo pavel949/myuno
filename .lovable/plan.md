@@ -1,158 +1,203 @@
 
-# План: Создание продуктовых категорий для свежих продуктов
 
-## Анализ текущей ситуации
+# План: Международная доставка для туристов
 
-Сейчас все продукты находятся в одной категории `groceries` (Русские продукты), которая включает:
-- Молочка и сыры
-- Крупы и каши
-- Консервы
-- Сладости
-- Заморозка
-
-**Нет отдельных категорий для**: рыбы, морепродуктов, мяса, органических продуктов.
+## Обзор
+Туристы покупают тайские товары и хотят отправить их домой. Добавляем функционал международной доставки с расчётом стоимости и расширенным каталогом товаров, подходящих для экспорта.
 
 ---
 
-## Новые категории
+## Часть 1: База данных
 
-| Категория | Slug | Иконка | Градиент |
-|-----------|------|--------|----------|
-| Fish & Seafood | seafood | 🐟 | from-cyan-500 to-blue-600 |
-| Organic & Farm | organic | 🌿 | from-green-500 to-emerald-600 |
-| Meat & Poultry | meat | 🥩 | from-red-500 to-rose-600 |
+### 1.1 Расширение таблицы товаров
+Добавим поле для обозначения товаров, подходящих для международной отправки:
+- `is_shippable_international` (boolean) - можно отправить за рубеж
+- `weight_kg` (numeric) - вес для расчёта доставки
 
----
-
-## Подкатегории
-
-### Fish & Seafood (Рыба и морепродукты)
-- Fresh Fish / Свежая рыба 🐠
-- Seafood / Морепродукты 🦐
-- Smoked Fish / Копчёная рыба 🐟
-- Frozen Seafood / Заморозка 🧊
-
-### Organic & Farm (Органика и фермерские)
-- Vegetables / Овощи 🥬
-- Fruits / Фрукты 🍎
-- Dairy / Молочка 🥛
-- Eggs / Яйца 🥚
-- Honey & Oils / Мёд и масла 🍯
-
-### Meat & Poultry (Мясо и птица)
-- Beef / Говядина 🥩
-- Pork / Свинина 🐷
-- Lamb / Баранина 🐑
-- Chicken / Курица 🍗
-- Duck / Утка 🦆
-- Minced Meat / Фарш 🍖
-
----
-
-## Товары с фотографиями
-
-### Fish & Seafood (~12 товаров)
-| Товар | Цена | Фото |
-|-------|------|------|
-| Tiger Prawns (Тигровые креветки) | ฿450/kg | Unsplash prawns |
-| Fresh Salmon Fillet (Филе лосося) | ฿890/kg | Unsplash salmon |
-| Sea Bass (Сибас) | ฿380/whole | Unsplash sea bass |
-| Squid (Кальмары) | ฿280/kg | Unsplash squid |
-| Mussels (Мидии) | ฿320/kg | Unsplash mussels |
-| Crab (Краб) | ฿650/kg | Unsplash crab |
-| Oysters (Устрицы) | ฿150/pc | Unsplash oysters |
-| Fresh Tuna (Тунец) | ฿520/kg | Unsplash tuna |
-| Smoked Salmon (Копчёный лосось) | ฿450/pack | Unsplash smoked |
-| Red Snapper (Красный окунь) | ฿350/kg | Unsplash snapper |
-| Lobster (Лобстер) | ฿1,800/kg | Unsplash lobster |
-| Scallops (Гребешки) | ฿580/kg | Unsplash scallops |
-
-### Organic & Farm (~10 товаров)
-| Товар | Цена | Фото |
-|-------|------|------|
-| Organic Tomatoes (Органические томаты) | ฿85/kg | Unsplash tomatoes |
-| Fresh Avocados (Свежие авокадо) | ฿120/3pc | Unsplash avocado |
-| Mixed Salad Greens (Микс салатов) | ฿95/pack | Unsplash salad |
-| Organic Milk (Органическое молоко) | ฿75/L | Unsplash milk |
-| Free Range Eggs (Яйца домашние) | ฿90/10pc | Unsplash eggs |
-| Fresh Berries Mix (Микс ягод) | ฿180/pack | Unsplash berries |
-| Organic Butter (Органическое масло) | ฿145/pack | Unsplash butter |
-| Fresh Mushrooms (Свежие грибы) | ฿120/pack | Unsplash mushrooms |
-| Cold Pressed Coconut Oil (Кокосовое масло) | ฿280/bottle | Unsplash coconut oil |
-| Organic Honey (Органический мёд) | ฿350/jar | Unsplash honey |
-
-### Meat & Poultry (~15 товаров)
-| Товар | Цена | Фото |
-|-------|------|------|
-| Beef Ribeye (Рибай говяжий) | ฿890/kg | Unsplash ribeye |
-| Beef Tenderloin (Говяжья вырезка) | ฿950/kg | Unsplash beef |
-| Ground Beef (Говяжий фарш) | ฿320/kg | Unsplash ground beef |
-| Pork Loin (Свиная корейка) | ฿280/kg | Unsplash pork |
-| Pork Belly (Свиная грудинка) | ฿250/kg | Unsplash pork belly |
-| Bacon (Бекон) | ฿195/pack | Unsplash bacon |
-| Lamb Rack (Каре ягнёнка) | ฿1,200/kg | Unsplash lamb |
-| Lamb Leg (Нога ягнёнка) | ฿680/kg | Unsplash lamb leg |
-| Whole Chicken (Курица целая) | ฿160/kg | Unsplash chicken |
-| Chicken Breast (Куриная грудка) | ฿180/kg | Unsplash breast |
-| Chicken Thighs (Куриные бёдра) | ฿140/kg | Unsplash thighs |
-| Black Chicken (Чёрная курица) | ฿320/kg | Unsplash black chicken |
-| Duck Breast (Утиная грудка) | ฿450/kg | Unsplash duck |
-| Sausages (Колбаски) | ฿220/pack | Unsplash sausages |
-| Mixed Minced Meat (Смешанный фарш) | ฿280/kg | Unsplash mince |
-
----
-
-## Изменения в базе данных
-
-### 1. SQL Migration
-```sql
--- 1. Создание новых категорий
-INSERT INTO marketplace_categories (name_en, name_ru, slug, icon, gradient, ...)
-
--- 2. Создание подкатегорий
-INSERT INTO marketplace_subcategories (category_slug, name_en, name_ru, slug, icon, ...)
-
--- 3. Добавление ~37 товаров
-INSERT INTO marketplace_products (category_slug, subcategory, name_en, name_ru, price, cover_image, ...)
+### 1.2 Новая таблица международных зон доставки
+```
+marketplace_international_shipping
+- id (uuid)
+- zone_code (text) - 'europe', 'russia_cis', 'asia', 'usa_canada', 'other'
+- zone_name_en, zone_name_ru (text)
+- base_fee (numeric) - базовая стоимость
+- per_kg_fee (numeric) - цена за кг
+- estimated_days_min, estimated_days_max (int) - сроки
+- min_order_amount (numeric)
+- is_active (boolean)
 ```
 
-### 2. Обновление изображений категорий
-```sql
-UPDATE marketplace_categories SET image_url = '...' WHERE slug = 'seafood';
-UPDATE marketplace_categories SET image_url = '...' WHERE slug = 'organic';
-UPDATE marketplace_categories SET image_url = '...' WHERE slug = 'meat';
-```
+### 1.3 Seed Data: Зоны доставки
+| Зона | Базовая | За кг | Дни |
+|------|---------|-------|-----|
+| Россия и СНГ | ฿800 | ฿150/кг | 7-14 |
+| Европа | ฿1200 | ฿200/кг | 10-18 |
+| Азия | ฿500 | ฿100/кг | 5-10 |
+| США/Канада | ฿1500 | ฿250/кг | 12-21 |
+| Другие | ฿1800 | ฿300/кг | 14-28 |
 
 ---
 
-## UI обновления
+## Часть 2: Seed Data - Товары для экспорта
 
-### ProfessionalCategoryBanner.tsx
-Добавить fallback изображения для новых категорий:
-```typescript
-const images = {
-  'seafood': 'https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?w=800',
-  'organic': 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800',
-  'meat': 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=800',
-  // ... existing
-};
+### 2.1 Расширение категории "Подарки и сувениры" (+15 товаров)
+**Классические тайские подарки:**
+- Тайский кофе (Doi Chaang, Doi Tung)
+- Тайский чай Cha Tra Mue (синий, зелёный, молочный)
+- Тайские специи наборы (карри пасты, том ям набор)
+- Кокосовые чипсы и сухофрукты
+- Тайский шоколад с дурианом
+- Ароматические свечи и благовония
+
+**Уникальные сувениры:**
+- Celadon керамика (традиционная посуда)
+- Benjarong (королевский фарфор)
+- Тайские подушки-треугольники (мини)
+- Муай Тай шорты и перчатки
+- Handmade украшения из серебра 925
+
+### 2.2 Расширение "Тайская косметика" (+10 товаров)
+- Тайгер бальзам оригинальный
+- Зелёный/белый бальзам
+- Змеиный бальзам
+- Тайский скраб с тамариндом
+- Маски для лица с рисовым молоком
+- Шампунь с кокосовым маслом
+- Мыло с мангостином
+
+### 2.3 Новая категория "Тайские деликатесы" (shippable food)
+Продукты с долгим сроком хранения:
+- Сушёное манго (premium)
+- Кокосовые роллы
+- Тайские чипсы (кассава, банан)
+- Вяленый дуриан
+- Рыбный соус premium
+- Кокосовое молоко (сухое)
+- Тайский рис Жасмин (вакуум)
+
+---
+
+## Часть 3: UI - Выбор доставки в Checkout
+
+### 3.1 Компонент DeliveryTypeSelector
+```text
++------------------------------------------+
+|  Куда доставить?                          |
++------------------------------------------+
+|  ⚡ Локальная доставка                    |
+|     Пхукет, 1 час, от ฿100               |
+|  [Выбрано]                               |
++------------------------------------------+
+|  ✈️ Международная доставка               |
+|     Отправка домой за рубеж              |
+|     [Выбрать страну ▼]                   |
++------------------------------------------+
 ```
+
+### 3.2 При выборе международной доставки
+```text
++------------------------------------------+
+|  Выберите регион:                         |
+|  ○ Россия и СНГ (7-14 дней, от ฿800)     |
+|  ○ Европа (10-18 дней, от ฿1200)         |
+|  ○ Азия (5-10 дней, от ฿500)             |
+|  ○ США/Канада (12-21 дней, от ฿1500)     |
++------------------------------------------+
+|  Расчёт стоимости:                        |
+|  Вес заказа: ~2.5 кг                      |
+|  Доставка: ฿800 + (2.5 × ฿150) = ฿1,175  |
++------------------------------------------+
+```
+
+### 3.3 Форма адреса - расширение
+При международной доставке:
+- Страна (обязательно)
+- Город
+- Полный адрес
+- Индекс (Postal Code)
+
+---
+
+## Часть 4: UI - Бейджи на товарах
+
+### 4.1 Бейдж "Можно отправить домой"
+На карточках товаров с `is_shippable_international = true`:
+```text
++----------------+
+| ✈️ Ship Home   |
++----------------+
+```
+или по-русски: "✈️ Отправка домой"
+
+### 4.2 Фильтр в каталоге
+Добавить quick-filter: "Можно отправить за рубеж"
+
+---
+
+## Часть 5: Проверки и валидация
+
+### 5.1 В корзине
+- Если выбрана международная доставка, но есть товары без `is_shippable_international`:
+  - Показать предупреждение
+  - Подсветить эти товары
+  - Предложить убрать или переключить на локальную
+
+### 5.2 Расчёт веса
+- Если `weight_kg` не указан, использовать дефолт 0.3 кг
+- Показывать примерный вес заказа
+
+---
+
+## Файлы для изменения
+
+| Файл | Действие |
+|------|----------|
+| `supabase/migrations/..._international_shipping.sql` | Новая миграция |
+| `src/types/marketplace.ts` | Добавить типы |
+| `src/hooks/useMarketplace.ts` | Хук для зон доставки |
+| `src/components/market/ShippableBadge.tsx` | Новый бейдж |
+| `src/components/market/DeliveryTypeSelector.tsx` | Новый компонент |
+| `src/components/market/InternationalAddressForm.tsx` | Форма адреса |
+| `src/components/market/ProfessionalProductCard.tsx` | Добавить бейдж |
+| `src/pages/market/MarketCheckout.tsx` | Интеграция выбора |
 
 ---
 
 ## Технические детали
 
-| Действие | Файлы |
-|----------|-------|
-| Migration | `supabase/migrations/xxx_add_food_categories.sql` |
-| UI Images | `src/components/market/ProfessionalCategoryBanner.tsx` |
+### Новые типы TypeScript
+```typescript
+interface InternationalShippingZone {
+  id: string;
+  zone_code: string;
+  zone_name_en: string;
+  zone_name_ru: string;
+  base_fee: number;
+  per_kg_fee: number;
+  estimated_days_min: number;
+  estimated_days_max: number;
+  min_order_amount: number;
+  is_active: boolean;
+}
+
+type DeliveryType = 'local' | 'international';
+```
+
+### Логика расчёта
+```typescript
+const calculateInternationalFee = (
+  zone: InternationalShippingZone,
+  totalWeight: number
+) => {
+  return zone.base_fee + (totalWeight * zone.per_kg_fee);
+};
+```
 
 ---
 
-## Ожидаемый результат
+## Результат
+- 106 -> ~140 товаров (добавится ~35 новых)
+- 25+ товаров с меткой "Ship Home"
+- Полноценный checkout с выбором международной доставки
+- Расчёт стоимости по весу и региону
 
-После реализации на странице `/market`:
-1. **3 новые категории** в баннерах с красивыми фото
-2. **~37 новых товаров** с изображениями Unsplash
-3. **Фильтрация по подкатегориям** (говядина, свинина, курица и т.д.)
-4. Полный выбор свежих продуктов для пользователей Пхукета
