@@ -3,19 +3,27 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { ChevronRight, ArrowRight } from 'lucide-react';
-import { MarketplaceCategory } from '@/types/marketplace';
+import { MarketplaceCategory, MarketplaceProduct } from '@/types/marketplace';
+import { Badge } from '@/components/ui/badge';
 
 interface ProfessionalCategoryBannerProps {
   categories: MarketplaceCategory[];
+  products?: MarketplaceProduct[];
   onCategoryClick?: (categorySlug: string) => void;
 }
 
 export const ProfessionalCategoryBanner: React.FC<ProfessionalCategoryBannerProps> = ({
   categories,
+  products = [],
   onCategoryClick,
 }) => {
   const { language } = useLanguage();
   const navigate = useNavigate();
+
+  // Get product count for a category
+  const getProductCount = (slug: string) => {
+    return products.filter(p => p.category_slug === slug).length;
+  };
 
   const handleClick = (categorySlug: string) => {
     if (onCategoryClick) {
@@ -77,6 +85,11 @@ export const ProfessionalCategoryBanner: React.FC<ProfessionalCategoryBannerProp
                   <h2 className="text-xl font-bold drop-shadow-lg">
                     {language === 'ru' ? heroCategory.name_ru : heroCategory.name_en}
                   </h2>
+                  {products.length > 0 && (
+                    <Badge className="bg-white/20 backdrop-blur-sm text-white border-0 text-xs">
+                      {getProductCount(heroCategory.slug)} {language === 'ru' ? 'шт' : 'items'}
+                    </Badge>
+                  )}
                 </div>
                 <p className="text-white/90 text-xs max-w-xs leading-relaxed">
                   {language === 'ru' ? heroCategory.description_ru : heroCategory.description_en}
@@ -115,16 +128,27 @@ export const ProfessionalCategoryBanner: React.FC<ProfessionalCategoryBannerProp
               )} />
               
               {/* Content */}
-              <div className="absolute inset-0 p-3 flex flex-col justify-end text-white">
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <span className="text-lg drop-shadow">{category.icon}</span>
-                  <h3 className="font-semibold text-sm drop-shadow line-clamp-1">
-                    {language === 'ru' ? category.name_ru : category.name_en}
-                  </h3>
+              <div className="absolute inset-0 p-3 flex flex-col justify-between text-white">
+                {/* Product count badge */}
+                {products.length > 0 && (
+                  <div className="flex justify-end">
+                    <Badge className="bg-white/20 backdrop-blur-sm text-white border-0 text-[10px] px-1.5 py-0.5">
+                      {getProductCount(category.slug)}
+                    </Badge>
+                  </div>
+                )}
+                
+                <div>
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <span className="text-lg drop-shadow">{category.icon}</span>
+                    <h3 className="font-semibold text-sm drop-shadow line-clamp-1">
+                      {language === 'ru' ? category.name_ru : category.name_en}
+                    </h3>
+                  </div>
+                  <p className="text-white/80 text-[10px] line-clamp-2 leading-tight">
+                    {language === 'ru' ? category.description_ru : category.description_en}
+                  </p>
                 </div>
-                <p className="text-white/80 text-[10px] line-clamp-2 leading-tight">
-                  {language === 'ru' ? category.description_ru : category.description_en}
-                </p>
               </div>
               
               {/* Subtle arrow */}
