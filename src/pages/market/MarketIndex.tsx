@@ -5,10 +5,8 @@ import {
   ChevronRight,
   Truck,
   Clock,
-  Star,
   Flame,
   Sparkles,
-  Grid3X3,
   ArrowRight,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -19,7 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { StickyCartBar } from '@/components/cart/StickyCartBar';
-import { ProfessionalProductCard } from '@/components/market';
+import { ProfessionalProductCard, CategoryRibbon } from '@/components/market';
 import { 
   useMarketplaceCategories, 
   useMarketplaceProducts,
@@ -205,51 +203,8 @@ const MarketIndex = () => {
           </div>
         </div>
 
-        {/* Categories Horizontal Scroll - Ozon Style */}
-        <div className="bg-card border-b border-border/50">
-          <ScrollArea className="w-full">
-            <div className="flex items-center gap-1 px-4 py-3 max-w-7xl mx-auto">
-              {/* All Categories Button */}
-              <button
-                onClick={() => navigate('/market/categories')}
-                className="flex flex-col items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-muted/50 transition-colors shrink-0"
-              >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Grid3X3 className="w-6 h-6 text-primary" />
-                </div>
-                <span className="text-[11px] font-medium text-center whitespace-nowrap">
-                  {language === 'ru' ? 'Каталог' : 'Catalog'}
-                </span>
-              </button>
-
-              <div className="w-px h-12 bg-border mx-1" />
-
-              {/* Category Pills */}
-              {categoriesLoading ? (
-                [...Array(8)].map((_, i) => (
-                  <div key={i} className="flex flex-col items-center gap-1.5 px-3 py-2 shrink-0">
-                    <div className="w-12 h-12 rounded-xl bg-muted animate-pulse" />
-                    <div className="w-12 h-3 bg-muted animate-pulse rounded" />
-                  </div>
-                ))
-              ) : (
-                activeCategories.map(category => (
-                  <button
-                    key={category.id}
-                    onClick={() => navigate(`/market/category/${category.slug}`)}
-                    className="flex flex-col items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-muted/50 transition-colors shrink-0 group"
-                  >
-                    <CategoryImage category={category} size="md" />
-                    <span className="text-[11px] font-medium text-center whitespace-nowrap max-w-[60px] truncate">
-                      {language === 'ru' ? category.name_ru : category.name_en}
-                    </span>
-                  </button>
-                ))
-              )}
-            </div>
-            <ScrollBar orientation="horizontal" className="invisible" />
-          </ScrollArea>
-        </div>
+        {/* 2-Row Category Ribbon - Ozon Style */}
+        <CategoryRibbon />
 
         {/* Promo Banners */}
         <div className="px-4 py-4 max-w-7xl mx-auto">
