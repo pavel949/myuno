@@ -392,8 +392,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/auth/reset-password" element={<LazyPage><ResetPassword /></LazyPage>} />
         
         {/* Lazy loaded routes */}
-        <Route path="/discover" element={<Navigate to="/categories" replace />} />
-        <Route path="/categories" element={<LazyPage><Categories /></LazyPage>} />
+        <Route path="/discover" element={<LazyPage><Categories /></LazyPage>} />
+        <Route path="/categories" element={<Navigate to="/discover" replace />} />
         <Route path="/map" element={<LazyPage><MapView /></LazyPage>} />
         <Route path="/bookings" element={<LazyPage><Bookings /></LazyPage>} />
         <Route path="/bookings/:id" element={<LazyPage><BookingDetail /></LazyPage>} />
