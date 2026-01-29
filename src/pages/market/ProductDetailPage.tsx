@@ -28,6 +28,7 @@ import { useVendorById } from '@/hooks/useMarketplaceVendors';
 import { WishlistButton } from '@/components/market/WishlistButton';
 import { ReviewList } from '@/components/market/reviews/ReviewList';
 import { ReviewForm } from '@/components/market/reviews/ReviewForm';
+import { ProductAttributes } from '@/components/market/ProductAttributes';
 import { cn } from '@/lib/utils';
 
 const ProductDetailPage = () => {
@@ -310,6 +311,11 @@ const ProductDetailPage = () => {
               </p>
             </div>
           )}
+
+          {/* Product Attributes/Specifications */}
+          <div className="mb-6">
+            <ProductAttributes productId={productId!} />
+          </div>
           
           {/* Features */}
           <div className="grid grid-cols-2 gap-3 mb-6">

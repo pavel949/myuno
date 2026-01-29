@@ -5,3 +5,4 @@ export { ProductSection } from './ProductSection';
 export { ProfessionalProductCard } from './ProfessionalProductCard';
 export { ProfessionalCategoryBanner } from './ProfessionalCategoryBanner';
 export { SubcategoryChips } from './SubcategoryChips';
+export { ProductAttributes } from './ProductAttributes';

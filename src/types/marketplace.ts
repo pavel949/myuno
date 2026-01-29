@@ -112,6 +112,22 @@ export interface MarketplaceProductWithVendor extends MarketplaceProduct {
   vendor?: MarketplaceVendor | null;
 }
 
+// Product attributes for professional filtering (like Ozon)
+export interface MarketplaceProductAttribute {
+  id: string;
+  product_id: string;
+  attribute_key: string;
+  attribute_value: string;
+  attribute_value_ru: string | null;
+  sort_order: number;
+}
+
+// Extended product with all relations
+export interface MarketplaceProductFull extends MarketplaceProductWithVendor {
+  attributes?: MarketplaceProductAttribute[];
+  subcategory_info?: MarketplaceSubcategory | null;
+}
+
 // For backward compatibility - maps subcategory to old format
 export interface Subcategory {
   id: string;
