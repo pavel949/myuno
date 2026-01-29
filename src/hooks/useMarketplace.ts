@@ -133,19 +133,26 @@ export function useMarketplaceSubcategories(categorySlug?: string) {
 }
 
 // Hook for fetching products with filters
-export function useMarketplaceProducts(options?: {
+export function useMarketplaceProducts(options: {
   category?: string;
   subcategory?: string;
   search?: string;
   popularOnly?: boolean;
   newOnly?: boolean;
   limit?: number;
-}) {
+} = {}) {
   const [products, setProducts] = useState<MarketplaceProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const stableOptions = useMemo(() => JSON.stringify(options), [options]);
+  const stableOptions = useMemo(() => JSON.stringify(options), [
+    options.category,
+    options.subcategory,
+    options.search,
+    options.popularOnly,
+    options.newOnly,
+    options.limit
+  ]);
 
   useEffect(() => {
     const fetchProducts = async () => {
