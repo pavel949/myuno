@@ -1,264 +1,165 @@
 
-# План реализации: Admin Marketplace Management
 
-## Обзор
+# План улучшения: Реалистичные единицы и фото товаров маркетплейса
 
-Добавление полноценного раздела управления маркетплейсом в админ-панель UNO. Включает CRUD-операции для товаров, категорий, подкатегорий и вендоров.
+## Обзор проблемы
 
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│                      ADMIN SIDEBAR                              │
-├─────────────────────────────────────────────────────────────────┤
-│  Operations                                                     │
-│  └── Dashboard, Moderation, Leads...                           │
-│                                                                 │
-│  Catalog (services)                                            │
-│  └── Properties, Yachts, Tours...                              │
-│                                                                 │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │ 🆕 MARKETPLACE (новая группа)                           │   │
-│  │    ├── Products (200)     - Товары маркетплейса         │   │
-│  │    ├── Categories (12)    - Категории                   │   │
-│  │    ├── Subcategories (114)- Подкатегории                │   │
-│  │    └── Vendors (20)       - Продавцы                    │   │
-│  └─────────────────────────────────────────────────────────┘   │
-│                                                                 │
-│  Health & Home, Services & Shops, Analytics, System            │
-└─────────────────────────────────────────────────────────────────┘
+Сейчас в маркетплейсе:
+- Единицы измерения слишком общие: "pack", "kg", "bottle"
+- Нужно точное указание: "500g", "1L", "250g pack"
+- Поле `images[]` для галереи пустое (только `cover_image`)
+- Вес товаров унифицирован (0.30 кг для всех)
+
+## Решение
+
+### Этап 1: Расширение схемы данных
+
+Добавить новые колонки в `marketplace_products`:
+
+```sql
+ALTER TABLE marketplace_products ADD COLUMN IF NOT EXISTS
+  unit_value NUMERIC,           -- 500 (для "500g")
+  unit_measure TEXT,            -- 'g', 'kg', 'ml', 'L', 'pc'
+  pack_quantity INTEGER;        -- количество в упаковке (например, 6 яиц)
 ```
 
----
+Это позволит формировать понятные единицы:
+- `unit_value: 500, unit_measure: 'g'` → "500g"
+- `unit_value: 1, unit_measure: 'L'` → "1L"  
+- `pack_quantity: 6, unit_measure: 'pc'` → "6 шт"
 
-## Этап 1: Создание хуков для админ-операций
+### Этап 2: Обновление типов TypeScript
 
-### `src/hooks/useAdminMarketplace.ts`
-
-Единый файл с хуками для всех сущностей маркетплейса:
-
-**useAdminMarketplaceProducts**
-- CRUD для таблицы `marketplace_products`
-- Фильтрация по категории, вендору, статусу
-- Поиск по названию
-
-**useAdminMarketplaceCategories**
-- CRUD для таблицы `marketplace_categories`
-- Управление sort_order, is_active
-- Загрузка изображений
-
-**useAdminMarketplaceSubcategories**
-- CRUD для таблицы `marketplace_subcategories`
-- Привязка к parent category
-
-**useAdminMarketplaceVendors**
-- CRUD для таблицы `marketplace_vendors`
-- Верификация вендоров
-- Статистика по товарам
-
----
-
-## Этап 2: Страница управления товарами
-
-### `src/pages/admin/AdminMarketplaceProducts.tsx`
-
-Функционал:
-- Таблица товаров с пагинацией
-- Фильтры: категория, вендор, статус (in_stock, is_active)
-- Поиск по названию
-- Диалог создания/редактирования с полями:
-  - Название EN/RU
-  - Описание EN/RU
-  - Категория (select из marketplace_categories)
-  - Подкатегория (select, фильтруется по категории)
-  - Цена, старая цена
-  - Вендор (select из marketplace_vendors)
-  - Изображения (cover + gallery)
-  - Флаги: is_popular, is_new, in_stock, is_active
-  - Теги
-  - Вес, единицы измерения
-
-```text
-┌────────────────────────────────────────────────────────────────┐
-│ Products                                           [+ Add]     │
-├────────────────────────────────────────────────────────────────┤
-│ [Search...] [Category ▼] [Vendor ▼] [Status ▼]                 │
-├────────────────────────────────────────────────────────────────┤
-│ ┌──────┬──────────────────┬──────────┬────────┬──────┬─────┐  │
-│ │ Img  │ Name             │ Category │ Price  │Stock │ ⋮   │  │
-│ ├──────┼──────────────────┼──────────┼────────┼──────┼─────┤  │
-│ │ 🖼   │ Organic Mangoes  │ Fruits   │ ฿150   │ ✓    │ ⋮   │  │
-│ │ 🖼   │ Thai Coffee      │ Beverages│ ฿320   │ ✓    │ ⋮   │  │
-│ └──────┴──────────────────┴──────────┴────────┴──────┴─────┘  │
-└────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Этап 3: Страница управления категориями
-
-### `src/pages/admin/AdminMarketplaceCategories.tsx`
-
-Функционал:
-- Список категорий с drag-and-drop для сортировки
-- Поля редактирования:
-  - Slug (уникальный идентификатор)
-  - Название EN/RU
-  - Описание EN/RU
-  - Иконка (icon name или emoji)
-  - Изображение
-  - Gradient (CSS градиент для карточки)
-  - Category group
-  - is_active
-
-```text
-┌────────────────────────────────────────────────────────────────┐
-│ Categories                                        [+ Add]      │
-├────────────────────────────────────────────────────────────────┤
-│ ┌──────┬────────────────┬──────────────┬────────┬──────┬─────┐│
-│ │ ≡    │ Icon + Name    │ Slug         │ Items  │Active│ ⋮   ││
-│ ├──────┼────────────────┼──────────────┼────────┼──────┼─────┤│
-│ │ ≡    │ 🍎 Groceries   │ groceries    │ 45     │ ✓    │ ⋮   ││
-│ │ ≡    │ 🏠 Home        │ home         │ 23     │ ✓    │ ⋮   ││
-│ │ ≡    │ 👶 Baby        │ baby         │ 18     │ ✓    │ ⋮   ││
-│ └──────┴────────────────┴──────────────┴────────┴──────┴─────┘│
-└────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Этап 4: Страница управления подкатегориями
-
-### `src/pages/admin/AdminMarketplaceSubcategories.tsx`
-
-Функционал:
-- Фильтр по родительской категории
-- Поля:
-  - Parent category (select)
-  - Slug
-  - Название EN/RU
-  - Иконка
-  - sort_order
-  - is_active
-
----
-
-## Этап 5: Страница управления вендорами
-
-### `src/pages/admin/AdminMarketplaceVendors.tsx`
-
-Функционал:
-- Список всех вендоров маркетплейса
-- Статистика: количество товаров, рейтинг, отзывы
-- Верификация вендоров (verified badge)
-- Поля редактирования:
-  - Slug
-  - Название EN/RU
-  - Описание EN/RU
-  - Логотип, cover image
-  - Контакты (phone, email, website)
-  - Адрес EN/RU
-  - verified, is_active
-
-```text
-┌────────────────────────────────────────────────────────────────┐
-│ Vendors                                           [+ Add]      │
-├────────────────────────────────────────────────────────────────┤
-│ ┌──────┬────────────────┬──────────┬────────┬────────┬─────┐  │
-│ │ Logo │ Name           │ Products │ Rating │Verified│ ⋮   │  │
-│ ├──────┼────────────────┼──────────┼────────┼────────┼─────┤  │
-│ │ 🏪   │ Fresh Farm     │ 45       │ ⭐ 4.8 │ ✓      │ ⋮   │  │
-│ │ 🏪   │ Thai Organics  │ 23       │ ⭐ 4.5 │ -      │ ⋮   │  │
-│ └──────┴────────────────┴──────────┴────────┴────────┴─────┘  │
-└────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Этап 6: Обновление AdminSidebar
-
-### `src/components/admin/AdminSidebar.tsx`
-
-Добавление новой группы "Marketplace" между "Services & Shops" и "Analytics & Finance":
+Расширить интерфейс `MarketplaceProduct`:
 
 ```typescript
-{
-  label: 'Marketplace',
-  labelRu: 'Маркетплейс',
-  defaultOpen: false,
-  items: [
-    { title: 'Products', titleRu: 'Товары', path: '/admin/marketplace/products', icon: Package },
-    { title: 'Categories', titleRu: 'Категории', path: '/admin/marketplace/categories', icon: Grid },
-    { title: 'Subcategories', titleRu: 'Подкатегории', path: '/admin/marketplace/subcategories', icon: List },
-    { title: 'Vendors', titleRu: 'Продавцы', path: '/admin/marketplace/vendors', icon: Store },
-  ],
+interface MarketplaceProduct {
+  // ... existing fields
+  unit_value: number | null;
+  unit_measure: string | null;
+  pack_quantity: number | null;
 }
 ```
 
----
+### Этап 3: Хелпер для форматирования единиц
 
-## Этап 7: Регистрация роутов
-
-### `src/components/layout/AnimatedRoutes.tsx`
-
-Добавление lazy imports и роутов:
+Создать `src/utils/formatProductUnit.ts`:
 
 ```typescript
-// Lazy imports
-const AdminMarketplaceProducts = lazy(() => import('@/pages/admin/AdminMarketplaceProducts'));
-const AdminMarketplaceCategories = lazy(() => import('@/pages/admin/AdminMarketplaceCategories'));
-const AdminMarketplaceSubcategories = lazy(() => import('@/pages/admin/AdminMarketplaceSubcategories'));
-const AdminMarketplaceVendors = lazy(() => import('@/pages/admin/AdminMarketplaceVendors'));
-
-// Routes внутри AdminRouteLayout
-<Route path="/admin/marketplace/products" element={<AdminMarketplaceProducts />} />
-<Route path="/admin/marketplace/categories" element={<AdminMarketplaceCategories />} />
-<Route path="/admin/marketplace/subcategories" element={<AdminMarketplaceSubcategories />} />
-<Route path="/admin/marketplace/vendors" element={<AdminMarketplaceVendors />} />
+function formatProductUnit(product, language) {
+  // "500g" / "500г"
+  // "1L" / "1л"
+  // "6 pcs" / "6 шт"
+  // "250g × 4" / "250г × 4"
+}
 ```
+
+### Этап 4: Обновление карточек товаров
+
+Изменить `ProfessionalProductCard` и `ProductCard`:
+- Использовать новый хелпер для отображения единиц
+- Показывать точный вес/объем рядом с ценой
+
+```text
+Сейчас:                      После:
+┌─────────────────┐         ┌─────────────────┐
+│ [Фото]          │         │ [Фото]          │
+│ Organic Butter  │         │ Organic Butter  │
+│ pack            │         │ 250g            │
+│ ฿145            │         │ ฿145 / 250g     │
+└─────────────────┘         └─────────────────┘
+```
+
+### Этап 5: Обновление страницы деталей товара
+
+В `ProductDetailPage.tsx` добавить:
+- Секцию "Информация о продукте" с точными характеристиками
+- Отображение веса/объема в понятном формате
+- Расчет цены за единицу (например, ฿580/kg)
+
+### Этап 6: Миграция данных
+
+SQL-скрипт для заполнения реалистичных данных:
+
+```sql
+-- Пример: обновить товары категории "organic"
+UPDATE marketplace_products SET
+  unit_value = 250, unit_measure = 'g', weight_kg = 0.25
+WHERE name_en = 'Organic Butter';
+
+UPDATE marketplace_products SET
+  unit_value = 1, unit_measure = 'L', weight_kg = 1.05
+WHERE name_en = 'Organic Milk';
+
+UPDATE marketplace_products SET
+  pack_quantity = 10, unit_measure = 'pc', weight_kg = 0.65
+WHERE name_en = 'Free Range Eggs';
+```
+
+### Этап 7: Обновление Admin-панели
+
+Добавить поля в форму редактирования товаров (`AdminMarketplaceProducts.tsx`):
+- Точный вес/объем (unit_value)
+- Единица измерения (unit_measure) - select с опциями
+- Количество в упаковке (pack_quantity)
+- Галерея изображений (images[])
+
+### Этап 8: Обновление Vendor-панели
+
+Добавить те же поля в форму создания товаров (`VendorProducts.tsx`):
+- Step 2 (Details): unit_value, unit_measure, pack_quantity
+- Step 3 (Photos): возможность загрузить несколько фото в gallery
 
 ---
 
-## Файловая структура
+## Файловая структура изменений
 
 ```text
 src/
-├── hooks/
-│   └── useAdminMarketplace.ts      [NEW]  - Все CRUD хуки
+├── utils/
+│   └── formatProductUnit.ts       [NEW]  - Хелпер форматирования
+├── types/
+│   └── marketplace.ts             [MODIFY] - Новые поля
+├── components/market/
+│   ├── ProfessionalProductCard.tsx [MODIFY] - Новый формат единиц
+│   ├── ProductCard.tsx            [MODIFY] - Новый формат единиц
+│   └── ProductUnitDisplay.tsx     [NEW]  - Компонент отображения единиц
+├── pages/market/
+│   └── ProductDetailPage.tsx      [MODIFY] - Секция характеристик
 ├── pages/admin/
-│   ├── AdminMarketplaceProducts.tsx     [NEW]
-│   ├── AdminMarketplaceCategories.tsx   [NEW]
-│   ├── AdminMarketplaceSubcategories.tsx [NEW]
-│   └── AdminMarketplaceVendors.tsx      [NEW]
-├── components/admin/
-│   └── AdminSidebar.tsx            [MODIFY] - Добавить Marketplace группу
-└── components/layout/
-    └── AnimatedRoutes.tsx          [MODIFY] - Добавить роуты
+│   └── AdminMarketplaceProducts.tsx [MODIFY] - Новые поля формы
+├── pages/vendor/
+│   └── VendorProducts.tsx         [MODIFY] - Новые поля wizard
+└── hooks/
+    └── useMarketplace.ts          [MODIFY] - Типы
 ```
 
 ---
 
-## Переиспользуемые компоненты
+## Примеры реалистичных единиц
 
-Все страницы будут использовать существующие компоненты:
-
-- `PageContainer`, `PageHeader` - layout
-- `Card`, `Button`, `Input`, `Textarea` - UI
-- `Dialog`, `DialogContent` - модальные окна
-- `Select`, `Switch`, `Label` - формы
-- `DropdownMenu` - действия
-- `AlertDialog` - подтверждение удаления
-- `ImageUpload`, `MultiImageUpload` - загрузка изображений
-- `Skeleton` - loading states
-- `ScrollArea` - скролл в диалогах
+| Товар | unit_value | unit_measure | pack_qty | Отображение |
+|-------|------------|--------------|----------|-------------|
+| Organic Butter | 250 | g | - | 250g |
+| Organic Milk | 1 | L | - | 1L |
+| Free Range Eggs | - | pc | 10 | 10 шт |
+| Dried Mango | 200 | g | - | 200g pack |
+| Coconut Oil | 500 | ml | - | 500ml |
+| Thai Basil | 100 | g | - | 100g bunch |
+| Rice | 5 | kg | - | 5kg bag |
+| Mineral Water | 500 | ml | 6 | 6×500ml |
 
 ---
 
 ## Результат
 
-После реализации админ получит полный контроль над маркетплейсом:
+После реализации:
 
-1. **Товары** - создание, редактирование, удаление, управление наличием
-2. **Категории** - структура каталога, сортировка, изображения
-3. **Подкатегории** - детальная классификация товаров
-4. **Вендоры** - управление продавцами, верификация
+1. **Карточки товаров** показывают точные единицы: "250g", "1L", "6 шт"
+2. **Страница товара** содержит детальные характеристики
+3. **Админ-панель** позволяет задавать точные параметры
+4. **Vendor-панель** позволяет создавать товары с правильными единицами
+5. **Галерея фото** поддерживает несколько изображений
 
-Паттерн реализации идентичен существующим админ-страницам (AdminStores, AdminYachts), что обеспечивает консистентный UX.
+Покупатель видит реальные показатели: сколько граммов, литров или штук он получит за указанную цену.
+
