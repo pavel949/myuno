@@ -127,6 +127,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
                 quantity={getQuantity(product.id)}
                 onAdd={() => handleAdd(product)}
                 onRemove={() => handleRemove(product.id)}
+                onClick={() => navigate(`/market/product/${product.id}`)}
                 variant={index === 0 ? 'grid' : 'grid'}
               />
             </div>
@@ -141,6 +142,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
               quantity={getQuantity(product.id)}
               onAdd={() => handleAdd(product)}
               onRemove={() => handleRemove(product.id)}
+              onClick={() => navigate(`/market/product/${product.id}`)}
             />
           ))}
         </div>
