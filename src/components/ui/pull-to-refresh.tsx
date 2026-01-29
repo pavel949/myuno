@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
@@ -22,33 +22,47 @@ export function PullToRefresh({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isPulling, setIsPulling] = useState(false);
   const startY = useRef(0);
+  const startScrollTop = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const hasTriggeredHaptic = useRef(false);
+  const canPull = useRef(false);
+
+  // Check if we're at the top of the page (using window scroll)
+  const isAtTop = useCallback(() => {
+    return window.scrollY <= 0;
+  }, []);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (disabled || isRefreshing) return;
     
-    const container = containerRef.current;
-    if (!container || container.scrollTop > 0) return;
+    // Only allow pull-to-refresh if we're at the top
+    canPull.current = isAtTop();
+    if (!canPull.current) return;
     
     startY.current = e.touches[0].clientY;
+    startScrollTop.current = window.scrollY;
     setIsPulling(true);
     hasTriggeredHaptic.current = false;
-  }, [disabled, isRefreshing]);
+  }, [disabled, isRefreshing, isAtTop]);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!isPulling || disabled || isRefreshing) return;
+    if (!isPulling || disabled || isRefreshing || !canPull.current) return;
     
-    const container = containerRef.current;
-    if (!container || container.scrollTop > 0) {
+    // If user scrolled down, cancel pull
+    if (window.scrollY > 0) {
       setPullDistance(0);
+      canPull.current = false;
       return;
     }
 
     const currentY = e.touches[0].clientY;
     const diff = currentY - startY.current;
     
-    if (diff > 0) {
+    // Only activate pull when moving down from top
+    if (diff > 0 && isAtTop()) {
+      // Prevent default scroll when pulling
+      e.preventDefault();
+      
       // Apply resistance to the pull
       const resistance = 0.4;
       const distance = Math.min(diff * resistance, threshold * 1.5);
@@ -61,13 +75,18 @@ export function PullToRefresh({
       } else if (distance < threshold && hasTriggeredHaptic.current) {
         hasTriggeredHaptic.current = false;
       }
+    } else if (diff < 0) {
+      // User is scrolling up, allow normal scroll
+      setPullDistance(0);
+      canPull.current = false;
     }
-  }, [isPulling, disabled, isRefreshing, threshold]);
+  }, [isPulling, disabled, isRefreshing, threshold, isAtTop]);
 
   const handleTouchEnd = useCallback(async () => {
     if (!isPulling || disabled) return;
     
     setIsPulling(false);
+    canPull.current = false;
     
     if (pullDistance >= threshold && !isRefreshing) {
       setIsRefreshing(true);
@@ -84,6 +103,15 @@ export function PullToRefresh({
     }
   }, [isPulling, disabled, pullDistance, threshold, isRefreshing, onRefresh]);
 
+  // Reset state if component becomes disabled
+  useEffect(() => {
+    if (disabled) {
+      setPullDistance(0);
+      setIsPulling(false);
+      setIsRefreshing(false);
+    }
+  }, [disabled]);
+
   const progress = Math.min(pullDistance / threshold, 1);
   const rotation = progress * 180;
   const showIndicator = pullDistance > 10 || isRefreshing;
@@ -91,18 +119,20 @@ export function PullToRefresh({
   return (
     <div 
       ref={containerRef}
-      className={cn("relative overflow-y-auto", className)}
+      className={cn("relative", className)}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      style={{ 
+        // Prevent browser's native pull-to-refresh
+        overscrollBehavior: 'none',
+        touchAction: pullDistance > 0 ? 'none' : 'pan-y'
+      }}
     >
       {/* Pull indicator */}
       {showIndicator && (
         <div 
-          className="sticky top-2 left-0 right-0 flex justify-center items-center z-10 pointer-events-none"
-          style={{ 
-            marginBottom: -40,
-          }}
+          className="fixed top-16 left-0 right-0 flex justify-center items-center z-50 pointer-events-none"
         >
           <div className={cn(
             "flex items-center justify-center w-10 h-10 rounded-full bg-background border border-border shadow-lg transition-opacity duration-200",
@@ -121,11 +151,11 @@ export function PullToRefresh({
         </div>
       )}
       
-      {/* Content wrapper - no transform to avoid blank screen issues */}
+      {/* Content wrapper */}
       <div 
         style={{ 
-          paddingTop: isRefreshing ? 50 : pullDistance > 0 ? pullDistance : 0,
-          transition: isPulling ? 'none' : 'padding-top 200ms ease-out'
+          transform: pullDistance > 0 || isRefreshing ? `translateY(${isRefreshing ? 50 : pullDistance}px)` : undefined,
+          transition: isPulling ? 'none' : 'transform 200ms ease-out'
         }}
       >
         {children}
