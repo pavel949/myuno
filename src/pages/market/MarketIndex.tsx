@@ -1,12 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  ShoppingBag, 
   Search, 
-  Heart,
   ChevronRight,
   Package,
   Store,
+  ShoppingBag,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
@@ -124,39 +123,8 @@ const MarketIndex = () => {
   };
 
   return (
-    <AppLayout>
-      <PageContainer className="pb-32">
-        {/* Header */}
-        <PageHeader
-          title={language === 'ru' ? 'Маркет' : 'Market'}
-          fallbackPath="/"
-          showBack
-          actions={
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => navigate('/market/wishlist')}
-                className="relative"
-              >
-                <Heart className="w-5 h-5" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => navigate('/cart')} 
-                className="relative"
-              >
-                <ShoppingBag className="w-5 h-5" />
-                {cartItemCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
-                    {cartItemCount}
-                  </span>
-                )}
-              </Button>
-            </div>
-          }
-        />
+    <AppLayout showHeader={true}>
+      <PageContainer className="pb-32 pt-0">
 
         {/* Hero Banner */}
         <FeaturedBanner
