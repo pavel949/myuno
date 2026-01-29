@@ -38,6 +38,10 @@ const iconMap: Record<string, LucideIcon> = {
   Key: LucideIcons.Key,
   CarFront: LucideIcons.CarFront,
   Building: LucideIcons.Building,
+  // New icons for added categories
+  Shield: LucideIcons.Shield,         // Insurance
+  Landmark: LucideIcons.Landmark,     // Banking
+  Warehouse: LucideIcons.Warehouse,   // Storage
 };
 
 export interface CategoryGroup {
@@ -77,6 +81,7 @@ const MINI_APP_SLUGS = new Set([
   'education', 'kids-education', 'flowers', 'flower-delivery',
   'pharmacy', 'pets', 'transport', 'market', 'marketplace',
   'cleaning', 'water', 'babysitter',
+  'insurance', 'legal', 'visa',  // Added for expat services
 ]);
 
 interface RawCategoryGroup {
@@ -144,6 +149,10 @@ function getPath(category: RawCategory): string {
     'handyman': '/services?category=handyman',
     'locksmith': '/services?category=locksmith',
     'road-assistance': '/services?category=road-assistance',
+    // New routes for expat services
+    'insurance': '/insurance',
+    'banking': '/banking',
+    'storage': '/storage',
   };
   return pathMap[type] || pathMap[category.slug] || `/${category.slug}`;
 }

@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Search, SlidersHorizontal, X, Sparkles, Package, 
   TrendingUp, ArrowDown, ArrowUp, Star, Clock, Check, ChevronRight,
-  History, Crown, Flame, Layers, Users
+  History, Crown, Flame, Layers, Users, Compass, Home
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
@@ -29,6 +29,15 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 type TabValue = 'all' | 'categories' | 'providers';
+type AudienceFilter = 'all' | 'tourists' | 'residents' | 'owners';
+
+// Category slugs for each audience
+const AUDIENCE_CATEGORIES: Record<AudienceFilter, Set<string>> = {
+  all: new Set(), // empty means show all
+  tourists: new Set(['yachts', 'tours', 'transport', 'events', 'water', 'restaurants', 'flowers', 'beauty', 'beauty-spa']),
+  residents: new Set(['legal', 'insurance', 'medical', 'banking', 'property', 'real-estate', 'education', 'visa', 'pharmacy', 'fitness']),
+  owners: new Set(['property', 'real-estate', 'cleaning', 'services', 'legal', 'insurance', 'babysitter']),
+};
 
 const SORT_OPTIONS: { value: SortOption; label: string; labelRu: string; icon: React.ElementType }[] = [
   { value: 'popular', label: 'Popular', labelRu: 'Популярные', icon: TrendingUp },
@@ -52,7 +61,9 @@ export default function Discover() {
   const [searchParams, setSearchParams] = useSearchParams();
   
   const initialTab = (searchParams.get('tab') as TabValue) || 'all';
+  const initialAudience = (searchParams.get('audience') as AudienceFilter) || 'all';
   const [activeTab, setActiveTab] = useState<TabValue>(initialTab);
+  const [audienceFilter, setAudienceFilter] = useState<AudienceFilter>(initialAudience);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -95,7 +106,20 @@ export default function Discover() {
 
   const handleTabChange = useCallback((value: string) => {
     setActiveTab(value as TabValue);
-    setSearchParams({ tab: value });
+    setSearchParams(prev => {
+      const params = new URLSearchParams(prev);
+      params.set('tab', value);
+      return params;
+    });
+  }, [setSearchParams]);
+
+  const handleAudienceChange = useCallback((value: AudienceFilter) => {
+    setAudienceFilter(value);
+    setSearchParams(prev => {
+      const params = new URLSearchParams(prev);
+      params.set('audience', value);
+      return params;
+    });
   }, [setSearchParams]);
 
   const handleRefresh = useCallback(async () => {
@@ -182,8 +206,15 @@ export default function Discover() {
           <TabsContent value="all" className="mt-0">
             <PullToRefresh onRefresh={handleRefresh} className="min-h-0">
               <div key={refreshKey} className="space-y-6">
+                {/* Audience Filter Tabs */}
+                <AudienceFilterTabs 
+                  value={audienceFilter} 
+                  onChange={handleAudienceChange} 
+                  language={language} 
+                />
+                
                 {/* Recently Viewed Section */}
-                {user && recentCategories.length > 0 && (
+                {user && recentCategories.length > 0 && audienceFilter === 'all' && (
                   <RecentlyViewedCompact 
                     items={recentCategories} 
                     language={language} 
@@ -200,6 +231,7 @@ export default function Discover() {
                     onCategoryClick={handleCategoryClick}
                     isFeatured={isFeatured}
                     getCount={getCount}
+                    audienceFilter={audienceFilter}
                   />
                 )}
               </div>
@@ -322,6 +354,47 @@ function RecentlyViewedCompact({ items, language }: RecentlyViewedCompactProps) 
   );
 }
 
+// Audience Filter Tabs Component
+interface AudienceFilterTabsProps {
+  value: AudienceFilter;
+  onChange: (value: AudienceFilter) => void;
+  language: string;
+}
+
+function AudienceFilterTabs({ value, onChange, language }: AudienceFilterTabsProps) {
+  const tabs: { id: AudienceFilter; label: string; labelRu: string; icon: React.ElementType }[] = [
+    { id: 'all', label: 'All', labelRu: 'Все', icon: Layers },
+    { id: 'tourists', label: 'Tourists', labelRu: 'Туристам', icon: Compass },
+    { id: 'residents', label: 'Residents', labelRu: 'Резидентам', icon: Users },
+    { id: 'owners', label: 'Owners', labelRu: 'Владельцам', icon: Home },
+  ];
+
+  return (
+    <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+      {tabs.map((tab) => {
+        const Icon = tab.icon;
+        const isActive = value === tab.id;
+        return (
+          <button
+            key={tab.id}
+            onClick={() => onChange(tab.id)}
+            className={cn(
+              "flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all",
+              isActive 
+                ? "bg-primary text-primary-foreground shadow-md" 
+                : "bg-card border border-border/50 text-muted-foreground hover:text-foreground hover:border-border"
+            )}
+          >
+            <Icon className="w-4 h-4" />
+            {language === 'ru' ? tab.labelRu : tab.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+
 interface AllCategoriesViewProps {
   groups: CategoryGroup[];
   getName: (item: Category | CategoryGroup) => string;
@@ -329,10 +402,27 @@ interface AllCategoriesViewProps {
   onCategoryClick: (cat: Category) => void;
   isFeatured?: (entityId: string, entityType?: string) => boolean;
   getCount?: (slugOrType: string) => number | undefined;
+  audienceFilter?: AudienceFilter;
 }
 
-function AllCategoriesView({ groups, getName, language, onCategoryClick, isFeatured, getCount }: AllCategoriesViewProps) {
-  if (groups.length === 0) {
+function AllCategoriesView({ groups, getName, language, onCategoryClick, isFeatured, getCount, audienceFilter = 'all' }: AllCategoriesViewProps) {
+  // Filter groups and categories based on audience
+  const filteredGroups = useMemo(() => {
+    if (audienceFilter === 'all') return groups;
+    
+    const audienceCategories = AUDIENCE_CATEGORIES[audienceFilter];
+    
+    return groups
+      .map(group => ({
+        ...group,
+        categories: (group.categories || []).filter(cat => 
+          audienceCategories.has(cat.slug) || audienceCategories.has(cat.miniAppType || '')
+        )
+      }))
+      .filter(group => group.categories.length > 0);
+  }, [groups, audienceFilter]);
+
+  if (filteredGroups.length === 0) {
     return (
       <EmptyState
         icon={Package}
@@ -344,7 +434,7 @@ function AllCategoriesView({ groups, getName, language, onCategoryClick, isFeatu
 
   return (
     <div className="space-y-8">
-      {groups.map((group) => (
+      {filteredGroups.map((group) => (
         <div key={group.id}>
           {/* Group Header - Enhanced */}
           <div className="flex items-center gap-3 mb-4">

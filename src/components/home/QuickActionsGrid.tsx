@@ -35,9 +35,11 @@ interface QuickAction {
   isUrgent?: boolean;
 }
 
-// 10 essential services in 2x5 grid - clean SuperApp style
+// 10 essential services optimized for 3 target audiences:
+// Row 1: Tourists (Yachts, Transfer, Tours, Food, Events)
+// Row 2: Residents (Property, Medical, Legal, Insurance) + More
 const quickActions: QuickAction[] = [
-  // Row 1
+  // Row 1 - Туристам
   {
     id: 'yachts',
     icon: Anchor,
@@ -57,22 +59,13 @@ const quickActions: QuickAction[] = [
     bgColor: 'bg-indigo-500/10',
   },
   {
-    id: 'flowers',
-    icon: Flower2,
-    label: 'Flowers',
-    labelRu: 'Цветы',
-    path: '/flowers',
-    iconColor: 'text-rose-500',
-    bgColor: 'bg-rose-500/10',
-  },
-  {
-    id: 'property',
-    icon: Home,
-    label: 'Property',
-    labelRu: 'Жильё',
-    path: '/property',
-    iconColor: 'text-teal-600',
-    bgColor: 'bg-teal-500/10',
+    id: 'tours',
+    icon: Compass,
+    label: 'Tours',
+    labelRu: 'Туры',
+    path: '/tours',
+    iconColor: 'text-amber-600',
+    bgColor: 'bg-amber-500/10',
   },
   {
     id: 'restaurants',
@@ -83,15 +76,24 @@ const quickActions: QuickAction[] = [
     iconColor: 'text-orange-500',
     bgColor: 'bg-orange-500/10',
   },
-  // Row 2
   {
-    id: 'tours',
-    icon: Compass,
-    label: 'Tours',
-    labelRu: 'Туры',
-    path: '/tours',
-    iconColor: 'text-amber-600',
-    bgColor: 'bg-amber-500/10',
+    id: 'flowers',
+    icon: Flower2,
+    label: 'Flowers',
+    labelRu: 'Цветы',
+    path: '/flowers',
+    iconColor: 'text-rose-500',
+    bgColor: 'bg-rose-500/10',
+  },
+  // Row 2 - Резидентам и владельцам
+  {
+    id: 'property',
+    icon: Home,
+    label: 'Property',
+    labelRu: 'Жильё',
+    path: '/property',
+    iconColor: 'text-teal-600',
+    bgColor: 'bg-teal-500/10',
   },
   {
     id: 'medical',
