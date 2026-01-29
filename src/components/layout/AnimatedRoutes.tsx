@@ -156,6 +156,7 @@ const DeliveryIndex = lazy(() => import('@/pages/delivery/DeliveryIndex'));
 // Market Mini-App
 const MarketIndex = lazy(() => import('@/pages/market/MarketIndex'));
 const MarketCategoryPage = lazy(() => import('@/pages/market/MarketCategoryPage'));
+const ProductDetailPage = lazy(() => import('@/pages/market/ProductDetailPage'));
 const StoreDetail = lazy(() => import('@/pages/market/StoreDetail'));
 const MarketCheckout = lazy(() => import('@/pages/market/MarketCheckout'));
 
@@ -554,6 +555,7 @@ export const AnimatedRoutes: React.FC = () => {
         {/* Market Mini-App Routes */}
         <Route path="/market" element={<LazyPage><MarketIndex /></LazyPage>} />
         <Route path="/market/category/:categoryId" element={<LazyPage><MarketCategoryPage /></LazyPage>} />
+        <Route path="/market/product/:productId" element={<LazyPage><ProductDetailPage /></LazyPage>} />
         <Route path="/market/store/:id" element={<LazyPage><StoreDetail /></LazyPage>} />
         <Route path="/market/checkout" element={<LazyPage><MarketCheckout /></LazyPage>} />
         

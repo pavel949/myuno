@@ -359,6 +359,7 @@ const MarketIndex = () => {
                   quantity={getQuantity(product.id)}
                   onAdd={() => handleAdd(product)}
                   onRemove={() => handleRemove(product.id)}
+                  onClick={() => navigate(`/market/product/${product.id}`)}
                 />
               ))}
             </div>
