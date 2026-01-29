@@ -24,6 +24,7 @@ const ResetPassword = lazy(() => import('@/pages/auth/ResetPassword'));
 
 // Lazy load all other pages for code splitting
 const Discover = lazy(() => import('@/pages/Discover'));
+const Categories = lazy(() => import('@/pages/Categories'));
 const MapView = lazy(() => import('@/pages/MapView'));
 const Bookings = lazy(() => import('@/pages/Bookings'));
 const BookingDetail = lazy(() => import('@/pages/BookingDetail'));
@@ -392,6 +393,7 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* Lazy loaded routes */}
         <Route path="/discover" element={<LazyPage><Discover /></LazyPage>} />
+        <Route path="/categories" element={<LazyPage><Categories /></LazyPage>} />
         <Route path="/map" element={<LazyPage><MapView /></LazyPage>} />
         <Route path="/bookings" element={<LazyPage><Bookings /></LazyPage>} />
         <Route path="/bookings/:id" element={<LazyPage><BookingDetail /></LazyPage>} />
