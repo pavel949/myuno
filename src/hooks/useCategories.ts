@@ -224,6 +224,22 @@ async function fetchCategoryGroups(): Promise<CategoryGroup[]> {
     };
   });
 
+  // Collect ungrouped categories (not in any group, not a subcategory)
+  const ungroupedCategories = categories.filter(c => !c.groupId && !c.parentId);
+
+  // Add "Other Services" group if there are ungrouped categories
+  if (ungroupedCategories.length > 0) {
+    result.push({
+      id: 'other',
+      slug: 'other',
+      nameEn: 'Other Services',
+      nameRu: 'Другие сервисы',
+      sortOrder: 999,
+      isActive: true,
+      categories: ungroupedCategories.sort((a, b) => a.sortOrder - b.sortOrder),
+    });
+  }
+
   return result;
 }
 
