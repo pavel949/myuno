@@ -66,8 +66,18 @@ export interface Category {
   isActive: boolean;
   isNew: boolean;
   isHot: boolean;
+  hasMiniApp: boolean;
   subcategories?: Category[];
 }
+
+// Mini-app category slugs - categories with full booking flow
+const MINI_APP_SLUGS = new Set([
+  'yachts', 'tours', 'restaurants', 'property', 'real-estate',
+  'beauty', 'beauty-spa', 'fitness', 'medical', 'events',
+  'education', 'kids-education', 'flowers', 'flower-delivery',
+  'pharmacy', 'pets', 'transport', 'market', 'marketplace',
+  'cleaning', 'water', 'babysitter',
+]);
 
 interface RawCategoryGroup {
   id: string;
@@ -141,6 +151,9 @@ function getPath(category: RawCategory): string {
 // Transform raw DB data to typed interface
 function transformCategory(raw: RawCategory): Category {
   const iconName = raw.icon || 'Package';
+  const hasMiniApp = MINI_APP_SLUGS.has(raw.slug) || 
+    (raw.mini_app_type !== null && MINI_APP_SLUGS.has(raw.mini_app_type));
+  
   return {
     id: raw.id,
     slug: raw.slug,
@@ -157,6 +170,7 @@ function transformCategory(raw: RawCategory): Category {
     isActive: raw.is_active ?? true,
     isNew: raw.is_new ?? false,
     isHot: raw.is_hot ?? false,
+    hasMiniApp,
   };
 }
 
