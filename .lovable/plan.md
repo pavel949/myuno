@@ -1,132 +1,34 @@
 
 # План: Профессиональный реестр поставщиков маркетплейса
 
-## Обзор проблемы
-Сейчас товары связаны с базой данных, но поставщики хранятся как простой текст (`vendor_name`). На ведущих маркетплейсах (Ozon, Wildberries, Amazon) каждый товар привязан к полноценной карточке продавца.
+## ✅ РЕАЛИЗОВАНО (29 января 2026)
 
----
+### База данных
+- ✅ Создана таблица `marketplace_vendors` с полями: slug, name_en/ru, description, logo, cover_image, контакты, рейтинг, verified
+- ✅ Добавлено поле `vendor_id` в `marketplace_products` с FK на vendors
+- ✅ Созданы RLS-политики для публичного чтения активных поставщиков
+- ✅ Загружены 20 поставщиков: Thai Rice Co, Coca-Cola, Red Bull, Nestlé и др.
+- ✅ Связаны 200 товаров с поставщиками
 
-## Часть 1: База данных - Реестр поставщиков
-
-### 1.1 Новая таблица `marketplace_vendors`
-```
-marketplace_vendors
-- id (uuid, PK)
-- slug (text, unique) - URL-friendly имя
-- name_en, name_ru (text) - название
-- description_en, description_ru (text) - описание
-- logo_url (text) - логотип
-- cover_image (text) - обложка
-- phone, email (text) - контакты
-- website (text) - сайт
-- address, address_ru (text) - адрес
-- rating (numeric) - рейтинг (1-5)
-- review_count (integer) - количество отзывов
-- verified (boolean) - верифицирован
-- is_active (boolean)
-- created_at, updated_at (timestamps)
-```
-
-### 1.2 Связь товаров с поставщиками
-Добавить в `marketplace_products`:
-- `vendor_id (uuid, FK -> marketplace_vendors.id)`
-
-### 1.3 Seed Data: Создание поставщиков
-Создать записи для всех существующих vendor_name:
-- Thai Rice Co, Organic Farm, Coca-Cola, Red Bull...
-- С логотипами, описаниями, контактами
-- Связать существующие товары через vendor_id
-
----
-
-## Часть 2: UI - Карточка поставщика
-
-### 2.1 На странице товара
-```
-+------------------------------------------+
-|  Продавец                                |
-+------------------------------------------+
-|  [Logo] Thai Rice Co.         ✓ Verified |
-|  ⭐ 4.8 (156 отзывов)                    |
-|  📦 125 товаров                          |
-|  [Все товары продавца →]                 |
-+------------------------------------------+
-```
-
-### 2.2 Страница продавца `/market/vendor/:slug`
-- Баннер с логотипом и информацией
-- Контакты и описание
-- Все товары этого продавца
-- Фильтры и сортировка
-
----
-
-## Часть 3: Навигация
-
-### 3.1 Клик на поставщика
-- На карточке товара → страница продавца
-- На странице товара → страница продавца
-- Поиск по названию продавца
-
-### 3.2 Фильтр по поставщику
-В категориях добавить фильтр "По продавцу"
-
----
-
-## Файлы для создания/изменения
-
-| Файл | Действие |
-|------|----------|
-| `supabase/migrations/..._vendors.sql` | Новая таблица + seed |
-| `src/types/marketplace.ts` | Добавить MarketplaceVendor |
-| `src/hooks/useMarketplace.ts` | Хук useVendor, useVendorProducts |
-| `src/pages/market/VendorPage.tsx` | Новая страница |
-| `src/components/market/VendorCard.tsx` | Карточка продавца |
-| `src/components/market/VendorInfo.tsx` | Блок на странице товара |
-| `src/pages/market/ProductDetailPage.tsx` | Добавить VendorInfo |
-| `src/components/layout/AnimatedRoutes.tsx` | Роут /market/vendor/:slug |
-
----
-
-## Технические детали
-
-### Новый тип
-```typescript
-interface MarketplaceVendor {
-  id: string;
-  slug: string;
-  name_en: string;
-  name_ru: string;
-  description_en: string | null;
-  description_ru: string | null;
-  logo_url: string | null;
-  cover_image: string | null;
-  phone: string | null;
-  email: string | null;
-  website: string | null;
-  rating: number | null;
-  review_count: number;
-  verified: boolean;
-  product_count?: number;
-}
-```
-
-### Запрос товара с поставщиком
-```typescript
-const { data } = await supabase
-  .from('marketplace_products')
-  .select(`
-    *,
-    vendor:marketplace_vendors(*)
-  `)
-  .eq('id', productId)
-  .single();
-```
+### UI-компоненты
+- ✅ `src/types/marketplace.ts` — добавлен интерфейс MarketplaceVendor
+- ✅ `src/hooks/useMarketplaceVendors.ts` — хуки useVendor, useVendorProducts, useVendorById
+- ✅ `src/components/market/VendorInfo.tsx` — карточка продавца на странице товара
+- ✅ `src/components/market/VendorCard.tsx` — карточка для списка продавцов
+- ✅ `src/pages/market/VendorPage.tsx` — страница продавца /market/vendor/:slug
+- ✅ Обновлён ProductDetailPage — блок VendorInfo с переходом на страницу продавца
+- ✅ Добавлен роут /market/vendor/:slug в AnimatedRoutes
 
 ---
 
 ## Результат
-- Полноценный реестр 25+ поставщиков
-- Карточки продавцов с рейтингом и верификацией
-- Навигация по товарам каждого продавца
-- Профессиональная структура как на Ozon/Wildberries
+- ✅ Реестр 20 поставщиков с рейтингами и верификацией
+- ✅ Карточки продавцов на страницах товаров
+- ✅ Страницы продавцов с их товарами
+- ✅ Навигация как на Ozon/Wildberries/Amazon
+
+## Дополнительные улучшения (опционально)
+- [ ] Фильтр товаров по поставщику в категориях
+- [ ] Поиск по названию поставщика
+- [ ] Страница "Все продавцы" с рейтингами
+- [ ] Логотипы и обложки для каждого поставщика

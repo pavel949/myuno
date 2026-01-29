@@ -3727,6 +3727,7 @@ export type Database = {
           unit: string | null
           unit_ru: string | null
           updated_at: string | null
+          vendor_id: string | null
           vendor_name: string | null
           vendor_name_ru: string | null
           weight_kg: number | null
@@ -3761,6 +3762,7 @@ export type Database = {
           unit?: string | null
           unit_ru?: string | null
           updated_at?: string | null
+          vendor_id?: string | null
           vendor_name?: string | null
           vendor_name_ru?: string | null
           weight_kg?: number | null
@@ -3795,6 +3797,7 @@ export type Database = {
           unit?: string | null
           unit_ru?: string | null
           updated_at?: string | null
+          vendor_id?: string | null
           vendor_name?: string | null
           vendor_name_ru?: string | null
           weight_kg?: number | null
@@ -3806,6 +3809,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "marketplace_categories"
             referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "marketplace_products_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_vendors"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3852,6 +3862,72 @@ export type Database = {
             referencedColumns: ["slug"]
           },
         ]
+      }
+      marketplace_vendors: {
+        Row: {
+          address: string | null
+          address_ru: string | null
+          cover_image: string | null
+          created_at: string
+          description_en: string | null
+          description_ru: string | null
+          email: string | null
+          id: string
+          is_active: boolean
+          logo_url: string | null
+          name_en: string
+          name_ru: string
+          phone: string | null
+          rating: number | null
+          review_count: number
+          slug: string
+          updated_at: string
+          verified: boolean
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          address_ru?: string | null
+          cover_image?: string | null
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name_en: string
+          name_ru: string
+          phone?: string | null
+          rating?: number | null
+          review_count?: number
+          slug: string
+          updated_at?: string
+          verified?: boolean
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          address_ru?: string | null
+          cover_image?: string | null
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name_en?: string
+          name_ru?: string
+          phone?: string | null
+          rating?: number | null
+          review_count?: number
+          slug?: string
+          updated_at?: string
+          verified?: boolean
+          website?: string | null
+        }
+        Relationships: []
       }
       medical_services: {
         Row: {
