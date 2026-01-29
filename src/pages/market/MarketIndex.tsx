@@ -30,8 +30,8 @@ import { MarketplaceProduct } from '@/types/marketplace';
 import { useCartToast } from '@/hooks/useCartToast';
 import { cn } from '@/lib/utils';
 
-// Category icon mapping
-const getCategoryIcon = (slug: string) => {
+// Fallback category icon mapping (used when no image available)
+const getCategoryFallbackIcon = (slug: string) => {
   const icons: Record<string, string> = {
     'fruits-vegetables': '🥬',
     'dairy-eggs': '🥛',
@@ -51,6 +51,38 @@ const getCategoryIcon = (slug: string) => {
     'fashion': '👔',
   };
   return icons[slug] || '📦';
+};
+
+// Category Image Component
+const CategoryImage = ({ category, size = 'md' }: { 
+  category: { slug: string; image_url: string | null; icon: string | null }; 
+  size?: 'sm' | 'md' | 'lg';
+}) => {
+  const sizeClasses = {
+    sm: 'w-10 h-10',
+    md: 'w-12 h-12',
+    lg: 'w-16 h-16',
+  };
+  
+  if (category.image_url) {
+    return (
+      <img 
+        src={category.image_url} 
+        alt="" 
+        className={cn(sizeClasses[size], "rounded-xl object-cover")}
+      />
+    );
+  }
+  
+  // Fallback to icon or emoji
+  return (
+    <div className={cn(
+      sizeClasses[size],
+      "rounded-xl bg-muted/50 flex items-center justify-center text-2xl"
+    )}>
+      {category.icon || getCategoryFallbackIcon(category.slug)}
+    </div>
+  );
 };
 
 const MarketIndex = () => {
@@ -207,9 +239,7 @@ const MarketIndex = () => {
                     onClick={() => navigate(`/market/category/${category.slug}`)}
                     className="flex flex-col items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-muted/50 transition-colors shrink-0 group"
                   >
-                    <div className="w-12 h-12 rounded-xl bg-muted/50 group-hover:bg-muted flex items-center justify-center text-2xl transition-colors">
-                      {getCategoryIcon(category.slug)}
-                    </div>
+                    <CategoryImage category={category} size="md" />
                     <span className="text-[11px] font-medium text-center whitespace-nowrap max-w-[60px] truncate">
                       {language === 'ru' ? category.name_ru : category.name_en}
                     </span>
@@ -357,7 +387,7 @@ const MarketIndex = () => {
               <div className="px-4 max-w-7xl mx-auto">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
-                    <span className="text-xl">{getCategoryIcon(category.slug)}</span>
+                    <CategoryImage category={category} size="sm" />
                     <h2 className="text-lg font-bold">
                       {language === 'ru' ? category.name_ru : category.name_en}
                     </h2>
