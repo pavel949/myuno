@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Search, ShoppingBag, LayoutGrid, List } from 'lucide-react';
+import { Search, ShoppingBag, LayoutGrid, List, Flame, Star, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -16,6 +16,42 @@ import { useCartToast } from '@/hooks/useCartToast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
+// Special virtual categories
+const SPECIAL_CATEGORIES = {
+  deals: {
+    slug: 'deals',
+    name_en: 'Deals & Discounts',
+    name_ru: 'Акции и скидки',
+    description_en: 'Best prices on popular products',
+    description_ru: 'Лучшие цены на популярные товары',
+    icon: '🔥',
+    gradient: 'from-orange-600/90 to-red-500/80',
+    image_url: 'https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?w=800&q=80',
+  },
+  popular: {
+    slug: 'popular',
+    name_en: 'Bestsellers',
+    name_ru: 'Хиты продаж',
+    description_en: 'Most popular products',
+    description_ru: 'Самые популярные товары',
+    icon: '⭐',
+    gradient: 'from-amber-600/90 to-yellow-500/80',
+    image_url: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80',
+  },
+  new: {
+    slug: 'new',
+    name_en: 'New Arrivals',
+    name_ru: 'Новинки',
+    description_en: 'Fresh products just added',
+    description_ru: 'Свежие товары только что добавлены',
+    icon: '✨',
+    gradient: 'from-purple-600/90 to-pink-500/80',
+    image_url: 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=800&q=80',
+  },
+};
+
+type SpecialCategorySlug = keyof typeof SPECIAL_CATEGORIES;
+
 const MarketCategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
   const navigate = useNavigate();
@@ -27,29 +63,55 @@ const MarketCategoryPage = () => {
   const [selectedSubcategory, setSelectedSubcategory] = useState('all');
   const [viewMode, setViewMode] = useState<'grid' | 'horizontal'>('grid');
 
+  // Check if it's a special category
+  const isSpecialCategory = categoryId && categoryId in SPECIAL_CATEGORIES;
+  const specialCategory = isSpecialCategory ? SPECIAL_CATEGORIES[categoryId as SpecialCategorySlug] : null;
+
   // Fetch from database
   const { categories, isLoading: categoriesLoading } = useMarketplaceCategories();
-  const { subcategories: dbSubcategories, isLoading: subcategoriesLoading } = useMarketplaceSubcategories(categoryId);
-  const { products: categoryProducts, isLoading: productsLoading } = useMarketplaceProducts({
-    category: categoryId,
-  });
+  const { subcategories: dbSubcategories, isLoading: subcategoriesLoading } = useMarketplaceSubcategories(
+    isSpecialCategory ? undefined : categoryId
+  );
+  
+  // Determine product filter options based on category type
+  const productOptions = useMemo(() => {
+    if (categoryId === 'deals') {
+      return { dealsOnly: true };
+    }
+    if (categoryId === 'popular') {
+      return { popularOnly: true };
+    }
+    if (categoryId === 'new') {
+      return { newOnly: true };
+    }
+    return { category: categoryId };
+  }, [categoryId]);
 
-  const category = categories.find(c => c.slug === categoryId);
-  // Use subcategories directly for new chips component
-  const subcategoryChips = useMemo(() => dbSubcategories.map(sub => ({
-    id: sub.slug,
-    label_en: sub.name_en,
-    label_ru: sub.name_ru,
-    icon: sub.icon,
-  })), [dbSubcategories]);
+  const { products: categoryProducts, isLoading: productsLoading } = useMarketplaceProducts(productOptions);
+
+  // For regular categories, find from DB; for special, use virtual category
+  const category = isSpecialCategory 
+    ? specialCategory 
+    : categories.find(c => c.slug === categoryId);
+
+  // Use subcategories directly for new chips component (only for regular categories)
+  const subcategoryChips = useMemo(() => {
+    if (isSpecialCategory) return [];
+    return dbSubcategories.map(sub => ({
+      id: sub.slug,
+      label_en: sub.name_en,
+      label_ru: sub.name_ru,
+      icon: sub.icon,
+    }));
+  }, [dbSubcategories, isSpecialCategory]);
   
   const cartItems = getItemsByType('product');
   const cartItemCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
 
   const filteredProducts = useMemo(() => {
     return categoryProducts.filter(product => {
-      // Subcategory filter
-      if (selectedSubcategory !== 'all' && product.subcategory !== selectedSubcategory) {
+      // Subcategory filter (only for regular categories)
+      if (!isSpecialCategory && selectedSubcategory !== 'all' && product.subcategory !== selectedSubcategory) {
         return false;
       }
 
@@ -66,7 +128,7 @@ const MarketCategoryPage = () => {
 
       return true;
     });
-  }, [categoryProducts, selectedSubcategory, searchQuery, language]);
+  }, [categoryProducts, selectedSubcategory, searchQuery, language, isSpecialCategory]);
 
   const getQuantity = (productId: string) => {
     return cartItems.find(i => i.id === productId)?.quantity || 0;
@@ -93,9 +155,10 @@ const MarketCategoryPage = () => {
     removeItem(productId);
   };
 
-  const isLoading = categoriesLoading || productsLoading || subcategoriesLoading;
+  const isLoading = categoriesLoading || productsLoading || (!isSpecialCategory && subcategoriesLoading);
 
-  if (!isLoading && !category) {
+  // For regular categories, show "not found" if category doesn't exist
+  if (!isLoading && !category && !isSpecialCategory) {
     return (
       <AppLayout>
         <PageContainer>
@@ -166,13 +229,15 @@ const MarketCategoryPage = () => {
           />
         </div>
 
-        {/* Subcategory Chips */}
-        <SubcategoryChips
-          subcategories={subcategoryChips}
-          selectedId={selectedSubcategory}
-          onSelect={setSelectedSubcategory}
-          className="mb-4"
-        />
+        {/* Subcategory Chips - only for regular categories */}
+        {!isSpecialCategory && subcategoryChips.length > 0 && (
+          <SubcategoryChips
+            subcategories={subcategoryChips}
+            selectedId={selectedSubcategory}
+            onSelect={setSelectedSubcategory}
+            className="mb-4"
+          />
+        )}
 
         {/* Results Count & View Toggle */}
         <div className="flex items-center justify-between mb-4">

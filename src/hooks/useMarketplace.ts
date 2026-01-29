@@ -143,6 +143,7 @@ export function useMarketplaceProducts(options: {
   search?: string;
   popularOnly?: boolean;
   newOnly?: boolean;
+  dealsOnly?: boolean;
   limit?: number;
 } = {}) {
   const [products, setProducts] = useState<MarketplaceProduct[]>([]);
@@ -155,6 +156,7 @@ export function useMarketplaceProducts(options: {
     options.search,
     options.popularOnly,
     options.newOnly,
+    options.dealsOnly,
     options.limit
   ]);
 
@@ -181,6 +183,10 @@ export function useMarketplaceProducts(options: {
         if (opts.newOnly) {
           query = query.eq('is_new', true);
         }
+        if (opts.dealsOnly) {
+          // Products with discount (original_price is set and higher than price)
+          query = query.not('original_price', 'is', null);
+        }
         if (opts.limit) {
           query = query.limit(opts.limit);
         }
@@ -190,6 +196,13 @@ export function useMarketplaceProducts(options: {
         if (queryError) throw queryError;
 
         let result = data || [];
+
+        // For deals, filter to only show items where original_price > price
+        if (opts.dealsOnly) {
+          result = result.filter((p: MarketplaceProduct) => 
+            p.original_price && p.original_price > p.price
+          );
+        }
 
         // Client-side search filter
         if (opts.search && opts.search.length >= 2) {
