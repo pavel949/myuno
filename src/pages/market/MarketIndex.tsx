@@ -125,11 +125,11 @@ const MarketIndex = () => {
   };
 
   return (
-    <AppLayout showHeader={true}>
+    <AppLayout showHeader={true} showBottomNav={true}>
       <div className="min-h-screen bg-background pb-32">
         
         {/* Search Bar - Sticky */}
-        <div className="sticky top-14 z-40 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3">
+        <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3">
           <div className="relative max-w-7xl mx-auto">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
