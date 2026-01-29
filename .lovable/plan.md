@@ -1,255 +1,264 @@
 
-# План реализации: Унифицированный Vendor Dashboard (Услуги + Товары)
+# План реализации: Admin Marketplace Management
 
-## Обзор проблемы
+## Обзор
 
-В текущей архитектуре существует дуализм систем вендоров:
-
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│                   ТЕКУЩАЯ АРХИТЕКТУРА                          │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌─────────────────────┐       ┌─────────────────────┐         │
-│  │     providers       │       │ marketplace_vendors │         │
-│  │  (для услуг)        │       │  (для товаров)      │         │
-│  └─────────────────────┘       └─────────────────────┘         │
-│           │                            │                        │
-│           ▼                            ▼                        │
-│  ┌─────────────────────┐       ┌─────────────────────┐         │
-│  │  vendor_services    │       │ marketplace_products│         │
-│  │  yachts, tours...   │       │                     │         │
-│  └─────────────────────┘       └─────────────────────┘         │
-│                                                                 │
-│            ❌ НЕТ СВЯЗИ МЕЖДУ СИСТЕМАМИ                        │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-## Решение: Unified Vendor System
+Добавление полноценного раздела управления маркетплейсом в админ-панель UNO. Включает CRUD-операции для товаров, категорий, подкатегорий и вендоров.
 
 ```text
 ┌─────────────────────────────────────────────────────────────────┐
-│                   ЦЕЛЕВАЯ АРХИТЕКТУРА                          │
+│                      ADMIN SIDEBAR                              │
 ├─────────────────────────────────────────────────────────────────┤
+│  Operations                                                     │
+│  └── Dashboard, Moderation, Leads...                           │
+│                                                                 │
+│  Catalog (services)                                            │
+│  └── Properties, Yachts, Tours...                              │
 │                                                                 │
 │  ┌─────────────────────────────────────────────────────────┐   │
-│  │                    providers                             │   │
-│  │  + marketplace_vendor_id (FK → marketplace_vendors)      │   │
+│  │ 🆕 MARKETPLACE (новая группа)                           │   │
+│  │    ├── Products (200)     - Товары маркетплейса         │   │
+│  │    ├── Categories (12)    - Категории                   │   │
+│  │    ├── Subcategories (114)- Подкатегории                │   │
+│  │    └── Vendors (20)       - Продавцы                    │   │
 │  └─────────────────────────────────────────────────────────┘   │
-│                          │                                      │
-│            ┌─────────────┼─────────────┐                       │
-│            ▼             ▼             ▼                       │
-│   ┌─────────────┐ ┌─────────────┐ ┌─────────────┐              │
-│   │  services   │ │   yachts    │ │  products   │              │
-│   └─────────────┘ └─────────────┘ └─────────────┘              │
 │                                                                 │
-│            ✅ ЕДИНАЯ СИСТЕМА ПОСТАВЩИКА                        │
+│  Health & Home, Services & Shops, Analytics, System            │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Этап 1: Миграция базы данных
+## Этап 1: Создание хуков для админ-операций
 
-Добавление связи между providers и marketplace_vendors:
+### `src/hooks/useAdminMarketplace.ts`
 
-1. Добавить колонку `marketplace_vendor_id` в таблицу `providers`
-2. Автоматически создавать запись в `marketplace_vendors` при онбординге вендора (если выбраны товары)
-3. RLS политики для безопасного доступа
+Единый файл с хуками для всех сущностей маркетплейса:
 
----
+**useAdminMarketplaceProducts**
+- CRUD для таблицы `marketplace_products`
+- Фильтрация по категории, вендору, статусу
+- Поиск по названию
 
-## Этап 2: Обновление Vendor Sidebar
+**useAdminMarketplaceCategories**
+- CRUD для таблицы `marketplace_categories`
+- Управление sort_order, is_active
+- Загрузка изображений
 
-Добавление раздела "Мои товары" в навигацию:
+**useAdminMarketplaceSubcategories**
+- CRUD для таблицы `marketplace_subcategories`
+- Привязка к parent category
 
-**Текущая структура:**
-- Main: Dashboard, Bookings, Services, Locations
-- Finance: Analytics, Payouts, Subscription
-- Verticals: Properties, Yachts, Transport...
-- Services: Beauty, Fitness, Clinics...
-
-**Новая структура:**
-- Main: Dashboard, Bookings, Services, **Products**, Locations
-- Products становится ссылкой на `/vendor/products`
-
----
-
-## Этап 3: Создание страницы управления товарами
-
-Новый файл: `src/pages/vendor/VendorProducts.tsx`
-
-Архитектура идентична VendorYachts / VendorServices:
-
-- Wizard-форма с 4 шагами: Basic Info → Details → Photos → Review
-- Draft-система (useFormDraft)
-- CRUD операции через useVendorProducts hook
-- CardPreview в реальном времени
-- Интеграция с marketplace_products и marketplace_categories
-
-**Шаги wizard-формы:**
-
-1. **Basic Info**: Название (EN/RU), Описание, Категория
-2. **Details**: Цена, Наличие, Единицы измерения, Теги
-3. **Photos**: Cover image + галерея
-4. **Review**: Превью карточки товара
+**useAdminMarketplaceVendors**
+- CRUD для таблицы `marketplace_vendors`
+- Верификация вендоров
+- Статистика по товарам
 
 ---
 
-## Этап 4: Создание hook для товаров вендора
+## Этап 2: Страница управления товарами
 
-Новый файл: `src/hooks/useVendorProducts.ts`
+### `src/pages/admin/AdminMarketplaceProducts.tsx`
+
+Функционал:
+- Таблица товаров с пагинацией
+- Фильтры: категория, вендор, статус (in_stock, is_active)
+- Поиск по названию
+- Диалог создания/редактирования с полями:
+  - Название EN/RU
+  - Описание EN/RU
+  - Категория (select из marketplace_categories)
+  - Подкатегория (select, фильтруется по категории)
+  - Цена, старая цена
+  - Вендор (select из marketplace_vendors)
+  - Изображения (cover + gallery)
+  - Флаги: is_popular, is_new, in_stock, is_active
+  - Теги
+  - Вес, единицы измерения
 
 ```text
-useVendorProducts(vendorId)
-├── products: MarketplaceProduct[]
-├── isLoading: boolean
-├── createProduct(data) → Promise
-├── updateProduct(id, data) → Promise
-├── deleteProduct(id) → Promise
-└── refetch() → Promise
+┌────────────────────────────────────────────────────────────────┐
+│ Products                                           [+ Add]     │
+├────────────────────────────────────────────────────────────────┤
+│ [Search...] [Category ▼] [Vendor ▼] [Status ▼]                 │
+├────────────────────────────────────────────────────────────────┤
+│ ┌──────┬──────────────────┬──────────┬────────┬──────┬─────┐  │
+│ │ Img  │ Name             │ Category │ Price  │Stock │ ⋮   │  │
+│ ├──────┼──────────────────┼──────────┼────────┼──────┼─────┤  │
+│ │ 🖼   │ Organic Mangoes  │ Fruits   │ ฿150   │ ✓    │ ⋮   │  │
+│ │ 🖼   │ Thai Coffee      │ Beverages│ ฿320   │ ✓    │ ⋮   │  │
+│ └──────┴──────────────────┴──────────┴────────┴──────┴─────┘  │
+└────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Этап 5: Интеграция с Vendor Dashboard
+## Этап 3: Страница управления категориями
 
-Добавление переключателя режимов на Dashboard:
+### `src/pages/admin/AdminMarketplaceCategories.tsx`
+
+Функционал:
+- Список категорий с drag-and-drop для сортировки
+- Поля редактирования:
+  - Slug (уникальный идентификатор)
+  - Название EN/RU
+  - Описание EN/RU
+  - Иконка (icon name или emoji)
+  - Изображение
+  - Gradient (CSS градиент для карточки)
+  - Category group
+  - is_active
 
 ```text
-┌─────────────────────────────────────────────────────────────────┐
-│                     Vendor Dashboard                            │
-├─────────────────────────────────────────────────────────────────┤
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │  [Org Header: Business Name, Verified Badge]              │  │
-│  └──────────────────────────────────────────────────────────┘  │
-│                                                                 │
-│  ┌─────────────────┬─────────────────┐                         │
-│  │    УСЛУГИ       │    ТОВАРЫ       │  ← ContentModeToggle    │
-│  └─────────────────┴─────────────────┘                         │
-│                                                                 │
-│  [Контент адаптируется под выбранный режим]                    │
-│                                                                 │
-│  Услуги:                  Товары:                              │
-│  - Revenue (services)     - Revenue (products)                 │
-│  - Orders (bookings)      - Orders (marketplace)               │
-│  - Recent Bookings        - Recent Product Orders              │
-└─────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────┐
+│ Categories                                        [+ Add]      │
+├────────────────────────────────────────────────────────────────┤
+│ ┌──────┬────────────────┬──────────────┬────────┬──────┬─────┐│
+│ │ ≡    │ Icon + Name    │ Slug         │ Items  │Active│ ⋮   ││
+│ ├──────┼────────────────┼──────────────┼────────┼──────┼─────┤│
+│ │ ≡    │ 🍎 Groceries   │ groceries    │ 45     │ ✓    │ ⋮   ││
+│ │ ≡    │ 🏠 Home        │ home         │ 23     │ ✓    │ ⋮   ││
+│ │ ≡    │ 👶 Baby        │ baby         │ 18     │ ✓    │ ⋮   ││
+│ └──────┴────────────────┴──────────────┴────────┴──────┴─────┘│
+└────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Файловая структура изменений
+## Этап 4: Страница управления подкатегориями
+
+### `src/pages/admin/AdminMarketplaceSubcategories.tsx`
+
+Функционал:
+- Фильтр по родительской категории
+- Поля:
+  - Parent category (select)
+  - Slug
+  - Название EN/RU
+  - Иконка
+  - sort_order
+  - is_active
+
+---
+
+## Этап 5: Страница управления вендорами
+
+### `src/pages/admin/AdminMarketplaceVendors.tsx`
+
+Функционал:
+- Список всех вендоров маркетплейса
+- Статистика: количество товаров, рейтинг, отзывы
+- Верификация вендоров (verified badge)
+- Поля редактирования:
+  - Slug
+  - Название EN/RU
+  - Описание EN/RU
+  - Логотип, cover image
+  - Контакты (phone, email, website)
+  - Адрес EN/RU
+  - verified, is_active
+
+```text
+┌────────────────────────────────────────────────────────────────┐
+│ Vendors                                           [+ Add]      │
+├────────────────────────────────────────────────────────────────┤
+│ ┌──────┬────────────────┬──────────┬────────┬────────┬─────┐  │
+│ │ Logo │ Name           │ Products │ Rating │Verified│ ⋮   │  │
+│ ├──────┼────────────────┼──────────┼────────┼────────┼─────┤  │
+│ │ 🏪   │ Fresh Farm     │ 45       │ ⭐ 4.8 │ ✓      │ ⋮   │  │
+│ │ 🏪   │ Thai Organics  │ 23       │ ⭐ 4.5 │ -      │ ⋮   │  │
+│ └──────┴────────────────┴──────────┴────────┴────────┴─────┘  │
+└────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Этап 6: Обновление AdminSidebar
+
+### `src/components/admin/AdminSidebar.tsx`
+
+Добавление новой группы "Marketplace" между "Services & Shops" и "Analytics & Finance":
+
+```typescript
+{
+  label: 'Marketplace',
+  labelRu: 'Маркетплейс',
+  defaultOpen: false,
+  items: [
+    { title: 'Products', titleRu: 'Товары', path: '/admin/marketplace/products', icon: Package },
+    { title: 'Categories', titleRu: 'Категории', path: '/admin/marketplace/categories', icon: Grid },
+    { title: 'Subcategories', titleRu: 'Подкатегории', path: '/admin/marketplace/subcategories', icon: List },
+    { title: 'Vendors', titleRu: 'Продавцы', path: '/admin/marketplace/vendors', icon: Store },
+  ],
+}
+```
+
+---
+
+## Этап 7: Регистрация роутов
+
+### `src/components/layout/AnimatedRoutes.tsx`
+
+Добавление lazy imports и роутов:
+
+```typescript
+// Lazy imports
+const AdminMarketplaceProducts = lazy(() => import('@/pages/admin/AdminMarketplaceProducts'));
+const AdminMarketplaceCategories = lazy(() => import('@/pages/admin/AdminMarketplaceCategories'));
+const AdminMarketplaceSubcategories = lazy(() => import('@/pages/admin/AdminMarketplaceSubcategories'));
+const AdminMarketplaceVendors = lazy(() => import('@/pages/admin/AdminMarketplaceVendors'));
+
+// Routes внутри AdminRouteLayout
+<Route path="/admin/marketplace/products" element={<AdminMarketplaceProducts />} />
+<Route path="/admin/marketplace/categories" element={<AdminMarketplaceCategories />} />
+<Route path="/admin/marketplace/subcategories" element={<AdminMarketplaceSubcategories />} />
+<Route path="/admin/marketplace/vendors" element={<AdminMarketplaceVendors />} />
+```
+
+---
+
+## Файловая структура
 
 ```text
 src/
-├── pages/vendor/
-│   ├── VendorProducts.tsx          [NEW]  - Управление товарами
-│   ├── VendorDashboard.tsx         [MODIFY] - Добавить toggle
-│   └── VendorOnboarding.tsx        [MODIFY] - Выбор: услуги/товары/оба
 ├── hooks/
-│   └── useVendorProducts.ts        [NEW]  - CRUD для товаров
-├── components/vendor/
-│   ├── VendorSidebar.tsx           [MODIFY] - Добавить Products
-│   ├── VendorProductCard.tsx       [NEW]  - Карточка товара в списке
-│   └── dashboard/
-│       └── VendorDashboardContent.tsx [NEW] - Условный контент
-└── App.tsx                         [MODIFY] - Route /vendor/products
+│   └── useAdminMarketplace.ts      [NEW]  - Все CRUD хуки
+├── pages/admin/
+│   ├── AdminMarketplaceProducts.tsx     [NEW]
+│   ├── AdminMarketplaceCategories.tsx   [NEW]
+│   ├── AdminMarketplaceSubcategories.tsx [NEW]
+│   └── AdminMarketplaceVendors.tsx      [NEW]
+├── components/admin/
+│   └── AdminSidebar.tsx            [MODIFY] - Добавить Marketplace группу
+└── components/layout/
+    └── AnimatedRoutes.tsx          [MODIFY] - Добавить роуты
 ```
 
 ---
 
-## Изменения в базе данных
+## Переиспользуемые компоненты
 
-**1. Миграция для связи providers → marketplace_vendors:**
+Все страницы будут использовать существующие компоненты:
 
-```sql
--- Добавить связь с marketplace_vendors
-ALTER TABLE providers 
-ADD COLUMN marketplace_vendor_id UUID REFERENCES marketplace_vendors(id);
-
--- Индекс для быстрого поиска
-CREATE INDEX idx_providers_marketplace_vendor 
-ON providers(marketplace_vendor_id);
-```
-
-**2. RLS политика для marketplace_products:**
-
-```sql
--- Вендор может управлять только своими товарами
-CREATE POLICY "Vendors manage own products" 
-ON marketplace_products
-FOR ALL
-USING (
-  vendor_id IN (
-    SELECT mv.id FROM marketplace_vendors mv
-    JOIN providers p ON p.marketplace_vendor_id = mv.id
-    WHERE p.user_id = auth.uid()
-  )
-);
-```
+- `PageContainer`, `PageHeader` - layout
+- `Card`, `Button`, `Input`, `Textarea` - UI
+- `Dialog`, `DialogContent` - модальные окна
+- `Select`, `Switch`, `Label` - формы
+- `DropdownMenu` - действия
+- `AlertDialog` - подтверждение удаления
+- `ImageUpload`, `MultiImageUpload` - загрузка изображений
+- `Skeleton` - loading states
+- `ScrollArea` - скролл в диалогах
 
 ---
 
-## Поток создания товара
+## Результат
 
-```text
-Vendor Dashboard
-     │
-     ▼
-/vendor/products
-     │
-     ├── [+ Добавить товар]
-     │         │
-     │         ▼
-     │    VendorFormWizard
-     │         │
-     │         ├── Step 1: Basic Info
-     │         │   - name_en, name_ru
-     │         │   - description
-     │         │   - category_slug (из marketplace_categories)
-     │         │
-     │         ├── Step 2: Details
-     │         │   - price, original_price
-     │         │   - in_stock, is_new, is_popular
-     │         │   - unit, weight_kg
-     │         │   - tags[]
-     │         │
-     │         ├── Step 3: Photos
-     │         │   - cover_image
-     │         │   - images[]
-     │         │
-     │         └── Step 4: Review
-     │             - CardPreview (product type)
-     │             - Submit → marketplace_products
-     │
-     └── [Список товаров]
-               │
-               ├── Edit → VendorFormWizard (prefilled)
-               └── Delete → Confirmation → Remove
-```
+После реализации админ получит полный контроль над маркетплейсом:
 
----
+1. **Товары** - создание, редактирование, удаление, управление наличием
+2. **Категории** - структура каталога, сортировка, изображения
+3. **Подкатегории** - детальная классификация товаров
+4. **Вендоры** - управление продавцами, верификация
 
-## Результат реализации
-
-После внедрения:
-
-1. **Единый Vendor Dashboard**
-   - Поставщик может продавать и услуги, и товары
-   - Toggle для переключения контекста
-   - Общая статистика с разбивкой по типам
-
-2. **Раздел "Мои товары"**
-   - Wizard-форма идентичная услугам
-   - Автосохранение черновиков
-   - Интеграция с marketplace_products
-
-3. **Онбординг**
-   - Выбор типа бизнеса: Услуги / Товары / Оба
-   - Автоматическое создание marketplace_vendor при выборе товаров
-
-4. **Консистентный UX**
-   - Единый паттерн создания (wizard)
-   - Одинаковые компоненты для всех типов листингов
-   - Draft-система работает везде
+Паттерн реализации идентичен существующим админ-страницам (AdminStores, AdminYachts), что обеспечивает консистентный UX.
