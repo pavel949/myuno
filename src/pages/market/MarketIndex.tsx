@@ -3,36 +3,55 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Search, 
   ChevronRight,
-  Package,
-  Store,
-  ShoppingBag,
+  Truck,
+  Clock,
+  Star,
+  Flame,
+  Sparkles,
+  Grid3X3,
+  ArrowRight,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { PageContainer } from '@/components/uno/PageContainer';
-import { PageHeader } from '@/components/uno/PageHeader';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { StickyCartBar } from '@/components/cart/StickyCartBar';
-import { ProductSection, ProfessionalProductCard } from '@/components/market';
-import { CategoryGrid } from '@/components/market/CategoryGrid';
-import { FeaturedBanner } from '@/components/market/FeaturedBanner';
+import { ProfessionalProductCard } from '@/components/market';
 import { 
   useMarketplaceCategories, 
   useMarketplaceProducts,
-  useMarketplaceSubcategories,
   useDeliverySettings,
-  MarketplaceCategory,
 } from '@/hooks/useMarketplace';
 import { useVendors } from '@/hooks/useMarketplaceVendors';
 import { MarketplaceProduct } from '@/types/marketplace';
 import { useCartToast } from '@/hooks/useCartToast';
-import { CrossSellSection } from '@/components/crosssell';
 import { cn } from '@/lib/utils';
+
+// Category icon mapping
+const getCategoryIcon = (slug: string) => {
+  const icons: Record<string, string> = {
+    'fruits-vegetables': '🥬',
+    'dairy-eggs': '🥛',
+    'meat': '🥩',
+    'seafood': '🦐',
+    'bakery': '🥖',
+    'beverages': '🥤',
+    'snacks': '🍿',
+    'organic': '🌿',
+    'frozen': '❄️',
+    'pantry': '🏺',
+    'baby': '👶',
+    'household': '🏠',
+    'personal-care': '🧴',
+    'pet-supplies': '🐕',
+    'electronics': '📱',
+    'fashion': '👔',
+  };
+  return icons[slug] || '📦';
+};
 
 const MarketIndex = () => {
   const navigate = useNavigate();
@@ -42,21 +61,18 @@ const MarketIndex = () => {
   
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [activeTab, setActiveTab] = useState<'categories' | 'products' | 'vendors'>('categories');
 
-  // Fetch data from database
+  // Fetch data
   const { categories, isLoading: categoriesLoading } = useMarketplaceCategories();
-  const { subcategories } = useMarketplaceSubcategories();
   const { products: allProducts, isLoading: productsLoading } = useMarketplaceProducts();
-  const { products: popularProducts, isLoading: popularLoading } = useMarketplaceProducts({ popularOnly: true, limit: 12 });
-  const { products: newProducts, isLoading: newLoading } = useMarketplaceProducts({ newOnly: true, limit: 8 });
+  const { products: popularProducts } = useMarketplaceProducts({ popularOnly: true, limit: 20 });
+  const { products: newProducts } = useMarketplaceProducts({ newOnly: true, limit: 12 });
   const { freeDeliveryThreshold, defaultZone } = useDeliverySettings();
-  const { vendors, isLoading: vendorsLoading } = useVendors();
+  const { vendors } = useVendors();
 
   const cartItems = getItemsByType('product');
-  const cartItemCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
 
-  // Calculate product counts per category
+  // Product counts per category
   const productCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     allProducts.forEach(p => {
@@ -65,23 +81,11 @@ const MarketIndex = () => {
     return counts;
   }, [allProducts]);
 
-  // Filter categories by group and hide empty ones
-  const { foodCategories, nonFoodCategories, activeCategories } = useMemo(() => {
-    const withProducts = categories.filter(cat => productCounts[cat.slug] > 0);
-    
-    const food = withProducts
-      .filter(c => c.category_group === 'food')
+  // Active categories with products
+  const activeCategories = useMemo(() => {
+    return categories
+      .filter(cat => productCounts[cat.slug] > 0)
       .sort((a, b) => a.sort_order - b.sort_order);
-    
-    const nonFood = withProducts
-      .filter(c => c.category_group === 'non-food')
-      .sort((a, b) => a.sort_order - b.sort_order);
-    
-    return { 
-      foodCategories: food, 
-      nonFoodCategories: nonFood, 
-      activeCategories: [...food, ...nonFood] 
-    };
   }, [categories, productCounts]);
 
   // Search results
@@ -91,10 +95,8 @@ const MarketIndex = () => {
     return allProducts.filter(p => 
       p.name_en.toLowerCase().includes(query) ||
       p.name_ru.toLowerCase().includes(query) ||
-      p.description_en?.toLowerCase().includes(query) ||
-      p.description_ru?.toLowerCase().includes(query) ||
       p.tags?.some(t => t.toLowerCase().includes(query))
-    ).slice(0, 10);
+    ).slice(0, 8);
   }, [searchQuery, allProducts]);
 
   const getQuantity = (productId: string) => {
@@ -124,274 +126,320 @@ const MarketIndex = () => {
 
   return (
     <AppLayout showHeader={true}>
-      <PageContainer className="pb-32 pt-0">
-
-        {/* Hero Banner */}
-        <FeaturedBanner
-          freeDeliveryThreshold={freeDeliveryThreshold}
-          estimatedTime={defaultZone?.estimated_time_minutes}
-          productCount={productsLoading ? 200 : allProducts.length}
-          vendorCount={vendorsLoading ? 17 : vendors.length}
-        />
-
-        {/* Search */}
-        <div className="relative my-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder={language === 'ru' ? 'Найти товары, категории, продавцов...' : 'Search products, categories, vendors...'}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onFocus={() => setIsSearchFocused(true)}
-            onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-            className="pl-10 pr-4 h-12 rounded-xl bg-muted/50 border-0"
-          />
-          
-          {/* Search Results Dropdown */}
-          {isSearchFocused && searchResults.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl shadow-xl z-50 max-h-96 overflow-y-auto">
-              <div className="p-2 border-b border-border">
-                <span className="text-xs text-muted-foreground px-2">
-                  {searchResults.length} {language === 'ru' ? 'найдено' : 'found'}
-                </span>
+      <div className="min-h-screen bg-background pb-32">
+        
+        {/* Search Bar - Sticky */}
+        <div className="sticky top-14 z-40 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3">
+          <div className="relative max-w-7xl mx-auto">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+              placeholder={language === 'ru' ? 'Искать на myUNO Market' : 'Search on myUNO Market'}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+              className="pl-12 pr-4 h-12 rounded-full bg-muted/60 border-0 text-base"
+            />
+            
+            {/* Search Dropdown */}
+            {isSearchFocused && searchResults.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-2xl shadow-2xl z-50 overflow-hidden">
+                {searchResults.map(product => (
+                  <button
+                    key={product.id}
+                    className="w-full flex items-center gap-3 p-3 hover:bg-muted/50 text-left transition-colors border-b border-border/50 last:border-0"
+                    onClick={() => {
+                      navigate(`/market/product/${product.id}`);
+                      setSearchQuery('');
+                    }}
+                  >
+                    <img
+                      src={product.cover_image || '/placeholder.svg'}
+                      alt=""
+                      className="w-12 h-12 rounded-lg object-cover"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium line-clamp-1">
+                        {language === 'ru' ? product.name_ru : product.name_en}
+                      </p>
+                      <p className="text-sm font-bold text-primary">
+                        ฿{product.price.toLocaleString()}
+                      </p>
+                    </div>
+                  </button>
+                ))}
               </div>
-              {searchResults.map(product => (
-                <button
-                  key={product.id}
-                  className="w-full flex items-center gap-3 p-3 hover:bg-muted/50 text-left transition-colors"
-                  onClick={() => {
-                    navigate(`/market/product/${product.id}`);
-                    setSearchQuery('');
-                  }}
-                >
-                  <img
-                    src={product.cover_image || '/placeholder.svg'}
-                    alt=""
-                    className="w-14 h-14 rounded-xl object-cover"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium line-clamp-1">
-                      {language === 'ru' ? product.name_ru : product.name_en}
-                    </p>
-                    <p className="text-xs text-muted-foreground line-clamp-1">
-                      {language === 'ru' ? product.vendor_name_ru : product.vendor_name}
-                    </p>
-                    <p className="text-sm text-primary font-bold mt-0.5">
-                      ฿{product.price.toLocaleString()}
-                    </p>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
-                </button>
-              ))}
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
-        {/* Main Navigation Tabs */}
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="mb-5">
-          <TabsList className="w-full grid grid-cols-3 h-12 bg-muted/50 p-1 rounded-xl">
-            <TabsTrigger 
-              value="categories" 
-              className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2"
-            >
-              <Package className="w-4 h-4" />
-              <span className="text-xs font-medium">
-                {language === 'ru' ? 'Категории' : 'Categories'}
-              </span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="products" 
-              className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2"
-            >
-              <ShoppingBag className="w-4 h-4" />
-              <span className="text-xs font-medium">
-                {language === 'ru' ? 'Товары' : 'Products'}
-              </span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="vendors" 
-              className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2"
-            >
-              <Store className="w-4 h-4" />
-              <span className="text-xs font-medium">
-                {language === 'ru' ? 'Продавцы' : 'Vendors'}
-              </span>
-            </TabsTrigger>
-          </TabsList>
+        {/* Categories Horizontal Scroll - Ozon Style */}
+        <div className="bg-card border-b border-border/50">
+          <ScrollArea className="w-full">
+            <div className="flex items-center gap-1 px-4 py-3 max-w-7xl mx-auto">
+              {/* All Categories Button */}
+              <button
+                onClick={() => navigate('/market/categories')}
+                className="flex flex-col items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-muted/50 transition-colors shrink-0"
+              >
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Grid3X3 className="w-6 h-6 text-primary" />
+                </div>
+                <span className="text-[11px] font-medium text-center whitespace-nowrap">
+                  {language === 'ru' ? 'Каталог' : 'Catalog'}
+                </span>
+              </button>
 
-          {/* Categories Tab */}
-          <TabsContent value="categories" className="mt-5 space-y-6">
-            {categoriesLoading ? (
-              <div className="grid grid-cols-2 gap-3">
-                {[1,2,3,4].map(i => (
-                  <div key={i} className="aspect-[1.4/1] rounded-2xl bg-muted animate-pulse" />
-                ))}
-              </div>
-            ) : (
-              <>
-                {/* Food Categories */}
-                {foodCategories.length > 0 && (
-                  <CategoryGrid
-                    categories={foodCategories}
-                    productCounts={productCounts}
-                    title="🍽️ Food & Groceries"
-                    titleRu="🍽️ Продукты питания"
-                  />
-                )}
+              <div className="w-px h-12 bg-border mx-1" />
 
-                {/* Non-Food Categories */}
-                {nonFoodCategories.length > 0 && (
-                  <CategoryGrid
-                    categories={nonFoodCategories}
-                    productCounts={productCounts}
-                    title="🛍️ Goods & Lifestyle"
-                    titleRu="🛍️ Товары и стиль жизни"
-                  />
-                )}
-              </>
-            )}
-          </TabsContent>
-
-          {/* Products Tab */}
-          <TabsContent value="products" className="mt-5 space-y-6">
-            {/* Popular Products */}
-            {popularProducts.length > 0 && (
-              <ProductSection
-                title="🔥 Bestsellers"
-                titleRu="🔥 Хиты продаж"
-                products={popularProducts}
-                variant="scroll"
-                maxItems={12}
-                isLoading={popularLoading}
-              />
-            )}
-
-            {/* New Arrivals */}
-            {newProducts.length > 0 && (
-              <ProductSection
-                title="✨ New Arrivals"
-                titleRu="✨ Новинки"
-                products={newProducts}
-                variant="scroll"
-                maxItems={8}
-                isLoading={newLoading}
-              />
-            )}
-
-            {/* All Products Grid */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-base font-bold">
-                  {language === 'ru' ? 'Все товары' : 'All Products'}
-                </h2>
-                <Badge variant="secondary">
-                  {allProducts.length} {language === 'ru' ? 'шт' : 'items'}
-                </Badge>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {allProducts.slice(0, 12).map(product => (
-                  <ProfessionalProductCard
-                    key={product.id}
-                    product={product}
-                    quantity={getQuantity(product.id)}
-                    onAdd={() => handleAdd(product)}
-                    onRemove={() => handleRemove(product.id)}
-                    onClick={() => navigate(`/market/product/${product.id}`)}
-                  />
-                ))}
-              </div>
-              
-              {allProducts.length > 12 && (
-                <Button 
-                  variant="outline" 
-                  className="w-full mt-4 rounded-xl h-11"
-                  onClick={() => setActiveTab('categories')}
-                >
-                  {language === 'ru' 
-                    ? 'Смотреть по категориям' 
-                    : 'Browse by Categories'}
-                  <ChevronRight className="w-4 h-4 ml-1" />
-                </Button>
+              {/* Category Pills */}
+              {categoriesLoading ? (
+                [...Array(8)].map((_, i) => (
+                  <div key={i} className="flex flex-col items-center gap-1.5 px-3 py-2 shrink-0">
+                    <div className="w-12 h-12 rounded-xl bg-muted animate-pulse" />
+                    <div className="w-12 h-3 bg-muted animate-pulse rounded" />
+                  </div>
+                ))
+              ) : (
+                activeCategories.map(category => (
+                  <button
+                    key={category.id}
+                    onClick={() => navigate(`/market/category/${category.slug}`)}
+                    className="flex flex-col items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-muted/50 transition-colors shrink-0 group"
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-muted/50 group-hover:bg-muted flex items-center justify-center text-2xl transition-colors">
+                      {getCategoryIcon(category.slug)}
+                    </div>
+                    <span className="text-[11px] font-medium text-center whitespace-nowrap max-w-[60px] truncate">
+                      {language === 'ru' ? category.name_ru : category.name_en}
+                    </span>
+                  </button>
+                ))
               )}
             </div>
-          </TabsContent>
+            <ScrollBar orientation="horizontal" className="invisible" />
+          </ScrollArea>
+        </div>
 
-          {/* Vendors Tab */}
-          <TabsContent value="vendors" className="mt-5">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h2 className="text-base font-bold">
-                  {language === 'ru' ? 'Продавцы' : 'Vendors'}
-                </h2>
-                <Badge variant="outline">
-                  {vendors.length} {language === 'ru' ? 'продавцов' : 'vendors'}
-                </Badge>
-              </div>
-              
-              <div className="space-y-3">
-                {vendors.map(vendor => {
-                  const vendorProductCount = allProducts.filter(p => (p as any).vendor_id === vendor.id).length;
-                  return (
-                    <button
-                      key={vendor.id}
-                      onClick={() => navigate(`/market/vendor/${vendor.slug}`)}
-                      className="w-full flex items-center gap-4 p-4 rounded-xl bg-card border border-border hover:border-primary/30 hover:shadow-md transition-all text-left group"
-                    >
-                      {/* Logo */}
-                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center overflow-hidden shrink-0">
-                        {vendor.logo_url ? (
-                          <img 
-                            src={vendor.logo_url} 
-                            alt="" 
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <Store className="w-6 h-6 text-primary" />
-                        )}
-                      </div>
-                      
-                      {/* Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-sm truncate">
-                            {language === 'ru' ? vendor.name_ru : vendor.name_en}
-                          </h3>
-                          {vendor.verified && (
-                            <Badge className="bg-blue-500/10 text-blue-600 border-0 text-[10px] px-1.5 py-0">
-                              ✓
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                          {vendor.rating && (
-                            <span className="flex items-center gap-1">
-                              ⭐ {vendor.rating.toFixed(1)}
-                            </span>
-                          )}
-                          <span>{vendorProductCount} {language === 'ru' ? 'товаров' : 'products'}</span>
-                        </div>
-                      </div>
-                      
-                      {/* Arrow */}
-                      <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
-                    </button>
-                  );
-                })}
+        {/* Promo Banners */}
+        <div className="px-4 py-4 max-w-7xl mx-auto">
+          <div className="grid grid-cols-2 gap-3">
+            {/* Free Delivery Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 p-4 text-white">
+              <Truck className="absolute -right-2 -bottom-2 w-16 h-16 opacity-20" />
+              <div className="relative z-10">
+                <p className="text-[10px] uppercase tracking-wide opacity-80 mb-1">
+                  {language === 'ru' ? 'Доставка' : 'Delivery'}
+                </p>
+                <p className="text-lg font-bold leading-tight">
+                  {language === 'ru' ? 'Бесплатно' : 'Free'}
+                </p>
+                <p className="text-xs opacity-90 mt-1">
+                  {language === 'ru' ? `от ฿${freeDeliveryThreshold}` : `from ฿${freeDeliveryThreshold}`}
+                </p>
               </div>
             </div>
-          </TabsContent>
-        </Tabs>
 
-        {/* Cross-sell section (only on categories tab) */}
-        {activeTab === 'categories' && (
-          <CrossSellSection currentVertical="market" className="mt-6" />
+            {/* Fast Delivery Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 p-4 text-white">
+              <Clock className="absolute -right-2 -bottom-2 w-16 h-16 opacity-20" />
+              <div className="relative z-10">
+                <p className="text-[10px] uppercase tracking-wide opacity-80 mb-1">
+                  {language === 'ru' ? 'Время' : 'Time'}
+                </p>
+                <p className="text-lg font-bold leading-tight">
+                  {defaultZone?.estimated_time_minutes || 45} {language === 'ru' ? 'мин' : 'min'}
+                </p>
+                <p className="text-xs opacity-90 mt-1">
+                  {language === 'ru' ? 'экспресс' : 'express'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Popular Products Section */}
+        {popularProducts.length > 0 && (
+          <section className="py-4">
+            <div className="px-4 max-w-7xl mx-auto">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Flame className="w-5 h-5 text-orange-500" />
+                  <h2 className="text-lg font-bold">
+                    {language === 'ru' ? 'Хиты продаж' : 'Bestsellers'}
+                  </h2>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-primary gap-1"
+                  onClick={() => navigate('/market/category/popular')}
+                >
+                  {language === 'ru' ? 'Все' : 'All'}
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            
+            <ScrollArea className="w-full">
+              <div className="flex gap-3 px-4 pb-2 max-w-7xl mx-auto">
+                {popularProducts.slice(0, 12).map(product => (
+                  <div key={product.id} className="w-[160px] shrink-0">
+                    <ProfessionalProductCard
+                      product={product}
+                      quantity={getQuantity(product.id)}
+                      onAdd={() => handleAdd(product)}
+                      onRemove={() => handleRemove(product.id)}
+                      onClick={() => navigate(`/market/product/${product.id}`)}
+                      compact
+                    />
+                  </div>
+                ))}
+              </div>
+              <ScrollBar orientation="horizontal" className="invisible" />
+            </ScrollArea>
+          </section>
         )}
+
+        {/* New Arrivals Section */}
+        {newProducts.length > 0 && (
+          <section className="py-4 bg-muted/30">
+            <div className="px-4 max-w-7xl mx-auto">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-purple-500" />
+                  <h2 className="text-lg font-bold">
+                    {language === 'ru' ? 'Новинки' : 'New Arrivals'}
+                  </h2>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-primary gap-1"
+                  onClick={() => navigate('/market/category/new')}
+                >
+                  {language === 'ru' ? 'Все' : 'All'}
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            
+            <ScrollArea className="w-full">
+              <div className="flex gap-3 px-4 pb-2 max-w-7xl mx-auto">
+                {newProducts.slice(0, 10).map(product => (
+                  <div key={product.id} className="w-[160px] shrink-0">
+                    <ProfessionalProductCard
+                      product={product}
+                      quantity={getQuantity(product.id)}
+                      onAdd={() => handleAdd(product)}
+                      onRemove={() => handleRemove(product.id)}
+                      onClick={() => navigate(`/market/product/${product.id}`)}
+                      compact
+                    />
+                  </div>
+                ))}
+              </div>
+              <ScrollBar orientation="horizontal" className="invisible" />
+            </ScrollArea>
+          </section>
+        )}
+
+        {/* Categories with Products - Ozon Style */}
+        {activeCategories.slice(0, 6).map(category => {
+          const categoryProducts = allProducts
+            .filter(p => p.category_slug === category.slug)
+            .slice(0, 8);
+          
+          if (categoryProducts.length === 0) return null;
+          
+          return (
+            <section key={category.id} className="py-4 border-t border-border/50">
+              <div className="px-4 max-w-7xl mx-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">{getCategoryIcon(category.slug)}</span>
+                    <h2 className="text-lg font-bold">
+                      {language === 'ru' ? category.name_ru : category.name_en}
+                    </h2>
+                    <Badge variant="secondary" className="text-xs">
+                      {productCounts[category.slug]}
+                    </Badge>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-primary gap-1"
+                    onClick={() => navigate(`/market/category/${category.slug}`)}
+                  >
+                    {language === 'ru' ? 'Все' : 'All'}
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              
+              <ScrollArea className="w-full">
+                <div className="flex gap-3 px-4 pb-2 max-w-7xl mx-auto">
+                  {categoryProducts.map(product => (
+                    <div key={product.id} className="w-[160px] shrink-0">
+                      <ProfessionalProductCard
+                        product={product}
+                        quantity={getQuantity(product.id)}
+                        onAdd={() => handleAdd(product)}
+                        onRemove={() => handleRemove(product.id)}
+                        onClick={() => navigate(`/market/product/${product.id}`)}
+                        compact
+                      />
+                    </div>
+                  ))}
+                </div>
+                <ScrollBar orientation="horizontal" className="invisible" />
+              </ScrollArea>
+            </section>
+          );
+        })}
+
+        {/* All Products Grid */}
+        <section className="py-6 px-4 max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold">
+              {language === 'ru' ? 'Все товары' : 'All Products'}
+            </h2>
+            <Badge variant="outline">
+              {allProducts.length} {language === 'ru' ? 'товаров' : 'items'}
+            </Badge>
+          </div>
+          
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+            {allProducts.slice(0, 20).map(product => (
+              <ProfessionalProductCard
+                key={product.id}
+                product={product}
+                quantity={getQuantity(product.id)}
+                onAdd={() => handleAdd(product)}
+                onRemove={() => handleRemove(product.id)}
+                onClick={() => navigate(`/market/product/${product.id}`)}
+              />
+            ))}
+          </div>
+          
+          {allProducts.length > 20 && (
+            <Button 
+              variant="outline" 
+              className="w-full mt-6 h-12 rounded-xl text-base font-medium"
+              onClick={() => navigate('/market/categories')}
+            >
+              {language === 'ru' ? 'Показать все товары' : 'Show All Products'}
+              <ChevronRight className="w-5 h-5 ml-2" />
+            </Button>
+          )}
+        </section>
 
         {/* Sticky Cart Bar */}
         <StickyCartBar
           itemType="product"
           checkoutPath="/market/checkout"
         />
-      </PageContainer>
+      </div>
     </AppLayout>
   );
 };

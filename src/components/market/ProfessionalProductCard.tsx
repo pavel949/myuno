@@ -27,6 +27,7 @@ interface ProfessionalProductCardProps {
   onRemove: () => void;
   onClick?: () => void;
   variant?: 'grid' | 'horizontal' | 'featured';
+  compact?: boolean;
 }
 
 // Recipe tooltip component
@@ -108,6 +109,7 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
   onRemove,
   onClick,
   variant = 'grid',
+  compact = false,
 }, ref) => {
   const { language } = useLanguage();
 
@@ -315,7 +317,10 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
 
   // Grid variant (default) - Professional card design
   return (
-    <div className="bg-card rounded-2xl border border-border overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 group">
+    <div className={cn(
+      "bg-card rounded-2xl border border-border overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 group",
+      compact && "rounded-xl"
+    )}>
       {/* Image Container */}
       <div 
         className="relative aspect-square cursor-pointer overflow-hidden"
@@ -372,31 +377,34 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
       </div>
 
       {/* Content */}
-      <div className="p-3">
-        {/* Vendor tag */}
-        {vendorName && (
+      <div className={cn("p-3", compact && "p-2")}>
+        {/* Vendor tag - hide in compact mode */}
+        {vendorName && !compact && (
           <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium mb-1 truncate">
             {vendorName}
           </p>
         )}
         
-        <h3 className="text-sm font-semibold line-clamp-2 min-h-[2.5rem] text-foreground leading-tight">
+        <h3 className={cn(
+          "font-semibold line-clamp-2 text-foreground leading-tight",
+          compact ? "text-xs min-h-[2rem]" : "text-sm min-h-[2.5rem]"
+        )}>
           {name}
         </h3>
         
-        {/* Description */}
-        {description && (
+        {/* Description - hide in compact mode */}
+        {description && !compact && (
           <p className="text-[11px] text-muted-foreground line-clamp-2 mt-1 leading-snug">
             {description}
           </p>
         )}
         
-        {unit && (
+        {unit && !compact && (
           <p className="text-xs text-muted-foreground mt-0.5">{unit}</p>
         )}
         
-        {/* Rating */}
-        {product.rating && (
+        {/* Rating - simplified in compact mode */}
+        {product.rating && !compact && (
           <div className="flex items-center gap-1 mt-1.5">
             <div className="flex items-center gap-0.5 bg-amber-100 dark:bg-amber-900/30 px-1.5 py-0.5 rounded-full">
               <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
@@ -413,12 +421,18 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
         )}
 
         {/* Price & Cart */}
-        <div className="flex items-end justify-between mt-3 pt-2 border-t border-border/50">
+        <div className={cn(
+          "flex items-end justify-between border-t border-border/50",
+          compact ? "mt-2 pt-1.5" : "mt-3 pt-2"
+        )}>
           <div className="flex flex-col">
-            <span className="font-bold text-lg leading-none text-foreground">
+            <span className={cn(
+              "font-bold leading-none text-foreground",
+              compact ? "text-sm" : "text-lg"
+            )}>
               ฿{product.price.toLocaleString()}
             </span>
-            {product.original_price && (
+            {product.original_price && !compact && (
               <span className="text-xs text-muted-foreground line-through mt-0.5">
                 ฿{product.original_price.toLocaleString()}
               </span>
@@ -429,28 +443,40 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
           {quantity === 0 ? (
             <Button 
               size="icon" 
-              className="h-9 w-9 rounded-full shadow-md shrink-0"
+              className={cn(
+                "rounded-full shadow-md shrink-0",
+                compact ? "h-7 w-7" : "h-9 w-9"
+              )}
               onClick={(e) => { e.stopPropagation(); onAdd(); }}
             >
-              <Plus className="h-4 w-4" />
+              <Plus className={compact ? "h-3 w-3" : "h-4 w-4"} />
             </Button>
           ) : (
             <div className="flex items-center gap-1 bg-primary/10 rounded-full px-1">
               <Button 
                 size="icon" 
                 variant="ghost" 
-                className="h-7 w-7 rounded-full hover:bg-primary/20"
+                className={cn(
+                  "rounded-full hover:bg-primary/20",
+                  compact ? "h-6 w-6" : "h-7 w-7"
+                )}
                 onClick={(e) => { e.stopPropagation(); onRemove(); }}
               >
-                <Minus className="h-3 w-3" />
+                <Minus className={compact ? "h-2.5 w-2.5" : "h-3 w-3"} />
               </Button>
-              <span className="text-sm font-bold w-5 text-center text-primary">{quantity}</span>
+              <span className={cn(
+                "font-bold text-center text-primary",
+                compact ? "text-xs w-4" : "text-sm w-5"
+              )}>{quantity}</span>
               <Button 
                 size="icon" 
-                className="h-7 w-7 rounded-full"
+                className={cn(
+                  "rounded-full",
+                  compact ? "h-6 w-6" : "h-7 w-7"
+                )}
                 onClick={(e) => { e.stopPropagation(); onAdd(); }}
               >
-                <Plus className="h-3 w-3" />
+                <Plus className={compact ? "h-2.5 w-2.5" : "h-3 w-3"} />
               </Button>
             </div>
           )}
