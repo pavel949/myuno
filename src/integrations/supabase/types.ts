@@ -3670,6 +3670,7 @@ export type Database = {
           price: number
           pricing_type: string | null
           rating: number | null
+          recipe: Json | null
           review_count: number | null
           sort_order: number | null
           subcategory: string | null
@@ -3701,6 +3702,7 @@ export type Database = {
           price: number
           pricing_type?: string | null
           rating?: number | null
+          recipe?: Json | null
           review_count?: number | null
           sort_order?: number | null
           subcategory?: string | null
@@ -3732,6 +3734,7 @@ export type Database = {
           price?: number
           pricing_type?: string | null
           rating?: number | null
+          recipe?: Json | null
           review_count?: number | null
           sort_order?: number | null
           subcategory?: string | null
