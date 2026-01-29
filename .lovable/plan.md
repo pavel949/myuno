@@ -1,203 +1,132 @@
 
+# План: Профессиональный реестр поставщиков маркетплейса
 
-# План: Международная доставка для туристов
-
-## Обзор
-Туристы покупают тайские товары и хотят отправить их домой. Добавляем функционал международной доставки с расчётом стоимости и расширенным каталогом товаров, подходящих для экспорта.
+## Обзор проблемы
+Сейчас товары связаны с базой данных, но поставщики хранятся как простой текст (`vendor_name`). На ведущих маркетплейсах (Ozon, Wildberries, Amazon) каждый товар привязан к полноценной карточке продавца.
 
 ---
 
-## Часть 1: База данных
+## Часть 1: База данных - Реестр поставщиков
 
-### 1.1 Расширение таблицы товаров
-Добавим поле для обозначения товаров, подходящих для международной отправки:
-- `is_shippable_international` (boolean) - можно отправить за рубеж
-- `weight_kg` (numeric) - вес для расчёта доставки
-
-### 1.2 Новая таблица международных зон доставки
+### 1.1 Новая таблица `marketplace_vendors`
 ```
-marketplace_international_shipping
-- id (uuid)
-- zone_code (text) - 'europe', 'russia_cis', 'asia', 'usa_canada', 'other'
-- zone_name_en, zone_name_ru (text)
-- base_fee (numeric) - базовая стоимость
-- per_kg_fee (numeric) - цена за кг
-- estimated_days_min, estimated_days_max (int) - сроки
-- min_order_amount (numeric)
+marketplace_vendors
+- id (uuid, PK)
+- slug (text, unique) - URL-friendly имя
+- name_en, name_ru (text) - название
+- description_en, description_ru (text) - описание
+- logo_url (text) - логотип
+- cover_image (text) - обложка
+- phone, email (text) - контакты
+- website (text) - сайт
+- address, address_ru (text) - адрес
+- rating (numeric) - рейтинг (1-5)
+- review_count (integer) - количество отзывов
+- verified (boolean) - верифицирован
 - is_active (boolean)
+- created_at, updated_at (timestamps)
 ```
 
-### 1.3 Seed Data: Зоны доставки
-| Зона | Базовая | За кг | Дни |
-|------|---------|-------|-----|
-| Россия и СНГ | ฿800 | ฿150/кг | 7-14 |
-| Европа | ฿1200 | ฿200/кг | 10-18 |
-| Азия | ฿500 | ฿100/кг | 5-10 |
-| США/Канада | ฿1500 | ฿250/кг | 12-21 |
-| Другие | ฿1800 | ฿300/кг | 14-28 |
+### 1.2 Связь товаров с поставщиками
+Добавить в `marketplace_products`:
+- `vendor_id (uuid, FK -> marketplace_vendors.id)`
+
+### 1.3 Seed Data: Создание поставщиков
+Создать записи для всех существующих vendor_name:
+- Thai Rice Co, Organic Farm, Coca-Cola, Red Bull...
+- С логотипами, описаниями, контактами
+- Связать существующие товары через vendor_id
 
 ---
 
-## Часть 2: Seed Data - Товары для экспорта
+## Часть 2: UI - Карточка поставщика
 
-### 2.1 Расширение категории "Подарки и сувениры" (+15 товаров)
-**Классические тайские подарки:**
-- Тайский кофе (Doi Chaang, Doi Tung)
-- Тайский чай Cha Tra Mue (синий, зелёный, молочный)
-- Тайские специи наборы (карри пасты, том ям набор)
-- Кокосовые чипсы и сухофрукты
-- Тайский шоколад с дурианом
-- Ароматические свечи и благовония
-
-**Уникальные сувениры:**
-- Celadon керамика (традиционная посуда)
-- Benjarong (королевский фарфор)
-- Тайские подушки-треугольники (мини)
-- Муай Тай шорты и перчатки
-- Handmade украшения из серебра 925
-
-### 2.2 Расширение "Тайская косметика" (+10 товаров)
-- Тайгер бальзам оригинальный
-- Зелёный/белый бальзам
-- Змеиный бальзам
-- Тайский скраб с тамариндом
-- Маски для лица с рисовым молоком
-- Шампунь с кокосовым маслом
-- Мыло с мангостином
-
-### 2.3 Новая категория "Тайские деликатесы" (shippable food)
-Продукты с долгим сроком хранения:
-- Сушёное манго (premium)
-- Кокосовые роллы
-- Тайские чипсы (кассава, банан)
-- Вяленый дуриан
-- Рыбный соус premium
-- Кокосовое молоко (сухое)
-- Тайский рис Жасмин (вакуум)
-
----
-
-## Часть 3: UI - Выбор доставки в Checkout
-
-### 3.1 Компонент DeliveryTypeSelector
-```text
+### 2.1 На странице товара
+```
 +------------------------------------------+
-|  Куда доставить?                          |
+|  Продавец                                |
 +------------------------------------------+
-|  ⚡ Локальная доставка                    |
-|     Пхукет, 1 час, от ฿100               |
-|  [Выбрано]                               |
-+------------------------------------------+
-|  ✈️ Международная доставка               |
-|     Отправка домой за рубеж              |
-|     [Выбрать страну ▼]                   |
+|  [Logo] Thai Rice Co.         ✓ Verified |
+|  ⭐ 4.8 (156 отзывов)                    |
+|  📦 125 товаров                          |
+|  [Все товары продавца →]                 |
 +------------------------------------------+
 ```
 
-### 3.2 При выборе международной доставки
-```text
-+------------------------------------------+
-|  Выберите регион:                         |
-|  ○ Россия и СНГ (7-14 дней, от ฿800)     |
-|  ○ Европа (10-18 дней, от ฿1200)         |
-|  ○ Азия (5-10 дней, от ฿500)             |
-|  ○ США/Канада (12-21 дней, от ฿1500)     |
-+------------------------------------------+
-|  Расчёт стоимости:                        |
-|  Вес заказа: ~2.5 кг                      |
-|  Доставка: ฿800 + (2.5 × ฿150) = ฿1,175  |
-+------------------------------------------+
-```
-
-### 3.3 Форма адреса - расширение
-При международной доставке:
-- Страна (обязательно)
-- Город
-- Полный адрес
-- Индекс (Postal Code)
+### 2.2 Страница продавца `/market/vendor/:slug`
+- Баннер с логотипом и информацией
+- Контакты и описание
+- Все товары этого продавца
+- Фильтры и сортировка
 
 ---
 
-## Часть 4: UI - Бейджи на товарах
+## Часть 3: Навигация
 
-### 4.1 Бейдж "Можно отправить домой"
-На карточках товаров с `is_shippable_international = true`:
-```text
-+----------------+
-| ✈️ Ship Home   |
-+----------------+
-```
-или по-русски: "✈️ Отправка домой"
+### 3.1 Клик на поставщика
+- На карточке товара → страница продавца
+- На странице товара → страница продавца
+- Поиск по названию продавца
 
-### 4.2 Фильтр в каталоге
-Добавить quick-filter: "Можно отправить за рубеж"
+### 3.2 Фильтр по поставщику
+В категориях добавить фильтр "По продавцу"
 
 ---
 
-## Часть 5: Проверки и валидация
-
-### 5.1 В корзине
-- Если выбрана международная доставка, но есть товары без `is_shippable_international`:
-  - Показать предупреждение
-  - Подсветить эти товары
-  - Предложить убрать или переключить на локальную
-
-### 5.2 Расчёт веса
-- Если `weight_kg` не указан, использовать дефолт 0.3 кг
-- Показывать примерный вес заказа
-
----
-
-## Файлы для изменения
+## Файлы для создания/изменения
 
 | Файл | Действие |
 |------|----------|
-| `supabase/migrations/..._international_shipping.sql` | Новая миграция |
-| `src/types/marketplace.ts` | Добавить типы |
-| `src/hooks/useMarketplace.ts` | Хук для зон доставки |
-| `src/components/market/ShippableBadge.tsx` | Новый бейдж |
-| `src/components/market/DeliveryTypeSelector.tsx` | Новый компонент |
-| `src/components/market/InternationalAddressForm.tsx` | Форма адреса |
-| `src/components/market/ProfessionalProductCard.tsx` | Добавить бейдж |
-| `src/pages/market/MarketCheckout.tsx` | Интеграция выбора |
+| `supabase/migrations/..._vendors.sql` | Новая таблица + seed |
+| `src/types/marketplace.ts` | Добавить MarketplaceVendor |
+| `src/hooks/useMarketplace.ts` | Хук useVendor, useVendorProducts |
+| `src/pages/market/VendorPage.tsx` | Новая страница |
+| `src/components/market/VendorCard.tsx` | Карточка продавца |
+| `src/components/market/VendorInfo.tsx` | Блок на странице товара |
+| `src/pages/market/ProductDetailPage.tsx` | Добавить VendorInfo |
+| `src/components/layout/AnimatedRoutes.tsx` | Роут /market/vendor/:slug |
 
 ---
 
 ## Технические детали
 
-### Новые типы TypeScript
+### Новый тип
 ```typescript
-interface InternationalShippingZone {
+interface MarketplaceVendor {
   id: string;
-  zone_code: string;
-  zone_name_en: string;
-  zone_name_ru: string;
-  base_fee: number;
-  per_kg_fee: number;
-  estimated_days_min: number;
-  estimated_days_max: number;
-  min_order_amount: number;
-  is_active: boolean;
+  slug: string;
+  name_en: string;
+  name_ru: string;
+  description_en: string | null;
+  description_ru: string | null;
+  logo_url: string | null;
+  cover_image: string | null;
+  phone: string | null;
+  email: string | null;
+  website: string | null;
+  rating: number | null;
+  review_count: number;
+  verified: boolean;
+  product_count?: number;
 }
-
-type DeliveryType = 'local' | 'international';
 ```
 
-### Логика расчёта
+### Запрос товара с поставщиком
 ```typescript
-const calculateInternationalFee = (
-  zone: InternationalShippingZone,
-  totalWeight: number
-) => {
-  return zone.base_fee + (totalWeight * zone.per_kg_fee);
-};
+const { data } = await supabase
+  .from('marketplace_products')
+  .select(`
+    *,
+    vendor:marketplace_vendors(*)
+  `)
+  .eq('id', productId)
+  .single();
 ```
 
 ---
 
 ## Результат
-- 106 -> ~140 товаров (добавится ~35 новых)
-- 25+ товаров с меткой "Ship Home"
-- Полноценный checkout с выбором международной доставки
-- Расчёт стоимости по весу и региону
-
+- Полноценный реестр 25+ поставщиков
+- Карточки продавцов с рейтингом и верификацией
+- Навигация по товарам каждого продавца
+- Профессиональная структура как на Ozon/Wildberries
