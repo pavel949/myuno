@@ -39,6 +39,7 @@ export interface MarketplaceCategory {
   gradient: string | null;
   sort_order: number;
   is_active: boolean;
+  category_group: string | null;
 }
 
 export interface MarketplaceSubcategory {
