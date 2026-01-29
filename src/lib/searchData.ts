@@ -105,6 +105,8 @@ export const searchTypeConfig: Record<string, TypeConfig> = {
   babysitter: { icon: Baby, label: { en: 'Babysitter', ru: 'Няня' }, color: 'from-pink-400 to-rose-500' },
   pets: { icon: PawPrint, label: { en: 'Pets', ru: 'Питомцы' }, color: 'from-amber-500 to-yellow-500' },
   market: { icon: ShoppingBag, label: { en: 'Market', ru: 'Магазины' }, color: 'from-violet-500 to-purple-500' },
+  product: { icon: ShoppingBag, label: { en: 'Product', ru: 'Товар' }, color: 'from-violet-500 to-purple-600' },
+  marketCategory: { icon: ShoppingBag, label: { en: 'Shop Category', ru: 'Категория товаров' }, color: 'from-purple-500 to-violet-600' },
 };
 
 /**

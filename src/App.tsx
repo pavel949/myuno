@@ -13,6 +13,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AnimatedRoutes } from "@/components/layout/AnimatedRoutes";
 import { UnifiedChatFAB } from "@/components/chat/UnifiedChatFAB";
 import { MiniAppsFAB } from "@/components/fab/MiniAppsFAB";
+import { MarketFAB } from "@/components/fab/MarketFAB";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PrefetchProvider } from "@/components/providers/PrefetchProvider";
 import { defaultQueryClientOptions } from "@/lib/queryConfig";
@@ -38,6 +39,7 @@ const App = () => (
                         <BrowserRouter>
                           <AnimatedRoutes />
                           <MiniAppsFAB />
+                          <MarketFAB />
                           <UnifiedChatFAB />
                         </BrowserRouter>
                       </PrefetchProvider>
