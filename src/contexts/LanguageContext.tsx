@@ -17,6 +17,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.discover': 'Каталог',
     'nav.map': 'Карта',
     'nav.support': 'Чат',
+    'nav.market': 'Маркет',
     'nav.bookings': 'Брони',
     'nav.profile': 'Профиль',
     
@@ -350,6 +351,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.discover': 'Discover',
     'nav.map': 'Map',
     'nav.support': 'Chat',
+    'nav.market': 'Market',
     'nav.bookings': 'Bookings',
     'nav.profile': 'Profile',
     
@@ -683,6 +685,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.discover': 'ค้นหา',
     'nav.map': 'แผนที่',
     'nav.support': 'แชท',
+    'nav.market': 'ตลาด',
     'nav.bookings': 'การจอง',
     'nav.profile': 'โปรไฟล์',
     

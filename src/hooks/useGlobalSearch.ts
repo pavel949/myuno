@@ -296,7 +296,35 @@ const searchTables: TableConfig[] = [
     rating: null,
     pathPrefix: '/services/',
     idField: 'id',
-    hasApprovalStatus: false // services table doesn't have approval_status
+    hasApprovalStatus: false
+  },
+  {
+    table: 'marketplace_products',
+    type: 'product',
+    titleEn: 'name_en',
+    titleRu: 'name_ru',
+    image: 'cover_image',
+    price: 'price',
+    locationEn: 'vendor_name',
+    locationRu: 'vendor_name_ru',
+    rating: 'rating',
+    pathPrefix: '/market/product/',
+    idField: 'id',
+    hasApprovalStatus: false
+  },
+  {
+    table: 'marketplace_categories',
+    type: 'marketCategory',
+    titleEn: 'name_en',
+    titleRu: 'name_ru',
+    image: 'image_url',
+    price: null,
+    locationEn: null,
+    locationRu: null,
+    rating: null,
+    pathPrefix: '/market/category/',
+    idField: 'slug',
+    hasApprovalStatus: false
   }
 ];
 
