@@ -8,7 +8,8 @@ import {
   LogOut,
   ChevronRight,
   Bot,
-  Inbox
+  Inbox,
+  UserPlus
 } from 'lucide-react';
 import {
   Sidebar,
@@ -75,6 +76,14 @@ const navigationItems: NavItem[] = [
     icon: Bot,
     description: 'Manage AI assistants',
     descriptionRu: 'Управление AI-агентами'
+  },
+  { 
+    title: 'Acquisition', 
+    titleRu: 'Привлечение', 
+    path: '/admin/vendor-prospects', 
+    icon: UserPlus,
+    description: 'Vendor prospecting',
+    descriptionRu: 'Привлечение вендоров'
   },
   { 
     title: 'Control', 
