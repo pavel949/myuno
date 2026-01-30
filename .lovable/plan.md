@@ -1,225 +1,170 @@
 
 
-# Location Knowledge Hub — ✅ COMPLETED
+# Наполнение Knowledge Hub контентом для Phuket
 
-## Концепция
+## Текущее состояние
 
-**Location Knowledge Hub** — централизованный справочник знаний о локации, который помогает пользователям быстро адаптироваться в новой стране. Это не просто статический контент, а **живая база знаний**, привязанная к системе городов UNO и масштабируемая на все будущие локации.
+Сейчас в базе **8 статей** для Phuket:
+- Overview: Geography, Climate
+- Culture: Thai Culture Basics
+- Dos-Donts: Cultural Etiquette
+- Government: Immigration Office
+- Nature: Wildlife Safety
+- Practical: SIM Cards
+- Emergency: Emergency Numbers
 
-```text
-┌─────────────────────────────────────────────────────────────┐
-│                   LOCATION KNOWLEDGE HUB                    │
-│                     /knowledge/:citySlug                    │
-├─────────────────────────────────────────────────────────────┤
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐       │
-│  │ Overview │ │  Living  │ │ Culture  │ │  Legal   │       │
-│  │          │ │   Guide  │ │   & Dos  │ │   Info   │       │
-│  └──────────┘ └──────────┘ └──────────┘ └──────────┘       │
-├─────────────────────────────────────────────────────────────┤
-│                     Контент секции:                         │
-│  • Общая информация (география, климат, население)          │
-│  • История и культура                                       │
-│  • Что делать / Что НЕ делать (Do's & Don'ts)               │
-│  • Государственные органы и посольства                      │
-│  • Флора и фауна (предупреждения)                           │
-│  • Полезные ссылки на UNO сервисы                           │
-└─────────────────────────────────────────────────────────────┘
-```
+## Новые статьи для добавления
 
----
+### 1. Банки и финансы (секция: practical)
 
-## Архитектура для масштабирования
+**Статья: banking-guide**
+- Открытие счета для иностранцев (пошагово)
+- Необходимые документы (паспорт, work permit, арендный контракт)
+- Лучшие банки для экспатов (Bangkok Bank, Kasikorn, SCB)
+- Онлайн-банкинг и мобильные приложения
+- Переводы денег и SWIFT
 
-### 1. Структура данных (БД)
+### 2. Визы и иммиграция (секция: government)
 
-**Новая таблица `location_knowledge`:**
+**Статья: visa-guide**
+- Типы виз (Tourist 60 дней, ED, Elite, LTR, Retirement)
+- Продление туристической визы — пошаговая инструкция
+- Visa run: маршруты и стоимость
+- Документы для каждого типа визы
+- Адреса иммиграционных офисов
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| id | uuid | Первичный ключ |
-| city_id | uuid (FK) | Связь с cities |
-| section | text | Категория (overview, culture, legal, nature, tips) |
-| slug | text | URL-идентификатор статьи |
-| title_en / title_ru | text | Заголовок |
-| content_en / content_ru | text | Markdown контент |
-| icon | text | Иконка или эмодзи |
-| sort_order | integer | Порядок отображения |
-| is_published | boolean | Опубликовано |
+### 3. Вождение в Таиланде (секция: practical)
 
-**Преимущества:**
-- Один источник данных для всех локаций
-- Легко добавлять новые города (Dubai, Bali) без изменения кода
-- CMS-редактируемый контент (переиспользуем существующую админку translations)
+**Статья: driving-guide**
+- Международные права (IDP) — как получить
+- Тайские права — процедура получения
+- Правила дорожного движения
+- Аренда байка/автомобиля
+- Страховка транспорта
+- Штрафы и полиция
 
-### 2. Структура разделов
+### 4. Страхование (секция: practical)
 
-```text
-/knowledge/:citySlug
-├── /overview          # Общее: география, климат, экономика
-├── /culture           # История, традиции, религия
-├── /dos-donts         # Что делать / не делать
-├── /government        # Госорганы, посольства, иммиграция
-├── /nature            # Флора, фауна, опасности
-├── /practical         # SIM-карты, банки, транспорт
-└── /emergency         # Экстренные контакты, SOS
-```
+**Статья: insurance-guide**
+- Медицинская страховка для экспатов
+- Сравнение локальных и международных полисов
+- Страховка для визы (требования)
+- Автострахование: обязательное и КАСКО
+- Как подать claim — пошаговая инструкция
 
 ---
 
-## Компоненты UI
+## Структура контента (пример формата)
 
-### Главная страница хаба (`KnowledgeHub.tsx`)
-
-- Hero с фото локации и названием
-- Сетка категорий (карточки с иконками)
-- Quick Facts (население, валюта, часовой пояс)
-- Интеграция с существующими сервисами UNO
-
-### Страница раздела (`KnowledgeSectionPage.tsx`)
-
-- Accordion/Cards с подтемами
-- Markdown рендеринг контента
-- CTA кнопки на релевантные сервисы (Banking → /banking, Visa → /visa)
-
-### Компоненты переиспользования
-
-- `KnowledgeCard` — карточка категории
-- `QuickFact` — компактная информация (🌡️ 28°C среднегодовая)
-- `DosDontsCard` — визуальные подсказки с ✅/❌
-- `EmergencyContacts` — экстренные номера
-
----
-
-## Интеграция с существующим кодом
-
-### Использование LocationContext
-
-```typescript
-// Автоматическое определение текущего города
-const { currentCity, getCityName } = useLocation();
-
-// Запрос контента для текущего города
-const { data } = useQuery({
-  queryKey: ['location-knowledge', currentCity?.id, section],
-  queryFn: () => fetchKnowledgeSection(currentCity.id, section)
-});
-```
-
-### Связь с существующими страницами
-
-| Knowledge Section | Связанный сервис UNO |
-|-------------------|---------------------|
-| Banking & Finance | `/banking` (уже есть) |
-| Visa & Immigration | `/visa` (уже есть) |
-| Medical Info | `/medical` |
-| Veterinary | `/veterinary` (уже есть) |
-| Legal Help | `/legal` |
-| Emergency | `/sos` (уже есть) |
-
----
-
-## Структура файлов
-
-```text
-src/
-├── pages/
-│   └── knowledge/
-│       ├── KnowledgeHub.tsx          # Главная страница хаба
-│       ├── KnowledgeSectionPage.tsx  # Страница раздела
-│       └── sections/
-│           ├── OverviewSection.tsx
-│           ├── CultureSection.tsx
-│           ├── DosDontsSection.tsx
-│           ├── GovernmentSection.tsx
-│           ├── NatureSection.tsx
-│           └── EmergencySection.tsx
-├── components/
-│   └── knowledge/
-│       ├── KnowledgeCard.tsx
-│       ├── QuickFactsGrid.tsx
-│       ├── DosDontsCard.tsx
-│       ├── EmergencyContacts.tsx
-│       └── RelatedServicesLinks.tsx
-├── hooks/
-│   └── useLocationKnowledge.ts       # Хук для запросов контента
-└── data/
-    └── knowledgeContent.ts           # Fallback/demo контент
-```
-
----
-
-## Пример контента для Phuket
-
-### Overview
-- 🗺️ География: остров в Андаманском море
-- 🌡️ Климат: тропический, сезон дождей май-октябрь
-- 👥 Население: ~400,000 (+ туристы)
-- 💰 Экономика: туризм, недвижимость
-
-### Do's & Don'ts
-- ✅ Снимайте обувь перед входом в дом/храм
-- ✅ Уважайте королевскую семью
-- ❌ Не трогайте голову тайцев
-- ❌ Не указывайте ногами на людей/Будду
-
-### Government
-- 🛂 Immigration Office Phuket: адрес, телефон
-- 🇷🇺 Консульство РФ: контакты
-- 🏛️ Phuket Provincial Hall
-
-### Nature Warnings
-- 🐍 Змеи: кобра, крайт (что делать при укусе)
-- 🪼 Медузы: сезон ноябрь-апрель
-- 🌊 Течения: красные флаги на пляжах
-
----
-
-## План реализации
-
-### Фаза 1: База и структура ✅ ВЫПОЛНЕНО
-1. ✅ Создать таблицу `location_knowledge` с RLS
-2. ✅ Заполнить контентом для Phuket (en/ru)
-3. ✅ Создать хук `useLocationKnowledge`
-
-### Фаза 2: UI компоненты ✅ ВЫПОЛНЕНО
-4. ✅ Создать `KnowledgeHub.tsx` — главная страница
-5. ✅ Создать компоненты карточек и секций
-6. ✅ Добавить роуты `/knowledge` и `/knowledge/:section`
-
-### Фаза 3: Интеграция
-7. ⏳ Добавить ссылку в главное меню/навигацию
-8. ✅ Связать с существующими страницами (banking, visa)
-9. ⏳ Добавить в QuickActionsGrid на главной
-
-### Фаза 4: Админка
-10. ⏳ Расширить админку для редактирования контента
-11. ⏳ Добавить preview для разных языков
-
----
-
-## Масштабирование на новые локации
-
-При добавлении нового города (например, Dubai):
-
-1. В таблице `cities` уже есть запись
-2. Добавляем записи в `location_knowledge` с `city_id = dubai_id`
-3. UI автоматически подхватывает контент через `LocationContext`
-
-Никаких изменений кода — только контент!
+Каждая статья будет содержать:
+- **Summary** — краткое описание (2-3 предложения)
+- **Content** — детальный Markdown с заголовками:
+  - `## Что нужно знать`
+  - `## Пошаговая инструкция`
+  - `## Необходимые документы`
+  - `## Стоимость и сроки`
+  - `## Полезные советы`
 
 ---
 
 ## Технические детали
 
-**Зависимости**: Используем существующие библиотеки:
-- `react-markdown` (если нужен для контента)
-- Существующие UI компоненты (Card, Accordion, Tabs)
+**Таблица:** `location_knowledge`
 
-**Кэширование**: 
-- staleTime: 24 часа (контент меняется редко)
-- localStorage fallback для offline доступа
+**Данные для вставки:**
 
-**SEO**: 
-- Уникальные meta-теги для каждой секции
-- Schema.org разметка для FAQ
+| section | slug | title_en | title_ru | icon |
+|---------|------|----------|----------|------|
+| practical | banking-guide | Banking for Foreigners | Банки для иностранцев | 🏦 |
+| government | visa-guide | Visa Guide | Визовый гид | 🛂 |
+| practical | driving-guide | Driving in Thailand | Вождение в Таиланде | 🚗 |
+| practical | insurance-guide | Insurance Guide | Страхование | 🛡️ |
+
+**city_id:** `ccb1666c-ff29-4643-9e44-f7c437fe26fa` (Phuket)
+
+---
+
+## Примерный контент статей
+
+### Banking Guide (EN/RU)
+
+**English:**
+```markdown
+## Opening a Bank Account
+
+### Required Documents
+- Valid passport with valid visa (minimum 3 months)
+- Work Permit OR Residence Certificate from Immigration
+- Thai phone number
+- Proof of address (rental contract or utility bill)
+
+### Step-by-Step Process
+1. Choose a bank (Bangkok Bank, Kasikorn, SCB recommended)
+2. Visit the main branch (not small kiosks)
+3. Bring all documents + copies
+4. Fill application form
+5. Initial deposit (usually 500-1000 THB)
+6. Receive debit card immediately or within 7 days
+
+### Best Banks for Expats
+- **Bangkok Bank**: Largest network, English support
+- **Kasikorn (KBank)**: Best mobile app
+- **SCB**: Good for international transfers
+
+### Mobile Banking
+All major banks offer mobile apps with English interface:
+- K PLUS (Kasikorn)
+- SCB EASY
+- Bangkok Bank Mobile Banking
+
+### International Transfers
+- SWIFT transfers available at all banks
+- Wise/Remitly often cheaper for small amounts
+- Keep documentation for amounts over $50,000
+```
+
+**Russian:**
+```markdown
+## Открытие банковского счета
+
+### Необходимые документы
+- Действующий паспорт с визой (минимум 3 месяца)
+- Work Permit ИЛИ Residence Certificate из иммиграции
+- Тайский номер телефона
+- Подтверждение адреса (контракт аренды или счет за коммуналку)
+
+### Пошаговая инструкция
+1. Выберите банк (рекомендуем Bangkok Bank, Kasikorn, SCB)
+2. Посетите главный офис (не маленькие киоски)
+3. Принесите все документы + копии
+4. Заполните анкету
+5. Внесите депозит (обычно 500-1000 THB)
+6. Получите дебетовую карту сразу или в течение 7 дней
+
+### Лучшие банки для экспатов
+- **Bangkok Bank**: Крупнейшая сеть, поддержка на английском
+- **Kasikorn (KBank)**: Лучшее мобильное приложение
+- **SCB**: Хорош для международных переводов
+
+### Мобильный банкинг
+Все крупные банки предлагают приложения на английском:
+- K PLUS (Kasikorn)
+- SCB EASY
+- Bangkok Bank Mobile Banking
+
+### Международные переводы
+- SWIFT переводы доступны во всех банках
+- Wise/Remitly часто дешевле для небольших сумм
+- Сохраняйте документацию для сумм свыше $50,000
+```
+
+---
+
+## План выполнения
+
+1. **Вставить 4 новые статьи** в таблицу `location_knowledge`
+2. **Обновить sort_order** для правильного отображения
+3. **Проверить отображение** в Knowledge Hub UI
+
+Все статьи будут доступны сразу после вставки данных (is_published = true).
 
