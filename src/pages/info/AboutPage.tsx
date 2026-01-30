@@ -15,6 +15,7 @@ import {
   Headphones, MapPinned, Smartphone, HandshakeIcon
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { QuickInstallButton } from '@/components/pwa/QuickInstallButton';
 
 export default function AboutPage() {
   const { language } = useLanguage();
@@ -357,12 +358,10 @@ export default function AboutPage() {
                 : 'A unified infrastructure for living abroad. From everyday tasks to investment management — online and offline.'}
             </p>
             <div className="flex flex-wrap justify-center gap-3">
-              <Button onClick={() => navigate('/')} className="gap-2">
+              <QuickInstallButton />
+              <Button onClick={() => navigate('/')} variant="outline" className="gap-2">
                 {isRu ? 'Начать' : isTh ? 'เริ่มต้น' : 'Get Started'}
                 <ArrowRight className="w-4 h-4" />
-              </Button>
-              <Button variant="outline" onClick={() => navigate('/partners')}>
-                {isRu ? 'Стать партнёром' : isTh ? 'เป็นพันธมิตร' : 'Become a Partner'}
               </Button>
             </div>
           </SectionCard>
