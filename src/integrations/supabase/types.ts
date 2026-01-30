@@ -10353,6 +10353,51 @@ export type Database = {
           },
         ]
       }
+      user_addresses: {
+        Row: {
+          address_text: string
+          city: string | null
+          country: string | null
+          created_at: string | null
+          id: string
+          is_default: boolean | null
+          label: string
+          phone: string
+          postal_code: string | null
+          recipient_name: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          address_text: string
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          id?: string
+          is_default?: boolean | null
+          label?: string
+          phone: string
+          postal_code?: string | null
+          recipient_name: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          address_text?: string
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          id?: string
+          is_default?: boolean | null
+          label?: string
+          phone?: string
+          postal_code?: string | null
+          recipient_name?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_analytics_daily: {
         Row: {
           created_at: string | null

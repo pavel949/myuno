@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { MapPin, Truck, ShoppingBag, Package, Sparkles, Plane, AlertTriangle } from 'lucide-react';
+import { MapPin, Truck, ShoppingBag, Package, Sparkles, Plane, AlertTriangle, User } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -9,6 +9,8 @@ import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBooking } from '@/hooks/useBooking';
 import { useDeliverySettings } from '@/hooks/useMarketplace';
+import { useProfile } from '@/hooks/useProfile';
+import { useUserAddresses } from '@/hooks/useUserAddresses';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,6 +19,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   BookingPaymentSelect,
   BookingBottomBar,
@@ -31,6 +34,7 @@ import {
   useInternationalShippingZones 
 } from '@/components/market/DeliveryTypeSelector';
 import { InternationalAddressForm } from '@/components/market/InternationalAddressForm';
+import { SavedAddressSelector } from '@/components/market/SavedAddressSelector';
 
 // Order Item Card Component
 interface OrderItemProps {
@@ -138,15 +142,41 @@ const MarketCheckout = () => {
   const { createBooking, isSubmitting } = useBooking();
   const { calculateDeliveryFee, freeDeliveryThreshold, amountToFreeDelivery, isLoading: deliveryLoading } = useDeliverySettings();
   const { zones: shippingZones, calculateFee: calculateInternationalFee } = useInternationalShippingZones();
+  const { profile } = useProfile();
+  const { addresses, defaultAddress, createAddressAsync } = useUserAddresses();
   
-  const storeInfo = location.state as { storeId: string; storeName: string; storeNameRu: string; deliveryFee: number; minOrder: number } | undefined;
-  const cartItems = getItemsByType('product').filter(item => storeInfo ? item.providerId === storeInfo.storeId : true);
+  // Check for Buy Now mode
+  const locationState = location.state as { 
+    storeId?: string; 
+    storeName?: string; 
+    storeNameRu?: string; 
+    deliveryFee?: number; 
+    minOrder?: number;
+    buyNowItem?: any;
+    isBuyNow?: boolean;
+  } | undefined;
+  
+  const isBuyNow = locationState?.isBuyNow;
+  const buyNowItem = locationState?.buyNowItem;
+  const storeInfo = locationState;
+
+  // Cart items - either from cart or from Buy Now
+  const cartItems = useMemo(() => {
+    if (isBuyNow && buyNowItem) {
+      return [buyNowItem];
+    }
+    return getItemsByType('product').filter(item => storeInfo?.storeId ? item.providerId === storeInfo.storeId : true);
+  }, [isBuyNow, buyNowItem, getItemsByType, storeInfo]);
 
   // Delivery type state
   const [deliveryType, setDeliveryType] = useState<DeliveryType>('local');
   const [selectedZone, setSelectedZone] = useState<InternationalShippingZone | null>(null);
 
-  // Local address form
+  // Track selected saved address
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  const [saveNewAddress, setSaveNewAddress] = useState(false);
+
+  // Local address form - with auto-fill
   const [localFormData, setLocalFormData] = useState({ name: '', phone: '', address: '', notes: '' });
   
   // International address form
@@ -162,6 +192,35 @@ const MarketCheckout = () => {
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [bookingResult, setBookingResult] = useState<{ success: boolean; bookingId?: string } | null>(null);
+
+  // Auto-fill from profile on mount
+  useEffect(() => {
+    if (profile && !localFormData.name && !localFormData.phone) {
+      setLocalFormData(prev => ({
+        ...prev,
+        name: profile.full_name || '',
+        phone: profile.phone || '',
+      }));
+      setIntlFormData(prev => ({
+        ...prev,
+        name: profile.full_name || '',
+        phone: profile.phone || '',
+      }));
+    }
+  }, [profile]);
+
+  // Auto-select default address
+  useEffect(() => {
+    if (defaultAddress && !selectedAddressId) {
+      setSelectedAddressId(defaultAddress.id);
+      setLocalFormData(prev => ({
+        ...prev,
+        name: defaultAddress.recipient_name,
+        phone: defaultAddress.phone,
+        address: defaultAddress.address_text,
+      }));
+    }
+  }, [defaultAddress, selectedAddressId]);
 
   // Calculate cart details
   const cartAnalysis = useMemo(() => {
@@ -281,7 +340,25 @@ const MarketCheckout = () => {
     });
 
     if (result.success) {
-      clearByType('product');
+      // Save address if checkbox is checked and it's a new address
+      if (saveNewAddress && !selectedAddressId && localFormData.address) {
+        try {
+          await createAddressAsync({
+            recipient_name: localFormData.name,
+            phone: localFormData.phone,
+            address_text: localFormData.address,
+            is_default: addresses.length === 0,
+          });
+        } catch (e) {
+          // Non-blocking - continue with order success
+          console.error('Failed to save address:', e);
+        }
+      }
+
+      // Only clear cart if not Buy Now mode
+      if (!isBuyNow) {
+        clearByType('product');
+      }
       setBookingResult({ success: true, bookingId: result.booking_id });
     }
   };
@@ -400,12 +477,39 @@ const MarketCheckout = () => {
                 <MapPin className="w-5 h-5 text-primary" />
                 <h3 className="font-semibold">{language === 'ru' ? 'Адрес доставки' : 'Delivery Address'}</h3>
               </div>
+
+              {/* Saved Addresses */}
+              {addresses.length > 0 && (
+                <div className="mb-4">
+                  <SavedAddressSelector
+                    selectedId={selectedAddressId}
+                    onSelect={(address) => {
+                      setSelectedAddressId(address.id);
+                      setLocalFormData({
+                        name: address.recipient_name,
+                        phone: address.phone,
+                        address: address.address_text,
+                        notes: '',
+                      });
+                    }}
+                  />
+                </div>
+              )}
+
+              {/* Manual form - always visible for editing */}
               <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                  <User className="w-4 h-4" />
+                  {language === 'ru' ? 'Или введите новый адрес:' : 'Or enter a new address:'}
+                </div>
                 <div>
                   <Label>{language === 'ru' ? 'Имя' : 'Name'} *</Label>
                   <Input 
                     value={localFormData.name} 
-                    onChange={(e) => setLocalFormData({ ...localFormData, name: e.target.value })} 
+                    onChange={(e) => {
+                      setLocalFormData({ ...localFormData, name: e.target.value });
+                      setSelectedAddressId(null);
+                    }}
                     className="mt-1"
                   />
                 </div>
@@ -413,7 +517,10 @@ const MarketCheckout = () => {
                   <Label>{language === 'ru' ? 'Телефон' : 'Phone'} *</Label>
                   <Input 
                     value={localFormData.phone} 
-                    onChange={(e) => setLocalFormData({ ...localFormData, phone: e.target.value })} 
+                    onChange={(e) => {
+                      setLocalFormData({ ...localFormData, phone: e.target.value });
+                      setSelectedAddressId(null);
+                    }}
                     placeholder="+66" 
                     className="mt-1"
                   />
@@ -422,7 +529,10 @@ const MarketCheckout = () => {
                   <Label>{language === 'ru' ? 'Адрес' : 'Address'} *</Label>
                   <Input 
                     value={localFormData.address} 
-                    onChange={(e) => setLocalFormData({ ...localFormData, address: e.target.value })} 
+                    onChange={(e) => {
+                      setLocalFormData({ ...localFormData, address: e.target.value });
+                      setSelectedAddressId(null);
+                    }}
                     className="mt-1"
                   />
                 </div>
@@ -435,6 +545,23 @@ const MarketCheckout = () => {
                     className="mt-1"
                   />
                 </div>
+
+                {/* Save address checkbox - only if manually editing */}
+                {!selectedAddressId && (
+                  <div className="flex items-center gap-2 pt-2">
+                    <Checkbox
+                      id="saveAddress"
+                      checked={saveNewAddress}
+                      onCheckedChange={(checked) => setSaveNewAddress(checked as boolean)}
+                    />
+                    <label 
+                      htmlFor="saveAddress" 
+                      className="text-sm cursor-pointer text-muted-foreground"
+                    >
+                      {language === 'ru' ? 'Сохранить адрес для следующих заказов' : 'Save address for future orders'}
+                    </label>
+                  </div>
+                )}
               </div>
             </>
           ) : (
