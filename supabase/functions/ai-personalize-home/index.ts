@@ -1,10 +1,13 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const AGENT_SLUG = 'ai-personalize-home';
 
 type UserPersona = 'tourist' | 'resident' | 'property_owner';
 
@@ -136,7 +139,30 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const startTime = Date.now();
+
   try {
+    // Create Supabase client
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    // Fetch agent config from DB (for is_active check and logging)
+    const { data: agentConfig } = await supabase
+      .from('ai_agents')
+      .select('id, is_active')
+      .eq('slug', AGENT_SLUG)
+      .single();
+
+    // Check if agent is disabled
+    if (agentConfig && !agentConfig.is_active) {
+      return new Response(JSON.stringify({ error: "Agent is currently disabled" }), {
+        status: 503,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { personas = [], language = 'en', recentCategories = [] }: RequestBody = await req.json();
 
     // Generate personalized response
@@ -146,8 +172,14 @@ serve(async (req) => {
       suggestedServices: getSuggestedServices(personas, language),
     };
 
-    // If user has recent activity, we could boost those categories
-    // (future enhancement: use AI model to generate smarter recommendations)
+    // Log usage asynchronously (non-blocking)
+    if (agentConfig?.id) {
+      supabase.from('ai_agent_logs').insert({
+        agent_id: agentConfig.id,
+        response_time_ms: Date.now() - startTime,
+        messages_count: 1,
+      });
+    }
 
     return new Response(JSON.stringify(response), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

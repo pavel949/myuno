@@ -191,6 +191,7 @@ export type Database = {
       }
       ai_agents: {
         Row: {
+          agent_type: string | null
           created_at: string
           description_en: string | null
           description_ru: string | null
@@ -209,6 +210,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          agent_type?: string | null
           created_at?: string
           description_en?: string | null
           description_ru?: string | null
@@ -227,6 +229,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          agent_type?: string | null
           created_at?: string
           description_en?: string | null
           description_ru?: string | null

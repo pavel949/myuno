@@ -1,9 +1,14 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
+
+const AGENT_SLUG = 'ai-smart-data';
+const DEFAULT_MODEL = 'google/gemini-3-flash-preview';
+const DEFAULT_TEMPERATURE = 0.2;
 
 interface SmartMappingRequest {
   type: 'field-mapping';
@@ -32,7 +37,34 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const startTime = Date.now();
+
   try {
+    // Create Supabase client
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    // Fetch agent config from DB
+    const { data: agentConfig } = await supabase
+      .from('ai_agents')
+      .select('id, model, temperature, is_active')
+      .eq('slug', AGENT_SLUG)
+      .single();
+
+    // Check if agent is disabled
+    if (agentConfig && !agentConfig.is_active) {
+      return new Response(JSON.stringify({ error: "Agent is currently disabled" }), {
+        status: 503,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Use config from DB or fallback to defaults
+    const configModel = agentConfig?.model || DEFAULT_MODEL;
+    const temperature = agentConfig?.temperature || DEFAULT_TEMPERATURE;
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY is not configured');
@@ -254,6 +286,9 @@ Provide detailed, accurate observations based on what you can see.`;
       messages.push({ role: "user", content: userPrompt });
     }
 
+    // Use gemini-2.5-flash for photo analysis (vision), configModel for text
+    const modelToUse = body.type === 'photo-analysis' ? 'google/gemini-2.5-flash' : configModel;
+
     // Call AI
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -262,7 +297,8 @@ Provide detailed, accurate observations based on what you can see.`;
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: body.type === 'photo-analysis' ? 'google/gemini-2.5-flash' : 'google/gemini-3-flash-preview',
+        model: modelToUse,
+        temperature,
         messages,
         tools,
         tool_choice: toolChoice,
@@ -296,6 +332,15 @@ Provide detailed, accurate observations based on what you can see.`;
     }
 
     const result = JSON.parse(toolCall.function.arguments);
+
+    // Log usage asynchronously (non-blocking)
+    if (agentConfig?.id) {
+      supabase.from('ai_agent_logs').insert({
+        agent_id: agentConfig.id,
+        response_time_ms: Date.now() - startTime,
+        messages_count: 1,
+      });
+    }
 
     return new Response(JSON.stringify({ 
       success: true, 
