@@ -24,8 +24,9 @@ export default defineConfig(({ mode }) => ({
         background_color: '#0a0a0b',
         display: 'standalone',
         orientation: 'portrait-primary',
-        start_url: '/',
-        id: 'myuno-app',
+        start_url: '/?source=pwa',
+        id: '/myuno-pwa-v2',
+        scope: '/',
         icons: [
           {
             src: '/icons/icon-72x72.png',
