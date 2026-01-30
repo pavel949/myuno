@@ -11045,6 +11045,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_personas: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          persona: Database["public"]["Enums"]["user_persona"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          persona: Database["public"]["Enums"]["user_persona"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          persona?: Database["public"]["Enums"]["user_persona"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_pins: {
         Row: {
           created_at: string
@@ -13065,6 +13089,7 @@ export type Database = {
         | "failed"
         | "refunded"
         | "cancelled"
+      user_persona: "tourist" | "resident" | "property_owner"
       user_type:
         | "tourist"
         | "resident"
@@ -13270,6 +13295,7 @@ export const Constants = {
         "refunded",
         "cancelled",
       ],
+      user_persona: ["tourist", "resident", "property_owner"],
       user_type: [
         "tourist",
         "resident",

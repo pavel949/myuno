@@ -17,6 +17,7 @@ import { RecommendedCarousel } from '@/components/home/RecommendedCarousel';
 import { ForYouSection } from '@/components/recommendations/ForYouSection';
 import { PersonalizedOffersSection } from '@/components/notifications/PersonalizedOffersSection';
 import { ContentModeToggle, ContentMode } from '@/components/home/ContentModeToggle';
+import { PersonaSelector } from '@/components/home/PersonaSelector';
 import { HomeCategoryRibbon } from '@/components/home/HomeCategoryRibbon';
 import { HomeProductsSection } from '@/components/home/HomeProductsSection';
 import { KnowledgeHubBanner } from '@/components/home/KnowledgeHubBanner';
@@ -136,6 +137,9 @@ const Index = () => {
               tabIndex={-1}
             />
           </div>
+
+          {/* Persona Selector - personalization by user type */}
+          <PersonaSelector />
 
           {/* Content Mode Toggle */}
           <ContentModeToggle 

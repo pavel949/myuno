@@ -20,6 +20,7 @@ import {
   Briefcase
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useUserPersonas, UserPersona } from '@/hooks/useUserPersonas';
 import { useProfile, type UserType } from '@/hooks/useProfile';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -363,6 +364,42 @@ const DEFAULT_ACTIONS: QuickAction[] = [
   },
 ];
 
+// Map personas to actions - personas take priority over user_type
+function getActionsForPersonas(personas: UserPersona[]): QuickAction[] {
+  if (personas.length === 0) {
+    return DEFAULT_ACTIONS;
+  }
+
+  // Collect actions from all active personas, track frequency
+  const actionScores: Record<string, { action: QuickAction; score: number }> = {};
+  
+  const personaToActions: Record<UserPersona, QuickAction[]> = {
+    tourist: TOURIST_ACTIONS,
+    resident: RESIDENT_ACTIONS,
+    property_owner: OWNER_ACTIONS,
+  };
+
+  for (const persona of personas) {
+    const actions = personaToActions[persona] || [];
+    actions.forEach((action, index) => {
+      const existing = actionScores[action.id];
+      // Score: higher for earlier position + bonus for appearing in multiple personas
+      const positionScore = actions.length - index;
+      if (existing) {
+        existing.score += positionScore + 5; // bonus for overlap
+      } else {
+        actionScores[action.id] = { action, score: positionScore };
+      }
+    });
+  }
+
+  // Sort by score and return top 8
+  return Object.values(actionScores)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 8)
+    .map(item => item.action);
+}
+
 function getActionsForUserType(userType: UserType | null | undefined): QuickAction[] {
   switch (userType) {
     case 'tourist':
@@ -384,14 +421,24 @@ export const QuickActionsGrid = memo(function QuickActionsGrid() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { profile } = useProfile();
+  const { personas } = useUserPersonas();
   const queryClient = useQueryClient();
 
-  // Get personalized actions based on user type
+  // Get personalized actions: personas take priority, fallback to user_type
   const quickActions = useMemo(() => {
-    const userActions = getActionsForUserType(profile?.user_type);
-    // Take first 8 user-specific actions + 1 fixed action (More) - SOS is now in SafetyBanner
+    let userActions: QuickAction[];
+    
+    if (personas.length > 0) {
+      // Use persona-based actions when user has selected personas
+      userActions = getActionsForPersonas(personas);
+    } else {
+      // Fallback to profile user_type
+      userActions = getActionsForUserType(profile?.user_type);
+    }
+    
+    // Add fixed actions (More button)
     return [...userActions.slice(0, 8), ...FIXED_ACTIONS];
-  }, [profile?.user_type]);
+  }, [personas, profile?.user_type]);
 
   const handleClick = useCallback((action: QuickAction, e: React.MouseEvent<HTMLButtonElement>) => {
     triggerRipple(e);
