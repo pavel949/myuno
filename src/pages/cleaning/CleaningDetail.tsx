@@ -1,15 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { 
-  Sparkles, Clock, Star, MapPin, Shield, Calendar, Check
-} from 'lucide-react';
+import { Clock, Star, Shield, Calendar, Check } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PageContainer } from '@/components/uno/PageContainer';
-import { PageHeader } from '@/components/uno/PageHeader';
+import { DetailPageHeader } from '@/components/uno/DetailPageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
 const cleaningServices = [
   {
@@ -116,20 +113,34 @@ export default function CleaningDetail() {
   const { language } = useLanguage();
 
   const service = cleaningServices.find(s => s.id === id) || cleaningServices[0];
+  const name = language === 'ru' ? service.nameRu : service.nameEn;
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: name,
+          text: language === 'ru' ? service.descRu : service.descEn,
+          url: window.location.href,
+        });
+      } catch {
+        // User cancelled
+      }
+    }
+  };
 
   return (
     <AppLayout>
-      <PageContainer className="pb-28">
-        <PageHeader title="" showBack />
-        
-        {/* Hero Image */}
-        <div className="relative h-48 -mx-4 -mt-4 mb-4">
+      <PageContainer className="pb-28 px-0">
+        {/* Hero Image with Overlay Header */}
+        <div className="relative h-56">
           <img 
             src={service.image} 
-            alt={language === 'ru' ? service.nameRu : service.nameEn}
+            alt={name}
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+          <DetailPageHeader fallbackPath="/cleaning" onShare={handleShare} />
         </div>
 
         {/* Service Info */}

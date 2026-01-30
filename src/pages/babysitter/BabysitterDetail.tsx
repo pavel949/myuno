@@ -1,13 +1,12 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
-  Baby, Heart, Clock, Star, MapPin, Shield, 
-  Languages, GraduationCap, CheckCircle2, Calendar, MessageCircle
+  Baby, Star, Shield, Languages, GraduationCap, CheckCircle2, Calendar
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PageContainer } from '@/components/uno/PageContainer';
-import { PageHeader } from '@/components/uno/PageHeader';
+import { DetailPageHeader } from '@/components/uno/DetailPageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
@@ -108,34 +107,56 @@ export default function BabysitterDetail() {
   const { language } = useLanguage();
 
   const babysitter = babysitters.find(bs => bs.id === id) || babysitters[0];
+  const name = language === 'ru' ? babysitter.nameRu : babysitter.nameEn;
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: name,
+          text: language === 'ru' ? babysitter.descRu : babysitter.descEn,
+          url: window.location.href,
+        });
+      } catch {
+        // User cancelled
+      }
+    }
+  };
 
   return (
     <AppLayout>
-      <PageContainer className="pb-28">
-        <PageHeader title="" showBack />
-        
-        {/* Profile Header */}
-        <div className="flex flex-col items-center text-center mb-6">
-          <div className="relative mb-4">
-            <img 
-              src={babysitter.image} 
-              alt={language === 'ru' ? babysitter.nameRu : babysitter.nameEn}
-              className="w-28 h-28 rounded-full object-cover border-4 border-background shadow-lg"
-            />
-            {babysitter.isVerified && (
-              <div className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center border-4 border-background">
-                <CheckCircle2 className="w-5 h-5 text-primary-foreground" />
-              </div>
-            )}
+      <PageContainer className="pb-28 px-0">
+        {/* Hero Image with Overlay Header */}
+        <div className="relative h-64 bg-gradient-to-b from-primary/20 to-background">
+          <DetailPageHeader fallbackPath="/babysitter" onShare={handleShare} />
+          
+          {/* Profile Header */}
+          <div className="absolute bottom-0 left-0 right-0 flex flex-col items-center text-center pb-4">
+            <div className="relative mb-3">
+              <img 
+                src={babysitter.image} 
+                alt={name}
+                className="w-24 h-24 rounded-full object-cover border-4 border-background shadow-lg"
+              />
+              {babysitter.isVerified && (
+                <div className="absolute bottom-0 right-0 w-7 h-7 bg-primary rounded-full flex items-center justify-center border-3 border-background">
+                  <CheckCircle2 className="w-4 h-4 text-primary-foreground" />
+                </div>
+              )}
+            </div>
           </div>
+        </div>
+
+        {/* Content */}
+        <div className="px-4 pt-4 text-center">
           <h1 className="text-2xl font-bold">
-            {language === 'ru' ? babysitter.nameRu : babysitter.nameEn}
+            {name}
           </h1>
           <p className="text-muted-foreground">
             {language === 'ru' ? babysitter.experienceRu : babysitter.experience}
           </p>
           
-          <div className="flex items-center gap-1 mt-2">
+          <div className="flex items-center justify-center gap-1 mt-2">
             <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
             <span className="font-semibold">{babysitter.rating}</span>
             <span className="text-muted-foreground">({babysitter.reviewCount} {language === 'ru' ? 'отзывов' : 'reviews'})</span>
@@ -153,7 +174,7 @@ export default function BabysitterDetail() {
         </div>
 
         {/* Info Cards */}
-        <div className="space-y-4">
+        <div className="px-4 space-y-4 mt-6">
           {/* About */}
           <div className="bg-card rounded-2xl border p-5">
             <h3 className="font-semibold mb-3">
