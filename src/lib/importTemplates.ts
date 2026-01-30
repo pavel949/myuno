@@ -17,7 +17,9 @@ export interface ImportTarget {
 export const autoMappingDictionary: Record<string, string> = {
   // English common names
   'name': 'name_en',
-  'title': 'name_en',
+  'title': 'title_en',
+  'title_en': 'title_en',
+  'title_ru': 'title_ru',
   'name_en': 'name_en',
   'name_ru': 'name_ru',
   'price': 'price',
@@ -42,8 +44,22 @@ export const autoMappingDictionary: Record<string, string> = {
   'featured': 'is_featured',
   'currency': 'currency',
   
+  // Real estate specific
+  'bedrooms': 'bedrooms',
+  'bathrooms': 'bathrooms',
+  'area': 'area_sqm',
+  'sqm': 'area_sqm',
+  'floor': 'floor',
+  'district': 'district',
+  'type': 'property_type',
+  'property_type': 'property_type',
+  'listing_type': 'listing_type',
+  'rent': 'listing_type',
+  'sale': 'listing_type',
+  
   // Russian common names
   'название': 'name_ru',
+  'заголовок': 'title_ru',
   'наименование': 'name_ru',
   'имя': 'name_ru',
   'цена': 'price',
@@ -61,6 +77,18 @@ export const autoMappingDictionary: Record<string, string> = {
   'остаток': 'stock_quantity',
   'наличие': 'in_stock',
   'валюта': 'currency',
+  
+  // Real estate Russian
+  'спальни': 'bedrooms',
+  'спален': 'bedrooms',
+  'ванные': 'bathrooms',
+  'санузел': 'bathrooms',
+  'площадь': 'area_sqm',
+  'этаж': 'floor',
+  'район': 'district',
+  'тип': 'property_type',
+  'аренда': 'listing_type',
+  'продажа': 'listing_type',
 };
 
 export const importTargets: ImportTarget[] = [
@@ -230,6 +258,36 @@ export const importTargets: ImportTarget[] = [
       currency: { en: 'Currency', ru: 'Валюта' },
       category_id: { en: 'Category ID', ru: 'ID категории' },
       is_active: { en: 'Active', ru: 'Активен' },
+    },
+  },
+  {
+    id: 'properties',
+    name: 'Real Estate',
+    nameRu: 'Недвижимость',
+    table: 'properties',
+    requiredFields: ['title_en', 'property_type', 'listing_type'],
+    optionalFields: ['title_ru', 'description_en', 'description_ru', 'cover_image', 'address', 'district', 'price', 'price_period', 'currency', 'bedrooms', 'bathrooms', 'area_sqm', 'floor', 'furnishing_level', 'amenities', 'is_active', 'is_featured'],
+    fieldLabels: {
+      title_en: { en: 'Title (EN)', ru: 'Название (EN)' },
+      title_ru: { en: 'Title (RU)', ru: 'Название (RU)' },
+      description_en: { en: 'Description (EN)', ru: 'Описание (EN)' },
+      description_ru: { en: 'Description (RU)', ru: 'Описание (RU)' },
+      cover_image: { en: 'Cover Image', ru: 'Обложка' },
+      address: { en: 'Address', ru: 'Адрес' },
+      district: { en: 'District', ru: 'Район' },
+      price: { en: 'Price', ru: 'Цена' },
+      price_period: { en: 'Price Period', ru: 'Период оплаты' },
+      currency: { en: 'Currency', ru: 'Валюта' },
+      property_type: { en: 'Property Type', ru: 'Тип недвижимости' },
+      listing_type: { en: 'Listing Type (rent/sale)', ru: 'Тип объявления (аренда/продажа)' },
+      bedrooms: { en: 'Bedrooms', ru: 'Спальни' },
+      bathrooms: { en: 'Bathrooms', ru: 'Ванные' },
+      area_sqm: { en: 'Area (sqm)', ru: 'Площадь (м²)' },
+      floor: { en: 'Floor', ru: 'Этаж' },
+      furnishing_level: { en: 'Furnishing', ru: 'Меблировка' },
+      amenities: { en: 'Amenities', ru: 'Удобства' },
+      is_active: { en: 'Active', ru: 'Активен' },
+      is_featured: { en: 'Featured', ru: 'Рекомендуемый' },
     },
   },
 ];

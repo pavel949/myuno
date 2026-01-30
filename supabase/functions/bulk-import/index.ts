@@ -16,6 +16,7 @@ const ALLOWED_TABLES = [
   'yachts',
   'tours',
   'services',
+  'properties',
 ];
 
 serve(async (req) => {
@@ -88,12 +89,15 @@ serve(async (req) => {
     for (let i = 0; i < records.length; i += batchSize) {
       const batch = records.slice(i, i + batchSize);
       
-      // Add default values
+      // Add default values + "Listed by UNO" tagging
       const processedBatch = batch.map((record: Record<string, any>) => ({
         ...record,
         is_active: record.is_active ?? true,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+        // Tag as created by UNO team (admin import)
+        created_by_uno_team: true,
+        uno_team_creator_id: user.id,
       }));
 
       const { data, error } = await supabase
