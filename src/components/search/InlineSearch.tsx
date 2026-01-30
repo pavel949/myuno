@@ -69,11 +69,10 @@ export const InlineSearch = memo(function InlineSearch() {
     mode 
   } = useAISearch(query, isExpanded && query.length > 0);
 
-  // Also get regular results for AI mode fallback
-  const { results: dbResults, isLoading: isDbLoading } = useGlobalSearch(
-    query, 
-    isExpanded && query.length > 0 && mode === 'ai' && aiResponse?.suggestedCategories?.length > 0
-  );
+  // Use search results from useAISearch for AI mode fallback (no separate call needed)
+  // dbResults are only needed when we have AI response with categories
+  const dbResults = searchResults;
+  const isDbLoading = isSearching;
 
   // Handle click outside to close
   useEffect(() => {
