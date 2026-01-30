@@ -11,6 +11,7 @@ import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { SmartWidget } from '@/components/home/SmartWidget';
 import { PromoBanner } from '@/components/home/PromoBanner';
 import { QuickActionsGrid } from '@/components/home/QuickActionsGrid';
+import { MarketplacePromoCarousel } from '@/components/home/MarketplacePromoCarousel';
 import { QuickAccessChips } from '@/components/home/QuickAccessChips';
 import { RecommendedCarousel } from '@/components/home/RecommendedCarousel';
 import { ForYouSection } from '@/components/recommendations/ForYouSection';
@@ -147,6 +148,9 @@ const Index = () => {
 
               {/* Promotions */}
               <PromoBanner />
+
+              {/* Marketplace Promo Carousel */}
+              <MarketplacePromoCarousel />
 
               {/* Quick Access Chips - Owner/Partner/Wallet */}
               <QuickAccessChips />
