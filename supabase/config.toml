@@ -83,3 +83,6 @@ verify_jwt = false
 
 [functions.leads-factory]
 verify_jwt = false
+
+[functions.vendor-acquisition]
+verify_jwt = false

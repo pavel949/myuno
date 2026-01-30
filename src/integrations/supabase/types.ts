@@ -11992,6 +11992,51 @@ export type Database = {
           },
         ]
       }
+      vendor_outreach_templates: {
+        Row: {
+          business_type: string | null
+          channel: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          language: string
+          name: string
+          stage: string
+          subject: string | null
+          template: string
+          variables: string[] | null
+        }
+        Insert: {
+          business_type?: string | null
+          channel: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          language?: string
+          name: string
+          stage: string
+          subject?: string | null
+          template: string
+          variables?: string[] | null
+        }
+        Update: {
+          business_type?: string | null
+          channel?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          language?: string
+          name?: string
+          stage?: string
+          subject?: string | null
+          template?: string
+          variables?: string[] | null
+        }
+        Relationships: []
+      }
       vendor_payouts: {
         Row: {
           amount: number
@@ -12033,6 +12078,199 @@ export type Database = {
           {
             foreignKeyName: "vendor_payouts_provider_id_fkey"
             columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_prospect_activity: {
+        Row: {
+          activity_type: string
+          created_at: string | null
+          id: string
+          message_channel: string | null
+          message_content: string | null
+          new_value: string | null
+          old_value: string | null
+          performed_by: string | null
+          prospect_id: string
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string | null
+          id?: string
+          message_channel?: string | null
+          message_content?: string | null
+          new_value?: string | null
+          old_value?: string | null
+          performed_by?: string | null
+          prospect_id: string
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string | null
+          id?: string
+          message_channel?: string | null
+          message_content?: string | null
+          new_value?: string | null
+          old_value?: string | null
+          performed_by?: string | null
+          prospect_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_prospect_activity_prospect_id_fkey"
+            columns: ["prospect_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_prospects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_prospects: {
+        Row: {
+          address: string | null
+          ai_analyzed_at: string | null
+          ai_priority: string | null
+          ai_reasoning: string | null
+          ai_recommended_plan: string | null
+          ai_score: number | null
+          ai_talking_points: string[] | null
+          assigned_to: string | null
+          business_name: string
+          business_name_ru: string | null
+          business_type: string | null
+          category: string | null
+          city: string | null
+          contact_count: number | null
+          contact_name: string | null
+          converted_at: string | null
+          converted_provider_id: string | null
+          created_at: string | null
+          created_by: string | null
+          district: string | null
+          email: string | null
+          engagement_rate: number | null
+          facebook: string | null
+          first_contact_at: string | null
+          followers_count: number | null
+          id: string
+          instagram: string | null
+          last_contact_at: string | null
+          last_post_at: string | null
+          lat: number | null
+          lng: number | null
+          next_followup_at: string | null
+          notes: string | null
+          outreach_channel: string | null
+          phone: string | null
+          posts_count: number | null
+          rejection_reason: string | null
+          source_data: Json | null
+          source_type: string
+          source_url: string | null
+          status: string
+          updated_at: string | null
+          website: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          address?: string | null
+          ai_analyzed_at?: string | null
+          ai_priority?: string | null
+          ai_reasoning?: string | null
+          ai_recommended_plan?: string | null
+          ai_score?: number | null
+          ai_talking_points?: string[] | null
+          assigned_to?: string | null
+          business_name: string
+          business_name_ru?: string | null
+          business_type?: string | null
+          category?: string | null
+          city?: string | null
+          contact_count?: number | null
+          contact_name?: string | null
+          converted_at?: string | null
+          converted_provider_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          district?: string | null
+          email?: string | null
+          engagement_rate?: number | null
+          facebook?: string | null
+          first_contact_at?: string | null
+          followers_count?: number | null
+          id?: string
+          instagram?: string | null
+          last_contact_at?: string | null
+          last_post_at?: string | null
+          lat?: number | null
+          lng?: number | null
+          next_followup_at?: string | null
+          notes?: string | null
+          outreach_channel?: string | null
+          phone?: string | null
+          posts_count?: number | null
+          rejection_reason?: string | null
+          source_data?: Json | null
+          source_type: string
+          source_url?: string | null
+          status?: string
+          updated_at?: string | null
+          website?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: string | null
+          ai_analyzed_at?: string | null
+          ai_priority?: string | null
+          ai_reasoning?: string | null
+          ai_recommended_plan?: string | null
+          ai_score?: number | null
+          ai_talking_points?: string[] | null
+          assigned_to?: string | null
+          business_name?: string
+          business_name_ru?: string | null
+          business_type?: string | null
+          category?: string | null
+          city?: string | null
+          contact_count?: number | null
+          contact_name?: string | null
+          converted_at?: string | null
+          converted_provider_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          district?: string | null
+          email?: string | null
+          engagement_rate?: number | null
+          facebook?: string | null
+          first_contact_at?: string | null
+          followers_count?: number | null
+          id?: string
+          instagram?: string | null
+          last_contact_at?: string | null
+          last_post_at?: string | null
+          lat?: number | null
+          lng?: number | null
+          next_followup_at?: string | null
+          notes?: string | null
+          outreach_channel?: string | null
+          phone?: string | null
+          posts_count?: number | null
+          rejection_reason?: string | null
+          source_data?: Json | null
+          source_type?: string
+          source_url?: string | null
+          status?: string
+          updated_at?: string | null
+          website?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_prospects_converted_provider_id_fkey"
+            columns: ["converted_provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
             referencedColumns: ["id"]
