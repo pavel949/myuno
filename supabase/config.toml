@@ -80,3 +80,6 @@ verify_jwt = false
 
 [functions.intake-listing-agent]
 verify_jwt = false
+
+[functions.leads-factory]
+verify_jwt = false

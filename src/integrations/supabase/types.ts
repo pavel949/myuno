@@ -1988,6 +1988,11 @@ export type Database = {
       consultation_requests: {
         Row: {
           admin_notes: string | null
+          ai_analysis_at: string | null
+          ai_priority: string | null
+          ai_reasoning: string | null
+          ai_recommended_action: string | null
+          ai_score: number | null
           assigned_to: string | null
           bedrooms_max: number | null
           bedrooms_min: number | null
@@ -2028,6 +2033,11 @@ export type Database = {
         }
         Insert: {
           admin_notes?: string | null
+          ai_analysis_at?: string | null
+          ai_priority?: string | null
+          ai_reasoning?: string | null
+          ai_recommended_action?: string | null
+          ai_score?: number | null
           assigned_to?: string | null
           bedrooms_max?: number | null
           bedrooms_min?: number | null
@@ -2068,6 +2078,11 @@ export type Database = {
         }
         Update: {
           admin_notes?: string | null
+          ai_analysis_at?: string | null
+          ai_priority?: string | null
+          ai_reasoning?: string | null
+          ai_recommended_action?: string | null
+          ai_score?: number | null
           assigned_to?: string | null
           bedrooms_max?: number | null
           bedrooms_min?: number | null

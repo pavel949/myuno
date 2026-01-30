@@ -4,6 +4,9 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminConsultations, type ConsultationFilters } from '@/hooks/useAdminConsultations';
 import type { ConsultationRequest, ConsultationStatus, ConsultationRequestType } from '@/hooks/useConsultationRequests';
 import { LeadActivityTimeline } from '@/components/admin/LeadActivityTimeline';
+import { LeadAIInsights } from '@/components/admin/leads/LeadAIInsights';
+import { FollowUpGenerator } from '@/components/admin/leads/FollowUpGenerator';
+import { BatchScoreButton } from '@/components/admin/leads/BatchScoreButton';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,7 +22,7 @@ import { ru, enUS } from 'date-fns/locale';
 import {
   Search, Phone, Mail, MessageCircle, Calendar, Users, Home,
   Clock, CheckCircle, XCircle, AlertCircle, Palmtree, TrendingUp, MapPin,
-  BarChart3
+  BarChart3, Flame, Thermometer, Snowflake
 } from 'lucide-react';
 
 const REQUEST_TYPE_CONFIG: Record<ConsultationRequestType, { icon: typeof Palmtree; labelRu: string; labelEn: string; color: string }> = {
@@ -40,13 +43,22 @@ const STATUS_CONFIG: Record<ConsultationStatus, { labelRu: string; labelEn: stri
   cancelled: { labelRu: 'Отменена', labelEn: 'Cancelled', color: 'bg-red-500', icon: XCircle },
 };
 
+// Extended type to include AI fields
+interface ExtendedConsultationRequest extends ConsultationRequest {
+  ai_score?: number | null;
+  ai_priority?: string | null;
+  ai_reasoning?: string | null;
+  ai_recommended_action?: string | null;
+  ai_analysis_at?: string | null;
+}
+
 function ConsultationCard({ 
   consultation, 
   onStatusChange,
   onNotesChange,
   isRu 
 }: { 
-  consultation: ConsultationRequest; 
+  consultation: ExtendedConsultationRequest; 
   onStatusChange: (id: string, status: ConsultationStatus, notes?: string) => void;
   onNotesChange: (id: string, notes: string) => void;
   isRu: boolean;
@@ -88,6 +100,16 @@ function ConsultationCard({
                 <StatusIcon className="w-3 h-3" />
                 {isRu ? statusConfig.labelRu : statusConfig.labelEn}
               </Badge>
+              {/* AI Score Badge */}
+              <LeadAIInsights
+                leadId={consultation.id}
+                aiScore={consultation.ai_score ?? null}
+                aiPriority={consultation.ai_priority ?? null}
+                aiReasoning={consultation.ai_reasoning ?? null}
+                aiRecommendedAction={consultation.ai_recommended_action ?? null}
+                aiAnalysisAt={consultation.ai_analysis_at ?? null}
+                compact
+              />
             </div>
 
             {/* Contact info */}
@@ -339,10 +361,13 @@ export default function AdminConsultations() {
         showBack
         fallbackPath="/admin"
         actions={
-          <Button variant="outline" onClick={() => navigate('/admin/leads')} className="gap-2">
-            <BarChart3 className="h-4 w-4" />
-            {isRu ? 'Аналитика' : 'Analytics'}
-          </Button>
+          <div className="flex gap-2">
+            <BatchScoreButton />
+            <Button variant="outline" onClick={() => navigate('/admin/leads')} className="gap-2">
+              <BarChart3 className="h-4 w-4" />
+              {isRu ? 'Аналитика' : 'Analytics'}
+            </Button>
+          </div>
         }
       />
 
