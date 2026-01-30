@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, User, Building2, Headphones } from 'lucide-react';
+import { Send, User, Building2, Check, CheckCheck } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -12,6 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 import { ChatTransactionWarning } from '@/components/chat/ChatTransactionWarning';
 import { QuickReplies } from '@/components/chat/QuickReplies';
+import { ChatMessageTranslation } from '@/components/chat/ChatMessageTranslation';
 import { cn } from '@/lib/utils';
 
 interface PropertyChatWindowProps {
@@ -208,6 +209,16 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwn, isRu }) =
     }
   };
 
+  // Message status indicators
+  const renderMessageStatus = () => {
+    if (!isOwn) return null;
+    
+    if (message.is_read) {
+      return <CheckCheck className="w-3 h-3 text-primary-foreground/70" />;
+    }
+    return <Check className="w-3 h-3 text-primary-foreground/50" />;
+  };
+
   return (
     <div className={cn('flex gap-2', isOwn ? 'justify-end' : 'justify-start')}>
       {!isOwn && (
@@ -243,11 +254,27 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwn, isRu }) =
           )}
         >
           <p className="text-sm whitespace-pre-wrap break-words">{message.message}</p>
+          <div className={cn(
+            'flex items-center gap-1 mt-1',
+            isOwn ? 'justify-end' : 'justify-start'
+          )}>
+            <span className={cn(
+              'text-[10px]',
+              isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'
+            )}>
+              {format(new Date(message.created_at), 'HH:mm', { locale: isRu ? ru : undefined })}
+            </span>
+            {renderMessageStatus()}
+          </div>
         </div>
         
-        <p className="text-[10px] text-muted-foreground mt-1">
-          {format(new Date(message.created_at), 'HH:mm', { locale: isRu ? ru : undefined })}
-        </p>
+        {/* Translation button - only for messages from others */}
+        {!isOwn && (
+          <ChatMessageTranslation 
+            messageId={message.id}
+            originalText={message.message}
+          />
+        )}
       </div>
     </div>
   );

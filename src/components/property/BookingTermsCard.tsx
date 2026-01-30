@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield, Clock, AlertTriangle, CheckCircle2, XCircle, Info } from 'lucide-react';
+import { Shield, Clock, AlertTriangle, CheckCircle2, XCircle, Info, Calendar } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -8,6 +8,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { CANCELLATION_POLICY_DETAILS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
+import { format, addHours } from 'date-fns';
+import { ru as ruLocale, enUS } from 'date-fns/locale';
 
 interface BookingTermsCardProps {
   cancellationPolicy?: string;
@@ -21,6 +23,10 @@ interface BookingTermsCardProps {
   lateCheckoutPenalty?: number;
   petDeposit?: number;
   className?: string;
+  // New props for refund calculator
+  checkInDate?: Date | string;
+  totalPrice?: number;
+  depositAmount?: number; // 10% prepayment amount
 }
 
 export function BookingTermsCard({
@@ -35,6 +41,9 @@ export function BookingTermsCard({
   lateCheckoutPenalty,
   petDeposit,
   className,
+  checkInDate,
+  totalPrice,
+  depositAmount,
 }: BookingTermsCardProps) {
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
@@ -43,6 +52,24 @@ export function BookingTermsCard({
 
   const policy = CANCELLATION_POLICY_DETAILS[cancellationPolicy as keyof typeof CANCELLATION_POLICY_DETAILS] 
     || CANCELLATION_POLICY_DETAILS.flexible;
+
+  // Calculate refund deadlines if check-in date is provided
+  const checkIn = checkInDate ? new Date(checkInDate) : null;
+  const fullRefundDeadline = checkIn && policy.fullRefundHours > 0 
+    ? addHours(checkIn, -policy.fullRefundHours) 
+    : null;
+  // For partial refund window, use 24h before check-in for policies that have partial refund
+  const partialRefundDeadline = checkIn && policy.partialRefundPercent > 0 
+    ? addHours(checkIn, -24) 
+    : null;
+  
+  // Calculate refund amounts
+  const deposit = depositAmount || (totalPrice ? totalPrice * 0.1 : 0);
+  const remainingAmount = totalPrice ? totalPrice - deposit : 0;
+  const partialRefundAmount = remainingAmount && policy.partialRefundPercent 
+    ? remainingAmount * (policy.partialRefundPercent / 100) 
+    : 0;
+  const fullRefundAmount = remainingAmount; // Full refund = everything except 10% deposit
 
   const policyColorClass = {
     green: 'bg-green-500/10 text-green-600 border-green-500/20',
@@ -99,36 +126,80 @@ export function BookingTermsCard({
                 </p>
               </div>
 
-              {/* Refund timeline visual */}
-              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
-                <span>
-                  {policy.fullRefundHours > 0 
-                    ? (isRu 
-                        ? `Полный возврат за ${policy.fullRefundHours}ч+ до заезда`
-                        : `Full refund ${policy.fullRefundHours}h+ before check-in`)
-                    : (isRu ? 'Возврат недоступен' : 'No refund available')
-                  }
-                </span>
-              </div>
-              {policy.partialRefundPercent > 0 && (
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <AlertTriangle className="w-3.5 h-3.5 text-yellow-500" />
-                  <span>
-                    {isRu 
-                      ? `${policy.partialRefundPercent}% возврат в течение окна`
-                      : `${policy.partialRefundPercent}% refund within window`}
-                  </span>
+              {/* Refund Calculator - Shows exact amounts and dates when available */}
+              {fullRefundDeadline && totalPrice && (
+                <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-green-600" />
+                    <span className="text-sm font-medium text-green-700 dark:text-green-400">
+                      {isRu ? 'Калькулятор возврата' : 'Refund Calculator'}
+                    </span>
+                  </div>
+                  <div className="space-y-1.5 text-xs">
+                    <div className="flex items-start gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-green-700 dark:text-green-300">
+                        {isRu 
+                          ? `До ${format(fullRefundDeadline, 'd MMM, HH:mm', { locale: ruLocale })}: полный возврат ${formatPrice(fullRefundAmount)}`
+                          : `Before ${format(fullRefundDeadline, 'd MMM, h:mm a', { locale: enUS })}: full refund ${formatPrice(fullRefundAmount)}`}
+                      </span>
+                    </div>
+                    {partialRefundDeadline && partialRefundAmount > 0 && (
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className="w-3.5 h-3.5 text-yellow-500 mt-0.5 flex-shrink-0" />
+                        <span className="text-yellow-700 dark:text-yellow-300">
+                          {isRu 
+                            ? `${format(fullRefundDeadline, 'd MMM')} — ${format(partialRefundDeadline, 'd MMM')}: возврат ${formatPrice(partialRefundAmount)} (${policy.partialRefundPercent}%)`
+                            : `${format(fullRefundDeadline, 'd MMM')} — ${format(partialRefundDeadline, 'd MMM')}: refund ${formatPrice(partialRefundAmount)} (${policy.partialRefundPercent}%)`}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex items-start gap-2">
+                      <XCircle className="w-3.5 h-3.5 text-red-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-red-600 dark:text-red-400">
+                        {isRu 
+                          ? `Предоплата ${formatPrice(deposit)} невозвратная`
+                          : `${formatPrice(deposit)} deposit is non-refundable`}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               )}
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <XCircle className="w-3.5 h-3.5 text-red-500" />
-                <span>
-                  {isRu 
-                    ? '10% предоплата невозвратная'
-                    : '10% deposit is non-refundable'}
-                </span>
-              </div>
+
+              {/* Refund timeline visual - when no specific dates available */}
+              {!fullRefundDeadline && (
+                <>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
+                    <span>
+                      {policy.fullRefundHours > 0 
+                        ? (isRu 
+                            ? `Полный возврат за ${policy.fullRefundHours}ч+ до заезда`
+                            : `Full refund ${policy.fullRefundHours}h+ before check-in`)
+                        : (isRu ? 'Возврат недоступен' : 'No refund available')
+                      }
+                    </span>
+                  </div>
+                  {policy.partialRefundPercent > 0 && (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <AlertTriangle className="w-3.5 h-3.5 text-yellow-500" />
+                      <span>
+                        {isRu 
+                          ? `${policy.partialRefundPercent}% возврат в течение окна`
+                          : `${policy.partialRefundPercent}% refund within window`}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <XCircle className="w-3.5 h-3.5 text-red-500" />
+                    <span>
+                      {isRu 
+                        ? '10% предоплата невозвратная'
+                        : '10% deposit is non-refundable'}
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Fees & Deposits */}

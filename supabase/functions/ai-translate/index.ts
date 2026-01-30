@@ -43,7 +43,13 @@ serve(async (req) => {
 
     const { text, fields, targetLang = 'ru' } = await req.json();
 
-    const langName = targetLang === 'ru' ? 'Russian' : 'English';
+    // Support Russian, English, and Thai
+    const langNames: Record<string, string> = {
+      ru: 'Russian',
+      en: 'English',
+      th: 'Thai',
+    };
+    const langName = langNames[targetLang] || 'English';
 
     // Handle multiple fields translation
     if (fields && typeof fields === 'object') {

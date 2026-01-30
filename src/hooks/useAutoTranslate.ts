@@ -12,7 +12,7 @@ export function useAutoTranslate() {
 
   const translate = useCallback(async (
     text: string,
-    targetLang: 'ru' | 'en' = 'ru'
+    targetLang: 'ru' | 'en' | 'th' = 'ru'
   ): Promise<TranslationResult> => {
     if (!text.trim()) {
       return { translated: '', success: false };
@@ -44,7 +44,7 @@ export function useAutoTranslate() {
 
   const translateMultiple = useCallback(async (
     fields: Record<string, string>,
-    targetLang: 'ru' | 'en' = 'ru'
+    targetLang: 'ru' | 'en' | 'th' = 'ru'
   ): Promise<Record<string, string>> => {
     const results: Record<string, string> = {};
     
