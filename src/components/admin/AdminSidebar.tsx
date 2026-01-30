@@ -6,7 +6,8 @@ import {
   Cog,
   Layers,
   LogOut,
-  ChevronRight
+  ChevronRight,
+  Bot
 } from 'lucide-react';
 import {
   Sidebar,
@@ -32,7 +33,7 @@ interface NavItem {
   descriptionRu: string;
 }
 
-// 4 mega-sections as per the plan
+// 5 mega-sections as per the plan
 const navigationItems: NavItem[] = [
   { 
     title: 'Dashboard', 
@@ -57,6 +58,14 @@ const navigationItems: NavItem[] = [
     icon: Layers,
     description: 'Moderation, leads, bookings',
     descriptionRu: 'Модерация, лиды, заказы'
+  },
+  { 
+    title: 'AI Agents', 
+    titleRu: 'AI Агенты', 
+    path: '/admin/ai-agents', 
+    icon: Bot,
+    description: 'Manage AI assistants',
+    descriptionRu: 'Управление AI-агентами'
   },
   { 
     title: 'Control', 

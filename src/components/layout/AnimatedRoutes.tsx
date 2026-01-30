@@ -261,6 +261,10 @@ const AdminDataImport = lazy(() => import('@/pages/admin/AdminDataImport'));
 const AdminUnifiedCatalog = lazy(() => import('@/pages/admin/AdminUnifiedCatalog'));
 const AdminControlCenter = lazy(() => import('@/pages/admin/AdminControlCenter'));
 
+// AI Agents pages
+const AdminAIAgents = lazy(() => import('@/pages/admin/AdminAIAgents'));
+const AdminAIAgentEditor = lazy(() => import('@/pages/admin/AdminAIAgentEditor'));
+
 // Admin route wrapper with layout
 const AdminRouteLayout = () => (
   <AdminGuard>
@@ -670,6 +674,9 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/admin/marketplace/vendors" element={<AdminMarketplaceVendors />} />
           {/* Data Import Hub */}
           <Route path="/admin/data-import" element={<AdminDataImport />} />
+          {/* AI Agents */}
+          <Route path="/admin/ai-agents" element={<AdminAIAgents />} />
+          <Route path="/admin/ai-agents/:id" element={<AdminAIAgentEditor />} />
         </Route>
         
         {/* Staff Routes - Protected */}
