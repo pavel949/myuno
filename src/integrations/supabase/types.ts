@@ -98,6 +98,154 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_agent_knowledge: {
+        Row: {
+          agent_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_published: boolean
+          knowledge_base: string | null
+          published_at: string | null
+          system_prompt: string
+          version: number
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_published?: boolean
+          knowledge_base?: string | null
+          published_at?: string | null
+          system_prompt: string
+          version?: number
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_published?: boolean
+          knowledge_base?: string | null
+          published_at?: string | null
+          system_prompt?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agent_knowledge_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_agent_logs: {
+        Row: {
+          agent_id: string
+          created_at: string
+          feedback: string | null
+          id: string
+          messages_count: number | null
+          response_time_ms: number | null
+          session_id: string | null
+          tokens_used: number | null
+          user_id: string | null
+          user_rating: number | null
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          messages_count?: number | null
+          response_time_ms?: number | null
+          session_id?: string | null
+          tokens_used?: number | null
+          user_id?: string | null
+          user_rating?: number | null
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          messages_count?: number | null
+          response_time_ms?: number | null
+          session_id?: string | null
+          tokens_used?: number | null
+          user_id?: string | null
+          user_rating?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agent_logs_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_agents: {
+        Row: {
+          created_at: string
+          description_en: string | null
+          description_ru: string | null
+          icon: string | null
+          id: string
+          is_active: boolean
+          is_public: boolean
+          max_tokens: number
+          model: string
+          name_en: string
+          name_ru: string
+          slug: string
+          target_audience: string[] | null
+          temperature: number
+          tone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          is_public?: boolean
+          max_tokens?: number
+          model?: string
+          name_en: string
+          name_ru: string
+          slug: string
+          target_audience?: string[] | null
+          temperature?: number
+          tone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          is_public?: boolean
+          max_tokens?: number
+          model?: string
+          name_en?: string
+          name_ru?: string
+          slug?: string
+          target_audience?: string[] | null
+          temperature?: number
+          tone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       babysitters: {
         Row: {
           age_groups: string[] | null
