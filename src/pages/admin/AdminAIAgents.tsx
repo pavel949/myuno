@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Plus, 
   Bot, 
@@ -19,7 +20,8 @@ import {
   Trash2,
   Edit,
   Play,
-  Pause
+  Pause,
+  BarChart3
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -39,6 +41,11 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useUpdateAgent } from '@/hooks/useAIAgents';
+
+// AI Insights Components
+import { AIInsightsOverview } from '@/components/admin/ai-insights/AIInsightsOverview';
+import { AIROIReport } from '@/components/admin/ai-insights/AIROIReport';
+import { AIWeeklySummary } from '@/components/admin/ai-insights/AIWeeklySummary';
 
 const iconMap: Record<string, React.ElementType> = {
   Bot,
@@ -208,8 +215,8 @@ export default function AdminAIAgents() {
           </h1>
           <p className="text-muted-foreground text-sm">
             {isRussian 
-              ? 'Управление AI-ассистентами платформы' 
-              : 'Manage platform AI assistants'}
+              ? 'Управление AI-ассистентами и аналитика' 
+              : 'Manage AI assistants & analytics'}
           </p>
         </div>
         <Button onClick={handleCreateAgent} disabled={createAgent.isPending}>
@@ -218,82 +225,115 @@ export default function AdminAIAgents() {
         </Button>
       </div>
 
-      {/* Loading State */}
-      {isLoading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <Card key={i}>
-              <CardHeader>
-                <Skeleton className="h-10 w-10 rounded-xl" />
-                <Skeleton className="h-5 w-32 mt-2" />
-                <Skeleton className="h-4 w-24" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-12 w-full" />
-              </CardContent>
+      {/* Tabs for Agents vs Insights */}
+      <Tabs defaultValue="agents" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="agents" className="gap-2">
+            <Bot className="w-4 h-4" />
+            {isRussian ? 'Агенты' : 'Agents'}
+          </TabsTrigger>
+          <TabsTrigger value="insights" className="gap-2">
+            <BarChart3 className="w-4 h-4" />
+            {isRussian ? 'Аналитика' : 'Insights'}
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Agents Tab */}
+        <TabsContent value="agents" className="space-y-6">
+          {/* Loading State */}
+          {isLoading && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3, 4].map((i) => (
+                <Card key={i}>
+                  <CardHeader>
+                    <Skeleton className="h-10 w-10 rounded-xl" />
+                    <Skeleton className="h-5 w-32 mt-2" />
+                    <Skeleton className="h-4 w-24" />
+                  </CardHeader>
+                  <CardContent>
+                    <Skeleton className="h-12 w-full" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {/* Active Agents */}
+          {!isLoading && activeAgents.length > 0 && (
+            <div className="space-y-3">
+              <h2 className="text-sm font-medium text-muted-foreground">
+                {isRussian ? 'Активные агенты' : 'Active Agents'} ({activeAgents.length})
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {activeAgents.map((agent) => (
+                  <AgentCard 
+                    key={agent.id} 
+                    agent={agent}
+                    onEdit={() => handleEdit(agent)}
+                    onDelete={() => handleDeleteClick(agent)}
+                    onToggleActive={() => handleToggleActive(agent)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Inactive Agents */}
+          {!isLoading && inactiveAgents.length > 0 && (
+            <div className="space-y-3">
+              <h2 className="text-sm font-medium text-muted-foreground">
+                {isRussian ? 'Неактивные агенты' : 'Inactive Agents'} ({inactiveAgents.length})
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {inactiveAgents.map((agent) => (
+                  <AgentCard 
+                    key={agent.id} 
+                    agent={agent}
+                    onEdit={() => handleEdit(agent)}
+                    onDelete={() => handleDeleteClick(agent)}
+                    onToggleActive={() => handleToggleActive(agent)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!isLoading && agents?.length === 0 && (
+            <Card className="p-12 text-center">
+              <Bot className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="font-medium mb-2">
+                {isRussian ? 'Нет агентов' : 'No Agents'}
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                {isRussian 
+                  ? 'Создайте первого AI-агента для вашей платформы' 
+                  : 'Create your first AI agent for the platform'}
+              </p>
+              <Button onClick={handleCreateAgent}>
+                <Plus className="h-4 w-4 mr-2" />
+                {isRussian ? 'Создать агента' : 'Create Agent'}
+              </Button>
             </Card>
-          ))}
-        </div>
-      )}
+          )}
+        </TabsContent>
 
-      {/* Active Agents */}
-      {!isLoading && activeAgents.length > 0 && (
-        <div className="space-y-3">
-          <h2 className="text-sm font-medium text-muted-foreground">
-            {isRussian ? 'Активные агенты' : 'Active Agents'} ({activeAgents.length})
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {activeAgents.map((agent) => (
-              <AgentCard 
-                key={agent.id} 
-                agent={agent}
-                onEdit={() => handleEdit(agent)}
-                onDelete={() => handleDeleteClick(agent)}
-                onToggleActive={() => handleToggleActive(agent)}
-              />
-            ))}
+        {/* Insights Tab - Phase J */}
+        <TabsContent value="insights" className="space-y-6">
+          {/* Overview + Weekly Summary Row */}
+          <div className="grid lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-2">
+              <AIInsightsOverview />
+            </div>
+            <div>
+              <AIWeeklySummary />
+            </div>
           </div>
-        </div>
-      )}
-
-      {/* Inactive Agents */}
-      {!isLoading && inactiveAgents.length > 0 && (
-        <div className="space-y-3">
-          <h2 className="text-sm font-medium text-muted-foreground">
-            {isRussian ? 'Неактивные агенты' : 'Inactive Agents'} ({inactiveAgents.length})
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {inactiveAgents.map((agent) => (
-              <AgentCard 
-                key={agent.id} 
-                agent={agent}
-                onEdit={() => handleEdit(agent)}
-                onDelete={() => handleDeleteClick(agent)}
-                onToggleActive={() => handleToggleActive(agent)}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Empty State */}
-      {!isLoading && agents?.length === 0 && (
-        <Card className="p-12 text-center">
-          <Bot className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h3 className="font-medium mb-2">
-            {isRussian ? 'Нет агентов' : 'No Agents'}
-          </h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            {isRussian 
-              ? 'Создайте первого AI-агента для вашей платформы' 
-              : 'Create your first AI agent for the platform'}
-          </p>
-          <Button onClick={handleCreateAgent}>
-            <Plus className="h-4 w-4 mr-2" />
-            {isRussian ? 'Создать агента' : 'Create Agent'}
-          </Button>
-        </Card>
-      )}
+          
+          {/* ROI Report */}
+          <AIROIReport />
+        </TabsContent>
+      </Tabs>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
