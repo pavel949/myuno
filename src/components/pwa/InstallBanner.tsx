@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, X, Smartphone, Share, Plus } from 'lucide-react';
+import { Download, X, Smartphone, Share, Plus, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -12,6 +12,7 @@ const BANNER_DISMISS_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
 export function InstallBanner() {
   const [isVisible, setIsVisible] = useState(false);
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { isInstalled, canInstall, isIOS, install } = usePWAInstall();
   const isMobileViewport = useIsMobile();
   const { language } = useLanguage();
@@ -45,18 +46,24 @@ export function InstallBanner() {
   };
 
   const handleInstall = async () => {
-    if (canInstall) {
-      // Android/Chrome - trigger native install prompt
-      const success = await install();
-      if (success) {
-        setIsVisible(false);
+    setIsLoading(true);
+    
+    try {
+      if (canInstall) {
+        // Android/Chrome - trigger native install prompt
+        const success = await install();
+        if (success) {
+          setIsVisible(false);
+        }
+      } else if (isIOS) {
+        // iOS - show inline instructions
+        setShowIOSInstructions(true);
+      } else {
+        // Fallback - go to install page
+        window.location.href = '/install';
       }
-    } else if (isIOS) {
-      // iOS - show inline instructions
-      setShowIOSInstructions(true);
-    } else {
-      // Fallback - go to install page
-      window.location.href = '/install';
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -106,11 +113,18 @@ export function InstallBanner() {
                   onClick={handleInstall}
                   size="sm"
                   variant="secondary"
-                  className="shrink-0 gap-1.5 bg-white text-primary hover:bg-white/90 h-9 px-3"
+                  disabled={isLoading}
+                  className="shrink-0 gap-1.5 bg-white text-primary hover:bg-white/90 h-9 px-3 disabled:opacity-70"
                 >
-                  <Download className="h-4 w-4" />
+                  {isLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4" />
+                  )}
                   <span className="text-sm font-medium">
-                    {isRu ? 'Скачать' : 'Install'}
+                    {isLoading 
+                      ? (isRu ? 'Загрузка...' : 'Loading...') 
+                      : (isRu ? 'Скачать' : 'Install')}
                   </span>
                 </Button>
 
