@@ -62,3 +62,6 @@ verify_jwt = false
 
 [functions.create-flowers-checkout]
 verify_jwt = false
+
+[functions.ai-smart-search]
+verify_jwt = false
