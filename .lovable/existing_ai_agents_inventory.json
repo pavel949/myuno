@@ -1,0 +1,278 @@
+{
+  "version": "1.0",
+  "generated": "2026-01-30",
+  "discovery_method": "database_query + edge_function_analysis + frontend_search",
+  "total_agents": 10,
+  "agents": {
+    "database_managed": [
+      {
+        "agent_id": "cb63d7e9-ea19-4916-b86c-f4338670c38e",
+        "slug": "owner-assistant",
+        "name_en": "Owner Assistant",
+        "name_ru": "Ассистент владельца",
+        "location": "DB + ai-agent edge function",
+        "invocation_method": "manual",
+        "trigger_source": "user_click (Owner Dashboard AI chat)",
+        "frontend_entry": "src/hooks/useOwnerAIChat.ts",
+        "edge_function": "ai-owner-assistant (legacy) + ai-agent (new)",
+        "input_data": {
+          "messages": "ChatMessage[]",
+          "context": "{ propertiesCount, activeBookings, pendingTasks }"
+        },
+        "output_data": "SSE stream (text/event-stream)",
+        "tables_read": ["ai_agents", "ai_agent_knowledge"],
+        "tables_written": ["ai_agent_logs"],
+        "side_effects": "logging only",
+        "money_touch": false,
+        "security_touch": false,
+        "current_status": "active",
+        "invocation_count": 2,
+        "avg_response_time_ms": 6312,
+        "last_invocation": "2026-01-30 12:24:17",
+        "knowledge_base_chars": 4375,
+        "confidence_level": "high"
+      },
+      {
+        "agent_id": "184032c0-a583-4942-84dc-5a96db6b3554",
+        "slug": "property-search",
+        "name_en": "Property Search",
+        "name_ru": "Поиск недвижимости",
+        "location": "DB + ai-agent edge function",
+        "invocation_method": "manual",
+        "trigger_source": "user_click (Property Search page)",
+        "frontend_entry": "src/hooks/usePropertyAIChat.ts",
+        "edge_function": "ai-property-assistant (legacy) + ai-agent (new)",
+        "input_data": {
+          "messages": "ChatMessage[]",
+          "context": "{ budget, dates, guests, preferences }"
+        },
+        "output_data": "SSE stream (text/event-stream)",
+        "tables_read": ["ai_agents", "ai_agent_knowledge"],
+        "tables_written": ["ai_agent_logs"],
+        "side_effects": "logging only",
+        "money_touch": false,
+        "security_touch": false,
+        "current_status": "active",
+        "invocation_count": 1,
+        "avg_response_time_ms": 1471,
+        "last_invocation": "2026-01-30 12:24:18",
+        "knowledge_base_chars": 4146,
+        "confidence_level": "high"
+      },
+      {
+        "agent_id": "4b549b07-3c06-4de5-9cd6-ae0dc3f35cd6",
+        "slug": "support-chat",
+        "name_en": "Support Chat",
+        "name_ru": "Чат поддержки",
+        "location": "DB + ai-agent edge function",
+        "invocation_method": "manual",
+        "trigger_source": "user_click (Chat FAB button)",
+        "frontend_entry": ["src/components/chat/AIChatbot.tsx", "src/components/chat/UnifiedChatFAB.tsx"],
+        "edge_function": "ai-support-chat (legacy) + ai-agent (new)",
+        "input_data": {
+          "messages": "ChatMessage[]"
+        },
+        "output_data": "SSE stream (text/event-stream)",
+        "tables_read": ["ai_agents", "ai_agent_knowledge"],
+        "tables_written": ["ai_agent_logs"],
+        "side_effects": "logging only",
+        "money_touch": false,
+        "security_touch": false,
+        "current_status": "active",
+        "invocation_count": 0,
+        "last_invocation": null,
+        "knowledge_base_chars": 561,
+        "confidence_level": "high"
+      },
+      {
+        "agent_id": "39c6177d-d1b5-4754-9089-91cc01d8791e",
+        "slug": "smart-search",
+        "name_en": "Smart Search",
+        "name_ru": "Умный поиск",
+        "location": "DB + ai-agent edge function",
+        "invocation_method": "event",
+        "trigger_source": "user_typing (search bar with question detection)",
+        "frontend_entry": "src/hooks/useAISearch.ts",
+        "edge_function": "ai-smart-search",
+        "input_data": {
+          "query": "string",
+          "language": "en|ru",
+          "personas": "string[]"
+        },
+        "output_data": "JSON { type, answer, suggestedCategories, suggestedServices }",
+        "tables_read": ["ai_agents", "ai_agent_knowledge"],
+        "tables_written": ["ai_agent_logs"],
+        "side_effects": "logging only",
+        "money_touch": false,
+        "security_touch": false,
+        "current_status": "active",
+        "invocation_count": 0,
+        "last_invocation": null,
+        "knowledge_base_chars": 835,
+        "confidence_level": "high"
+      }
+    ],
+    "standalone_edge_functions": [
+      {
+        "agent_id": "ai-translate",
+        "name": "AI Translate",
+        "location": "edge function only",
+        "invocation_method": "manual",
+        "trigger_source": "user_click (translate button in forms)",
+        "frontend_entry": ["src/hooks/useAutoTranslate.ts", "src/components/forms/TranslatableInput.tsx"],
+        "edge_function": "ai-translate",
+        "input_data": {
+          "text": "string | null",
+          "fields": "Record<string, string> | null",
+          "targetLang": "ru|en|th"
+        },
+        "output_data": "JSON { translated } or { translations }",
+        "tables_read": [],
+        "tables_written": [],
+        "side_effects": "none",
+        "money_touch": false,
+        "security_touch": false,
+        "current_status": "active",
+        "model": "google/gemini-2.5-flash",
+        "rate_limited": true,
+        "confidence_level": "high"
+      },
+      {
+        "agent_id": "ai-generate-description",
+        "name": "AI Description Generator",
+        "location": "edge function only",
+        "invocation_method": "manual",
+        "trigger_source": "user_click (generate description button)",
+        "frontend_entry": "src/components/shared/AIDescriptionGenerator.tsx",
+        "edge_function": "ai-generate-description",
+        "input_data": {
+          "type": "product|service|property",
+          "name": "string",
+          "language": "en|ru",
+          "details": "object"
+        },
+        "output_data": "JSON { description }",
+        "tables_read": [],
+        "tables_written": [],
+        "side_effects": "none",
+        "money_touch": false,
+        "security_touch": false,
+        "current_status": "active",
+        "model": "google/gemini-2.5-flash",
+        "confidence_level": "high"
+      },
+      {
+        "agent_id": "ai-smart-data",
+        "name": "AI Smart Data",
+        "location": "edge function only",
+        "invocation_method": "manual",
+        "trigger_source": "user_action (import wizard, photo analysis)",
+        "frontend_entry": [
+          "src/components/shared/AITextExtractor.tsx",
+          "src/components/shared/AISmartFieldMapper.tsx",
+          "src/components/shared/AIPhotoAnalyzer.tsx"
+        ],
+        "edge_function": "ai-smart-data",
+        "input_data": {
+          "type": "field-mapping|text-extraction|photo-analysis",
+          "varies_by_type": true
+        },
+        "output_data": "JSON with structured extraction results",
+        "tables_read": [],
+        "tables_written": [],
+        "side_effects": "none",
+        "money_touch": false,
+        "security_touch": false,
+        "current_status": "active",
+        "models_used": ["google/gemini-3-flash-preview", "google/gemini-2.5-flash (photo)"],
+        "tool_calling": true,
+        "confidence_level": "high"
+      },
+      {
+        "agent_id": "ai-personalize-home",
+        "name": "AI Personalize Home",
+        "location": "edge function only",
+        "invocation_method": "event",
+        "trigger_source": "page_load (home page)",
+        "frontend_entry": "UNKNOWN - needs verification",
+        "edge_function": "ai-personalize-home",
+        "input_data": {
+          "personas": "UserPersona[]",
+          "language": "en|ru",
+          "recentCategories": "string[]"
+        },
+        "output_data": "JSON { greeting, priorityCategories, suggestedServices }",
+        "tables_read": [],
+        "tables_written": [],
+        "side_effects": "none",
+        "money_touch": false,
+        "security_touch": false,
+        "current_status": "active",
+        "uses_ai_model": false,
+        "note": "Rule-based only, no AI model calls despite name",
+        "confidence_level": "high"
+      }
+    ],
+    "legacy_functions": [
+      {
+        "agent_id": "ai-owner-assistant-legacy",
+        "name": "Owner Assistant (Legacy)",
+        "location": "edge function",
+        "edge_function": "ai-owner-assistant",
+        "status": "ACTIVE but REDUNDANT",
+        "note": "Has hardcoded prompts. DB-managed version exists. Recommend deprecation.",
+        "knowledge_base_size": "~5500 chars hardcoded",
+        "rate_limited": true,
+        "confidence_level": "high"
+      },
+      {
+        "agent_id": "ai-property-assistant-legacy",
+        "name": "Property Assistant (Legacy)",
+        "location": "edge function",
+        "edge_function": "ai-property-assistant",
+        "status": "ACTIVE but REDUNDANT",
+        "note": "Has hardcoded prompts. DB-managed version exists. Recommend deprecation.",
+        "knowledge_base_size": "~7000 chars hardcoded",
+        "confidence_level": "high"
+      },
+      {
+        "agent_id": "ai-support-chat-legacy",
+        "name": "Support Chat (Legacy)",
+        "location": "edge function",
+        "edge_function": "ai-support-chat",
+        "status": "ACTIVE - still in use by frontend",
+        "note": "Frontend directly calls this. Not yet migrated to ai-agent.",
+        "rate_limited": true,
+        "confidence_level": "high"
+      }
+    ]
+  },
+  "infrastructure": {
+    "ai_gateway": "https://ai.gateway.lovable.dev/v1/chat/completions",
+    "api_key_env": "LOVABLE_API_KEY",
+    "models_in_use": [
+      "google/gemini-3-flash-preview (default)",
+      "google/gemini-2.5-flash (translation, description, photo)"
+    ],
+    "db_tables": {
+      "ai_agents": "Agent registry (4 active agents)",
+      "ai_agent_knowledge": "Versioned prompts and knowledge (4 versions)",
+      "ai_agent_logs": "Usage tracking (3 log entries)"
+    },
+    "rate_limiting": {
+      "module": "supabase/functions/_shared/rate-limit.ts",
+      "limit_type": "RATE_LIMITS.ai",
+      "applied_to": ["ai-support-chat", "ai-owner-assistant", "ai-translate"]
+    },
+    "db_triggers_ai_related": []
+  },
+  "summary": {
+    "total_unique_agents": 10,
+    "db_managed": 4,
+    "standalone_edge": 4,
+    "legacy_redundant": 2,
+    "money_touching": 0,
+    "security_touching": 0,
+    "all_safe": true
+  }
+}

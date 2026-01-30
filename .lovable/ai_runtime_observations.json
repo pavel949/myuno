@@ -1,0 +1,140 @@
+{
+  "version": "1.0",
+  "generated": "2026-01-30",
+  "observation_mode": "PASSIVE",
+  "note": "All observations from existing logs and code analysis. No runtime modifications made.",
+  "agent_observations": {
+    "owner-assistant": {
+      "agent_id": "cb63d7e9-ea19-4916-b86c-f4338670c38e",
+      "observations": [
+        {
+          "timestamp": "2026-01-30 12:22:02",
+          "event": "invocation",
+          "response_time_ms": 6312,
+          "tokens_used": 0,
+          "user_rating": null,
+          "session_id": null,
+          "error": null
+        },
+        {
+          "timestamp": "2026-01-30 12:24:17",
+          "event": "invocation",
+          "response_time_ms": 6312,
+          "tokens_used": 0,
+          "user_rating": null,
+          "session_id": null,
+          "error": null
+        }
+      ],
+      "patterns": {
+        "avg_response_time_ms": 6312,
+        "total_invocations": 2,
+        "error_rate": 0,
+        "rating_coverage": 0
+      }
+    },
+    "property-search": {
+      "agent_id": "184032c0-a583-4942-84dc-5a96db6b3554",
+      "observations": [
+        {
+          "timestamp": "2026-01-30 12:24:18",
+          "event": "invocation",
+          "response_time_ms": 1471,
+          "tokens_used": 0,
+          "user_rating": null,
+          "session_id": null,
+          "error": null
+        }
+      ],
+      "patterns": {
+        "avg_response_time_ms": 1471,
+        "total_invocations": 1,
+        "error_rate": 0,
+        "rating_coverage": 0
+      }
+    },
+    "support-chat": {
+      "agent_id": "4b549b07-3c06-4de5-9cd6-ae0dc3f35cd6",
+      "observations": [],
+      "patterns": {
+        "avg_response_time_ms": null,
+        "total_invocations": 0,
+        "error_rate": null,
+        "rating_coverage": null
+      },
+      "note": "No invocations recorded. May be using legacy edge function."
+    },
+    "smart-search": {
+      "agent_id": "39c6177d-d1b5-4754-9089-91cc01d8791e",
+      "observations": [],
+      "patterns": {
+        "avg_response_time_ms": null,
+        "total_invocations": 0,
+        "error_rate": null,
+        "rating_coverage": null
+      },
+      "note": "No DB logs. Function may not use ai-agent endpoint."
+    }
+  },
+  "infrastructure_observations": {
+    "ai_gateway": {
+      "status": "operational",
+      "endpoint": "https://ai.gateway.lovable.dev/v1/chat/completions",
+      "models_used": ["google/gemini-3-flash-preview", "google/gemini-2.5-flash"],
+      "streaming": true,
+      "rate_limiting_active": true
+    },
+    "logging_system": {
+      "table": "ai_agent_logs",
+      "total_records": 3,
+      "fields_captured": ["agent_id", "user_id", "session_id", "messages_count", "response_time_ms", "tokens_used", "user_rating", "feedback"],
+      "gaps": ["tokens_used always 0", "user_rating always null", "session_id rarely set"]
+    },
+    "knowledge_management": {
+      "table": "ai_agent_knowledge",
+      "versioning": true,
+      "total_versions": 4,
+      "all_published": true,
+      "injection_method": "{{KNOWLEDGE_BASE}} placeholder replacement"
+    }
+  },
+  "event_trace": {
+    "typical_flow": [
+      "1. User action triggers frontend hook",
+      "2. Hook calls edge function with messages + context",
+      "3. Edge function loads agent config from DB (if ai-agent)",
+      "4. Edge function constructs system prompt",
+      "5. Edge function calls Lovable AI Gateway",
+      "6. Gateway returns SSE stream",
+      "7. Edge function passes stream to client",
+      "8. Edge function logs usage asynchronously"
+    ],
+    "observed_issues": [
+      {
+        "issue": "Tokens not tracked",
+        "location": "ai-agent/index.ts line 170",
+        "reason": "tokens_used hardcoded to 0, not extracted from AI response"
+      },
+      {
+        "issue": "Async logging may fail silently",
+        "location": "ai-agent/index.ts line 174",
+        "reason": "Promise not awaited, function may terminate before log completes"
+      }
+    ]
+  },
+  "recommendations": {
+    "immediate": [
+      "Fix tokens_used tracking - extract from AI response headers or count estimate",
+      "Add session_id generation in frontend for conversation tracking"
+    ],
+    "short_term": [
+      "Migrate frontend to use unified ai-agent endpoint",
+      "Deprecate legacy hardcoded edge functions",
+      "Add user rating prompt after AI conversations"
+    ],
+    "long_term": [
+      "Implement A/B testing for prompts",
+      "Add conversation persistence for multi-turn analysis"
+    ]
+  }
+}
