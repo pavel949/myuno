@@ -22,6 +22,7 @@ import { HomeProductsSection } from '@/components/home/HomeProductsSection';
 import { KnowledgeHubBanner } from '@/components/home/KnowledgeHubBanner';
 import { supabase } from '@/integrations/supabase/client';
 import { HeroBanner } from '@/components/home/HeroBanner';
+import { InstallBanner } from '@/components/pwa/InstallBanner';
 
 // Lazy load only modals (opened by user action)
 const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
@@ -106,6 +107,9 @@ const Index = () => {
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="px-4 py-4 pb-24 space-y-4" key={refreshKey}>
           
+          {/* PWA Install Banner - shows on mobile if not installed */}
+          <InstallBanner />
+
           {/* Hero Banner - Platform positioning */}
           <HeroBanner />
 
