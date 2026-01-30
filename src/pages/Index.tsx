@@ -20,6 +20,7 @@ import { ContentModeToggle, ContentMode } from '@/components/home/ContentModeTog
 import { HomeCategoryRibbon } from '@/components/home/HomeCategoryRibbon';
 import { HomeProductsSection } from '@/components/home/HomeProductsSection';
 import { KnowledgeHubBanner } from '@/components/home/KnowledgeHubBanner';
+import { SafetyBanner } from '@/components/home/SafetyBanner';
 import { supabase } from '@/integrations/supabase/client';
 import { HeroBanner } from '@/components/home/HeroBanner';
 import { InstallBanner } from '@/components/pwa/InstallBanner';
@@ -146,6 +147,9 @@ const Index = () => {
           {contentMode === 'services' ? (
             /* Services Mode Content */
             <>
+              {/* Safety Banner - always visible trust marker */}
+              <SafetyBanner />
+
               {/* Smart Widget & Quick Actions */}
               <div className="space-y-3">
                 <SmartWidget />

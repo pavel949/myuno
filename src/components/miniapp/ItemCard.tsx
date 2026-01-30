@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { triggerRipple } from '@/hooks/useRipple';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { iconSizes } from '@/lib/iconMap';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 
@@ -23,6 +24,7 @@ export interface ItemCardProps {
   priceLabel?: string;
   pricePrefix?: string;
   priceUnit?: string;
+  /** @deprecated Use useCurrency context instead. This prop is ignored. */
   currency?: string;
   rating?: number;
   reviewCount?: number;
@@ -50,7 +52,7 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
       priceLabel,
       pricePrefix,
       priceUnit,
-      currency = '฿',
+      currency: _currency, // Deprecated, ignored
       rating,
       reviewCount,
       location,
@@ -67,6 +69,8 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
     ref
   ) => {
   const { language, t } = useLanguage();
+  const { formatPrice, currencyInfo } = useCurrency();
+  const symbol = currencyInfo.symbol;
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isAvailable) return;
@@ -152,11 +156,11 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
           {price !== undefined && (
             <div className="flex items-center gap-2 mt-2">
               <span className="text-base font-bold text-primary">
-                {currency}{price.toLocaleString()}
+                {symbol}{price.toLocaleString()}
               </span>
               {originalPrice && (
                 <span className="text-xs text-muted-foreground line-through">
-                  {currency}{originalPrice.toLocaleString()}
+                  {symbol}{originalPrice.toLocaleString()}
                 </span>
               )}
             </div>
@@ -275,7 +279,7 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
               <div className="text-right">
                 {pricePrefix && <span className="text-xs text-muted-foreground mr-1">{pricePrefix}</span>}
                 <span className="text-base font-bold text-primary">
-                  {currency}{price.toLocaleString()}
+                  {symbol}{price.toLocaleString()}
                 </span>
                 {priceUnit && <span className="text-xs text-muted-foreground">{priceUnit}</span>}
                 {priceLabel && (

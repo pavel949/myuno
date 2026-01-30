@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { useFinancialStats } from '@/hooks/usePropertyFinancials';
 import { useDepositStats } from '@/hooks/useDepositStats';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,14 +11,17 @@ import { cn } from '@/lib/utils';
 export function MoneyBlock() {
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { currencyInfo, convertPrice } = useCurrency();
   const isRu = language === 'ru';
   const { data: stats, isLoading } = useFinancialStats();
   const { data: depositStats, isLoading: depositsLoading } = useDepositStats();
 
-  const formatCurrency = (value: number) => {
-    if (value >= 1000000) return `฿${(value / 1000000).toFixed(1)}M`;
-    if (value >= 1000) return `฿${(value / 1000).toFixed(0)}K`;
-    return `฿${value.toFixed(0)}`;
+  const formatCurrency = (valueInTHB: number) => {
+    const converted = convertPrice(valueInTHB);
+    const symbol = currencyInfo.symbol;
+    if (converted >= 1000000) return `${symbol}${(converted / 1000000).toFixed(1)}M`;
+    if (converted >= 1000) return `${symbol}${(converted / 1000).toFixed(0)}K`;
+    return `${symbol}${converted.toFixed(0)}`;
   };
 
   if (isLoading || depositsLoading) {
@@ -95,7 +99,7 @@ export function MoneyBlock() {
               <span className="text-[10px] text-muted-foreground uppercase">{isRu ? 'Депозит' : 'Deposits'}</span>
             </div>
             <p className="text-sm font-semibold">
-              {depositStats ? formatCurrency(depositStats.totalHeld) : '฿0'}
+              {depositStats ? formatCurrency(depositStats.totalHeld) : `${currencyInfo.symbol}0`}
             </p>
             {depositStats && depositStats.pendingReturn > 0 && (
               <p className="text-[10px] text-warning">{depositStats.pendingReturn} pending</p>
