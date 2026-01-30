@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
   DialogContent,
@@ -25,10 +26,13 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-  Loader2
+  Loader2,
+  Building2,
+  History
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { PayoutMethodsSection } from '@/components/vendor/PayoutMethodsSection';
 
 const paymentMethods = [
   { value: 'bank_card', labelEn: 'Bank Card', labelRu: 'Банковская карта' },
@@ -165,53 +169,70 @@ const VendorPayouts = () => {
 
   return (
     <div className="p-4 space-y-6">
-
-        {/* Balance Card */}
-        <Card className="mb-6 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="p-3 rounded-full bg-primary/10">
-                <Wallet className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  {isRussian ? 'Доступно к выводу' : 'Available for payout'}
-                </p>
-                <p className="text-3xl font-bold">{pendingPayout.toLocaleString()} ₽</p>
-              </div>
+      {/* Balance Card */}
+      <Card className="mb-6 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="p-3 rounded-full bg-primary/10">
+              <Wallet className="h-6 w-6 text-primary" />
             </div>
-            
-            <Button 
-              className="w-full" 
-              size="lg"
-              onClick={() => setIsDialogOpen(true)}
-              disabled={pendingPayout <= 0}
-            >
-              <ArrowDownToLine className="h-4 w-4 mr-2" />
-              {isRussian ? 'Вывести средства' : 'Withdraw Funds'}
-            </Button>
-          </CardContent>
-        </Card>
+            <div>
+              <p className="text-sm text-muted-foreground">
+                {isRussian ? 'Доступно к выводу' : 'Available for payout'}
+              </p>
+              <p className="text-3xl font-bold">฿{pendingPayout.toLocaleString()}</p>
+            </div>
+          </div>
+          
+          <Button 
+            className="w-full" 
+            size="lg"
+            onClick={() => setIsDialogOpen(true)}
+            disabled={pendingPayout <= 0}
+          >
+            <ArrowDownToLine className="h-4 w-4 mr-2" />
+            {isRussian ? 'Вывести средства' : 'Withdraw Funds'}
+          </Button>
+        </CardContent>
+      </Card>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <Card>
-            <CardContent className="p-4 text-center">
-              <p className="text-2xl font-bold">{totalEarnings.toLocaleString()} ₽</p>
-              <p className="text-xs text-muted-foreground">
-                {isRussian ? 'Всего заработано' : 'Total Earned'}
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <p className="text-2xl font-bold">{payouts.filter(p => p.status === 'completed').length}</p>
-              <p className="text-xs text-muted-foreground">
-                {isRussian ? 'Выплат получено' : 'Payouts Received'}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+      {/* Tabs for Methods and History */}
+      <Tabs defaultValue="methods" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="methods" className="gap-2">
+            <Building2 className="w-4 h-4" />
+            {isRussian ? 'Реквизиты' : 'Methods'}
+          </TabsTrigger>
+          <TabsTrigger value="history" className="gap-2">
+            <History className="w-4 h-4" />
+            {isRussian ? 'История' : 'History'}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="methods" className="mt-4">
+          <PayoutMethodsSection />
+        </TabsContent>
+
+        <TabsContent value="history" className="mt-4 space-y-4">
+          {/* Stats */}
+          <div className="grid grid-cols-2 gap-4">
+            <Card>
+              <CardContent className="p-4 text-center">
+                <p className="text-2xl font-bold">฿{totalEarnings.toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground">
+                  {isRussian ? 'Всего заработано' : 'Total Earned'}
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <p className="text-2xl font-bold">{payouts.filter(p => p.status === 'completed').length}</p>
+                <p className="text-xs text-muted-foreground">
+                  {isRussian ? 'Выплат получено' : 'Payouts Received'}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
 
         {/* Payout History */}
         <Card>
@@ -254,8 +275,8 @@ const VendorPayouts = () => {
             )}
           </CardContent>
         </Card>
-
-        {/* Request Payout Dialog */}
+        </TabsContent>
+      </Tabs>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent>
             <DialogHeader>

@@ -8496,6 +8496,56 @@ export type Database = {
           },
         ]
       }
+      provider_payout_methods: {
+        Row: {
+          account_holder_name: string | null
+          account_number: string | null
+          bank_code: string | null
+          bank_name: string | null
+          created_at: string
+          id: string
+          is_default: boolean | null
+          is_verified: boolean | null
+          provider_id: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          account_holder_name?: string | null
+          account_number?: string | null
+          bank_code?: string | null
+          bank_name?: string | null
+          created_at?: string
+          id?: string
+          is_default?: boolean | null
+          is_verified?: boolean | null
+          provider_id: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          account_holder_name?: string | null
+          account_number?: string | null
+          bank_code?: string | null
+          bank_name?: string | null
+          created_at?: string
+          id?: string
+          is_default?: boolean | null
+          is_verified?: boolean | null
+          provider_id?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_payout_methods_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       providers: {
         Row: {
           address: string | null
