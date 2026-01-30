@@ -14,6 +14,7 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
+import { RoleContextSwitcher } from '@/components/uno/RoleContextSwitcher';
 
 // Route to breadcrumb mapping
 const routeLabels: Record<string, { en: string; ru: string }> = {
@@ -116,6 +117,7 @@ export function OwnerHeader() {
 
       {/* Actions */}
       <div className="flex items-center gap-1">
+        <RoleContextSwitcher compact />
         <Button 
           variant="ghost" 
           size="icon"

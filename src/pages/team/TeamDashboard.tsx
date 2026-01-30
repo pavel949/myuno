@@ -81,7 +81,7 @@ export default function TeamDashboard() {
 
   if (authLoading || rolesLoading) {
     return (
-      <AppLayout title="UNO Team">
+      <AppLayout title="myUNO Team">
         <div className="container py-6 space-y-4">
           <Skeleton className="h-32 w-full" />
           <Skeleton className="h-64 w-full" />
@@ -97,8 +97,8 @@ export default function TeamDashboard() {
   const handleWhatsApp = (phone: string, name: string) => {
     const cleanPhone = phone.replace(/\D/g, '');
     const message = encodeURIComponent(isRu 
-      ? `Здравствуйте, ${name}! Это команда UNO. Мы получили вашу заявку и хотели бы обсудить детали.`
-      : `Hello, ${name}! This is the UNO team. We received your request and would like to discuss the details.`
+      ? `Здравствуйте, ${name}! Это команда myUNO. Мы получили вашу заявку и хотели бы обсудить детали.`
+      : `Hello, ${name}! This is the myUNO team. We received your request and would like to discuss the details.`
     );
     window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
   };
@@ -115,7 +115,7 @@ export default function TeamDashboard() {
   };
 
   return (
-    <AppLayout title={isRu ? 'Команда UNO' : 'UNO Team'}>
+    <AppLayout title={isRu ? 'Команда myUNO' : 'myUNO Team'}>
       <div className="container py-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

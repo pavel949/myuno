@@ -10,6 +10,8 @@ import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { CurrencySwitcher } from '@/components/uno/CurrencySwitcher';
 import { MiniCart } from '@/components/market/MiniCart';
+import { RoleContextSwitcher } from '@/components/uno/RoleContextSwitcher';
+import { useUserContext } from '@/hooks/useUserContext';
 
 interface AppHeaderProps {
   title?: string;
@@ -23,6 +25,7 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
   const { t } = useLanguage();
   const { unreadCount } = useNotifications();
   const navigate = useNavigate();
+  const { availableRoles } = useUserContext();
 
   return (
     <header
@@ -62,10 +65,15 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
           {/* Mini Cart with dropdown */}
           <MiniCart className="rounded-xl hover:bg-secondary transition-colors" />
           
+          {/* Role Switcher - show only for users with multiple roles */}
+          {user && availableRoles.length > 1 && (
+            <RoleContextSwitcher compact />
+          )}
+          
           {user ? (
             <>
               {/* Notifications */}
-              <button 
+              <button
                 onClick={() => navigate('/notifications')}
                 aria-label={t('nav.notifications')}
                 className="relative flex items-center justify-center w-10 h-10 rounded-xl hover:bg-secondary transition-colors"
