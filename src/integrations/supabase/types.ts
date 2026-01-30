@@ -1203,6 +1203,127 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_message_flags: {
+        Row: {
+          action_taken: string | null
+          auto_detected: boolean | null
+          booking_id: string | null
+          confidence_score: number | null
+          created_at: string
+          detected_pattern: string | null
+          flag_type: string
+          id: string
+          message_id: string | null
+          property_id: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          severity: string
+          status: string
+          warning_acknowledged_at: string | null
+          warning_shown_to_sender: boolean | null
+        }
+        Insert: {
+          action_taken?: string | null
+          auto_detected?: boolean | null
+          booking_id?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          detected_pattern?: string | null
+          flag_type: string
+          id?: string
+          message_id?: string | null
+          property_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          severity?: string
+          status?: string
+          warning_acknowledged_at?: string | null
+          warning_shown_to_sender?: boolean | null
+        }
+        Update: {
+          action_taken?: string | null
+          auto_detected?: boolean | null
+          booking_id?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          detected_pattern?: string | null
+          flag_type?: string
+          id?: string
+          message_id?: string | null
+          property_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          severity?: string
+          status?: string
+          warning_acknowledged_at?: string | null
+          warning_shown_to_sender?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_message_flags_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "property_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_message_flags_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "property_chat_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_message_flags_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_violation_history: {
+        Row: {
+          created_at: string
+          id: string
+          is_restricted: boolean | null
+          last_violation_at: string
+          notes: string | null
+          restricted_until: string | null
+          updated_at: string
+          user_id: string
+          violation_count: number
+          violation_type: string
+          warning_level: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_restricted?: boolean | null
+          last_violation_at?: string
+          notes?: string | null
+          restricted_until?: string | null
+          updated_at?: string
+          user_id: string
+          violation_count?: number
+          violation_type: string
+          warning_level?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_restricted?: boolean | null
+          last_violation_at?: string
+          notes?: string | null
+          restricted_until?: string | null
+          updated_at?: string
+          user_id?: string
+          violation_count?: number
+          violation_type?: string
+          warning_level?: number
+        }
+        Relationships: []
+      }
       cities: {
         Row: {
           country_code: string
@@ -5260,6 +5381,7 @@ export type Database = {
           bathrooms: number | null
           bedrooms: number | null
           cancellation_policy: string | null
+          chat_delegated_to_platform: boolean | null
           check_in_instructions: string | null
           check_in_instructions_ru: string | null
           check_in_time: string | null
@@ -5404,6 +5526,7 @@ export type Database = {
           bathrooms?: number | null
           bedrooms?: number | null
           cancellation_policy?: string | null
+          chat_delegated_to_platform?: boolean | null
           check_in_instructions?: string | null
           check_in_instructions_ru?: string | null
           check_in_time?: string | null
@@ -5548,6 +5671,7 @@ export type Database = {
           bathrooms?: number | null
           bedrooms?: number | null
           cancellation_policy?: string | null
+          chat_delegated_to_platform?: boolean | null
           check_in_instructions?: string | null
           check_in_instructions_ru?: string | null
           check_in_time?: string | null
@@ -7236,9 +7360,12 @@ export type Database = {
           attachments: Json | null
           booking_id: string | null
           created_at: string
+          hidden_reason: string | null
           id: string
+          is_hidden: boolean | null
           is_read: boolean | null
           message: string
+          moderation_metadata: Json | null
           property_id: string | null
           sender_id: string
           sender_name: string | null
@@ -7248,9 +7375,12 @@ export type Database = {
           attachments?: Json | null
           booking_id?: string | null
           created_at?: string
+          hidden_reason?: string | null
           id?: string
+          is_hidden?: boolean | null
           is_read?: boolean | null
           message: string
+          moderation_metadata?: Json | null
           property_id?: string | null
           sender_id: string
           sender_name?: string | null
@@ -7260,9 +7390,12 @@ export type Database = {
           attachments?: Json | null
           booking_id?: string | null
           created_at?: string
+          hidden_reason?: string | null
           id?: string
+          is_hidden?: boolean | null
           is_read?: boolean | null
           message?: string
+          moderation_metadata?: Json | null
           property_id?: string | null
           sender_id?: string
           sender_name?: string | null

@@ -1,18 +1,21 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, MessageCircle, LogIn, Check, CheckCheck } from 'lucide-react';
+import { Send, Loader2, MessageCircle, LogIn, Check, CheckCheck, AlertTriangle } from 'lucide-react';
 import { format, Locale } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGuestPropertyChat, GuestChatMessage } from '@/hooks/useGuestPropertyChat';
+import { useChatModeration } from '@/hooks/useChatModeration';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 import { ChatTransactionWarning } from '@/components/chat/ChatTransactionWarning';
+import { ChatModerationWarning } from '@/components/chat/ChatModerationWarning';
 import { ChatMessageTranslation } from '@/components/chat/ChatMessageTranslation';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
+import { ModerationResult } from '@/lib/chatModerationPatterns';
 
 interface GuestPropertyChatProps {
   propertyId: string;
@@ -38,7 +41,11 @@ export const GuestPropertyChat: React.FC<GuestPropertyChatProps> = ({
     propertyId, 
     bookingId 
   });
+  
+  const { analyzeBeforeSend, logViolation, warningLevel } = useChatModeration(propertyId);
+  
   const [newMessage, setNewMessage] = useState('');
+  const [preSendWarning, setPreSendWarning] = useState<ModerationResult | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isRu = language === 'ru';
 
@@ -53,11 +60,42 @@ export const GuestPropertyChat: React.FC<GuestPropertyChatProps> = ({
   const handleSend = async () => {
     if (!newMessage.trim() || isSending) return;
     
+    // Analyze message for policy violations
+    const moderationResult = analyzeBeforeSend(newMessage.trim());
+    if (moderationResult.isViolation && moderationResult.severity === 'critical') {
+      setPreSendWarning(moderationResult);
+      return; // Block critical violations
+    }
+    
+    // Show warning for non-critical violations but allow sending
+    if (moderationResult.isViolation && moderationResult.severity === 'warning') {
+      setPreSendWarning(moderationResult);
+    }
+    
     try {
-      await sendMessage({ message: newMessage.trim() });
+      const result = await sendMessage({ message: newMessage.trim() });
+      
+      // Log violation after message is sent (for warnings)
+      if (moderationResult.isViolation && result?.id) {
+        logViolation({
+          messageId: result.id,
+          propertyId,
+          bookingId,
+          result: moderationResult,
+        });
+      }
+      
       setNewMessage('');
+      setPreSendWarning(null);
     } catch (error) {
       console.error('Error sending message:', error);
+    }
+  };
+
+  const handleMessageChange = (value: string) => {
+    setNewMessage(value);
+    if (preSendWarning) {
+      setPreSendWarning(null);
     }
   };
 
@@ -159,13 +197,37 @@ export const GuestPropertyChat: React.FC<GuestPropertyChatProps> = ({
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Pre-send moderation warning */}
+      {preSendWarning && (
+        <div className="px-3">
+          <ChatModerationWarning
+            moderationResult={preSendWarning}
+            isPreSend={preSendWarning.severity === 'critical'}
+            onDismiss={() => setPreSendWarning(null)}
+            onAcknowledge={() => setPreSendWarning(null)}
+          />
+        </div>
+      )}
+
+      {/* User warning level banner */}
+      {warningLevel >= 2 && (
+        <div className="mx-3 px-3 py-2 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" />
+          <span className="text-xs text-amber-600 dark:text-amber-400">
+            {isRu 
+              ? `У вас ${warningLevel} предупреждение(й). Соблюдайте правила платформы.`
+              : `You have ${warningLevel} warning(s). Please follow platform rules.`}
+          </span>
+        </div>
+      )}
+
       {/* Input */}
       <div className="p-3 border-t border-border bg-muted/20 rounded-b-xl">
         <div className="flex gap-2">
           <Textarea
             placeholder={isRu ? 'Напишите сообщение...' : 'Type a message...'}
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
+            onChange={(e) => handleMessageChange(e.target.value)}
             onKeyDown={handleKeyPress}
             disabled={isSending}
             className="flex-1 min-h-[40px] max-h-[100px] resize-none"
@@ -173,7 +235,7 @@ export const GuestPropertyChat: React.FC<GuestPropertyChatProps> = ({
           />
           <Button 
             onClick={handleSend} 
-            disabled={!newMessage.trim() || isSending}
+            disabled={!newMessage.trim() || isSending || (preSendWarning?.severity === 'critical')}
             size="icon"
             className="flex-shrink-0 self-end"
           >
