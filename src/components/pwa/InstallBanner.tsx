@@ -18,22 +18,24 @@ export function InstallBanner() {
   const isRu = language === 'ru';
 
   useEffect(() => {
-    // Check if already installed
-    if (isInstalled) return;
+    // Don't show if already installed as PWA
+    if (isInstalled) {
+      setIsVisible(false);
+      return;
+    }
 
     // Check if banner was dismissed recently
     const dismissedAt = localStorage.getItem(BANNER_DISMISSED_KEY);
     if (dismissedAt) {
       const dismissedTime = parseInt(dismissedAt, 10);
       if (Date.now() - dismissedTime < BANNER_DISMISS_DURATION) {
+        setIsVisible(false);
         return;
       }
     }
 
-    // Show banner on mobile viewport (always, no delay needed)
-    if (isMobileViewport) {
-      setIsVisible(true);
-    }
+    // Show banner on mobile viewport immediately
+    setIsVisible(isMobileViewport);
   }, [isMobileViewport, isInstalled]);
 
   const handleDismiss = () => {
