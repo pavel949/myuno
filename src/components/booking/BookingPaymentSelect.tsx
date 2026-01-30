@@ -1,5 +1,5 @@
 import { useState, useEffect, forwardRef } from 'react';
-import { CreditCard, Wallet, Banknote, Smartphone, Loader2, ChevronRight, Star } from 'lucide-react';
+import { CreditCard, Wallet, Banknote, Smartphone, Loader2, ChevronRight, Star, QrCode } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,7 +12,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 
-export type PaymentMethod = 'cash' | 'card' | 'wallet' | 'online';
+export type PaymentMethod = 'cash' | 'card' | 'wallet' | 'online' | 'promptpay';
 
 interface PaymentOption {
   id: PaymentMethod;
@@ -31,6 +31,7 @@ export interface BookingPaymentSelectProps {
   showCash?: boolean;
   showCard?: boolean;
   showOnline?: boolean;
+  showPromptPay?: boolean;
   selectedCardId?: string | null;
   onCardSelect?: (cardId: string | null) => void;
 }
@@ -59,6 +60,7 @@ export const BookingPaymentSelect = forwardRef<HTMLDivElement, BookingPaymentSel
   showCash = true,
   showCard = false,
   showOnline = true,
+  showPromptPay = true,
   selectedCardId,
   onCardSelect,
 }, ref) => {
@@ -106,6 +108,9 @@ export const BookingPaymentSelect = forwardRef<HTMLDivElement, BookingPaymentSel
   const selectedCard = paymentMethods.find(c => c.id === selectedCardId);
   const hasCards = paymentMethods.length > 0;
 
+  // Only show PromptPay for THB currency
+  const canShowPromptPay = showPromptPay && currency.toUpperCase() === 'THB';
+  
   const paymentOptions: PaymentOption[] = [
     ...(showWallet ? [{
       id: 'wallet' as PaymentMethod,
@@ -126,8 +131,14 @@ export const BookingPaymentSelect = forwardRef<HTMLDivElement, BookingPaymentSel
     }] : []),
     ...(showOnline ? [{
       id: 'online' as PaymentMethod,
-      label: { en: 'Pay online', ru: 'Оплатить онлайн' },
-      icon: <Smartphone className="w-5 h-5" />,
+      label: { en: 'Pay online (Card)', ru: 'Картой онлайн' },
+      icon: <CreditCard className="w-5 h-5" />,
+    }] : []),
+    ...(canShowPromptPay ? [{
+      id: 'promptpay' as PaymentMethod,
+      label: { en: 'QR PromptPay', ru: 'QR PromptPay' },
+      icon: <QrCode className="w-5 h-5" />,
+      badge: 'Thai QR',
     }] : []),
   ];
 

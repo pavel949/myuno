@@ -14,7 +14,8 @@ import {
   BookingContactForm,
   BookingPaymentSelect,
   BookingBottomBar,
-  BookingConfirmation 
+  BookingConfirmation,
+  type PaymentMethod 
 } from '@/components/booking';
 import { type ContactFormData } from '@/components/booking/BookingContactForm';
 import { Textarea } from '@/components/ui/textarea';
@@ -36,7 +37,7 @@ export default function SetMenuBooking() {
   const [selectedTime, setSelectedTime] = useState('');
   const [guests, setGuests] = useState(2);
   const [specialRequests, setSpecialRequests] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'wallet' | 'online'>('card');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
   const [isSuccess, setIsSuccess] = useState(false);
   const [bookingId, setBookingId] = useState('');
   

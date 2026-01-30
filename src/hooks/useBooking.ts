@@ -41,7 +41,7 @@ export interface BookingAddress {
 
 export interface BookingPayment {
   amount: number;
-  payment_method: 'cash' | 'card' | 'wallet' | 'online';
+  payment_method: 'cash' | 'card' | 'wallet' | 'online' | 'promptpay';
   status?: 'pending' | 'paid' | 'failed' | 'refunded';
 }
 

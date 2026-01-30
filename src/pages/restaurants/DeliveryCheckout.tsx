@@ -11,7 +11,8 @@ import {
   BookingContactForm,
   BookingPaymentSelect,
   BookingBottomBar,
-  BookingConfirmation 
+  BookingConfirmation,
+  type PaymentMethod 
 } from '@/components/booking';
 import { type ContactFormData } from '@/components/booking/BookingContactForm';
 import { Textarea } from '@/components/ui/textarea';
@@ -31,7 +32,7 @@ export default function DeliveryCheckout() {
   const cartItems = getItemsByProvider(id || '');
 
   const [address, setAddress] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'wallet' | 'online'>('cash');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [isSuccess, setIsSuccess] = useState(false);
   
   const [contactData, setContactData] = useState<ContactFormData>({
