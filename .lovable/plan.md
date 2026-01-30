@@ -1,231 +1,78 @@
 
+# Plan: Optimize Scrolling and Swiping Experience
 
-# Аудит: Валюта + Home UX + SOS + Иконки
+## Overview
+Perform consistency improvements across all scrollable components to ensure smooth, native-like scrolling and swiping behavior on mobile devices.
 
----
+## Issues Found
 
-## 1. Проблемы с переключением валют
+| Component | Issue | Priority |
+|-----------|-------|----------|
+| AudienceFilterTabs | Missing `touch-pan-x` for horizontal touch gestures | Medium |
+| HomeCategoryRibbon | Uses `scrollbar-none` (not defined) instead of `scrollbar-hide` | Medium |
+| FeaturedServicesGallery | Uses ScrollArea without explicit touch optimization | Low |
+| AudienceFilterTabs | No scroll snap for better UX | Low |
+| Multiple components | Inconsistent class patterns | Low |
 
-### Найденные места с хардкодом `฿`:
+## Implementation Steps
 
-| Файл | Строка | Проблема |
-|------|--------|----------|
-| `BeautySpaIndex.tsx` | 70-73 | `sublabel: '฿600'` — хардкод в quickItems |
-| `InspectionRequest.tsx` | 296-300 | `฿500`, `+฿300` — хардкод цен |
-| `VisaImmigrationPage.tsx` | 40+ | Все цены виз: `฿1,900`, `฿2,000` и т.д. |
-| `VendorDemo.tsx` | 152 | `฿128,450` — демо-данные |
-| `MarketCheckout.tsx` | 129-130 | `฿0`, `฿{threshold}` — прогресс-бар |
-| `MoneyBlock.tsx` | 18-20 | `formatCurrency` с хардкодом `฿` |
-| `ItemCard.tsx` | 53 | `currency = '฿'` — дефолт, но не использует контекст |
-
-### Корневая проблема:
-Компонент `ItemCard` и многие страницы используют `currency: string` prop вместо хука `useCurrency()`. Когда пользователь переключает валюту в `CurrencySwitcher`, эти компоненты не обновляются.
-
-### Решение:
-1. **Обновить `ItemCard`** — убрать `currency` prop, использовать `useCurrency()` + `PriceDisplay`
-2. **Пройти по всем файлам с хардкодом** — заменить на `formatPrice(priceInTHB)`
-3. **Создать компонент `QuickPriceChip`** — для quickItems с автоконверсией
-
----
-
-## 2. UX главной страницы: Глубокая концепция
-
-### Текущие проблемы:
-- QuickActionsGrid показывает **яхты первыми** — это не ежедневная потребность
-- SOS теряется в сетке 5×2 среди обычных услуг
-- Нет чёткой визуальной иерархии: "срочное" vs "ежедневное" vs "особенное"
-- Toggle Услуги/Товары выглядит как равнозначный выбор, хотя это разные ментальные модели
-
-### Предлагаемая UX-концепция: "Слои потребностей"
+### Step 1: Fix AudienceFilterTabs
+Add `touch-pan-x` class to enable proper horizontal touch gestures without interfering with vertical scrolling.
 
 ```text
-┌─────────────────────────────────────────────────────────────┐
-│  🛡️ БЕЗОПАСНОСТЬ (ПОСТОЯННО ВИДИМА)                        │
-│  ┌───────────────────────────────────────────────────────┐  │
-│  │ SOS 24/7 │ Мед. помощь │ Связь с UNO                 │  │
-│  └───────────────────────────────────────────────────────┘  │
-├─────────────────────────────────────────────────────────────┤
-│  📅 ЕЖЕДНЕВНЫЕ (ЧАСТЫЕ ДЕЙСТВИЯ)                           │
-│  ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐                   │
-│  │Цветы│ │ Еда │ │Транс│ │Красо│ │Уборка│                  │
-│  └─────┘ └─────┘ └─────┘ └─────┘ └─────┘                   │
-├─────────────────────────────────────────────────────────────┤
-│  ✨ ОСОБЕННЫЕ (ПЛАНИРУЕМЫЕ СОБЫТИЯ)                         │
-│  ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐                           │
-│  │ Яхты│ │ Туры│ │ СПА │ │Event│                           │
-│  └─────┘ └─────┘ └─────┘ └─────┘                           │
-├─────────────────────────────────────────────────────────────┤
-│  🏠 ИНФРАСТРУКТУРА (ДОЛГОСРОЧНЫЕ)                          │
-│  [ Жильё ] [ Виза ] [ Страховка ] [ Юрист ]                 │
-└─────────────────────────────────────────────────────────────┘
+Before: "flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide"
+After:  "flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide touch-pan-x"
 ```
 
-### Принцип выбора иконок:
+### Step 2: Fix HomeCategoryRibbon
+Replace non-existent `scrollbar-none` with `scrollbar-hide` and add `touch-pan-x`.
 
-| Слой | Цвет | Размер | Примеры |
-|------|------|--------|---------|
-| **Безопасность** | Красный/Оранжевый | XL (48px) | SOS, Медицина, Поддержка |
-| **Ежедневные** | Яркие, разные | L (40px) | Цветы, Еда, Транспорт, Красота |
-| **Особенные** | Градиенты | L (40px) | Яхты, Туры, СПА, События |
-| **Инфраструктура** | Приглушённые | M (32px) | Жильё, Виза, Страховка |
+Row 1 (Quick Actions):
+```text
+Before: "flex items-center gap-2 overflow-x-auto scrollbar-none pb-1"
+After:  "flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1 touch-pan-x"
+```
 
-### SOS: Отдельный блок
+Row 2 (Categories):
+```text
+Before: "flex items-center gap-2 overflow-x-auto scrollbar-none pb-1"
+After:  "flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1 touch-pan-x"
+```
 
-Вынести SOS в фиксированный мини-баннер над сеткой услуг:
+Skeleton rows also need fixing.
+
+### Step 3: Optimize FeaturedServicesGallery
+Replace ScrollArea component with native scroll div for better touch control:
 
 ```text
-┌──────────────────────────────────────────┐
-│ 🆘 UNO ALERT                        [→] │
-│ 24/7 помощь • Полиция • Скорая          │
-└──────────────────────────────────────────┘
+Before: <ScrollArea className="-mx-4 px-4">
+After:  <div className="-mx-4 px-4 overflow-x-auto scrollbar-hide touch-pan-x">
 ```
 
-Этот блок:
-- Всегда видим в режиме "Услуги"
-- Компактный (высота ~50px)
-- Кликабелен → ведёт на /sos
-- Служит маркером надёжности платформы
-
-### Порядок иконок (Цветы первыми):
-
-**Новый порядок DEFAULT_ACTIONS:**
-1. 💐 Flowers (Цветы) — эмоциональная покупка, высокий AOV
-2. 🍽️ Food (Еда) — ежедневная потребность
-3. ✈️ Transfer (Трансфер) — частая потребность для гостей
-4. 💆 Beauty (Красота) — популярная услуга
-5. 🚗 Transport (Транспорт) — ежедневная потребность
-6. 🏠 Property (Жильё) — ключевая услуга
-7. 🩺 Medical (Медицина) — важная инфраструктура
-8. 🛒 Market (Маркет) — ссылка на товары
-
-**Фиксированные слоты:**
-- Слот 9: SOS → **УБРАТЬ из сетки** (вынести в отдельный блок)
-- Слот 10: More (Ещё) → /discover
-
----
-
-## 3. Техническая реализация
-
-### 3.1 Компоненты для создания
+### Step 4: Add scroll snap to AudienceFilterTabs (optional UX improvement)
+Add snap behavior for better filter selection feel:
 
 ```text
-src/components/home/
-├── SafetyBanner.tsx       # Мини-баннер SOS (всегда видим)
-├── ServiceLayersGrid.tsx  # Новая сетка по слоям
-└── QuickPriceChip.tsx     # Чип с автоконверсией валюты
+Container: style={{ scrollSnapType: 'x mandatory' }}
+Each button: style={{ scrollSnapAlign: 'start' }}
 ```
 
-### 3.2 Изменения в QuickActionsGrid.tsx
+## Files to Modify
 
-```typescript
-// Новый порядок (Цветы первыми)
-const DEFAULT_ACTIONS: QuickAction[] = [
-  { id: 'flowers', /* ... */ },  // 1. Цветы
-  { id: 'restaurants', /* ... */ },  // 2. Еда
-  { id: 'transfer', /* ... */ },  // 3. Трансфер
-  { id: 'beauty', /* ... */ },  // 4. Красота
-  { id: 'transport', /* ... */ },  // 5. Транспорт
-  { id: 'property', /* ... */ },  // 6. Жильё
-  { id: 'medical', /* ... */ },  // 7. Медицина
-  { id: 'market', /* ... */ },  // 8. Маркет
-];
+1. `src/components/discover/AudienceFilterTabs.tsx` - Add touch-pan-x
+2. `src/components/home/HomeCategoryRibbon.tsx` - Fix scrollbar-hide, add touch-pan-x
+3. `src/components/discover/FeaturedServicesGallery.tsx` - Replace ScrollArea with native scroll
 
-// SOS убираем из FIXED_ACTIONS
-const FIXED_ACTIONS: QuickAction[] = [
-  { id: 'more', /* ... */ },  // Только "Ещё"
-];
-```
+## Technical Notes
 
-### 3.3 SafetyBanner.tsx
+- `touch-pan-x` allows horizontal touch scrolling while permitting vertical page scroll
+- `scrollbar-hide` is defined in `index.css` and works across browsers
+- `scrollbar-none` is NOT defined and won't hide scrollbars
+- Consistent use of `-mx-4 px-4` creates full-width bleed for carousels
 
-```typescript
-export function SafetyBanner() {
-  return (
-    <Link to="/sos" className="block">
-      <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/20">
-        <div className="p-2 rounded-lg bg-red-500/20">
-          <AlertTriangle className="w-5 h-5 text-red-500" />
-        </div>
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-sm">UNO ALERT</span>
-            <Badge className="bg-red-500 text-white text-[10px]">24/7</Badge>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            {isRu ? 'Экстренная помощь и поддержка' : 'Emergency help & support'}
-          </p>
-        </div>
-        <ChevronRight className="w-5 h-5 text-muted-foreground" />
-      </div>
-    </Link>
-  );
-}
-```
+## Expected Result
 
-### 3.4 Исправление валюты в ItemCard
-
-```typescript
-// Вместо:
-currency = '฿'
-
-// Использовать:
-import { useCurrency } from '@/contexts/CurrencyContext';
-
-const { formatPrice } = useCurrency();
-
-// В рендере:
-<span>{formatPrice(price)}</span>
-```
-
-### 3.5 Index.tsx — новая структура
-
-```typescript
-{contentMode === 'services' ? (
-  <>
-    <SmartWidget />
-    
-    {/* SOS всегда сверху */}
-    <SafetyBanner />
-    
-    {/* Услуги по слоям */}
-    <QuickActionsGrid />  {/* Обновлённый порядок */}
-    
-    <PromoBanner />
-    <MarketplacePromoCarousel />
-    {/* ... */}
-  </>
-) : (
-  /* Products mode */
-)}
-```
-
----
-
-## 4. Файлы для изменения
-
-| Файл | Изменения |
-|------|-----------|
-| `QuickActionsGrid.tsx` | Новый порядок, убрать SOS из сетки, сетка 4×2+1 |
-| `Index.tsx` | Добавить SafetyBanner перед сеткой |
-| `ItemCard.tsx` | Использовать useCurrency() вместо currency prop |
-| `BeautySpaIndex.tsx` | quickItems — использовать formatPrice |
-| `InspectionRequest.tsx` | Использовать PriceDisplay |
-| `VisaImmigrationPage.tsx` | Использовать PriceDisplay |
-| `MoneyBlock.tsx` | Использовать useCurrency() |
-| `MarketCheckout.tsx` | Использовать currencyInfo.symbol |
-
-### Новые файлы:
-- `src/components/home/SafetyBanner.tsx`
-
----
-
-## 5. Результат
-
-После реализации:
-
-1. **Валюта работает везде** — переключатель обновляет цены на всех страницах
-2. **SOS выделен** — как маркер надёжности, всегда видим
-3. **Цветы первыми** — эмоциональная покупка с высоким AOV
-4. **Логика слоёв** — визуальная иерархия потребностей (безопасность → ежедневные → особенные → инфраструктура)
-5. **Чистая сетка** — 8 услуг + More (без SOS в сетке)
-
+- Smoother horizontal swiping on all filter tabs and carousels
+- No interference with vertical page scrolling
+- Hidden scrollbars on all horizontal scroll areas
+- Consistent touch behavior across all components
