@@ -101,8 +101,11 @@ export function AdminSidebar() {
   const { language } = useLanguage();
   const isRussian = language === 'ru';
   const { user, signOut } = useAuth();
-  const { state } = useSidebar();
-  const isCollapsed = state === 'collapsed';
+  const { state, isMobile, openMobile } = useSidebar();
+  
+  // On mobile, always show full content when sidebar is open
+  // On desktop, respect the collapsed state
+  const isCollapsed = isMobile ? false : state === 'collapsed';
 
   const isActive = (path: string) => {
     if (path === '/admin') {
