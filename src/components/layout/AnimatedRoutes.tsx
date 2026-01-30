@@ -265,6 +265,9 @@ const AdminControlCenter = lazy(() => import('@/pages/admin/AdminControlCenter')
 const AdminAIAgents = lazy(() => import('@/pages/admin/AdminAIAgents'));
 const AdminAIAgentEditor = lazy(() => import('@/pages/admin/AdminAIAgentEditor'));
 
+// AI Intake page
+const AdminIntake = lazy(() => import('@/pages/admin/AdminIntake'));
+
 // Admin route wrapper with layout
 const AdminRouteLayout = () => (
   <AdminGuard>
@@ -677,6 +680,8 @@ export const AnimatedRoutes: React.FC = () => {
           {/* AI Agents */}
           <Route path="/admin/ai-agents" element={<AdminAIAgents />} />
           <Route path="/admin/ai-agents/:id" element={<AdminAIAgentEditor />} />
+          {/* AI Intake */}
+          <Route path="/admin/intake" element={<AdminIntake />} />
         </Route>
         
         {/* Staff Routes - Protected */}

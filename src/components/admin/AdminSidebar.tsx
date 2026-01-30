@@ -7,7 +7,8 @@ import {
   Layers,
   LogOut,
   ChevronRight,
-  Bot
+  Bot,
+  Inbox
 } from 'lucide-react';
 import {
   Sidebar,
@@ -58,6 +59,14 @@ const navigationItems: NavItem[] = [
     icon: Layers,
     description: 'Moderation, leads, bookings',
     descriptionRu: 'Модерация, лиды, заказы'
+  },
+  { 
+    title: 'Intake', 
+    titleRu: 'Приём', 
+    path: '/admin/intake', 
+    icon: Inbox,
+    description: 'AI listing creation',
+    descriptionRu: 'AI-создание листингов'
   },
   { 
     title: 'AI Agents', 
