@@ -1,12 +1,10 @@
 import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { Search } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { SEOHead, createOrganizationSchema } from '@/components/seo';
-import { Input } from '@/components/ui/input';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { SmartWidget } from '@/components/home/SmartWidget';
 import { PromoBanner } from '@/components/home/PromoBanner';
@@ -26,10 +24,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { HeroBanner } from '@/components/home/HeroBanner';
 import { InstallBanner } from '@/components/pwa/InstallBanner';
 import { PWAWelcomeScreen } from '@/components/pwa/PWAWelcomeScreen';
+import { InlineSearch } from '@/components/search/InlineSearch';
 
 // Lazy load only modals (opened by user action)
 const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
-const GlobalSearchModal = lazy(() => import('@/components/search/GlobalSearchModal').then(m => ({ default: m.GlobalSearchModal })));
 
 const Index = () => {
   const { t } = useLanguage();
@@ -40,7 +38,7 @@ const Index = () => {
   const [showOnboarding, setShowOnboarding] = useState(() => {
     return !localStorage.getItem('myuno-onboarding-complete');
   });
-  const [showSearch, setShowSearch] = useState(false);
+  // Removed showSearch state - using InlineSearch now
   const [contentMode, setContentMode] = useState<ContentMode>(() => {
     return (localStorage.getItem('myuno-content-mode') as ContentMode) || 'services';
   });
@@ -101,14 +99,6 @@ const Index = () => {
           />
         </Suspense>
       )}
-      {showSearch && (
-        <Suspense fallback={null}>
-          <GlobalSearchModal 
-            open={showSearch} 
-            onOpenChange={setShowSearch} 
-          />
-        </Suspense>
-      )}
 
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="px-4 py-4 pb-24 space-y-4" key={refreshKey}>
@@ -119,23 +109,9 @@ const Index = () => {
           {/* Hero Banner - Platform positioning */}
           <HeroBanner />
 
-          {/* Search Bar */}
-          <div 
-            onClick={() => setShowSearch(true)}
-            className="relative cursor-pointer"
-            data-tour="search"
-            role="button"
-            tabIndex={0}
-            aria-label={t('action.search')}
-            onKeyDown={(e) => e.key === 'Enter' && setShowSearch(true)}
-          >
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" aria-hidden="true" />
-            <Input
-              placeholder={t('action.search') + '...'}
-              className="pl-10 cursor-pointer"
-              readOnly
-              tabIndex={-1}
-            />
+          {/* Inline Search */}
+          <div data-tour="search">
+            <InlineSearch />
           </div>
 
           {/* Persona Selector - personalization by user type */}

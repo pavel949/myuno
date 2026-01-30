@@ -1,8 +1,11 @@
+import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
 export type UserPersona = 'tourist' | 'resident' | 'property_owner';
+
+const GUEST_PERSONAS_KEY = 'myuno-guest-personas';
 
 interface UserPersonaRecord {
   id: string;
@@ -12,14 +15,50 @@ interface UserPersonaRecord {
   created_at: string;
 }
 
+// Guest personas hook (localStorage-based)
+function useGuestPersonas() {
+  const [personas, setPersonas] = useState<UserPersona[]>(() => {
+    try {
+      const saved = localStorage.getItem(GUEST_PERSONAS_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const togglePersona = useCallback((persona: UserPersona) => {
+    setPersonas(prev => {
+      const newPersonas = prev.includes(persona)
+        ? prev.filter(p => p !== persona)
+        : [...prev, persona];
+      localStorage.setItem(GUEST_PERSONAS_KEY, JSON.stringify(newPersonas));
+      return newPersonas;
+    });
+  }, []);
+
+  const setPersonasAll = useCallback((newPersonas: UserPersona[]) => {
+    setPersonas(newPersonas);
+    localStorage.setItem(GUEST_PERSONAS_KEY, JSON.stringify(newPersonas));
+  }, []);
+
+  return {
+    personas,
+    togglePersona,
+    setPersonas: setPersonasAll,
+    isLoading: false,
+    isToggling: false,
+  };
+}
+
 export function useUserPersonas() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const guestHook = useGuestPersonas();
   
   const queryKey = ['user-personas', user?.id];
 
-  // Fetch user's active personas
-  const { data: personas = [], isLoading, error } = useQuery({
+  // Fetch user's active personas (authenticated users)
+  const { data: dbPersonas = [], isLoading, error } = useQuery({
     queryKey,
     queryFn: async (): Promise<UserPersona[]> => {
       if (!user?.id) return [];
@@ -34,18 +73,17 @@ export function useUserPersonas() {
       return (data || []).map(r => r.persona as UserPersona);
     },
     enabled: !!user?.id,
-    staleTime: 60000, // 1 minute
+    staleTime: 60000,
   });
 
-  // Toggle a persona on/off
+  // Toggle a persona on/off (authenticated users)
   const togglePersonaMutation = useMutation({
     mutationFn: async (persona: UserPersona) => {
       if (!user?.id) throw new Error('User not authenticated');
       
-      const isActive = personas.includes(persona);
+      const isActive = dbPersonas.includes(persona);
       
       if (isActive) {
-        // Remove persona
         const { error } = await supabase
           .from('user_personas')
           .delete()
@@ -54,7 +92,6 @@ export function useUserPersonas() {
         
         if (error) throw error;
       } else {
-        // Add persona (upsert in case it exists but is inactive)
         const { error } = await supabase
           .from('user_personas')
           .upsert(
@@ -68,13 +105,9 @@ export function useUserPersonas() {
       return { persona, wasActive: isActive };
     },
     onMutate: async (persona) => {
-      // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey });
-      
-      // Snapshot previous value
       const previousPersonas = queryClient.getQueryData<UserPersona[]>(queryKey);
       
-      // Optimistically update
       queryClient.setQueryData<UserPersona[]>(queryKey, (old = []) => {
         if (old.includes(persona)) {
           return old.filter(p => p !== persona);
@@ -85,29 +118,25 @@ export function useUserPersonas() {
       return { previousPersonas };
     },
     onError: (err, persona, context) => {
-      // Rollback on error
       if (context?.previousPersonas) {
         queryClient.setQueryData(queryKey, context.previousPersonas);
       }
     },
     onSettled: () => {
-      // Refetch to ensure consistency
       queryClient.invalidateQueries({ queryKey });
     },
   });
 
-  // Set multiple personas at once
+  // Set multiple personas at once (authenticated users)
   const setPersonasMutation = useMutation({
     mutationFn: async (newPersonas: UserPersona[]) => {
       if (!user?.id) throw new Error('User not authenticated');
       
-      // Delete all existing personas
       await supabase
         .from('user_personas')
         .delete()
         .eq('user_id', user.id);
       
-      // Insert new ones if any
       if (newPersonas.length > 0) {
         const { error } = await supabase
           .from('user_personas')
@@ -127,18 +156,46 @@ export function useUserPersonas() {
     },
   });
 
+  // Migrate guest personas to DB on login
+  useEffect(() => {
+    if (user?.id) {
+      const guestPersonas = localStorage.getItem(GUEST_PERSONAS_KEY);
+      if (guestPersonas) {
+        const parsed = JSON.parse(guestPersonas) as UserPersona[];
+        if (parsed.length > 0 && dbPersonas.length === 0) {
+          // Migrate guest personas to authenticated user
+          setPersonasMutation.mutate(parsed);
+        }
+        localStorage.removeItem(GUEST_PERSONAS_KEY);
+      }
+    }
+  }, [user?.id, dbPersonas.length]);
+
+  // Return appropriate hook based on auth status
+  if (!user) {
+    return {
+      personas: guestHook.personas,
+      isLoading: false,
+      error: null,
+      isAuthenticated: false,
+      togglePersona: guestHook.togglePersona,
+      setPersonas: guestHook.setPersonas,
+      isToggling: false,
+      isSetting: false,
+    };
+  }
+
   return {
-    personas,
+    personas: dbPersonas,
     isLoading,
     error,
-    isAuthenticated: !!user,
+    isAuthenticated: true,
     togglePersona: togglePersonaMutation.mutate,
     setPersonas: setPersonasMutation.mutate,
     isToggling: togglePersonaMutation.isPending,
     isSetting: setPersonasMutation.isPending,
   };
 }
-
 // Helper to check if user has a specific persona
 export function hasPersona(personas: UserPersona[], persona: UserPersona): boolean {
   return personas.includes(persona);
