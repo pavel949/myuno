@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Download, X, Smartphone, Share, Plus, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
+import { usePWATracking } from '@/hooks/usePWATracking';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -13,7 +14,8 @@ export function InstallBanner() {
   const [isVisible, setIsVisible] = useState(false);
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { isInstalled, canInstall, isIOS, install } = usePWAInstall();
+  const { isInstalled, canInstall, isIOS, isAndroid, install } = usePWAInstall();
+  const { trackInstall } = usePWATracking();
   const isMobileViewport = useIsMobile();
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -53,13 +55,17 @@ export function InstallBanner() {
         // Android/Chrome - trigger native install prompt
         const success = await install();
         if (success) {
+          // Track successful installation
+          const platform = isAndroid ? 'android' : 'desktop';
+          await trackInstall({ platform, source: 'banner' });
           setIsVisible(false);
         }
       } else if (isIOS) {
-        // iOS - show inline instructions
+        // iOS - show inline instructions (track as intent)
+        await trackInstall({ platform: 'ios', source: 'banner' });
         setShowIOSInstructions(true);
       } else {
-        // Fallback - go to install page
+        // Fallback - go to install page with detailed instructions
         window.location.href = '/install';
       }
     } finally {
