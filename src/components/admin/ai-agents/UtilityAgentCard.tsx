@@ -36,6 +36,30 @@ const AGENT_INTERFACES: Record<string, string> = {
   'intake-listing-agent': '/admin/intake',
 };
 
+// Detailed functionality descriptions for each agent
+const AGENT_CAPABILITIES: Record<string, { en: string[]; ru: string[] }> = {
+  'ai-translate': {
+    en: ['Auto-translates EN↔RU for all listings', 'Maintains tone and terminology', 'Batch processing support'],
+    ru: ['Авто-перевод EN↔RU для листингов', 'Сохранение тона и терминологии', 'Пакетная обработка'],
+  },
+  'ai-generate-description': {
+    en: ['Generates SEO descriptions', 'Bilingual output (EN+RU)', 'Category-specific templates'],
+    ru: ['Генерация SEO-описаний', 'Двуязычный вывод (EN+RU)', 'Шаблоны по категориям'],
+  },
+  'ai-smart-data': {
+    en: ['Extracts fields from raw text', 'Normalizes prices & specs', 'Maps to DB schema'],
+    ru: ['Извлечение полей из текста', 'Нормализация цен и спек', 'Маппинг на схему БД'],
+  },
+  'ai-personalize-home': {
+    en: ['Personalizes home feed', 'Analyzes user preferences', 'Category prioritization'],
+    ru: ['Персонализация главной', 'Анализ предпочтений', 'Приоритет категорий'],
+  },
+  'intake-listing-agent': {
+    en: ['Scrapes URLs via Firecrawl', 'Detects vertical (22+ types)', 'Generates bilingual titles'],
+    ru: ['Парсинг URL через Firecrawl', 'Детекция вертикали (22+ типа)', 'Генерация двуязычных заголовков'],
+  },
+};
+
 const AVAILABLE_MODELS = [
   { value: 'google/gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
   { value: 'google/gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash Lite' },
@@ -111,6 +135,26 @@ export function UtilityAgentCard({ agent, onUpdate, isUpdating }: UtilityAgentCa
         <p className="text-xs text-muted-foreground line-clamp-2">
           {isRussian ? agent.description_ru : agent.description_en}
         </p>
+
+        {/* Capabilities List */}
+        {AGENT_CAPABILITIES[agent.slug] && (
+          <div className="bg-muted/50 rounded-md p-2 space-y-1">
+            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+              {isRussian ? 'Возможности' : 'Capabilities'}
+            </span>
+            <ul className="space-y-0.5">
+              {(isRussian 
+                ? AGENT_CAPABILITIES[agent.slug].ru 
+                : AGENT_CAPABILITIES[agent.slug].en
+              ).map((cap, idx) => (
+                <li key={idx} className="text-[11px] text-foreground/80 flex items-center gap-1.5">
+                  <span className="w-1 h-1 rounded-full bg-primary/60" />
+                  {cap}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* Model Select */}
         <div className="space-y-1.5">

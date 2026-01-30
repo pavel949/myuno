@@ -71,6 +71,30 @@ const iconMap: Record<string, React.ElementType> = {
   Wrench,
 };
 
+// Detailed functionality descriptions for conversational/analyzer agents
+const AGENT_CAPABILITIES: Record<string, { en: string[]; ru: string[] }> = {
+  'owner-assistant': {
+    en: ['Guides hosts on platform features', 'Phuket market insights', 'Thai real estate law tips'],
+    ru: ['Помощь хостам по платформе', 'Инсайты рынка Пхукета', 'Советы по законам Таиланда'],
+  },
+  'property-search': {
+    en: ['Matches rentals to guest needs', 'Market risk highlights', 'Personalized recommendations'],
+    ru: ['Подбор аренды под запрос', 'Оценка рисков рынка', 'Персонализированные рекомендации'],
+  },
+  'support-chat': {
+    en: ['24/7 customer support', 'Booking assistance', 'FAQ auto-answers'],
+    ru: ['Поддержка 24/7', 'Помощь с бронированием', 'Авто-ответы на FAQ'],
+  },
+  'smart-search': {
+    en: ['Natural language queries', 'Intent detection', 'Category mapping'],
+    ru: ['Запросы на естественном языке', 'Определение интента', 'Маппинг категорий'],
+  },
+  'listing-quality-analyzer': {
+    en: ['Quality scoring (1-100)', 'Photo & text analysis', 'Improvement suggestions'],
+    ru: ['Оценка качества (1-100)', 'Анализ фото и текста', 'Рекомендации по улучшению'],
+  },
+};
+
 function AgentCard({ agent, onEdit, onDelete, onToggleActive }: { 
   agent: AIAgent; 
   onEdit: () => void;
@@ -173,6 +197,26 @@ function AgentCard({ agent, onEdit, onDelete, onToggleActive }: {
             </Badge>
           ))}
         </div>
+
+        {/* Capabilities List */}
+        {AGENT_CAPABILITIES[agent.slug] && (
+          <div className="bg-muted/50 rounded-md p-2 space-y-1">
+            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+              {isRussian ? 'Возможности' : 'Capabilities'}
+            </span>
+            <ul className="space-y-0.5">
+              {(isRussian 
+                ? AGENT_CAPABILITIES[agent.slug].ru 
+                : AGENT_CAPABILITIES[agent.slug].en
+              ).map((cap, idx) => (
+                <li key={idx} className="text-[11px] text-foreground/80 flex items-center gap-1.5">
+                  <span className="w-1 h-1 rounded-full bg-primary/60" />
+                  {cap}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         
         <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
           <span>{agent.model.split('/')[1] || agent.model}</span>
