@@ -68,3 +68,6 @@ verify_jwt = false
 
 [functions.ai-owner-assistant]
 verify_jwt = false
+
+[functions.ai-property-assistant]
+verify_jwt = false
