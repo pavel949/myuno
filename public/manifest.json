@@ -1,5 +1,5 @@
 {
-  "name": "myUNO - All Services in One",
+  "name": "myUNO",
   "short_name": "myUNO",
   "description": "Все услуги в одном приложении",
   "start_url": "/?source=pwa",
@@ -7,9 +7,8 @@
   "background_color": "#0a0a0b",
   "theme_color": "#d4af37",
   "scope": "/",
-  "id": "/myuno-pwa-v2",
-  "orientation": "portrait-primary",
   "id": "myuno-app",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
@@ -20,13 +19,25 @@
       "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
