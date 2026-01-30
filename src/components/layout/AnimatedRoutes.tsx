@@ -179,7 +179,11 @@ const VipConcierge = lazy(() => import('@/pages/VipConcierge'));
 const Support = lazy(() => import('@/pages/Support'));
 const OrderTracking = lazy(() => import('@/pages/orders/OrderTracking'));
 
-// Info pages
+// Knowledge Hub pages
+const KnowledgeHub = lazy(() => import('@/pages/knowledge/KnowledgeHub'));
+const KnowledgeSectionPage = lazy(() => import('@/pages/knowledge/KnowledgeSectionPage'));
+const KnowledgeArticlePage = lazy(() => import('@/pages/knowledge/KnowledgeArticlePage'));
+
 const AboutPage = lazy(() => import('@/pages/info/AboutPage'));
 const HowItWorksPage = lazy(() => import('@/pages/info/HowItWorksPage'));
 const FAQPage = lazy(() => import('@/pages/info/FAQPage'));
@@ -522,6 +526,11 @@ export const AnimatedRoutes: React.FC = () => {
         {/* Expat Services Routes */}
         <Route path="/banking" element={<LazyPage><BankingPage /></LazyPage>} />
         <Route path="/veterinary" element={<LazyPage><VeterinaryPage /></LazyPage>} />
+        
+        {/* Knowledge Hub Routes */}
+        <Route path="/knowledge" element={<LazyPage><KnowledgeHub /></LazyPage>} />
+        <Route path="/knowledge/:section" element={<LazyPage><KnowledgeSectionPage /></LazyPage>} />
+        <Route path="/knowledge/:section/:slug" element={<LazyPage><KnowledgeArticlePage /></LazyPage>} />
         
         {/* Tours Mini-App Routes */}
         <Route path="/tours" element={<LazyPage><ToursIndex /></LazyPage>} />
