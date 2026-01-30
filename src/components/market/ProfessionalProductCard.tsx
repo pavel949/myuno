@@ -31,77 +31,81 @@ interface ProfessionalProductCardProps {
   compact?: boolean;
 }
 
-// Recipe tooltip component
-const RecipeBadge = ({ recipe, language }: { recipe: ProductRecipe; language: string }) => {
-  const [showTooltip, setShowTooltip] = useState(false);
-  
-  const difficultyColors = {
-    easy: 'bg-green-500',
-    medium: 'bg-amber-500', 
-    hard: 'bg-red-500',
-  };
-  
-  const difficultyLabels = {
-    easy: language === 'ru' ? 'Легко' : 'Easy',
-    medium: language === 'ru' ? 'Средне' : 'Medium',
-    hard: language === 'ru' ? 'Сложно' : 'Hard',
-  };
+// Recipe tooltip component with forwardRef to avoid React warnings
+const RecipeBadge = forwardRef<HTMLDivElement, { recipe: ProductRecipe; language: string }>(
+  ({ recipe, language }, ref) => {
+    const [showTooltip, setShowTooltip] = useState(false);
+    
+    const difficultyColors = {
+      easy: 'bg-green-500',
+      medium: 'bg-amber-500', 
+      hard: 'bg-red-500',
+    };
+    
+    const difficultyLabels = {
+      easy: language === 'ru' ? 'Легко' : 'Easy',
+      medium: language === 'ru' ? 'Средне' : 'Medium',
+      hard: language === 'ru' ? 'Сложно' : 'Hard',
+    };
 
-  return (
-    <div className="relative">
-      <button
-        onClick={(e) => { e.stopPropagation(); setShowTooltip(!showTooltip); }}
-        className="flex items-center gap-1 bg-emerald-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-md hover:bg-emerald-600 transition-colors"
-      >
-        <ChefHat className="w-3 h-3" />
-        <span>{language === 'ru' ? recipe.dish_ru : recipe.dish}</span>
-      </button>
-      
-      {showTooltip && (
-        <div 
-          className="absolute z-50 top-full left-0 mt-2 w-64 bg-card border border-border rounded-xl shadow-xl p-3 animate-in fade-in slide-in-from-top-2 duration-200"
-          onClick={(e) => e.stopPropagation()}
+    return (
+      <div ref={ref} className="relative">
+        <button
+          onClick={(e) => { e.stopPropagation(); setShowTooltip(!showTooltip); }}
+          className="flex items-center gap-1 bg-emerald-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-md hover:bg-emerald-600 transition-colors"
         >
-          <button 
-            onClick={() => setShowTooltip(false)}
-            className="absolute top-2 right-2 text-muted-foreground hover:text-foreground"
+          <ChefHat className="w-3 h-3" />
+          <span>{language === 'ru' ? recipe.dish_ru : recipe.dish}</span>
+        </button>
+        
+        {showTooltip && (
+          <div 
+            className="absolute z-50 top-full left-0 mt-2 w-64 bg-card border border-border rounded-xl shadow-xl p-3 animate-in fade-in slide-in-from-top-2 duration-200"
+            onClick={(e) => e.stopPropagation()}
           >
-            <X className="w-4 h-4" />
-          </button>
-          
-          <div className="flex gap-3">
-            <img 
-              src={recipe.image} 
-              alt={recipe.dish}
-              className="w-16 h-16 rounded-lg object-cover shrink-0"
-            />
-            <div className="min-w-0">
-              <h4 className="font-bold text-sm text-foreground">
-                {language === 'ru' ? recipe.dish_ru : recipe.dish}
-              </h4>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Clock className="w-3 h-3" />
-                  {recipe.time_mins} {language === 'ru' ? 'мин' : 'min'}
-                </span>
-                <span className={cn(
-                  "text-[10px] px-1.5 py-0.5 rounded-full text-white",
-                  difficultyColors[recipe.difficulty]
-                )}>
-                  {difficultyLabels[recipe.difficulty]}
-                </span>
+            <button 
+              onClick={() => setShowTooltip(false)}
+              className="absolute top-2 right-2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            
+            <div className="flex gap-3">
+              <img 
+                src={recipe.image} 
+                alt={recipe.dish}
+                className="w-16 h-16 rounded-lg object-cover shrink-0"
+              />
+              <div className="min-w-0">
+                <h4 className="font-bold text-sm text-foreground">
+                  {language === 'ru' ? recipe.dish_ru : recipe.dish}
+                </h4>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Clock className="w-3 h-3" />
+                    {recipe.time_mins} {language === 'ru' ? 'мин' : 'min'}
+                  </span>
+                  <span className={cn(
+                    "text-[10px] px-1.5 py-0.5 rounded-full text-white",
+                    difficultyColors[recipe.difficulty]
+                  )}>
+                    {difficultyLabels[recipe.difficulty]}
+                  </span>
+                </div>
               </div>
             </div>
+            
+            <p className="mt-2 text-xs text-muted-foreground border-t border-border pt-2">
+              💡 {language === 'ru' ? recipe.tip_ru : recipe.tip}
+            </p>
           </div>
-          
-          <p className="mt-2 text-xs text-muted-foreground border-t border-border pt-2">
-            💡 {language === 'ru' ? recipe.tip_ru : recipe.tip}
-          </p>
-        </div>
-      )}
-    </div>
-  );
-};
+        )}
+      </div>
+    );
+  }
+);
+
+RecipeBadge.displayName = 'RecipeBadge';
 
 export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalProductCardProps>(({
   product,
