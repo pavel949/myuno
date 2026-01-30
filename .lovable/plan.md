@@ -1,198 +1,138 @@
 
 
-# План: Персонализация главного экрана через персоны пользователя + AI
+# План: Расширение маппингов персон для AI-персонализации
 
 ## Обзор
 
-Создание системы, где пользователь выбирает свои "персоны" (турист, резидент, владелец недвижимости), и AI формирует персонализированный экран с релевантными услугами и предложениями.
+"Обучение" AI в данном случае = обновление конфигурационных данных в двух местах:
+1. **Edge Function** (`ai-personalize-home`) — для AI-рекомендаций и категорий
+2. **QuickActionsGrid** — для быстрых действий на главном экране
 
-**Да, это безопасно реализовать!** Персоны — это не роли доступа (admin, staff), а предпочтения пользователя для персонализации контента. Они не влияют на права доступа к данным.
+AI не требует отдельного обучения — он работает на основе маппингов, которые мы определяем.
 
-## Архитектура
+## Текущие vs Новые маппинги
 
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│                        Главный экран                            │
-├─────────────────────────────────────────────────────────────────┤
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │     Персона-селектор (мульти-выбор)                      │   │
-│  │  [🧳 Турист ✓] [🏠 Резидент] [🏢 Владелец ✓]            │   │
-│  └─────────────────────────────────────────────────────────┘   │
-│                              ↓                                  │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │     AI-генерированный контент                            │   │
-│  │  "На основе ваших интересов мы подобрали..."             │   │
-│  │                                                           │   │
-│  │  [Яхты] [Туры] [Недвижимость] [Юрист] [Страховка]       │   │
-│  └─────────────────────────────────────────────────────────┘   │
-│                              ↓                                  │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │     Персонализированные рекомендации                     │   │
-│  │  Карточки услуг, отобранные AI под персоны               │   │
-│  └─────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────┘
-```
+### Турист (Tourist)
 
-## Безопасность
-
-| Аспект | Подход |
-|--------|--------|
-| Персоны vs Роли | Персоны (tourist, resident, owner) хранятся отдельно от ролей доступа (admin, staff) |
-| Хранение | Новая таблица `user_personas` с RLS политиками |
-| Мульти-выбор | Пользователь может иметь несколько персон одновременно |
-| AI обработка | Edge function с Lovable AI для генерации рекомендаций |
-
-## Шаги реализации
-
-### Шаг 1: Создание таблицы `user_personas`
-
-Отдельная таблица для предпочтений персонализации (не путать с ролями доступа):
-
-```sql
-CREATE TYPE public.user_persona AS ENUM ('tourist', 'resident', 'property_owner');
-
-CREATE TABLE public.user_personas (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  persona user_persona NOT NULL,
-  is_active boolean DEFAULT true,
-  created_at timestamptz DEFAULT now(),
-  UNIQUE (user_id, persona)
-);
-
-ALTER TABLE public.user_personas ENABLE ROW LEVEL SECURITY;
-
--- Пользователь видит только свои персоны
-CREATE POLICY "Users can view own personas"
-  ON public.user_personas FOR SELECT
-  TO authenticated
-  USING (auth.uid() = user_id);
-
--- Пользователь может добавлять себе персоны
-CREATE POLICY "Users can insert own personas"
-  ON public.user_personas FOR INSERT
-  TO authenticated
-  WITH CHECK (auth.uid() = user_id);
-
--- Пользователь может обновлять свои персоны
-CREATE POLICY "Users can update own personas"
-  ON public.user_personas FOR UPDATE
-  TO authenticated
-  USING (auth.uid() = user_id);
-
--- Пользователь может удалять свои персоны
-CREATE POLICY "Users can delete own personas"
-  ON public.user_personas FOR DELETE
-  TO authenticated
-  USING (auth.uid() = user_id);
-```
-
-### Шаг 2: UI компонент PersonaSelector
-
-Новый компонент для выбора персон на главном экране:
-
-```text
-Файл: src/components/home/PersonaSelector.tsx
-
-Функционал:
-- Горизонтальный ряд чипов с персонами
-- Мульти-выбор (можно выбрать несколько)
-- Иконки и цвета для каждой персоны
-- Сохранение в БД через React Query
-- Анимация при переключении
-```
-
-Персоны с UI:
-- 🧳 **Турист** — Яхты, туры, рестораны, развлечения
-- 🏠 **Резидент** — Визы, медицина, юристы, страховки
-- 🏢 **Владелец** — Управление недвижимостью, юридические услуги
-
-### Шаг 3: Hook `useUserPersonas`
-
-```text
-Файл: src/hooks/useUserPersonas.ts
-
-Функционал:
-- Загрузка персон пользователя из БД
-- Добавление/удаление персон
-- Кэширование через React Query
-- Оптимистичные обновления UI
-```
-
-### Шаг 4: Edge Function для AI-персонализации
-
-```text
-Файл: supabase/functions/ai-personalize-home/index.ts
-
-Входные данные:
-- personas: ['tourist', 'property_owner']
-- language: 'ru' | 'en'
-- view_history: последние просмотренные категории
-
-Выходные данные:
-- recommended_categories: список категорий с приоритетами
-- suggested_actions: персонализированные быстрые действия
-- greeting_message: AI-сформированное приветствие
-```
-
-AI промпт будет учитывать комбинации персон:
-- Турист + Владелец → показать яхты И управление недвижимостью
-- Резидент → фокус на визах, страховках, медицине
-
-### Шаг 5: Интеграция в Index.tsx
-
-Обновление главной страницы:
-1. Добавить `PersonaSelector` после `ContentModeToggle`
-2. Использовать `useUserPersonas` для получения персон
-3. Передавать персоны в `QuickActionsGrid` для фильтрации
-4. Добавить AI-приветствие на основе персон
-
-### Шаг 6: Обновление QuickActionsGrid
-
-Изменить логику выбора действий:
-- Вместо `user_type` из профиля использовать активные персоны
-- Объединять действия для нескольких персон
-- Приоритизировать по пересечению интересов
-
-## Технические детали
-
-### Структура персон
-
-| Персона | Категории услуг |
+| Текущие | Ваши требования |
 |---------|-----------------|
-| tourist | yachts, tours, restaurants, events, water, transport, beauty |
-| resident | visa, medical, legal, insurance, banking, education, pharmacy |
-| property_owner | property, legal, insurance, services, cleaning |
+| yachts, tours, restaurants, events, water, transport, beauty, flowers | property (аренда), transport (авто/байки), yachts, tours, flowers, market (продукты), beauty (массаж), events, exchange (обмен валют) |
 
-### Формат ответа AI
+**Новый список:**
+- `property` — Аренда жилья
+- `transport` — Авто и байки
+- `yachts` — Яхты
+- `tours` — Туры и экскурсии
+- `flowers` — Цветы
+- `market` — Продукты и маркет
+- `beauty` — Массаж и SPA
+- `events` — Мероприятия
+- `exchange` — Обмен валют
 
-```json
-{
-  "greeting": "Привет! Для вас как туриста и владельца недвижимости...",
-  "priority_categories": ["yachts", "property", "legal", "tours"],
-  "suggested_services": [
-    { "id": "yacht-rental", "reason": "Популярно среди туристов" },
-    { "id": "property-management", "reason": "Для владельцев недвижимости" }
-  ]
-}
+### Резидент (Resident)
+
+| Текущие | Ваши требования |
+|---------|-----------------|
+| visa, medical, legal, insurance, banking, education, pharmacy, property | visa, property (аренда), education (школы, сады, репетиторы) |
+
+**Новый список:**
+- `visa` — Визы и документы
+- `property` — Аренда жилья
+- `education` — Школы, детсады, репетиторы
+- `medical` — Медицина
+- `legal` — Юридические услуги
+- `insurance` — Страховки
+- `banking` — Банки
+
+### Владелец (Property Owner)
+
+| Текущие | Ваши требования |
+|---------|-----------------|
+| property, legal, insurance, services, cleaning, visa | services (обслуживание), property-management (УК), rental (управление арендой) |
+
+**Новый список:**
+- `services` — Обслуживание объекта (клининг, ремонт)
+- `property-management` — Поиск управляющей компании
+- `rental` — Управление арендой
+- `legal` — Юридические услуги
+- `insurance` — Страховка объекта
+
+## Файлы для изменения
+
+### 1. Edge Function: `supabase/functions/ai-personalize-home/index.ts`
+
+Обновить `PERSONA_CATEGORIES`:
+```typescript
+const PERSONA_CATEGORIES: Record<UserPersona, string[]> = {
+  tourist: [
+    'property',      // Аренда жилья
+    'transport',     // Авто и байки  
+    'yachts',        // Яхты
+    'tours',         // Туры
+    'flowers',       // Цветы
+    'market',        // Продукты
+    'beauty',        // Массаж/SPA
+    'events',        // Мероприятия
+    'exchange',      // Обмен валют
+  ],
+  resident: [
+    'visa',          // Визы
+    'property',      // Аренда жилья
+    'education',     // Школы, сады, репетиторы
+    'medical',       // Медицина
+    'legal',         // Юристы
+    'insurance',     // Страховки
+    'banking',       // Банки
+  ],
+  property_owner: [
+    'services',      // Обслуживание объекта
+    'property-management', // Поиск УК
+    'rental',        // Управление арендой
+    'legal',         // Юридические услуги
+    'insurance',     // Страховка объекта
+    'cleaning',      // Клининг
+  ],
+};
 ```
 
-## Файлы для создания/изменения
+Обновить `PERSONA_SERVICES` с релевантными рекомендациями:
+```typescript
+const PERSONA_SERVICES: Record<UserPersona, Array<...>> = {
+  tourist: [
+    { id: 'villa-rental', reasonRu: 'Лучшие виллы на острове' },
+    { id: 'bike-rental', reasonRu: 'Удобное передвижение' },
+    { id: 'yacht-charter', reasonRu: 'Незабываемый отдых на воде' },
+    { id: 'island-tour', reasonRu: 'Откройте красоты острова' },
+    { id: 'spa-massage', reasonRu: 'Расслабление и релакс' },
+  ],
+  resident: [
+    { id: 'visa-extension', reasonRu: 'Продление визы без проблем' },
+    { id: 'international-school', reasonRu: 'Лучшие школы для детей' },
+    { id: 'long-term-rental', reasonRu: 'Жильё на долгий срок' },
+  ],
+  property_owner: [
+    { id: 'property-management-company', reasonRu: 'Доверьте управление профессионалам' },
+    { id: 'rental-management', reasonRu: 'Максимальный доход от аренды' },
+    { id: 'maintenance-service', reasonRu: 'Обслуживание вашего объекта' },
+  ],
+};
+```
 
-| Файл | Действие |
-|------|----------|
-| `supabase/migrations/xxx_create_user_personas.sql` | Создать |
-| `src/hooks/useUserPersonas.ts` | Создать |
-| `src/components/home/PersonaSelector.tsx` | Создать |
-| `supabase/functions/ai-personalize-home/index.ts` | Создать |
-| `src/pages/Index.tsx` | Изменить |
-| `src/components/home/QuickActionsGrid.tsx` | Изменить |
+### 2. QuickActionsGrid: `src/components/home/QuickActionsGrid.tsx`
 
-## Ожидаемый результат
+Обновить массивы `TOURIST_ACTIONS`, `RESIDENT_ACTIONS`, `OWNER_ACTIONS` с новыми иконками и путями.
 
-- Пользователь выбирает персоны на главном экране
-- Выбор сохраняется в БД и синхронизируется между устройствами
-- AI формирует персонализированное приветствие и рекомендации
-- Quick Actions адаптируются под выбранные персоны
-- Безопасность: персоны не влияют на доступ к данным
+Добавить новые действия:
+- `Exchange` (обмен валют) — иконка `Banknote`, путь `/exchange`
+- `Market` (продукты) — уже есть
+- `Rental Management` — путь `/property/management`
+
+## Результат
+
+После обновления:
+- **Турист** увидит: Жильё, Транспорт, Яхты, Туры, Цветы, Маркет, Массаж, События, Обмен
+- **Резидент** увидит: Визы, Жильё, Образование, Медицина, Юрист, Страховка, Банки
+- **Владелец** увидит: Обслуживание, УК, Управление арендой, Юрист, Страховка
+
+При комбинации персон (например, Турист + Владелец) AI объединит релевантные категории с приоритетом по частоте появления.
 
