@@ -69,6 +69,10 @@ export function useAISearch(
   const [aiResponse, setAiResponse] = useState<AISearchResponse | null>(null);
   const [isAILoading, setIsAILoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [lastQuery, setLastQuery] = useState('');
+  
+  // Memoize personas to prevent re-renders
+  const personasKey = personas.join(',');
   
   // Determine if query looks like a question
   const isQuestion = query.length >= 3 && isLikelyQuestion(query, language);
@@ -86,6 +90,13 @@ export function useAISearch(
     if (!enabled || !query.trim() || query.length < 3 || !isQuestion) {
       setAiResponse(null);
       setAiError(null);
+      setLastQuery('');
+      return;
+    }
+
+    // Prevent duplicate requests for the same query
+    const trimmedQuery = query.trim();
+    if (trimmedQuery === lastQuery && aiResponse) {
       return;
     }
 
@@ -98,7 +109,7 @@ export function useAISearch(
       try {
         const { data, error } = await supabase.functions.invoke('ai-smart-search', {
           body: { 
-            query: query.trim(), 
+            query: trimmedQuery, 
             language,
             personas 
           }
@@ -109,6 +120,7 @@ export function useAISearch(
         }
 
         if (isMounted) {
+          setLastQuery(trimmedQuery);
           if (data.type === 'search') {
             // AI determined this should be regular search
             setAiResponse(null);
@@ -133,7 +145,8 @@ export function useAISearch(
       isMounted = false;
       clearTimeout(searchTimeout);
     };
-  }, [query, enabled, language, isQuestion, personas]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, enabled, language, isQuestion, personasKey]);
 
   // Determine current mode
   const mode: 'search' | 'ai' | 'idle' = !query.trim() 
