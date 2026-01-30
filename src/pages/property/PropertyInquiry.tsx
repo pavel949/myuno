@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { Users, MessageCircle, Check, AlertCircle, Shield, Zap, ChevronRight } from 'lucide-react';
+import { Users, MessageCircle, AlertCircle, Zap, ChevronRight } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 import { useProfile } from '@/hooks/useProfile';
 import { usePropertyWithRentalTerms } from '@/hooks/useProperties';
 import { DepositPaymentOptions } from '@/components/property/DepositPaymentOptions';
+import { BookingTermsCard } from '@/components/property/BookingTermsCard';
 import { differenceInDays, format, parseISO } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
@@ -315,18 +316,19 @@ export default function PropertyInquiry() {
             </div>
           )}
 
-          {/* House Rules */}
-          {(rentalTerms?.house_rules || rentalTerms?.house_rules_ru) && (
-            <div className="p-4 rounded-xl bg-muted/50 space-y-2">
-              <h3 className="font-medium text-sm flex items-center gap-2">
-                <Shield className="w-4 h-4" />
-                {isRu ? 'Правила дома' : 'House Rules'}
-              </h3>
-              <p className="text-sm text-muted-foreground whitespace-pre-line">
-                {isRu ? (rentalTerms.house_rules_ru || rentalTerms.house_rules) : rentalTerms.house_rules}
-              </p>
-            </div>
-          )}
+          {/* Booking Terms - Cancellation Policy & Rules */}
+          <BookingTermsCard
+            cancellationPolicy={rentalTerms?.cancellation_policy}
+            securityDeposit={rentalTerms?.deposit_amount}
+            cleaningFee={rentalTerms?.extra_cleaning_price}
+            checkInTime={rentalTerms?.check_in_time}
+            checkOutTime={rentalTerms?.check_out_time}
+            houseRules={rentalTerms?.house_rules}
+            houseRulesRu={rentalTerms?.house_rules_ru}
+            smokingPenalty={rentalTerms?.smoking_penalty}
+            lateCheckoutPenalty={rentalTerms?.late_checkout_penalty}
+            petDeposit={rentalTerms?.pet_deposit}
+          />
         </div>
       </div>
     </AppLayout>

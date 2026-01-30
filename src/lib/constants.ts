@@ -45,11 +45,85 @@ export const VALIDATION = {
   EMAIL_REGEX: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
 } as const;
 
+// Extended booking statuses for reliable booking flow
 export const BOOKING_STATUS = {
   PENDING: 'pending',
+  PENDING_DEPOSIT: 'pending_deposit',
+  DEPOSIT_PAID: 'deposit_paid',
   CONFIRMED: 'confirmed',
+  CHECKED_IN: 'checked_in',
+  CHECKED_OUT: 'checked_out',
   COMPLETED: 'completed',
   CANCELLED: 'cancelled',
+  CANCELLED_BY_GUEST: 'cancelled_by_guest',
+  CANCELLED_BY_HOST: 'cancelled_by_host',
+  NO_SHOW: 'no_show',
+} as const;
+
+// Airbnb-style cancellation policies
+export const CANCELLATION_POLICY = {
+  FLEXIBLE: 'flexible',
+  MODERATE: 'moderate',
+  STRICT: 'strict',
+  SUPER_STRICT: 'super_strict',
+  NON_REFUNDABLE: 'non_refundable',
+} as const;
+
+// Cancellation policy details for UI display
+export const CANCELLATION_POLICY_DETAILS = {
+  flexible: {
+    nameEn: 'Flexible',
+    nameRu: 'Гибкая',
+    descEn: 'Full refund up to 24 hours before check-in',
+    descRu: 'Полный возврат до 24 часов перед заездом',
+    fullRefundHours: 24,
+    partialRefundPercent: 0,
+    color: 'green',
+  },
+  moderate: {
+    nameEn: 'Moderate',
+    nameRu: 'Умеренная',
+    descEn: 'Full refund up to 5 days before check-in, 50% up to 24h',
+    descRu: 'Полный возврат до 5 дней перед заездом, 50% до 24ч',
+    fullRefundHours: 120,
+    partialRefundPercent: 50,
+    color: 'yellow',
+  },
+  strict: {
+    nameEn: 'Strict',
+    nameRu: 'Строгая',
+    descEn: '50% refund up to 7 days before check-in, no refund after',
+    descRu: '50% возврат до 7 дней перед заездом, далее без возврата',
+    fullRefundHours: 168,
+    partialRefundPercent: 0,
+    color: 'orange',
+  },
+  super_strict: {
+    nameEn: 'Super Strict',
+    nameRu: 'Очень строгая',
+    descEn: '50% refund up to 30 days before check-in, no refund after',
+    descRu: '50% возврат до 30 дней перед заездом, далее без возврата',
+    fullRefundHours: 720,
+    partialRefundPercent: 0,
+    color: 'red',
+  },
+  non_refundable: {
+    nameEn: 'Non-refundable',
+    nameRu: 'Невозвратная',
+    descEn: 'No refund, but 10% discount on booking',
+    descRu: 'Без возврата, но скидка 10% на бронирование',
+    fullRefundHours: 0,
+    partialRefundPercent: 0,
+    discount: 10,
+    color: 'destructive',
+  },
+} as const;
+
+export const REFUND_STATUS = {
+  PENDING: 'pending',
+  PROCESSED: 'processed',
+  DECLINED: 'declined',
+  PARTIAL: 'partial',
 } as const;
 
 export const PAYMENT_STATUS = {

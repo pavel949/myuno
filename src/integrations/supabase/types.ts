@@ -960,6 +960,60 @@ export type Database = {
           },
         ]
       }
+      cancellation_policy_rules: {
+        Row: {
+          created_at: string | null
+          deposit_refundable: boolean | null
+          description_en: string | null
+          description_ru: string | null
+          full_refund_hours: number | null
+          id: string
+          is_active: boolean | null
+          name_en: string
+          name_ru: string
+          no_refund_hours: number | null
+          non_refundable_discount: number | null
+          partial_refund_hours: number | null
+          partial_refund_percent: number | null
+          policy_code: string
+          sort_order: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          deposit_refundable?: boolean | null
+          description_en?: string | null
+          description_ru?: string | null
+          full_refund_hours?: number | null
+          id?: string
+          is_active?: boolean | null
+          name_en: string
+          name_ru: string
+          no_refund_hours?: number | null
+          non_refundable_discount?: number | null
+          partial_refund_hours?: number | null
+          partial_refund_percent?: number | null
+          policy_code: string
+          sort_order?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          deposit_refundable?: boolean | null
+          description_en?: string | null
+          description_ru?: string | null
+          full_refund_hours?: number | null
+          id?: string
+          is_active?: boolean | null
+          name_en?: string
+          name_ru?: string
+          no_refund_hours?: number | null
+          non_refundable_discount?: number | null
+          partial_refund_hours?: number | null
+          partial_refund_percent?: number | null
+          policy_code?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
       cart_items: {
         Row: {
           created_at: string
@@ -6997,12 +7051,64 @@ export type Database = {
           },
         ]
       }
+      property_booking_status_log: {
+        Row: {
+          booking_id: string
+          changed_by: string | null
+          created_at: string | null
+          from_status: string | null
+          id: string
+          metadata: Json | null
+          reason: string | null
+          to_status: string
+        }
+        Insert: {
+          booking_id: string
+          changed_by?: string | null
+          created_at?: string | null
+          from_status?: string | null
+          id?: string
+          metadata?: Json | null
+          reason?: string | null
+          to_status: string
+        }
+        Update: {
+          booking_id?: string
+          changed_by?: string | null
+          created_at?: string | null
+          from_status?: string | null
+          id?: string
+          metadata?: Json | null
+          reason?: string | null
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_booking_status_log_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "property_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_bookings: {
         Row: {
+          cancellation_policy: string | null
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
           check_in: string
           check_out: string
+          cleaning_fee: number | null
+          confirmed_at: string | null
+          confirmed_by: string | null
           created_at: string
           currency: string | null
+          deposit_amount: number | null
+          deposit_paid_at: string | null
+          deposit_payment_method: string | null
+          deposit_stripe_session_id: string | null
           external_id: string | null
           guest_email: string | null
           guest_id: string | null
@@ -7013,7 +7119,12 @@ export type Database = {
           marketplace_booking_id: string | null
           notes: string | null
           owner_id: string
+          platform_commission: number | null
           property_id: string
+          refund_amount: number | null
+          refund_processed_at: string | null
+          refund_status: string | null
+          service_fee: number | null
           source: string | null
           source_calendar_id: string | null
           status: string | null
@@ -7021,10 +7132,21 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          cancellation_policy?: string | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           check_in: string
           check_out: string
+          cleaning_fee?: number | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
           created_at?: string
           currency?: string | null
+          deposit_amount?: number | null
+          deposit_paid_at?: string | null
+          deposit_payment_method?: string | null
+          deposit_stripe_session_id?: string | null
           external_id?: string | null
           guest_email?: string | null
           guest_id?: string | null
@@ -7035,7 +7157,12 @@ export type Database = {
           marketplace_booking_id?: string | null
           notes?: string | null
           owner_id: string
+          platform_commission?: number | null
           property_id: string
+          refund_amount?: number | null
+          refund_processed_at?: string | null
+          refund_status?: string | null
+          service_fee?: number | null
           source?: string | null
           source_calendar_id?: string | null
           status?: string | null
@@ -7043,10 +7170,21 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          cancellation_policy?: string | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           check_in?: string
           check_out?: string
+          cleaning_fee?: number | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
           created_at?: string
           currency?: string | null
+          deposit_amount?: number | null
+          deposit_paid_at?: string | null
+          deposit_payment_method?: string | null
+          deposit_stripe_session_id?: string | null
           external_id?: string | null
           guest_email?: string | null
           guest_id?: string | null
@@ -7057,7 +7195,12 @@ export type Database = {
           marketplace_booking_id?: string | null
           notes?: string | null
           owner_id?: string
+          platform_commission?: number | null
           property_id?: string
+          refund_amount?: number | null
+          refund_processed_at?: string | null
+          refund_status?: string | null
+          service_fee?: number | null
           source?: string | null
           source_calendar_id?: string | null
           status?: string | null
