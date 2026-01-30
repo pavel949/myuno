@@ -311,13 +311,14 @@ export default function AdminContentModeration() {
                           </div>
 
                           {/* Actions */}
-                          <div className="flex items-center gap-2 mt-3">
+                          <div className="flex flex-wrap items-center gap-2 mt-3">
                             <Button 
                               variant="outline" 
                               size="sm"
                               onClick={() => handleViewDetails(item)}
+                              className="text-xs px-2"
                             >
-                              <Eye className="w-4 h-4 mr-1" />
+                              <Eye className="w-3 h-3 mr-1" />
                               {isRu ? 'Просмотр' : 'View'}
                             </Button>
                             
@@ -326,21 +327,24 @@ export default function AdminContentModeration() {
                                 <Button 
                                   variant="default" 
                                   size="sm"
-                                  className="bg-green-600 hover:bg-green-700"
+                                  className="bg-green-600 hover:bg-green-700 text-xs px-2"
                                   onClick={() => handleApprove(item)}
                                   disabled={isProcessing}
                                 >
-                                  <Check className="w-4 h-4 mr-1" />
-                                  {isRu ? 'Одобрить' : 'Approve'}
+                                  <Check className="w-3 h-3 mr-1" />
+                                  <span className="hidden xs:inline">{isRu ? 'Одобрить' : 'Approve'}</span>
+                                  <span className="xs:hidden">✓</span>
                                 </Button>
                                 <Button 
                                   variant="destructive" 
                                   size="sm"
                                   onClick={() => handleOpenRejectDialog(item)}
                                   disabled={isProcessing}
+                                  className="text-xs px-2"
                                 >
-                                  <X className="w-4 h-4 mr-1" />
-                                  {isRu ? 'Отклонить' : 'Reject'}
+                                  <X className="w-3 h-3 mr-1" />
+                                  <span className="hidden xs:inline">{isRu ? 'Отклонить' : 'Reject'}</span>
+                                  <span className="xs:hidden">✕</span>
                                 </Button>
                               </>
                             )}
