@@ -30,12 +30,9 @@ export function InstallBanner() {
       }
     }
 
-    // Show banner on mobile viewport
+    // Show banner on mobile viewport (always, no delay needed)
     if (isMobileViewport) {
-      const timer = setTimeout(() => {
-        setIsVisible(true);
-      }, 300);
-      return () => clearTimeout(timer);
+      setIsVisible(true);
     }
   }, [isMobileViewport, isInstalled]);
 
