@@ -13,7 +13,8 @@ import {
   Bell,
   Wifi,
   Shield,
-  ArrowRight
+  ArrowRight,
+  ExternalLink
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,6 +24,7 @@ import { PageHeader } from "@/components/uno/PageHeader";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { IOSInstallGuide } from "@/components/pwa/IOSInstallGuide";
+import { usePWATracking } from "@/hooks/usePWATracking";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -33,6 +35,7 @@ type InstallState = 'idle' | 'installing' | 'success' | 'already-installed';
 
 const Install = () => {
   const { language } = useLanguage();
+  const { trackInstall } = usePWATracking();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [installState, setInstallState] = useState<InstallState>('idle');
   const [progress, setProgress] = useState(0);
@@ -116,6 +119,10 @@ const Install = () => {
           setProgress(100);
           setInstallState('success');
           setDeferredPrompt(null);
+          
+          // Track the install
+          const platform = isIOS ? 'ios' : isAndroid ? 'android' : 'desktop';
+          trackInstall({ platform, source: 'install_page' });
         } else {
           setInstallState('idle');
           setProgress(0);
@@ -128,6 +135,9 @@ const Install = () => {
     } else if (isIOS) {
       // Show iOS interactive guide
       setShowIOSGuide(true);
+    } else if (isAndroid) {
+      // For Android without native prompt, show instructions
+      // and track as potential install
     }
   };
 
@@ -152,16 +162,17 @@ const Install = () => {
         { icon: Shield, text: 'Безопасное хранение данных' },
       ]
     },
-    iosTitle: 'Установка на iPhone/iPad',
+    iosTitle: 'Установка на iPhone/iPad (Safari)',
     iosSteps: [
-      { icon: Share, text: 'Нажмите кнопку "Поделиться"' },
-      { icon: Plus, text: 'Выберите "На экран Домой"' },
-      { icon: CheckCircle2, text: 'Нажмите "Добавить"' },
+      { icon: Share, text: 'Нажмите кнопку "Поделиться" (□↑) внизу экрана' },
+      { icon: Plus, text: 'Прокрутите вниз и выберите "На экран Домой"' },
+      { icon: CheckCircle2, text: 'Нажмите "Добавить" в правом верхнем углу' },
     ],
-    androidTitle: 'Установка на Android',
+    iosNote: '⚠️ Важно: Используйте Safari. В Chrome/Firefox эта опция недоступна.',
+    androidTitle: 'Установка на Android (Chrome)',
     androidSteps: [
-      { icon: MoreVertical, text: 'Нажмите меню браузера (⋮)' },
-      { icon: Download, text: 'Выберите "Установить приложение"' },
+      { icon: MoreVertical, text: 'Нажмите меню (⋮) в правом верхнем углу Chrome' },
+      { icon: Download, text: 'Выберите "Установить приложение" или "Добавить на главный экран"' },
       { icon: CheckCircle2, text: 'Подтвердите установку' },
     ],
   } : {
@@ -185,16 +196,17 @@ const Install = () => {
         { icon: Shield, text: 'Secure data storage' },
       ]
     },
-    iosTitle: 'Install on iPhone/iPad',
+    iosTitle: 'Install on iPhone/iPad (Safari)',
     iosSteps: [
-      { icon: Share, text: 'Tap the Share button' },
-      { icon: Plus, text: 'Select "Add to Home Screen"' },
-      { icon: CheckCircle2, text: 'Tap "Add"' },
+      { icon: Share, text: 'Tap the Share button (□↑) at the bottom' },
+      { icon: Plus, text: 'Scroll down and tap "Add to Home Screen"' },
+      { icon: CheckCircle2, text: 'Tap "Add" in the top right corner' },
     ],
-    androidTitle: 'Install on Android',
+    iosNote: '⚠️ Important: Use Safari. This option is not available in Chrome/Firefox.',
+    androidTitle: 'Install on Android (Chrome)',
     androidSteps: [
-      { icon: MoreVertical, text: 'Tap browser menu (⋮)' },
-      { icon: Download, text: 'Select "Install app"' },
+      { icon: MoreVertical, text: 'Tap the menu (⋮) in the top right of Chrome' },
+      { icon: Download, text: 'Select "Install app" or "Add to Home screen"' },
       { icon: CheckCircle2, text: 'Confirm installation' },
     ],
   };
@@ -477,6 +489,16 @@ const Install = () => {
                       </motion.div>
                     ))}
                   </div>
+                  
+                  {/* Safari warning for iOS */}
+                  {isIOS && (
+                    <div className="mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                      <p className="text-xs text-amber-600 dark:text-amber-400 flex items-start gap-2">
+                        <ExternalLink className="w-4 h-4 shrink-0 mt-0.5" />
+                        <span>{(t as any).iosNote || "⚠️ Important: Use Safari. This option is not available in Chrome/Firefox."}</span>
+                      </p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>
