@@ -10,6 +10,8 @@ import {
   OperationsSection,
   FinancesSummary,
   CommunicationsSection,
+  OwnerPerformanceCard,
+  BookingSearchBar,
 } from '@/components/owner/dashboard';
 
 export default function OwnerDashboard() {
@@ -49,11 +51,17 @@ export default function OwnerDashboard() {
       {/* Ownership Invites Banner */}
       <OwnershipInviteBanner />
 
+      {/* Global Booking Search */}
+      <BookingSearchBar />
+
       {/* Quick Actions - horizontal scroll */}
       <QuickActionsBar />
 
       {/* Portfolio Section - Hero with properties */}
       <PortfolioSection />
+
+      {/* Performance Metrics - Airbnb style */}
+      <OwnerPerformanceCard />
 
       {/* Operations Section - Today's tasks */}
       <OperationsSection />
