@@ -1,220 +1,119 @@
 
-# План реорганизации Admin Panel: Unified Command Center
+# План улучшения Role Switching в myUNO
 
-## Анализ текущей ситуации
+## Анализ текущей архитектуры
 
-### Проблемы структуры
-- **7 групп в сайдбаре** с неясной логикой (Operations, Catalog, Health & Home, Services & Shops, Marketplace, Analytics & Finance, System)
-- **47+ отдельных страниц** - функционал размазан
-- **Дублирование аналитики** - Analytics, Finance, Leads Dashboard, User Analytics - частично пересекаются
-- **Нет централизованного управления** пользователями с правами
-- **Отсутствует мониторинг** системных ошибок и производительности
+### Как это работает у крупных маркетплейсов (Airbnb)
+Airbnb использует паттерн **"Switch to Hosting / Traveling"**:
+- В меню профиля есть чёткий пункт переключения
+- При нажатии меняется весь контекст: навигация, дашборд, функционал
+- Общие настройки (профиль, уведомления) доступны из любого режима
+- Роль хранится на сервере, синхронизируется между устройствами
 
-### Что нужно добавить
-- Управление всеми пользователями и правами
-- Мониторинг ошибок и производительности системы
-- Единая точка входа к любым данным
+### Текущее состояние myUNO
 
----
+| Компонент | Где используется | Статус |
+|-----------|------------------|--------|
+| `RoleContextSwitcher` | Admin Header | ✅ Работает |
+| `RoleSwitchMenu` | Profile Page | ✅ Работает |
+| `RoleSwitcher` | Не используется | ⚠️ Дубликат |
+| `AdaptiveBottomNav` | Everywhere | ✅ Работает |
+| `RoleGuard` | Route protection | ✅ Правильная логика |
 
-## Новая архитектура: 4 мега-раздела
+### Выявленные проблемы
 
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│                    UNO COMMAND CENTER                           │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  1. DASHBOARD (/)           - Live overview, alerts, KPIs      │
-│                                                                 │
-│  2. CATALOG (/catalog)      - All verticals + marketplace      │
-│     └─ Unified table with tabs/filters by category             │
-│                                                                 │
-│  3. OPERATIONS (/ops)       - Daily work center                │
-│     └─ Moderation, Leads, Bookings, Tickets, Staff             │
-│                                                                 │
-│  4. CONTROL (/control)      - System management                │
-│     └─ Users, Roles, Analytics, Finance, Settings, Logs        │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+1. **Дублирование компонентов**
+   - 3 разных компонента для переключения ролей
+   - `RoleSwitcher` использует `localStorage`
+   - `RoleContextSwitcher` использует DB через `useUserContext`
+   - Потенциальный конфликт синхронизации
+
+2. **Непоследовательный доступ к свитчеру**
+   - В Guest режиме свитчер только на странице Profile
+   - В Owner/Vendor layouts - нет видимого свитчера
+   - В Admin - есть в header
+
+3. **Branding issues**
+   - Местами "UNO" вместо "myUNO"
 
 ---
 
-## Детальная структура разделов
+## Что НЕ требует изменений (уже правильно)
 
-### 1. DASHBOARD (Главная)
-**Цель**: Мгновенный обзор всего + быстрые действия
-
-| Блок | Содержимое |
-|------|------------|
-| **Live Stats** | Онлайн пользователи, активные сессии, заказы сегодня |
-| **KPI Row** | Users, Providers, Bookings, GMV с динамикой |
-| **Alerts Panel** | Срочное: модерация, просроченные заказы, ошибки |
-| **Quick Actions** | +Провайдер, +Объект, Импорт данных |
-| **Verticals Grid** | Компактная сетка всех 19 вертикалей с counts |
-| **Recent Activity** | Последние действия в системе |
-
-### 2. CATALOG (Каталог)
-**Цель**: Единая точка управления всем контентом
-
-**Структура страницы**:
-```text
-┌────────────────────────────────────────────┐
-│ [Фильтры]  Тип: [▼ All] Статус: [▼ All]   │
-│            Поиск: [_______________] 🔍      │
-├────────────────────────────────────────────┤
-│ Tabs: Services | Properties | Products     │
-├────────────────────────────────────────────┤
-│                                            │
-│  ┌─────┬──────────┬─────────┬───────────┐ │
-│  │ ID  │ Name     │ Category│ Status    │ │
-│  ├─────┼──────────┼─────────┼───────────┤ │
-│  │ ... │ ...      │ Yachts  │ Active    │ │
-│  │ ... │ ...      │ Tours   │ Pending   │ │
-│  └─────┴──────────┴─────────┴───────────┘ │
-│                                            │
-└────────────────────────────────────────────┘
-```
-
-**Категории объединены**:
-- **Services**: Yachts, Tours, Properties, Restaurants, Salons, Clinics, Gyms, Events, Education, Legal, Pets, Cleaning, Babysitters, Flowers, Pharmacies, Insurance, Water Activities, Transport
-- **Properties**: Owner Properties, Rentals
-- **Products**: Marketplace товары
-
-### 3. OPERATIONS (Операции)
-**Цель**: Центр ежедневной работы
-
-| Таб | Функционал |
-|-----|------------|
-| **Moderation** | Pending content + approve/reject |
-| **Leads** | Воронка заявок + назначение менеджеров |
-| **Bookings** | Все заказы со статусами |
-| **Tickets** | Обращения клиентов |
-| **Staff** | Управление исполнителями |
-
-### 4. CONTROL (Управление)
-**Цель**: Полный контроль системы
-
-**Табы**:
-
-| Таб | Содержимое |
-|-----|------------|
-| **Users** | Все пользователи с ролями, сегментами, активностью |
-| **Roles** | Управление правами: Admin, UNO Team, Staff, Vendors |
-| **Analytics** | Revenue, Users, Bookings charts - объединённые |
-| **Finance** | GMV, Commissions, Payouts в одном месте |
-| **System** | Справочники, города, переводы, настройки |
-| **Logs** | Системные логи, ошибки, производительность |
+- ✅ Guards проверяют наличие роли, не активную роль (Airbnb-паттерн)
+- ✅ Раздельные дашборды с уникальным функционалом
+- ✅ Адаптивная нижняя навигация по контексту
+- ✅ Хранение роли в БД (`user_active_context`)
+- ✅ Архитектура масштабируемая
 
 ---
 
-## Новые компоненты
+## План улучшений
 
-### A. UnifiedCatalogPage
-Заменяет 19 отдельных страниц вертикалей одной умной таблицей:
-- Фильтр по типу (вертикали)
-- Фильтр по статусу
-- Inline редактирование
-- Bulk actions
+### Фаза 1: Унификация компонентов
 
-### B. ControlCenterPage  
-Объединяет Users + Roles + Analytics + Finance + System:
-- Tabs для переключения контекста
-- Единый поиск по всему
+**Удалить дубликаты:**
+- Удалить `src/components/uno/RoleSwitcher.tsx` (неиспользуемый)
+- Оставить `RoleContextSwitcher` как единый source of truth
+- Обновить `RoleSwitchMenu` чтобы использовал `useUserContext`
 
-### C. SystemHealthPanel
-Новый виджет для Dashboard:
-- Uptime
-- Response times
-- Error rate
-- Active connections
+**Файлы:**
+- Удалить: `src/components/uno/RoleSwitcher.tsx`
+- Изменить: `src/components/profile/RoleSwitchMenu.tsx`
+- Изменить: `src/hooks/useUserRoles.ts` - убрать `useActiveRole` с localStorage
 
-### D. UserManagementTable
-Новая таблица пользователей:
-- Все profiles с фильтрами
-- Роли и права inline
-- Сегменты пользователей
-- Действия: block, unblock, change role
+### Фаза 2: Добавить свитчер во все layouts
 
----
+**Добавить свитчер в Header всех layouts:**
 
-## Изменения в Sidebar
+| Layout | Файл | Изменение |
+|--------|------|-----------|
+| AppHeader (Guest) | `src/components/layout/AppHeader.tsx` | +RoleContextSwitcher |
+| OwnerLayout Header | `src/components/owner/OwnerLayout.tsx` | +RoleContextSwitcher |
+| VendorLayout Header | `src/components/vendor/VendorLayout.tsx` | +RoleContextSwitcher |
 
-**БЫЛО (7 групп, 30+ пунктов)**:
-```text
-Operations (6 items)
-Catalog (9 items)
-Health & Home (5 items)
-Services & Shops (5 items)
-Marketplace (4 items)
-Analytics & Finance (5 items)
-System (8 items)
-```
+### Фаза 3: Улучшить UX свитчера
 
-**СТАНЕТ (4 раздела)**:
-```text
-Dashboard        ← Главная с обзором
-Catalog          ← Все объекты
-Operations       ← Ежедневная работа  
-Control          ← Система и аналитика
-```
+**Визуальные улучшения:**
+- Добавить индикатор текущей роли в профильный аватар
+- Показывать badge с количеством доступных ролей
+- Добавить анимацию перехода между дашбордами
 
----
+### Фаза 4: Branding consistency
 
-## Файлы для создания/изменения
-
-### Новые файлы
-1. `src/pages/admin/AdminUnifiedCatalog.tsx` - единый каталог
-2. `src/pages/admin/AdminControlCenter.tsx` - центр управления
-3. `src/components/admin/catalog/UnifiedCatalogTable.tsx`
-4. `src/components/admin/control/UserManagementTab.tsx`
-5. `src/components/admin/control/RolesManagementTab.tsx`
-6. `src/components/admin/control/SystemHealthTab.tsx`
-7. `src/components/admin/dashboard/SystemHealthPanel.tsx`
-8. `src/hooks/useUnifiedCatalog.ts` - универсальный хук для всех вертикалей
-9. `src/hooks/useSystemHealth.ts` - мониторинг системы
-
-### Изменяемые файлы
-1. `src/components/admin/AdminSidebar.tsx` - новая структура навигации
-2. `src/pages/admin/AdminDashboard.tsx` - добавить System Health
-3. `src/pages/admin/OperationsHub.tsx` - расширить как центр операций
-4. `src/components/layout/AnimatedRoutes.tsx` - новые роуты
+**Заменить "UNO" на "myUNO":**
+- TeamDashboard.tsx (3 места)
+- Любые оставшиеся упоминания
 
 ---
 
 ## Техническая реализация
 
-### UnifiedCatalogTable - универсальная таблица
+### 1. Обновлённый RoleSwitchMenu
 ```typescript
-interface CatalogConfig {
-  type: 'services' | 'properties' | 'products';
-  table: string;
-  columns: ColumnDef[];
-  filters: FilterConfig[];
-}
+// Использует useUserContext вместо дублирования логики
+import { useUserContext } from '@/hooks/useUserContext';
 
-const catalogConfigs: Record<string, CatalogConfig> = {
-  yachts: { type: 'services', table: 'yachts', ... },
-  tours: { type: 'services', table: 'tours', ... },
-  // ... all 19 verticals
-};
+export function RoleSwitchMenu() {
+  const { availableRoles, activeRole, switchContext } = useUserContext();
+  // ... единая логика
+}
 ```
 
-### SystemHealth - мониторинг
-Данные из:
-- `platform_metrics` - KPIs
-- Supabase Analytics API - логи ошибок
-- Edge Function для проверки uptime
+### 2. Удаление localStorage-логики
+```typescript
+// useUserRoles.ts - убрать useActiveRole()
+// Вся логика активной роли теперь в useUserContext
+```
 
----
+### 3. Универсальный Header с Role Switcher
+```typescript
+// AppHeader.tsx
+import { RoleContextSwitcher } from '@/components/uno/RoleContextSwitcher';
 
-## Порядок реализации
-
-1. **Фаза 1**: ✅ Новый Sidebar с 4 разделами - ВЫПОЛНЕНО
-2. **Фаза 2**: ✅ UnifiedCatalog - объединение вертикалей - ВЫПОЛНЕНО  
-3. **Фаза 3**: ✅ ControlCenter - управление и аналитика - ВЫПОЛНЕНО
-4. **Фаза 4**: SystemHealth - мониторинг (следующий шаг)
-5. **Фаза 5**: Удаление устаревших страниц
+// Показывать только для пользователей с >1 роли
+{availableRoles.length > 1 && <RoleContextSwitcher compact />}
+```
 
 ---
 
@@ -222,15 +121,14 @@ const catalogConfigs: Record<string, CatalogConfig> = {
 
 | Метрика | Было | Станет |
 |---------|------|--------|
-| Групп в sidebar | 7 | 4 |
-| Пунктов меню | 42 | 4 + подразделы |
-| Страниц вертикалей | 19 | 1 (unified) |
-| Страниц аналитики | 4 | 1 (control) |
-| Клики до любого объекта | 2-3 | 1-2 |
+| Компонентов для переключения | 3 | 1 |
+| Источников правды | 2 (localStorage + DB) | 1 (DB) |
+| Layouts со свитчером | 1 (Admin) | 4 (все) |
+| Клики до переключения | 2-3 | 1 |
 
-**Ключевые улучшения**:
-- Из любой точки доступ к любым данным за 1-2 клика
-- Единая таблица для всех объектов с фильтрами
-- Мониторинг системы и ошибок
-- Централизованное управление пользователями и правами
-- Максимум информации без избыточности
+**Ключевые улучшения:**
+- Единый компонент, единый источник данных
+- Свитчер доступен из любого layout одним кликом
+- Синхронизация между устройствами через БД
+- Консистентный branding "myUNO"
+
