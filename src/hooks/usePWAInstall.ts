@@ -14,10 +14,12 @@ export function usePWAInstall() {
   const [canInstall, setCanInstall] = useState(false);
 
   useEffect(() => {
-    // Check if already installed
+    // Check if already installed - must be in standalone mode AND not in an iframe
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches 
       || (window.navigator as any).standalone === true;
-    setIsInstalled(isStandalone);
+    // Avoid false positive in iframes (like Lovable preview)
+    const isInIframe = window.self !== window.top;
+    setIsInstalled(isStandalone && !isInIframe);
 
     // Detect platform
     const userAgent = navigator.userAgent.toLowerCase();
