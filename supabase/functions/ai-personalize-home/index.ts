@@ -25,27 +25,30 @@ interface PersonalizedResponse {
 
 // Category mappings for each persona
 const PERSONA_CATEGORIES: Record<UserPersona, string[]> = {
-  tourist: ['yachts', 'tours', 'restaurants', 'events', 'water', 'transport', 'beauty', 'flowers'],
-  resident: ['visa', 'medical', 'legal', 'insurance', 'banking', 'education', 'pharmacy', 'property'],
-  property_owner: ['property', 'legal', 'insurance', 'services', 'cleaning', 'visa'],
+  tourist: ['property', 'transport', 'yachts', 'tours', 'flowers', 'market', 'beauty', 'events', 'exchange'],
+  resident: ['visa', 'property', 'education', 'medical', 'legal', 'insurance', 'banking'],
+  property_owner: ['services', 'property-management', 'rental', 'legal', 'insurance', 'cleaning'],
 };
 
 // Service suggestions per persona
 const PERSONA_SERVICES: Record<UserPersona, Array<{ id: string; reasonEn: string; reasonRu: string }>> = {
   tourist: [
-    { id: 'yacht-rental', reasonEn: 'Popular among tourists', reasonRu: 'Популярно среди туристов' },
-    { id: 'island-tour', reasonEn: 'Must-see experience', reasonRu: 'Незабываемый опыт' },
-    { id: 'airport-transfer', reasonEn: 'Convenient arrival', reasonRu: 'Удобный трансфер' },
+    { id: 'villa-rental', reasonEn: 'Best villas on the island', reasonRu: 'Лучшие виллы на острове' },
+    { id: 'bike-rental', reasonEn: 'Easy way to get around', reasonRu: 'Удобное передвижение' },
+    { id: 'yacht-charter', reasonEn: 'Unforgettable sea experience', reasonRu: 'Незабываемый отдых на воде' },
+    { id: 'island-tour', reasonEn: 'Discover island beauty', reasonRu: 'Откройте красоты острова' },
+    { id: 'spa-massage', reasonEn: 'Relaxation and wellness', reasonRu: 'Расслабление и релакс' },
   ],
   resident: [
-    { id: 'visa-extension', reasonEn: 'Essential for long stay', reasonRu: 'Важно для долгого пребывания' },
+    { id: 'visa-extension', reasonEn: 'Hassle-free visa renewal', reasonRu: 'Продление визы без проблем' },
+    { id: 'international-school', reasonEn: 'Best schools for children', reasonRu: 'Лучшие школы для детей' },
+    { id: 'long-term-rental', reasonEn: 'Long-term housing', reasonRu: 'Жильё на долгий срок' },
     { id: 'health-insurance', reasonEn: 'Security for you and family', reasonRu: 'Защита для вас и семьи' },
-    { id: 'legal-consultation', reasonEn: 'Solve any legal issues', reasonRu: 'Решение правовых вопросов' },
   ],
   property_owner: [
-    { id: 'property-management', reasonEn: 'Maximize your rental income', reasonRu: 'Максимальный доход от аренды' },
-    { id: 'legal-property', reasonEn: 'Protect your investment', reasonRu: 'Защита ваших инвестиций' },
-    { id: 'cleaning-service', reasonEn: 'Keep property ready for guests', reasonRu: 'Подготовка к гостям' },
+    { id: 'property-management-company', reasonEn: 'Trust professionals with management', reasonRu: 'Доверьте управление профессионалам' },
+    { id: 'rental-management', reasonEn: 'Maximize your rental income', reasonRu: 'Максимальный доход от аренды' },
+    { id: 'maintenance-service', reasonEn: 'Keep your property in top shape', reasonRu: 'Обслуживание вашего объекта' },
   ],
 };
 
