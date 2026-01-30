@@ -23,7 +23,8 @@ import {
   CheckInDetails, 
   HouseRules,
   PropertyPriceBreakdown,
-  PropertyBookingCard
+  PropertyBookingCard,
+  MessageHostButton
 } from '@/components/property';
 import { ProjectInfoCard } from '@/components/property/ProjectInfoCard';
 import { UnitSpecs } from '@/components/property/UnitSpecs';
@@ -735,12 +736,21 @@ export default function PropertyDetail() {
             </div>
 
             {/* Sidebar - Booking Card (Desktop Only) */}
-            <div className="hidden lg:block">
+            <div className="hidden lg:block space-y-4">
               <PropertyBookingCard
                 propertyId={id || 'prop-1'}
                 pricePerNight={pricePerNight}
                 rentalTerms={rentalTerms}
                 currency="THB"
+              />
+              {/* Message Host Button for Desktop */}
+              <MessageHostButton
+                propertyId={id || 'prop-1'}
+                propertyTitle={property.title_en}
+                propertyTitleRu={property.title_ru}
+                ownerName={'host' in property && property.host ? property.host.name : undefined}
+                variant="outline"
+                fullWidth
               />
             </div>
           </div>
@@ -768,9 +778,14 @@ export default function PropertyDetail() {
             <Button variant="outline" size="icon" className="flex-shrink-0">
               <Phone className="w-5 h-5" />
             </Button>
-            <Button variant="outline" size="icon" className="flex-shrink-0">
-              <MessageCircle className="w-5 h-5" />
-            </Button>
+            <MessageHostButton
+              propertyId={id || 'prop-1'}
+              propertyTitle={property.title_en}
+              propertyTitleRu={property.title_ru}
+              variant="outline"
+              size="icon"
+              showLabel={false}
+            />
             <Button
               size="lg"
               className="flex-shrink-0 px-6"

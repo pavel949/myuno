@@ -10,3 +10,5 @@ export { PropertyCalendar } from './PropertyCalendar';
 export { SeasonalPricing } from './SeasonalPricing';
 export { PropertyHighlights } from './PropertyHighlights';
 export { PropertyPreviewCard } from './PropertyPreviewCard';
+export { GuestPropertyChat } from './GuestPropertyChat';
+export { MessageHostButton } from './MessageHostButton';
