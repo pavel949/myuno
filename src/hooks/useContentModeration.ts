@@ -124,6 +124,43 @@ export function useContentModeration() {
           continue;
         }
 
+        // Special handling for vendor_locations - uses org_id instead of provider_id
+        if (table === 'vendor_locations') {
+          const { data, error } = await supabase
+            .from('vendor_locations')
+            .select(`
+              id,
+              name,
+              org_id,
+              created_at,
+              cover_image,
+              approval_status
+            `)
+            .eq('approval_status', statusFilter)
+            .order('created_at', { ascending: false });
+
+          if (error) {
+            console.error(`Error fetching vendor_locations:`, error);
+            continue;
+          }
+
+          if (data) {
+            const mapped = data.map((item: any) => ({
+              id: item.id,
+              content_type: 'vendor_locations' as ContentType,
+              title: item.name || 'Untitled',
+              provider_name: 'Vendor',
+              provider_id: item.org_id,
+              owner_user_id: null, // vendor_locations don't have direct user mapping
+              created_at: item.created_at,
+              cover_image: item.cover_image,
+              approval_status: item.approval_status as ApprovalStatus,
+            }));
+            allContent.push(...mapped);
+          }
+          continue;
+        }
+
         // Get column mappings for this table
         const mapping = COLUMN_MAPPINGS[table] || { imageColumn: 'cover_image', titleColumn: 'name_en' };
         const { imageColumn, titleColumn } = mapping;
