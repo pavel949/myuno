@@ -241,6 +241,7 @@ const AdminFinance = lazy(() => import('@/pages/admin/AdminFinance'));
 const AdminCities = lazy(() => import('@/pages/admin/AdminCities'));
 const AdminTranslations = lazy(() => import('@/pages/admin/AdminTranslations'));
 const UserAnalyticsDashboard = lazy(() => import('@/pages/admin/UserAnalyticsDashboard'));
+const AdminLocationKnowledge = lazy(() => import('@/pages/admin/AdminLocationKnowledge'));
 
 // Admin Marketplace pages
 const AdminMarketplaceProducts = lazy(() => import('@/pages/admin/AdminMarketplaceProducts'));
@@ -640,6 +641,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/admin/finance" element={<AdminFinance />} />
           <Route path="/admin/cities" element={<AdminCities />} />
           <Route path="/admin/translations" element={<AdminTranslations />} />
+          <Route path="/admin/location-knowledge" element={<AdminLocationKnowledge />} />
           <Route path="/admin/quick-listings" element={<AdminQuickListings />} />
           <Route path="/admin/user-analytics" element={<UserAnalyticsDashboard />} />
           {/* Marketplace Management */}

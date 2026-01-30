@@ -170,6 +170,7 @@ const navigationGroups: NavGroup[] = [
       { title: 'Services', titleRu: 'Услуги', path: '/admin/services', icon: Package },
       { title: 'UNO Team', titleRu: 'Команда UNO', path: '/admin/uno-team', icon: Users },
       { title: 'Cities', titleRu: 'Города', path: '/admin/cities', icon: Globe },
+      { title: 'Knowledge', titleRu: 'База знаний', path: '/admin/location-knowledge', icon: FileText },
       { title: 'Translations', titleRu: 'Переводы', path: '/admin/translations', icon: Globe },
       { title: 'Lookups', titleRu: 'Справочники', path: '/admin/lookups', icon: Settings },
       { title: 'Partner Apps', titleRu: 'Заявки', path: '/admin/partner-applications', icon: FileText },
