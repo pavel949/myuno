@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useGlobalSearch, SearchResult } from './useGlobalSearch';
@@ -69,7 +69,8 @@ export function useAISearch(
   const [aiResponse, setAiResponse] = useState<AISearchResponse | null>(null);
   const [isAILoading, setIsAILoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
-  const [lastQuery, setLastQuery] = useState('');
+  const lastQueryRef = useRef<string>('');
+  const isRequestingRef = useRef(false);
   
   // Memoize personas to prevent re-renders
   const personasKey = personas.join(',');
@@ -87,22 +88,36 @@ export function useAISearch(
   useEffect(() => {
     let isMounted = true;
     
-    if (!enabled || !query.trim() || query.length < 3 || !isQuestion) {
+    const trimmedQuery = query.trim();
+    
+    if (!enabled || !trimmedQuery || trimmedQuery.length < 3 || !isQuestion) {
       setAiResponse(null);
       setAiError(null);
-      setLastQuery('');
+      lastQueryRef.current = '';
+      isRequestingRef.current = false;
       return;
     }
 
     // Prevent duplicate requests for the same query
-    const trimmedQuery = query.trim();
-    if (trimmedQuery === lastQuery && aiResponse) {
+    if (trimmedQuery === lastQueryRef.current) {
+      return;
+    }
+    
+    // Prevent concurrent requests
+    if (isRequestingRef.current) {
       return;
     }
 
     const searchTimeout = setTimeout(async () => {
       if (!isMounted) return;
       
+      // Double-check to prevent race conditions
+      if (isRequestingRef.current || trimmedQuery === lastQueryRef.current) {
+        return;
+      }
+      
+      isRequestingRef.current = true;
+      lastQueryRef.current = trimmedQuery;
       setIsAILoading(true);
       setAiError(null);
 
@@ -120,7 +135,6 @@ export function useAISearch(
         }
 
         if (isMounted) {
-          setLastQuery(trimmedQuery);
           if (data.type === 'search') {
             // AI determined this should be regular search
             setAiResponse(null);
@@ -133,13 +147,16 @@ export function useAISearch(
         if (isMounted) {
           setAiError(err instanceof Error ? err.message : 'AI search failed');
           setAiResponse(null);
+          // Reset lastQuery on error to allow retry
+          lastQueryRef.current = '';
         }
       } finally {
+        isRequestingRef.current = false;
         if (isMounted) {
           setIsAILoading(false);
         }
       }
-    }, 500); // Slightly longer debounce for AI
+    }, 600); // Debounce
 
     return () => {
       isMounted = false;
