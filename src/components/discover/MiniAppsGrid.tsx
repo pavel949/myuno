@@ -51,7 +51,7 @@ export const MiniAppsGrid = memo(function MiniAppsGrid({
         </div>
       </div>
       
-      <div className="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-5 gap-3">
+      <div className="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3 md:gap-4">
         {miniApps.map((cat) => {
           const Icon = cat.icon;
           const featured = isFeatured?.(cat.id, 'category');
@@ -107,7 +107,7 @@ const MiniAppCard = memo(function MiniAppCard({
       onClick={onClick}
       className={cn(
         "relative flex flex-col items-center justify-start",
-        "rounded-2xl p-3 min-h-[100px]",
+        "rounded-2xl p-3 md:p-4 min-h-[100px] md:min-h-[120px]",
         "bg-card/80 backdrop-blur-sm border",
         isFeatured
           ? "border-amber-400/50 shadow-[0_0_15px_rgba(251,191,36,0.15)]"
@@ -120,44 +120,44 @@ const MiniAppCard = memo(function MiniAppCard({
     >
       {/* Badges */}
       {isFeatured && (
-        <div className="absolute -top-1 -right-1 flex items-center gap-0.5 text-[8px] px-1.5 py-0.5 rounded-full font-bold bg-gradient-to-r from-amber-400 to-amber-500 text-white shadow-sm">
-          <Crown className="w-2.5 h-2.5" />
+        <div className="absolute -top-1 -right-1 md:-top-1.5 md:-right-1.5 flex items-center gap-0.5 text-[8px] md:text-[9px] px-1.5 md:px-2 py-0.5 md:py-1 rounded-full font-bold bg-gradient-to-r from-amber-400 to-amber-500 text-white shadow-sm">
+          <Crown className="w-2.5 h-2.5 md:w-3 md:h-3" />
           PRO
         </div>
       )}
       
       {!isFeatured && isNew && (
-        <div className="absolute -top-1 -right-1 text-[8px] px-1.5 py-0.5 rounded-full font-bold bg-emerald-500 text-white shadow-sm">
-          <Sparkles className="w-2.5 h-2.5 inline mr-0.5" />
+        <div className="absolute -top-1 -right-1 md:-top-1.5 md:-right-1.5 text-[8px] md:text-[9px] px-1.5 md:px-2 py-0.5 md:py-1 rounded-full font-bold bg-emerald-500 text-white shadow-sm">
+          <Sparkles className="w-2.5 h-2.5 md:w-3 md:h-3 inline mr-0.5" />
           NEW
         </div>
       )}
       
       {!isFeatured && !isNew && isHot && (
-        <div className="absolute -top-1 -right-1 text-[8px] px-1.5 py-0.5 rounded-full font-bold bg-gradient-to-r from-orange-400 to-red-500 text-white shadow-sm">
-          <Flame className="w-2.5 h-2.5 inline" />
+        <div className="absolute -top-1 -right-1 md:-top-1.5 md:-right-1.5 text-[8px] md:text-[9px] px-1.5 md:px-2 py-0.5 md:py-1 rounded-full font-bold bg-gradient-to-r from-orange-400 to-red-500 text-white shadow-sm">
+          <Flame className="w-2.5 h-2.5 md:w-3 md:h-3 inline" />
         </div>
       )}
       
       {/* Icon */}
       <div className={cn(
-        "w-12 h-12 rounded-xl flex items-center justify-center mb-2",
+        "w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 rounded-xl md:rounded-2xl flex items-center justify-center mb-2 md:mb-3",
         "bg-gradient-to-br shadow-md",
         color || "from-primary/80 to-primary",
         "group-hover:scale-110 group-hover:shadow-lg transition-all duration-200"
       )}>
-        <div className="absolute inset-0 rounded-xl bg-gradient-to-tr from-white/15 to-transparent" />
-        <Icon className="w-6 h-6 text-white drop-shadow-sm relative z-10" />
+        <div className="absolute inset-0 rounded-xl md:rounded-2xl bg-gradient-to-tr from-white/15 to-transparent" />
+        <Icon className="w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 text-white drop-shadow-sm relative z-10" />
       </div>
       
       {/* Name */}
-      <span className="text-[10px] sm:text-[11px] font-medium text-center leading-tight line-clamp-2 px-0.5 text-foreground/80 group-hover:text-foreground transition-colors">
+      <span className="text-[10px] sm:text-[11px] md:text-xs lg:text-sm font-medium text-center leading-tight line-clamp-2 px-0.5 text-foreground/80 group-hover:text-foreground transition-colors">
         {name}
       </span>
       
       {/* Count */}
       {count !== undefined && count > 0 && (
-        <span className="text-[9px] text-muted-foreground mt-auto pt-1">
+        <span className="text-[9px] md:text-[10px] text-muted-foreground mt-auto pt-1">
           {count}
         </span>
       )}
