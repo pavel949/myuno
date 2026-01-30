@@ -318,6 +318,23 @@ export function PropertyBookingCard({
                 <span>{isRu ? 'Итого' : 'Total'}</span>
                 <span>{formatPrice(pricing.total)}</span>
               </div>
+              
+              {/* 10% Deposit Info */}
+              <div className="pt-2 mt-2 border-t border-dashed">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">
+                    {isRu ? 'Предоплата 10%' : '10% Deposit'}
+                  </span>
+                  <span className="font-semibold text-primary">
+                    {formatPrice(Math.round(pricing.total * 0.1))}
+                  </span>
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  {isRu 
+                    ? 'Невозвратная предоплата для подтверждения'
+                    : 'Non-refundable to confirm booking'}
+                </p>
+              </div>
             </div>
           </>
         )}

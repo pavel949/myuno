@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, Users, MessageCircle, Check, AlertCircle, Clock, Shield, Zap, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { Users, MessageCircle, Check, AlertCircle, Shield, Zap, ChevronRight } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -10,34 +10,35 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
-import { toast } from 'sonner';
-import { useOrders } from '@/hooks/useOrders';
-import { usePropertyAvailability, usePropertyBlockedDates, usePropertyRentalTerms } from '@/hooks/usePropertyAvailability';
-import { useProfile } from '@/hooks/useProfile';
-import { usePropertyWithRentalTerms } from '@/hooks/useProperties';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { differenceInDays, format, isSameDay, addDays, startOfDay, isAfter, isBefore, addMonths } from 'date-fns';
+import { toast } from 'sonner';
+import { useProfile } from '@/hooks/useProfile';
+import { usePropertyWithRentalTerms } from '@/hooks/useProperties';
+import { DepositPaymentOptions } from '@/components/property/DepositPaymentOptions';
+import { differenceInDays, format, parseISO } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
-import { DateRange } from 'react-day-picker';
 
 export default function PropertyInquiry() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const { user } = useAuth();
-  const { toast: toastHook } = useToast();
   const { profile } = useProfile();
-  const { createOrder, isCreating } = useOrders();
   const isRu = language === 'ru';
 
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [dateRange, setDateRange] = useState<DateRange | undefined>();
-  const [guests, setGuests] = useState(2);
+  // Get dates from URL params (set by PropertyBookingCard)
+  const checkInParam = searchParams.get('checkIn');
+  const checkOutParam = searchParams.get('checkOut');
+  const guestsParam = searchParams.get('guests');
+
+  // Parse dates
+  const checkIn = checkInParam ? parseISO(checkInParam) : null;
+  const checkOut = checkOutParam ? parseISO(checkOutParam) : null;
+  const guests = guestsParam ? parseInt(guestsParam, 10) : 2;
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -45,17 +46,9 @@ export default function PropertyInquiry() {
     message: '',
   });
 
-  // Get property info
+  // Get property info with rental terms
   const { data: property } = usePropertyWithRentalTerms(id);
-
-  // Get rental terms and blocked dates
-  const { data: rentalTerms } = usePropertyRentalTerms(id);
-  const { data: blockedDates } = usePropertyBlockedDates(id);
-  const { data: availability } = usePropertyAvailability(
-    id, 
-    dateRange?.from ? format(dateRange.from, 'yyyy-MM-dd') : undefined,
-    dateRange?.to ? format(dateRange.to, 'yyyy-MM-dd') : undefined
-  );
+  const rentalTerms = property?.rentalTerms;
 
   // Autofill from profile
   useEffect(() => {
@@ -69,40 +62,38 @@ export default function PropertyInquiry() {
     }
   }, [profile]);
 
+  // Redirect if no dates selected
+  useEffect(() => {
+    if (!checkIn || !checkOut) {
+      toast.error(isRu ? 'Сначала выберите даты' : 'Please select dates first');
+      navigate(`/property/${id}`);
+    }
+  }, [checkIn, checkOut, id, navigate, isRu]);
+
   // Calculate nights and total
   const nights = useMemo(() => {
-    if (!dateRange?.from || !dateRange?.to) return 0;
-    return differenceInDays(dateRange.to, dateRange.from);
-  }, [dateRange]);
+    if (!checkIn || !checkOut) return 0;
+    return differenceInDays(checkOut, checkIn);
+  }, [checkIn, checkOut]);
 
   const pricePerNight = rentalTerms?.price_per_night || property?.price || 0;
-  // Currency info now comes from useCurrency context - conversion happens automatically
 
   const totalPrice = useMemo(() => {
     if (!pricePerNight || nights <= 0) return 0;
-    return pricePerNight * nights;
-  }, [pricePerNight, nights]);
-
-  // Check if date is blocked
-  const isDateBlocked = (date: Date) => {
-    if (!blockedDates) return false;
-    return blockedDates.some(blocked => isSameDay(blocked.date, date));
-  };
-
-  // Disable dates: past dates and blocked dates
-  const disabledDays = useMemo(() => {
-    const disabled: Date[] = [];
-    const today = startOfDay(new Date());
     
-    // Add all blocked dates
-    if (blockedDates) {
-      blockedDates.forEach(blocked => {
-        disabled.push(blocked.date);
-      });
+    let subtotal = pricePerNight * nights;
+    let discountPercent = 0;
+    
+    // Apply weekly/monthly discount
+    if (nights >= 30 && rentalTerms?.monthly_discount) {
+      discountPercent = rentalTerms.monthly_discount;
+    } else if (nights >= 7 && rentalTerms?.weekly_discount) {
+      discountPercent = rentalTerms.weekly_discount;
     }
     
-    return disabled;
-  }, [blockedDates]);
+    const discount = Math.round(subtotal * (discountPercent / 100));
+    return subtotal - discount;
+  }, [pricePerNight, nights, rentalTerms]);
 
   // Validation
   const validationErrors = useMemo(() => {
@@ -120,144 +111,19 @@ export default function PropertyInquiry() {
         : `Maximum guests: ${rentalTerms.max_guests}`);
     }
     
-    if (availability && !availability.isAvailable) {
-      errors.push(isRu ? 'Выбранные даты недоступны' : 'Selected dates are not available');
-    }
-    
     return errors;
-  }, [nights, rentalTerms, guests, availability, isRu]);
+  }, [nights, rentalTerms, guests, isRu]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!user) {
-      toast.error(isRu ? 'Войдите для бронирования' : 'Please login to book');
-      navigate('/auth');
-      return;
-    }
+  const isFormValid = formData.name && formData.phone && checkIn && checkOut && validationErrors.length === 0;
+  const propertyTitle = isRu ? property?.title_ru : property?.title_en;
 
-    if (!dateRange?.from || !dateRange?.to) {
-      toast.error(isRu ? 'Выберите даты' : 'Select dates');
-      return;
-    }
-
-    if (validationErrors.length > 0) {
-      toast.error(validationErrors[0]);
-      return;
-    }
-
-    try {
-      const propertyTitle = isRu ? property?.title_ru : property?.title_en;
-      
-      const result = await createOrder({
-        order_type: 'property',
-        provider_org_id: undefined, // Property bookings don't have provider_org_id
-        start_at: dateRange.from,
-        total_amount: totalPrice || 0,
-        currency: 'THB', // Prices stored in THB
-        notes: formData.message || undefined,
-        metadata: {
-          property_id: id,
-          check_in: format(dateRange.from, 'yyyy-MM-dd'),
-          check_out: format(dateRange.to, 'yyyy-MM-dd'),
-          guests_count: guests,
-          instant_booking: rentalTerms?.instant_booking || false,
-          property_title: propertyTitle,
-        },
-        items: [{
-          item_name: propertyTitle || 'Property Rental',
-          item_type: 'property',
-          qty: nights,
-          unit_price: pricePerNight,
-          amount: totalPrice,
-        }],
-        participants: [{
-          role: 'primary' as const,
-          name: formData.name,
-          phone: formData.phone || undefined,
-          email: formData.email || undefined,
-        }],
-        serviceName: propertyTitle,
-      });
-
-      if (result.success) {
-        setIsSuccess(true);
-        toast.success(
-          rentalTerms?.instant_booking 
-            ? (isRu ? 'Забронировано!' : 'Booked!')
-            : (isRu ? 'Запрос отправлен!' : 'Request Sent!')
-        );
-      } else {
-        toast.error(isRu ? 'Не удалось создать бронирование' : 'Failed to create booking');
-      }
-    } catch (error) {
-      console.error('Error submitting booking:', error);
-      toast.error(isRu ? 'Не удалось создать бронирование' : 'Failed to create booking');
-    }
-  };
-
-  if (isSuccess) {
-    return (
-      <AppLayout showBottomNav={false}>
-        <div className="flex-1 flex flex-col items-center justify-center p-8 min-h-[80vh]">
-          <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mb-6">
-            <Check className="w-10 h-10 text-green-500" />
-          </div>
-          <h2 className="text-2xl font-display font-bold mb-2 text-center">
-            {rentalTerms?.instant_booking 
-              ? (isRu ? 'Забронировано!' : 'Booking Confirmed!')
-              : (isRu ? 'Запрос отправлен!' : 'Request Sent!')}
-          </h2>
-          <p className="text-muted-foreground text-center max-w-sm mb-4">
-            {rentalTerms?.instant_booking
-              ? (isRu 
-                  ? 'Ваше бронирование подтверждено.'
-                  : 'Your booking is confirmed.')
-              : (isRu 
-                  ? 'Владелец свяжется с вами в ближайшее время.'
-                  : 'The property owner will contact you soon.')}
-          </p>
-          
-          {/* Booking Summary */}
-          <div className="w-full max-w-sm p-4 rounded-xl bg-muted/50 mb-6 space-y-2">
-            {property && (
-              <p className="font-medium text-sm">
-                {isRu ? property.title_ru : property.title_en}
-              </p>
-            )}
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">{isRu ? 'Даты' : 'Dates'}</span>
-              <span>{dateRange?.from && dateRange?.to && (
-                `${format(dateRange.from, 'dd MMM', { locale: isRu ? ru : undefined })} — ${format(dateRange.to, 'dd MMM', { locale: isRu ? ru : undefined })}`
-              )}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">{isRu ? 'Гостей' : 'Guests'}</span>
-              <span>{guests}</span>
-            </div>
-            <Separator className="my-2" />
-            <div className="flex justify-between font-semibold">
-              <span>{isRu ? 'Итого' : 'Total'}</span>
-              <span>{formatPrice(totalPrice)}</span>
-            </div>
-          </div>
-          
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={() => navigate('/property')}>
-              {isRu ? 'К списку' : 'Browse More'}
-            </Button>
-            <Button onClick={() => navigate('/bookings')}>
-              {isRu ? 'Мои бронирования' : 'My Bookings'}
-            </Button>
-          </div>
-        </div>
-      </AppLayout>
-    );
+  if (!checkIn || !checkOut) {
+    return null; // Will redirect
   }
 
   return (
     <AppLayout showBottomNav={false}>
-      <div className="pb-32">
+      <div className="pb-8">
         {/* Header */}
         <div className="sticky top-0 z-20 flex items-center gap-4 p-4 bg-background/95 backdrop-blur-md border-b">
           <BackButton fallbackPath={`/property/${id}`} variant="ghost" />
@@ -267,7 +133,7 @@ export default function PropertyInquiry() {
             </h1>
             {property && (
               <p className="text-sm text-muted-foreground truncate max-w-[250px]">
-                {isRu ? property.title_ru : property.title_en}
+                {propertyTitle}
               </p>
             )}
           </div>
@@ -288,107 +154,52 @@ export default function PropertyInquiry() {
             )}
           </div>
 
-          {/* Visual Calendar */}
+          {/* Selected Dates Summary (read-only) */}
           <div className="rounded-xl border bg-card p-4">
-            <div className="flex items-center gap-2 mb-4">
-              <Calendar className="w-5 h-5 text-primary" />
-              <span className="font-semibold">{isRu ? 'Выберите даты' : 'Select Dates'}</span>
-              {rentalTerms?.min_stay_nights && rentalTerms.min_stay_nights > 1 && (
-                <Badge variant="outline" className="ml-auto text-xs">
-                  {isRu ? `мин. ${rentalTerms.min_stay_nights} ночей` : `min. ${rentalTerms.min_stay_nights} nights`}
-                </Badge>
-              )}
-            </div>
-            
-            <CalendarComponent
-              mode="range"
-              selected={dateRange}
-              onSelect={setDateRange}
-              numberOfMonths={1}
-              disabled={(date) => 
-                isBefore(date, startOfDay(new Date())) || isDateBlocked(date)
-              }
-              modifiers={{
-                booked: blockedDates?.map(b => b.date) || [],
-              }}
-              modifiersClassNames={{
-                booked: 'bg-destructive/20 text-destructive line-through',
-              }}
-              locale={isRu ? ru : undefined}
-              className={cn("p-0 pointer-events-auto w-full")}
-              classNames={{
-                months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-                month: "space-y-4 w-full",
-                caption: "flex justify-center pt-1 relative items-center",
-                caption_label: "text-sm font-medium",
-                nav: "space-x-1 flex items-center",
-                nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
-                nav_button_previous: "absolute left-1",
-                nav_button_next: "absolute right-1",
-                table: "w-full border-collapse space-y-1",
-                head_row: "flex justify-between",
-                head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem] flex-1 text-center",
-                row: "flex w-full mt-2 justify-between",
-                cell: "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 flex-1",
-                day: cn(
-                  "h-9 w-9 p-0 font-normal aria-selected:opacity-100 mx-auto",
-                  "hover:bg-accent hover:text-accent-foreground rounded-md"
-                ),
-                day_range_start: "day-range-start rounded-l-md bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
-                day_range_end: "day-range-end rounded-r-md bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
-                day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-                day_today: "bg-accent text-accent-foreground",
-                day_outside: "text-muted-foreground opacity-50",
-                day_disabled: "text-muted-foreground opacity-50",
-                day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
-                day_hidden: "invisible",
-              }}
-            />
-            
-            {/* Selected dates display */}
-            {dateRange?.from && (
-              <div className="mt-4 pt-4 border-t flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="text-center">
-                    <p className="text-xs text-muted-foreground">{isRu ? 'Заезд' : 'Check-in'}</p>
-                    <p className="font-medium">{format(dateRange.from, 'dd MMM', { locale: isRu ? ru : undefined })}</p>
-                    {rentalTerms?.check_in_time && (
-                      <p className="text-xs text-muted-foreground">{isRu ? 'с' : 'from'} {rentalTerms.check_in_time}</p>
-                    )}
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                  <div className="text-center">
-                    <p className="text-xs text-muted-foreground">{isRu ? 'Выезд' : 'Check-out'}</p>
-                    <p className="font-medium">
-                      {dateRange.to 
-                        ? format(dateRange.to, 'dd MMM', { locale: isRu ? ru : undefined })
-                        : '—'
-                      }
-                    </p>
-                    {rentalTerms?.check_out_time && (
-                      <p className="text-xs text-muted-foreground">{isRu ? 'до' : 'by'} {rentalTerms.check_out_time}</p>
-                    )}
-                  </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="text-center">
+                  <p className="text-xs text-muted-foreground">{isRu ? 'Заезд' : 'Check-in'}</p>
+                  <p className="font-semibold">{format(checkIn, 'd MMM', { locale: isRu ? ru : undefined })}</p>
+                  {rentalTerms?.check_in_time && (
+                    <p className="text-xs text-muted-foreground">{isRu ? 'с' : 'from'} {rentalTerms.check_in_time}</p>
+                  )}
                 </div>
-                {nights > 0 && (
-                  <Badge variant="secondary" className="text-base px-3 py-1">
-                    {nights} {isRu ? (nights === 1 ? 'ночь' : 'ночей') : (nights === 1 ? 'night' : 'nights')}
-                  </Badge>
-                )}
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                <div className="text-center">
+                  <p className="text-xs text-muted-foreground">{isRu ? 'Выезд' : 'Check-out'}</p>
+                  <p className="font-semibold">{format(checkOut, 'd MMM', { locale: isRu ? ru : undefined })}</p>
+                  {rentalTerms?.check_out_time && (
+                    <p className="text-xs text-muted-foreground">{isRu ? 'до' : 'by'} {rentalTerms.check_out_time}</p>
+                  )}
+                </div>
               </div>
-            )}
-
-            {/* Legend */}
-            <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded bg-destructive/20" />
-                <span>{isRu ? 'Занято' : 'Booked'}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded bg-primary" />
-                <span>{isRu ? 'Выбрано' : 'Selected'}</span>
-              </div>
+              <Badge variant="secondary" className="text-base px-3 py-1">
+                {nights} {isRu ? (nights === 1 ? 'ночь' : 'ночей') : (nights === 1 ? 'night' : 'nights')}
+              </Badge>
             </div>
+            
+            {/* Guests */}
+            <Separator className="my-3" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">{isRu ? 'Гости' : 'Guests'}</span>
+              </div>
+              <span className="font-medium">
+                {guests} {isRu ? (guests === 1 ? 'гость' : 'гостей') : (guests === 1 ? 'guest' : 'guests')}
+              </span>
+            </div>
+            
+            {/* Edit link */}
+            <Button 
+              variant="link" 
+              size="sm" 
+              className="mt-2 h-auto p-0 text-xs"
+              onClick={() => navigate(`/property/${id}`)}
+            >
+              {isRu ? 'Изменить даты' : 'Change dates'}
+            </Button>
           </div>
 
           {/* Validation Errors */}
@@ -403,46 +214,8 @@ export default function PropertyInquiry() {
             </div>
           )}
 
-          {/* Guests */}
-          <div className="rounded-xl border bg-card p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-primary" />
-                <span className="font-medium">{isRu ? 'Гости' : 'Guests'}</span>
-                {rentalTerms?.max_guests && (
-                  <span className="text-xs text-muted-foreground">
-                    ({isRu ? `макс. ${rentalTerms.max_guests}` : `max ${rentalTerms.max_guests}`})
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => setGuests(Math.max(1, guests - 1))}
-                  disabled={guests <= 1}
-                >
-                  -
-                </Button>
-                <span className="w-8 text-center font-semibold">{guests}</span>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => setGuests(Math.min(rentalTerms?.max_guests || 20, guests + 1))}
-                  disabled={guests >= (rentalTerms?.max_guests || 20)}
-                >
-                  +
-                </Button>
-              </div>
-            </div>
-          </div>
-
           {/* Contact Info */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-4">
             <h2 className="font-semibold flex items-center gap-2">
               <MessageCircle className="w-5 h-5 text-primary" />
               {isRu ? 'Контактная информация' : 'Contact Information'}
@@ -474,13 +247,14 @@ export default function PropertyInquiry() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="phone">{isRu ? 'Телефон' : 'Phone'}</Label>
+                  <Label htmlFor="phone">{isRu ? 'Телефон' : 'Phone'} *</Label>
                   <Input
                     id="phone"
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="+66..."
+                    required
                     className="mt-1"
                   />
                 </div>
@@ -500,7 +274,46 @@ export default function PropertyInquiry() {
                 />
               </div>
             </div>
-          </form>
+          </div>
+
+          {/* Auth check */}
+          {!user && (
+            <div className="p-4 rounded-xl bg-muted/50 border text-center space-y-3">
+              <p className="text-sm text-muted-foreground">
+                {isRu ? 'Для бронирования необходимо войти в аккаунт' : 'Please sign in to book'}
+              </p>
+              <Button onClick={() => navigate('/auth')} variant="outline">
+                {isRu ? 'Войти' : 'Sign In'}
+              </Button>
+            </div>
+          )}
+
+          {/* Payment Options (only show if user is logged in and form is valid) */}
+          {user && isFormValid && (
+            <DepositPaymentOptions
+              propertyId={id!}
+              propertyTitle={propertyTitle || 'Property'}
+              checkIn={checkIn}
+              checkOut={checkOut}
+              guests={guests}
+              nights={nights}
+              totalAmount={totalPrice}
+              guestName={formData.name}
+              guestPhone={formData.phone}
+              guestEmail={formData.email}
+            />
+          )}
+
+          {/* Form incomplete message */}
+          {user && !isFormValid && (
+            <div className="p-4 rounded-xl bg-muted/50 text-center">
+              <p className="text-sm text-muted-foreground">
+                {isRu 
+                  ? 'Заполните имя и телефон для продолжения'
+                  : 'Fill in name and phone to continue'}
+              </p>
+            </div>
+          )}
 
           {/* House Rules */}
           {(rentalTerms?.house_rules || rentalTerms?.house_rules_ru) && (
@@ -514,44 +327,6 @@ export default function PropertyInquiry() {
               </p>
             </div>
           )}
-        </div>
-
-        {/* Fixed Bottom Bar */}
-        <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-md border-t p-4 z-30">
-          <div className="max-w-lg mx-auto">
-            {/* Price breakdown */}
-            {nights > 0 && (
-              <div className="flex justify-between items-center mb-3 text-sm">
-                <span className="text-muted-foreground">
-                  {formatPrice(pricePerNight)} × {nights} {isRu ? 'ночей' : 'nights'}
-                </span>
-                <span className="text-xl font-bold">{formatPrice(totalPrice)}</span>
-              </div>
-            )}
-            
-            <Button
-              onClick={handleSubmit}
-              className="w-full h-12 text-base font-semibold gap-2"
-              disabled={isCreating || !formData.name || !dateRange?.from || !dateRange?.to || validationErrors.length > 0}
-            >
-              {isCreating ? (
-                <span className="animate-pulse">{isRu ? 'Отправка...' : 'Sending...'}</span>
-              ) : rentalTerms?.instant_booking ? (
-                <>
-                  <Zap className="w-4 h-4" />
-                  {isRu ? 'Забронировать' : 'Book Now'}
-                </>
-              ) : (
-                isRu ? 'Отправить запрос' : 'Send Request'
-              )}
-            </Button>
-            
-            {!user && (
-              <p className="text-xs text-center text-muted-foreground mt-2">
-                {isRu ? 'Для бронирования требуется авторизация' : 'Login required to book'}
-              </p>
-            )}
-          </div>
         </div>
       </div>
     </AppLayout>
