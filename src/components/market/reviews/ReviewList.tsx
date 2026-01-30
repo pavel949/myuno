@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { Star, ThumbsUp, User } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { MarketplaceReview, useProductReviews } from '@/hooks/useMarketplaceReviews';
@@ -13,22 +13,25 @@ interface ReviewListProps {
   onWriteReview?: () => void;
 }
 
-function RatingStars({ rating }: { rating: number }) {
-  return (
-    <div className="flex gap-0.5">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <Star
-          key={star}
-          className={`w-4 h-4 ${
-            star <= rating 
-              ? 'fill-amber-400 text-amber-400' 
-              : 'text-muted-foreground/30'
-          }`}
-        />
-      ))}
-    </div>
-  );
-}
+const RatingStars = forwardRef<HTMLDivElement, { rating: number }>(
+  function RatingStars({ rating }, ref) {
+    return (
+      <div ref={ref} className="flex gap-0.5">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`w-4 h-4 ${
+              star <= rating 
+                ? 'fill-amber-400 text-amber-400' 
+                : 'text-muted-foreground/30'
+            }`}
+          />
+        ))}
+      </div>
+    );
+  }
+);
+RatingStars.displayName = 'RatingStars';
 
 function ReviewCard({ review }: { review: MarketplaceReview }) {
   const { language } = useLanguage();
