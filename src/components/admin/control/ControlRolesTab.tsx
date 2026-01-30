@@ -2,18 +2,51 @@ import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Users, Star, Store } from 'lucide-react';
+import { Shield, Users, Star, Store, Building2, UserCog, Headphones } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { Skeleton } from '@/components/ui/skeleton';
 
-const roles = [
-  { key: 'admin', label: 'Admin', labelRu: 'Администратор', icon: Shield, color: 'bg-red-500', count: 2 },
-  { key: 'uno_team', label: 'UNO Team', labelRu: 'Команда UNO', icon: Star, color: 'bg-purple-500', count: 5 },
-  { key: 'vendor', label: 'Vendor', labelRu: 'Продавец', icon: Store, color: 'bg-blue-500', count: 45 },
-  { key: 'user', label: 'User', labelRu: 'Пользователь', icon: Users, color: 'bg-gray-500', count: 1250 },
+const roleConfigs = [
+  { key: 'admin', label: 'Admin', labelRu: 'Администратор', icon: Shield, color: 'bg-red-500' },
+  { key: 'uno_team', label: 'myUNO Team', labelRu: 'Команда myUNO', icon: Headphones, color: 'bg-emerald-500' },
+  { key: 'staff', label: 'Staff', labelRu: 'Сотрудник', icon: UserCog, color: 'bg-orange-500' },
+  { key: 'vendor', label: 'Service Provider', labelRu: 'Поставщик услуг', icon: Store, color: 'bg-purple-500' },
+  { key: 'property_owner', label: 'Property Owner', labelRu: 'Владелец недвижимости', icon: Building2, color: 'bg-teal-500' },
+  { key: 'user', label: 'User', labelRu: 'Пользователь', icon: Users, color: 'bg-blue-500' },
 ];
 
 export function ControlRolesTab() {
   const { language } = useLanguage();
   const isRussian = language === 'ru';
+
+  // Fetch actual role counts from database
+  const { data: roleCounts, isLoading } = useQuery({
+    queryKey: ['admin-role-counts'],
+    queryFn: async () => {
+      const counts: Record<string, number> = {};
+      
+      // Fetch all role counts in parallel
+      const roleKeys = roleConfigs.map(r => r.key);
+      
+      const results = await Promise.all(
+        roleKeys.map(async (roleKey) => {
+          const { count, error } = await supabase
+            .from('user_roles')
+            .select('*', { count: 'exact', head: true })
+            .eq('role', roleKey as 'admin' | 'uno_team' | 'staff' | 'vendor' | 'property_owner' | 'user');
+          
+          return { roleKey, count: error ? 0 : (count || 0) };
+        })
+      );
+      
+      results.forEach(({ roleKey, count }) => {
+        counts[roleKey] = count;
+      });
+      
+      return counts;
+    },
+  });
 
   return (
     <div className="space-y-4">
@@ -25,32 +58,47 @@ export function ControlRolesTab() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {roles.map((role) => (
-              <Card key={role.key} className="cursor-pointer hover:shadow-md transition-shadow">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className={`h-10 w-10 rounded-lg ${role.color} flex items-center justify-center`}>
-                      <role.icon className="h-5 w-5 text-white" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {roleConfigs.map((role) => {
+              const Icon = role.icon;
+              const count = roleCounts?.[role.key] || 0;
+              
+              return (
+                <Card key={role.key} className="cursor-pointer hover:shadow-md transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`h-10 w-10 rounded-lg ${role.color} flex items-center justify-center`}>
+                        <Icon className="h-5 w-5 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">{isRussian ? role.labelRu : role.label}</p>
+                        {isLoading ? (
+                          <Skeleton className="h-4 w-16 mt-1" />
+                        ) : (
+                          <p className="text-sm text-muted-foreground">
+                            {count} {isRussian ? 'польз.' : 'users'}
+                          </p>
+                        )}
+                      </div>
+                      <Badge variant="outline" className="text-xs">
+                        {role.key}
+                      </Badge>
                     </div>
-                    <div>
-                      <p className="font-medium">{isRussian ? role.labelRu : role.label}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {role.count} {isRussian ? 'польз.' : 'users'}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
 
-          <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-            <p className="text-sm text-muted-foreground">
-              {isRussian 
-                ? 'Управление ролями через таблицу user_roles. Используйте функцию has_role() для проверки прав.'
-                : 'Roles are managed via user_roles table. Use has_role() function for permission checks.'}
+          <div className="mt-6 p-4 bg-muted/50 rounded-lg space-y-2">
+            <p className="text-sm font-medium">
+              {isRussian ? 'Архитектура ролей' : 'Role Architecture'}
             </p>
+            <ul className="text-sm text-muted-foreground space-y-1">
+              <li>• {isRussian ? 'Роли хранятся в таблице user_roles (безопасно)' : 'Roles stored in user_roles table (secure)'}</li>
+              <li>• {isRussian ? 'Используйте has_role() для проверки прав' : 'Use has_role() for permission checks'}</li>
+              <li>• {isRussian ? 'RLS политики защищают данные' : 'RLS policies protect data'}</li>
+            </ul>
           </div>
         </CardContent>
       </Card>

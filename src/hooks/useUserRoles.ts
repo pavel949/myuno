@@ -113,8 +113,8 @@ export const ROLE_CONFIG: Record<AppRole, {
     path: '/admin',
   },
   uno_team: {
-    labelEn: 'UNO Team',
-    labelRu: 'Команда UNO',
+    labelEn: 'myUNO Team',
+    labelRu: 'Команда myUNO',
     icon: 'Headphones',
     color: 'from-emerald-400 to-emerald-500',
     path: '/team',
