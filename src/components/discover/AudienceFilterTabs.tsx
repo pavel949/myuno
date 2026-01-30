@@ -31,7 +31,10 @@ export const AudienceFilterTabs = memo(function AudienceFilterTabs({
   language 
 }: AudienceFilterTabsProps) {
   return (
-    <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+    <div 
+      className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide touch-pan-x"
+      style={{ scrollSnapType: 'x mandatory' }}
+    >
       {TABS.map((tab) => {
         const Icon = tab.icon;
         const isActive = value === tab.id;
@@ -45,6 +48,7 @@ export const AudienceFilterTabs = memo(function AudienceFilterTabs({
                 ? "bg-primary text-primary-foreground shadow-md" 
                 : "bg-card border border-border/50 text-muted-foreground hover:text-foreground hover:border-border"
             )}
+            style={{ scrollSnapAlign: 'start' }}
           >
             <Icon className="w-4 h-4" />
             {language === 'ru' ? tab.labelRu : tab.label}
