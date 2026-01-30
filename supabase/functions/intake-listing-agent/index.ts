@@ -235,6 +235,10 @@ ${content.substring(0, 8000)}
 Return valid JSON only.`;
 
   try {
+    // Get model and temperature from function context (passed via closure or defaults)
+    const modelToUse = (globalThis as any).__intakeModel || "google/gemini-3-flash-preview";
+    const tempToUse = (globalThis as any).__intakeTemperature ?? 0.3;
+    
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -242,8 +246,8 @@ Return valid JSON only.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        temperature: 0.3,
+        model: modelToUse,
+        temperature: tempToUse,
         max_tokens: 2000,
         messages: [
           { role: "system", content: systemPrompt },
@@ -444,6 +448,25 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Fetch agent config from DB
+    const { data: agentConfig } = await supabase
+      .from('ai_agents')
+      .select('id, model, temperature, is_active')
+      .eq('slug', 'intake-listing-agent')
+      .single();
+
+    // Check if agent is active
+    if (agentConfig && !agentConfig.is_active) {
+      return new Response(
+        JSON.stringify({ error: "Intake agent is currently disabled" }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Use DB config or fallback to defaults
+    const aiModel = agentConfig?.model || 'google/gemini-3-flash-preview';
+    const aiTemperature = agentConfig?.temperature ?? 0.3;
+
     // Get user from auth header
     let userId: string | null = null;
     const authHeader = req.headers.get("Authorization");
@@ -459,6 +482,10 @@ serve(async (req) => {
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // Set global config for AI calls (used in extractFieldsWithAI)
+    (globalThis as any).__intakeModel = aiModel;
+    (globalThis as any).__intakeTemperature = aiTemperature;
 
     // Get API key
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -594,6 +621,23 @@ serve(async (req) => {
         needsReview,
       },
     };
+
+    // Log usage to ai_agent_logs (async, non-blocking)
+    if (agentConfig?.id) {
+      (async () => {
+        try {
+          await supabase.from('ai_agent_logs').insert({
+            agent_id: agentConfig.id,
+            user_id: userId,
+            session_id: newSessionId,
+            response_time_ms: Date.now() - startTime,
+            messages_count: items.length,
+          });
+        } catch (e) {
+          console.error('[INTAKE] Failed to log usage:', e);
+        }
+      })();
+    }
 
     console.log(`[INTAKE] Completed in ${Date.now() - startTime}ms: ${items.length} items processed`);
 

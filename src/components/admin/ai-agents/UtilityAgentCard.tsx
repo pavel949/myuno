@@ -1,9 +1,11 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
+import { Button } from '@/components/ui/button';
 import { 
   Languages, 
   FileText, 
@@ -11,7 +13,9 @@ import {
   Home,
   Bot,
   Wrench,
-  Search
+  Search,
+  Inbox,
+  ExternalLink
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { AIAgent } from '@/hooks/useAIAgents';
@@ -24,6 +28,12 @@ const iconMap: Record<string, React.ElementType> = {
   Bot,
   Wrench,
   Search,
+  Inbox,
+};
+
+// Agents with dedicated UI pages
+const AGENT_INTERFACES: Record<string, string> = {
+  'intake-listing-agent': '/admin/intake',
 };
 
 const AVAILABLE_MODELS = [
@@ -82,11 +92,19 @@ export function UtilityAgentCard({ agent, onUpdate, isUpdating }: UtilityAgentCa
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* Type Badge */}
-        <div className="flex items-center gap-2">
+        {/* Type Badge + Interface Link */}
+        <div className="flex items-center justify-between gap-2">
           <Badge variant="outline" className={typeColor}>
             {typeLabel}
           </Badge>
+          {AGENT_INTERFACES[agent.slug] && (
+            <Button variant="outline" size="sm" asChild className="h-7 text-xs gap-1">
+              <Link to={AGENT_INTERFACES[agent.slug]}>
+                <ExternalLink className="h-3 w-3" />
+                {isRussian ? 'Открыть' : 'Open'}
+              </Link>
+            </Button>
+          )}
         </div>
 
         {/* Description */}
