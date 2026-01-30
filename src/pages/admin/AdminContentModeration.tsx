@@ -11,6 +11,7 @@ import {
   allContentTypes,
   getContentTypeLabel
 } from '@/hooks/useContentModeration';
+import { useListingQualityAnalysis } from '@/hooks/useListingQualityAnalysis';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -23,9 +24,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { AIQualityBadge } from '@/components/admin/AIQualityBadge';
+import { AIAnalysisPanel } from '@/components/admin/AIAnalysisPanel';
 import { 
   Check, X, Eye, Clock, CheckCircle, XCircle, 
-  Filter, RefreshCw, Building2, Calendar, MessageSquare, AlertTriangle
+  Filter, RefreshCw, Building2, Calendar, MessageSquare, AlertTriangle,
+  Sparkles, Loader2
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -53,6 +57,17 @@ export default function AdminContentModeration() {
   const [rejectionReason, setRejectionReason] = useState('');
   const [requestInfoMessage, setRequestInfoMessage] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [expandedAIPanel, setExpandedAIPanel] = useState<string | null>(null);
+
+  // AI Quality Analysis
+  const {
+    isAnalyzing,
+    analyzeListing,
+    analyzeBatch,
+    fetchArtifactsForEntities,
+    getResult,
+    updateArtifactAction,
+  } = useListingQualityAnalysis();
 
   const isRu = language === 'ru';
 
@@ -76,6 +91,17 @@ export default function AdminContentModeration() {
       );
     }
   }, [isAdmin, activeTab, typeFilter, fetchPendingContent]);
+
+  // Fetch AI artifacts for current content
+  useEffect(() => {
+    if (pendingContent.length > 0) {
+      const entities = pendingContent.map(item => ({
+        entityType: item.content_type,
+        entityId: item.id,
+      }));
+      fetchArtifactsForEntities(entities);
+    }
+  }, [pendingContent, fetchArtifactsForEntities]);
 
   const handleViewDetails = async (item: PendingContent) => {
     setSelectedItem(item);
@@ -159,6 +185,22 @@ export default function AdminContentModeration() {
     fetchPendingContent(activeTab, typeFilter === 'all' ? undefined : typeFilter);
   };
 
+  // AI Quality Analysis handlers
+  const handleAnalyzeSingle = async (item: PendingContent) => {
+    await analyzeListing(item.content_type, item.id);
+  };
+
+  const handleAnalyzeBatch = async () => {
+    const items = pendingContent
+      .filter(item => item.approval_status === 'pending')
+      .map(item => ({ entityType: item.content_type, entityId: item.id }));
+    await analyzeBatch(items);
+  };
+
+  const handleArtifactAction = async (artifactId: string, action: 'acknowledged' | 'dismissed') => {
+    await updateArtifactAction(artifactId, action);
+  };
+
   if (authLoading || adminLoading) {
     return (
       <AppLayout>
@@ -222,6 +264,22 @@ export default function AdminContentModeration() {
             <RefreshCw className="w-4 h-4 mr-2" />
             {isRu ? 'Обновить' : 'Refresh'}
           </Button>
+
+          {activeTab === 'pending' && pendingCount > 0 && (
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              onClick={handleAnalyzeBatch}
+              disabled={isAnalyzing}
+            >
+              {isAnalyzing ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Sparkles className="w-4 h-4 mr-2" />
+              )}
+              {isRu ? 'AI Анализ' : 'AI Analyze'}
+            </Button>
+          )}
         </div>
 
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as ApprovalStatus)}>
@@ -297,7 +355,38 @@ export default function AdminContentModeration() {
                                 {item.provider_name}
                               </p>
                             </div>
-                            {getStatusBadge(item.approval_status)}
+                            <div className="flex items-center gap-2">
+                              {/* AI Quality Badge */}
+                              {(() => {
+                                const artifact = getResult(item.content_type, item.id);
+                                return artifact ? (
+                                  <AIQualityBadge
+                                    artifact={artifact}
+                                    isRu={isRu}
+                                    onClick={() => setExpandedAIPanel(
+                                      expandedAIPanel === `${item.content_type}-${item.id}` 
+                                        ? null 
+                                        : `${item.content_type}-${item.id}`
+                                    )}
+                                  />
+                                ) : (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 px-2 text-xs"
+                                    onClick={() => handleAnalyzeSingle(item)}
+                                    disabled={isAnalyzing}
+                                  >
+                                    {isAnalyzing ? (
+                                      <Loader2 className="w-3 h-3 animate-spin" />
+                                    ) : (
+                                      <Sparkles className="w-3 h-3" />
+                                    )}
+                                  </Button>
+                                );
+                              })()}
+                              {getStatusBadge(item.approval_status)}
+                            </div>
                           </div>
 
                           <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
@@ -351,6 +440,22 @@ export default function AdminContentModeration() {
                           </div>
                         </div>
                       </div>
+
+                      {/* Expanded AI Analysis Panel */}
+                      {expandedAIPanel === `${item.content_type}-${item.id}` && (() => {
+                        const artifact = getResult(item.content_type, item.id);
+                        return artifact ? (
+                          <div className="mt-4 pt-4 border-t">
+                            <AIAnalysisPanel
+                              artifact={artifact}
+                              isRu={isRu}
+                              onAcknowledge={() => handleArtifactAction(artifact.id, 'acknowledged')}
+                              onDismiss={() => handleArtifactAction(artifact.id, 'dismissed')}
+                              isLoading={isProcessing}
+                            />
+                          </div>
+                        ) : null;
+                      })()}
                     </CardContent>
                   </Card>
                 ))}
@@ -440,6 +545,35 @@ export default function AdminContentModeration() {
                       <p className="text-red-700 mt-1">{itemDetails.rejection_reason}</p>
                     </div>
                   )}
+
+                  {/* AI Quality Analysis in Dialog */}
+                  {selectedItem && (() => {
+                    const artifact = getResult(selectedItem.content_type, selectedItem.id);
+                    return artifact ? (
+                      <AIAnalysisPanel
+                        artifact={artifact}
+                        isRu={isRu}
+                        onAcknowledge={() => handleArtifactAction(artifact.id, 'acknowledged')}
+                        onDismiss={() => handleArtifactAction(artifact.id, 'dismissed')}
+                        isLoading={isProcessing}
+                      />
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleAnalyzeSingle(selectedItem)}
+                        disabled={isAnalyzing}
+                        className="w-full"
+                      >
+                        {isAnalyzing ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <Sparkles className="w-4 h-4 mr-2" />
+                        )}
+                        {isRu ? 'Запустить AI анализ' : 'Run AI Analysis'}
+                      </Button>
+                    );
+                  })()}
                 </div>
               ) : (
                 <div className="space-y-4">
