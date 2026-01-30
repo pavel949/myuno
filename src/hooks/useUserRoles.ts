@@ -207,28 +207,6 @@ export function useUserRoles() {
   };
 }
 
-// Hook for managing active role in UI
-export function useActiveRole() {
-  const { activeRoles } = useUserRoles();
-  
-  // Get stored active role from localStorage
-  const getStoredRole = (): AppRole => {
-    const stored = localStorage.getItem('myuno-active-role');
-    if (stored && activeRoles.includes(stored as AppRole)) {
-      return stored as AppRole;
-    }
-    // Default to first available switchable role or 'user'
-    return activeRoles.find(r => ['property_owner', 'vendor', 'admin'].includes(r)) || 'user';
-  };
-
-  const setActiveRole = (role: AppRole) => {
-    localStorage.setItem('myuno-active-role', role);
-    // Trigger re-render by dispatching storage event
-    window.dispatchEvent(new StorageEvent('storage', { key: 'myuno-active-role', newValue: role }));
-  };
-
-  return {
-    activeRole: getStoredRole(),
-    setActiveRole,
-  };
-}
+// Note: useActiveRole has been removed
+// Use useUserContext from '@/hooks/useUserContext' for role management
+// It provides: activeRole, switchContext, availableRoles, hasRole

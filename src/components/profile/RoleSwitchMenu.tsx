@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home, Building2, Store, Shield, Users } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useUserContext } from '@/hooks/useUserContext';
+import { useUserContext, type AppRole } from '@/hooks/useUserContext';
 import { SectionCard } from '@/components/uno/SectionCard';
 import { cn } from '@/lib/utils';
 
@@ -13,12 +13,12 @@ interface RoleSwitchMenuProps {
 
 /**
  * Airbnb-style "Switch to..." menu showing available dashboards
- * Based on user's roles (not active role)
+ * Uses unified useUserContext as single source of truth
  */
 export function RoleSwitchMenu({ compact = false, className }: RoleSwitchMenuProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { hasRole, isLoading } = useUserContext();
+  const { hasRole, isLoading, switchContext, activeRole } = useUserContext();
 
   if (isLoading) return null;
 
@@ -75,18 +75,38 @@ export function RoleSwitchMenu({ compact = false, className }: RoleSwitchMenuPro
   // If only guest mode is available, don't show the menu
   if (availableDashboards.length <= 1) return null;
 
+  const handleSwitch = async (path: string, roleKey: string) => {
+    // Map dashboard keys to AppRole values
+    const roleMap: Record<string, AppRole> = {
+      guest: 'user',
+      owner: 'owner',
+      vendor: 'vendor',
+      team: 'uno_team',
+      admin: 'admin',
+    };
+    const targetRole = roleMap[roleKey] || 'user';
+    
+    // Update context in DB and navigate
+    await switchContext({ role: targetRole });
+    navigate(path);
+  };
+
   if (compact) {
     return (
       <div className={cn("flex flex-wrap gap-2", className)}>
         {availableDashboards.map((dashboard) => {
           const Icon = dashboard.icon;
+          const isActive = dashboard.key === 'guest' && activeRole === 'user' 
+            || dashboard.key === activeRole;
           return (
             <button
               key={dashboard.key}
-              onClick={() => navigate(dashboard.path)}
+              onClick={() => handleSwitch(dashboard.path, dashboard.key)}
               className={cn(
-                "flex items-center gap-2 px-3 py-2 rounded-xl",
-                "bg-secondary/50 hover:bg-secondary transition-colors",
+                "flex items-center gap-2 px-3 py-2 rounded-xl transition-colors",
+                isActive 
+                  ? "bg-primary/10 border border-primary/30"
+                  : "bg-secondary/50 hover:bg-secondary",
                 "text-sm font-medium"
               )}
             >
@@ -109,14 +129,17 @@ export function RoleSwitchMenu({ compact = false, className }: RoleSwitchMenuPro
       <div className="grid grid-cols-2 gap-2">
         {availableDashboards.map((dashboard) => {
           const Icon = dashboard.icon;
+          const isActive = dashboard.key === 'guest' && activeRole === 'user' 
+            || dashboard.key === activeRole;
           return (
             <button
               key={dashboard.key}
-              onClick={() => navigate(dashboard.path)}
+              onClick={() => handleSwitch(dashboard.path, dashboard.key)}
               className={cn(
-                "flex items-center gap-3 p-3 rounded-xl",
-                "bg-secondary/30 hover:bg-secondary/60 transition-colors",
-                "text-left"
+                "flex items-center gap-3 p-3 rounded-xl transition-colors text-left",
+                isActive 
+                  ? "bg-primary/10 border border-primary/30"
+                  : "bg-secondary/30 hover:bg-secondary/60"
               )}
             >
               <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", dashboard.color)}>
