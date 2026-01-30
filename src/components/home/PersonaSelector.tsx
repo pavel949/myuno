@@ -96,9 +96,7 @@ export const PersonaSelector = memo(function PersonaSelector() {
     isToggling 
   } = useUserPersonas();
 
-  // Don't show for non-authenticated users
-  if (!isAuthenticated) return null;
-
+  // Show for all users - guests use localStorage, authenticated users use DB
   const allPersonas: UserPersona[] = ['tourist', 'resident', 'property_owner'];
 
   if (isLoading) {
