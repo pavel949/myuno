@@ -65,8 +65,8 @@ const ROLE_CONFIG: Record<AppRole, {
     path: '/admin',
   },
   uno_team: {
-    labelEn: 'UNO Team',
-    labelRu: 'Команда UNO',
+    labelEn: 'myUNO Team',
+    labelRu: 'Команда myUNO',
     icon: UserCog,
     color: 'bg-emerald-500',
     path: '/team',

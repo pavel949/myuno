@@ -89,12 +89,12 @@ export function AdminSidebar() {
       {/* Header */}
       <SidebarHeader className="border-b border-sidebar-border px-4 py-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold text-lg shadow-sm">
-            U
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground font-bold text-lg shadow-sm">
+            m
           </div>
           {!isCollapsed && (
             <div className="flex flex-col">
-              <span className="font-bold text-sidebar-foreground text-lg">UNO</span>
+              <span className="font-bold text-sidebar-foreground text-lg">myUNO</span>
               <span className="text-xs text-sidebar-foreground/60">Command Center</span>
             </div>
           )}

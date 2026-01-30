@@ -14,6 +14,7 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
+import { RoleContextSwitcher } from '@/components/uno/RoleContextSwitcher';
 
 interface AdminHeaderProps {
   onOpenCommandPalette?: () => void;
@@ -149,7 +150,8 @@ export function AdminHeader({ onOpenCommandPalette }: AdminHeaderProps) {
       </button>
 
       {/* Actions */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-2">
+        <RoleContextSwitcher compact />
         <ThemeSwitcher />
         <LanguageSwitcher />
         <Button variant="ghost" size="icon" className="relative">
