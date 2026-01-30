@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef } from 'react';
 import { MessageCircle, X } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -26,7 +26,7 @@ interface SupportFABProps {
 const HIDDEN_ROUTES = ['/auth'];
 const PHONE_NUMBER = '66922407355';
 
-export const SupportFAB: React.FC<SupportFABProps> = ({ className }) => {
+export const SupportFAB = forwardRef<HTMLDivElement, SupportFABProps>(({ className }, ref) => {
   const [isOpen, setIsOpen] = useState(false);
   const { language } = useLanguage();
   const location = useLocation();
@@ -55,7 +55,7 @@ export const SupportFAB: React.FC<SupportFABProps> = ({ className }) => {
   }
 
   return (
-    <>
+    <div ref={ref}>
       {/* Backdrop */}
       <AnimatePresence>
         {isOpen && (
@@ -128,8 +128,10 @@ export const SupportFAB: React.FC<SupportFABProps> = ({ className }) => {
           </>
         )}
       </motion.button>
-    </>
+    </div>
   );
-};
+});
+
+SupportFAB.displayName = 'SupportFAB';
 
 export default SupportFAB;
