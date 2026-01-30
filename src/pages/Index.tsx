@@ -19,6 +19,7 @@ import { PersonalizedOffersSection } from '@/components/notifications/Personaliz
 import { ContentModeToggle, ContentMode } from '@/components/home/ContentModeToggle';
 import { HomeCategoryRibbon } from '@/components/home/HomeCategoryRibbon';
 import { HomeProductsSection } from '@/components/home/HomeProductsSection';
+import { KnowledgeHubBanner } from '@/components/home/KnowledgeHubBanner';
 import { supabase } from '@/integrations/supabase/client';
 import { HeroBanner } from '@/components/home/HeroBanner';
 
@@ -151,6 +152,9 @@ const Index = () => {
 
               {/* Marketplace Promo Carousel */}
               <MarketplacePromoCarousel />
+
+              {/* Knowledge Hub Banner */}
+              <KnowledgeHubBanner />
 
               {/* Quick Access Chips - Owner/Partner/Wallet */}
               <QuickAccessChips />
