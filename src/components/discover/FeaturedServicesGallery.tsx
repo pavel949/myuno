@@ -1,11 +1,10 @@
 import React, { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Star, Clock, MapPin, ChevronRight, Sparkles } from 'lucide-react';
+import { Star, Clock, ChevronRight, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Service } from '@/hooks/useServices';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 interface FeaturedServicesGalleryProps {
   services: Service[];
@@ -94,7 +93,7 @@ export const FeaturedServicesGallery = memo(function FeaturedServicesGallery({
       </div>
       
       {/* Horizontal Scroll */}
-      <ScrollArea className="-mx-4 px-4">
+      <div className="-mx-4 px-4 overflow-x-auto scrollbar-hide touch-pan-x">
         <div className="flex gap-3 pb-2">
           {topServices.map((service) => (
             <ServiceCard
@@ -105,8 +104,7 @@ export const FeaturedServicesGallery = memo(function FeaturedServicesGallery({
             />
           ))}
         </div>
-        <ScrollBar orientation="horizontal" className="invisible" />
-      </ScrollArea>
+      </div>
     </section>
   );
 });
