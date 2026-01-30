@@ -1,78 +1,198 @@
 
-# Plan: Optimize Scrolling and Swiping Experience
 
-## Overview
-Perform consistency improvements across all scrollable components to ensure smooth, native-like scrolling and swiping behavior on mobile devices.
+# План: Персонализация главного экрана через персоны пользователя + AI
 
-## Issues Found
+## Обзор
 
-| Component | Issue | Priority |
-|-----------|-------|----------|
-| AudienceFilterTabs | Missing `touch-pan-x` for horizontal touch gestures | Medium |
-| HomeCategoryRibbon | Uses `scrollbar-none` (not defined) instead of `scrollbar-hide` | Medium |
-| FeaturedServicesGallery | Uses ScrollArea without explicit touch optimization | Low |
-| AudienceFilterTabs | No scroll snap for better UX | Low |
-| Multiple components | Inconsistent class patterns | Low |
+Создание системы, где пользователь выбирает свои "персоны" (турист, резидент, владелец недвижимости), и AI формирует персонализированный экран с релевантными услугами и предложениями.
 
-## Implementation Steps
+**Да, это безопасно реализовать!** Персоны — это не роли доступа (admin, staff), а предпочтения пользователя для персонализации контента. Они не влияют на права доступа к данным.
 
-### Step 1: Fix AudienceFilterTabs
-Add `touch-pan-x` class to enable proper horizontal touch gestures without interfering with vertical scrolling.
+## Архитектура
 
 ```text
-Before: "flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide"
-After:  "flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide touch-pan-x"
+┌─────────────────────────────────────────────────────────────────┐
+│                        Главный экран                            │
+├─────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │     Персона-селектор (мульти-выбор)                      │   │
+│  │  [🧳 Турист ✓] [🏠 Резидент] [🏢 Владелец ✓]            │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                              ↓                                  │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │     AI-генерированный контент                            │   │
+│  │  "На основе ваших интересов мы подобрали..."             │   │
+│  │                                                           │   │
+│  │  [Яхты] [Туры] [Недвижимость] [Юрист] [Страховка]       │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                              ↓                                  │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │     Персонализированные рекомендации                     │   │
+│  │  Карточки услуг, отобранные AI под персоны               │   │
+│  └─────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-### Step 2: Fix HomeCategoryRibbon
-Replace non-existent `scrollbar-none` with `scrollbar-hide` and add `touch-pan-x`.
+## Безопасность
 
-Row 1 (Quick Actions):
+| Аспект | Подход |
+|--------|--------|
+| Персоны vs Роли | Персоны (tourist, resident, owner) хранятся отдельно от ролей доступа (admin, staff) |
+| Хранение | Новая таблица `user_personas` с RLS политиками |
+| Мульти-выбор | Пользователь может иметь несколько персон одновременно |
+| AI обработка | Edge function с Lovable AI для генерации рекомендаций |
+
+## Шаги реализации
+
+### Шаг 1: Создание таблицы `user_personas`
+
+Отдельная таблица для предпочтений персонализации (не путать с ролями доступа):
+
+```sql
+CREATE TYPE public.user_persona AS ENUM ('tourist', 'resident', 'property_owner');
+
+CREATE TABLE public.user_personas (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  persona user_persona NOT NULL,
+  is_active boolean DEFAULT true,
+  created_at timestamptz DEFAULT now(),
+  UNIQUE (user_id, persona)
+);
+
+ALTER TABLE public.user_personas ENABLE ROW LEVEL SECURITY;
+
+-- Пользователь видит только свои персоны
+CREATE POLICY "Users can view own personas"
+  ON public.user_personas FOR SELECT
+  TO authenticated
+  USING (auth.uid() = user_id);
+
+-- Пользователь может добавлять себе персоны
+CREATE POLICY "Users can insert own personas"
+  ON public.user_personas FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = user_id);
+
+-- Пользователь может обновлять свои персоны
+CREATE POLICY "Users can update own personas"
+  ON public.user_personas FOR UPDATE
+  TO authenticated
+  USING (auth.uid() = user_id);
+
+-- Пользователь может удалять свои персоны
+CREATE POLICY "Users can delete own personas"
+  ON public.user_personas FOR DELETE
+  TO authenticated
+  USING (auth.uid() = user_id);
+```
+
+### Шаг 2: UI компонент PersonaSelector
+
+Новый компонент для выбора персон на главном экране:
+
 ```text
-Before: "flex items-center gap-2 overflow-x-auto scrollbar-none pb-1"
-After:  "flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1 touch-pan-x"
+Файл: src/components/home/PersonaSelector.tsx
+
+Функционал:
+- Горизонтальный ряд чипов с персонами
+- Мульти-выбор (можно выбрать несколько)
+- Иконки и цвета для каждой персоны
+- Сохранение в БД через React Query
+- Анимация при переключении
 ```
 
-Row 2 (Categories):
-```text
-Before: "flex items-center gap-2 overflow-x-auto scrollbar-none pb-1"
-After:  "flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1 touch-pan-x"
-```
+Персоны с UI:
+- 🧳 **Турист** — Яхты, туры, рестораны, развлечения
+- 🏠 **Резидент** — Визы, медицина, юристы, страховки
+- 🏢 **Владелец** — Управление недвижимостью, юридические услуги
 
-Skeleton rows also need fixing.
-
-### Step 3: Optimize FeaturedServicesGallery
-Replace ScrollArea component with native scroll div for better touch control:
-
-```text
-Before: <ScrollArea className="-mx-4 px-4">
-After:  <div className="-mx-4 px-4 overflow-x-auto scrollbar-hide touch-pan-x">
-```
-
-### Step 4: Add scroll snap to AudienceFilterTabs (optional UX improvement)
-Add snap behavior for better filter selection feel:
+### Шаг 3: Hook `useUserPersonas`
 
 ```text
-Container: style={{ scrollSnapType: 'x mandatory' }}
-Each button: style={{ scrollSnapAlign: 'start' }}
+Файл: src/hooks/useUserPersonas.ts
+
+Функционал:
+- Загрузка персон пользователя из БД
+- Добавление/удаление персон
+- Кэширование через React Query
+- Оптимистичные обновления UI
 ```
 
-## Files to Modify
+### Шаг 4: Edge Function для AI-персонализации
 
-1. `src/components/discover/AudienceFilterTabs.tsx` - Add touch-pan-x
-2. `src/components/home/HomeCategoryRibbon.tsx` - Fix scrollbar-hide, add touch-pan-x
-3. `src/components/discover/FeaturedServicesGallery.tsx` - Replace ScrollArea with native scroll
+```text
+Файл: supabase/functions/ai-personalize-home/index.ts
 
-## Technical Notes
+Входные данные:
+- personas: ['tourist', 'property_owner']
+- language: 'ru' | 'en'
+- view_history: последние просмотренные категории
 
-- `touch-pan-x` allows horizontal touch scrolling while permitting vertical page scroll
-- `scrollbar-hide` is defined in `index.css` and works across browsers
-- `scrollbar-none` is NOT defined and won't hide scrollbars
-- Consistent use of `-mx-4 px-4` creates full-width bleed for carousels
+Выходные данные:
+- recommended_categories: список категорий с приоритетами
+- suggested_actions: персонализированные быстрые действия
+- greeting_message: AI-сформированное приветствие
+```
 
-## Expected Result
+AI промпт будет учитывать комбинации персон:
+- Турист + Владелец → показать яхты И управление недвижимостью
+- Резидент → фокус на визах, страховках, медицине
 
-- Smoother horizontal swiping on all filter tabs and carousels
-- No interference with vertical page scrolling
-- Hidden scrollbars on all horizontal scroll areas
-- Consistent touch behavior across all components
+### Шаг 5: Интеграция в Index.tsx
+
+Обновление главной страницы:
+1. Добавить `PersonaSelector` после `ContentModeToggle`
+2. Использовать `useUserPersonas` для получения персон
+3. Передавать персоны в `QuickActionsGrid` для фильтрации
+4. Добавить AI-приветствие на основе персон
+
+### Шаг 6: Обновление QuickActionsGrid
+
+Изменить логику выбора действий:
+- Вместо `user_type` из профиля использовать активные персоны
+- Объединять действия для нескольких персон
+- Приоритизировать по пересечению интересов
+
+## Технические детали
+
+### Структура персон
+
+| Персона | Категории услуг |
+|---------|-----------------|
+| tourist | yachts, tours, restaurants, events, water, transport, beauty |
+| resident | visa, medical, legal, insurance, banking, education, pharmacy |
+| property_owner | property, legal, insurance, services, cleaning |
+
+### Формат ответа AI
+
+```json
+{
+  "greeting": "Привет! Для вас как туриста и владельца недвижимости...",
+  "priority_categories": ["yachts", "property", "legal", "tours"],
+  "suggested_services": [
+    { "id": "yacht-rental", "reason": "Популярно среди туристов" },
+    { "id": "property-management", "reason": "Для владельцев недвижимости" }
+  ]
+}
+```
+
+## Файлы для создания/изменения
+
+| Файл | Действие |
+|------|----------|
+| `supabase/migrations/xxx_create_user_personas.sql` | Создать |
+| `src/hooks/useUserPersonas.ts` | Создать |
+| `src/components/home/PersonaSelector.tsx` | Создать |
+| `supabase/functions/ai-personalize-home/index.ts` | Создать |
+| `src/pages/Index.tsx` | Изменить |
+| `src/components/home/QuickActionsGrid.tsx` | Изменить |
+
+## Ожидаемый результат
+
+- Пользователь выбирает персоны на главном экране
+- Выбор сохраняется в БД и синхронизируется между устройствами
+- AI формирует персонализированное приветствие и рекомендации
+- Quick Actions адаптируются под выбранные персоны
+- Безопасность: персоны не влияют на доступ к данным
+
