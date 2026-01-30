@@ -25,6 +25,11 @@
 
 /* UNO SuperApp Premium Dark Design System */
 
+/* Prevent browser back/forward gestures on horizontal overscroll */
+html, body {
+  overscroll-behavior-x: none;
+}
+
 @layer base {
   :root {
     /* Light mode - kept for compatibility but app defaults to dark */
