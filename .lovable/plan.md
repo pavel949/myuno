@@ -1,245 +1,236 @@
 
+# План реорганизации Admin Panel: Unified Command Center
 
-# Data Import Hub — Инструмент Массового Импорта Контента
+## Анализ текущей ситуации
 
-## Бизнес-Цель
+### Проблемы структуры
+- **7 групп в сайдбаре** с неясной логикой (Operations, Catalog, Health & Home, Services & Shops, Marketplace, Analytics & Finance, System)
+- **47+ отдельных страниц** - функционал размазан
+- **Дублирование аналитики** - Analytics, Finance, Leads Dashboard, User Analytics - частично пересекаются
+- **Нет централизованного управления** пользователями с правами
+- **Отсутствует мониторинг** системных ошибок и производительности
 
-Создать профессиональный **Admin Data Import Center** для быстрого наполнения платформы реальным контентом из различных источников. Инструмент предназначен для команды UNO и позволяет импортировать данные о провайдерах, товарах, услугах из Excel, Google Sheets, сайтов партнёров и облачных хранилищ.
+### Что нужно добавить
+- Управление всеми пользователями и правами
+- Мониторинг ошибок и производительности системы
+- Единая точка входа к любым данным
 
-## Поддерживаемые Источники Данных
+---
 
-| Источник | Метод обработки | Приоритет |
-|----------|----------------|-----------|
-| Excel (.xlsx, .xls) | File upload + xlsx parser | Высокий |
-| CSV | File upload + native parsing | Высокий |
-| Google Sheets | Public link parsing | Высокий |
-| Partner Websites | Firecrawl scraping | Средний |
-| Google Drive links | Direct file fetch | Средний |
-| Dropbox links | Direct file fetch | Средний |
-
-## Целевые Таблицы для Импорта
-
-1. **providers** — Поставщики услуг
-2. **marketplace_products** — Товары маркетплейса
-3. **marketplace_vendors** — Продавцы маркетплейса
-4. **services** — Услуги
-5. **restaurants** — Рестораны
-6. **salons** — Салоны красоты
-7. **yachts** — Яхты
-8. **tours** — Туры
-
-## Архитектура Решения
+## Новая архитектура: 4 мега-раздела
 
 ```text
 ┌─────────────────────────────────────────────────────────────────┐
-│                    ADMIN DATA IMPORT HUB                        │
-│                   /admin/data-import                            │
+│                    UNO COMMAND CENTER                           │
 ├─────────────────────────────────────────────────────────────────┤
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
-│  │ File Upload  │  │ URL Import   │  │ Web Scraper  │          │
-│  │ Excel/CSV    │  │ GDrive/Box   │  │ Firecrawl    │          │
-│  └──────────────┘  └──────────────┘  └──────────────┘          │
-├─────────────────────────────────────────────────────────────────┤
-│                     DATA PROCESSOR                              │
-│  ┌────────────────────────────────────────────────────────┐    │
-│  │ 1. Parse → 2. Map Fields → 3. Validate → 4. Preview   │    │
-│  └────────────────────────────────────────────────────────┘    │
-├─────────────────────────────────────────────────────────────────┤
-│                     TARGET SELECTOR                             │
-│  ┌─────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐           │
-│  │Providers│ │ Products │ │ Services │ │Restaurants│           │
-│  └─────────┘ └──────────┘ └──────────┘ └──────────┘           │
-├─────────────────────────────────────────────────────────────────┤
-│                     IMPORT ACTIONS                              │
-│  [ Preview ] [ Validate ] [ Import All ] [ Import Selected ]   │
+│                                                                 │
+│  1. DASHBOARD (/)           - Live overview, alerts, KPIs      │
+│                                                                 │
+│  2. CATALOG (/catalog)      - All verticals + marketplace      │
+│     └─ Unified table with tabs/filters by category             │
+│                                                                 │
+│  3. OPERATIONS (/ops)       - Daily work center                │
+│     └─ Moderation, Leads, Bookings, Tickets, Staff             │
+│                                                                 │
+│  4. CONTROL (/control)      - System management                │
+│     └─ Users, Roles, Analytics, Finance, Settings, Logs        │
+│                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-## Компоненты
+---
 
-### 1. Главная Страница `/admin/data-import`
+## Детальная структура разделов
 
-**AdminDataImport.tsx** — центр управления импортом:
-- Выбор целевой таблицы (Providers, Products, Services и т.д.)
-- Tabs для разных методов импорта (File Upload / URL / Scraper)
-- История импортов с логами
+### 1. DASHBOARD (Главная)
+**Цель**: Мгновенный обзор всего + быстрые действия
 
-### 2. Компонент FileImporter
+| Блок | Содержимое |
+|------|------------|
+| **Live Stats** | Онлайн пользователи, активные сессии, заказы сегодня |
+| **KPI Row** | Users, Providers, Bookings, GMV с динамикой |
+| **Alerts Panel** | Срочное: модерация, просроченные заказы, ошибки |
+| **Quick Actions** | +Провайдер, +Объект, Импорт данных |
+| **Verticals Grid** | Компактная сетка всех 19 вертикалей с counts |
+| **Recent Activity** | Последние действия в системе |
 
-**FileImporter.tsx** — загрузка и парсинг файлов:
-- Drag-n-drop зона для файлов
-- Поддержка .xlsx, .xls, .csv
-- Парсинг через библиотеку `xlsx` (SheetJS)
-- Preview первых 10 строк
+### 2. CATALOG (Каталог)
+**Цель**: Единая точка управления всем контентом
 
-### 3. Компонент FieldMapper
-
-**FieldMapper.tsx** — маппинг колонок:
-- Автоматическое определение колонок (name → name_en, цена → price)
-- Ручной маппинг через dropdowns
-- Сохранение mapping-пресетов для повторного использования
-
-### 4. Компонент ImportPreview
-
-**ImportPreview.tsx** — превью и валидация:
-- Таблица с предпросмотром данных
-- Подсветка ошибок валидации
-- Возможность редактирования перед импортом
-- Чекбоксы для выборочного импорта
-
-### 5. Edge Function `bulk-import`
-
-**supabase/functions/bulk-import/index.ts:**
-- Приём batch-данных
-- Валидация по схеме целевой таблицы
-- Bulk upsert с обработкой конфликтов
-- Логирование результатов
-
-### 6. Web Scraper (опционально)
-
-**WebScraper.tsx** — интеграция с Firecrawl:
-- Ввод URL партнёрского сайта
-- Scrape и парсинг структурированных данных
-- AI-извлечение (название, цена, описание) через Lovable AI
-
-## Структура Файлов
-
+**Структура страницы**:
 ```text
-src/
-├── pages/admin/
-│   └── AdminDataImport.tsx        # Главная страница
-├── components/admin/data-import/
-│   ├── FileImporter.tsx           # File upload + parsing
-│   ├── FieldMapper.tsx            # Column mapping UI
-│   ├── ImportPreview.tsx          # Preview table
-│   ├── ImportHistory.tsx          # Import logs
-│   ├── UrlImporter.tsx            # Google Drive/Dropbox
-│   ├── WebScraper.tsx             # Firecrawl integration
-│   └── ImportTargetSelector.tsx   # Target table selector
-├── hooks/
-│   └── useDataImport.ts           # Import logic hook
-└── lib/
-    └── importTemplates.ts         # Field mappings per table
-
-supabase/functions/
-└── bulk-import/
-    └── index.ts                   # Batch insert endpoint
+┌────────────────────────────────────────────┐
+│ [Фильтры]  Тип: [▼ All] Статус: [▼ All]   │
+│            Поиск: [_______________] 🔍      │
+├────────────────────────────────────────────┤
+│ Tabs: Services | Properties | Products     │
+├────────────────────────────────────────────┤
+│                                            │
+│  ┌─────┬──────────┬─────────┬───────────┐ │
+│  │ ID  │ Name     │ Category│ Status    │ │
+│  ├─────┼──────────┼─────────┼───────────┤ │
+│  │ ... │ ...      │ Yachts  │ Active    │ │
+│  │ ... │ ...      │ Tours   │ Pending   │ │
+│  └─────┴──────────┴─────────┴───────────┘ │
+│                                            │
+└────────────────────────────────────────────┘
 ```
 
-## Схемы Маппинга (примеры)
+**Категории объединены**:
+- **Services**: Yachts, Tours, Properties, Restaurants, Salons, Clinics, Gyms, Events, Education, Legal, Pets, Cleaning, Babysitters, Flowers, Pharmacies, Insurance, Water Activities, Transport
+- **Properties**: Owner Properties, Rentals
+- **Products**: Marketplace товары
 
-### Для marketplace_products:
+### 3. OPERATIONS (Операции)
+**Цель**: Центр ежедневной работы
+
+| Таб | Функционал |
+|-----|------------|
+| **Moderation** | Pending content + approve/reject |
+| **Leads** | Воронка заявок + назначение менеджеров |
+| **Bookings** | Все заказы со статусами |
+| **Tickets** | Обращения клиентов |
+| **Staff** | Управление исполнителями |
+
+### 4. CONTROL (Управление)
+**Цель**: Полный контроль системы
+
+**Табы**:
+
+| Таб | Содержимое |
+|-----|------------|
+| **Users** | Все пользователи с ролями, сегментами, активностью |
+| **Roles** | Управление правами: Admin, UNO Team, Staff, Vendors |
+| **Analytics** | Revenue, Users, Bookings charts - объединённые |
+| **Finance** | GMV, Commissions, Payouts в одном месте |
+| **System** | Справочники, города, переводы, настройки |
+| **Logs** | Системные логи, ошибки, производительность |
+
+---
+
+## Новые компоненты
+
+### A. UnifiedCatalogPage
+Заменяет 19 отдельных страниц вертикалей одной умной таблицей:
+- Фильтр по типу (вертикали)
+- Фильтр по статусу
+- Inline редактирование
+- Bulk actions
+
+### B. ControlCenterPage  
+Объединяет Users + Roles + Analytics + Finance + System:
+- Tabs для переключения контекста
+- Единый поиск по всему
+
+### C. SystemHealthPanel
+Новый виджет для Dashboard:
+- Uptime
+- Response times
+- Error rate
+- Active connections
+
+### D. UserManagementTable
+Новая таблица пользователей:
+- Все profiles с фильтрами
+- Роли и права inline
+- Сегменты пользователей
+- Действия: block, unblock, change role
+
+---
+
+## Изменения в Sidebar
+
+**БЫЛО (7 групп, 30+ пунктов)**:
+```text
+Operations (6 items)
+Catalog (9 items)
+Health & Home (5 items)
+Services & Shops (5 items)
+Marketplace (4 items)
+Analytics & Finance (5 items)
+System (8 items)
+```
+
+**СТАНЕТ (4 раздела)**:
+```text
+Dashboard        ← Главная с обзором
+Catalog          ← Все объекты
+Operations       ← Ежедневная работа  
+Control          ← Система и аналитика
+```
+
+---
+
+## Файлы для создания/изменения
+
+### Новые файлы
+1. `src/pages/admin/AdminUnifiedCatalog.tsx` - единый каталог
+2. `src/pages/admin/AdminControlCenter.tsx` - центр управления
+3. `src/components/admin/catalog/UnifiedCatalogTable.tsx`
+4. `src/components/admin/control/UserManagementTab.tsx`
+5. `src/components/admin/control/RolesManagementTab.tsx`
+6. `src/components/admin/control/SystemHealthTab.tsx`
+7. `src/components/admin/dashboard/SystemHealthPanel.tsx`
+8. `src/hooks/useUnifiedCatalog.ts` - универсальный хук для всех вертикалей
+9. `src/hooks/useSystemHealth.ts` - мониторинг системы
+
+### Изменяемые файлы
+1. `src/components/admin/AdminSidebar.tsx` - новая структура навигации
+2. `src/pages/admin/AdminDashboard.tsx` - добавить System Health
+3. `src/pages/admin/OperationsHub.tsx` - расширить как центр операций
+4. `src/components/layout/AnimatedRoutes.tsx` - новые роуты
+
+---
+
+## Техническая реализация
+
+### UnifiedCatalogTable - универсальная таблица
 ```typescript
-const productMapping = {
-  'name': 'name_en',
-  'название': 'name_ru',
-  'price': 'price',
-  'цена': 'price',
-  'category': 'category_slug',
-  'description': 'description_en',
-  'описание': 'description_ru',
-  'image': 'cover_image',
-  'stock': 'in_stock',
-  'vendor': 'vendor_id', // требует lookup
+interface CatalogConfig {
+  type: 'services' | 'properties' | 'products';
+  table: string;
+  columns: ColumnDef[];
+  filters: FilterConfig[];
+}
+
+const catalogConfigs: Record<string, CatalogConfig> = {
+  yachts: { type: 'services', table: 'yachts', ... },
+  tours: { type: 'services', table: 'tours', ... },
+  // ... all 19 verticals
 };
 ```
 
-### Для providers:
-```typescript
-const providerMapping = {
-  'name': 'name',
-  'phone': 'phone',
-  'email': 'email',
-  'address': 'address',
-  'category': 'business_category',
-  'website': 'website',
-};
-```
+### SystemHealth - мониторинг
+Данные из:
+- `platform_metrics` - KPIs
+- Supabase Analytics API - логи ошибок
+- Edge Function для проверки uptime
 
-## Технические Детали
+---
 
-### Зависимости (добавить)
-```bash
-npm install xlsx
-```
+## Порядок реализации
 
-### Парсинг Excel
-```typescript
-import * as XLSX from 'xlsx';
+1. **Фаза 1**: Новый Sidebar с 4 разделами
+2. **Фаза 2**: UnifiedCatalog - объединение вертикалей
+3. **Фаза 3**: ControlCenter - управление и аналитика
+4. **Фаза 4**: SystemHealth - мониторинг
+5. **Фаза 5**: Удаление устаревших страниц
 
-const parseExcel = (file: File): Promise<any[]> => {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const data = new Uint8Array(e.target?.result as ArrayBuffer);
-      const workbook = XLSX.read(data, { type: 'array' });
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const json = XLSX.utils.sheet_to_json(sheet);
-      resolve(json);
-    };
-    reader.readAsArrayBuffer(file);
-  });
-};
-```
+---
 
-### Bulk Insert Edge Function
-```typescript
-// supabase/functions/bulk-import/index.ts
-const { table, records } = await req.json();
+## Результат
 
-const { data, error } = await supabase
-  .from(table)
-  .upsert(records, { 
-    onConflict: 'id',
-    ignoreDuplicates: false 
-  });
-```
+| Метрика | Было | Станет |
+|---------|------|--------|
+| Групп в sidebar | 7 | 4 |
+| Пунктов меню | 42 | 4 + подразделы |
+| Страниц вертикалей | 19 | 1 (unified) |
+| Страниц аналитики | 4 | 1 (control) |
+| Клики до любого объекта | 2-3 | 1-2 |
 
-## UX Flow
-
-1. **Выбор цели** → Admin выбирает таблицу (Products, Providers, etc.)
-2. **Загрузка** → Drag-n-drop файла или вставка URL
-3. **Маппинг** → Система предлагает автоматический маппинг, admin корректирует
-4. **Preview** → Предпросмотр с валидацией, можно редактировать
-5. **Import** → Массовый импорт с прогресс-баром
-6. **Результат** → Отчёт (успешно/ошибки/пропущено)
-
-## Интеграция с Firecrawl (для сайтов)
-
-Если требуется scraping партнёрских сайтов:
-1. Подключить Firecrawl через коннектор (уже доступен в workspace)
-2. Создать edge function `scrape-partner-site`
-3. Использовать Lovable AI для извлечения структурированных данных из markdown
-
-## План Реализации
-
-### Фаза 1: Базовый импорт (1-2 часа)
-1. Создать `AdminDataImport.tsx` с выбором таблицы
-2. Создать `FileImporter.tsx` для Excel/CSV
-3. Добавить xlsx зависимость
-4. Добавить роут в админку
-
-### Фаза 2: Маппинг и Preview (1 час)
-5. Создать `FieldMapper.tsx` с автоопределением
-6. Создать `ImportPreview.tsx` с редактированием
-7. Добавить валидацию по схеме таблицы
-
-### Фаза 3: Edge Function и Импорт (1 час)
-8. Создать `bulk-import` edge function
-9. Реализовать batch upsert
-10. Добавить логирование и историю
-
-### Фаза 4: URL и Scraping (опционально)
-11. Подключить Firecrawl коннектор
-12. Создать `UrlImporter.tsx` для GDrive/Dropbox
-13. Создать `WebScraper.tsx` для сайтов
-
-## Преимущества Решения
-
-- **Унифицированный интерфейс** — один инструмент для всех типов данных
-- **Гибкий маппинг** — работает с любой структурой Excel
-- **Валидация** — ошибки видны ДО импорта
-- **Скорость** — batch-импорт 1000+ записей за секунды
-- **Логирование** — история всех импортов
-- **Масштабируемость** — легко добавить новые таблицы
-
+**Ключевые улучшения**:
+- Из любой точки доступ к любым данным за 1-2 клика
+- Единая таблица для всех объектов с фильтрами
+- Мониторинг системы и ошибок
+- Централизованное управление пользователями и правами
+- Максимум информации без избыточности
