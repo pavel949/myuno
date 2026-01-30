@@ -45,6 +45,9 @@ const PropertyInquiry = lazy(() => import('@/pages/property/PropertyInquiry'));
 const PropertyMap = lazy(() => import('@/pages/property/PropertyMap'));
 const PropertyDepositSuccess = lazy(() => import('@/pages/property/PropertyDepositSuccess'));
 
+// Guest pages
+const GuestMessages = lazy(() => import('@/pages/guest/GuestMessages'));
+
 // Food & Delivery Mini-App (legacy - removed, redirects only)
 
 // Restaurants Mini-App
@@ -432,6 +435,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/favorites" element={<LazyPage><Favorites /></LazyPage>} />
         <Route path="/search" element={<LazyPage><Search /></LazyPage>} />
         <Route path="/notifications" element={<LazyPage><Notifications /></LazyPage>} />
+        <Route path="/messages" element={<LazyPage><GuestMessages /></LazyPage>} />
         <Route path="/history" element={<LazyPage><ViewHistory /></LazyPage>} />
         <Route path="/cart" element={<LazyPage><Cart /></LazyPage>} />
         <Route path="/wallet" element={<LazyPage><Wallet /></LazyPage>} />
