@@ -1,7 +1,7 @@
 # AI Agent Deployment Order
 ## Safe Rollout Plan for UNO AI Infrastructure
 
-Generated: 2026-01-30
+Generated: 2026-01-30 (Updated)
 
 ---
 
@@ -9,15 +9,36 @@ Generated: 2026-01-30
 
 | Category | Count | Status |
 |----------|-------|--------|
-| Active Agents | 8 | ✅ OPERATIONAL |
-| Deprecated Agents | 2 | ⚠️ PENDING REMOVAL |
-| New Agents | 0 | N/A |
+| Active Agents (DB-managed) | 4 | ✅ OPERATIONAL |
+| Standalone Utilities | 4 | ✅ OPERATIONAL |
+| Legacy Duplicates | 2 | ⚠️ PENDING DEPRECATION |
+| New Agents (v1) | 2 | 📋 PLANNED |
+
+---
+
+## Documentation Index
+
+| Document | Purpose |
+|----------|---------|
+| `ai_agent_canonical_spec.md` | Canonical entrypoint specification |
+| `ai_agent_delta_patch_plan.md` | Minimal safe patches |
+| `ai_observability_patch.md` | Logging and tracing |
+| `routing_matrix.md` | Current vs target routing |
+| `feature_flags_spec.md` | Migration control |
+| `migration_steps.md` | Step-by-step rollout |
+| `frontend_ai_entrypoints_map.md` | Frontend integration points |
+| `aiClient_spec.md` | Unified client specification |
+| `admin_ai_observability_spec.md` | Admin UI enhancements |
+| `db_managed_agents_contracts.md` | Agent behavior contracts |
+| `ai_agent_knowledge_versioning.md` | Knowledge management |
+| `ai_factory_v1_implementation_plan.md` | New agent creation |
+| `PAVEL_AI_OPERATIONS_GUIDE.md` | Executive operations guide |
 
 ---
 
 ## Phase 0: Validation (COMPLETE)
 
-- [x] Discovery complete
+- [x] Discovery complete (10 agents identified)
 - [x] All agents documented
 - [x] Boundary contract verified
 - [x] No money/security touching
@@ -25,160 +46,140 @@ Generated: 2026-01-30
 
 ---
 
-## Phase 1: Consolidation (RECOMMENDED)
+## Phase 1: Observability (PRIORITY)
 
-### Step 1.1: Migrate Support Chat Frontend
+### Step 1.1: Schema Migration
+**Priority:** P0
+**Risk:** NONE (additive only)
+**Effort:** 15 minutes
+
+Add columns to `ai_agent_logs`:
+- `correlation_id`
+- `agent_version`
+- `model`
+- `error_code`
+- `is_success`
+
+### Step 1.2: Shared Logging Helper
+**Priority:** P1
+**Risk:** LOW
+**Effort:** 1 hour
+
+Create `supabase/functions/_shared/ai-logging.ts`
+
+### Step 1.3: Update ai-agent Function
 **Priority:** P1
 **Risk:** LOW
 **Effort:** 2 hours
 
-**Current State:**
-- Frontend calls `ai-support-chat` directly
-- DB-managed `support-chat` agent exists but unused
-
-**Action:**
-```typescript
-// src/components/chat/AIChatbot.tsx
-// Change from:
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-support-chat`;
-
-// To:
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-agent`;
-
-// And update request body to include:
-{ agentSlug: 'support-chat', messages: [...] }
-```
-
-**Verification:**
-1. Test chat FAB in all user roles
-2. Verify streaming works
-3. Check ai_agent_logs for new entries
+Apply patches from `ai_agent_delta_patch_plan.md`
 
 ---
 
-### Step 1.2: Migrate Owner Assistant Frontend
+## Phase 2: Frontend Consolidation
+
+### Step 2.1: Create aiClient.ts
 **Priority:** P1
 **Risk:** LOW
 **Effort:** 2 hours
 
-**Current State:**
-- `useOwnerAIChat.ts` calls `ai-owner-assistant` directly
-- DB-managed `owner-assistant` exists and has been tested
+Per `aiClient_spec.md`
 
-**Action:**
-```typescript
-// src/hooks/useOwnerAIChat.ts
-// Change from:
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-owner-assistant`;
-
-// To:
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-agent`;
-
-// Update request to include agentSlug: 'owner-assistant'
-```
-
-**Verification:**
-1. Test AI chat in owner dashboard
-2. Verify context (properties, bookings) is passed
-3. Check ai_agent_logs
-
----
-
-### Step 1.3: Migrate Property Search Frontend
+### Step 2.2: Create featureFlags.ts
 **Priority:** P1
 **Risk:** LOW
-**Effort:** 2 hours
+**Effort:** 30 minutes
 
-**Current State:**
-- `usePropertyAIChat.ts` calls `ai-property-assistant` directly
-- DB-managed `property-search` exists
+Per `feature_flags_spec.md`
 
-**Action:**
-```typescript
-// src/hooks/usePropertyAIChat.ts
-// Change from:
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-property-assistant`;
+### Step 2.3: Migrate Support Chat Frontend
+**Priority:** P1
+**Risk:** LOW
+**Effort:** 1 hour
 
-// To:
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-agent`;
+Update:
+- `src/components/chat/UnifiedChatFAB.tsx`
+- `src/components/chat/AIChatbot.tsx`
 
-// Update request to include agentSlug: 'property-search'
-```
+### Step 2.4: Migrate Owner Assistant Frontend
+**Priority:** P1
+**Risk:** LOW
+**Effort:** 1 hour
+
+Update:
+- `src/hooks/useOwnerAIChat.ts`
+
+### Step 2.5: Migrate Property Search Frontend
+**Priority:** P1
+**Risk:** LOW
+**Effort:** 1 hour
+
+Update:
+- `src/hooks/usePropertyAIChat.ts`
 
 ---
 
-### Step 1.4: Deprecate Legacy Edge Functions
+## Phase 3: Legacy Cleanup
+
+### Step 3.1: Add Deprecation Warnings
+**Priority:** P2
+**Risk:** NONE
+**Effort:** 30 minutes
+
+Add `X-Deprecation-Warning` header to legacy functions
+
+### Step 3.2: Deprecate Legacy Edge Functions
 **Priority:** P2
 **Risk:** LOW
 **Effort:** 1 hour
-**Prerequisite:** Steps 1.1-1.3 verified in production
+**Prerequisite:** Phase 2 verified in production (2 weeks)
 
-**Action:**
-1. Remove from `supabase/config.toml`:
-   - `[functions.ai-owner-assistant]`
-   - `[functions.ai-property-assistant]`
-   
-2. Delete edge function directories:
-   - `supabase/functions/ai-owner-assistant/`
-   - `supabase/functions/ai-property-assistant/`
+Remove from `supabase/config.toml`:
+- `[functions.ai-owner-assistant]`
+- `[functions.ai-property-assistant]`
 
-3. Keep `ai-support-chat` for now (may have external integrations)
+Delete directories:
+- `supabase/functions/ai-owner-assistant/`
+- `supabase/functions/ai-property-assistant/`
+
+Keep `ai-support-chat` (may have external integrations)
 
 ---
 
-## Phase 2: Observability Improvements
+## Phase 4: New Agents (v1)
 
-### Step 2.1: Fix Token Tracking
+### Step 4.1: Review Analyzer
 **Priority:** P2
 **Risk:** LOW
 **Effort:** 4 hours
 
-**Location:** `supabase/functions/ai-agent/index.ts`
+Per `ai_factory_v1_implementation_plan.md`
 
-**Action:**
-```typescript
-// After streaming response, extract token count from headers or estimate
-// Update log entry with actual token count
-```
+### Step 4.2: Vendor Advisor
+**Priority:** P2
+**Risk:** LOW
+**Effort:** 4 hours
+
+Per `ai_factory_v1_implementation_plan.md`
 
 ---
 
-### Step 2.2: Add Session Tracking
-**Priority:** P2
+## Phase 5: Admin UI Enhancements
+
+### Step 5.1: Enhanced Stats Card
+**Priority:** P3
 **Risk:** LOW
 **Effort:** 2 hours
 
-**Action:**
-1. Generate UUID in frontend for each conversation
-2. Pass `sessionId` to all AI agent calls
-3. Use for multi-turn conversation analysis
-
----
-
-### Step 2.3: Add User Rating Collection
+### Step 5.2: Logs Table
 **Priority:** P3
 **Risk:** LOW
-**Effort:** 4 hours
+**Effort:** 3 hours
 
-**Action:**
-1. Add thumbs up/down UI after AI responses
-2. Call `ai_agent_logs` update with rating
-3. Dashboard for rating trends
-
----
-
-## Phase 3: New Agent Candidates (FUTURE)
-
-Based on `uncovered_domains` in capability map:
-
-| Candidate | Domain | Value | Effort | Priority |
-|-----------|--------|-------|--------|----------|
-| Review Analyzer | reviews_trust | Fake review detection | Medium | P2 |
-| Order Analyst | orders_canonical | Revenue insights | Medium | P3 |
-| Vendor Advisor | vendor_subscriptions | Upsell, churn prevention | High | P2 |
-| Analytics Reporter | analytics_metrics | Executive dashboards | Medium | P3 |
-
-**NOTE:** These are recommendations only. No implementation until Phase 1-2 complete.
+### Step 5.3: Error Panel
+**Priority:** P3
+**Risk:** LOW
+**Effort:** 2 hours
 
 ---
 
@@ -187,16 +188,19 @@ Based on `uncovered_domains` in capability map:
 ### Pre-Deployment
 - [ ] Backup current edge functions
 - [ ] Document current frontend behavior
+- [ ] Review schema migration
 - [ ] Notify team of planned changes
 
 ### During Deployment
-- [ ] Deploy one migration at a time
+- [ ] Deploy schema migration first
+- [ ] Deploy one component at a time
 - [ ] Monitor error rates
 - [ ] Check ai_agent_logs for entries
 
 ### Post-Deployment
 - [ ] Verify all AI features working
 - [ ] Compare response quality
+- [ ] Update Pavel's operations guide
 - [ ] Clean up deprecated code
 
 ---
@@ -205,9 +209,9 @@ Based on `uncovered_domains` in capability map:
 
 If any migration causes issues:
 
-1. **Immediate:** Revert frontend code to call legacy endpoints
-2. **Edge Functions:** Legacy functions remain in place until Phase 1.4
-3. **Database:** No schema changes, no rollback needed
+1. **Immediate (Frontend):** Change feature flag to `legacy`
+2. **Immediate (Backend):** Revert edge function to previous version
+3. **Schema:** No rollback needed (additive columns)
 
 ---
 
@@ -215,13 +219,18 @@ If any migration causes issues:
 
 | Phase | Duration | Dependencies |
 |-------|----------|--------------|
-| Phase 1 (Consolidation) | 1-2 days | None |
-| Phase 2 (Observability) | 2-3 days | Phase 1 |
-| Phase 3 (New Agents) | 5-10 days | Phase 2 + Business requirements |
+| Phase 1 (Observability) | 1 day | None |
+| Phase 2 (Frontend) | 2 days | Phase 1 |
+| Phase 3 (Cleanup) | 1 day | Phase 2 + 2 weeks |
+| Phase 4 (New Agents) | 3 days | Phase 2 |
+| Phase 5 (Admin UI) | 2 days | Phase 1 |
+
+**Total:** 9 days (can parallelize Phase 4-5 after Phase 2)
 
 ---
 
 ## Approval Required
 
-Phase 1-2: **Self-service** (no business logic changes)
-Phase 3: **Requires product approval** (new capabilities)
+- Phase 1-3: **Self-service** (infrastructure only)
+- Phase 4: **Product review** (new AI features)
+- Phase 5: **Self-service** (admin tools)
