@@ -1,0 +1,612 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
+
+// Vertical configurations (simplified for edge function)
+const VERTICALS = [
+  { id: 'yachts', table: 'yachts', keywords: ['yacht', 'яхта', 'boat', 'лодка', 'катер', 'charter', 'чартер', 'catamaran', 'катамаран', 'sailboat', 'парусник'] },
+  { id: 'properties', table: 'properties', keywords: ['property', 'недвижимость', 'квартира', 'apartment', 'villa', 'вилла', 'condo', 'кондо', 'house', 'дом', 'rent', 'аренда', 'penthouse'] },
+  { id: 'owner_properties', table: 'owner_properties', keywords: ['owner property', 'собственник', 'владелец', 'сдаю', 'my property', 'моя квартира'] },
+  { id: 'tours', table: 'tours', keywords: ['tour', 'тур', 'excursion', 'экскурсия', 'trip', 'поездка', 'island hopping', 'sightseeing'] },
+  { id: 'water_activities', table: 'water_activities', keywords: ['diving', 'дайвинг', 'snorkeling', 'jet ski', 'гидроцикл', 'parasailing', 'kayak', 'surfing', 'сёрфинг'] },
+  { id: 'restaurants', table: 'restaurants', keywords: ['restaurant', 'ресторан', 'cafe', 'кафе', 'bar', 'бар', 'bistro', 'food', 'еда', 'cuisine', 'menu'] },
+  { id: 'salons', table: 'salons', keywords: ['salon', 'салон', 'spa', 'спа', 'beauty', 'massage', 'массаж', 'manicure', 'маникюр', 'hair', 'nails'] },
+  { id: 'clinics', table: 'clinics', keywords: ['clinic', 'клиника', 'hospital', 'госпиталь', 'doctor', 'доктор', 'врач', 'medical', 'dental', 'health'] },
+  { id: 'gyms', table: 'gyms', keywords: ['gym', 'зал', 'fitness', 'фитнес', 'workout', 'crossfit', 'yoga', 'йога', 'pilates', 'sport'] },
+  { id: 'vehicles', table: 'vehicles', keywords: ['car', 'машина', 'авто', 'motorbike', 'мотобайк', 'scooter', 'скутер', 'bike', 'rental', 'прокат'] },
+  { id: 'events', table: 'events', keywords: ['event', 'событие', 'party', 'вечеринка', 'concert', 'концерт', 'festival', 'фестиваль', 'show'] },
+  { id: 'babysitters', table: 'babysitters', keywords: ['babysitter', 'няня', 'nanny', 'childcare', 'baby', 'ребёнок', 'children', 'дети'] },
+  { id: 'cleaning_services', table: 'cleaning_services', keywords: ['cleaning', 'уборка', 'maid', 'housekeeping', 'клининг', 'deep clean'] },
+  { id: 'legal_services', table: 'legal_services', keywords: ['lawyer', 'юрист', 'адвокат', 'legal', 'visa', 'виза', 'immigration', 'notary', 'contract'] },
+  { id: 'pet_services', table: 'pet_services', keywords: ['pet', 'питомец', 'dog', 'собака', 'cat', 'кошка', 'vet', 'ветеринар', 'grooming'] },
+  { id: 'education_providers', table: 'education_providers', keywords: ['school', 'школа', 'education', 'course', 'курс', 'tutor', 'репетитор', 'language', 'training'] },
+  { id: 'pharmacies', table: 'pharmacies', keywords: ['pharmacy', 'аптека', 'medicine', 'лекарство', 'drug', 'препарат', 'drugstore'] },
+  { id: 'insurance_providers', table: 'insurance_providers', keywords: ['insurance', 'страховка', 'страхование', 'policy', 'полис', 'health insurance'] },
+  { id: 'flower_shops', table: 'flower_shops', keywords: ['flowers', 'цветы', 'bouquet', 'букет', 'florist', 'флорист', 'roses'] },
+  { id: 'stores', table: 'stores', keywords: ['store', 'магазин', 'shop', 'shopping', 'retail', 'supermarket', 'grocery'] },
+  { id: 'providers', table: 'providers', keywords: ['provider', 'провайдер', 'company', 'компания', 'service', 'услуга', 'business'] },
+  { id: 'marketplace_products', table: 'marketplace_products', keywords: ['product', 'товар', 'item', 'goods', 'buy', 'sell', 'продать'] },
+  { id: 'marketplace_vendors', table: 'marketplace_vendors', keywords: ['vendor', 'продавец', 'seller', 'merchant', 'shop'] },
+  { id: 'vendor_locations', table: 'vendor_locations', keywords: ['location', 'локация', 'branch', 'филиал', 'office', 'outlet'] },
+];
+
+// URL detection regex
+const URL_REGEX = /https?:\/\/[^\s<>"{}|\\^`[\]]+/gi;
+
+// Item separators for bulk text
+const ITEM_SEPARATORS = [
+  /^---+$/m,
+  /^===+$/m,
+  /^#{2,}\s/m,
+  /^\d+\.\s+[A-ZА-Я]/m,
+];
+
+interface IntakeRequest {
+  mode: 'single' | 'bulk_text' | 'bulk_file' | 'bulk_urls';
+  rawText?: string;
+  fileData?: { rows: Record<string, unknown>[] };
+  urls?: string[];
+  images?: string[];
+  forceVertical?: string;
+  sessionId?: string;
+}
+
+interface ExtractedField {
+  value: unknown;
+  confidence: number;
+  source: 'text' | 'scraped' | 'image' | 'inferred';
+}
+
+interface IntakeItem {
+  id: string;
+  status: 'pending' | 'approved' | 'discarded' | 'created';
+  sourceUrl?: string;
+  sourceText?: string;
+  sourceImages?: string[];
+  detectedVertical: string;
+  verticalConfidence: number;
+  extractedFields: Record<string, ExtractedField>;
+  suggestedTitle: { en: string; ru: string };
+  suggestedDescription: { en: string; ru: string };
+  missingRequiredFields: string[];
+  warnings: string[];
+  overallConfidence: number;
+  createdListingId?: string;
+  createdListingTable?: string;
+}
+
+interface IntakeResponse {
+  sessionId: string;
+  status: 'ready' | 'partial' | 'failed';
+  items: IntakeItem[];
+  summary: {
+    total: number;
+    byVertical: Record<string, number>;
+    avgConfidence: number;
+    readyToApprove: number;
+    needsReview: number;
+  };
+}
+
+/**
+ * Detect vertical from content using keyword matching + AI
+ */
+function detectVerticalFromKeywords(content: string): { vertical: string; confidence: number } {
+  const lowerContent = content.toLowerCase();
+  const scores: Record<string, number> = {};
+
+  for (const v of VERTICALS) {
+    let score = 0;
+    for (const keyword of v.keywords) {
+      if (lowerContent.includes(keyword.toLowerCase())) {
+        score += 1;
+      }
+    }
+    if (score > 0) {
+      scores[v.id] = score;
+    }
+  }
+
+  const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+  if (sorted.length > 0) {
+    const maxScore = sorted[0][1];
+    const confidence = Math.min(0.95, 0.5 + (maxScore * 0.1));
+    return { vertical: sorted[0][0], confidence };
+  }
+
+  return { vertical: 'providers', confidence: 0.3 };
+}
+
+/**
+ * Split bulk text into individual items
+ */
+function splitBulkText(text: string): string[] {
+  for (const sep of ITEM_SEPARATORS) {
+    const parts = text.split(sep).filter(p => p.trim().length > 50);
+    if (parts.length > 1) {
+      return parts;
+    }
+  }
+  // Check for double newlines as separator
+  const doubleNewlineParts = text.split(/\n\n\n+/).filter(p => p.trim().length > 50);
+  if (doubleNewlineParts.length > 1) {
+    return doubleNewlineParts;
+  }
+  return [text];
+}
+
+/**
+ * Extract URLs from text
+ */
+function extractUrls(text: string): string[] {
+  const matches = text.match(URL_REGEX);
+  return matches ? [...new Set(matches)] : [];
+}
+
+/**
+ * Call Firecrawl to scrape URLs
+ */
+async function scrapeUrls(urls: string[], supabaseUrl: string, supabaseKey: string): Promise<Record<string, { title: string; content: string; metadata: Record<string, unknown> }>> {
+  if (urls.length === 0) return {};
+
+  try {
+    const response = await fetch(`${supabaseUrl}/functions/v1/firecrawl-scrape`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ urls }),
+    });
+
+    if (!response.ok) {
+      console.error('[INTAKE] Firecrawl error:', response.status);
+      return {};
+    }
+
+    const data = await response.json();
+    const results: Record<string, { title: string; content: string; metadata: Record<string, unknown> }> = {};
+    
+    for (const r of data.results || []) {
+      if (r.success && r.url) {
+        results[r.url] = {
+          title: r.title || '',
+          content: r.content || '',
+          metadata: r.metadata || {},
+        };
+      }
+    }
+    return results;
+  } catch (error) {
+    console.error('[INTAKE] Firecrawl exception:', error);
+    return {};
+  }
+}
+
+/**
+ * Call AI to extract structured fields and generate descriptions
+ */
+async function extractFieldsWithAI(
+  content: string,
+  vertical: string,
+  apiKey: string
+): Promise<{
+  fields: Record<string, ExtractedField>;
+  title: { en: string; ru: string };
+  description: { en: string; ru: string };
+  confidence: number;
+}> {
+  const verticalConfig = VERTICALS.find(v => v.id === vertical);
+  
+  const systemPrompt = `You are a data extraction assistant for a marketplace platform. 
+Extract structured information from the provided content for a "${vertical}" listing.
+
+Return a JSON object with:
+1. "fields": Object with extracted field values and confidence scores (0-1)
+2. "title": { "en": "English title", "ru": "Russian title" }
+3. "description": { "en": "English description (2-3 sentences)", "ru": "Russian description (2-3 sentences)" }
+4. "confidence": Overall extraction confidence (0-1)
+
+Common fields to extract based on vertical type:
+- name_en, name_ru: Names/titles
+- description_en, description_ru: Descriptions
+- price, price_per_day, price_per_hour, price_per_month: Prices
+- address, district: Location info
+- phone, email, website: Contact info
+- features, amenities, services: Lists
+- capacity, bedrooms, bathrooms, area_sqm: Numeric specs
+- working_hours: Operating schedule
+- images, cover_image: Image URLs
+
+For prices, extract the numeric value only. 
+For arrays, return as arrays of strings.
+Generate professional, engaging descriptions in both languages.`;
+
+  const userPrompt = `Extract listing data for vertical "${vertical}" from this content:
+
+"""
+${content.substring(0, 8000)}
+"""
+
+Return valid JSON only.`;
+
+  try {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        temperature: 0.3,
+        max_tokens: 2000,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        tools: [{
+          type: "function",
+          function: {
+            name: "extract_listing_data",
+            description: "Extract structured listing data from content",
+            parameters: {
+              type: "object",
+              properties: {
+                fields: {
+                  type: "object",
+                  description: "Extracted fields with values and confidence",
+                  additionalProperties: {
+                    type: "object",
+                    properties: {
+                      value: {},
+                      confidence: { type: "number" },
+                      source: { type: "string", enum: ["text", "scraped", "image", "inferred"] }
+                    }
+                  }
+                },
+                title: {
+                  type: "object",
+                  properties: {
+                    en: { type: "string" },
+                    ru: { type: "string" }
+                  },
+                  required: ["en", "ru"]
+                },
+                description: {
+                  type: "object",
+                  properties: {
+                    en: { type: "string" },
+                    ru: { type: "string" }
+                  },
+                  required: ["en", "ru"]
+                },
+                confidence: { type: "number" }
+              },
+              required: ["fields", "title", "description", "confidence"]
+            }
+          }
+        }],
+        tool_choice: { type: "function", function: { name: "extract_listing_data" } }
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('[INTAKE] AI extraction error:', response.status);
+      return getDefaultExtraction(vertical);
+    }
+
+    const data = await response.json();
+    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+    
+    if (toolCall?.function?.arguments) {
+      try {
+        const parsed = JSON.parse(toolCall.function.arguments);
+        return {
+          fields: parsed.fields || {},
+          title: parsed.title || { en: 'Untitled', ru: 'Без названия' },
+          description: parsed.description || { en: '', ru: '' },
+          confidence: parsed.confidence || 0.5,
+        };
+      } catch (e) {
+        console.error('[INTAKE] Failed to parse AI response:', e);
+      }
+    }
+
+    return getDefaultExtraction(vertical);
+  } catch (error) {
+    console.error('[INTAKE] AI extraction exception:', error);
+    return getDefaultExtraction(vertical);
+  }
+}
+
+function getDefaultExtraction(vertical: string) {
+  return {
+    fields: {},
+    title: { en: `New ${vertical} listing`, ru: `Новый листинг ${vertical}` },
+    description: { en: '', ru: '' },
+    confidence: 0.3,
+  };
+}
+
+/**
+ * Get required fields for a vertical
+ */
+function getRequiredFields(vertical: string): string[] {
+  const requiredByVertical: Record<string, string[]> = {
+    yachts: ['name_en'],
+    properties: ['name_en'],
+    owner_properties: ['title_en'],
+    tours: ['name_en'],
+    restaurants: ['name_en'],
+    salons: ['name_en'],
+    clinics: ['name_en'],
+    gyms: ['name_en'],
+    vehicles: ['name_en'],
+    events: ['name_en'],
+    babysitters: ['name_en'],
+    cleaning_services: ['name_en'],
+    legal_services: ['name_en'],
+    pet_services: ['name_en'],
+    education_providers: ['name_en'],
+    pharmacies: ['name_en'],
+    insurance_providers: ['name_en'],
+    flower_shops: ['name_en'],
+    stores: ['name_en'],
+    providers: ['name_en'],
+    marketplace_products: ['name_en'],
+    marketplace_vendors: ['name_en'],
+    vendor_locations: ['name_en'],
+    water_activities: ['name_en'],
+  };
+  return requiredByVertical[vertical] || ['name_en'];
+}
+
+/**
+ * Process a single content item
+ */
+async function processItem(
+  content: string,
+  sourceUrl: string | undefined,
+  images: string[],
+  forceVertical: string | undefined,
+  apiKey: string
+): Promise<IntakeItem> {
+  const id = crypto.randomUUID();
+  
+  // Detect vertical
+  let verticalResult: { vertical: string; confidence: number };
+  if (forceVertical && VERTICALS.find(v => v.id === forceVertical)) {
+    verticalResult = { vertical: forceVertical, confidence: 0.99 };
+  } else {
+    verticalResult = detectVerticalFromKeywords(content);
+  }
+
+  // Extract fields with AI
+  const extraction = await extractFieldsWithAI(content, verticalResult.vertical, apiKey);
+
+  // Check required fields
+  const requiredFields = getRequiredFields(verticalResult.vertical);
+  const missingRequired: string[] = [];
+  for (const field of requiredFields) {
+    if (!extraction.fields[field]?.value) {
+      missingRequired.push(field);
+    }
+  }
+
+  // Generate warnings
+  const warnings: string[] = [];
+  if (extraction.confidence < 0.5) {
+    warnings.push('Low confidence extraction - please review carefully');
+  }
+  if (Object.keys(extraction.fields).length < 3) {
+    warnings.push('Few fields extracted - consider adding more details');
+  }
+
+  // Calculate overall confidence
+  const overallConfidence = (verticalResult.confidence + extraction.confidence) / 2;
+
+  return {
+    id,
+    status: 'pending',
+    sourceUrl,
+    sourceText: content.substring(0, 500),
+    sourceImages: images,
+    detectedVertical: verticalResult.vertical,
+    verticalConfidence: verticalResult.confidence,
+    extractedFields: extraction.fields,
+    suggestedTitle: extraction.title,
+    suggestedDescription: extraction.description,
+    missingRequiredFields: missingRequired,
+    warnings,
+    overallConfidence,
+  };
+}
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  const startTime = Date.now();
+
+  try {
+    const { mode, rawText, fileData, urls, images, forceVertical, sessionId } = await req.json() as IntakeRequest;
+
+    console.log(`[INTAKE] Processing request: mode=${mode}, sessionId=${sessionId || 'new'}`);
+
+    // Initialize Supabase
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Get user from auth header
+    let userId: string | null = null;
+    const authHeader = req.headers.get("Authorization");
+    if (authHeader) {
+      const token = authHeader.replace("Bearer ", "");
+      const { data: { user } } = await supabase.auth.getUser(token);
+      userId = user?.id || null;
+    }
+
+    if (!userId) {
+      return new Response(
+        JSON.stringify({ error: "Authentication required" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Get API key
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      return new Response(
+        JSON.stringify({ error: "AI service not configured" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const items: IntakeItem[] = [];
+    const scrapedContent: Record<string, { title: string; content: string; metadata: Record<string, unknown> }> = {};
+
+    // Process based on mode
+    if (mode === 'bulk_urls' && urls && urls.length > 0) {
+      // Scrape all URLs
+      const scraped = await scrapeUrls(urls, supabaseUrl, supabaseServiceKey);
+      Object.assign(scrapedContent, scraped);
+
+      for (const url of urls) {
+        const content = scrapedContent[url];
+        if (content) {
+          const combinedContent = `${content.title}\n\n${content.content}`;
+          const item = await processItem(combinedContent, url, [], forceVertical, LOVABLE_API_KEY);
+          items.push(item);
+        } else {
+          // Failed to scrape - create placeholder
+          items.push({
+            id: crypto.randomUUID(),
+            status: 'pending',
+            sourceUrl: url,
+            sourceText: '',
+            detectedVertical: 'providers',
+            verticalConfidence: 0,
+            extractedFields: {},
+            suggestedTitle: { en: 'Failed to scrape', ru: 'Ошибка загрузки' },
+            suggestedDescription: { en: '', ru: '' },
+            missingRequiredFields: ['name_en'],
+            warnings: ['Failed to scrape URL content'],
+            overallConfidence: 0,
+          });
+        }
+      }
+    } else if (mode === 'bulk_file' && fileData?.rows) {
+      // Process file rows
+      for (const row of fileData.rows) {
+        const content = Object.entries(row)
+          .map(([k, v]) => `${k}: ${v}`)
+          .join('\n');
+        const item = await processItem(content, undefined, [], forceVertical, LOVABLE_API_KEY);
+        items.push(item);
+      }
+    } else if (rawText) {
+      // Check for URLs in text
+      const extractedUrls = extractUrls(rawText);
+      if (extractedUrls.length > 0 && mode !== 'bulk_text') {
+        // Scrape URLs first
+        const scraped = await scrapeUrls(extractedUrls, supabaseUrl, supabaseServiceKey);
+        Object.assign(scrapedContent, scraped);
+      }
+
+      if (mode === 'bulk_text') {
+        // Split into multiple items
+        const textItems = splitBulkText(rawText);
+        for (const text of textItems) {
+          const item = await processItem(text, undefined, images || [], forceVertical, LOVABLE_API_KEY);
+          items.push(item);
+        }
+      } else {
+        // Single item - combine raw text with scraped content
+        let combinedContent = rawText;
+        for (const [url, content] of Object.entries(scrapedContent)) {
+          combinedContent += `\n\n--- Content from ${url} ---\n${content.title}\n${content.content}`;
+        }
+        const item = await processItem(combinedContent, extractedUrls[0], images || [], forceVertical, LOVABLE_API_KEY);
+        items.push(item);
+      }
+    } else {
+      return new Response(
+        JSON.stringify({ error: "No input provided" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Calculate summary
+    const byVertical: Record<string, number> = {};
+    let totalConfidence = 0;
+    let readyToApprove = 0;
+    let needsReview = 0;
+
+    for (const item of items) {
+      byVertical[item.detectedVertical] = (byVertical[item.detectedVertical] || 0) + 1;
+      totalConfidence += item.overallConfidence;
+      if (item.overallConfidence >= 0.7 && item.missingRequiredFields.length === 0) {
+        readyToApprove++;
+      } else {
+        needsReview++;
+      }
+    }
+
+    const avgConfidence = items.length > 0 ? totalConfidence / items.length : 0;
+
+    // Create or update session
+    const newSessionId = sessionId || crypto.randomUUID();
+    const { error: sessionError } = await supabase
+      .from('ai_intake_sessions')
+      .upsert({
+        id: newSessionId,
+        admin_id: userId,
+        input_mode: mode,
+        raw_input: rawText?.substring(0, 10000),
+        uploaded_images: images,
+        items_count: items.length,
+        items: items,
+        status: items.length > 0 ? 'ready' : 'failed',
+        processed_count: items.length,
+        updated_at: new Date().toISOString(),
+      });
+
+    if (sessionError) {
+      console.error('[INTAKE] Failed to save session:', sessionError);
+    }
+
+    const response: IntakeResponse = {
+      sessionId: newSessionId,
+      status: items.length > 0 ? 'ready' : 'failed',
+      items,
+      summary: {
+        total: items.length,
+        byVertical,
+        avgConfidence: Math.round(avgConfidence * 100) / 100,
+        readyToApprove,
+        needsReview,
+      },
+    };
+
+    console.log(`[INTAKE] Completed in ${Date.now() - startTime}ms: ${items.length} items processed`);
+
+    return new Response(
+      JSON.stringify(response),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+
+  } catch (error) {
+    console.error("[INTAKE] Error:", error);
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});
