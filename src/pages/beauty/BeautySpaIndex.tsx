@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { useSalons } from '@/hooks/useSalons';
 import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from '@/components/miniapp';
 import { beautyFilterConfig, FilterValues } from '@/components/filters';
@@ -20,6 +21,7 @@ const SERVICE_CATEGORIES: MiniAppCategory[] = [
 
 export default function BeautySpaIndex() {
   const { t, language } = useLanguage();
+  const { formatPrice } = useCurrency();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -67,10 +69,10 @@ export default function BeautySpaIndex() {
   }, [salons, searchQuery, language, filterValues]);
 
   const quickItems: QuickGridItem[] = [
-    { icon: '💆', label: language === 'ru' ? 'Массаж' : 'Massage', sublabel: '฿600', onClick: () => setSelectedCategory('massage') },
-    { icon: '💅', label: language === 'ru' ? 'Ногти' : 'Nails', sublabel: '฿400', onClick: () => setSelectedCategory('nail_salon') },
-    { icon: '💇', label: language === 'ru' ? 'Волосы' : 'Hair', sublabel: '฿500', onClick: () => setSelectedCategory('hair_salon') },
-    { icon: '🧖', label: language === 'ru' ? 'СПА' : 'Spa', sublabel: '฿1,500', onClick: () => setSelectedCategory('spa') },
+    { icon: '💆', label: language === 'ru' ? 'Массаж' : 'Massage', sublabel: formatPrice(600), onClick: () => setSelectedCategory('massage') },
+    { icon: '💅', label: language === 'ru' ? 'Ногти' : 'Nails', sublabel: formatPrice(400), onClick: () => setSelectedCategory('nail_salon') },
+    { icon: '💇', label: language === 'ru' ? 'Волосы' : 'Hair', sublabel: formatPrice(500), onClick: () => setSelectedCategory('hair_salon') },
+    { icon: '🧖', label: language === 'ru' ? 'СПА' : 'Spa', sublabel: formatPrice(1500), onClick: () => setSelectedCategory('spa') },
   ];
 
   return (
@@ -111,7 +113,6 @@ export default function BeautySpaIndex() {
             reviewCount={salon.review_count}
             price={salon.price_from ?? undefined}
             pricePrefix={t('label.from')}
-            currency="฿"
             location={salon.district || salon.address || ''}
             isVerified={salon.is_verified}
             isFeatured={salon.is_featured}

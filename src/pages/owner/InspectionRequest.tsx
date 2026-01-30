@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { useOwnerProperties, useCreateInspection } from '@/hooks/usePropertyCare';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -22,6 +23,7 @@ import { cn } from '@/lib/utils';
 
 export default function InspectionRequest() {
   const { language } = useLanguage();
+  const { formatPrice } = useCurrency();
   const navigate = useNavigate();
   const isRu = language === 'ru';
 
@@ -293,10 +295,10 @@ export default function InspectionRequest() {
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-2xl font-bold">฿500</p>
+                <p className="text-2xl font-bold">{formatPrice(500)}</p>
                 <p className="text-xs text-muted-foreground">
                   {formData.inspection_type === 'emergency' 
-                    ? (isRu ? '+฿300 срочность' : '+฿300 urgency')
+                    ? (isRu ? `+${formatPrice(300)} срочность` : `+${formatPrice(300)} urgency`)
                     : ''}
                 </p>
               </div>

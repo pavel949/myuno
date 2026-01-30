@@ -274,20 +274,8 @@ const OWNER_ACTIONS: QuickAction[] = [
   },
 ];
 
-// Fixed actions (always last 2 slots)
+// Fixed action (only "More" - SOS moved to SafetyBanner)
 const FIXED_ACTIONS: QuickAction[] = [
-  {
-    id: 'sos',
-    icon: AlertTriangle,
-    label: 'SOS',
-    labelRu: 'SOS',
-    path: '/sos',
-    iconColor: 'text-red-500',
-    bgColor: 'bg-red-500/10',
-    badge: '24/7',
-    badgeRu: '24/7',
-    isUrgent: true,
-  },
   {
     id: 'more',
     icon: MoreHorizontal,
@@ -299,34 +287,16 @@ const FIXED_ACTIONS: QuickAction[] = [
   },
 ];
 
-// Default actions for guests (not logged in)
+// Default actions for guests (not logged in) - Flowers first!
 const DEFAULT_ACTIONS: QuickAction[] = [
   {
-    id: 'yachts',
-    icon: Anchor,
-    label: 'Yachts',
-    labelRu: 'Яхты',
-    path: '/yachts',
-    iconColor: 'text-cyan-600',
-    bgColor: 'bg-cyan-500/10',
-  },
-  {
-    id: 'transfer',
-    icon: Plane,
-    label: 'Transfer',
-    labelRu: 'Трансфер',
-    path: '/transport/airport',
-    iconColor: 'text-indigo-600',
-    bgColor: 'bg-indigo-500/10',
-  },
-  {
-    id: 'tours',
-    icon: Compass,
-    label: 'Tours',
-    labelRu: 'Туры',
-    path: '/tours',
-    iconColor: 'text-amber-600',
-    bgColor: 'bg-amber-500/10',
+    id: 'flowers',
+    icon: Flower2,
+    label: 'Flowers',
+    labelRu: 'Цветы',
+    path: '/flowers',
+    iconColor: 'text-rose-500',
+    bgColor: 'bg-rose-500/10',
   },
   {
     id: 'restaurants',
@@ -338,13 +308,31 @@ const DEFAULT_ACTIONS: QuickAction[] = [
     bgColor: 'bg-orange-500/10',
   },
   {
-    id: 'flowers',
-    icon: Flower2,
-    label: 'Flowers',
-    labelRu: 'Цветы',
-    path: '/flowers',
-    iconColor: 'text-rose-500',
-    bgColor: 'bg-rose-500/10',
+    id: 'transfer',
+    icon: Plane,
+    label: 'Transfer',
+    labelRu: 'Трансфер',
+    path: '/transport/airport',
+    iconColor: 'text-indigo-600',
+    bgColor: 'bg-indigo-500/10',
+  },
+  {
+    id: 'beauty',
+    icon: Sparkles,
+    label: 'Beauty',
+    labelRu: 'Красота',
+    path: '/beauty',
+    iconColor: 'text-pink-500',
+    bgColor: 'bg-pink-500/10',
+  },
+  {
+    id: 'transport',
+    icon: Car,
+    label: 'Transport',
+    labelRu: 'Транспорт',
+    path: '/transport',
+    iconColor: 'text-blue-600',
+    bgColor: 'bg-blue-500/10',
   },
   {
     id: 'property',
@@ -401,7 +389,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid() {
   // Get personalized actions based on user type
   const quickActions = useMemo(() => {
     const userActions = getActionsForUserType(profile?.user_type);
-    // Take first 8 user-specific actions + 2 fixed actions (SOS + More)
+    // Take first 8 user-specific actions + 1 fixed action (More) - SOS is now in SafetyBanner
     return [...userActions.slice(0, 8), ...FIXED_ACTIONS];
   }, [profile?.user_type]);
 
@@ -418,7 +406,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid() {
   }, [queryClient]);
 
   return (
-    <div className="grid grid-cols-5 gap-2">
+    <div className="grid grid-cols-3 gap-2">
       {quickActions.map((action) => {
         const Icon = action.icon;
         const label = language === 'ru' ? action.labelRu : action.label;
