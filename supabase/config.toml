@@ -65,3 +65,6 @@ verify_jwt = false
 
 [functions.ai-smart-search]
 verify_jwt = false
+
+[functions.ai-owner-assistant]
+verify_jwt = false
