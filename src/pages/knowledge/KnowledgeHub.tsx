@@ -1,0 +1,120 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { PageContainer } from '@/components/uno/PageContainer';
+import { SEOHead } from '@/components/seo';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ArrowLeft, BookOpen, MapPin } from 'lucide-react';
+import { useLocation } from '@/contexts/LocationContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useKnowledgeSections, KNOWLEDGE_SECTIONS } from '@/hooks/useLocationKnowledge';
+import { KnowledgeCard, QuickFactsGrid, DosDontsCard, EmergencyContacts } from '@/components/knowledge';
+
+export default function KnowledgeHub() {
+  const navigate = useNavigate();
+  const { currentCity, getCityName } = useLocation();
+  const { language } = useLanguage();
+  const { data: sections, isLoading } = useKnowledgeSections();
+
+  const cityName = getCityName(language as 'en' | 'ru' | 'th');
+  const pageTitle = language === 'ru' 
+    ? `Справочник знаний — ${cityName}` 
+    : `Knowledge Hub — ${cityName}`;
+
+  // Group sections for display
+  const sectionGroups = KNOWLEDGE_SECTIONS.map(section => {
+    const items = sections?.filter(s => s.section === section.id) || [];
+    return {
+      ...section,
+      label: language === 'ru' ? section.labelRu : section.labelEn,
+      count: items.length,
+      summary: items[0]?.summary || '',
+    };
+  });
+
+  return (
+    <>
+      <SEOHead 
+        title={pageTitle}
+        description={language === 'ru' 
+          ? `Все что нужно знать о ${cityName}: культура, законы, госорганы, экстренные контакты`
+          : `Everything you need to know about ${cityName}: culture, laws, government, emergency contacts`
+        }
+      />
+      
+      <PageContainer className="pb-32">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-6">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => navigate(-1)}
+            className="shrink-0"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+              <BookOpen className="h-6 w-6 text-primary" />
+              {language === 'ru' ? 'Справочник знаний' : 'Knowledge Hub'}
+            </h1>
+            <div className="flex items-center gap-1 text-muted-foreground text-sm">
+              <MapPin className="h-4 w-4" />
+              <span>{cityName}</span>
+              {currentCity?.flag && <span>{currentCity.flag}</span>}
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Facts */}
+        <section className="mb-8">
+          <h2 className="text-lg font-semibold mb-3 text-foreground">
+            {language === 'ru' ? 'Основные факты' : 'Quick Facts'}
+          </h2>
+          <QuickFactsGrid />
+        </section>
+
+        {/* Knowledge Sections Grid */}
+        <section className="mb-8">
+          <h2 className="text-lg font-semibold mb-3 text-foreground">
+            {language === 'ru' ? 'Разделы справочника' : 'Knowledge Sections'}
+          </h2>
+          
+          {isLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3, 4].map(i => (
+                <Skeleton key={i} className="h-20 w-full rounded-xl" />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {sectionGroups.map(section => (
+                <KnowledgeCard
+                  key={section.id}
+                  section={section.id}
+                  title={section.label}
+                  summary={section.summary}
+                  icon={section.icon}
+                  articleCount={section.count}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Do's & Don'ts Preview */}
+        <section className="mb-8">
+          <h2 className="text-lg font-semibold mb-3 text-foreground">
+            {language === 'ru' ? 'Культурный этикет' : 'Cultural Etiquette'}
+          </h2>
+          <DosDontsCard />
+        </section>
+
+        {/* Emergency Contacts */}
+        <section>
+          <EmergencyContacts citySlug={currentCity?.slug || 'phuket'} />
+        </section>
+      </PageContainer>
+    </>
+  );
+}

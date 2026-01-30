@@ -3453,6 +3453,68 @@ export type Database = {
           },
         ]
       }
+      location_knowledge: {
+        Row: {
+          city_id: string
+          content_en: string | null
+          content_ru: string | null
+          created_at: string
+          icon: string | null
+          id: string
+          is_published: boolean | null
+          section: string
+          slug: string
+          sort_order: number | null
+          summary_en: string | null
+          summary_ru: string | null
+          title_en: string
+          title_ru: string
+          updated_at: string
+        }
+        Insert: {
+          city_id: string
+          content_en?: string | null
+          content_ru?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_published?: boolean | null
+          section: string
+          slug: string
+          sort_order?: number | null
+          summary_en?: string | null
+          summary_ru?: string | null
+          title_en: string
+          title_ru: string
+          updated_at?: string
+        }
+        Update: {
+          city_id?: string
+          content_en?: string | null
+          content_ru?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_published?: boolean | null
+          section?: string
+          slug?: string
+          sort_order?: number | null
+          summary_en?: string | null
+          summary_ru?: string | null
+          title_en?: string
+          title_ru?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "location_knowledge_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       locations: {
         Row: {
           address: string | null
