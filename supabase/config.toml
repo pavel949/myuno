@@ -77,3 +77,6 @@ verify_jwt = false
 
 [functions.firecrawl-scrape]
 verify_jwt = false
+
+[functions.intake-listing-agent]
+verify_jwt = false
