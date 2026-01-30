@@ -13,7 +13,8 @@ import {
   Minus,
   Package,
   Scale,
-  Ruler
+  Ruler,
+  Zap
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
@@ -33,6 +34,8 @@ import { ReviewForm } from '@/components/market/reviews/ReviewForm';
 import { ProductAttributes } from '@/components/market/ProductAttributes';
 import { cn } from '@/lib/utils';
 import { formatProductUnit, formatPricePerUnit } from '@/utils/formatProductUnit';
+import { useBuyNow } from '@/hooks/useBuyNow';
+import { MarketplaceProduct } from '@/types/marketplace';
 
 const ProductDetailPage = () => {
   const { productId } = useParams<{ productId: string }>();
@@ -40,6 +43,7 @@ const ProductDetailPage = () => {
   const { language } = useLanguage();
   const { addItem, removeItem, getItemsByType } = useCart();
   const { showAddedToast } = useCartToast();
+  const { buyNow } = useBuyNow();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showReviewForm, setShowReviewForm] = useState(false);
 
@@ -435,13 +439,13 @@ const ProductDetailPage = () => {
 
         {/* Fixed Bottom Bar */}
         <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4 z-50">
-          <div className="max-w-lg mx-auto flex items-center gap-4">
+          <div className="max-w-lg mx-auto flex items-center gap-3">
             {/* Price */}
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div className="flex items-baseline gap-2">
-                <span className="text-xl font-bold">฿{product.price.toLocaleString()}</span>
+                <span className="text-lg font-bold">฿{product.price.toLocaleString()}</span>
                 {product.original_price && (
-                  <span className="text-sm text-muted-foreground line-through">
+                  <span className="text-xs text-muted-foreground line-through">
                     ฿{product.original_price.toLocaleString()}
                   </span>
                 )}
@@ -451,31 +455,52 @@ const ProductDetailPage = () => {
             
             {/* Cart Controls */}
             {quantity === 0 ? (
-              <Button 
-                size="lg" 
-                className="gap-2 rounded-full px-8"
-                onClick={handleAdd}
-              >
-                <ShoppingBag className="h-5 w-5" />
-                {language === 'ru' ? 'В корзину' : 'Add to Cart'}
-              </Button>
-            ) : (
-              <div className="flex items-center gap-3 bg-primary/10 rounded-full px-4 py-2">
+              <div className="flex gap-2">
                 <Button 
-                  size="icon" 
-                  variant="ghost" 
-                  className="h-10 w-10 rounded-full hover:bg-primary/20"
-                  onClick={handleRemove}
-                >
-                  <Minus className="h-5 w-5" />
-                </Button>
-                <span className="text-lg font-bold w-8 text-center">{quantity}</span>
-                <Button 
-                  size="icon" 
-                  className="h-10 w-10 rounded-full"
+                  variant="outline"
+                  size="lg" 
+                  className="gap-2 rounded-full"
                   onClick={handleAdd}
                 >
-                  <Plus className="h-5 w-5" />
+                  <ShoppingBag className="h-5 w-5" />
+                  <span className="hidden sm:inline">{language === 'ru' ? 'В корзину' : 'Cart'}</span>
+                </Button>
+                <Button 
+                  size="lg" 
+                  className="gap-2 rounded-full bg-gradient-to-r from-primary to-primary/80"
+                  onClick={() => buyNow(product as MarketplaceProduct)}
+                >
+                  <Zap className="h-5 w-5" />
+                  {language === 'ru' ? 'Купить' : 'Buy Now'}
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 bg-primary/10 rounded-full px-3 py-1.5">
+                  <Button 
+                    size="icon" 
+                    variant="ghost" 
+                    className="h-8 w-8 rounded-full hover:bg-primary/20"
+                    onClick={handleRemove}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <span className="text-base font-bold w-6 text-center">{quantity}</span>
+                  <Button 
+                    size="icon" 
+                    className="h-8 w-8 rounded-full"
+                    onClick={handleAdd}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                <Button 
+                  size="lg" 
+                  className="gap-2 rounded-full bg-gradient-to-r from-primary to-primary/80"
+                  onClick={() => buyNow(product as MarketplaceProduct)}
+                >
+                  <Zap className="h-5 w-5" />
+                  {language === 'ru' ? 'Купить' : 'Buy'}
                 </Button>
               </div>
             )}

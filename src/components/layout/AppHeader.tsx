@@ -1,15 +1,15 @@
 import React, { memo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bell, ShoppingBag } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { PremiumButton } from '@/components/uno/PremiumButton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNotifications } from '@/hooks/useNotifications';
-import { useCart } from '@/contexts/CartContext';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { CurrencySwitcher } from '@/components/uno/CurrencySwitcher';
+import { MiniCart } from '@/components/market/MiniCart';
 
 interface AppHeaderProps {
   title?: string;
@@ -22,9 +22,7 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
   const { user } = useAuth();
   const { t } = useLanguage();
   const { unreadCount } = useNotifications();
-  const { getItemCount } = useCart();
   const navigate = useNavigate();
-  const cartItemCount = getItemCount();
 
   return (
     <header
@@ -61,21 +59,8 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
             <ThemeSwitcher size="sm" />
           </div>
           
-          {/* Cart Button */}
-          <button
-            onClick={() => navigate('/cart')}
-            aria-label={t('nav.cart')}
-            className="relative flex items-center justify-center w-10 h-10 rounded-xl hover:bg-secondary transition-colors"
-          >
-            <ShoppingBag className="w-5 h-5" />
-            {cartItemCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-primary rounded-full flex items-center justify-center">
-                <span className="text-[10px] font-bold text-primary-foreground">
-                  {cartItemCount > 99 ? '99+' : cartItemCount}
-                </span>
-              </span>
-            )}
-          </button>
+          {/* Mini Cart with dropdown */}
+          <MiniCart className="rounded-xl hover:bg-secondary transition-colors" />
           
           {user ? (
             <>
