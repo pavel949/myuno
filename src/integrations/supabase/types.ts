@@ -246,6 +246,83 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_artifacts: {
+        Row: {
+          admin_action: string | null
+          admin_notes: string | null
+          agent_id: string | null
+          agent_slug: string
+          artifact_type: string
+          correlation_id: string | null
+          created_at: string
+          data: Json
+          entity_id: string
+          entity_type: string
+          expires_at: string | null
+          feedback_at: string | null
+          feedback_comment: string | null
+          feedback_rating: number | null
+          id: string
+          is_reviewed: boolean | null
+          primary_score: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          verdict: string | null
+        }
+        Insert: {
+          admin_action?: string | null
+          admin_notes?: string | null
+          agent_id?: string | null
+          agent_slug: string
+          artifact_type: string
+          correlation_id?: string | null
+          created_at?: string
+          data: Json
+          entity_id: string
+          entity_type: string
+          expires_at?: string | null
+          feedback_at?: string | null
+          feedback_comment?: string | null
+          feedback_rating?: number | null
+          id?: string
+          is_reviewed?: boolean | null
+          primary_score?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          verdict?: string | null
+        }
+        Update: {
+          admin_action?: string | null
+          admin_notes?: string | null
+          agent_id?: string | null
+          agent_slug?: string
+          artifact_type?: string
+          correlation_id?: string | null
+          created_at?: string
+          data?: Json
+          entity_id?: string
+          entity_type?: string
+          expires_at?: string | null
+          feedback_at?: string | null
+          feedback_comment?: string | null
+          feedback_rating?: number | null
+          id?: string
+          is_reviewed?: boolean | null
+          primary_score?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          verdict?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_artifacts_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       babysitters: {
         Row: {
           age_groups: string[] | null
@@ -13033,6 +13110,14 @@ export type Database = {
         }[]
       }
       generate_referral_code: { Args: { p_user_id: string }; Returns: string }
+      get_latest_ai_artifact: {
+        Args: {
+          p_artifact_type?: string
+          p_entity_id: string
+          p_entity_type: string
+        }
+        Returns: Json
+      }
       get_or_create_loyalty_status: {
         Args: { p_user_id: string }
         Returns: Json
