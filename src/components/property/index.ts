@@ -12,3 +12,7 @@ export { PropertyHighlights } from './PropertyHighlights';
 export { PropertyPreviewCard } from './PropertyPreviewCard';
 export { GuestPropertyChat } from './GuestPropertyChat';
 export { MessageHostButton } from './MessageHostButton';
+export { CancellationPolicySelector } from './CancellationPolicySelector';
+export { TripServicesGrid } from './TripServicesGrid';
+export { BookingTermsCard } from './BookingTermsCard';
+export { PropertyBookingSuccess } from './PropertyBookingSuccess';
