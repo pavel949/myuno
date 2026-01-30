@@ -13,15 +13,17 @@ import {
 } from '@/components/ui/select';
 import { ArrowRight, Check, X, Wand2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { AISmartFieldMapper } from '@/components/shared/AISmartFieldMapper';
 
 interface FieldMapperProps {
   mappings: FieldMapping[];
   targetId: string;
+  sampleData?: Record<string, any>[];
   onUpdateMapping: (sourceColumn: string, targetField: string | null) => void;
   onAutoMap: () => void;
 }
 
-export function FieldMapper({ mappings, targetId, onUpdateMapping, onAutoMap }: FieldMapperProps) {
+export function FieldMapper({ mappings, targetId, sampleData, onUpdateMapping, onAutoMap }: FieldMapperProps) {
   const { language } = useLanguage();
   
   const target = importTargets.find(t => t.id === targetId);
@@ -49,6 +51,19 @@ export function FieldMapper({ mappings, targetId, onUpdateMapping, onAutoMap }: 
   ).length || 0;
   const requiredTotal = target?.requiredFields.length || 0;
 
+  // Prepare target fields for AI mapper
+  const aiTargetFields = targetFields.map(field => ({
+    name: field,
+    label: getFieldLabel(field),
+    required: target?.requiredFields.includes(field) || false,
+  }));
+
+  const handleAIMappings = (aiMappings: { sourceColumn: string; targetField: string; confidence: number }[]) => {
+    aiMappings.forEach(m => {
+      onUpdateMapping(m.sourceColumn, m.targetField);
+    });
+  };
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -68,6 +83,15 @@ export function FieldMapper({ mappings, targetId, onUpdateMapping, onAutoMap }: 
               {language === 'ru' ? 'Авто' : 'Auto'}
             </Button>
           </div>
+        </div>
+        {/* AI Smart Mapper */}
+        <div className="mt-3">
+          <AISmartFieldMapper
+            sourceColumns={mappings.map(m => m.sourceColumn)}
+            targetFields={aiTargetFields}
+            sampleData={sampleData}
+            onMappingsGenerated={handleAIMappings}
+          />
         </div>
       </CardHeader>
       

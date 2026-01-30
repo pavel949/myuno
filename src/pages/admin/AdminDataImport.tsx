@@ -277,6 +277,7 @@ export default function AdminDataImport() {
           <FieldMapper
             mappings={fieldMappings}
             targetId={selectedTarget}
+            sampleData={parsedData.rows.slice(0, 5)}
             onUpdateMapping={updateMapping}
             onAutoMap={handleAutoMap}
           />
