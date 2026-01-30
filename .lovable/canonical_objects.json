@@ -1,0 +1,211 @@
+{
+  "version": "1.0",
+  "generated": "2026-01-30",
+  "objects": {
+    "order": {
+      "name": "Order",
+      "primary_table": "orders",
+      "related_tables": ["order_items", "order_status_history", "order_addresses", "order_participants"],
+      "owner": "user",
+      "money_impact": true,
+      "ai_permissions": {
+        "read": true,
+        "analyze": true,
+        "create": false,
+        "update": false,
+        "delete": false
+      },
+      "key_fields": ["id", "user_id", "provider_id", "order_type", "status", "total_amount", "currency"],
+      "statuses": ["pending", "confirmed", "in_progress", "completed", "cancelled", "refund_requested"]
+    },
+    "order_item": {
+      "name": "Order Item",
+      "primary_table": "order_items",
+      "related_tables": ["orders"],
+      "owner": "system",
+      "money_impact": true,
+      "ai_permissions": {
+        "read": true,
+        "analyze": true,
+        "create": false,
+        "update": false,
+        "delete": false
+      },
+      "key_fields": ["id", "order_id", "item_type", "item_id", "quantity", "unit_price", "subtotal"]
+    },
+    "wallet": {
+      "name": "Wallet",
+      "primary_table": "wallets",
+      "related_tables": ["wallet_transactions"],
+      "owner": "user",
+      "money_impact": true,
+      "ai_permissions": {
+        "read": true,
+        "analyze": true,
+        "create": false,
+        "update": false,
+        "delete": false
+      },
+      "key_fields": ["id", "user_id", "balance", "currency"],
+      "notes": "Created automatically on user signup via trigger"
+    },
+    "ledger_entry": {
+      "name": "Ledger Entry",
+      "primary_table": "ledger_entries",
+      "related_tables": ["ledger_accounts"],
+      "owner": "system",
+      "money_impact": true,
+      "ai_permissions": {
+        "read": true,
+        "analyze": true,
+        "create": false,
+        "update": false,
+        "delete": false
+      },
+      "key_fields": ["id", "account_id", "entry_type", "amount", "reference_type", "reference_id"],
+      "notes": "Double-entry accounting. Sum(debits) = Sum(credits)"
+    },
+    "property": {
+      "name": "Property (Catalog)",
+      "primary_table": "properties",
+      "related_tables": ["property_images", "property_amenities"],
+      "owner": "vendor",
+      "money_impact": false,
+      "ai_permissions": {
+        "read": true,
+        "analyze": true,
+        "generate_description": true,
+        "flag": true,
+        "create": false,
+        "update": false,
+        "delete": false
+      },
+      "key_fields": ["id", "name_en", "name_ru", "property_type", "price_per_night", "is_active", "approval_status"]
+    },
+    "owner_property": {
+      "name": "Owner Property (PMS)",
+      "primary_table": "owner_properties",
+      "related_tables": ["property_bookings", "property_financials", "property_meters", "property_inventory_items", "property_documents"],
+      "owner": "owner",
+      "money_impact": true,
+      "ai_permissions": {
+        "read": true,
+        "analyze": true,
+        "forecast": true,
+        "suggest_pricing": true,
+        "create": false,
+        "update": false,
+        "delete": false
+      },
+      "key_fields": ["id", "org_id", "user_id", "title_en", "property_type", "status", "approval_status"]
+    },
+    "vendor": {
+      "name": "Vendor/Provider",
+      "primary_table": "providers",
+      "related_tables": ["orgs", "org_members", "vendor_subscriptions", "provider_payout_methods"],
+      "owner": "vendor",
+      "money_impact": true,
+      "ai_permissions": {
+        "read": true,
+        "analyze": true,
+        "suggest": true,
+        "create": false,
+        "update": false,
+        "delete": false
+      },
+      "key_fields": ["id", "user_id", "org_id", "business_name", "is_verified", "trust_score", "pending_payout"]
+    },
+    "provider_listing": {
+      "name": "Provider Listing (Any Vertical)",
+      "primary_table": "dynamic - varies by vertical",
+      "related_tables": [],
+      "owner": "vendor",
+      "money_impact": false,
+      "ai_permissions": {
+        "read": true,
+        "analyze": true,
+        "generate_description": true,
+        "classify": true,
+        "flag": true,
+        "create": false,
+        "update": false,
+        "delete": false
+      },
+      "verticals": ["tours", "yachts", "restaurants", "salons", "clinics", "gyms", "vehicles", "events", "cleaning_services", "babysitters", "pet_services", "legal_services", "education_providers", "flower_shops", "water_activities", "insurance_providers"],
+      "common_fields": ["id", "name_en", "name_ru", "provider_id", "is_active", "approval_status", "rating", "review_count"]
+    },
+    "review": {
+      "name": "Review",
+      "primary_table": "reviews",
+      "related_tables": ["review_helpful"],
+      "owner": "user",
+      "money_impact": false,
+      "ai_permissions": {
+        "read": true,
+        "analyze": true,
+        "summarize": true,
+        "flag_fake": true,
+        "create": false,
+        "update": false,
+        "delete": false
+      },
+      "key_fields": ["id", "user_id", "reviewable_type", "reviewable_id", "rating", "comment", "is_verified"]
+    },
+    "support_ticket": {
+      "name": "Support Ticket",
+      "primary_table": "support_tickets",
+      "related_tables": ["ticket_messages"],
+      "owner": "user",
+      "money_impact": false,
+      "ai_permissions": {
+        "read": true,
+        "analyze": true,
+        "classify": true,
+        "prioritize": true,
+        "draft_response": true,
+        "create": false,
+        "update": false,
+        "delete": false
+      },
+      "key_fields": ["id", "user_id", "subject", "status", "priority", "category"],
+      "statuses": ["open", "in_progress", "waiting_customer", "resolved", "closed"]
+    },
+    "notification": {
+      "name": "Notification",
+      "primary_table": "notifications",
+      "related_tables": [],
+      "owner": "system",
+      "money_impact": false,
+      "ai_permissions": {
+        "read": true,
+        "create": true,
+        "update": false,
+        "delete": false
+      },
+      "key_fields": ["id", "user_id", "type", "title", "message", "is_read"],
+      "notes": "AI can create notifications to inform users"
+    },
+    "ai_agent": {
+      "name": "AI Agent",
+      "primary_table": "ai_agents",
+      "related_tables": ["ai_agent_knowledge", "ai_agent_logs"],
+      "owner": "admin",
+      "money_impact": false,
+      "ai_permissions": {
+        "read": true,
+        "log": true,
+        "analyze_performance": true,
+        "create": false,
+        "update": false,
+        "delete": false
+      },
+      "key_fields": ["id", "slug", "name_en", "name_ru", "model", "is_active", "is_public"]
+    }
+  },
+  "summary": {
+    "total_objects": 12,
+    "money_impact_objects": 6,
+    "ai_writable": 1,
+    "ai_read_only": 11
+  }
+}
