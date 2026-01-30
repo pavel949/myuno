@@ -249,6 +249,9 @@ const AdminMarketplaceCategories = lazy(() => import('@/pages/admin/AdminMarketp
 const AdminMarketplaceSubcategories = lazy(() => import('@/pages/admin/AdminMarketplaceSubcategories'));
 const AdminMarketplaceVendors = lazy(() => import('@/pages/admin/AdminMarketplaceVendors'));
 
+// Admin Data Import
+const AdminDataImport = lazy(() => import('@/pages/admin/AdminDataImport'));
+
 // Admin route wrapper with layout
 const AdminRouteLayout = () => (
   <AdminGuard>
@@ -649,6 +652,8 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/admin/marketplace/categories" element={<AdminMarketplaceCategories />} />
           <Route path="/admin/marketplace/subcategories" element={<AdminMarketplaceSubcategories />} />
           <Route path="/admin/marketplace/vendors" element={<AdminMarketplaceVendors />} />
+          {/* Data Import Hub */}
+          <Route path="/admin/data-import" element={<AdminDataImport />} />
         </Route>
         
         {/* Staff Routes - Protected */}
