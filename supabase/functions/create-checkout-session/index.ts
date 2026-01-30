@@ -86,10 +86,15 @@ serve(async (req) => {
     // Get origin for redirect URLs
     const origin = req.headers.get("origin") || "http://localhost:5173";
     
-    // Create Checkout Session
+    // Create Checkout Session with card and PromptPay (Thai QR)
+    // Note: PromptPay only works with THB currency
+    const paymentMethods: ("card" | "promptpay")[] = currency.toLowerCase() === "thb" 
+      ? ["card", "promptpay"] 
+      : ["card"];
+    
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      payment_method_types: ["card"],
+      payment_method_types: paymentMethods,
       line_items: [
         {
           price_data: {

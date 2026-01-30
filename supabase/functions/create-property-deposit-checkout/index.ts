@@ -131,9 +131,10 @@ serve(async (req) => {
     const origin = req.headers.get("origin") || "https://id-preview--dcc2b024-7627-4ad9-a915-a3df3dd839f0.lovable.app";
 
     // Create Stripe Checkout Session for 10% deposit
+    // Include PromptPay (Thai QR) for THB payments
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      payment_method_types: ["card"],
+      payment_method_types: ["card", "promptpay"],
       line_items: [
         {
           price_data: {

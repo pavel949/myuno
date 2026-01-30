@@ -216,10 +216,15 @@ serve(async (req) => {
       quantity: item.qty,
     }));
 
-    // Create Stripe Checkout Session
+    // Create Stripe Checkout Session with card and PromptPay (Thai QR)
+    // PromptPay only works with THB currency
+    const paymentMethods: ("card" | "promptpay")[] = currency.toUpperCase() === "THB" 
+      ? ["card", "promptpay"] 
+      : ["card"];
+    
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      payment_method_types: ["card"],
+      payment_method_types: paymentMethods,
       line_items: lineItems,
       mode: "payment",
       success_url: `${origin}/bookings/${order.id}?success=true`,
