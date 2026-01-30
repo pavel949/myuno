@@ -46,9 +46,23 @@ const Install = () => {
     setIsIOS(/iphone|ipad|ipod/.test(userAgent));
     setIsAndroid(/android/.test(userAgent));
 
-    // Check if already installed
-    if (window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone === true) {
-      setInstallState('already-installed');
+    // More robust check for standalone mode
+    // Only mark as installed if BOTH conditions are met:
+    // 1. Display mode is standalone
+    // 2. We're on our actual domain (not preview/iframe)
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches || 
+                         (window.navigator as any).standalone === true;
+    const isOurDomain = window.location.hostname.includes('myuno') || 
+                        window.location.hostname.includes('lovable.app');
+    
+    // Don't auto-detect as installed - let user decide
+    // Only mark installed if truly in standalone mode on our domain
+    if (isStandalone && isOurDomain && !window.location.search.includes('force')) {
+      // Double check by looking for our specific app marker
+      const isReallyOurApp = document.title.includes('myUNO');
+      if (isReallyOurApp) {
+        setInstallState('already-installed');
+      }
     }
 
     // Listen for install prompt
@@ -268,6 +282,25 @@ const Install = () => {
 
   // Already installed screen
   if (installState === 'already-installed') {
+    const handleClearCache = async () => {
+      // Unregister all service workers
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const registration of registrations) {
+          await registration.unregister();
+        }
+      }
+      // Clear caches
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        for (const name of cacheNames) {
+          await caches.delete(name);
+        }
+      }
+      // Reload with force flag
+      window.location.href = '/install?force=1';
+    };
+
     return (
       <PageContainer>
         <PageHeader title={t.title} showBack />
@@ -282,14 +315,24 @@ const Install = () => {
           </motion.div>
           <h2 className="text-2xl font-bold mb-2">{t.alreadyTitle}</h2>
           <p className="text-muted-foreground">{t.alreadyDesc}</p>
-          <Button 
-            onClick={() => window.location.href = '/'}
-            className="mt-6 gap-2"
-            size="lg"
-          >
-            <ArrowRight className="w-5 h-5" />
-            {t.openApp}
-          </Button>
+          <div className="flex flex-col gap-3 mt-6 w-full max-w-xs">
+            <Button 
+              onClick={() => window.location.href = '/'}
+              className="gap-2"
+              size="lg"
+            >
+              <ArrowRight className="w-5 h-5" />
+              {t.openApp}
+            </Button>
+            <Button 
+              onClick={handleClearCache}
+              variant="outline"
+              size="sm"
+              className="text-muted-foreground"
+            >
+              {language === 'ru' ? 'Не вижу иконку? Сбросить кэш' : "Don't see the icon? Clear cache"}
+            </Button>
+          </div>
         </div>
       </PageContainer>
     );
