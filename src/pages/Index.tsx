@@ -23,6 +23,7 @@ import { KnowledgeHubBanner } from '@/components/home/KnowledgeHubBanner';
 import { supabase } from '@/integrations/supabase/client';
 import { HeroBanner } from '@/components/home/HeroBanner';
 import { InstallBanner } from '@/components/pwa/InstallBanner';
+import { PWAWelcomeScreen } from '@/components/pwa/PWAWelcomeScreen';
 
 // Lazy load only modals (opened by user action)
 const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
@@ -85,6 +86,9 @@ const Index = () => {
       <SEOHead 
         jsonLd={createOrganizationSchema()}
       />
+      
+      {/* PWA Welcome Screen - shows on first launch after installation */}
+      <PWAWelcomeScreen />
       
       {/* Lazy Modals */}
       {showOnboarding && (
