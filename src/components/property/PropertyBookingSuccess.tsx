@@ -15,7 +15,8 @@ import {
   Shield,
   ExternalLink,
   Loader2,
-  Home
+  Home,
+  ArrowRight
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -23,6 +24,7 @@ import { cn } from '@/lib/utils';
 import { generatePropertyBookingICS, downloadICSFile } from '@/lib/generateCalendarEvent';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { TripServicesGrid } from './TripServicesGrid';
 import type { PaymentStage } from './PaymentStageSelector';
 
 interface PropertyBookingSuccessProps {
@@ -42,6 +44,7 @@ interface PropertyBookingSuccessProps {
   totalAmount: number;
   paymentStages: PaymentStage[];
   isInstantBooking?: boolean;
+  propertyId?: string;
 }
 
 export function PropertyBookingSuccess({
@@ -61,6 +64,7 @@ export function PropertyBookingSuccess({
   totalAmount,
   paymentStages,
   isInstantBooking,
+  propertyId,
 }: PropertyBookingSuccessProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
@@ -263,8 +267,26 @@ export function PropertyBookingSuccess({
         </div>
       </div>
 
+      {/* Cross-sell Services */}
+      <div className="w-full max-w-md mb-6">
+        <TripServicesGrid 
+          variant="compact" 
+          maxItems={6}
+          bookingId={orderId}
+          propertyId={propertyId}
+        />
+      </div>
+
       {/* Action Buttons */}
       <div className="w-full max-w-md space-y-3">
+        <Button
+          className="w-full gap-2"
+          onClick={() => navigate(`/trip/${orderId}`)}
+        >
+          <ArrowRight className="w-4 h-4" />
+          {isRu ? 'Моя поездка' : 'My Trip'}
+        </Button>
+
         <Button
           variant="outline"
           className="w-full gap-2"
@@ -289,7 +311,7 @@ export function PropertyBookingSuccess({
         </Button>
 
         <Button
-          variant="outline"
+          variant="ghost"
           className="w-full gap-2"
           onClick={handleShare}
         >

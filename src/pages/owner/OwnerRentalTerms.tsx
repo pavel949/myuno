@@ -14,18 +14,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
+import { CancellationPolicySelector } from '@/components/property/CancellationPolicySelector';
 import { 
   Loader2, DollarSign, Clock, Users, FileText, Shield, Zap, Droplets, 
   Sparkles, Car, PawPrint, Baby, Phone, Percent, CalendarDays, Key,
   Plane, Volume2, PartyPopper, Wifi
 } from 'lucide-react';
-
-const CANCELLATION_POLICIES = [
-  { value: 'flexible', labelEn: 'Flexible (free cancellation 24h before)', labelRu: 'Гибкая (бесплатная отмена за 24ч)' },
-  { value: 'moderate', labelEn: 'Moderate (free cancellation 5 days before)', labelRu: 'Умеренная (бесплатная отмена за 5 дней)' },
-  { value: 'strict', labelEn: 'Strict (50% refund up to 1 week before)', labelRu: 'Строгая (50% возврат за неделю)' },
-  { value: 'non_refundable', labelEn: 'Non-refundable', labelRu: 'Без возврата' },
-];
 
 const DEPOSIT_TYPES = [
   { value: 'fixed', labelEn: 'Fixed amount', labelRu: 'Фиксированная сумма' },
@@ -653,25 +647,12 @@ export default function OwnerRentalTerms() {
                   {isRu ? 'Бронирование' : 'Booking'}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label>{isRu ? 'Политика отмены' : 'Cancellation policy'}</Label>
-                  <Select
-                    value={formData.cancellation_policy}
-                    onValueChange={(v) => setFormData({ ...formData, cancellation_policy: v })}
-                  >
-                    <SelectTrigger className="mt-1">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CANCELLATION_POLICIES.map((policy) => (
-                        <SelectItem key={policy.value} value={policy.value}>
-                          {isRu ? policy.labelRu : policy.labelEn}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              <CardContent className="space-y-6">
+                {/* Visual Cancellation Policy Selector */}
+                <CancellationPolicySelector
+                  value={formData.cancellation_policy}
+                  onChange={(v) => setFormData({ ...formData, cancellation_policy: v })}
+                />
 
                 <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                   <div>

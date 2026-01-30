@@ -1,10 +1,11 @@
 import React from 'react';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { Check, Calendar, Home, ArrowRight } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Check, Calendar, Home, MessageCircle, ArrowRight } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { TripServicesGrid } from '@/components/property/TripServicesGrid';
 
 export default function PropertyDepositSuccess() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ export default function PropertyDepositSuccess() {
 
   const sessionId = searchParams.get('session_id');
   const propertyId = searchParams.get('property_id');
+  const bookingId = searchParams.get('booking_id');
 
   return (
     <AppLayout showBottomNav={false}>
@@ -76,14 +78,35 @@ export default function PropertyDepositSuccess() {
           </CardContent>
         </Card>
 
+        {/* Cross-sell Services */}
+        <div className="w-full max-w-sm mb-6">
+          <TripServicesGrid 
+            variant="compact" 
+            maxItems={6}
+            bookingId={bookingId || undefined}
+            propertyId={propertyId || undefined}
+          />
+        </div>
+
         {/* Action Buttons */}
         <div className="flex flex-col gap-3 w-full max-w-sm">
-          <Button onClick={() => navigate('/bookings')} className="w-full gap-2">
+          {bookingId && (
+            <Button onClick={() => navigate(`/trip/${bookingId}`)} className="w-full gap-2">
+              <ArrowRight className="w-4 h-4" />
+              {isRu ? 'Моя поездка' : 'My Trip'}
+            </Button>
+          )}
+          
+          <Button 
+            variant={bookingId ? 'outline' : 'default'}
+            onClick={() => navigate('/bookings')} 
+            className="w-full gap-2"
+          >
             <Calendar className="w-4 h-4" />
             {isRu ? 'Мои бронирования' : 'My Bookings'}
           </Button>
           
-          <Button variant="outline" onClick={() => navigate('/property')} className="w-full gap-2">
+          <Button variant="ghost" onClick={() => navigate('/property')} className="w-full gap-2">
             <Home className="w-4 h-4" />
             {isRu ? 'К списку недвижимости' : 'Browse Properties'}
           </Button>
