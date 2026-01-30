@@ -1,170 +1,245 @@
 
 
-# Наполнение Knowledge Hub контентом для Phuket
+# Data Import Hub — Инструмент Массового Импорта Контента
 
-## Текущее состояние
+## Бизнес-Цель
 
-Сейчас в базе **8 статей** для Phuket:
-- Overview: Geography, Climate
-- Culture: Thai Culture Basics
-- Dos-Donts: Cultural Etiquette
-- Government: Immigration Office
-- Nature: Wildlife Safety
-- Practical: SIM Cards
-- Emergency: Emergency Numbers
+Создать профессиональный **Admin Data Import Center** для быстрого наполнения платформы реальным контентом из различных источников. Инструмент предназначен для команды UNO и позволяет импортировать данные о провайдерах, товарах, услугах из Excel, Google Sheets, сайтов партнёров и облачных хранилищ.
 
-## Новые статьи для добавления
+## Поддерживаемые Источники Данных
 
-### 1. Банки и финансы (секция: practical)
+| Источник | Метод обработки | Приоритет |
+|----------|----------------|-----------|
+| Excel (.xlsx, .xls) | File upload + xlsx parser | Высокий |
+| CSV | File upload + native parsing | Высокий |
+| Google Sheets | Public link parsing | Высокий |
+| Partner Websites | Firecrawl scraping | Средний |
+| Google Drive links | Direct file fetch | Средний |
+| Dropbox links | Direct file fetch | Средний |
 
-**Статья: banking-guide**
-- Открытие счета для иностранцев (пошагово)
-- Необходимые документы (паспорт, work permit, арендный контракт)
-- Лучшие банки для экспатов (Bangkok Bank, Kasikorn, SCB)
-- Онлайн-банкинг и мобильные приложения
-- Переводы денег и SWIFT
+## Целевые Таблицы для Импорта
 
-### 2. Визы и иммиграция (секция: government)
+1. **providers** — Поставщики услуг
+2. **marketplace_products** — Товары маркетплейса
+3. **marketplace_vendors** — Продавцы маркетплейса
+4. **services** — Услуги
+5. **restaurants** — Рестораны
+6. **salons** — Салоны красоты
+7. **yachts** — Яхты
+8. **tours** — Туры
 
-**Статья: visa-guide**
-- Типы виз (Tourist 60 дней, ED, Elite, LTR, Retirement)
-- Продление туристической визы — пошаговая инструкция
-- Visa run: маршруты и стоимость
-- Документы для каждого типа визы
-- Адреса иммиграционных офисов
+## Архитектура Решения
 
-### 3. Вождение в Таиланде (секция: practical)
-
-**Статья: driving-guide**
-- Международные права (IDP) — как получить
-- Тайские права — процедура получения
-- Правила дорожного движения
-- Аренда байка/автомобиля
-- Страховка транспорта
-- Штрафы и полиция
-
-### 4. Страхование (секция: practical)
-
-**Статья: insurance-guide**
-- Медицинская страховка для экспатов
-- Сравнение локальных и международных полисов
-- Страховка для визы (требования)
-- Автострахование: обязательное и КАСКО
-- Как подать claim — пошаговая инструкция
-
----
-
-## Структура контента (пример формата)
-
-Каждая статья будет содержать:
-- **Summary** — краткое описание (2-3 предложения)
-- **Content** — детальный Markdown с заголовками:
-  - `## Что нужно знать`
-  - `## Пошаговая инструкция`
-  - `## Необходимые документы`
-  - `## Стоимость и сроки`
-  - `## Полезные советы`
-
----
-
-## Технические детали
-
-**Таблица:** `location_knowledge`
-
-**Данные для вставки:**
-
-| section | slug | title_en | title_ru | icon |
-|---------|------|----------|----------|------|
-| practical | banking-guide | Banking for Foreigners | Банки для иностранцев | 🏦 |
-| government | visa-guide | Visa Guide | Визовый гид | 🛂 |
-| practical | driving-guide | Driving in Thailand | Вождение в Таиланде | 🚗 |
-| practical | insurance-guide | Insurance Guide | Страхование | 🛡️ |
-
-**city_id:** `ccb1666c-ff29-4643-9e44-f7c437fe26fa` (Phuket)
-
----
-
-## Примерный контент статей
-
-### Banking Guide (EN/RU)
-
-**English:**
-```markdown
-## Opening a Bank Account
-
-### Required Documents
-- Valid passport with valid visa (minimum 3 months)
-- Work Permit OR Residence Certificate from Immigration
-- Thai phone number
-- Proof of address (rental contract or utility bill)
-
-### Step-by-Step Process
-1. Choose a bank (Bangkok Bank, Kasikorn, SCB recommended)
-2. Visit the main branch (not small kiosks)
-3. Bring all documents + copies
-4. Fill application form
-5. Initial deposit (usually 500-1000 THB)
-6. Receive debit card immediately or within 7 days
-
-### Best Banks for Expats
-- **Bangkok Bank**: Largest network, English support
-- **Kasikorn (KBank)**: Best mobile app
-- **SCB**: Good for international transfers
-
-### Mobile Banking
-All major banks offer mobile apps with English interface:
-- K PLUS (Kasikorn)
-- SCB EASY
-- Bangkok Bank Mobile Banking
-
-### International Transfers
-- SWIFT transfers available at all banks
-- Wise/Remitly often cheaper for small amounts
-- Keep documentation for amounts over $50,000
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│                    ADMIN DATA IMPORT HUB                        │
+│                   /admin/data-import                            │
+├─────────────────────────────────────────────────────────────────┤
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
+│  │ File Upload  │  │ URL Import   │  │ Web Scraper  │          │
+│  │ Excel/CSV    │  │ GDrive/Box   │  │ Firecrawl    │          │
+│  └──────────────┘  └──────────────┘  └──────────────┘          │
+├─────────────────────────────────────────────────────────────────┤
+│                     DATA PROCESSOR                              │
+│  ┌────────────────────────────────────────────────────────┐    │
+│  │ 1. Parse → 2. Map Fields → 3. Validate → 4. Preview   │    │
+│  └────────────────────────────────────────────────────────┘    │
+├─────────────────────────────────────────────────────────────────┤
+│                     TARGET SELECTOR                             │
+│  ┌─────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐           │
+│  │Providers│ │ Products │ │ Services │ │Restaurants│           │
+│  └─────────┘ └──────────┘ └──────────┘ └──────────┘           │
+├─────────────────────────────────────────────────────────────────┤
+│                     IMPORT ACTIONS                              │
+│  [ Preview ] [ Validate ] [ Import All ] [ Import Selected ]   │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-**Russian:**
-```markdown
-## Открытие банковского счета
+## Компоненты
 
-### Необходимые документы
-- Действующий паспорт с визой (минимум 3 месяца)
-- Work Permit ИЛИ Residence Certificate из иммиграции
-- Тайский номер телефона
-- Подтверждение адреса (контракт аренды или счет за коммуналку)
+### 1. Главная Страница `/admin/data-import`
 
-### Пошаговая инструкция
-1. Выберите банк (рекомендуем Bangkok Bank, Kasikorn, SCB)
-2. Посетите главный офис (не маленькие киоски)
-3. Принесите все документы + копии
-4. Заполните анкету
-5. Внесите депозит (обычно 500-1000 THB)
-6. Получите дебетовую карту сразу или в течение 7 дней
+**AdminDataImport.tsx** — центр управления импортом:
+- Выбор целевой таблицы (Providers, Products, Services и т.д.)
+- Tabs для разных методов импорта (File Upload / URL / Scraper)
+- История импортов с логами
 
-### Лучшие банки для экспатов
-- **Bangkok Bank**: Крупнейшая сеть, поддержка на английском
-- **Kasikorn (KBank)**: Лучшее мобильное приложение
-- **SCB**: Хорош для международных переводов
+### 2. Компонент FileImporter
 
-### Мобильный банкинг
-Все крупные банки предлагают приложения на английском:
-- K PLUS (Kasikorn)
-- SCB EASY
-- Bangkok Bank Mobile Banking
+**FileImporter.tsx** — загрузка и парсинг файлов:
+- Drag-n-drop зона для файлов
+- Поддержка .xlsx, .xls, .csv
+- Парсинг через библиотеку `xlsx` (SheetJS)
+- Preview первых 10 строк
 
-### Международные переводы
-- SWIFT переводы доступны во всех банках
-- Wise/Remitly часто дешевле для небольших сумм
-- Сохраняйте документацию для сумм свыше $50,000
+### 3. Компонент FieldMapper
+
+**FieldMapper.tsx** — маппинг колонок:
+- Автоматическое определение колонок (name → name_en, цена → price)
+- Ручной маппинг через dropdowns
+- Сохранение mapping-пресетов для повторного использования
+
+### 4. Компонент ImportPreview
+
+**ImportPreview.tsx** — превью и валидация:
+- Таблица с предпросмотром данных
+- Подсветка ошибок валидации
+- Возможность редактирования перед импортом
+- Чекбоксы для выборочного импорта
+
+### 5. Edge Function `bulk-import`
+
+**supabase/functions/bulk-import/index.ts:**
+- Приём batch-данных
+- Валидация по схеме целевой таблицы
+- Bulk upsert с обработкой конфликтов
+- Логирование результатов
+
+### 6. Web Scraper (опционально)
+
+**WebScraper.tsx** — интеграция с Firecrawl:
+- Ввод URL партнёрского сайта
+- Scrape и парсинг структурированных данных
+- AI-извлечение (название, цена, описание) через Lovable AI
+
+## Структура Файлов
+
+```text
+src/
+├── pages/admin/
+│   └── AdminDataImport.tsx        # Главная страница
+├── components/admin/data-import/
+│   ├── FileImporter.tsx           # File upload + parsing
+│   ├── FieldMapper.tsx            # Column mapping UI
+│   ├── ImportPreview.tsx          # Preview table
+│   ├── ImportHistory.tsx          # Import logs
+│   ├── UrlImporter.tsx            # Google Drive/Dropbox
+│   ├── WebScraper.tsx             # Firecrawl integration
+│   └── ImportTargetSelector.tsx   # Target table selector
+├── hooks/
+│   └── useDataImport.ts           # Import logic hook
+└── lib/
+    └── importTemplates.ts         # Field mappings per table
+
+supabase/functions/
+└── bulk-import/
+    └── index.ts                   # Batch insert endpoint
 ```
 
----
+## Схемы Маппинга (примеры)
 
-## План выполнения
+### Для marketplace_products:
+```typescript
+const productMapping = {
+  'name': 'name_en',
+  'название': 'name_ru',
+  'price': 'price',
+  'цена': 'price',
+  'category': 'category_slug',
+  'description': 'description_en',
+  'описание': 'description_ru',
+  'image': 'cover_image',
+  'stock': 'in_stock',
+  'vendor': 'vendor_id', // требует lookup
+};
+```
 
-1. **Вставить 4 новые статьи** в таблицу `location_knowledge`
-2. **Обновить sort_order** для правильного отображения
-3. **Проверить отображение** в Knowledge Hub UI
+### Для providers:
+```typescript
+const providerMapping = {
+  'name': 'name',
+  'phone': 'phone',
+  'email': 'email',
+  'address': 'address',
+  'category': 'business_category',
+  'website': 'website',
+};
+```
 
-Все статьи будут доступны сразу после вставки данных (is_published = true).
+## Технические Детали
+
+### Зависимости (добавить)
+```bash
+npm install xlsx
+```
+
+### Парсинг Excel
+```typescript
+import * as XLSX from 'xlsx';
+
+const parseExcel = (file: File): Promise<any[]> => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const data = new Uint8Array(e.target?.result as ArrayBuffer);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json(sheet);
+      resolve(json);
+    };
+    reader.readAsArrayBuffer(file);
+  });
+};
+```
+
+### Bulk Insert Edge Function
+```typescript
+// supabase/functions/bulk-import/index.ts
+const { table, records } = await req.json();
+
+const { data, error } = await supabase
+  .from(table)
+  .upsert(records, { 
+    onConflict: 'id',
+    ignoreDuplicates: false 
+  });
+```
+
+## UX Flow
+
+1. **Выбор цели** → Admin выбирает таблицу (Products, Providers, etc.)
+2. **Загрузка** → Drag-n-drop файла или вставка URL
+3. **Маппинг** → Система предлагает автоматический маппинг, admin корректирует
+4. **Preview** → Предпросмотр с валидацией, можно редактировать
+5. **Import** → Массовый импорт с прогресс-баром
+6. **Результат** → Отчёт (успешно/ошибки/пропущено)
+
+## Интеграция с Firecrawl (для сайтов)
+
+Если требуется scraping партнёрских сайтов:
+1. Подключить Firecrawl через коннектор (уже доступен в workspace)
+2. Создать edge function `scrape-partner-site`
+3. Использовать Lovable AI для извлечения структурированных данных из markdown
+
+## План Реализации
+
+### Фаза 1: Базовый импорт (1-2 часа)
+1. Создать `AdminDataImport.tsx` с выбором таблицы
+2. Создать `FileImporter.tsx` для Excel/CSV
+3. Добавить xlsx зависимость
+4. Добавить роут в админку
+
+### Фаза 2: Маппинг и Preview (1 час)
+5. Создать `FieldMapper.tsx` с автоопределением
+6. Создать `ImportPreview.tsx` с редактированием
+7. Добавить валидацию по схеме таблицы
+
+### Фаза 3: Edge Function и Импорт (1 час)
+8. Создать `bulk-import` edge function
+9. Реализовать batch upsert
+10. Добавить логирование и историю
+
+### Фаза 4: URL и Scraping (опционально)
+11. Подключить Firecrawl коннектор
+12. Создать `UrlImporter.tsx` для GDrive/Dropbox
+13. Создать `WebScraper.tsx` для сайтов
+
+## Преимущества Решения
+
+- **Унифицированный интерфейс** — один инструмент для всех типов данных
+- **Гибкий маппинг** — работает с любой структурой Excel
+- **Валидация** — ошибки видны ДО импорта
+- **Скорость** — batch-импорт 1000+ записей за секунды
+- **Логирование** — история всех импортов
+- **Масштабируемость** — легко добавить новые таблицы
 
