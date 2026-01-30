@@ -1,0 +1,79 @@
+import React, { useState } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Users, Shield, BarChart3, DollarSign, Settings, FileText } from 'lucide-react';
+import { ControlUsersTab } from '@/components/admin/control/ControlUsersTab';
+import { ControlRolesTab } from '@/components/admin/control/ControlRolesTab';
+import { ControlAnalyticsTab } from '@/components/admin/control/ControlAnalyticsTab';
+import { ControlFinanceTab } from '@/components/admin/control/ControlFinanceTab';
+import { ControlSystemTab } from '@/components/admin/control/ControlSystemTab';
+import { ControlLogsTab } from '@/components/admin/control/ControlLogsTab';
+
+export default function AdminControlCenter() {
+  const { language } = useLanguage();
+  const isRussian = language === 'ru';
+  const [activeTab, setActiveTab] = useState('users');
+
+  const tabs = [
+    { id: 'users', label: isRussian ? 'Пользователи' : 'Users', icon: Users },
+    { id: 'roles', label: isRussian ? 'Роли' : 'Roles', icon: Shield },
+    { id: 'analytics', label: isRussian ? 'Аналитика' : 'Analytics', icon: BarChart3 },
+    { id: 'finance', label: isRussian ? 'Финансы' : 'Finance', icon: DollarSign },
+    { id: 'system', label: isRussian ? 'Система' : 'System', icon: Settings },
+    { id: 'logs', label: isRussian ? 'Логи' : 'Logs', icon: FileText },
+  ];
+
+  return (
+    <div className="p-4 md:p-6 space-y-4">
+      {/* Header */}
+      <div>
+        <h1 className="text-xl font-bold">
+          {isRussian ? 'Центр управления' : 'Control Center'}
+        </h1>
+        <p className="text-muted-foreground text-sm">
+          {isRussian ? 'Пользователи, аналитика, настройки системы' : 'Users, analytics, system settings'}
+        </p>
+      </div>
+
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1">
+          {tabs.map((tab) => (
+            <TabsTrigger
+              key={tab.id}
+              value={tab.id}
+              className="gap-2 data-[state=active]:bg-background"
+            >
+              <tab.icon className="h-4 w-4" />
+              <span className="hidden sm:inline">{tab.label}</span>
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        <TabsContent value="users" className="mt-4">
+          <ControlUsersTab />
+        </TabsContent>
+
+        <TabsContent value="roles" className="mt-4">
+          <ControlRolesTab />
+        </TabsContent>
+
+        <TabsContent value="analytics" className="mt-4">
+          <ControlAnalyticsTab />
+        </TabsContent>
+
+        <TabsContent value="finance" className="mt-4">
+          <ControlFinanceTab />
+        </TabsContent>
+
+        <TabsContent value="system" className="mt-4">
+          <ControlSystemTab />
+        </TabsContent>
+
+        <TabsContent value="logs" className="mt-4">
+          <ControlLogsTab />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}

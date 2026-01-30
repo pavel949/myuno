@@ -252,6 +252,10 @@ const AdminMarketplaceVendors = lazy(() => import('@/pages/admin/AdminMarketplac
 // Admin Data Import
 const AdminDataImport = lazy(() => import('@/pages/admin/AdminDataImport'));
 
+// Unified Admin pages
+const AdminUnifiedCatalog = lazy(() => import('@/pages/admin/AdminUnifiedCatalog'));
+const AdminControlCenter = lazy(() => import('@/pages/admin/AdminControlCenter'));
+
 // Admin route wrapper with layout
 const AdminRouteLayout = () => (
   <AdminGuard>
@@ -606,6 +610,10 @@ export const AnimatedRoutes: React.FC = () => {
         {/* Admin Routes - Protected with AdminLayout */}
         <Route element={<AdminRouteLayout />}>
           <Route path="/admin" element={<AdminDashboard />} />
+          {/* New unified pages */}
+          <Route path="/admin/catalog" element={<AdminUnifiedCatalog />} />
+          <Route path="/admin/control" element={<AdminControlCenter />} />
+          {/* Legacy routes - kept for backward compatibility */}
           <Route path="/admin/analytics" element={<AdminAnalytics />} />
           <Route path="/admin/providers" element={<AdminProviders />} />
           <Route path="/admin/services" element={<AdminServices />} />
