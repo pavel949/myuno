@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Bell, Search, ChevronRight, Home } from 'lucide-react';
+import { Bell, Search, ChevronRight, ChevronLeft, Home, ArrowLeft, ArrowRight } from 'lucide-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,6 +15,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { RoleContextSwitcher } from '@/components/uno/RoleContextSwitcher';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface AdminHeaderProps {
   onOpenCommandPalette?: () => void;
@@ -23,6 +24,9 @@ interface AdminHeaderProps {
 // Route to breadcrumb mapping
 const routeLabels: Record<string, { en: string; ru: string }> = {
   '/admin': { en: 'Dashboard', ru: 'Панель управления' },
+  '/admin/catalog': { en: 'Catalog', ru: 'Каталог' },
+  '/admin/control': { en: 'Control', ru: 'Управление' },
+  '/admin/ai-agents': { en: 'AI Agents', ru: 'AI Агенты' },
   '/admin/analytics': { en: 'Analytics', ru: 'Аналитика' },
   '/admin/providers': { en: 'Providers', ru: 'Провайдеры' },
   '/admin/services': { en: 'Services', ru: 'Услуги' },
@@ -52,6 +56,7 @@ const routeLabels: Record<string, { en: string; ru: string }> = {
   '/admin/moderation': { en: 'Moderation', ru: 'Модерация' },
   '/admin/operations': { en: 'Operations Hub', ru: 'Центр операций' },
   '/admin/acquisition-metrics': { en: 'Acquisition', ru: 'Привлечение' },
+  '/admin/vendor-prospects': { en: 'Vendor Prospects', ru: 'Поиск вендоров' },
   '/admin/pitch-deck': { en: 'Pitch Deck', ru: 'Презентация' },
   '/admin/investor-demo': { en: 'Investor Demo', ru: 'Демо для инвестора' },
   '/admin/finance': { en: 'Finance', ru: 'Финансы' },
@@ -59,6 +64,7 @@ const routeLabels: Record<string, { en: string; ru: string }> = {
   '/admin/cities': { en: 'Cities', ru: 'Города' },
   '/admin/lookups': { en: 'Lookups', ru: 'Справочники' },
   '/admin/partner-applications': { en: 'Partner Apps', ru: 'Заявки партнеров' },
+  '/admin/marketplace': { en: 'Marketplace', ru: 'Маркетплейс' },
 };
 
 export function AdminHeader({ onOpenCommandPalette }: AdminHeaderProps) {
@@ -66,6 +72,9 @@ export function AdminHeader({ onOpenCommandPalette }: AdminHeaderProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRussian = language === 'ru';
+  
+  // Check if we can go back (not on main dashboard)
+  const canGoBack = location.pathname !== '/admin';
   
   // Build breadcrumb from current path
   const pathSegments = location.pathname.split('/').filter(Boolean);
@@ -92,12 +101,65 @@ export function AdminHeader({ onOpenCommandPalette }: AdminHeaderProps) {
     ? (isRussian ? currentRoute.ru : currentRoute.en) 
     : 'Admin';
 
+  const handleGoBack = () => {
+    // If we have browser history, use it
+    if (window.history.length > 2) {
+      navigate(-1);
+    } else {
+      // Fallback to dashboard
+      navigate('/admin');
+    }
+  };
+
+  const handleGoForward = () => {
+    navigate(1);
+  };
+
   return (
-    <header className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
+    <header className="sticky top-0 z-40 flex h-14 items-center gap-2 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
       {/* Sidebar trigger */}
       <SidebarTrigger data-sidebar="trigger" className="-ml-1" />
       
-      {/* Breadcrumbs */}
+      {/* Navigation buttons */}
+      <div className="flex items-center gap-1">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8"
+              onClick={handleGoBack}
+              disabled={!canGoBack}
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            {isRussian ? 'Назад' : 'Back'}
+          </TooltipContent>
+        </Tooltip>
+        
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8"
+              onClick={handleGoForward}
+            >
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            {isRussian ? 'Вперёд' : 'Forward'}
+          </TooltipContent>
+        </Tooltip>
+      </div>
+
+      {/* Divider */}
+      <div className="h-6 w-px bg-border hidden sm:block" />
+      
+      {/* Breadcrumbs - Desktop */}
       <Breadcrumb className="hidden md:flex">
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -131,8 +193,20 @@ export function AdminHeader({ onOpenCommandPalette }: AdminHeaderProps) {
         </BreadcrumbList>
       </Breadcrumb>
 
-      {/* Mobile title */}
-      <h1 className="md:hidden font-semibold text-lg">{pageTitle}</h1>
+      {/* Mobile: Show current page with back hint */}
+      <div className="md:hidden flex items-center gap-2 min-w-0">
+        {canGoBack && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-7 px-2 text-muted-foreground"
+            onClick={() => navigate('/admin')}
+          >
+            <Home className="h-3.5 w-3.5" />
+          </Button>
+        )}
+        <span className="font-semibold text-sm truncate">{pageTitle}</span>
+      </div>
 
       {/* Spacer */}
       <div className="flex-1" />
