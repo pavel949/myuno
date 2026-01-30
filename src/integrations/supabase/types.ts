@@ -323,6 +323,57 @@ export type Database = {
           },
         ]
       }
+      ai_intake_sessions: {
+        Row: {
+          admin_id: string
+          approved_count: number | null
+          created_at: string | null
+          discarded_count: number | null
+          file_name: string | null
+          id: string
+          input_mode: string
+          items: Json | null
+          items_count: number | null
+          processed_count: number | null
+          raw_input: string | null
+          status: string | null
+          updated_at: string | null
+          uploaded_images: string[] | null
+        }
+        Insert: {
+          admin_id: string
+          approved_count?: number | null
+          created_at?: string | null
+          discarded_count?: number | null
+          file_name?: string | null
+          id?: string
+          input_mode: string
+          items?: Json | null
+          items_count?: number | null
+          processed_count?: number | null
+          raw_input?: string | null
+          status?: string | null
+          updated_at?: string | null
+          uploaded_images?: string[] | null
+        }
+        Update: {
+          admin_id?: string
+          approved_count?: number | null
+          created_at?: string | null
+          discarded_count?: number | null
+          file_name?: string | null
+          id?: string
+          input_mode?: string
+          items?: Json | null
+          items_count?: number | null
+          processed_count?: number | null
+          raw_input?: string | null
+          status?: string | null
+          updated_at?: string | null
+          uploaded_images?: string[] | null
+        }
+        Relationships: []
+      }
       babysitters: {
         Row: {
           age_groups: string[] | null

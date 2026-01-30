@@ -74,3 +74,6 @@ verify_jwt = false
 
 [functions.ai-agent]
 verify_jwt = false
+
+[functions.firecrawl-scrape]
+verify_jwt = false
