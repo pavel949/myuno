@@ -55,10 +55,9 @@ export function usePWAInstall() {
     };
   }, []);
 
-  const install = async () => {
+  const install = async (): Promise<boolean> => {
     if (!deferredPrompt) {
-      // If no prompt available, redirect to install page for instructions
-      window.location.href = '/install';
+      // No native prompt available - return false so caller can show manual instructions
       return false;
     }
 
