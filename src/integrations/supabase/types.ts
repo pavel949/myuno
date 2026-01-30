@@ -8339,6 +8339,39 @@ export type Database = {
         }
         Relationships: []
       }
+      pwa_installs: {
+        Row: {
+          browser: string | null
+          device_info: Json | null
+          id: string
+          installed_at: string
+          ip_hash: string | null
+          platform: string
+          source: string | null
+          user_id: string | null
+        }
+        Insert: {
+          browser?: string | null
+          device_info?: Json | null
+          id?: string
+          installed_at?: string
+          ip_hash?: string | null
+          platform: string
+          source?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          browser?: string | null
+          device_info?: Json | null
+          id?: string
+          installed_at?: string
+          ip_hash?: string | null
+          platform?: string
+          source?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       quick_listings: {
         Row: {
           admin_notes: string | null
