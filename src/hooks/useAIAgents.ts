@@ -17,6 +17,7 @@ export interface AIAgent {
   is_public: boolean;
   target_audience: string[];
   tone: string;
+  agent_type: 'conversational' | 'utility' | 'analyzer';
   created_at: string;
   updated_at: string;
 }
@@ -58,10 +59,17 @@ export function useAIAgents() {
       const { data, error } = await supabase
         .from('ai_agents')
         .select('*')
+        .order('agent_type', { ascending: true })
         .order('created_at', { ascending: true });
       
       if (error) throw error;
-      return data as AIAgent[];
+      
+      // Cast agent_type with default fallback
+      return (data || []).map(agent => ({
+        ...agent,
+        agent_type: (agent.agent_type || 'conversational') as 'conversational' | 'utility' | 'analyzer',
+        target_audience: agent.target_audience || [],
+      })) as AIAgent[];
     },
   });
 }

@@ -7,22 +7,53 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const AGENT_SLUG = 'ai-translate';
+const DEFAULT_MODEL = 'google/gemini-2.5-flash';
+const DEFAULT_TEMPERATURE = 0.3;
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const startTime = Date.now();
+
   try {
+    // Create Supabase client
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    // Fetch agent config from DB
+    const { data: agentConfig } = await supabase
+      .from('ai_agents')
+      .select('id, model, temperature, is_active')
+      .eq('slug', AGENT_SLUG)
+      .single();
+
+    // Check if agent is disabled
+    if (agentConfig && !agentConfig.is_active) {
+      return new Response(JSON.stringify({ error: "Agent is currently disabled" }), {
+        status: 503,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Use config from DB or fallback to defaults
+    const model = agentConfig?.model || DEFAULT_MODEL;
+    const temperature = agentConfig?.temperature || DEFAULT_TEMPERATURE;
+
     // P1-1: Extract user ID from auth header if available
     let userId: string | undefined;
     const authHeader = req.headers.get("authorization");
     if (authHeader?.startsWith("Bearer ")) {
       const token = authHeader.slice(7);
-      const supabase = createClient(
+      const anonClient = createClient(
         Deno.env.get("SUPABASE_URL")!,
         Deno.env.get("SUPABASE_ANON_KEY")!
       );
-      const { data: { user } } = await supabase.auth.getUser(token);
+      const { data: { user } } = await anonClient.auth.getUser(token);
       userId = user?.id;
     }
 
@@ -72,7 +103,8 @@ ${entries.map(([key, value]) => `"${key}": "${String(value).replace(/"/g, '\\"')
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model,
+          temperature,
           messages: [
             {
               role: "system",
@@ -122,7 +154,8 @@ ${entries.map(([key, value]) => `"${key}": "${String(value).replace(/"/g, '\\"')
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model,
+        temperature,
         messages: [
           {
             role: "system",
@@ -151,6 +184,16 @@ ${entries.map(([key, value]) => `"${key}": "${String(value).replace(/"/g, '\\"')
 
     const data = await response.json();
     const translated = data.choices?.[0]?.message?.content?.trim() || '';
+
+    // Log usage asynchronously (non-blocking)
+    if (agentConfig?.id) {
+      supabase.from('ai_agent_logs').insert({
+        agent_id: agentConfig.id,
+        user_id: userId || null,
+        response_time_ms: Date.now() - startTime,
+        messages_count: 1,
+      });
+    }
 
     return new Response(JSON.stringify({ translated }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
