@@ -1,19 +1,23 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, User, Building2, Check, CheckCheck } from 'lucide-react';
+import { Send, User, Building2, Check, CheckCheck, ShieldAlert } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePropertyChat, PropertyChatMessage } from '@/hooks/usePropertyChat';
+import { useChatModeration } from '@/hooks/useChatModeration';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 import { ChatTransactionWarning } from '@/components/chat/ChatTransactionWarning';
+import { ChatDelegationBanner } from '@/components/chat/ChatDelegationBanner';
+import { ChatModerationWarning } from '@/components/chat/ChatModerationWarning';
 import { QuickReplies } from '@/components/chat/QuickReplies';
 import { ChatMessageTranslation } from '@/components/chat/ChatMessageTranslation';
 import { cn } from '@/lib/utils';
+import { ModerationResult } from '@/lib/chatModerationPatterns';
 
 interface PropertyChatWindowProps {
   propertyId?: string;
@@ -39,7 +43,15 @@ export const PropertyChatWindow: React.FC<PropertyChatWindowProps> = ({
     bookingId,
   });
 
+  const { 
+    analyzeBeforeSend, 
+    isDelegated, 
+    toggleDelegation, 
+    isTogglingDelegation 
+  } = useChatModeration(propertyId);
+
   const [newMessage, setNewMessage] = useState('');
+  const [preSendWarning, setPreSendWarning] = useState<ModerationResult | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -53,6 +65,13 @@ export const PropertyChatWindow: React.FC<PropertyChatWindowProps> = ({
   const handleSend = async () => {
     if (!newMessage.trim() || isSending) return;
 
+    // Analyze message for policy violations
+    const moderationResult = analyzeBeforeSend(newMessage.trim());
+    if (moderationResult.isViolation && moderationResult.severity === 'critical') {
+      setPreSendWarning(moderationResult);
+      return; // Block critical violations
+    }
+
     try {
       await sendMessage({
         message: newMessage.trim(),
@@ -60,8 +79,17 @@ export const PropertyChatWindow: React.FC<PropertyChatWindowProps> = ({
         senderName: user?.email || 'Owner',
       });
       setNewMessage('');
+      setPreSendWarning(null);
     } catch (error) {
       console.error('Error sending message:', error);
+    }
+  };
+
+  const handleMessageChange = (value: string) => {
+    setNewMessage(value);
+    // Clear warning when user edits message
+    if (preSendWarning) {
+      setPreSendWarning(null);
     }
   };
 
@@ -113,6 +141,16 @@ export const PropertyChatWindow: React.FC<PropertyChatWindowProps> = ({
         </div>
       </div>
 
+      {/* Delegation Banner - only show if owner is viewing */}
+      <div className="px-3 pt-3">
+        <ChatDelegationBanner
+          isDelegated={isDelegated}
+          onToggleDelegation={toggleDelegation}
+          isLoading={isTogglingDelegation}
+          variant="compact"
+        />
+      </div>
+
       {/* Transaction Warning */}
       <ChatTransactionWarning variant="compact" />
 
@@ -149,13 +187,24 @@ export const PropertyChatWindow: React.FC<PropertyChatWindowProps> = ({
         />
       </div>
 
+      {/* Pre-send moderation warning */}
+      {preSendWarning && (
+        <div className="px-4">
+          <ChatModerationWarning
+            moderationResult={preSendWarning}
+            isPreSend
+            onDismiss={() => setPreSendWarning(null)}
+          />
+        </div>
+      )}
+
       {/* Input */}
       <div className="p-4 border-t">
         <div className="flex gap-2">
           <Input
             placeholder={isRu ? 'Введите сообщение...' : 'Type a message...'}
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
+            onChange={(e) => handleMessageChange(e.target.value)}
             onKeyPress={handleKeyPress}
             disabled={isSending}
             className="flex-1"
