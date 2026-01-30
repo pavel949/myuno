@@ -3,8 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ChevronLeft, 
   ChevronRight, 
-  ShoppingBag, 
-  Share2, 
   Star, 
   Truck, 
   Shield, 
@@ -14,12 +12,15 @@ import {
   Package,
   Scale,
   Ruler,
-  Zap
+  ShoppingBag,
+  Zap,
+  Share2
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
+import { DetailPageHeader } from '@/components/uno/DetailPageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -182,24 +183,12 @@ const ProductDetailPage = () => {
             className="w-full h-full object-cover"
           />
           
-          {/* Back button */}
-          <button
-            onClick={() => navigate(-1)}
-            className="absolute top-4 left-4 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center shadow-lg"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          
-          {/* Action buttons */}
-          <div className="absolute top-4 right-4 flex gap-2">
-            <WishlistButton productId={productId!} />
-            <button
-              onClick={handleShare}
-              className="w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center shadow-lg"
-            >
-              <Share2 className="h-5 w-5" />
-            </button>
-          </div>
+          {/* Overlay Header with DetailPageHeader */}
+          <DetailPageHeader 
+            fallbackPath="/market"
+            onShare={handleShare}
+            actions={<WishlistButton productId={productId!} />}
+          />
           
           {/* Gallery navigation */}
           {images.length > 1 && (
