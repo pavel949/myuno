@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, MessageCircle, LogIn } from 'lucide-react';
+import { Send, Loader2, MessageCircle, LogIn, Check, CheckCheck } from 'lucide-react';
 import { format, Locale } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 import { ChatTransactionWarning } from '@/components/chat/ChatTransactionWarning';
+import { ChatMessageTranslation } from '@/components/chat/ChatMessageTranslation';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 
@@ -206,6 +207,16 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwn, locale, i
     }
   };
 
+  // Message status indicators
+  const renderMessageStatus = () => {
+    if (!isOwn) return null;
+    
+    if (message.is_read) {
+      return <CheckCheck className="w-3 h-3 text-primary" />;
+    }
+    return <Check className="w-3 h-3 text-muted-foreground" />;
+  };
+
   return (
     <div className={cn('flex', isOwn ? 'justify-end' : 'justify-start')}>
       <div
@@ -225,12 +236,26 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwn, locale, i
           </p>
         )}
         <p className="text-sm whitespace-pre-wrap break-words">{message.message}</p>
-        <p className={cn(
-          'text-[10px] mt-1',
-          isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'
+        <div className={cn(
+          'flex items-center gap-1 mt-1',
+          isOwn ? 'justify-end' : 'justify-start'
         )}>
-          {format(new Date(message.created_at), 'HH:mm', { locale })}
-        </p>
+          <span className={cn(
+            'text-[10px]',
+            isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'
+          )}>
+            {format(new Date(message.created_at), 'HH:mm', { locale })}
+          </span>
+          {renderMessageStatus()}
+        </div>
+        
+        {/* Translation button - only for messages from others */}
+        {!isOwn && (
+          <ChatMessageTranslation 
+            messageId={message.id}
+            originalText={message.message}
+          />
+        )}
       </div>
     </div>
   );
