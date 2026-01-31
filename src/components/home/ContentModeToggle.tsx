@@ -28,7 +28,7 @@ export function ContentModeToggle({ value, onChange, className }: ContentModeTog
   return (
     <div 
       className={cn(
-        "relative flex p-1 bg-muted rounded-xl",
+        "relative flex p-1 bg-secondary rounded-xl border border-border/50",
         className
       )}
     >
@@ -47,10 +47,10 @@ export function ContentModeToggle({ value, onChange, className }: ContentModeTog
       <button
         onClick={() => handleChange('services')}
         className={cn(
-          "relative z-10 flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-colors",
+          "relative z-10 flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all",
           value === 'services' 
-            ? "text-foreground" 
-            : "text-muted-foreground hover:text-foreground/80"
+            ? "text-foreground shadow-sm" 
+            : "text-foreground/60 hover:text-foreground/80"
         )}
       >
         <Briefcase className="w-4 h-4" />
@@ -61,10 +61,10 @@ export function ContentModeToggle({ value, onChange, className }: ContentModeTog
       <button
         onClick={() => handleChange('products')}
         className={cn(
-          "relative z-10 flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-colors",
+          "relative z-10 flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all",
           value === 'products' 
-            ? "text-foreground" 
-            : "text-muted-foreground hover:text-foreground/80"
+            ? "text-foreground shadow-sm" 
+            : "text-foreground/60 hover:text-foreground/80"
         )}
       >
         <ShoppingBag className="w-4 h-4" />

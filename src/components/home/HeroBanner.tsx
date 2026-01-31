@@ -10,7 +10,7 @@ interface TrustBadgeProps {
 }
 
 const TrustBadge = ({ icon, label }: TrustBadgeProps) => (
-  <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-medium">
+  <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-card text-foreground border border-border shadow-sm text-[10px] font-medium">
     {icon}
     <span>{label}</span>
   </div>
