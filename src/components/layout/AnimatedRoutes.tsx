@@ -191,7 +191,7 @@ const KnowledgeSectionPage = lazy(() => import('@/pages/knowledge/KnowledgeSecti
 const KnowledgeArticlePage = lazy(() => import('@/pages/knowledge/KnowledgeArticlePage'));
 
 const AboutPage = lazy(() => import('@/pages/info/AboutPage'));
-const HowItWorksPage = lazy(() => import('@/pages/info/HowItWorksPage'));
+const HowItWorksPage = lazy(() => import('@/pages/HowItWorks'));
 const FAQPage = lazy(() => import('@/pages/info/FAQPage'));
 const PartnersPage = lazy(() => import('@/pages/info/PartnersPage'));
 const PrivacyPage = lazy(() => import('@/pages/info/PrivacyPage'));
