@@ -39,6 +39,7 @@ export function useVendorClinics(providerId?: string) {
     providerIdField: 'provider_id',
     orderByColumn: 'created_at',
     orderAscending: false,
+    select: 'id,provider_id,name_en,name_ru,description_en,description_ru,clinic_type,specialty,cover_image,images,address,district,lat,lng,phone,email,website,working_hours,languages,is_24h,is_verified,is_featured,is_active,rating,review_count,consultation_price,currency,created_at,updated_at',
   });
 
   return {

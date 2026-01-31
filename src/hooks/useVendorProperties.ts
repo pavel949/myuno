@@ -11,6 +11,7 @@ export function useVendorProperties(providerId?: string) {
     providerIdField: 'provider_id',
     orderByColumn: 'created_at',
     orderAscending: false,
+    select: 'id,name_en,name_ru,description_en,description_ru,property_type,cover_image,images,bedrooms,bathrooms,max_guests,price_per_night,currency,address,district,is_active,is_featured,rating,review_count,created_at,updated_at,approval_status',
   });
 
   return {

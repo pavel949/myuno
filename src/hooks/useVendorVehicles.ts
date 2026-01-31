@@ -45,6 +45,7 @@ export function useVendorVehicles(providerId?: string) {
     providerIdField: 'provider_id',
     orderByColumn: 'created_at',
     orderAscending: false,
+    select: 'id,name_en,name_ru,description_en,description_ru,vehicle_type,cover_image,images,capacity,luggage_capacity,doors,transmission,fuel_type,year_built,engine_size,color,location_name,location_ru,price_per_hour,price_per_day,price_airport_transfer,deposit_amount,min_rental_days,free_km_per_day,extra_km_price,currency,features,rating,review_count,is_available,is_featured,is_verified,is_active,provider_id,created_at',
   });
 
   return {

@@ -71,19 +71,20 @@ export const AnimatedList: React.FC<AnimatedListProps> = ({
 };
 AnimatedList.displayName = 'AnimatedList';
 
-export const AnimatedItem: React.FC<AnimatedItemProps> = ({ 
+export const AnimatedItem = forwardRef<HTMLDivElement, AnimatedItemProps>(({ 
   children, 
   className = '',
-}) => {
+}, ref) => {
   return (
     <motion.div
+      ref={ref}
       variants={itemVariants}
       className={className}
     >
       {children}
     </motion.div>
   );
-};
+});
 AnimatedItem.displayName = 'AnimatedItem';
 
 // Grid variant for card grids

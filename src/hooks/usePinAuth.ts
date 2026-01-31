@@ -21,7 +21,7 @@ export function usePinAuth() {
     const email = localStorage.getItem(PIN_EMAIL_KEY);
     const refreshToken = localStorage.getItem(PIN_REFRESH_TOKEN_KEY);
     
-    console.log('[usePinAuth] Init from localStorage:', { userId: !!userId, email: !!email, refreshToken: !!refreshToken });
+    // Debug disabled for production
     
     setSavedUserId(userId);
     setSavedEmail(email);
@@ -40,7 +40,7 @@ export function usePinAuth() {
       const currentStoredToken = localStorage.getItem(PIN_REFRESH_TOKEN_KEY);
       // Update if token is missing OR different - this fixes the issue where token wasn't being saved
       if (!currentStoredToken || currentStoredToken !== session.refresh_token) {
-        console.log('[usePinAuth] Syncing refresh token to localStorage for PIN login');
+        // Token synced silently
         localStorage.setItem(PIN_REFRESH_TOKEN_KEY, session.refresh_token);
         setHasRefreshToken(true);
       }
@@ -51,7 +51,7 @@ export function usePinAuth() {
   // This happens when user has PIN in DB but localStorage was cleared
   useEffect(() => {
     if (session?.refresh_token && user?.id && hasPin && !savedUserId) {
-      console.log('[usePinAuth] User has PIN but no saved session - storing for next PIN login');
+      // Storing session for future PIN login
       localStorage.setItem(PIN_USER_KEY, user.id);
       localStorage.setItem(PIN_EMAIL_KEY, user.email || '');
       localStorage.setItem(PIN_REFRESH_TOKEN_KEY, session.refresh_token);
@@ -80,7 +80,7 @@ export function usePinAuth() {
       }
 
       try {
-        console.log('[usePinAuth] Checking PIN status for user:', userIdToCheck);
+        
         
         const { data, error } = await supabase
           .from('user_pins')
@@ -90,7 +90,7 @@ export function usePinAuth() {
 
         if (error) throw error;
         
-        console.log('[usePinAuth] PIN check result:', { hasPin: !!data, userIdToCheck });
+        
         
         if (isMounted) {
           setHasPin(!!data);

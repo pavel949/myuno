@@ -34,6 +34,7 @@ export function useVendorFlowers(providerId?: string) {
     providerIdField: 'provider_id',
     orderByColumn: 'created_at',
     orderAscending: false,
+    select: 'id,provider_id,name_en,name_ru,description_en,description_ru,address,phone,email,cover_image,images,working_hours,delivery_available,delivery_fee,min_order_amount,is_active,is_featured,is_verified,rating,review_count,lat,lng,created_at,updated_at',
   });
 
   return {

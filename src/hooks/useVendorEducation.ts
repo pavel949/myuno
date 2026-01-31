@@ -41,6 +41,7 @@ export function useVendorEducation(providerId?: string) {
     providerIdField: 'provider_id',
     orderByColumn: 'created_at',
     orderAscending: false,
+    select: 'id,provider_id,name_en,name_ru,description_en,description_ru,provider_type,subjects,age_groups,qualifications,languages,price_per_hour,price_per_course,currency,address,district,phone,email,website,cover_image,images,is_online,is_active,is_featured,is_verified,rating,review_count,lat,lng,created_at,updated_at',
   });
 
   return {
