@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -27,6 +28,7 @@ interface OwnerRevenueChartProps {
 
 export function OwnerRevenueChart({ data, loading }: OwnerRevenueChartProps) {
   const { language } = useLanguage();
+  const { currencyInfo, convertPrice } = useCurrency();
   const navigate = useNavigate();
   const isRu = language === 'ru';
 
@@ -44,9 +46,10 @@ export function OwnerRevenueChart({ data, loading }: OwnerRevenueChartProps) {
   }
 
   const formatCurrency = (value: number) => {
-    if (value >= 1000000) return `฿${(value / 1000000).toFixed(1)}M`;
-    if (value >= 1000) return `฿${(value / 1000).toFixed(0)}K`;
-    return `฿${value}`;
+    const converted = convertPrice(value);
+    if (converted >= 1000000) return `${currencyInfo.symbol}${(converted / 1000000).toFixed(1)}M`;
+    if (converted >= 1000) return `${currencyInfo.symbol}${(converted / 1000).toFixed(0)}K`;
+    return `${currencyInfo.symbol}${converted}`;
   };
 
   const formatDate = (dateStr: string) => {

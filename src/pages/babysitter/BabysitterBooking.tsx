@@ -311,7 +311,6 @@ export default function BabysitterBooking() {
         {/* Bottom Bar */}
         <BookingBottomBar
           total={totalAmount}
-          currency="THB"
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
           disabled={!date || !time || !contactData.name || !contactData.phone || !address}

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Baby, Heart, Star, Shield, Languages, Calendar } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { MiniAppLayout, ItemCard, type MiniAppCategory } from '@/components/miniapp';
 import { FilterValues, babysitterFilterConfig } from '@/components/filters';
 import { Badge } from '@/components/ui/badge';
@@ -103,6 +104,7 @@ const babysitters = [
 
 export default function BabysitterIndex() {
   const { language } = useLanguage();
+  const { currencyInfo } = useCurrency();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAgeGroup, setSelectedAgeGroup] = useState('all');
@@ -204,7 +206,7 @@ export default function BabysitterIndex() {
             reviewCount={bs.reviewCount}
             price={bs.pricePerHour}
             priceUnit={`/${language === 'ru' ? 'час' : 'hr'}`}
-            currency="฿"
+            currency={currencyInfo.symbol}
             isVerified={bs.isVerified}
             badge={bs.isFeatured 
               ? { text: language === 'ru' ? 'Топ' : 'Top', className: 'bg-amber-500 text-white' }

@@ -182,7 +182,6 @@ export default function EventBooking() {
             min={1}
             max={event.max_spots || 10}
             pricePerPerson={event.price || 0}
-            currency={event.currency || 'THB'}
             label={language === 'ru' ? 'Билетов' : 'Tickets'}
           />
         </div>
@@ -243,7 +242,6 @@ export default function EventBooking() {
         {/* Bottom Bar */}
         <BookingBottomBar
           total={totalAmount}
-          currency={event.currency || 'THB'}
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
           disabled={!contactData.name || !contactData.phone}

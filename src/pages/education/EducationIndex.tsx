@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { GraduationCap, BookOpen } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 import { MiniAppLayout, ItemCard, type MiniAppCategory } from "@/components/miniapp";
 import { FilterValues, educationFilterConfig } from "@/components/filters";
@@ -19,6 +20,7 @@ const categories: MiniAppCategory[] = [
 export default function EducationIndex() {
   const navigate = useNavigate();
   const { language, t } = useLanguage();
+  const { currencyInfo } = useCurrency();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [filterValues, setFilterValues] = useState<FilterValues>({});
@@ -144,7 +146,7 @@ export default function EducationIndex() {
                   reviewCount={provider.review_count}
                   price={provider.price_per_hour || provider.price_per_course}
                   priceUnit={provider.price_per_hour ? `/${language === "ru" ? "час" : "hr"}` : undefined}
-                  currency="฿"
+                  currency={currencyInfo.symbol}
                   badge={provider.provider_type === "tutor" 
                     ? { text: t('education.tutor'), className: "bg-blue-100 text-blue-600" }
                     : { text: t('education.school'), className: "bg-purple-100 text-purple-600" }
@@ -179,7 +181,7 @@ export default function EducationIndex() {
                   reviewCount={tutor.review_count}
                   price={tutor.price_per_hour}
                   priceUnit={`/${language === "ru" ? "час" : "hr"}`}
-                  currency="฿"
+                  currency={currencyInfo.symbol}
                   badge={tutor.is_online 
                     ? { text: "Online", className: "bg-green-100 text-green-600" }
                     : undefined
@@ -214,7 +216,7 @@ export default function EducationIndex() {
                   reviewCount={school.review_count}
                   price={school.price_per_course || school.price_per_hour}
                   priceUnit={school.price_per_course ? `/${language === "ru" ? "курс" : "course"}` : `/${language === "ru" ? "час" : "hr"}`}
-                  currency="฿"
+                  currency={currencyInfo.symbol}
                   badge={school.is_verified 
                     ? { text: t('education.verified'), className: "bg-emerald-100 text-emerald-600" }
                     : undefined

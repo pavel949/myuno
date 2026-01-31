@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Minus, Plus, Users } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { cn } from '@/lib/utils';
 
 interface BookingParticipantsProps {
@@ -9,8 +10,7 @@ interface BookingParticipantsProps {
   onChange: (count: number) => void;
   min?: number;
   max?: number;
-  pricePerPerson?: number;
-  currency?: string;
+  pricePerPerson?: number; // Always in THB
   label?: string;
 }
 
@@ -20,11 +20,10 @@ export function BookingParticipants({
   min = 1,
   max = 10,
   pricePerPerson,
-  currency = 'THB',
   label,
 }: BookingParticipantsProps) {
   const { language, t } = useLanguage();
-  const currencySymbol = currency === 'THB' ? '฿' : currency === 'USD' ? '$' : currency === 'EUR' ? '€' : '₽';
+  const { currencyInfo, convertPrice } = useCurrency();
 
   return (
     <div>
@@ -51,7 +50,7 @@ export function BookingParticipants({
           </div>
           {pricePerPerson && (
             <span className="text-xs text-muted-foreground mt-1">
-              {currencySymbol}{pricePerPerson.toLocaleString()} × {count} = {currencySymbol}{(pricePerPerson * count).toLocaleString()}
+              {currencyInfo.symbol}{convertPrice(pricePerPerson).toLocaleString()} × {count} = {currencyInfo.symbol}{convertPrice(pricePerPerson * count).toLocaleString()}
             </span>
           )}
         </div>

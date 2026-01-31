@@ -195,7 +195,6 @@ export default function TourBooking() {
             min={1}
             max={tour.max_participants || 10}
             pricePerPerson={tour.price || 0}
-            currency={tour.currency || 'THB'}
           />
         </div>
 
@@ -230,7 +229,6 @@ export default function TourBooking() {
         {/* Bottom Bar */}
         <BookingBottomBar
           total={totalAmount}
-          currency={tour.currency || 'THB'}
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
           disabled={!date || !time || !contactData.name || !contactData.phone}

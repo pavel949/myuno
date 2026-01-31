@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Compass, Clock, Users, MapPin, Star } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { useTours } from "@/hooks/useTours";
 import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from "@/components/miniapp";
 import { tourFilterConfig, FilterValues } from "@/components/filters";
@@ -18,6 +19,7 @@ const TOUR_CATEGORIES: MiniAppCategory[] = [
 
 export default function ToursIndex() {
   const { language, t } = useLanguage();
+  const { currencyInfo } = useCurrency();
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -106,7 +108,7 @@ export default function ToursIndex() {
             title={language === 'ru' ? tour.title_ru : tour.title_en}
             rating={tour.rating ?? undefined}
             price={tour.price ?? undefined}
-            currency="฿"
+            currency={currencyInfo.symbol}
             location={tour.meeting_point ?? undefined}
             meta={[
               { icon: Clock, label: `${tour.duration_hours}h` },

@@ -1,21 +1,20 @@
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { motion } from 'framer-motion';
 
 interface BookingBottomBarProps {
-  total: number;
-  currency?: string;
+  total: number; // Always in THB
   onSubmit: () => void;
   isSubmitting?: boolean;
   disabled?: boolean;
   submitLabel?: string;
-  showBreakdown?: { label: string; amount: number }[];
+  showBreakdown?: { label: string; amount: number }[]; // amounts in THB
 }
 
 export function BookingBottomBar({
   total,
-  currency = 'THB',
   onSubmit,
   isSubmitting = false,
   disabled = false,
@@ -23,7 +22,7 @@ export function BookingBottomBar({
   showBreakdown,
 }: BookingBottomBarProps) {
   const { language, t } = useLanguage();
-  const currencySymbol = currency === 'THB' ? '฿' : currency === 'USD' ? '$' : currency === 'EUR' ? '€' : '₽';
+  const { currencyInfo, convertPrice } = useCurrency();
 
   return (
     <motion.div
@@ -36,7 +35,7 @@ export function BookingBottomBar({
           {showBreakdown.map((item, idx) => (
             <div key={idx} className="flex justify-between text-sm text-muted-foreground">
               <span>{item.label}</span>
-              <span>{currencySymbol}{item.amount.toLocaleString()}</span>
+              <span>{currencyInfo.symbol}{convertPrice(item.amount).toLocaleString()}</span>
             </div>
           ))}
         </div>
@@ -48,7 +47,7 @@ export function BookingBottomBar({
             {t('booking.total')}
           </p>
           <p className="text-2xl font-bold text-primary">
-            {currencySymbol}{total.toLocaleString()}
+            {currencyInfo.symbol}{convertPrice(total).toLocaleString()}
           </p>
         </div>
 

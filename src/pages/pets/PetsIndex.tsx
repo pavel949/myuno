@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PawPrint } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from '@/components/miniapp';
 import { FilterValues, petsFilterConfig } from '@/components/filters';
 import { usePetServices } from '@/hooks/usePetServices';
@@ -19,6 +20,7 @@ const categories: MiniAppCategory[] = [
 export default function PetsIndex() {
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { currencyInfo } = useCurrency();
   const { services: petServices, isLoading } = usePetServices();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -118,7 +120,7 @@ export default function PetsIndex() {
             location={service.address ?? undefined}
             price={service.price_from ?? undefined}
             pricePrefix={language === 'ru' ? 'от' : 'from'}
-            currency="฿"
+            currency={currencyInfo.symbol}
             isVerified={service.is_verified}
             tags={service.features?.slice(0, 2) || []}
             onClick={() => navigate(`/pets/${service.id}`)}

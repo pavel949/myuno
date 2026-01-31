@@ -339,7 +339,6 @@ export default function LegalBooking() {
             {/* Bottom Bar */}
             <BookingBottomBar
               total={consultationPrice}
-              currency="THB"
               onSubmit={handleSubmit}
               isSubmitting={isSubmitting}
               disabled={!contactData.name || !contactData.phone}

@@ -164,7 +164,6 @@ export default function FitnessBooking() {
         {/* Bottom Bar */}
         <BookingBottomBar
           total={membership.price}
-          currency="THB"
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
           disabled={!contactData.name || !contactData.phone}

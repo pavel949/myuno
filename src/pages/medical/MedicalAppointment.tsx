@@ -232,7 +232,6 @@ export default function MedicalAppointment() {
         {/* Bottom Bar */}
         <BookingBottomBar
           total={price}
-          currency="THB"
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
           disabled={!date || !time || !contactData.name || !contactData.phone}

@@ -286,7 +286,6 @@ export default function DeliveryCheckout() {
         {/* Bottom Bar */}
         <BookingBottomBar
           total={total}
-          currency="฿"
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
           disabled={!isFormValid}

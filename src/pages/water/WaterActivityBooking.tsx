@@ -175,7 +175,6 @@ export default function WaterActivityBooking() {
             min={activity.min_participants || 1}
             max={activity.max_participants || 10}
             pricePerPerson={activity.price || 0}
-            currency={activity.currency || 'THB'}
           />
         </div>
 
@@ -211,7 +210,6 @@ export default function WaterActivityBooking() {
         {/* Bottom Bar */}
         <BookingBottomBar
           total={totalAmount}
-          currency={activity.currency || 'THB'}
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
           disabled={!date || !time || !contactData.name || !contactData.phone}

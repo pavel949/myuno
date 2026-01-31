@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Ticket, Calendar, Clock, Users, MapPin, Music, PartyPopper, Trophy, Sparkles, Wine } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { useEvents } from '@/hooks/useEvents';
 import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from '@/components/miniapp';
 import { eventsFilterConfig, FilterValues } from '@/components/filters';
@@ -24,6 +25,7 @@ const ENTERTAINMENT_CATEGORIES = ['concerts', 'parties', 'clubs', 'sports', 'fes
 
 export default function EventsIndex() {
   const { language } = useLanguage();
+  const { currencyInfo } = useCurrency();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -243,8 +245,8 @@ export default function EventsIndex() {
             </div>
           </div>
           <div className="absolute top-4 right-4">
-            <Badge variant="secondary" className="bg-white/95 text-black font-bold text-lg px-3 py-1">
-              ฿{featuredEvent.price?.toLocaleString()}
+          <Badge variant="secondary" className="bg-white/95 text-black font-bold text-lg px-3 py-1">
+            {currencyInfo.symbol}{featuredEvent.price?.toLocaleString()}
             </Badge>
           </div>
         </div>
@@ -269,7 +271,7 @@ export default function EventsIndex() {
             rating={event.rating ?? undefined}
             price={event.price ?? undefined}
             originalPrice={event.original_price ?? undefined}
-            currency="฿"
+            currency={currencyInfo.symbol}
             location={language === 'ru' ? (event.location_ru ?? undefined) : (event.location_name ?? undefined)}
             badge={event.is_hot ? { text: '🔥 Hot', className: 'bg-red-500 text-white' } : 
                    event.is_featured ? { text: '⭐ Featured', className: 'bg-primary text-primary-foreground' } : undefined}

@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Car, Users, Clock, Gauge } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { MiniAppLayout, MiniAppQuickGrid, ItemCard, type MiniAppCategory, type QuickGridItem } from '@/components/miniapp';
 import { transportFilterConfig, FilterValues } from '@/components/filters';
 import { useVehicles } from '@/hooks/useVehicles';
@@ -16,6 +17,7 @@ const VEHICLE_CATEGORIES: MiniAppCategory[] = [
 
 export default function TransportIndex() {
   const { language } = useLanguage();
+  const { currencyInfo } = useCurrency();
   const navigate = useNavigate();
   const { vehicles, isLoading } = useVehicles();
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -120,7 +122,7 @@ export default function TransportIndex() {
             title={language === 'ru' ? vehicle.name_ru : vehicle.name_en}
             rating={vehicle.rating ?? undefined}
             price={vehicle.price_per_day ?? undefined}
-            currency="฿"
+            currency={currencyInfo.symbol}
             priceLabel={`/${language === 'ru' ? 'день' : 'day'}`}
             meta={[
               { icon: Users, label: `${vehicle.capacity || 0}` },

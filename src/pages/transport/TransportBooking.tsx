@@ -267,7 +267,6 @@ export default function TransportBooking() {
         {/* Bottom Bar */}
         <BookingBottomBar
           total={totalAmount}
-          currency="THB"
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
           disabled={!pickupDate || !pickupLocation || !contactData.name || !contactData.phone}
