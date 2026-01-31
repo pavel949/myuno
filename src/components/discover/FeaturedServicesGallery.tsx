@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Service } from '@/hooks/useServices';
 import { Skeleton } from '@/components/ui/skeleton';
+import { LanguageIndicator } from '@/components/ui/LanguageIndicator';
 
 interface FeaturedServicesGalleryProps {
   services: Service[];
@@ -177,6 +178,16 @@ const ServiceCard = memo(function ServiceCard({
           <p className="text-[10px] text-muted-foreground line-clamp-1">
             {providerName}
           </p>
+        )}
+        
+        {/* Language indicators */}
+        {(service.languages?.length > 0 || service.provider?.has_machine_translation) && (
+          <LanguageIndicator
+            languages={service.languages || []}
+            hasMachineTranslation={service.provider?.has_machine_translation}
+            variant="compact"
+            maxDisplay={2}
+          />
         )}
         
         <div className="flex items-center justify-between pt-1">
