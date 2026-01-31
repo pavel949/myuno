@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from '@/components/miniapp';
 import { FilterValues, cleaningFilterConfig } from '@/components/filters';
 import { useCleaningServices } from '@/hooks/useCleaningServices';
@@ -17,6 +18,7 @@ const serviceTypes: MiniAppCategory[] = [
 
 export default function CleaningIndex() {
   const { language } = useLanguage();
+  const { currencyInfo } = useCurrency();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('all');
@@ -117,7 +119,7 @@ export default function CleaningIndex() {
               reviewCount={service.review_count}
               price={price}
               priceUnit={service.price_per_hour ? '/hr' : ''}
-              currency="฿"
+              currency={currencyInfo.symbol}
               badge={service.is_verified 
                 ? { text: language === 'ru' ? 'Проверено' : 'Verified', className: 'bg-green-500 text-white' }
                 : undefined

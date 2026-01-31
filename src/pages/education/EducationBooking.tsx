@@ -215,7 +215,6 @@ export default function EducationBooking() {
         {/* Bottom Bar */}
         <BookingBottomBar
           total={price}
-          currency="THB"
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
           disabled={!date || !time || !contactData.name || !contactData.phone}

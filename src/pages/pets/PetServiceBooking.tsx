@@ -229,7 +229,6 @@ export default function PetServiceBooking() {
         {/* Bottom Bar */}
         <BookingBottomBar
           total={service.price}
-          currency="THB"
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
           disabled={!isValid}

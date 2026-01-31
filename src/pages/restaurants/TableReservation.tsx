@@ -320,7 +320,6 @@ export default function TableReservation() {
         {/* Bottom Bar */}
         <BookingBottomBar
           total={depositRequired ? depositAmount : 0}
-          currency="฿"
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
           disabled={!isFormValid}

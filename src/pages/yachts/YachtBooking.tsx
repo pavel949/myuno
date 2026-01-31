@@ -376,7 +376,6 @@ export default function YachtBooking() {
 
       <BookingBottomBar
         total={total}
-        currency={yacht.currency || 'THB'}
         onSubmit={handleSubmit}
         isSubmitting={isSubmitting}
         disabled={!canSubmit}

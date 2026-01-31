@@ -199,7 +199,6 @@ export default function BeautyBooking() {
         {/* Bottom Bar */}
         <BookingBottomBar
           total={totalPrice}
-          currency="THB"
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
           disabled={!date || !time || !contactData.name || !contactData.phone}

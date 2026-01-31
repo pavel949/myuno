@@ -239,7 +239,6 @@ export default function SetMenuBooking() {
             min={1}
             max={setMenu.maxGuests}
             pricePerPerson={setMenu.price}
-            currency="฿"
             label={language === 'ru' ? 'Количество гостей' : 'Number of Guests'}
           />
 
@@ -279,7 +278,6 @@ export default function SetMenuBooking() {
         {/* Bottom Bar */}
         <BookingBottomBar
           total={totalPrice}
-          currency="฿"
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
           disabled={!isFormValid}

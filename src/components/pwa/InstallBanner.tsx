@@ -5,7 +5,28 @@ import { Button } from '@/components/ui/button';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { usePWATracking } from '@/hooks/usePWATracking';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useLanguage } from '@/contexts/LanguageContext';
 
+const texts = {
+  en: {
+    install: 'Install app',
+    download: 'Download',
+    close: 'Close',
+    iosInstall: 'Install on iPhone',
+    androidInstall: 'Install on Android',
+    toScreen: 'To Home Screen',
+    installBtn: 'Install',
+  },
+  ru: {
+    install: 'Установить приложение',
+    download: 'Скачать',
+    close: 'Закрыть',
+    iosInstall: 'Установка на iPhone',
+    androidInstall: 'Установка на Android',
+    toScreen: 'На экран',
+    installBtn: 'Установить',
+  },
+};
 const BANNER_DISMISSED_KEY = 'pwa_banner_dismissed';
 const BANNER_DISMISS_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
 
@@ -16,6 +37,8 @@ export function InstallBanner() {
   const { isInstalled, canInstall, isIOS, isAndroid, install } = usePWAInstall();
   const { trackInstall } = usePWATracking();
   const isMobileViewport = useIsMobile();
+  const { language } = useLanguage();
+  const t = texts[language] || texts.en;
 
   useEffect(() => {
     if (isInstalled) {
@@ -90,11 +113,11 @@ export function InstallBanner() {
                 </div>
 
                 <div className="flex-1 min-w-0 mr-1">
-                  <h3 className="font-semibold text-primary-foreground text-sm leading-tight">
+                <h3 className="font-semibold text-primary-foreground text-sm leading-tight">
                     myUNO
                   </h3>
                   <p className="text-xs text-primary-foreground/80 leading-tight">
-                    Установить приложение
+                    {t.install}
                   </p>
                 </div>
 
@@ -111,14 +134,14 @@ export function InstallBanner() {
                     <Download className="h-4 w-4" />
                   )}
                   <span className="text-sm font-medium">
-                    {isLoading ? '...' : 'Скачать'}
+                    {isLoading ? '...' : t.download}
                   </span>
                 </Button>
 
                 <button
                   onClick={handleDismiss}
                   className="shrink-0 p-1 rounded-full text-primary-foreground/60 hover:text-primary-foreground hover:bg-white/10 transition-colors"
-                  aria-label="Закрыть"
+                  aria-label={t.close}
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -128,7 +151,7 @@ export function InstallBanner() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="font-semibold text-primary-foreground text-sm">
-                    {isIOS ? 'Установка на iPhone' : 'Установка на Android'}
+                    {isIOS ? t.iosInstall : t.androidInstall}
                   </h3>
                   <button
                     onClick={handleDismiss}
@@ -149,7 +172,7 @@ export function InstallBanner() {
                     <div className="flex items-center gap-1.5">
                       <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold">2</div>
                       <Plus className="h-4 w-4" />
-                      <span className="text-xs">На экран</span>
+                      <span className="text-xs">{t.toScreen}</span>
                     </div>
                   </div>
                 ) : (
@@ -163,7 +186,7 @@ export function InstallBanner() {
                     <div className="flex items-center gap-1.5">
                       <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold">2</div>
                       <Download className="h-4 w-4" />
-                      <span className="text-xs">Установить</span>
+                      <span className="text-xs">{t.installBtn}</span>
                     </div>
                   </div>
                 )}

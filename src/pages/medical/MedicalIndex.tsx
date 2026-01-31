@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Stethoscope, Phone } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from '@/components/miniapp';
 import { medicalFilterConfig, FilterValues } from '@/components/filters';
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,7 @@ const SPECIALTY_CATEGORIES: MiniAppCategory[] = [
 
 export default function MedicalIndex() {
   const { language } = useLanguage();
+  const { currencyInfo } = useCurrency();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] = useState('all');
@@ -119,7 +121,7 @@ export default function MedicalIndex() {
               reviewCount={clinic.review_count}
               price={clinic.consultation_price || 0}
               pricePrefix={language === 'ru' ? 'от' : 'from'}
-              currency="฿"
+              currency={currencyInfo.symbol}
               location={clinic.district || clinic.address || ''}
               isVerified={clinic.is_verified}
               isFeatured={clinic.is_featured}

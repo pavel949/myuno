@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { Scale, Award } from "lucide-react";
 import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from "@/components/miniapp";
 import { FilterValues, legalFilterConfig } from "@/components/filters";
@@ -20,6 +21,7 @@ const categories: MiniAppCategory[] = [
 
 export default function LegalServicesIndex() {
   const { language, t } = useLanguage();
+  const { currencyInfo } = useCurrency();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { services: legalServices, isLoading } = useLegalServices();
@@ -139,7 +141,7 @@ export default function LegalServicesIndex() {
                 reviewCount={provider.review_count}
                 price={provider.price_consultation ?? undefined}
                 priceUnit={language === 'ru' ? '/консультация' : '/consultation'}
-                currency="฿"
+                currency={currencyInfo.symbol}
                 isVerified={provider.is_verified}
                 tags={provider.specializations?.slice(0, 2) || []}
                 onClick={() => navigate(`/legal/provider/${provider.id}`)}

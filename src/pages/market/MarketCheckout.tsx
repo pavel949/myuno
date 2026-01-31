@@ -633,7 +633,6 @@ const MarketCheckout = () => {
         {/* Bottom Bar */}
         <BookingBottomBar
           total={total}
-          currency="THB"
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
           disabled={!isFormValid}
