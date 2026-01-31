@@ -8850,9 +8850,11 @@ export type Database = {
           description_en: string | null
           description_ru: string | null
           email: string | null
+          has_machine_translation: boolean | null
           id: string
           is_active: boolean | null
           is_verified: boolean | null
+          languages: string[] | null
           lat: number | null
           lng: number | null
           logo_url: string | null
@@ -8877,9 +8879,11 @@ export type Database = {
           description_en?: string | null
           description_ru?: string | null
           email?: string | null
+          has_machine_translation?: boolean | null
           id?: string
           is_active?: boolean | null
           is_verified?: boolean | null
+          languages?: string[] | null
           lat?: number | null
           lng?: number | null
           logo_url?: string | null
@@ -8904,9 +8908,11 @@ export type Database = {
           description_en?: string | null
           description_ru?: string | null
           email?: string | null
+          has_machine_translation?: boolean | null
           id?: string
           is_active?: boolean | null
           is_verified?: boolean | null
+          languages?: string[] | null
           lat?: number | null
           lng?: number | null
           logo_url?: string | null
@@ -10066,6 +10072,7 @@ export type Database = {
           id: string
           images: string[] | null
           is_active: boolean | null
+          languages: string[] | null
           location_id: string | null
           name_en: string
           name_ru: string
@@ -10089,6 +10096,7 @@ export type Database = {
           id?: string
           images?: string[] | null
           is_active?: boolean | null
+          languages?: string[] | null
           location_id?: string | null
           name_en: string
           name_ru: string
@@ -10112,6 +10120,7 @@ export type Database = {
           id?: string
           images?: string[] | null
           is_active?: boolean | null
+          languages?: string[] | null
           location_id?: string | null
           name_en?: string
           name_ru?: string

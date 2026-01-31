@@ -15,10 +15,12 @@ export interface Service {
   provider_id: string;
   rating: number | null;
   review_count: number | null;
+  languages: string[];
   provider?: {
     name: string;
     logo_url: string | null;
     is_verified: boolean;
+    has_machine_translation?: boolean;
   };
   category?: {
     name_en: string;
@@ -63,6 +65,7 @@ const demoServices: Service[] = [
     provider_id: 'demo-provider',
     rating: 4.8,
     review_count: 124,
+    languages: ['en', 'th'],
     provider: { name: 'Orchid Spa', logo_url: null, is_verified: true },
     category: { name_en: 'Beauty & Spa', name_ru: 'Красота и СПА', slug: 'beauty-spa' },
   },
@@ -80,6 +83,7 @@ const demoServices: Service[] = [
     provider_id: 'demo-provider',
     rating: 4.9,
     review_count: 87,
+    languages: ['en', 'ru'],
     provider: { name: 'Fitness First', logo_url: null, is_verified: true },
     category: { name_en: 'Fitness', name_ru: 'Фитнес', slug: 'fitness' },
   },
@@ -97,7 +101,8 @@ const demoServices: Service[] = [
     provider_id: 'demo-provider',
     rating: 4.5,
     review_count: 56,
-    provider: { name: 'Ocean View', logo_url: null, is_verified: false },
+    languages: ['en', 'th', 'zh'],
+    provider: { name: 'Ocean View', logo_url: null, is_verified: false, has_machine_translation: true },
     category: { name_en: 'Restaurants', name_ru: 'Рестораны', slug: 'restaurants' },
   },
   {
@@ -114,6 +119,7 @@ const demoServices: Service[] = [
     provider_id: 'demo-provider',
     rating: 4.7,
     review_count: 203,
+    languages: ['en', 'ru', 'th'],
     provider: { name: 'Phuket Dental', logo_url: null, is_verified: true },
     category: { name_en: 'Medical', name_ru: 'Медицина', slug: 'medical' },
   },
@@ -131,7 +137,8 @@ const demoServices: Service[] = [
     provider_id: 'demo-provider',
     rating: 4.6,
     review_count: 312,
-    provider: { name: 'Phuket Cars', logo_url: null, is_verified: true },
+    languages: ['en'],
+    provider: { name: 'Phuket Cars', logo_url: null, is_verified: true, has_machine_translation: true },
     category: { name_en: 'Transport', name_ru: 'Транспорт', slug: 'transport' },
   },
   {
@@ -148,6 +155,7 @@ const demoServices: Service[] = [
     provider_id: 'demo-provider',
     rating: 4.9,
     review_count: 445,
+    languages: ['en', 'ru', 'zh'],
     provider: { name: 'Phuket Tours', logo_url: null, is_verified: true },
     category: { name_en: 'Events & Tickets', name_ru: 'Мероприятия', slug: 'events' },
   },
@@ -167,7 +175,7 @@ export const useServices = (options: UseServicesOptions = {}) => {
         .from('services')
         .select(`
           *,
-          provider:providers(name, logo_url, is_verified),
+          provider:providers(name, logo_url, is_verified, has_machine_translation),
           category:categories(name_en, name_ru, slug)
         `)
         .eq('is_active', true);
@@ -274,7 +282,7 @@ export const useServices = (options: UseServicesOptions = {}) => {
           .from('services')
           .select(`
             *,
-            provider:providers(name, logo_url, is_verified),
+            provider:providers(name, logo_url, is_verified, has_machine_translation),
             category:categories(name_en, name_ru, slug)
           `)
           .eq('is_active', true);
