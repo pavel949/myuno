@@ -1,6 +1,7 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { Component, ErrorInfo, ReactNode, useEffect } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 interface Props {
   children: ReactNode;
@@ -32,25 +33,44 @@ export class ErrorBoundary extends Component<Props, State> {
     this.setState({ hasError: false, error: null });
   };
 
+  private handleReload = () => {
+    window.location.reload();
+  };
+
   public render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
         return this.props.fallback;
       }
 
+      // Check if it's a chunk loading error (dynamic import failure)
+      const isChunkError = this.state.error?.message?.includes('dynamically imported') ||
+                          this.state.error?.message?.includes('Failed to fetch') ||
+                          this.state.error?.message?.includes('Loading chunk');
+
       return (
         <div className="flex flex-col items-center justify-center min-h-[200px] p-6 text-center">
           <AlertTriangle className="h-12 w-12 text-destructive mb-4" />
           <h2 className="text-lg font-semibold text-foreground mb-2">
-            Something went wrong
+            {isChunkError ? 'Connection issue' : 'Something went wrong'}
           </h2>
           <p className="text-sm text-muted-foreground mb-4 max-w-md">
-            {this.state.error?.message || 'An unexpected error occurred'}
+            {isChunkError 
+              ? 'Failed to load some components. Please check your connection and try again.'
+              : (this.state.error?.message || 'An unexpected error occurred')
+            }
           </p>
-          <Button onClick={this.handleReset} variant="outline" size="sm">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Try again
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={this.handleReset} variant="outline" size="sm">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Try again
+            </Button>
+            {isChunkError && (
+              <Button onClick={this.handleReload} variant="default" size="sm">
+                Reload page
+              </Button>
+            )}
+          </div>
         </div>
       );
     }
@@ -71,4 +91,47 @@ export function withErrorBoundary<P extends object>(
       </ErrorBoundary>
     );
   };
+}
+
+// Global unhandled rejection handler hook
+export function useGlobalErrorHandler() {
+  useEffect(() => {
+    const handleRejection = (event: PromiseRejectionEvent) => {
+      console.error('Unhandled rejection:', event.reason);
+      
+      // Check for chunk loading errors
+      const message = event.reason?.message || String(event.reason);
+      if (message.includes('dynamically imported') || 
+          message.includes('Failed to fetch') ||
+          message.includes('Loading chunk')) {
+        toast.error('Failed to load component. Please refresh the page.', {
+          action: {
+            label: 'Refresh',
+            onClick: () => window.location.reload(),
+          },
+        });
+      } else {
+        toast.error('An error occurred. Please try again.');
+      }
+      
+      event.preventDefault();
+    };
+
+    const handleError = (event: ErrorEvent) => {
+      console.error('Global error:', event.error);
+      // Prevent crash for recoverable errors
+      if (event.error?.message?.includes('dynamically imported')) {
+        event.preventDefault();
+        toast.error('Connection issue. Please refresh the page.');
+      }
+    };
+
+    window.addEventListener('unhandledrejection', handleRejection);
+    window.addEventListener('error', handleError);
+    
+    return () => {
+      window.removeEventListener('unhandledrejection', handleRejection);
+      window.removeEventListener('error', handleError);
+    };
+  }, []);
 }
