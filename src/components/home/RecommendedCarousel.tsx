@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useCallback, useMemo, memo } from 'react';
+import { useRef, useState, useEffect, useCallback, useMemo, memo, forwardRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Star, MapPin, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -18,7 +18,7 @@ interface CarouselItem {
   path: string;
 }
 
-export const RecommendedCarousel = memo(function RecommendedCarousel() {
+export const RecommendedCarousel = memo(forwardRef<HTMLDivElement>(function RecommendedCarousel(_props, ref) {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -184,4 +184,6 @@ export const RecommendedCarousel = memo(function RecommendedCarousel() {
       </div>
     </div>
   );
-});
+}));
+
+RecommendedCarousel.displayName = 'RecommendedCarousel';
