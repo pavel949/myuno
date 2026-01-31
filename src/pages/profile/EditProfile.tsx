@@ -20,8 +20,67 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { cn } from '@/lib/utils';
 import { AlertTriangle } from 'lucide-react';
 
-const profileSchema = z.object({
-  full_name: z.string().min(1, 'Введите имя').max(100, 'Слишком длинное имя'),
+const texts = {
+  ru: {
+    pageTitle: 'Редактировать профиль',
+    personalData: 'Личные данные',
+    fullName: 'Полное имя',
+    fullNamePlaceholder: 'Введите ваше имя',
+    phone: 'Телефон',
+    emailNote: 'Email нельзя изменить',
+    interfaceLanguage: 'Язык интерфейса',
+    emergencyContact: 'Экстренный контакт',
+    emergencyNote: 'Этот контакт будет использован в случае чрезвычайной ситуации',
+    contactName: 'Имя контакта',
+    contactNamePlaceholder: 'Иван Иванов',
+    relationship: 'Кем приходится',
+    selectPlaceholder: 'Выберите',
+    spouse: 'Супруг(а)',
+    parent: 'Родитель',
+    child: 'Ребёнок',
+    sibling: 'Брат/Сестра',
+    friend: 'Друг',
+    colleague: 'Коллега',
+    other: 'Другое',
+    saving: 'Сохранение...',
+    saveChanges: 'Сохранить изменения',
+    validation: {
+      nameRequired: 'Введите имя',
+      nameTooLong: 'Слишком длинное имя',
+    },
+  },
+  en: {
+    pageTitle: 'Edit Profile',
+    personalData: 'Personal Data',
+    fullName: 'Full Name',
+    fullNamePlaceholder: 'Enter your name',
+    phone: 'Phone',
+    emailNote: 'Email cannot be changed',
+    interfaceLanguage: 'Interface Language',
+    emergencyContact: 'Emergency Contact',
+    emergencyNote: 'This contact will be used in case of emergency',
+    contactName: 'Contact Name',
+    contactNamePlaceholder: 'John Doe',
+    relationship: 'Relationship',
+    selectPlaceholder: 'Select',
+    spouse: 'Spouse',
+    parent: 'Parent',
+    child: 'Child',
+    sibling: 'Sibling',
+    friend: 'Friend',
+    colleague: 'Colleague',
+    other: 'Other',
+    saving: 'Saving...',
+    saveChanges: 'Save Changes',
+    validation: {
+      nameRequired: 'Name is required',
+      nameTooLong: 'Name is too long',
+    },
+  },
+};
+
+const getSchema = (t: typeof texts.en) => z.object({
+  full_name: z.string().min(1, t.validation.nameRequired).max(100, t.validation.nameTooLong),
   phone: z.string().optional(),
   avatar_url: z.string().nullable().optional(),
   preferred_language: z.enum(['ru', 'en', 'th']),
@@ -30,7 +89,7 @@ const profileSchema = z.object({
   emergency_contact_relationship: z.string().optional(),
 });
 
-type ProfileFormData = z.infer<typeof profileSchema>;
+type ProfileFormData = z.infer<ReturnType<typeof getSchema>>;
 
 const languages = [
   { code: 'ru', flag: '🇷🇺', name: 'Русский' },
@@ -43,6 +102,9 @@ export default function EditProfile() {
   const { user, isLoading: authLoading } = useAuth();
   const { profile, isLoading, updateProfileAsync, isUpdating } = useProfile();
   const { language } = useLanguage();
+  
+  const t = texts[language === 'th' ? 'en' : language] || texts.en;
+  const profileSchema = getSchema(t);
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
@@ -117,7 +179,7 @@ export default function EditProfile() {
     <AppLayout>
       <PageContainer>
         <PageHeader
-          title="Редактировать профиль"
+          title={t.pageTitle}
           showBack
           fallbackPath="/profile"
         />
@@ -146,17 +208,17 @@ export default function EditProfile() {
 
             {/* Personal Info Section */}
             <SectionCard>
-              <SectionTitle>Личные данные</SectionTitle>
+              <SectionTitle>{t.personalData}</SectionTitle>
               <div className="space-y-4">
                 <FormField
                   control={form.control}
                   name="full_name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Полное имя</FormLabel>
+                      <FormLabel>{t.fullName}</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Введите ваше имя"
+                          placeholder={t.fullNamePlaceholder}
                           {...field}
                         />
                       </FormControl>
@@ -170,7 +232,7 @@ export default function EditProfile() {
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Телефон</FormLabel>
+                      <FormLabel>{t.phone}</FormLabel>
                       <FormControl>
                         <Input
                           type="tel"
@@ -191,7 +253,7 @@ export default function EditProfile() {
                     className="bg-muted"
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    Email нельзя изменить
+                    {t.emailNote}
                   </p>
                 </div>
               </div>
@@ -199,7 +261,7 @@ export default function EditProfile() {
 
             {/* Language Section */}
             <SectionCard>
-              <SectionTitle>Язык интерфейса</SectionTitle>
+              <SectionTitle>{t.interfaceLanguage}</SectionTitle>
               <FormField
                 control={form.control}
                 name="preferred_language"
@@ -236,27 +298,18 @@ export default function EditProfile() {
             <SectionCard>
               <div className="flex items-center gap-2 mb-4">
                 <AlertTriangle className="w-4 h-4 text-amber-500" />
-                <SectionTitle className="mb-0">
-                  {language === 'ru' ? 'Экстренный контакт' : 'Emergency Contact'}
-                </SectionTitle>
+                <SectionTitle className="mb-0">{t.emergencyContact}</SectionTitle>
               </div>
-              <p className="text-xs text-muted-foreground mb-4">
-                {language === 'ru' 
-                  ? 'Этот контакт будет использован в случае чрезвычайной ситуации'
-                  : 'This contact will be used in case of emergency'}
-              </p>
+              <p className="text-xs text-muted-foreground mb-4">{t.emergencyNote}</p>
               <div className="space-y-4">
                 <FormField
                   control={form.control}
                   name="emergency_contact_name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{language === 'ru' ? 'Имя контакта' : 'Contact Name'}</FormLabel>
+                      <FormLabel>{t.contactName}</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder={language === 'ru' ? 'Иван Иванов' : 'John Doe'}
-                          {...field}
-                        />
+                        <Input placeholder={t.contactNamePlaceholder} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -268,13 +321,9 @@ export default function EditProfile() {
                   name="emergency_contact_phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{language === 'ru' ? 'Телефон' : 'Phone'}</FormLabel>
+                      <FormLabel>{t.phone}</FormLabel>
                       <FormControl>
-                        <Input
-                          type="tel"
-                          placeholder="+7 (999) 123-45-67"
-                          {...field}
-                        />
+                        <Input type="tel" placeholder="+7 (999) 123-45-67" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -286,21 +335,21 @@ export default function EditProfile() {
                   name="emergency_contact_relationship"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{language === 'ru' ? 'Кем приходится' : 'Relationship'}</FormLabel>
+                      <FormLabel>{t.relationship}</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder={language === 'ru' ? 'Выберите' : 'Select'} />
+                            <SelectValue placeholder={t.selectPlaceholder} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="spouse">{language === 'ru' ? 'Супруг(а)' : 'Spouse'}</SelectItem>
-                          <SelectItem value="parent">{language === 'ru' ? 'Родитель' : 'Parent'}</SelectItem>
-                          <SelectItem value="child">{language === 'ru' ? 'Ребёнок' : 'Child'}</SelectItem>
-                          <SelectItem value="sibling">{language === 'ru' ? 'Брат/Сестра' : 'Sibling'}</SelectItem>
-                          <SelectItem value="friend">{language === 'ru' ? 'Друг' : 'Friend'}</SelectItem>
-                          <SelectItem value="colleague">{language === 'ru' ? 'Коллега' : 'Colleague'}</SelectItem>
-                          <SelectItem value="other">{language === 'ru' ? 'Другое' : 'Other'}</SelectItem>
+                          <SelectItem value="spouse">{t.spouse}</SelectItem>
+                          <SelectItem value="parent">{t.parent}</SelectItem>
+                          <SelectItem value="child">{t.child}</SelectItem>
+                          <SelectItem value="sibling">{t.sibling}</SelectItem>
+                          <SelectItem value="friend">{t.friend}</SelectItem>
+                          <SelectItem value="colleague">{t.colleague}</SelectItem>
+                          <SelectItem value="other">{t.other}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -321,10 +370,10 @@ export default function EditProfile() {
                 {isUpdating ? (
                   <>
                     <LoadingSpinner size="sm" className="mr-2" />
-                    Сохранение...
+                    {t.saving}
                   </>
                 ) : (
-                  'Сохранить изменения'
+                  t.saveChanges
                 )}
               </Button>
             </div>
