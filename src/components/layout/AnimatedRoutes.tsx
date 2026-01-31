@@ -174,6 +174,7 @@ const MarketCheckout = lazy(() => import('@/pages/market/MarketCheckout'));
 const Favorites = lazy(() => import('@/pages/Favorites'));
 const Search = lazy(() => import('@/pages/Search'));
 const Notifications = lazy(() => import('@/pages/Notifications'));
+const NotificationSettingsEnhanced = lazy(() => import('@/pages/profile/NotificationSettingsEnhanced'));
 const ViewHistory = lazy(() => import('@/pages/ViewHistory'));
 const Cart = lazy(() => import('@/pages/Cart'));
 const Wallet = lazy(() => import('@/pages/Wallet'));
@@ -444,6 +445,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/favorites" element={<LazyPage><Favorites /></LazyPage>} />
         <Route path="/search" element={<LazyPage><Search /></LazyPage>} />
         <Route path="/notifications" element={<LazyPage><Notifications /></LazyPage>} />
+        <Route path="/profile/notifications" element={<LazyPage><NotificationSettingsEnhanced /></LazyPage>} />
         <Route path="/messages" element={<LazyPage><GuestMessages /></LazyPage>} />
         <Route path="/trip/:id" element={<LazyPage><GuestTripDetail /></LazyPage>} />
         <Route path="/history" element={<LazyPage><ViewHistory /></LazyPage>} />
