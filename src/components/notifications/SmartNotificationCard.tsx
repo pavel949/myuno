@@ -56,7 +56,10 @@ const typeConfig = {
   },
 };
 
-export function SmartNotificationCard({
+export const SmartNotificationCard = React.forwardRef<
+  HTMLDivElement,
+  SmartNotificationCardProps
+>(({
   type,
   title,
   description,
@@ -68,7 +71,7 @@ export function SmartNotificationCard({
   expiresAt,
   onDismiss,
   className,
-}: SmartNotificationCardProps) {
+}, ref) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const config = typeConfig[type];
@@ -76,6 +79,7 @@ export function SmartNotificationCard({
 
   return (
     <div
+      ref={ref}
       className={cn(
         "relative overflow-hidden rounded-2xl border p-4",
         `bg-gradient-to-r ${config.gradient}`,
@@ -152,4 +156,6 @@ export function SmartNotificationCard({
       </div>
     </div>
   );
-}
+});
+
+SmartNotificationCard.displayName = 'SmartNotificationCard';
