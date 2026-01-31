@@ -66,18 +66,67 @@ export function useIntakeAgent() {
 
   // Analyze input (single or bulk)
   const analyze = useCallback(async (options: {
-    mode: 'single' | 'bulk_text' | 'bulk_urls';
+    mode: 'single' | 'bulk_text' | 'bulk_urls' | 'files';
     rawText?: string;
     urls?: string[];
-    images?: string[];
+    files?: Array<{ id: string; file: File; type: string }>;
     forceVertical?: string;
   }) => {
     setIsProcessing(true);
     setError(null);
     
     try {
+      let uploadedFileUrls: string[] = [];
+      
+      // Upload files to storage if in files mode
+      if (options.mode === 'files' && options.files && options.files.length > 0) {
+        const uploadPromises = options.files.map(async (fileItem) => {
+          const timestamp = Date.now();
+          const fileName = `${timestamp}-${fileItem.file.name}`;
+          const filePath = `intake/${fileName}`;
+          
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('intake-uploads')
+            .upload(filePath, fileItem.file);
+            
+          if (uploadError) {
+            console.error('Upload error:', uploadError);
+            throw new Error(`Failed to upload ${fileItem.file.name}: ${uploadError.message}`);
+          }
+          
+          // Get public URL
+          const { data: urlData } = supabase.storage
+            .from('intake-uploads')
+            .getPublicUrl(filePath);
+            
+          return {
+            url: urlData.publicUrl,
+            name: fileItem.file.name,
+            type: fileItem.type
+          };
+        });
+        
+        const uploadedFiles = await Promise.all(uploadPromises);
+        uploadedFileUrls = uploadedFiles.map(f => f.url);
+        
+        toast.success(
+          language === 'ru' 
+            ? `Загружено ${uploadedFiles.length} файлов` 
+            : `Uploaded ${uploadedFiles.length} files`
+        );
+      }
+      
+      // Prepare body for edge function
+      const body = {
+        mode: options.mode,
+        rawText: options.rawText,
+        urls: options.urls,
+        uploadedImages: uploadedFileUrls.length > 0 ? uploadedFileUrls : undefined,
+        forceVertical: options.forceVertical,
+      };
+      
       const { data, error: fnError } = await supabase.functions.invoke('intake-listing-agent', {
-        body: options
+        body
       });
 
       if (fnError) throw fnError;

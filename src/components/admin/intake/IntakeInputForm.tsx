@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Bot, Loader2, Sparkles } from 'lucide-react';
 import { IntakeMode } from './IntakeModeSelector';
+import { IntakeFileUpload, UploadedFile } from './IntakeFileUpload';
 import { INTAKE_VERTICALS } from '@/lib/intakeVerticals';
 import {
   Select,
@@ -21,6 +22,7 @@ interface IntakeInputFormProps {
     mode: IntakeMode;
     rawText?: string;
     urls?: string[];
+    files?: UploadedFile[];
     forceVertical?: string;
   }) => Promise<void>;
   isProcessing: boolean;
@@ -31,10 +33,16 @@ export function IntakeInputForm({ mode, onAnalyze, isProcessing }: IntakeInputFo
   const isRu = language === 'ru';
   
   const [rawText, setRawText] = useState('');
+  const [files, setFiles] = useState<UploadedFile[]>([]);
   const [forceVertical, setForceVertical] = useState<string>('');
 
   const handleSubmit = async () => {
-    if (!rawText.trim()) return;
+    // Validate based on mode
+    if (mode === 'files') {
+      if (files.length === 0) return;
+    } else if (!rawText.trim()) {
+      return;
+    }
     
     let urls: string[] | undefined;
     
@@ -49,8 +57,9 @@ export function IntakeInputForm({ mode, onAnalyze, isProcessing }: IntakeInputFo
     
     await onAnalyze({
       mode,
-      rawText: mode !== 'bulk_urls' ? rawText : undefined,
+      rawText: mode !== 'bulk_urls' && mode !== 'files' ? rawText : undefined,
       urls,
+      files: mode === 'files' ? files : undefined,
       forceVertical: forceVertical && forceVertical !== 'auto' ? forceVertical : undefined,
     });
   };
@@ -84,7 +93,21 @@ export function IntakeInputForm({ mode, onAnalyze, isProcessing }: IntakeInputFo
         ? `Найдено ${itemCount} объектов` 
         : `Found ${itemCount} items`;
     }
+    if (mode === 'files') {
+      const imageCount = files.filter(f => f.type === 'image').length;
+      const docCount = files.filter(f => f.type !== 'image').length;
+      if (files.length === 0) return null;
+      return isRu 
+        ? `${imageCount} изображений, ${docCount} документов` 
+        : `${imageCount} images, ${docCount} documents`;
+    }
     return null;
+  };
+
+  const isSubmitDisabled = () => {
+    if (isProcessing) return true;
+    if (mode === 'files') return files.length === 0;
+    return !rawText.trim();
   };
 
   return (
@@ -116,25 +139,40 @@ export function IntakeInputForm({ mode, onAnalyze, isProcessing }: IntakeInputFo
           </Select>
         </div>
 
-        {/* Main textarea */}
-        <div className="space-y-2">
-          <Label>{isRu ? 'Исходные данные' : 'Source Data'}</Label>
-          <Textarea
-            value={rawText}
-            onChange={(e) => setRawText(e.target.value)}
-            placeholder={getPlaceholder()}
-            className="min-h-[200px] font-mono text-sm"
-            disabled={isProcessing}
-          />
-          {getHint() && (
-            <p className="text-sm text-muted-foreground">{getHint()}</p>
-          )}
-        </div>
+        {/* File upload for files mode */}
+        {mode === 'files' ? (
+          <div className="space-y-2">
+            <Label>{isRu ? 'Загрузите файлы' : 'Upload Files'}</Label>
+            <IntakeFileUpload
+              files={files}
+              onFilesChange={setFiles}
+              disabled={isProcessing}
+            />
+            {getHint() && (
+              <p className="text-sm text-muted-foreground">{getHint()}</p>
+            )}
+          </div>
+        ) : (
+          /* Main textarea for text modes */
+          <div className="space-y-2">
+            <Label>{isRu ? 'Исходные данные' : 'Source Data'}</Label>
+            <Textarea
+              value={rawText}
+              onChange={(e) => setRawText(e.target.value)}
+              placeholder={getPlaceholder()}
+              className="min-h-[200px] font-mono text-sm"
+              disabled={isProcessing}
+            />
+            {getHint() && (
+              <p className="text-sm text-muted-foreground">{getHint()}</p>
+            )}
+          </div>
+        )}
 
         {/* Submit button */}
         <Button 
           onClick={handleSubmit}
-          disabled={!rawText.trim() || isProcessing}
+          disabled={isSubmitDisabled()}
           className="w-full"
           size="lg"
         >
