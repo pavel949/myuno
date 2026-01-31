@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  User, Calendar, MapPin, Globe, Mail, Phone, Shield, 
-  Palette, Coins, Lock, Heart, AlertTriangle, Save, 
-  Instagram, MessageCircle, ChevronRight, ShieldCheck
+  User, MapPin, Lock, Heart, AlertTriangle, Save, 
+  Palette, ShieldCheck, Shield, MessageCircle
 } from 'lucide-react';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -24,7 +23,9 @@ import { CurrencySwitcher } from '@/components/uno/CurrencySwitcher';
 import { LocationSwitcher } from '@/components/uno/LocationSwitcher';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useNavigate } from 'react-router-dom';
-import { cn } from '@/lib/utils';
+import { SecuritySettingsSection } from '@/components/profile/SecuritySettingsSection';
+import { ConnectedAccountsSection } from '@/components/profile/ConnectedAccountsSection';
+import { ProfileCompletionCard } from '@/components/profile/ProfileCompletionCard';
 
 const COUNTRIES = [
   { code: 'RU', nameEn: 'Russia', nameRu: 'Россия' },
@@ -115,6 +116,9 @@ export default function ProfileSettings() {
         <PageHeader title={isRu ? 'Настройки профиля' : 'Profile Settings'} showBack fallbackPath="/profile" />
 
         <div className="space-y-6 pb-24">
+          {/* Profile Completion Progress */}
+          <ProfileCompletionCard />
+
           {/* Trust Ecosystem Banner */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
             <SectionCard className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
@@ -427,8 +431,14 @@ export default function ProfileSettings() {
             </SectionCard>
           </motion.div>
 
+          {/* Security Settings */}
+          <SecuritySettingsSection />
+
+          {/* Connected Accounts */}
+          <ConnectedAccountsSection />
+
           {/* Save Button */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
             <Button 
               className="w-full gap-2" 
               size="lg" 
