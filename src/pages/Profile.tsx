@@ -11,6 +11,8 @@ import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { ReferralCard } from '@/components/uno/ReferralCard';
 import { EmailVerificationBadge } from '@/components/profile/EmailVerificationBadge';
 import { RoleSwitchMenu } from '@/components/profile/RoleSwitchMenu';
+import { ActiveRoleBadge } from '@/components/profile/ActiveRoleBadge';
+import { BecomePartnerCTA } from '@/components/profile/BecomePartnerCTA';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
 
@@ -115,9 +117,12 @@ export default function Profile() {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className="text-base sm:text-lg font-semibold truncate">
-                {profile?.full_name || user.email}
-              </h2>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-base sm:text-lg font-semibold truncate">
+                  {profile?.full_name || user.email}
+                </h2>
+                <ActiveRoleBadge />
+              </div>
               <p className="text-xs sm:text-sm text-muted-foreground truncate">
                 {profile?.full_name ? user.email : (language === 'ru' ? 'Аккаунт туриста' : 'Tourist Account')}
               </p>
@@ -132,6 +137,9 @@ export default function Profile() {
 
         {/* Switch to Hosting/Admin/Vendor Menu */}
         <RoleSwitchMenu />
+        
+        {/* CTA to become owner/vendor for regular users */}
+        <BecomePartnerCTA />
 
         {/* Referral program */}
         <ReferralCard variant="compact" />
