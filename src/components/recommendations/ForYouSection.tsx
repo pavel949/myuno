@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, Star, Clock, TrendingUp, ArrowRight, Compass } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -38,14 +38,15 @@ const typeRoutes: Record<string, string> = {
   flower_shop: '/flowers/shop',
 };
 
-export function ForYouSection() {
+export const ForYouSection = forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(
+  function ForYouSection(props, ref) {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const { recommendations, isLoading } = useRecommendations();
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
+      <div ref={ref} className={cn("space-y-4", props.className)} {...props}>
         <div className="flex items-center gap-2">
           <div className="p-1.5 bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg">
             <Sparkles className="w-5 h-5 text-primary" />
@@ -76,7 +77,7 @@ export function ForYouSection() {
   // Show empty state with CTA instead of returning null
   if (recommendations.length === 0) {
     return (
-      <div className="space-y-4">
+      <div ref={ref} className={cn("space-y-4", props.className)} {...props}>
         <div className="flex items-center gap-2">
           <div className="p-1.5 bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg">
             <Sparkles className="w-5 h-5 text-primary" />
@@ -116,7 +117,7 @@ export function ForYouSection() {
   };
 
   return (
-    <div className="space-y-4">
+    <div ref={ref} className={cn("space-y-4", props.className)} {...props}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="p-1.5 bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg">
@@ -191,4 +192,6 @@ export function ForYouSection() {
       </div>
     </div>
   );
-}
+});
+
+ForYouSection.displayName = 'ForYouSection';
