@@ -1,15 +1,16 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, Package } from 'lucide-react';
+import { Package, Users, Plane, Home as HomeIcon, Flame, Star, Sparkles } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
-import { PageHeader } from '@/components/uno/PageHeader';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { EmptyState } from '@/components/uno/EmptyState';
-import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+
+// Unified components
+import { UnifiedHeader, UnifiedFilterRibbon, UnifiedSectionHeader, UnifiedScrollSection, FilterRibbonItem } from '@/components/shared';
 
 // Hooks
 import { useServices } from '@/hooks/useServices';
@@ -21,13 +22,22 @@ import { useCategoryCounts } from '@/hooks/useCategoryCounts';
 import { MiniAppsGrid } from '@/components/discover/MiniAppsGrid';
 import { FeaturedServicesGallery } from '@/components/discover/FeaturedServicesGallery';
 import { CategoryGroupSection } from '@/components/discover/CategoryGroupSection';
-import { AudienceFilterTabs, AudienceFilter, AUDIENCE_CATEGORIES } from '@/components/discover/AudienceFilterTabs';
+
+export type AudienceFilter = 'all' | 'tourists' | 'residents' | 'owners';
+
+const AUDIENCE_CATEGORIES: Record<AudienceFilter, Set<string>> = {
+  all: new Set(),
+  tourists: new Set(['yachts', 'tours', 'transport', 'restaurants', 'events', 'water-activities', 'beauty-spa']),
+  residents: new Set(['legal', 'insurance', 'medical', 'banking', 'education', 'fitness', 'veterinary']),
+  owners: new Set(['real-estate', 'cleaning', 'storage', 'maintenance', 'property-management']),
+};
 
 export default function Discover() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
+  const isRu = language === 'ru';
   
   const initialAudience = (searchParams.get('audience') as AudienceFilter) || 'all';
   const [audienceFilter, setAudienceFilter] = useState<AudienceFilter>(initialAudience);
@@ -38,6 +48,14 @@ export default function Discover() {
   const { isFeatured } = useFeaturedCategories();
   const { getCount } = useCategoryCounts();
   const { services, isLoading: servicesLoading, refetch: refetchServices } = useServices({ limit: 20 });
+
+  // Filter items for ribbon
+  const audienceItems: FilterRibbonItem[] = useMemo(() => [
+    { id: 'all', label: isRu ? 'Все' : 'All', icon: Sparkles, variant: 'primary' as const },
+    { id: 'tourists', label: isRu ? 'Туристам' : 'Tourists', icon: Plane },
+    { id: 'residents', label: isRu ? 'Резидентам' : 'Residents', icon: Users },
+    { id: 'owners', label: isRu ? 'Владельцам' : 'Owners', icon: HomeIcon },
+  ], [isRu]);
 
   // Filter groups based on audience
   const filteredGroups = useMemo(() => {
@@ -56,14 +74,15 @@ export default function Discover() {
   }, [groups, audienceFilter]);
 
   // Handlers
-  const handleAudienceChange = useCallback((value: AudienceFilter) => {
-    setAudienceFilter(value);
+  const handleAudienceChange = useCallback((value: string) => {
+    const filter = value as AudienceFilter;
+    setAudienceFilter(filter);
     setSearchParams(prev => {
       const params = new URLSearchParams(prev);
-      if (value === 'all') {
+      if (filter === 'all') {
         params.delete('audience');
       } else {
-        params.set('audience', value);
+        params.set('audience', filter);
       }
       return params;
     });
@@ -78,82 +97,77 @@ export default function Discover() {
 
   return (
     <AppLayout showBottomNav>
-      <PageContainer className="pb-24">
-        <PageHeader 
-          title={language === 'ru' ? 'Услуги' : 'Services'}
-          showBack
-          fallbackPath="/"
-        />
-        
-        {/* Search Bar - Navigate to dedicated search page */}
-        <div 
-          className="relative cursor-pointer mt-4 mb-4"
-          onClick={() => navigate('/search')}
-        >
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-          <Input 
-            placeholder={language === 'ru' ? 'Поиск услуг и провайдеров...' : 'Search services & providers...'}
-            className="pl-11 h-12 text-base rounded-xl bg-muted/50 border-0 cursor-pointer"
-            readOnly
+      <div className="min-h-screen bg-background pb-24">
+        {/* Unified sticky header with search */}
+        <div className="sticky top-0 z-40">
+          <UnifiedHeader
+            title={isRu ? 'Услуги' : 'Services'}
+            subtitle={isRu ? 'Все сервисы для жизни в Таиланде' : 'All services for life in Thailand'}
+            showBack
+            fallbackPath="/"
+            searchPlaceholder={isRu ? 'Поиск услуг и провайдеров...' : 'Search services & providers...'}
+            onSearchClick={() => navigate('/search')}
+          />
+          
+          {/* Audience Filter Ribbon */}
+          <UnifiedFilterRibbon
+            items={audienceItems}
+            activeId={audienceFilter}
+            onSelect={handleAudienceChange}
           />
         </div>
 
-        <PullToRefresh onRefresh={handleRefresh} className="min-h-0">
-          <div key={refreshKey} className="space-y-8">
-            
-            {/* Audience Filter */}
-            <AudienceFilterTabs 
-              value={audienceFilter} 
-              onChange={handleAudienceChange} 
-              language={language} 
-            />
-            
-            {isLoading ? (
-              <LoadingSkeleton />
-            ) : filteredGroups.length === 0 ? (
-              <EmptyState
-                icon={Package}
-                title={language === 'ru' ? 'Ничего не найдено' : 'Nothing found'}
-                description={language === 'ru' ? 'Попробуйте другой фильтр' : 'Try a different filter'}
-              />
-            ) : (
-              <>
-                {/* 1. Mini-Apps Grid (full booking experience) */}
-                <MiniAppsGrid
-                  groups={filteredGroups}
-                  getName={getName}
-                  language={language}
-                  isFeatured={isFeatured}
-                  getCount={getCount}
+        <PageContainer className="pt-0">
+          <PullToRefresh onRefresh={handleRefresh} className="min-h-0">
+            <div key={refreshKey} className="space-y-6 pt-4">
+              
+              {isLoading ? (
+                <LoadingSkeleton />
+              ) : filteredGroups.length === 0 ? (
+                <EmptyState
+                  icon={Package}
+                  title={isRu ? 'Ничего не найдено' : 'Nothing found'}
+                  description={isRu ? 'Попробуйте другой фильтр' : 'Try a different filter'}
                 />
-                
-                {/* 2. Featured Services Gallery */}
-                {audienceFilter === 'all' && (
-                  <FeaturedServicesGallery
-                    services={services}
-                    isLoading={servicesLoading}
-                    viewAllPath="/services"
+              ) : (
+                <>
+                  {/* 1. Mini-Apps Grid (full booking experience) */}
+                  <MiniAppsGrid
+                    groups={filteredGroups}
+                    getName={getName}
+                    language={language}
+                    isFeatured={isFeatured}
+                    getCount={getCount}
                   />
-                )}
-                
-                {/* 3. Other Categories (non-mini-app) grouped */}
-                <div className="space-y-6">
-                  {filteredGroups.map(group => (
-                    <CategoryGroupSection
-                      key={group.id}
-                      group={group}
-                      getName={getName}
-                      language={language}
-                      getCount={getCount}
-                      excludeMiniApps={true}
+                  
+                  {/* 2. Featured Services Gallery */}
+                  {audienceFilter === 'all' && (
+                    <FeaturedServicesGallery
+                      services={services}
+                      isLoading={servicesLoading}
+                      viewAllPath="/services"
                     />
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        </PullToRefresh>
-      </PageContainer>
+                  )}
+                  
+                  {/* 3. Other Categories (non-mini-app) grouped */}
+                  <div className="space-y-6">
+                    {filteredGroups.map(group => (
+                      <CategoryGroupSection
+                        key={group.id}
+                        group={group}
+                        getName={getName}
+                        language={language}
+                        getCount={getCount}
+                        excludeMiniApps={true}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </PullToRefresh>
+        </PageContainer>
+      </div>
     </AppLayout>
   );
 }
