@@ -16,7 +16,7 @@ interface MiniCartProps {
   className?: string;
 }
 
-export const MiniCart = forwardRef<HTMLDivElement, MiniCartProps>(({ className }, ref) => {
+export const MiniCart = forwardRef<HTMLButtonElement | HTMLDivElement, MiniCartProps>(({ className }, ref) => {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { getItemsByType, getItemCount, removeItem } = useCart();
@@ -30,22 +30,23 @@ export const MiniCart = forwardRef<HTMLDivElement, MiniCartProps>(({ className }
 
   if (totalItems === 0) {
     return (
-      <div ref={ref}>
-        <button 
-          className={cn("relative p-2 rounded-full hover:bg-muted transition-colors", className)}
-          onClick={() => navigate('/cart')}
-        >
-          <ShoppingCart className="w-6 h-6" />
-        </button>
-      </div>
+      <button 
+        ref={ref as React.Ref<HTMLButtonElement>}
+        className={cn("relative p-2 rounded-full hover:bg-muted transition-colors", className)}
+        onClick={() => navigate('/cart')}
+      >
+        <ShoppingCart className="w-6 h-6" />
+      </button>
     );
   }
 
   return (
-    <div ref={ref}>
-      <Popover>
+    <Popover>
       <PopoverTrigger asChild>
-        <button className={cn("relative p-2 rounded-full hover:bg-muted transition-colors", className)}>
+        <button 
+          ref={ref as React.Ref<HTMLButtonElement>}
+          className={cn("relative p-2 rounded-full hover:bg-muted transition-colors", className)}
+        >
           <ShoppingCart className="w-6 h-6" />
           <Badge 
             className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-[10px] font-bold"
@@ -54,7 +55,7 @@ export const MiniCart = forwardRef<HTMLDivElement, MiniCartProps>(({ className }
           </Badge>
         </button>
       </PopoverTrigger>
-      <PopoverContent 
+      <PopoverContent
         className="w-80 p-0" 
         align="end" 
         sideOffset={8}
@@ -143,7 +144,6 @@ export const MiniCart = forwardRef<HTMLDivElement, MiniCartProps>(({ className }
         </div>
       </PopoverContent>
     </Popover>
-    </div>
   );
 });
 
