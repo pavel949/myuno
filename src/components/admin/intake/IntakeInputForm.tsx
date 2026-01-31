@@ -51,7 +51,7 @@ export function IntakeInputForm({ mode, onAnalyze, isProcessing }: IntakeInputFo
       mode,
       rawText: mode !== 'bulk_urls' ? rawText : undefined,
       urls,
-      forceVertical: forceVertical || undefined,
+      forceVertical: forceVertical && forceVertical !== 'auto' ? forceVertical : undefined,
     });
   };
 
@@ -104,7 +104,7 @@ export function IntakeInputForm({ mode, onAnalyze, isProcessing }: IntakeInputFo
               <SelectValue placeholder={isRu ? 'Авто-определение' : 'Auto-detect'} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">
+              <SelectItem value="auto">
                 {isRu ? '🤖 Авто-определение' : '🤖 Auto-detect'}
               </SelectItem>
               {INTAKE_VERTICALS.map(v => (
