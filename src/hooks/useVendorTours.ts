@@ -40,6 +40,7 @@ export function useVendorTours(providerId?: string) {
     providerIdField: 'provider_id',
     orderByColumn: 'created_at',
     orderAscending: false,
+    select: 'id,provider_id,title_en,title_ru,description_en,description_ru,category,difficulty,duration_hours,price,currency,max_participants,meeting_point,meeting_point_lat,meeting_point_lng,includes,excludes,highlights,itinerary,cover_image,images,available_days,start_times,is_active,is_featured,rating,review_count,created_at,updated_at',
   });
 
   return {

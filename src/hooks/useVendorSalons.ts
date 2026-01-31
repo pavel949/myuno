@@ -35,6 +35,10 @@ export function useVendorSalons(providerId?: string) {
   const { items, isLoading, create, update, remove, refetch } = useSupabaseCRUD<VendorSalon>({
     table: 'salons',
     providerId,
+    providerIdField: 'provider_id',
+    orderByColumn: 'created_at',
+    orderAscending: false,
+    select: 'id,provider_id,name_en,name_ru,description_en,description_ru,salon_type,cover_image,images,address,district,phone,email,services,amenities,price_from,currency,rating,review_count,is_verified,is_featured,is_active,working_hours,created_at,updated_at',
   });
 
   return {

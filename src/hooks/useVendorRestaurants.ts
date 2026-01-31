@@ -38,6 +38,7 @@ export function useVendorRestaurants(providerId?: string) {
     providerIdField: 'provider_id',
     orderByColumn: 'created_at',
     orderAscending: false,
+    select: 'id,provider_id,name_en,name_ru,description_en,description_ru,cuisine,address,district,phone,email,website,price_level,cover_image,images,working_hours,has_delivery,has_takeout,has_reservations,is_active,is_featured,is_verified,rating,review_count,lat,lng,created_at,updated_at',
   });
 
   return {

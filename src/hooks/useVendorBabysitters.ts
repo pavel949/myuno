@@ -37,6 +37,7 @@ export function useVendorBabysitters(providerId?: string) {
     providerIdField: 'provider_id',
     orderByColumn: 'created_at',
     orderAscending: false,
+    select: 'id,provider_id,name_en,name_ru,bio_en,bio_ru,photo,images,age_groups,languages,certifications,experience_years,price_per_hour,price_per_day,currency,availability,can_cook,can_drive,first_aid_certified,background_checked,is_active,is_featured,is_verified,rating,review_count,created_at,updated_at',
   });
 
   return {

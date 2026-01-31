@@ -8,6 +8,7 @@ export function useVendorYachts(providerId?: string) {
     providerIdField: 'provider_id',
     orderByColumn: 'created_at',
     orderAscending: false,
+    select: 'id,name_en,name_ru,description_en,description_ru,yacht_type,cover_image,images,capacity,cabins,length_ft,year_built,price_per_day,price_per_hour,currency,is_active,is_featured,rating,review_count,created_at,updated_at,approval_status',
   });
 
   return {

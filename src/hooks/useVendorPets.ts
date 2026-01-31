@@ -40,6 +40,7 @@ export function useVendorPets(providerId?: string) {
     providerIdField: 'provider_id',
     orderByColumn: 'created_at',
     orderAscending: false,
+    select: 'id,provider_id,name_en,name_ru,description_en,description_ru,service_type,pet_types,services_offered,price_per_hour,price_per_day,currency,address,district,phone,email,website,cover_image,images,working_hours,has_pickup,is_active,is_featured,is_verified,rating,review_count,lat,lng,created_at,updated_at',
   });
 
   return {
