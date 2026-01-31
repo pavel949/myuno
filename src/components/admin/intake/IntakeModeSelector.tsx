@@ -1,9 +1,9 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { FileText, Files, Link2 } from 'lucide-react';
+import { FileText, Files, Link2, Upload } from 'lucide-react';
 
-export type IntakeMode = 'single' | 'bulk_text' | 'bulk_urls';
+export type IntakeMode = 'single' | 'bulk_text' | 'bulk_urls' | 'files';
 
 interface IntakeModeSelectorProps {
   mode: IntakeMode;
@@ -36,6 +36,14 @@ const modes = [
     descEn: 'Scrape from websites',
     descRu: 'Парсинг сайтов'
   },
+  { 
+    id: 'files' as const, 
+    icon: Upload, 
+    labelEn: 'Files', 
+    labelRu: 'Файлы',
+    descEn: 'Images, PDF, Excel',
+    descRu: 'Фото, PDF, Excel'
+  },
 ];
 
 export function IntakeModeSelector({ mode, onChange, disabled }: IntakeModeSelectorProps) {
@@ -43,7 +51,7 @@ export function IntakeModeSelector({ mode, onChange, disabled }: IntakeModeSelec
   const isRu = language === 'ru';
 
   return (
-    <div className="grid grid-cols-3 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
       {modes.map((m) => {
         const Icon = m.icon;
         const isActive = mode === m.id;
