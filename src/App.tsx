@@ -12,13 +12,29 @@ import { CartProvider } from "@/contexts/CartContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AnimatedRoutes } from "@/components/layout/AnimatedRoutes";
 import { SupportFAB } from "@/components/chat/SupportFAB";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ErrorBoundary, useGlobalErrorHandler } from "@/components/ErrorBoundary";
 import { PrefetchProvider } from "@/components/providers/PrefetchProvider";
 import { defaultQueryClientOptions } from "@/lib/queryConfig";
 
 const queryClient = new QueryClient({
   defaultOptions: defaultQueryClientOptions,
 });
+
+// Inner component to use hooks
+function AppContent() {
+  useGlobalErrorHandler();
+  
+  return (
+    <>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <AnimatedRoutes />
+        <SupportFAB />
+      </BrowserRouter>
+    </>
+  );
+}
 
 const App = () => (
   <ErrorBoundary>
@@ -32,12 +48,7 @@ const App = () => (
                   <CartProvider>
                     <TooltipProvider>
                       <PrefetchProvider>
-                        <Toaster />
-                        <Sonner />
-                        <BrowserRouter>
-                          <AnimatedRoutes />
-                          <SupportFAB />
-                        </BrowserRouter>
+                        <AppContent />
                       </PrefetchProvider>
                     </TooltipProvider>
                   </CartProvider>
