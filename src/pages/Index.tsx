@@ -6,28 +6,47 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { SEOHead, createOrganizationSchema } from '@/components/seo';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
-import { SmartWidget } from '@/components/home/SmartWidget';
 import { PromoBanner } from '@/components/home/PromoBanner';
 import { QuickActionsGrid } from '@/components/home/QuickActionsGrid';
-import { MarketplacePromoCarousel } from '@/components/home/MarketplacePromoCarousel';
 import { QuickAccessChips } from '@/components/home/QuickAccessChips';
-import { RecommendedCarousel } from '@/components/home/RecommendedCarousel';
-import { ForYouSection } from '@/components/recommendations/ForYouSection';
-import { PersonalizedOffersSection } from '@/components/notifications/PersonalizedOffersSection';
 import { ContentModeToggle, ContentMode } from '@/components/home/ContentModeToggle';
 import { PersonaSelector } from '@/components/home/PersonaSelector';
-import { HomeCategoryRibbon } from '@/components/home/HomeCategoryRibbon';
-import { HomeProductsSection } from '@/components/home/HomeProductsSection';
-import { KnowledgeHubBanner } from '@/components/home/KnowledgeHubBanner';
 import { SafetyBanner } from '@/components/home/SafetyBanner';
 import { supabase } from '@/integrations/supabase/client';
 import { HeroBanner } from '@/components/home/HeroBanner';
 import { InstallBanner } from '@/components/pwa/InstallBanner';
 import { PWAWelcomeScreen } from '@/components/pwa/PWAWelcomeScreen';
 import { InlineSearch } from '@/components/search/InlineSearch';
+import { Skeleton } from '@/components/ui/skeleton';
 
-// Lazy load only modals (opened by user action)
+// Lazy load heavier components that fetch data
+const SmartWidget = lazy(() => import('@/components/home/SmartWidget').then(m => ({ default: m.SmartWidget })));
+const MarketplacePromoCarousel = lazy(() => import('@/components/home/MarketplacePromoCarousel').then(m => ({ default: m.MarketplacePromoCarousel })));
+const RecommendedCarousel = lazy(() => import('@/components/home/RecommendedCarousel').then(m => ({ default: m.RecommendedCarousel })));
+const ForYouSection = lazy(() => import('@/components/recommendations/ForYouSection').then(m => ({ default: m.ForYouSection })));
+const PersonalizedOffersSection = lazy(() => import('@/components/notifications/PersonalizedOffersSection').then(m => ({ default: m.PersonalizedOffersSection })));
+const KnowledgeHubBanner = lazy(() => import('@/components/home/KnowledgeHubBanner').then(m => ({ default: m.KnowledgeHubBanner })));
+const HomeCategoryRibbon = lazy(() => import('@/components/home/HomeCategoryRibbon').then(m => ({ default: m.HomeCategoryRibbon })));
+const HomeProductsSection = lazy(() => import('@/components/home/HomeProductsSection').then(m => ({ default: m.HomeProductsSection })));
+
+// Lazy load modals (opened by user action)
 const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
+
+// Loading skeleton for lazy components
+const SectionSkeleton = () => (
+  <div className="space-y-3">
+    <Skeleton className="h-6 w-32" />
+    <div className="flex gap-3 overflow-hidden">
+      <Skeleton className="h-40 w-56 rounded-xl flex-shrink-0" />
+      <Skeleton className="h-40 w-56 rounded-xl flex-shrink-0" />
+      <Skeleton className="h-40 w-56 rounded-xl flex-shrink-0" />
+    </div>
+  </div>
+);
+
+const WidgetSkeleton = () => (
+  <Skeleton className="h-36 w-full rounded-xl" />
+);
 
 const Index = () => {
   const { t } = useLanguage();
@@ -132,7 +151,9 @@ const Index = () => {
 
               {/* Smart Widget & Quick Actions */}
               <div className="space-y-3">
-                <SmartWidget />
+                <Suspense fallback={<WidgetSkeleton />}>
+                  <SmartWidget />
+                </Suspense>
                 <QuickActionsGrid />
               </div>
 
@@ -143,10 +164,14 @@ const Index = () => {
               <PromoBanner />
 
               {/* Marketplace Promo Carousel */}
-              <MarketplacePromoCarousel />
+              <Suspense fallback={<SectionSkeleton />}>
+                <MarketplacePromoCarousel />
+              </Suspense>
 
               {/* Knowledge Hub Banner */}
-              <KnowledgeHubBanner />
+              <Suspense fallback={null}>
+                <KnowledgeHubBanner />
+              </Suspense>
 
               {/* Quick Access Chips - Owner/Partner/Wallet */}
               <QuickAccessChips />
@@ -157,19 +182,27 @@ const Index = () => {
               {/* Recommendations */}
               <div className="space-y-5">
                 <div data-tour="recommended">
-                  <RecommendedCarousel />
+                  <Suspense fallback={<SectionSkeleton />}>
+                    <RecommendedCarousel />
+                  </Suspense>
                 </div>
 
-                <PersonalizedOffersSection />
+                <Suspense fallback={<SectionSkeleton />}>
+                  <PersonalizedOffersSection />
+                </Suspense>
 
-                <ForYouSection />
+                <Suspense fallback={<SectionSkeleton />}>
+                  <ForYouSection />
+                </Suspense>
               </div>
             </>
           ) : (
             /* Products Mode Content */
             <>
               {/* Category Ribbon for products */}
-              <HomeCategoryRibbon />
+              <Suspense fallback={<Skeleton className="h-12 w-full rounded-lg" />}>
+                <HomeCategoryRibbon />
+              </Suspense>
 
               {/* Visual Divider */}
               <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
@@ -181,7 +214,9 @@ const Index = () => {
               <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
               {/* Product Sections */}
-              <HomeProductsSection />
+              <Suspense fallback={<SectionSkeleton />}>
+                <HomeProductsSection />
+              </Suspense>
             </>
           )}
 

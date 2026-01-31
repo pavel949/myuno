@@ -2,7 +2,7 @@ import { useRef, useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Star, MapPin, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useTours } from '@/hooks/useTours';
+import { useHomePageData } from '@/hooks/useHomePageData';
 
 interface CarouselItem {
   id: string;
@@ -25,7 +25,8 @@ export const RecommendedCarousel = memo(function RecommendedCarousel() {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
-  const { tours, isLoading: toursLoading } = useTours({ category: undefined });
+  // Use centralized data hook to avoid duplicate queries
+  const { tours, isToursLoading: toursLoading } = useHomePageData();
 
   // Memoize items transformation
   const items: CarouselItem[] = useMemo(() => 
@@ -37,9 +38,9 @@ export const RecommendedCarousel = memo(function RecommendedCarousel() {
       titleRu: tour.title_ru,
       rating: tour.rating ?? undefined,
       price: tour.price ?? undefined,
-      location: tour.meeting_point ?? undefined,
-      locationRu: tour.meeting_point ?? undefined,
-      duration: tour.duration_hours ? `${tour.duration_hours}h` : undefined,
+      location: undefined,
+      locationRu: undefined,
+      duration: undefined,
       path: `/tours/${tour.id}`,
     })), [tours]);
 
