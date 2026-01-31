@@ -3,15 +3,13 @@ import { LucideIcon, ShoppingCart, MapIcon, SlidersHorizontal } from 'lucide-rea
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { PageContainer } from '@/components/uno/PageContainer';
-import { PageHeader } from '@/components/uno/PageHeader';
 import { MiniAppHero } from './MiniAppHero';
-import { MiniAppSearch } from './MiniAppSearch';
-import { FilterChip, FilterChipGroup } from '@/components/uno/FilterChip';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { UniversalFilter, type FilterConfig, type FilterValues } from '@/components/filters/UniversalFilter';
+import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import { UnifiedFilterRibbon, type FilterRibbonItem } from '@/components/shared/UnifiedFilterRibbon';
 
 export interface MiniAppCategory {
   id: string;
@@ -106,6 +104,7 @@ export function MiniAppLayout({
   // Map
   mapPath,
   showMapButton = false,
+  onMapClick,
   
   // Cart
   cartItemCount = 0,
@@ -128,18 +127,18 @@ export function MiniAppLayout({
   const navigate = useNavigate();
   const { language, t } = useLanguage();
 
-  // Build header actions
+  // Build header right actions
   const buildHeaderActions = () => {
     const actions: ReactNode[] = [];
     
-    if (showMapButton && mapPath) {
+    if (showMapButton) {
       actions.push(
         <Button 
           key="map"
-          variant="outline" 
+          variant="ghost" 
           size="icon"
-          onClick={() => navigate(mapPath)}
-          className="shrink-0"
+          onClick={onMapClick || (mapPath ? () => navigate(mapPath) : undefined)}
+          className="shrink-0 h-9 w-9 rounded-xl"
         >
           <MapIcon className="w-5 h-5" />
         </Button>
@@ -153,7 +152,7 @@ export function MiniAppLayout({
           variant="ghost"
           size="icon"
           onClick={() => navigate('/cart')}
-          className="relative shrink-0"
+          className="relative shrink-0 h-9 w-9 rounded-xl"
         >
           <ShoppingCart className="w-5 h-5" />
           {cartItemCount > 0 && (
@@ -164,26 +163,73 @@ export function MiniAppLayout({
         </Button>
       );
     }
+
+    // Filter button
+    if (showFilter && filterConfig && onFilterChange) {
+      actions.push(
+        <UniversalFilter
+          key="filter"
+          config={filterConfig}
+          values={filterValues || {}}
+          onChange={onFilterChange}
+        >
+          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl relative shrink-0">
+            <SlidersHorizontal className="w-5 h-5" />
+            {filterActiveCount > 0 && (
+              <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
+                {filterActiveCount}
+              </Badge>
+            )}
+          </Button>
+        </UniversalFilter>
+      );
+    } else if (showFilter && filterButton) {
+      actions.push(<React.Fragment key="filterButton">{filterButton}</React.Fragment>);
+    }
     
     if (headerActions) {
       actions.push(<React.Fragment key="custom">{headerActions}</React.Fragment>);
     }
     
-    return actions.length > 0 ? <div className="flex items-center gap-2">{actions}</div> : undefined;
+    return actions.length > 0 ? <div className="flex items-center gap-1">{actions}</div> : undefined;
   };
+
+  // Convert categories to FilterRibbonItem format
+  const categoryItems: FilterRibbonItem[] = categories.map(cat => ({
+    id: cat.id,
+    label: language === 'ru' ? cat.labelRu : cat.labelEn,
+    emoji: cat.icon, // MiniAppCategory uses string emoji icons
+  }));
 
   return (
     <AppLayout showBottomNav={showBottomNav}>
-      <PageContainer className={cn("pb-4", showBottomNav && "pb-24", contentClassName)}>
-        {/* Header */}
-        <PageHeader
+      {/* Unified Sticky Header */}
+      <div className="sticky top-0 z-40">
+        <UnifiedHeader
           title={title}
           subtitle={subtitle}
           showBack
           fallbackPath={fallbackPath}
-          actions={buildHeaderActions()}
+          searchPlaceholder={searchPlaceholder}
+          searchValue={showSearch ? searchValue : undefined}
+          onSearchChange={showSearch && onSearchChange ? onSearchChange : undefined}
+          rightAction={buildHeaderActions()}
         />
+        
+        {/* Category Filter Ribbon */}
+        {showCategories && categoryItems.length > 0 && onCategoryChange && (
+          <div className="bg-background/95 backdrop-blur-sm border-b border-border/30">
+            <UnifiedFilterRibbon
+              items={categoryItems}
+              activeId={selectedCategory}
+              onSelect={onCategoryChange}
+              className="px-4 py-2 border-0"
+            />
+          </div>
+        )}
+      </div>
 
+      <div className={cn("p-4 pb-4 space-y-4", showBottomNav && "pb-24", contentClassName)}>
         {/* Hero Section */}
         {showHero && heroIcon && heroTitle && (
           <MiniAppHero
@@ -194,67 +240,15 @@ export function MiniAppLayout({
             gradientFrom={heroGradientFrom}
             gradientVia={heroGradientVia}
             gradientTo={heroGradientTo}
-            className="mt-4 mb-4"
           />
         )}
 
         {/* Quick Actions */}
-        {quickActions && (
-          <div className="mb-4">
-            {quickActions}
-          </div>
-        )}
-
-        {/* Search + Filter Row */}
-        {(showSearch || showFilter) && (
-          <div className="flex gap-2 mb-4">
-            {showSearch && onSearchChange && (
-              <div className="flex-1">
-                <MiniAppSearch
-                  value={searchValue}
-                  onChange={onSearchChange}
-                  placeholder={searchPlaceholder}
-                />
-              </div>
-            )}
-            {showFilter && filterButton}
-            {showFilter && !filterButton && filterConfig && onFilterChange && (
-              <UniversalFilter
-                config={filterConfig}
-                values={filterValues || {}}
-                onChange={onFilterChange}
-              >
-                <Button variant="outline" size="icon" className="h-12 w-12 relative shrink-0">
-                  <SlidersHorizontal className="w-5 h-5" />
-                  {filterActiveCount > 0 && (
-                    <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
-                      {filterActiveCount}
-                    </Badge>
-                  )}
-                </Button>
-              </UniversalFilter>
-            )}
-          </div>
-        )}
-
-        {/* Category Chips */}
-        {showCategories && categories.length > 0 && onCategoryChange && (
-          <FilterChipGroup scrollable className="mb-4">
-            {categories.map((cat) => (
-              <FilterChip
-                key={cat.id}
-                label={`${cat.icon ? cat.icon + ' ' : ''}${language === 'ru' ? cat.labelRu : cat.labelEn}`}
-                isActive={selectedCategory === cat.id}
-                size="sm"
-                onToggle={() => onCategoryChange(cat.id)}
-              />
-            ))}
-          </FilterChipGroup>
-        )}
+        {quickActions}
 
         {/* Results Count */}
         {resultsCount !== undefined && (
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">
               {resultsLabel || t('booking.results')}
             </h2>
@@ -266,7 +260,7 @@ export function MiniAppLayout({
 
         {/* Main Content */}
         {children}
-      </PageContainer>
+      </div>
     </AppLayout>
   );
 }
