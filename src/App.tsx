@@ -1,6 +1,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { SkipToContent } from "@/components/a11y/SkipToContent";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
@@ -26,6 +27,7 @@ function AppContent() {
   
   return (
     <>
+      <SkipToContent />
       <Toaster />
       <Sonner />
       <BrowserRouter>
