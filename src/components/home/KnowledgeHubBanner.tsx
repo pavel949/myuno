@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, ChevronRight, Globe, Landmark, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -6,7 +6,8 @@ import { useLocation } from '@/contexts/LocationContext';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
-export function KnowledgeHubBanner() {
+export const KnowledgeHubBanner = forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(
+  function KnowledgeHubBanner(props, ref) {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { currentCity, getCityName } = useLocation();
@@ -22,11 +23,13 @@ export function KnowledgeHubBanner() {
 
   return (
     <Card 
+      ref={ref}
       className={cn(
         "relative overflow-hidden cursor-pointer group",
         "bg-gradient-to-br from-primary/5 via-primary/10 to-accent/5",
         "border-primary/20 hover:border-primary/40 transition-all duration-300",
-        "hover:shadow-lg hover:shadow-primary/10"
+        "hover:shadow-lg hover:shadow-primary/10",
+        props.className
       )}
       onClick={() => navigate('/knowledge')}
     >
@@ -66,4 +69,6 @@ export function KnowledgeHubBanner() {
       </div>
     </Card>
   );
-}
+});
+
+KnowledgeHubBanner.displayName = 'KnowledgeHubBanner';
