@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBooking } from "@/hooks/useBooking";
+import { useSalonStaff } from "@/hooks/useSalonStaff";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageContainer } from "@/components/uno/PageContainer";
 import { PageHeader } from "@/components/uno/PageHeader";
@@ -18,6 +19,7 @@ import {
   type ContactFormData,
   type PaymentMethod 
 } from "@/components/booking";
+import { StaffPickerInline } from "@/components/beauty/StaffPicker";
 import { addDays, format } from "date-fns";
 import { ru } from "date-fns/locale";
 
@@ -34,9 +36,13 @@ export default function BeautyBooking() {
     salon?: any;
   };
 
+  // Fetch salon staff
+  const { staff, isLoading: staffLoading } = useSalonStaff(salon?.id || id);
+
   // Form state
   const [date, setDate] = useState<Date | undefined>(addDays(new Date(), 1));
   const [time, setTime] = useState<string>("");
+  const [selectedStaffId, setSelectedStaffId] = useState<string | undefined>();
   const [contactData, setContactData] = useState<ContactFormData>({ name: "", phone: "" });
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
   const [bookingResult, setBookingResult] = useState<{ success: boolean; bookingId?: string } | null>(null);
@@ -90,12 +96,18 @@ export default function BeautyBooking() {
     const [hours, minutes] = time.split(':').map(Number);
     scheduledAt.setHours(hours, minutes, 0, 0);
 
+    const selectedStaff = staff.find(s => s.id === selectedStaffId);
+    const staffName = selectedStaff 
+      ? (language === 'ru' ? selectedStaff.name_ru : selectedStaff.name_en) 
+      : undefined;
+
     const result = await createBooking({
       booking_type: 'service',
       scheduled_at: scheduledAt,
       total_amount: totalPrice,
       currency: 'THB',
-      notes: `Salon: ${salon?.name || 'Beauty Salon'}. Duration: ${totalDuration} min`,
+      staff_id: selectedStaffId, // Add staff selection
+      notes: `Salon: ${salon?.name || 'Beauty Salon'}. Duration: ${totalDuration} min${staffName ? `. Staff: ${staffName}` : ''}`,
       items: selectedServiceDetails.map((service: any) => ({
         item_type: 'service',
         item_id: service.id,
@@ -152,6 +164,21 @@ export default function BeautyBooking() {
             sourceCurrency="THB"
           />
         </div>
+
+        {/* Staff Selection */}
+        {staff.length > 0 && (
+          <div className="bg-card rounded-2xl border p-5 mb-4">
+            <h3 className="font-semibold mb-3">
+              {language === 'ru' ? 'Выберите мастера' : 'Choose Specialist'}
+            </h3>
+            <StaffPickerInline
+              staff={staff}
+              selectedId={selectedStaffId}
+              onSelect={setSelectedStaffId}
+              isLoading={staffLoading}
+            />
+          </div>
+        )}
 
         {/* Date & Time */}
         <div className="bg-card rounded-2xl border p-5 mb-4">

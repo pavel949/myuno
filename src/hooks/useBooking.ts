@@ -52,6 +52,7 @@ export interface CreateBookingParams {
   currency?: string;
   provider_id?: string;
   service_id?: string;
+  staff_id?: string;
   notes?: string;
   items?: BookingItem[];
   participants?: BookingParticipant[];
@@ -161,6 +162,7 @@ export function useBooking() {
         metadata: {
           ...params.metadata,
           service_id: params.service_id,
+          staff_id: params.staff_id,
           legacy_booking_type: params.booking_type,
         },
         items: (params.items || []).map(item => ({
