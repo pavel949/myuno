@@ -52,7 +52,8 @@ export function ReceiptUploadWithOCR({
     
     try {
       // Use Lovable AI via edge function for OCR
-      const response = await fetch('/functions/v1/ocr-receipt', {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const response = await fetch(`${supabaseUrl}/functions/v1/ocr-receipt`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ image_url: imageUrl }),
@@ -155,7 +156,7 @@ export function ReceiptUploadWithOCR({
             {/* OCR Status */}
             {parsedData && !isProcessing && (
               <div className="space-y-3">
-                <div className="flex items-center gap-2 text-green-600">
+                <div className="flex items-center gap-2 text-success">
                   <Check className="h-4 w-4" />
                   <span className="text-sm font-medium">
                     {isRu ? 'Успешно распознано' : 'Successfully parsed'}
