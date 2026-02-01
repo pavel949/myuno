@@ -13,9 +13,10 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { 
   Globe, Sparkles, Loader2, CheckCircle2, AlertCircle, ExternalLink,
-  Home, Bed, Bath, Users, DollarSign, Image, FileText, MapPin
+  Home, Bed, Bath, Users, DollarSign, Image, FileText, MapPin, ShieldAlert, PenLine
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 // Supported OTA platforms
 const OTA_PLATFORMS = [
@@ -39,7 +40,7 @@ const IMPORT_FIELDS = [
   { id: 'house_rules', labelEn: 'House Rules', labelRu: 'Правила', icon: FileText },
 ];
 
-type ImportStep = 'input' | 'preview' | 'select' | 'complete';
+type ImportStep = 'input' | 'preview' | 'select' | 'complete' | 'blocked';
 
 export default function OwnerPropertyImport() {
   const { language } = useLanguage();
@@ -97,8 +98,14 @@ export default function OwnerPropertyImport() {
       });
 
       setStep('preview');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error analyzing URL:', error);
+      
+      // Check for OTA blocked error
+      const errorMessage = error?.message || '';
+      if (errorMessage.includes('OTA_BLOCKED') || errorMessage.includes('blocklisted') || errorMessage.includes('blocked')) {
+        setStep('blocked');
+      }
     }
   };
 
@@ -248,6 +255,97 @@ export default function OwnerPropertyImport() {
                     <li>{isRu ? 'Объект создаётся на myUNO' : 'Property is created on myUNO'}</li>
                     <li>{isRu ? 'Календарь синхронизируется автоматически' : 'Calendar syncs automatically'}</li>
                   </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Step: Blocked - OTA restricts automated access */}
+      {step === 'blocked' && (
+        <div className="space-y-6">
+          <Alert variant="destructive" className="border-orange-500/50 bg-orange-50 dark:bg-orange-950/20">
+            <ShieldAlert className="h-5 w-5 text-orange-600" />
+            <AlertTitle className="text-orange-800 dark:text-orange-200">
+              {isRu ? 'Площадка ограничивает автоматический доступ' : 'Platform Restricts Automated Access'}
+            </AlertTitle>
+            <AlertDescription className="text-orange-700 dark:text-orange-300">
+              {isRu 
+                ? 'Airbnb и некоторые другие площадки блокируют автоматическое считывание данных. Это ограничение на стороне площадки, а не ошибка системы.'
+                : 'Airbnb and some other platforms block automated data extraction. This is a platform-side restriction, not a system error.'
+              }
+            </AlertDescription>
+          </Alert>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <PenLine className="h-5 w-5 text-primary" />
+                {isRu ? 'Альтернативные варианты' : 'Alternative Options'}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4">
+                <Button 
+                  onClick={() => navigate('/owner/properties/new')}
+                  className="w-full justify-start h-auto py-4"
+                  variant="outline"
+                >
+                  <div className="flex items-start gap-3 text-left">
+                    <FileText className="h-5 w-5 mt-0.5 text-primary" />
+                    <div>
+                      <p className="font-medium">{isRu ? 'Создать объект вручную' : 'Create Property Manually'}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {isRu 
+                          ? 'Заполните форму самостоятельно — это займёт 5-10 минут'
+                          : 'Fill out the form yourself — it takes 5-10 minutes'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                </Button>
+                
+                <Button 
+                  onClick={() => {
+                    setStep('input');
+                    setUrl('');
+                    setSelectedPlatform(null);
+                  }}
+                  variant="ghost"
+                  className="w-full justify-start h-auto py-4"
+                >
+                  <div className="flex items-start gap-3 text-left">
+                    <Globe className="h-5 w-5 mt-0.5" />
+                    <div>
+                      <p className="font-medium">{isRu ? 'Попробовать другую ссылку' : 'Try Another URL'}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {isRu 
+                          ? 'Booking.com и VRBO могут работать'
+                          : 'Booking.com and VRBO may work'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-muted/50">
+            <CardContent className="pt-4">
+              <div className="flex gap-3">
+                <AlertCircle className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+                <div className="text-sm text-muted-foreground">
+                  <p className="font-medium mb-1">
+                    {isRu ? 'Почему так происходит?' : 'Why does this happen?'}
+                  </p>
+                  <p>
+                    {isRu 
+                      ? 'Крупные площадки (Airbnb, Booking) активно защищают свои данные от автоматического считывания. Это стандартная практика в индустрии для защиты контента.'
+                      : 'Major platforms (Airbnb, Booking) actively protect their data from automated extraction. This is standard industry practice to protect content.'
+                    }
+                  </p>
                 </div>
               </div>
             </CardContent>
