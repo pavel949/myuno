@@ -26,6 +26,7 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserPersonas, UserPersona } from '@/hooks/useUserPersonas';
 import { useProfile, type UserType } from '@/hooks/useProfile';
+import { useUserContext, type AppRole } from '@/hooks/useUserContext';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { triggerRipple } from '@/hooks/useRipple';
@@ -403,28 +404,54 @@ function getActionsForUserType(userType: UserType | null | undefined): QuickActi
   }
 }
 
+/**
+ * Map AppRole (from context switcher) to QuickActions
+ * This takes priority when user switches role via RoleContextSwitcher
+ */
+function getActionsForRole(role: AppRole): QuickAction[] {
+  switch (role) {
+    case 'owner':
+      return OWNER_ACTIONS;
+    case 'vendor':
+      return RESIDENT_ACTIONS; // Vendors see resident-style actions on home
+    case 'admin':
+    case 'staff':
+    case 'uno_team':
+      return RESIDENT_ACTIONS;
+    case 'user':
+    default:
+      return DEFAULT_ACTIONS;
+  }
+}
+
 export const QuickActionsGrid = memo(function QuickActionsGrid() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { profile } = useProfile();
   const { personas } = useUserPersonas();
+  const { activeRole, isLoading: roleLoading } = useUserContext();
   const queryClient = useQueryClient();
 
-  // Get personalized actions: personas take priority, fallback to user_type
+  // Get personalized actions: activeRole > personas > user_type
   const quickActions = useMemo(() => {
     let userActions: QuickAction[];
     
-    if (personas.length > 0) {
-      // Use persona-based actions when user has selected personas
+    // Priority 1: If user has explicitly switched role (not default 'user'), use role-based actions
+    if (!roleLoading && activeRole && activeRole !== 'user') {
+      userActions = getActionsForRole(activeRole);
+    }
+    // Priority 2: Use persona-based actions when user has selected personas
+    else if (personas.length > 0) {
       userActions = getActionsForPersonas(personas);
-    } else {
-      // Fallback to profile user_type
+    } 
+    // Priority 3: Fallback to profile user_type
+    else {
       userActions = getActionsForUserType(profile?.user_type);
     }
     
     // Add fixed actions (More button)
     return [...userActions.slice(0, 8), ...FIXED_ACTIONS];
-  }, [personas, profile?.user_type]);
+  }, [activeRole, roleLoading, personas, profile?.user_type]);
 
   const handleClick = useCallback((action: QuickAction, e: React.MouseEvent<HTMLButtonElement>) => {
     triggerRipple(e);
