@@ -284,25 +284,258 @@ export const HOUSE_RULES_PRESETS = [
   { id: 'trash_rules', labelEn: 'Take out trash before checkout', labelRu: 'Вынести мусор перед выездом', icon: '🗑️', default: false },
 ] as const;
 
+// ============= NORMALIZATION ALIASES =============
+// Map legacy/variant keys to canonical keys
+
+const AMENITY_ALIASES: Record<string, string> = {
+  // Air conditioning variants
+  'ac': 'air-conditioning',
+  'air_conditioning': 'air-conditioning',
+  'aircon': 'air-conditioning',
+  'a/c': 'air-conditioning',
+  'Air Conditioning': 'air-conditioning',
+  'AC': 'air-conditioning',
+  // View variants
+  'sea_view': 'sea-view',
+  'seaview': 'sea-view',
+  'Sea View': 'sea-view',
+  'ocean_view': 'ocean-view',
+  'oceanview': 'ocean-view',
+  'Ocean View': 'ocean-view',
+  'mountain_view': 'mountain-view',
+  'Mountain View': 'mountain-view',
+  'pool_view': 'pool-view',
+  'Pool View': 'pool-view',
+  'garden_view': 'garden-view',
+  'Garden View': 'garden-view',
+  // Pet variants
+  'pets': 'pet-friendly',
+  'pets_allowed': 'pet-friendly',
+  'Pets Allowed': 'pet-friendly',
+  // Beach variants
+  'beach': 'beach-access',
+  'beach_access': 'beach-access',
+  'Beach Access': 'beach-access',
+  // Security variants
+  'security': 'security-24h',
+  '24h_security': 'security-24h',
+  '24/7 Security': 'security-24h',
+  // Other common variants
+  'Pool': 'pool',
+  'WiFi': 'wifi',
+  'Wifi': 'wifi',
+  'WIFI': 'wifi',
+  'Gym': 'gym',
+  'Parking': 'parking',
+  'Kitchen': 'kitchen',
+  'Balcony': 'balcony',
+  'Garden': 'garden',
+  'Sauna': 'sauna',
+  'Jacuzzi': 'jacuzzi',
+  'Washer': 'washer',
+  'Dryer': 'dryer',
+  'Smart Home': 'smart-home',
+  'smart_home': 'smart-home',
+  'Bathtub': 'bathtub',
+  'Terrace': 'terrace',
+  'BBQ': 'bbq',
+  'bbq_area': 'bbq',
+  'Rooftop': 'rooftop',
+  'CCTV': 'cctv',
+  'Safe': 'safe',
+  'safe_box': 'safe',
+  'Kids Pool': 'kids-pool',
+  'kids_pool': 'kids-pool',
+  'Playground': 'playground',
+  'Crib': 'crib',
+  'High Chair': 'high-chair',
+  'high_chair': 'high-chair',
+  // Furnished variants
+  'Fully Furnished': 'furnished',
+  'fully_furnished': 'furnished',
+  // Location variants
+  'Beachfront': 'beachfront',
+  'City Center': 'city-center',
+  'city_center': 'city-center',
+  'Quiet Area': 'quiet-area',
+  'quiet_area': 'quiet-area',
+  // Gated community
+  'Gated Community': 'gated',
+  'gated_community': 'gated',
+};
+
+const DISTRICT_ALIASES: Record<string, string> = {
+  // Case normalization
+  'Patong': 'patong',
+  'PATONG': 'patong',
+  'Kata': 'kata',
+  'KATA': 'kata',
+  'Karon': 'karon',
+  'KARON': 'karon',
+  'Rawai': 'rawai',
+  'RAWAI': 'rawai',
+  'Chalong': 'chalong',
+  'CHALONG': 'chalong',
+  'Kamala': 'kamala',
+  'KAMALA': 'kamala',
+  'Surin': 'surin',
+  'SURIN': 'surin',
+  'Bang Tao': 'bang-tao',
+  'Bangtao': 'bang-tao',
+  'bang_tao': 'bang-tao',
+  'Laguna': 'laguna',
+  'LAGUNA': 'laguna',
+  'Cherngtalay': 'cherngtalay',
+  'Cherng Talay': 'cherngtalay',
+  'cherng_talay': 'cherngtalay',
+  'Phuket Town': 'phuket-town',
+  'phuket_town': 'phuket-town',
+  'Kathu': 'kathu',
+  'KATHU': 'kathu',
+  'Nai Harn': 'nai-harn',
+  'Naiharn': 'nai-harn',
+  'nai_harn': 'nai-harn',
+  'Mai Khao': 'mai-khao',
+  'Maikhao': 'mai-khao',
+  'mai_khao': 'mai-khao',
+  'Nai Yang': 'nai-yang',
+  'nai_yang': 'nai-yang',
+  'Nai Thon': 'naithon',
+  'nai_thon': 'naithon',
+  'Kata Noi': 'kata-noi',
+  'kata_noi': 'kata-noi',
+  'Cape Panwa': 'cape-panwa',
+  'cape_panwa': 'cape-panwa',
+  'Ao Po': 'ao-po',
+  'ao_po': 'ao-po',
+  'Koh Kaew': 'koh-kaew',
+  'koh_kaew': 'koh-kaew',
+  'Thalang': 'thalang',
+  'THALANG': 'thalang',
+  'Layan': 'layan',
+  'LAYAN': 'layan',
+};
+
+const PROPERTY_TYPE_ALIASES: Record<string, string> = {
+  'Villa': 'villa',
+  'VILLA': 'villa',
+  'Condo': 'condo',
+  'CONDO': 'condo',
+  'condominium': 'condo',
+  'Condominium': 'condo',
+  'Apartment': 'apartment',
+  'APARTMENT': 'apartment',
+  'apt': 'apartment',
+  'House': 'house',
+  'HOUSE': 'house',
+  'Townhouse': 'townhouse',
+  'TOWNHOUSE': 'townhouse',
+  'town_house': 'townhouse',
+  'Penthouse': 'penthouse',
+  'PENTHOUSE': 'penthouse',
+  'Studio': 'studio',
+  'STUDIO': 'studio',
+  'Bungalow': 'bungalow',
+  'BUNGALOW': 'bungalow',
+};
+
+// ============= NORMALIZATION FUNCTIONS =============
+
+/**
+ * Normalize amenity ID to canonical format
+ * @example normalizeAmenityId('ac') => 'air-conditioning'
+ * @example normalizeAmenityId('sea_view') => 'sea-view'
+ */
+export function normalizeAmenityId(id: string): string {
+  if (!id) return '';
+  const trimmed = id.trim();
+  return AMENITY_ALIASES[trimmed] || trimmed.toLowerCase().replace(/_/g, '-');
+}
+
+/**
+ * Normalize an array of amenity IDs
+ */
+export function normalizeAmenities(amenities: string[]): string[] {
+  if (!amenities || !Array.isArray(amenities)) return [];
+  return [...new Set(amenities.map(normalizeAmenityId).filter(Boolean))];
+}
+
+/**
+ * Normalize district ID to canonical format
+ * @example normalizeDistrictId('Patong') => 'patong'
+ * @example normalizeDistrictId('Bang Tao') => 'bang-tao'
+ */
+export function normalizeDistrictId(id: string): string {
+  if (!id) return '';
+  const trimmed = id.trim();
+  return DISTRICT_ALIASES[trimmed] || trimmed.toLowerCase().replace(/\s+/g, '-').replace(/_/g, '-');
+}
+
+/**
+ * Normalize property type ID
+ * @example normalizePropertyType('Villa') => 'villa'
+ */
+export function normalizePropertyType(type: string): string {
+  if (!type) return '';
+  const trimmed = type.trim();
+  return PROPERTY_TYPE_ALIASES[trimmed] || trimmed.toLowerCase();
+}
+
+/**
+ * Check if amenity ID is valid (exists in taxonomy)
+ */
+export function isValidAmenity(id: string): boolean {
+  const normalized = normalizeAmenityId(id);
+  return ALL_AMENITIES.some(a => a.id === normalized);
+}
+
+/**
+ * Check if district ID is valid
+ */
+export function isValidDistrict(id: string): boolean {
+  const normalized = normalizeDistrictId(id);
+  return PHUKET_DISTRICTS.some(d => d.id === normalized);
+}
+
+/**
+ * Get amenity details by ID (with normalization)
+ */
+export function getAmenityById(id: string) {
+  const normalized = normalizeAmenityId(id);
+  return ALL_AMENITIES.find(a => a.id === normalized);
+}
+
+/**
+ * Get district details by ID (with normalization)
+ */
+export function getDistrictById(id: string) {
+  const normalized = normalizeDistrictId(id);
+  return PHUKET_DISTRICTS.find(d => d.id === normalized);
+}
+
 // ============= UTILITY HELPERS =============
 
 export function getPropertyTypeLabel(id: string, lang: 'en' | 'ru' = 'en'): string {
-  const type = PROPERTY_TYPES.find(t => t.id === id);
+  const normalized = normalizePropertyType(id);
+  const type = PROPERTY_TYPES.find(t => t.id === normalized);
   return type ? (lang === 'ru' ? type.labelRu : type.labelEn) : id;
 }
 
 export function getDistrictLabel(id: string, lang: 'en' | 'ru' = 'en'): string {
-  const district = PHUKET_DISTRICTS.find(d => d.id === id);
+  const normalized = normalizeDistrictId(id);
+  const district = PHUKET_DISTRICTS.find(d => d.id === normalized);
   return district ? (lang === 'ru' ? district.labelRu : district.labelEn) : id;
 }
 
 export function getAmenityLabel(id: string, lang: 'en' | 'ru' = 'en'): string {
-  const amenity = ALL_AMENITIES.find(a => a.id === id);
+  const normalized = normalizeAmenityId(id);
+  const amenity = ALL_AMENITIES.find(a => a.id === normalized);
   return amenity ? (lang === 'ru' ? amenity.labelRu : amenity.labelEn) : id;
 }
 
 export function getAmenityIcon(id: string): string {
-  const amenity = ALL_AMENITIES.find(a => a.id === id);
+  const normalized = normalizeAmenityId(id);
+  const amenity = ALL_AMENITIES.find(a => a.id === normalized);
   return amenity?.icon || '✓';
 }
 
