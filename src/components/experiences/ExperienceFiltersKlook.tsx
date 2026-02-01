@@ -343,39 +343,36 @@ export function ExperienceFiltersKlook({
           </DrawerHeader>
 
           <ScrollArea className="flex-1 max-h-[calc(85vh-160px)]">
-            <div className="px-4 py-6 space-y-6">
+            <div className="px-4 py-5 space-y-5">
               
-              {/* Categories Section - Klook style */}
-              <ChipSection
-                title={isRu ? 'Категории' : 'Categories'}
-                options={categories}
-                selectedIds={tempCategory === 'all' ? [] : [tempCategory]}
-                onToggle={toggleCategory}
-                language={language}
-                initialVisible={8}
-              />
-
-              <Separator />
-
-              {/* Interests Section - Klook style */}
-              <ChipSection
-                title={isRu ? 'Интересы' : 'Interests'}
-                options={INTEREST_OPTIONS}
-                selectedIds={tempInterests}
-                onToggle={toggleInterest}
-                language={language}
-                initialVisible={6}
-              />
-
-              <Separator />
-
-              {/* Price Range - Klook style */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-sm">{isRu ? 'Цена' : 'Price range'}</h3>
-                <div className="text-sm text-muted-foreground mb-2">
-                  ฿{tempPriceRange[0].toLocaleString()} - ฿{tempPriceRange[1].toLocaleString()}
+              {/* Price Range - Quick presets + slider */}
+              <div className="space-y-3">
+                <h3 className="font-semibold text-sm">{isRu ? 'Бюджет' : 'Budget'}</h3>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { min: 0, max: 1000, label: isRu ? 'До ฿1K' : 'Under ฿1K' },
+                    { min: 1000, max: 3000, label: '฿1K-3K' },
+                    { min: 3000, max: 10000, label: '฿3K-10K' },
+                    { min: 10000, max: 50000, label: '฿10K+' },
+                  ].map((preset) => {
+                    const isActive = tempPriceRange[0] === preset.min && tempPriceRange[1] === preset.max;
+                    return (
+                      <button
+                        key={preset.label}
+                        onClick={() => setTempPriceRange([preset.min, preset.max])}
+                        className={cn(
+                          "px-3 py-1.5 rounded-full text-xs font-medium border transition-all",
+                          isActive
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-background text-foreground border-border hover:border-primary/50"
+                        )}
+                      >
+                        {preset.label}
+                      </button>
+                    );
+                  })}
                 </div>
-                <div className="px-2">
+                <div className="pt-2 px-1">
                   <Slider
                     value={tempPriceRange}
                     onValueChange={(value) => setTempPriceRange(value as [number, number])}
@@ -384,23 +381,50 @@ export function ExperienceFiltersKlook({
                     step={500}
                     className="w-full"
                   />
-                  <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-                    <span>฿0</span>
-                    <span>฿50,000</span>
+                  <div className="flex justify-between mt-1.5 text-xs text-muted-foreground">
+                    <span>฿{tempPriceRange[0].toLocaleString()}</span>
+                    <span>฿{tempPriceRange[1].toLocaleString()}</span>
                   </div>
                 </div>
               </div>
 
               <Separator />
 
-              {/* Others Section - Klook style */}
+              {/* Quick filters row - instant confirm, free cancel */}
+              <div className="space-y-3">
+                <h3 className="font-semibold text-sm">{isRu ? 'Быстрые фильтры' : 'Quick filters'}</h3>
+                <div className="flex flex-wrap gap-2">
+                  {OTHER_OPTIONS.map((option) => {
+                    const isActive = tempFeatures.includes(option.id);
+                    return (
+                      <button
+                        key={option.id}
+                        onClick={() => toggleFeature(option.id)}
+                        className={cn(
+                          "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm transition-all border",
+                          isActive
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-background text-foreground border-border hover:border-primary/50"
+                        )}
+                      >
+                        {renderIcon(option.icon)}
+                        <span>{isRu ? option.labelRu : option.labelEn}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Interests - travel style tags */}
               <ChipSection
-                title={isRu ? 'Другое' : 'Others'}
-                options={OTHER_OPTIONS}
-                selectedIds={tempFeatures}
-                onToggle={toggleFeature}
+                title={isRu ? 'Стиль путешествия' : 'Travel style'}
+                options={INTEREST_OPTIONS}
+                selectedIds={tempInterests}
+                onToggle={toggleInterest}
                 language={language}
-                initialVisible={4}
+                initialVisible={8}
               />
             </div>
           </ScrollArea>
