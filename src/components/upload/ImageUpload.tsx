@@ -1,7 +1,8 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Upload, X, Loader2, ImageIcon } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Upload, X, Loader2, ImageIcon, Link, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -22,6 +23,8 @@ export function ImageUpload({
 }: ImageUploadProps) {
   const { user } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const [urlValue, setUrlValue] = useState('');
   const isMountedRef = useRef(true);
 
   useEffect(() => {
@@ -87,6 +90,27 @@ export function ImageUpload({
     onChange('');
   };
 
+  const handleUrlSubmit = () => {
+    const trimmed = urlValue.trim();
+    if (!trimmed) {
+      toast.error('Введите URL');
+      return;
+    }
+    
+    // Basic URL validation
+    try {
+      new URL(trimmed);
+    } catch {
+      toast.error('Некорректный URL');
+      return;
+    }
+
+    onChange(trimmed);
+    setUrlValue('');
+    setShowUrlInput(false);
+    toast.success('Фото добавлено по URL');
+  };
+
   return (
     <div className={`relative ${className}`}>
       {value ? (
@@ -106,24 +130,57 @@ export function ImageUpload({
             <X className="h-4 w-4" />
           </Button>
         </div>
+      ) : showUrlInput ? (
+        <div className="flex flex-col gap-2 p-4 border-2 border-dashed border-border rounded-lg">
+          <div className="flex gap-2">
+            <Input
+              type="url"
+              placeholder="https://example.com/image.jpg"
+              value={urlValue}
+              onChange={(e) => setUrlValue(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleUrlSubmit())}
+              className="flex-1"
+              autoFocus
+            />
+            <Button type="button" size="icon" onClick={handleUrlSubmit}>
+              <Check className="h-4 w-4" />
+            </Button>
+            <Button type="button" size="icon" variant="ghost" onClick={() => setShowUrlInput(false)}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <span className="text-xs text-muted-foreground">Вставьте ссылку на изображение</span>
+        </div>
       ) : (
-        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
-            onChange={handleFileSelect}
-            className="hidden"
-            disabled={isUploading}
-          />
-          {isUploading ? (
-            <Loader2 className="h-8 w-8 text-muted-foreground animate-spin" />
-          ) : (
-            <>
-              <ImageIcon className="h-8 w-8 text-muted-foreground mb-2" />
-              <span className="text-sm text-muted-foreground">{placeholder}</span>
-            </>
-          )}
-        </label>
+        <div className="flex flex-col gap-2">
+          <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              onChange={handleFileSelect}
+              className="hidden"
+              disabled={isUploading}
+            />
+            {isUploading ? (
+              <Loader2 className="h-8 w-8 text-muted-foreground animate-spin" />
+            ) : (
+              <>
+                <ImageIcon className="h-6 w-6 text-muted-foreground mb-1" />
+                <span className="text-sm text-muted-foreground">{placeholder}</span>
+              </>
+            )}
+          </label>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="w-full"
+            onClick={() => setShowUrlInput(true)}
+          >
+            <Link className="h-4 w-4 mr-2" />
+            Добавить по ссылке
+          </Button>
+        </div>
       )}
     </div>
   );
@@ -254,41 +311,157 @@ export function MultiImageUpload({
     toast.success('Обложка установлена');
   };
 
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const [urlValue, setUrlValue] = useState('');
+
+  const handleUrlSubmit = () => {
+    const trimmed = urlValue.trim();
+    if (!trimmed) {
+      toast.error('Введите URL');
+      return;
+    }
+    
+    // Basic URL validation
+    try {
+      new URL(trimmed);
+    } catch {
+      toast.error('Некорректный URL');
+      return;
+    }
+
+    if (value.length >= maxImages) {
+      toast.error(`Максимум ${maxImages} фото`);
+      return;
+    }
+
+    onChange([...value, trimmed]);
+    setUrlValue('');
+    toast.success('Фото добавлено по URL');
+  };
+
+  const handleMultipleUrls = (text: string) => {
+    // Split by newlines or commas and extract URLs
+    const urls = text
+      .split(/[\n,]+/)
+      .map(s => s.trim())
+      .filter(s => {
+        try {
+          new URL(s);
+          return true;
+        } catch {
+          return false;
+        }
+      });
+    
+    if (urls.length === 0) {
+      toast.error('Не найдено валидных URL');
+      return;
+    }
+
+    const remainingSlots = maxImages - value.length;
+    const urlsToAdd = urls.slice(0, remainingSlots);
+    
+    onChange([...value, ...urlsToAdd]);
+    setUrlValue('');
+    toast.success(`Добавлено ${urlsToAdd.length} фото по URL`);
+    
+    if (urls.length > urlsToAdd.length) {
+      toast.warning(`${urls.length - urlsToAdd.length} URL пропущено (лимит ${maxImages})`);
+    }
+  };
+
   return (
     <div className={`space-y-3 ${className}`}>
-      {/* Upload area */}
-      <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
-        <input
-          type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif"
-          onChange={handleFileSelect}
-          className="hidden"
-          disabled={isUploading || value.length >= maxImages}
-          multiple
-        />
-        {isUploading ? (
-          <div className="flex flex-col items-center gap-2">
-            <Loader2 className="h-8 w-8 text-primary animate-spin" />
-            <span className="text-sm text-muted-foreground">
-              Загрузка... {uploadProgress}%
-            </span>
+      {/* URL input mode */}
+      {showUrlInput ? (
+        <div className="p-4 border-2 border-dashed border-border rounded-lg space-y-3">
+          <div className="flex gap-2">
+            <Input
+              type="url"
+              placeholder="https://example.com/image.jpg"
+              value={urlValue}
+              onChange={(e) => setUrlValue(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleUrlSubmit())}
+              className="flex-1"
+              autoFocus
+            />
+            <Button type="button" size="icon" onClick={handleUrlSubmit} disabled={!urlValue.trim()}>
+              <Check className="h-4 w-4" />
+            </Button>
+            <Button type="button" size="icon" variant="ghost" onClick={() => setShowUrlInput(false)}>
+              <X className="h-4 w-4" />
+            </Button>
           </div>
-        ) : value.length >= maxImages ? (
-          <span className="text-sm text-muted-foreground">
-            Максимум {maxImages} фото
-          </span>
-        ) : (
-          <>
-            <Upload className="h-8 w-8 text-muted-foreground mb-2" />
-            <span className="text-sm text-muted-foreground">
-              Выберите фото или перетащите сюда
-            </span>
-            <span className="text-xs text-muted-foreground mt-1">
-              {value.length} / {maxImages} фото
-            </span>
-          </>
-        )}
-      </label>
+          <div className="text-xs text-muted-foreground">
+            Вставьте ссылку на изображение. Можно несколько URL через запятую или с новой строки.
+          </div>
+          <Button 
+            type="button" 
+            variant="outline" 
+            size="sm" 
+            className="w-full"
+            onClick={() => {
+              if (urlValue.includes(',') || urlValue.includes('\n')) {
+                handleMultipleUrls(urlValue);
+              } else {
+                handleUrlSubmit();
+              }
+            }}
+            disabled={!urlValue.trim()}
+          >
+            Добавить все URL
+          </Button>
+        </div>
+      ) : (
+        <>
+          {/* Upload area */}
+          <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              onChange={handleFileSelect}
+              className="hidden"
+              disabled={isUploading || value.length >= maxImages}
+              multiple
+            />
+            {isUploading ? (
+              <div className="flex flex-col items-center gap-2">
+                <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                <span className="text-sm text-muted-foreground">
+                  Загрузка... {uploadProgress}%
+                </span>
+              </div>
+            ) : value.length >= maxImages ? (
+              <span className="text-sm text-muted-foreground">
+                Максимум {maxImages} фото
+              </span>
+            ) : (
+              <>
+                <Upload className="h-6 w-6 text-muted-foreground mb-1" />
+                <span className="text-sm text-muted-foreground">
+                  Выберите фото или перетащите
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {value.length} / {maxImages}
+                </span>
+              </>
+            )}
+          </label>
+
+          {/* URL button */}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="w-full"
+            onClick={() => setShowUrlInput(true)}
+            disabled={value.length >= maxImages}
+          >
+            <Link className="h-4 w-4 mr-2" />
+            Добавить по ссылке
+          </Button>
+        </>
+      )}
 
       {/* Image grid */}
       {value.length > 0 && (
