@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Compass, Waves, Star, Shield, Clock, MapPin, Filter } from 'lucide-react';
+import { Compass, Waves, Star, Shield, Clock, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
@@ -8,13 +8,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { 
   useExperiences, 
-  EXPERIENCE_CATEGORIES, 
   formatDuration,
   ExperienceType,
   Experience
 } from '@/hooks/useExperiences';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { CrossSellSection } from '@/components/crosssell';
+import { ExperienceFilters, SortOption } from '@/components/experiences/ExperienceFilters';
 import { cn } from '@/lib/utils';
 
 type ViewType = 'all' | 'tour' | 'activity';
@@ -152,17 +152,53 @@ export default function ExperiencesIndex() {
   const navigate = useNavigate();
   const isRu = language === 'ru';
   
-  // Get initial type from URL
+  // Get initial values from URL
   const initialType = (searchParams.get('type') as ViewType) || 'all';
   const initialCategory = searchParams.get('category') || 'all';
+  const initialSort = (searchParams.get('sort') as SortOption) || 'rating';
   
   const [viewType, setViewType] = useState<ViewType>(initialType);
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const [sortBy, setSortBy] = useState<SortOption>(initialSort);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000]);
+  const [durationRange, setDurationRange] = useState<[number, number]>([0, 480]);
   
   const { experiences, isLoading } = useExperiences({
     type: viewType === 'all' ? undefined : viewType as ExperienceType,
     category: selectedCategory === 'all' ? undefined : selectedCategory,
   });
+  
+  // Filter and sort experiences
+  const filteredExperiences = useMemo(() => {
+    let result = experiences.filter(exp => {
+      // Price filter
+      const price = exp.price || 0;
+      if (price < priceRange[0] || price > priceRange[1]) return false;
+      
+      // Duration filter
+      const duration = exp.duration_minutes || 0;
+      if (duration < durationRange[0] || duration > durationRange[1]) return false;
+      
+      return true;
+    });
+    
+    // Sort
+    result.sort((a, b) => {
+      switch (sortBy) {
+        case 'price_asc':
+          return (a.price || 0) - (b.price || 0);
+        case 'price_desc':
+          return (b.price || 0) - (a.price || 0);
+        case 'duration':
+          return (a.duration_minutes || 0) - (b.duration_minutes || 0);
+        case 'rating':
+        default:
+          return (b.rating || 0) - (a.rating || 0);
+      }
+    });
+    
+    return result;
+  }, [experiences, sortBy, priceRange, durationRange]);
   
   // Handle type change
   const handleTypeChange = (type: ViewType) => {
@@ -188,7 +224,19 @@ export default function ExperiencesIndex() {
     setSearchParams(newParams);
   };
   
-  // Stats
+  // Handle sort change
+  const handleSortChange = (sort: SortOption) => {
+    setSortBy(sort);
+    const newParams = new URLSearchParams(searchParams);
+    if (sort === 'rating') {
+      newParams.delete('sort');
+    } else {
+      newParams.set('sort', sort);
+    }
+    setSearchParams(newParams);
+  };
+  
+  // Stats for type toggle
   const stats = useMemo(() => {
     const tours = experiences.filter(e => e.experience_type === 'tour').length;
     const activities = experiences.filter(e => e.experience_type === 'activity').length;
@@ -216,8 +264,8 @@ export default function ExperiencesIndex() {
               </h1>
               <p className="text-sm text-muted-foreground">
                 {isRu 
-                  ? `${stats.total} впечатлений доступно`
-                  : `${stats.total} experiences available`
+                  ? `${filteredExperiences.length} впечатлений доступно`
+                  : `${filteredExperiences.length} experiences available`
                 }
               </p>
             </div>
@@ -247,24 +295,19 @@ export default function ExperiencesIndex() {
           </div>
         </div>
         
-        {/* Category Chips */}
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4 pb-2">
-          {EXPERIENCE_CATEGORIES.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => handleCategoryChange(category.id)}
-              className={cn(
-                "flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-1.5",
-                selectedCategory === category.id
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              )}
-            >
-              <span>{category.icon}</span>
-              <span>{isRu ? category.labelRu : category.labelEn}</span>
-            </button>
-          ))}
-        </div>
+        {/* Klook-style Filters */}
+        <ExperienceFilters
+          selectedCategory={selectedCategory}
+          onCategoryChange={handleCategoryChange}
+          sortBy={sortBy}
+          onSortChange={handleSortChange}
+          priceRange={priceRange}
+          onPriceRangeChange={setPriceRange}
+          durationRange={durationRange}
+          onDurationRangeChange={setDurationRange}
+          resultsCount={filteredExperiences.length}
+          language={language}
+        />
         
         {/* Results Grid */}
         {isLoading ? (
@@ -273,7 +316,7 @@ export default function ExperiencesIndex() {
               <div key={i} className="bg-muted rounded-2xl h-72 animate-pulse" />
             ))}
           </div>
-        ) : experiences.length === 0 ? (
+        ) : filteredExperiences.length === 0 ? (
           <div className="text-center py-12">
             <Compass className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="font-semibold text-lg mb-2">
@@ -289,7 +332,7 @@ export default function ExperiencesIndex() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <AnimatePresence mode="popLayout">
-              {experiences.map((experience) => (
+              {filteredExperiences.map((experience) => (
                 <ExperienceCard 
                   key={experience.id} 
                   experience={experience} 
