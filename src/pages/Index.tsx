@@ -22,6 +22,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 // Lazy load heavier components that fetch data
 const SmartWidget = lazy(() => import('@/components/home/SmartWidget').then(m => ({ default: m.SmartWidget })));
 const MarketplacePromoCarousel = lazy(() => import('@/components/home/MarketplacePromoCarousel').then(m => ({ default: m.MarketplacePromoCarousel })));
+const ExperiencesSection = lazy(() => import('@/components/home/ExperiencesSection').then(m => ({ default: m.ExperiencesSection })));
 const RecommendedCarousel = lazy(() => import('@/components/home/RecommendedCarousel').then(m => ({ default: m.RecommendedCarousel })));
 const ForYouSection = lazy(() => import('@/components/recommendations/ForYouSection').then(m => ({ default: m.ForYouSection })));
 const PersonalizedOffersSection = lazy(() => import('@/components/notifications/PersonalizedOffersSection').then(m => ({ default: m.PersonalizedOffersSection })));
@@ -166,6 +167,11 @@ const Index = () => {
               {/* Marketplace Promo Carousel */}
               <Suspense fallback={<SectionSkeleton />}>
                 <MarketplacePromoCarousel />
+              </Suspense>
+
+              {/* Experiences Section - Featured Tours & Activities */}
+              <Suspense fallback={<SectionSkeleton />}>
+                <ExperiencesSection />
               </Suspense>
 
               {/* Knowledge Hub Banner */}
