@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, Search, Check, ExternalLink, Globe } from 'lucide-react';
+import { Loader2, Search, Check, ExternalLink, Globe, ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -35,6 +35,8 @@ export function ImagePickerFromUrl({
   const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set());
   const [pageTitle, setPageTitle] = useState('');
   const [source, setSource] = useState<string>('');
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
+  const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
 
   const remainingSlots = maxImages - currentCount;
 
@@ -49,6 +51,8 @@ export function ImagePickerFromUrl({
     setSelectedImages(new Set());
     setPageTitle('');
     setSource('');
+    setLoadedImages(new Set());
+    setFailedImages(new Set());
 
     try {
       const { data, error } = await supabase.functions.invoke('extract-images-from-url', {
@@ -113,10 +117,16 @@ export function ImagePickerFromUrl({
     setUrl('');
     setPageTitle('');
     setSource('');
+    setLoadedImages(new Set());
+    setFailedImages(new Set());
   };
 
   const selectAll = () => {
-    const toSelect = images.slice(0, remainingSlots).map(img => img.url);
+    // Only select images that loaded successfully
+    const validIndices = images
+      .map((_, idx) => idx)
+      .filter(idx => loadedImages.has(idx) && !failedImages.has(idx));
+    const toSelect = validIndices.slice(0, remainingSlots).map(idx => images[idx].url);
     setSelectedImages(new Set(toSelect));
   };
 
@@ -124,8 +134,20 @@ export function ImagePickerFromUrl({
     setSelectedImages(new Set());
   };
 
+  const handleImageLoad = (index: number) => {
+    setLoadedImages(prev => new Set([...prev, index]));
+  };
+
+  const handleImageError = (index: number) => {
+    setFailedImages(prev => new Set([...prev, index]));
+  };
+
   // Check if URL looks like Yandex Disk
   const isYandexDiskUrl = url.includes('disk.yandex.ru') || url.includes('yadi.sk');
+
+  // Count successfully loaded images
+  const loadedCount = loadedImages.size - failedImages.size;
+  const totalImages = images.length;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -195,6 +217,11 @@ export function ImagePickerFromUrl({
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">
                 Выбрано: {selectedImages.size} / {remainingSlots} доступно
+                {totalImages > 0 && loadedCount < totalImages && (
+                  <span className="ml-2 text-xs">
+                    (загружено превью: {loadedCount}/{totalImages})
+                  </span>
+                )}
               </span>
               <div className="flex gap-2">
                 <Button variant="ghost" size="sm" onClick={selectAll}>
@@ -211,29 +238,46 @@ export function ImagePickerFromUrl({
                 {images.map((image, index) => {
                   const isSelected = selectedImages.has(image.url);
                   const displayUrl = image.preview || image.url;
+                  const isImageLoaded = loadedImages.has(index);
+                  const isImageFailed = failedImages.has(index);
+                  
+                  if (isImageFailed) return null; // Hide failed images
+                  
                   return (
                     <div
                       key={index}
                       className={cn(
-                        "relative aspect-square rounded-lg overflow-hidden cursor-pointer border-2 transition-all group",
+                        "relative aspect-square rounded-lg overflow-hidden cursor-pointer border-2 transition-all group bg-muted",
                         isSelected ? "border-primary ring-2 ring-primary/20" : "border-transparent hover:border-muted-foreground/30"
                       )}
-                      onClick={() => toggleImage(image.url)}
+                      onClick={() => isImageLoaded && toggleImage(image.url)}
                     >
+                      {/* Loading placeholder */}
+                      {!isImageLoaded && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground">Загрузка...</span>
+                        </div>
+                      )}
+                      
                       <img
                         src={displayUrl}
                         alt={image.name || `Image ${index + 1}`}
-                        className="w-full h-full object-cover"
+                        className={cn(
+                          "w-full h-full object-cover transition-opacity",
+                          isImageLoaded ? "opacity-100" : "opacity-0"
+                        )}
                         loading="lazy"
-                        onError={(e) => {
-                          e.currentTarget.parentElement!.style.display = 'none';
-                        }}
+                        onLoad={() => handleImageLoad(index)}
+                        onError={() => handleImageError(index)}
                       />
-                      {image.name && (
+                      
+                      {image.name && isImageLoaded && (
                         <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs p-1 truncate opacity-0 group-hover:opacity-100 transition-opacity">
                           {image.name}
                         </div>
                       )}
+                      
                       {isSelected && (
                         <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
                           <div className="bg-primary text-primary-foreground rounded-full p-1">
