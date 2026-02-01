@@ -16,6 +16,10 @@ import { ChannelManagementCTA } from '@/components/owner/ChannelManagementCTA';
 import { AirbnbSyncDialog } from '@/components/owner/airbnb-sync/AirbnbSyncDialog';
 import { OtaConnectionsList } from '@/components/owner/airbnb-sync/OtaConnectionsList';
 import { SyncedListingPreview } from '@/components/owner/airbnb-sync/SyncedListingPreview';
+import { ChannelHealthDashboard } from '@/components/owner/channel-manager/ChannelHealthDashboard';
+import { SyncTimeline, SyncStatsChart } from '@/components/owner/channel-manager/SyncTimeline';
+import { ConflictResolver } from '@/components/owner/channel-manager/ConflictResolver';
+import { QuickConnectCards } from '@/components/owner/channel-manager/QuickConnectCards';
 import { 
   RefreshCw, 
   Plus, 
@@ -29,7 +33,9 @@ import {
   Copy,
   Unlink,
   Download,
-  Upload
+  Upload,
+  Activity,
+  History
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
@@ -214,18 +220,52 @@ export default function ChannelManager() {
           </Button>
         </div>
 
-        {/* Tabs for Import/Export */}
+        {/* Tabs for Import/Export/Health */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="import" className="gap-2">
-              <Download className="h-4 w-4" />
-              {isRu ? 'Импорт с OTA' : 'Import from OTA'}
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="health" className="gap-1 px-2">
+              <Activity className="h-4 w-4" />
+              <span className="hidden sm:inline">{isRu ? 'Статус' : 'Health'}</span>
             </TabsTrigger>
-            <TabsTrigger value="export" className="gap-2">
+            <TabsTrigger value="import" className="gap-1 px-2">
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline">{isRu ? 'Импорт' : 'Import'}</span>
+            </TabsTrigger>
+            <TabsTrigger value="export" className="gap-1 px-2">
               <Upload className="h-4 w-4" />
-              {isRu ? 'Экспорт iCal' : 'Export iCal'}
+              <span className="hidden sm:inline">{isRu ? 'Экспорт' : 'Export'}</span>
+            </TabsTrigger>
+            <TabsTrigger value="history" className="gap-1 px-2">
+              <History className="h-4 w-4" />
+              <span className="hidden sm:inline">{isRu ? 'История' : 'History'}</span>
             </TabsTrigger>
           </TabsList>
+
+          {/* Health Tab - Channel Status Dashboard */}
+          <TabsContent value="health" className="space-y-4 mt-4">
+            <ChannelHealthDashboard />
+            
+            {/* Quick Connect */}
+            <div>
+              <h2 className="text-lg font-semibold mb-3">
+                {isRu ? 'Быстрое подключение' : 'Quick Connect'}
+              </h2>
+              <QuickConnectCards />
+            </div>
+
+            {/* Conflicts for first property */}
+            {properties && properties.length > 0 && (
+              <div>
+                <h2 className="text-lg font-semibold mb-3">
+                  {isRu ? 'Конфликты бронирований' : 'Booking Conflicts'}
+                </h2>
+                <ConflictResolver 
+                  propertyId={properties[0].id} 
+                  propertyName={isRu ? properties[0].title_ru || properties[0].title : properties[0].title}
+                />
+              </div>
+            )}
+          </TabsContent>
 
           {/* Import Tab - OTA Connections */}
           <TabsContent value="import" className="space-y-4 mt-4">
@@ -431,6 +471,18 @@ export default function ChannelManager() {
                 </div>
               </div>
             )}
+          </TabsContent>
+
+          {/* History Tab - Sync Timeline */}
+          <TabsContent value="history" className="space-y-4 mt-4">
+            <SyncStatsChart />
+            
+            <div>
+              <h2 className="text-lg font-semibold mb-3">
+                {isRu ? 'История синхронизации' : 'Sync History'}
+              </h2>
+              <SyncTimeline limit={30} />
+            </div>
           </TabsContent>
         </Tabs>
 
