@@ -1,358 +1,240 @@
 
+# Phase 2: Experiences - Frontend Implementation Plan
 
-# Анализ: Объединение Tours и Water Activities в Experiences
+## Current State Summary
 
-## Текущая архитектура myUNO
+### Database (Phase 1 - Completed)
+The `experiences` table has been created and contains **60 records**:
+- **29 tours** (`experience_type: 'tour'`)
+- **31 activities** (`experience_type: 'activity'`)
+
+Key unified fields:
+- `experience_type`: 'tour' | 'activity'
+- `category`: islands, water-sports, adventure, cultural, nature, etc.
+- `title_en`, `title_ru`, `description_en`, `description_ru`
+- `price`, `currency`, `duration_minutes`
+- `rating`, `review_count`, `is_featured`, `is_active`
+- `difficulty`, `equipment_included`, `is_certified`
+- `includes`, `excludes`, `requirements`, `highlights`, `itinerary`
+- `meeting_point`, `location_name`, `meeting_point_lat/lng`
+
+### Frontend (Phase 2 - To Be Implemented)
+Currently using separate systems:
+- `/tours` - uses `useTours` hook, `tours` table
+- `/water` - uses `useWaterActivities` hook, `water_activities` table
+
+---
+
+## Implementation Plan
+
+### Step 1: Create Unified Experiences Hook
+
+Create a new hook `useExperiences.ts` that:
+- Fetches from the `experiences` table
+- Supports filtering by `experience_type` (tour/activity/all)
+- Supports filtering by category, featured status
+- Provides both list and single-item fetching
 
 ```text
-┌──────────────────────────────────────────────────────────────────┐
-│                         ТЕКУЩЕЕ СОСТОЯНИЕ                        │
-├──────────────────────────────────────────────────────────────────┤
-│  category_groups:                                                 │
-│  ├── "Travel & Transport" → Tours (/tours)                       │
-│  ├── "Water Sports"       → Water Activities (/water)            │
-│  └── ... другие группы                                           │
-├──────────────────────────────────────────────────────────────────┤
-│  Базы данных:                                                     │
-│  ├── tours (29 записей) - islands, culture, nature, adventure    │
-│  └── water_activities (31 запись) - diving, jet-ski, kayaking    │
-├──────────────────────────────────────────────────────────────────┤
-│  Vendor Portal:                                                   │
-│  ├── /vendor/tours      → VendorTours.tsx                        │
-│  └── /vendor/activities → VendorActivities.tsx                   │
-├──────────────────────────────────────────────────────────────────┤
-│  Admin Panel:                                                     │
-│  ├── /admin/tours            → AdminTours.tsx                    │
-│  └── /admin/water-activities → AdminWaterActivities.tsx          │
-└──────────────────────────────────────────────────────────────────┘
+src/hooks/useExperiences.ts
+  - Experience interface (unified type)
+  - useExperiences(options) - list hook
+  - useExperience(id) - single item hook
+  - transformExperience() - data normalization
 ```
 
----
+### Step 2: Create Unified Filter Configuration
 
-## Таксономия Klook / Arival (индустриальный стандарт)
-
-Согласно исследованию Arival (ведущий аналитик travel experiences), индустрия использует 4-уровневую таксономию:
+Create a combined filter config for experiences:
 
 ```text
-Operator Type (5)
-├── Activities    ← Все, где турист участвует: дайвинг, снорклинг, классы...
-├── Attractions   ← Билеты: музеи, зоопарки, парки...
-├── Events        ← Концерты, фестивали, спорт-события
-├── Tours         ← Экскурсии: пешие, автобусные, морские...
-└── Transportation ← Трансферы, паромы
-
-Business Type (22)
-├── Active / Adventure   ← Активный отдых
-├── Cultural             ← Культурные
-├── Food & Drink         ← Гастро-туры
-├── Sightseeing          ← Обзорные
-├── Water-based          ← Водные активности
-├── Wellness             ← Спа, йога
-└── ...
-
-Experience Type (133)
-└── Experience Detail (343)
+src/components/filters/ExperiencesFilters.tsx
+  - experienceFilterConfig
+  - Merges tour and water activity filter options
+  - Adds experience_type filter (Tour/Activity toggle)
 ```
 
-Airbnb использует упрощенную версию:
-- Adventures (мультидневные, экстремальные)
-- Animal experiences
-- Food and cooking
-- Entertainment
-- Nature and outdoors
-- Sports
+### Step 3: Create Experiences Pages
 
----
+**Index Page** (`/experiences`):
+```text
+src/pages/experiences/ExperiencesIndex.tsx
+  - Hero with experience-type toggle (All/Tours/Activities)
+  - Category chips (Islands, Water Sports, Adventure, etc.)
+  - Unified filter sidebar
+  - ItemCard grid with experience cards
+  - CrossSellSection
+```
 
-## Рекомендация: ДА, объединять
+**Detail Page** (`/experiences/:id`):
+```text
+src/pages/experiences/ExperienceDetail.tsx
+  - Unified detail view
+  - Shows itinerary for tours
+  - Shows requirements/safety for water activities
+  - Dynamic sections based on experience_type
+```
 
-Объединение Tours + Water Activities в единую сущность **"Experiences"** имеет смысл по нескольким причинам:
+**Booking Page** (`/experiences/:id/book`):
+```text
+src/pages/experiences/ExperienceBooking.tsx
+  - Unified booking flow
+  - Date/time selection
+  - Participant count
+  - Payment integration
+```
 
-### 1. Пользовательский опыт становится чище
+### Step 4: Create Homepage Section
 
-**Текущая проблема:**
-- Турист думает: "Хочу снорклинг на острова" 
-- Это ТУР (поездка на острова) или WATER ACTIVITY (снорклинг)?
-- На Klook это одна карточка в "Things to Do"
-
-**После объединения:**
-- Один раздел "Experiences" / "Впечатления" с фильтрами
-- Пользователь выбирает по тегам/типам, а не думает о структуре
-
-### 2. Схемы таблиц на 90% идентичны
+Replace `ToursSection` and `WaterSection` with unified:
 
 ```text
-tours                        water_activities
-─────────────────────────    ─────────────────────────
-✓ id, provider_id            ✓ id, provider_id
-✓ title_en, title_ru         ✓ title_en, title_ru
-✓ description_en/ru          ✓ description_en/ru
-✓ price, currency            ✓ price, currency, price_per
-✓ duration_hours             ✓ duration_minutes
-✓ difficulty                 ✓ difficulty
-✓ max_participants           ✓ max_participants, min_participants
-✓ meeting_point              ✓ meeting_point
-✓ includes                   ✓ includes
-✓ rating, review_count       ✓ rating, review_count
-✓ is_active, is_featured     ✓ is_active, is_featured
-✓ approval_status            ✓ approval_status
-✓ category                   ✓ category
-─────────────────────────    ─────────────────────────
-  itinerary (JSONB)            requirements (array)
-  excludes (array)             equipment_included (bool)
-  highlights (array)           is_certified (bool)
-                               age_restriction (int)
-                               safety_briefing_required
+src/components/home/ExperiencesSection.tsx
+  - Shows featured experiences (mixed tours & activities)
+  - Optional tabs for Tours/Activities/All
+  - Links to /experiences
 ```
 
-### 3. Vendor Portal упрощается
+### Step 5: Update Routing
 
-**Сейчас:** 2 отдельные страницы управления
-**После:** 1 страница с выбором типа опыта
+Update `AnimatedRoutes.tsx`:
+- Add `/experiences` route
+- Add `/experiences/:id` route
+- Add `/experiences/:id/book` route
+- Keep `/tours` and `/water` as redirects (backward compatibility)
 
-### 4. Admin Panel упрощается
+### Step 6: Update Navigation & Cross-Sell
 
-**Сейчас:** /admin/tours + /admin/water-activities
-**После:** /admin/experiences с фильтром по типу
+- Update navigation to link to `/experiences`
+- Update `crossSellConfig` to use experiences instead of separate tours/water
+- Update `QuickActionsGrid` if needed
 
 ---
 
-## Предлагаемая архитектура
+## File Structure (New Files)
 
 ```text
-┌──────────────────────────────────────────────────────────────────┐
-│                      НОВАЯ АРХИТЕКТУРА                           │
-├──────────────────────────────────────────────────────────────────┤
-│  Единая таблица: experiences                                     │
-│  ├── experience_type: 'tour' | 'activity' | 'workshop' | ...    │
-│  ├── category: 'islands', 'diving', 'culture', 'cooking'...     │
-│  ├── tags: ['water', 'adventure', 'family', 'snorkeling']       │
-│  └── ... все поля из обеих таблиц                                │
-├──────────────────────────────────────────────────────────────────┤
-│  UI Навигация:                                                   │
-│  ├── /experiences          → Все впечатления (MiniApp)          │
-│  ├── /experiences?type=tour → Туры                              │
-│  ├── /experiences?type=activity → Активности                    │
-│  └── /experiences?tag=water → Водные                            │
-├──────────────────────────────────────────────────────────────────┤
-│  Категории в Discover:                                           │
-│  └── "Experiences" (одна иконка в Travel & Transport)           │
-├──────────────────────────────────────────────────────────────────┤
-│  Фильтры внутри:                                                 │
-│  ├── Type: Tours | Activities | Workshops | Attractions         │
-│  ├── Theme: Water | Culture | Nature | Adventure | Food         │
-│  ├── Duration: 1-3h | Half-day | Full-day | Multi-day           │
-│  └── Features: Equipment included | Kid-friendly | Private      │
-└──────────────────────────────────────────────────────────────────┘
+src/
+  hooks/
+    useExperiences.ts         (NEW)
+  
+  pages/
+    experiences/
+      ExperiencesIndex.tsx    (NEW)
+      ExperienceDetail.tsx    (NEW)
+      ExperienceBooking.tsx   (NEW)
+  
+  components/
+    filters/
+      ExperiencesFilters.tsx  (NEW)
+    home/
+      ExperiencesSection.tsx  (NEW)
 ```
 
 ---
 
-## План миграции (если решите объединять)
+## Files to Modify
 
-### Phase 1: Подготовка данных
+1. **src/components/layout/AnimatedRoutes.tsx**
+   - Add lazy imports for experience pages
+   - Add new routes
+   - Add redirects from /tours and /water
 
-**1.1 Создать новую таблицу experiences:**
-```sql
-CREATE TABLE experiences (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  provider_id UUID REFERENCES providers(id),
-  
-  -- Titles & descriptions
-  title_en TEXT NOT NULL,
-  title_ru TEXT NOT NULL,
-  description_en TEXT,
-  description_ru TEXT,
-  
-  -- Type classification (ключевое поле!)
-  experience_type TEXT NOT NULL DEFAULT 'tour', 
-    -- 'tour' | 'activity' | 'workshop' | 'attraction' | 'event'
-  category TEXT, -- 'islands', 'diving', 'culture', etc.
-  tags TEXT[] DEFAULT '{}', -- ['water', 'adventure', 'snorkeling']
-  
-  -- Pricing
-  price DECIMAL(10,2),
-  price_per TEXT DEFAULT 'person', -- 'person' | 'group' | 'hour'
-  currency TEXT DEFAULT 'THB',
-  
-  -- Duration (unified to minutes)
-  duration_minutes INTEGER,
-  
-  -- Participants
-  min_participants INTEGER DEFAULT 1,
-  max_participants INTEGER DEFAULT 20,
-  age_restriction INTEGER,
-  
-  -- Location
-  meeting_point TEXT,
-  meeting_point_lat DECIMAL(10,7),
-  meeting_point_lng DECIMAL(10,7),
-  location_name TEXT,
-  
-  -- Details
-  difficulty TEXT DEFAULT 'easy',
-  includes JSONB DEFAULT '[]',
-  excludes JSONB DEFAULT '[]',
-  highlights JSONB DEFAULT '[]',
-  requirements JSONB DEFAULT '[]',
-  itinerary JSONB DEFAULT '[]',
-  
-  -- Equipment/Safety (for activities)
-  equipment_included BOOLEAN DEFAULT false,
-  is_certified BOOLEAN DEFAULT false,
-  certification_details TEXT,
-  safety_briefing_required BOOLEAN DEFAULT false,
-  
-  -- Media
-  cover_image TEXT,
-  images TEXT[] DEFAULT '{}',
-  
-  -- Scheduling
-  available_days TEXT[] DEFAULT '{}',
-  start_times TEXT[] DEFAULT '{}',
-  
-  -- Status
-  is_active BOOLEAN DEFAULT true,
-  is_featured BOOLEAN DEFAULT false,
-  rating DECIMAL(2,1) DEFAULT 0,
-  review_count INTEGER DEFAULT 0,
-  
-  -- Approval
-  approval_status TEXT DEFAULT 'pending',
-  rejection_reason TEXT,
-  reviewed_by UUID REFERENCES auth.users(id),
-  reviewed_at TIMESTAMPTZ,
-  
-  -- Aggregator support
-  source_type TEXT DEFAULT 'native',
-  partner_id UUID,
-  external_link TEXT,
-  commission_rate DECIMAL(5,2),
-  
-  -- Timestamps
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now()
-);
+2. **src/components/filters/index.ts**
+   - Export new experienceFilterConfig
 
--- Индексы для быстрой фильтрации
-CREATE INDEX idx_experiences_type ON experiences(experience_type);
-CREATE INDEX idx_experiences_category ON experiences(category);
-CREATE INDEX idx_experiences_active ON experiences(is_active, is_featured);
-CREATE INDEX idx_experiences_provider ON experiences(provider_id);
-```
+3. **src/pages/Index.tsx** (if needed)
+   - Replace ToursSection/WaterSection with ExperiencesSection
 
-**1.2 Миграция данных:**
-```sql
--- Мигрировать туры
-INSERT INTO experiences (
-  id, provider_id, title_en, title_ru, description_en, description_ru,
-  experience_type, category, 
-  price, currency, duration_minutes,
-  max_participants, meeting_point, difficulty,
-  includes, excludes, highlights, itinerary,
-  cover_image, images, available_days, start_times,
-  is_active, is_featured, rating, review_count,
-  approval_status, source_type, partner_id, external_link, commission_rate,
-  created_at, updated_at
-)
-SELECT 
-  id, provider_id, title_en, title_ru, description_en, description_ru,
-  'tour', category,
-  price, currency, (duration_hours * 60)::integer,
-  max_participants, meeting_point, difficulty,
-  includes, excludes, highlights, itinerary,
-  cover_image, images, available_days, start_times,
-  is_active, is_featured, rating, review_count,
-  approval_status, source_type, partner_id, external_link, commission_rate,
-  created_at, updated_at
-FROM tours;
-
--- Мигрировать water_activities
-INSERT INTO experiences (
-  id, provider_id, title_en, title_ru, description_en, description_ru,
-  experience_type, category, 
-  price, price_per, currency, duration_minutes,
-  min_participants, max_participants, age_restriction,
-  meeting_point, meeting_point_lat, meeting_point_lng, location_name,
-  difficulty, includes, requirements,
-  equipment_included, is_certified, certification_details, safety_briefing_required,
-  cover_image, images, available_days, start_times,
-  is_active, is_featured, rating, review_count,
-  approval_status,
-  created_at, updated_at
-)
-SELECT 
-  id, provider_id, title_en, title_ru, description_en, description_ru,
-  'activity', category,
-  price, price_per, currency, duration_minutes,
-  min_participants, max_participants, age_restriction,
-  meeting_point, meeting_point_lat, meeting_point_lng, location_name,
-  difficulty, includes, requirements,
-  equipment_included, is_certified, certification_details, safety_briefing_required,
-  cover_image, images, available_days, available_times,
-  is_active, is_featured, rating, review_count,
-  approval_status,
-  created_at, updated_at
-FROM water_activities;
-```
-
-### Phase 2: Обновление Frontend
-
-**2.1 Новые файлы:**
-- `src/pages/experiences/ExperiencesIndex.tsx` - главный лендинг
-- `src/pages/experiences/ExperienceDetail.tsx` - детальная страница
-- `src/pages/experiences/ExperienceBooking.tsx` - бронирование
-- `src/hooks/useExperiences.ts` - новый unified hook
-- `src/components/filters/ExperiencesFilters.tsx` - фильтры
-
-**2.2 Редиректы для обратной совместимости:**
-- `/tours` → `/experiences?type=tour`
-- `/tours/:id` → `/experiences/:id`
-- `/water` → `/experiences?type=activity`
-- `/water/:id` → `/experiences/:id`
-
-**2.3 Обновить category_groups:**
-- Удалить "Water Sports" как отдельную группу
-- Обновить "Travel & Transport" → добавить единую категорию "Experiences"
-
-### Phase 3: Обновление Vendor/Admin
-
-**3.1 Vendor Portal:**
-- Объединить VendorTours + VendorActivities → VendorExperiences
-- Добавить селектор experience_type при создании
-
-**3.2 Admin Panel:**
-- Объединить AdminTours + AdminWaterActivities → AdminExperiences
-- Добавить фильтр по experience_type
+4. **src/lib/crossSellConfig.ts** (if exists)
+   - Update to reference experiences
 
 ---
 
-## Альтернативный вариант: Виртуальное объединение
+## Technical Details
 
-Если миграция слишком рискованна, можно создать "виртуальную" объединенную таксономию:
+### Experience Interface
+```typescript
+interface Experience {
+  id: string;
+  experience_type: 'tour' | 'activity';
+  title_en: string;
+  title_ru: string;
+  description_en: string | null;
+  description_ru: string | null;
+  category: string | null;
+  cover_image: string | null;
+  images: string[];
+  price: number | null;
+  price_per: string | null;
+  currency: string;
+  duration_minutes: number | null;
+  max_participants: number | null;
+  min_participants: number | null;
+  difficulty: string | null;
+  equipment_included: boolean;
+  is_certified: boolean;
+  includes: unknown[];
+  excludes: unknown[];
+  requirements: unknown[];
+  highlights: unknown[];
+  itinerary: unknown[];
+  location_name: string | null;
+  meeting_point: string | null;
+  meeting_point_lat: number | null;
+  meeting_point_lng: number | null;
+  available_days: string[];
+  start_times: string[];
+  rating: number | null;
+  review_count: number | null;
+  is_active: boolean;
+  is_featured: boolean;
+  // ... other fields
+}
+```
 
-**Оставить две таблицы, но:**
-1. Создать `useExperiences` hook, который объединяет данные из обеих таблиц
-2. Создать единую страницу `/experiences` с unified UI
-3. Оставить `/tours` и `/water` как legacy routes с редиректами
-
-Преимущества: меньше риска, постепенная миграция
-Недостатки: дублирование логики, сложнее поддерживать
+### Categories (Unified)
+```typescript
+const EXPERIENCE_CATEGORIES = [
+  { id: 'all', labelEn: 'All', labelRu: 'Все' },
+  { id: 'islands', labelEn: 'Islands', labelRu: 'Острова' },
+  { id: 'water-sports', labelEn: 'Water Sports', labelRu: 'Водный спорт' },
+  { id: 'adventure', labelEn: 'Adventure', labelRu: 'Приключения' },
+  { id: 'culture', labelEn: 'Culture', labelRu: 'Культура' },
+  { id: 'nature', labelEn: 'Nature', labelRu: 'Природа' },
+  { id: 'diving', labelEn: 'Diving', labelRu: 'Дайвинг' },
+  { id: 'snorkeling', labelEn: 'Snorkeling', labelRu: 'Снорклинг' },
+];
+```
 
 ---
 
-## Резюме: Да, объединять стоит
+## Implementation Order
 
-| Аспект | До | После |
-|--------|-----|------|
-| Таблицы в БД | 2 (tours, water_activities) | 1 (experiences) |
-| Страницы в UI | 2 (/tours, /water) | 1 (/experiences) |
-| Vendor страницы | 2 | 1 |
-| Admin страницы | 2 | 1 |
-| Категории в Discover | 2 иконки | 1 иконка |
-| UX ясность | Запутанно | Чисто (как Klook) |
-| Фильтрация | По разным таблицам | Единые фильтры |
-| Cross-sell | Ограничено | Легко комбинировать |
+1. **useExperiences hook** - foundation for data fetching
+2. **ExperiencesFilters** - filter configuration
+3. **ExperiencesIndex page** - main listing page
+4. **ExperienceDetail page** - individual experience view
+5. **ExperienceBooking page** - booking flow
+6. **AnimatedRoutes update** - routing setup
+7. **ExperiencesSection** - homepage component
+8. **Legacy redirects** - /tours and /water redirects
 
-Рекомендую **Phase 1** как первый шаг - создание таблицы и миграция данных. Это можно сделать без изменения UI, протестировать, и только потом переключить фронтенд.
+---
+
+## Backward Compatibility
+
+The old routes `/tours` and `/water` will redirect to `/experiences` with appropriate filters:
+- `/tours` redirects to `/experiences?type=tour`
+- `/water` redirects to `/experiences?type=activity`
+
+Old hooks (`useTours`, `useWaterActivities`) can remain for vendor/admin pages until Phase 3 is complete.
+
+---
+
+## Estimated Scope
+
+- **New files**: 6
+- **Modified files**: 3-5
+- **Lines of code**: ~800-1000
 
