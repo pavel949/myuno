@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Anchor, Star, Users, MapPin, Clock, Shield, Check, 
-  Calendar, Share2, Heart, Phone, MessageCircle, Ruler, Gauge, Fuel
+  Share2, Heart, Ruler
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BackButton } from '@/components/uno/BackButton';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useYacht } from '@/hooks/useYachts';
+import { YachtBookingQuickSelect } from '@/components/yachts/YachtBookingQuickSelect';
 
 export default function YachtDetail() {
   const { id } = useParams();
@@ -159,7 +160,7 @@ export default function YachtDetail() {
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="overview" className="mb-24">
+        <Tabs defaultValue="overview" className="mb-32">
           <TabsList className="w-full grid grid-cols-3">
             <TabsTrigger value="overview">{language === 'ru' ? 'Обзор' : 'Overview'}</TabsTrigger>
             <TabsTrigger value="specs">{language === 'ru' ? 'Характеристики' : 'Specs'}</TabsTrigger>
@@ -278,35 +279,10 @@ export default function YachtDetail() {
             </div>
           </TabsContent>
         </Tabs>
-
-        {/* Fixed Bottom Bar */}
-        <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 flex items-center justify-between">
-          <div>
-            <p className="text-xs text-muted-foreground">{language === 'ru' ? 'от' : 'from'}</p>
-            <p className="text-xl font-bold text-primary">
-              {yacht.currency === 'THB' ? '฿' : '$'}
-              {(yacht.price_half_day || yacht.price_full_day || 0).toLocaleString()}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {yacht.price_half_day ? (language === 'ru' ? '/полдня' : '/half day') : (language === 'ru' ? '/день' : '/day')}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            {yacht.price_half_day && (
-              <Button variant="outline" onClick={() => navigate(`/yachts/${id}/booking?type=half`)}>
-                {language === 'ru' ? 'Полдня' : 'Half Day'}
-                <span className="ml-1 text-xs text-muted-foreground">
-                  {yacht.currency === 'THB' ? '฿' : '$'}{yacht.price_half_day.toLocaleString()}
-                </span>
-              </Button>
-            )}
-            <Button onClick={() => navigate(`/yachts/${id}/booking`)}>
-              <Calendar className="w-4 h-4 mr-2" />
-              {language === 'ru' ? 'Забронировать' : 'Book Now'}
-            </Button>
-          </div>
-        </div>
       </PageContainer>
+
+      {/* New Booking Quick Select Component */}
+      <YachtBookingQuickSelect yacht={yacht} />
     </AppLayout>
   );
 }
