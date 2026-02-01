@@ -11,8 +11,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useOtaConnections, useOtaSync } from '@/hooks/useOtaSync';
-import { RefreshCw, Link2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { RefreshCw, Link2, AlertCircle, CheckCircle2, AlertTriangle, ExternalLink, FileDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface AirbnbSyncDialogProps {
   open: boolean;
@@ -25,7 +26,7 @@ export function AirbnbSyncDialog({ open, onOpenChange, onSuccess }: AirbnbSyncDi
   const isRu = language === 'ru';
   
   const [listingUrl, setListingUrl] = useState('');
-  const [step, setStep] = useState<'url' | 'syncing' | 'done' | 'error'>('url');
+  const [step, setStep] = useState<'url' | 'syncing' | 'done' | 'error' | 'blocked'>('url');
   const [error, setError] = useState<string | null>(null);
   const [connectionId, setConnectionId] = useState<string | null>(null);
   
@@ -65,10 +66,17 @@ export function AirbnbSyncDialog({ open, onOpenChange, onSuccess }: AirbnbSyncDi
       if (onSuccess) {
         onSuccess(connection.id);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Sync error:', err);
-      setError(err instanceof Error ? err.message : 'Unknown error');
-      setStep('error');
+      const errorMessage = err?.message || 'Unknown error';
+      
+      // Check if blocked by OTA
+      if (errorMessage.includes('OTA_BLOCKED') || errorMessage.includes('blocklisted')) {
+        setStep('blocked');
+      } else {
+        setError(errorMessage);
+        setStep('error');
+      }
     }
   };
 
@@ -78,6 +86,10 @@ export function AirbnbSyncDialog({ open, onOpenChange, onSuccess }: AirbnbSyncDi
     setError(null);
     setConnectionId(null);
     onOpenChange(false);
+  };
+
+  const handleOpenICalHelp = () => {
+    window.open('https://www.airbnb.com/help/article/99', '_blank');
   };
 
   return (
@@ -156,7 +168,7 @@ export function AirbnbSyncDialog({ open, onOpenChange, onSuccess }: AirbnbSyncDi
 
           {step === 'done' && (
             <div className="py-8 text-center">
-              <CheckCircle2 className="h-12 w-12 mx-auto mb-4 text-emerald-500" />
+              <CheckCircle2 className="h-12 w-12 mx-auto mb-4 text-success" />
               <p className="text-lg font-medium">
                 {isRu ? 'Данные импортированы!' : 'Data imported!'}
               </p>
@@ -168,6 +180,53 @@ export function AirbnbSyncDialog({ open, onOpenChange, onSuccess }: AirbnbSyncDi
               <Button className="mt-4" onClick={handleClose}>
                 {isRu ? 'Продолжить' : 'Continue'}
               </Button>
+            </div>
+          )}
+
+          {step === 'blocked' && (
+            <div className="py-4 space-y-4">
+              <div className="text-center">
+                <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-warning" />
+                <p className="text-lg font-medium">
+                  {isRu ? 'Airbnb заблокировал импорт' : 'Airbnb blocked the import'}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {isRu 
+                    ? 'Но вы можете синхронизировать календарь вручную'
+                    : 'But you can sync calendar manually'}
+                </p>
+              </div>
+
+              <Alert>
+                <FileDown className="h-4 w-4" />
+                <AlertDescription className="text-sm">
+                  {isRu 
+                    ? 'Используйте iCal-ссылку из Airbnb для синхронизации занятости. UNO автоматически будет обновлять ваш календарь.'
+                    : 'Use the iCal link from Airbnb to sync availability. UNO will automatically update your calendar.'}
+                </AlertDescription>
+              </Alert>
+
+              <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+                <p className="text-sm font-medium">
+                  {isRu ? 'Как получить iCal ссылку:' : 'How to get iCal link:'}
+                </p>
+                <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
+                  <li>{isRu ? 'Откройте ваш листинг в Airbnb' : 'Open your listing in Airbnb'}</li>
+                  <li>{isRu ? 'Перейдите в Календарь → Настройки' : 'Go to Calendar → Settings'}</li>
+                  <li>{isRu ? 'Скопируйте ссылку "Экспорт календаря"' : 'Copy the "Export calendar" link'}</li>
+                  <li>{isRu ? 'Вставьте в UNO на странице Каналы' : 'Paste in UNO on the Channels page'}</li>
+                </ol>
+              </div>
+
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex-1" onClick={handleOpenICalHelp}>
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  {isRu ? 'Инструкция Airbnb' : 'Airbnb Guide'}
+                </Button>
+                <Button className="flex-1" onClick={handleClose}>
+                  {isRu ? 'Понятно' : 'Got it'}
+                </Button>
+              </div>
             </div>
           )}
 
