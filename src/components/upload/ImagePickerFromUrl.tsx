@@ -25,11 +25,8 @@ interface ImagePickerFromUrlProps {
 }
 
 // Generate proxy URL for Yandex Disk previews
-function getProxiedUrl(url: string, isYandexSource: boolean): string {
-  if (!isYandexSource) return url;
-  // Use edge function to proxy the image
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  return `${supabaseUrl}/functions/v1/proxy-image?url=${encodeURIComponent(url)}`;
+function getProxiedUrl(url: string): string {
+  return `https://kakkwibljrjsawxgnupk.supabase.co/functions/v1/proxy-image?url=${encodeURIComponent(url)}`;
 }
 
 export function ImagePickerFromUrl({
@@ -238,7 +235,7 @@ export function ImagePickerFromUrl({
               {images.map((image, index) => {
                 const isSelected = selectedImages.has(image.url);
                 const rawPreviewUrl = image.preview || image.url;
-                const displayUrl = isYandexSource ? getProxiedUrl(rawPreviewUrl, true) : rawPreviewUrl;
+                const displayUrl = isYandexSource ? getProxiedUrl(rawPreviewUrl) : rawPreviewUrl;
                 const isImageLoaded = loadedImages.has(index);
                 const isImageFailed = failedImages.has(index);
                 
