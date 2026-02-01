@@ -2,11 +2,19 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { 
-  Plus, Receipt, Sparkles, Calendar, FileText, MessageCircle
+  Plus, Receipt, Sparkles, Calendar, FileText, MessageCircle, Download
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const actions = [
+  { 
+    id: 'sync', 
+    icon: Download, 
+    labelEn: 'Import OTA', 
+    labelRu: 'Импорт OTA',
+    path: '/owner/channels',
+    color: 'bg-rose-500/10 text-rose-600 hover:bg-rose-500/20',
+  },
   { 
     id: 'expense', 
     icon: Receipt, 

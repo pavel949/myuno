@@ -7,10 +7,15 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useExternalCalendars, useICalExportUrl } from '@/hooks/useExternalCalendars';
 import { useOwnerProperties } from '@/hooks/usePropertyCare';
 import { usePropertyBookings } from '@/hooks/usePropertyBookings';
+import { useOtaConnections, OtaConnection } from '@/hooks/useOtaSync';
 import { ChannelManagementCTA } from '@/components/owner/ChannelManagementCTA';
+import { AirbnbSyncDialog } from '@/components/owner/airbnb-sync/AirbnbSyncDialog';
+import { OtaConnectionsList } from '@/components/owner/airbnb-sync/OtaConnectionsList';
+import { SyncedListingPreview } from '@/components/owner/airbnb-sync/SyncedListingPreview';
 import { 
   RefreshCw, 
   Plus, 
@@ -22,7 +27,9 @@ import {
   Clock,
   ExternalLink,
   Copy,
-  Unlink
+  Unlink,
+  Download,
+  Upload
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
@@ -94,14 +101,21 @@ export default function ChannelManager() {
   const isRu = language === 'ru';
   const locale = isRu ? ru : enUS;
 
+  const [showAirbnbSync, setShowAirbnbSync] = useState(false);
+  const [selectedConnection, setSelectedConnection] = useState<OtaConnection | null>(null);
+  const [activeTab, setActiveTab] = useState('import');
+
   const { data: properties } = useOwnerProperties();
   const { calendars, isLoading, syncAllCalendars, isSyncing } = useExternalCalendars();
   const { bookings } = usePropertyBookings();
+  const { connections: otaConnections } = useOtaConnections();
 
   // Calculate stats
-  const totalChannels = calendars?.length || 0;
-  const activeChannels = calendars?.filter(c => c.is_active && !c.sync_error).length || 0;
-  const errorChannels = calendars?.filter(c => c.sync_error).length || 0;
+  const totalChannels = (calendars?.length || 0) + (otaConnections?.length || 0);
+  const activeChannels = (calendars?.filter(c => c.is_active && !c.sync_error).length || 0) + 
+    (otaConnections?.filter(c => c.is_active && !c.sync_error).length || 0);
+  const errorChannels = (calendars?.filter(c => c.sync_error).length || 0) + 
+    (otaConnections?.filter(c => c.sync_error).length || 0);
   
   // Group bookings by source
   const bookingsBySource = bookings?.reduce((acc, booking) => {
@@ -193,165 +207,242 @@ export default function ChannelManager() {
           </Button>
           <Button 
             variant="outline" 
-            onClick={() => navigate('/owner/calendar')}
+            onClick={() => setShowAirbnbSync(true)}
           >
-            <Plus className="h-4 w-4 mr-2" />
-            {isRu ? 'Добавить' : 'Add'}
+            <Download className="h-4 w-4 mr-2" />
+            {isRu ? 'Импорт' : 'Import'}
           </Button>
         </div>
 
-        {/* How it Works */}
-        <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-          <CardContent className="pt-4">
-            <h3 className="font-semibold mb-2 flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-primary" />
-              {isRu ? 'Как работает синхронизация' : 'How Sync Works'}
-            </h3>
-            <ul className="text-sm text-muted-foreground space-y-1">
-              <li>• {isRu ? 'Подключите iCal-ссылку с Airbnb, Booking и других OTA' : 'Connect iCal link from Airbnb, Booking and other OTAs'}</li>
-              <li>• {isRu ? 'UNO автоматически импортирует бронирования' : 'UNO automatically imports bookings'}</li>
-              <li>• {isRu ? 'Экспортируйте календарь UNO обратно на OTA' : 'Export UNO calendar back to OTAs'}</li>
-              <li>• {isRu ? 'Избегайте двойных бронирований!' : 'Avoid double bookings!'}</li>
-            </ul>
-          </CardContent>
-        </Card>
+        {/* Tabs for Import/Export */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="import" className="gap-2">
+              <Download className="h-4 w-4" />
+              {isRu ? 'Импорт с OTA' : 'Import from OTA'}
+            </TabsTrigger>
+            <TabsTrigger value="export" className="gap-2">
+              <Upload className="h-4 w-4" />
+              {isRu ? 'Экспорт iCal' : 'Export iCal'}
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Channel Management CTA */}
-        <ChannelManagementCTA />
-
-        {/* Connected Channels */}
-        <div>
-          <h2 className="text-lg font-semibold mb-3">
-            {isRu ? 'Подключённые каналы' : 'Connected Channels'}
-          </h2>
-
-          {isLoading ? (
-            <div className="space-y-3">
-              {[1, 2].map(i => (
-                <div key={i} className="h-24 bg-muted animate-pulse rounded-lg" />
-              ))}
-            </div>
-          ) : calendars && calendars.length > 0 ? (
-            <div className="space-y-3">
-              {calendars.map((calendar, index) => {
-                const channel = getChannelConfig(calendar.name);
-                const property = properties?.find(p => p.id === calendar.property_id);
-                
-                return (
-                  <motion.div
-                    key={calendar.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    <ChannelCard
-                      calendar={calendar}
-                      channel={channel}
-                      propertyName={isRu ? property?.title_ru || property?.title : property?.title}
-                      bookingsCount={bookingsBySource[calendar.name] || 0}
-                      isRu={isRu}
-                      locale={locale}
-                    />
-                  </motion.div>
-                );
-              })}
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <Link2 className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-50" />
-                <p className="text-muted-foreground mb-4">
-                  {isRu 
-                    ? 'Нет подключённых каналов. Добавьте iCal-ссылку с вашего OTA.' 
-                    : 'No connected channels. Add an iCal link from your OTA.'}
-                </p>
-                <Button onClick={() => navigate('/owner/calendar')}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  {isRu ? 'Подключить канал' : 'Connect Channel'}
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-
-        {/* Bookings by Source */}
-        {Object.keys(bookingsBySource).length > 0 && (
-          <div>
-            <h2 className="text-lg font-semibold mb-3">
-              {isRu ? 'Бронирования по источникам' : 'Bookings by Source'}
-            </h2>
-            <Card>
+          {/* Import Tab - OTA Connections */}
+          <TabsContent value="import" className="space-y-4 mt-4">
+            {/* Import from Airbnb CTA */}
+            <Card className="bg-gradient-to-br from-rose-500/10 to-pink-500/10 border-rose-200 dark:border-rose-800">
               <CardContent className="pt-4">
-                <div className="space-y-3">
-                  {Object.entries(bookingsBySource)
-                    .sort(([, a], [, b]) => b - a)
-                    .map(([source, count]) => {
-                      const channel = getChannelConfig(source);
-                      const percentage = Math.round((count / (bookings?.length || 1)) * 100);
-                      
-                      return (
-                        <div key={source} className="flex items-center gap-3">
-                          <div className={cn(
-                            "w-10 h-10 rounded-lg flex items-center justify-center text-lg",
-                            channel.bgColor
-                          )}>
-                            {channel.logo}
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex justify-between items-center mb-1">
-                              <span className="font-medium text-sm">{source}</span>
-                              <span className="text-sm text-muted-foreground">
-                                {count} ({percentage}%)
-                              </span>
-                            </div>
-                            <div className="h-2 bg-muted rounded-full overflow-hidden">
-                              <div 
-                                className={cn("h-full rounded-full bg-gradient-to-r", channel.color)}
-                                style={{ width: `${percentage}%` }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-xl bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center text-3xl shrink-0">
+                    🏠
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold">
+                      {isRu ? 'Импорт листинга с Airbnb' : 'Import listing from Airbnb'}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {isRu 
+                        ? 'Автоматически скопируйте название, фото, описание и характеристики'
+                        : 'Automatically copy title, photos, description and specs'}
+                    </p>
+                  </div>
+                  <Button onClick={() => setShowAirbnbSync(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    {isRu ? 'Импорт' : 'Import'}
+                  </Button>
                 </div>
               </CardContent>
             </Card>
-          </div>
-        )}
 
-        {/* Export Section */}
-        {properties && properties.length > 0 && (
-          <div>
-            <h2 className="text-lg font-semibold mb-3">
-              {isRu ? 'Экспорт календаря UNO' : 'Export UNO Calendar'}
-            </h2>
-            <p className="text-sm text-muted-foreground mb-3">
-              {isRu 
-                ? 'Добавьте эту ссылку на ваши OTA-площадки для синхронизации занятости' 
-                : 'Add this link to your OTA platforms to sync availability'}
-            </p>
-            <div className="space-y-2">
-              {properties.slice(0, 3).map(property => (
-                <ExportLinkCard 
-                  key={property.id} 
-                  propertyId={property.id}
-                  propertyName={isRu ? property.title_ru || property.title : property.title}
-                  isRu={isRu}
+            {/* OTA Connections List */}
+            <div>
+              <h2 className="text-lg font-semibold mb-3">
+                {isRu ? 'Подключённые OTA' : 'Connected OTAs'}
+              </h2>
+              <OtaConnectionsList onSelectConnection={setSelectedConnection} />
+            </div>
+
+            {/* Selected Connection Preview */}
+            {selectedConnection && (
+              <div>
+                <h2 className="text-lg font-semibold mb-3">
+                  {isRu ? 'Импортированные данные' : 'Imported Data'}
+                </h2>
+                <SyncedListingPreview 
+                  connectionId={selectedConnection.id}
+                  propertyId={selectedConnection.property_id || properties?.[0]?.id}
+                  onApplied={() => setSelectedConnection(null)}
                 />
-              ))}
-              {properties.length > 3 && (
-                <Button 
-                  variant="ghost" 
-                  className="w-full"
-                  onClick={() => navigate('/owner/calendar')}
-                >
-                  {isRu ? `Ещё ${properties.length - 3} объектов...` : `${properties.length - 3} more properties...`}
-                </Button>
+              </div>
+            )}
+
+            {/* How it Works */}
+            <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+              <CardContent className="pt-4">
+                <h3 className="font-semibold mb-2 flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-primary" />
+                  {isRu ? 'Как работает импорт' : 'How Import Works'}
+                </h3>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li>• {isRu ? 'Вставьте ссылку на ваш листинг Airbnb' : 'Paste your Airbnb listing URL'}</li>
+                  <li>• {isRu ? 'UNO автоматически скачает все данные' : 'UNO automatically downloads all data'}</li>
+                  <li>• {isRu ? 'Выберите какие поля применить к объекту' : 'Choose which fields to apply'}</li>
+                  <li>• {isRu ? 'Редактируйте и публикуйте!' : 'Edit and publish!'}</li>
+                </ul>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Export Tab - iCal Calendars */}
+          <TabsContent value="export" className="space-y-4 mt-4">
+            {/* Channel Management CTA */}
+            <ChannelManagementCTA />
+
+            {/* Connected iCal Channels */}
+            <div>
+              <h2 className="text-lg font-semibold mb-3">
+                {isRu ? 'Подключённые каналы (iCal)' : 'Connected Channels (iCal)'}
+              </h2>
+
+              {isLoading ? (
+                <div className="space-y-3">
+                  {[1, 2].map(i => (
+                    <div key={i} className="h-24 bg-muted animate-pulse rounded-lg" />
+                  ))}
+                </div>
+              ) : calendars && calendars.length > 0 ? (
+                <div className="space-y-3">
+                  {calendars.map((calendar, index) => {
+                    const channel = getChannelConfig(calendar.name);
+                    const property = properties?.find(p => p.id === calendar.property_id);
+                    
+                    return (
+                      <motion.div
+                        key={calendar.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                      >
+                        <ChannelCard
+                          calendar={calendar}
+                          channel={channel}
+                          propertyName={isRu ? property?.title_ru || property?.title : property?.title}
+                          bookingsCount={bookingsBySource[calendar.name] || 0}
+                          isRu={isRu}
+                          locale={locale}
+                        />
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <Card>
+                  <CardContent className="py-12 text-center">
+                    <Link2 className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-50" />
+                    <p className="text-muted-foreground mb-4">
+                      {isRu 
+                        ? 'Нет подключённых каналов. Добавьте iCal-ссылку с вашего OTA.' 
+                        : 'No connected channels. Add an iCal link from your OTA.'}
+                    </p>
+                    <Button onClick={() => navigate('/owner/calendar')}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      {isRu ? 'Подключить канал' : 'Connect Channel'}
+                    </Button>
+                  </CardContent>
+                </Card>
               )}
             </div>
-          </div>
-        )}
+
+            {/* Bookings by Source */}
+            {Object.keys(bookingsBySource).length > 0 && (
+              <div>
+                <h2 className="text-lg font-semibold mb-3">
+                  {isRu ? 'Бронирования по источникам' : 'Bookings by Source'}
+                </h2>
+                <Card>
+                  <CardContent className="pt-4">
+                    <div className="space-y-3">
+                      {Object.entries(bookingsBySource)
+                        .sort(([, a], [, b]) => (b as number) - (a as number))
+                        .map(([source, count]) => {
+                          const channel = getChannelConfig(source);
+                          const percentage = Math.round(((count as number) / (bookings?.length || 1)) * 100);
+                          
+                          return (
+                            <div key={source} className="flex items-center gap-3">
+                              <div className={cn(
+                                "w-10 h-10 rounded-lg flex items-center justify-center text-lg",
+                                channel.bgColor
+                              )}>
+                                {channel.logo}
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex justify-between items-center mb-1">
+                                  <span className="font-medium text-sm">{source}</span>
+                                  <span className="text-sm text-muted-foreground">
+                                    {count as number} ({percentage}%)
+                                  </span>
+                                </div>
+                                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                                  <div 
+                                    className={cn("h-full rounded-full bg-gradient-to-r", channel.color)}
+                                    style={{ width: `${percentage}%` }}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Export Section */}
+            {properties && properties.length > 0 && (
+              <div>
+                <h2 className="text-lg font-semibold mb-3">
+                  {isRu ? 'Экспорт календаря UNO' : 'Export UNO Calendar'}
+                </h2>
+                <p className="text-sm text-muted-foreground mb-3">
+                  {isRu 
+                    ? 'Добавьте эту ссылку на ваши OTA-площадки для синхронизации занятости' 
+                    : 'Add this link to your OTA platforms to sync availability'}
+                </p>
+                <div className="space-y-2">
+                  {properties.slice(0, 3).map(property => (
+                    <ExportLinkCard 
+                      key={property.id} 
+                      propertyId={property.id}
+                      propertyName={isRu ? property.title_ru || property.title : property.title}
+                      isRu={isRu}
+                    />
+                  ))}
+                  {properties.length > 3 && (
+                    <Button 
+                      variant="ghost" 
+                      className="w-full"
+                      onClick={() => navigate('/owner/calendar')}
+                    >
+                      {isRu ? `Ещё ${properties.length - 3} объектов...` : `${properties.length - 3} more properties...`}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+
+        {/* Airbnb Sync Dialog */}
+        <AirbnbSyncDialog 
+          open={showAirbnbSync} 
+          onOpenChange={setShowAirbnbSync}
+          onSuccess={(connectionId) => {
+            // Find the new connection and select it
+            setShowAirbnbSync(false);
+          }}
+        />
       </div>
     </PageContainer>
   );
