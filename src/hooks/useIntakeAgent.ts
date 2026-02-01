@@ -131,8 +131,9 @@ export function useIntakeAgent() {
 
       if (fnError) throw fnError;
       
-      if (!data.success) {
-        throw new Error(data.error || 'Failed to process intake');
+      // Edge function returns sessionId, status, items - check for valid response
+      if (!data || !data.sessionId || !data.items) {
+        throw new Error(data?.error || 'Failed to process intake');
       }
 
       // Parse session from response
