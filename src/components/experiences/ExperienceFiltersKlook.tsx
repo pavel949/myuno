@@ -1,7 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { ArrowUpDown, ChevronDown, ChevronUp, SlidersHorizontal, RotateCcw, Check, type LucideIcon } from 'lucide-react';
+import { ArrowUpDown, ChevronDown, ChevronUp, SlidersHorizontal, RotateCcw, Check, CalendarDays, X, type LucideIcon } from 'lucide-react';
+import { format, addDays, isToday, isTomorrow, isThisWeek, startOfDay, endOfDay, isWithinInterval } from 'date-fns';
+import { ru, enUS } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { 
   Drawer, 
   DrawerContent, 
@@ -34,6 +38,7 @@ export interface CategoryOption {
 }
 
 export type SortOption = 'rating' | 'price_asc' | 'price_desc' | 'duration';
+export type DatePreset = 'any' | 'today' | 'tomorrow' | 'this-week' | 'custom';
 
 // Interests/Tags for discovery (Klook style)
 const INTEREST_OPTIONS = [
@@ -80,6 +85,10 @@ interface ExperienceFiltersKlookProps {
   onInterestsChange: (interests: string[]) => void;
   selectedFeatures: string[];
   onFeaturesChange: (features: string[]) => void;
+  selectedDate: Date | null;
+  onDateChange: (date: Date | null) => void;
+  datePreset: DatePreset;
+  onDatePresetChange: (preset: DatePreset) => void;
   resultsCount: number;
   language: string;
 }
@@ -168,27 +177,85 @@ export function ExperienceFiltersKlook({
   onInterestsChange,
   selectedFeatures,
   onFeaturesChange,
+  selectedDate,
+  onDateChange,
+  datePreset,
+  onDatePresetChange,
   resultsCount,
   language,
 }: ExperienceFiltersKlookProps) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [tempPriceRange, setTempPriceRange] = useState(priceRange);
   const [tempCategory, setTempCategory] = useState(selectedCategory);
   const [tempInterests, setTempInterests] = useState(selectedInterests);
   const [tempFeatures, setTempFeatures] = useState(selectedFeatures);
   const isRu = language === 'ru';
+  const locale = isRu ? ru : enUS;
 
   const currentSort = SORT_OPTIONS.find(o => o.id === sortBy) || SORT_OPTIONS[0];
+  
+  // Date presets
+  const DATE_PRESETS: { id: DatePreset; labelEn: string; labelRu: string }[] = [
+    { id: 'today', labelEn: 'Today', labelRu: 'Сегодня' },
+    { id: 'tomorrow', labelEn: 'Tomorrow', labelRu: 'Завтра' },
+    { id: 'this-week', labelEn: 'This week', labelRu: 'Эта неделя' },
+  ];
+  
+  // Handle date preset click
+  const handleDatePreset = (preset: DatePreset) => {
+    if (datePreset === preset) {
+      // Toggle off
+      onDatePresetChange('any');
+      onDateChange(null);
+    } else {
+      onDatePresetChange(preset);
+      if (preset === 'today') {
+        onDateChange(new Date());
+      } else if (preset === 'tomorrow') {
+        onDateChange(addDays(new Date(), 1));
+      } else if (preset === 'this-week') {
+        onDateChange(null); // Will filter by week range
+      }
+    }
+  };
+
+  // Handle calendar date select
+  const handleCalendarSelect = (date: Date | undefined) => {
+    if (date) {
+      onDateChange(date);
+      onDatePresetChange('custom');
+    } else {
+      onDateChange(null);
+      onDatePresetChange('any');
+    }
+    setIsCalendarOpen(false);
+  };
+
+  // Clear date filter
+  const clearDateFilter = () => {
+    onDateChange(null);
+    onDatePresetChange('any');
+  };
+
+  // Get date display text
+  const getDateDisplay = () => {
+    if (datePreset === 'custom' && selectedDate) {
+      return format(selectedDate, 'd MMM', { locale });
+    }
+    return null;
+  };
   
   // Count active filters
   const activeFilterCount = useMemo(() => {
     let count = 0;
     if (priceRange[0] > 0 || priceRange[1] < 50000) count++;
     if (selectedCategory !== 'all') count++;
+    if (datePreset !== 'any') count++;
     count += selectedInterests.length;
     count += selectedFeatures.length;
     return count;
-  }, [priceRange, selectedCategory, selectedInterests, selectedFeatures]);
+  }, [priceRange, selectedCategory, selectedInterests, selectedFeatures, datePreset]);
 
   const hasActiveFilters = activeFilterCount > 0;
 
@@ -241,8 +308,65 @@ export function ExperienceFiltersKlook({
     <>
       {/* Sticky Filter Bar */}
       <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b -mx-4 px-4 py-2">
-        {/* Quick Category Chips */}
+        {/* Date Quick Filters - Klook style */}
         <div className="flex gap-2 overflow-x-auto scrollbar-hide touch-pan-x pb-2 -mx-1 px-1">
+          {DATE_PRESETS.map((preset) => (
+            <button
+              key={preset.id}
+              onClick={() => handleDatePreset(preset.id)}
+              className={cn(
+                "flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1 whitespace-nowrap border",
+                datePreset === preset.id
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-background text-foreground border-border hover:border-primary/50"
+              )}
+            >
+              <CalendarDays className="w-3.5 h-3.5" />
+              <span>{isRu ? preset.labelRu : preset.labelEn}</span>
+            </button>
+          ))}
+          
+          {/* Calendar picker */}
+          <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+            <PopoverTrigger asChild>
+              <button
+                className={cn(
+                  "flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1 whitespace-nowrap border",
+                  datePreset === 'custom'
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background text-foreground border-border hover:border-primary/50"
+                )}
+              >
+                <CalendarDays className="w-3.5 h-3.5" />
+                <span>{getDateDisplay() || (isRu ? 'Выбрать дату' : 'Pick date')}</span>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={selectedDate || undefined}
+                onSelect={handleCalendarSelect}
+                disabled={(date) => date < startOfDay(new Date())}
+                locale={locale}
+                initialFocus
+                className="p-3 pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+
+          {/* Clear date if active */}
+          {datePreset !== 'any' && (
+            <button
+              onClick={clearDateFilter}
+              className="flex-shrink-0 px-2 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1 text-muted-foreground hover:text-foreground"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+
+          <div className="w-px h-6 bg-border flex-shrink-0 self-center mx-1" />
+          
+          {/* Category Quick Chips */}
           <button
             onClick={() => onCategoryChange('all')}
             className={cn(
