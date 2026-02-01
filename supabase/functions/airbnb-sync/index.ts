@@ -246,8 +246,16 @@ serve(async (req) => {
     const scrapeData = await scrapeResponse.json();
     
     if (!scrapeResponse.ok || !scrapeData.success) {
-      const errorMessage = scrapeData.error || `Scrape failed: ${scrapeResponse.status}`;
-      console.error('Firecrawl error:', errorMessage);
+      const rawError = scrapeData.error || `Scrape failed: ${scrapeResponse.status}`;
+      console.error('Firecrawl error:', rawError);
+      
+      // Check for blocklist error and provide user-friendly message
+      const isBlocklisted = rawError.toLowerCase().includes('blocklisted') || 
+                           rawError.toLowerCase().includes('blocked');
+      
+      const errorMessage = isBlocklisted 
+        ? 'OTA_BLOCKED' 
+        : rawError;
       
       // Update sync log with error
       if (syncLog) {
@@ -255,7 +263,7 @@ serve(async (req) => {
           .from('ota_sync_logs')
           .update({
             status: 'failed',
-            error_message: errorMessage,
+            error_message: rawError,
             duration_ms: Date.now() - startTime,
             completed_at: new Date().toISOString(),
           })
@@ -269,14 +277,14 @@ serve(async (req) => {
           .update({
             last_sync_at: new Date().toISOString(),
             last_sync_status: 'failed',
-            sync_error: errorMessage,
+            sync_error: rawError,
           })
           .eq('id', connectionId);
       }
 
       return new Response(
-        JSON.stringify({ success: false, error: errorMessage }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ success: false, error: errorMessage, isBlocklisted }),
+        { status: isBlocklisted ? 403 : 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
