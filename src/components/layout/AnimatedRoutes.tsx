@@ -274,6 +274,9 @@ const AdminAIAgentEditor = lazy(() => import('@/pages/admin/AdminAIAgentEditor')
 const AdminIntake = lazy(() => import('@/pages/admin/AdminIntake'));
 const AdminVendorProspects = lazy(() => import('@/pages/admin/AdminVendorProspects'));
 
+// Experience Categories Management
+const ExperienceCategoriesPage = lazy(() => import('@/pages/admin/ExperienceCategoriesPage'));
+
 // Admin route wrapper with layout
 const AdminRouteLayout = () => (
   <AdminGuard>
@@ -698,6 +701,8 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/admin/intake" element={<AdminIntake />} />
           {/* Vendor Acquisition */}
           <Route path="/admin/vendor-prospects" element={<AdminVendorProspects />} />
+          {/* Experience Categories */}
+          <Route path="/admin/experience-categories" element={<ExperienceCategoriesPage />} />
         </Route>
         
         {/* Staff Routes - Protected */}

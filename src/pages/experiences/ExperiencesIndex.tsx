@@ -12,9 +12,10 @@ import {
   ExperienceType,
   Experience
 } from '@/hooks/useExperiences';
+import { useExperienceCategories } from '@/hooks/useExperienceCategories';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { CrossSellSection } from '@/components/crosssell';
-import { ExperienceFiltersKlook, SortOption } from '@/components/experiences/ExperienceFiltersKlook';
+import { ExperienceFiltersKlook, SortOption, CategoryOption } from '@/components/experiences/ExperienceFiltersKlook';
 import { cn } from '@/lib/utils';
 
 type ViewType = 'all' | 'tour' | 'activity';
@@ -169,6 +170,20 @@ export default function ExperiencesIndex() {
     type: viewType === 'all' ? undefined : viewType as ExperienceType,
     category: selectedCategory === 'all' ? undefined : selectedCategory,
   });
+
+  // Fetch dynamic categories from DB
+  const experienceTypeForCategories = viewType === 'all' ? undefined : viewType as 'tour' | 'activity';
+  const { data: dbCategories = [] } = useExperienceCategories(experienceTypeForCategories);
+  
+  // Transform DB categories to filter options format
+  const categoryOptions: CategoryOption[] = useMemo(() => {
+    return dbCategories.map(cat => ({
+      id: cat.slug,
+      labelEn: cat.name_en,
+      labelRu: cat.name_ru,
+      icon: cat.icon,
+    }));
+  }, [dbCategories]);
   
   // Filter and sort experiences
   const filteredExperiences = useMemo(() => {
@@ -299,6 +314,7 @@ export default function ExperiencesIndex() {
         
         {/* Klook-style Filters */}
         <ExperienceFiltersKlook
+          categories={categoryOptions}
           selectedCategory={selectedCategory}
           onCategoryChange={handleCategoryChange}
           sortBy={sortBy}

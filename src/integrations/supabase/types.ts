@@ -2846,6 +2846,45 @@ export type Database = {
           },
         ]
       }
+      experience_categories: {
+        Row: {
+          created_at: string | null
+          experience_type: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name_en: string
+          name_ru: string
+          slug: string
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          experience_type?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name_en: string
+          name_ru: string
+          slug: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          experience_type?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name_en?: string
+          name_ru?: string
+          slug?: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       experiences: {
         Row: {
           age_restriction: number | null
