@@ -262,6 +262,122 @@ const OWNER_ACTIONS: QuickAction[] = [
   },
 ];
 
+// Vendor-focused actions (service provider tools)
+const VENDOR_ACTIONS: QuickAction[] = [
+  {
+    id: 'vendor-dashboard',
+    icon: Building2,
+    label: 'Dashboard',
+    labelRu: 'Панель',
+    path: '/vendor',
+    iconColor: 'text-purple-600',
+    bgColor: 'bg-purple-500/10',
+  },
+  {
+    id: 'vendor-orders',
+    icon: ShoppingBag,
+    label: 'Orders',
+    labelRu: 'Заказы',
+    path: '/vendor/orders',
+    iconColor: 'text-blue-600',
+    bgColor: 'bg-blue-500/10',
+  },
+  {
+    id: 'vendor-services',
+    icon: Wrench,
+    label: 'Services',
+    labelRu: 'Услуги',
+    path: '/vendor/services',
+    iconColor: 'text-amber-600',
+    bgColor: 'bg-amber-500/10',
+  },
+  {
+    id: 'vendor-calendar',
+    icon: Calendar,
+    label: 'Calendar',
+    labelRu: 'Календарь',
+    path: '/vendor/calendar',
+    iconColor: 'text-teal-600',
+    bgColor: 'bg-teal-500/10',
+  },
+  {
+    id: 'market',
+    icon: ShoppingBag,
+    label: 'Market',
+    labelRu: 'Маркет',
+    path: '/market',
+    iconColor: 'text-violet-600',
+    bgColor: 'bg-violet-500/10',
+  },
+  {
+    id: 'banking',
+    icon: Banknote,
+    label: 'Banking',
+    labelRu: 'Банки',
+    path: '/banking',
+    iconColor: 'text-green-600',
+    bgColor: 'bg-green-500/10',
+  },
+];
+
+// Admin/Staff/Team-focused actions (platform management)
+const ADMIN_ACTIONS: QuickAction[] = [
+  {
+    id: 'admin-dashboard',
+    icon: Shield,
+    label: 'Admin',
+    labelRu: 'Админ',
+    path: '/admin',
+    iconColor: 'text-red-600',
+    bgColor: 'bg-red-500/10',
+  },
+  {
+    id: 'team-dashboard',
+    icon: Building2,
+    label: 'Team',
+    labelRu: 'Команда',
+    path: '/team',
+    iconColor: 'text-emerald-600',
+    bgColor: 'bg-emerald-500/10',
+  },
+  {
+    id: 'services',
+    icon: Wrench,
+    label: 'Services',
+    labelRu: 'Сервисы',
+    path: '/services',
+    iconColor: 'text-amber-600',
+    bgColor: 'bg-amber-500/10',
+  },
+  {
+    id: 'property',
+    icon: Home,
+    label: 'Property',
+    labelRu: 'Жильё',
+    path: '/property',
+    iconColor: 'text-teal-600',
+    bgColor: 'bg-teal-500/10',
+  },
+  {
+    id: 'market',
+    icon: ShoppingBag,
+    label: 'Market',
+    labelRu: 'Маркет',
+    path: '/market',
+    iconColor: 'text-violet-600',
+    bgColor: 'bg-violet-500/10',
+  },
+  {
+    id: 'legal',
+    icon: Scale,
+    label: 'Legal',
+    labelRu: 'Юрист',
+    path: '/legal',
+    iconColor: 'text-indigo-600',
+    bgColor: 'bg-indigo-500/10',
+  },
+];
+
 // Fixed action (only "More" - SOS moved to SafetyBanner)
 const FIXED_ACTIONS: QuickAction[] = [
   {
@@ -413,11 +529,11 @@ function getActionsForRole(role: AppRole): QuickAction[] {
     case 'owner':
       return OWNER_ACTIONS;
     case 'vendor':
-      return RESIDENT_ACTIONS; // Vendors see resident-style actions on home
+      return VENDOR_ACTIONS;
     case 'admin':
     case 'staff':
     case 'uno_team':
-      return RESIDENT_ACTIONS;
+      return ADMIN_ACTIONS;
     case 'user':
     default:
       return DEFAULT_ACTIONS;
