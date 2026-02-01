@@ -6,6 +6,12 @@ import {
   Microwave, Coffee, Wind, LockKeyhole, Car, Waves, TreePine,
   ArrowUpDown, Ruler, Building2
 } from 'lucide-react';
+import { 
+  VIEW_TYPES, 
+  FURNISHING_LEVELS, 
+  getAmenityIcon, 
+  normalizeAmenityId 
+} from '@/lib/propertyTaxonomy';
 
 interface UnitSpecsProps {
   // Multi-unit fields
@@ -29,24 +35,15 @@ interface UnitSpecsProps {
 // Property type categories
 const STANDALONE_TYPES = ['villa', 'house', 'townhouse'];
 
-const viewTypeLabels: Record<string, { en: string; ru: string }> = {
-  sea: { en: 'Sea View', ru: 'Вид на море' },
-  pool: { en: 'Pool View', ru: 'Вид на бассейн' },
-  garden: { en: 'Garden View', ru: 'Вид на сад' },
-  mountain: { en: 'Mountain View', ru: 'Вид на горы' },
-  city: { en: 'City View', ru: 'Вид на город' },
-  parking: { en: 'Parking View', ru: 'Вид на парковку' },
-  interior: { en: 'Interior View', ru: 'Внутренний вид' },
-  panoramic: { en: 'Panoramic View', ru: 'Панорамный вид' },
-  jungle: { en: 'Jungle View', ru: 'Вид на джунгли' },
-};
+// View type labels derived from taxonomy
+const viewTypeLabels: Record<string, { en: string; ru: string }> = Object.fromEntries(
+  VIEW_TYPES.map(v => [v.id, { en: v.labelEn, ru: v.labelRu }])
+);
 
-const furnishingLabels: Record<string, { en: string; ru: string }> = {
-  unfurnished: { en: 'Unfurnished', ru: 'Без мебели' },
-  partially: { en: 'Partially Furnished', ru: 'Частичная меблировка' },
-  fully: { en: 'Fully Furnished', ru: 'Полная меблировка' },
-  luxury: { en: 'Luxury Furnished', ru: 'Люкс меблировка' },
-};
+// Furnishing labels derived from taxonomy
+const furnishingLabels: Record<string, { en: string; ru: string }> = Object.fromEntries(
+  FURNISHING_LEVELS.map(f => [f.id, { en: f.labelEn, ru: f.labelRu }])
+);
 
 const parkingTypeLabels: Record<string, { en: string; ru: string }> = {
   garage: { en: 'Garage', ru: 'Гараж' },

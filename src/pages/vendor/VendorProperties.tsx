@@ -61,19 +61,29 @@ import {
   CardPreviewSection,
 } from '@/components/vendor';
 
-const propertyTypes = [
-  { id: 'villa', label: 'Villa', labelRu: 'Вилла' },
-  { id: 'apartment', label: 'Apartment', labelRu: 'Апартаменты' },
-  { id: 'condo', label: 'Condo', labelRu: 'Кондо' },
-  { id: 'house', label: 'House', labelRu: 'Дом' },
-  { id: 'studio', label: 'Studio', labelRu: 'Студия' },
-  { id: 'townhouse', label: 'Townhouse', labelRu: 'Таунхаус' },
-];
+// Import centralized taxonomy
+import { 
+  PROPERTY_TYPES, 
+  LISTING_TYPES,
+  ALL_AMENITIES,
+  PHUKET_DISTRICTS,
+  normalizeAmenityId,
+  normalizeAmenities,
+  normalizeDistrictId,
+} from '@/lib/propertyTaxonomy';
 
-const listingTypes = [
-  { id: 'rent', label: 'For Rent', labelRu: 'Аренда' },
-  { id: 'sale', label: 'For Sale', labelRu: 'Продажа' },
-];
+// Use centralized taxonomy
+const propertyTypes = PROPERTY_TYPES.map(t => ({
+  id: t.id,
+  label: t.labelEn,
+  labelRu: t.labelRu,
+}));
+
+const listingTypes = LISTING_TYPES.map(l => ({
+  id: l.id,
+  label: l.labelEn,
+  labelRu: l.labelRu,
+}));
 
 const pricePeriods = [
   { id: 'day', label: 'Per Day', labelRu: 'За день' },
@@ -81,20 +91,21 @@ const pricePeriods = [
   { id: 'year', label: 'Per Year', labelRu: 'За год' },
 ];
 
-const amenitiesList = [
-  { id: 'wifi', label: 'Wi-Fi', labelRu: 'Wi-Fi' },
-  { id: 'pool', label: 'Pool', labelRu: 'Бассейн' },
-  { id: 'gym', label: 'Gym', labelRu: 'Спортзал' },
-  { id: 'parking', label: 'Parking', labelRu: 'Парковка' },
-  { id: 'ac', label: 'Air Conditioning', labelRu: 'Кондиционер' },
-  { id: 'kitchen', label: 'Kitchen', labelRu: 'Кухня' },
-  { id: 'washer', label: 'Washer', labelRu: 'Стиральная машина' },
-  { id: 'balcony', label: 'Balcony', labelRu: 'Балкон' },
-  { id: 'sea_view', label: 'Sea View', labelRu: 'Вид на море' },
-  { id: 'security', label: '24h Security', labelRu: 'Охрана 24ч' },
-  { id: 'pets', label: 'Pets Allowed', labelRu: 'Можно с питомцами' },
-  { id: 'garden', label: 'Garden', labelRu: 'Сад' },
-];
+// Use centralized amenities list (canonical IDs)
+const amenitiesList = ALL_AMENITIES.map(a => ({
+  id: a.id,
+  label: a.labelEn,
+  labelRu: a.labelRu,
+  icon: a.icon,
+}));
+
+// Districts for dropdown
+const districtOptions = PHUKET_DISTRICTS.map(d => ({
+  id: d.id,
+  label: d.labelEn,
+  labelRu: d.labelRu,
+  icon: d.icon,
+}));
 
 interface PropertyFormData {
   title_en: string;
@@ -294,6 +305,10 @@ const VendorProperties = () => {
 
     setIsSubmitting(true);
     try {
+      // Normalize amenities before saving
+      const normalizedAmenities = normalizeAmenities(formData.amenities);
+      const normalizedDistrict = normalizeDistrictId(formData.district);
+      
       const propertyData: Partial<VendorProperty> = {
         title_en: formData.title_en,
         title_ru: formData.title_ru || formData.title_en,
@@ -310,12 +325,12 @@ const VendorProperties = () => {
         max_guests: parseInt(formData.max_guests) || 2,
         min_stay_nights: parseInt(formData.min_stay_nights) || 1,
         address: formData.address || undefined,
-        district: formData.district || undefined,
+        district: normalizedDistrict || undefined,
         lat: formData.lat ? parseFloat(formData.lat) : undefined,
         lng: formData.lng ? parseFloat(formData.lng) : undefined,
         cover_image: formData.cover_image || undefined,
         images: formData.images.length > 0 ? formData.images : undefined,
-        amenities: formData.amenities.length > 0 ? formData.amenities : undefined,
+        amenities: normalizedAmenities.length > 0 ? normalizedAmenities : undefined,
         is_active: formData.is_active,
       };
 

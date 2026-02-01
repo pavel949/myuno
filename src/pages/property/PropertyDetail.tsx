@@ -137,21 +137,8 @@ const demoProperty = {
   },
 };
 
-// Amenity icons mapping
-const amenityIcons: Record<string, string> = {
-  'pool': '🏊', 'Pool': '🏊',
-  'ocean view': '🌊', 'Ocean View': '🌊', 'sea view': '🌊', 'Sea View': '🌊',
-  'gym': '🏋️', 'Gym': '🏋️', 'fitness': '🏋️', 'Fitness Center': '🏋️',
-  'garden': '🌳', 'Garden': '🌳',
-  'parking': '🅿️', 'Parking': '🅿️',
-  'wifi': '📶', 'WiFi': '📶',
-  'ac': '❄️', 'AC': '❄️', 'Air Conditioning': '❄️',
-  'kitchen': '👨‍🍳', 'Kitchen': '👨‍🍳',
-  'cleaning': '🧹', 'Daily Cleaning': '🧹',
-  'security': '🛡️', '24/7 Security': '🛡️',
-  'balcony': '🌅', 'Balcony': '🌅',
-  'beach': '🏖️', 'Beach Access': '🏖️',
-};
+// Import centralized taxonomy for amenities
+import { getAmenityIcon, getAmenityLabel, normalizeAmenityId } from '@/lib/propertyTaxonomy';
 
 // View type labels
 const viewTypeLabels: Record<string, { en: string; ru: string }> = {
@@ -623,15 +610,17 @@ export default function PropertyDetail() {
                 </h2>
                 <div className="grid grid-cols-2 gap-3">
                   {amenities.slice(0, 8).map((amenity, i) => {
-                    const amenityName = typeof amenity === 'string' ? amenity : amenity;
-                    const icon = amenityIcons[amenityName] || '✓';
+                    const amenityId = typeof amenity === 'string' ? amenity : amenity;
+                    const normalizedId = normalizeAmenityId(amenityId);
+                    const icon = getAmenityIcon(normalizedId);
+                    const label = getAmenityLabel(normalizedId, isRu ? 'ru' : 'en');
                     return (
                       <div
                         key={i}
                         className="flex items-center gap-3 py-2"
                       >
                         <span className="text-xl w-8">{icon}</span>
-                        <span className="text-sm">{amenityName}</span>
+                        <span className="text-sm">{label}</span>
                       </div>
                     );
                   })}

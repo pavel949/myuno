@@ -44,19 +44,21 @@ const editorSteps = [
   { id: 'team', title: 'Team', titleRu: 'Команда', icon: <UsersRound className="h-4 w-4" /> },
 ];
 
-// Static data
-const districts = [
-  'Patong', 'Kata', 'Karon', 'Rawai', 'Nai Harn', 
-  'Kamala', 'Surin', 'Bang Tao', 'Laguna', 'Cherngtalay',
-  'Phuket Town', 'Chalong', 'Kathu'
-];
+// Import centralized taxonomy
+import { 
+  PHUKET_DISTRICTS, 
+  PROPERTY_TYPES,
+  normalizeDistrictId,
+  normalizePropertyType,
+} from '@/lib/propertyTaxonomy';
 
-const propertyTypes = [
-  { value: 'villa', labelEn: 'Villa', labelRu: 'Вилла' },
-  { value: 'apartment', labelEn: 'Apartment', labelRu: 'Квартира' },
-  { value: 'condo', labelEn: 'Condo', labelRu: 'Кондо' },
-  { value: 'house', labelEn: 'House', labelRu: 'Дом' },
-];
+// Use centralized taxonomy data
+const districts = PHUKET_DISTRICTS.map(d => d.id);
+const propertyTypes = PROPERTY_TYPES.map(t => ({
+  value: t.id,
+  labelEn: t.labelEn,
+  labelRu: t.labelRu,
+}));
 
 const managementTypes = [
   { value: 'full', labelEn: 'Full Management', labelRu: 'Полное управление', desc: 'UNO handles everything' },
