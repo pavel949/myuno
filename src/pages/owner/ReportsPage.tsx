@@ -274,7 +274,7 @@ export default function ReportsPage() {
                           <p className="text-xs text-muted-foreground mb-1">
                             {isRu ? 'Доход' : 'Income'}
                           </p>
-                          <p className="font-medium text-green-600 flex items-center gap-1">
+                          <p className="font-medium text-success flex items-center gap-1">
                             <TrendingUp className="h-3.5 w-3.5" />
                             {formatCurrency(report.data.income?.total || 0)}
                           </p>
@@ -283,7 +283,7 @@ export default function ReportsPage() {
                           <p className="text-xs text-muted-foreground mb-1">
                             {isRu ? 'Расходы' : 'Expenses'}
                           </p>
-                          <p className="font-medium text-red-600 flex items-center gap-1">
+                          <p className="font-medium text-destructive flex items-center gap-1">
                             <TrendingDown className="h-3.5 w-3.5" />
                             {formatCurrency(report.data.expenses?.total || 0)}
                           </p>
@@ -292,7 +292,7 @@ export default function ReportsPage() {
                           <p className="text-xs text-muted-foreground mb-1">
                             {isRu ? 'Чистый доход' : 'Net Income'}
                           </p>
-                          <p className={`font-medium ${report.data.net_income >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          <p className={`font-medium ${report.data.net_income >= 0 ? 'text-success' : 'text-destructive'}`}>
                             {formatCurrency(report.data.net_income || 0)}
                           </p>
                         </div>

@@ -13,7 +13,7 @@ const actions = [
     labelEn: 'Import OTA', 
     labelRu: 'Импорт OTA',
     path: '/owner/channels',
-    color: 'bg-rose-500/10 text-rose-600 hover:bg-rose-500/20',
+    color: 'bg-destructive/10 text-destructive hover:bg-destructive/20',
   },
   { 
     id: 'expense', 
@@ -21,7 +21,7 @@ const actions = [
     labelEn: 'Add Expense', 
     labelRu: 'Расход',
     path: '/owner/quick-expense',
-    color: 'bg-orange-500/10 text-orange-600 hover:bg-orange-500/20',
+    color: 'bg-warning/10 text-warning hover:bg-warning/20',
   },
   { 
     id: 'cleaning', 
@@ -29,7 +29,7 @@ const actions = [
     labelEn: 'Cleaning', 
     labelRu: 'Уборка',
     path: '/owner/service-request?type=cleaning',
-    color: 'bg-blue-500/10 text-blue-600 hover:bg-blue-500/20',
+    color: 'bg-accent/50 text-accent-foreground hover:bg-accent',
   },
   { 
     id: 'calendar', 
@@ -37,7 +37,7 @@ const actions = [
     labelEn: 'Calendar', 
     labelRu: 'Календарь',
     path: '/owner/calendar',
-    color: 'bg-purple-500/10 text-purple-600 hover:bg-purple-500/20',
+    color: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
   },
   { 
     id: 'property', 
