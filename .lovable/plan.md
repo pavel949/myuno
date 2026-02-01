@@ -1,304 +1,166 @@
 
-# ✅ ВЫПОЛНЕНО: Профессиональная таксономия недвижимости Пхукета
+# План: Поддержка загрузки файлов с Yandex Disk
 
-## Статус: Завершено
+## Проблема
 
-Все 4 этапа реализованы:
-- ✅ Функции нормализации в `propertyTaxonomy.ts`
-- ✅ Централизованный хук `usePropertyFormOptions.ts`
-- ✅ Рефакторинг форм PropertyEditor и VendorProperties
-- ✅ Миграция данных БД (ac→air-conditioning, Patong→patong)
+Yandex Disk (`disk.yandex.ru`) - это облачное хранилище с динамическим JavaScript-контентом. Текущий метод парсинга HTML через Firecrawl не работает, потому что:
+1. Yandex Disk загружает изображения через JavaScript после загрузки страницы
+2. Публичные ссылки (типа `https://disk.yandex.ru/d/xxxxx`) требуют API-вызов для получения прямой ссылки на скачивание
+3. Firecrawl возвращает пустой HTML без реальных изображений
 
-## Обзор проблемы (РЕШЕНО)
+## Решение
 
-```text
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        ТЕКУЩЕЕ СОСТОЯНИЕ (ПРОБЛЕМЫ)                        │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  БД (lookup_values)          Фронтенд (формы)         БД (properties)      │
-│  ─────────────────          ────────────────         ────────────────      │
-│  air-conditioning           ac                       air_conditioning      │
-│  sea-view                   sea_view                 sea_view              │
-│  pet-friendly               pets                     pet-friendly          │
-│  beach-access               (отсутствует)            beach_access          │
-│                                                                             │
-│  РЕЗУЛЬТАТ: Фильтры не работают, данные не отображаются корректно          │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
+Создать отдельный обработчик для Yandex Disk, который использует их публичный API для получения прямых ссылок на файлы.
 
-### Найденные проблемы
-
-1. **Несогласованность ключей аменитиз**
-   - БД `lookup_values`: `air-conditioning`, `sea-view`, `pet-friendly`
-   - Формы вендоров: `ac`, `sea_view`, `pets`
-   - Реальные данные в `properties.amenities`: `air_conditioning`, `air-conditioning`, `ac`
-
-2. **Дублирование списков районов**
-   - `PropertyEditor.tsx`: статический массив 13 районов
-   - `propertyTaxonomy.ts`: 22 района с метаданными
-   - `lookup_values`: 22 района (синхронизированы)
-
-3. **Формы не используют централизованную таксономию**
-   - `VendorProperties.tsx` — свои статические списки
-   - `PropertyEditor.tsx` — свои статические списки
-   - Не загружают данные из `lookup_values` или `propertyTaxonomy.ts`
-
-4. **Отсутствует нормализация при сохранении/чтении**
-   - При записи: разные ключи сохраняются как есть
-   - При чтении: фильтры не находят совпадений
-
----
-
-## Архитектура решения
+### Как это будет работать
 
 ```text
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           ЦЕЛЕВАЯ АРХИТЕКТУРА                               │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│                    src/lib/propertyTaxonomy.ts                              │
-│                    ─────────────────────────                                │
-│                    Единый источник истины                                   │
-│                           ↓                                                 │
-│           ┌───────────────┼───────────────┐                                 │
-│           ↓               ↓               ↓                                 │
-│    PropertyIndex    PropertyEditor   VendorProperties                       │
-│    (фильтры)        (формы owner)    (формы vendor)                         │
-│           ↓               ↓               ↓                                 │
-│           └───────────────┼───────────────┘                                 │
-│                           ↓                                                 │
-│                   normalizeAmenityId()                                      │
-│                   ─────────────────────                                     │
-│                   Приведение к единому формату                              │
-│                           ↓                                                 │
-│                    БД properties                                            │
-│                    ─────────────                                            │
-│                    Только стандартные ключи                                 │
-└─────────────────────────────────────────────────────────────────────────────┘
+Пользователь вставляет ссылку
+         ↓
+┌─────────────────────────────────┐
+│  Определение типа ссылки        │
+│  disk.yandex.ru? → Yandex API   │
+│  Другой сайт? → Firecrawl       │
+└─────────────────────────────────┘
+         ↓
+┌─────────────────────────────────┐
+│  Yandex Disk API                │
+│  GET /public/resources?         │
+│  public_key=URL                 │
+│  → Список файлов + превью       │
+└─────────────────────────────────┘
+         ↓
+┌─────────────────────────────────┐
+│  Отображение файлов             │
+│  с превью и возможностью        │
+│  выбора для импорта             │
+└─────────────────────────────────┘
 ```
+
+### Изменения
+
+**1. Обновить Edge Function `extract-images-from-url`**
+
+Добавить специальную обработку для Yandex Disk:
+- Определять URL Yandex Disk по домену
+- Использовать публичный API Yandex Disk (не требует токена для публичных папок)
+- Получать список файлов с превью
+
+**2. Yandex Disk Public API**
+
+Для публичных ссылок API не требует авторизации:
+- Endpoint: `https://cloud-api.yandex.net/v1/disk/public/resources`
+- Параметр: `public_key` - публичная ссылка
+- Возвращает: список файлов с `preview` (превью) и `file` (ссылка для скачивания)
 
 ---
 
-## Этапы реализации
+## Техническая секция
 
-### Этап 1: Расширение таксономии
+### Файлы для изменения
 
-**Файл:** `src/lib/propertyTaxonomy.ts`
+**`supabase/functions/extract-images-from-url/index.ts`**
 
-Добавить:
-- Функции нормализации ключей аменитиз
-- Маппинг алиасов (ac → air-conditioning)
-- Расширенный список районов с координатами
-- Типы для TypeScript
+### Логика обработки Yandex Disk
 
 ```typescript
-// Маппинг алиасов к каноническим ключам
-const AMENITY_ALIASES: Record<string, string> = {
-  'ac': 'air-conditioning',
-  'air_conditioning': 'air-conditioning',
-  'sea_view': 'sea-view',
-  'ocean_view': 'ocean-view',
-  'pets': 'pet-friendly',
-  'beach': 'beach-access',
-  // ...
-};
+// Определить тип ссылки
+const isYandexDisk = formattedUrl.includes('disk.yandex.ru') || 
+                     formattedUrl.includes('yadi.sk');
 
-export function normalizeAmenityId(id: string): string {
-  const normalized = id.toLowerCase().trim();
-  return AMENITY_ALIASES[normalized] || normalized;
+if (isYandexDisk) {
+  // Использовать Yandex Disk API
+  const apiUrl = `https://cloud-api.yandex.net/v1/disk/public/resources?public_key=${encodeURIComponent(formattedUrl)}&limit=100`;
+  
+  const response = await fetch(apiUrl);
+  const data = await response.json();
+  
+  // Извлечь изображения из ответа
+  const images = [];
+  
+  // Если это папка - получить список файлов
+  if (data._embedded?.items) {
+    for (const item of data._embedded.items) {
+      if (item.media_type === 'image' && item.preview) {
+        // Получить ссылку на скачивание
+        const downloadUrl = `https://cloud-api.yandex.net/v1/disk/public/resources/download?public_key=${encodeURIComponent(formattedUrl)}&path=${encodeURIComponent(item.path)}`;
+        const downloadResp = await fetch(downloadUrl);
+        const downloadData = await downloadResp.json();
+        
+        images.push({
+          preview: item.preview,
+          download: downloadData.href,
+          name: item.name
+        });
+      }
+    }
+  }
+  // Если это один файл
+  else if (data.media_type === 'image') {
+    const downloadUrl = `https://cloud-api.yandex.net/v1/disk/public/resources/download?public_key=${encodeURIComponent(formattedUrl)}`;
+    const downloadResp = await fetch(downloadUrl);
+    const downloadData = await downloadResp.json();
+    
+    images.push({
+      preview: data.preview,
+      download: downloadData.href,
+      name: data.name
+    });
+  }
+  
+  return images;
 }
 ```
 
-### Этап 2: Создание централизованного хука для форм
+### Обновить компонент `ImagePickerFromUrl`
 
-**Новый файл:** `src/hooks/usePropertyFormOptions.ts`
+Адаптировать для работы с новым форматом ответа:
+- Отображать превью из `preview`
+- При выборе использовать `download` ссылку для импорта
 
-```typescript
-// Загружает опции из lookup_values с fallback на propertyTaxonomy
-export function usePropertyFormOptions() {
-  // Возвращает:
-  // - districts: DistrictOption[]
-  // - propertyTypes: PropertyTypeOption[]
-  // - amenities: AmenityOption[]
-  // - всё с is_active, sort_order, icons
+### Структура ответа API
+
+**Для папки:**
+```json
+{
+  "name": "Фотографии",
+  "type": "dir",
+  "_embedded": {
+    "items": [
+      {
+        "name": "photo1.jpg",
+        "media_type": "image",
+        "preview": "https://...",
+        "path": "/photo1.jpg"
+      }
+    ]
+  }
 }
 ```
 
-### Этап 3: Рефакторинг форм
-
-**Файлы:**
-- `src/pages/owner/PropertyEditor.tsx`
-- `src/pages/vendor/VendorProperties.tsx`
-
-Изменения:
-1. Удалить статические массивы `districts`, `propertyTypes`, `amenitiesList`
-2. Использовать `usePropertyFormOptions()` 
-3. Применять `normalizeAmenityId()` при сохранении
-
-### Этап 4: Миграция данных в БД
-
-**SQL миграция:**
-
-```sql
--- Нормализация существующих данных
-UPDATE properties 
-SET amenities = (
-  SELECT array_agg(
-    CASE 
-      WHEN a = 'ac' THEN 'air-conditioning'
-      WHEN a = 'air_conditioning' THEN 'air-conditioning'
-      WHEN a = 'sea_view' THEN 'sea-view'
-      WHEN a = 'pets' THEN 'pet-friendly'
-      ELSE a
-    END
-  )
-  FROM unnest(amenities) AS a
-)
-WHERE amenities IS NOT NULL;
-```
-
-### Этап 5: Синхронизация отображения
-
-**Файлы для обновления:**
-- `src/pages/property/PropertyDetail.tsx` — использовать хелперы из таксономии
-- `src/components/property/PropertyPreviewCard.tsx` — уже использует
-- `src/components/filters/PropertyFilters.tsx` — уже использует
-
----
-
-## Детальные технические изменения
-
-### 1. Обновление `propertyTaxonomy.ts`
-
-| Секция | Изменения |
-|--------|-----------|
-| Districts | Добавить `lat/lng`, `description`, `beachQuality` |
-| Amenities | Добавить алиасы, группировку по категориям |
-| Нормализация | Новые функции `normalizeAmenityId`, `normalizeDistrictId` |
-| Типы | Экспортировать строгие TypeScript типы |
-
-### 2. Новый хук `usePropertyFormOptions`
-
-```typescript
-interface PropertyFormOptions {
-  districts: Array<{
-    id: string;
-    labelEn: string;
-    labelRu: string;
-    icon: string;
-    zone: string;
-    popular: boolean;
-  }>;
-  propertyTypes: Array<{ ... }>;
-  amenities: Array<{ ... }>;
-  isLoading: boolean;
+**Для файла:**
+```json
+{
+  "name": "photo.jpg",
+  "media_type": "image",
+  "preview": "https://..."
 }
 ```
 
-### 3. Изменения в PropertyEditor.tsx
+### Итоговый алгоритм
 
-**Было (строки 48-59):**
-```typescript
-const districts = [
-  'Patong', 'Kata', 'Karon', ...
-];
-const propertyTypes = [
-  { value: 'villa', labelEn: 'Villa', ... },
-  ...
-];
+```text
+1. Получить URL от пользователя
+2. Проверить: это Yandex Disk?
+   ├── ДА → Yandex Disk API
+   │   ├── Получить метаданные публичного ресурса
+   │   ├── Если папка → получить список файлов
+   │   ├── Фильтровать только изображения
+   │   └── Для каждого получить download ссылку
+   │
+   └── НЕТ → Firecrawl (текущая логика)
+
+3. Вернуть список изображений с превью и ссылками
+4. Пользователь выбирает нужные
+5. Импорт по download-ссылкам
 ```
-
-**Станет:**
-```typescript
-import { PHUKET_DISTRICTS, PROPERTY_TYPES } from '@/lib/propertyTaxonomy';
-// Или через хук для динамической загрузки
-const { districts, propertyTypes, amenities } = usePropertyFormOptions();
-```
-
-### 4. Изменения в VendorProperties.tsx
-
-**Было (строки 64-97):**
-```typescript
-const propertyTypes = [...];
-const amenitiesList = [
-  { id: 'ac', label: 'Air Conditioning', ... },
-  ...
-];
-```
-
-**Станет:**
-```typescript
-import { 
-  PROPERTY_TYPES, 
-  ALL_AMENITIES, 
-  normalizeAmenityId 
-} from '@/lib/propertyTaxonomy';
-
-// При сохранении:
-const normalizedAmenities = formData.amenities.map(normalizeAmenityId);
-```
-
----
-
-## Миграция данных
-
-### SQL скрипт для нормализации
-
-```sql
--- 1. Создать маппинг алиасов
-CREATE TEMP TABLE amenity_mapping (
-  old_key TEXT,
-  new_key TEXT
-);
-
-INSERT INTO amenity_mapping VALUES
-  ('ac', 'air-conditioning'),
-  ('air_conditioning', 'air-conditioning'),
-  ('sea_view', 'sea-view'),
-  ('ocean_view', 'ocean-view'),
-  ('pets', 'pet-friendly'),
-  ('beach', 'beach-access'),
-  ('Pool', 'pool'),
-  ('WiFi', 'wifi'),
-  ('Gym', 'gym');
-
--- 2. Нормализовать amenities в properties
-UPDATE properties p
-SET amenities = (
-  SELECT array_agg(COALESCE(m.new_key, LOWER(a)))
-  FROM unnest(p.amenities) AS a
-  LEFT JOIN amenity_mapping m ON LOWER(a) = m.old_key
-)
-WHERE amenities IS NOT NULL;
-
--- 3. Нормализовать district (capitalize)
-UPDATE properties
-SET district = initcap(district)
-WHERE district IS NOT NULL;
-```
-
----
-
-## Файлы для изменения
-
-| Файл | Тип изменения |
-|------|---------------|
-| `src/lib/propertyTaxonomy.ts` | Расширить (алиасы, нормализация) |
-| `src/hooks/usePropertyFormOptions.ts` | Создать новый |
-| `src/pages/owner/PropertyEditor.tsx` | Рефакторинг |
-| `src/pages/vendor/VendorProperties.tsx` | Рефакторинг |
-| `src/pages/property/PropertyDetail.tsx` | Обновить отображение аменитиз |
-| `src/components/property/UnitSpecs.tsx` | Использовать таксономию |
-| `src/components/uno/LocationSwitcher.tsx` | Использовать PHUKET_DISTRICTS |
-| `supabase/migrations/xxx.sql` | Миграция данных |
-
----
-
-## Ожидаемый результат
-
-1. **Единый источник истины** — все формы, фильтры и карточки используют `propertyTaxonomy.ts`
-2. **Консистентные данные** — любой ключ нормализуется к стандарту перед сохранением
-3. **Фильтры работают** — `air-conditioning` в БД соответствует фильтру
-4. **Легко редактировать** — добавление нового района/аменити в одном месте
-5. **Профессионально** — полный охват Пхукета (22 района, 35+ аменитиз)
