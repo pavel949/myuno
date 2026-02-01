@@ -2846,6 +2846,173 @@ export type Database = {
           },
         ]
       }
+      experiences: {
+        Row: {
+          age_restriction: number | null
+          approval_status: string | null
+          available_days: string[] | null
+          category: string | null
+          certification_details: string | null
+          commission_rate: number | null
+          cover_image: string | null
+          created_at: string | null
+          created_by_uno_team: boolean | null
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          difficulty: string | null
+          duration_minutes: number | null
+          equipment_included: boolean | null
+          excludes: Json | null
+          experience_type: string
+          external_link: string | null
+          highlights: Json | null
+          id: string
+          images: string[] | null
+          includes: Json | null
+          is_active: boolean | null
+          is_certified: boolean | null
+          is_featured: boolean | null
+          itinerary: Json | null
+          location_name: string | null
+          max_participants: number | null
+          meeting_point: string | null
+          meeting_point_lat: number | null
+          meeting_point_lng: number | null
+          min_participants: number | null
+          partner_id: string | null
+          price: number | null
+          price_per: string | null
+          provider_id: string | null
+          rating: number | null
+          rejection_reason: string | null
+          requirements: Json | null
+          review_count: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          safety_briefing_required: boolean | null
+          source_type: string | null
+          start_times: string[] | null
+          tags: string[] | null
+          title_en: string
+          title_ru: string
+          uno_team_creator_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          age_restriction?: number | null
+          approval_status?: string | null
+          available_days?: string[] | null
+          category?: string | null
+          certification_details?: string | null
+          commission_rate?: number | null
+          cover_image?: string | null
+          created_at?: string | null
+          created_by_uno_team?: boolean | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          difficulty?: string | null
+          duration_minutes?: number | null
+          equipment_included?: boolean | null
+          excludes?: Json | null
+          experience_type?: string
+          external_link?: string | null
+          highlights?: Json | null
+          id?: string
+          images?: string[] | null
+          includes?: Json | null
+          is_active?: boolean | null
+          is_certified?: boolean | null
+          is_featured?: boolean | null
+          itinerary?: Json | null
+          location_name?: string | null
+          max_participants?: number | null
+          meeting_point?: string | null
+          meeting_point_lat?: number | null
+          meeting_point_lng?: number | null
+          min_participants?: number | null
+          partner_id?: string | null
+          price?: number | null
+          price_per?: string | null
+          provider_id?: string | null
+          rating?: number | null
+          rejection_reason?: string | null
+          requirements?: Json | null
+          review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          safety_briefing_required?: boolean | null
+          source_type?: string | null
+          start_times?: string[] | null
+          tags?: string[] | null
+          title_en: string
+          title_ru: string
+          uno_team_creator_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          age_restriction?: number | null
+          approval_status?: string | null
+          available_days?: string[] | null
+          category?: string | null
+          certification_details?: string | null
+          commission_rate?: number | null
+          cover_image?: string | null
+          created_at?: string | null
+          created_by_uno_team?: boolean | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          difficulty?: string | null
+          duration_minutes?: number | null
+          equipment_included?: boolean | null
+          excludes?: Json | null
+          experience_type?: string
+          external_link?: string | null
+          highlights?: Json | null
+          id?: string
+          images?: string[] | null
+          includes?: Json | null
+          is_active?: boolean | null
+          is_certified?: boolean | null
+          is_featured?: boolean | null
+          itinerary?: Json | null
+          location_name?: string | null
+          max_participants?: number | null
+          meeting_point?: string | null
+          meeting_point_lat?: number | null
+          meeting_point_lng?: number | null
+          min_participants?: number | null
+          partner_id?: string | null
+          price?: number | null
+          price_per?: string | null
+          provider_id?: string | null
+          rating?: number | null
+          rejection_reason?: string | null
+          requirements?: Json | null
+          review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          safety_briefing_required?: boolean | null
+          source_type?: string | null
+          start_times?: string[] | null
+          tags?: string[] | null
+          title_en?: string
+          title_ru?: string
+          uno_team_creator_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiences_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       favorites: {
         Row: {
           created_at: string
