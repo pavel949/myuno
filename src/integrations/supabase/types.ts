@@ -1108,6 +1108,74 @@ export type Database = {
           },
         ]
       }
+      booking_vouchers: {
+        Row: {
+          booking_id: string | null
+          booking_type: string
+          created_at: string
+          id: string
+          is_used: boolean | null
+          metadata: Json | null
+          order_id: string | null
+          pdf_url: string | null
+          qr_code_data: string
+          status: string | null
+          updated_at: string
+          used_at: string | null
+          used_by: string | null
+          user_id: string
+          valid_from: string
+          valid_until: string | null
+          voucher_number: string
+        }
+        Insert: {
+          booking_id?: string | null
+          booking_type: string
+          created_at?: string
+          id?: string
+          is_used?: boolean | null
+          metadata?: Json | null
+          order_id?: string | null
+          pdf_url?: string | null
+          qr_code_data: string
+          status?: string | null
+          updated_at?: string
+          used_at?: string | null
+          used_by?: string | null
+          user_id: string
+          valid_from?: string
+          valid_until?: string | null
+          voucher_number: string
+        }
+        Update: {
+          booking_id?: string | null
+          booking_type?: string
+          created_at?: string
+          id?: string
+          is_used?: boolean | null
+          metadata?: Json | null
+          order_id?: string | null
+          pdf_url?: string | null
+          qr_code_data?: string
+          status?: string | null
+          updated_at?: string
+          used_at?: string | null
+          used_by?: string | null
+          user_id?: string
+          valid_from?: string
+          valid_until?: string | null
+          voucher_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_vouchers_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           booking_type: Database["public"]["Enums"]["booking_type"]
@@ -1118,6 +1186,7 @@ export type Database = {
           provider_id: string | null
           scheduled_at: string | null
           service_id: string | null
+          staff_id: string | null
           status: Database["public"]["Enums"]["booking_status"]
           total_amount: number | null
           updated_at: string
@@ -1132,6 +1201,7 @@ export type Database = {
           provider_id?: string | null
           scheduled_at?: string | null
           service_id?: string | null
+          staff_id?: string | null
           status?: Database["public"]["Enums"]["booking_status"]
           total_amount?: number | null
           updated_at?: string
@@ -1146,6 +1216,7 @@ export type Database = {
           provider_id?: string | null
           scheduled_at?: string | null
           service_id?: string | null
+          staff_id?: string | null
           status?: Database["public"]["Enums"]["booking_status"]
           total_amount?: number | null
           updated_at?: string
@@ -1164,6 +1235,13 @@ export type Database = {
             columns: ["service_id"]
             isOneToOne: false
             referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "salon_staff"
             referencedColumns: ["id"]
           },
         ]
@@ -1238,6 +1316,81 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      bundle_offers: {
+        Row: {
+          cover_image: string | null
+          created_at: string
+          currency: string | null
+          current_purchases: number | null
+          description_en: string | null
+          description_ru: string | null
+          discount_fixed: number | null
+          discount_percent: number | null
+          final_price: number | null
+          id: string
+          images: string[] | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          items: Json
+          max_purchases: number | null
+          name_en: string
+          name_ru: string
+          original_total: number | null
+          tags: string[] | null
+          updated_at: string
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          cover_image?: string | null
+          created_at?: string
+          currency?: string | null
+          current_purchases?: number | null
+          description_en?: string | null
+          description_ru?: string | null
+          discount_fixed?: number | null
+          discount_percent?: number | null
+          final_price?: number | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          items?: Json
+          max_purchases?: number | null
+          name_en: string
+          name_ru: string
+          original_total?: number | null
+          tags?: string[] | null
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          cover_image?: string | null
+          created_at?: string
+          currency?: string | null
+          current_purchases?: number | null
+          description_en?: string | null
+          description_ru?: string | null
+          discount_fixed?: number | null
+          discount_percent?: number | null
+          final_price?: number | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          items?: Json
+          max_purchases?: number | null
+          name_en?: string
+          name_ru?: string
+          original_total?: number | null
+          tags?: string[] | null
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: []
       }
       cancellation_policy_rules: {
         Row: {
@@ -5415,10 +5568,12 @@ export type Database = {
           discount_amount: number | null
           end_at: string | null
           id: string
+          is_reorder: boolean | null
           metadata: Json | null
           notes: string | null
           order_number: string | null
           order_type: string
+          original_order_id: string | null
           platform_fee_amount: number | null
           provider_org_id: string | null
           start_at: string | null
@@ -5440,10 +5595,12 @@ export type Database = {
           discount_amount?: number | null
           end_at?: string | null
           id?: string
+          is_reorder?: boolean | null
           metadata?: Json | null
           notes?: string | null
           order_number?: string | null
           order_type: string
+          original_order_id?: string | null
           platform_fee_amount?: number | null
           provider_org_id?: string | null
           start_at?: string | null
@@ -5465,10 +5622,12 @@ export type Database = {
           discount_amount?: number | null
           end_at?: string | null
           id?: string
+          is_reorder?: boolean | null
           metadata?: Json | null
           notes?: string | null
           order_number?: string | null
           order_type?: string
+          original_order_id?: string | null
           platform_fee_amount?: number | null
           provider_org_id?: string | null
           start_at?: string | null
@@ -5481,6 +5640,13 @@ export type Database = {
           vertical?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "orders_original_order_id_fkey"
+            columns: ["original_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "orders_provider_org_id_fkey"
             columns: ["provider_org_id"]
@@ -6236,6 +6402,66 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
           website?: string | null
+        }
+        Relationships: []
+      }
+      partners: {
+        Row: {
+          api_endpoint: string | null
+          api_key_encrypted: string | null
+          categories: string[] | null
+          commission_default: number | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          is_verified: boolean | null
+          logo: string | null
+          name: string
+          name_ru: string | null
+          payment_terms: string | null
+          updated_at: string
+          webhook_url: string | null
+        }
+        Insert: {
+          api_endpoint?: string | null
+          api_key_encrypted?: string | null
+          categories?: string[] | null
+          commission_default?: number | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          logo?: string | null
+          name: string
+          name_ru?: string | null
+          payment_terms?: string | null
+          updated_at?: string
+          webhook_url?: string | null
+        }
+        Update: {
+          api_endpoint?: string | null
+          api_key_encrypted?: string | null
+          categories?: string[] | null
+          commission_default?: number | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          logo?: string | null
+          name?: string
+          name_ru?: string | null
+          payment_terms?: string | null
+          updated_at?: string
+          webhook_url?: string | null
         }
         Relationships: []
       }
@@ -9760,6 +9986,83 @@ export type Database = {
           },
         ]
       }
+      salon_staff: {
+        Row: {
+          bio_en: string | null
+          bio_ru: string | null
+          certifications: string[] | null
+          created_at: string
+          experience_years: number | null
+          id: string
+          is_active: boolean | null
+          is_featured: boolean | null
+          name_en: string
+          name_ru: string
+          photo: string | null
+          portfolio_images: string[] | null
+          rating: number | null
+          review_count: number | null
+          salon_id: string
+          sort_order: number | null
+          specializations: string[] | null
+          updated_at: string
+          working_days: string[] | null
+          working_hours: Json | null
+        }
+        Insert: {
+          bio_en?: string | null
+          bio_ru?: string | null
+          certifications?: string[] | null
+          created_at?: string
+          experience_years?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          name_en: string
+          name_ru: string
+          photo?: string | null
+          portfolio_images?: string[] | null
+          rating?: number | null
+          review_count?: number | null
+          salon_id: string
+          sort_order?: number | null
+          specializations?: string[] | null
+          updated_at?: string
+          working_days?: string[] | null
+          working_hours?: Json | null
+        }
+        Update: {
+          bio_en?: string | null
+          bio_ru?: string | null
+          certifications?: string[] | null
+          created_at?: string
+          experience_years?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          name_en?: string
+          name_ru?: string
+          photo?: string | null
+          portfolio_images?: string[] | null
+          rating?: number | null
+          review_count?: number | null
+          salon_id?: string
+          sort_order?: number | null
+          specializations?: string[] | null
+          updated_at?: string
+          working_days?: string[] | null
+          working_hours?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salon_staff_salon_id_fkey"
+            columns: ["salon_id"]
+            isOneToOne: false
+            referencedRelation: "salons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       salons: {
         Row: {
           address: string | null
@@ -10439,6 +10742,71 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_user_passes: {
+        Row: {
+          benefits_used: Json | null
+          billing_cycle: string | null
+          cancelled_at: string | null
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          expires_at: string | null
+          id: string
+          pause_end: string | null
+          pause_start: string | null
+          plan_id: string
+          started_at: string
+          status: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          benefits_used?: Json | null
+          billing_cycle?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          expires_at?: string | null
+          id?: string
+          pause_end?: string | null
+          pause_start?: string | null
+          plan_id: string
+          started_at?: string
+          status?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          benefits_used?: Json | null
+          billing_cycle?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          expires_at?: string | null
+          id?: string
+          pause_end?: string | null
+          pause_start?: string | null
+          plan_id?: string
+          started_at?: string
+          status?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_user_passes_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       support_tickets: {
         Row: {
           assigned_to: string | null
@@ -10686,6 +11054,7 @@ export type Database = {
           difficulty: string | null
           duration_hours: number | null
           excludes: string[] | null
+          external_link: string | null
           highlights: string[] | null
           id: string
           images: string[] | null
@@ -10697,6 +11066,7 @@ export type Database = {
           meeting_point: string | null
           meeting_point_lat: number | null
           meeting_point_lng: number | null
+          partner_id: string | null
           price: number | null
           provider_id: string | null
           rating: number | null
@@ -10704,6 +11074,7 @@ export type Database = {
           review_count: number | null
           reviewed_at: string | null
           reviewed_by: string | null
+          source_type: string | null
           start_times: string[] | null
           title_en: string
           title_ru: string
@@ -10724,6 +11095,7 @@ export type Database = {
           difficulty?: string | null
           duration_hours?: number | null
           excludes?: string[] | null
+          external_link?: string | null
           highlights?: string[] | null
           id?: string
           images?: string[] | null
@@ -10735,6 +11107,7 @@ export type Database = {
           meeting_point?: string | null
           meeting_point_lat?: number | null
           meeting_point_lng?: number | null
+          partner_id?: string | null
           price?: number | null
           provider_id?: string | null
           rating?: number | null
@@ -10742,6 +11115,7 @@ export type Database = {
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          source_type?: string | null
           start_times?: string[] | null
           title_en: string
           title_ru: string
@@ -10762,6 +11136,7 @@ export type Database = {
           difficulty?: string | null
           duration_hours?: number | null
           excludes?: string[] | null
+          external_link?: string | null
           highlights?: string[] | null
           id?: string
           images?: string[] | null
@@ -10773,6 +11148,7 @@ export type Database = {
           meeting_point?: string | null
           meeting_point_lat?: number | null
           meeting_point_lng?: number | null
+          partner_id?: string | null
           price?: number | null
           provider_id?: string | null
           rating?: number | null
@@ -10780,6 +11156,7 @@ export type Database = {
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          source_type?: string | null
           start_times?: string[] | null
           title_en?: string
           title_ru?: string
@@ -10787,6 +11164,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "tours_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tours_provider_id_fkey"
             columns: ["provider_id"]
