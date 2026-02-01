@@ -7,7 +7,7 @@ import { BackButton } from '@/components/uno/BackButton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Home, Plus, MapPin, Bed, Bath, SquareStack, Globe, Copy, Clock, CheckCircle, XCircle, Shield } from 'lucide-react';
+import { Home, Plus, MapPin, Bed, Bath, SquareStack, Globe, Copy, Clock, CheckCircle, XCircle, Shield, Download } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   DropdownMenu,
@@ -86,13 +86,23 @@ export default function OwnerProperties() {
         subtitle={isRu ? 'Управление недвижимостью' : 'Property management'}
       />
 
-      <Button 
-        className="w-full mb-6"
-        onClick={() => navigate('/owner/properties/new')}
-      >
-        <Plus className="h-4 w-4 mr-2" />
-        {isRu ? 'Добавить объект' : 'Add Property'}
-      </Button>
+      {/* Action buttons */}
+      <div className="flex gap-3 mb-6">
+        <Button 
+          className="flex-1"
+          onClick={() => navigate('/owner/properties/new')}
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          {isRu ? 'Добавить объект' : 'Add Property'}
+        </Button>
+        <Button 
+          variant="outline"
+          onClick={() => navigate('/owner/properties/import')}
+        >
+          <Download className="h-4 w-4 mr-2" />
+          {isRu ? 'Импорт с OTA' : 'Import from OTA'}
+        </Button>
+      </div>
 
       {isLoading ? (
         <div className="space-y-4">
