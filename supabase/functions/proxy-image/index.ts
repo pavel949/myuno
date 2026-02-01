@@ -11,20 +11,30 @@ serve(async (req) => {
   }
 
   try {
-    const { url } = await req.json();
+    // Support both GET with query param and POST with JSON body
+    let imageUrl: string | null = null;
+    
+    const url = new URL(req.url);
+    imageUrl = url.searchParams.get('url');
+    
+    if (!imageUrl && req.method === 'POST') {
+      const body = await req.json();
+      imageUrl = body.url;
+    }
 
-    if (!url) {
+    if (!imageUrl) {
       return new Response(
         JSON.stringify({ error: 'URL is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('Proxying image:', url);
+    console.log('Proxying image:', imageUrl);
 
-    const response = await fetch(url, {
+    const response = await fetch(imageUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'image/*,*/*',
       },
     });
 
