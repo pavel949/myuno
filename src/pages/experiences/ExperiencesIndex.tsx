@@ -14,7 +14,7 @@ import {
 } from '@/hooks/useExperiences';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { CrossSellSection } from '@/components/crosssell';
-import { ExperienceFilters, SortOption } from '@/components/experiences/ExperienceFilters';
+import { ExperienceFiltersKlook, SortOption } from '@/components/experiences/ExperienceFiltersKlook';
 import { cn } from '@/lib/utils';
 
 type ViewType = 'all' | 'tour' | 'activity';
@@ -162,6 +162,8 @@ export default function ExperiencesIndex() {
   const [sortBy, setSortBy] = useState<SortOption>(initialSort);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000]);
   const [durationRange, setDurationRange] = useState<[number, number]>([0, 480]);
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   
   const { experiences, isLoading } = useExperiences({
     type: viewType === 'all' ? undefined : viewType as ExperienceType,
@@ -296,7 +298,7 @@ export default function ExperiencesIndex() {
         </div>
         
         {/* Klook-style Filters */}
-        <ExperienceFilters
+        <ExperienceFiltersKlook
           selectedCategory={selectedCategory}
           onCategoryChange={handleCategoryChange}
           sortBy={sortBy}
@@ -305,6 +307,10 @@ export default function ExperiencesIndex() {
           onPriceRangeChange={setPriceRange}
           durationRange={durationRange}
           onDurationRangeChange={setDurationRange}
+          selectedInterests={selectedInterests}
+          onInterestsChange={setSelectedInterests}
+          selectedFeatures={selectedFeatures}
+          onFeaturesChange={setSelectedFeatures}
           resultsCount={filteredExperiences.length}
           language={language}
         />
