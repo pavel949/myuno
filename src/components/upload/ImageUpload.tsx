@@ -2,9 +2,10 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Upload, X, Loader2, ImageIcon, Link, Check } from 'lucide-react';
+import { Upload, X, Loader2, ImageIcon, Link, Check, Globe } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { ImagePickerFromUrl } from './ImagePickerFromUrl';
 
 interface ImageUploadProps {
   value?: string;
@@ -313,6 +314,7 @@ export function MultiImageUpload({
 
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [urlValue, setUrlValue] = useState('');
+  const [showUrlPicker, setShowUrlPicker] = useState(false);
 
   const handleUrlSubmit = () => {
     const trimmed = urlValue.trim();
@@ -448,20 +450,45 @@ export function MultiImageUpload({
             )}
           </label>
 
-          {/* URL button */}
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="w-full"
-            onClick={() => setShowUrlInput(true)}
-            disabled={value.length >= maxImages}
-          >
-            <Link className="h-4 w-4 mr-2" />
-            Добавить по ссылке
-          </Button>
+          {/* URL buttons */}
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={() => setShowUrlInput(true)}
+              disabled={value.length >= maxImages}
+            >
+              <Link className="h-4 w-4 mr-2" />
+              По ссылке
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={() => setShowUrlPicker(true)}
+              disabled={value.length >= maxImages}
+            >
+              <Globe className="h-4 w-4 mr-2" />
+              С сайта
+            </Button>
+          </div>
         </>
       )}
+
+      {/* Image Picker Dialog */}
+      <ImagePickerFromUrl
+        open={showUrlPicker}
+        onOpenChange={setShowUrlPicker}
+        onSelect={(urls) => {
+          onChange([...value, ...urls]);
+          toast.success(`Добавлено ${urls.length} фото`);
+        }}
+        maxImages={maxImages}
+        currentCount={value.length}
+      />
 
       {/* Image grid */}
       {value.length > 0 && (
