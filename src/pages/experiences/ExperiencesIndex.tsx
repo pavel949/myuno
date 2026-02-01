@@ -15,8 +15,9 @@ import {
 import { useExperienceCategories } from '@/hooks/useExperienceCategories';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { CrossSellSection } from '@/components/crosssell';
-import { ExperienceFiltersKlook, SortOption, CategoryOption } from '@/components/experiences/ExperienceFiltersKlook';
+import { ExperienceFiltersKlook, SortOption, CategoryOption, DatePreset } from '@/components/experiences/ExperienceFiltersKlook';
 import { cn } from '@/lib/utils';
+import { isToday, isTomorrow, isThisWeek, isSameDay } from 'date-fns';
 
 type ViewType = 'all' | 'tour' | 'activity';
 
@@ -165,6 +166,8 @@ export default function ExperiencesIndex() {
   const [durationRange, setDurationRange] = useState<[number, number]>([0, 480]);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [datePreset, setDatePreset] = useState<DatePreset>('any');
   
   const { experiences, isLoading } = useExperiences({
     type: viewType === 'all' ? undefined : viewType as ExperienceType,
@@ -327,6 +330,10 @@ export default function ExperiencesIndex() {
           onInterestsChange={setSelectedInterests}
           selectedFeatures={selectedFeatures}
           onFeaturesChange={setSelectedFeatures}
+          selectedDate={selectedDate}
+          onDateChange={setSelectedDate}
+          datePreset={datePreset}
+          onDatePresetChange={setDatePreset}
           resultsCount={filteredExperiences.length}
           language={language}
         />
