@@ -1,10 +1,15 @@
+/**
+ * AirbnbStyleImageUpload - Complete photo management system
+ * Features: Drag & Drop reordering, compression, cloud import, editing, quality tips
+ */
+
 import { useState, useCallback, useRef, useEffect } from 'react';
 import imageCompression from 'browser-image-compression';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { 
-  Upload, X, Loader2, ImageIcon, GripVertical, Star, 
-  Globe, Plus, Check, AlertCircle 
+  Upload, X, Loader2, GripVertical, Star, 
+  Globe, Plus, Check, AlertCircle, Pencil, Cloud
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,7 +23,9 @@ import {
   useSensors,
   DragEndEvent,
   DragStartEvent,
-  DragOverlay
+  DragOverlay,
+  MouseSensor,
+  TouchSensor
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -29,6 +36,9 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { ImagePickerFromUrl, ExternalImageResult } from './ImagePickerFromUrl';
+import { ImageEditor } from './ImageEditor';
+import { CloudStoragePicker } from './CloudStoragePicker';
+import { ImageQualityTips } from './ImageQualityTips';
 
 interface UploadingImage {
   id: string;
@@ -57,17 +67,19 @@ const compressionOptions = {
   initialQuality: 0.85,
 };
 
-// Sortable Image Item Component
+// Sortable Image Item Component with improved DnD
 function SortableImageItem({ 
   url, 
   index, 
-  onRemove, 
+  onRemove,
+  onEdit,
   isFirst,
   isDragging 
 }: { 
   url: string; 
   index: number;
   onRemove: () => void;
+  onEdit: () => void;
   isFirst: boolean;
   isDragging?: boolean;
 }) {
@@ -83,6 +95,7 @@ function SortableImageItem({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    zIndex: isItemDragging ? 50 : 'auto',
   };
 
   return (
@@ -90,49 +103,80 @@ function SortableImageItem({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "relative group aspect-square rounded-xl overflow-hidden border-2 transition-all",
+        "relative group rounded-xl overflow-hidden border-2 transition-all select-none",
         isFirst ? "col-span-2 row-span-2 border-primary" : "border-border",
-        isItemDragging && "opacity-50 scale-95",
-        isDragging && "cursor-grabbing"
+        isItemDragging && "opacity-30 scale-95 shadow-2xl ring-2 ring-primary",
+        !isItemDragging && isDragging && "transition-transform duration-200"
       )}
     >
-      <img 
-        src={url} 
-        alt={`Image ${index + 1}`}
-        className="w-full h-full object-cover"
-        loading="lazy"
+      {/* Draggable area - entire card */}
+      <div
+        {...attributes}
+        {...listeners}
+        className={cn(
+          "absolute inset-0 cursor-grab active:cursor-grabbing z-10",
+          "touch-none" // Prevent scroll on touch devices
+        )}
       />
+      
+      {/* Image */}
+      <div className={cn(
+        "aspect-square",
+        isFirst && "aspect-auto h-full"
+      )}>
+        <img 
+          src={url} 
+          alt={`Фото ${index + 1}`}
+          className="w-full h-full object-cover pointer-events-none"
+          loading="lazy"
+          draggable={false}
+        />
+      </div>
       
       {/* Cover badge */}
       {isFirst && (
-        <div className="absolute top-2 left-2 bg-primary text-primary-foreground text-xs font-medium px-2 py-1 rounded-md flex items-center gap-1 shadow-lg">
+        <div className="absolute top-2 left-2 bg-primary text-primary-foreground text-xs font-medium px-2 py-1 rounded-md flex items-center gap-1 shadow-lg z-20">
           <Star className="h-3 w-3" fill="currentColor" />
           Обложка
         </div>
       )}
       
-      {/* Drag handle */}
-      <div
-        {...attributes}
-        {...listeners}
-        className="absolute top-2 right-10 p-1.5 bg-black/60 rounded-md opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
-      >
+      {/* Drag indicator - always visible */}
+      <div className="absolute top-2 left-1/2 -translate-x-1/2 p-1 bg-black/40 rounded-full opacity-60 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
         <GripVertical className="h-4 w-4 text-white" />
       </div>
       
-      {/* Remove button */}
-      <button
-        type="button"
-        onClick={onRemove}
-        className="absolute top-2 right-2 p-1.5 bg-black/60 hover:bg-red-500 rounded-md opacity-0 group-hover:opacity-100 transition-all"
-      >
-        <X className="h-4 w-4 text-white" />
-      </button>
+      {/* Action buttons - hover only */}
+      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit();
+          }}
+          className="p-1.5 bg-black/60 hover:bg-primary rounded-md transition-colors"
+        >
+          <Pencil className="h-4 w-4 text-white" />
+        </button>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove();
+          }}
+          className="p-1.5 bg-black/60 hover:bg-red-500 rounded-md transition-colors"
+        >
+          <X className="h-4 w-4 text-white" />
+        </button>
+      </div>
       
       {/* Photo number */}
-      <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-md">
+      <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-md z-20 pointer-events-none">
         {index + 1}
       </div>
+      
+      {/* Hover overlay hint */}
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none z-0" />
     </div>
   );
 }
@@ -143,7 +187,7 @@ function UploadingImageItem({ image }: { image: UploadingImage }) {
     <div className="relative aspect-square rounded-xl overflow-hidden border-2 border-dashed border-primary/50 bg-muted">
       <img 
         src={image.preview} 
-        alt="Uploading"
+        alt="Загрузка"
         className="w-full h-full object-cover opacity-50"
       />
       
@@ -156,34 +200,32 @@ function UploadingImageItem({ image }: { image: UploadingImage }) {
           </>
         )}
         {image.status === 'uploading' && (
-          <>
-            <div className="w-16 h-16 relative">
-              <svg className="w-16 h-16 transform -rotate-90">
-                <circle
-                  cx="32"
-                  cy="32"
-                  r="28"
-                  stroke="rgba(255,255,255,0.3)"
-                  strokeWidth="4"
-                  fill="none"
-                />
-                <circle
-                  cx="32"
-                  cy="32"
-                  r="28"
-                  stroke="white"
-                  strokeWidth="4"
-                  fill="none"
-                  strokeDasharray={175.93}
-                  strokeDashoffset={175.93 - (175.93 * image.progress) / 100}
-                  strokeLinecap="round"
-                />
-              </svg>
-              <span className="absolute inset-0 flex items-center justify-center text-white text-sm font-bold">
-                {image.progress}%
-              </span>
-            </div>
-          </>
+          <div className="w-16 h-16 relative">
+            <svg className="w-16 h-16 transform -rotate-90">
+              <circle
+                cx="32"
+                cy="32"
+                r="28"
+                stroke="rgba(255,255,255,0.3)"
+                strokeWidth="4"
+                fill="none"
+              />
+              <circle
+                cx="32"
+                cy="32"
+                r="28"
+                stroke="white"
+                strokeWidth="4"
+                fill="none"
+                strokeDasharray={175.93}
+                strokeDashoffset={175.93 - (175.93 * image.progress) / 100}
+                strokeLinecap="round"
+              />
+            </svg>
+            <span className="absolute inset-0 flex items-center justify-center text-white text-sm font-bold">
+              {image.progress}%
+            </span>
+          </div>
         )}
         {image.status === 'done' && (
           <div className="bg-green-500 rounded-full p-2">
@@ -212,7 +254,9 @@ export function AirbnbStyleImageUpload({
   const [uploadingImages, setUploadingImages] = useState<UploadingImage[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [showUrlPicker, setShowUrlPicker] = useState(false);
+  const [showCloudPicker, setShowCloudPicker] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [editingImage, setEditingImage] = useState<{ url: string; index: number } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isMountedRef = useRef(true);
 
@@ -220,15 +264,21 @@ export function AirbnbStyleImageUpload({
     isMountedRef.current = true;
     return () => { 
       isMountedRef.current = false;
-      // Clean up preview URLs
       uploadingImages.forEach(img => URL.revokeObjectURL(img.preview));
     };
   }, []);
 
+  // Improved sensors for better DnD experience
   const sensors = useSensors(
-    useSensor(PointerSensor, {
+    useSensor(MouseSensor, {
       activationConstraint: {
-        distance: 8,
+        distance: 5, // Reduced for easier activation
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 150, // Short delay for touch
+        tolerance: 5,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -238,6 +288,10 @@ export function AirbnbStyleImageUpload({
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
+    // Haptic feedback on mobile
+    if ('vibrate' in navigator) {
+      navigator.vibrate(50);
+    }
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -261,7 +315,6 @@ export function AirbnbStyleImageUpload({
 
   // Compress and upload a single file
   const processFile = useCallback(async (file: File, id: string): Promise<string | null> => {
-    // Validate file type
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic'];
     if (!allowedTypes.includes(file.type) && !file.name.toLowerCase().endsWith('.heic')) {
       setUploadingImages(prev => prev.map(img => 
@@ -270,16 +323,14 @@ export function AirbnbStyleImageUpload({
       return null;
     }
 
-    // Validate file size (max 20MB before compression)
     if (file.size > 20 * 1024 * 1024) {
       setUploadingImages(prev => prev.map(img => 
-        img.id === id ? { ...img, status: 'error' as const, error: 'Файл слишком большой' } : img
+        img.id === id ? { ...img, status: 'error' as const, error: 'Файл > 20MB' } : img
       ));
       return null;
     }
 
     try {
-      // Step 1: Compress
       setUploadingImages(prev => prev.map(img => 
         img.id === id ? { ...img, status: 'compressing' as const } : img
       ));
@@ -297,7 +348,6 @@ export function AirbnbStyleImageUpload({
         }
       });
 
-      // Step 2: Upload
       setUploadingImages(prev => prev.map(img => 
         img.id === id ? { ...img, status: 'uploading' as const, progress: 30 } : img
       ));
@@ -309,12 +359,11 @@ export function AirbnbStyleImageUpload({
         .from('vendor-uploads')
         .upload(filePath, compressedFile, {
           contentType: 'image/webp',
-          cacheControl: '31536000' // 1 year cache
+          cacheControl: '31536000'
         });
 
       if (uploadError) throw uploadError;
 
-      // Simulate progress
       for (let p = 30; p <= 100; p += 10) {
         if (!isMountedRef.current) break;
         setUploadingImages(prev => prev.map(img => 
@@ -356,7 +405,6 @@ export function AirbnbStyleImageUpload({
 
     const filesToProcess = files.slice(0, remainingSlots);
     
-    // Create preview items
     const newUploadingImages: UploadingImage[] = filesToProcess.map(file => ({
       id: `${Date.now()}-${Math.random().toString(36).substring(7)}`,
       file,
@@ -367,7 +415,6 @@ export function AirbnbStyleImageUpload({
 
     setUploadingImages(prev => [...prev, ...newUploadingImages]);
 
-    // Process all files in parallel (max 3 concurrent)
     const results: string[] = [];
     const batchSize = 3;
     
@@ -382,7 +429,6 @@ export function AirbnbStyleImageUpload({
     if (isMountedRef.current && results.length > 0) {
       onChange([...value, ...results]);
       
-      // Clean up completed uploads after delay
       setTimeout(() => {
         if (isMountedRef.current) {
           setUploadingImages(prev => prev.filter(img => img.status !== 'done'));
@@ -403,7 +449,6 @@ export function AirbnbStyleImageUpload({
     const remainingSlots = maxImages - value.length;
     const imagesToProcess = images.slice(0, remainingSlots);
     
-    // Create placeholder uploading items
     const newUploadingImages: UploadingImage[] = imagesToProcess.map((img, idx) => ({
       id: `ext-${Date.now()}-${idx}`,
       file: new File([], img.name || 'image'),
@@ -421,7 +466,6 @@ export function AirbnbStyleImageUpload({
       const uploadingId = newUploadingImages[i].id;
       
       try {
-        // Fetch via proxy for Yandex Disk
         const fetchUrl = img.isYandexDisk 
           ? `https://kakkwibljrjsawxgnupk.supabase.co/functions/v1/proxy-image?url=${encodeURIComponent(img.originalUrl)}`
           : img.originalUrl;
@@ -432,7 +476,6 @@ export function AirbnbStyleImageUpload({
         const blob = await response.blob();
         const file = new File([blob], img.name || 'image.jpg', { type: blob.type });
         
-        // Compress the downloaded image
         setUploadingImages(prev => prev.map(u => 
           u.id === uploadingId ? { ...u, status: 'compressing' as const } : u
         ));
@@ -443,7 +486,6 @@ export function AirbnbStyleImageUpload({
           u.id === uploadingId ? { ...u, status: 'uploading' as const, progress: 50 } : u
         ));
         
-        // Upload
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.webp`;
         const filePath = `${user.id}/${folder}/${fileName}`;
         
@@ -490,6 +532,19 @@ export function AirbnbStyleImageUpload({
     onChange(value.filter((_, i) => i !== index));
   };
 
+  const handleEdit = (url: string, index: number) => {
+    setEditingImage({ url, index });
+  };
+
+  const handleEditSave = (newUrl: string) => {
+    if (!editingImage) return;
+    
+    const newValue = [...value];
+    newValue[editingImage.index] = newUrl;
+    onChange(newValue);
+    setEditingImage(null);
+  };
+
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(true);
@@ -516,7 +571,7 @@ export function AirbnbStyleImageUpload({
   return (
     <div className={cn("space-y-4", className)}>
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h3 className="font-medium">Фотографии</h3>
           <p className="text-sm text-muted-foreground">
@@ -524,6 +579,16 @@ export function AirbnbStyleImageUpload({
           </p>
         </div>
         <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowCloudPicker(true)}
+            disabled={remainingSlots <= 0}
+          >
+            <Cloud className="h-4 w-4 mr-2" />
+            Облако
+          </Button>
           <Button
             type="button"
             variant="outline"
@@ -579,7 +644,7 @@ export function AirbnbStyleImageUpload({
           onDragEnd={handleDragEnd}
         >
           <SortableContext items={value} strategy={rectSortingStrategy}>
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 auto-rows-fr">
               {/* Uploaded images */}
               {value.map((url, index) => (
                 <SortableImageItem
@@ -588,6 +653,7 @@ export function AirbnbStyleImageUpload({
                   index={index}
                   isFirst={index === 0}
                   onRemove={() => handleRemove(index)}
+                  onEdit={() => handleEdit(url, index)}
                   isDragging={!!activeId}
                 />
               ))}
@@ -614,12 +680,13 @@ export function AirbnbStyleImageUpload({
           {/* Drag overlay */}
           <DragOverlay>
             {activeImage && (
-              <div className="aspect-square rounded-xl overflow-hidden border-2 border-primary shadow-2xl scale-105">
+              <div className="aspect-square rounded-xl overflow-hidden border-2 border-primary shadow-2xl scale-110 rotate-3">
                 <img 
                   src={activeImage} 
-                  alt="Dragging"
+                  alt="Перетаскивание"
                   className="w-full h-full object-cover"
                 />
+                <div className="absolute inset-0 bg-primary/20" />
               </div>
             )}
           </DragOverlay>
@@ -668,15 +735,11 @@ export function AirbnbStyleImageUpload({
         )}
       </div>
 
-      {/* Tips */}
-      {value.length > 0 && (
-        <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
-          <ImageIcon className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-          <div className="text-sm text-muted-foreground">
-            <p><strong>Совет:</strong> Первое фото станет обложкой. Перетащите фото, чтобы изменить порядок.</p>
-          </div>
-        </div>
-      )}
+      {/* Quality Tips */}
+      <ImageQualityTips 
+        imageUrl={value[0]} 
+        imageCount={value.length} 
+      />
 
       {/* URL Picker */}
       <ImagePickerFromUrl
@@ -686,6 +749,35 @@ export function AirbnbStyleImageUpload({
         maxImages={maxImages}
         currentCount={value.length}
       />
+
+      {/* Cloud Storage Picker */}
+      <CloudStoragePicker
+        open={showCloudPicker}
+        onOpenChange={setShowCloudPicker}
+        onSelect={(urls) => {
+          // Convert URLs to ExternalImageResult format
+          const images: ExternalImageResult[] = urls.map(url => ({
+            originalUrl: url,
+            previewUrl: url,
+            name: 'cloud-image.jpg',
+            isYandexDisk: false
+          }));
+          handleExternalImages(images);
+        }}
+        maxImages={maxImages}
+      />
+
+      {/* Image Editor */}
+      {editingImage && (
+        <ImageEditor
+          open={!!editingImage}
+          onOpenChange={(open) => !open && setEditingImage(null)}
+          imageUrl={editingImage.url}
+          onSave={handleEditSave}
+          userId={user?.id}
+          folder={folder}
+        />
+      )}
     </div>
   );
 }
