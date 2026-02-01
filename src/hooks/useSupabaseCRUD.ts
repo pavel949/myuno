@@ -3,6 +3,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
+interface AdditionalFilter {
+  column: string;
+  value: string | number | boolean;
+  operator?: 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'like' | 'ilike';
+}
+
 interface UseSupabaseCRUDOptions {
   table: string;
   providerId?: string;
@@ -12,6 +18,7 @@ interface UseSupabaseCRUDOptions {
   select?: string;
   enabled?: boolean;
   showToasts?: boolean;
+  additionalFilters?: AdditionalFilter[];
 }
 
 interface CRUDResult<T> {
@@ -38,6 +45,7 @@ export function useSupabaseCRUD<T extends { id: string }>({
   select = '*',
   enabled = true,
   showToasts = false,
+  additionalFilters = [],
 }: UseSupabaseCRUDOptions): CRUDResult<T> {
   const { user } = useAuth();
   const [items, setItems] = useState<T[]>([]);
@@ -70,11 +78,42 @@ export function useSupabaseCRUD<T extends { id: string }>({
 
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const baseQuery = supabase.from(table as any).select(select);
+      let query = supabase.from(table as any).select(select);
       
-      const query = providerId 
-        ? baseQuery.eq(providerIdField, providerId)
-        : baseQuery;
+      // Apply provider filter
+      if (providerId) {
+        query = query.eq(providerIdField, providerId);
+      }
+      
+      // Apply additional filters
+      for (const filter of additionalFilters) {
+        const op = filter.operator || 'eq';
+        switch (op) {
+          case 'neq':
+            query = query.neq(filter.column, filter.value);
+            break;
+          case 'gt':
+            query = query.gt(filter.column, filter.value);
+            break;
+          case 'gte':
+            query = query.gte(filter.column, filter.value);
+            break;
+          case 'lt':
+            query = query.lt(filter.column, filter.value);
+            break;
+          case 'lte':
+            query = query.lte(filter.column, filter.value);
+            break;
+          case 'like':
+            query = query.like(filter.column, filter.value as string);
+            break;
+          case 'ilike':
+            query = query.ilike(filter.column, filter.value as string);
+            break;
+          default:
+            query = query.eq(filter.column, filter.value);
+        }
+      }
 
       const { data, error: queryError } = await query.order(orderByColumn, { ascending: orderAscending });
 
@@ -95,7 +134,7 @@ export function useSupabaseCRUD<T extends { id: string }>({
         setIsLoading(false);
       }
     }
-  }, [user, enabled, table, providerId, providerIdField, select, orderByColumn, orderAscending, handleError]);
+  }, [user, enabled, table, providerId, providerIdField, select, orderByColumn, orderAscending, additionalFilters, handleError]);
 
   useEffect(() => {
     isMountedRef.current = true;

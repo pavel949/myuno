@@ -242,6 +242,7 @@ const AdminStores = lazy(() => import('@/pages/admin/AdminStores'));
 const AdminInsurance = lazy(() => import('@/pages/admin/AdminInsurance'));
 const AdminQuickListings = lazy(() => import('@/pages/admin/AdminQuickListings'));
 const AdminWaterActivities = lazy(() => import('@/pages/admin/AdminWaterActivities'));
+const AdminExperiences = lazy(() => import('@/pages/admin/AdminExperiences'));
 const AdminContentModeration = lazy(() => import('@/pages/admin/AdminContentModeration'));
 const AdminConsultations = lazy(() => import('@/pages/admin/AdminConsultations'));
 const AdminUnoTeam = lazy(() => import('@/pages/admin/AdminUnoTeam'));
@@ -324,6 +325,7 @@ const VendorPayouts = lazy(() => import('@/pages/vendor/VendorPayouts'));
 const VendorProperties = lazy(() => import('@/pages/vendor/VendorProperties'));
 const VendorTours = lazy(() => import('@/pages/vendor/VendorTours'));
 const VendorActivities = lazy(() => import('@/pages/vendor/VendorActivities'));
+const VendorExperiences = lazy(() => import('@/pages/vendor/VendorExperiences'));
 const VendorYachts = lazy(() => import('@/pages/vendor/VendorYachts'));
 const VendorTransport = lazy(() => import('@/pages/vendor/VendorTransport'));
 const VendorBeauty = lazy(() => import('@/pages/vendor/VendorBeauty'));
@@ -671,6 +673,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/admin/stores" element={<AdminStores />} />
           <Route path="/admin/insurance" element={<AdminInsurance />} />
           <Route path="/admin/water-activities" element={<AdminWaterActivities />} />
+          <Route path="/admin/experiences" element={<AdminExperiences />} />
           <Route path="/admin/moderation" element={<AdminContentModeration />} />
           <Route path="/admin/consultations" element={<AdminConsultations />} />
           <Route path="/admin/uno-team" element={<AdminUnoTeam />} />
@@ -727,6 +730,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/vendor/properties" element={<VendorProperties />} />
           <Route path="/vendor/tours" element={<VendorTours />} />
           <Route path="/vendor/activities" element={<VendorActivities />} />
+          <Route path="/vendor/experiences" element={<VendorExperiences />} />
           <Route path="/vendor/yachts" element={<VendorYachts />} />
           <Route path="/vendor/transport" element={<VendorTransport />} />
           <Route path="/vendor/beauty" element={<VendorBeauty />} />
