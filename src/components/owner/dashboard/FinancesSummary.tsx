@@ -39,7 +39,7 @@ export function FinancesSummary() {
   const netProfit = income - expenses;
 
   return (
-    <div className="space-y-3">
+    <div data-tour="finances" className="space-y-3">
       <div className="flex items-center justify-between">
         <h2 className="font-semibold text-base">
           {isRu ? 'Финансы' : 'Finances'}

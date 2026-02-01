@@ -18,3 +18,6 @@ export { PortfolioSection } from './PortfolioSection';
 // Performance & Search (Airbnb UX improvements)
 export { OwnerPerformanceCard } from './OwnerPerformanceCard';
 export { BookingSearchBar } from './BookingSearchBar';
+
+// Property Wizard Steps
+export * from '../property-wizard';
