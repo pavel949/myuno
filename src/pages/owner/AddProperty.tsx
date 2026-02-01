@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCreateOwnerProperty, useOwnerProperty } from '@/hooks/usePropertyCare';
 import { useSendOwnershipInvite } from '@/hooks/usePropertyOwnership';
 import { useUserContext } from '@/hooks/useUserContext';
+import { useIntakeAgent } from '@/hooks/useIntakeAgent';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { PropertyWizard } from '@/components/owner/PropertyWizard';
@@ -11,7 +12,7 @@ import { OwnershipTypeStep, OwnershipType } from '@/components/owner/OwnershipTy
 import { PropertySubmissionSuccess } from '@/components/owner/PropertySubmissionSuccess';
 import { toast } from 'sonner';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -19,7 +20,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Home, MapPin, Bed, Bath, SquareStack, Upload, DollarSign, Clock, Users, Copy, BadgeDollarSign, Building2, Landmark, Briefcase } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Home, MapPin, Bed, Bath, SquareStack, Upload, DollarSign, Clock, Users, Copy, BadgeDollarSign, Building2, Landmark, Briefcase, Bot, Sparkles, Loader2, ChevronDown, Wand2 } from 'lucide-react';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
 import { ProjectSelector } from '@/components/property/ProjectSelector';
 import { UnitFields } from '@/components/property/UnitFields';
@@ -32,6 +35,7 @@ import { LivePropertyPreview } from '@/components/property/LivePropertyPreview';
 export default function AddProperty() {
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const isRu = language === 'ru';
   
@@ -41,6 +45,11 @@ export default function AddProperty() {
   const createProperty = useCreateOwnerProperty();
   const sendInvite = useSendOwnershipInvite();
   const { activeOrgId } = useUserContext();
+  
+  // AI Intake
+  const { isProcessing: isIntakeProcessing, analyze: intakeAnalyze } = useIntakeAgent();
+  const [aiText, setAiText] = useState('');
+  const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
 
   const [selectedProject, setSelectedProject] = useState<PropertyProject | null>(null);
   const [isCloneDataApplied, setIsCloneDataApplied] = useState(false);
@@ -50,6 +59,70 @@ export default function AddProperty() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [createdPropertyId, setCreatedPropertyId] = useState<string>();
   const [createdPropertyTitle, setCreatedPropertyTitle] = useState<string>();
+  
+  // Apply prefill data from AI Intake or OTA import
+  const prefillData = (location.state as any)?.prefillData;
+  useEffect(() => {
+    if (prefillData && !isCloneDataApplied) {
+      setFormData(prev => ({
+        ...prev,
+        title: prefillData.name_en || prefillData.title || prev.title,
+        title_ru: prefillData.name_ru || prefillData.title_ru || prev.title_ru,
+        description: prefillData.description_en || prefillData.description || prev.description,
+        description_ru: prefillData.description_ru || prev.description_ru,
+        bedrooms: prefillData.bedrooms || prev.bedrooms,
+        bathrooms: prefillData.bathrooms || prev.bathrooms,
+        max_guests: prefillData.max_guests || prev.max_guests,
+        price_per_night: prefillData.price_per_night?.toString() || prev.price_per_night,
+        district: prefillData.district || prev.district,
+        address: prefillData.address || prev.address,
+        property_type: prefillData.property_type || prev.property_type,
+        images: prefillData.images || prev.images,
+        cover_image: prefillData.images?.[0] || prev.cover_image,
+      }));
+      setIsCloneDataApplied(true);
+      toast.success(isRu ? 'Данные AI загружены в форму' : 'AI data loaded into form');
+    }
+  }, [prefillData, isCloneDataApplied, isRu]);
+  
+  // AI Intake handler
+  const handleAiParse = async () => {
+    if (!aiText.trim()) {
+      toast.error(isRu ? 'Введите описание объекта' : 'Enter property description');
+      return;
+    }
+    
+    const result = await intakeAnalyze({
+      mode: 'single',
+      rawText: aiText,
+      forceVertical: 'properties',
+    });
+    
+    if (result && result.items.length > 0) {
+      const item = result.items[0];
+      const fields = item.extractedFields;
+      
+      setFormData(prev => ({
+        ...prev,
+        title: item.suggestedTitle?.en || fields.name_en?.value || prev.title,
+        title_ru: item.suggestedTitle?.ru || fields.name_ru?.value || prev.title_ru,
+        description: item.suggestedDescription?.en || fields.description_en?.value || prev.description,
+        description_ru: item.suggestedDescription?.ru || fields.description_ru?.value || prev.description_ru,
+        bedrooms: fields.bedrooms?.value || prev.bedrooms,
+        bathrooms: fields.bathrooms?.value || prev.bathrooms,
+        max_guests: fields.max_guests?.value || prev.max_guests,
+        price_per_night: fields.price_per_night?.value?.toString() || prev.price_per_night,
+        district: fields.district?.value || prev.district,
+        address: fields.address?.value || prev.address,
+        property_type: fields.property_type?.value || prev.property_type,
+        area_sqm: fields.area_sqm?.value?.toString() || prev.area_sqm,
+      }));
+      
+      setAiText('');
+      setIsAiPanelOpen(false);
+      toast.success(isRu ? 'AI извлёк данные и заполнил форму!' : 'AI extracted data and filled the form!');
+    }
+  };
   
   // Ownership data
   const [ownershipData, setOwnershipData] = useState({
@@ -1024,6 +1097,79 @@ export default function AddProperty() {
           : (isRu ? 'Зарегистрируйте недвижимость' : 'Register your property')
         }
       />
+
+      {/* AI Intake Panel */}
+      {!cloneFromId && (
+        <Collapsible open={isAiPanelOpen} onOpenChange={setIsAiPanelOpen} className="mb-6">
+          <Card className="border-dashed border-primary/30 bg-gradient-to-r from-primary/5 to-transparent">
+            <CollapsibleTrigger asChild>
+              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <Bot className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">
+                        {isRu ? 'AI Заполнение' : 'AI Fill'}
+                      </CardTitle>
+                      <CardDescription className="text-xs">
+                        {isRu 
+                          ? 'Вставьте текст — AI заполнит форму за вас'
+                          : 'Paste text — AI will fill the form for you'
+                        }
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isAiPanelOpen ? 'rotate-180' : ''}`} />
+                </div>
+              </CardHeader>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent className="pt-0 space-y-4">
+                <Alert className="bg-muted/50 border-0">
+                  <Wand2 className="h-4 w-4" />
+                  <AlertDescription className="text-xs">
+                    {isRu 
+                      ? 'Вставьте описание с сайта, из мессенджера или PDF — AI извлечёт название, спальни, цену, район и другие данные'
+                      : 'Paste description from website, messenger or PDF — AI will extract title, bedrooms, price, district and other data'
+                    }
+                  </AlertDescription>
+                </Alert>
+                
+                <Textarea
+                  value={aiText}
+                  onChange={(e) => setAiText(e.target.value)}
+                  placeholder={isRu 
+                    ? 'Вилла Sunset View в Камале\n3 спальни, 2 ванные, бассейн\n150 кв.м, участок 400 кв.м\nЦена: 15000 бат/ночь\nWiFi, кондиционер, парковка'
+                    : 'Sunset View Villa in Kamala\n3 bedrooms, 2 bathrooms, pool\n150 sqm, plot 400 sqm\nPrice: 15,000 THB/night\nWiFi, AC, parking'
+                  }
+                  className="min-h-[120px] font-mono text-sm"
+                  disabled={isIntakeProcessing}
+                />
+                
+                <Button
+                  onClick={handleAiParse}
+                  disabled={!aiText.trim() || isIntakeProcessing}
+                  className="w-full"
+                >
+                  {isIntakeProcessing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {isRu ? 'AI анализирует...' : 'AI analyzing...'}
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      {isRu ? 'Заполнить форму через AI' : 'Fill form with AI'}
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
+      )}
 
       {cloneFromId && (
         <div className="mb-4 p-3 rounded-lg bg-primary/10 border border-primary/20 flex items-center gap-2">
