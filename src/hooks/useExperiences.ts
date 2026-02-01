@@ -64,16 +64,25 @@ export interface Experience {
 }
 
 // ====== CATEGORIES ======
+// Synced with actual database values
 export const EXPERIENCE_CATEGORIES = [
   { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '🌟' },
+  // Tours
   { id: 'islands', labelEn: 'Islands', labelRu: 'Острова', icon: '🏝️' },
-  { id: 'water-sports', labelEn: 'Water Sports', labelRu: 'Водный спорт', icon: '🏄' },
-  { id: 'adventure', labelEn: 'Adventure', labelRu: 'Приключения', icon: '🧗' },
   { id: 'culture', labelEn: 'Culture', labelRu: 'Культура', icon: '🛕' },
   { id: 'nature', labelEn: 'Nature', labelRu: 'Природа', icon: '🌿' },
+  { id: 'adventure', labelEn: 'Adventure', labelRu: 'Приключения', icon: '🧗' },
+  { id: 'water-sports', labelEn: 'Water Sports', labelRu: 'Водный спорт', icon: '🏄' },
+  // Activities
   { id: 'diving', labelEn: 'Diving', labelRu: 'Дайвинг', icon: '🤿' },
   { id: 'snorkeling', labelEn: 'Snorkeling', labelRu: 'Снорклинг', icon: '🥽' },
-  { id: 'sunset', labelEn: 'Sunset', labelRu: 'Закаты', icon: '🌅' },
+  { id: 'fishing', labelEn: 'Fishing', labelRu: 'Рыбалка', icon: '🎣' },
+  { id: 'kayaking', labelEn: 'Kayaking', labelRu: 'Каякинг', icon: '🛶' },
+  { id: 'parasailing', labelEn: 'Parasailing', labelRu: 'Парасейлинг', icon: '🪂' },
+  { id: 'jet-ski', labelEn: 'Jet Ski', labelRu: 'Гидроцикл', icon: '🚤' },
+  { id: 'yacht', labelEn: 'Yacht', labelRu: 'Яхта', icon: '⛵' },
+  { id: 'surfing', labelEn: 'Surfing', labelRu: 'Серфинг', icon: '🏄‍♂️' },
+  { id: 'wakeboarding', labelEn: 'Wakeboarding', labelRu: 'Вейкбординг', icon: '🏂' },
 ] as const;
 
 // ====== OPTIONS ======
