@@ -55,7 +55,7 @@ export function CommunicationsSection() {
   }
 
   return (
-    <div className="space-y-3">
+    <div data-tour="team" className="space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <h2 className="font-semibold text-base">

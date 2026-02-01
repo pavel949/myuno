@@ -55,7 +55,7 @@ export function QuickActionsBar() {
   const isRu = language === 'ru';
 
   return (
-    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
+    <div data-tour="quick-actions" className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
       {actions.map((action) => {
         const Icon = action.icon;
         return (
@@ -68,6 +68,7 @@ export function QuickActionsBar() {
               action.color
             )}
             onClick={() => navigate(action.path)}
+            data-tour={action.id === 'property' ? 'add-property' : undefined}
           >
             <Icon className="h-4 w-4" />
             <span className="text-xs font-medium">

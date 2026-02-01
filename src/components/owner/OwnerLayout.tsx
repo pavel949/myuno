@@ -3,6 +3,8 @@ import { Outlet } from 'react-router-dom';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { OwnerSidebar } from './OwnerSidebar';
 import { OwnerHeader } from './OwnerHeader';
+import { OwnerMobileNav } from './OwnerMobileNav';
+import { OwnerOnboardingTour } from './onboarding/OwnerOnboardingTour';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface OwnerLayoutProps {
@@ -37,6 +39,12 @@ export function OwnerLayout({ children }: OwnerLayoutProps) {
             {children || <Outlet />}
           </main>
         </SidebarInset>
+        
+        {/* Mobile Bottom Navigation */}
+        <OwnerMobileNav />
+        
+        {/* Onboarding Tour */}
+        <OwnerOnboardingTour autoStart />
       </div>
     </SidebarProvider>
   );
