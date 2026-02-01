@@ -28,7 +28,7 @@ const promos: Promo[] = [
     subtitleRu: 'Бронируй любой тур на острова',
     badge: 'LIMITED',
     badgeRu: 'АКЦИЯ',
-    path: '/tours',
+    path: '/experiences?type=tour',
     gradient: 'from-emerald-500 to-teal-500',
     icon: Percent,
   },

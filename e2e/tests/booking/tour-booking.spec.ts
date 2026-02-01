@@ -2,28 +2,29 @@ import { test, expect } from '@playwright/test';
 import { BookingPage } from '../../pages/BookingPage';
 import { AuthPage } from '../../pages/AuthPage';
 
-test.describe('Tour Booking Flow', () => {
+test.describe('Tour/Experience Booking Flow', () => {
   let bookingPage: BookingPage;
 
   test.beforeEach(async ({ page }) => {
     bookingPage = new BookingPage(page);
   });
 
-  test('should display tours list', async ({ page }) => {
+  test('should display experiences list (tours)', async ({ page }) => {
     await bookingPage.gotoTours();
     
-    const tourCards = page.locator('[data-testid="tour-card"], .tour-card, article').first();
-    await expect(tourCards).toBeVisible({ timeout: 15000 });
+    // Experiences cards should be visible
+    const experienceCards = page.locator('[data-testid="experience-card"], article, .bg-card').first();
+    await expect(experienceCards).toBeVisible({ timeout: 15000 });
   });
 
-  test('should open tour details on click', async ({ page }) => {
+  test('should open experience details on click', async ({ page }) => {
     await bookingPage.gotoTours();
     
     await bookingPage.selectFirstItem();
     
     // Expect detail page or modal
     await expect(
-      page.locator('[data-testid="tour-detail"], h1, button:has-text("Book"), button:has-text("Забронировать")').first()
+      page.locator('[data-testid="experience-detail"], h1, button:has-text("Book"), button:has-text("Забронировать")').first()
     ).toBeVisible({ timeout: 10000 });
   });
 

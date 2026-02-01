@@ -19,7 +19,7 @@ const ALL_MINI_APPS = [
   { id: 'flowers', icon: Flower2, label: 'Flowers', labelRu: 'Цветы', path: '/flowers', color: 'from-rose-400 to-pink-500' },
   { id: 'property', icon: Home, label: 'Property', labelRu: 'Жильё', path: '/property', color: 'from-teal-500 to-emerald-500' },
   { id: 'restaurants', icon: Utensils, label: 'Food', labelRu: 'Еда', path: '/restaurants', color: 'from-orange-400 to-red-500' },
-  { id: 'tours', icon: Compass, label: 'Tours', labelRu: 'Туры', path: '/tours', color: 'from-amber-400 to-orange-500' },
+  { id: 'experiences', icon: Compass, label: 'Experiences', labelRu: 'Впечатления', path: '/experiences', color: 'from-amber-400 to-orange-500' },
   { id: 'medical', icon: Stethoscope, label: 'Medical', labelRu: 'Медицина', path: '/medical', color: 'from-emerald-400 to-teal-500' },
   { id: 'market', icon: ShoppingBag, label: 'Market', labelRu: 'Маркет', path: '/market', color: 'from-violet-500 to-purple-600' },
   { id: 'beauty', icon: Sparkles, label: 'Beauty', labelRu: 'Красота', path: '/beauty', color: 'from-pink-400 to-rose-500' },

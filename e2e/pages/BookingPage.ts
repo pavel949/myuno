@@ -30,7 +30,13 @@ export class BookingPage {
   }
 
   async gotoTours() {
-    await this.page.goto('/tours');
+    // Tours redirect to experiences, go directly to experiences with type=tour
+    await this.page.goto('/experiences?type=tour');
+    await this.page.waitForLoadState('networkidle');
+  }
+
+  async gotoExperiences() {
+    await this.page.goto('/experiences');
     await this.page.waitForLoadState('networkidle');
   }
 
@@ -40,7 +46,7 @@ export class BookingPage {
   }
 
   async selectFirstItem() {
-    const firstCard = this.page.locator('[data-testid="tour-card"], [data-testid="yacht-card"], .tour-card, .yacht-card').first();
+    const firstCard = this.page.locator('[data-testid="tour-card"], [data-testid="yacht-card"], [data-testid="experience-card"], .tour-card, .yacht-card, article').first();
     await firstCard.click();
   }
 
