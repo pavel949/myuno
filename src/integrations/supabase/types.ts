@@ -8349,6 +8349,7 @@ export type Database = {
           invited_email: string | null
           invited_name: string | null
           notes: string | null
+          notification_preferences: Json | null
           permissions: Json | null
           property_id: string
           role: string
@@ -8365,6 +8366,7 @@ export type Database = {
           invited_email?: string | null
           invited_name?: string | null
           notes?: string | null
+          notification_preferences?: Json | null
           permissions?: Json | null
           property_id: string
           role: string
@@ -8381,6 +8383,7 @@ export type Database = {
           invited_email?: string | null
           invited_name?: string | null
           notes?: string | null
+          notification_preferences?: Json | null
           permissions?: Json | null
           property_id?: string
           role?: string
@@ -8616,6 +8619,7 @@ export type Database = {
           paid_date: string | null
           payment_method: string | null
           property_id: string
+          receipt_metadata: Json | null
           receipt_url: string | null
           recurring: boolean | null
           recurring_interval: string | null
@@ -8626,6 +8630,9 @@ export type Database = {
           transaction_date: string
           transaction_type: string
           vendor_name: string | null
+          verification_status: string | null
+          verified_at: string | null
+          verified_by: string | null
         }
         Insert: {
           amount: number
@@ -8642,6 +8649,7 @@ export type Database = {
           paid_date?: string | null
           payment_method?: string | null
           property_id: string
+          receipt_metadata?: Json | null
           receipt_url?: string | null
           recurring?: boolean | null
           recurring_interval?: string | null
@@ -8652,6 +8660,9 @@ export type Database = {
           transaction_date?: string
           transaction_type: string
           vendor_name?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Update: {
           amount?: number
@@ -8668,6 +8679,7 @@ export type Database = {
           paid_date?: string | null
           payment_method?: string | null
           property_id?: string
+          receipt_metadata?: Json | null
           receipt_url?: string | null
           recurring?: boolean | null
           recurring_interval?: string | null
@@ -8678,6 +8690,9 @@ export type Database = {
           transaction_date?: string
           transaction_type?: string
           vendor_name?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Relationships: [
           {
@@ -8957,6 +8972,74 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "property_inventory_items_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_management_requests: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          message: string | null
+          property_id: string | null
+          proposed_permissions: Json | null
+          proposed_role: string | null
+          proposed_terms: Json | null
+          request_type: string
+          requester_id: string
+          requester_type: string
+          responded_at: string | null
+          response_message: string | null
+          status: string
+          target_email: string
+          target_user_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          message?: string | null
+          property_id?: string | null
+          proposed_permissions?: Json | null
+          proposed_role?: string | null
+          proposed_terms?: Json | null
+          request_type: string
+          requester_id: string
+          requester_type: string
+          responded_at?: string | null
+          response_message?: string | null
+          status?: string
+          target_email: string
+          target_user_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          message?: string | null
+          property_id?: string | null
+          proposed_permissions?: Json | null
+          proposed_role?: string | null
+          proposed_terms?: Json | null
+          request_type?: string
+          requester_id?: string
+          requester_type?: string
+          responded_at?: string | null
+          response_message?: string | null
+          status?: string
+          target_email?: string
+          target_user_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_management_requests_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "owner_properties"
@@ -9270,6 +9353,77 @@ export type Database = {
           year_built?: number | null
         }
         Relationships: []
+      }
+      property_reports: {
+        Row: {
+          created_at: string
+          data: Json
+          error_message: string | null
+          generated_by: string | null
+          id: string
+          owner_id: string
+          pdf_url: string | null
+          period_end: string
+          period_start: string
+          property_id: string
+          report_type: string
+          sent_at: string | null
+          sent_to: string[] | null
+          status: string
+          summary_text: string | null
+          summary_text_ru: string | null
+          updated_at: string
+          viewed_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          data?: Json
+          error_message?: string | null
+          generated_by?: string | null
+          id?: string
+          owner_id: string
+          pdf_url?: string | null
+          period_end: string
+          period_start: string
+          property_id: string
+          report_type: string
+          sent_at?: string | null
+          sent_to?: string[] | null
+          status?: string
+          summary_text?: string | null
+          summary_text_ru?: string | null
+          updated_at?: string
+          viewed_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          error_message?: string | null
+          generated_by?: string | null
+          id?: string
+          owner_id?: string
+          pdf_url?: string | null
+          period_end?: string
+          period_start?: string
+          property_id?: string
+          report_type?: string
+          sent_at?: string | null
+          sent_to?: string[] | null
+          status?: string
+          summary_text?: string | null
+          summary_text_ru?: string | null
+          updated_at?: string
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_reports_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       property_service_requests: {
         Row: {
