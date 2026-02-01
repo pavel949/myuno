@@ -323,13 +323,13 @@ export function ProjectLocationPicker({ value, onChange }: ProjectLocationPicker
             </div>
 
             {/* Map */}
-            <div className="flex-1 relative min-h-0">
+            <div className="flex-1 relative" style={{ minHeight: '350px' }}>
               {isLoading ? (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <Loader2 className="w-8 h-8 animate-spin text-primary" />
                 </div>
               ) : (
-                <div ref={mapContainer} className="absolute inset-0" />
+                <div ref={mapContainer} className="absolute inset-0" style={{ width: '100%', height: '100%' }} />
               )}
             </div>
 
