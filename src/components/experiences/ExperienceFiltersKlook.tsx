@@ -19,12 +19,19 @@ import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  experienceCategoryOptions,
   experienceFeatureOptions,
   experienceDurationOptions,
   experienceDifficultyOptions
 } from '@/components/filters/ExperiencesFilters';
 import { cn } from '@/lib/utils';
+
+// Category option type (from DB or static)
+export interface CategoryOption {
+  id: string;
+  labelEn: string;
+  labelRu: string;
+  icon?: string;
+}
 
 export type SortOption = 'rating' | 'price_asc' | 'price_desc' | 'duration';
 
@@ -60,6 +67,7 @@ const SORT_OPTIONS: { id: SortOption; labelEn: string; labelRu: string }[] = [
 ];
 
 interface ExperienceFiltersKlookProps {
+  categories: CategoryOption[];
   selectedCategory: string;
   onCategoryChange: (category: string) => void;
   sortBy: SortOption;
@@ -147,6 +155,7 @@ function ChipSection({
 }
 
 export function ExperienceFiltersKlook({
+  categories,
   selectedCategory,
   onCategoryChange,
   sortBy,
@@ -225,8 +234,8 @@ export function ExperienceFiltersKlook({
     setTempCategory(prev => prev === id ? 'all' : id);
   };
 
-  // Quick filter chips (horizontal scroll bar)
-  const quickCategories = experienceCategoryOptions.slice(0, 8);
+  // Quick filter chips (horizontal scroll bar) - use passed categories
+  const quickCategories = categories.slice(0, 8);
 
   return (
     <>
@@ -339,7 +348,7 @@ export function ExperienceFiltersKlook({
               {/* Categories Section - Klook style */}
               <ChipSection
                 title={isRu ? 'Категории' : 'Categories'}
-                options={experienceCategoryOptions}
+                options={categories}
                 selectedIds={tempCategory === 'all' ? [] : [tempCategory]}
                 onToggle={toggleCategory}
                 language={language}
