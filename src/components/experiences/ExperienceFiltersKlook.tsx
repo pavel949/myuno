@@ -306,8 +306,8 @@ export function ExperienceFiltersKlook({
 
   return (
     <>
-      {/* Sticky Filter Bar */}
-      <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b -mx-4 px-4 py-2">
+      {/* Sticky Filter Bar - offset for main header */}
+      <div className="sticky top-14 z-20 bg-background/95 backdrop-blur-sm border-b -mx-4 px-4 py-2">
         {/* Date Quick Filters - Klook style */}
         <div className="flex gap-2 overflow-x-auto scrollbar-hide touch-pan-x pb-2 -mx-1 px-1">
           {DATE_PRESETS.map((preset) => (
