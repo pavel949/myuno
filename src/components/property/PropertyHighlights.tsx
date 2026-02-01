@@ -8,6 +8,8 @@ import {
   ShieldCheck, Baby, Dog, Accessibility, Clock
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { PROPERTY_HIGHLIGHTS } from '@/lib/propertyTaxonomy';
+import type { LucideIcon } from 'lucide-react';
 
 interface PropertyHighlightsProps {
   highlights: string[];
@@ -15,32 +17,43 @@ interface PropertyHighlightsProps {
   className?: string;
 }
 
-const highlightOptions = [
-  // Location
-  { value: 'beach_close', labelEn: 'Near Beach (< 500m)', labelRu: 'Рядом с пляжем (< 500м)', icon: Waves, category: 'location' },
-  { value: 'amazing_view', labelEn: 'Amazing View', labelRu: 'Потрясающий вид', icon: Sunrise, category: 'location' },
-  { value: 'garden', labelEn: 'Private Garden', labelRu: 'Частный сад', icon: TreePine, category: 'location' },
-  { value: 'mountain_view', labelEn: 'Mountain View', labelRu: 'Вид на горы', icon: Mountain, category: 'location' },
-  { value: 'city_center', labelEn: 'City Center', labelRu: 'Центр города', icon: Building2, category: 'location' },
-  
-  // Amenities
-  { value: 'private_pool', labelEn: 'Private Pool', labelRu: 'Частный бассейн', icon: Waves, category: 'amenity' },
-  { value: 'luxury', labelEn: 'Luxury Property', labelRu: 'Люкс', icon: Sparkles, category: 'amenity' },
-  { value: 'fast_wifi', labelEn: 'High-Speed WiFi', labelRu: 'Быстрый WiFi', icon: Wifi, category: 'amenity' },
-  { value: 'parking', labelEn: 'Free Parking', labelRu: 'Бесплатная парковка', icon: Car, category: 'amenity' },
-  { value: 'full_kitchen', labelEn: 'Full Kitchen', labelRu: 'Полная кухня', icon: Utensils, category: 'amenity' },
-  { value: 'gym', labelEn: 'Gym Access', labelRu: 'Доступ в зал', icon: Dumbbell, category: 'amenity' },
-  
-  // Trust
-  { value: 'verified', labelEn: 'Verified Host', labelRu: 'Верифицированный хозяин', icon: ShieldCheck, category: 'trust' },
-  { value: 'family_friendly', labelEn: 'Family Friendly', labelRu: 'Для семей с детьми', icon: Baby, category: 'trust' },
-  { value: 'pet_friendly', labelEn: 'Pet Friendly', labelRu: 'Можно с питомцами', icon: Dog, category: 'trust' },
-  { value: 'accessible', labelEn: 'Wheelchair Accessible', labelRu: 'Доступно для инвалидов', icon: Accessibility, category: 'trust' },
-  { value: 'flexible_checkin', labelEn: 'Flexible Check-in', labelRu: 'Гибкий заезд', icon: Clock, category: 'trust' },
-];
+// Map taxonomy icons to Lucide components
+const iconMap: Record<string, LucideIcon> = {
+  beach_close: Waves,
+  beachfront: Waves,
+  city_center: Building2,
+  sea_view: Waves,
+  ocean_view: Sunrise,
+  amazing_view: Sunrise,
+  mountain_view: Mountain,
+  private_pool: Waves,
+  infinity_pool: Waves,
+  fast_wifi: Wifi,
+  luxury: Sparkles,
+  superhost: ShieldCheck,
+  verified: ShieldCheck,
+  instant_book: Clock,
+  family_friendly: Baby,
+  pet_friendly: Dog,
+  accessible: Accessibility,
+  parking: Car,
+  full_kitchen: Utensils,
+  gym: Dumbbell,
+  garden: TreePine,
+};
+
+// Convert taxonomy to legacy format for editor
+const highlightOptions = PROPERTY_HIGHLIGHTS.map(h => ({
+  value: h.id,
+  labelEn: h.labelEn,
+  labelRu: h.labelRu,
+  icon: iconMap[h.id] || Sparkles,
+  category: h.category,
+}));
 
 const categories = [
   { value: 'location', labelEn: 'Location', labelRu: 'Расположение' },
+  { value: 'view', labelEn: 'Views', labelRu: 'Виды' },
   { value: 'amenity', labelEn: 'Amenities', labelRu: 'Удобства' },
   { value: 'trust', labelEn: 'Trust & Safety', labelRu: 'Доверие' },
 ];
