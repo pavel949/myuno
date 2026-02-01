@@ -1,73 +1,16 @@
 
-# План: Реализация "Add to Cart" + "Book Now" для туров (Klook-стиль)
+# Implementation Plan: Add to Cart + Book Now for Tours (Klook-style)
 
-## Цель
-Добавить в вертикаль Туры возможность выбора двух путей оформления заказа:
-- **Add to Cart** — добавить тур с выбранной датой/временем в корзину для последующего группового оформления
-- **Book Now** — мгновенный переход к оформлению одного тура (текущее поведение)
+## Overview
+This plan implements dual checkout paths for tours matching the Klook UX pattern - users can either add tours to their cart for batch checkout or instantly book a single tour.
 
 ---
 
-## Ключевые изменения
+## Step 1: Extend CartContext
 
-### 1. Расширение системы корзины
+**File:** `src/contexts/CartContext.tsx`
 
-**Файл:** `src/contexts/CartContext.tsx`
-- Добавить тип `'tour'` в `CartItem.type`
-- Расширить интерфейс `CartItem` полями для бронирований:
-  - `scheduledDate?: string` — выбранная дата
-  - `scheduledTime?: string` — выбранное время
-  - `participants?: number` — количество участников
-  - `providerId` — ID провайдера тура
-
-### 2. Новый hook для мгновенного бронирования туров
-
-**Новый файл:** `src/hooks/useBookNow.ts`
-- Аналог `useBuyNow` для туров
-- Передаёт данные тура напрямую в `/tours/:id/book` через `state`
-- Поддержка предзаполненных параметров (дата, время, участники)
-
-### 3. Компонент выбора параметров бронирования
-
-**Новый файл:** `src/components/tours/TourBookingQuickSelect.tsx`
-- Мини-форма выбора даты, времени и участников
-- Показывается в Bottom Sheet или встроенном блоке
-- Кнопки "Add to Cart" и "Book Now"
-- Расчёт стоимости на лету
-
-### 4. Обновление страницы деталей тура
-
-**Файл:** `src/pages/tours/TourDetail.tsx`
-- Заменить одну кнопку "Book Now" на компонент `TourBookingQuickSelect`
-- Добавить интеграцию с корзиной через `useCart`
-- Показывать индикатор, если тур уже в корзине
-
-### 5. Обновление страницы бронирования тура
-
-**Файл:** `src/pages/tours/TourBooking.tsx`
-- Поддержка получения предзаполненных данных из `location.state`
-- Если данные переданы — автозаполнение формы
-
-### 6. Обновление страницы корзины
-
-**Файл:** `src/pages/Cart.tsx`
-- Добавить секцию для туров
-- Отображение даты, времени и участников для каждого тура
-- Возможность редактирования параметров
-- Переход к оформлению группы туров
-
-### 7. Страница checkout для туров (опционально)
-
-**Новый файл:** `src/pages/tours/TourCheckout.tsx`
-- Единая страница оформления нескольких туров из корзины
-- Объединённый контакт, оплата
-- Создание нескольких заказов или одного сводного
-
----
-
-## Техническая реализация
-
-### Обновлённый тип CartItem
+Update the `CartItem` interface to support tours and booking-specific fields:
 
 ```typescript
 export interface CartItem {
@@ -83,71 +26,123 @@ export interface CartItem {
   providerName?: string;
   providerNameRu?: string;
   options?: Record<string, string>;
-  // Новые поля для бронирований
+  // New booking-specific fields
   scheduledDate?: string;
   scheduledTime?: string;
   participants?: number;
 }
 ```
 
-### Компонент TourBookingQuickSelect
+---
 
+## Step 2: Create useBookNow Hook
+
+**New File:** `src/hooks/useBookNow.ts`
+
+Hook for instant booking that bypasses the cart:
+- Takes tour data and optional pre-selected parameters (date, time, participants)
+- Navigates to `/tours/:id/book` with state containing booking data
+- Enables auto-fill on the booking page
+
+---
+
+## Step 3: Create TourBookingQuickSelect Component
+
+**New File:** `src/components/tours/TourBookingQuickSelect.tsx`
+
+A Bottom Sheet component with:
+- Quick date selection (Today, Tomorrow, Other)
+- Time slot selection from tour's `start_times`
+- Participant counter with price calculation
+- Two action buttons: "Add to Cart" and "Book Now"
+- Shows "In Cart" indicator if tour already added
+- Real-time total price display
+
+---
+
+## Step 4: Update TourDetail Page
+
+**File:** `src/pages/tours/TourDetail.tsx`
+
+Replace the current single "Book Now" footer with `TourBookingQuickSelect`:
+- Hybrid sticky bar showing price + Cart + Book Now buttons
+- Import and integrate the new component
+- Remove old booking footer code
+
+---
+
+## Step 5: Update TourBooking Page
+
+**File:** `src/pages/tours/TourBooking.tsx`
+
+Add support for pre-filled data from `location.state`:
+- Check for `bookNowData` in location state
+- Auto-populate date, time, and participants if provided
+- Skip redundant selection steps when data is pre-filled
+
+---
+
+## Step 6: Update Cart Page
+
+**File:** `src/pages/Cart.tsx`
+
+Add tour support to the cart display:
+- Add `'tour'` type with appropriate icon and colors
+- Display scheduled date, time, and participants for tour items
+- Route tour checkout to `/tours/checkout` (or handle inline)
+- Allow editing of tour booking parameters
+
+---
+
+## Technical Details
+
+### Cart Item ID Strategy
+For tours with the same base ID but different booking times:
+```typescript
+id: `${tour.id}-${date}-${time}`
+```
+This allows multiple bookings of the same tour with different dates/times.
+
+### Component Hierarchy
 ```text
-┌────────────────────────────────────────────┐
-│  📅 Выберите дату                          │
-│  [Сегодня] [Завтра] [Календарь...]         │
-├────────────────────────────────────────────┤
-│  ⏰ Время                                   │
-│  [09:00] [14:00] [17:00]                   │
-├────────────────────────────────────────────┤
-│  👥 Участники                               │
-│  [-] 2 [+]                                 │
-├────────────────────────────────────────────┤
-│  💰 Итого: ฿4,000 (฿2,000 × 2)             │
-├────────────────────────────────────────────┤
-│  [🛒 В корзину]    [⚡ Забронировать]      │
-└────────────────────────────────────────────┘
+TourDetail
+└── TourBookingQuickSelect (fixed bottom bar)
+    └── Sheet (booking form)
+        ├── DateSelection (quick dates + calendar)
+        ├── TimeSelection (tour start_times)
+        ├── ParticipantCounter
+        ├── TotalPrice
+        └── ActionButtons (Cart + Book Now)
 ```
 
-### Новый Bottom Bar для TourDetail
-
+### State Flow
 ```text
-┌──────────────────────────────────────────────────────┐
-│  ฿2,000 /чел.     [🛒 Cart]  [⚡ Book Now]           │
-└──────────────────────────────────────────────────────┘
+User selects date/time/participants
+    │
+    ├── [Add to Cart] → CartContext → Cart Page → Tour Checkout
+    │
+    └── [Book Now] → useBookNow → TourBooking (pre-filled)
 ```
 
-При нажатии — открывается Sheet с выбором параметров.
+---
+
+## Files to Create/Modify
+
+| File | Action |
+|------|--------|
+| `src/contexts/CartContext.tsx` | Modify - add tour type and booking fields |
+| `src/hooks/useBookNow.ts` | Create - instant booking hook |
+| `src/components/tours/TourBookingQuickSelect.tsx` | Create - booking UI component |
+| `src/pages/tours/TourDetail.tsx` | Modify - integrate new component |
+| `src/pages/tours/TourBooking.tsx` | Modify - support pre-filled state |
+| `src/pages/Cart.tsx` | Modify - add tour display support |
 
 ---
 
-## Порядок реализации
+## Expected Outcome
 
-1. **Обновить `CartContext`** — добавить тип `'tour'` и поля для бронирований
-2. **Создать `useBookNow`** — hook для быстрого бронирования
-3. **Создать `TourBookingQuickSelect`** — компонент выбора параметров
-4. **Обновить `TourDetail`** — интегрировать новый UI
-5. **Обновить `TourBooking`** — поддержка предзаполнения
-6. **Обновить `Cart`** — отображение туров
-7. **Тестирование** — проверка всех сценариев
-
----
-
-## Применение к другим вертикалям
-
-Этот паттерн можно переиспользовать для:
-- 🚤 Яхты (Yachts)
-- 🏄 Водные активности (Water Activities)
-- 🎭 Мероприятия (Events)
-- 💆 Бьюти-услуги (Beauty)
-
-Все они имеют схожую структуру: выбор даты/времени + количество участников/часов.
-
----
-
-## Ожидаемый результат
-
-- Пользователь может добавить несколько туров в корзину с разными датами
-- Оформление нескольких туров за один checkout
-- Сохранение UX "Book Now" для быстрого бронирования одного тура
-- Консистентность с маркетплейсом (Add to Cart + Buy Now)
+- Users can add multiple tours to cart with different dates
+- "Book Now" provides fast single-tour checkout (existing flow)
+- Cart displays tours with date/time/participants metadata
+- Consistent with marketplace "Buy Now" + "Add to Cart" pattern
+- Ready for extension to Yachts, Activities, and other verticals
