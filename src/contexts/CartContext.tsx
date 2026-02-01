@@ -4,7 +4,7 @@ import { useAuth } from './AuthContext';
 
 export interface CartItem {
   id: string;
-  type: 'food' | 'flowers' | 'service' | 'product';
+  type: 'food' | 'flowers' | 'service' | 'product' | 'tour' | 'activity' | 'yacht';
   name: string;
   nameRu?: string;
   price: number;
@@ -15,6 +15,11 @@ export interface CartItem {
   providerName?: string;
   providerNameRu?: string;
   options?: Record<string, string>;
+  // Booking-specific fields for tours, yachts, activities
+  scheduledDate?: string;
+  scheduledTime?: string;
+  participants?: number;
+  charterType?: 'half_day' | 'full_day';
 }
 
 interface CartContextType {

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Anchor, Users, Clock, Loader2, AlertCircle } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -21,9 +21,17 @@ import { BackButton } from '@/components/uno/BackButton';
 import { YachtExperienceSelect, YACHT_EXPERIENCES } from '@/components/yachts/YachtExperienceSelect';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
+interface BookNowData {
+  date?: string;
+  time?: string;
+  guests?: number;
+  charterType?: 'half_day' | 'full_day';
+}
+
 export default function YachtBooking() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const { language } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
@@ -33,17 +41,27 @@ export default function YachtBooking() {
 
   const [availabilityError, setAvailabilityError] = useState<string | null>(null);
 
+  // Get pre-filled data from location state (Book Now flow)
+  const bookNowData = (location.state as { bookNowData?: BookNowData })?.bookNowData;
+
   // Auth redirect
   if (!authLoading && !user) {
     navigate('/auth', { state: { from: `/yachts/${id}/booking` } });
     return null;
   }
 
-  const isHalfDay = searchParams.get('type') === 'half';
+  // Determine if half day from URL params or bookNowData
+  const isHalfDay = bookNowData?.charterType === 'half_day' || searchParams.get('type') === 'half';
 
-  const [date, setDate] = useState<Date | undefined>();
-  const [time, setTime] = useState<string>('');
-  const [guests, setGuests] = useState(2);
+  // Initialize state with bookNowData if available
+  const [date, setDate] = useState<Date | undefined>(() => {
+    if (bookNowData?.date) {
+      return new Date(bookNowData.date);
+    }
+    return undefined;
+  });
+  const [time, setTime] = useState<string>(() => bookNowData?.time || '');
+  const [guests, setGuests] = useState(() => bookNowData?.guests || 2);
   const [contactData, setContactData] = useState<ContactFormData>({
     name: '',
     phone: '',

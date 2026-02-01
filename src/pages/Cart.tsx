@@ -13,15 +13,26 @@ import {
   Flower2, 
   Wrench,
   Package,
-  ArrowRight
+  ArrowRight,
+  Map,
+  Anchor,
+  Waves,
+  Calendar,
+  Clock,
+  Users
 } from 'lucide-react';
 import { triggerRipple } from '@/hooks/useRipple';
+import { format, parseISO } from 'date-fns';
+import { ru, enUS } from 'date-fns/locale';
 
 const typeIcons: Record<CartItem['type'], React.ElementType> = {
   food: UtensilsCrossed,
   flowers: Flower2,
   service: Wrench,
   product: Package,
+  tour: Map,
+  yacht: Anchor,
+  activity: Waves,
 };
 
 const typeLabels: Record<CartItem['type'], { en: string; ru: string }> = {
@@ -29,6 +40,9 @@ const typeLabels: Record<CartItem['type'], { en: string; ru: string }> = {
   flowers: { en: 'Flowers', ru: 'Цветы' },
   service: { en: 'Services', ru: 'Услуги' },
   product: { en: 'Products', ru: 'Товары' },
+  tour: { en: 'Tours', ru: 'Туры' },
+  yacht: { en: 'Yachts', ru: 'Яхты' },
+  activity: { en: 'Activities', ru: 'Активности' },
 };
 
 const typeColors: Record<CartItem['type'], string> = {
@@ -36,6 +50,9 @@ const typeColors: Record<CartItem['type'], string> = {
   flowers: 'from-rose-500 to-pink-500',
   service: 'from-slate-500 to-zinc-600',
   product: 'from-blue-500 to-indigo-500',
+  tour: 'from-emerald-500 to-teal-500',
+  yacht: 'from-sky-500 to-blue-500',
+  activity: 'from-cyan-500 to-blue-500',
 };
 
 const Cart = () => {
@@ -80,6 +97,18 @@ const Cart = () => {
       case 'product':
         // Product/Market checkout
         navigate('/market/checkout');
+        break;
+      case 'tour':
+        // Tour checkout - navigate to tours checkout
+        navigate('/tours/checkout');
+        break;
+      case 'yacht':
+        // Yacht checkout - navigate to yachts checkout
+        navigate('/yachts/checkout');
+        break;
+      case 'activity':
+        // Activity checkout
+        navigate('/activities/checkout');
         break;
       default:
         navigate('/');
@@ -182,8 +211,43 @@ const Cart = () => {
                             : item.providerName}
                         </p>
                       )}
+                      
+                      {/* Booking details for tours, yachts, activities */}
+                      {(item.type === 'tour' || item.type === 'yacht' || item.type === 'activity') && (
+                        <div className="flex flex-wrap gap-2 mt-1.5">
+                          {item.scheduledDate && (
+                            <span className="inline-flex items-center gap-1 text-xs bg-muted px-2 py-0.5 rounded-full">
+                              <Calendar className="w-3 h-3" />
+                              {format(parseISO(item.scheduledDate), 'd MMM', { 
+                                locale: language === 'ru' ? ru : enUS 
+                              })}
+                            </span>
+                          )}
+                          {item.scheduledTime && (
+                            <span className="inline-flex items-center gap-1 text-xs bg-muted px-2 py-0.5 rounded-full">
+                              <Clock className="w-3 h-3" />
+                              {item.scheduledTime}
+                            </span>
+                          )}
+                          {item.participants && (
+                            <span className="inline-flex items-center gap-1 text-xs bg-muted px-2 py-0.5 rounded-full">
+                              <Users className="w-3 h-3" />
+                              {item.participants}
+                            </span>
+                          )}
+                          {item.charterType && (
+                            <span className="inline-flex items-center gap-1 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                              {item.charterType === 'half_day' 
+                                ? (language === 'ru' ? 'Полдня' : 'Half day')
+                                : (language === 'ru' ? 'Полный день' : 'Full day')
+                              }
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      
                       <p className="text-primary font-semibold mt-1">
-                        {item.currency}{item.price}
+                        {item.currency === 'THB' ? '฿' : item.currency}{item.price.toLocaleString()}
                       </p>
                     </div>
 
