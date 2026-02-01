@@ -23,7 +23,8 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Home, MapPin, Bed, Bath, SquareStack, Upload, DollarSign, Clock, Users, Copy, BadgeDollarSign, Building2, Landmark, Briefcase, Bot, Sparkles, Loader2, ChevronDown, Wand2 } from 'lucide-react';
-import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
+import { ImageUpload } from '@/components/upload/ImageUpload';
+import { AirbnbStyleImageUpload } from '@/components/upload/AirbnbStyleImageUpload';
 import { ProjectSelector } from '@/components/property/ProjectSelector';
 import { UnitFields } from '@/components/property/UnitFields';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
@@ -618,14 +619,8 @@ export default function AddProperty() {
       case 'photos':
         return (
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Upload className="h-4 w-4" />
-                {isRu ? 'Фотографии' : 'Photos'}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <MultiImageUpload
+            <CardContent className="pt-6">
+              <AirbnbStyleImageUpload
                 value={formData.cover_image 
                   ? [formData.cover_image, ...formData.images] 
                   : formData.images}
@@ -643,12 +638,6 @@ export default function AddProperty() {
                 folder="property-care"
                 maxImages={20}
               />
-
-              <p className="text-xs text-muted-foreground">
-                {isRu 
-                  ? '💡 Первое фото станет обложкой. Можно выбрать несколько фото сразу. Рекомендуем 5-15 качественных снимков.' 
-                  : '💡 First photo becomes the cover. You can select multiple photos at once. We recommend 5-15 quality images.'}
-              </p>
             </CardContent>
           </Card>
         );
