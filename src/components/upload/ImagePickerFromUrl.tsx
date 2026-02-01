@@ -16,10 +16,17 @@ interface ImageItem {
   name?: string;
 }
 
+export interface ExternalImageResult {
+  originalUrl: string;
+  previewUrl?: string;
+  name?: string;
+  isYandexDisk?: boolean;
+}
+
 interface ImagePickerFromUrlProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSelect: (urls: string[]) => void;
+  onSelect: (images: ExternalImageResult[]) => void;
   maxImages?: number;
   currentCount?: number;
 }
@@ -118,7 +125,19 @@ export function ImagePickerFromUrl({
       toast.error('Выберите хотя бы одно изображение');
       return;
     }
-    onSelect(Array.from(selectedImages));
+    
+    // Build result with metadata
+    const results: ExternalImageResult[] = Array.from(selectedImages).map(url => {
+      const imageItem = images.find(img => img.url === url);
+      return {
+        originalUrl: url,
+        previewUrl: imageItem?.preview,
+        name: imageItem?.name,
+        isYandexDisk: isYandexSource
+      };
+    });
+    
+    onSelect(results);
     onOpenChange(false);
     resetState();
   };
