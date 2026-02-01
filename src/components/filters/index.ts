@@ -38,7 +38,16 @@ export {
   tourDifficultyOptions,
 } from './ToursFilters';
 
-// Beauty & Spa filters
+// Experiences filters (unified tours + activities)
+export {
+  experienceFilterConfig,
+  experienceTypeOptions,
+  experienceCategoryOptions,
+  experienceDurationOptions,
+  experienceDifficultyOptions,
+  experienceFeatureOptions,
+  experienceGroupOptions,
+} from './ExperiencesFilters';
 export {
   beautyFilterConfig,
   beautyServiceOptions,
