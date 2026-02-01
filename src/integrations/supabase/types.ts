@@ -5945,6 +5945,201 @@ export type Database = {
         }
         Relationships: []
       }
+      ota_listing_connections: {
+        Row: {
+          auto_sync_enabled: boolean | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          last_sync_at: string | null
+          last_sync_status: string | null
+          listing_id: string | null
+          listing_url: string
+          owner_id: string
+          platform: string
+          property_id: string | null
+          sync_error: string | null
+          sync_interval_hours: number | null
+          updated_at: string
+        }
+        Insert: {
+          auto_sync_enabled?: boolean | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          last_sync_status?: string | null
+          listing_id?: string | null
+          listing_url: string
+          owner_id: string
+          platform: string
+          property_id?: string | null
+          sync_error?: string | null
+          sync_interval_hours?: number | null
+          updated_at?: string
+        }
+        Update: {
+          auto_sync_enabled?: boolean | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          last_sync_status?: string | null
+          listing_id?: string | null
+          listing_url?: string
+          owner_id?: string
+          platform?: string
+          property_id?: string | null
+          sync_error?: string | null
+          sync_interval_hours?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ota_listing_connections_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ota_sync_logs: {
+        Row: {
+          completed_at: string | null
+          connection_id: string
+          duration_ms: number | null
+          error_message: string | null
+          id: string
+          items_synced: Json | null
+          started_at: string
+          status: string
+          sync_type: string
+        }
+        Insert: {
+          completed_at?: string | null
+          connection_id: string
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          items_synced?: Json | null
+          started_at?: string
+          status: string
+          sync_type: string
+        }
+        Update: {
+          completed_at?: string | null
+          connection_id?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          items_synced?: Json | null
+          started_at?: string
+          status?: string
+          sync_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ota_sync_logs_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "ota_listing_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ota_synced_listings: {
+        Row: {
+          address: string | null
+          amenities: string[] | null
+          bathrooms: number | null
+          bedrooms: number | null
+          blocked_dates: Json | null
+          cleaning_fee: number | null
+          connection_id: string
+          cover_photo: string | null
+          currency: string | null
+          description: string | null
+          house_rules: string | null
+          ical_url: string | null
+          id: string
+          lat: number | null
+          lng: number | null
+          max_guests: number | null
+          parsed_at: string | null
+          photos: Json | null
+          price_per_night: number | null
+          property_type: string | null
+          rating: number | null
+          raw_data: Json | null
+          review_count: number | null
+          synced_at: string
+          title: string | null
+        }
+        Insert: {
+          address?: string | null
+          amenities?: string[] | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          blocked_dates?: Json | null
+          cleaning_fee?: number | null
+          connection_id: string
+          cover_photo?: string | null
+          currency?: string | null
+          description?: string | null
+          house_rules?: string | null
+          ical_url?: string | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          max_guests?: number | null
+          parsed_at?: string | null
+          photos?: Json | null
+          price_per_night?: number | null
+          property_type?: string | null
+          rating?: number | null
+          raw_data?: Json | null
+          review_count?: number | null
+          synced_at?: string
+          title?: string | null
+        }
+        Update: {
+          address?: string | null
+          amenities?: string[] | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          blocked_dates?: Json | null
+          cleaning_fee?: number | null
+          connection_id?: string
+          cover_photo?: string | null
+          currency?: string | null
+          description?: string | null
+          house_rules?: string | null
+          ical_url?: string | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          max_guests?: number | null
+          parsed_at?: string | null
+          photos?: Json | null
+          price_per_night?: number | null
+          property_type?: string | null
+          rating?: number | null
+          raw_data?: Json | null
+          review_count?: number | null
+          synced_at?: string
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ota_synced_listings_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: true
+            referencedRelation: "ota_listing_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       owner_commission_tiers: {
         Row: {
           benefits: Json | null

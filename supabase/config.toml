@@ -89,3 +89,6 @@ verify_jwt = false
 
 [functions.generate-booking-voucher]
 verify_jwt = false
+
+[functions.airbnb-sync]
+verify_jwt = false
