@@ -385,6 +385,8 @@ const OwnerSuperhost = lazy(() => import('@/pages/owner/OwnerSuperhost'));
 const OwnerOperations = lazy(() => import('@/pages/owner/OwnerOperations'));
 const OwnerGuidePage = lazy(() => import('@/pages/owner/OwnerGuidePage'));
 const OwnerPropertyImport = lazy(() => import('@/pages/owner/OwnerPropertyImport'));
+const TeamPage = lazy(() => import('@/pages/owner/TeamPage'));
+const ReportsPage = lazy(() => import('@/pages/owner/ReportsPage'));
 
 // Property Consultation
 const PropertyConsultation = lazy(() => import('@/pages/property/PropertyConsultation'));
@@ -799,6 +801,8 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="inspection" element={<LazyPage><InspectionRequest /></LazyPage>} />
           <Route path="full-management" element={<LazyPage><FullManagement /></LazyPage>} />
           <Route path="channels" element={<LazyPage><ChannelManager /></LazyPage>} />
+          <Route path="team" element={<LazyPage><TeamPage /></LazyPage>} />
+          <Route path="reports" element={<LazyPage><ReportsPage /></LazyPage>} />
         </Route>
         
         {/* Demo Routes - No Auth Required */}

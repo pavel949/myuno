@@ -4,18 +4,13 @@ import {
   LayoutDashboard, 
   Building2,
   CalendarDays,
-  MessageCircle,
   DollarSign,
-  ClipboardList,
-  Settings,
-  Plus,
-  BarChart3,
-  Star,
-  Wrench,
   FileText,
-  ChevronDown,
+  Users,
+  Settings,
   LogOut,
-  Home
+  Home,
+  ChevronDown
 } from 'lucide-react';
 import {
   Sidebar,
@@ -41,6 +36,7 @@ interface NavItem {
   titleRu: string;
   path: string;
   icon: React.ElementType;
+  badge?: number;
 }
 
 interface NavGroup {
@@ -50,51 +46,37 @@ interface NavGroup {
   defaultOpen?: boolean;
 }
 
+// Консолидированная навигация: 14 пунктов → 7 пунктов
 const navigationGroups: NavGroup[] = [
-  // 1. MAIN - Core functionality (always open)
+  // MAIN - Core functionality (always open)
   {
     label: 'Main',
     labelRu: 'Главное',
     defaultOpen: true,
     items: [
       { title: 'Dashboard', titleRu: 'Обзор', path: '/owner', icon: LayoutDashboard },
-      { title: 'My Properties', titleRu: 'Мои объекты', path: '/owner/properties', icon: Building2 },
+      { title: 'Properties', titleRu: 'Объекты', path: '/owner/properties', icon: Building2 },
       { title: 'Calendar', titleRu: 'Календарь', path: '/owner/calendar', icon: CalendarDays },
-      { title: 'Messages', titleRu: 'Сообщения', path: '/owner/messages', icon: MessageCircle },
     ],
   },
-  // 2. OPERATIONS - Daily tasks
+  // MONEY - Financial management
   {
-    label: 'Operations',
-    labelRu: 'Операции',
-    defaultOpen: false,
-    items: [
-      { title: 'Tasks', titleRu: 'Задачи', path: '/owner/operations', icon: ClipboardList },
-      { title: 'Service Request', titleRu: 'Заявка на услугу', path: '/owner/service-request', icon: Wrench },
-      { title: 'Inspection', titleRu: 'Осмотр', path: '/owner/inspection', icon: FileText },
-    ],
-  },
-  // 3. FINANCE - Money management
-  {
-    label: 'Finance',
+    label: 'Money',
     labelRu: 'Финансы',
     defaultOpen: false,
     items: [
-      { title: 'Financials', titleRu: 'Финансы', path: '/owner/financials', icon: DollarSign },
-      { title: 'Quick Expense', titleRu: 'Быстрый расход', path: '/owner/expenses/quick', icon: Plus },
-      { title: 'Portfolio', titleRu: 'Портфолио', path: '/owner/portfolio', icon: BarChart3 },
+      { title: 'Financials', titleRu: 'Доходы и расходы', path: '/owner/financials', icon: DollarSign },
+      { title: 'Documents', titleRu: 'Документы', path: '/owner/documents', icon: FileText },
     ],
   },
-  // 4. GROWTH - Improve performance
+  // TEAM - Collaboration
   {
-    label: 'Growth',
-    labelRu: 'Рост',
+    label: 'Team',
+    labelRu: 'Команда',
     defaultOpen: false,
     items: [
-      { title: 'Reviews', titleRu: 'Отзывы', path: '/owner/reviews', icon: Star },
-      { title: 'Superhost', titleRu: 'Суперхозяин', path: '/owner/superhost', icon: Star },
-      { title: 'Channel Manager', titleRu: 'Каналы', path: '/owner/channels', icon: Settings },
-      { title: 'Full Management', titleRu: 'Полное управление', path: '/owner/full-management', icon: Building2 },
+      { title: 'My Team', titleRu: 'Моя команда', path: '/owner/team', icon: Users },
+      { title: 'Settings', titleRu: 'Настройки', path: '/owner/settings', icon: Settings },
     ],
   },
 ];
@@ -116,7 +98,6 @@ export function OwnerSidebar() {
   };
 
   const getGroupDefaultOpen = (group: NavGroup) => {
-    // Keep group open if any item in it is active
     return group.items.some(item => isActive(item.path)) || group.defaultOpen;
   };
 
@@ -131,10 +112,10 @@ export function OwnerSidebar() {
           {!isCollapsed && (
             <div className="flex flex-col">
               <span className="font-semibold text-sidebar-foreground">
-                {isRussian ? 'Мой дом' : 'My Home'}
+                UNO Property
               </span>
               <span className="text-xs text-sidebar-foreground/60">
-                {isRussian ? 'Управление недвижимостью' : 'Property Management'}
+                {isRussian ? 'Управление' : 'Management'}
               </span>
             </div>
           )}
@@ -174,6 +155,11 @@ export function OwnerSidebar() {
                         >
                           <item.icon className="h-4 w-4" />
                           <span>{isRussian ? item.titleRu : item.title}</span>
+                          {item.badge && item.badge > 0 && (
+                            <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+                              {item.badge > 9 ? '9+' : item.badge}
+                            </span>
+                          )}
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                     ))}
