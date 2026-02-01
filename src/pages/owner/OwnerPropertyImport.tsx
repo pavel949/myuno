@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useOtaConnections, useOtaSync, useOtaSyncedListing, useApplySyncedData } from '@/hooks/useOtaSync';
+import { useIntakeAgent } from '@/hooks/useIntakeAgent';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -11,12 +12,18 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 import { 
   Globe, Sparkles, Loader2, CheckCircle2, AlertCircle, ExternalLink,
-  Home, Bed, Bath, Users, DollarSign, Image, FileText, MapPin, ShieldAlert, PenLine
+  Home, Bed, Bath, Users, DollarSign, Image, FileText, MapPin, ShieldAlert, PenLine,
+  Bot, Wand2, Edit3, ArrowRight
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
+// Import modes
+type ImportMode = 'url' | 'ai';
 
 // Supported OTA platforms
 const OTA_PLATFORMS = [
@@ -40,15 +47,17 @@ const IMPORT_FIELDS = [
   { id: 'house_rules', labelEn: 'House Rules', labelRu: 'Правила', icon: FileText },
 ];
 
-type ImportStep = 'input' | 'preview' | 'select' | 'complete' | 'blocked';
+type ImportStep = 'input' | 'preview' | 'select' | 'complete' | 'blocked' | 'ai-result';
 
 export default function OwnerPropertyImport() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const isRu = language === 'ru';
   
+  const [importMode, setImportMode] = useState<ImportMode>('url');
   const [step, setStep] = useState<ImportStep>('input');
   const [url, setUrl] = useState('');
+  const [aiText, setAiText] = useState('');
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
   const [connectionId, setConnectionId] = useState<string | null>(null);
   const [selectedFields, setSelectedFields] = useState<string[]>([
@@ -59,6 +68,9 @@ export default function OwnerPropertyImport() {
   const syncMutation = useOtaSync();
   const applyMutation = useApplySyncedData();
   const { data: syncedListing, isLoading: isLoadingListing } = useOtaSyncedListing(connectionId || undefined);
+  
+  // AI Intake
+  const { session: intakeSession, isProcessing: isIntakeProcessing, analyze, reset: resetIntake } = useIntakeAgent();
 
   // Detect platform from URL
   const detectPlatform = (inputUrl: string) => {
@@ -74,6 +86,54 @@ export default function OwnerPropertyImport() {
     setUrl(value);
     const detected = detectPlatform(value);
     if (detected) setSelectedPlatform(detected);
+  };
+
+  // AI Intake handler
+  const handleAiAnalyze = async () => {
+    if (!aiText.trim()) {
+      toast.error(isRu ? 'Введите описание объекта' : 'Please enter property description');
+      return;
+    }
+
+    const result = await analyze({
+      mode: 'single',
+      rawText: aiText,
+      forceVertical: 'properties',
+    });
+
+    if (result && result.items.length > 0) {
+      setStep('ai-result');
+    }
+  };
+
+  // Navigate to create property with AI extracted data
+  const handleCreateFromAi = () => {
+    if (!intakeSession || intakeSession.items.length === 0) return;
+    
+    const item = intakeSession.items[0];
+    const fields = item.extractedFields;
+    
+    navigate('/owner/properties/new', {
+      state: {
+        prefillData: {
+          name_en: item.suggestedTitle?.en || fields.name_en?.value,
+          name_ru: item.suggestedTitle?.ru || fields.name_ru?.value,
+          description_en: item.suggestedDescription?.en || fields.description_en?.value,
+          description_ru: item.suggestedDescription?.ru || fields.description_ru?.value,
+          bedrooms: fields.bedrooms?.value,
+          bathrooms: fields.bathrooms?.value,
+          max_guests: fields.max_guests?.value,
+          price_per_night: fields.price_per_night?.value,
+          district: fields.district?.value,
+          address: fields.address?.value,
+          property_type: fields.property_type?.value,
+          amenities: fields.amenities?.value,
+        },
+        sourceType: 'ai-intake',
+      }
+    });
+    
+    toast.success(isRu ? 'Данные загружены! Проверьте и сохраните.' : 'Data loaded! Review and save.');
   };
 
   const handleAnalyze = async () => {
@@ -152,113 +212,319 @@ export default function OwnerPropertyImport() {
   return (
     <PageContainer className="pb-24">
       <PageHeader
-        title={isRu ? 'Импорт с OTA' : 'Import from OTA'}
+        title={isRu ? 'Импорт объекта' : 'Import Property'}
         subtitle={isRu 
-          ? 'Автоматически перенесите данные с Airbnb, Booking и других площадок'
-          : 'Automatically import your listing from Airbnb, Booking, and other platforms'
+          ? 'AI автоматически распарсит данные и создаст объект'
+          : 'AI will automatically parse data and create a property'
         }
       />
 
-      {/* Step: Input URL */}
+      {/* Step: Input - Mode selector */}
       {step === 'input' && (
         <div className="space-y-6">
-          {/* Supported platforms */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Globe className="h-5 w-5 text-primary" />
-                {isRu ? 'Поддерживаемые площадки' : 'Supported Platforms'}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {OTA_PLATFORMS.map(p => (
-                  <div
-                    key={p.id}
-                    className={`p-3 rounded-lg border text-center transition-all ${
-                      selectedPlatform === p.id 
-                        ? 'border-primary bg-primary/5 ring-2 ring-primary/20' 
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <span className="text-2xl block mb-1">{p.icon}</span>
-                    <span className="text-sm font-medium">{p.name}</span>
+          {/* Mode tabs */}
+          <Tabs value={importMode} onValueChange={(v) => setImportMode(v as ImportMode)} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="url" className="flex items-center gap-2">
+                <Globe className="h-4 w-4" />
+                {isRu ? 'Ссылка (OTA)' : 'URL (OTA)'}
+              </TabsTrigger>
+              <TabsTrigger value="ai" className="flex items-center gap-2">
+                <Bot className="h-4 w-4" />
+                {isRu ? 'AI Парсинг' : 'AI Parse'}
+              </TabsTrigger>
+            </TabsList>
+
+            {/* URL Mode */}
+            <TabsContent value="url" className="space-y-6 mt-6">
+              {/* Supported platforms */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Globe className="h-5 w-5 text-primary" />
+                    {isRu ? 'Поддерживаемые площадки' : 'Supported Platforms'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {OTA_PLATFORMS.map(p => (
+                      <div
+                        key={p.id}
+                        className={`p-3 rounded-lg border text-center transition-all ${
+                          selectedPlatform === p.id 
+                            ? 'border-primary bg-primary/5 ring-2 ring-primary/20' 
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        <span className="text-2xl block mb-1">{p.icon}</span>
+                        <span className="text-sm font-medium">{p.name}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
 
-          {/* URL Input */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">
-                {isRu ? 'Ссылка на объект' : 'Listing URL'}
-              </CardTitle>
-              <CardDescription>
-                {isRu 
-                  ? 'Вставьте ссылку на ваш объект с любой площадки'
-                  : 'Paste the link to your listing from any platform'
-                }
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>{isRu ? 'URL объекта' : 'Listing URL'}</Label>
-                <Input
-                  value={url}
-                  onChange={(e) => handleUrlChange(e.target.value)}
-                  placeholder="https://www.airbnb.com/rooms/123456..."
-                  className="font-mono text-sm"
-                />
-                {platform && (
-                  <p className="text-sm text-muted-foreground flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-500" />
-                    {isRu ? 'Обнаружено:' : 'Detected:'} {platform.icon} {platform.name}
-                  </p>
-                )}
-              </div>
+              {/* URL Input */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">
+                    {isRu ? 'Ссылка на объект' : 'Listing URL'}
+                  </CardTitle>
+                  <CardDescription>
+                    {isRu 
+                      ? 'Вставьте ссылку на ваш объект с любой площадки'
+                      : 'Paste the link to your listing from any platform'
+                    }
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>{isRu ? 'URL объекта' : 'Listing URL'}</Label>
+                    <Input
+                      value={url}
+                      onChange={(e) => handleUrlChange(e.target.value)}
+                      placeholder="https://www.airbnb.com/rooms/123456..."
+                      className="font-mono text-sm"
+                    />
+                    {platform && (
+                      <p className="text-sm text-muted-foreground flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        {isRu ? 'Обнаружено:' : 'Detected:'} {platform.icon} {platform.name}
+                      </p>
+                    )}
+                  </div>
 
-              <Button
-                onClick={handleAnalyze}
-                disabled={!url.trim() || !selectedPlatform || isAnalyzing}
-                className="w-full"
-                size="lg"
-              >
-                {isAnalyzing ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    {isRu ? 'Анализирую...' : 'Analyzing...'}
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    {isRu ? 'Загрузить данные' : 'Import Data'}
-                  </>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
+                  <Button
+                    onClick={handleAnalyze}
+                    disabled={!url.trim() || !selectedPlatform || isAnalyzing}
+                    className="w-full"
+                    size="lg"
+                  >
+                    {isAnalyzing ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        {isRu ? 'Анализирую...' : 'Analyzing...'}
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        {isRu ? 'Загрузить данные' : 'Import Data'}
+                      </>
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-          {/* Info */}
-          <Card className="bg-muted/50">
-            <CardContent className="pt-4">
-              <div className="flex gap-3">
-                <AlertCircle className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-                <div className="text-sm text-muted-foreground">
-                  <p className="font-medium mb-1">
-                    {isRu ? 'Как это работает:' : 'How it works:'}
-                  </p>
-                  <ul className="list-disc list-inside space-y-1">
-                    <li>{isRu ? 'AI извлекает все данные с площадки' : 'AI extracts all data from the platform'}</li>
-                    <li>{isRu ? 'Вы проверяете и редактируете информацию' : 'You review and edit the information'}</li>
-                    <li>{isRu ? 'Объект создаётся на myUNO' : 'Property is created on myUNO'}</li>
-                    <li>{isRu ? 'Календарь синхронизируется автоматически' : 'Calendar syncs automatically'}</li>
-                  </ul>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            {/* AI Parse Mode */}
+            <TabsContent value="ai" className="space-y-6 mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Wand2 className="h-5 w-5 text-primary" />
+                    {isRu ? 'AI Парсинг данных' : 'AI Data Parsing'}
+                  </CardTitle>
+                  <CardDescription>
+                    {isRu 
+                      ? 'Вставьте любой текст с описанием объекта — AI извлечёт все данные'
+                      : 'Paste any text describing your property — AI will extract all data'
+                    }
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>{isRu ? 'Описание объекта' : 'Property Description'}</Label>
+                    <Textarea
+                      value={aiText}
+                      onChange={(e) => setAiText(e.target.value)}
+                      placeholder={isRu 
+                        ? 'Вставьте описание: название, расположение, спальни, цена, удобства...\n\nПример:\nВилла Sunset View в Камале\n3 спальни, 2 ванные, бассейн\nЦена: 15000 бат/ночь\nWiFi, кондиционер, парковка'
+                        : 'Paste description: name, location, bedrooms, price, amenities...\n\nExample:\nSunset View Villa in Kamala\n3 bedrooms, 2 bathrooms, pool\nPrice: 15,000 THB/night\nWiFi, AC, parking'
+                      }
+                      className="min-h-[200px] font-mono text-sm"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      {isRu 
+                        ? 'Можно вставить текст с сайта, сообщения в мессенджере, PDF — AI сам разберётся'
+                        : 'You can paste text from website, messenger, PDF — AI will figure it out'
+                      }
+                    </p>
+                  </div>
+
+                  <Button
+                    onClick={handleAiAnalyze}
+                    disabled={!aiText.trim() || isIntakeProcessing}
+                    className="w-full"
+                    size="lg"
+                  >
+                    {isIntakeProcessing ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        {isRu ? 'AI анализирует...' : 'AI analyzing...'}
+                      </>
+                    ) : (
+                      <>
+                        <Bot className="h-4 w-4 mr-2" />
+                        {isRu ? 'Распарсить через AI' : 'Parse with AI'}
+                      </>
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* AI Features */}
+              <Card className="bg-muted/50">
+                <CardContent className="pt-4">
+                  <div className="flex gap-3">
+                    <Sparkles className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <div className="text-sm text-muted-foreground">
+                      <p className="font-medium mb-2 text-foreground">
+                        {isRu ? 'AI автоматически извлечёт:' : 'AI will automatically extract:'}
+                      </p>
+                      <ul className="grid grid-cols-2 gap-1 text-xs">
+                        <li>• {isRu ? 'Название и описание' : 'Title & description'}</li>
+                        <li>• {isRu ? 'Спальни, ванные, гости' : 'Bedrooms, baths, guests'}</li>
+                        <li>• {isRu ? 'Цена за ночь' : 'Price per night'}</li>
+                        <li>• {isRu ? 'Район и адрес' : 'District & address'}</li>
+                        <li>• {isRu ? 'Тип недвижимости' : 'Property type'}</li>
+                        <li>• {isRu ? 'Удобства' : 'Amenities'}</li>
+                      </ul>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+      )}
+
+      {/* Step: AI Result */}
+      {step === 'ai-result' && intakeSession && intakeSession.items.length > 0 && (
+        <div className="space-y-6">
+          <Alert className="border-green-500/50 bg-green-50 dark:bg-green-950/20">
+            <CheckCircle2 className="h-5 w-5 text-green-600" />
+            <AlertTitle className="text-green-800 dark:text-green-200">
+              {isRu ? 'Данные успешно извлечены!' : 'Data Successfully Extracted!'}
+            </AlertTitle>
+            <AlertDescription className="text-green-700 dark:text-green-300">
+              {isRu 
+                ? 'AI обработал текст и извлёк информацию об объекте'
+                : 'AI processed the text and extracted property information'
+              }
+            </AlertDescription>
+          </Alert>
+
+          {/* Extracted data preview */}
+          {(() => {
+            const item = intakeSession.items[0];
+            const fields = item.extractedFields;
+            return (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">
+                    {item.suggestedTitle?.en || item.suggestedTitle?.ru || (isRu ? 'Новый объект' : 'New Property')}
+                  </CardTitle>
+                  <CardDescription>
+                    {isRu ? 'Уверенность AI:' : 'AI Confidence:'} {Math.round(item.overallConfidence * 100)}%
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Key specs */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {fields.bedrooms?.value && (
+                      <div className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+                        <Bed className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">{fields.bedrooms.value} {isRu ? 'спален' : 'bed'}</span>
+                      </div>
+                    )}
+                    {fields.bathrooms?.value && (
+                      <div className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+                        <Bath className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">{fields.bathrooms.value} {isRu ? 'ванных' : 'bath'}</span>
+                      </div>
+                    )}
+                    {fields.max_guests?.value && (
+                      <div className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">{fields.max_guests.value} {isRu ? 'гостей' : 'guests'}</span>
+                      </div>
+                    )}
+                    {fields.price_per_night?.value && (
+                      <div className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+                        <DollarSign className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">{fields.price_per_night.value} {isRu ? '/ночь' : '/night'}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Description preview */}
+                  {(item.suggestedDescription?.en || item.suggestedDescription?.ru) && (
+                    <div className="p-3 bg-muted/50 rounded-lg">
+                      <p className="text-sm text-muted-foreground line-clamp-3">
+                        {isRu ? item.suggestedDescription?.ru : item.suggestedDescription?.en}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Location */}
+                  {(fields.district?.value || fields.address?.value) && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <MapPin className="h-4 w-4" />
+                      {fields.district?.value}{fields.address?.value ? `, ${fields.address.value}` : ''}
+                    </div>
+                  )}
+
+                  {/* Amenities */}
+                  {fields.amenities?.value && Array.isArray(fields.amenities.value) && (
+                    <div className="flex flex-wrap gap-1">
+                      {fields.amenities.value.slice(0, 8).map((a: string, i: number) => (
+                        <Badge key={i} variant="secondary" className="text-xs">
+                          {a}
+                        </Badge>
+                      ))}
+                      {fields.amenities.value.length > 8 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{fields.amenities.value.length - 8}
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Warnings */}
+                  {item.missingRequiredFields.length > 0 && (
+                    <Alert variant="default" className="border-yellow-500/50">
+                      <AlertCircle className="h-4 w-4 text-yellow-600" />
+                      <AlertDescription className="text-sm">
+                        {isRu ? 'Не удалось извлечь:' : 'Could not extract:'} {item.missingRequiredFields.join(', ')}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })()}
+
+          {/* Actions */}
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setStep('input');
+                resetIntake();
+              }}
+              className="flex-1"
+            >
+              <Edit3 className="h-4 w-4 mr-2" />
+              {isRu ? 'Изменить текст' : 'Edit Text'}
+            </Button>
+            <Button
+              onClick={handleCreateFromAi}
+              className="flex-1"
+            >
+              <ArrowRight className="h-4 w-4 mr-2" />
+              {isRu ? 'Создать объект' : 'Create Property'}
+            </Button>
+          </div>
         </div>
       )}
 
