@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Upload, X, Loader2, ImageIcon, Link, Check, Globe } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
-import { ImagePickerFromUrl } from './ImagePickerFromUrl';
+import { ImagePickerFromUrl, ExternalImageResult } from './ImagePickerFromUrl';
 
 interface ImageUploadProps {
   value?: string;
@@ -315,6 +315,103 @@ export function MultiImageUpload({
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [urlValue, setUrlValue] = useState('');
   const [showUrlPicker, setShowUrlPicker] = useState(false);
+  const [isUploadingExternal, setIsUploadingExternal] = useState(false);
+
+  // Upload external images (from Yandex Disk, etc.) to storage
+  const uploadExternalImages = useCallback(async (images: ExternalImageResult[]) => {
+    if (!user) {
+      toast.error('Необходимо авторизоваться');
+      return;
+    }
+
+    const remainingSlots = maxImages - value.length;
+    if (remainingSlots <= 0) {
+      toast.error(`Максимум ${maxImages} фото`);
+      return;
+    }
+
+    const imagesToUpload = images.slice(0, remainingSlots);
+    if (imagesToUpload.length === 0) return;
+
+    setIsUploadingExternal(true);
+    setUploadProgress(0);
+    const uploadedUrls: string[] = [];
+
+    try {
+      for (let i = 0; i < imagesToUpload.length; i++) {
+        const img = imagesToUpload[i];
+        
+        // For Yandex Disk images, fetch via proxy
+        const fetchUrl = img.isYandexDisk 
+          ? `https://kakkwibljrjsawxgnupk.supabase.co/functions/v1/proxy-image?url=${encodeURIComponent(img.originalUrl)}`
+          : img.originalUrl;
+        
+        try {
+          const response = await fetch(fetchUrl);
+          if (!response.ok) {
+            console.error(`Failed to fetch image: ${response.status}`);
+            continue;
+          }
+          
+          const blob = await response.blob();
+          
+          // Determine file extension from content type or URL
+          const contentType = response.headers.get('content-type') || 'image/jpeg';
+          const extMap: Record<string, string> = {
+            'image/jpeg': 'jpg',
+            'image/png': 'png',
+            'image/webp': 'webp',
+            'image/gif': 'gif'
+          };
+          const ext = extMap[contentType] || 'jpg';
+          
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
+          const filePath = `${user.id}/${folder}/${fileName}`;
+
+          const { error: uploadError } = await supabase.storage
+            .from('vendor-uploads')
+            .upload(filePath, blob, {
+              contentType,
+              cacheControl: '3600'
+            });
+
+          if (uploadError) {
+            console.error('Upload error:', uploadError);
+            continue;
+          }
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('vendor-uploads')
+            .getPublicUrl(filePath);
+
+          uploadedUrls.push(publicUrl);
+        } catch (err) {
+          console.error(`Error uploading image ${i}:`, err);
+        }
+        
+        setUploadProgress(Math.round(((i + 1) / imagesToUpload.length) * 100));
+      }
+
+      if (isMountedRef.current) {
+        if (uploadedUrls.length > 0) {
+          onChange([...value, ...uploadedUrls]);
+          toast.success(`Загружено ${uploadedUrls.length} фото`);
+        } else {
+          toast.error('Не удалось загрузить изображения');
+        }
+      }
+    } catch (error) {
+      console.error('External upload error:', error);
+      if (isMountedRef.current) {
+        toast.error('Ошибка загрузки изображений');
+      }
+    } finally {
+      if (isMountedRef.current) {
+        setIsUploadingExternal(false);
+        setUploadProgress(0);
+      }
+    }
+  }, [user, folder, value, onChange, maxImages]);
 
   const handleUrlSubmit = () => {
     const trimmed = urlValue.trim();
@@ -423,14 +520,14 @@ export function MultiImageUpload({
               accept="image/jpeg,image/png,image/webp,image/gif"
               onChange={handleFileSelect}
               className="hidden"
-              disabled={isUploading || value.length >= maxImages}
+              disabled={isUploading || isUploadingExternal || value.length >= maxImages}
               multiple
             />
-            {isUploading ? (
+            {isUploading || isUploadingExternal ? (
               <div className="flex flex-col items-center gap-2">
                 <Loader2 className="h-8 w-8 text-primary animate-spin" />
                 <span className="text-sm text-muted-foreground">
-                  Загрузка... {uploadProgress}%
+                  {isUploadingExternal ? 'Загрузка с сайта...' : 'Загрузка...'} {uploadProgress}%
                 </span>
               </div>
             ) : value.length >= maxImages ? (
@@ -458,7 +555,7 @@ export function MultiImageUpload({
               size="sm"
               className="flex-1"
               onClick={() => setShowUrlInput(true)}
-              disabled={value.length >= maxImages}
+              disabled={value.length >= maxImages || isUploading || isUploadingExternal}
             >
               <Link className="h-4 w-4 mr-2" />
               По ссылке
@@ -469,7 +566,7 @@ export function MultiImageUpload({
               size="sm"
               className="flex-1"
               onClick={() => setShowUrlPicker(true)}
-              disabled={value.length >= maxImages}
+              disabled={value.length >= maxImages || isUploading || isUploadingExternal}
             >
               <Globe className="h-4 w-4 mr-2" />
               С сайта
@@ -482,9 +579,9 @@ export function MultiImageUpload({
       <ImagePickerFromUrl
         open={showUrlPicker}
         onOpenChange={setShowUrlPicker}
-        onSelect={(urls) => {
-          onChange([...value, ...urls]);
-          toast.success(`Добавлено ${urls.length} фото`);
+        onSelect={(images) => {
+          // Upload external images to storage
+          uploadExternalImages(images);
         }}
         maxImages={maxImages}
         currentCount={value.length}
