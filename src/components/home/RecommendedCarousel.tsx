@@ -41,7 +41,7 @@ export const RecommendedCarousel = memo(forwardRef<HTMLDivElement>(function Reco
       location: undefined,
       locationRu: undefined,
       duration: undefined,
-      path: `/tours/${tour.id}`,
+      path: `/experiences/${tour.id}`,
     })), [tours]);
 
   const checkScroll = useCallback(() => {

@@ -30,6 +30,7 @@ const ExperienceCard = React.forwardRef<HTMLDivElement, { experience: Experience
     return (
       <motion.div
         ref={ref}
+        data-testid="experience-card"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
@@ -199,6 +200,36 @@ export default function ExperiencesIndex() {
       const duration = exp.duration_minutes || 0;
       if (duration < durationRange[0] || duration > durationRange[1]) return false;
       
+      // Date filter - check if experience is available on selected date
+      if (selectedDate) {
+        const dayOfWeek = selectedDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+        const availableDays = exp.available_days || [];
+        // If no available_days specified, assume available every day
+        if (availableDays.length > 0 && !availableDays.includes(dayOfWeek)) {
+          return false;
+        }
+      }
+      
+      // Date preset filter
+      if (datePreset === 'today') {
+        // Filter to experiences available today
+        const today = new Date();
+        const dayOfWeek = today.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+        const availableDays = exp.available_days || [];
+        if (availableDays.length > 0 && !availableDays.includes(dayOfWeek)) {
+          return false;
+        }
+      } else if (datePreset === 'tomorrow') {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const dayOfWeek = tomorrow.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+        const availableDays = exp.available_days || [];
+        if (availableDays.length > 0 && !availableDays.includes(dayOfWeek)) {
+          return false;
+        }
+      }
+      // 'this-week' and 'any' show all experiences
+      
       return true;
     });
     
@@ -218,7 +249,7 @@ export default function ExperiencesIndex() {
     });
     
     return result;
-  }, [experiences, sortBy, priceRange, durationRange]);
+  }, [experiences, sortBy, priceRange, durationRange, selectedDate, datePreset]);
   
   // Handle type change
   const handleTypeChange = (type: ViewType) => {

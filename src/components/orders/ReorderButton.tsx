@@ -36,7 +36,7 @@ export function ReorderButton({
       food: '/restaurants',
       flowers: '/flowers',
       beauty: '/beauty',
-      tour: '/tours',
+      tour: '/experiences',
       yacht: '/yachts',
       service: '/services',
       cleaning: '/cleaning',

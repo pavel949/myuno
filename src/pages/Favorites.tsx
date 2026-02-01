@@ -74,8 +74,8 @@ export default function Favorites() {
       vehicle: `/transport/${item.item_id}`,
       clinic: `/medical/clinic/${item.item_id}`,
       gym: `/fitness/${item.item_id}`,
-      tour: `/tours/${item.item_id}`,
-      water_activity: `/water/${item.item_id}`,
+      tour: `/experiences/${item.item_id}`,
+      water_activity: `/experiences/${item.item_id}`,
       restaurant: `/restaurants/${item.item_id}`,
     };
     const route = routes[item.item_type];
