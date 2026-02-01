@@ -8,6 +8,7 @@ import {
   Home, CheckCircle2, Clock, AlertTriangle, Star, Users
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getPropertyTypeLabel } from '@/lib/propertyTaxonomy';
 
 interface Property {
   id: string;
@@ -119,7 +120,7 @@ export const PropertyHeroCard = forwardRef<HTMLDivElement, PropertyHeroCardProps
         <div className="p-4">
           <h3 className="font-semibold text-base truncate mb-1">{title}</h3>
           <p className="text-sm text-muted-foreground">
-            {property.property_type || 'Property'}
+            {property.property_type ? getPropertyTypeLabel(property.property_type, isRu ? 'ru' : 'en') : 'Property'}
             {property.bedrooms && ` · ${property.bedrooms} ${isRu ? 'спален' : 'bedrooms'}`}
           </p>
           

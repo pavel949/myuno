@@ -2,8 +2,14 @@ import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Bed, Bath, Users, Star, Sparkles, Calendar, DollarSign } from 'lucide-react';
+import { MapPin, Bed, Bath, Users, Star, Sparkles, DollarSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { 
+  getPropertyTypeLabel, 
+  getDistrictLabel,
+  getHighlightLabel,
+  PROPERTY_HIGHLIGHTS 
+} from '@/lib/propertyTaxonomy';
 
 interface PropertyPreviewCardProps {
   data: {
@@ -26,27 +32,13 @@ interface PropertyPreviewCardProps {
   variant?: 'search' | 'detail';
 }
 
-const propertyTypeLabels: Record<string, { en: string; ru: string }> = {
-  villa: { en: 'Villa', ru: 'Вилла' },
-  apartment: { en: 'Apartment', ru: 'Квартира' },
-  condo: { en: 'Condo', ru: 'Кондо' },
-  house: { en: 'House', ru: 'Дом' },
-};
-
-const highlightLabels: Record<string, { en: string; ru: string; icon?: string }> = {
-  beach_close: { en: 'Near Beach', ru: 'У пляжа' },
-  amazing_view: { en: 'Amazing View', ru: 'Вид' },
-  private_pool: { en: 'Pool', ru: 'Бассейн' },
-  fast_wifi: { en: 'Fast WiFi', ru: 'WiFi' },
-};
-
 export function PropertyPreviewCard({ data, className, variant = 'search' }: PropertyPreviewCardProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
   const title = isRu ? (data.titleRu || data.title) : data.title;
   const typeLabel = data.propertyType 
-    ? (isRu ? propertyTypeLabels[data.propertyType]?.ru : propertyTypeLabels[data.propertyType]?.en) 
+    ? getPropertyTypeLabel(data.propertyType, isRu ? 'ru' : 'en')
     : '';
 
   const formatPrice = (price: number) => {
@@ -82,11 +74,11 @@ export function PropertyPreviewCard({ data, className, variant = 'search' }: Pro
           {data.highlights && data.highlights.length > 0 && (
             <div className="absolute bottom-2 left-2 right-2 flex gap-1 flex-wrap">
               {data.highlights.slice(0, 3).map(h => {
-                const label = highlightLabels[h];
-                if (!label) return null;
+                const highlight = PROPERTY_HIGHLIGHTS.find(hl => hl.id === h);
+                if (!highlight) return null;
                 return (
                   <Badge key={h} variant="secondary" className="text-[10px] py-0.5 px-1.5 bg-background/80 backdrop-blur-sm">
-                    {isRu ? label.ru : label.en}
+                    {highlight.icon} {isRu ? highlight.labelRu : highlight.labelEn}
                   </Badge>
                 );
               })}
@@ -240,11 +232,11 @@ export function PropertyPreviewCard({ data, className, variant = 'search' }: Pro
         {data.highlights && data.highlights.length > 0 && (
           <div className="flex gap-2 flex-wrap">
             {data.highlights.map(h => {
-              const label = highlightLabels[h];
-              if (!label) return null;
+              const highlight = PROPERTY_HIGHLIGHTS.find(hl => hl.id === h);
+              if (!highlight) return null;
               return (
                 <Badge key={h} variant="outline" className="text-xs">
-                  {isRu ? label.ru : label.en}
+                  {highlight.icon} {isRu ? highlight.labelRu : highlight.labelEn}
                 </Badge>
               );
             })}
