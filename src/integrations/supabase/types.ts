@@ -1392,6 +1392,69 @@ export type Database = {
         }
         Relationships: []
       }
+      calendar_sync_logs: {
+        Row: {
+          calendar_id: string | null
+          created_at: string | null
+          error: string | null
+          events_added: number | null
+          events_found: number | null
+          events_removed: number | null
+          events_updated: number | null
+          id: string
+          owner_id: string
+          property_id: string | null
+          sync_duration_ms: number | null
+          sync_type: string | null
+          synced_at: string | null
+        }
+        Insert: {
+          calendar_id?: string | null
+          created_at?: string | null
+          error?: string | null
+          events_added?: number | null
+          events_found?: number | null
+          events_removed?: number | null
+          events_updated?: number | null
+          id?: string
+          owner_id: string
+          property_id?: string | null
+          sync_duration_ms?: number | null
+          sync_type?: string | null
+          synced_at?: string | null
+        }
+        Update: {
+          calendar_id?: string | null
+          created_at?: string | null
+          error?: string | null
+          events_added?: number | null
+          events_found?: number | null
+          events_removed?: number | null
+          events_updated?: number | null
+          id?: string
+          owner_id?: string
+          property_id?: string | null
+          sync_duration_ms?: number | null
+          sync_type?: string | null
+          synced_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_sync_logs_calendar_id_fkey"
+            columns: ["calendar_id"]
+            isOneToOne: false
+            referencedRelation: "property_external_calendars"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_sync_logs_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cancellation_policy_rules: {
         Row: {
           created_at: string | null
@@ -8148,6 +8211,8 @@ export type Database = {
           cleaning_fee: number | null
           confirmed_at: string | null
           confirmed_by: string | null
+          conflict_detected_at: string | null
+          conflict_with_booking_id: string | null
           created_at: string
           currency: string | null
           deposit_amount: number | null
@@ -8173,6 +8238,7 @@ export type Database = {
           source: string | null
           source_calendar_id: string | null
           status: string | null
+          sync_priority: number | null
           total_amount: number | null
           updated_at: string
         }
@@ -8186,6 +8252,8 @@ export type Database = {
           cleaning_fee?: number | null
           confirmed_at?: string | null
           confirmed_by?: string | null
+          conflict_detected_at?: string | null
+          conflict_with_booking_id?: string | null
           created_at?: string
           currency?: string | null
           deposit_amount?: number | null
@@ -8211,6 +8279,7 @@ export type Database = {
           source?: string | null
           source_calendar_id?: string | null
           status?: string | null
+          sync_priority?: number | null
           total_amount?: number | null
           updated_at?: string
         }
@@ -8224,6 +8293,8 @@ export type Database = {
           cleaning_fee?: number | null
           confirmed_at?: string | null
           confirmed_by?: string | null
+          conflict_detected_at?: string | null
+          conflict_with_booking_id?: string | null
           created_at?: string
           currency?: string | null
           deposit_amount?: number | null
@@ -8249,6 +8320,7 @@ export type Database = {
           source?: string | null
           source_calendar_id?: string | null
           status?: string | null
+          sync_priority?: number | null
           total_amount?: number | null
           updated_at?: string
         }
@@ -8558,6 +8630,8 @@ export type Database = {
       }
       property_external_calendars: {
         Row: {
+          auto_sync: boolean | null
+          channel_type: string | null
           created_at: string
           ical_url: string
           id: string
@@ -8565,11 +8639,15 @@ export type Database = {
           last_synced_at: string | null
           name: string
           owner_id: string
+          priority: number | null
           property_id: string
           sync_error: string | null
+          sync_interval_minutes: number | null
           updated_at: string
         }
         Insert: {
+          auto_sync?: boolean | null
+          channel_type?: string | null
           created_at?: string
           ical_url: string
           id?: string
@@ -8577,11 +8655,15 @@ export type Database = {
           last_synced_at?: string | null
           name: string
           owner_id: string
+          priority?: number | null
           property_id: string
           sync_error?: string | null
+          sync_interval_minutes?: number | null
           updated_at?: string
         }
         Update: {
+          auto_sync?: boolean | null
+          channel_type?: string | null
           created_at?: string
           ical_url?: string
           id?: string
@@ -8589,8 +8671,10 @@ export type Database = {
           last_synced_at?: string | null
           name?: string
           owner_id?: string
+          priority?: number | null
           property_id?: string
           sync_error?: string | null
+          sync_interval_minutes?: number | null
           updated_at?: string
         }
         Relationships: [
@@ -14309,6 +14393,22 @@ export type Database = {
         Returns: string
       }
       credit_cashback: { Args: { p_order_id: string }; Returns: Json }
+      detect_booking_conflicts: {
+        Args: { p_property_id: string }
+        Returns: {
+          booking_id_1: string
+          booking_id_2: string
+          check_in_1: string
+          check_in_2: string
+          check_out_1: string
+          check_out_2: string
+          guest_name_1: string
+          guest_name_2: string
+          overlap_days: number
+          source_1: string
+          source_2: string
+        }[]
+      }
       find_nearby_clinics: {
         Args: { radius_km?: number; user_lat: number; user_lng: number }
         Returns: {
