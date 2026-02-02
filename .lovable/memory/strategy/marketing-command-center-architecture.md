@@ -1,0 +1,4 @@
+# Memory: strategy/marketing-command-center-architecture
+Updated: now
+
+The Marketing Command Center (MCC) is fully architected as a platform-level Growth OS at `/admin/marketing`. Phase 1 focuses on B2C user acquisition with 7 core modules: Dashboard (KPIs, funnel visualization, AI insights), Campaign Factory (multi-channel campaign management), Lead Hub (CRM-lite with scoring), Funnel Engine (visual funnel builder), Content Lab (AI-powered content generation), Analytics (channel performance, attribution models), and Automation (trigger-based rules). Database schema includes 8 tables: `mcc_campaigns`, `mcc_leads`, `mcc_funnels`, `mcc_funnel_events`, `mcc_creatives`, `mcc_events`, `mcc_channel_metrics`, `mcc_automation_rules`. AI agents planned: Traffic Optimizer, Content Generator, Funnel Optimizer, Lead Scorer, Churn Predictor, SEO Agent.

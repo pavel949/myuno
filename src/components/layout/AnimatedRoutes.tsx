@@ -291,6 +291,7 @@ const AdminAIAgentEditor = lazy(() => import('@/pages/admin/AdminAIAgentEditor')
 // AI Intake page
 const AdminIntake = lazy(() => import('@/pages/admin/AdminIntake'));
 const AdminVendorProspects = lazy(() => import('@/pages/admin/AdminVendorProspects'));
+const MarketingDashboard = lazy(() => import('@/pages/admin/marketing/MarketingDashboard'));
 
 // Experience Categories Management
 const ExperienceCategoriesPage = lazy(() => import('@/pages/admin/ExperienceCategoriesPage'));
@@ -737,6 +738,8 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/admin/intake" element={<AdminIntake />} />
           {/* Vendor Acquisition */}
           <Route path="/admin/vendor-prospects" element={<AdminVendorProspects />} />
+          {/* Marketing Command Center */}
+          <Route path="/admin/marketing" element={<MarketingDashboard />} />
           {/* Experience Categories */}
           <Route path="/admin/experience-categories" element={<ExperienceCategoriesPage />} />
         </Route>

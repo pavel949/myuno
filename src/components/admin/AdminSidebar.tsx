@@ -9,7 +9,8 @@ import {
   ChevronRight,
   Bot,
   Inbox,
-  UserPlus
+  UserPlus,
+  Megaphone
 } from 'lucide-react';
 import {
   Sidebar,
@@ -86,8 +87,16 @@ const navigationItems: NavItem[] = [
     descriptionRu: 'Привлечение вендоров'
   },
   { 
+    title: 'Marketing', 
+    titleRu: 'Маркетинг', 
+    path: '/admin/marketing', 
+    icon: Megaphone,
+    description: 'Command Center',
+    descriptionRu: 'Центр управления'
+  },
+  { 
     title: 'Control', 
-    titleRu: 'Управление', 
+    titleRu: 'Управление',
     path: '/admin/control', 
     icon: Cog,
     description: 'Users, analytics, system',

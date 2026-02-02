@@ -5271,6 +5271,537 @@ export type Database = {
           },
         ]
       }
+      mcc_automation_rules: {
+        Row: {
+          actions: Json
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          executions_count: number | null
+          id: string
+          is_active: boolean | null
+          last_executed_at: string | null
+          name: string
+          trigger_conditions: Json
+          trigger_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          actions: Json
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          executions_count?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_executed_at?: string | null
+          name: string
+          trigger_conditions: Json
+          trigger_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          actions?: Json
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          executions_count?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_executed_at?: string | null
+          name?: string
+          trigger_conditions?: Json
+          trigger_type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      mcc_campaigns: {
+        Row: {
+          ab_variants: Json | null
+          budget: Json | null
+          channels: Json | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          goal: string
+          id: string
+          kpi_targets: Json | null
+          name: string
+          performance_data: Json | null
+          schedule: Json | null
+          status: string | null
+          target_segment: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          ab_variants?: Json | null
+          budget?: Json | null
+          channels?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          goal: string
+          id?: string
+          kpi_targets?: Json | null
+          name: string
+          performance_data?: Json | null
+          schedule?: Json | null
+          status?: string | null
+          target_segment?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          ab_variants?: Json | null
+          budget?: Json | null
+          channels?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          goal?: string
+          id?: string
+          kpi_targets?: Json | null
+          name?: string
+          performance_data?: Json | null
+          schedule?: Json | null
+          status?: string | null
+          target_segment?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      mcc_channel_metrics: {
+        Row: {
+          cac: number | null
+          campaign_id: string | null
+          channel: string
+          clicks: number | null
+          conversions: number | null
+          cpc: number | null
+          cpl: number | null
+          created_at: string | null
+          ctr: number | null
+          cvr: number | null
+          date: string
+          id: string
+          impressions: number | null
+          leads: number | null
+          revenue: number | null
+          roas: number | null
+          signups: number | null
+          source: string | null
+          spend: number | null
+        }
+        Insert: {
+          cac?: number | null
+          campaign_id?: string | null
+          channel: string
+          clicks?: number | null
+          conversions?: number | null
+          cpc?: number | null
+          cpl?: number | null
+          created_at?: string | null
+          ctr?: number | null
+          cvr?: number | null
+          date?: string
+          id?: string
+          impressions?: number | null
+          leads?: number | null
+          revenue?: number | null
+          roas?: number | null
+          signups?: number | null
+          source?: string | null
+          spend?: number | null
+        }
+        Update: {
+          cac?: number | null
+          campaign_id?: string | null
+          channel?: string
+          clicks?: number | null
+          conversions?: number | null
+          cpc?: number | null
+          cpl?: number | null
+          created_at?: string | null
+          ctr?: number | null
+          cvr?: number | null
+          date?: string
+          id?: string
+          impressions?: number | null
+          leads?: number | null
+          revenue?: number | null
+          roas?: number | null
+          signups?: number | null
+          source?: string | null
+          spend?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mcc_channel_metrics_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "mcc_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mcc_creatives: {
+        Row: {
+          campaign_id: string | null
+          clicks: number | null
+          content: Json
+          conversions: number | null
+          created_at: string | null
+          creative_type: string
+          id: string
+          impressions: number | null
+          is_active: boolean | null
+          is_control: boolean | null
+          language: string | null
+          name: string
+          performance: Json | null
+          spend: number | null
+          updated_at: string | null
+          variant_name: string | null
+        }
+        Insert: {
+          campaign_id?: string | null
+          clicks?: number | null
+          content: Json
+          conversions?: number | null
+          created_at?: string | null
+          creative_type: string
+          id?: string
+          impressions?: number | null
+          is_active?: boolean | null
+          is_control?: boolean | null
+          language?: string | null
+          name: string
+          performance?: Json | null
+          spend?: number | null
+          updated_at?: string | null
+          variant_name?: string | null
+        }
+        Update: {
+          campaign_id?: string | null
+          clicks?: number | null
+          content?: Json
+          conversions?: number | null
+          created_at?: string | null
+          creative_type?: string
+          id?: string
+          impressions?: number | null
+          is_active?: boolean | null
+          is_control?: boolean | null
+          language?: string | null
+          name?: string
+          performance?: Json | null
+          spend?: number | null
+          updated_at?: string | null
+          variant_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mcc_creatives_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "mcc_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mcc_events: {
+        Row: {
+          campaign_id: string | null
+          channel: string | null
+          created_at: string | null
+          creative_id: string | null
+          event_type: string
+          funnel_id: string | null
+          id: string
+          lead_id: string | null
+          properties: Json | null
+          revenue: number | null
+          source: string | null
+          user_id: string | null
+        }
+        Insert: {
+          campaign_id?: string | null
+          channel?: string | null
+          created_at?: string | null
+          creative_id?: string | null
+          event_type: string
+          funnel_id?: string | null
+          id?: string
+          lead_id?: string | null
+          properties?: Json | null
+          revenue?: number | null
+          source?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          campaign_id?: string | null
+          channel?: string | null
+          created_at?: string | null
+          creative_id?: string | null
+          event_type?: string
+          funnel_id?: string | null
+          id?: string
+          lead_id?: string | null
+          properties?: Json | null
+          revenue?: number | null
+          source?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mcc_events_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "mcc_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mcc_events_creative_id_fkey"
+            columns: ["creative_id"]
+            isOneToOne: false
+            referencedRelation: "mcc_creatives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mcc_events_funnel_id_fkey"
+            columns: ["funnel_id"]
+            isOneToOne: false
+            referencedRelation: "mcc_funnels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mcc_events_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "mcc_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mcc_funnel_events: {
+        Row: {
+          entered_at: string | null
+          exit_reason: string | null
+          exited_at: string | null
+          funnel_id: string | null
+          id: string
+          lead_id: string | null
+          metadata: Json | null
+          stage_id: string
+          stage_name: string | null
+          time_in_stage: unknown
+        }
+        Insert: {
+          entered_at?: string | null
+          exit_reason?: string | null
+          exited_at?: string | null
+          funnel_id?: string | null
+          id?: string
+          lead_id?: string | null
+          metadata?: Json | null
+          stage_id: string
+          stage_name?: string | null
+          time_in_stage?: unknown
+        }
+        Update: {
+          entered_at?: string | null
+          exit_reason?: string | null
+          exited_at?: string | null
+          funnel_id?: string | null
+          id?: string
+          lead_id?: string | null
+          metadata?: Json | null
+          stage_id?: string
+          stage_name?: string | null
+          time_in_stage?: unknown
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mcc_funnel_events_funnel_id_fkey"
+            columns: ["funnel_id"]
+            isOneToOne: false
+            referencedRelation: "mcc_funnels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mcc_funnel_events_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "mcc_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mcc_funnels: {
+        Row: {
+          avg_time_to_convert: unknown
+          conversion_rate: number | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          funnel_type: string
+          id: string
+          is_active: boolean | null
+          name: string
+          stages: Json
+          target_segment: string | null
+          triggers: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          avg_time_to_convert?: unknown
+          conversion_rate?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          funnel_type: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          stages?: Json
+          target_segment?: string | null
+          triggers?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          avg_time_to_convert?: unknown
+          conversion_rate?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          funnel_type?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          stages?: Json
+          target_segment?: string | null
+          triggers?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      mcc_leads: {
+        Row: {
+          ai_insights: Json | null
+          app_opens: number | null
+          campaign: string | null
+          churn_risk: number | null
+          content: string | null
+          conversion_value: number | null
+          converted_at: string | null
+          converted_to: string | null
+          created_at: string | null
+          device_info: Json | null
+          email: string | null
+          emails_opened: number | null
+          emails_sent: number | null
+          first_touch_at: string | null
+          geo_info: Json | null
+          id: string
+          landing_page: string | null
+          last_touch_at: string | null
+          medium: string | null
+          messages_replied: number | null
+          messages_sent: number | null
+          name: string | null
+          pages_viewed: number | null
+          phone: string | null
+          predicted_ltv: number | null
+          priority: string | null
+          referrer_url: string | null
+          score: number | null
+          segment: string | null
+          source: string
+          status: string | null
+          substatus: string | null
+          tags: string[] | null
+          term: string | null
+          touchpoints: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          ai_insights?: Json | null
+          app_opens?: number | null
+          campaign?: string | null
+          churn_risk?: number | null
+          content?: string | null
+          conversion_value?: number | null
+          converted_at?: string | null
+          converted_to?: string | null
+          created_at?: string | null
+          device_info?: Json | null
+          email?: string | null
+          emails_opened?: number | null
+          emails_sent?: number | null
+          first_touch_at?: string | null
+          geo_info?: Json | null
+          id?: string
+          landing_page?: string | null
+          last_touch_at?: string | null
+          medium?: string | null
+          messages_replied?: number | null
+          messages_sent?: number | null
+          name?: string | null
+          pages_viewed?: number | null
+          phone?: string | null
+          predicted_ltv?: number | null
+          priority?: string | null
+          referrer_url?: string | null
+          score?: number | null
+          segment?: string | null
+          source: string
+          status?: string | null
+          substatus?: string | null
+          tags?: string[] | null
+          term?: string | null
+          touchpoints?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          ai_insights?: Json | null
+          app_opens?: number | null
+          campaign?: string | null
+          churn_risk?: number | null
+          content?: string | null
+          conversion_value?: number | null
+          converted_at?: string | null
+          converted_to?: string | null
+          created_at?: string | null
+          device_info?: Json | null
+          email?: string | null
+          emails_opened?: number | null
+          emails_sent?: number | null
+          first_touch_at?: string | null
+          geo_info?: Json | null
+          id?: string
+          landing_page?: string | null
+          last_touch_at?: string | null
+          medium?: string | null
+          messages_replied?: number | null
+          messages_sent?: number | null
+          name?: string | null
+          pages_viewed?: number | null
+          phone?: string | null
+          predicted_ltv?: number | null
+          priority?: string | null
+          referrer_url?: string | null
+          score?: number | null
+          segment?: string | null
+          source?: string
+          status?: string | null
+          substatus?: string | null
+          tags?: string[] | null
+          term?: string | null
+          touchpoints?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       medical_services: {
         Row: {
           category: string
@@ -15276,6 +15807,7 @@ export type Database = {
         Returns: undefined
       }
       is_admin_or_uno_team: { Args: never; Returns: boolean }
+      is_mcc_admin: { Args: never; Returns: boolean }
       is_org_owner: { Args: { check_org_id: string }; Returns: boolean }
       is_team_member: { Args: { check_user_id: string }; Returns: boolean }
       is_verified_purchase: {
