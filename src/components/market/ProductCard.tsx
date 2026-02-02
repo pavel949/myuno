@@ -39,7 +39,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   if (variant === 'horizontal') {
     return (
       <div 
-        className="flex gap-3 p-3 bg-card rounded-xl border border-border"
+        className="flex gap-3 p-3 bg-card rounded-2xl border border-border group hover:shadow-md transition-all"
         onClick={onClick}
       >
         {/* Image */}
@@ -47,7 +47,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <img
             src={product.cover_image || '/placeholder.svg'}
             alt={name}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           />
           {product.is_new && (
             <Badge className="absolute top-1 left-1 bg-blue-500 text-[10px] px-1.5 py-0">
@@ -121,16 +121,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
   // Grid variant (default)
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <div className="bg-card rounded-2xl border border-border overflow-hidden group hover:shadow-md transition-all">
       {/* Image */}
       <div 
-        className="relative aspect-square cursor-pointer"
+        className="relative aspect-square cursor-pointer overflow-hidden"
         onClick={onClick}
       >
         <img
           src={product.cover_image || '/placeholder.svg'}
           alt={name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
         />
         
         {/* Badges */}

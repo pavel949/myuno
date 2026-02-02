@@ -38,7 +38,7 @@ export function WaterSection() {
               <img 
                 src={activity.cover_image || 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400'} 
                 alt="" 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
                 loading="lazy"
               />
               {activity.is_certified && (

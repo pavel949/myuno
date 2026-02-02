@@ -212,7 +212,7 @@ export default function EventsIndex() {
           <img
             src={featuredEvent.cover_image || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800'}
             alt={featuredEvent.title_en}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
           <div className="absolute bottom-4 left-4 right-4">

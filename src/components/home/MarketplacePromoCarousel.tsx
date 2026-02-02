@@ -137,7 +137,7 @@ export const MarketplacePromoCarousel = memo(function MarketplacePromoCarousel()
             return (
               <div
                 key={product.id}
-                className="flex-shrink-0 w-36 rounded-xl overflow-hidden bg-card border border-border/50 hover:border-primary/30 transition-all group/card touch-manipulation"
+                className="flex-shrink-0 w-36 rounded-2xl overflow-hidden bg-card border border-border/50 hover:border-primary/30 transition-all group/card touch-manipulation"
                 style={{ scrollSnapAlign: 'start' }}
               >
                 {/* Image with click handler */}
@@ -148,7 +148,7 @@ export const MarketplacePromoCarousel = memo(function MarketplacePromoCarousel()
                   <img
                     src={product.cover_image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=300'}
                     alt={language === 'ru' ? product.name_ru : product.name_en}
-                    className="w-full h-full object-cover group-hover/card:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover group-hover/card:scale-[1.03] transition-transform duration-300"
                     loading="lazy"
                   />
                   

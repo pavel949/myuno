@@ -43,7 +43,7 @@ export function ToursSection() {
                 alt={language === 'ru' ? tour.title_ru : tour.title_en}
                 width={256}
                 height={144}
-                className="w-full h-full group-hover:scale-105 transition-transform"
+                className="w-full h-full group-hover:scale-[1.03] transition-transform duration-300"
                 quality={75}
                 sizes="256px"
               />

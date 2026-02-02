@@ -89,7 +89,7 @@ export function RecentlyViewedSection() {
                 <img
                   src={data.image || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300'}
                   alt=""
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                  className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
                 />
                 {item.view_count > 1 && (
                   <Badge 

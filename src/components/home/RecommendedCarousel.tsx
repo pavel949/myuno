@@ -135,7 +135,7 @@ export const RecommendedCarousel = memo(forwardRef<HTMLDivElement>(function Reco
                 <img
                   src={item.image}
                   alt={language === 'ru' ? item.titleRu : item.title}
-                  className="w-full h-full object-cover group-hover/card:scale-105 transition-transform duration-300"
+                  className="w-full h-full object-cover group-hover/card:scale-[1.03] transition-transform duration-300"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                 
