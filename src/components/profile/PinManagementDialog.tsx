@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Lock, KeyRound, Trash2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -97,15 +97,34 @@ export function PinManagementDialog({ mode, onClose, onSuccess }: PinManagementD
   const { setupPin, changePin, resetPinWithPassword, disablePin, isLoading } = usePinManagement();
   const t = texts[language === 'th' ? 'en' : language] || texts.en;
   
-  const [step, setStep] = useState<'current' | 'new' | 'confirm' | 'password'>('current');
+  // Initialize step based on mode
+  const getInitialStep = (dialogMode: DialogMode): 'current' | 'new' | 'confirm' | 'password' => {
+    if (dialogMode === 'reset') return 'password';
+    if (dialogMode === 'setup') return 'new';
+    return 'current';
+  };
+  
+  const [step, setStep] = useState<'current' | 'new' | 'confirm' | 'password'>(getInitialStep(mode));
   const [currentPinValue, setCurrentPinValue] = useState('');
   const [newPinValue, setNewPinValue] = useState('');
   const [confirmPinValue, setConfirmPinValue] = useState('');
   const [password, setPassword] = useState('');
   const [pinInputKey, setPinInputKey] = useState(0);
 
+  // Reset step when mode changes
+  useEffect(() => {
+    if (mode) {
+      setStep(getInitialStep(mode));
+      setCurrentPinValue('');
+      setNewPinValue('');
+      setConfirmPinValue('');
+      setPassword('');
+      setPinInputKey(prev => prev + 1);
+    }
+  }, [mode]);
+
   const resetState = () => {
-    setStep('current');
+    setStep(getInitialStep(mode));
     setCurrentPinValue('');
     setNewPinValue('');
     setConfirmPinValue('');
