@@ -272,6 +272,7 @@ export default function TransportBooking() {
           isSubmitting={isSubmitting}
           disabled={!pickupDate || !pickupLocation || !contactData.name || !contactData.phone}
           submitLabel={language === 'ru' ? 'Забронировать' : 'Book Now'}
+          hint={language === 'ru' ? '🔒 Безопасное бронирование — никаких списаний до подтверждения' : '🔒 Secure booking — no charges until confirmed'}
         />
       </PageContainer>
     </AppLayout>

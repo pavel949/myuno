@@ -15,6 +15,8 @@ export const ORDER_TYPE_LABELS: Record<string, { en: string; ru: string; emoji: 
   event: { en: 'Event Booking', ru: 'Бронирование мероприятия', emoji: '🎉' },
   property: { en: 'Property Rental', ru: 'Аренда недвижимости', emoji: '🏠' },
   water_activity: { en: 'Water Activity', ru: 'Водные развлечения', emoji: '🌊' },
+  experience: { en: 'Experience', ru: 'Активность', emoji: '✨' },
+  babysitter: { en: 'Babysitter', ru: 'Няня', emoji: '👶' },
   general: { en: 'Order', ru: 'Заказ', emoji: '📦' },
 };
 
@@ -36,6 +38,13 @@ interface OrderConfirmationData extends BaseEmailData {
 interface OrderCancellationData extends BaseEmailData {
   reason?: string;
   refundAmount?: number;
+}
+
+interface OrderRequestReceivedData extends BaseEmailData {
+  paymentMethod: 'cash' | 'wallet' | 'stripe' | 'bank_transfer' | 'card' | 'online';
+  scheduledAt?: string;
+  items?: Array<{ name: string; quantity: number; price: number }>;
+  trackingUrl?: string;
 }
 
 interface WalletTopUpData {
@@ -69,7 +78,14 @@ const baseStyles = `
     .footer { background: #1f2937; color: #9ca3af; padding: 24px; text-align: center; font-size: 14px; }
     .footer a { color: #a78bfa; }
     .success-badge { display: inline-block; background: #dcfce7; color: #166534; padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: 600; }
+    .pending-badge { display: inline-block; background: #fef3c7; color: #92400e; padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: 600; }
     .cancelled-badge { display: inline-block; background: #fee2e2; color: #991b1b; padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: 600; }
+    .next-steps { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px; margin: 16px 0; }
+    .next-steps h3 { margin: 0 0 12px 0; color: #1e40af; font-size: 14px; font-weight: 600; }
+    .next-steps ul { margin: 0; padding-left: 20px; }
+    .next-steps li { margin: 8px 0; color: #1e40af; }
+    .channels { display: flex; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
+    .channel-badge { display: inline-flex; align-items: center; gap: 6px; background: #f3f4f6; padding: 8px 12px; border-radius: 8px; font-size: 13px; }
   </style>
 `;
 
@@ -192,6 +208,216 @@ export function generateOrderConfirmationEmail(data: OrderConfirmationData): { s
               <span class="total-label">${t.total}</span>
               <span class="total-amount">${data.totalAmount} ${data.currency}</span>
             </div>
+          </div>
+          
+          ${data.trackingUrl ? `
+            <div style="text-align: center;">
+              <a href="${data.trackingUrl}" class="button">${t.trackOrder} →</a>
+            </div>
+          ` : ''}
+          
+          <p style="color: #6b7280; text-align: center;">${t.questions}</p>
+        </div>
+        
+        <div class="footer">
+          <p style="margin: 0;">${t.footer}</p>
+          <p style="margin: 8px 0 0 0; font-size: 12px;">
+            <a href="https://uno.ae">uno.ae</a> • 
+            <a href="mailto:support@uno.ae">support@uno.ae</a>
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return { subject: t.subject, html };
+}
+
+export function generateOrderRequestReceivedEmail(data: OrderRequestReceivedData): { subject: string; html: string } {
+  const lang = data.language || 'en';
+  const typeInfo = ORDER_TYPE_LABELS[data.orderType] || ORDER_TYPE_LABELS.general;
+  const typeLabel = lang === 'ru' ? typeInfo.ru : typeInfo.en;
+  
+  const isCash = data.paymentMethod === 'cash';
+  const isWallet = data.paymentMethod === 'wallet';
+  const isOnline = data.paymentMethod === 'online' || data.paymentMethod === 'stripe' || data.paymentMethod === 'card';
+  
+  const texts = {
+    en: {
+      subject: `Request Received! #${data.orderNumber}`,
+      greeting: `Hi ${data.customerName}!`,
+      thankYou: 'We received your booking request',
+      requestReceived: 'Your request has been received',
+      orderNumber: 'Order Number',
+      orderType: 'Service Type',
+      scheduledFor: 'Scheduled For',
+      items: 'Details',
+      item: 'Item',
+      qty: 'Qty',
+      price: 'Price',
+      total: 'Total',
+      trackOrder: 'View My Booking',
+      questions: 'Questions? Contact us anytime',
+      footer: 'myUNO — Your Phuket Concierge',
+      nextStepsTitle: 'What happens next?',
+      cashSteps: [
+        'Our manager will contact you shortly to confirm',
+        'You can pay in cash upon arrival',
+        'We\'ll send a confirmation once verified',
+      ],
+      walletSteps: [
+        'Payment processed from your wallet ✓',
+        'Booking confirmed — see you soon!',
+        'Check your bookings for details',
+      ],
+      onlineSteps: [
+        'Complete your payment to confirm',
+        'You\'ll receive a confirmation email',
+        'We\'ll send reminders before your booking',
+      ],
+      notificationChannels: 'Notifications sent to:',
+      emailChannel: 'Email',
+      appChannel: 'App',
+      whatsappChannel: 'WhatsApp (for cash)',
+    },
+    ru: {
+      subject: `Запрос получен! #${data.orderNumber}`,
+      greeting: `Привет, ${data.customerName}!`,
+      thankYou: 'Мы получили ваш запрос на бронирование',
+      requestReceived: 'Ваш запрос получен',
+      orderNumber: 'Номер заказа',
+      orderType: 'Тип услуги',
+      scheduledFor: 'Запланировано на',
+      items: 'Детали',
+      item: 'Услуга',
+      qty: 'Кол-во',
+      price: 'Цена',
+      total: 'Итого',
+      trackOrder: 'Мои бронирования',
+      questions: 'Вопросы? Свяжитесь с нами',
+      footer: 'myUNO — Ваш консьерж на Пхукете',
+      nextStepsTitle: 'Что дальше?',
+      cashSteps: [
+        'Наш менеджер скоро свяжется для подтверждения',
+        'Оплата наличными при встрече',
+        'Мы отправим подтверждение после проверки',
+      ],
+      walletSteps: [
+        'Оплата с кошелька прошла ✓',
+        'Бронирование подтверждено — до встречи!',
+        'Детали в разделе "Мои бронирования"',
+      ],
+      onlineSteps: [
+        'Завершите оплату для подтверждения',
+        'Вы получите письмо с подтверждением',
+        'Мы напомним перед бронированием',
+      ],
+      notificationChannels: 'Уведомления отправлены:',
+      emailChannel: 'Email',
+      appChannel: 'Приложение',
+      whatsappChannel: 'WhatsApp (для оплаты наличными)',
+    },
+  };
+  
+  const t = texts[lang];
+  
+  const scheduledDate = data.scheduledAt 
+    ? new Date(data.scheduledAt).toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : null;
+
+  const nextSteps = isCash ? t.cashSteps : isWallet ? t.walletSteps : t.onlineSteps;
+  const statusBadge = isWallet 
+    ? `<span class="success-badge">✓ ${lang === 'ru' ? 'Оплачено' : 'Paid'}</span>`
+    : `<span class="pending-badge">⏳ ${lang === 'ru' ? 'Ожидает' : 'Pending'}</span>`;
+
+  const itemsHtml = data.items && data.items.length > 0 
+    ? `
+      <div class="label">${t.items}</div>
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th>${t.item}</th>
+            <th>${t.qty}</th>
+            <th>${t.price}</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.items.map(item => `
+            <tr>
+              <td>${escapeHtml(item.name)}</td>
+              <td>${item.quantity}</td>
+              <td>${item.price} ${data.currency}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `
+    : '';
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      ${baseStyles}
+    </head>
+    <body>
+      <div class="container">
+        <div class="header" style="background: linear-gradient(135deg, ${isWallet ? '#059669' : '#6366f1'} 0%, ${isWallet ? '#10b981' : '#8b5cf6'} 100%);">
+          <h1>${typeInfo.emoji} ${t.requestReceived}</h1>
+          <p>${t.thankYou}</p>
+        </div>
+        
+        <div class="content">
+          <p style="font-size: 18px;">${t.greeting}</p>
+          
+          <div class="order-card">
+            ${statusBadge}
+            
+            <div style="margin-top: 16px;">
+              <div class="label">${t.orderNumber}</div>
+              <div class="order-value">#${data.orderNumber}</div>
+            </div>
+            
+            <div class="label">${t.orderType}</div>
+            <div class="value">${typeInfo.emoji} ${typeLabel}</div>
+            
+            ${scheduledDate ? `
+              <div class="label">${t.scheduledFor}</div>
+              <div class="value">📅 ${scheduledDate}</div>
+            ` : ''}
+            
+            ${itemsHtml}
+            
+            <div class="total-row">
+              <span class="total-label">${t.total}</span>
+              <span class="total-amount">${data.totalAmount} ${data.currency}</span>
+            </div>
+          </div>
+          
+          <div class="next-steps">
+            <h3>📋 ${t.nextStepsTitle}</h3>
+            <ul>
+              ${nextSteps.map(step => `<li>${step}</li>`).join('')}
+            </ul>
+          </div>
+          
+          <p style="font-size: 13px; color: #6b7280; margin-top: 16px;">
+            ${t.notificationChannels}
+          </p>
+          <div class="channels">
+            <span class="channel-badge">📧 ${t.emailChannel}</span>
+            <span class="channel-badge">📱 ${t.appChannel}</span>
+            ${isCash ? `<span class="channel-badge">💬 ${t.whatsappChannel}</span>` : ''}
           </div>
           
           ${data.trackingUrl ? `

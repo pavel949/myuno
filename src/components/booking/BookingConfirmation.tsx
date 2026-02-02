@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, Calendar, Clock, MapPin, Download, Share2 } from 'lucide-react';
+import { CheckCircle, Calendar, Clock, MapPin, Download, Share2, Mail, Smartphone, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
@@ -16,6 +16,7 @@ interface BookingConfirmationProps {
   onContinue?: () => void;
   continueLabel?: string;
   continuePath?: string;
+  paymentMethod?: string;
 }
 
 export function BookingConfirmation({
@@ -30,11 +31,13 @@ export function BookingConfirmation({
   onContinue,
   continueLabel,
   continuePath,
+  paymentMethod,
 }: BookingConfirmationProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
 
   const currencySymbol = currency === 'THB' ? '฿' : currency === 'USD' ? '$' : currency === 'EUR' ? '€' : '₽';
+  const isCash = paymentMethod === 'cash';
 
   const handleViewBookings = () => {
     if (onViewBookings) {
@@ -95,7 +98,7 @@ export function BookingConfirmation({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="w-full max-w-sm bg-card rounded-2xl border p-5 mb-6"
+        className="w-full max-w-sm bg-card rounded-2xl border p-5 mb-4"
       >
         <h3 className="font-semibold text-lg mb-4">{title}</h3>
         
@@ -128,6 +131,41 @@ export function BookingConfirmation({
             {currencySymbol}{total.toLocaleString()}
           </span>
         </div>
+      </motion.div>
+
+      {/* Notification Channels */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.35 }}
+        className="w-full max-w-sm bg-muted/50 rounded-xl p-4 mb-6"
+      >
+        <p className="text-xs text-muted-foreground mb-3">
+          {language === 'ru' ? 'Уведомления отправлены:' : 'Notifications sent to:'}
+        </p>
+        <div className="flex flex-wrap gap-2 justify-center">
+          <div className="flex items-center gap-1.5 bg-background px-3 py-1.5 rounded-lg text-sm">
+            <Mail className="w-3.5 h-3.5 text-primary" />
+            <span>Email</span>
+          </div>
+          <div className="flex items-center gap-1.5 bg-background px-3 py-1.5 rounded-lg text-sm">
+            <Smartphone className="w-3.5 h-3.5 text-primary" />
+            <span>{language === 'ru' ? 'Приложение' : 'App'}</span>
+          </div>
+          {isCash && (
+            <div className="flex items-center gap-1.5 bg-background px-3 py-1.5 rounded-lg text-sm">
+              <MessageCircle className="w-3.5 h-3.5 text-green-600" />
+              <span>WhatsApp</span>
+            </div>
+          )}
+        </div>
+        {isCash && (
+          <p className="text-xs text-muted-foreground mt-3">
+            {language === 'ru' 
+              ? 'Наш менеджер скоро свяжется с вами для подтверждения'
+              : 'Our manager will contact you shortly to confirm'}
+          </p>
+        )}
       </motion.div>
 
       <motion.div

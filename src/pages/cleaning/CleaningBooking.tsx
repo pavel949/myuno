@@ -250,6 +250,7 @@ export default function CleaningBooking() {
           isSubmitting={isSubmitting}
           disabled={!date || !time || !contactData.name || !contactData.phone || !address}
           submitLabel={language === 'ru' ? 'Подтвердить заказ' : 'Confirm Order'}
+          hint={language === 'ru' ? '🔒 Безопасное бронирование — заполните форму' : '🔒 Secure booking — complete the form'}
         />
       </PageContainer>
     </AppLayout>

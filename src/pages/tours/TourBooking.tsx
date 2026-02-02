@@ -233,6 +233,7 @@ export default function TourBooking() {
           isSubmitting={isSubmitting}
           disabled={!date || !time || !contactData.name || !contactData.phone}
           submitLabel={language === 'ru' ? 'Подтвердить бронирование' : 'Confirm Booking'}
+          hint={language === 'ru' ? '🔒 Безопасное бронирование — заполните форму' : '🔒 Secure booking — complete the form'}
         />
       </PageContainer>
     </AppLayout>
