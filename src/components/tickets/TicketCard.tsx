@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { TicketStatusBadge } from './TicketStatusBadge';
 import { TicketPriorityBadge } from './TicketPriorityBadge';
@@ -14,15 +15,19 @@ interface TicketCardProps {
   showSlaWarning?: boolean;
 }
 
-export function TicketCard({ ticket, onClick, showSlaWarning = true }: TicketCardProps) {
-  const isOverdue = ticket.sla_deadline && 
-    new Date(ticket.sla_deadline) < new Date() && 
-    !['resolved', 'closed'].includes(ticket.status);
+function TicketCardInner({ ticket, onClick, showSlaWarning = true }: TicketCardProps) {
+  const isOverdue = useMemo(() => {
+    return ticket.sla_deadline && 
+      new Date(ticket.sla_deadline) < new Date() && 
+      !['resolved', 'closed'].includes(ticket.status);
+  }, [ticket.sla_deadline, ticket.status]);
 
-  const timeAgo = formatDistanceToNow(new Date(ticket.created_at), { 
-    addSuffix: true, 
-    locale: ru 
-  });
+  const timeAgo = useMemo(() => {
+    return formatDistanceToNow(new Date(ticket.created_at), { 
+      addSuffix: true, 
+      locale: ru 
+    });
+  }, [ticket.created_at]);
 
   return (
     <Card 
@@ -72,3 +77,6 @@ export function TicketCard({ ticket, onClick, showSlaWarning = true }: TicketCar
     </Card>
   );
 }
+
+// Memoize to prevent re-renders when parent updates
+export const TicketCard = memo(TicketCardInner);

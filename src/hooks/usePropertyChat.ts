@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Json } from '@/integrations/supabase/types';
+import { CACHE_PROFILES } from '@/lib/queryConfig';
 
 export interface PropertyChatMessage {
   id: string;
@@ -79,6 +80,7 @@ export function usePropertyChat(options: { propertyId?: string; bookingId?: stri
       return (data || []) as PropertyChatMessage[];
     },
     enabled: !!user && (!!propertyId || !!bookingId),
+    ...CACHE_PROFILES.REALTIME,
   });
 
   const sendMessage = useMutation({
@@ -200,42 +202,42 @@ export function useOwnerChats() {
     queryFn: async (): Promise<OwnerChatItem[]> => {
       if (!user) return [];
 
-      // Get properties with their latest messages
-      const { data: properties, error: propError } = await supabase
-        .from('owner_properties')
-        .select('id, title, title_ru, cover_image')
-        .eq('owner_id', user.id);
+      // Parallel fetch for better performance
+      const [propertiesRes, messagesCountRes, bookingsRes] = await Promise.all([
+        supabase
+          .from('owner_properties')
+          .select('id, title, title_ru, cover_image')
+          .eq('owner_id', user.id),
+        supabase
+          .from('property_chat_messages')
+          .select('property_id, booking_id, message, created_at, is_read, sender_type')
+          .order('created_at', { ascending: false })
+          .limit(500), // Reasonable limit for performance
+        supabase
+          .from('property_bookings')
+          .select('id, property_id, guest_name, guest_phone, check_in, check_out, status')
+          .eq('owner_id', user.id)
+          .order('check_in', { ascending: false })
+          .limit(100),
+      ]);
 
-      if (propError) throw propError;
+      const properties = propertiesRes.data || [];
+      const allMessages = messagesCountRes.data || [];
+      const allBookings = bookingsRes.data || [];
 
-      if (!properties || properties.length === 0) return [];
+      if (properties.length === 0) return [];
 
-      const propertyIds = properties.map(p => p.id);
+      const propertyIds = new Set(properties.map(p => p.id));
 
-      // Get latest messages for all owned properties
-      const { data: messages, error: msgError } = await supabase
-        .from('property_chat_messages')
-        .select('property_id, booking_id, message, created_at, is_read, sender_type')
-        .in('property_id', propertyIds)
-        .order('created_at', { ascending: false });
-
-      if (msgError) throw msgError;
-
-      // Get all bookings for these properties (including those without messages for complete view)
-      const { data: allBookings, error: bookingsError } = await supabase
-        .from('property_bookings')
-        .select('id, property_id, guest_name, guest_phone, check_in, check_out, status')
-        .in('property_id', propertyIds)
-        .order('check_in', { ascending: false });
-
-      if (bookingsError) throw bookingsError;
+      // Filter messages to owned properties
+      const messages = allMessages.filter(m => m.property_id && propertyIds.has(m.property_id));
 
       // Create chat map
       const chatMap = new Map<string, OwnerChatItem>();
 
       // First, add property-level chats (general inquiries without booking)
       properties.forEach(prop => {
-        const propMessages = messages?.filter(m => m.property_id === prop.id && !m.booking_id) || [];
+        const propMessages = messages.filter(m => m.property_id === prop.id && !m.booking_id);
         const unreadCount = propMessages.filter(m => !m.is_read && m.sender_type !== 'owner').length;
         
         if (propMessages.length > 0) {
@@ -254,8 +256,10 @@ export function useOwnerChats() {
       });
 
       // Add booking chats (guest conversations)
-      allBookings?.forEach(booking => {
-        const bMessages = messages?.filter(m => m.booking_id === booking.id) || [];
+      allBookings.forEach(booking => {
+        if (!propertyIds.has(booking.property_id)) return;
+        
+        const bMessages = messages.filter(m => m.booking_id === booking.id);
         const unreadCount = bMessages.filter(m => !m.is_read && m.sender_type !== 'owner').length;
         const property = properties.find(p => p.id === booking.property_id);
 
@@ -293,6 +297,7 @@ export function useOwnerChats() {
       );
     },
     enabled: !!user,
+    ...CACHE_PROFILES.DYNAMIC,
   });
 
   const totalUnread = chats?.reduce((sum, chat) => sum + chat.unreadCount, 0) || 0;

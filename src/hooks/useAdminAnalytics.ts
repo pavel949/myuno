@@ -1,6 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { subDays, format, eachDayOfInterval, parseISO } from 'date-fns';
+import { CACHE_PROFILES } from '@/lib/queryConfig';
 
 export interface PlatformMetrics {
   id: string;
@@ -35,37 +37,23 @@ export interface AnalyticsSummary {
 }
 
 export function useAdminAnalytics(days: number = 30) {
-  const [metrics, setMetrics] = useState<PlatformMetrics[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const startDate = useMemo(() => format(subDays(new Date(), days), 'yyyy-MM-dd'), [days]);
 
-  useEffect(() => {
-    let isMounted = true;
-    
-    const fetchMetrics = async () => {
-      try {
-        if (isMounted) setIsLoading(true);
-        const startDate = format(subDays(new Date(), days), 'yyyy-MM-dd');
-        
-        const { data, error: fetchError } = await supabase
-          .from('platform_metrics')
-          .select('*')
-          .gte('date', startDate)
-          .order('date', { ascending: true });
+  // Main metrics query with React Query caching
+  const { data: metrics = [], isLoading, error } = useQuery({
+    queryKey: ['admin-analytics-metrics', days, startDate],
+    queryFn: async () => {
+      const { data, error: fetchError } = await supabase
+        .from('platform_metrics')
+        .select('*')
+        .gte('date', startDate)
+        .order('date', { ascending: true });
 
-        if (fetchError) throw fetchError;
-        if (isMounted) setMetrics((data as PlatformMetrics[]) || []);
-      } catch (err: any) {
-        console.error('Error fetching analytics:', err);
-        if (isMounted) setError(err.message);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-
-    fetchMetrics();
-    return () => { isMounted = false; };
-  }, [days]);
+      if (fetchError) throw fetchError;
+      return (data as PlatformMetrics[]) || [];
+    },
+    ...CACHE_PROFILES.ADMIN,
+  });
 
   // Fill in missing dates with zero values
   const filledMetrics = useMemo(() => {
@@ -180,105 +168,74 @@ export function useAdminAnalytics(days: number = 30) {
     userChartData,
     bookingChartData,
     isLoading,
-    error
+    error: error?.message || null
   };
 }
 
 // Hook for fetching real-time stats (not from snapshots)
 export function useRealtimeStats() {
-  const [stats, setStats] = useState({
+  const { data: stats = {
     totalUsers: 0,
     totalProviders: 0,
     totalBookings: 0,
     pendingBookings: 0,
     activeSubscriptions: 0,
     todayRevenue: 0
+  }, isLoading } = useQuery({
+    queryKey: ['admin-realtime-stats'],
+    queryFn: async () => {
+      const today = format(new Date(), 'yyyy-MM-dd');
+
+      const [
+        usersRes,
+        providersRes,
+        bookingsRes,
+        confirmedRes,
+        subscriptionsRes,
+        todayBookingsRes
+      ] = await Promise.all([
+        supabase.from('profiles').select('id', { count: 'exact', head: true }),
+        supabase.from('providers').select('id', { count: 'exact', head: true }),
+        supabase.from('bookings').select('id', { count: 'exact', head: true }),
+        supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('status', 'confirmed'),
+        supabase.from('vendor_subscriptions').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+        supabase.from('bookings').select('total_amount').gte('created_at', today).eq('status', 'completed')
+      ]);
+
+      const todayRevenue = todayBookingsRes.data?.reduce((sum, b) => sum + (b.total_amount || 0), 0) || 0;
+
+      return {
+        totalUsers: usersRes.count || 0,
+        totalProviders: providersRes.count || 0,
+        totalBookings: bookingsRes.count || 0,
+        pendingBookings: confirmedRes.count || 0,
+        activeSubscriptions: subscriptionsRes.count || 0,
+        todayRevenue: todayRevenue * 0.1 // Platform fee
+      };
+    },
+    ...CACHE_PROFILES.REALTIME,
   });
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    let isMounted = true;
-    
-    const fetchStats = async () => {
-      try {
-        const today = format(new Date(), 'yyyy-MM-dd');
-
-        const [
-          usersRes,
-          providersRes,
-          bookingsRes,
-          confirmedRes,
-          subscriptionsRes,
-          todayBookingsRes
-        ] = await Promise.all([
-          supabase.from('profiles').select('id', { count: 'exact', head: true }),
-          supabase.from('providers').select('id', { count: 'exact', head: true }),
-          supabase.from('bookings').select('id', { count: 'exact', head: true }),
-          supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('status', 'confirmed'),
-          supabase.from('vendor_subscriptions').select('id', { count: 'exact', head: true }).eq('status', 'active'),
-          supabase.from('bookings').select('total_amount').gte('created_at', today).eq('status', 'completed')
-        ]);
-
-        const todayRevenue = todayBookingsRes.data?.reduce((sum, b) => sum + (b.total_amount || 0), 0) || 0;
-
-        if (isMounted) {
-          setStats({
-            totalUsers: usersRes.count || 0,
-            totalProviders: providersRes.count || 0,
-            totalBookings: bookingsRes.count || 0,
-            pendingBookings: confirmedRes.count || 0,
-            activeSubscriptions: subscriptionsRes.count || 0,
-            todayRevenue: todayRevenue * 0.1 // Platform fee
-          });
-        }
-      } catch (err) {
-        console.error('Error fetching realtime stats:', err);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-
-    fetchStats();
-    const interval = setInterval(fetchStats, 60000); // Refresh every minute
-    return () => {
-      isMounted = false;
-      clearInterval(interval);
-    };
-  }, []);
 
   return { stats, isLoading };
 }
 
 // Hook for top providers
 export function useTopProviders(limit: number = 10) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [providers, setProviders] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: providers = [], isLoading } = useQuery({
+    queryKey: ['admin-top-providers', limit],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('providers')
+        .select('*')
+        .eq('is_active', true)
+        .order('rating', { ascending: false })
+        .limit(limit);
 
-  useEffect(() => {
-    let isMounted = true;
-    
-    const fetchTopProviders = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('providers')
-          .select('*')
-          .eq('is_active', true)
-          .order('rating', { ascending: false })
-          .limit(limit);
-
-        if (error) throw error;
-        if (isMounted) setProviders(data || []);
-      } catch (err) {
-        console.error('Error fetching top providers:', err);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-
-    fetchTopProviders();
-    return () => { isMounted = false; };
-  }, [limit]);
+      if (error) throw error;
+      return data || [];
+    },
+    ...CACHE_PROFILES.ADMIN,
+  });
 
   return { providers, isLoading };
 }
