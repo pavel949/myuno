@@ -39,7 +39,7 @@ const guestNavItems: NavItem[] = [
   { path: '/discover', icon: Compass, labelEn: 'Services', labelRu: 'Услуги' },
   { path: '/market', icon: ShoppingBag, labelEn: 'Market', labelRu: 'Товары' },
   { path: '/bookings', icon: Calendar, labelEn: 'Bookings', labelRu: 'Брони' },
-  { path: '/profile', icon: User, labelEn: 'Profile', labelRu: 'Профиль' },
+  { path: '/account', icon: User, labelEn: 'Account', labelRu: 'Кабинет' },
 ];
 
 // Owner/Host navigation
@@ -139,7 +139,7 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
     // Check if current path matches nav item (handles nested routes)
     const isActive = (itemPath: string) => {
       if (itemPath === '/') return location.pathname === '/';
-      if (itemPath === '/profile') return location.pathname.startsWith('/profile');
+      if (itemPath === '/account') return location.pathname.startsWith('/account') || location.pathname.startsWith('/profile');
       if (itemPath === '/market') return location.pathname.startsWith('/market');
       return location.pathname.startsWith(itemPath);
     };
