@@ -288,25 +288,16 @@ export default function OwnerPropertyDetail() {
       {/* Quick actions */}
       <div className="grid grid-cols-2 gap-3 mb-6">
         <Button 
-          variant="outline" 
           className="h-auto py-4 flex-col gap-2"
-          onClick={() => navigate(`/owner/properties/${id}/terms`)}
+          onClick={() => navigate(`/owner/properties/${id}/manage`)}
         >
-          <DollarSign className="h-5 w-5" />
-          <span className="text-sm">{isRu ? 'Условия аренды' : 'Rental Terms'}</span>
+          <Settings className="h-5 w-5" />
+          <span className="text-sm">{isRu ? 'Редактировать' : 'Manage Listing'}</span>
         </Button>
         <Button 
           variant="outline" 
           className="h-auto py-4 flex-col gap-2"
-          onClick={() => navigate(`/owner/properties/${id}/guidebook`)}
-        >
-          <BookOpen className="h-5 w-5" />
-          <span className="text-sm">{isRu ? 'Гайд для гостей' : 'Guest Guidebook'}</span>
-        </Button>
-        <Button 
-          variant="outline" 
-          className="h-auto py-4 flex-col gap-2"
-          onClick={() => navigate(`/owner/calendar`)}
+          onClick={() => navigate(`/owner/properties/${id}/manage?section=calendar`)}
         >
           <Calendar className="h-5 w-5" />
           <span className="text-sm">{isRu ? 'Календарь' : 'Calendar'}</span>
@@ -314,10 +305,26 @@ export default function OwnerPropertyDetail() {
         <Button 
           variant="outline" 
           className="h-auto py-4 flex-col gap-2"
+          onClick={() => navigate(`/owner/properties/${id}/manage?section=pricing`)}
+        >
+          <DollarSign className="h-5 w-5" />
+          <span className="text-sm">{isRu ? 'Цены' : 'Pricing'}</span>
+        </Button>
+        <Button 
+          variant="outline" 
+          className="h-auto py-4 flex-col gap-2"
+          onClick={() => navigate(`/owner/properties/${id}/guidebook`)}
+        >
+          <BookOpen className="h-5 w-5" />
+          <span className="text-sm">{isRu ? 'Гайдбук' : 'Guidebook'}</span>
+        </Button>
+        <Button 
+          variant="outline" 
+          className="h-auto py-4 flex-col gap-2"
           onClick={() => navigate(`/owner/service-request?property=${id}`)}
         >
           <Wrench className="h-5 w-5" />
-          <span className="text-sm">{isRu ? 'Заказать услугу' : 'Request Service'}</span>
+          <span className="text-sm">{isRu ? 'Услуга' : 'Service'}</span>
         </Button>
         <Button 
           variant="outline" 
