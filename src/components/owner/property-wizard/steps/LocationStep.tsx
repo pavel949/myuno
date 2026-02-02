@@ -6,17 +6,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { MapPin } from 'lucide-react';
 import { ProjectLocationPicker } from '@/components/property/ProjectLocationPicker';
 import { PropertyFormData } from '@/hooks/usePropertyWizard';
+import { PHUKET_DISTRICTS } from '@/lib/propertyTaxonomy';
 
 interface LocationStepProps {
   formData: PropertyFormData;
   updateFormData: (updates: Partial<PropertyFormData>) => void;
 }
-
-const districts = [
-  'Patong', 'Kata', 'Karon', 'Rawai', 'Nai Harn', 
-  'Kamala', 'Surin', 'Bang Tao', 'Laguna', 'Cherngtalay',
-  'Phuket Town', 'Chalong', 'Kathu'
-];
 
 export function LocationStep({ formData, updateFormData }: LocationStepProps) {
   const { language } = useLanguage();
@@ -50,9 +45,9 @@ export function LocationStep({ formData, updateFormData }: LocationStepProps) {
               <SelectValue placeholder={isRu ? 'Выберите район' : 'Select district'} />
             </SelectTrigger>
             <SelectContent>
-              {districts.map((district) => (
-                <SelectItem key={district} value={district}>
-                  {district}
+              {PHUKET_DISTRICTS.map((district) => (
+                <SelectItem key={district.id} value={district.id}>
+                  {isRu ? district.labelRu : district.labelEn}
                 </SelectItem>
               ))}
             </SelectContent>

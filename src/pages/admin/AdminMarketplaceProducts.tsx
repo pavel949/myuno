@@ -54,7 +54,7 @@ export default function AdminMarketplaceProducts() {
     currency: 'THB',
     unit: 'piece',
     unit_ru: 'шт',
-    // New precise unit fields
+    // Precise unit fields
     unit_value: null as number | null,
     unit_measure: '',
     pack_quantity: null as number | null,
@@ -66,6 +66,8 @@ export default function AdminMarketplaceProducts() {
     vendor_id: '',
     weight_kg: 0,
     tags: [] as string[],
+    // Shipping (synced with Vendor)
+    is_shippable_international: false,
   });
 
   const resetForm = () => {
@@ -92,6 +94,7 @@ export default function AdminMarketplaceProducts() {
       vendor_id: '',
       weight_kg: 0,
       tags: [],
+      is_shippable_international: false,
     });
     setEditingProduct(null);
   };
@@ -126,6 +129,7 @@ export default function AdminMarketplaceProducts() {
       vendor_id: (product as any).vendor_id || '',
       weight_kg: product.weight_kg,
       tags: product.tags || [],
+      is_shippable_international: (product as any).is_shippable_international ?? false,
     });
     setIsDialogOpen(true);
   };
@@ -138,6 +142,7 @@ export default function AdminMarketplaceProducts() {
       unit_value: formData.unit_value || null,
       unit_measure: formData.unit_measure || null,
       pack_quantity: formData.pack_quantity || null,
+      is_shippable_international: formData.is_shippable_international,
     };
 
     if (editingProduct) {
@@ -567,6 +572,13 @@ export default function AdminMarketplaceProducts() {
                   onCheckedChange={(v) => setFormData({ ...formData, is_new: v })}
                 />
                 <Label>{isRu ? 'Новинка' : 'New'}</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={formData.is_shippable_international}
+                  onCheckedChange={(v) => setFormData({ ...formData, is_shippable_international: v })}
+                />
+                <Label>{isRu ? 'Международная доставка' : 'International Shipping'}</Label>
               </div>
             </div>
           </div>

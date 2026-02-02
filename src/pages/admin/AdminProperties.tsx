@@ -47,20 +47,25 @@ import {
   Zap
 } from 'lucide-react';
 import { AirbnbStyleImageUpload } from '@/components/upload/AirbnbStyleImageUpload';
+import { 
+  PROPERTY_TYPES as TAXONOMY_PROPERTY_TYPES, 
+  PHUKET_DISTRICTS,
+  ALL_AMENITIES,
+  LISTING_TYPES 
+} from '@/lib/propertyTaxonomy';
 
-const propertyTypes = [
-  { id: 'villa', label: 'Villa', labelRu: 'Вилла' },
-  { id: 'apartment', label: 'Apartment', labelRu: 'Апартаменты' },
-  { id: 'condo', label: 'Condo', labelRu: 'Кондо' },
-  { id: 'house', label: 'House', labelRu: 'Дом' },
-  { id: 'studio', label: 'Studio', labelRu: 'Студия' },
-  { id: 'townhouse', label: 'Townhouse', labelRu: 'Таунхаус' },
-];
+// Use centralized taxonomy
+const propertyTypes = TAXONOMY_PROPERTY_TYPES.map(t => ({
+  id: t.id,
+  label: t.labelEn,
+  labelRu: t.labelRu,
+}));
 
-const listingTypes = [
-  { id: 'rent', label: 'For Rent', labelRu: 'Аренда' },
-  { id: 'sale', label: 'For Sale', labelRu: 'Продажа' },
-];
+const listingTypes = LISTING_TYPES.map(l => ({
+  id: l.id,
+  label: l.labelEn,
+  labelRu: l.labelRu,
+}));
 
 const pricePeriods = [
   { id: 'day', label: 'Per Day', labelRu: 'За день' },
@@ -68,20 +73,19 @@ const pricePeriods = [
   { id: 'year', label: 'Per Year', labelRu: 'За год' },
 ];
 
-const amenitiesList = [
-  { id: 'wifi', label: 'Wi-Fi', labelRu: 'Wi-Fi' },
-  { id: 'pool', label: 'Pool', labelRu: 'Бассейн' },
-  { id: 'gym', label: 'Gym', labelRu: 'Спортзал' },
-  { id: 'parking', label: 'Parking', labelRu: 'Парковка' },
-  { id: 'ac', label: 'Air Conditioning', labelRu: 'Кондиционер' },
-  { id: 'kitchen', label: 'Kitchen', labelRu: 'Кухня' },
-  { id: 'washer', label: 'Washer', labelRu: 'Стиральная машина' },
-  { id: 'balcony', label: 'Balcony', labelRu: 'Балкон' },
-  { id: 'sea_view', label: 'Sea View', labelRu: 'Вид на море' },
-  { id: 'security', label: '24h Security', labelRu: 'Охрана 24ч' },
-  { id: 'pets', label: 'Pets Allowed', labelRu: 'Можно с питомцами' },
-  { id: 'garden', label: 'Garden', labelRu: 'Сад' },
-];
+// Use centralized amenities (all 36)
+const amenitiesList = ALL_AMENITIES.map(a => ({
+  id: a.id,
+  label: a.labelEn,
+  labelRu: a.labelRu,
+}));
+
+// Use centralized districts (all 22)
+const districtOptions = PHUKET_DISTRICTS.map(d => ({
+  id: d.id,
+  label: d.labelEn,
+  labelRu: d.labelRu,
+}));
 
 export default function AdminProperties() {
   const navigate = useNavigate();

@@ -49,6 +49,7 @@ import {
   Settings
 } from 'lucide-react';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
+import { AirbnbStyleImageUpload } from '@/components/upload/AirbnbStyleImageUpload';
 import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
 import {
   VendorFormWizard,
@@ -110,6 +111,7 @@ const districtOptions = PHUKET_DISTRICTS.map(d => ({
 interface PropertyFormData {
   title_en: string;
   title_ru: string;
+  internal_name: string; // For internal tracking
   description_en: string;
   description_ru: string;
   property_type: string;
@@ -135,6 +137,7 @@ interface PropertyFormData {
 const initialFormData: PropertyFormData = {
   title_en: '',
   title_ru: '',
+  internal_name: '',
   description_en: '',
   description_ru: '',
   property_type: 'apartment',
@@ -272,6 +275,7 @@ const VendorProperties = () => {
     setFormData({
       title_en: property.title_en,
       title_ru: property.title_ru || '',
+      internal_name: (property as any).internal_name || '',
       description_en: property.description_en || '',
       description_ru: property.description_ru || '',
       property_type: property.property_type,

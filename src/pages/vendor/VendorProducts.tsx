@@ -52,6 +52,7 @@ import {
   DollarSign
 } from 'lucide-react';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
+import { getUnitMeasureOptions } from '@/utils/formatProductUnit';
 import { ApprovalStatusBadge, ApprovalStatus } from '@/components/vendor/ApprovalStatusBadge';
 import {
   VendorFormWizard,
@@ -78,6 +79,10 @@ interface ProductFormData {
   currency: string;
   unit: string;
   unit_ru: string;
+  // Precise unit fields (synced with Admin)
+  unit_value: string;
+  unit_measure: string;
+  pack_quantity: string;
   in_stock: boolean;
   is_popular: boolean;
   is_new: boolean;
@@ -100,6 +105,10 @@ const initialFormData: ProductFormData = {
   currency: 'THB',
   unit: 'pc',
   unit_ru: 'шт',
+  // Precise unit fields
+  unit_value: '',
+  unit_measure: '',
+  pack_quantity: '',
   in_stock: true,
   is_popular: false,
   is_new: true,
@@ -231,6 +240,10 @@ const VendorProducts = () => {
       currency: product.currency || 'THB',
       unit: product.unit || 'pc',
       unit_ru: product.unit_ru || 'шт',
+      // Precise unit fields
+      unit_value: (product as any).unit_value?.toString() || '',
+      unit_measure: (product as any).unit_measure || '',
+      pack_quantity: (product as any).pack_quantity?.toString() || '',
       in_stock: product.in_stock ?? true,
       is_popular: product.is_popular ?? false,
       is_new: product.is_new ?? false,
@@ -269,6 +282,10 @@ const VendorProducts = () => {
         currency: formData.currency,
         unit: formData.unit,
         unit_ru: formData.unit_ru,
+        // Precise unit fields
+        unit_value: formData.unit_value ? parseFloat(formData.unit_value) : null,
+        unit_measure: formData.unit_measure || null,
+        pack_quantity: formData.pack_quantity ? parseInt(formData.pack_quantity) : null,
         in_stock: formData.in_stock,
         is_popular: formData.is_popular,
         is_new: formData.is_new,
@@ -276,10 +293,10 @@ const VendorProducts = () => {
         tags: formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(Boolean) : null,
         weight_kg: formData.weight_kg ? parseFloat(formData.weight_kg) : 0,
         is_shippable_international: formData.is_shippable_international,
-      };
+      } as any;
 
       if (editingProduct) {
-        const updateData = isAdmin 
+        const updateData = isAdmin
           ? productData 
           : { ...productData, approval_status: 'pending' };
         const { error } = await updateProduct(editingProduct.id, updateData);
@@ -659,6 +676,50 @@ const VendorProducts = () => {
                           value={formData.unit_ru}
                           onChange={(e) => updateField('unit_ru', e.target.value)}
                           placeholder="шт"
+                        />
+                      </CompactField>
+                    </div>
+                  </VendorFormSection>
+
+                  {/* Precise Unit Section - synced with Admin */}
+                  <VendorFormSection title={isRussian ? 'Точные единицы' : 'Precise Units'}>
+                    <p className="text-xs text-muted-foreground mb-3">
+                      {isRussian 
+                        ? 'Для товаров с весом/объёмом (напр. 500г, 1л)' 
+                        : 'For products with weight/volume (e.g., 500g, 1L)'}
+                    </p>
+                    <div className="grid grid-cols-3 gap-3">
+                      <CompactField label={isRussian ? 'Значение' : 'Value'}>
+                        <Input
+                          type="number"
+                          value={formData.unit_value}
+                          onChange={(e) => updateField('unit_value', e.target.value)}
+                          placeholder="500"
+                        />
+                      </CompactField>
+                      <CompactField label={isRussian ? 'Единица' : 'Measure'}>
+                        <Select
+                          value={formData.unit_measure}
+                          onValueChange={(v) => updateField('unit_measure', v)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder={isRussian ? 'Выбрать' : 'Select'} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {getUnitMeasureOptions(isRussian ? 'ru' : 'en').map((opt) => (
+                              <SelectItem key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </CompactField>
+                      <CompactField label={isRussian ? 'Кол-во в уп.' : 'Pack Qty'}>
+                        <Input
+                          type="number"
+                          value={formData.pack_quantity}
+                          onChange={(e) => updateField('pack_quantity', e.target.value)}
+                          placeholder="6"
                         />
                       </CompactField>
                     </div>
