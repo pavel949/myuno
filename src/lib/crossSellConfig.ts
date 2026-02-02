@@ -117,9 +117,9 @@ export const CROSS_SELL_MATRIX: Record<string, CrossSellLink[]> = {
     { id: 'grocery', icon: ShoppingCart, path: '/market?category=grocery', labelEn: 'Groceries', labelRu: 'Продукты', descriptionEn: 'Stock fridge', descriptionRu: 'Заполнить холодильник', gradient: 'from-green-500 to-emerald-600' },
     { id: 'flowers', icon: Flower2, path: '/flowers', labelEn: 'Flowers', labelRu: 'Цветы', descriptionEn: 'Welcome bouquet', descriptionRu: 'Букет к приезду', gradient: 'from-pink-400 to-rose-500' },
     { id: 'cleaning', icon: Sparkles, path: '/services?type=cleaning', labelEn: 'Extra Cleaning', labelRu: 'Уборка', descriptionEn: 'During stay', descriptionRu: 'Во время проживания', gradient: 'from-teal-400 to-cyan-500' },
-    { id: 'bank', icon: CreditCard, path: '/banks', labelEn: 'Open Account', labelRu: 'Открыть счёт', descriptionEn: 'Thai bank', descriptionRu: 'Тайский банк', gradient: 'from-amber-500 to-orange-500' },
+    { id: 'bank', icon: CreditCard, path: '/banking', labelEn: 'Open Account', labelRu: 'Открыть счёт', descriptionEn: 'Thai bank', descriptionRu: 'Тайский банк', gradient: 'from-amber-500 to-orange-500' },
     { id: 'restaurant', icon: UtensilsCrossed, path: '/restaurants', labelEn: 'Restaurants', labelRu: 'Рестораны', descriptionEn: 'Book a table', descriptionRu: 'Забронировать столик', gradient: 'from-orange-400 to-red-500' },
-    { id: 'babysitter', icon: Baby, path: '/babysitters', labelEn: 'Babysitter', labelRu: 'Няня', descriptionEn: 'Childcare', descriptionRu: 'Присмотр за детьми', gradient: 'from-violet-400 to-purple-500' },
+    { id: 'babysitter', icon: Baby, path: '/babysitter', labelEn: 'Babysitter', labelRu: 'Няня', descriptionEn: 'Childcare', descriptionRu: 'Присмотр за детьми', gradient: 'from-violet-400 to-purple-500' },
     { id: 'sim', icon: Wifi, path: '/market?category=sim', labelEn: 'SIM Card', labelRu: 'SIM-карта', descriptionEn: 'Stay connected', descriptionRu: 'Оставайся на связи', gradient: 'from-indigo-500 to-blue-600' },
   ],
 };

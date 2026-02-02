@@ -126,15 +126,6 @@ const TOURIST_ACTIONS: QuickAction[] = [
     iconColor: 'text-purple-600',
     bgColor: 'bg-purple-500/10',
   },
-  {
-    id: 'exchange',
-    icon: Banknote,
-    label: 'Exchange',
-    labelRu: 'Обмен',
-    path: '/exchange',
-    iconColor: 'text-green-600',
-    bgColor: 'bg-green-500/10',
-  },
 ];
 
 // Resident-focused actions (long-term living infrastructure)
@@ -220,7 +211,7 @@ const OWNER_ACTIONS: QuickAction[] = [
     icon: Building2,
     label: 'Management',
     labelRu: 'УК',
-    path: '/property/management',
+    path: '/services?category=property-management',
     iconColor: 'text-indigo-600',
     bgColor: 'bg-indigo-500/10',
   },
@@ -229,7 +220,7 @@ const OWNER_ACTIONS: QuickAction[] = [
     icon: Key,
     label: 'Rental',
     labelRu: 'Аренда',
-    path: '/property/rental',
+    path: '/property',
     iconColor: 'text-teal-600',
     bgColor: 'bg-teal-500/10',
   },
