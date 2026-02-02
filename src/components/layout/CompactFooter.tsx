@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Send, Instagram, MessageCircle } from 'lucide-react';
+import { COMPANY_CONTACTS } from '@/lib/config';
 
 export function CompactFooter() {
   const { language } = useLanguage();
@@ -16,19 +17,19 @@ export function CompactFooter() {
 
   const socialLinks = [
     { 
-      href: 'https://t.me/myuno_support', 
+      href: COMPANY_CONTACTS.social.telegram, 
       icon: Send, 
       label: 'Telegram',
       hoverColor: 'hover:text-[#0088cc]'
     },
     { 
-      href: 'https://instagram.com/myuno.app', 
+      href: COMPANY_CONTACTS.social.instagram, 
       icon: Instagram, 
       label: 'Instagram',
       hoverColor: 'hover:text-[#E4405F]'
     },
     { 
-      href: 'https://wa.me/66922407355', 
+      href: COMPANY_CONTACTS.social.whatsapp, 
       icon: MessageCircle, 
       label: 'WhatsApp',
       hoverColor: 'hover:text-[#25D366]'

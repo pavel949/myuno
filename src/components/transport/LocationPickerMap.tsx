@@ -8,6 +8,7 @@ import { Loader2, Navigation, MapPin, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { getMapCenter, PHUKET_LANDMARKS, DEFAULT_CITY } from '@/lib/config';
 
 interface LocationPickerMapProps {
   isOpen: boolean;
@@ -17,15 +18,15 @@ interface LocationPickerMapProps {
   initialLocation?: { lat: number; lng: number } | null;
 }
 
-// Default popular locations (Phuket fallback)
+// Default popular locations (using centralized landmarks for Phuket)
 const defaultPopularLocations = [
-  { id: 'patong', nameEn: 'Patong Beach', nameRu: 'Пляж Патонг', lat: 7.8965, lng: 98.3008 },
-  { id: 'kata', nameEn: 'Kata Beach', nameRu: 'Пляж Ката', lat: 7.8205, lng: 98.2988 },
-  { id: 'karon', nameEn: 'Karon Beach', nameRu: 'Пляж Карон', lat: 7.8468, lng: 98.2947 },
-  { id: 'rawai', nameEn: 'Rawai', nameRu: 'Равай', lat: 7.7773, lng: 98.3253 },
-  { id: 'phuket-town', nameEn: 'Phuket Town', nameRu: 'Пхукет Таун', lat: 7.8804, lng: 98.3923 },
-  { id: 'airport', nameEn: 'Phuket Airport', nameRu: 'Аэропорт Пхукета', lat: 8.1132, lng: 98.3169 },
-  { id: 'central', nameEn: 'Central Festival', nameRu: 'Централ Фестиваль', lat: 7.8917, lng: 98.3648 },
+  { id: 'patong', nameEn: PHUKET_LANDMARKS.patong.nameEn, nameRu: PHUKET_LANDMARKS.patong.nameRu, lat: PHUKET_LANDMARKS.patong.lat, lng: PHUKET_LANDMARKS.patong.lng },
+  { id: 'kata', nameEn: PHUKET_LANDMARKS.kata.nameEn, nameRu: PHUKET_LANDMARKS.kata.nameRu, lat: PHUKET_LANDMARKS.kata.lat, lng: PHUKET_LANDMARKS.kata.lng },
+  { id: 'karon', nameEn: PHUKET_LANDMARKS.karon.nameEn, nameRu: PHUKET_LANDMARKS.karon.nameRu, lat: PHUKET_LANDMARKS.karon.lat, lng: PHUKET_LANDMARKS.karon.lng },
+  { id: 'rawai', nameEn: PHUKET_LANDMARKS.rawai.nameEn, nameRu: PHUKET_LANDMARKS.rawai.nameRu, lat: PHUKET_LANDMARKS.rawai.lat, lng: PHUKET_LANDMARKS.rawai.lng },
+  { id: 'phuket-town', nameEn: PHUKET_LANDMARKS.phuketTown.nameEn, nameRu: PHUKET_LANDMARKS.phuketTown.nameRu, lat: PHUKET_LANDMARKS.phuketTown.lat, lng: PHUKET_LANDMARKS.phuketTown.lng },
+  { id: 'airport', nameEn: PHUKET_LANDMARKS.airport.nameEn, nameRu: PHUKET_LANDMARKS.airport.nameRu, lat: PHUKET_LANDMARKS.airport.lat, lng: PHUKET_LANDMARKS.airport.lng },
+  { id: 'central', nameEn: PHUKET_LANDMARKS.central.nameEn, nameRu: PHUKET_LANDMARKS.central.nameRu, lat: PHUKET_LANDMARKS.central.lat, lng: PHUKET_LANDMARKS.central.lng },
   { id: 'jungceylon', nameEn: 'Jungceylon', nameRu: 'Джангцейлон', lat: 7.8889, lng: 98.2962 },
 ];
 
@@ -80,10 +81,10 @@ const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLocation, setSelectedLocation] = useState<{ address: string; lat: number; lng: number } | null>(null);
   
-  // Get city config for dynamic center
+  // Get city config for dynamic center - using centralized geography config
   const cityConfig = getCityConfig();
   const mapCenter: [number, number] = useMemo(() => 
-    cityConfig ? [cityConfig.lng, cityConfig.lat] : [98.3923, 7.8804],
+    cityConfig ? [cityConfig.lng, cityConfig.lat] : getMapCenter(DEFAULT_CITY),
     [cityConfig]
   );
   

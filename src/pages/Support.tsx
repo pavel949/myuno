@@ -30,9 +30,9 @@ import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { SectionCard } from '@/components/uno/SectionCard';
 import { PremiumButton } from '@/components/uno/PremiumButton';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useSupportChat, UNO_WHATSAPP } from '@/hooks/useChat';
+import { COMPANY_CONTACTS } from '@/lib/config';
 
 // WhatsApp icon component - wrapped in forwardRef for PremiumButton compatibility
 const WhatsAppIcon = React.forwardRef<SVGSVGElement, { className?: string }>(
@@ -193,7 +193,7 @@ export default function Support() {
           </PremiumButton>
           
           <p className="text-xs text-center text-muted-foreground mt-3">
-            {UNO_WHATSAPP}
+            {COMPANY_CONTACTS.phone.display}
           </p>
         </SectionCard>
 
@@ -330,7 +330,7 @@ export default function Support() {
         </div>
         <SectionCard className="space-y-4">
           <a 
-            href={`tel:${UNO_WHATSAPP}`}
+            href={`tel:${COMPANY_CONTACTS.phone.raw}`}
             className="flex items-center gap-3"
           >
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -340,12 +340,12 @@ export default function Support() {
               <p className="text-sm font-medium">
                 {isRu ? 'Позвонить' : 'Call us'}
               </p>
-              <p className="text-xs text-muted-foreground">{UNO_WHATSAPP}</p>
+              <p className="text-xs text-muted-foreground">{COMPANY_CONTACTS.phone.display}</p>
             </div>
           </a>
           
           <a 
-            href="mailto:support@uno.phuket"
+            href={`mailto:${COMPANY_CONTACTS.email.support}`}
             className="flex items-center gap-3"
           >
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -353,7 +353,7 @@ export default function Support() {
             </div>
             <div>
               <p className="text-sm font-medium">Email</p>
-              <p className="text-xs text-muted-foreground">support@uno.phuket</p>
+              <p className="text-xs text-muted-foreground">{COMPANY_CONTACTS.email.support}</p>
             </div>
           </a>
           
@@ -365,7 +365,7 @@ export default function Support() {
               <p className="text-sm font-medium">
                 {isRu ? 'Время работы' : 'Working hours'}
               </p>
-              <p className="text-xs text-muted-foreground">24/7</p>
+              <p className="text-xs text-muted-foreground">{COMPANY_CONTACTS.workingHours.support}</p>
             </div>
           </div>
         </SectionCard>

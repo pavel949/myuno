@@ -5,6 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
+import { COMPANY_CONTACTS } from '@/lib/config';
 
 // WhatsApp icon component
 const WhatsAppIcon = ({ className }: { className?: string }) => (
@@ -24,7 +25,6 @@ interface SupportFABProps {
 }
 
 const HIDDEN_ROUTES = ['/auth'];
-const PHONE_NUMBER = '66922407355';
 
 export const SupportFAB = forwardRef<HTMLDivElement, SupportFABProps>(({ className }, ref) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -34,13 +34,13 @@ export const SupportFAB = forwardRef<HTMLDivElement, SupportFABProps>(({ classNa
 
   const handleWhatsApp = () => {
     triggerHaptic('light');
-    window.open(`https://wa.me/${PHONE_NUMBER}`, '_blank');
+    window.open(COMPANY_CONTACTS.whatsapp.link, '_blank');
     setIsOpen(false);
   };
 
   const handleTelegram = () => {
     triggerHaptic('light');
-    window.open(`https://t.me/+${PHONE_NUMBER}`, '_blank');
+    window.open(COMPANY_CONTACTS.telegram.number, '_blank');
     setIsOpen(false);
   };
 

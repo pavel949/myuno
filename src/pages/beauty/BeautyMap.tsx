@@ -14,6 +14,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import { getDefaultCenter, DEFAULT_CITY } from '@/lib/config';
 
 // Demo salon data with coordinates
 const demoSalons: SalonMarker[] = [
@@ -96,8 +97,9 @@ export default function BeautyMap() {
         },
         (error) => {
           console.log('Geolocation error:', error);
-          // Default to Phuket center if geolocation fails
-          setUserLocation({ lat: 7.8804, lng: 98.3923 });
+          // Default to centralized city center if geolocation fails
+          const defaultLocation = getDefaultCenter(DEFAULT_CITY);
+          setUserLocation(defaultLocation);
         }
       );
     }

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { COMPANY_CONTACTS, getWhatsAppUrl } from '@/lib/config';
 
 export interface ChatMessage {
   id: string;
@@ -22,12 +23,11 @@ export interface SupportConversation {
   updated_at: string;
 }
 
-// UNO Support WhatsApp number
-export const UNO_WHATSAPP = '+66922407355';
+// UNO Support WhatsApp number - using centralized config
+export const UNO_WHATSAPP = COMPANY_CONTACTS.phone.raw;
 
 export const openWhatsApp = (message?: string) => {
-  const encodedMessage = message ? encodeURIComponent(message) : '';
-  const url = `https://wa.me/${UNO_WHATSAPP.replace('+', '')}${encodedMessage ? `?text=${encodedMessage}` : ''}`;
+  const url = getWhatsAppUrl(message);
   window.open(url, '_blank');
 };
 
