@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { CACHE_PROFILES } from '@/lib/queryConfig';
 import type { Database } from '@/integrations/supabase/types';
 
 type SupportTicketInsert = Database['public']['Tables']['support_tickets']['Insert'];
@@ -72,17 +73,14 @@ export interface CreateTicketInput {
 export function useTickets() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [tickets, setTickets] = useState<SupportTicket[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  const fetchTickets = async () => {
-    if (!user) {
-      setTickets([]);
-      setIsLoading(false);
-      return;
-    }
+  // Main tickets query with React Query
+  const { data: tickets = [], isLoading, refetch } = useQuery({
+    queryKey: ['user-tickets', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
 
-    try {
       const { data, error } = await supabase
         .from('support_tickets')
         .select('*')
@@ -90,21 +88,15 @@ export function useTickets() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setTickets((data as unknown as SupportTicket[]) || []);
-    } catch (error) {
-      console.error('Error fetching tickets:', error);
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось загрузить обращения',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      return (data as unknown as SupportTicket[]) || [];
+    },
+    enabled: !!user,
+    ...CACHE_PROFILES.DYNAMIC,
+  });
 
-  const createTicket = async (input: CreateTicketInput): Promise<SupportTicket | null> => {
-    try {
+  // Create ticket mutation
+  const createTicketMutation = useMutation({
+    mutationFn: async (input: CreateTicketInput): Promise<SupportTicket> => {
       const ticketData = {
         user_id: user?.id || null,
         category: input.category,
@@ -129,21 +121,29 @@ export function useTickets() {
         .single();
 
       if (error) throw error;
-
+      return data as unknown as SupportTicket;
+    },
+    onSuccess: (data) => {
       toast({
         title: 'Обращение создано',
-        description: `Номер: ${(data as unknown as SupportTicket).ticket_number}`,
+        description: `Номер: ${data.ticket_number}`,
       });
-
-      await fetchTickets();
-      return data as unknown as SupportTicket;
-    } catch (error) {
+      queryClient.invalidateQueries({ queryKey: ['user-tickets'] });
+    },
+    onError: (error) => {
       console.error('Error creating ticket:', error);
       toast({
         title: 'Ошибка',
         description: 'Не удалось создать обращение',
         variant: 'destructive',
       });
+    },
+  });
+
+  const createTicket = async (input: CreateTicketInput): Promise<SupportTicket | null> => {
+    try {
+      return await createTicketMutation.mutateAsync(input);
+    } catch {
       return null;
     }
   };
@@ -212,35 +212,6 @@ export function useTickets() {
     }
   };
 
-  useEffect(() => {
-    fetchTickets();
-  }, [user]);
-
-  // Real-time subscription
-  useEffect(() => {
-    if (!user) return;
-
-    const channel = supabase
-      .channel('user-tickets')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'support_tickets',
-          filter: `user_id=eq.${user.id}`,
-        },
-        () => {
-          fetchTickets();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user]);
-
   return {
     tickets,
     isLoading,
@@ -248,6 +219,50 @@ export function useTickets() {
     getTicket,
     getTicketMessages,
     addMessage,
-    refetch: fetchTickets,
+    refetch,
   };
+}
+
+// Hook for single ticket with caching
+export function useTicketDetail(ticketId: string | undefined) {
+  const { user } = useAuth();
+  
+  return useQuery({
+    queryKey: ['ticket-detail', ticketId],
+    queryFn: async () => {
+      if (!ticketId) return null;
+
+      const { data, error } = await supabase
+        .from('support_tickets')
+        .select('*')
+        .eq('id', ticketId)
+        .single();
+
+      if (error) throw error;
+      return data as unknown as SupportTicket;
+    },
+    enabled: !!ticketId && !!user,
+    ...CACHE_PROFILES.DYNAMIC,
+  });
+}
+
+// Hook for ticket messages with caching
+export function useTicketMessages(ticketId: string | undefined) {
+  return useQuery({
+    queryKey: ['ticket-messages', ticketId],
+    queryFn: async () => {
+      if (!ticketId) return [];
+
+      const { data, error } = await supabase
+        .from('ticket_messages')
+        .select('*')
+        .eq('ticket_id', ticketId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      return (data as unknown as TicketMessage[]) || [];
+    },
+    enabled: !!ticketId,
+    ...CACHE_PROFILES.REALTIME,
+  });
 }

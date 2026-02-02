@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { CACHE_PROFILES } from '@/lib/queryConfig';
 import type { SupportTicket, TicketMessage, TicketStatus, TicketPriority, ResolutionType } from './useTickets';
 
 export interface TicketStats {
@@ -23,21 +25,16 @@ export interface TicketFilters {
 
 export function useAdminTickets() {
   const { toast } = useToast();
-  const [tickets, setTickets] = useState<SupportTicket[]>([]);
-  const [stats, setStats] = useState<TicketStats>({
-    total: 0,
-    open: 0,
-    inProgress: 0,
-    waitingResponse: 0,
-    resolved: 0,
-    overdueSla: 0,
-    urgent: 0,
-  });
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [filters, setFilters] = useState<TicketFilters>({ status: 'all', priority: 'all' });
 
-  const fetchTickets = async () => {
-    try {
+  // Stabilize filter key for query
+  const filterKey = useMemo(() => JSON.stringify(filters), [filters]);
+
+  // Tickets query with React Query
+  const { data: tickets = [], isLoading: ticketsLoading, refetch: refetchTickets } = useQuery({
+    queryKey: ['admin-tickets', filterKey],
+    queryFn: async () => {
       let query = supabase
         .from('support_tickets')
         .select('*')
@@ -66,21 +63,23 @@ export function useAdminTickets() {
       const { data, error } = await query;
 
       if (error) throw error;
-      setTickets((data as unknown as SupportTicket[]) || []);
-    } catch (error) {
-      console.error('Error fetching tickets:', error);
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось загрузить тикеты',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      return (data as unknown as SupportTicket[]) || [];
+    },
+    ...CACHE_PROFILES.ADMIN,
+  });
 
-  const fetchStats = async () => {
-    try {
+  // Stats query - separate from filtered tickets for accurate counts
+  const { data: stats = {
+    total: 0,
+    open: 0,
+    inProgress: 0,
+    waitingResponse: 0,
+    resolved: 0,
+    overdueSla: 0,
+    urgent: 0,
+  }, refetch: refetchStats } = useQuery({
+    queryKey: ['admin-tickets-stats'],
+    queryFn: async () => {
       const { data: allTickets, error } = await supabase
         .from('support_tickets')
         .select('status, priority, sla_deadline');
@@ -90,7 +89,7 @@ export function useAdminTickets() {
       const now = new Date();
       const ticketsList = (allTickets as unknown as SupportTicket[]) || [];
 
-      setStats({
+      return {
         total: ticketsList.length,
         open: ticketsList.filter(t => t.status === 'open').length,
         inProgress: ticketsList.filter(t => t.status === 'in_progress').length,
@@ -102,14 +101,16 @@ export function useAdminTickets() {
           !['resolved', 'closed'].includes(t.status)
         ).length,
         urgent: ticketsList.filter(t => t.priority === 'urgent' && !['resolved', 'closed'].includes(t.status)).length,
-      });
-    } catch (error) {
-      console.error('Error fetching stats:', error);
-    }
-  };
+      };
+    },
+    ...CACHE_PROFILES.ADMIN,
+  });
 
-  const updateTicketStatus = async (ticketId: string, status: TicketStatus): Promise<boolean> => {
-    try {
+  const isLoading = ticketsLoading;
+
+  // Update status mutation
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ ticketId, status }: { ticketId: string; status: TicketStatus }) => {
       const updateData: Record<string, unknown> = { status };
 
       if (status === 'resolved') {
@@ -124,23 +125,33 @@ export function useAdminTickets() {
         .eq('id', ticketId);
 
       if (error) throw error;
-
+    },
+    onSuccess: () => {
       toast({ title: 'Статус обновлён' });
-      await Promise.all([fetchTickets(), fetchStats()]);
-      return true;
-    } catch (error) {
-      console.error('Error updating status:', error);
+      queryClient.invalidateQueries({ queryKey: ['admin-tickets'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-tickets-stats'] });
+    },
+    onError: () => {
       toast({
         title: 'Ошибка',
         description: 'Не удалось обновить статус',
         variant: 'destructive',
       });
+    },
+  });
+
+  const updateTicketStatus = async (ticketId: string, status: TicketStatus): Promise<boolean> => {
+    try {
+      await updateStatusMutation.mutateAsync({ ticketId, status });
+      return true;
+    } catch {
       return false;
     }
   };
 
-  const assignTicket = async (ticketId: string, adminId: string | null): Promise<boolean> => {
-    try {
+  // Assign ticket mutation
+  const assignMutation = useMutation({
+    mutationFn: async ({ ticketId, adminId }: { ticketId: string; adminId: string | null }) => {
       const updateData: Record<string, unknown> = { 
         assigned_to: adminId,
         status: adminId ? 'in_progress' : 'open',
@@ -152,51 +163,75 @@ export function useAdminTickets() {
         .eq('id', ticketId);
 
       if (error) throw error;
-
+    },
+    onSuccess: (_, { adminId }) => {
       toast({ title: adminId ? 'Тикет назначен' : 'Назначение снято' });
-      await fetchTickets();
-      return true;
-    } catch (error) {
-      console.error('Error assigning ticket:', error);
+      queryClient.invalidateQueries({ queryKey: ['admin-tickets'] });
+    },
+    onError: () => {
       toast({
         title: 'Ошибка',
         description: 'Не удалось назначить тикет',
         variant: 'destructive',
       });
+    },
+  });
+
+  const assignTicket = async (ticketId: string, adminId: string | null): Promise<boolean> => {
+    try {
+      await assignMutation.mutateAsync({ ticketId, adminId });
+      return true;
+    } catch {
       return false;
     }
   };
 
-  const updatePriority = async (ticketId: string, priority: TicketPriority): Promise<boolean> => {
-    try {
+  // Update priority mutation
+  const updatePriorityMutation = useMutation({
+    mutationFn: async ({ ticketId, priority }: { ticketId: string; priority: TicketPriority }) => {
       const { error } = await supabase
         .from('support_tickets')
         .update({ priority })
         .eq('id', ticketId);
 
       if (error) throw error;
-
+    },
+    onSuccess: () => {
       toast({ title: 'Приоритет обновлён' });
-      await Promise.all([fetchTickets(), fetchStats()]);
-      return true;
-    } catch (error) {
-      console.error('Error updating priority:', error);
+      queryClient.invalidateQueries({ queryKey: ['admin-tickets'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-tickets-stats'] });
+    },
+    onError: () => {
       toast({
         title: 'Ошибка',
         description: 'Не удалось обновить приоритет',
         variant: 'destructive',
       });
+    },
+  });
+
+  const updatePriority = async (ticketId: string, priority: TicketPriority): Promise<boolean> => {
+    try {
+      await updatePriorityMutation.mutateAsync({ ticketId, priority });
+      return true;
+    } catch {
       return false;
     }
   };
 
-  const resolveTicket = async (
-    ticketId: string,
-    resolutionType: ResolutionType,
-    resolution: string,
-    refundAmount?: number
-  ): Promise<boolean> => {
-    try {
+  // Resolve ticket mutation
+  const resolveMutation = useMutation({
+    mutationFn: async ({ 
+      ticketId, 
+      resolutionType, 
+      resolution, 
+      refundAmount 
+    }: { 
+      ticketId: string; 
+      resolutionType: ResolutionType; 
+      resolution: string; 
+      refundAmount?: number 
+    }) => {
       const { error } = await supabase
         .from('support_tickets')
         .update({
@@ -219,17 +254,31 @@ export function useAdminTickets() {
           message: `Тикет решён: ${resolution}`,
           is_internal: false,
         });
-
+    },
+    onSuccess: () => {
       toast({ title: 'Тикет решён' });
-      await Promise.all([fetchTickets(), fetchStats()]);
-      return true;
-    } catch (error) {
-      console.error('Error resolving ticket:', error);
+      queryClient.invalidateQueries({ queryKey: ['admin-tickets'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-tickets-stats'] });
+    },
+    onError: () => {
       toast({
         title: 'Ошибка',
         description: 'Не удалось решить тикет',
         variant: 'destructive',
       });
+    },
+  });
+
+  const resolveTicket = async (
+    ticketId: string,
+    resolutionType: ResolutionType,
+    resolution: string,
+    refundAmount?: number
+  ): Promise<boolean> => {
+    try {
+      await resolveMutation.mutateAsync({ ticketId, resolutionType, resolution, refundAmount });
+      return true;
+    } catch {
       return false;
     }
   };
@@ -293,25 +342,21 @@ export function useAdminTickets() {
     }
   };
 
-  useEffect(() => {
-    fetchTickets();
-    fetchStats();
-  }, [filters]);
-
-  // Real-time subscription
+  // Real-time subscription for new tickets
   useEffect(() => {
     const channel = supabase
-      .channel('admin-tickets')
+      .channel('admin-tickets-realtime')
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'INSERT',
           schema: 'public',
           table: 'support_tickets',
         },
         () => {
-          fetchTickets();
-          fetchStats();
+          // Only invalidate on new ticket creation
+          queryClient.invalidateQueries({ queryKey: ['admin-tickets'] });
+          queryClient.invalidateQueries({ queryKey: ['admin-tickets-stats'] });
         }
       )
       .subscribe();
@@ -319,7 +364,7 @@ export function useAdminTickets() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [queryClient]);
 
   return {
     tickets,
@@ -333,6 +378,6 @@ export function useAdminTickets() {
     resolveTicket,
     addAdminMessage,
     getTicketMessages,
-    refetch: () => Promise.all([fetchTickets(), fetchStats()]),
+    refetch: () => Promise.all([refetchTickets(), refetchStats()]),
   };
 }
