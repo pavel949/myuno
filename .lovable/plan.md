@@ -1,224 +1,342 @@
 
-# Рекомендация: Единый User Dashboard
+# UNO Team - Полная Система Управления Командой
 
-## Анализ текущей ситуации
+## Обзор
 
-У тебя сейчас **3 пересекающиеся страницы** для пользователя:
-
-| Страница | Роут | Назначение |
-|----------|------|------------|
-| **Profile.tsx** | `/profile` | Настройки аккаунта, документы, меню |
-| **UserAccountDashboard.tsx** | `/account` | Обзор: профиль + заказы + роли |
-| **Bookings.tsx** | `/bookings` | Полный список бронирований |
-
-**Проблема**: UserAccountDashboard частично дублирует Profile и Bookings, но при этом недостаточно функционален для полноценного dashboard.
+Создание комплексной системы для управления внутренней командой myUNO с четырьмя специализациями, геймификацией, внутренним чатом и заметками к объектам.
 
 ---
 
-## Моя рекомендация
+## 1. Архитектура Ролей и Специализаций
 
-### Объединить `/account` и улучшить как главную точку входа
+### Текущее состояние
+- Роль `uno_team` существует в `app_role` enum
+- Таблица `uno_team_permissions` хранит права по вертикалям
+- Базовый dashboard `/team` и `/team/content` реализованы
 
-```text
-/account  →  "Мой кабинет" (главный dashboard пользователя)
-/profile  →  "Настройки" (редактирование данных, безопасность)
-/bookings →  "Все бронирования" (детальный список)
-```
-
-**Почему так:**
-1. Пользователь приходит в `/account` → видит всё важное одним взглядом
-2. Детали и настройки — по ссылкам в глубину
-3. Нет дублирования, чёткая иерархия
-
----
-
-## Структура нового User Dashboard (`/account`)
-
-### Визуальная архитектура
+### Новая структура специализаций
 
 ```text
-┌─────────────────────────────────────────────────┐
-│  Header: "Мой кабинет" + Logout                 │
-├─────────────────────────────────────────────────┤
-│                                                 │
-│  ┌─────────────────────────────────────────┐   │
-│  │ 👤 Profile Card (avatar + name + role)  │   │
-│  │     → Edit Profile                       │   │
-│  └─────────────────────────────────────────┘   │
-│                                                 │
-│  ┌─────────────────────────────────────────┐   │
-│  │ 🏨 Active Stay (if any)                 │   │  ← Контекст текущего пребывания
-│  │     Check-in: 15 Jan | Check-out: 20    │   │
-│  └─────────────────────────────────────────┘   │
-│                                                 │
-│  ┌──────────┬──────────┬──────────┐            │
-│  │ Bookings │  Wallet  │ Favorites│            │  ← Stats Bar (3 ключевые метрики)
-│  │    3     │  ฿1,500  │    12    │            │
-│  └──────────┴──────────┴──────────┘            │
-│                                                 │
-│  ┌─────────────────────────────────────────┐   │
-│  │ 📦 Upcoming (предстоящие)               │   │
-│  │   → Tour: Phi Phi Islands | 18 Jan 10:00│   │
-│  │   → Beauty: Massage | 19 Jan 14:00      │   │
-│  │   [View All →]                          │   │
-│  └─────────────────────────────────────────┘   │
-│                                                 │
-│  ┌─────────────────────────────────────────┐   │
-│  │ 🛒 Recent Purchases (покупки)           │   │
-│  │   → Flowers bouquet | ฿890 | Delivered  │   │
-│  │   → Grocery order | ฿450 | In Transit   │   │
-│  │   [Order History →]                     │   │
-│  └─────────────────────────────────────────┘   │
-│                                                 │
-│  ┌─────────────────────────────────────────┐   │
-│  │ ⚡ Quick Services                        │   │  ← Персонализированные Quick Actions
-│  │   🚕 🌸 💆 🍽️ 🎫 🚤 ⋯                     │   │
-│  └─────────────────────────────────────────┘   │
-│                                                 │
-│  ┌─────────────────────────────────────────┐   │
-│  │ 🔧 Account Menu                          │   │  ← Компактный доступ к настройкам
-│  │   Settings | Documents | Wallet | Help   │   │
-│  └─────────────────────────────────────────┘   │
-│                                                 │
-└─────────────────────────────────────────────────┘
+                    ┌─────────────────────┐
+                    │    uno_team role    │
+                    └─────────┬───────────┘
+                              │
+    ┌─────────────┬───────────┼───────────┬─────────────┐
+    │             │           │           │             │
+    ▼             ▼           ▼           ▼             ▼
+┌────────┐  ┌──────────┐  ┌────────┐  ┌──────────┐  ┌────────┐
+│Content │  │ Support  │  │ Sales  │  │Moderation│  │ Lead   │
+│Manager │  │ Operator │  │Manager │  │ Officer  │  │ Admin  │
+└────────┘  └──────────┘  └────────┘  └──────────┘  └────────┘
+    │             │           │           │             │
+    ▼             ▼           ▼           ▼             ▼
+ Добавление   Тикеты     Лиды и      Проверка       Все
+ контента     и чат      конверсии   контента      функции
 ```
 
 ---
 
-## Компоненты для реализации
+## 2. Схема Базы Данных
 
-### Новые виджеты
+### Новые таблицы
 
-| Компонент | Назначение |
-|-----------|------------|
-| `DashboardStatsBar` | 3 метрики: активные бронирования, баланс, избранное |
-| `UpcomingBookingsWidget` | Предстоящие бронирования (max 3) с таймером до события |
-| `RecentPurchasesWidget` | Последние покупки из marketplace (max 3) |
-| `DashboardQuickServices` | Персонализированная сетка сервисов (последние использованные) |
+**`team_members`** - Профили сотрудников с специализацией
+```
+id, user_id, specialization[], display_name, avatar_url,
+phone, shift_schedule, is_active, hired_at, bio
+```
 
-### Существующие компоненты (переиспользуем)
+**`team_activity_log`** - Логирование действий для KPI
+```
+id, user_id, action_type, entity_type, entity_id,
+points_earned, metadata, created_at
+```
 
-- `AccountProfileCard` → уже есть, оставляем
-- `AccountActiveStay` → уже есть, оставляем  
-- `AccountQuickLinks` → преобразуем в компактный `AccountMenu`
+**`team_gamification`** - Очки, уровни, достижения
+```
+id, user_id, total_points, level, streak_days,
+badges[], weekly_points, monthly_points
+```
 
-### Удаляем/упрощаем
+**`team_achievements`** - Справочник достижений
+```
+id, key, name_en, name_ru, description, icon,
+points_required, unlock_condition, is_secret
+```
 
-- `AccountRolesBlock` → перенести функционал в Profile Settings
-- `AccountOrdersSummary` → заменить на `UpcomingBookingsWidget` + `RecentPurchasesWidget`
+**`team_user_achievements`** - Полученные достижения
+```
+id, user_id, achievement_id, unlocked_at
+```
+
+**`team_messages`** - Внутренний чат
+```
+id, sender_id, channel, content, reply_to,
+attachments, is_pinned, created_at
+```
+
+**`team_entity_notes`** - Заметки к объектам
+```
+id, user_id, entity_type, entity_id, content,
+is_important, mentioned_users[], created_at
+```
 
 ---
 
-## Техническая реализация
+## 3. Система Специализаций
 
-### Файловая структура
+### Типы специализаций и их возможности
 
-```text
-src/components/account/
-├── index.ts                      # exports
-├── AccountProfileCard.tsx        # (существует)
-├── AccountActiveStay.tsx         # (существует)
-├── AccountMenu.tsx               # НОВЫЙ - компактное меню настроек
-├── DashboardStatsBar.tsx         # НОВЫЙ - 3 метрики
-├── UpcomingBookingsWidget.tsx    # НОВЫЙ - предстоящие бронирования
-├── RecentPurchasesWidget.tsx     # НОВЫЙ - последние покупки
-└── DashboardQuickServices.tsx    # НОВЫЙ - персонализированные сервисы
+| Специализация | Доступы | Dashboards |
+|---------------|---------|------------|
+| **content_manager** | Создание/редактирование контента во всех вертикалях | `/team/content` |
+| **support_operator** | Тикеты, чат с клиентами, звонки | `/team/support` |
+| **sales_manager** | Лиды, консультации, конверсии | `/team/leads` |
+| **moderation_officer** | Модерация UGC, отзывов, фото | `/team/moderation` |
+
+### Гранулярные права
+- Каждая специализация может иметь несколько под-прав
+- Комбинирование специализаций (один сотрудник может быть и sales, и support)
+
+---
+
+## 4. Gamification Engine
+
+### Система очков
+
+**Действия и награды:**
+| Действие | Очки | Категория |
+|----------|------|-----------|
+| Ответ на тикет | +5 | Support |
+| Закрытие тикета < 1ч | +15 (бонус) | Support |
+| Обработка лида | +10 | Sales |
+| Конверсия лида | +50 | Sales |
+| Добавление листинга | +20 | Content |
+| Модерация контента | +5 | Moderation |
+| Streak 7 дней | +100 | Bonus |
+
+### Уровни
+```
+Level 1: Новичок       (0-500 очков)
+Level 2: Специалист    (500-2000)
+Level 3: Профи         (2000-5000)
+Level 4: Эксперт       (5000-10000)
+Level 5: Легенда       (10000+)
 ```
 
-### Источники данных
+### Достижения (Badges)
+- **Первый контакт**: Первый обработанный лид
+- **Скорострел**: 10 тикетов за день
+- **Золотые руки**: 100 добавленных листингов
+- **Конвертор**: 50 успешных конверсий
+- **Марафонец**: 30-дневный streak
 
+### Leaderboard
+- Недельный/месячный рейтинг
+- Фильтр по специализации
+- Анимированные позиции
+
+---
+
+## 5. Внутренний Чат
+
+### Архитектура каналов
+```
+#general       - Общий чат команды
+#support       - Канал поддержки
+#sales         - Продажи
+#content       - Контент-менеджеры
+#announcements - Объявления (только admin)
+```
+
+### Функционал
+- Real-time с Supabase Realtime
+- Ответы на сообщения (threading)
+- Упоминания (@username)
+- Прикрепление файлов
+- Закреплённые сообщения
+- Emoji-реакции
+
+---
+
+## 6. Заметки к Объектам
+
+### Entity Types
+```
+property, listing, lead, ticket, booking,
+order, user, vendor, review
+```
+
+### Функционал
+- Markdown-форматирование
+- Упоминание коллег (@user)
+- Метка "Важное" с уведомлением
+- История заметок
+- Прикрепление к любой сущности
+
+---
+
+## 7. Навигация Team Dashboard
+
+### Новая структура маршрутов
+```
+/team                  - Главный dashboard с KPI
+/team/inbox           - Входящие задачи (unified)
+/team/content         - Content Hub (существует)
+/team/support         - Тикеты и чаты
+/team/leads           - CRM для лидов
+/team/moderation      - Очередь модерации
+/team/chat            - Внутренний чат
+/team/leaderboard     - Gamification рейтинги
+/team/my-profile      - Профиль сотрудника
+```
+
+### Bottom Navigation (Mobile)
+```
+[Dashboard] [Inbox] [Chat] [Profile]
+```
+
+---
+
+## 8. Компоненты UI
+
+### Новые компоненты
+```
+src/components/team/
+├── TeamLayout.tsx           # Layout с sidebar
+├── TeamSidebar.tsx          # Навигация
+├── TeamBottomNav.tsx        # Mobile nav
+├── dashboard/
+│   ├── TeamStatsBar.tsx     # KPI виджеты
+│   ├── MyTasksWidget.tsx    # Мои задачи
+│   └── QuickActionsGrid.tsx # Быстрые действия
+├── gamification/
+│   ├── PointsDisplay.tsx    # Текущие очки
+│   ├── LevelBadge.tsx       # Уровень
+│   ├── AchievementCard.tsx  # Достижение
+│   ├── Leaderboard.tsx      # Таблица лидеров
+│   └── StreakCounter.tsx    # Серия дней
+├── chat/
+│   ├── ChatSidebar.tsx      # Каналы
+│   ├── ChatMessages.tsx     # Сообщения
+│   ├── ChatInput.tsx        # Ввод
+│   └── MessageBubble.tsx    # Сообщение
+├── notes/
+│   ├── EntityNotesPanel.tsx # Панель заметок
+│   ├── NoteCard.tsx         # Карточка заметки
+│   └── AddNoteForm.tsx      # Добавление
+└── shared/
+    ├── SpecializationBadge.tsx
+    └── TeamMemberAvatar.tsx
+```
+
+---
+
+## 9. Хуки и Логика
+
+### Новые хуки
 ```typescript
-// DashboardStatsBar
-const stats = await supabase.rpc('get_user_dashboard_stats', { user_id });
-// Returns: { active_bookings: 3, wallet_balance: 1500, favorites_count: 12 }
-
-// UpcomingBookingsWidget  
-const { data } = await supabase
-  .from('bookings')
-  .select('*, booking_items(*)')
-  .eq('user_id', user.id)
-  .in('status', ['confirmed', 'pending'])
-  .gte('scheduled_at', new Date().toISOString())
-  .order('scheduled_at', { ascending: true })
-  .limit(3);
-
-// RecentPurchasesWidget
-const { data } = await supabase
-  .from('orders')
-  .select('*, order_items(*)')
-  .eq('user_id', user.id)
-  .eq('order_type', 'product')
-  .order('created_at', { ascending: false })
-  .limit(3);
+useTeamMember()       // Профиль текущего сотрудника
+useTeamGamification() // Очки, уровни, достижения
+useTeamChat()         // Real-time чат
+useEntityNotes()      // CRUD заметок
+useTeamLeaderboard()  // Рейтинги
+useTeamInbox()        // Unified inbox
+useActivityLogger()   // Логирование действий
 ```
 
 ---
 
-## Навигация после изменений
+## 10. RLS и Безопасность
 
-### Основной flow
+### Политики доступа
+- `team_members`: Только свой профиль + admin видит всех
+- `team_activity_log`: Только свои логи + admin
+- `team_gamification`: Публичное чтение (leaderboard), своё обновление
+- `team_messages`: Чтение по каналу, запись авторизованным
+- `team_entity_notes`: CRUD по user_id, чтение по команде
 
-```text
-Home (/)
-   ↓ click avatar
-Account (/account) ← ГЛАВНЫЙ DASHBOARD
-   ├── [Edit Profile] → /profile/edit
-   ├── [Settings] → /profile/settings  
-   ├── [View All Bookings] → /bookings
-   ├── [Order History] → /orders/history
-   ├── [Wallet] → /wallet
-   └── [Quick Service] → /beauty, /tours, etc.
+### Helper функции
+```sql
+is_team_member(user_id) -- Проверка роли uno_team
+has_specialization(user_id, spec) -- Проверка специализации
 ```
 
-### Где показывать ссылку на Dashboard
+---
 
-1. **AppHeader**: Avatar → переход на `/account` (вместо `/profile`)
-2. **AdaptiveBottomNav**: Иконка пользователя → `/account`
-3. Старый `/profile` остаётся для глубоких настроек
+## 11. План Реализации
+
+### Фаза 1: База (2-3 дня)
+1. Миграция БД с новыми таблицами
+2. RLS политики и функции
+3. `TeamLayout` и базовая навигация
+4. Хук `useTeamMember`
+
+### Фаза 2: Gamification (2 дня)
+1. Таблицы очков и достижений
+2. `useActivityLogger` для трекинга
+3. UI компоненты gamification
+4. Leaderboard страница
+
+### Фаза 3: Чат (2 дня)
+1. Таблица сообщений с Realtime
+2. Компоненты чата
+3. Каналы и права доступа
+4. Уведомления об упоминаниях
+
+### Фаза 4: Заметки (1 день)
+1. Таблица заметок
+2. `EntityNotesPanel` компонент
+3. Интеграция в существующие страницы
+
+### Фаза 5: Интеграция (1-2 дня)
+1. Связь с существующими хуками (leads, tickets)
+2. Автоматическое начисление очков
+3. Unified inbox
+4. Тестирование и polish
 
 ---
 
-## Что конкретно делаем
+## 12. Техническая Реализация
 
-### Шаг 1: Создать новые виджеты
-- `DashboardStatsBar.tsx` — 3 карточки с числами
-- `UpcomingBookingsWidget.tsx` — карточки предстоящих событий
-- `RecentPurchasesWidget.tsx` — карточки последних покупок
-- `DashboardQuickServices.tsx` — сетка 4x2 иконок сервисов
+### Пример структуры team_members
+```sql
+CREATE TABLE team_members (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE,
+  specializations TEXT[] DEFAULT '{}',
+  display_name TEXT,
+  phone TEXT,
+  shift_schedule JSONB, -- {mon: "09:00-18:00", ...}
+  is_active BOOLEAN DEFAULT true,
+  hired_at TIMESTAMPTZ DEFAULT now(),
+  bio TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+```
 
-### Шаг 2: Обновить `UserAccountDashboard.tsx`
-- Заменить `AccountOrdersSummary` на новые виджеты
-- Добавить `DashboardStatsBar`
-- Заменить `AccountQuickLinks` на `AccountMenu` + `DashboardQuickServices`
-- Убрать `AccountRolesBlock` (переносим в Settings)
-
-### Шаг 3: Обновить навигацию
-- `AppHeader`: avatar → `/account`
-- Добавить breadcrumbs в `/profile` ("← Мой кабинет")
-
-### Шаг 4: Создать RPC функцию (опционально)
-- `get_user_dashboard_stats` для агрегированных метрик
-
----
-
-## Итог
-
-**Преимущества подхода:**
-1. Один экран для всего важного — no hunting
-2. Чёткое разделение: Dashboard (обзор) vs Profile (настройки)
-3. Персонализация через Quick Services
-4. Использование существующих компонентов + минимум нового кода
-5. Соответствует паттерну Airbnb/Uber (dashboard первым, settings вторичны)
+### Realtime для чата
+```typescript
+const channel = supabase
+  .channel('team-chat')
+  .on('postgres_changes', 
+    { event: 'INSERT', schema: 'public', table: 'team_messages' },
+    handleNewMessage
+  )
+  .subscribe();
+```
 
 ---
 
-## Техническая сложность
+## Резюме
 
-| Компонент | Сложность | Время |
-|-----------|-----------|-------|
-| DashboardStatsBar | Низкая | 15 мин |
-| UpcomingBookingsWidget | Средняя | 25 мин |
-| RecentPurchasesWidget | Средняя | 20 мин |
-| DashboardQuickServices | Низкая | 15 мин |
-| Обновление навигации | Низкая | 10 мин |
-| **Итого** | | **~1.5 часа** |
+Полная система управления командой UNO включает:
+
+- **4 специализации** с гранулярными правами
+- **Gamification** с очками, уровнями и достижениями
+- **Внутренний real-time чат** с каналами
+- **Заметки к объектам** для командной работы
+- **Unified inbox** для всех типов задач
+- **Leaderboard** для мотивации
+
+Это создаст профессиональную среду для команды поддержки уровня enterprise-компаний.
