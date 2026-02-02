@@ -6,3 +6,4 @@
 export * from './contacts';
 export * from './geography';
 export * from './defaults';
+export * from './investorData';
