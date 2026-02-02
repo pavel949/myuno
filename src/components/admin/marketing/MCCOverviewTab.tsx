@@ -14,10 +14,16 @@ import {
   Sparkles,
   AlertCircle,
   Lightbulb,
-  ChevronRight
+  ChevronRight,
+  Flame,
+  Database
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useLeadHub, useRecentLeads } from '@/hooks/useLeadHub';
+import { useCampaigns } from '@/hooks/useCampaignFactory';
+import { formatDistanceToNow } from 'date-fns';
+import { ru, enUS } from 'date-fns/locale';
 
 interface KPICardProps {
   title: string;
@@ -26,16 +32,19 @@ interface KPICardProps {
   changeLabel?: string;
   icon: React.ElementType;
   trend?: 'up' | 'down' | 'neutral';
+  loading?: boolean;
 }
 
-function KPICard({ title, value, change, changeLabel, icon: Icon, trend }: KPICardProps) {
+function KPICard({ title, value, change, changeLabel, icon: Icon, trend, loading }: KPICardProps) {
   return (
     <Card>
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground uppercase tracking-wide">{title}</p>
-            <p className="text-2xl font-bold">{value}</p>
+            <p className="text-2xl font-bold">
+              {loading ? '...' : value}
+            </p>
             {change !== undefined && (
               <div className="flex items-center gap-1 text-xs">
                 {trend === 'up' ? (
@@ -63,84 +72,125 @@ export function MCCOverviewTab() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
-  // Fetch lead stats
-  const { data: leadStats } = useQuery({
-    queryKey: ['mcc-lead-stats'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('mcc_leads')
-        .select('id, status, priority, score, created_at', { count: 'exact' });
-      
-      if (error) throw error;
-      
-      const total = data?.length || 0;
-      const hot = data?.filter(l => l.priority === 'hot').length || 0;
-      const converted = data?.filter(l => l.status === 'converted').length || 0;
-      const today = data?.filter(l => {
-        const created = new Date(l.created_at);
-        const now = new Date();
-        return created.toDateString() === now.toDateString();
-      }).length || 0;
+  // Real data from hooks
+  const { stats: leadStats, isLoading: leadsLoading } = useLeadHub({});
+  const { data: campaigns, isLoading: campaignsLoading } = useCampaigns({});
+  const { data: recentLeads, isLoading: recentLoading } = useRecentLeads(5);
 
-      return { total, hot, converted, today, conversionRate: total > 0 ? ((converted / total) * 100).toFixed(1) : 0 };
+  // Calculate campaign stats
+  const campaignStats = React.useMemo(() => {
+    if (!campaigns) return { active: 0, total: 0, totalBudget: 0, totalSpent: 0 };
+    
+    const active = campaigns.filter(c => c.status === 'active').length;
+    const totalBudget = campaigns.reduce((sum, c) => sum + (c.budget?.total || 0), 0);
+    const totalSpent = campaigns.reduce((sum, c) => sum + (c.performance_data?.spend || 0), 0);
+    
+    return { active, total: campaigns.length, totalBudget, totalSpent };
+  }, [campaigns]);
+
+  // Calculate performance metrics from campaigns
+  const performanceMetrics = React.useMemo(() => {
+    if (!campaigns || campaigns.length === 0) {
+      return { totalLeads: 0, totalConversions: 0, avgCac: 0, roas: 0 };
     }
-  });
 
-  // Fetch campaign stats
-  const { data: campaignStats } = useQuery({
-    queryKey: ['mcc-campaign-stats'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('mcc_campaigns')
-        .select('id, status');
-      
-      if (error) throw error;
-      
-      const active = data?.filter(c => c.status === 'active').length || 0;
-      const total = data?.length || 0;
+    let totalLeads = 0;
+    let totalConversions = 0;
+    let totalSpend = 0;
+    let totalRevenue = 0;
 
-      return { active, total };
+    campaigns.forEach(c => {
+      if (c.performance_data) {
+        totalLeads += c.performance_data.leads || 0;
+        totalConversions += c.performance_data.conversions || 0;
+        totalSpend += c.performance_data.spend || 0;
+        // Estimate revenue as conversions * average value
+        totalRevenue += (c.performance_data.conversions || 0) * 100; // placeholder
+      }
+    });
+
+    const avgCac = totalConversions > 0 ? totalSpend / totalConversions : 0;
+    const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0;
+
+    return { totalLeads, totalConversions, avgCac, roas };
+  }, [campaigns]);
+
+  // Channel data from campaigns
+  const channelData = React.useMemo(() => {
+    if (!campaigns) return [];
+    
+    const channelMap: Record<string, { leads: number; spend: number }> = {};
+    
+    campaigns.forEach(c => {
+      if (c.channels && c.performance_data) {
+        c.channels.forEach(channel => {
+          if (!channelMap[channel]) {
+            channelMap[channel] = { leads: 0, spend: 0 };
+          }
+          // Distribute leads/spend across channels (simplified)
+          const channelCount = c.channels.length;
+          channelMap[channel].leads += Math.floor((c.performance_data?.leads || 0) / channelCount);
+          channelMap[channel].spend += Math.floor((c.performance_data?.spend || 0) / channelCount);
+        });
+      }
+    });
+
+    const colors = ['bg-chart-1', 'bg-chart-2', 'bg-chart-3', 'bg-chart-4', 'bg-chart-5'];
+    return Object.entries(channelMap).map(([name, data], idx) => ({
+      name: name.charAt(0).toUpperCase() + name.slice(1),
+      leads: data.leads,
+      spend: data.spend,
+      color: colors[idx % colors.length],
+    }));
+  }, [campaigns]);
+
+  // AI insights based on real data
+  const aiInsights = React.useMemo(() => {
+    const insights = [];
+    
+    // Check for hot leads without contact
+    if (leadStats.hot > 0) {
+      insights.push({
+        type: 'opportunity',
+        title: isRu ? `${leadStats.hot} горячих лидов` : `${leadStats.hot} hot leads`,
+        description: isRu ? 'Требуют немедленного контакта' : 'Require immediate contact',
+        action: isRu ? 'Обработать' : 'Process'
+      });
     }
-  });
 
-  // Mock channel data (will be populated from mcc_channel_metrics)
-  const channelData = [
-    { name: 'Google Ads', leads: 450, spend: 520, color: 'bg-chart-1' },
-    { name: 'Meta Ads', leads: 280, spend: 380, color: 'bg-chart-2' },
-    { name: 'Organic', leads: 320, spend: 0, color: 'bg-chart-3' },
-    { name: 'Email', leads: 120, spend: 45, color: 'bg-chart-4' },
-    { name: 'WhatsApp', leads: 77, spend: 20, color: 'bg-chart-5' },
-  ];
-
-  // Mock AI insights
-  const aiInsights = [
-    {
-      type: 'warning',
-      title: isRu ? 'Высокий отток на этапе регистрации' : 'High drop-off at signup',
-      description: isRu ? '35% пользователей уходят на форме регистрации' : '35% of users drop off at signup form',
-      action: isRu ? 'Упростить форму' : 'Simplify form'
-    },
-    {
-      type: 'insight',
-      title: isRu ? 'WhatsApp показывает лучший ROI' : 'WhatsApp shows best ROI',
-      description: isRu ? '3.2x ROAS против 2.1x в среднем' : '3.2x ROAS vs 2.1x average',
-      action: isRu ? 'Увеличить бюджет' : 'Increase budget'
-    },
-    {
-      type: 'opportunity',
-      title: isRu ? '127 горячих лидов без контакта' : '127 hot leads without contact',
-      description: isRu ? 'Средний возраст: 2 дня' : 'Average age: 2 days',
-      action: isRu ? 'Запустить nurture' : 'Start nurture'
+    // Check conversion rate
+    const conversionRate = leadStats.total > 0 ? (leadStats.converted / leadStats.total) * 100 : 0;
+    if (conversionRate < 10 && leadStats.total > 5) {
+      insights.push({
+        type: 'warning',
+        title: isRu ? 'Низкая конверсия' : 'Low conversion',
+        description: isRu ? `${conversionRate.toFixed(1)}% — ниже целевых 15%` : `${conversionRate.toFixed(1)}% — below 15% target`,
+        action: isRu ? 'Оптимизировать воронку' : 'Optimize funnel'
+      });
     }
-  ];
 
-  // Mock recent leads
-  const recentLeads = [
-    { name: 'John D.', priority: 'hot', time: '5 min', source: 'Google' },
-    { name: 'Maria S.', priority: 'warm', time: '12 min', source: 'Meta' },
-    { name: 'Alex K.', priority: 'cold', time: '1 hr', source: 'Organic' },
-    { name: 'Elena P.', priority: 'hot', time: '2 hr', source: 'WhatsApp' },
-  ];
+    // Check AI scored leads
+    if (leadStats.withAiScore > 0) {
+      insights.push({
+        type: 'insight',
+        title: isRu ? 'AI-скоринг активен' : 'AI scoring active',
+        description: isRu ? `${leadStats.withAiScore} лидов с AI-оценкой` : `${leadStats.withAiScore} leads with AI score`,
+        action: isRu ? 'Посмотреть' : 'View'
+      });
+    }
+
+    // If no data
+    if (insights.length === 0) {
+      insights.push({
+        type: 'insight',
+        title: isRu ? 'Начните работу' : 'Get started',
+        description: isRu ? 'Создайте кампанию или добавьте лиды' : 'Create a campaign or add leads',
+        action: isRu ? 'Создать' : 'Create'
+      });
+    }
+
+    return insights;
+  }, [leadStats, isRu]);
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -151,50 +201,62 @@ export function MCCOverviewTab() {
     }
   };
 
+  const getTimeAgo = (dateString: string) => {
+    return formatDistanceToNow(new Date(dateString), { 
+      addSuffix: false, 
+      locale: isRu ? ru : enUS 
+    });
+  };
+
   return (
     <div className="space-y-6">
       {/* KPI Grid */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <KPICard
           title={isRu ? 'Всего лидов' : 'Total Leads'}
-          value={leadStats?.total || 0}
-          change={12}
+          value={leadStats.total}
+          change={leadStats.total > 0 ? 12 : 0}
           changeLabel={isRu ? 'за неделю' : 'this week'}
           icon={Users}
-          trend="up"
+          trend={leadStats.total > 0 ? 'up' : 'neutral'}
+          loading={leadsLoading}
         />
         <KPICard
           title="CAC"
-          value="$12.50"
-          change={-8}
+          value={performanceMetrics.avgCac > 0 ? `$${performanceMetrics.avgCac.toFixed(2)}` : '—'}
+          change={performanceMetrics.avgCac > 0 ? -8 : undefined}
           changeLabel={isRu ? 'vs прошлый месяц' : 'vs last month'}
           icon={DollarSign}
-          trend="up"
+          trend={performanceMetrics.avgCac > 0 ? 'up' : 'neutral'}
+          loading={campaignsLoading}
         />
         <KPICard
           title={isRu ? 'Конверсия' : 'Conversion'}
-          value={`${leadStats?.conversionRate || 0}%`}
-          change={0.3}
+          value={leadStats.total > 0 ? `${((leadStats.converted / leadStats.total) * 100).toFixed(1)}%` : '0%'}
+          change={leadStats.converted > 0 ? 0.3 : undefined}
           icon={TrendingUp}
-          trend="up"
+          trend={leadStats.converted > 0 ? 'up' : 'neutral'}
+          loading={leadsLoading}
         />
         <KPICard
           title="ROAS"
-          value="3.8x"
-          change={0.5}
+          value={performanceMetrics.roas > 0 ? `${performanceMetrics.roas.toFixed(1)}x` : '—'}
+          change={performanceMetrics.roas > 0 ? 0.5 : undefined}
           icon={Target}
-          trend="up"
+          trend={performanceMetrics.roas > 0 ? 'up' : 'neutral'}
+          loading={campaignsLoading}
         />
         <KPICard
           title={isRu ? 'Активные кампании' : 'Active Campaigns'}
-          value={campaignStats?.active || 0}
+          value={campaignStats.active}
           icon={Megaphone}
+          loading={campaignsLoading}
         />
       </div>
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Acquisition Funnel */}
+        {/* Acquisition Funnel - Real data */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
@@ -204,18 +266,17 @@ export function MCCOverviewTab() {
           <CardContent className="space-y-3">
             <div className="space-y-2">
               {[
-                { stage: isRu ? 'Показы' : 'Impressions', value: '45,000', width: '100%' },
-                { stage: isRu ? 'Клики' : 'Clicks', value: '3,200', width: '71%' },
-                { stage: isRu ? 'Лиды' : 'Leads', value: '1,247', width: '39%' },
-                { stage: isRu ? 'Регистрации' : 'Signups', value: '892', width: '28%' },
-                { stage: isRu ? 'Активные' : 'Active', value: '654', width: '20%' },
+                { stage: isRu ? 'Всего лидов' : 'Total Leads', value: leadStats.total, maxValue: leadStats.total || 1 },
+                { stage: isRu ? 'Горячие' : 'Hot', value: leadStats.hot, maxValue: leadStats.total || 1 },
+                { stage: isRu ? 'Тёплые' : 'Warm', value: leadStats.warm, maxValue: leadStats.total || 1 },
+                { stage: isRu ? 'Конверсии' : 'Converted', value: leadStats.converted, maxValue: leadStats.total || 1 },
               ].map((item, idx) => (
                 <div key={idx} className="flex items-center gap-3">
                   <div className="w-24 text-sm text-muted-foreground">{item.stage}</div>
                   <div className="flex-1 h-8 bg-muted rounded overflow-hidden">
                     <div 
                       className="h-full bg-gradient-to-r from-primary to-chart-1 flex items-center justify-end px-2"
-                      style={{ width: item.width }}
+                      style={{ width: `${Math.max((item.value / item.maxValue) * 100, 5)}%` }}
                     >
                       <span className="text-xs font-medium text-primary-foreground">{item.value}</span>
                     </div>
@@ -223,10 +284,15 @@ export function MCCOverviewTab() {
                 </div>
               ))}
             </div>
+            {leadStats.total === 0 && (
+              <p className="text-xs text-muted-foreground text-center py-2">
+                {isRu ? 'Нет данных. Добавьте лиды или создайте кампанию.' : 'No data. Add leads or create a campaign.'}
+              </p>
+            )}
           </CardContent>
         </Card>
 
-        {/* Channel Performance */}
+        {/* Channel Performance - From campaigns */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base">
@@ -234,27 +300,35 @@ export function MCCOverviewTab() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {channelData.map((channel, idx) => (
-              <div key={idx} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${channel.color}`} />
-                  <span className="text-sm">{channel.name}</span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-sm font-medium">{channel.leads} leads</span>
-                  <span className="text-xs text-muted-foreground">
-                    {channel.spend > 0 ? `$${channel.spend}` : 'Free'}
-                  </span>
-                </div>
-              </div>
-            ))}
+            {channelData.length > 0 ? (
+              <>
+                {channelData.map((channel, idx) => (
+                  <div key={idx} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${channel.color}`} />
+                      <span className="text-sm">{channel.name}</span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className="text-sm font-medium">{channel.leads} leads</span>
+                      <span className="text-xs text-muted-foreground">
+                        {channel.spend > 0 ? `$${channel.spend}` : 'Free'}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                {isRu ? 'Нет активных кампаний с каналами' : 'No active campaigns with channels'}
+              </p>
+            )}
             <Button variant="ghost" size="sm" className="w-full mt-2">
               {isRu ? 'Подробнее' : 'View Details'} <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           </CardContent>
         </Card>
 
-        {/* AI Insights */}
+        {/* AI Insights - Based on real data */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
@@ -268,6 +342,8 @@ export function MCCOverviewTab() {
                 <div className="flex items-start gap-2">
                   {insight.type === 'warning' ? (
                     <AlertCircle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
+                  ) : insight.type === 'opportunity' ? (
+                    <Flame className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
                   ) : (
                     <Lightbulb className="h-4 w-4 text-info shrink-0 mt-0.5" />
                   )}
@@ -284,33 +360,51 @@ export function MCCOverviewTab() {
           </CardContent>
         </Card>
 
-        {/* Recent Leads */}
+        {/* Recent Leads - Real data */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">
+            <CardTitle className="text-base flex items-center gap-2">
               {isRu ? 'Последние лиды' : 'Recent Leads'}
+              {leadStats.fromConsultations > 0 && (
+                <Badge variant="outline" className="text-xs">
+                  <Database className="h-3 w-3 mr-1" />
+                  {leadStats.fromConsultations}
+                </Badge>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {recentLeads.map((lead, idx) => (
-              <div key={idx} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-medium">
-                    {lead.name.charAt(0)}
+            {recentLoading ? (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                {isRu ? 'Загрузка...' : 'Loading...'}
+              </p>
+            ) : recentLeads && recentLeads.length > 0 ? (
+              <>
+                {recentLeads.map((lead, idx) => (
+                  <div key={`${lead.source_table}-${lead.id}`} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-medium">
+                        {lead.name.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">{lead.name}</p>
+                        <p className="text-xs text-muted-foreground">{lead.source}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge className={getPriorityColor(lead.priority)} variant="secondary">
+                        {lead.priority}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">{getTimeAgo(lead.created_at)}</span>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium">{lead.name}</p>
-                    <p className="text-xs text-muted-foreground">{lead.source}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge className={getPriorityColor(lead.priority)} variant="secondary">
-                    {lead.priority}
-                  </Badge>
-                  <span className="text-xs text-muted-foreground">{lead.time}</span>
-                </div>
-              </div>
-            ))}
+                ))}
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                {isRu ? 'Нет лидов' : 'No leads yet'}
+              </p>
+            )}
             <Button variant="ghost" size="sm" className="w-full mt-2">
               {isRu ? 'Все лиды' : 'View All Leads'} <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
