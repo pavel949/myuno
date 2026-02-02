@@ -21,7 +21,7 @@ export default function TeamChatPage() {
           </p>
         </div>
 
-        <TeamChat className="h-[calc(100vh-250px)]" />
+        <TeamChat className="h-[calc(100vh-280px)] lg:h-[calc(100vh-220px)]" />
       </div>
     </TeamLayout>
   );
