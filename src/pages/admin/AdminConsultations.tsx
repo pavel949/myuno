@@ -330,6 +330,14 @@ function ConsultationCard({
               </DialogContent>
             </Dialog>
 
+            {/* Follow-up generator */}
+            <FollowUpGenerator
+              leadId={consultation.id}
+              leadName={consultation.name}
+              leadPhone={consultation.phone}
+              leadEmail={consultation.email}
+            />
+
             {/* Quick status buttons */}
             {consultation.status === 'pending' && (
               <Button 

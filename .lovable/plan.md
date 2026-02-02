@@ -41,9 +41,19 @@
 
 ---
 
-## 📋 Фаза 3: AI & Automation (TODO)
+## ✅ Фаза 3: AI & Automation (ВЫПОЛНЕНО)
 
-- AI Auto-routing по вертикалям
-- WhatsApp/Telegram интеграция
-- Smart Suggestions
-- Lead Scoring по вертикалям
+- ✅ AI Lead Scoring (edge function `leads-factory`)
+- ✅ Batch scoring (кнопка AI-скоринг в админке)
+- ✅ WhatsApp/Email follow-up генератор
+- ✅ AI Insights в карточках лидов (score, priority, reasoning)
+- ✅ FollowUpGenerator с копированием и открытием мессенджеров
+
+---
+
+## 📋 Фаза 4: Future Enhancements (TODO)
+
+- Telegram Bot интеграция
+- Smart Suggestions (на основе истории просмотров)
+- AI Auto-routing по вертикалям (назначение менеджеров)
+- Расширенная аналитика по вертикалям
