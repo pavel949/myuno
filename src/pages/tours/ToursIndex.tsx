@@ -8,6 +8,7 @@ import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type Q
 import { tourFilterConfig, FilterValues } from "@/components/filters";
 import { matchesFilter, matchesPriceLevel, matchesGroupSize } from "@/lib/filterUtils";
 import { CrossSellSection } from "@/components/crosssell";
+import { VerticalCTA } from '@/components/leads/VerticalCTA';
 
 const TOUR_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All Tours', labelRu: 'Все туры' },
@@ -119,6 +120,7 @@ export default function ToursIndex() {
           />
         ))}
       </div>
+      <VerticalCTA vertical="tours" className="my-6" />
 
       <CrossSellSection currentVertical="tours" />
     </MiniAppLayout>

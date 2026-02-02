@@ -9,6 +9,7 @@ import { ExperienceFilterChips } from '@/components/yachts/YachtExperienceSelect
 import { useYachts } from '@/hooks/useYachts';
 import { matchesFilter, matchesPriceLevel } from '@/lib/filterUtils';
 import { CrossSellSection } from '@/components/crosssell';
+import { VerticalCTA } from '@/components/leads/VerticalCTA';
 
 const YACHT_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -201,6 +202,7 @@ export default function YachtsIndex() {
           />
         ))}
       </div>
+      <VerticalCTA vertical="yachts" className="my-6" />
 
       <CrossSellSection currentVertical="yachts" />
     </MiniAppLayout>

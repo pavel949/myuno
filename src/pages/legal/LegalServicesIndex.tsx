@@ -8,6 +8,7 @@ import { FilterValues, legalFilterConfig } from "@/components/filters";
 import { useLegalServices } from "@/hooks/useLegalServices";
 import { VisaServicesSection } from "./VisaServicesSection";
 import { matchesFilter, matchesPriceLevel } from '@/lib/filterUtils';
+import { VerticalCTA } from '@/components/leads/VerticalCTA';
 
 const categories: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -150,6 +151,8 @@ export default function LegalServicesIndex() {
           </div>
         </>
       )}
+
+      <VerticalCTA vertical="legal" className="my-6" />
     </MiniAppLayout>
   );
 }

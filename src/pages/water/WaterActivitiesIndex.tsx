@@ -6,6 +6,7 @@ import { useWaterActivities } from "@/hooks/useWaterActivities";
 import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from "@/components/miniapp";
 import { waterFilterConfig, FilterValues } from "@/components/filters";
 import { CrossSellSection } from "@/components/crosssell";
+import { VerticalCTA } from '@/components/leads/VerticalCTA';
 
 const CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All Activities', labelRu: 'Все активности' },
@@ -104,6 +105,8 @@ export default function WaterActivitiesIndex() {
           />
         ))}
       </div>
+
+      <VerticalCTA vertical="water_sports" className="my-6" />
 
       <CrossSellSection 
         currentVertical="water" 
