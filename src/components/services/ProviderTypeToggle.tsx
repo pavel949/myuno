@@ -1,0 +1,39 @@
+import React from 'react';
+import { cn } from '@/lib/utils';
+import { PROVIDER_TYPE_OPTIONS, ProviderType } from '@/lib/config/homeServicesTaxonomy';
+import { useLanguage } from '@/contexts/LanguageContext';
+
+interface ProviderTypeToggleProps {
+  selectedType: ProviderType | 'all';
+  onTypeChange: (type: ProviderType | 'all') => void;
+  className?: string;
+}
+
+export function ProviderTypeToggle({ selectedType, onTypeChange, className }: ProviderTypeToggleProps) {
+  const { language } = useLanguage();
+
+  return (
+    <div className={cn("flex gap-1 p-1 bg-muted rounded-lg", className)}>
+      {PROVIDER_TYPE_OPTIONS.map((option) => {
+        const isSelected = selectedType === option.id;
+        const label = language === 'ru' ? option.labelRu : option.labelEn;
+        
+        return (
+          <button
+            key={option.id}
+            onClick={() => onTypeChange(option.id as ProviderType | 'all')}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all flex-1",
+              isSelected
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <span className="text-base">{option.icon}</span>
+            <span>{label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}

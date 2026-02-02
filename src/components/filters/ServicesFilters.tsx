@@ -1,29 +1,42 @@
 import { FilterConfig, FilterOption } from './UniversalFilter';
+import { 
+  ALL_SERVICE_CATEGORIES, 
+  SERVICE_DOMAINS,
+  PROVIDER_TYPE_OPTIONS 
+} from '@/lib/config/homeServicesTaxonomy';
 
-// ====== SERVICE CATEGORIES ======
-export const serviceCategoryOptions: FilterOption[] = [
-  { id: 'cleaning', labelEn: 'Cleaning', labelRu: 'Уборка', icon: '🧹' },
-  { id: 'laundry', labelEn: 'Laundry', labelRu: 'Стирка', icon: '🧺' },
-  { id: 'repair', labelEn: 'Repair', labelRu: 'Ремонт', icon: '🔧' },
-  { id: 'plumbing', labelEn: 'Plumbing', labelRu: 'Сантехник', icon: '🚿' },
-  { id: 'electrical', labelEn: 'Electrical', labelRu: 'Электрик', icon: '⚡' },
-  { id: 'ac-service', labelEn: 'AC Service', labelRu: 'Кондиционеры', icon: '❄️' },
-  { id: 'pest-control', labelEn: 'Pest Control', labelRu: 'Дезинсекция', icon: '🐜' },
-  { id: 'gardening', labelEn: 'Gardening', labelRu: 'Садовник', icon: '🌿' },
-  { id: 'moving', labelEn: 'Moving', labelRu: 'Переезд', icon: '📦' },
-  { id: 'handyman', labelEn: 'Handyman', labelRu: 'Мастер на час', icon: '🔨' },
-];
+// ====== SERVICE CATEGORIES (from centralized taxonomy) ======
+export const serviceCategoryOptions: FilterOption[] = ALL_SERVICE_CATEGORIES.map(cat => ({
+  id: cat.id,
+  labelEn: cat.labelEn,
+  labelRu: cat.labelRu,
+  icon: cat.icon,
+}));
+
+// ====== SERVICE DOMAINS ======
+export const serviceDomainOptions: FilterOption[] = SERVICE_DOMAINS.map(domain => ({
+  id: domain.id,
+  labelEn: domain.labelEn,
+  labelRu: domain.labelRu,
+  icon: domain.icon,
+}));
+
+// ====== PROVIDER TYPE ======
+export const providerTypeOptions: FilterOption[] = PROVIDER_TYPE_OPTIONS.filter(o => o.id !== 'all').map(opt => ({
+  id: opt.id,
+  labelEn: opt.labelEn,
+  labelRu: opt.labelRu,
+  icon: opt.icon,
+}));
 
 // ====== SERVICE FEATURES ======
 export const serviceFeatureOptions: FilterOption[] = [
-  { id: 'same-day', labelEn: 'Same Day', labelRu: 'В тот же день', icon: '⚡' },
-  { id: 'weekend', labelEn: 'Weekend Available', labelRu: 'Работают в выходные', icon: '🗓️' },
-  { id: 'english', labelEn: 'English Speaking', labelRu: 'Говорят по-английски', icon: '🇬🇧' },
-  { id: 'russian', labelEn: 'Russian Speaking', labelRu: 'Говорят по-русски', icon: '🇷🇺' },
   { id: 'verified', labelEn: 'Verified', labelRu: 'Проверенные', icon: '✅' },
   { id: 'insured', labelEn: 'Insured', labelRu: 'Застрахованы', icon: '🛡️' },
-  { id: 'eco-friendly', labelEn: 'Eco Friendly', labelRu: 'Эко средства', icon: '🌱' },
-  { id: 'guaranteed', labelEn: 'Work Guaranteed', labelRu: 'Гарантия работ', icon: '💯' },
+  { id: 'guaranteed', labelEn: 'Guaranteed', labelRu: 'Гарантия работ', icon: '💯' },
+  { id: 'fast-response', labelEn: 'Fast Response', labelRu: 'Быстрый отклик', icon: '⚡' },
+  { id: 'english', labelEn: 'English Speaking', labelRu: 'Говорят по-английски', icon: '🇬🇧' },
+  { id: 'russian', labelEn: 'Russian Speaking', labelRu: 'Говорят по-русски', icon: '🇷🇺' },
 ];
 
 // ====== BOOKING TYPE ======
@@ -36,6 +49,13 @@ export const bookingTypeOptions: FilterOption[] = [
 // ====== COMPLETE SERVICES FILTER CONFIG ======
 export const servicesFilterConfig: FilterConfig = {
   sections: [
+    {
+      id: 'providerType',
+      titleEn: 'Provider Type',
+      titleRu: 'Тип исполнителя',
+      type: 'single',
+      options: providerTypeOptions,
+    },
     {
       id: 'priceLevel',
       titleEn: 'Price Level',
