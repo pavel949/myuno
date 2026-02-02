@@ -16,6 +16,7 @@ import { SupportFAB } from "@/components/chat/SupportFAB";
 import { ErrorBoundary, useGlobalErrorHandler } from "@/components/ErrorBoundary";
 import { PrefetchProvider } from "@/components/providers/PrefetchProvider";
 import { defaultQueryClientOptions } from "@/lib/queryConfig";
+import { HintProvider } from "@/components/hints/HintProvider";
 
 const queryClient = new QueryClient({
   defaultOptions: defaultQueryClientOptions,
@@ -49,13 +50,15 @@ const App = () => (
                 <AuthProvider>
                   <CartProvider>
                     <TooltipProvider>
-                      <PrefetchProvider>
-                        <AppContent />
-                      </PrefetchProvider>
+                      <HintProvider>
+                        <PrefetchProvider>
+                          <AppContent />
+                        </PrefetchProvider>
+                      </HintProvider>
                     </TooltipProvider>
-                  </CartProvider>
-                </AuthProvider>
-              </CurrencyProvider>
+                    </CartProvider>
+                  </AuthProvider>
+                </CurrencyProvider>
             </LocationProvider>
           </LanguageProvider>
         </ThemeProvider>
