@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { useExperiences, formatDuration } from '@/hooks/useExperiences';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { cn } from '@/lib/utils';
+import { CARD_STYLES, IMAGE_STYLES, BADGE_STYLES } from '@/lib/designTokens';
 
 export function ExperiencesSection() {
   const { t, language } = useLanguage();
@@ -42,7 +43,7 @@ export function ExperiencesSection() {
             <div 
               key={experience.id}
               onClick={() => navigate(`/experiences/${experience.id}`)}
-              className="flex-shrink-0 w-64 bg-card rounded-2xl overflow-hidden border hover:shadow-lg transition-all cursor-pointer group"
+              className={cn(CARD_STYLES.interactive, "flex-shrink-0 w-64")}
             >
               <div className="relative h-36 overflow-hidden">
                 <OptimizedImage 
@@ -50,7 +51,7 @@ export function ExperiencesSection() {
                   alt={language === 'ru' ? experience.title_ru : experience.title_en}
                   width={256}
                   height={144}
-                  className="w-full h-full group-hover:scale-105 transition-transform"
+                  className={IMAGE_STYLES.hover}
                   quality={75}
                   sizes="256px"
                 />
@@ -89,10 +90,12 @@ export function ExperiencesSection() {
                   {language === 'ru' ? experience.title_ru : experience.title_en}
                 </h3>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-                  <span className="flex items-center gap-0.5">
-                    <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                    {experience.rating.toFixed(1)}
-                  </span>
+                  <div className="flex items-center gap-0.5 bg-amber-100 dark:bg-amber-900/30 px-1.5 py-0.5 rounded-full">
+                    <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
+                    <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-400">
+                      {experience.rating.toFixed(1)}
+                    </span>
+                  </div>
                   <span>•</span>
                   <span>{formatDuration(experience.duration_minutes, language)}</span>
                 </div>

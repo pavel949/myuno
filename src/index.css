@@ -62,6 +62,19 @@ html, body {
     --warning: 38 92% 50%;
     --info: 199 89% 48%;
 
+    /* ============ Unified Card Tokens ============ */
+    --card-radius: 1rem;           /* 16px = rounded-2xl */
+    --card-radius-compact: 0.75rem; /* 12px = rounded-xl */
+    --card-padding: 1rem;          /* 16px */
+    --card-padding-compact: 0.75rem; /* 12px */
+    --card-gap: 0.75rem;           /* 12px */
+    
+    /* Unified Shadow Tokens */
+    --shadow-card: 0 1px 3px 0 hsl(0 0% 0% / 0.1);
+    --shadow-card-hover: 0 4px 12px -2px hsl(0 0% 0% / 0.12);
+    --shadow-elevated: 0 10px 25px -5px hsl(0 0% 0% / 0.15);
+    --shadow-float: 0 20px 40px -10px hsl(0 0% 0% / 0.2);
+
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 43 74% 42%;
@@ -114,6 +127,12 @@ html, body {
     /* Elevated surfaces */
     --card-elevated: 240 10% 8%;
     --card-hover: 240 10% 10%;
+    
+    /* ============ Unified Card Tokens (Dark) ============ */
+    --shadow-card: 0 1px 3px 0 hsl(0 0% 0% / 0.3);
+    --shadow-card-hover: 0 4px 12px -2px hsl(0 0% 0% / 0.4);
+    --shadow-elevated: 0 10px 25px -5px hsl(0 0% 0% / 0.5);
+    --shadow-float: 0 20px 40px -10px hsl(0 0% 0% / 0.6);
 
     --sidebar-background: 240 10% 5%;
     --sidebar-foreground: 0 0% 90%;

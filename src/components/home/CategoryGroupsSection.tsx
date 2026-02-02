@@ -72,7 +72,7 @@ export function CategoryGroupsSection({ expanded = false, showAll = false }: Cat
                     "w-10 h-10 rounded-xl flex items-center justify-center mb-1.5",
                     "bg-gradient-to-br shadow-sm",
                     cat.color,
-                    "group-hover:scale-110 transition-transform"
+                    "group-hover:scale-[1.03] transition-transform duration-300"
                   )}>
                     <Icon className="w-5 h-5 text-white" />
                   </div>

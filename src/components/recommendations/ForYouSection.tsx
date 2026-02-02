@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { DESIGN_TOKENS, CARD_STYLES, IMAGE_STYLES, BADGE_STYLES } from '@/lib/designTokens';
 
 const reasonIcons = {
   history: Clock,
@@ -144,25 +145,25 @@ export const ForYouSection = forwardRef<HTMLDivElement, React.ComponentPropsWith
           const reasonLabel = reasonLabels[item.reason][language];
           
           return (
-            <button
+            <div
               key={`${item.item_type}-${item.id}`}
               onClick={() => handleItemClick(item)}
               className={cn(
-                "flex-shrink-0 w-64 bg-card rounded-2xl overflow-hidden border text-left",
-                "hover:shadow-lg transition-all cursor-pointer group touch-manipulation"
+                CARD_STYLES.interactive,
+                "flex-shrink-0 w-64 text-left touch-manipulation"
               )}
             >
-              <div className="relative h-36">
+              <div className="relative h-36 overflow-hidden">
                 <img
                   src={item.image && item.image.trim() !== '' ? item.image : 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'}
                   alt=""
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                  className={IMAGE_STYLES.hover}
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400';
                   }}
                 />
                 <Badge 
-                  className="absolute top-2 left-2 bg-background/80 backdrop-blur-sm text-foreground text-[10px] gap-1"
+                  className={cn(BADGE_STYLES.muted, "absolute top-2 left-2 gap-1")}
                   variant="secondary"
                 >
                   <ReasonIcon className="w-3 h-3" />
@@ -179,16 +180,18 @@ export const ForYouSection = forwardRef<HTMLDivElement, React.ComponentPropsWith
                   </p>
                 )}
                 <div className="flex items-center justify-between mt-2">
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                    {item.rating.toFixed(1)}
+                  <div className="flex items-center gap-0.5 bg-amber-100 dark:bg-amber-900/30 px-1.5 py-0.5 rounded-full">
+                    <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
+                    <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-400">
+                      {item.rating.toFixed(1)}
+                    </span>
                   </div>
                   <p className="text-primary font-bold text-sm">
                     {formatPrice(item.price)}
                   </p>
                 </div>
               </div>
-            </button>
+            </div>
           );
         })}
       </div>
