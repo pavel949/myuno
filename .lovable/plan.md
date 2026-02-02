@@ -1,349 +1,383 @@
 
-# План: Унификация дизайна и UX/UI
+# Сравнительный анализ: myUNO Yacht Charter vs. Мировые лидеры
 
-## Цель
-Создать единую, современную, глобально-конкурентную дизайн-систему, устранив несогласованности в карточках, типографике, тенях, анимациях и spacing.
+## Обзор платформ для сравнения
+- **Premium:** YachtCharterFleet, Boatbookings
+- **Marketplace:** YACHTICO, Sailo, Sailogy
+- **P2P:** Boatsetter, Viravira
 
 ---
 
-## Часть 1: Выявленные проблемы дизайна
+## 1. Модель листинга и каталогизации судов
 
-### 1.1 Несогласованность border-radius
+### Текущая реализация myUNO
+**Структура данных (`yachts` table):**
+- Базовые поля: `name_en/ru`, `description_en/ru`, `yacht_type`
+- Технические спеки: `length_meters`, `year_built`, `beam`, `draft`, `engines`, `cruising_speed`, `max_speed`, `fuel_capacity`
+- Вместимость: `capacity`, `cabins`, `bathrooms`
+- Сервис: `has_crew`, `has_catering`
+- Медиа: `cover_image`, `images[]`
+- Фичи: `features_en[]`, `features_ru[]`
 
-| Компонент | Текущее значение | Проблема |
-|-----------|------------------|----------|
-| ui/Card | `rounded-xl` | Базовое |
-| ProfessionalProductCard | `rounded-2xl` | Больше чем base |
-| ProductCard | `rounded-xl` | Согласовано |
-| ForYouSection карточки | `rounded-2xl` | Больше |
-| RecommendedCarousel | `rounded-2xl` | Больше |
-| CategoryGrid | `rounded-xl` | Согласовано |
-| MarketplacePromoCarousel | `rounded-xl` | Согласовано |
+**Типы яхт:** yacht, catamaran, speedboat, sailboat
 
-**Решение**: Стандартизировать `rounded-2xl` (16px) для всех карточек контента.
+**Фильтрация (`YachtsFilters.tsx`):**
+- По типу (6 категорий)
+- По вместимости (4 диапазона)
+- По продолжительности (5 опций)
+- По направлениям (6 маршрутов Пхукета)
+- По удобствам (9 опций)
+- По уровню цен
 
-### 1.2 Несогласованность размеров текста
+### Сравнение с лидерами
 
-Найдено 1051+ использований нестандартных размеров:
-- `text-[10px]` — 700+ использований
-- `text-[11px]` — 200+ использований
-- `text-[9px]` — 50+ использований
+| Параметр | myUNO | YachtCharterFleet | YACHTICO | Boatsetter |
+|----------|-------|-------------------|----------|------------|
+| Технические спеки | ✅ Полные | ✅ Расширенные | ✅ Полные | ⚠️ Базовые |
+| Видео-туры | ❌ Нет | ✅ 4K видео | ✅ Есть | ⚠️ Опционально |
+| 3D-туры | ❌ Нет | ✅ Matterport | ❌ Нет | ❌ Нет |
+| Верификация флота | ⚠️ Manual | ✅ Physical inspection | ⚠️ Documents | ✅ Coast Guard |
+| Мультиязычность | ✅ EN/RU | ✅ 8+ языков | ✅ 5 языков | ⚠️ EN only |
 
-**Решение**: Создать семантическую типографическую шкалу:
-```css
---text-caption: 10px;   /* badges, meta */
---text-small: 11px;     /* secondary info */
---text-body-sm: 12px;   /* body small */
---text-body: 14px;      /* default body */
+### Сильные стороны myUNO
+- Глубокая билингвальность (RU/EN на уровне БД)
+- "Experiences" как уникальный слой каталога (Yacht Yoga, Fishing Trip, Birthday Party)
+- Локальная специфика Пхукета (маршруты: Phi-Phi, Similan, James Bond)
+
+### Зоны улучшения
+```text
+┌─────────────────────────────────────────────────────────────┐
+│  КРИТИЧНО:                                                  │
+│  • Видео контент — обязателен для luxury-сегмента           │
+│  • Deck Plans — стандарт для катамаранов 40ft+              │
+│  • Builder/Designer metadata — важно для коллекционеров     │
+├─────────────────────────────────────────────────────────────┤
+│  ЖЕЛАТЕЛЬНО:                                                │
+│  • Crew profiles (капитан, повар)                           │
+│  • Sample itineraries с картами                             │
+│  • Eco-certifications (Green Yachting)                      │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-### 1.3 Несогласованность теней
+---
 
-| Тип | Использование | Проблема |
-|-----|--------------|----------|
-| `shadow-sm` | ~200 файлов | Слишком тонкие |
-| `shadow-md` | ~150 файлов | Среднее |
-| `shadow-lg` | ~300 файлов | Основное |
-| `shadow-xl` | ~200 файлов | Для hero |
-| `shadow-2xl` | ~50 файлов | Избыточное |
+## 2. Поиск и рекомендации
 
-**Решение**: Стандартизировать:
-- `shadow-sm` → карточки в списках
-- `shadow-md` → hover состояние
-- `shadow-lg` → модалы, dropdowns
+### Текущая реализация myUNO
+- **Фильтрация:** Universal Filter с chip-based UI
+- **Experience chips:** Quick selection по типу впечатлений
+- **Геолокация:** Hardcoded Phuket routes (phi-phi, james-bond, similan)
+- **Персонализация:** AI-powered home через `ai-personalize-home` edge function
 
-### 1.4 Несогласованность анимаций hover
+### Сравнение с лидерами
 
-| Компонент | Анимация | 
-|-----------|----------|
-| ProfessionalProductCard | `group-hover:scale-110` (10%) |
-| ExperiencesSection | `group-hover:scale-105` (5%) |
-| MarketplacePromoCarousel | `group-hover:scale-105` (5%) |
-| PromoBanner | `group-hover:scale-110` (10%) |
-| CategoryGrid | `group-hover:scale-105` & `scale-110` |
+| Функция | myUNO | Sailogy | Sailo | Boatsetter |
+|---------|-------|---------|-------|------------|
+| Map-based search | ❌ | ✅ Marina pins | ✅ Interactive | ✅ Full map |
+| Real-time availability | ✅ RPC check | ✅ | ✅ | ✅ |
+| AI recommendations | ✅ Personas | ❌ | ❌ | ⚠️ Basic |
+| Similar yachts | ❌ | ✅ | ✅ | ✅ |
+| Price alerts | ❌ | ✅ | ❌ | ✅ |
 
-**Решение**: Унифицировать `group-hover:scale-[1.03]` (3%) для всех изображений.
+### Уникальное преимущество myUNO
+AI-персонализация на основе user personas — конкурентное преимущество, которого нет у специализированных чартерных платформ.
 
-### 1.5 Дублирование карточек товаров
-
-Существуют два компонента:
-- `ProductCard.tsx` — 220 строк, базовый
-- `ProfessionalProductCard.tsx` — 500+ строк, расширенный
-
-**Решение**: Объединить в один `UnifiedProductCard` с вариантами.
+### Зоны улучшения
+- **Map integration:** Добавить Mapbox/Leaflet с маринами и маршрутами
+- **"Similar yachts":** Collaborative filtering на основе bookings
+- **Saved searches:** Уведомления о новых яхтах по критериям
 
 ---
 
-## Часть 2: Создание Design Tokens
+## 3. Ценообразование и доступность
 
-### 2.1 Новый файл `src/lib/designTokens.ts`
-
+### Текущая реализация myUNO
 ```typescript
-export const DESIGN_TOKENS = {
-  // Border Radius
-  radius: {
-    card: 'rounded-2xl',          // 16px - все карточки
-    button: 'rounded-lg',          // 8px - кнопки
-    badge: 'rounded-md',           // 6px - бейджи
-    pill: 'rounded-full',          // круглые элементы
-    input: 'rounded-xl',           // 12px - инпуты
-  },
-  
-  // Shadows
-  shadow: {
-    card: 'shadow-sm',             // карточки по умолчанию
-    cardHover: 'shadow-md',        // hover состояние
-    elevated: 'shadow-lg',         // модалы, dropdowns
-    float: 'shadow-xl',            // FAB, hero
-  },
-  
-  // Spacing (8px grid)
-  spacing: {
-    cardPadding: 'p-4',            // 16px
-    cardPaddingCompact: 'p-3',     // 12px
-    sectionGap: 'gap-4',           // 16px
-    itemGap: 'gap-3',              // 12px
-  },
-  
-  // Typography
-  text: {
-    caption: 'text-[10px]',        // badges, meta
-    small: 'text-xs',              // 12px
-    body: 'text-sm',               // 14px
-    title: 'text-base',            // 16px
-    heading: 'text-lg',            // 18px
-  },
-  
-  // Image hover
-  imageHover: 'group-hover:scale-[1.03]',
-  
-  // Transitions
-  transition: {
-    fast: 'transition-all duration-150',
-    normal: 'transition-all duration-200',
-    slow: 'transition-all duration-300',
-  },
-} as const;
+// Модель цен (из YachtBookingQuickSelect.tsx)
+price_half_day: number  // 4 часа
+price_full_day: number  // 8 часов
+currency: 'THB' | 'USD'
+
+// Типы чартера
+type CharterType = 'half_day' | 'full_day'
+
+// Дополнительные опыты (add-ons)
+YACHT_EXPERIENCES: YachtExperience[] // 13 опций от ฿3,000 до ฿15,000
 ```
 
-### 2.2 Обновление CSS переменных в `src/index.css`
+**Проверка доступности:**
+- RPC `check_availability` с vertical='yacht'
+- Проверка пересечений в таблице `orders`
+- Real-time блокировка при бронировании
 
-```css
-@layer base {
-  :root {
-    /* Card tokens */
-    --card-radius: 1rem;           /* 16px = rounded-2xl */
-    --card-padding: 1rem;          /* 16px */
-    --card-gap: 0.75rem;           /* 12px */
-    
-    /* Shadow tokens */
-    --shadow-card: 0 1px 3px rgba(0,0,0,0.1);
-    --shadow-card-hover: 0 4px 12px rgba(0,0,0,0.15);
-    --shadow-elevated: 0 10px 25px rgba(0,0,0,0.2);
-  }
-}
+### Сравнение с лидерами
+
+| Аспект | myUNO | YachtCharterFleet | YACHTICO | Boatsetter |
+|--------|-------|-------------------|----------|------------|
+| Модель цен | Статичная | Динамическая | Статичная + торг | Динамическая |
+| Сезонность | ❌ | ✅ High/Low | ✅ | ✅ |
+| Day-of-week | ❌ | ✅ Weekend premium | ⚠️ | ✅ |
+| Мультивалютность | ⚠️ THB/USD | ✅ 20+ валют | ✅ EUR/USD | ✅ USD |
+| Прозрачность fees | ✅ 5% service | ⚠️ Hidden | ⚠️ Negotiable | ✅ Clear |
+| Deposit system | ❌ | ✅ 50% advance | ✅ | ✅ |
+
+### Критические пробелы
+```text
+┌────────────────────────────────────────────────────────────────────┐
+│  БЛОКЕРЫ для scale:                                                │
+│                                                                    │
+│  1. Отсутствие iCal sync для яхт                                   │
+│     → Риск double-booking при листинге на нескольких платформах    │
+│                                                                    │
+│  2. Нет "Blackout dates" UI для владельцев                         │
+│     → Владельцы не могут закрыть даты для личного использования    │
+│                                                                    │
+│  3. Статичные цены                                                 │
+│     → Потеря revenue в high-season (Songkran, NYE)                 │
+│                                                                    │
+│  4. Нет APA (Advance Provisioning Allowance) калькулятора          │
+│     → Стандарт для недельных чартеров                              │
+└────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Часть 3: Унифицированные компоненты карточек
+## 4. Бронирование и оплата
 
-### 3.1 Создать `UnifiedContentCard.tsx`
+### Текущая реализация myUNO
+**Booking flow (`YachtBooking.tsx`):**
+1. Select charter type (half/full day)
+2. Pick date + departure time
+3. Set guest count
+4. Add experiences (upsell)
+5. Contact info
+6. Payment method (card, wallet, cash)
+7. Submit → `createBooking()` → `order_item_yacht_details`
 
-Единый компонент для всего контента с вариантами:
-- `product` — товары маркетплейса
-- `service` — услуги и провайдеры
-- `experience` — туры и активности
-- `property` — недвижимость
+**Двойной flow:**
+- "Add to Cart" — уникальный ID: `${yacht.id}-${date}-${time}-${charterType}`
+- "Book Now" — прямой checkout
 
-```typescript
-interface UnifiedContentCardProps {
-  variant: 'product' | 'service' | 'experience' | 'property';
-  size?: 'compact' | 'default' | 'featured';
-  orientation?: 'vertical' | 'horizontal';
-  // ... common props
-}
-```
+### Сравнение с лидерами
 
-### 3.2 Компоненты для замены/рефакторинга
+| Функция | myUNO | Premium Charters | P2P Platforms |
+|---------|-------|------------------|---------------|
+| Instant booking | ✅ | ❌ Request only | ✅ |
+| Split payment | ❌ | ✅ Group split | ✅ Boatsetter |
+| Deposit + balance | ❌ | ✅ 50%/50% | ✅ |
+| Escrow | ❌ | ✅ | ✅ Stripe Connect |
+| Insurance upsell | ❌ | ✅ Integrated | ✅ Boatsetter |
+| Cancellation tiers | ❌ | ✅ 7-30-60 days | ✅ Flexible/Moderate/Strict |
 
-| Старый компонент | Новый подход |
-|-----------------|--------------|
-| `ProductCard.tsx` | → `UnifiedContentCard variant="product"` |
-| `ProfessionalProductCard.tsx` | → объединить с ProductCard |
-| `ServiceProviderCard.tsx` | → `UnifiedContentCard variant="service"` |
-| `PropertyPreviewCard.tsx` | → оставить, унифицировать стили |
-| `ForYouSection` карточки | → использовать UnifiedContentCard |
+### Сильные стороны myUNO
+- **Mobile-first checkout** — Sheet-based quick booking
+- **Experience upsells** — 13 add-ons directly in flow
+- **Wallet integration** — Cashback & loyalty
 
----
-
-## Часть 4: Исправление ForYouSection
-
-### 4.1 Текущие проблемы
-- Карточки как `<button>` вместо `<div>` с onClick
-- Нестандартный hover эффект
-- Отсутствие разделения цены и рейтинга
-
-### 4.2 Улучшения
-```tsx
-// Было: простая button
-<button className="flex-shrink-0 w-64 bg-card rounded-2xl...">
-
-// Станет: структурированная карточка
-<UnifiedContentCard
-  variant="experience"
-  size="default"
-  image={item.image}
-  title={item.title}
-  rating={item.rating}
-  price={item.price}
-  badge={reasonLabel}
-  onClick={handleClick}
-/>
-```
+### Критические улучшения
+- **Deposit logic:** 50% при бронировании, 50% за 48 часов
+- **Cancellation policies:** Tiered refund rules
+- **Insurance integration:** Партнёрство со страховщиками
 
 ---
 
-## Часть 5: Стандартизация анимаций
+## 5. Управление собственниками (Vendor Dashboard)
 
-### 5.1 Файл `src/lib/motionPresets.ts`
+### Текущая реализация myUNO (`VendorYachts.tsx`)
 
-```typescript
-export const CARD_ANIMATIONS = {
-  // Image hover zoom
-  imageHover: {
-    className: 'transition-transform duration-300 group-hover:scale-[1.03]',
-  },
-  
-  // Card lift on hover
-  cardHover: {
-    className: 'transition-all duration-200 hover:shadow-md hover:-translate-y-0.5',
-  },
-  
-  // Button press
-  buttonPress: {
-    className: 'active:scale-[0.98]',
-  },
-  
-  // Icon bounce
-  iconHover: {
-    className: 'group-hover:scale-110 transition-transform',
-  },
-};
-```
+**4-step Wizard:**
+1. **Basic Info:** Name, type, description (EN/RU)
+2. **Specifications:** Prices, capacity, technical specs
+3. **Photos:** Cover + gallery upload
+4. **Review:** Preview before submission
 
-### 5.2 Framer Motion presets
+**Moderation:**
+- `approval_status`: pending → approved/rejected
+- Non-admin edits reset to pending
+- `ApprovalStatusBadge` component
 
-```typescript
-export const MOTION_VARIANTS = {
-  cardAppear: {
-    initial: { opacity: 0, y: 8 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.2 },
-  },
-  
-  stagger: {
-    container: { staggerChildren: 0.05 },
-    item: { 
-      initial: { opacity: 0, y: 10 },
-      animate: { opacity: 1, y: 0 },
-    },
-  },
-};
+**Draft system:**
+- `useFormDraft` hook с localStorage
+- `DraftRestorationBanner` при возврате
+
+### Сравнение с лидерами
+
+| Функция | myUNO | YACHTICO | Boatsetter | GetMyBoat |
+|---------|-------|----------|------------|-----------|
+| Listing wizard | ✅ 4-step | ✅ 6-step | ✅ Guided | ✅ |
+| Calendar management | ❌ | ✅ Full | ✅ Full | ✅ |
+| iCal import/export | ❌ | ✅ | ✅ | ✅ |
+| Pricing rules | ❌ | ✅ Seasons | ✅ Smart | ⚠️ Basic |
+| Booking requests | ⚠️ Auto-confirm | ✅ Accept/Decline | ✅ | ✅ |
+| Revenue analytics | ❌ | ✅ | ✅ Full | ⚠️ |
+| Crew profiles | ❌ | ✅ | ⚠️ | ❌ |
+| Insurance upload | ❌ | ✅ Required | ✅ | ✅ |
+
+### Критический Gap
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│  ОБЯЗАТЕЛЬНО для B2B adoption:                                  │
+│                                                                 │
+│  • Yacht Calendar UI (аналог Property Calendar)                 │
+│  • iCal sync с Booking Manager / YachtBooker / MMK Systems      │
+│  • Blackout dates для техобслуживания                           │
+│  • Request/Accept flow вместо auto-confirm                      │
+│  • Financial reports (earnings, fees, payouts)                  │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Часть 6: Файлы для изменения
+## 6. Коммуникация
 
-### Новые файлы
-| Файл | Описание |
-|------|----------|
-| `src/lib/designTokens.ts` | Централизованные design tokens |
-| `src/lib/motionPresets.ts` | Стандартизированные анимации |
-| `src/components/shared/UnifiedContentCard.tsx` | Универсальная карточка контента |
+### Текущая реализация myUNO
+- **UnifiedChatFAB:** AI Agent / WhatsApp / Telegram
+- **Booking notes:** Free-text в форме
+- **Post-booking:** WhatsApp redirect для cash payments
 
-### Обновление существующих
-| Файл | Изменения |
-|------|-----------|
-| `src/index.css` | Добавить CSS переменные для карточек |
-| `src/components/ui/card.tsx` | Обновить base radius на `rounded-2xl` |
-| `src/components/recommendations/ForYouSection.tsx` | Рефакторинг карточек |
-| `src/components/home/RecommendedCarousel.tsx` | Унификация стилей |
-| `src/components/home/ExperiencesSection.tsx` | Унификация hover |
-| `src/components/home/MarketplacePromoCarousel.tsx` | Унификация стилей |
-| `src/components/market/ProductCard.tsx` | Слияние с Professional |
-| `src/components/market/ProfessionalProductCard.tsx` | Слияние |
-| `src/components/services/ServiceProviderCard.tsx` | Унификация |
+### Сравнение с лидерами
 
-### Масштабное обновление теней и анимаций
-- 27+ файлов с `group-hover:scale` → унифицировать
-- 139+ файлов с тенями → стандартизировать
+| Канал | myUNO | YACHTICO | Sailo | Boatsetter |
+|-------|-------|----------|-------|------------|
+| In-app messaging | ❌ | ✅ Full | ✅ | ✅ |
+| Email templates | ⚠️ Generic | ✅ Branded | ✅ | ✅ |
+| SMS notifications | ❌ | ❌ | ✅ | ✅ |
+| WhatsApp | ✅ Direct | ❌ | ❌ | ❌ |
+| Telegram | ✅ Direct | ❌ | ❌ | ❌ |
+| Owner-Guest chat | ❌ | ✅ Protected | ✅ | ✅ |
 
----
+### Уникальное преимущество myUNO
+Прямая интеграция WhatsApp/Telegram — критична для азиатского рынка, где эти мессенджеры доминируют.
 
-## Часть 7: Порядок реализации
-
-### Этап 1: Фундамент (4 файла)
-1. Создать `designTokens.ts`
-2. Создать `motionPresets.ts`
-3. Обновить `index.css` с CSS переменными
-4. Обновить `card.tsx` с новым radius
-
-### Этап 2: Унифицированная карточка (1 файл)
-1. Создать `UnifiedContentCard.tsx` с 4 вариантами
-
-### Этап 3: Рефакторинг главной страницы (5 файлов)
-1. `ForYouSection.tsx` — использовать токены
-2. `RecommendedCarousel.tsx` — унифицировать
-3. `ExperiencesSection.tsx` — унифицировать
-4. `MarketplacePromoCarousel.tsx` — унифицировать
-5. `PromoBanner.tsx` — унифицировать
-
-### Этап 4: Рефакторинг маркетплейса (3 файла)
-1. Объединить `ProductCard` и `ProfessionalProductCard`
-2. Обновить `ProductSection.tsx`
-3. Обновить все импорты
-
-### Этап 5: Массовая замена (batch)
-1. Поиск и замена `group-hover:scale-105` → `group-hover:scale-[1.03]`
-2. Поиск и замена `group-hover:scale-110` → `group-hover:scale-[1.03]`
-3. Стандартизация теней
+### Зоны улучшения
+- **In-app chat:** Защита от ухода сделок из платформы
+- **Booking lifecycle notifications:** Confirmation → Reminder → Day-of → Feedback
 
 ---
 
-## Ожидаемый результат
+## 7. Юридические аспекты
 
-После реализации:
-1. **Единый визуальный язык** — все карточки выглядят согласованно
-2. **Современный вид** — тонкие hover эффекты как у Airbnb/Klook
-3. **Предсказуемые анимации** — одинаковый отклик везде
-4. **Maintainability** — изменение токена обновляет весь UI
-5. **Performance** — меньше кастомных классов, лучше tree-shaking
-6. **Глобальный стандарт** — соответствие лучшим практикам мировых приложений
+### Текущая реализация myUNO
+- Нет цифровых договоров
+- Нет явных Terms & Conditions для чартера
+- Cancellation policy не определена
 
----
+### Стандарт индустрии
+- **MYBA Charter Agreement** — международный стандарт
+- **Digital signatures** — DocuSign/PandaDoc интеграция
+- **Damage deposits** — Escrow с pre-authorization
 
-## Визуальные примеры стандартов
-
-### Карточка товара (цель):
-```
-┌─────────────────────────────┐  ← rounded-2xl (16px)
-│  ┌───────────────────────┐  │
-│  │      IMAGE            │  │  ← aspect-square
-│  │   scale-[1.03] hover  │  │
-│  └───────────────────────┘  │
-│                             │
-│  Vendor Name (caption)      │  ← text-[10px] muted
-│  Product Title              │  ← text-sm semibold
-│  ★ 4.8 (123)                │  ← amber badge
-│                             │
-│  ฿1,290    [+] button       │  ← primary bold + rounded-full
-└─────────────────────────────┘
-   ↑ shadow-sm → shadow-md on hover
+### Критические требования
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│  Юридические must-have:                                        │
+│                                                                 │
+│  1. Charter Agreement template (MYBA-based)                     │
+│  2. Cancellation policy tiers (Flexible/Moderate/Strict)        │
+│  3. Damage deposit pre-auth                                     │
+│  4. Crew liability disclaimer                                   │
+│  5. Weather cancellation clause                                 │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-### Hover поведение:
-- Image: `scale-[1.03]` over 300ms
-- Card: `shadow-md` + `-translate-y-0.5` over 200ms
-- Button: `active:scale-[0.98]`
+---
+
+## 8. UX/UI сравнение
+
+### myUNO strengths
+- **Mobile-first:** Sheet-based booking, bottom bar CTAs
+- **Quick booking:** 2-tap from listing to date selection
+- **Visual consistency:** MiniAppLayout, UnifiedFilter
+- **Dual flow:** Cart + Book Now
+
+### Comparison with leaders
+
+| Aspect | myUNO | YachtCharterFleet | Sailo | Boatsetter |
+|--------|-------|-------------------|-------|------------|
+| Mobile UX | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+| Desktop UX | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+| Load speed | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+| Booking friction | Low | High (inquiry) | Medium | Low |
+| Image gallery | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+
+### Improvement opportunities
+- **Fullscreen gallery** with swipe gestures
+- **Map view** для выбора маршрутов
+- **Comparison tool** для нескольких яхт
+
+---
+
+## 9. Экосистема партнёров
+
+### Текущая реализация myUNO
+- **Cross-sell matrix:** 8 связанных вертикалей (Restaurants, Transport, Beauty...)
+- **Experience providers:** Встроены в booking flow
+- **Нет API:** Закрытая система
+
+### Стандарт индустрии
+
+| Интеграция | YachtCharterFleet | YACHTICO | Boatsetter |
+|------------|-------------------|----------|------------|
+| Channel Managers | ✅ MMK, YachtBooker | ✅ | ❌ |
+| Insurance APIs | ✅ | ✅ | ✅ Buoy |
+| Crew agencies | ✅ Direct | ⚠️ | ❌ |
+| Provisioning | ✅ | ⚠️ | ❌ |
+| Concierge networks | ✅ | ❌ | ❌ |
+| Public API | ⚠️ Partner only | ✅ | ✅ |
+
+### myUNO advantage
+Уникальная супер-апп экосистема: чартер яхты → ресторан на борту → трансфер → цветы.
+
+---
+
+## 10. Метрики успешности
+
+### Рекомендуемые KPIs для myUNO Yacht vertical
+
+| Метрика | Формула | Benchmark |
+|---------|---------|-----------|
+| Listing-to-Booking | Bookings / Listings | 15-25% monthly |
+| View-to-Book | Bookings / Detail views | 2-5% |
+| Avg. charter value | Total GMV / Bookings | ฿35,000+ |
+| Repeat charter rate | Return customers / Total | 20-30% |
+| Experience attach rate | Experience add-ons / Bookings | 40%+ |
+| Vendor retention | Active vendors MoM | 85%+ |
+| Response time | Median inquiry-to-response | < 2 hours |
+| NPS | Promoters - Detractors | 50+ |
+
+---
+
+## Итоговая матрица Gap-анализа
+
+| Приоритет | Gap | Impact | Effort |
+|-----------|-----|--------|--------|
+| 🔴 P0 | iCal sync для яхт | Критично для scale | Medium |
+| 🔴 P0 | Yacht Calendar UI | Блокер для владельцев | High |
+| 🔴 P0 | Cancellation policies | Юридический риск | Low |
+| 🟠 P1 | Dynamic pricing | Revenue optimization | Medium |
+| 🟠 P1 | Deposit/payment splits | Conversion | Medium |
+| 🟠 P1 | In-app messaging | Commission protection | High |
+| 🟡 P2 | Map-based search | UX improvement | Medium |
+| 🟡 P2 | Video/3D tours | Premium positioning | Low |
+| 🟡 P2 | Similar yachts | Discovery | Medium |
+| 🟢 P3 | Crew profiles | Trust building | Low |
+| 🟢 P3 | Insurance integration | Safety | Medium |
+
+---
+
+## Рекомендуемый Roadmap
+
+### Phase 1: Foundation (2-4 weeks)
+- [ ] Yacht Calendar component (extend PropertyCalendar)
+- [ ] Cancellation policy selector в vendor wizard
+- [ ] Blackout dates для владельцев
+
+### Phase 2: Scale (4-8 weeks)
+- [ ] iCal sync infrastructure для яхт
+- [ ] Dynamic pricing rules (seasons, weekends)
+- [ ] Deposit payment flow
+
+### Phase 3: Premium (8-12 weeks)
+- [ ] Map-based search с маринами
+- [ ] Video upload в listing wizard
+- [ ] In-app protected messaging
