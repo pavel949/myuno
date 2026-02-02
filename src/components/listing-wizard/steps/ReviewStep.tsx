@@ -66,7 +66,7 @@ export function ReviewStep({ draft, onEdit, onSubmit, onBack, isLoading }: Revie
             )}
             {draft.price && (
               <p className="text-lg font-bold text-primary">
-                {draft.currency === 'THB' ? '฿' : draft.currency === 'USD' ? '$' : '€'}
+                {draft.currency === 'THB' ? '฿' : draft.currency === 'USD' ? '$' : draft.currency === 'RUB' ? '₽' : '€'}
                 {draft.price.toLocaleString()}
               </p>
             )}

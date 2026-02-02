@@ -27,6 +27,7 @@ export function ContactStep({ draft, onChange, onNext, onBack }: ContactStepProp
         applicant_name: user.user_metadata?.name || '',
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
   
   const isValid = draft.applicant_email && draft.applicant_name;
