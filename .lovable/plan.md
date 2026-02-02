@@ -1,161 +1,133 @@
 
+# План: Улучшение формы добавления объектов в Админ-панели
 
-# Финальный Аудит перед Публикацией myUNO
-
-## Результат: ✅ ГОТОВО К ПУБЛИКАЦИИ (с рекомендациями)
-
----
-
-## 1. Безопасность
-
-### ✅ Пройдено
-
-| Проверка | Статус | Детали |
-|----------|--------|--------|
-| RLS на всех таблицах | ✅ | 235/235 таблиц защищены RLS |
-| Аутентификация | ✅ | Email + PIN, reset password работают |
-| Admin RBAC | ✅ | Проверка через `has_role()` и `is_admin_or_uno_team()` |
-| XSS защита | ✅ | DOMPurify в `src/lib/sanitize.ts` |
-| Error Boundary | ✅ | Глобальный перехват ошибок с recovery |
-| Секреты | ✅ | 6 ключей настроены (Stripe, Mapbox, Resend, etc.) |
-
-### ⚠️ Рекомендации (не блокирующие)
-
-| Проблема | Уровень | Что сделать |
-|----------|---------|-------------|
-| Leaked Password Protection | WARN | Включить в настройках Auth (опционально) |
-| RLS `USING(true)` для INSERT | WARN | 8 таблиц (ai_agent_logs, mcc_leads, pwa_installs...) - это логи/аналитика, допустимо |
-| Таблица `partners` без policy | INFO | Добавить RLS policy для SELECT (только для админов) |
-| iCal token enumeration | WARN | Добавить rate limiting и token rotation (в будущем) |
+## Цель
+Привести форму добавления объектов в `/admin/properties` к единообразию с формой собственника, добавить расширенную загрузку фото и поле "Внутреннее название".
 
 ---
 
-## 2. Данные
+## Часть 1: Добавление поля "Внутреннее название"
 
-### ✅ Контент в базе
+### 1.1 Миграция базы данных
+Добавить новую колонку `internal_name` в обе таблицы:
 
-| Таблица | Всего | Approved | Pending | Готово |
-|---------|-------|----------|---------|--------|
-| Yachts | 36 | 31 | 5 | ✅ |
-| Tours | 29 | 24 | 5 | ✅ |
-| Properties | 28 | 23 | 5 | ✅ |
-| Providers | 16 | — | — | ✅ |
-| Profiles | 7 | — | — | ✅ |
+```sql
+-- properties table (для marketplace/vendor)
+ALTER TABLE properties ADD COLUMN internal_name TEXT;
 
-### ⚠️ Seed-данные для удаления
-
-6 тестовых профилей присутствуют:
-```
-test-tourist@myuno.app, test-resident@myuno.app, test-owner@myuno.app,
-test-vendor@myuno.app, test-admin@myuno.app, test-unoteam@myuno.app
+-- owner_properties table (для собственников)
+ALTER TABLE owner_properties ADD COLUMN internal_name TEXT;
 ```
 
-**Действие**: Эти профили полезны для тестирования. Можно оставить или удалить через Cloud View → SQL.
+### 1.2 Обновление типов
+Добавить `internal_name?: string` в:
+- `src/types/property.ts` → `VendorProperty` и `OwnerProperty`
 
 ---
 
-## 3. UI/UX Проверка
+## Часть 2: Замена компонента загрузки фото в Admin
 
-### ✅ Пройдено
+### 2.1 Изменения в `AdminProperties.tsx`
 
-| Компонент | Статус |
-|-----------|--------|
-| Главная страница | ✅ Загружается, все секции видны |
-| Навигация (Bottom Nav) | ✅ Все 5 табов работают |
-| FAB "Нужна помощь?" | ✅ Открывается, вертикали отображаются |
-| Onboarding Modal | ✅ Показывается, можно закрыть |
-| Страница Кабинет | ✅ Работает для авторизованных |
-| Детали Events | ✅ Страница загружается корректно |
-| Pull-to-Refresh | ✅ Работает на мобильном |
-
-### ❌ Консольные ошибки
-
-| Ошибка | Причина | Критичность |
-|--------|---------|-------------|
-| CORS manifest.json | Lovable инфраструктура (не ваш код) | Игнорировать |
-| postMessage origin | Lovable IDE (исчезнет после публикации) | Игнорировать |
-| apple-mobile-web-app-capable deprecated | PWA meta tag | Низкая, не влияет |
-
----
-
-## 4. Placeholder-данные для замены
-
-### 🔴 Критично (заменить перед публикацией)
-
-| Файл | Проблема | Действие |
-|------|----------|----------|
-| `UniversalHelpFAB.tsx:177` | `wa.me/66123456789` | Заменить на реальный номер |
-| `UniversalHelpFAB.tsx:186` | `tel:+66123456789` | Заменить на реальный номер |
-| `ContactPage.tsx:39` | `wa.me/66812345678` | Заменить на реальный номер |
-| `CompactFooter.tsx:31` | `wa.me/66XXXXXXXXX` | Заменить на реальный номер |
-| `ContactAdminButton.tsx:83` | `66612345678` | Заменить на реальный номер |
-| `OrderTracking.tsx:283` | `tel:+66123456789` | Заменить на реальный номер |
-
-### ✅ Корректные номера (уже настроены)
-
-- `SOS.tsx` → `+66922407355` ✅
-- `VipConcierge.tsx` → `+66922407355` ✅
-- `useChat.ts` (UNO_WHATSAPP) → настроен ✅
-
----
-
-## 5. API & Edge Functions
-
-### ✅ Все сетевые запросы успешны
-
-Проверено 21 запрос к Supabase — все вернули HTTP 200.
-
-### ✅ Edge Functions
-
-- `get-weather` — работает (2596ms)
-- Все функции в `config.toml` зарегистрированы (28 функций)
-
----
-
-## 6. Console.log в продакшене
-
-### ⚠️ 573 вхождения в 46 файлах
-
-Большинство — в Edge Functions (допустимо для логирования).
-
-В клиентском коде:
-- `useBookingVouchers.ts:121` — `console.log('Share cancelled')` (безвредно)
-- `webVitals.ts:28` — debug mode logging (ok)
-- `ErrorBoundary.tsx:28,100,121` — error logging (нужно)
-
-**Рекомендация**: Не критично, можно оставить.
-
----
-
-## 7. План Действий
-
-### Перед публикацией (5 минут)
-
-1. **Заменить placeholder-номера** в 6 файлах выше
-2. **Решить про seed-пользователей** — оставить или удалить
-
-### После публикации
-
-3. Включить Leaked Password Protection (Settings → Auth)
-4. Добавить RLS policy для таблицы `partners`
-5. Настроить rate limiting для iCal endpoint
-
----
-
-## Вердикт
-
-```
-╔═══════════════════════════════════════════════════════╗
-║         🚀 ГОТОВО К ПУБЛИКАЦИИ                        ║
-╠═══════════════════════════════════════════════════════╣
-║ ✅ Безопасность: 235/235 таблиц с RLS                 ║
-║ ✅ UI/UX: Все основные пути работают                  ║
-║ ✅ API: Все запросы успешны                           ║
-║ ⚠️ Нужно: Заменить 6 placeholder-номеров             ║
-╚═══════════════════════════════════════════════════════╝
+**Текущее состояние (строки 500-516):**
+```tsx
+<ImageUpload value={formData.cover_image} ... />
+<MultiImageUpload value={formData.images} ... />
 ```
 
-Приложение технически готово. Критических багов не обнаружено. 
+**Новое состояние:**
+```tsx
+<AirbnbStyleImageUpload
+  value={formData.cover_image 
+    ? [formData.cover_image, ...formData.images] 
+    : formData.images}
+  onChange={(urls) => {
+    if (urls.length === 0) {
+      setFormData(prev => ({ ...prev, cover_image: '', images: [] }));
+    } else {
+      setFormData(prev => ({ 
+        ...prev, 
+        cover_image: urls[0], 
+        images: urls.slice(1) 
+      }));
+    }
+  }}
+  folder="properties"
+  maxImages={20}
+/>
+```
 
-После замены placeholder-номеров можно публиковать!
+Это добавит:
+- Drag & Drop загрузку файлов
+- Перетаскивание для изменения порядка (первое фото = обложка)
+- Импорт из Google Drive / Dropbox (через ссылки)
+- Импорт с любого сайта по URL
+- Сжатие в WebP
+- Редактирование изображений (поворот, обрезка)
 
+### 2.2 Добавление поля "Внутреннее название"
+
+Добавить новое поле в форму администратора после Provider Selector:
+
+```tsx
+<div className="space-y-2">
+  <Label>{isRussian ? 'Внутреннее название' : 'Internal Name'}</Label>
+  <Input
+    value={formData.internal_name}
+    onChange={(e) => setFormData(prev => ({ ...prev, internal_name: e.target.value }))}
+    placeholder={isRussian ? 'Для внутреннего использования' : 'For internal use only'}
+  />
+  <p className="text-xs text-muted-foreground">
+    {isRussian 
+      ? 'Не отображается клиентам. Например: "Вилла Петровых"' 
+      : 'Not shown to customers. E.g.: "Villa Petrov Family"'}
+  </p>
+</div>
+```
+
+---
+
+## Часть 3: Синхронизация форм Owner и Admin
+
+### 3.1 Добавление поля internal_name в форму собственника
+
+В `AddProperty.tsx` добавить поле в секцию "Basic Information":
+
+```tsx
+<div className="space-y-2">
+  <Label>{isRu ? 'Внутреннее название' : 'Internal Name'}</Label>
+  <Input
+    value={formData.internal_name}
+    onChange={(e) => setFormData(prev => ({ ...prev, internal_name: e.target.value }))}
+    placeholder={isRu ? 'Только для вас (не публикуется)' : 'Private note (not published)'}
+  />
+</div>
+```
+
+---
+
+## Изменяемые файлы
+
+| Файл | Изменение |
+|------|-----------|
+| `src/pages/admin/AdminProperties.tsx` | Заменить ImageUpload на AirbnbStyleImageUpload, добавить internal_name |
+| `src/pages/owner/AddProperty.tsx` | Добавить поле internal_name |
+| `src/types/property.ts` | Добавить internal_name в типы |
+| **Миграция БД** | Добавить колонку internal_name в properties и owner_properties |
+
+---
+
+## Техническая часть
+
+### Возможности AirbnbStyleImageUpload:
+1. **Drag & Drop** — перетащите файлы прямо в область
+2. **Облако** — Google Drive, Dropbox через копирование ссылки
+3. **С сайта** — извлечение изображений с любого URL (Yandex Disk, сайты застройщиков)
+4. **Сортировка** — перетаскивание для изменения порядка, первое фото = обложка
+5. **Редактирование** — поворот, обрезка изображений
+6. **Сжатие** — автоматическая конвертация в WebP, уменьшение размера
+
+### Зависимости:
+- `@dnd-kit/core` и `@dnd-kit/sortable` — уже установлены
+- `browser-image-compression` — уже установлен
+- Компоненты `CloudStoragePicker`, `ImagePickerFromUrl`, `ImageEditor` — уже реализованы
