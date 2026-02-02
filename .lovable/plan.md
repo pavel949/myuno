@@ -1,59 +1,161 @@
 
-# План: Unified Lead System (Единая система лидов по вертикалям)
 
-## ✅ Фаза 1: ВЫПОЛНЕНО
+# Финальный Аудит перед Публикацией myUNO
 
-### Реализованные компоненты:
-
-| Файл | Статус | Описание |
-|------|--------|----------|
-| `migration` | ✅ | Добавлены vertical_id, vertical_metadata, entry_point, lead_source |
-| `src/lib/leadVerticalConfig.ts` | ✅ | Конфиг 12 вертикалей с динамическими полями |
-| `src/components/fab/UniversalHelpFAB.tsx` | ✅ | Глобальная FAB-кнопка |
-| `src/components/leads/UniversalLeadForm.tsx` | ✅ | Многошаговая форма |
-| `src/components/leads/VerticalCTA.tsx` | ✅ | CTA с 5 вариантами |
-| `src/hooks/useUniversalLead.ts` | ✅ | Хук для сабмита |
+## Результат: ✅ ГОТОВО К ПУБЛИКАЦИИ (с рекомендациями)
 
 ---
 
-## ✅ Фаза 2.1: VerticalCTA на страницах (ВЫПОЛНЕНО)
+## 1. Безопасность
 
-| Страница | Vertical | ✓ |
-|----------|----------|---|
-| /yachts | yachts | ✅ |
-| /tours | tours | ✅ |
-| /transport | vehicles | ✅ |
-| /legal | legal | ✅ |
-| /fitness | gyms | ✅ |
-| /medical | clinics | ✅ |
-| /babysitter | babysitters | ✅ |
-| /beauty | salons | ✅ |
-| /restaurants | restaurants | ✅ |
-| /water | water_sports | ✅ |
+### ✅ Пройдено
 
----
+| Проверка | Статус | Детали |
+|----------|--------|--------|
+| RLS на всех таблицах | ✅ | 235/235 таблиц защищены RLS |
+| Аутентификация | ✅ | Email + PIN, reset password работают |
+| Admin RBAC | ✅ | Проверка через `has_role()` и `is_admin_or_uno_team()` |
+| XSS защита | ✅ | DOMPurify в `src/lib/sanitize.ts` |
+| Error Boundary | ✅ | Глобальный перехват ошибок с recovery |
+| Секреты | ✅ | 6 ключей настроены (Stripe, Mapbox, Resend, etc.) |
 
-## ✅ Фаза 2.2: Admin Lead Hub (ВЫПОЛНЕНО)
+### ⚠️ Рекомендации (не блокирующие)
 
-- ✅ Фильтр по vertical_id в `/admin/consultations`
-- ✅ Фильтр по lead_source (fab/cta/organic/chat/external)
-- ✅ Отображение вертикали и источника на карточках лидов
-
----
-
-## ✅ Фаза 3: AI & Automation (ВЫПОЛНЕНО)
-
-- ✅ AI Lead Scoring (edge function `leads-factory`)
-- ✅ Batch scoring (кнопка AI-скоринг в админке)
-- ✅ WhatsApp/Email follow-up генератор
-- ✅ AI Insights в карточках лидов (score, priority, reasoning)
-- ✅ FollowUpGenerator с копированием и открытием мессенджеров
+| Проблема | Уровень | Что сделать |
+|----------|---------|-------------|
+| Leaked Password Protection | WARN | Включить в настройках Auth (опционально) |
+| RLS `USING(true)` для INSERT | WARN | 8 таблиц (ai_agent_logs, mcc_leads, pwa_installs...) - это логи/аналитика, допустимо |
+| Таблица `partners` без policy | INFO | Добавить RLS policy для SELECT (только для админов) |
+| iCal token enumeration | WARN | Добавить rate limiting и token rotation (в будущем) |
 
 ---
 
-## 📋 Фаза 4: Future Enhancements (TODO)
+## 2. Данные
 
-- Telegram Bot интеграция
-- Smart Suggestions (на основе истории просмотров)
-- AI Auto-routing по вертикалям (назначение менеджеров)
-- Расширенная аналитика по вертикалям
+### ✅ Контент в базе
+
+| Таблица | Всего | Approved | Pending | Готово |
+|---------|-------|----------|---------|--------|
+| Yachts | 36 | 31 | 5 | ✅ |
+| Tours | 29 | 24 | 5 | ✅ |
+| Properties | 28 | 23 | 5 | ✅ |
+| Providers | 16 | — | — | ✅ |
+| Profiles | 7 | — | — | ✅ |
+
+### ⚠️ Seed-данные для удаления
+
+6 тестовых профилей присутствуют:
+```
+test-tourist@myuno.app, test-resident@myuno.app, test-owner@myuno.app,
+test-vendor@myuno.app, test-admin@myuno.app, test-unoteam@myuno.app
+```
+
+**Действие**: Эти профили полезны для тестирования. Можно оставить или удалить через Cloud View → SQL.
+
+---
+
+## 3. UI/UX Проверка
+
+### ✅ Пройдено
+
+| Компонент | Статус |
+|-----------|--------|
+| Главная страница | ✅ Загружается, все секции видны |
+| Навигация (Bottom Nav) | ✅ Все 5 табов работают |
+| FAB "Нужна помощь?" | ✅ Открывается, вертикали отображаются |
+| Onboarding Modal | ✅ Показывается, можно закрыть |
+| Страница Кабинет | ✅ Работает для авторизованных |
+| Детали Events | ✅ Страница загружается корректно |
+| Pull-to-Refresh | ✅ Работает на мобильном |
+
+### ❌ Консольные ошибки
+
+| Ошибка | Причина | Критичность |
+|--------|---------|-------------|
+| CORS manifest.json | Lovable инфраструктура (не ваш код) | Игнорировать |
+| postMessage origin | Lovable IDE (исчезнет после публикации) | Игнорировать |
+| apple-mobile-web-app-capable deprecated | PWA meta tag | Низкая, не влияет |
+
+---
+
+## 4. Placeholder-данные для замены
+
+### 🔴 Критично (заменить перед публикацией)
+
+| Файл | Проблема | Действие |
+|------|----------|----------|
+| `UniversalHelpFAB.tsx:177` | `wa.me/66123456789` | Заменить на реальный номер |
+| `UniversalHelpFAB.tsx:186` | `tel:+66123456789` | Заменить на реальный номер |
+| `ContactPage.tsx:39` | `wa.me/66812345678` | Заменить на реальный номер |
+| `CompactFooter.tsx:31` | `wa.me/66XXXXXXXXX` | Заменить на реальный номер |
+| `ContactAdminButton.tsx:83` | `66612345678` | Заменить на реальный номер |
+| `OrderTracking.tsx:283` | `tel:+66123456789` | Заменить на реальный номер |
+
+### ✅ Корректные номера (уже настроены)
+
+- `SOS.tsx` → `+66922407355` ✅
+- `VipConcierge.tsx` → `+66922407355` ✅
+- `useChat.ts` (UNO_WHATSAPP) → настроен ✅
+
+---
+
+## 5. API & Edge Functions
+
+### ✅ Все сетевые запросы успешны
+
+Проверено 21 запрос к Supabase — все вернули HTTP 200.
+
+### ✅ Edge Functions
+
+- `get-weather` — работает (2596ms)
+- Все функции в `config.toml` зарегистрированы (28 функций)
+
+---
+
+## 6. Console.log в продакшене
+
+### ⚠️ 573 вхождения в 46 файлах
+
+Большинство — в Edge Functions (допустимо для логирования).
+
+В клиентском коде:
+- `useBookingVouchers.ts:121` — `console.log('Share cancelled')` (безвредно)
+- `webVitals.ts:28` — debug mode logging (ok)
+- `ErrorBoundary.tsx:28,100,121` — error logging (нужно)
+
+**Рекомендация**: Не критично, можно оставить.
+
+---
+
+## 7. План Действий
+
+### Перед публикацией (5 минут)
+
+1. **Заменить placeholder-номера** в 6 файлах выше
+2. **Решить про seed-пользователей** — оставить или удалить
+
+### После публикации
+
+3. Включить Leaked Password Protection (Settings → Auth)
+4. Добавить RLS policy для таблицы `partners`
+5. Настроить rate limiting для iCal endpoint
+
+---
+
+## Вердикт
+
+```
+╔═══════════════════════════════════════════════════════╗
+║         🚀 ГОТОВО К ПУБЛИКАЦИИ                        ║
+╠═══════════════════════════════════════════════════════╣
+║ ✅ Безопасность: 235/235 таблиц с RLS                 ║
+║ ✅ UI/UX: Все основные пути работают                  ║
+║ ✅ API: Все запросы успешны                           ║
+║ ⚠️ Нужно: Заменить 6 placeholder-номеров             ║
+╚═══════════════════════════════════════════════════════╝
+```
+
+Приложение технически готово. Критических багов не обнаружено. 
+
+После замены placeholder-номеров можно публиковать!
+
