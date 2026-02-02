@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMyUnoPermissions, VERTICAL_LABELS, type Vertical } from '@/hooks/useUnoTeamPermissions';
-import { AppLayout } from '@/components/layout/AppLayout';
+import { TeamLayout } from '@/components/team/TeamLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -56,8 +56,8 @@ export default function TeamContentHub() {
 
   if (isLoading) {
     return (
-      <AppLayout title={isRu ? 'Добавление контента' : 'Add Content'}>
-        <div className="container py-6 space-y-4">
+      <TeamLayout title={isRu ? 'Контент' : 'Content'}>
+        <div className="py-6 px-4 space-y-4">
           <Skeleton className="h-32 w-full" />
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {[1, 2, 3, 4, 5, 6].map(i => (
@@ -65,15 +65,15 @@ export default function TeamContentHub() {
             ))}
           </div>
         </div>
-      </AppLayout>
+      </TeamLayout>
     );
   }
 
   const allVerticals = Object.keys(VERTICAL_LABELS) as Vertical[];
 
   return (
-    <AppLayout title={isRu ? 'Добавление контента' : 'Add Content'}>
-      <div className="container py-6 space-y-6">
+    <TeamLayout title={isRu ? 'Контент' : 'Content'}>
+      <div className="py-6 px-4 space-y-6">
         {/* Header */}
         <div>
           <h1 className="text-2xl font-bold">
@@ -168,6 +168,6 @@ export default function TeamContentHub() {
           </Card>
         )}
       </div>
-    </AppLayout>
+    </TeamLayout>
   );
 }

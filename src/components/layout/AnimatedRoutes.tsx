@@ -414,6 +414,10 @@ const TeamContentHub = lazy(() => import('@/pages/team/TeamContentHub'));
 const TeamChatPage = lazy(() => import('@/pages/team/TeamChatPage'));
 const TeamLeaderboardPage = lazy(() => import('@/pages/team/TeamLeaderboardPage'));
 const TeamProfilePage = lazy(() => import('@/pages/team/TeamProfilePage'));
+const TeamInboxPage = lazy(() => import('@/pages/team/TeamInboxPage'));
+const TeamSupportPage = lazy(() => import('@/pages/team/TeamSupportPage'));
+const TeamLeadsPage = lazy(() => import('@/pages/team/TeamLeadsPage'));
+const TeamModerationPage = lazy(() => import('@/pages/team/TeamModerationPage'));
 
 // Demo pages
 const DemoIndex = lazy(() => import('@/pages/demo/DemoIndex'));
@@ -740,6 +744,10 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/team/chat" element={<LazyPage><TeamGuard><TeamChatPage /></TeamGuard></LazyPage>} />
         <Route path="/team/leaderboard" element={<LazyPage><TeamGuard><TeamLeaderboardPage /></TeamGuard></LazyPage>} />
         <Route path="/team/my-profile" element={<LazyPage><TeamGuard><TeamProfilePage /></TeamGuard></LazyPage>} />
+        <Route path="/team/inbox" element={<LazyPage><TeamGuard><TeamInboxPage /></TeamGuard></LazyPage>} />
+        <Route path="/team/support" element={<LazyPage><TeamGuard><TeamSupportPage /></TeamGuard></LazyPage>} />
+        <Route path="/team/leads" element={<LazyPage><TeamGuard><TeamLeadsPage /></TeamGuard></LazyPage>} />
+        <Route path="/team/moderation" element={<LazyPage><TeamGuard><TeamModerationPage /></TeamGuard></LazyPage>} />
         
         {/* Guest Routes - Protected with GuestLayout */}
         <Route element={<GuestRouteLayout />}>
