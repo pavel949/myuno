@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
+import { MaintenanceToggle } from '@/components/maintenance/MaintenanceToggle';
 import { cn } from '@/lib/utils';
 
 export function DrawerFooter() {
@@ -9,6 +10,9 @@ export function DrawerFooter() {
   return (
     <div className="px-4 py-3 border-t border-border bg-muted/30">
       <div className="flex flex-col gap-2">
+        {/* Maintenance Toggle */}
+        <MaintenanceToggle className="justify-between" />
+
         {/* Language Toggle */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1 bg-background rounded-lg p-1 border border-border">
