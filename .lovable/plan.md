@@ -1,407 +1,168 @@
 
-# Сравнительный анализ: myUNO Yacht Charter vs. Мировые лидеры
+# План: UX улучшения бронирования + мультиканальные уведомления
 
-## Обзор платформ для сравнения
-- **Premium:** YachtCharterFleet, Boatbookings
-- **Marketplace:** YACHTICO, Sailo, Sailogy
-- **P2P:** Boatsetter, Viravira
+## Проблема
+
+Пользователи на первых шагах формы бронирования опасаются нажимать на кнопку — не понимают, что ещё не платят, а только выбирают параметры. После бронирования уведомления отправляются не по всем каналам.
 
 ---
 
-## 1. Модель листинга и каталогизации судов
+## Решение: Двухчастная доработка
 
-### Текущая реализация myUNO
-**Структура данных (`yachts` table):**
-- Базовые поля: `name_en/ru`, `description_en/ru`, `yacht_type`
-- Технические спеки: `length_meters`, `year_built`, `beam`, `draft`, `engines`, `cruising_speed`, `max_speed`, `fuel_capacity`
-- Вместимость: `capacity`, `cabins`, `bathrooms`
-- Сервис: `has_crew`, `has_catering`
-- Медиа: `cover_image`, `images[]`
-- Фичи: `features_en[]`, `features_ru[]`
+### Часть 1: UX — "Booking Confidence System"
 
-**Типы яхт:** yacht, catamaran, speedboat, sailboat
+**1.1 Динамическая подсказка в BookingBottomBar**
 
-**Фильтрация (`YachtsFilters.tsx`):**
-- По типу (6 категорий)
-- По вместимости (4 диапазона)
-- По продолжительности (5 опций)
-- По направлениям (6 маршрутов Пхукета)
-- По удобствам (9 опций)
-- По уровню цен
+Добавить контекстный текст над кнопкой, который меняется в зависимости от шага:
 
-### Сравнение с лидерами
+| Шаг | Кнопка | Подсказка (RU/EN) |
+|-----|--------|-------------------|
+| 0 (Детали) | "Далее" | "Выберите дату, время и участников" / "Select date, time and participants" |
+| 1 (Контакты) | "Далее" | "Никаких списаний — это только ваши контакты" / "No charges yet — just your contact info" |
+| 2 (Оплата) | "Подтвердить" | "Проверьте и подтвердите бронирование" / "Review and confirm your booking" |
+| Final | "Оплатить" | Показывается сумма + "Безопасная оплата" |
 
-| Параметр | myUNO | YachtCharterFleet | YACHTICO | Boatsetter |
-|----------|-------|-------------------|----------|------------|
-| Технические спеки | ✅ Полные | ✅ Расширенные | ✅ Полные | ⚠️ Базовые |
-| Видео-туры | ❌ Нет | ✅ 4K видео | ✅ Есть | ⚠️ Опционально |
-| 3D-туры | ❌ Нет | ✅ Matterport | ❌ Нет | ❌ Нет |
-| Верификация флота | ⚠️ Manual | ✅ Physical inspection | ⚠️ Documents | ✅ Coast Guard |
-| Мультиязычность | ✅ EN/RU | ✅ 8+ языков | ✅ 5 языков | ⚠️ EN only |
+**1.2 Обновление BookingBottomBar**
 
-### Сильные стороны myUNO
-- Глубокая билингвальность (RU/EN на уровне БД)
-- "Experiences" как уникальный слой каталога (Yacht Yoga, Fishing Trip, Birthday Party)
-- Локальная специфика Пхукета (маршруты: Phi-Phi, Similan, James Bond)
-
-### Зоны улучшения
-```text
-┌─────────────────────────────────────────────────────────────┐
-│  КРИТИЧНО:                                                  │
-│  • Видео контент — обязателен для luxury-сегмента           │
-│  • Deck Plans — стандарт для катамаранов 40ft+              │
-│  • Builder/Designer metadata — важно для коллекционеров     │
-├─────────────────────────────────────────────────────────────┤
-│  ЖЕЛАТЕЛЬНО:                                                │
-│  • Crew profiles (капитан, повар)                           │
-│  • Sample itineraries с картами                             │
-│  • Eco-certifications (Green Yachting)                      │
-└─────────────────────────────────────────────────────────────┘
+```tsx
+interface BookingBottomBarProps {
+  // ... existing props
+  step?: number;           // Текущий шаг (0-3)
+  totalSteps?: number;     // Всего шагов
+  hint?: string;           // Опциональная кастомная подсказка
+}
 ```
 
----
+Добавить:
+- Иконка 🔒 рядом с "Безопасно" на финальном шаге
+- Текст "Оплата не требуется" на промежуточных шагах
+- Прогресс `1 из 3` внизу бара
 
-## 2. Поиск и рекомендации
+**1.3 Компонент BookingStepHint**
 
-### Текущая реализация myUNO
-- **Фильтрация:** Universal Filter с chip-based UI
-- **Experience chips:** Quick selection по типу впечатлений
-- **Геолокация:** Hardcoded Phuket routes (phi-phi, james-bond, similan)
-- **Персонализация:** AI-powered home через `ai-personalize-home` edge function
-
-### Сравнение с лидерами
-
-| Функция | myUNO | Sailogy | Sailo | Boatsetter |
-|---------|-------|---------|-------|------------|
-| Map-based search | ❌ | ✅ Marina pins | ✅ Interactive | ✅ Full map |
-| Real-time availability | ✅ RPC check | ✅ | ✅ | ✅ |
-| AI recommendations | ✅ Personas | ❌ | ❌ | ⚠️ Basic |
-| Similar yachts | ❌ | ✅ | ✅ | ✅ |
-| Price alerts | ❌ | ✅ | ❌ | ✅ |
-
-### Уникальное преимущество myUNO
-AI-персонализация на основе user personas — конкурентное преимущество, которого нет у специализированных чартерных платформ.
-
-### Зоны улучшения
-- **Map integration:** Добавить Mapbox/Leaflet с маринами и маршрутами
-- **"Similar yachts":** Collaborative filtering на основе bookings
-- **Saved searches:** Уведомления о новых яхтах по критериям
+Новый компонент для показа контекстных подсказок:
+- Показывает что нужно заполнить на текущем шаге
+- Показывает сколько осталось шагов
+- Анимированный при смене шагов
 
 ---
 
-## 3. Ценообразование и доступность
+### Часть 2: Мультиканальные уведомления
 
-### Текущая реализация myUNO
+**2.1 Расширение системы email-уведомлений**
+
+Добавить новый тип email: `order_request_received` (для всех типов оплаты):
+
 ```typescript
-// Модель цен (из YachtBookingQuickSelect.tsx)
-price_half_day: number  // 4 часа
-price_full_day: number  // 8 часов
-currency: 'THB' | 'USD'
-
-// Типы чартера
-type CharterType = 'half_day' | 'full_day'
-
-// Дополнительные опыты (add-ons)
-YACHT_EXPERIENCES: YachtExperience[] // 13 опций от ฿3,000 до ฿15,000
+// email-templates.ts — новый шаблон
+generateOrderRequestEmail({
+  customerName,
+  orderNumber,
+  orderType,
+  totalAmount,
+  paymentMethod,  // cash, card, wallet
+  scheduledAt,
+  nextSteps,      // Что делать дальше
+})
 ```
 
-**Проверка доступности:**
-- RPC `check_availability` с vertical='yacht'
-- Проверка пересечений в таблице `orders`
-- Real-time блокировка при бронировании
+Шаблон покажет:
+- "Мы получили ваш запрос" (не "Заказ подтверждён")
+- Детали бронирования
+- Для cash: "Наш менеджер свяжется с вами"
+- Для card: "Ожидаем оплату"
+- Для wallet: "Оплата прошла"
 
-### Сравнение с лидерами
+**2.2 Триггер email при создании заказа**
 
-| Аспект | myUNO | YachtCharterFleet | YACHTICO | Boatsetter |
-|--------|-------|-------------------|----------|------------|
-| Модель цен | Статичная | Динамическая | Статичная + торг | Динамическая |
-| Сезонность | ❌ | ✅ High/Low | ✅ | ✅ |
-| Day-of-week | ❌ | ✅ Weekend premium | ⚠️ | ✅ |
-| Мультивалютность | ⚠️ THB/USD | ✅ 20+ валют | ✅ EUR/USD | ✅ USD |
-| Прозрачность fees | ✅ 5% service | ⚠️ Hidden | ⚠️ Negotiable | ✅ Clear |
-| Deposit system | ❌ | ✅ 50% advance | ✅ | ✅ |
+Изменить `useOrders.ts`:
 
-### Критические пробелы
-```text
-┌────────────────────────────────────────────────────────────────────┐
-│  БЛОКЕРЫ для scale:                                                │
-│                                                                    │
-│  1. Отсутствие iCal sync для яхт                                   │
-│     → Риск double-booking при листинге на нескольких платформах    │
-│                                                                    │
-│  2. Нет "Blackout dates" UI для владельцев                         │
-│     → Владельцы не могут закрыть даты для личного использования    │
-│                                                                    │
-│  3. Статичные цены                                                 │
-│     → Потеря revenue в high-season (Songkran, NYE)                 │
-│                                                                    │
-│  4. Нет APA (Advance Provisioning Allowance) калькулятора          │
-│     → Стандарт для недельных чартеров                              │
-└────────────────────────────────────────────────────────────────────┘
+```typescript
+// После создания заказа — отправляем email
+await supabase.functions.invoke('send-order-email', {
+  body: {
+    type: 'order_request_received',
+    order_id: orderId,
+    user_id: user.id,
+    payment_method: input.payment?.method,
+  },
+});
 ```
+
+**2.3 Обновление BookingConfirmation**
+
+После успешного бронирования показывать:
+- ✓ Бронирование создано
+- 📧 Подтверждение отправлено на email
+- 📱 Уведомление в приложении
+- 💬 (если cash) Менеджер свяжется через WhatsApp
 
 ---
 
-## 4. Бронирование и оплата
+## Файлы для изменения
 
-### Текущая реализация myUNO
-**Booking flow (`YachtBooking.tsx`):**
-1. Select charter type (half/full day)
-2. Pick date + departure time
-3. Set guest count
-4. Add experiences (upsell)
-5. Contact info
-6. Payment method (card, wallet, cash)
-7. Submit → `createBooking()` → `order_item_yacht_details`
+### Новые файлы:
+1. `src/components/booking/BookingStepHint.tsx` — контекстные подсказки по шагам
 
-**Двойной flow:**
-- "Add to Cart" — уникальный ID: `${yacht.id}-${date}-${time}-${charterType}`
-- "Book Now" — прямой checkout
+### Изменяемые файлы:
+1. `src/components/booking/BookingBottomBar.tsx` — добавить hint, step props
+2. `src/components/booking/BookingConfirmation.tsx` — показывать каналы уведомлений
+3. `src/hooks/useOrders.ts` — отправка email при создании заказа
+4. `supabase/functions/send-order-email/index.ts` — новый тип email
+5. `supabase/functions/_shared/email-templates.ts` — шаблон "Request Received"
 
-### Сравнение с лидерами
-
-| Функция | myUNO | Premium Charters | P2P Platforms |
-|---------|-------|------------------|---------------|
-| Instant booking | ✅ | ❌ Request only | ✅ |
-| Split payment | ❌ | ✅ Group split | ✅ Boatsetter |
-| Deposit + balance | ❌ | ✅ 50%/50% | ✅ |
-| Escrow | ❌ | ✅ | ✅ Stripe Connect |
-| Insurance upsell | ❌ | ✅ Integrated | ✅ Boatsetter |
-| Cancellation tiers | ❌ | ✅ 7-30-60 days | ✅ Flexible/Moderate/Strict |
-
-### Сильные стороны myUNO
-- **Mobile-first checkout** — Sheet-based quick booking
-- **Experience upsells** — 13 add-ons directly in flow
-- **Wallet integration** — Cashback & loyalty
-
-### Критические улучшения
-- **Deposit logic:** 50% при бронировании, 50% за 48 часов
-- **Cancellation policies:** Tiered refund rules
-- **Insurance integration:** Партнёрство со страховщиками
+### Страницы бронирования для обновления:
+- `ExperienceBooking.tsx`
+- `TourBooking.tsx`
+- `YachtBooking.tsx`
+- `BabysitterBooking.tsx`
+- `BeautyBooking.tsx`
+- `TransportBooking.tsx`
+- `CleaningBooking.tsx`
+- `WaterActivityBooking.tsx`
 
 ---
 
-## 5. Управление собственниками (Vendor Dashboard)
+## Технические детали
 
-### Текущая реализация myUNO (`VendorYachts.tsx`)
+### BookingBottomBar — обновлённая логика
 
-**4-step Wizard:**
-1. **Basic Info:** Name, type, description (EN/RU)
-2. **Specifications:** Prices, capacity, technical specs
-3. **Photos:** Cover + gallery upload
-4. **Review:** Preview before submission
+```tsx
+// Определение hint на основе шага
+const getStepHint = (step: number, isRu: boolean) => {
+  const hints = {
+    0: isRu ? '👆 Выберите параметры — оплата будет позже' : '👆 Select options — payment comes later',
+    1: isRu ? '✍️ Укажите контакты для связи' : '✍️ Add contact details',
+    2: isRu ? '💳 Выберите способ оплаты' : '💳 Choose payment method',
+    3: isRu ? '🔒 Безопасное подтверждение' : '🔒 Secure confirmation',
+  };
+  return hints[step] || hints[0];
+};
+```
 
-**Moderation:**
-- `approval_status`: pending → approved/rejected
-- Non-admin edits reset to pending
-- `ApprovalStatusBadge` component
+### Email template — Request Received
 
-**Draft system:**
-- `useFormDraft` hook с localStorage
-- `DraftRestorationBanner` при возврате
-
-### Сравнение с лидерами
-
-| Функция | myUNO | YACHTICO | Boatsetter | GetMyBoat |
-|---------|-------|----------|------------|-----------|
-| Listing wizard | ✅ 4-step | ✅ 6-step | ✅ Guided | ✅ |
-| Calendar management | ❌ | ✅ Full | ✅ Full | ✅ |
-| iCal import/export | ❌ | ✅ | ✅ | ✅ |
-| Pricing rules | ❌ | ✅ Seasons | ✅ Smart | ⚠️ Basic |
-| Booking requests | ⚠️ Auto-confirm | ✅ Accept/Decline | ✅ | ✅ |
-| Revenue analytics | ❌ | ✅ | ✅ Full | ⚠️ |
-| Crew profiles | ❌ | ✅ | ⚠️ | ❌ |
-| Insurance upload | ❌ | ✅ Required | ✅ | ✅ |
-
-### Критический Gap
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│  ОБЯЗАТЕЛЬНО для B2B adoption:                                  │
-│                                                                 │
-│  • Yacht Calendar UI (аналог Property Calendar)                 │
-│  • iCal sync с Booking Manager / YachtBooker / MMK Systems      │
-│  • Blackout dates для техобслуживания                           │
-│  • Request/Accept flow вместо auto-confirm                      │
-│  • Financial reports (earnings, fees, payouts)                  │
-└─────────────────────────────────────────────────────────────────┘
+```typescript
+generateOrderRequestEmail({
+  customerName: 'Иван',
+  orderNumber: 'UNO-240202-ABC1',
+  orderType: 'experience',
+  totalAmount: 5000,
+  currency: 'THB',
+  paymentMethod: 'cash',
+  scheduledAt: '2024-02-05T14:00:00Z',
+})
+// → Subject: "Запрос получен! #UNO-240202-ABC1"
+// → Body: "Мы получили ваш запрос на бронирование..."
 ```
 
 ---
 
-## 6. Коммуникация
+## Результат
 
-### Текущая реализация myUNO
-- **UnifiedChatFAB:** AI Agent / WhatsApp / Telegram
-- **Booking notes:** Free-text в форме
-- **Post-booking:** WhatsApp redirect для cash payments
+После реализации:
 
-### Сравнение с лидерами
-
-| Канал | myUNO | YACHTICO | Sailo | Boatsetter |
-|-------|-------|----------|-------|------------|
-| In-app messaging | ❌ | ✅ Full | ✅ | ✅ |
-| Email templates | ⚠️ Generic | ✅ Branded | ✅ | ✅ |
-| SMS notifications | ❌ | ❌ | ✅ | ✅ |
-| WhatsApp | ✅ Direct | ❌ | ❌ | ❌ |
-| Telegram | ✅ Direct | ❌ | ❌ | ❌ |
-| Owner-Guest chat | ❌ | ✅ Protected | ✅ | ✅ |
-
-### Уникальное преимущество myUNO
-Прямая интеграция WhatsApp/Telegram — критична для азиатского рынка, где эти мессенджеры доминируют.
-
-### Зоны улучшения
-- **In-app chat:** Защита от ухода сделок из платформы
-- **Booking lifecycle notifications:** Confirmation → Reminder → Day-of → Feedback
-
----
-
-## 7. Юридические аспекты
-
-### Текущая реализация myUNO
-- Нет цифровых договоров
-- Нет явных Terms & Conditions для чартера
-- Cancellation policy не определена
-
-### Стандарт индустрии
-- **MYBA Charter Agreement** — международный стандарт
-- **Digital signatures** — DocuSign/PandaDoc интеграция
-- **Damage deposits** — Escrow с pre-authorization
-
-### Критические требования
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│  Юридические must-have:                                        │
-│                                                                 │
-│  1. Charter Agreement template (MYBA-based)                     │
-│  2. Cancellation policy tiers (Flexible/Moderate/Strict)        │
-│  3. Damage deposit pre-auth                                     │
-│  4. Crew liability disclaimer                                   │
-│  5. Weather cancellation clause                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 8. UX/UI сравнение
-
-### myUNO strengths
-- **Mobile-first:** Sheet-based booking, bottom bar CTAs
-- **Quick booking:** 2-tap from listing to date selection
-- **Visual consistency:** MiniAppLayout, UnifiedFilter
-- **Dual flow:** Cart + Book Now
-
-### Comparison with leaders
-
-| Aspect | myUNO | YachtCharterFleet | Sailo | Boatsetter |
-|--------|-------|-------------------|-------|------------|
-| Mobile UX | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
-| Desktop UX | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
-| Load speed | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
-| Booking friction | Low | High (inquiry) | Medium | Low |
-| Image gallery | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
-
-### Improvement opportunities
-- **Fullscreen gallery** with swipe gestures
-- **Map view** для выбора маршрутов
-- **Comparison tool** для нескольких яхт
-
----
-
-## 9. Экосистема партнёров
-
-### Текущая реализация myUNO
-- **Cross-sell matrix:** 8 связанных вертикалей (Restaurants, Transport, Beauty...)
-- **Experience providers:** Встроены в booking flow
-- **Нет API:** Закрытая система
-
-### Стандарт индустрии
-
-| Интеграция | YachtCharterFleet | YACHTICO | Boatsetter |
-|------------|-------------------|----------|------------|
-| Channel Managers | ✅ MMK, YachtBooker | ✅ | ❌ |
-| Insurance APIs | ✅ | ✅ | ✅ Buoy |
-| Crew agencies | ✅ Direct | ⚠️ | ❌ |
-| Provisioning | ✅ | ⚠️ | ❌ |
-| Concierge networks | ✅ | ❌ | ❌ |
-| Public API | ⚠️ Partner only | ✅ | ✅ |
-
-### myUNO advantage
-Уникальная супер-апп экосистема: чартер яхты → ресторан на борту → трансфер → цветы.
-
----
-
-## 10. Метрики успешности
-
-### Рекомендуемые KPIs для myUNO Yacht vertical
-
-| Метрика | Формула | Benchmark |
-|---------|---------|-----------|
-| Listing-to-Booking | Bookings / Listings | 15-25% monthly |
-| View-to-Book | Bookings / Detail views | 2-5% |
-| Avg. charter value | Total GMV / Bookings | ฿35,000+ |
-| Repeat charter rate | Return customers / Total | 20-30% |
-| Experience attach rate | Experience add-ons / Bookings | 40%+ |
-| Vendor retention | Active vendors MoM | 85%+ |
-| Response time | Median inquiry-to-response | < 2 hours |
-| NPS | Promoters - Detractors | 50+ |
-
----
-
-## Итоговая матрица Gap-анализа (Updated)
-
-| Приоритет | Gap | Impact | Status |
-|-----------|-----|--------|--------|
-| 🟢 P0 | Yacht Calendar UI | Блокер для владельцев | ✅ Done |
-| 🟢 P0 | Cancellation policies | Юридический риск | ✅ Done |
-| 🟢 P0 | Blackout dates | Owner UX | ✅ Done |
-| 🟠 P0 | iCal sync для яхт | Критично для scale | 🔜 Phase 2 |
-| 🟠 P1 | Dynamic pricing | Revenue optimization | 🔜 Phase 2 |
-| 🟠 P1 | Deposit/payment splits | Conversion | 🔜 Phase 2 |
-| 🟡 P2 | Map-based search | UX improvement | 🔜 Phase 3 |
-| 🟡 P2 | Video/3D tours | Premium positioning | 🔜 Phase 3 |
-| 🟡 P2 | Similar yachts | Discovery | 🔜 Planned |
-| 🟢 P3 | Crew profiles | Trust building | 🔜 Planned |
-| 🟢 P3 | Insurance integration | Safety | 🔜 Planned |
-
----
-
-## Рекомендуемый Roadmap
-
-### Phase 1: Foundation (2-4 weeks) ✅ COMPLETED
-- [x] Yacht Calendar component (`src/components/yacht/YachtCalendar.tsx`)
-- [x] Cancellation policy selector (`src/components/yacht/CancellationPolicySelector.tsx`)
-- [x] Blackout dates for owners (yacht_availability table + UI)
-- [x] Database: `yacht_availability`, `cancellation_policies` tables
-- [x] Route: `/vendor/yachts/:id/calendar`
-- [x] Hook: `useYachtAvailability` for CRUD operations
-
-### Phase 2: Scale (4-8 weeks) — TODO
-- [ ] iCal sync infrastructure для яхт
-- [ ] Dynamic pricing rules (seasons, weekends)
-- [ ] Deposit payment flow
-
-### Phase 3: Premium (8-12 weeks) — TODO
-- [ ] Map-based search с маринами
-- [ ] Video upload в listing wizard
-- [ ] In-app protected messaging
-
----
-
-## Implemented Components (Phase 1)
-
-### YachtCalendar.tsx
-- Drag-to-select date ranges
-- Statuses: Available, Blocked, Booked, Maintenance
-- Price override per date
-- Notes/reasons for blocking
-- Bilingual support (EN/RU)
-
-### CancellationPolicySelector.tsx
-- Flexible: 100% за 24ч, 50% за 2ч
-- Moderate: 100% за 5д, 50% за 48ч (Recommended)
-- Strict: 100% за 7д, 50% за 3д
-- Super Strict: 100% за 14д+ only
-
-### useYachtAvailability Hook
-- Fetch/upsert/delete availability entries
-- RPC: `check_yacht_availability()`
+1. **Пользователь уверен** — на каждом шаге видит что делать и что оплата будет потом
+2. **Мультиканальные уведомления** — email + in-app сразу после бронирования
+3. **Консистентность** — единый UX паттерн во всех формах бронирования
+4. **Прозрачность** — на экране подтверждения видно по каким каналам отправлены уведомления
