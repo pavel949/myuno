@@ -1,133 +1,140 @@
 
-# План: Улучшение формы добавления объектов в Админ-панели
+
+# План унификации форм ввода данных на платформе
 
 ## Цель
-Привести форму добавления объектов в `/admin/properties` к единообразию с формой собственника, добавить расширенную загрузку фото и поле "Внутреннее название".
+Обеспечить единообразие данных, вводимых администраторами, вендорами и собственниками, через централизованные таксономии и стандартизированные компоненты.
 
 ---
 
-## Часть 1: Добавление поля "Внутреннее название"
+## Часть 1: Унификация районов (Districts)
 
-### 1.1 Миграция базы данных
-Добавить новую колонку `internal_name` в обе таблицы:
+### Проблема
+- `propertyTaxonomy.ts` содержит 22 района
+- `AddProperty.tsx` (Owner) — только 13 районов  
+- `LocationStep.tsx` (Wizard) — только 13 районов
+- `PropertyConsultation.tsx` — только 10 районов
 
-```sql
--- properties table (для marketplace/vendor)
-ALTER TABLE properties ADD COLUMN internal_name TEXT;
+### Решение
+Заменить локальные массивы на импорт `PHUKET_DISTRICTS` из `propertyTaxonomy.ts`:
 
--- owner_properties table (для собственников)
-ALTER TABLE owner_properties ADD COLUMN internal_name TEXT;
-```
-
-### 1.2 Обновление типов
-Добавить `internal_name?: string` в:
-- `src/types/property.ts` → `VendorProperty` и `OwnerProperty`
+**Файлы для изменения:**
+- `src/pages/owner/AddProperty.tsx`
+- `src/pages/owner/EditProperty.tsx`  
+- `src/components/owner/property-wizard/steps/LocationStep.tsx`
+- `src/pages/property/PropertyConsultation.tsx`
+- `src/lib/leadVerticalConfig.ts`
 
 ---
 
-## Часть 2: Замена компонента загрузки фото в Admin
+## Часть 2: Унификация типов недвижимости и удобств
 
-### 2.1 Изменения в `AdminProperties.tsx`
+### Проблема
+- Admin форма использует 6 типов и 12 удобств
+- Vendor форма использует канонические 8 типов и 36 удобств
 
-**Текущее состояние (строки 500-516):**
-```tsx
-<ImageUpload value={formData.cover_image} ... />
-<MultiImageUpload value={formData.images} ... />
-```
+### Решение
+В `AdminProperties.tsx` заменить локальные массивы на импорты:
+- `PROPERTY_TYPES` (8 типов)
+- `ALL_AMENITIES` (36 удобств по категориям)
 
-**Новое состояние:**
-```tsx
-<AirbnbStyleImageUpload
-  value={formData.cover_image 
-    ? [formData.cover_image, ...formData.images] 
-    : formData.images}
-  onChange={(urls) => {
-    if (urls.length === 0) {
-      setFormData(prev => ({ ...prev, cover_image: '', images: [] }));
-    } else {
-      setFormData(prev => ({ 
-        ...prev, 
-        cover_image: urls[0], 
-        images: urls.slice(1) 
-      }));
-    }
-  }}
-  folder="properties"
-  maxImages={20}
-/>
-```
+---
 
-Это добавит:
-- Drag & Drop загрузку файлов
-- Перетаскивание для изменения порядка (первое фото = обложка)
-- Импорт из Google Drive / Dropbox (через ссылки)
-- Импорт с любого сайта по URL
+## Часть 3: Унификация форм товаров (Products)
+
+### Проблема
+| Поле | Admin | Vendor |
+|------|-------|--------|
+| unit_value, unit_measure | ✅ | ❌ |
+| pack_quantity | ✅ | ❌ |
+| is_shippable_international | ❌ | ✅ |
+| Загрузка изображений | ❌ URL только | ✅ Базовая |
+
+### Решение
+1. Добавить в `VendorProducts.tsx`: unit_value, unit_measure, pack_quantity
+2. Добавить в `AdminMarketplaceProducts.tsx`: is_shippable_international, AirbnbStyleImageUpload
+
+---
+
+## Часть 4: Унификация загрузки изображений
+
+### Текущее состояние
+| Форма | Компонент |
+|-------|-----------|
+| AdminProperties | AirbnbStyleImageUpload ✅ |
+| Owner AddProperty | AirbnbStyleImageUpload ✅ |
+| VendorProperties | ImageUpload базовый ❌ |
+| VendorProducts | ImageUpload базовый ❌ |
+| AdminMarketplaceProducts | Только URL ❌ |
+
+### Решение
+Заменить на `AirbnbStyleImageUpload` во всех формах для единообразия:
+- Drag & Drop
+- Импорт из облака (Google Drive, Dropbox)
 - Сжатие в WebP
-- Редактирование изображений (поворот, обрезка)
+- Редактирование изображений
 
-### 2.2 Добавление поля "Внутреннее название"
+---
 
-Добавить новое поле в форму администратора после Provider Selector:
+## Часть 5: Добавление internal_name
 
-```tsx
-<div className="space-y-2">
-  <Label>{isRussian ? 'Внутреннее название' : 'Internal Name'}</Label>
-  <Input
-    value={formData.internal_name}
-    onChange={(e) => setFormData(prev => ({ ...prev, internal_name: e.target.value }))}
-    placeholder={isRussian ? 'Для внутреннего использования' : 'For internal use only'}
-  />
-  <p className="text-xs text-muted-foreground">
-    {isRussian 
-      ? 'Не отображается клиентам. Например: "Вилла Петровых"' 
-      : 'Not shown to customers. E.g.: "Villa Petrov Family"'}
-  </p>
-</div>
+Добавить поле "Внутреннее название" в:
+- `VendorProperties.tsx` (сейчас отсутствует)
+- Формы товаров (как SKU или внутренний код)
+
+---
+
+## Порядок реализации
+
+### Шаг 1: Таксономии районов (5 файлов)
+```
+AddProperty.tsx → импорт PHUKET_DISTRICTS
+EditProperty.tsx → импорт PHUKET_DISTRICTS  
+LocationStep.tsx → импорт PHUKET_DISTRICTS
+PropertyConsultation.tsx → импорт PHUKET_DISTRICTS
+leadVerticalConfig.ts → импорт PHUKET_DISTRICTS
+```
+
+### Шаг 2: Admin Properties (1 файл)
+```
+AdminProperties.tsx → импорт PROPERTY_TYPES, ALL_AMENITIES
+```
+
+### Шаг 3: Формы товаров (2 файла)
+```
+VendorProducts.tsx → добавить unit поля + AirbnbStyleImageUpload
+AdminMarketplaceProducts.tsx → добавить shipping + AirbnbStyleImageUpload
+```
+
+### Шаг 4: Vendor Properties (1 файл)
+```
+VendorProperties.tsx → AirbnbStyleImageUpload + internal_name
 ```
 
 ---
 
-## Часть 3: Синхронизация форм Owner и Admin
-
-### 3.1 Добавление поля internal_name в форму собственника
-
-В `AddProperty.tsx` добавить поле в секцию "Basic Information":
-
-```tsx
-<div className="space-y-2">
-  <Label>{isRu ? 'Внутреннее название' : 'Internal Name'}</Label>
-  <Input
-    value={formData.internal_name}
-    onChange={(e) => setFormData(prev => ({ ...prev, internal_name: e.target.value }))}
-    placeholder={isRu ? 'Только для вас (не публикуется)' : 'Private note (not published)'}
-  />
-</div>
-```
-
----
-
-## Изменяемые файлы
+## Итоговая таблица изменений
 
 | Файл | Изменение |
 |------|-----------|
-| `src/pages/admin/AdminProperties.tsx` | Заменить ImageUpload на AirbnbStyleImageUpload, добавить internal_name |
-| `src/pages/owner/AddProperty.tsx` | Добавить поле internal_name |
-| `src/types/property.ts` | Добавить internal_name в типы |
-| **Миграция БД** | Добавить колонку internal_name в properties и owner_properties |
+| `src/pages/owner/AddProperty.tsx` | PHUKET_DISTRICTS, PROPERTY_TYPES |
+| `src/pages/owner/EditProperty.tsx` | PHUKET_DISTRICTS, PROPERTY_TYPES |
+| `src/components/owner/property-wizard/steps/LocationStep.tsx` | PHUKET_DISTRICTS |
+| `src/pages/property/PropertyConsultation.tsx` | PHUKET_DISTRICTS |
+| `src/lib/leadVerticalConfig.ts` | PHUKET_DISTRICTS |
+| `src/pages/admin/AdminProperties.tsx` | PROPERTY_TYPES, ALL_AMENITIES |
+| `src/pages/vendor/VendorProducts.tsx` | unit поля, AirbnbStyleImageUpload |
+| `src/pages/admin/AdminMarketplaceProducts.tsx` | shipping, AirbnbStyleImageUpload |
+| `src/pages/vendor/VendorProperties.tsx` | AirbnbStyleImageUpload, internal_name |
 
 ---
 
-## Техническая часть
+## Ожидаемый результат
 
-### Возможности AirbnbStyleImageUpload:
-1. **Drag & Drop** — перетащите файлы прямо в область
-2. **Облако** — Google Drive, Dropbox через копирование ссылки
-3. **С сайта** — извлечение изображений с любого URL (Yandex Disk, сайты застройщиков)
-4. **Сортировка** — перетаскивание для изменения порядка, первое фото = обложка
-5. **Редактирование** — поворот, обрезка изображений
-6. **Сжатие** — автоматическая конвертация в WebP, уменьшение размера
+После реализации:
+- Все 22 района Пхукета доступны во всех формах
+- Все 8 типов недвижимости и 36 удобств доступны везде
+- Товары имеют единую структуру полей
+- Единый UX загрузки фото во всех формах
+- Фильтры работают корректно с нормализованными данными
 
-### Зависимости:
-- `@dnd-kit/core` и `@dnd-kit/sortable` — уже установлены
-- `browser-image-compression` — уже установлен
-- Компоненты `CloudStoragePicker`, `ImagePickerFromUrl`, `ImageEditor` — уже реализованы
