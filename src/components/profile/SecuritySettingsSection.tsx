@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { KeyRound, Smartphone, Monitor, Trash2, ChevronRight, Shield } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { KeyRound, Smartphone, Monitor, Trash2, ChevronRight, Shield, Plus, Pencil, RotateCcw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { SectionCard } from '@/components/uno/SectionCard';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,8 @@ import { Label } from '@/components/ui/label';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { usePinManagement } from '@/hooks/usePinManagement';
+import { PinManagementDialog } from './PinManagementDialog';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 import { toast } from 'sonner';
 import {
@@ -17,7 +19,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -30,6 +31,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const texts = {
   ru: {
@@ -58,6 +65,10 @@ const texts = {
     logoutAllSuccess: 'Вы вышли со всех устройств',
     configured: 'Настроен',
     notConfigured: 'Не настроен',
+    setupPin: 'Настроить PIN',
+    changePin: 'Изменить PIN',
+    resetPin: 'Сбросить PIN',
+    disablePin: 'Отключить PIN',
   },
   en: {
     sectionTitle: 'Security',
@@ -85,22 +96,33 @@ const texts = {
     logoutAllSuccess: 'Signed out from all devices',
     configured: 'Configured',
     notConfigured: 'Not configured',
+    setupPin: 'Set up PIN',
+    changePin: 'Change PIN',
+    resetPin: 'Reset PIN',
+    disablePin: 'Disable PIN',
   },
 };
+
+type PinDialogMode = 'setup' | 'change' | 'reset' | 'disable' | null;
 
 export function SecuritySettingsSection() {
   const { language } = useLanguage();
   const { signOut } = useAuth();
+  const { hasPin, isLoading: pinLoading, checkHasPin } = usePinManagement();
   const t = texts[language === 'th' ? 'en' : language] || texts.en;
   
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [pinDialogMode, setPinDialogMode] = useState<PinDialogMode>(null);
   const [passwordForm, setPasswordForm] = useState({
     newPassword: '',
     confirmPassword: '',
   });
-  
-  const hasPinConfigured = !!localStorage.getItem('uno_pin_enabled');
+
+  // Check PIN status on mount
+  useEffect(() => {
+    checkHasPin();
+  }, [checkHasPin]);
 
   const handleChangePassword = async () => {
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
@@ -137,8 +159,11 @@ export function SecuritySettingsSection() {
   };
 
   const handleDeleteAccount = async () => {
-    // This would typically call an edge function to handle account deletion
     toast.error('Contact support to delete your account');
+  };
+
+  const handlePinAction = (action: PinDialogMode) => {
+    setPinDialogMode(action);
   };
 
   const menuItems = [
@@ -153,9 +178,15 @@ export function SecuritySettingsSection() {
       icon: Smartphone,
       label: t.pinSettings,
       description: t.pinSettingsDesc,
-      action: () => {},
-      badge: hasPinConfigured ? t.configured : t.notConfigured,
-      badgeColor: hasPinConfigured ? 'text-green-600 bg-green-100' : 'text-muted-foreground bg-muted',
+      action: hasPin ? undefined : () => handlePinAction('setup'),
+      badge: pinLoading ? '...' : (hasPin ? t.configured : t.notConfigured),
+      badgeColor: hasPin ? 'text-green-600 bg-green-100' : 'text-muted-foreground bg-muted',
+      hasDropdown: hasPin,
+      dropdownItems: hasPin ? [
+        { label: t.changePin, action: () => handlePinAction('change'), icon: Pencil },
+        { label: t.resetPin, action: () => handlePinAction('reset'), icon: RotateCcw },
+        { label: t.disablePin, action: () => handlePinAction('disable'), icon: Trash2, destructive: true },
+      ] : undefined,
     },
     {
       icon: Monitor,
@@ -175,23 +206,55 @@ export function SecuritySettingsSection() {
       </div>
       <SectionCard noPadding className="overflow-hidden divide-y divide-border">
         {menuItems.map((item, index) => (
-          <button
-            key={index}
-            onClick={item.action}
-            className="w-full flex items-center gap-3 p-4 hover:bg-secondary/50 transition-colors text-left"
-          >
-            <item.icon className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium">{item.label}</p>
-              <p className="text-xs text-muted-foreground">{item.description}</p>
-            </div>
-            {item.badge && (
-              <span className={`text-xs px-2 py-0.5 rounded-full ${item.badgeColor}`}>
-                {item.badge}
-              </span>
-            )}
-            <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-          </button>
+          item.hasDropdown ? (
+            <DropdownMenu key={index}>
+              <DropdownMenuTrigger asChild>
+                <button className="w-full flex items-center gap-3 p-4 hover:bg-secondary/50 transition-colors text-left">
+                  <item.icon className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">{item.label}</p>
+                    <p className="text-xs text-muted-foreground">{item.description}</p>
+                  </div>
+                  {item.badge && (
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${item.badgeColor}`}>
+                      {item.badge}
+                    </span>
+                  )}
+                  <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                {item.dropdownItems?.map((dropdownItem, dropdownIndex) => (
+                  <DropdownMenuItem 
+                    key={dropdownIndex}
+                    onClick={dropdownItem.action}
+                    className={dropdownItem.destructive ? 'text-destructive focus:text-destructive' : ''}
+                  >
+                    <dropdownItem.icon className="w-4 h-4 mr-2" />
+                    {dropdownItem.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <button
+              key={index}
+              onClick={item.action}
+              className="w-full flex items-center gap-3 p-4 hover:bg-secondary/50 transition-colors text-left"
+            >
+              <item.icon className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium">{item.label}</p>
+                <p className="text-xs text-muted-foreground">{item.description}</p>
+              </div>
+              {item.badge && (
+                <span className={`text-xs px-2 py-0.5 rounded-full ${item.badgeColor}`}>
+                  {item.badge}
+                </span>
+              )}
+              <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+            </button>
+          )
         ))}
         
         {/* Delete Account */}
@@ -256,6 +319,13 @@ export function SecuritySettingsSection() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* PIN Management Dialog */}
+      <PinManagementDialog
+        mode={pinDialogMode}
+        onClose={() => setPinDialogMode(null)}
+        onSuccess={() => checkHasPin()}
+      />
     </motion.div>
   );
 }
