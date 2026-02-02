@@ -15,6 +15,7 @@ import {
   AccountMenu,
   MyApplicationsWidget,
 } from '@/components/account';
+import { DownloadAppButton } from '@/components/pwa/DownloadAppButton';
 
 export default function UserAccountDashboard() {
   const navigate = useNavigate();
@@ -82,6 +83,9 @@ export default function UserAccountDashboard() {
 
         {/* Account Menu (Settings, Documents, etc.) */}
         <AccountMenu />
+
+        {/* PWA Install Button - persistent option */}
+        <DownloadAppButton />
       </PageContainer>
     </div>
   );
