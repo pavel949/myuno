@@ -6,6 +6,8 @@ import type { ConsultationRequest, ConsultationStatus, ConsultationRequestType }
 export interface ConsultationFilters {
   status?: ConsultationStatus | 'all';
   requestType?: ConsultationRequestType | 'all';
+  verticalId?: string | 'all';
+  leadSource?: string | 'all';
   search?: string;
 }
 
@@ -27,6 +29,14 @@ export function useAdminConsultations(filters?: ConsultationFilters) {
 
       if (filters?.requestType && filters.requestType !== 'all') {
         query = query.eq('request_type', filters.requestType);
+      }
+
+      if (filters?.verticalId && filters.verticalId !== 'all') {
+        query = query.eq('vertical_id', filters.verticalId);
+      }
+
+      if (filters?.leadSource && filters.leadSource !== 'all') {
+        query = query.eq('lead_source', filters.leadSource);
       }
 
       if (filters?.search) {

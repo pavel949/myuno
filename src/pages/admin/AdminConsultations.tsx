@@ -22,8 +22,10 @@ import { ru, enUS } from 'date-fns/locale';
 import {
   Search, Phone, Mail, MessageCircle, Calendar, Users, Home,
   Clock, CheckCircle, XCircle, AlertCircle, Palmtree, TrendingUp, MapPin,
-  BarChart3, Flame, Thermometer, Snowflake
+  BarChart3, Flame, Thermometer, Snowflake, Anchor, Compass, Car, Scale, 
+  Stethoscope, Baby, Sparkles, Dumbbell, Waves, UtensilsCrossed
 } from 'lucide-react';
+import { LEAD_VERTICALS } from '@/lib/leadVerticalConfig';
 
 const REQUEST_TYPE_CONFIG: Record<ConsultationRequestType, { icon: typeof Palmtree; labelRu: string; labelEn: string; color: string }> = {
   vacation_rental: { icon: Palmtree, labelRu: 'Аренда на отпуск', labelEn: 'Vacation Rental', color: 'bg-green-500' },
@@ -132,6 +134,27 @@ function ConsultationCard({
 
             {/* Request details */}
             <div className="flex flex-wrap gap-2 text-xs">
+              {/* Vertical badge */}
+              {consultation.vertical_id && (
+                <Badge variant="default" className="bg-primary/20 text-primary border-primary/30">
+                  {LEAD_VERTICALS.find(v => v.id === consultation.vertical_id)?.icon || '📋'}{' '}
+                  {isRu 
+                    ? LEAD_VERTICALS.find(v => v.id === consultation.vertical_id)?.nameRu || consultation.vertical_id
+                    : LEAD_VERTICALS.find(v => v.id === consultation.vertical_id)?.nameEn || consultation.vertical_id
+                  }
+                </Badge>
+              )}
+              {/* Lead source badge */}
+              {consultation.lead_source && (
+                <Badge variant="outline" className="text-muted-foreground">
+                  {consultation.lead_source === 'fab' && '💬'}
+                  {consultation.lead_source === 'cta' && '📢'}
+                  {consultation.lead_source === 'organic' && '🌱'}
+                  {consultation.lead_source === 'chat' && '💭'}
+                  {consultation.lead_source === 'external' && '🌐'}
+                  {' '}{consultation.lead_source.toUpperCase()}
+                </Badge>
+              )}
               <Badge variant="secondary">
                 {isRu ? typeConfig.labelRu : typeConfig.labelEn}
               </Badge>
@@ -330,6 +353,8 @@ export default function AdminConsultations() {
   const [filters, setFilters] = useState<ConsultationFilters>({
     status: 'all',
     requestType: 'all',
+    verticalId: 'all',
+    leadSource: 'all',
     search: '',
   });
 
@@ -405,12 +430,12 @@ export default function AdminConsultations() {
           />
         </div>
 
-        <div className="flex gap-2">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           <Select 
             value={filters.status} 
             onValueChange={(v) => setFilters(prev => ({ ...prev, status: v as ConsultationStatus | 'all' }))}
           >
-            <SelectTrigger className="flex-1">
+            <SelectTrigger>
               <SelectValue placeholder={isRu ? 'Статус' : 'Status'} />
             </SelectTrigger>
             <SelectContent>
@@ -427,7 +452,7 @@ export default function AdminConsultations() {
             value={filters.requestType} 
             onValueChange={(v) => setFilters(prev => ({ ...prev, requestType: v as ConsultationRequestType | 'all' }))}
           >
-            <SelectTrigger className="flex-1">
+            <SelectTrigger>
               <SelectValue placeholder={isRu ? 'Тип' : 'Type'} />
             </SelectTrigger>
             <SelectContent>
@@ -437,6 +462,40 @@ export default function AdminConsultations() {
                   {isRu ? config.labelRu : config.labelEn}
                 </SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+
+          <Select 
+            value={filters.verticalId || 'all'} 
+            onValueChange={(v) => setFilters(prev => ({ ...prev, verticalId: v }))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={isRu ? 'Вертикаль' : 'Vertical'} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{isRu ? 'Все вертикали' : 'All Verticals'}</SelectItem>
+              {LEAD_VERTICALS.map((v) => (
+                <SelectItem key={v.id} value={v.id}>
+                  {v.icon} {isRu ? v.nameRu : v.nameEn}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select 
+            value={filters.leadSource || 'all'} 
+            onValueChange={(v) => setFilters(prev => ({ ...prev, leadSource: v }))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={isRu ? 'Источник' : 'Source'} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{isRu ? 'Все источники' : 'All Sources'}</SelectItem>
+              <SelectItem value="fab">💬 FAB</SelectItem>
+              <SelectItem value="cta">📢 CTA</SelectItem>
+              <SelectItem value="organic">🌱 Organic</SelectItem>
+              <SelectItem value="chat">💭 Chat</SelectItem>
+              <SelectItem value="external">🌐 External</SelectItem>
             </SelectContent>
           </Select>
         </div>

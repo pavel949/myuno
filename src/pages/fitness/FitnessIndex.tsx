@@ -8,6 +8,7 @@ import { UniversalFilter, ActiveFilters, fitnessFilterConfig, FilterValues } fro
 import { useGyms } from '@/hooks/useGyms';
 import { matchesFilter, matchesPriceLevel, matchesMembership, isOpenNow } from '@/lib/filterUtils';
 import { CrossSellSection } from '@/components/crosssell';
+import { VerticalCTA } from '@/components/leads/VerticalCTA';
 
 const GYM_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -176,6 +177,7 @@ export default function FitnessIndex() {
           );
         })}
       </div>
+      <VerticalCTA vertical="gyms" className="my-6" />
 
       <CrossSellSection currentVertical="fitness" />
     </MiniAppLayout>

@@ -15,6 +15,7 @@ import {
 } from '@/components/filters';
 import { CrossSellSection } from '@/components/crosssell';
 import { matchesFilter, matchesPriceLevel, isOpenNow } from '@/lib/filterUtils';
+import { VerticalCTA } from '@/components/leads/VerticalCTA';
 
 type Mode = 'delivery' | 'reservation';
 
@@ -268,6 +269,7 @@ export default function RestaurantsIndex() {
           </div>
         ))}
       </div>
+      <VerticalCTA vertical="restaurants" className="my-6" />
 
       <CrossSellSection currentVertical="restaurants" />
     </MiniAppLayout>

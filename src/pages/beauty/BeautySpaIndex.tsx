@@ -8,6 +8,7 @@ import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type Q
 import { beautyFilterConfig, FilterValues } from '@/components/filters';
 import { matchesFilter, matchesPriceLevel, isOpenNow } from '@/lib/filterUtils';
 import { CrossSellSection } from '@/components/crosssell';
+import { VerticalCTA } from '@/components/leads/VerticalCTA';
 
 const SERVICE_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -121,6 +122,7 @@ export default function BeautySpaIndex() {
           />
         ))}
       </div>
+      <VerticalCTA vertical="salons" className="my-6" />
 
       <CrossSellSection currentVertical="beauty" />
     </MiniAppLayout>

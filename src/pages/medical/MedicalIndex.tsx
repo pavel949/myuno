@@ -7,6 +7,7 @@ import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type Q
 import { medicalFilterConfig, FilterValues } from '@/components/filters';
 import { Button } from '@/components/ui/button';
 import { useClinics } from '@/hooks/useClinics';
+import { VerticalCTA } from '@/components/leads/VerticalCTA';
 
 const SPECIALTY_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -135,6 +136,8 @@ export default function MedicalIndex() {
           );
         })}
       </div>
+
+      <VerticalCTA vertical="clinics" className="my-6" />
     </MiniAppLayout>
   );
 }

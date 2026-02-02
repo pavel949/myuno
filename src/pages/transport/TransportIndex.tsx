@@ -7,6 +7,7 @@ import { MiniAppLayout, MiniAppQuickGrid, ItemCard, type MiniAppCategory, type Q
 import { transportFilterConfig, FilterValues } from '@/components/filters';
 import { useVehicles } from '@/hooks/useVehicles';
 import { matchesFilter, matchesPriceLevel } from '@/lib/filterUtils';
+import { VerticalCTA } from '@/components/leads/VerticalCTA';
 
 const VEHICLE_CATEGORIES: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -134,6 +135,8 @@ export default function TransportIndex() {
           />
         ))}
       </div>
+
+      <VerticalCTA vertical="vehicles" className="my-6" />
     </MiniAppLayout>
   );
 }

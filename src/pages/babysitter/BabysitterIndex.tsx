@@ -8,6 +8,7 @@ import { FilterValues, babysitterFilterConfig } from '@/components/filters';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { matchesFilter, matchesPriceLevel } from '@/lib/filterUtils';
+import { VerticalCTA } from '@/components/leads/VerticalCTA';
 
 const experienceFilters: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -219,6 +220,8 @@ export default function BabysitterIndex() {
           />
         ))}
       </div>
+
+      <VerticalCTA vertical="babysitters" className="my-6" />
     </MiniAppLayout>
   );
 }
