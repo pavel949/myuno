@@ -1,25 +1,82 @@
 
 # План: Unified Lead System (Единая система лидов по вертикалям)
 
-## Проблема
+## ✅ Фаза 1: ВЫПОЛНЕНО
 
-Сейчас у платформы есть **критический разрыв** между:
-- 19+ вертикалей в `INTAKE_VERTICALS` (яхты, туры, транспорт, юристы и т.д.)
-- Форма консультации **только для недвижимости** (6 типов: vacation_rental, property_consultation...)
-- Кнопка консультации **скрыта** на странице `/property/consultation`
-- Лиды из разных источников хранятся в разных таблицах без связи
+### Реализованные компоненты:
 
-### Текущие таблицы лидов:
+| Файл | Статус | Описание |
+|------|--------|----------|
+| `migration` | ✅ | Добавлены vertical_id, vertical_metadata, entry_point, lead_source в consultation_requests |
+| `src/lib/leadVerticalConfig.ts` | ✅ | Конфиг 12 вертикалей с динамическими полями форм |
+| `src/components/fab/UniversalHelpFAB.tsx` | ✅ | Глобальная FAB-кнопка на всех страницах |
+| `src/components/leads/UniversalLeadForm.tsx` | ✅ | Многошаговая форма с динамическими полями |
+| `src/components/leads/VerticalCTA.tsx` | ✅ | CTA компонент с 5 вариантами отображения |
+| `src/hooks/useUniversalLead.ts` | ✅ | Хук для сабмита лидов |
+| `src/hooks/useConsultationRequests.ts` | ✅ | Расширены типы запросов |
+| `src/components/layout/AppLayout.tsx` | ✅ | Интегрирован UniversalHelpFAB |
 
-| Таблица | Назначение | Проблема |
-|---------|------------|----------|
-| `consultation_requests` | Property-focused лиды | Только 6 типов, все про недвижимость |
-| `mcc_leads` | Marketing attribution | Нет привязки к вертикалям |
-| `property_service_requests` | Заявки на сервис | Отдельная изоляция |
+### Покрытые вертикали (12):
+- 🏠 Properties (vacation_rental, long_term, purchase, tour, investment)
+- 🚤 Yachts (charter, multiday, party, purchase)
+- 🗺️ Tours (island, city, adventure, custom)
+- 🚗 Transport (car, bike, driver, airport)
+- ⚖️ Legal (visa, property, business, general)
+- 🏥 Medical (doctor, dental, checkup, emergency)
+- 👶 Babysitters (hourly, daily, longterm)
+- 💇 Beauty & Spa (spa, hair, nails, beauty)
+- 🏋️ Fitness (daypass, membership, trainer, yoga)
+- 🏄 Water Sports (diving, snorkeling, jet_ski, surfing)
+- 🍽️ Restaurants (table, private_event, recommendation)
+- 💬 Other (general_inquiry)
 
-## Предлагаемое решение
+### Функционал:
+- ✅ FAB кнопка видна на всех страницах (кроме /admin)
+- ✅ Контекстное определение вертикали по URL
+- ✅ Динамические поля формы по выбранной вертикали
+- ✅ Сохранение в consultation_requests с vertical_id и vertical_metadata
+- ✅ Трекинг источника (lead_source) и точки входа (entry_point)
 
-### Архитектура "Universal Lead Hub"
+---
+
+## 📋 Фаза 2: Интеграция (следующий спринт)
+
+### Задачи:
+
+1. **Добавить VerticalCTA на страницы вертикалей**
+   - /yachts → `<VerticalCTA vertical="yachts" />`
+   - /tours → `<VerticalCTA vertical="tours" />`
+   - /transport → `<VerticalCTA vertical="vehicles" />`
+   - и т.д.
+
+2. **AI Auto-routing**
+   - AI определяет вертикаль по свободному тексту
+   - Маршрутизация на нужного менеджера по специализации
+
+3. **MCC Lead Hub Integration**
+   - Фильтр по vertical_id в админке
+   - Статистика по источникам (fab vs cta vs organic)
+   - Dashboard с конверсией по вертикалям
+
+4. **WhatsApp/Telegram Bot**
+   - Приём заявок через мессенджеры
+   - lead_source='chat'
+
+---
+
+## 📋 Фаза 3: Оптимизация
+
+5. **Smart Suggestions**
+   - Предложения на основе истории просмотров
+   - "Вы смотрели виллы в Раваи — нужна помощь с выбором?"
+
+6. **Lead Scoring по вертикалям**
+   - Разные веса для разных вертикалей
+   - Hot/Warm/Cold приоритизация
+
+---
+
+## Архитектура
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────────┐
@@ -29,219 +86,28 @@
 │  ┌─────────────┐   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐       │
 │  │ UniversalFAB│   │ VerticalCTA │   │ QuickChat   │   │ ExternalAPI │       │
 │  │   (global)  │   │(per page)   │   │  Widget     │   │ (partners)  │       │
+│  │     ✅      │   │     ✅      │   │   TODO      │   │   TODO      │       │
 │  └──────┬──────┘   └──────┬──────┘   └──────┬──────┘   └──────┬──────┘       │
 │         │                 │                 │                 │              │
 │         └────────────────┴─────────────────┴─────────────────┘              │
 │                                    │                                         │
 │                                    ▼                                         │
 │  ┌──────────────────────────────────────────────────────────────────────┐   │
-│  │              UniversalLeadForm (unified intake)                       │   │
-│  │  ┌─────────────────────────────────────────────────────────────────┐ │   │
-│  │  │ Step 1: What do you need?                                       │ │   │
-│  │  │ [🏠 Property] [🚤 Yacht] [🗺️ Tour] [🚗 Transport] [⚖️ Legal]... │ │   │
-│  │  └─────────────────────────────────────────────────────────────────┘ │   │
-│  │  ┌─────────────────────────────────────────────────────────────────┐ │   │
-│  │  │ Step 2: Details (dynamic per vertical)                          │ │   │
-│  │  │ - Dates / Budget / Location / Guests...                         │ │   │
-│  │  └─────────────────────────────────────────────────────────────────┘ │   │
-│  │  ┌─────────────────────────────────────────────────────────────────┐ │   │
-│  │  │ Step 3: Contact info                                            │ │   │
-│  │  │ Name / Phone / Preferred contact method                         │ │   │
-│  │  └─────────────────────────────────────────────────────────────────┘ │   │
+│  │              UniversalLeadForm (unified intake) ✅                    │   │
 │  └──────────────────────────────────────────────────────────────────────┘   │
 │                                    │                                         │
 │                                    ▼                                         │
 │  ┌──────────────────────────────────────────────────────────────────────┐   │
-│  │                   consultation_requests (extended)                    │   │
-│  │  + vertical_id: string (from INTAKE_VERTICALS)                       │   │
-│  │  + vertical_metadata: jsonb (flexible per-vertical data)             │   │
-│  │  + lead_source: 'fab' | 'cta' | 'chat' | 'external' | 'organic'      │   │
-│  │  + entry_point: string (page URL where lead was captured)            │   │
+│  │                   consultation_requests (extended) ✅                 │   │
+│  │  + vertical_id | + vertical_metadata | + lead_source | + entry_point │   │
 │  └──────────────────────────────────────────────────────────────────────┘   │
 │                                                                               │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
-## Компоненты для реализации
-
-### 1. Универсальная FAB-кнопка "Нужна помощь?"
-
-**Файл:** `src/components/fab/UniversalHelpFAB.tsx`
-
-Плавающая кнопка, видимая на всех страницах:
-- Открывает шторку с выбором вертикали
-- Определяет контекст по текущей странице (если на /yachts → предлагает яхты первыми)
-- Показывает популярные запросы
-
-Визуально:
-```text
-┌─────────────────────────────────────┐
-│  [💬]  ← Floating button            │
-│                                     │
-│  ┌───────────────────────────────┐  │
-│  │  Чем можем помочь?            │  │
-│  │  ───────────────────────────  │  │
-│  │  🏠 Найти жильё               │  │
-│  │  🚤 Арендовать яхту           │  │
-│  │  🗺️ Организовать тур          │  │
-│  │  🚗 Арендовать авто           │  │
-│  │  ⚖️ Юридическая помощь        │  │
-│  │  ... (+ еще 14 вертикалей)    │  │
-│  │  ───────────────────────────  │  │
-│  │  📞 Позвонить нам             │  │
-│  │  💬 Написать в WhatsApp       │  │
-│  └───────────────────────────────┘  │
-└─────────────────────────────────────┘
-```
-
-### 2. Универсальная форма заявки
-
-**Файл:** `src/components/leads/UniversalLeadForm.tsx`
-
-Многошаговая форма с динамическими полями:
-
-| Шаг | Содержимое |
-|-----|------------|
-| 1. Вертикаль | Выбор из INTAKE_VERTICALS с иконками |
-| 2. Детали | Динамические поля в зависимости от vertical_id |
-| 3. Контакт | Имя, телефон, предпочтительный способ связи |
-| 4. Подтверждение | Summary + отправка |
-
-### 3. Расширение схемы consultation_requests
-
-Добавить поля для универсальности:
-
-```sql
-ALTER TABLE consultation_requests 
-ADD COLUMN vertical_id text,
-ADD COLUMN vertical_metadata jsonb DEFAULT '{}',
-ADD COLUMN entry_point text;
-
--- Update request_type to include all verticals
--- Existing types remain, new ones added:
--- 'yacht_charter', 'tour_booking', 'vehicle_rental', 
--- 'legal_consultation', 'medical_appointment', etc.
-```
-
-### 4. Конфигурация полей по вертикалям
-
-**Файл:** `src/lib/leadVerticalConfig.ts`
-
-```typescript
-type LeadVerticalConfig = {
-  id: string;  // matches INTAKE_VERTICALS.id
-  requestTypes: string[];  // sub-types within vertical
-  requiredFields: string[];
-  optionalFields: string[];
-  formSteps: FormStepConfig[];
-};
-
-const LEAD_VERTICALS: LeadVerticalConfig[] = [
-  {
-    id: 'yachts',
-    requestTypes: ['yacht_charter', 'yacht_purchase', 'yacht_party'],
-    requiredFields: ['dates', 'guests_count'],
-    optionalFields: ['yacht_type', 'budget', 'duration'],
-    // ...
-  },
-  // ... для каждой вертикали
-];
-```
-
-### 5. Контекстный CTA на страницах вертикалей
-
-**Файл:** `src/components/leads/VerticalCTA.tsx`
-
-Компонент для встраивания на страницы вертикалей:
-
-```tsx
-<VerticalCTA 
-  vertical="yachts"
-  context="list"  // or 'detail', 'empty-results'
-/>
-```
-
-Варианты отображения:
-- `sticky` — прилипает к низу экрана
-- `inline` — встраивается в контент
-- `modal` — открывает модальное окно
-
-## Порядок реализации
-
-### Фаза 1: База (этот спринт)
-
-1. **Миграция БД**
-   - Добавить `vertical_id`, `vertical_metadata`, `entry_point` в `consultation_requests`
-   - Добавить новые значения в `request_type` (или сделать text без ограничений)
-
-2. **UniversalHelpFAB**
-   - Плавающая кнопка на всех страницах
-   - Sheet с выбором вертикали
-   - Быстрые действия (позвонить, написать)
-
-3. **UniversalLeadForm**
-   - Многошаговая форма
-   - Динамические поля по вертикали
-   - Интеграция с useConsultationRequests
-
-4. **VerticalCTA**
-   - Обновить ConsultationCTA → VerticalCTA
-   - Добавить на страницы: /yachts, /tours, /transport, /legal...
-
-### Фаза 2: Интеграция (следующий спринт)
-
-5. **AI Auto-routing**
-   - AI определяет вертикаль по свободному тексту
-   - Маршрутизация на нужного менеджера
-
-6. **MCC Lead Hub Integration**
-   - Единый дашборд для всех вертикалей
-   - Фильтры по vertical_id
-   - Статистика по источникам
-
-7. **WhatsApp/Telegram Bot**
-   - Приём заявок через мессенджеры
-   - Сохранение в consultation_requests с lead_source='chat'
-
-### Фаза 3: Оптимизация
-
-8. **Smart Suggestions**
-   - Предложения на основе истории просмотров
-   - "Вы смотрели виллы в Раваи — нужна помощь с выбором?"
-
-9. **Lead Scoring по вертикалям**
-   - Разные веса для разных вертикалей
-   - Приоритизация hot-leads
-
-## Файлы для создания/изменения
-
-| Файл | Действие | Описание |
-|------|----------|----------|
-| `migration` | Создать | Расширение consultation_requests |
-| `src/lib/leadVerticalConfig.ts` | Создать | Конфиг полей по вертикалям |
-| `src/components/fab/UniversalHelpFAB.tsx` | Создать | Глобальная FAB-кнопка помощи |
-| `src/components/leads/UniversalLeadForm.tsx` | Создать | Универсальная форма заявки |
-| `src/components/leads/VerticalCTA.tsx` | Создать | CTA для страниц вертикалей |
-| `src/hooks/useUniversalLead.ts` | Создать | Хук для работы с лидами |
-| `src/hooks/useConsultationRequests.ts` | Обновить | Добавить новые типы |
-| `src/pages/property/PropertyConsultation.tsx` | Обновить | Использовать UniversalLeadForm |
-
-## Визуальный результат
-
-### До (сейчас):
-- Кнопка консультации только на /property
-- Форма только для недвижимости
-- Яхты, туры, транспорт — без точки входа
-
-### После:
-- FAB "Помощь" на всех страницах
-- Единая форма для 19+ вертикалей
-- Контекстные CTA на каждой странице вертикали
-- Единый Lead Hub в админке для всех заявок
-
 ## Ожидаемый эффект
 
-- **+40-60% конверсия** в заявки (доступность на всех страницах)
-- **-80% хаос** (единая таблица вместо разрозненных)
-- **+100% покрытие** (все вертикали имеют точку входа)
-- **Полная трассировка** (откуда пришёл лид, что смотрел)
+- **+40-60% конверсия** в заявки (FAB доступен везде)
+- **-80% хаос** (единая таблица для всех лидов)
+- **+100% покрытие** (все 12 вертикалей)
+- **Полная трассировка** (откуда пришёл, что смотрел)
