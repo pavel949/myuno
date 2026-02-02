@@ -9,3 +9,4 @@ export { UpcomingBookingsWidget } from './UpcomingBookingsWidget';
 export { RecentPurchasesWidget } from './RecentPurchasesWidget';
 export { DashboardQuickServices } from './DashboardQuickServices';
 export { AccountMenu } from './AccountMenu';
+export { MyApplicationsWidget } from './MyApplicationsWidget';

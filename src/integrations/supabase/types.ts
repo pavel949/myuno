@@ -4344,6 +4344,96 @@ export type Database = {
           },
         ]
       }
+      listing_applications: {
+        Row: {
+          address: string | null
+          admin_notes: string | null
+          applicant_email: string | null
+          applicant_name: string | null
+          applicant_phone: string | null
+          city: string | null
+          cover_image: string | null
+          created_at: string
+          created_property_id: string | null
+          created_provider_id: string | null
+          created_vendor_id: string | null
+          currency: string | null
+          district: string | null
+          draft_data: Json
+          estimated_price: number | null
+          id: string
+          listing_type: Database["public"]["Enums"]["listing_type"]
+          product_category: string | null
+          property_type: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          service_category: string | null
+          status: Database["public"]["Enums"]["listing_application_status"]
+          submitted_at: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          admin_notes?: string | null
+          applicant_email?: string | null
+          applicant_name?: string | null
+          applicant_phone?: string | null
+          city?: string | null
+          cover_image?: string | null
+          created_at?: string
+          created_property_id?: string | null
+          created_provider_id?: string | null
+          created_vendor_id?: string | null
+          currency?: string | null
+          district?: string | null
+          draft_data?: Json
+          estimated_price?: number | null
+          id?: string
+          listing_type: Database["public"]["Enums"]["listing_type"]
+          product_category?: string | null
+          property_type?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          service_category?: string | null
+          status?: Database["public"]["Enums"]["listing_application_status"]
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          admin_notes?: string | null
+          applicant_email?: string | null
+          applicant_name?: string | null
+          applicant_phone?: string | null
+          city?: string | null
+          cover_image?: string | null
+          created_at?: string
+          created_property_id?: string | null
+          created_provider_id?: string | null
+          created_vendor_id?: string | null
+          currency?: string | null
+          district?: string | null
+          draft_data?: Json
+          estimated_price?: number | null
+          id?: string
+          listing_type?: Database["public"]["Enums"]["listing_type"]
+          product_category?: string | null
+          property_type?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          service_category?: string | null
+          status?: Database["public"]["Enums"]["listing_application_status"]
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       location_knowledge: {
         Row: {
           city_id: string
@@ -14654,6 +14744,14 @@ export type Database = {
         | "failed"
         | "cancelled"
         | "refunded"
+      listing_application_status:
+        | "draft"
+        | "pending"
+        | "under_review"
+        | "approved"
+        | "rejected"
+        | "revision_requested"
+      listing_type: "property" | "service" | "product"
       order_item_status:
         | "pending"
         | "confirmed"
@@ -14857,6 +14955,15 @@ export const Constants = {
         "cancelled",
         "refunded",
       ],
+      listing_application_status: [
+        "draft",
+        "pending",
+        "under_review",
+        "approved",
+        "rejected",
+        "revision_requested",
+      ],
+      listing_type: ["property", "service", "product"],
       order_item_status: [
         "pending",
         "confirmed",

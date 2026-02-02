@@ -29,6 +29,7 @@ const PersonalizedOffersSection = lazy(() => import('@/components/notifications/
 const KnowledgeHubBanner = lazy(() => import('@/components/home/KnowledgeHubBanner').then(m => ({ default: m.KnowledgeHubBanner })));
 const HomeCategoryRibbon = lazy(() => import('@/components/home/HomeCategoryRibbon').then(m => ({ default: m.HomeCategoryRibbon })));
 const HomeProductsSection = lazy(() => import('@/components/home/HomeProductsSection').then(m => ({ default: m.HomeProductsSection })));
+import { ListWithUsBanner } from '@/components/home/ListWithUsBanner';
 
 // Lazy load modals (opened by user action)
 const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
@@ -181,6 +182,9 @@ const Index = () => {
 
               {/* Quick Access Chips - Owner/Partner/Wallet */}
               <QuickAccessChips />
+
+              {/* List With Us CTA */}
+              <ListWithUsBanner variant="compact" />
 
               {/* Visual Divider */}
               <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />

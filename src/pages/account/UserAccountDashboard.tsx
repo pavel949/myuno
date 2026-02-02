@@ -13,6 +13,7 @@ import {
   RecentPurchasesWidget,
   DashboardQuickServices,
   AccountMenu,
+  MyApplicationsWidget,
 } from '@/components/account';
 
 export default function UserAccountDashboard() {
@@ -75,6 +76,9 @@ export default function UserAccountDashboard() {
 
         {/* Quick Services Grid */}
         <DashboardQuickServices />
+
+        {/* My Listing Applications */}
+        <MyApplicationsWidget />
 
         {/* Account Menu (Settings, Documents, etc.) */}
         <AccountMenu />
