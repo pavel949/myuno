@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { CACHE_PROFILES } from '@/lib/queryConfig';
 
 export interface City {
   id: string;
@@ -24,50 +25,32 @@ export interface City {
   updated_at: string;
 }
 
-interface UseCitiesReturn {
-  cities: City[];
-  activeCities: City[];
-  comingSoonCities: City[];
-  isLoading: boolean;
-  error: Error | null;
-  refetch: () => Promise<void>;
-}
+// Centralized query key
+const CITIES_QUERY_KEY = ['cities'] as const;
+
+// Single fetch function for all cities
+const fetchAllCities = async (): Promise<City[]> => {
+  const { data, error } = await supabase
+    .from('cities')
+    .select('*')
+    .order('sort_order', { ascending: true });
+
+  if (error) throw error;
+  return data || [];
+};
 
 /**
  * Hook to fetch and manage cities for multi-location support
+ * Uses React Query for caching - prevents duplicate requests
  */
-export function useCities(): UseCitiesReturn {
-  const [cities, setCities] = useState<City[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+export function useCities() {
+  const { data: cities = [], isLoading, error, refetch } = useQuery({
+    queryKey: CITIES_QUERY_KEY,
+    queryFn: fetchAllCities,
+    ...CACHE_PROFILES.STATIC, // Cities rarely change - 5 min cache
+  });
 
-  const fetchCities = async () => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const { data, error: fetchError } = await supabase
-        .from('cities')
-        .select('*')
-        .order('sort_order', { ascending: true });
-
-      if (fetchError) {
-        throw new Error(fetchError.message);
-      }
-
-      setCities(data || []);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to fetch cities'));
-      console.error('Error fetching cities:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCities();
-  }, []);
-
+  // Derive filtered lists from cache
   const activeCities = cities.filter(city => city.is_active && !city.is_coming_soon);
   const comingSoonCities = cities.filter(city => city.is_coming_soon);
 
@@ -76,51 +59,28 @@ export function useCities(): UseCitiesReturn {
     activeCities,
     comingSoonCities,
     isLoading,
-    error,
-    refetch: fetchCities,
+    error: error as Error | null,
+    refetch,
   };
 }
 
 /**
  * Hook to get a single city by slug
+ * Reuses the same cache as useCities to avoid duplicate requests
  */
 export function useCity(slug: string | null) {
-  const [city, setCity] = useState<City | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const { data: cities = [], isLoading, error } = useQuery({
+    queryKey: CITIES_QUERY_KEY,
+    queryFn: fetchAllCities,
+    ...CACHE_PROFILES.STATIC,
+  });
 
-  useEffect(() => {
-    if (!slug) {
-      setCity(null);
-      setIsLoading(false);
-      return;
-    }
+  // Find city from cached list instead of separate request
+  const city = slug ? cities.find(c => c.slug === slug) || null : null;
 
-    const fetchCity = async () => {
-      setIsLoading(true);
-      
-      try {
-        const { data, error: fetchError } = await supabase
-          .from('cities')
-          .select('*')
-          .eq('slug', slug)
-          .single();
-
-        if (fetchError) {
-          throw new Error(fetchError.message);
-        }
-
-        setCity(data);
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error('Failed to fetch city'));
-        console.error('Error fetching city:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchCity();
-  }, [slug]);
-
-  return { city, isLoading, error };
+  return { 
+    city, 
+    isLoading, 
+    error: error as Error | null 
+  };
 }
