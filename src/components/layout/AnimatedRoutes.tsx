@@ -186,6 +186,9 @@ const WishlistPage = lazy(() => import('@/pages/market/WishlistPage'));
 const StoreDetail = lazy(() => import('@/pages/market/StoreDetail'));
 const MarketCheckout = lazy(() => import('@/pages/market/MarketCheckout'));
 
+// C2C Sell Item Wizard
+const SellItemPage = lazy(() => import('@/pages/market/SellItemPage'));
+
 // Other pages
 
 // Other pages
@@ -649,6 +652,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/market/wishlist" element={<LazyPage><WishlistPage /></LazyPage>} />
         <Route path="/market/store/:id" element={<LazyPage><StoreDetail /></LazyPage>} />
         <Route path="/market/checkout" element={<LazyPage><MarketCheckout /></LazyPage>} />
+        
+        {/* C2C Sell Item Wizard */}
+        <Route path="/sell" element={<AuthGuard><LazyPage><SellItemPage /></LazyPage></AuthGuard>} />
         
         {/* Info Pages */}
         <Route path="/about" element={<LazyPage><AboutPage /></LazyPage>} />
