@@ -1,177 +1,210 @@
 
-# Личный кабинет пользователя (User Account Dashboard)
+# Аудит и улучшение системы аутентификации myUNO
 
-## Анализ текущей архитектуры
+## Текущее состояние системы
 
-### Что есть сейчас:
+### 1. Процесс регистрации (Signup)
+**Что есть:**
+- 3-шаговая форма в стиле Airbnb: Имя → Контакты (Email + телефон) → Пароль
+- Реферальные коды
+- После успешной регистрации предлагается настройка PIN
+
+**Проблемы:**
+- Нет верификации email (пользователь сразу входит)
+- Нет верификации телефона
+- PIN привязан к `localStorage` — теряется при очистке браузера
+
+### 2. Система PIN-кода
+**Что есть:**
 ```text
-/profile         → Настройки аккаунта (Email, документы, кошелёк)
-/bookings        → Все заказы пользователя (туры, услуги, еда)
-/my-stay         → Дэшборд ГОСТЯ апартаментов (активное проживание)
-/owner           → Дэшборд владельца недвижимости
-/vendor          → Дэшборд поставщика услуг
+user_pins (таблица)
+├── user_id      → UUID пользователя
+├── pin_hash     → bcrypt хэш PIN
+├── device_id    → ID устройства (localStorage)
+└── refresh_token → хранится в localStorage
 ```
 
-### Проблема:
-- **Guest** (`/my-stay`) = человек, проживающий в забронированном жилье
-- **Обычный пользователь** (купил билет на тур) = нет своего дэшборда, использует разрозненные `/bookings` + `/profile`
-- Нет единого "центра управления" для обычного авторизованного пользователя
+**Критические проблемы:**
+1. **Зависимость от localStorage** — если пользователь очистит данные браузера, PIN становится бесполезным
+2. **refresh_token истекает** — Supabase ротирует токены, и через ~7 дней PIN перестаёт работать
+3. **Нет fallback-механизма** — при проблемах пользователь вынужден вводить email+пароль
+4. **Нет управления PIN в настройках** — нельзя сбросить или изменить PIN из профиля
+5. **Проверка hasPinConfigured некорректна** — использует `uno_pin_enabled`, которого нет в коде
 
-### Предлагаемое решение:
+### 3. Восстановление пароля
+**Что есть:**
+- Стандартный Supabase flow: Email → Magic Link → Новый пароль
+- Работает через `resetPasswordForEmail()`
 
-```text
-┌─────────────────────────────────────────────────────────────┐
-│                    /account (Мой аккаунт)                   │
-│                 Единый личный кабинет пользователя           │
-├─────────────────────────────────────────────────────────────┤
-│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐            │
-│  │  Мои роли   │ │ Активная    │ │ Быстрые     │            │
-│  │  (Owner,    │ │ поездка     │ │ действия    │            │
-│  │  Vendor,    │ │ (если есть) │ │             │            │
-│  │  Guest)     │ │             │ │             │            │
-│  └─────────────┘ └─────────────┘ └─────────────┘            │
-│                                                              │
-│  ┌─────────────────────────────────────────────────────────┐│
-│  │ Мои заказы и бронирования (сводка)                      ││
-│  └─────────────────────────────────────────────────────────┘│
-│                                                              │
-│  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐   │
-│  │ Кошелёк   │ │ Избранное │ │ Документы │ │ Настройки │   │
-│  └───────────┘ └───────────┘ └───────────┘ └───────────┘   │
-└─────────────────────────────────────────────────────────────┘
-```
+**Проблемы:**
+- Нет альтернативного способа восстановления (SMS, секретный вопрос)
+- Нет восстановления PIN-кода
+- При потере доступа к email — полная потеря аккаунта
 
 ---
 
-## План реализации
+## Сравнение с Airbnb
 
-### Шаг 1: Создание страницы `/account` (UserAccountDashboard)
+| Функция | Airbnb | myUNO (сейчас) |
+|---------|--------|----------------|
+| Регистрация | Email/Phone/Social | Email + пароль |
+| Верификация | SMS OTP / Email OTP | Нет |
+| Вход | Email + OTP (без пароля!) | Email + пароль / PIN |
+| Быстрый вход | Face ID / Touch ID | PIN (ненадёжный) |
+| Восстановление | Phone/Email OTP | Только Email link |
+| Multi-device | Автоматическая синхронизация | Нет (PIN на устройство) |
 
-**Новый файл:** `src/pages/account/UserAccountDashboard.tsx`
-
-Единый личный кабинет с блоками:
-1. **Профиль-карточка** — аватар, имя, текущая роль (ActiveRoleBadge)
-2. **Блок ролей** — переключение между Guest/Owner/Vendor с визуальными карточками
-3. **Активная поездка** — если есть бронь жилья, показать виджет
-4. **Сводка заказов** — последние 3 заказа из всех категорий
-5. **Quick Links** — Кошелёк, Избранное, Документы, История
-
-### Шаг 2: Компоненты блоков
-
-**Новые файлы:**
-- `src/components/account/AccountRolesBlock.tsx` — управление ролями
-- `src/components/account/AccountOrdersSummary.tsx` — сводка заказов
-- `src/components/account/AccountActiveStay.tsx` — виджет активной поездки
-- `src/components/account/AccountQuickLinks.tsx` — быстрые ссылки
-- `src/components/account/index.ts` — экспорты
-
-### Шаг 3: Логика ролей в AccountRolesBlock
-
-```typescript
-// Показываем доступные роли из useUserContext()
-// + CTA для получения новых ролей (BecomePartnerCTA логика)
-
-roles: [
-  { key: 'user', label: 'Покупатель', always: true },
-  { key: 'guest', label: 'Гость', condition: hasActiveBooking },
-  { key: 'owner', label: 'Владелец', condition: hasRole('owner') },
-  { key: 'vendor', label: 'Поставщик', condition: hasRole('vendor') },
-]
-```
-
-### Шаг 4: Обновление навигации
-
-**Изменить:** `src/components/layout/AdaptiveBottomNav.tsx`
-- `/profile` → `/account` (или добавить `/account` как основной)
-
-**Изменить:** `src/components/layout/AnimatedRoutes.tsx`
-- Добавить роуты `/account/*`
-
-**Изменить:** `src/pages/Profile.tsx`
-- Сделать редирект с `/profile` на `/account` ИЛИ
-- Оставить `/profile` для детальных настроек, а `/account` как хаб
-
-### Шаг 5: Интеграция с существующими дэшбордами
-
-```text
-/account              → User Hub (все роли, сводка)
-  ├── role: guest     → /my-stay (активное проживание)
-  ├── role: owner     → /owner (управление недвижимостью)
-  ├── role: vendor    → /vendor (услуги)
-  └── settings        → /profile (детальные настройки)
-```
+**Ключевое отличие Airbnb**: они используют **passwordless auth** с OTP-кодами, а не пароли. Это проще и безопаснее.
 
 ---
 
-## Структура файлов
+## Рекомендуемые улучшения
 
+### Фаза 1: Исправление критических проблем PIN
+
+#### 1.1 Сброс PIN через профиль
 ```text
-src/pages/account/
-├── UserAccountDashboard.tsx    # Главная страница кабинета
-└── index.ts
+/profile/settings → Безопасность → PIN-код
+├── Изменить PIN (ввод старого → нового)
+├── Сбросить PIN (требует пароль)
+└── Удалить PIN
+```
 
-src/components/account/
-├── AccountRolesBlock.tsx       # Блок управления ролями
-├── AccountOrdersSummary.tsx    # Сводка заказов
-├── AccountActiveStay.tsx       # Виджет активной поездки
-├── AccountQuickLinks.tsx       # Быстрые ссылки
-└── index.ts
+#### 1.2 Надёжное хранение сессии
+Вместо `localStorage` refresh_token использовать серверную привязку:
+```sql
+-- Добавить в user_pins
+ALTER TABLE user_pins ADD COLUMN last_login_at TIMESTAMPTZ;
+ALTER TABLE user_pins ADD COLUMN trusted_until TIMESTAMPTZ;
+```
+
+#### 1.3 Fallback при истечении токена
+При ошибке PIN автоматически показывать форму email/пароль с подсказкой "PIN устарел"
+
+### Фаза 2: Email/Phone OTP (как Airbnb)
+
+#### 2.1 Регистрация с верификацией
+```text
+Шаг 1: Ввод email
+Шаг 2: OTP-код на email (6 цифр, 5 минут)
+Шаг 3: Имя + телефон (опционально)
+Шаг 4: Создание пароля (опционально, можно позже)
+```
+
+#### 2.2 Вход через OTP (passwordless)
+```text
+1. Пользователь вводит email
+2. Выбор: "Отправить код" или "Войти с паролем"
+3. OTP приходит на email
+4. Ввод 6-значного кода → вход
+```
+
+#### 2.3 Компонент OTP-ввода
+Использовать существующий `input-otp` компонент:
+```tsx
+<InputOTP maxLength={6} onComplete={handleVerify}>
+  <InputOTPGroup>
+    <InputOTPSlot index={0} />
+    <InputOTPSlot index={1} />
+    <InputOTPSlot index={2} />
+    <InputOTPSlot index={3} />
+    <InputOTPSlot index={4} />
+    <InputOTPSlot index={5} />
+  </InputOTPGroup>
+</InputOTP>
+```
+
+### Фаза 3: Восстановление доступа
+
+#### 3.1 Множественные методы
+```text
+Забыли пароль?
+├── Получить код на email
+├── Получить код по SMS (если привязан телефон)
+└── Связаться с поддержкой (последний вариант)
+```
+
+#### 3.2 Восстановление PIN
+```text
+Забыли PIN?
+├── Войти с паролем → автоматически сбрасывает PIN
+├── Установить новый PIN после входа
+└── Опция: отключить PIN полностью
 ```
 
 ---
 
 ## Техническая реализация
 
-### AccountRolesBlock — управление ролями
+### Новые файлы
+```text
+src/pages/auth/
+├── VerifyEmail.tsx           # Страница ввода OTP
+├── VerifyPhone.tsx           # Страница SMS верификации
 
-```typescript
-// Логика определения доступных ролей
-const { availableRoles, hasRole, switchContext, activeRole } = useUserContext();
+src/components/auth/
+├── OTPInput.tsx              # Обёртка над input-otp
+├── PinManagement.tsx         # Управление PIN в профиле
+├── AuthMethodSelector.tsx    # Выбор способа входа
 
-// Динамические роли:
-// - 'user' — всегда доступна (базовый покупатель)
-// - 'guest' — если есть активное бронирование жилья
-// - 'owner' — если в user_roles есть 'owner' или 'property_owner'
-// - 'vendor' — если в user_roles есть 'vendor'
-// - 'admin/staff/team' — служебные роли
+src/hooks/
+├── useOTPAuth.ts             # Логика OTP-аутентификации
+└── usePinManagement.ts       # CRUD для PIN
+
+supabase/functions/
+├── send-otp/                 # Отправка OTP через Resend
+└── verify-otp/               # Проверка OTP
 ```
 
-### Навигация между дэшбордами
+### База данных
+```sql
+-- Таблица OTP-кодов
+CREATE TABLE auth_otp_codes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  identifier TEXT NOT NULL,           -- email или phone
+  identifier_type TEXT NOT NULL,      -- 'email' или 'phone'
+  code_hash TEXT NOT NULL,            -- bcrypt хэш 6-значного кода
+  attempts INT DEFAULT 0,             -- количество попыток
+  expires_at TIMESTAMPTZ NOT NULL,    -- TTL 5 минут
+  created_at TIMESTAMPTZ DEFAULT now()
+);
 
+-- RPC для генерации и проверки OTP
+CREATE FUNCTION generate_otp(p_identifier TEXT, p_type TEXT) ...
+CREATE FUNCTION verify_otp(p_identifier TEXT, p_code TEXT) ...
+```
+
+### Улучшенный usePinAuth
 ```typescript
-const dashboardRoutes = {
-  user: '/account',      // Личный кабинет
-  guest: '/my-stay',     // Дэшборд гостя апартаментов
-  owner: '/owner',       // Дэшборд владельца
-  vendor: '/vendor',     // Дэшборд вендора
-};
-
-// При клике на карточку роли:
-onClick={() => {
-  switchContext({ role: selectedRole });
-  navigate(dashboardRoutes[selectedRole]);
-}}
+// Добавить методы:
+- resetPin(currentPassword: string): Promise<void>
+- changePin(oldPin: string, newPin: string): Promise<void>
+- disablePin(): Promise<void>
+- syncPinSession(): Promise<void>  // Принудительная синхронизация
 ```
 
 ---
 
-## Бизнес-логика ролей
+## Приоритеты реализации
 
-| Роль | Условие получения | Дэшборд |
-|------|-------------------|---------|
-| User (Покупатель) | Регистрация | `/account` |
-| Guest (Гость) | Активное бронирование жилья | `/my-stay` |
-| Owner (Владелец) | Заявка + подтверждение | `/owner` |
-| Vendor (Поставщик) | Заявка + подтверждение | `/vendor` |
+| Приоритет | Задача | Сложность | Влияние |
+|-----------|--------|-----------|---------|
+| P0 | Исправить управление PIN в профиле | Низкая | Высокое |
+| P0 | Добавить fallback при ошибке PIN | Низкая | Высокое |
+| P1 | Email OTP для регистрации | Средняя | Высокое |
+| P1 | Passwordless вход (email OTP) | Средняя | Высокое |
+| P2 | SMS верификация телефона | Высокая | Среднее |
+| P2 | Biometric auth (Face ID/Touch ID) | Средняя | Среднее |
 
 ---
 
-## Результат
+## Итог
 
-После реализации:
+**Главные проблемы сейчас:**
+1. PIN ненадёжен из-за localStorage + refresh_token rotation
+2. Нет верификации email/phone при регистрации
+3. Нет управления PIN в профиле
+4. Единственный способ восстановления — email link
 
-1. **Единый вход** — `/account` как центральный хаб для всех пользователей
-2. **Управление ролями** — визуальное переключение между режимами
-3. **Контекстность** — показ виджета "Активная поездка" только при наличии брони
-4. **Масштабируемость** — легко добавить новые роли в будущем
-5. **UX как у Airbnb** — "Switch to hosting" / "Switch to traveling"
+**Рекомендация:**
+Начать с Фазы 1 (исправление PIN) и Фазы 3 (восстановление), затем внедрить OTP-аутентификацию в стиле Airbnb.
