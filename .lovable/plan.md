@@ -1,166 +1,224 @@
 
+# Рекомендация: Единый User Dashboard
 
-# Аудит Booking Flows — Результаты проверки
+## Анализ текущей ситуации
 
-## Итоги анализа
+У тебя сейчас **3 пересекающиеся страницы** для пользователя:
 
-Я проверил **13 booking flows** во всём приложении. Только **ОДИН** файл содержит критическую ошибку с симуляцией вместо реального сохранения:
+| Страница | Роут | Назначение |
+|----------|------|------------|
+| **Profile.tsx** | `/profile` | Настройки аккаунта, документы, меню |
+| **UserAccountDashboard.tsx** | `/account` | Обзор: профиль + заказы + роли |
+| **Bookings.tsx** | `/bookings` | Полный список бронирований |
 
-### ❌ КРИТИЧЕСКАЯ ОШИБКА
-
-| Файл | Проблема |
-|------|----------|
-| `src/pages/experiences/ExperienceBooking.tsx` | `setTimeout` симуляция вместо `createBooking()` |
-
-```typescript
-// Строки 94-106 — ПРОБЛЕМА
-const handleSubmit = async () => {
-  setIsSubmitting(true);
-  try {
-    // Simulate booking submission  ← ЭТО ЗАГЛУШКА!
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    toast.success(...);
-    navigate('/bookings');
-  }
-  ...
-}
-```
+**Проблема**: UserAccountDashboard частично дублирует Profile и Bookings, но при этом недостаточно функционален для полноценного dashboard.
 
 ---
 
-### ✅ РАБОТАЮЩИЕ BOOKING FLOWS
+## Моя рекомендация
 
-Все остальные booking pages **корректно используют** `useBooking().createBooking()`:
-
-| Файл | Статус |
-|------|--------|
-| `TourBooking.tsx` | ✅ Работает |
-| `YachtBooking.tsx` | ✅ Работает + yacht_details |
-| `EventBooking.tsx` | ✅ Работает |
-| `TransportBooking.tsx` | ✅ Работает + transport_details |
-| `AirportTransferBooking.tsx` | ✅ Работает + transport_details |
-| `FitnessBooking.tsx` | ✅ Работает |
-| `CleaningBooking.tsx` | ✅ Работает |
-| `BeautyBooking.tsx` | ✅ Работает |
-| `ServiceBooking.tsx` | ✅ Работает |
-| `TableReservation.tsx` | ✅ Работает + Stripe deposit |
-| `TaxiBooking.tsx` | (существует) |
-
----
-
-## План исправления
-
-### Шаг 1: Исправить `ExperienceBooking.tsx`
-
-Заменить симуляцию на реальный вызов `createBooking()`:
-
-```typescript
-const handleSubmit = async () => {
-  if (!selectedDate || !selectedTime || !contactData.name || !contactData.phone) {
-    return;
-  }
-
-  const scheduledAt = new Date(selectedDate);
-  const [hours, minutes] = selectedTime.split(':').map(Number);
-  scheduledAt.setHours(hours, minutes, 0, 0);
-
-  const totalPrice = (experience.price || 0) * participants;
-  const experienceTitle = isRu ? experience.title_ru : experience.title_en;
-
-  const result = await createBooking({
-    booking_type: 'activity', // or 'tour' — experience type
-    scheduled_at: scheduledAt,
-    total_amount: totalPrice,
-    currency: experience.currency || 'THB',
-    notes: `Experience: ${experienceTitle}. Participants: ${participants}`,
-    items: [{
-      item_type: 'experience',
-      item_id: experience.id,
-      item_name: experienceTitle,
-      quantity: participants,
-      unit_price: experience.price || 0,
-      subtotal: totalPrice,
-    }],
-    participants: [{
-      name: contactData.name,
-      phone: contactData.phone,
-      email: contactData.email,
-      is_primary: true,
-    }],
-    payment: {
-      amount: totalPrice,
-      payment_method: paymentMethod,
-    },
-    metadata: {
-      experience_id: experience.id,
-      experience_type: experience.experience_type,
-      duration_minutes: experience.duration_minutes,
-    },
-  });
-
-  if (result.success) {
-    navigate(`/bookings/${result.booking_id}/success`);
-  }
-};
-```
-
-### Шаг 2: Добавить состояние подтверждения
-
-Добавить `BookingConfirmation` компонент как в других booking pages:
-
-```typescript
-const [bookingResult, setBookingResult] = useState<{
-  success: boolean;
-  bookingId?: string;
-} | null>(null);
-
-// В success state показать BookingConfirmation
-if (bookingResult?.success && bookingResult.bookingId) {
-  return (
-    <BookingConfirmation
-      bookingId={bookingResult.bookingId}
-      title={experienceTitle}
-      date={format(selectedDate, 'PPP', { locale: isRu ? ru : undefined })}
-      time={selectedTime}
-      location={experience.meeting_point}
-      total={totalPrice}
-      currency={experience.currency || 'THB'}
-      continuePath="/experiences"
-      continueLabel={isRu ? 'К активностям' : 'Browse Experiences'}
-    />
-  );
-}
-```
-
-### Шаг 3: Импортировать недостающие зависимости
-
-```typescript
-import { useBooking } from "@/hooks/useBooking";
-import { BookingConfirmation } from "@/components/booking";
-```
-
----
-
-## Что будет исправлено
-
-1. **ExperienceBooking** будет реально сохранять заказы в `orders` таблицу
-2. Пользователь увидит подтверждение с `booking_id`
-3. Заказы появятся в `/bookings` и `/account`
-4. Метаданные (`experience_type`, `duration`) сохранятся для аналитики
-
----
-
-## Техническая справка: Как работает `useBooking`
+### Объединить `/account` и улучшить как главную точку входа
 
 ```text
-useBooking() 
-  ↓
-useOrders().createOrder()
-  ↓
-INSERT INTO orders + order_items + order_participants + order_payments
-  ↓
-return { success: true, booking_id: UUID }
+/account  →  "Мой кабинет" (главный dashboard пользователя)
+/profile  →  "Настройки" (редактирование данных, безопасность)
+/bookings →  "Все бронирования" (детальный список)
 ```
 
-Все 12 других booking flows уже используют эту цепочку корректно.
+**Почему так:**
+1. Пользователь приходит в `/account` → видит всё важное одним взглядом
+2. Детали и настройки — по ссылкам в глубину
+3. Нет дублирования, чёткая иерархия
 
+---
+
+## Структура нового User Dashboard (`/account`)
+
+### Визуальная архитектура
+
+```text
+┌─────────────────────────────────────────────────┐
+│  Header: "Мой кабинет" + Logout                 │
+├─────────────────────────────────────────────────┤
+│                                                 │
+│  ┌─────────────────────────────────────────┐   │
+│  │ 👤 Profile Card (avatar + name + role)  │   │
+│  │     → Edit Profile                       │   │
+│  └─────────────────────────────────────────┘   │
+│                                                 │
+│  ┌─────────────────────────────────────────┐   │
+│  │ 🏨 Active Stay (if any)                 │   │  ← Контекст текущего пребывания
+│  │     Check-in: 15 Jan | Check-out: 20    │   │
+│  └─────────────────────────────────────────┘   │
+│                                                 │
+│  ┌──────────┬──────────┬──────────┐            │
+│  │ Bookings │  Wallet  │ Favorites│            │  ← Stats Bar (3 ключевые метрики)
+│  │    3     │  ฿1,500  │    12    │            │
+│  └──────────┴──────────┴──────────┘            │
+│                                                 │
+│  ┌─────────────────────────────────────────┐   │
+│  │ 📦 Upcoming (предстоящие)               │   │
+│  │   → Tour: Phi Phi Islands | 18 Jan 10:00│   │
+│  │   → Beauty: Massage | 19 Jan 14:00      │   │
+│  │   [View All →]                          │   │
+│  └─────────────────────────────────────────┘   │
+│                                                 │
+│  ┌─────────────────────────────────────────┐   │
+│  │ 🛒 Recent Purchases (покупки)           │   │
+│  │   → Flowers bouquet | ฿890 | Delivered  │   │
+│  │   → Grocery order | ฿450 | In Transit   │   │
+│  │   [Order History →]                     │   │
+│  └─────────────────────────────────────────┘   │
+│                                                 │
+│  ┌─────────────────────────────────────────┐   │
+│  │ ⚡ Quick Services                        │   │  ← Персонализированные Quick Actions
+│  │   🚕 🌸 💆 🍽️ 🎫 🚤 ⋯                     │   │
+│  └─────────────────────────────────────────┘   │
+│                                                 │
+│  ┌─────────────────────────────────────────┐   │
+│  │ 🔧 Account Menu                          │   │  ← Компактный доступ к настройкам
+│  │   Settings | Documents | Wallet | Help   │   │
+│  └─────────────────────────────────────────┘   │
+│                                                 │
+└─────────────────────────────────────────────────┘
+```
+
+---
+
+## Компоненты для реализации
+
+### Новые виджеты
+
+| Компонент | Назначение |
+|-----------|------------|
+| `DashboardStatsBar` | 3 метрики: активные бронирования, баланс, избранное |
+| `UpcomingBookingsWidget` | Предстоящие бронирования (max 3) с таймером до события |
+| `RecentPurchasesWidget` | Последние покупки из marketplace (max 3) |
+| `DashboardQuickServices` | Персонализированная сетка сервисов (последние использованные) |
+
+### Существующие компоненты (переиспользуем)
+
+- `AccountProfileCard` → уже есть, оставляем
+- `AccountActiveStay` → уже есть, оставляем  
+- `AccountQuickLinks` → преобразуем в компактный `AccountMenu`
+
+### Удаляем/упрощаем
+
+- `AccountRolesBlock` → перенести функционал в Profile Settings
+- `AccountOrdersSummary` → заменить на `UpcomingBookingsWidget` + `RecentPurchasesWidget`
+
+---
+
+## Техническая реализация
+
+### Файловая структура
+
+```text
+src/components/account/
+├── index.ts                      # exports
+├── AccountProfileCard.tsx        # (существует)
+├── AccountActiveStay.tsx         # (существует)
+├── AccountMenu.tsx               # НОВЫЙ - компактное меню настроек
+├── DashboardStatsBar.tsx         # НОВЫЙ - 3 метрики
+├── UpcomingBookingsWidget.tsx    # НОВЫЙ - предстоящие бронирования
+├── RecentPurchasesWidget.tsx     # НОВЫЙ - последние покупки
+└── DashboardQuickServices.tsx    # НОВЫЙ - персонализированные сервисы
+```
+
+### Источники данных
+
+```typescript
+// DashboardStatsBar
+const stats = await supabase.rpc('get_user_dashboard_stats', { user_id });
+// Returns: { active_bookings: 3, wallet_balance: 1500, favorites_count: 12 }
+
+// UpcomingBookingsWidget  
+const { data } = await supabase
+  .from('bookings')
+  .select('*, booking_items(*)')
+  .eq('user_id', user.id)
+  .in('status', ['confirmed', 'pending'])
+  .gte('scheduled_at', new Date().toISOString())
+  .order('scheduled_at', { ascending: true })
+  .limit(3);
+
+// RecentPurchasesWidget
+const { data } = await supabase
+  .from('orders')
+  .select('*, order_items(*)')
+  .eq('user_id', user.id)
+  .eq('order_type', 'product')
+  .order('created_at', { ascending: false })
+  .limit(3);
+```
+
+---
+
+## Навигация после изменений
+
+### Основной flow
+
+```text
+Home (/)
+   ↓ click avatar
+Account (/account) ← ГЛАВНЫЙ DASHBOARD
+   ├── [Edit Profile] → /profile/edit
+   ├── [Settings] → /profile/settings  
+   ├── [View All Bookings] → /bookings
+   ├── [Order History] → /orders/history
+   ├── [Wallet] → /wallet
+   └── [Quick Service] → /beauty, /tours, etc.
+```
+
+### Где показывать ссылку на Dashboard
+
+1. **AppHeader**: Avatar → переход на `/account` (вместо `/profile`)
+2. **AdaptiveBottomNav**: Иконка пользователя → `/account`
+3. Старый `/profile` остаётся для глубоких настроек
+
+---
+
+## Что конкретно делаем
+
+### Шаг 1: Создать новые виджеты
+- `DashboardStatsBar.tsx` — 3 карточки с числами
+- `UpcomingBookingsWidget.tsx` — карточки предстоящих событий
+- `RecentPurchasesWidget.tsx` — карточки последних покупок
+- `DashboardQuickServices.tsx` — сетка 4x2 иконок сервисов
+
+### Шаг 2: Обновить `UserAccountDashboard.tsx`
+- Заменить `AccountOrdersSummary` на новые виджеты
+- Добавить `DashboardStatsBar`
+- Заменить `AccountQuickLinks` на `AccountMenu` + `DashboardQuickServices`
+- Убрать `AccountRolesBlock` (переносим в Settings)
+
+### Шаг 3: Обновить навигацию
+- `AppHeader`: avatar → `/account`
+- Добавить breadcrumbs в `/profile` ("← Мой кабинет")
+
+### Шаг 4: Создать RPC функцию (опционально)
+- `get_user_dashboard_stats` для агрегированных метрик
+
+---
+
+## Итог
+
+**Преимущества подхода:**
+1. Один экран для всего важного — no hunting
+2. Чёткое разделение: Dashboard (обзор) vs Profile (настройки)
+3. Персонализация через Quick Services
+4. Использование существующих компонентов + минимум нового кода
+5. Соответствует паттерну Airbnb/Uber (dashboard первым, settings вторичны)
+
+---
+
+## Техническая сложность
+
+| Компонент | Сложность | Время |
+|-----------|-----------|-------|
+| DashboardStatsBar | Низкая | 15 мин |
+| UpcomingBookingsWidget | Средняя | 25 мин |
+| RecentPurchasesWidget | Средняя | 20 мин |
+| DashboardQuickServices | Низкая | 15 мин |
+| Обновление навигации | Низкая | 10 мин |
+| **Итого** | | **~1.5 часа** |
