@@ -71,11 +71,11 @@ export function PWAWelcomeScreen() {
                 <Sparkles className="w-4 h-4 text-primary-foreground/80" />
               </div>
               
-              <h1 className="text-3xl font-bold text-primary-foreground mb-1">
+              <h1 className="text-3xl font-bold text-primary-foreground mb-1 text-center w-full">
                 myUNO
               </h1>
               
-              <p className="text-primary-foreground/90 text-base mb-6">
+              <p className="text-primary-foreground/90 text-base mb-6 text-center w-full">
                 Добро пожаловать!
               </p>
             </motion.div>
