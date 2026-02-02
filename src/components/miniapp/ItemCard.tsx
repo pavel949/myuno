@@ -86,7 +86,7 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
         ref={ref}
         onClick={handleClick}
         className={cn(
-          "relative overflow-hidden rounded-xl bg-card border border-border/50 transition-all",
+          "relative overflow-hidden rounded-2xl bg-card border border-border/50 transition-all",
           isAvailable && "cursor-pointer hover:border-primary/30 hover:shadow-md active:scale-[0.98]",
           !isAvailable && "opacity-60",
           className
@@ -185,7 +185,7 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
     >
       <div className="flex">
         {/* Image - larger on mobile for better tap targets */}
-        <div className="w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0 relative overflow-hidden rounded-xl">
+        <div className="w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0 relative overflow-hidden rounded-2xl">
           <OptimizedImage
             src={image || 'https://images.unsplash.com/photo-1537956965359-7573183d1f57?w=400'}
             alt={title}

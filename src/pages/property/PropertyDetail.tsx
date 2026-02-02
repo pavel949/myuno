@@ -290,7 +290,7 @@ export default function PropertyDetail() {
                 <img
                   src={images[0]}
                   alt=""
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                  className="w-full h-full object-cover hover:scale-[1.03] transition-transform duration-300"
                 />
               </div>
               {images.slice(1, 5).map((img, i) => (
@@ -306,7 +306,7 @@ export default function PropertyDetail() {
                   <img
                     src={img}
                     alt=""
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover hover:scale-[1.03] transition-transform duration-300"
                   />
                   {i === 3 && images.length > 5 && (
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center">

@@ -222,7 +222,7 @@ export default function Favorites() {
                             <img
                               src={data.image || data.images?.[0] || '/placeholder.svg'}
                               alt={title}
-                              className="w-16 h-16 rounded-xl object-cover flex-shrink-0"
+                              className="w-16 h-16 rounded-2xl object-cover flex-shrink-0"
                             />
                             <div className="flex-1 min-w-0 text-left">
                               <div className="flex items-center gap-2 mb-1">

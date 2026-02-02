@@ -59,7 +59,7 @@ export const UnifiedCard = memo(function UnifiedCard({
       <div
         onClick={handleClick}
         className={cn(
-          "group relative overflow-hidden rounded-xl bg-card border border-border/50",
+          "group relative overflow-hidden rounded-2xl bg-card border border-border/50",
           "transition-all duration-200 cursor-pointer",
           "hover:border-primary/30 hover:shadow-md",
           "active:scale-[0.98]",
@@ -107,7 +107,7 @@ export const UnifiedCard = memo(function UnifiedCard({
       <div
         onClick={handleClick}
         className={cn(
-          "group relative overflow-hidden rounded-xl bg-card border border-border/50",
+          "group relative overflow-hidden rounded-2xl bg-card border border-border/50",
           "transition-all duration-200 cursor-pointer",
           "hover:border-primary/30 hover:shadow-md",
           "active:scale-[0.98]",
@@ -267,7 +267,7 @@ export const UnifiedCard = memo(function UnifiedCard({
     <div
       onClick={handleClick}
       className={cn(
-        "group relative overflow-hidden rounded-xl bg-card border border-border/50",
+        "group relative overflow-hidden rounded-2xl bg-card border border-border/50",
         "transition-all duration-300 ease-out cursor-pointer",
         "hover:border-primary/30 hover:shadow-elevated hover:scale-[1.02]",
         "active:scale-[0.98] active:opacity-90",
