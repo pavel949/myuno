@@ -11662,6 +11662,337 @@ export type Database = {
         }
         Relationships: []
       }
+      team_achievements: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description_en: string | null
+          description_ru: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          is_secret: boolean | null
+          key: string
+          name_en: string
+          name_ru: string
+          points_required: number | null
+          sort_order: number | null
+          unlock_condition: Json | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_secret?: boolean | null
+          key: string
+          name_en: string
+          name_ru: string
+          points_required?: number | null
+          sort_order?: number | null
+          unlock_condition?: Json | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_secret?: boolean | null
+          key?: string
+          name_en?: string
+          name_ru?: string
+          points_required?: number | null
+          sort_order?: number | null
+          unlock_condition?: Json | null
+        }
+        Relationships: []
+      }
+      team_activity_log: {
+        Row: {
+          action_type: string
+          created_at: string | null
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          metadata: Json | null
+          points_earned: number | null
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          metadata?: Json | null
+          points_earned?: number | null
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          metadata?: Json | null
+          points_earned?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      team_channels: {
+        Row: {
+          allowed_specializations: string[] | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          is_announcements_only: boolean | null
+          is_private: boolean | null
+          name_en: string
+          name_ru: string
+          slug: string
+        }
+        Insert: {
+          allowed_specializations?: string[] | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_announcements_only?: boolean | null
+          is_private?: boolean | null
+          name_en: string
+          name_ru: string
+          slug: string
+        }
+        Update: {
+          allowed_specializations?: string[] | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_announcements_only?: boolean | null
+          is_private?: boolean | null
+          name_en?: string
+          name_ru?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      team_entity_notes: {
+        Row: {
+          content: string
+          created_at: string | null
+          entity_id: string
+          entity_type: string
+          id: string
+          is_important: boolean | null
+          mentioned_users: string[] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          is_important?: boolean | null
+          mentioned_users?: string[] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          is_important?: boolean | null
+          mentioned_users?: string[] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      team_gamification: {
+        Row: {
+          badges: string[] | null
+          created_at: string | null
+          id: string
+          last_activity_date: string | null
+          level: number | null
+          monthly_points: number | null
+          streak_days: number | null
+          total_points: number | null
+          updated_at: string | null
+          user_id: string
+          weekly_points: number | null
+        }
+        Insert: {
+          badges?: string[] | null
+          created_at?: string | null
+          id?: string
+          last_activity_date?: string | null
+          level?: number | null
+          monthly_points?: number | null
+          streak_days?: number | null
+          total_points?: number | null
+          updated_at?: string | null
+          user_id: string
+          weekly_points?: number | null
+        }
+        Update: {
+          badges?: string[] | null
+          created_at?: string | null
+          id?: string
+          last_activity_date?: string | null
+          level?: number | null
+          monthly_points?: number | null
+          streak_days?: number | null
+          total_points?: number | null
+          updated_at?: string | null
+          user_id?: string
+          weekly_points?: number | null
+        }
+        Relationships: []
+      }
+      team_members: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          display_name: string | null
+          hired_at: string | null
+          id: string
+          is_active: boolean | null
+          phone: string | null
+          shift_schedule: Json | null
+          specializations: string[] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          hired_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          phone?: string | null
+          shift_schedule?: Json | null
+          specializations?: string[] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          hired_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          phone?: string | null
+          shift_schedule?: Json | null
+          specializations?: string[] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      team_messages: {
+        Row: {
+          attachments: Json | null
+          channel: string
+          content: string
+          created_at: string | null
+          id: string
+          is_deleted: boolean | null
+          is_pinned: boolean | null
+          mentioned_users: string[] | null
+          reactions: Json | null
+          reply_to: string | null
+          sender_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          attachments?: Json | null
+          channel?: string
+          content: string
+          created_at?: string | null
+          id?: string
+          is_deleted?: boolean | null
+          is_pinned?: boolean | null
+          mentioned_users?: string[] | null
+          reactions?: Json | null
+          reply_to?: string | null
+          sender_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          attachments?: Json | null
+          channel?: string
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_deleted?: boolean | null
+          is_pinned?: boolean | null
+          mentioned_users?: string[] | null
+          reactions?: Json | null
+          reply_to?: string | null
+          sender_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_messages_reply_to_fkey"
+            columns: ["reply_to"]
+            isOneToOne: false
+            referencedRelation: "team_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_user_achievements: {
+        Row: {
+          achievement_id: string
+          id: string
+          unlocked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          id?: string
+          unlocked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          id?: string
+          unlocked_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "team_achievements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ticket_messages: {
         Row: {
           attachments: Json | null
@@ -14357,6 +14688,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_team_points: {
+        Args: {
+          p_action_type: string
+          p_entity_id?: string
+          p_entity_type?: string
+          p_metadata?: Json
+          p_points: number
+          p_user_id: string
+        }
+        Returns: number
+      }
       apply_referral_code: {
         Args: { p_code: string; p_referred_id: string }
         Returns: boolean
@@ -14622,12 +14964,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_specialization: {
+        Args: { check_user_id: string; spec: string }
+        Returns: boolean
+      }
       increment_helpful_count: {
         Args: { review_id_param: string }
         Returns: undefined
       }
       is_admin_or_uno_team: { Args: never; Returns: boolean }
       is_org_owner: { Args: { check_org_id: string }; Returns: boolean }
+      is_team_member: { Args: { check_user_id: string }; Returns: boolean }
       is_verified_purchase: {
         Args: { p_item_id: string; p_item_type: string; p_user_id: string }
         Returns: boolean
@@ -14775,6 +15122,12 @@ export type Database = {
         | "failed"
         | "refunded"
         | "cancelled"
+      team_specialization:
+        | "content_manager"
+        | "support_operator"
+        | "sales_manager"
+        | "moderation_officer"
+        | "team_lead"
       user_persona: "tourist" | "resident" | "property_owner"
       user_type:
         | "tourist"
@@ -14989,6 +15342,13 @@ export const Constants = {
         "failed",
         "refunded",
         "cancelled",
+      ],
+      team_specialization: [
+        "content_manager",
+        "support_operator",
+        "sales_manager",
+        "moderation_officer",
+        "team_lead",
       ],
       user_persona: ["tourist", "resident", "property_owner"],
       user_type: [

@@ -411,6 +411,9 @@ const StaffDashboard = lazy(() => import('@/pages/staff/StaffDashboard'));
 // Team (UNO Team) pages
 const TeamDashboard = lazy(() => import('@/pages/team/TeamDashboard'));
 const TeamContentHub = lazy(() => import('@/pages/team/TeamContentHub'));
+const TeamChatPage = lazy(() => import('@/pages/team/TeamChatPage'));
+const TeamLeaderboardPage = lazy(() => import('@/pages/team/TeamLeaderboardPage'));
+const TeamProfilePage = lazy(() => import('@/pages/team/TeamProfilePage'));
 
 // Demo pages
 const DemoIndex = lazy(() => import('@/pages/demo/DemoIndex'));
@@ -734,6 +737,9 @@ export const AnimatedRoutes: React.FC = () => {
         {/* UNO Team Routes - Protected */}
         <Route path="/team" element={<LazyPage><TeamGuard><TeamDashboard /></TeamGuard></LazyPage>} />
         <Route path="/team/content" element={<LazyPage><TeamGuard><TeamContentHub /></TeamGuard></LazyPage>} />
+        <Route path="/team/chat" element={<LazyPage><TeamGuard><TeamChatPage /></TeamGuard></LazyPage>} />
+        <Route path="/team/leaderboard" element={<LazyPage><TeamGuard><TeamLeaderboardPage /></TeamGuard></LazyPage>} />
+        <Route path="/team/my-profile" element={<LazyPage><TeamGuard><TeamProfilePage /></TeamGuard></LazyPage>} />
         
         {/* Guest Routes - Protected with GuestLayout */}
         <Route element={<GuestRouteLayout />}>
