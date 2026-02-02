@@ -1,6 +1,20 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Handshake, ChevronRight, Shield, HelpCircle, FileText, Download } from 'lucide-react';
+import { 
+  Handshake, 
+  ChevronRight, 
+  Shield, 
+  HelpCircle, 
+  Download,
+  Clock,
+  Users,
+  BadgeCheck,
+  MapPin,
+  Send,
+  Instagram,
+  MessageCircle
+} from 'lucide-react';
+import { ContextualHint } from '@/components/hints/ContextualHint';
 
 export function CompactFooter() {
   const { language } = useLanguage();
@@ -22,9 +36,54 @@ export function CompactFooter() {
   ];
 
   const supportLinks = [
-    { to: '/support', label: isRu ? 'Помощь' : 'Help', icon: HelpCircle },
-    { to: '/sos', label: 'SOS', icon: Shield },
     { to: '/install', label: isRu ? 'Приложение' : 'App', icon: Download },
+    { to: '/sos', label: 'SOS', icon: Shield },
+    { to: '/support', label: isRu ? 'Помощь' : 'Help', icon: HelpCircle },
+  ];
+
+  const socialLinks = [
+    { 
+      href: 'https://t.me/myuno_support', 
+      label: 'Telegram', 
+      icon: Send,
+      color: 'hover:text-[#0088cc]' 
+    },
+    { 
+      href: 'https://instagram.com/myuno.app', 
+      label: 'Instagram', 
+      icon: Instagram,
+      color: 'hover:text-[#E4405F]' 
+    },
+    { 
+      href: 'https://wa.me/66XXXXXXXXX', 
+      label: 'WhatsApp', 
+      icon: MessageCircle,
+      color: 'hover:text-[#25D366]' 
+    },
+  ];
+
+  const trustBadges = [
+    {
+      icon: BadgeCheck,
+      label: 'G-Trust',
+      hint: isRu 
+        ? 'Партнёры проходят верификацию G-Trust: проверка документов, аудит качества, реальные отзывы'
+        : 'Partners pass G-Trust verification: document check, quality audit, real reviews',
+    },
+    {
+      icon: Clock,
+      label: isRu ? '24/7 Поддержка' : '24/7 Support',
+      hint: isRu
+        ? 'Круглосуточная поддержка на русском и английском языках'
+        : 'Round-the-clock support in Russian and English',
+    },
+    {
+      icon: Users,
+      label: isRu ? '500+ Партнёров' : '500+ Partners',
+      hint: isRu
+        ? 'Более 500 проверенных провайдеров услуг на Пхукете'
+        : 'Over 500 verified service providers in Phuket',
+    },
   ];
 
   return (
@@ -50,6 +109,26 @@ export function CompactFooter() {
           </div>
           <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
         </button>
+
+        {/* Trust Badges */}
+        <div className="grid grid-cols-3 gap-2 mb-5">
+          {trustBadges.map((badge) => (
+            <ContextualHint
+              key={badge.label}
+              id={`trust-${badge.label}`}
+              content={badge.hint}
+              side="top"
+              showIcon={false}
+            >
+              <div className="flex flex-col items-center gap-1.5 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors cursor-help">
+                <badge.icon className="w-5 h-5 text-primary" />
+                <span className="text-[11px] font-medium text-foreground text-center leading-tight">
+                  {badge.label}
+                </span>
+              </div>
+            </ContextualHint>
+          ))}
+        </div>
 
         {/* Links Row */}
         <div className="flex flex-wrap items-start justify-between gap-6 mb-5">
@@ -81,19 +160,49 @@ export function CompactFooter() {
           </div>
         </div>
 
+        {/* Location Badge */}
+        <div className="flex items-center justify-center gap-2 mb-4 py-2">
+          <MapPin className="w-3.5 h-3.5 text-primary" />
+          <span className="text-xs text-muted-foreground">
+            Phuket, Thailand
+          </span>
+        </div>
+
+        {/* Social Links */}
+        <div className="flex items-center justify-center gap-4 mb-5">
+          {socialLinks.map((social) => (
+            <a
+              key={social.label}
+              href={social.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`flex items-center gap-1.5 text-xs text-muted-foreground transition-colors ${social.color}`}
+              aria-label={social.label}
+            >
+              <social.icon className="w-4 h-4" />
+              <span className="hidden sm:inline">{social.label}</span>
+            </a>
+          ))}
+        </div>
+
         {/* Legal + Copyright Row */}
-        <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-border/50">
-          {/* Logo */}
-          <div className="flex items-center gap-1">
-            <span className="text-xs text-muted-foreground">my</span>
-            <div className="w-5 h-5 rounded-md gradient-gold flex items-center justify-center">
-              <span className="text-[10px] font-bold text-primary-foreground">U</span>
+        <div className="flex flex-col items-center gap-4 pt-4 border-t border-border/50">
+          {/* Logo + Slogan */}
+          <div className="flex flex-col items-center gap-1">
+            <div className="flex items-center gap-1">
+              <span className="text-xs text-muted-foreground">my</span>
+              <div className="w-5 h-5 rounded-md gradient-gold flex items-center justify-center">
+                <span className="text-[10px] font-bold text-primary-foreground">U</span>
+              </div>
+              <span className="text-sm font-medium text-foreground">UNO</span>
             </div>
-            <span className="text-sm font-medium text-foreground">UNO</span>
+            <p className="text-[10px] text-muted-foreground italic">
+              "The only app you need abroad"
+            </p>
           </div>
 
           {/* Legal Links */}
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-3">
             {legalLinks.map((link, i) => (
               <span key={link.to} className="flex items-center gap-3">
                 <Link
@@ -109,9 +218,9 @@ export function CompactFooter() {
             ))}
           </div>
 
-          {/* Copyright */}
-          <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} myUNO
+          {/* Copyright + Version */}
+          <p className="text-[10px] text-muted-foreground">
+            © {new Date().getFullYear()} myUNO · Phuket Edition v1.0
           </p>
         </div>
       </div>
