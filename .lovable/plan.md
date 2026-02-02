@@ -1,168 +1,185 @@
 
-# План: UX улучшения бронирования + мультиканальные уведомления
+# Таксономия Thumbtack для myUNO Home Services
 
-## Проблема
+## Почему Thumbtack?
 
-Пользователи на первых шагах формы бронирования опасаются нажимать на кнопку — не понимают, что ещё не платят, а только выбирают параметры. После бронирования уведомления отправляются не по всем каналам.
+**Thumbtack** — крупнейший американский marketplace домашних услуг (оценка $3.2B, 10M+ клиентов). Их таксономия идеально подходит для myUNO по следующим причинам:
 
----
-
-## Решение: Двухчастная доработка
-
-### Часть 1: UX — "Booking Confidence System"
-
-**1.1 Динамическая подсказка в BookingBottomBar**
-
-Добавить контекстный текст над кнопкой, который меняется в зависимости от шага:
-
-| Шаг | Кнопка | Подсказка (RU/EN) |
-|-----|--------|-------------------|
-| 0 (Детали) | "Далее" | "Выберите дату, время и участников" / "Select date, time and participants" |
-| 1 (Контакты) | "Далее" | "Никаких списаний — это только ваши контакты" / "No charges yet — just your contact info" |
-| 2 (Оплата) | "Подтвердить" | "Проверьте и подтвердите бронирование" / "Review and confirm your booking" |
-| Final | "Оплатить" | Показывается сумма + "Безопасная оплата" |
-
-**1.2 Обновление BookingBottomBar**
-
-```tsx
-interface BookingBottomBarProps {
-  // ... existing props
-  step?: number;           // Текущий шаг (0-3)
-  totalSteps?: number;     // Всего шагов
-  hint?: string;           // Опциональная кастомная подсказка
-}
-```
-
-Добавить:
-- Иконка 🔒 рядом с "Безопасно" на финальном шаге
-- Текст "Оплата не требуется" на промежуточных шагах
-- Прогресс `1 из 3` внизу бара
-
-**1.3 Компонент BookingStepHint**
-
-Новый компонент для показа контекстных подсказок:
-- Показывает что нужно заполнить на текущем шаге
-- Показывает сколько осталось шагов
-- Анимированный при смене шагов
+| Критерий | Thumbtack | TaskRabbit | Helpling |
+|----------|-----------|------------|----------|
+| Смешанный рынок (мастера + компании) | ✅ | ⚠️ Только фрилансеры | ❌ Только компании |
+| Глубина категорий | 4 домена → 25+ категорий | 8 flat categories | 5 категорий |
+| Локальная адаптация | ✅ Региональные услуги | ⚠️ Только крупные города | ❌ |
+| Подходит для Азии | ✅ | ⚠️ | ❌ |
 
 ---
 
-### Часть 2: Мультиканальные уведомления
+## Адаптированная таксономия для myUNO
 
-**2.1 Расширение системы email-уведомлений**
+### Структура: 4 домена → 16 категорий
 
-Добавить новый тип email: `order_request_received` (для всех типов оплаты):
+```
+🏠 HOME MAINTENANCE (Обслуживание дома)
+├── handyman      → Мастер на час (общие работы)
+├── plumbing      → Сантехник
+├── electrical    → Электрик  
+├── ac            → Кондиционеры / HVAC
+├── repair        → Ремонт техники
+└── security      → Системы безопасности
 
-```typescript
-// email-templates.ts — новый шаблон
-generateOrderRequestEmail({
-  customerName,
-  orderNumber,
-  orderType,
-  totalAmount,
-  paymentMethod,  // cash, card, wallet
-  scheduledAt,
-  nextSteps,      // Что делать дальше
-})
+✨ CLEANING (Уборка и гигиена)
+├── home-cleaning → Уборка дома
+├── deep-cleaning → Генеральная уборка
+├── laundry       → Прачечная
+├── pest          → Дезинсекция
+└── pool          → Бассейн (химия + чистка)
+
+🌿 OUTDOOR (Двор и территория)
+├── garden        → Садовник / ландшафт
+├── pool-tech     → Техобслуживание бассейна
+└── exterior      → Мойка фасадов / крыш
+
+🚚 LOGISTICS (Логистика)
+├── moving        → Переезд и грузчики
+├── water-delivery→ Доставка воды
+└── road-assistance → Помощь на дороге
 ```
 
-Шаблон покажет:
-- "Мы получили ваш запрос" (не "Заказ подтверждён")
-- Детали бронирования
-- Для cash: "Наш менеджер свяжется с вами"
-- Для card: "Ожидаем оплату"
-- Для wallet: "Оплата прошла"
+---
 
-**2.2 Триггер email при создании заказа**
+## Исправление текущих проблем
 
-Изменить `useOrders.ts`:
+### Проблема 1: Несинхронизированные ID
 
-```typescript
-// После создания заказа — отправляем email
-await supabase.functions.invoke('send-order-email', {
-  body: {
-    type: 'order_request_received',
-    order_id: orderId,
-    user_id: user.id,
-    payment_method: input.payment?.method,
-  },
-});
+| Файл | Текущие ID | Нужные ID |
+|------|------------|-----------|
+| ServicesIndex.tsx | `ac`, `repair` | `ac`, `repair` ✓ |
+| ServicesFilters.tsx | `ac-service`, `pest-control`, `gardening` | `ac`, `pest`, `garden` ✗ |
+| useHomeServices.ts | `hvac`, `tech` | Объединить в `ac`, `repair` |
+
+**Решение:** Единый источник правды в `homeServicesTaxonomy.ts`
+
+### Проблема 2: Нет различия мастер/компания
+
+Добавить в `providers`:
+- `provider_type`: `'individual'` | `'company'`
+- `response_time_minutes`: число (для "⚡ Отвечает за 15 мин")
+- `has_insurance`: boolean
+- `has_guarantee`: boolean
+
+### Проблема 3: Дублирование с /cleaning
+
+**Решение:** Cleaning становится поддоменом Home Services:
+- `/services` — главная страница с 4 доменами
+- Домен "Cleaning" показывает контент из `cleaning_services` table
+- `/cleaning` — остается как shortcut (redirect на `/services?domain=cleaning`)
+
+---
+
+## Новая структура UI
+
 ```
-
-**2.3 Обновление BookingConfirmation**
-
-После успешного бронирования показывать:
-- ✓ Бронирование создано
-- 📧 Подтверждение отправлено на email
-- 📱 Уведомление в приложении
-- 💬 (если cash) Менеджер свяжется через WhatsApp
+┌─────────────────────────────────────────────────────────────┐
+│  🔧 Домашние услуги              [🔍] [⚙️]                  │
+│  48 профессионалов                                          │
+├─────────────────────────────────────────────────────────────┤
+│  Domain Tabs:                                               │
+│  [Все] [🏠 Ремонт] [✨ Уборка] [🌿 Двор] [🚚 Логистика]     │
+├─────────────────────────────────────────────────────────────┤
+│  Quick Grid (4 самых популярных в выбранном домене):        │
+│  ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐               │
+│  │   🔨   │ │   🚿   │ │   ⚡   │ │   ❄️   │               │
+│  │ Мастер │ │Сантехн │ │Электрик│ │   AC   │               │
+│  └────────┘ └────────┘ └────────┘ └────────┘               │
+├─────────────────────────────────────────────────────────────┤
+│  Provider Type Toggle:                                       │
+│  [Все] [👤 Мастера] [🏢 Компании]                           │
+├─────────────────────────────────────────────────────────────┤
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │ [Logo] ProFix Electrical    ⭐ 4.9 (156)                ││
+│  │        🏢 Компания • ✅ Верифицирован                   ││
+│  │        ⚡ Электрик • 🛡️ Страховка • ⚡ 30 мин           ││
+│  │        от ฿500/вызов                                    ││
+│  └─────────────────────────────────────────────────────────┘│
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │ [Photo] Сергей М.           ⭐ 4.8 (89)                 ││
+│  │         👤 Частный мастер • 🔨 Мастер на час            ││
+│  │         🇷🇺 Русский • ⚡ 15 мин отклик                   ││
+│  │         от ฿300/час                                     ││
+│  └─────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────┘
+```
 
 ---
 
 ## Файлы для изменения
 
-### Новые файлы:
-1. `src/components/booking/BookingStepHint.tsx` — контекстные подсказки по шагам
+### Новые файлы
 
-### Изменяемые файлы:
-1. `src/components/booking/BookingBottomBar.tsx` — добавить hint, step props
-2. `src/components/booking/BookingConfirmation.tsx` — показывать каналы уведомлений
-3. `src/hooks/useOrders.ts` — отправка email при создании заказа
-4. `supabase/functions/send-order-email/index.ts` — новый тип email
-5. `supabase/functions/_shared/email-templates.ts` — шаблон "Request Received"
+| Файл | Назначение |
+|------|------------|
+| `src/lib/config/homeServicesTaxonomy.ts` | Единый источник категорий (Thumbtack-based) |
+| `src/components/services/ServiceProviderCard.tsx` | Карточка с визуальным различием мастер/компания |
+| `src/components/services/ProviderTypeToggle.tsx` | Переключатель типа исполнителя |
+| `src/components/services/DomainTabs.tsx` | Табы по доменам |
 
-### Страницы бронирования для обновления:
-- `ExperienceBooking.tsx`
-- `TourBooking.tsx`
-- `YachtBooking.tsx`
-- `BabysitterBooking.tsx`
-- `BeautyBooking.tsx`
-- `TransportBooking.tsx`
-- `CleaningBooking.tsx`
-- `WaterActivityBooking.tsx`
+### Изменяемые файлы
 
----
+| Файл | Изменения |
+|------|-----------|
+| `src/pages/services/ServicesIndex.tsx` | Новая структура: Domains → Quick Grid → Type Toggle → Cards |
+| `src/components/filters/ServicesFilters.tsx` | Импорт категорий из taxonomy, добавление providerType |
+| `src/hooks/useHomeServices.ts` | Синхронизация категорий, поддержка provider_type |
 
-## Технические детали
+### Миграция БД
 
-### BookingBottomBar — обновлённая логика
+```sql
+-- Добавить поля для различения типов исполнителей
+ALTER TABLE providers 
+  ADD COLUMN IF NOT EXISTS provider_type TEXT DEFAULT 'company',
+  ADD COLUMN IF NOT EXISTS response_time_minutes INTEGER,
+  ADD COLUMN IF NOT EXISTS has_insurance BOOLEAN DEFAULT false,
+  ADD COLUMN IF NOT EXISTS has_guarantee BOOLEAN DEFAULT false,
+  ADD COLUMN IF NOT EXISTS service_domains TEXT[] DEFAULT '{}';
 
-```tsx
-// Определение hint на основе шага
-const getStepHint = (step: number, isRu: boolean) => {
-  const hints = {
-    0: isRu ? '👆 Выберите параметры — оплата будет позже' : '👆 Select options — payment comes later',
-    1: isRu ? '✍️ Укажите контакты для связи' : '✍️ Add contact details',
-    2: isRu ? '💳 Выберите способ оплаты' : '💳 Choose payment method',
-    3: isRu ? '🔒 Безопасное подтверждение' : '🔒 Secure confirmation',
-  };
-  return hints[step] || hints[0];
-};
-```
-
-### Email template — Request Received
-
-```typescript
-generateOrderRequestEmail({
-  customerName: 'Иван',
-  orderNumber: 'UNO-240202-ABC1',
-  orderType: 'experience',
-  totalAmount: 5000,
-  currency: 'THB',
-  paymentMethod: 'cash',
-  scheduledAt: '2024-02-05T14:00:00Z',
-})
-// → Subject: "Запрос получен! #UNO-240202-ABC1"
-// → Body: "Мы получили ваш запрос на бронирование..."
+-- Нормализовать существующие категории
+UPDATE providers SET business_category = 'ac' WHERE business_category = 'hvac';
+UPDATE providers SET business_category = 'repair' WHERE business_category = 'tech';
 ```
 
 ---
 
-## Результат
+## Порядок реализации
 
-После реализации:
+### Шаг 1: Таксономия и БД
+1. Создать `homeServicesTaxonomy.ts` с Thumbtack-структурой
+2. Миграция БД: добавить `provider_type`, `has_insurance`, `has_guarantee`
+3. Нормализовать `business_category` в существующих записях
 
-1. **Пользователь уверен** — на каждом шаге видит что делать и что оплата будет потом
-2. **Мультиканальные уведомления** — email + in-app сразу после бронирования
-3. **Консистентность** — единый UX паттерн во всех формах бронирования
-4. **Прозрачность** — на экране подтверждения видно по каким каналам отправлены уведомления
+### Шаг 2: Компоненты
+1. `DomainTabs.tsx` — навигация по 4 доменам
+2. `ProviderTypeToggle.tsx` — переключатель Все/Мастера/Компании
+3. `ServiceProviderCard.tsx` — карточка с бейджами и типом
+
+### Шаг 3: Интеграция
+1. Обновить `ServicesIndex.tsx` с новой структурой
+2. Синхронизировать `ServicesFilters.tsx` с taxonomy
+3. Обновить `useHomeServices.ts` для фильтрации по домену и типу
+
+### Шаг 4: Проверка
+1. Тестирование фильтров по категориям
+2. Тестирование фильтров по типу исполнителя
+3. Тестирование поиска
+4. Проверка корректной работы на мобильных устройствах
+
+---
+
+## Ожидаемый результат
+
+| До | После |
+|----|-------|
+| Плоский список 8 категорий | 4 домена → 16 категорий |
+| Фильтры не работают (разные ID) | Единая таксономия |
+| Мастера и компании выглядят одинаково | Визуальное различие + бейджи |
+| Дублирование с /cleaning | Cleaning как домен внутри Services |
+| Нет информации о скорости отклика | "⚡ 15 мин" badge |
