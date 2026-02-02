@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { QuickInstallButton } from '@/components/pwa/QuickInstallButton';
+import { COMPANY_CONTACTS, getTelLink } from '@/lib/config/contacts';
 
 export default function AboutPage() {
   const { language } = useLanguage();
@@ -775,9 +776,9 @@ export default function AboutPage() {
               <Mail className="w-4 h-4" />
               assist@myuno.app
             </a>
-            <a href="tel:+66922407355" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
+            <a href={getTelLink()} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
               <Phone className="w-4 h-4" />
-              +66 92 240 7355
+              {COMPANY_CONTACTS.phone.display}
             </a>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <MapPin className="w-4 h-4" />

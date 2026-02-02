@@ -18,6 +18,7 @@ import {
   LeadVerticalConfig 
 } from '@/lib/leadVerticalConfig';
 import { UniversalLeadForm } from '@/components/leads/UniversalLeadForm';
+import { COMPANY_CONTACTS, getTelLink } from '@/lib/config/contacts';
 
 interface UniversalHelpFABProps {
   className?: string;
@@ -174,7 +175,7 @@ export function UniversalHelpFAB({ className }: UniversalHelpFABProps) {
                       variant="outline"
                       className="flex-1"
                       onClick={() => {
-                        window.open('https://wa.me/66922407355', '_blank');
+                        window.open(COMPANY_CONTACTS.whatsapp.link, '_blank');
                       }}
                     >
                       <MessageCircle className="h-4 w-4 mr-2" />
@@ -184,7 +185,7 @@ export function UniversalHelpFAB({ className }: UniversalHelpFABProps) {
                       variant="outline"
                       className="flex-1"
                       onClick={() => {
-                        window.open('tel:+66922407355', '_blank');
+                        window.open(getTelLink(), '_blank');
                       }}
                     >
                       <Phone className="h-4 w-4 mr-2" />

@@ -16,7 +16,8 @@ import { formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
-// Mock tickets data
+// TODO: Replace with DB query - tickets should come from support_tickets table
+// Mock tickets data for demo purposes
 const MOCK_TICKETS = [
   { id: '1', subject: 'Payment not processed', user: 'John Smith', status: 'open', priority: 'high', created: new Date(Date.now() - 30 * 60000) },
   { id: '2', subject: 'Booking cancellation request', user: 'Maria Garcia', status: 'in_progress', priority: 'medium', created: new Date(Date.now() - 2 * 3600000) },

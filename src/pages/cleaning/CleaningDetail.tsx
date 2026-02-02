@@ -8,6 +8,7 @@ import { DetailPageHeader } from '@/components/uno/DetailPageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
+// TODO: Replace with DB query - cleaning services should come from services table with category='cleaning'
 const cleaningServices = [
   {
     id: 'clean-1',

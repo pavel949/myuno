@@ -13,8 +13,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import { CITY_GEOGRAPHY } from '@/lib/config/geography';
 
-// Demo property markers
+// TODO: Replace with DB query - demo property markers should come from owner_properties table
 const demoProperties: SalonMarker[] = [
   {
     id: 'prop-1',
@@ -101,7 +102,9 @@ export default function PropertyMap() {
           });
         },
         () => {
-          setUserLocation({ lat: 7.8804, lng: 98.3923 });
+          // Fallback to Phuket center from centralized config
+          const phuket = CITY_GEOGRAPHY.phuket;
+          setUserLocation({ lat: phuket.center.lat, lng: phuket.center.lng });
         }
       );
     }

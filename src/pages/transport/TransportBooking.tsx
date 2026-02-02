@@ -23,7 +23,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "lucide-react";
 
-// Demo vehicle data (fallback)
+// TODO: Replace with DB query - vehicles should come from transport_vehicles table
+// Demo vehicle data (fallback for when DB is empty)
 const demoVehicles: Record<string, { nameEn: string; nameRu: string; pricePerDay: number; image: string }> = {
   'car-1': { nameEn: 'Toyota Camry', nameRu: 'Тойота Камри', pricePerDay: 1500, image: 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=600' },
   'car-2': { nameEn: 'Honda City', nameRu: 'Хонда Сити', pricePerDay: 1200, image: 'https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=600' },

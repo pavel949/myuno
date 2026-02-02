@@ -31,10 +31,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useOfflineStatus } from '@/hooks/useOfflineStatus';
 import { toast } from 'sonner';
-
-// UNO Emergency Contact
-const UNO_EMERGENCY_PHONE = '+66922407355';
-const UNO_WHATSAPP = 'https://wa.me/66922407355';
+import { COMPANY_CONTACTS, getTelLink } from '@/lib/config/contacts';
 
 // Quick action buttons for most critical services
 const quickActions = [
@@ -316,7 +313,7 @@ export default function SOS() {
             <Button
               size="sm"
               className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
-              onClick={() => window.location.href = `tel:${UNO_EMERGENCY_PHONE}`}
+              onClick={() => window.location.href = getTelLink()}
             >
               <Phone className="w-4 h-4 mr-1.5" />
               {language === 'ru' ? 'Позвонить' : 'Call'}
@@ -325,7 +322,7 @@ export default function SOS() {
               size="sm"
               variant="outline"
               className="flex-1 border-amber-500/50 text-amber-600 hover:bg-amber-500/10"
-              onClick={() => window.open(UNO_WHATSAPP, '_blank')}
+              onClick={() => window.open(COMPANY_CONTACTS.whatsapp.link, '_blank')}
             >
               <MessageCircle className="w-4 h-4 mr-1.5" />
               WhatsApp

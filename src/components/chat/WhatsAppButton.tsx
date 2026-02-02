@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { MessageCircle, X, GripVertical } from 'lucide-react';
+import { COMPANY_CONTACTS } from '@/lib/config/contacts';
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -31,8 +32,6 @@ export const WhatsAppButton: React.FC<SocialButtonsProps> = ({ className }) => {
   const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
   const dragRef = useRef<HTMLDivElement>(null);
   const dragStartRef = useRef<{ x: number; y: number; posX: number; posY: number } | null>(null);
-  
-  const phoneNumber = '66922407355';
 
   // Load saved position
   useEffect(() => {
@@ -132,14 +131,14 @@ export const WhatsAppButton: React.FC<SocialButtonsProps> = ({ className }) => {
   
   const handleWhatsApp = () => {
     if (!isDragging) {
-      window.open(`https://wa.me/${phoneNumber}`, '_blank');
+      window.open(COMPANY_CONTACTS.whatsapp.link, '_blank');
       setIsOpen(false);
     }
   };
 
   const handleTelegram = () => {
     if (!isDragging) {
-      window.open(`https://t.me/+${phoneNumber}`, '_blank');
+      window.open(COMPANY_CONTACTS.telegram.number, '_blank');
       setIsOpen(false);
     }
   };

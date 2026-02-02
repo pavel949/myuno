@@ -16,7 +16,8 @@ import { formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
-// Mock data for unified inbox
+// TODO: Replace with DB query - tasks should come from team_tasks or unified_inbox table
+// Mock data for unified inbox - for demo purposes
 const MOCK_TASKS = [
   { id: '1', type: 'lead', title: 'New rental inquiry', subtitle: 'John Smith • Vacation Rental', priority: 'high', time: new Date(Date.now() - 30 * 60000) },
   { id: '2', type: 'ticket', title: 'Payment issue', subtitle: 'Order #12345', priority: 'medium', time: new Date(Date.now() - 2 * 3600000) },

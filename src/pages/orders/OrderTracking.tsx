@@ -24,6 +24,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import type { OrderStatus } from '@/hooks/useOrders';
+import { COMPANY_CONTACTS, getTelLink } from '@/lib/config/contacts';
 
 const statusConfig: Record<OrderStatus, { 
   icon: typeof Clock; 
@@ -280,7 +281,7 @@ export default function OrderTracking() {
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t safe-area-bottom">
           <div className="flex gap-3 max-w-lg mx-auto">
             <Button variant="outline" className="flex-1" asChild>
-              <a href="tel:+66922407355">
+              <a href={getTelLink()}>
                 <Phone className="w-4 h-4 mr-2" />
                 {isRu ? 'Позвонить' : 'Call'}
               </a>
