@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
+export type EntityType = 'institution' | 'individual';
+
 export interface EducationProvider {
   id: string;
   name_en: string;
@@ -8,6 +10,7 @@ export interface EducationProvider {
   description_en: string | null;
   description_ru: string | null;
   provider_type: string;
+  entity_type: EntityType;
   cover_image: string | null;
   subjects: string[];
   age_groups: string[];

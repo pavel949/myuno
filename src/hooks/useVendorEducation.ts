@@ -1,5 +1,7 @@
 import { useSupabaseCRUD } from './useSupabaseCRUD';
 
+export type EntityType = 'institution' | 'individual';
+
 export interface VendorEducationProvider {
   id: string;
   provider_id?: string;
@@ -8,6 +10,7 @@ export interface VendorEducationProvider {
   description_en?: string;
   description_ru?: string;
   provider_type?: string;
+  entity_type?: EntityType;
   subjects?: string[];
   age_groups?: string[];
   qualifications?: string[];
