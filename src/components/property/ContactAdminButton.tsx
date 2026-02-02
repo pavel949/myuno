@@ -80,7 +80,7 @@ export function ContactAdminButton({
 I would like to discuss payment options for the deposit.`;
 
     // myUNO WhatsApp number (Thailand)
-    const whatsappNumber = '66612345678'; // Replace with actual myUNO number
+    const whatsappNumber = '66922407355';
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
     window.open(whatsappUrl, '_blank');

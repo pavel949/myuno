@@ -26,17 +26,17 @@ export default function ContactPage() {
       icon: Phone,
       title: isRu ? 'Горячая линия' : 'Hotline',
       description: isRu ? 'Срочные вопросы и экстренная помощь' : 'Urgent questions and emergency help',
-      action: '+66 76 123 456',
+      action: '+66 92 240 7355',
       actionLabel: isRu ? 'Позвонить' : 'Call',
-      href: 'tel:+6676123456',
+      href: 'tel:+66922407355',
     },
     {
       icon: MessageCircle,
       title: 'WhatsApp',
       description: isRu ? 'Быстрые ответы в мессенджере' : 'Quick replies via messenger',
-      action: '+66 81 234 5678',
+      action: '+66 92 240 7355',
       actionLabel: isRu ? 'Написать' : 'Message',
-      href: 'https://wa.me/66812345678',
+      href: 'https://wa.me/66922407355',
     },
   ];
 
