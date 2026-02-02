@@ -6391,6 +6391,7 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           area_sqm: number | null
+          auto_report_enabled: boolean | null
           balance_due_days: number | null
           bathrooms: number | null
           bedrooms: number | null
@@ -6499,6 +6500,8 @@ export type Database = {
           quiet_hours_start: string | null
           rejection_reason: string | null
           rental_platform: string | null
+          report_frequency: string | null
+          report_recipients: string[] | null
           rooms: Json | null
           safety_features: string[] | null
           sale_currency: string | null
@@ -6536,6 +6539,7 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           area_sqm?: number | null
+          auto_report_enabled?: boolean | null
           balance_due_days?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
@@ -6644,6 +6648,8 @@ export type Database = {
           quiet_hours_start?: string | null
           rejection_reason?: string | null
           rental_platform?: string | null
+          report_frequency?: string | null
+          report_recipients?: string[] | null
           rooms?: Json | null
           safety_features?: string[] | null
           sale_currency?: string | null
@@ -6681,6 +6687,7 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           area_sqm?: number | null
+          auto_report_enabled?: boolean | null
           balance_due_days?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
@@ -6789,6 +6796,8 @@ export type Database = {
           quiet_hours_start?: string | null
           rejection_reason?: string | null
           rental_platform?: string | null
+          report_frequency?: string | null
+          report_recipients?: string[] | null
           rooms?: Json | null
           safety_features?: string[] | null
           sale_currency?: string | null
@@ -8195,6 +8204,59 @@ export type Database = {
           },
         ]
       }
+      property_analytics: {
+        Row: {
+          bookings: number | null
+          clicks: number | null
+          created_at: string | null
+          date: string
+          favorites: number | null
+          id: string
+          inquiries: number | null
+          property_id: string
+          search_impressions: number | null
+          shares: number | null
+          source: string | null
+          views: number | null
+        }
+        Insert: {
+          bookings?: number | null
+          clicks?: number | null
+          created_at?: string | null
+          date: string
+          favorites?: number | null
+          id?: string
+          inquiries?: number | null
+          property_id: string
+          search_impressions?: number | null
+          shares?: number | null
+          source?: string | null
+          views?: number | null
+        }
+        Update: {
+          bookings?: number | null
+          clicks?: number | null
+          created_at?: string | null
+          date?: string
+          favorites?: number | null
+          id?: string
+          inquiries?: number | null
+          property_id?: string
+          search_impressions?: number | null
+          shares?: number | null
+          source?: string | null
+          views?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_analytics_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_availability: {
         Row: {
           booking_id: string | null
@@ -9153,6 +9215,65 @@ export type Database = {
           },
         ]
       }
+      property_listing_scores: {
+        Row: {
+          amenities_score: number | null
+          created_at: string | null
+          description_score: number | null
+          id: string
+          improvement_tips: Json | null
+          last_calculated_at: string | null
+          missing_fields: string[] | null
+          overall_score: number | null
+          photos_score: number | null
+          pricing_score: number | null
+          property_id: string
+          response_score: number | null
+          reviews_score: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          amenities_score?: number | null
+          created_at?: string | null
+          description_score?: number | null
+          id?: string
+          improvement_tips?: Json | null
+          last_calculated_at?: string | null
+          missing_fields?: string[] | null
+          overall_score?: number | null
+          photos_score?: number | null
+          pricing_score?: number | null
+          property_id: string
+          response_score?: number | null
+          reviews_score?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          amenities_score?: number | null
+          created_at?: string | null
+          description_score?: number | null
+          id?: string
+          improvement_tips?: Json | null
+          last_calculated_at?: string | null
+          missing_fields?: string[] | null
+          overall_score?: number | null
+          photos_score?: number | null
+          pricing_score?: number | null
+          property_id?: string
+          response_score?: number | null
+          reviews_score?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_listing_scores_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_management_requests: {
         Row: {
           created_at: string
@@ -9527,6 +9648,62 @@ export type Database = {
           year_built?: number | null
         }
         Relationships: []
+      }
+      property_promotions: {
+        Row: {
+          clicks_delivered: number | null
+          cost: number | null
+          created_at: string | null
+          currency: string | null
+          ends_at: string
+          id: string
+          impressions_delivered: number | null
+          owner_id: string
+          promotion_type: string
+          property_id: string
+          starts_at: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          clicks_delivered?: number | null
+          cost?: number | null
+          created_at?: string | null
+          currency?: string | null
+          ends_at: string
+          id?: string
+          impressions_delivered?: number | null
+          owner_id: string
+          promotion_type: string
+          property_id: string
+          starts_at: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          clicks_delivered?: number | null
+          cost?: number | null
+          created_at?: string | null
+          currency?: string | null
+          ends_at?: string
+          id?: string
+          impressions_delivered?: number | null
+          owner_id?: string
+          promotion_type?: string
+          property_id?: string
+          starts_at?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_promotions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       property_reports: {
         Row: {

@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 import { 
   Home, Image, Calendar, DollarSign, FileText, 
   Users, MapPin, Zap, Bed, Settings, Save,
-  ChevronLeft, Loader2, Eye, CheckCircle2
+  ChevronLeft, Loader2, Eye, CheckCircle2, Megaphone
 } from 'lucide-react';
 
 // Section components
@@ -22,6 +22,7 @@ import { PropertyManageListingSection } from '@/components/owner/property-manage
 import { PropertyManageCalendarSection } from '@/components/owner/property-manage/CalendarSection';
 import { PropertyManagePricingSection } from '@/components/owner/property-manage/PricingSection';
 import { PropertyManageRulesSection } from '@/components/owner/property-manage/RulesSection';
+import { PropertyManageMarketingSection } from '@/components/owner/marketing';
 
 interface MenuSection {
   id: string;
@@ -37,6 +38,7 @@ const MENU_SECTIONS: MenuSection[] = [
   { id: 'calendar', label: 'Calendar', labelRu: 'Календарь', icon: <Calendar className="h-4 w-4" /> },
   { id: 'pricing', label: 'Pricing', labelRu: 'Цены', icon: <DollarSign className="h-4 w-4" /> },
   { id: 'rules', label: 'Policies & Rules', labelRu: 'Правила', icon: <FileText className="h-4 w-4" /> },
+  { id: 'marketing', label: 'Marketing', labelRu: 'Продвижение', icon: <Megaphone className="h-4 w-4" />, badge: 'NEW' },
 ];
 
 export default function PropertyManage() {
@@ -218,6 +220,10 @@ export default function PropertyManage() {
             updateFormData={updateFormData}
           />
         );
+      case 'marketing':
+        return id ? (
+          <PropertyManageMarketingSection propertyId={id} />
+        ) : null;
       default:
         return null;
     }
