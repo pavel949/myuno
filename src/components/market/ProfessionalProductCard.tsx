@@ -1,6 +1,7 @@
 import React, { forwardRef, useState } from 'react';
 import { Plus, Minus, Star, Heart, ShoppingBag, Check, ChefHat, Clock, X, Plane } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { MarketplaceProduct } from '@/types/marketplace';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -117,6 +118,7 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
   compact = false,
 }, ref) => {
   const { language } = useLanguage();
+  const { formatPrice } = useCurrency();
 
   const name = language === 'ru' ? product.name_ru : product.name_en;
   const description = language === 'ru' ? product.description_ru : product.description_en;
@@ -181,10 +183,10 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
         <div className="p-4 flex items-center justify-between bg-card">
           <div>
             <div className="flex items-baseline gap-2">
-              <span className="text-lg font-bold text-foreground">฿{product.price.toLocaleString()}</span>
+              <span className="text-lg font-bold text-foreground">{formatPrice(product.price)}</span>
               {product.original_price && (
                 <span className="text-sm text-muted-foreground line-through">
-                  ฿{product.original_price.toLocaleString()}
+                  {formatPrice(product.original_price)}
                 </span>
               )}
             </div>
@@ -280,10 +282,10 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
 
           <div className="flex items-center justify-between">
             <div className="flex items-baseline gap-1.5">
-              <span className="font-bold text-base">฿{product.price.toLocaleString()}</span>
+              <span className="font-bold text-base">{formatPrice(product.price)}</span>
               {product.original_price && (
                 <span className="text-xs text-muted-foreground line-through">
-                  ฿{product.original_price.toLocaleString()}
+                  {formatPrice(product.original_price)}
                 </span>
               )}
             </div>
@@ -441,11 +443,11 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
               "font-bold leading-none text-foreground",
               compact ? "text-sm" : "text-lg"
             )}>
-              ฿{product.price.toLocaleString()}
+              {formatPrice(product.price)}
             </span>
             {product.original_price && !compact && (
               <span className="text-xs text-muted-foreground line-through mt-0.5">
-                ฿{product.original_price.toLocaleString()}
+                {formatPrice(product.original_price)}
               </span>
             )}
           </div>

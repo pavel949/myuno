@@ -3,6 +3,7 @@ import { CreditCard, ChevronRight, Plus, Check, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePaymentMethods, PaymentMethod } from '@/hooks/usePaymentMethods';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -44,6 +45,7 @@ export function PaymentMethodSelector({
   walletBalance = 0,
 }: PaymentMethodSelectorProps) {
   const { language } = useLanguage();
+  const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
   const { paymentMethods, isLoading, defaultMethod } = usePaymentMethods();
   const [isOpen, setIsOpen] = useState(false);
@@ -190,7 +192,7 @@ export function PaymentMethodSelector({
                 <div className="text-left">
                   <p className="text-sm font-medium">UNO Wallet</p>
                   <p className="text-xs text-muted-foreground">
-                    {isRu ? 'Баланс:' : 'Balance:'} ฿{walletBalance.toLocaleString()}
+                    {isRu ? 'Баланс:' : 'Balance:'} {formatPrice(walletBalance)}
                   </p>
                 </div>
               </div>

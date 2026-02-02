@@ -1,6 +1,7 @@
 import React from 'react';
 import { Plus, Minus, Star } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { MarketplaceProduct } from '@/types/marketplace';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -24,6 +25,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   variant = 'grid',
 }) => {
   const { language } = useLanguage();
+  const { formatPrice } = useCurrency();
 
   const name = language === 'ru' ? product.name_ru : product.name_en;
   // Use new precise unit formatting
@@ -74,10 +76,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
           <div className="flex items-center justify-between mt-2">
             <div>
-              <span className="font-bold">฿{product.price}</span>
+              <span className="font-bold">{formatPrice(product.price)}</span>
               {product.original_price && (
                 <span className="text-xs text-muted-foreground line-through ml-1">
-                  ฿{product.original_price}
+                  {formatPrice(product.original_price)}
                 </span>
               )}
             </div>
@@ -170,7 +172,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
         <div className="flex items-center justify-between mt-2">
           <div className="flex flex-col">
-            <span className="font-bold text-base">฿{product.price}</span>
+            <span className="font-bold text-base">{formatPrice(product.price)}</span>
             {pricePerUnit && (
               <span className="text-[10px] text-muted-foreground">
                 {pricePerUnit}
@@ -178,7 +180,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             )}
             {product.original_price && !pricePerUnit && (
               <span className="text-xs text-muted-foreground line-through">
-                ฿{product.original_price}
+                {formatPrice(product.original_price)}
               </span>
             )}
           </div>

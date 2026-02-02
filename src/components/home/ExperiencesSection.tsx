@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Compass, ArrowRight, Star, Shield, Waves } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { Badge } from '@/components/ui/badge';
 import { useExperiences, formatDuration } from '@/hooks/useExperiences';
 import { OptimizedImage } from '@/components/ui/optimized-image';
@@ -9,6 +10,7 @@ import { cn } from '@/lib/utils';
 
 export function ExperiencesSection() {
   const { t, language } = useLanguage();
+  const { formatPrice } = useCurrency();
   const navigate = useNavigate();
   const { experiences, isLoading } = useExperiences({ featured: true, limit: 6 });
   const isRu = language === 'ru';
@@ -95,7 +97,7 @@ export function ExperiencesSection() {
                   <span>{formatDuration(experience.duration_minutes, language)}</span>
                 </div>
                 <p className="text-primary font-bold mt-2">
-                  ฿{experience.price?.toLocaleString()}
+                  {formatPrice(experience.price || 0)}
                 </p>
               </div>
             </div>

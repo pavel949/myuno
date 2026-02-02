@@ -2,6 +2,7 @@ import { useRef, useState, useEffect, useCallback, useMemo, memo, forwardRef } f
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Star, MapPin, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { useHomePageData } from '@/hooks/useHomePageData';
 
 interface CarouselItem {
@@ -20,6 +21,7 @@ interface CarouselItem {
 
 export const RecommendedCarousel = memo(forwardRef<HTMLDivElement>(function RecommendedCarousel(_props, ref) {
   const { language } = useLanguage();
+  const { formatPrice } = useCurrency();
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -145,7 +147,7 @@ export const RecommendedCarousel = memo(forwardRef<HTMLDivElement>(function Reco
                 {/* Price */}
                 {item.price && (
                   <span className="absolute bottom-2 right-2 px-2 py-1 rounded-lg bg-background/90 backdrop-blur-sm text-sm font-bold">
-                    ฿{item.price.toLocaleString()}
+                    {formatPrice(item.price)}
                   </span>
                 )}
               </div>
