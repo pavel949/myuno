@@ -153,8 +153,10 @@ function getPath(category: RawCategory): string {
     'road-assistance': '/services?category=road-assistance',
     'insurance': '/insurance',
     'banking': '/banking',
-    'storage': '/storage',
+    'storage': '/services?category=storage',
     'veterinary': '/veterinary',
+    'maintenance': '/services?category=maintenance',
+    'property-management': '/services?category=property-management',
   };
   return pathMap[type] || pathMap[category.slug] || `/${category.slug}`;
 }
