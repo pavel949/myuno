@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOwnerProperties } from '@/hooks/usePropertyCare';
-import { useCreateFinancial, EXPENSE_CATEGORIES, PAYMENT_METHODS } from '@/hooks/usePropertyFinancials';
+import { useCreateFinancial } from '@/hooks/usePropertyFinancials';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { BackButton } from '@/components/uno/BackButton';
@@ -14,7 +14,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { QuickPropertySelector } from '@/components/owner/QuickPropertySelector';
 import { QuickCategoryGrid } from '@/components/owner/QuickCategoryGrid';
-import { DocumentUpload } from '@/components/upload/DocumentUpload';
+import { DragDropReceiptUpload } from '@/components/upload/DragDropReceiptUpload';
+import { VendorCombobox } from '@/components/owner/expense/VendorCombobox';
+import { VoiceInput } from '@/components/ui/voice-input';
 import { 
   Loader2, Check, Banknote, CreditCard, ArrowLeftRight,
   Receipt, Camera
@@ -48,8 +50,21 @@ export default function QuickExpense() {
   const [category, setCategory] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('');
   const [receiptUrl, setReceiptUrl] = useState('');
+  const [vendorName, setVendorName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  const handleCategorySuggestion = (suggestedCategory: string) => {
+    // Only auto-fill if category is not already selected
+    if (!category) {
+      setCategory(suggestedCategory);
+    }
+  };
+
+  const handleVoiceTranscript = (transcript: string) => {
+    // Append to existing description or set new
+    setDescription(prev => prev ? `${prev} ${transcript}` : transcript);
+  };
 
   const handleSubmit = async () => {
     if (!selectedPropertyId || !amount || !category) return;
@@ -67,6 +82,7 @@ export default function QuickExpense() {
         transaction_date: format(new Date(), 'yyyy-MM-dd'),
         status: 'completed',
         receipt_url: receiptUrl || undefined,
+        vendor_name: vendorName || undefined,
       });
       
       setIsSuccess(true);
@@ -116,7 +132,7 @@ export default function QuickExpense() {
       </p>
 
       <div className="space-y-5">
-        {/* Receipt Photo First - Mobile Camera Ready */}
+        {/* Receipt Photo First - Drag & Drop with Camera */}
         <Card>
           <CardContent className="pt-4">
             <div className="flex items-center gap-2 mb-3">
@@ -125,7 +141,7 @@ export default function QuickExpense() {
                 {isRu ? 'Фото чека (опционально)' : 'Receipt Photo (optional)'}
               </Label>
             </div>
-            <DocumentUpload
+            <DragDropReceiptUpload
               value={receiptUrl}
               onChange={setReceiptUrl}
               folder="receipts"
@@ -185,6 +201,20 @@ export default function QuickExpense() {
           </CardContent>
         </Card>
 
+        {/* Vendor with Autocomplete */}
+        <Card>
+          <CardContent className="pt-4">
+            <Label className="text-sm font-medium mb-2 block">
+              {isRu ? 'Поставщик' : 'Vendor'}
+            </Label>
+            <VendorCombobox
+              value={vendorName}
+              onChange={setVendorName}
+              onCategorySuggestion={handleCategorySuggestion}
+            />
+          </CardContent>
+        </Card>
+
         {/* Category Grid */}
         <div className="space-y-2">
           <Label className="text-sm font-medium px-1">
@@ -224,18 +254,25 @@ export default function QuickExpense() {
           </div>
         </div>
 
-        {/* Description */}
+        {/* Description with Voice Input */}
         <Card>
           <CardContent className="pt-4">
             <Label className="text-sm font-medium mb-2 block">
               {isRu ? 'Что купили?' : 'What was purchased?'}
             </Label>
-            <Textarea
-              placeholder={isRu ? 'Например: Средства для уборки' : 'e.g., Cleaning supplies'}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={2}
-            />
+            <div className="flex gap-2">
+              <Textarea
+                placeholder={isRu ? 'Например: Средства для уборки' : 'e.g., Cleaning supplies'}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={2}
+                className="flex-1"
+              />
+              <VoiceInput
+                onTranscript={handleVoiceTranscript}
+                className="self-end"
+              />
+            </div>
           </CardContent>
         </Card>
 
