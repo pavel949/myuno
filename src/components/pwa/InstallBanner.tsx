@@ -41,11 +41,13 @@ export function InstallBanner() {
   const t = texts[language] || texts.en;
 
   useEffect(() => {
+    // Skip if already installed as PWA
     if (isInstalled) {
       setIsVisible(false);
       return;
     }
 
+    // Check if dismissed recently
     const dismissedAt = localStorage.getItem(BANNER_DISMISSED_KEY);
     if (dismissedAt) {
       const dismissedTime = parseInt(dismissedAt, 10);
@@ -53,10 +55,15 @@ export function InstallBanner() {
         setIsVisible(false);
         return;
       }
+      // Clear expired dismissal
+      localStorage.removeItem(BANNER_DISMISSED_KEY);
     }
 
-    setIsVisible(isMobileViewport);
-  }, [isMobileViewport, isInstalled]);
+    // Show on mobile OR when on iOS/Android regardless of viewport
+    // This ensures it shows on actual mobile devices even if viewport detection fails
+    const shouldShow = isMobileViewport || isIOS || isAndroid;
+    setIsVisible(shouldShow);
+  }, [isMobileViewport, isInstalled, isIOS, isAndroid]);
 
   const handleDismiss = () => {
     localStorage.setItem(BANNER_DISMISSED_KEY, Date.now().toString());
