@@ -68,19 +68,14 @@ const COMMON_FIELDS = {
   },
 };
 
-const PHUKET_DISTRICTS = [
-  { value: 'rawai', labelEn: 'Rawai', labelRu: 'Раваи' },
-  { value: 'kata', labelEn: 'Kata', labelRu: 'Ката' },
-  { value: 'karon', labelEn: 'Karon', labelRu: 'Карон' },
-  { value: 'patong', labelEn: 'Patong', labelRu: 'Патонг' },
-  { value: 'kamala', labelEn: 'Kamala', labelRu: 'Камала' },
-  { value: 'surin', labelEn: 'Surin', labelRu: 'Сурин' },
-  { value: 'bangtao', labelEn: 'Bang Tao', labelRu: 'Банг Тао' },
-  { value: 'laguna', labelEn: 'Laguna', labelRu: 'Лагуна' },
-  { value: 'naiharn', labelEn: 'Nai Harn', labelRu: 'Най Харн' },
-  { value: 'chalong', labelEn: 'Chalong', labelRu: 'Чалонг' },
-  { value: 'phuket_town', labelEn: 'Phuket Town', labelRu: 'Пхукет Таун' },
-];
+import { PHUKET_DISTRICTS as TAXONOMY_DISTRICTS } from './propertyTaxonomy';
+
+// Map taxonomy to lead form options
+const PHUKET_DISTRICTS = TAXONOMY_DISTRICTS.map(d => ({
+  value: d.id,
+  labelEn: d.labelEn,
+  labelRu: d.labelRu,
+}));
 
 export const LEAD_VERTICALS: LeadVerticalConfig[] = [
   // 🏠 Properties - Most popular

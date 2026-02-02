@@ -27,25 +27,20 @@ import { cn } from '@/lib/utils';
 
 type RequestType = 'vacation_rental' | 'property_consultation' | 'property_tour' | 'investment_advice';
 
-const PROPERTY_TYPES = [
-  { value: 'villa', labelEn: 'Villa', labelRu: 'Вилла' },
-  { value: 'condo', labelEn: 'Condo', labelRu: 'Кондо' },
-  { value: 'apartment', labelEn: 'Apartment', labelRu: 'Апартаменты' },
-  { value: 'townhouse', labelEn: 'Townhouse', labelRu: 'Таунхаус' },
-];
+import { PROPERTY_TYPES as TAXONOMY_PROPERTY_TYPES, PHUKET_DISTRICTS } from '@/lib/propertyTaxonomy';
 
-const DISTRICTS = [
-  { value: 'rawai', labelEn: 'Rawai', labelRu: 'Раваи' },
-  { value: 'kata', labelEn: 'Kata', labelRu: 'Ката' },
-  { value: 'karon', labelEn: 'Karon', labelRu: 'Карон' },
-  { value: 'patong', labelEn: 'Patong', labelRu: 'Патонг' },
-  { value: 'kamala', labelEn: 'Kamala', labelRu: 'Камала' },
-  { value: 'surin', labelEn: 'Surin', labelRu: 'Сурин' },
-  { value: 'bangtao', labelEn: 'Bang Tao', labelRu: 'Банг Тао' },
-  { value: 'laguna', labelEn: 'Laguna', labelRu: 'Лагуна' },
-  { value: 'cherngtalay', labelEn: 'Cherngtalay', labelRu: 'Чернгталай' },
-  { value: 'naiharn', labelEn: 'Nai Harn', labelRu: 'Най Харн' },
-];
+// Map taxonomy to form options
+const PROPERTY_TYPES = TAXONOMY_PROPERTY_TYPES.map(t => ({
+  value: t.id,
+  labelEn: t.labelEn,
+  labelRu: t.labelRu,
+}));
+
+const DISTRICTS = PHUKET_DISTRICTS.map(d => ({
+  value: d.id,
+  labelEn: d.labelEn,
+  labelRu: d.labelRu,
+}));
 
 const PURPOSES = [
   { value: 'personal', labelEn: 'Personal living', labelRu: 'Личное проживание' },

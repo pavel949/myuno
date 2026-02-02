@@ -32,6 +32,7 @@ import { ProjectLocationPicker } from '@/components/property/ProjectLocationPick
 import { Skeleton } from '@/components/ui/skeleton';
 import { TranslatableInput } from '@/components/forms/TranslatableInput';
 import { LivePropertyPreview } from '@/components/property/LivePropertyPreview';
+import { PHUKET_DISTRICTS } from '@/lib/propertyTaxonomy';
 
 export default function AddProperty() {
   const { language } = useLanguage();
@@ -242,11 +243,8 @@ export default function AddProperty() {
     }
   }, [sourceProperty, isCloneDataApplied, isRu]);
 
-  const districts = [
-    'Patong', 'Kata', 'Karon', 'Rawai', 'Nai Harn', 
-    'Kamala', 'Surin', 'Bang Tao', 'Laguna', 'Cherngtalay',
-    'Phuket Town', 'Chalong', 'Kathu'
-  ];
+  // Use centralized taxonomy
+  const districts = PHUKET_DISTRICTS;
 
   const propertyTypes = [
     { value: 'villa', labelEn: 'Villa', labelRu: 'Вилла' },
@@ -601,8 +599,8 @@ export default function AddProperty() {
                   </SelectTrigger>
                   <SelectContent>
                     {districts.map((district) => (
-                      <SelectItem key={district} value={district}>
-                        {district}
+                      <SelectItem key={district.id} value={district.id}>
+                        {isRu ? district.labelRu : district.labelEn}
                       </SelectItem>
                     ))}
                   </SelectContent>

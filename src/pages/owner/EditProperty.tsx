@@ -16,6 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Home, MapPin, Bed, Bath, SquareStack, Upload, Loader2, DollarSign, Clock, Users } from 'lucide-react';
 import { ImageUpload } from '@/components/upload/ImageUpload';
 import { ProjectLocationPicker } from '@/components/property/ProjectLocationPicker';
+import { PHUKET_DISTRICTS } from '@/lib/propertyTaxonomy';
 
 export default function EditProperty() {
   const { id } = useParams();
@@ -84,11 +85,8 @@ export default function EditProperty() {
     }
   }, [property]);
 
-  const districts = [
-    'Patong', 'Kata', 'Karon', 'Rawai', 'Nai Harn', 
-    'Kamala', 'Surin', 'Bang Tao', 'Laguna', 'Cherngtalay',
-    'Phuket Town', 'Chalong', 'Kathu'
-  ];
+  // Use centralized taxonomy
+  const districts = PHUKET_DISTRICTS;
 
   const propertyTypes = [
     { value: 'villa', labelEn: 'Villa', labelRu: 'Вилла' },
@@ -427,8 +425,8 @@ export default function EditProperty() {
                 </SelectTrigger>
                 <SelectContent>
                   {districts.map((district) => (
-                    <SelectItem key={district} value={district}>
-                      {district}
+                    <SelectItem key={district.id} value={district.id}>
+                      {isRu ? district.labelRu : district.labelEn}
                     </SelectItem>
                   ))}
                 </SelectContent>
