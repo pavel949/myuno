@@ -141,18 +141,8 @@ export const USER_ROLES = {
   USER: 'user',
 } as const;
 
-export const DISTRICTS = [
-  'Patong',
-  'Kata',
-  'Karon',
-  'Kamala',
-  'Surin',
-  'Bang Tao',
-  'Rawai',
-  'Chalong',
-  'Phuket Town',
-  'Cherng Talay',
-] as const;
+// DISTRICTS removed - use PHUKET_DISTRICTS from src/lib/propertyTaxonomy.ts instead
+// This prevents data inconsistency between forms and filters
 
 export const CASHBACK = {
   DEFAULT_PERCENTAGE: 5,

@@ -8,6 +8,7 @@ import {
   Mail, Phone, MapPin, Clock, MessageCircle, 
   Globe, Building2, Headphones, Send 
 } from 'lucide-react';
+import { COMPANY_CONTACTS, getWhatsAppUrl, getTelLink, getMailtoLink } from '@/lib/config';
 
 export default function ContactPage() {
   const { language } = useLanguage();
@@ -18,25 +19,25 @@ export default function ContactPage() {
       icon: Headphones,
       title: isRu ? 'Служба поддержки' : 'Customer Support',
       description: isRu ? 'Помощь с бронированиями и вопросами' : 'Help with bookings and questions',
-      action: 'support@uno.ae',
+      action: COMPANY_CONTACTS.email.support,
       actionLabel: isRu ? 'Написать' : 'Email',
-      href: 'mailto:support@uno.ae',
+      href: getMailtoLink('support'),
     },
     {
       icon: Phone,
       title: isRu ? 'Горячая линия' : 'Hotline',
       description: isRu ? 'Срочные вопросы и экстренная помощь' : 'Urgent questions and emergency help',
-      action: '+66 92 240 7355',
+      action: COMPANY_CONTACTS.phone.display,
       actionLabel: isRu ? 'Позвонить' : 'Call',
-      href: 'tel:+66922407355',
+      href: getTelLink(),
     },
     {
       icon: MessageCircle,
       title: 'WhatsApp',
       description: isRu ? 'Быстрые ответы в мессенджере' : 'Quick replies via messenger',
-      action: '+66 92 240 7355',
+      action: COMPANY_CONTACTS.phone.display,
       actionLabel: isRu ? 'Написать' : 'Message',
-      href: 'https://wa.me/66922407355',
+      href: COMPANY_CONTACTS.whatsapp.link,
     },
   ];
 
@@ -44,19 +45,19 @@ export default function ContactPage() {
     {
       icon: Building2,
       title: isRu ? 'Для партнёров' : 'For Partners',
-      email: 'partners@uno.ae',
+      email: COMPANY_CONTACTS.email.partners,
       description: isRu ? 'Сотрудничество и подключение бизнеса' : 'Partnership and business onboarding',
     },
     {
       icon: Mail,
       title: isRu ? 'Пресса и PR' : 'Press & PR',
-      email: 'press@uno.ae',
+      email: COMPANY_CONTACTS.email.press,
       description: isRu ? 'Медиа-запросы и интервью' : 'Media inquiries and interviews',
     },
     {
       icon: Globe,
       title: isRu ? 'Общие вопросы' : 'General Inquiries',
-      email: 'info@uno.ae',
+      email: COMPANY_CONTACTS.email.info,
       description: isRu ? 'Любые другие вопросы' : 'Any other questions',
     },
   ];
@@ -130,9 +131,7 @@ export default function ContactPage() {
               <div>
                 <p className="font-medium">{isRu ? 'Адрес' : 'Address'}</p>
                 <p className="text-sm text-muted-foreground">
-                  {isRu 
-                    ? '88/88 Moo 3, Chalong, Muang, Phuket 83130, Thailand'
-                    : '88/88 Moo 3, Chalong, Muang, Phuket 83130, Thailand'}
+                  {COMPANY_CONTACTS.address.full}
                 </p>
               </div>
             </div>
@@ -143,13 +142,13 @@ export default function ContactPage() {
                 <p className="font-medium">{isRu ? 'Часы работы' : 'Working Hours'}</p>
                 <p className="text-sm text-muted-foreground">
                   {isRu 
-                    ? 'Пн-Пт: 09:00 - 18:00 (ICT, UTC+7)'
-                    : 'Mon-Fri: 09:00 AM - 06:00 PM (ICT, UTC+7)'}
+                    ? `Пн-Пт: ${COMPANY_CONTACTS.workingHours.office} (${COMPANY_CONTACTS.workingHours.officeTimezone})`
+                    : `Mon-Fri: ${COMPANY_CONTACTS.workingHours.office} (${COMPANY_CONTACTS.workingHours.officeTimezone})`}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {isRu 
-                    ? 'Поддержка 24/7 через WhatsApp'
-                    : '24/7 Support via WhatsApp'}
+                    ? `Поддержка ${COMPANY_CONTACTS.workingHours.support} через WhatsApp`
+                    : `${COMPANY_CONTACTS.workingHours.support} Support via WhatsApp`}
                 </p>
               </div>
             </div>
@@ -165,11 +164,11 @@ export default function ContactPage() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              <strong>UNO Platform Co., Ltd.</strong><br />
-              Tax ID: 0835564001234<br />
+              <strong>{COMPANY_CONTACTS.legal.companyName}</strong><br />
+              Tax ID: {COMPANY_CONTACTS.legal.taxId}<br />
               {isRu 
-                ? 'Зарегистрировано в Королевстве Таиланд'
-                : 'Registered in the Kingdom of Thailand'}
+                ? `Зарегистрировано в Королевстве ${COMPANY_CONTACTS.legal.registrationCountry}`
+                : `Registered in the Kingdom of ${COMPANY_CONTACTS.legal.registrationCountry}`}
             </p>
           </CardContent>
         </Card>

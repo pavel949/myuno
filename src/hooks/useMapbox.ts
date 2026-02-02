@@ -6,6 +6,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { supabase } from '@/integrations/supabase/client';
+import { getMapCenter, getDefaultZoom, DEFAULT_CITY } from '@/lib/config';
 
 export interface MapboxMarker {
   id: string;
@@ -24,6 +25,7 @@ export interface UseMapboxOptions {
   pitch?: number;
   enableGeolocation?: boolean;
   enableNavigation?: boolean;
+  citySlug?: string; // City slug to get default center from config
 }
 
 export interface UseMapboxReturn {
@@ -47,8 +49,8 @@ const STYLE_MAP: Record<string, string> = {
   satellite: 'mapbox://styles/mapbox/satellite-streets-v12',
 };
 
-// Default center: Phuket
-const DEFAULT_CENTER: [number, number] = [98.3923, 7.8804];
+// Default center from centralized config
+const DEFAULT_CENTER: [number, number] = getMapCenter(DEFAULT_CITY);
 
 export function useMapbox(options: UseMapboxOptions = {}): UseMapboxReturn {
   const {

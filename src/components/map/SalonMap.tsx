@@ -6,6 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useLocation as useLocationContext } from '@/contexts/LocationContext';
 import { Loader2 } from 'lucide-react';
 import { createMapPopupHtml, escapeHtml } from '@/lib/sanitize';
+import { getMapCenter, DEFAULT_CITY } from '@/lib/config';
 
 export interface SalonMarker {
   id: string;
@@ -105,11 +106,11 @@ const SalonMap: React.FC<SalonMapProps> = ({
 
     mapboxgl.accessToken = mapboxToken;
 
-    // Get city config for dynamic center
+    // Get city config for dynamic center - fallback to centralized geography config
     const cityConfig = getCityConfig();
     const defaultCenter: [number, number] = cityConfig 
       ? [cityConfig.lng, cityConfig.lat] 
-      : [98.3923, 7.8804]; // Fallback to Phuket
+      : getMapCenter(DEFAULT_CITY);
     const center = userLocation 
       ? [userLocation.lng, userLocation.lat] as [number, number]
       : defaultCenter;
