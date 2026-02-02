@@ -9,7 +9,50 @@ export type ConsultationRequestType =
   | 'property_tour'
   | 'full_management'
   | 'investment_advice'
-  | 'channel_management';
+  | 'channel_management'
+  // Universal lead types
+  | 'long_term_rental'
+  | 'property_purchase'
+  | 'yacht_charter'
+  | 'yacht_multiday'
+  | 'yacht_party'
+  | 'yacht_purchase'
+  | 'island_tour'
+  | 'city_tour'
+  | 'adventure_tour'
+  | 'custom_tour'
+  | 'car_rental'
+  | 'bike_rental'
+  | 'driver_service'
+  | 'airport_transfer'
+  | 'visa_consultation'
+  | 'property_legal'
+  | 'business_legal'
+  | 'general_legal'
+  | 'doctor_appointment'
+  | 'dental'
+  | 'health_checkup'
+  | 'emergency'
+  | 'babysitter_hourly'
+  | 'babysitter_daily'
+  | 'nanny_longterm'
+  | 'spa_booking'
+  | 'hair_salon'
+  | 'nail_salon'
+  | 'beauty_service'
+  | 'gym_daypass'
+  | 'gym_membership'
+  | 'personal_trainer'
+  | 'yoga_class'
+  | 'diving'
+  | 'snorkeling'
+  | 'jet_ski'
+  | 'surfing'
+  | 'table_booking'
+  | 'private_event'
+  | 'restaurant_recommendation'
+  | 'general_inquiry'
+  | string; // Allow dynamic types
 
 export type ConsultationStatus = 
   | 'pending'
@@ -29,6 +72,12 @@ export interface ConsultationRequest {
   id: string;
   user_id: string | null;
   request_type: ConsultationRequestType;
+  
+  // Universal lead fields
+  vertical_id: string | null;
+  vertical_metadata: Record<string, unknown> | null;
+  entry_point: string | null;
+  lead_source: string | null;
   
   // Contact
   name: string;

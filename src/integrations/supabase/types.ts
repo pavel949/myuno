@@ -2222,6 +2222,7 @@ export type Database = {
           current_occupancy: string | null
           districts: string[] | null
           email: string | null
+          entry_point: string | null
           first_contact_at: string | null
           follow_up_date: string | null
           guests_count: number | null
@@ -2246,6 +2247,8 @@ export type Database = {
           status: string | null
           updated_at: string
           user_id: string | null
+          vertical_id: string | null
+          vertical_metadata: Json | null
         }
         Insert: {
           admin_notes?: string | null
@@ -2267,6 +2270,7 @@ export type Database = {
           current_occupancy?: string | null
           districts?: string[] | null
           email?: string | null
+          entry_point?: string | null
           first_contact_at?: string | null
           follow_up_date?: string | null
           guests_count?: number | null
@@ -2291,6 +2295,8 @@ export type Database = {
           status?: string | null
           updated_at?: string
           user_id?: string | null
+          vertical_id?: string | null
+          vertical_metadata?: Json | null
         }
         Update: {
           admin_notes?: string | null
@@ -2312,6 +2318,7 @@ export type Database = {
           current_occupancy?: string | null
           districts?: string[] | null
           email?: string | null
+          entry_point?: string | null
           first_contact_at?: string | null
           follow_up_date?: string | null
           guests_count?: number | null
@@ -2336,6 +2343,8 @@ export type Database = {
           status?: string | null
           updated_at?: string
           user_id?: string | null
+          vertical_id?: string | null
+          vertical_metadata?: Json | null
         }
         Relationships: [
           {
