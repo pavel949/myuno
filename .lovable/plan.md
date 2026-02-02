@@ -1,294 +1,237 @@
 
-# Улучшение Подвала (Footer) и Система Подсказок для Пользователей
+# Аудит модуля управления недвижимостью Owner
 
-## 1. Аудит Текущего Подвала
+## Резюме текущего состояния
 
-### Что хорошо:
-- **Партнёрский CTA** — соответствует стратегии привлечения партнёров
-- **SOS кнопка** — критично важный элемент для позиционирования myUNO
-- **Кнопка установки PWA** — поддерживает мобильную стратегию
-- **Языковое переключение** — соответствует мультиязычности (RU/EN/TH)
+### ✅ Что реализовано хорошо
 
-### Что требует улучшения:
+#### 1. Учёт расходов и чеков
+| Функция | Статус | Детали |
+|---------|--------|--------|
+| Быстрый расход (QuickExpense) | ✅ Отлично | Мобильно-адаптированная форма с фото чека, быстрыми суммами, привязкой к объекту |
+| OCR распознавание | ✅ Работает | `ReceiptUploadWithOCR.tsx` — AI (Gemini) извлекает сумму, дату, вендора, категорию |
+| Просмотр чеков | ✅ Есть | `ReceiptViewer` — просмотр прикреплённых чеков в финансах |
+| Категории расходов | ✅ Детальные | EXPENSE_CATEGORIES включает: уборка, ремонт, коммуналка, страховка и др. |
+| Экспорт CSV | ✅ Работает | Кнопка экспорта в `OwnerFinancials.tsx` |
 
-| Элемент | Проблема | Рекомендация |
-|---------|----------|--------------|
-| Слоган | Отсутствует | Добавить «The only app you need abroad» |
-| G-Trust | Не упоминается | Добавить значок доверия в footer |
-| 24/7 Support | Скрыт | Визуально выделить как ключевое преимущество |
-| Социальные сети | Отсутствуют | Добавить иконки (Telegram, Instagram, WhatsApp) |
-| Регион | Не указан | Добавить «Phuket, Thailand» как базовую локацию |
-| Версия | Только «v1.0» | Добавить контекст «Phuket Edition» |
+#### 2. Делегирование и второй хозяин (Co-Host)
+| Функция | Статус | Детали |
+|---------|--------|--------|
+| Система делегирования | ✅ Полная | Таблица `property_delegates` с 4 ролями |
+| Роли | ✅ Airbnb-уровень | trustee, agent, manager, management_company |
+| Гранулярные права | ✅ Реализованы | view, edit, financials, bookings, maintenance |
+| Приглашения | ✅ Работают | `InviteTeamMemberDialog` — 3-шаговый визард |
+| Принятие/отклонение | ✅ Есть | `useAcceptInvitation`, `useRevokeDelegate` |
+| Передача права собственности | ✅ Есть | `useTransferOwnership` — полный transfer workflow |
 
----
+#### 3. OTA-синхронизация (iCal)
+| Функция | Статус | Детали |
+|---------|--------|--------|
+| Импорт из OTA | ✅ Работает | iCal-ссылки с Airbnb, Booking, VRBO |
+| Автосинхронизация | ✅ Есть | Edge Function `ical-sync`, 15-минутный интервал |
+| Экспорт на OTA | ✅ Работает | `useICalExportUrl` с ротацией токенов |
+| Channel Manager | ✅ Визуальный | 4 вкладки: Health, Import, Export, History |
+| Обнаружение конфликтов | ✅ Есть | `ConflictResolver` компонент |
+| Статус здоровья | ✅ Dashboard | `ChannelHealthDashboard` с метриками |
 
-## 2. Переработанная Структура Подвала
-
-```text
-┌──────────────────────────────────────────────────┐
-│  🤝 Стать партнёром myUNO → [CTA Button]         │
-├──────────────────────────────────────────────────┤
-│                                                  │
-│  ┌─────────┐  ┌─────────┐  ┌─────────┐           │
-│  │ G-Trust │  │ 24/7    │  │ 500+    │           │
-│  │ ✓       │  │ Support │  │ Partners│           │
-│  └─────────┘  └─────────┘  └─────────┘           │
-│                                                  │
-│  ─────────────────────────────────────────────   │
-│                                                  │
-│  О нас | Как работает | FAQ | Контакты           │
-│                                                  │
-│  [📱 App] [🆘 SOS] [💬 Support] [📍 Phuket]     │
-│                                                  │
-│  ─────────────────────────────────────────────   │
-│                                                  │
-│  Telegram | Instagram | WhatsApp                 │
-│                                                  │
-│  ─────────────────────────────────────────────   │
-│                                                  │
-│  my[U]UNO   Terms • Privacy • Cookies            │
-│  "The only app you need abroad"                  │
-│  © 2026 myUNO • Phuket Edition v1.0              │
-│                                                  │
-└──────────────────────────────────────────────────┘
-```
+#### 4. Отчёты
+| Функция | Статус | Детали |
+|---------|--------|--------|
+| Генерация отчётов | ✅ Работает | Ежемесячные, квартальные, годовые |
+| Содержание отчёта | ✅ Детальное | Доходы, расходы, occupancy, bookings, maintenance |
+| Фильтр по объекту | ✅ Есть | Выбор конкретного property |
+| Произвольный период | ✅ Есть | Custom date range |
 
 ---
 
-## 3. Система Подсказок для Пользователей
+## ⚠️ Выявленные пробелы
 
-### 3.1 Типы подсказок (по глобальным практикам)
+### 1. Маркетинг и продвижение объектов
+**Статус: НЕ РЕАЛИЗОВАНО**
 
-| Тип | Когда показывать | Пример |
-|-----|------------------|--------|
-| **First-Time Tour** | При первом входе | driver.js тур по главным функциям |
-| **Contextual Tooltips** | При наведении/фокусе | Объяснение G-Trust значка |
-| **Spotlight Hints** | При первом открытии раздела | «Это ваш кошелёк. Здесь кэшбек» |
-| **Empty State Guidance** | При пустых списках | «Добавьте первую бронь» |
-| **Feature Discovery** | После действия | «Знаете ли вы? Можно сохранить в избранное» |
-| **Coachmarks** | При новом функционале | Пульсирующая точка на новой кнопке |
+У владельцев отсутствует блок для маркетинга/продвижения:
+- Нет "Boost Listing" функционала
+- Нет статистики просмотров листинга
+- Нет рекомендаций по улучшению объявления
+- Нет интеграции с динамическим ценообразованием
+- Нет сравнения с конкурентами
 
-### 3.2 Компоненты для реализации
+### 2. Отчёты для управляющих vs собственников
+**Статус: ЧАСТИЧНО**
 
-**`ContextualHint`** — всплывающая подсказка с иконкой (?)
-```text
-[?] ← Нажми → "G-Trust — система верификации партнёров"
-```
+Текущие отчёты одинаковы для всех ролей:
+- Нет разделения отчётов по ролям (owner vs manager)
+- Нет автоматической рассылки отчётов владельцу
+- Нет PDF-генерации (поле есть, но не заполняется)
+- Нет white-label отчётов для УК
 
-**`SpotlightHint`** — выделение элемента с объяснением
-```text
-┌────────────────────────┐
-│  ↓ Pulse animation     │
-│  [Button]              │
-│  ─────────────────     │
-│  "Нажмите для SOS"     │
-└────────────────────────┘
-```
+### 3. UX улучшения в финансах
+**Статус: МОЖНО УЛУЧШИТЬ**
 
-**`EmptyStateGuide`** — инструкции при отсутствии данных
-```text
-┌────────────────────────┐
-│  📭 Нет бронирований   │
-│                        │
-│  Начните с:            │
-│  1. Выберите сервис    │
-│  2. Забронируйте       │
-│  3. Наслаждайтесь      │
-│                        │
-│  [Открыть сервисы →]   │
-└────────────────────────┘
-```
-
-**`FeatureDiscoveryToast`** — ненавязчивые подсказки
-```text
-┌──────────────────────────────────────┐
-│ 💡 Совет: Добавьте в избранное,     │
-│    чтобы быстро находить            │
-└──────────────────────────────────────┘
-```
-
-**`Coachmark`** — пульсирующая точка на новых элементах
-```text
-[New Feature] ● ← пульсирует
-```
+- Нет drag-and-drop для фото чеков
+- Нет автозаполнения на основе истории
+- Нет голосового ввода расходов
+- Нет интеграции с банковскими выписками
 
 ---
 
-## 4. Архитектура Системы Подсказок
+## План улучшений
 
-### 4.1 Хранение состояния
+### Фаза 1: Маркетинговый блок для владельцев (2-3 дня)
 
-**localStorage ключи:**
+**1.1 Создать страницу "Продвижение объекта"**
 ```
-uno-hints-dismissed: { "sos-hint": true, "wallet-intro": true }
-uno-tours-completed: { "main-tour": true, "owner-tour": true }
-uno-feature-discovery: { "favorites-tip": true }
+src/pages/owner/PropertyMarketing.tsx
 ```
 
-### 4.2 Новые компоненты
+Функционал:
+- Статистика просмотров (views, clicks, conversion)
+- Анализ листинга (checklist качества)
+- Рекомендации AI по улучшению описания/фото
+- Сравнение с похожими объектами (benchmark)
+- Кнопка "Boost" для Featured-размещения
 
+**1.2 Компоненты маркетинга**
 ```
-src/components/hints/
-├── ContextualHint.tsx     # Иконка (?) с Tooltip
-├── SpotlightHint.tsx      # Выделение + объяснение
-├── EmptyStateGuide.tsx    # Инструкции для пустых экранов
-├── FeatureDiscoveryToast.tsx  # Всплывающие советы
-├── Coachmark.tsx          # Пульсирующая точка
-├── HintProvider.tsx       # Context для управления
-└── useHints.ts            # Хук для показа/скрытия
-```
-
-### 4.3 Примеры использования
-
-**Главная страница:**
-- First-time tour (уже есть через GuidedTour.tsx)
-- Spotlight на SOS кнопке
-- Coachmark на новых категориях
-
-**Страница сервиса:**
-- Contextual hint на G-Trust значке
-- Feature discovery: «Добавьте в избранное»
-
-**Корзина:**
-- Empty state guide при пустой корзине
-- Spotlight на способах оплаты
-
-**Профиль:**
-- Coachmark на новых настройках
-- Spotlight на UNO Wallet при первом визите
-
----
-
-## 5. Контекстные Подсказки для Ключевых Элементов
-
-### G-Trust Значок
-```
-Hover/Tap → "Партнёр прошёл верификацию G-Trust: 
-проверка документов, аудит качества, реальные отзывы. 
-Trust Score: 92%"
+src/components/owner/marketing/
+├── ListingHealthScore.tsx      # Оценка качества листинга
+├── ViewsAnalytics.tsx          # Статистика просмотров
+├── CompetitorBenchmark.tsx     # Сравнение с рынком
+├── AIListingOptimizer.tsx      # AI-рекомендации
+├── BoostListingCard.tsx        # Платное продвижение
+└── DynamicPricingCard.tsx      # Рекомендации по ценам
 ```
 
-### SOS Кнопка
+**1.3 Схема данных**
+```sql
+-- Статистика просмотров
+CREATE TABLE property_analytics (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  property_id UUID REFERENCES owner_properties(id),
+  date DATE NOT NULL,
+  views INTEGER DEFAULT 0,
+  inquiries INTEGER DEFAULT 0,
+  bookings INTEGER DEFAULT 0,
+  search_impressions INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Платные буст-кампании
+CREATE TABLE property_promotions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  property_id UUID REFERENCES owner_properties(id),
+  promotion_type TEXT NOT NULL, -- 'featured', 'boost', 'highlight'
+  starts_at TIMESTAMPTZ NOT NULL,
+  ends_at TIMESTAMPTZ NOT NULL,
+  cost NUMERIC(10,2),
+  currency TEXT DEFAULT 'THB',
+  status TEXT DEFAULT 'active',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
 ```
-First visit → "Экстренная помощь 24/7. 
-Нажмите при любых проблемах — 
-наша команда свяжется в течение 5 минут."
-```
 
-### UNO Wallet
-```
-First visit → "Ваш кошелёк для кэшбека. 
-До 10% возврат с каждого бронирования. 
-Деньги можно использовать для оплаты услуг."
-```
+### Фаза 2: Улучшение отчётности (1-2 дня)
 
-### Escrow Protection
-```
-Hover/Tap → "Деньги хранятся на защищённом счёте 
-до подтверждения оказания услуги. 
-100% возврат при проблемах."
-```
+**2.1 Разделение отчётов по ролям**
 
----
+Для **владельца**:
+- Полный финансовый отчёт
+- ROI и сравнение с прошлыми периодами
+- Автоматическая email-рассылка
 
-## 6. План Реализации
+Для **управляющего**:
+- Операционный отчёт (bookings, maintenance)
+- Доступ к финансам только при наличии прав
 
-### Фаза 1: Улучшение Footer (1 день)
-1. Добавить trust badges (G-Trust, 24/7, Partners)
-2. Добавить слоган и локацию
-3. Добавить социальные сети
-4. Улучшить визуальную иерархию
-
-### Фаза 2: Базовые компоненты подсказок (1 день)
-1. `ContextualHint` с Radix Tooltip
-2. `SpotlightHint` с анимацией
-3. `HintProvider` и `useHints`
-4. localStorage интеграция
-
-### Фаза 3: Расширенные подсказки (1 день)
-1. `EmptyStateGuide` для пустых экранов
-2. `FeatureDiscoveryToast` (toast-based)
-3. `Coachmark` с пульсацией
-4. Интеграция с существующим driver.js
-
-### Фаза 4: Интеграция (1 день)
-1. Добавить hints на ключевые элементы
-2. Обновить Index.tsx с подсказками
-3. Обновить Account/Profile с подсказками
-4. Тестирование UX
-
----
-
-## 7. Технические Детали
-
-### ContextualHint компонент
+**2.2 PDF-генерация**
 ```typescript
-<ContextualHint 
-  id="g-trust-badge"
-  content="Партнёр прошёл верификацию G-Trust..."
-  side="bottom"
->
-  <Badge>✓ G-Trust</Badge>
-</ContextualHint>
+// Edge Function: generate-report-pdf
+// Использует Puppeteer/Playwright для генерации PDF
+// Сохранение в Supabase Storage
 ```
 
-### SpotlightHint компонент
-```typescript
-<SpotlightHint
-  id="sos-button"
-  title="Экстренная помощь"
-  description="Нажмите при любых проблемах"
-  showOnce
->
-  <SOSButton />
-</SpotlightHint>
+**2.3 Автоотправка отчётов**
+```sql
+-- Настройки автоотправки
+ALTER TABLE owner_properties 
+ADD COLUMN report_frequency TEXT DEFAULT 'monthly',
+ADD COLUMN report_recipients TEXT[] DEFAULT '{}',
+ADD COLUMN auto_report_enabled BOOLEAN DEFAULT false;
 ```
 
-### useHints хук
+### Фаза 3: UX-улучшения финансов (1 день)
+
+**3.1 Drag-and-drop чеки**
+- Обновить `DocumentUpload` для поддержки drag-and-drop на мобильных
+
+**3.2 Автозаполнение**
+- Сохранять последние вендоры/категории
+- Предлагать на основе истории
+
+**3.3 Голосовой ввод**
+- Интеграция Web Speech API для описания расходов
+
+---
+
+## Техническая архитектура
+
+### Маршруты для маркетинга
 ```typescript
-const { 
-  showHint, 
-  dismissHint, 
-  isHintDismissed,
-  resetAllHints 
-} = useHints();
+// В AnimatedRoutes.tsx
+<Route path="properties/:id/marketing" element={<LazyPage><PropertyMarketing /></LazyPage>} />
+```
+
+### Хуки для аналитики
+```typescript
+// src/hooks/usePropertyAnalytics.ts
+export function usePropertyAnalytics(propertyId: string) {
+  // Статистика просмотров за период
+}
+
+export function useListingHealthScore(propertyId: string) {
+  // Оценка качества листинга (0-100)
+  // Чеклист: фото, описание, цены, amenities, отзывы
+}
+
+export function usePropertyPromotions(propertyId: string) {
+  // Активные буст-кампании
+}
+```
+
+### Интеграция в PropertyManage
+```
+src/components/owner/property-manage/
+├── index.ts (существует)
+├── ListingSection.tsx (существует)
+├── CalendarSection.tsx (существует)
+├── PricingSection.tsx (существует)
+├── RulesSection.tsx (существует)
+└── MarketingSection.tsx (НОВЫЙ) ← Добавить вкладку "Продвижение"
 ```
 
 ---
 
-## 8. Соответствие Глобальным Практикам
+## Итоговая оценка
 
-### UX Принципы (по Nielsen Norman Group):
-- **Visibility**: Подсказки видимы, но не мешают
-- **Recognition**: Знакомые паттерны (?, пульсация)
-- **Flexibility**: Можно отключить/сбросить
-- **Error prevention**: Объяснение до действия
+| Область | Текущий статус | После улучшений |
+|---------|---------------|-----------------|
+| Расходы/Чеки | ⭐⭐⭐⭐⭐ (5/5) | ⭐⭐⭐⭐⭐ |
+| Co-Host/Делегирование | ⭐⭐⭐⭐⭐ (5/5) | ⭐⭐⭐⭐⭐ |
+| OTA-синхронизация | ⭐⭐⭐⭐☆ (4/5) | ⭐⭐⭐⭐⭐ |
+| Отчёты | ⭐⭐⭐☆☆ (3/5) | ⭐⭐⭐⭐⭐ |
+| Маркетинг | ☆☆☆☆☆ (0/5) | ⭐⭐⭐⭐☆ |
 
-### Accessibility (WCAG 2.1):
-- `aria-describedby` для tooltip контента
-- Keyboard-navigable hints
-- Фокус на закрытие при Escape
-- Достаточный контраст текста
+### Ключевые выводы
 
-### Mobile-First:
-- Touch-friendly targets (44px minimum)
-- Long-press для tooltips на мобильных
-- Swipe-to-dismiss для toast подсказок
+**Сильные стороны:**
+1. QuickExpense — отличный mobile-first UX для записи расходов
+2. OCR чеков — автоматическое распознавание через AI
+3. Делегирование — полноценная система как в Airbnb
+4. iCal Channel Manager — профессионального уровня
 
----
+**Критические пробелы:**
+1. **Маркетинг** — владельцы не могут продвигать объекты
+2. **PDF-отчёты** — нет реальной генерации PDF
+3. **Email-рассылка** — нет автоматической отправки отчётов
 
-## Резюме
-
-**Улучшения Footer:**
-- Добавление trust indicators (G-Trust, 24/7)
-- Слоган «The only app you need abroad»
-- Социальные сети и региональная метка
-- Улучшенная визуальная иерархия
-
-**Система подсказок:**
-- 5 типов hint-компонентов
-- localStorage для персистентности
-- Интеграция с существующим driver.js
-- Соответствие WCAG и UX best practices
-
-Это создаст профессиональный onboarding experience уровня ведущих супер-аппов (Grab, Revolut, Wise).
+**Рекомендация:** Приоритетно реализовать маркетинговый блок, так как это напрямую влияет на привлечение гостей и доход владельцев.
