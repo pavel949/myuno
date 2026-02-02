@@ -46,7 +46,7 @@ import {
   Loader2,
   Zap
 } from 'lucide-react';
-import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
+import { AirbnbStyleImageUpload } from '@/components/upload/AirbnbStyleImageUpload';
 
 const propertyTypes = [
   { id: 'villa', label: 'Villa', labelRu: 'Вилла' },
@@ -107,6 +107,7 @@ export default function AdminProperties() {
 
   const [formData, setFormData] = useState({
     provider_id: '',
+    internal_name: '',
     title_en: '',
     title_ru: '',
     description_en: '',
@@ -148,6 +149,7 @@ export default function AdminProperties() {
   const resetForm = () => {
     setFormData({
       provider_id: '',
+      internal_name: '',
       title_en: '',
       title_ru: '',
       description_en: '',
@@ -178,6 +180,7 @@ export default function AdminProperties() {
     setEditingProperty(property);
     setFormData({
       provider_id: property.provider_id || '',
+      internal_name: property.internal_name || '',
       title_en: property.title_en,
       title_ru: property.title_ru || '',
       description_en: property.description_en || '',
@@ -214,6 +217,7 @@ export default function AdminProperties() {
     try {
       const propertyData: any = {
         provider_id: formData.provider_id,
+        internal_name: formData.internal_name || undefined,
         title_en: formData.title_en,
         title_ru: formData.title_ru || formData.title_en,
         description_en: formData.description_en || undefined,
@@ -496,23 +500,47 @@ export default function AdminProperties() {
                 </div>
               </div>
 
+              {/* Internal Name */}
               <div className="space-y-2">
-                <Label>{isRussian ? 'Обложка' : 'Cover Image'}</Label>
-                <ImageUpload
-                  value={formData.cover_image}
-                  onChange={(url) => setFormData(prev => ({ ...prev, cover_image: url }))}
-                  folder="properties"
+                <Label>{isRussian ? 'Внутреннее название' : 'Internal Name'}</Label>
+                <Input
+                  value={formData.internal_name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, internal_name: e.target.value }))}
+                  placeholder={isRussian ? 'Для внутреннего использования' : 'For internal use only'}
                 />
+                <p className="text-xs text-muted-foreground">
+                  {isRussian 
+                    ? 'Не отображается клиентам. Например: "Вилла Петровых"' 
+                    : 'Not shown to customers. E.g.: "Villa Petrov Family"'}
+                </p>
               </div>
 
+              {/* Photo Upload - Airbnb Style */}
               <div className="space-y-2">
-                <Label>{isRussian ? 'Галерея' : 'Gallery'}</Label>
-                <MultiImageUpload
-                  value={formData.images}
-                  onChange={(urls) => setFormData(prev => ({ ...prev, images: urls }))}
+                <Label>{isRussian ? 'Фотографии' : 'Photos'}</Label>
+                <AirbnbStyleImageUpload
+                  value={formData.cover_image 
+                    ? [formData.cover_image, ...formData.images] 
+                    : formData.images}
+                  onChange={(urls) => {
+                    if (urls.length === 0) {
+                      setFormData(prev => ({ ...prev, cover_image: '', images: [] }));
+                    } else {
+                      setFormData(prev => ({ 
+                        ...prev, 
+                        cover_image: urls[0], 
+                        images: urls.slice(1) 
+                      }));
+                    }
+                  }}
                   folder="properties"
                   maxImages={20}
                 />
+                <p className="text-xs text-muted-foreground">
+                  {isRussian 
+                    ? 'Первое фото станет обложкой. Перетащите для изменения порядка.' 
+                    : 'First photo becomes cover. Drag to reorder.'}
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">

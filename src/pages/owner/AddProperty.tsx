@@ -142,6 +142,7 @@ export default function AddProperty() {
   const [formData, setFormData] = useState({
     title: '',
     title_ru: '',
+    internal_name: '',
     address: '',
     district: '',
     lat: undefined as number | undefined,
@@ -192,6 +193,7 @@ export default function AddProperty() {
       setFormData({
         title: sourceProperty.title || '',
         title_ru: sourceProperty.title_ru || '',
+        internal_name: (sourceProperty as any).internal_name || '',
         address: sourceProperty.address || '',
         district: sourceProperty.district || '',
         lat: sourceProperty.lat ?? undefined,
@@ -311,6 +313,7 @@ export default function AddProperty() {
     
     const property = await createProperty.mutateAsync({
       ...formData,
+      internal_name: formData.internal_name || undefined,
       area_sqm: formData.area_sqm ? Number(formData.area_sqm) : undefined,
       price_per_night: formData.price_per_night ? Number(formData.price_per_night) : undefined,
       deposit_amount: formData.deposit_amount ? Number(formData.deposit_amount) : undefined,
@@ -490,6 +493,21 @@ export default function AddProperty() {
                   placeholder={isRu ? 'Современная вилла с бассейном' : 'Modern Villa with Pool'}
                   translatedPlaceholder={isRu ? 'Modern Villa with Pool' : 'Современная вилла с бассейном'}
                 />
+
+                {/* Internal Name */}
+                <div className="space-y-2">
+                  <Label>{isRu ? 'Внутреннее название' : 'Internal Name'}</Label>
+                  <Input
+                    value={formData.internal_name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, internal_name: e.target.value }))}
+                    placeholder={isRu ? 'Только для вас (не публикуется)' : 'Private note (not published)'}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {isRu 
+                      ? 'Не отображается гостям. Например: "Дача бабушки"' 
+                      : 'Not shown to guests. E.g.: "Grandma\'s cottage"'}
+                  </p>
+                </div>
 
                 <div className="space-y-2">
                   <Label>{isRu ? 'Тип недвижимости' : 'Property Type'} *</Label>
