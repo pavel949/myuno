@@ -1,246 +1,177 @@
 
-# План: Бесплатный iCal-based Channel Manager с максимальным функционалом
+# Личный кабинет пользователя (User Account Dashboard)
 
-## Обзор текущего состояния
+## Анализ текущей архитектуры
 
-Система уже имеет базовую iCal-интеграцию:
-- **Экспорт** (`calendar-export`): Генерация iCal-фида с бронированиями для OTA
-- **Импорт** (`ical-sync`): Парсинг iCal из Airbnb/Booking и создание бронирований
-- **UI**: Channel Manager страница с вкладками Import/Export
+### Что есть сейчас:
+```text
+/profile         → Настройки аккаунта (Email, документы, кошелёк)
+/bookings        → Все заказы пользователя (туры, услуги, еда)
+/my-stay         → Дэшборд ГОСТЯ апартаментов (активное проживание)
+/owner           → Дэшборд владельца недвижимости
+/vendor          → Дэшборд поставщика услуг
+```
 
-## Архитектура решения
+### Проблема:
+- **Guest** (`/my-stay`) = человек, проживающий в забронированном жилье
+- **Обычный пользователь** (купил билет на тур) = нет своего дэшборда, использует разрозненные `/bookings` + `/profile`
+- Нет единого "центра управления" для обычного авторизованного пользователя
+
+### Предлагаемое решение:
 
 ```text
-┌─────────────────────────────────────────────────────────────────┐
-│                     UNO iCal Channel Manager                    │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐      │
-│  │   Airbnb     │    │  Booking.com │    │    VRBO      │      │
-│  │  iCal URL    │    │   iCal URL   │    │  iCal URL    │      │
-│  └──────┬───────┘    └──────┬───────┘    └──────┬───────┘      │
-│         │                   │                   │               │
-│         └───────────────────┼───────────────────┘               │
-│                             ▼                                   │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │              ical-sync Edge Function                      │  │
-│  │  • Фоновая синхронизация по расписанию                   │  │
-│  │  • Парсинг дат, UID, summary                             │  │
-│  │  • Upsert в property_bookings                            │  │
-│  └──────────────────────────────────────────────────────────┘  │
-│                             │                                   │
-│                             ▼                                   │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │                  property_bookings                        │  │
-│  │  + sync_direction: 'inbound' | 'outbound' | 'master'     │  │
-│  │  + conflict_status: 'none' | 'detected' | 'resolved'     │  │
-│  │  + sync_priority: integer                                │  │
-│  └──────────────────────────────────────────────────────────┘  │
-│                             │                                   │
-│                             ▼                                   │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │             calendar-export Edge Function                 │  │
-│  │  • Генерация iCal с ВСЕМИ бронированиями                 │  │
-│  │  • Token-based авторизация                               │  │
-│  └──────────────────────────────────────────────────────────┘  │
-│                             │                                   │
-│         ┌───────────────────┼───────────────────┐               │
-│         ▼                   ▼                   ▼               │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐      │
-│  │   Airbnb     │    │  Booking.com │    │    VRBO      │      │
-│  │ Import iCal  │    │  Sync iCal   │    │  Sync iCal   │      │
-│  └──────────────┘    └──────────────┘    └──────────────┘      │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                    /account (Мой аккаунт)                   │
+│                 Единый личный кабинет пользователя           │
+├─────────────────────────────────────────────────────────────┤
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐            │
+│  │  Мои роли   │ │ Активная    │ │ Быстрые     │            │
+│  │  (Owner,    │ │ поездка     │ │ действия    │            │
+│  │  Vendor,    │ │ (если есть) │ │             │            │
+│  │  Guest)     │ │             │ │             │            │
+│  └─────────────┘ └─────────────┘ └─────────────┘            │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │ Мои заказы и бронирования (сводка)                      ││
+│  └─────────────────────────────────────────────────────────┘│
+│                                                              │
+│  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐   │
+│  │ Кошелёк   │ │ Избранное │ │ Документы │ │ Настройки │   │
+│  └───────────┘ └───────────┘ └───────────┘ └───────────┘   │
+└─────────────────────────────────────────────────────────────┘
 ```
-
-## Новый функционал
-
-### Фаза 1: Автоматическая фоновая синхронизация
-
-**Цель**: Календари синхронизируются автоматически каждые 15 минут без участия пользователя.
-
-**Изменения**:
-1. Создать Edge Function `ical-scheduled-sync`:
-   - Выбирает все активные `property_external_calendars`
-   - Синхронизирует с rate limiting (не более 10 параллельных запросов)
-   - Записывает результаты в `sync_logs` таблицу
-   
-2. Настроить pg_cron через Supabase:
-   - Вызов функции каждые 15 минут
-   - Fallback: Frontend polling как резерв
-
-3. Добавить `sync_logs` таблицу:
-   - `calendar_id`, `synced_at`, `events_found`, `events_added`, `events_removed`, `error`
-
-### Фаза 2: Обнаружение конфликтов бронирований
-
-**Цель**: Предупреждать о пересечениях дат между каналами.
-
-**Изменения**:
-1. Добавить колонки в `property_bookings`:
-   - `sync_priority` (integer, default 0) - приоритет канала
-   - `conflict_detected_at` (timestamp) - когда обнаружен конфликт
-
-2. Создать RPC функцию `detect_booking_conflicts`:
-   - Находит пересекающиеся даты для одного property
-   - Возвращает список конфликтующих пар
-
-3. Добавить UI-компонент `ConflictAlert`:
-   - Показывает красный badge при наличии конфликтов
-   - Предлагает варианты разрешения
-
-### Фаза 3: Расширенный парсинг iCal
-
-**Цель**: Извлекать максимум данных из iCal-событий OTA.
-
-**Изменения в `ical-sync`**:
-1. Парсинг дополнительных полей:
-   - `X-AIRBNB-PRICE` -> `total_amount`
-   - `X-BOOKING-GUESTS` -> `guests_count`
-   - `LOCATION` -> заметки
-   - `ORGANIZER` -> контакт гостя (если есть)
-
-2. Интеллектуальное определение источника:
-   - По домену iCal URL
-   - По X-* заголовкам в VCALENDAR
-
-### Фаза 4: Дашборд синхронизации
-
-**Цель**: Единый экран управления всеми каналами.
-
-**UI компоненты**:
-1. `ChannelHealthDashboard`:
-   - Статус каждого канала (зеленый/желтый/красный)
-   - Время последней синхронизации
-   - Количество импортированных событий
-   - Кнопка принудительной синхронизации
-
-2. `SyncTimeline`:
-   - История синхронизаций за 7 дней
-   - Графики успешности
-
-3. `QuickConnect` карточки:
-   - Шаблоны для быстрого добавления популярных OTA
-   - Инструкции по получению iCal URL
-
-### Фаза 5: Push-уведомления о бронированиях
-
-**Цель**: Мгновенно уведомлять о новых бронированиях с OTA.
-
-**Изменения**:
-1. Расширить `ical-sync` для определения новых бронирований:
-   - Сравнение с предыдущим состоянием
-   - Trigger уведомления при новом `external_id`
-
-2. Интеграция с существующей системой уведомлений:
-   - Push-notification в браузер
-   - Email (опционально)
-   - Telegram bot (будущее)
 
 ---
 
-## Детали реализации
+## План реализации
 
-### База данных
+### Шаг 1: Создание страницы `/account` (UserAccountDashboard)
 
-**Новая таблица `calendar_sync_logs`**:
-```sql
-CREATE TABLE calendar_sync_logs (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  calendar_id uuid REFERENCES property_external_calendars(id) ON DELETE CASCADE,
-  property_id uuid REFERENCES owner_properties(id) ON DELETE CASCADE,
-  synced_at timestamptz DEFAULT now(),
-  events_found integer DEFAULT 0,
-  events_added integer DEFAULT 0,
-  events_updated integer DEFAULT 0,
-  events_removed integer DEFAULT 0,
-  sync_duration_ms integer,
-  error text,
-  created_at timestamptz DEFAULT now()
-);
+**Новый файл:** `src/pages/account/UserAccountDashboard.tsx`
+
+Единый личный кабинет с блоками:
+1. **Профиль-карточка** — аватар, имя, текущая роль (ActiveRoleBadge)
+2. **Блок ролей** — переключение между Guest/Owner/Vendor с визуальными карточками
+3. **Активная поездка** — если есть бронь жилья, показать виджет
+4. **Сводка заказов** — последние 3 заказа из всех категорий
+5. **Quick Links** — Кошелёк, Избранное, Документы, История
+
+### Шаг 2: Компоненты блоков
+
+**Новые файлы:**
+- `src/components/account/AccountRolesBlock.tsx` — управление ролями
+- `src/components/account/AccountOrdersSummary.tsx` — сводка заказов
+- `src/components/account/AccountActiveStay.tsx` — виджет активной поездки
+- `src/components/account/AccountQuickLinks.tsx` — быстрые ссылки
+- `src/components/account/index.ts` — экспорты
+
+### Шаг 3: Логика ролей в AccountRolesBlock
+
+```typescript
+// Показываем доступные роли из useUserContext()
+// + CTA для получения новых ролей (BecomePartnerCTA логика)
+
+roles: [
+  { key: 'user', label: 'Покупатель', always: true },
+  { key: 'guest', label: 'Гость', condition: hasActiveBooking },
+  { key: 'owner', label: 'Владелец', condition: hasRole('owner') },
+  { key: 'vendor', label: 'Поставщик', condition: hasRole('vendor') },
+]
 ```
 
-**Изменения в `property_bookings`**:
-```sql
-ALTER TABLE property_bookings ADD COLUMN IF NOT EXISTS sync_priority integer DEFAULT 0;
-ALTER TABLE property_bookings ADD COLUMN IF NOT EXISTS conflict_detected_at timestamptz;
+### Шаг 4: Обновление навигации
+
+**Изменить:** `src/components/layout/AdaptiveBottomNav.tsx`
+- `/profile` → `/account` (или добавить `/account` как основной)
+
+**Изменить:** `src/components/layout/AnimatedRoutes.tsx`
+- Добавить роуты `/account/*`
+
+**Изменить:** `src/pages/Profile.tsx`
+- Сделать редирект с `/profile` на `/account` ИЛИ
+- Оставить `/profile` для детальных настроек, а `/account` как хаб
+
+### Шаг 5: Интеграция с существующими дэшбордами
+
+```text
+/account              → User Hub (все роли, сводка)
+  ├── role: guest     → /my-stay (активное проживание)
+  ├── role: owner     → /owner (управление недвижимостью)
+  ├── role: vendor    → /vendor (услуги)
+  └── settings        → /profile (детальные настройки)
 ```
-
-**Изменения в `property_external_calendars`**:
-```sql
-ALTER TABLE property_external_calendars ADD COLUMN IF NOT EXISTS sync_interval_minutes integer DEFAULT 15;
-ALTER TABLE property_external_calendars ADD COLUMN IF NOT EXISTS priority integer DEFAULT 0;
-ALTER TABLE property_external_calendars ADD COLUMN IF NOT EXISTS auto_sync boolean DEFAULT true;
-```
-
-### Edge Functions
-
-**`ical-scheduled-sync/index.ts`** - новая функция для фоновой синхронизации:
-- Получает все календари с `auto_sync = true`
-- Выполняет синхронизацию с логированием
-- Определяет новые бронирования и отправляет уведомления
-
-### Frontend компоненты
-
-1. **`src/components/owner/channel-manager/ChannelHealthDashboard.tsx`**
-   - Общий статус всех каналов
-   - Индикаторы здоровья синхронизации
-
-2. **`src/components/owner/channel-manager/SyncTimeline.tsx`**
-   - Лог синхронизаций
-   - Графики активности
-
-3. **`src/components/owner/channel-manager/ConflictResolver.tsx`**
-   - UI для разрешения конфликтов дат
-
-4. **`src/components/owner/channel-manager/QuickConnectCards.tsx`**
-   - Быстрое подключение Airbnb/Booking/VRBO с инструкциями
-
-5. **`src/hooks/useChannelHealth.ts`**
-   - Хук для мониторинга статуса каналов
 
 ---
 
-## Приоритеты реализации
+## Структура файлов
 
-| Фаза | Функционал | Сложность | Ценность |
-|------|-----------|-----------|----------|
-| 1 | Автоматическая синхронизация | Средняя | Высокая |
-| 2 | Обнаружение конфликтов | Низкая | Высокая |
-| 3 | Расширенный парсинг | Низкая | Средняя |
-| 4 | Дашборд синхронизации | Средняя | Высокая |
-| 5 | Push-уведомления | Средняя | Высокая |
+```text
+src/pages/account/
+├── UserAccountDashboard.tsx    # Главная страница кабинета
+└── index.ts
 
----
-
-## Ограничения iCal-подхода
-
-Важно понимать границы бесплатного решения:
-
-| Возможность | iCal Channel Manager | Платный API |
-|-------------|---------------------|-------------|
-| Синхронизация календаря | Да (15 мин задержка) | Да (realtime) |
-| Синхронизация цен | Нет | Да |
-| Создание листингов | Нет | Да |
-| Изменение описаний | Нет | Да |
-| Автоответы гостям | Нет | Да |
-| Информация о госте | Частично (из summary) | Полная |
+src/components/account/
+├── AccountRolesBlock.tsx       # Блок управления ролями
+├── AccountOrdersSummary.tsx    # Сводка заказов
+├── AccountActiveStay.tsx       # Виджет активной поездки
+├── AccountQuickLinks.tsx       # Быстрые ссылки
+└── index.ts
+```
 
 ---
 
-## Файлы для создания/изменения
+## Техническая реализация
 
-**Новые файлы**:
-- `supabase/functions/ical-scheduled-sync/index.ts`
-- `src/components/owner/channel-manager/ChannelHealthDashboard.tsx`
-- `src/components/owner/channel-manager/SyncTimeline.tsx`
-- `src/components/owner/channel-manager/ConflictResolver.tsx`
-- `src/components/owner/channel-manager/QuickConnectCards.tsx`
-- `src/hooks/useChannelHealth.ts`
-- `src/hooks/useSyncLogs.ts`
+### AccountRolesBlock — управление ролями
 
-**Изменения в существующих файлах**:
-- `supabase/functions/ical-sync/index.ts` - расширенный парсинг + логирование
-- `src/pages/owner/ChannelManager.tsx` - интеграция новых компонентов
-- `src/hooks/useExternalCalendars.ts` - добавление полей priority, auto_sync
+```typescript
+// Логика определения доступных ролей
+const { availableRoles, hasRole, switchContext, activeRole } = useUserContext();
+
+// Динамические роли:
+// - 'user' — всегда доступна (базовый покупатель)
+// - 'guest' — если есть активное бронирование жилья
+// - 'owner' — если в user_roles есть 'owner' или 'property_owner'
+// - 'vendor' — если в user_roles есть 'vendor'
+// - 'admin/staff/team' — служебные роли
+```
+
+### Навигация между дэшбордами
+
+```typescript
+const dashboardRoutes = {
+  user: '/account',      // Личный кабинет
+  guest: '/my-stay',     // Дэшборд гостя апартаментов
+  owner: '/owner',       // Дэшборд владельца
+  vendor: '/vendor',     // Дэшборд вендора
+};
+
+// При клике на карточку роли:
+onClick={() => {
+  switchContext({ role: selectedRole });
+  navigate(dashboardRoutes[selectedRole]);
+}}
+```
+
+---
+
+## Бизнес-логика ролей
+
+| Роль | Условие получения | Дэшборд |
+|------|-------------------|---------|
+| User (Покупатель) | Регистрация | `/account` |
+| Guest (Гость) | Активное бронирование жилья | `/my-stay` |
+| Owner (Владелец) | Заявка + подтверждение | `/owner` |
+| Vendor (Поставщик) | Заявка + подтверждение | `/vendor` |
+
+---
+
+## Результат
+
+После реализации:
+
+1. **Единый вход** — `/account` как центральный хаб для всех пользователей
+2. **Управление ролями** — визуальное переключение между режимами
+3. **Контекстность** — показ виджета "Активная поездка" только при наличии брони
+4. **Масштабируемость** — легко добавить новые роли в будущем
+5. **UX как у Airbnb** — "Switch to hosting" / "Switch to traveling"
