@@ -22,6 +22,7 @@ import { useMarketIndexData } from '@/hooks/useMarketIndexData';
 import { MarketplaceProduct } from '@/types/marketplace';
 import { useCartToast } from '@/hooks/useCartToast';
 import { cn } from '@/lib/utils';
+import { CrossSellSection } from '@/components/crosssell';
 
 // Unified components
 import { 
@@ -415,6 +416,11 @@ const MarketIndex = () => {
               <ChevronRight className="w-5 h-5 ml-2" />
             </Button>
           )}
+        </section>
+
+        {/* Cross-sell to other services */}
+        <section className="py-6 px-4 max-w-7xl mx-auto">
+          <CrossSellSection currentVertical="marketplace" maxItems={4} />
         </section>
 
         {/* Sticky Cart Bar */}

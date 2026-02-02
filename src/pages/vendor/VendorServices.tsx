@@ -48,9 +48,9 @@ import { DraftRestorationBanner, DraftIndicator } from '@/components/vendor/Draf
 const DRAFT_KEY = 'vendor-service-draft';
 
 interface ServiceFormData {
-  name: string;
+  name_en: string;
   name_ru: string;
-  description: string;
+  description_en: string;
   description_ru: string;
   price: string;
   duration_minutes: string;
@@ -60,9 +60,9 @@ interface ServiceFormData {
 }
 
 const initialFormData: ServiceFormData = {
-  name: '',
+  name_en: '',
   name_ru: '',
-  description: '',
+  description_en: '',
   description_ru: '',
   price: '',
   duration_minutes: '',
@@ -104,8 +104,8 @@ const VendorServices = () => {
     const newErrors: Partial<Record<keyof ServiceFormData, string>> = {};
     
     if (stepIndex === 0) {
-      if (!formData.name.trim()) {
-        newErrors.name = isRussian ? 'Введите название' : 'Name is required';
+      if (!formData.name_en.trim()) {
+        newErrors.name_en = isRussian ? 'Введите название' : 'Name is required';
       }
     }
     
@@ -175,9 +175,9 @@ const VendorServices = () => {
   const openEditDialog = (service: VendorService) => {
     setEditingService(service);
     setFormData({
-      name: service.name,
+      name_en: service.name,
       name_ru: service.name_ru || '',
-      description: service.description || '',
+      description_en: service.description || '',
       description_ru: service.description_ru || '',
       price: service.price.toString(),
       duration_minutes: service.duration_minutes?.toString() || '',
@@ -193,9 +193,9 @@ const VendorServices = () => {
     setIsSubmitting(true);
     try {
       const serviceData = {
-        name: formData.name,
+        name: formData.name_en,
         name_ru: formData.name_ru || undefined,
-        description: formData.description || undefined,
+        description: formData.description_en || undefined,
         description_ru: formData.description_ru || undefined,
         price: parseFloat(formData.price),
         currency: 'THB',
@@ -243,7 +243,7 @@ const VendorServices = () => {
   };
 
   const handleDialogChange = (open: boolean) => {
-    if (!open && !editingService && (formData.name || formData.price)) {
+    if (!open && !editingService && (formData.name_en || formData.price)) {
       // Keep draft when closing without saving
     }
     setIsDialogOpen(open);
@@ -435,13 +435,13 @@ const VendorServices = () => {
                   >
                     <FormFieldWithHelp
                       label={isRussian ? 'Название услуги' : 'Service Name'}
-                      name="name"
-                      value={formData.name}
-                      onChange={(v) => setFormData({ ...formData, name: v })}
+                      name="name_en"
+                      value={formData.name_en}
+                      onChange={(v) => setFormData({ ...formData, name_en: v })}
                       placeholder={isRussian ? 'Например: Маникюр' : 'e.g., Manicure'}
                       required
-                      error={errors.name}
-                      isValid={!!formData.name.trim()}
+                      error={errors.name_en}
+                      isValid={!!formData.name_en.trim()}
                       helpText={isRussian ? 'Краткое название услуги для клиентов' : 'Short service name for customers'}
                       example={isRussian ? 'Пример: Стрижка мужская' : 'Example: Men\'s Haircut'}
                     />
@@ -457,9 +457,9 @@ const VendorServices = () => {
 
                     <FormFieldWithHelp
                       label={isRussian ? 'Описание' : 'Description'}
-                      name="description"
-                      value={formData.description}
-                      onChange={(v) => setFormData({ ...formData, description: v })}
+                      name="description_en"
+                      value={formData.description_en}
+                      onChange={(v) => setFormData({ ...formData, description_en: v })}
                       type="textarea"
                       rows={3}
                       placeholder={isRussian ? 'Опишите что включено...' : 'Describe what\'s included...'}
@@ -573,18 +573,18 @@ const VendorServices = () => {
                           <span className="text-xs text-muted-foreground uppercase tracking-wide">
                             {isRussian ? 'Название' : 'Name'}
                           </span>
-                          <p className="font-medium">{formData.name || '-'}</p>
+                          <p className="font-medium">{formData.name_en || '-'}</p>
                           {formData.name_ru && (
                             <p className="text-sm text-muted-foreground">{formData.name_ru}</p>
                           )}
                         </div>
 
-                        {formData.description && (
+                        {formData.description_en && (
                           <div>
                             <span className="text-xs text-muted-foreground uppercase tracking-wide">
                               {isRussian ? 'Описание' : 'Description'}
                             </span>
-                            <p className="text-sm">{formData.description}</p>
+                            <p className="text-sm">{formData.description_en}</p>
                           </div>
                         )}
 
@@ -627,9 +627,9 @@ const VendorServices = () => {
                 <CardPreview
                   type="service"
                   image={formData.image}
-                  title={formData.name}
+                  title={formData.name_en}
                   titleRu={formData.name_ru}
-                  description={formData.description}
+                  description={formData.description_en}
                   descriptionRu={formData.description_ru}
                   price={formData.price ? parseFloat(formData.price) : undefined}
                   durationMinutes={formData.duration_minutes ? parseInt(formData.duration_minutes) : undefined}
