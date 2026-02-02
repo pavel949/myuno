@@ -1455,6 +1455,54 @@ export type Database = {
           },
         ]
       }
+      cancellation_policies: {
+        Row: {
+          code: string
+          created_at: string
+          description_en: string | null
+          description_ru: string | null
+          full_refund_hours: number | null
+          id: string
+          is_active: boolean | null
+          name_en: string
+          name_ru: string
+          no_refund_hours: number | null
+          partial_refund_hours: number | null
+          partial_refund_percent: number | null
+          sort_order: number | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          full_refund_hours?: number | null
+          id?: string
+          is_active?: boolean | null
+          name_en: string
+          name_ru: string
+          no_refund_hours?: number | null
+          partial_refund_hours?: number | null
+          partial_refund_percent?: number | null
+          sort_order?: number | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          full_refund_hours?: number | null
+          id?: string
+          is_active?: boolean | null
+          name_en?: string
+          name_ru?: string
+          no_refund_hours?: number | null
+          partial_refund_hours?: number | null
+          partial_refund_percent?: number | null
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
       cancellation_policy_rules: {
         Row: {
           created_at: string | null
@@ -15383,18 +15431,65 @@ export type Database = {
           },
         ]
       }
+      yacht_availability: {
+        Row: {
+          booking_id: string | null
+          created_at: string
+          date: string
+          id: string
+          note: string | null
+          price_override: number | null
+          status: string
+          updated_at: string
+          yacht_id: string
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string
+          date: string
+          id?: string
+          note?: string | null
+          price_override?: number | null
+          status?: string
+          updated_at?: string
+          yacht_id: string
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          note?: string | null
+          price_override?: number | null
+          status?: string
+          updated_at?: string
+          yacht_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "yacht_availability_yacht_id_fkey"
+            columns: ["yacht_id"]
+            isOneToOne: false
+            referencedRelation: "yachts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       yachts: {
         Row: {
           approval_status: string | null
+          balance_due_hours: number | null
           bathrooms: number | null
           beam: string | null
           cabins: number | null
+          cancellation_policy: string | null
           capacity: number | null
           cover_image: string | null
           created_at: string
           created_by_uno_team: boolean | null
           cruising_speed: string | null
           currency: string | null
+          deposit_percent: number | null
           description_en: string | null
           description_ru: string | null
           draft: string | null
@@ -15404,6 +15499,9 @@ export type Database = {
           fuel_capacity: string | null
           has_catering: boolean | null
           has_crew: boolean | null
+          ical_token: string | null
+          ical_token_expires_at: string | null
+          ical_token_refreshed_at: string | null
           id: string
           images: string[] | null
           is_active: boolean | null
@@ -15432,15 +15530,18 @@ export type Database = {
         }
         Insert: {
           approval_status?: string | null
+          balance_due_hours?: number | null
           bathrooms?: number | null
           beam?: string | null
           cabins?: number | null
+          cancellation_policy?: string | null
           capacity?: number | null
           cover_image?: string | null
           created_at?: string
           created_by_uno_team?: boolean | null
           cruising_speed?: string | null
           currency?: string | null
+          deposit_percent?: number | null
           description_en?: string | null
           description_ru?: string | null
           draft?: string | null
@@ -15450,6 +15551,9 @@ export type Database = {
           fuel_capacity?: string | null
           has_catering?: boolean | null
           has_crew?: boolean | null
+          ical_token?: string | null
+          ical_token_expires_at?: string | null
+          ical_token_refreshed_at?: string | null
           id?: string
           images?: string[] | null
           is_active?: boolean | null
@@ -15478,15 +15582,18 @@ export type Database = {
         }
         Update: {
           approval_status?: string | null
+          balance_due_hours?: number | null
           bathrooms?: number | null
           beam?: string | null
           cabins?: number | null
+          cancellation_policy?: string | null
           capacity?: number | null
           cover_image?: string | null
           created_at?: string
           created_by_uno_team?: boolean | null
           cruising_speed?: string | null
           currency?: string | null
+          deposit_percent?: number | null
           description_en?: string | null
           description_ru?: string | null
           draft?: string | null
@@ -15496,6 +15603,9 @@ export type Database = {
           fuel_capacity?: string | null
           has_catering?: boolean | null
           has_crew?: boolean | null
+          ical_token?: string | null
+          ical_token_expires_at?: string | null
+          ical_token_refreshed_at?: string | null
           id?: string
           images?: string[] | null
           is_active?: boolean | null
@@ -15651,15 +15761,24 @@ export type Database = {
           spots_remaining: number
         }[]
       }
-      check_yacht_availability: {
-        Args: {
-          p_end_date: string
-          p_exclude_order_id?: string
-          p_start_date: string
-          p_yacht_id: string
-        }
-        Returns: boolean
-      }
+      check_yacht_availability:
+        | {
+            Args: {
+              p_end_date: string
+              p_start_date: string
+              p_yacht_id: string
+            }
+            Returns: boolean
+          }
+        | {
+            Args: {
+              p_end_date: string
+              p_exclude_order_id?: string
+              p_start_date: string
+              p_yacht_id: string
+            }
+            Returns: boolean
+          }
       create_booking_with_wallet_payment: {
         Args: {
           p_booking_type: string
@@ -15806,6 +15925,15 @@ export type Database = {
         }[]
       }
       get_user_analytics_summary: { Args: { p_days?: number }; Returns: Json }
+      get_yacht_availability: {
+        Args: { p_month?: string; p_yacht_id: string }
+        Returns: {
+          date: string
+          note: string
+          price_override: number
+          status: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

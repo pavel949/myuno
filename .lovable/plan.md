@@ -347,37 +347,61 @@ YACHT_EXPERIENCES: YachtExperience[] // 13 опций от ฿3,000 до ฿15,0
 
 ---
 
-## Итоговая матрица Gap-анализа
+## Итоговая матрица Gap-анализа (Updated)
 
-| Приоритет | Gap | Impact | Effort |
+| Приоритет | Gap | Impact | Status |
 |-----------|-----|--------|--------|
-| 🔴 P0 | iCal sync для яхт | Критично для scale | Medium |
-| 🔴 P0 | Yacht Calendar UI | Блокер для владельцев | High |
-| 🔴 P0 | Cancellation policies | Юридический риск | Low |
-| 🟠 P1 | Dynamic pricing | Revenue optimization | Medium |
-| 🟠 P1 | Deposit/payment splits | Conversion | Medium |
-| 🟠 P1 | In-app messaging | Commission protection | High |
-| 🟡 P2 | Map-based search | UX improvement | Medium |
-| 🟡 P2 | Video/3D tours | Premium positioning | Low |
-| 🟡 P2 | Similar yachts | Discovery | Medium |
-| 🟢 P3 | Crew profiles | Trust building | Low |
-| 🟢 P3 | Insurance integration | Safety | Medium |
+| 🟢 P0 | Yacht Calendar UI | Блокер для владельцев | ✅ Done |
+| 🟢 P0 | Cancellation policies | Юридический риск | ✅ Done |
+| 🟢 P0 | Blackout dates | Owner UX | ✅ Done |
+| 🟠 P0 | iCal sync для яхт | Критично для scale | 🔜 Phase 2 |
+| 🟠 P1 | Dynamic pricing | Revenue optimization | 🔜 Phase 2 |
+| 🟠 P1 | Deposit/payment splits | Conversion | 🔜 Phase 2 |
+| 🟡 P2 | Map-based search | UX improvement | 🔜 Phase 3 |
+| 🟡 P2 | Video/3D tours | Premium positioning | 🔜 Phase 3 |
+| 🟡 P2 | Similar yachts | Discovery | 🔜 Planned |
+| 🟢 P3 | Crew profiles | Trust building | 🔜 Planned |
+| 🟢 P3 | Insurance integration | Safety | 🔜 Planned |
 
 ---
 
 ## Рекомендуемый Roadmap
 
-### Phase 1: Foundation (2-4 weeks)
-- [ ] Yacht Calendar component (extend PropertyCalendar)
-- [ ] Cancellation policy selector в vendor wizard
-- [ ] Blackout dates для владельцев
+### Phase 1: Foundation (2-4 weeks) ✅ COMPLETED
+- [x] Yacht Calendar component (`src/components/yacht/YachtCalendar.tsx`)
+- [x] Cancellation policy selector (`src/components/yacht/CancellationPolicySelector.tsx`)
+- [x] Blackout dates for owners (yacht_availability table + UI)
+- [x] Database: `yacht_availability`, `cancellation_policies` tables
+- [x] Route: `/vendor/yachts/:id/calendar`
+- [x] Hook: `useYachtAvailability` for CRUD operations
 
-### Phase 2: Scale (4-8 weeks)
+### Phase 2: Scale (4-8 weeks) — TODO
 - [ ] iCal sync infrastructure для яхт
 - [ ] Dynamic pricing rules (seasons, weekends)
 - [ ] Deposit payment flow
 
-### Phase 3: Premium (8-12 weeks)
+### Phase 3: Premium (8-12 weeks) — TODO
 - [ ] Map-based search с маринами
 - [ ] Video upload в listing wizard
 - [ ] In-app protected messaging
+
+---
+
+## Implemented Components (Phase 1)
+
+### YachtCalendar.tsx
+- Drag-to-select date ranges
+- Statuses: Available, Blocked, Booked, Maintenance
+- Price override per date
+- Notes/reasons for blocking
+- Bilingual support (EN/RU)
+
+### CancellationPolicySelector.tsx
+- Flexible: 100% за 24ч, 50% за 2ч
+- Moderate: 100% за 5д, 50% за 48ч (Recommended)
+- Strict: 100% за 7д, 50% за 3д
+- Super Strict: 100% за 14д+ only
+
+### useYachtAvailability Hook
+- Fetch/upsert/delete availability entries
+- RPC: `check_yacht_availability()`
