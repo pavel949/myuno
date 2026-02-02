@@ -13,7 +13,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { MaintenanceProvider, useMaintenance } from "@/contexts/MaintenanceContext";
 import { AnimatedRoutes } from "@/components/layout/AnimatedRoutes";
-import { SupportFAB } from "@/components/chat/SupportFAB";
+import { UnifiedChatFAB } from "@/components/chat/UnifiedChatFAB";
 import { ErrorBoundary, useGlobalErrorHandler } from "@/components/ErrorBoundary";
 import { PrefetchProvider } from "@/components/providers/PrefetchProvider";
 import { defaultQueryClientOptions } from "@/lib/queryConfig";
@@ -41,7 +41,7 @@ function AppContent() {
       <Sonner />
       <BrowserRouter>
         <AnimatedRoutes />
-        <SupportFAB />
+        <UnifiedChatFAB />
       </BrowserRouter>
     </>
   );

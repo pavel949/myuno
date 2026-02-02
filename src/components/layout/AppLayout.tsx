@@ -2,7 +2,7 @@ import React, { ReactNode, forwardRef } from 'react';
 import { cn } from '@/lib/utils';
 import { AppHeader } from './AppHeader';
 import { Footer } from './Footer';
-import { UniversalHelpFAB } from '@/components/fab/UniversalHelpFAB';
+// UniversalHelpFAB removed - using global UnifiedChatFAB instead
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -10,7 +10,6 @@ interface AppLayoutProps {
   showHeader?: boolean;
   showBottomNav?: boolean;
   showFooter?: boolean;
-  showHelpFAB?: boolean;
   className?: string;
   contentClassName?: string;
 }
@@ -23,7 +22,6 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
       showHeader = true,
       showBottomNav = true,
       showFooter = false,
-      showHelpFAB = true,
       className,
       contentClassName,
     },
@@ -44,9 +42,6 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
         </main>
         
         {showFooter && <Footer />}
-        
-        {/* Global Help FAB */}
-        {showHelpFAB && <UniversalHelpFAB />}
       </div>
     );
   }

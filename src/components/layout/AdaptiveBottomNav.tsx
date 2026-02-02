@@ -93,6 +93,12 @@ const routesWithOwnBottomBar = [
   '/cart',
   '/checkout',
   '/auth',
+  '/market/product/',
+  '/market/category/',
+  '/experience/',
+  '/babysitter/',
+  '/transfer/',
+  '/service/',
 ];
 
 function shouldHideBottomNav(pathname: string): boolean {
