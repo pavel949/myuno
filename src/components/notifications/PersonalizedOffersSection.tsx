@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef } from 'react';
 import { Gift, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -50,7 +50,7 @@ const demoOffers: PersonalizedOffer[] = [
   },
 ];
 
-export function PersonalizedOffersSection() {
+export const PersonalizedOffersSection = forwardRef<HTMLDivElement>(function PersonalizedOffersSection(_props, ref) {
   const { user } = useAuth();
   const { language } = useLanguage();
   const navigate = useNavigate();
@@ -102,7 +102,7 @@ export function PersonalizedOffersSection() {
   if (offers.length === 0) return null;
 
   return (
-    <div className="space-y-4">
+    <div ref={ref} className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="p-1.5 bg-gradient-to-br from-amber-500/20 to-orange-500/10 rounded-lg">
@@ -132,4 +132,4 @@ export function PersonalizedOffersSection() {
       </div>
     </div>
   );
-}
+});
