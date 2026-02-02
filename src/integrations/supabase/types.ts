@@ -7016,6 +7016,7 @@ export type Database = {
           included_services: Json | null
           instant_booking: boolean | null
           instant_booking_enabled_at: string | null
+          internal_name: string | null
           internet_provider: string | null
           internet_speed: string | null
           is_for_sale: boolean | null
@@ -7164,6 +7165,7 @@ export type Database = {
           included_services?: Json | null
           instant_booking?: boolean | null
           instant_booking_enabled_at?: string | null
+          internal_name?: string | null
           internet_provider?: string | null
           internet_speed?: string | null
           is_for_sale?: boolean | null
@@ -7312,6 +7314,7 @@ export type Database = {
           included_services?: Json | null
           instant_booking?: boolean | null
           instant_booking_enabled_at?: string | null
+          internal_name?: string | null
           internet_provider?: string | null
           internet_speed?: string | null
           is_for_sale?: boolean | null
@@ -8578,6 +8581,7 @@ export type Database = {
           id: string
           images: string[] | null
           instant_booking: boolean | null
+          internal_name: string | null
           is_active: boolean | null
           is_featured: boolean | null
           is_verified: boolean | null
@@ -8627,6 +8631,7 @@ export type Database = {
           id?: string
           images?: string[] | null
           instant_booking?: boolean | null
+          internal_name?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
           is_verified?: boolean | null
@@ -8676,6 +8681,7 @@ export type Database = {
           id?: string
           images?: string[] | null
           instant_booking?: boolean | null
+          internal_name?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
           is_verified?: boolean | null

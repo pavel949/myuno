@@ -48,6 +48,7 @@ export interface OwnerProperty extends BaseProperty {
   rental_platform?: string;
   status: string;
   verified_at?: string;
+  internal_name?: string;
   notes?: string;
   marketplace_property_id?: string;
   
@@ -222,6 +223,7 @@ export interface VendorProperty extends Omit<BaseProperty, 'title'> {
   price?: number;
   price_period?: string;
   currency?: string;
+  internal_name?: string;
   max_guests?: number;
   min_stay_nights?: number;
   amenities?: string[];
