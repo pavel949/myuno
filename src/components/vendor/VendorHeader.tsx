@@ -15,6 +15,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { RoleContextSwitcher } from '@/components/uno/RoleContextSwitcher';
+import { CurrencySwitcher } from '@/components/uno/CurrencySwitcher';
 
 const routeLabels: Record<string, { en: string; ru: string }> = {
   '/vendor': { en: 'Dashboard', ru: 'Обзор' },
@@ -121,6 +122,7 @@ export function VendorHeader() {
         >
           <HelpCircle className="h-4 w-4" />
         </Button>
+        <CurrencySwitcher size="sm" />
         <ThemeSwitcher />
         <LanguageSwitcher />
         <Button 
