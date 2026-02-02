@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, Sparkles, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMarketplaceProducts } from '@/hooks/useMarketplace';
 import { ProductSection } from '@/components/market/ProductSection';
@@ -10,26 +10,23 @@ export function HomeProductsSection() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
-  // Fetch popular products
-  const { products: popularProducts, isLoading: popularLoading } = useMarketplaceProducts({
-    popularOnly: true,
-    limit: 8,
-  });
+  // Single query - useMarketplaceProducts now uses shared cache
+  // Client-side filtering prevents duplicate API calls
+  const { products: allProducts, isLoading } = useMarketplaceProducts({});
 
-  // Fetch new arrivals (products marked as new)
-  const { products: newProducts, isLoading: newLoading } = useMarketplaceProducts({
-    limit: 8,
-  });
+  // Derive popular and new products from the cached data
+  const popularProducts = useMemo(() => {
+    return allProducts.filter(p => p.is_popular).slice(0, 8);
+  }, [allProducts]);
 
-  // Filter products marked as new
-  const newArrivals = React.useMemo(() => {
-    return newProducts.filter(p => p.is_new).slice(0, 8);
-  }, [newProducts]);
+  const newArrivals = useMemo(() => {
+    return allProducts.filter(p => p.is_new).slice(0, 8);
+  }, [allProducts]);
 
   return (
     <div className="space-y-5">
       {/* Popular Products */}
-      {(popularLoading || popularProducts.length > 0) && (
+      {(isLoading || popularProducts.length > 0) && (
         <ProductSection
           title="Bestsellers"
           titleRu="Хиты продаж"
@@ -37,13 +34,13 @@ export function HomeProductsSection() {
           seeAllPath="/market?filter=popular"
           maxItems={8}
           variant="scroll"
-          isLoading={popularLoading}
+          isLoading={isLoading}
           icon="trending"
         />
       )}
 
       {/* New Arrivals */}
-      {(newLoading || newArrivals.length > 0) && (
+      {(isLoading || newArrivals.length > 0) && (
         <ProductSection
           title="New Arrivals"
           titleRu="Новинки"
@@ -51,7 +48,7 @@ export function HomeProductsSection() {
           seeAllPath="/market?filter=new"
           maxItems={8}
           variant="scroll"
-          isLoading={newLoading}
+          isLoading={isLoading}
           icon="sparkles"
         />
       )}

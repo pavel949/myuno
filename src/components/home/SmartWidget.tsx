@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, memo, useCallback, forwardRef } from 'react';
+import { useState, useEffect, useMemo, memo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sun, Cloud, CloudRain, Calendar, Thermometer, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -11,29 +11,23 @@ interface WeatherIconProps {
   isLoading?: boolean;
 }
 
-// Memoized weather icon component with forwardRef for animation compatibility
-const WeatherIcon = memo(forwardRef<HTMLDivElement, WeatherIconProps>(
-  function WeatherIcon({ condition, isLoading }, ref) {
-    if (isLoading) {
-      return <Skeleton ref={ref as React.Ref<HTMLDivElement>} className="w-8 h-8 rounded-full" />;
-    }
-    
-    const IconWrapper = ({ children }: { children: React.ReactNode }) => (
-      <span ref={ref as React.Ref<HTMLSpanElement>}>{children}</span>
-    );
-    
-    switch (condition) {
-      case 'sunny':
-        return <IconWrapper><Sun className="w-8 h-8 text-amber-400" /></IconWrapper>;
-      case 'cloudy':
-        return <IconWrapper><Cloud className="w-8 h-8 text-slate-400" /></IconWrapper>;
-      case 'rainy':
-        return <IconWrapper><CloudRain className="w-8 h-8 text-blue-400" /></IconWrapper>;
-      default:
-        return <IconWrapper><Sun className="w-8 h-8 text-amber-400" /></IconWrapper>;
-    }
+// Memoized weather icon component - simplified without ref forwarding
+const WeatherIcon = memo(function WeatherIcon({ condition, isLoading }: WeatherIconProps) {
+  if (isLoading) {
+    return <Skeleton className="w-8 h-8 rounded-full" />;
   }
-));
+  
+  switch (condition) {
+    case 'sunny':
+      return <Sun className="w-8 h-8 text-amber-400" />;
+    case 'cloudy':
+      return <Cloud className="w-8 h-8 text-slate-400" />;
+    case 'rainy':
+      return <CloudRain className="w-8 h-8 text-blue-400" />;
+    default:
+      return <Sun className="w-8 h-8 text-amber-400" />;
+  }
+});
 WeatherIcon.displayName = 'WeatherIcon';
 
 export const SmartWidget = memo(function SmartWidget() {

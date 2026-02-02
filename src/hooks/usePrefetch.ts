@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { CACHE_PROFILES, PREFETCH_ROUTES, queryKeys } from '@/lib/queryConfig';
@@ -6,6 +6,9 @@ import { CACHE_PROFILES, PREFETCH_ROUTES, queryKeys } from '@/lib/queryConfig';
 /**
  * Smart prefetching hook that loads popular data during idle time
  * Uses requestIdleCallback for non-blocking prefetching
+ * 
+ * NOTE: Cities are NOT prefetched here because they are already
+ * fetched by LocationContext on app mount. This prevents duplicate requests.
  */
 export function usePrefetchPopularData() {
   const queryClient = useQueryClient();
@@ -69,7 +72,7 @@ export function usePrefetchPopularData() {
       ...CACHE_PROFILES.SEMI_STATIC,
     });
 
-    // Prefetch featured tours
+    // Prefetch featured tours - uses same key as useSmartRecommendations to share cache
     await queryClient.prefetchQuery({
       queryKey: ['tours', { featured: true }],
       queryFn: async () => {
@@ -85,24 +88,12 @@ export function usePrefetchPopularData() {
     });
   }, [queryClient]);
 
-  const prefetchCities = useCallback(async () => {
-    await queryClient.prefetchQuery({
-      queryKey: ['cities'],
-      queryFn: async () => {
-        const { data } = await supabase
-          .from('cities')
-          .select('*')
-          .eq('is_active', true)
-          .order('sort_order');
-        return data || [];
-      },
-      ...CACHE_PROFILES.STATIC,
-    });
-  }, [queryClient]);
+  // Removed prefetchCities - now handled by LocationContext via useCities hook
+  // which uses React Query with shared cache key ['cities']
 
-  useEffect(() => {
-    // Use requestIdleCallback for non-blocking prefetch
-    const scheduleIdlePrefetch = (callback: () => void): number => {
+  // Use requestIdleCallback for non-blocking prefetch
+  const scheduleIdlePrefetch = useCallback(() => {
+    const doIdlePrefetch = (callback: () => void): number => {
       if ('requestIdleCallback' in window) {
         return (window as Window & { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback(callback, { timeout: 2000 });
       }
@@ -119,10 +110,9 @@ export function usePrefetchPopularData() {
     };
 
     // Schedule prefetching in sequence during idle time
-    const idleId = scheduleIdlePrefetch(async () => {
+    const idleId = doIdlePrefetch(async () => {
       try {
         await prefetchCategories();
-        await prefetchCities();
         await prefetchFeaturedContent();
       } catch (error) {
         // Silently fail - prefetching is optional
@@ -131,7 +121,10 @@ export function usePrefetchPopularData() {
     });
 
     return () => cancelIdlePrefetch(idleId);
-  }, [prefetchCategories, prefetchCities, prefetchFeaturedContent]);
+  }, [prefetchCategories, prefetchFeaturedContent]);
+
+  // Schedule on mount
+  scheduleIdlePrefetch();
 }
 
 /**
