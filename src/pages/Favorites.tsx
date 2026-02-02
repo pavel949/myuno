@@ -270,13 +270,13 @@ export default function Favorites() {
                       <div
                         key={item.id}
                         onClick={() => handleNavigate(item)}
-                        className="bg-card rounded-xl overflow-hidden border hover:shadow-md transition-all cursor-pointer group"
+                        className="bg-card rounded-2xl overflow-hidden border hover:shadow-md transition-all cursor-pointer group"
                       >
-                        <div className="relative aspect-[4/3]">
+                        <div className="relative aspect-[4/3] overflow-hidden">
                           <img
                             src={data.image || data.images?.[0] || '/placeholder.svg'}
                             alt={title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                            className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
                           />
                           <button
                             onClick={(e) => {

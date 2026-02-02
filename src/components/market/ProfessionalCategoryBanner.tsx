@@ -67,7 +67,7 @@ export const ProfessionalCategoryBanner: React.FC<ProfessionalCategoryBannerProp
           <img
             src={heroCategory.image_url || getCategoryImage(heroCategory.slug)}
             alt=""
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           />
           
           {/* Gradient Overlay */}
@@ -118,7 +118,7 @@ export const ProfessionalCategoryBanner: React.FC<ProfessionalCategoryBannerProp
               <img
                 src={category.image_url || getCategoryImage(category.slug)}
                 alt=""
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
               />
               
               {/* Gradient Overlay */}

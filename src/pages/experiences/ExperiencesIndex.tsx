@@ -45,7 +45,7 @@ const ExperienceCard = React.forwardRef<HTMLDivElement, { experience: Experience
             alt={isRu ? experience.title_ru : experience.title_en}
             width={400}
             height={176}
-            className="w-full h-full group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full group-hover:scale-[1.03] transition-transform duration-300"
             quality={80}
           />
           

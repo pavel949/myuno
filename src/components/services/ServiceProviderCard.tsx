@@ -143,12 +143,12 @@ export const ServiceProviderCard = memo(function ServiceProviderCard({
       <div className={cn("h-1", categoryColor)} />
       
       {/* Image with Avatar Overlay */}
-      <div className="relative h-32 bg-muted">
+      <div className="relative h-32 bg-muted overflow-hidden">
         {image ? (
           <img
             src={image}
             alt={name}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
             loading="lazy"
           />
         ) : (
