@@ -6267,28 +6267,43 @@ export type Database = {
       }
       order_item_yacht_details: {
         Row: {
+          balance_due_at: string | null
+          balance_paid_at: string | null
           catering_included: boolean | null
           charter_type: string | null
           created_at: string | null
           crew_included: boolean | null
+          deposit_amount: number | null
+          deposit_paid_at: string | null
+          deposit_percent: number | null
           guests_count: number | null
           id: string
           order_item_id: string
         }
         Insert: {
+          balance_due_at?: string | null
+          balance_paid_at?: string | null
           catering_included?: boolean | null
           charter_type?: string | null
           created_at?: string | null
           crew_included?: boolean | null
+          deposit_amount?: number | null
+          deposit_paid_at?: string | null
+          deposit_percent?: number | null
           guests_count?: number | null
           id?: string
           order_item_id: string
         }
         Update: {
+          balance_due_at?: string | null
+          balance_paid_at?: string | null
           catering_included?: boolean | null
           charter_type?: string | null
           created_at?: string | null
           crew_included?: boolean | null
+          deposit_amount?: number | null
+          deposit_paid_at?: string | null
+          deposit_percent?: number | null
           guests_count?: number | null
           id?: string
           order_item_id?: string
@@ -15475,6 +15490,115 @@ export type Database = {
           },
         ]
       }
+      yacht_external_calendars: {
+        Row: {
+          created_at: string
+          ical_url: string
+          id: string
+          is_active: boolean | null
+          last_synced_at: string | null
+          name: string
+          owner_id: string
+          sync_error: string | null
+          updated_at: string
+          yacht_id: string
+        }
+        Insert: {
+          created_at?: string
+          ical_url: string
+          id?: string
+          is_active?: boolean | null
+          last_synced_at?: string | null
+          name: string
+          owner_id: string
+          sync_error?: string | null
+          updated_at?: string
+          yacht_id: string
+        }
+        Update: {
+          created_at?: string
+          ical_url?: string
+          id?: string
+          is_active?: boolean | null
+          last_synced_at?: string | null
+          name?: string
+          owner_id?: string
+          sync_error?: string | null
+          updated_at?: string
+          yacht_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "yacht_external_calendars_yacht_id_fkey"
+            columns: ["yacht_id"]
+            isOneToOne: false
+            referencedRelation: "yachts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      yacht_pricing_rules: {
+        Row: {
+          created_at: string
+          days_of_week: number[] | null
+          end_date: string | null
+          id: string
+          is_active: boolean | null
+          name_en: string
+          name_ru: string | null
+          price_modifier_percent: number | null
+          price_override_full_day: number | null
+          price_override_half_day: number | null
+          priority: number | null
+          rule_type: string
+          start_date: string | null
+          updated_at: string
+          yacht_id: string
+        }
+        Insert: {
+          created_at?: string
+          days_of_week?: number[] | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          name_en: string
+          name_ru?: string | null
+          price_modifier_percent?: number | null
+          price_override_full_day?: number | null
+          price_override_half_day?: number | null
+          priority?: number | null
+          rule_type: string
+          start_date?: string | null
+          updated_at?: string
+          yacht_id: string
+        }
+        Update: {
+          created_at?: string
+          days_of_week?: number[] | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          name_en?: string
+          name_ru?: string | null
+          price_modifier_percent?: number | null
+          price_override_full_day?: number | null
+          price_override_half_day?: number | null
+          priority?: number | null
+          rule_type?: string
+          start_date?: string | null
+          updated_at?: string
+          yacht_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "yacht_pricing_rules_yacht_id_fkey"
+            columns: ["yacht_id"]
+            isOneToOne: false
+            referencedRelation: "yachts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       yachts: {
         Row: {
           approval_status: string | null
@@ -15933,6 +16057,10 @@ export type Database = {
           price_override: number
           status: string
         }[]
+      }
+      get_yacht_price_for_date: {
+        Args: { p_charter_type?: string; p_date: string; p_yacht_id: string }
+        Returns: number
       }
       has_role: {
         Args: {
