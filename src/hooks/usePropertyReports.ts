@@ -303,22 +303,37 @@ export function useDeleteReport() {
   });
 }
 
-// Generate PDF for a report
+// Generate PDF for a report (client-side using jsPDF)
 export function useGeneratePdf() {
-  const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: async ({ reportId, language = 'ru' }: { reportId: string; language?: 'en' | 'ru' }) => {
-      const { data, error } = await supabase.functions.invoke('generate-report-pdf', {
-        body: { reportId, language },
-      });
-
-      if (error) throw error;
-      return data;
+    mutationFn: async ({ 
+      report, 
+      language = 'ru' 
+    }: { 
+      report: PropertyReport; 
+      language?: 'en' | 'ru';
+    }) => {
+      // Dynamically import to reduce bundle size
+      const { downloadReportPdf } = await import('@/utils/generateReportPdf');
+      
+      const propertyTitle = language === 'ru' 
+        ? (report.property?.title_ru || report.property?.title || 'Property')
+        : (report.property?.title || 'Property');
+      
+      downloadReportPdf({
+        propertyTitle,
+        reportType: report.report_type,
+        periodStart: report.period_start,
+        periodEnd: report.period_end,
+        data: report.data,
+        language,
+        currency: 'THB',
+      }, `report-${report.property?.title?.replace(/\s+/g, '-') || 'property'}-${report.period_start}.pdf`);
+      
+      return { success: true };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['property-reports'] });
-      toast.success('PDF готов к скачиванию');
+      toast.success('PDF скачан');
     },
     onError: (error) => {
       toast.error('Ошибка генерации PDF: ' + error.message);

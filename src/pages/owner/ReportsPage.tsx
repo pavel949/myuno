@@ -7,7 +7,8 @@ import {
   useDeleteReport, 
   useGeneratePdf,
   useSendReportEmail,
-  ReportType 
+  ReportType,
+  PropertyReport 
 } from '@/hooks/usePropertyReports';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -117,8 +118,8 @@ export default function ReportsPage() {
     });
   };
 
-  const handleGeneratePdf = (reportId: string) => {
-    generatePdf.mutate({ reportId, language: isRu ? 'ru' : 'en' });
+  const handleGeneratePdf = (report: PropertyReport) => {
+    generatePdf.mutate({ report, language: isRu ? 'ru' : 'en' });
   };
 
   const handleSendEmail = () => {
@@ -355,7 +356,7 @@ export default function ReportsPage() {
                       variant="outline" 
                       size="sm" 
                       className="flex-1 md:flex-none"
-                      onClick={() => handleGeneratePdf(report.id)}
+                      onClick={() => handleGeneratePdf(report)}
                       disabled={generatePdf.isPending}
                     >
                       {generatePdf.isPending ? (
