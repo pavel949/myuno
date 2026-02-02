@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
@@ -66,7 +66,15 @@ export function useOperationalTasks(options?: {
   
   const t = (en: string, ru: string) => language === 'ru' ? ru : en;
 
-  const queryKey = ['operational-tasks', user?.id, options];
+  // Stabilize query key to prevent infinite refetches
+  const dateStr = options?.date ? format(options.date, 'yyyy-MM-dd') : undefined;
+  const dateRangeStr = options?.dateRange 
+    ? `${format(options.dateRange.from, 'yyyy-MM-dd')}-${format(options.dateRange.to, 'yyyy-MM-dd')}`
+    : undefined;
+  const statusArr = options?.status ? (Array.isArray(options.status) ? options.status : [options.status]).sort().join(',') : undefined;
+  const typeArr = options?.taskType ? (Array.isArray(options.taskType) ? options.taskType : [options.taskType]).sort().join(',') : undefined;
+
+  const queryKey = ['operational-tasks', user?.id, options?.propertyId, dateStr, dateRangeStr, statusArr, typeArr];
   
   const { data: tasks = [], isLoading, refetch } = useQuery({
     queryKey,
@@ -235,10 +243,13 @@ export function useOperationalTasks(options?: {
   };
 }
 
-// Hook for today's operations summary
+// Hook for today's operations summary - uses stable date reference
 export function useTodayOperations() {
+  // Use stable date that doesn't change on every render
+  const today = useMemo(() => new Date(), []);
+  
   return useOperationalTasks({
-    date: new Date(),
+    date: today,
     status: ['pending', 'in_progress'],
   });
 }
