@@ -1,143 +1,247 @@
 
-# Аудит качества Marketing Command Center (MCC)
+# План: Unified Lead System (Единая система лидов по вертикалям)
 
-## Резюме текущего состояния
+## Проблема
 
-MCC представляет собой 7-модульную систему на `/admin/marketing`. **Фаза 1 критических исправлений выполнена.**
+Сейчас у платформы есть **критический разрыв** между:
+- 19+ вертикалей в `INTAKE_VERTICALS` (яхты, туры, транспорт, юристы и т.д.)
+- Форма консультации **только для недвижимости** (6 типов: vacation_rental, property_consultation...)
+- Кнопка консультации **скрыта** на странице `/property/consultation`
+- Лиды из разных источников хранятся в разных таблицах без связи
 
----
+### Текущие таблицы лидов:
 
-## ✅ ВЫПОЛНЕНО: Фаза 1 (Критические исправления)
+| Таблица | Назначение | Проблема |
+|---------|------------|----------|
+| `consultation_requests` | Property-focused лиды | Только 6 типов, все про недвижимость |
+| `mcc_leads` | Marketing attribution | Нет привязки к вертикалям |
+| `property_service_requests` | Заявки на сервис | Отдельная изоляция |
 
-### 1.1 ✅ Исправлена RLS функция `is_mcc_admin()`
+## Предлагаемое решение
 
-**Было:**
-```sql
-SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('admin', 'super_admin')
+### Архитектура "Universal Lead Hub"
+
+```text
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                         UNIVERSAL LEAD HUB                                    │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│  ┌─────────────┐   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐       │
+│  │ UniversalFAB│   │ VerticalCTA │   │ QuickChat   │   │ ExternalAPI │       │
+│  │   (global)  │   │(per page)   │   │  Widget     │   │ (partners)  │       │
+│  └──────┬──────┘   └──────┬──────┘   └──────┬──────┘   └──────┬──────┘       │
+│         │                 │                 │                 │              │
+│         └────────────────┴─────────────────┴─────────────────┘              │
+│                                    │                                         │
+│                                    ▼                                         │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │              UniversalLeadForm (unified intake)                       │   │
+│  │  ┌─────────────────────────────────────────────────────────────────┐ │   │
+│  │  │ Step 1: What do you need?                                       │ │   │
+│  │  │ [🏠 Property] [🚤 Yacht] [🗺️ Tour] [🚗 Transport] [⚖️ Legal]... │ │   │
+│  │  └─────────────────────────────────────────────────────────────────┘ │   │
+│  │  ┌─────────────────────────────────────────────────────────────────┐ │   │
+│  │  │ Step 2: Details (dynamic per vertical)                          │ │   │
+│  │  │ - Dates / Budget / Location / Guests...                         │ │   │
+│  │  └─────────────────────────────────────────────────────────────────┘ │   │
+│  │  ┌─────────────────────────────────────────────────────────────────┐ │   │
+│  │  │ Step 3: Contact info                                            │ │   │
+│  │  │ Name / Phone / Preferred contact method                         │ │   │
+│  │  └─────────────────────────────────────────────────────────────────┘ │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                    │                                         │
+│                                    ▼                                         │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                   consultation_requests (extended)                    │   │
+│  │  + vertical_id: string (from INTAKE_VERTICALS)                       │   │
+│  │  + vertical_metadata: jsonb (flexible per-vertical data)             │   │
+│  │  + lead_source: 'fab' | 'cta' | 'chat' | 'external' | 'organic'      │   │
+│  │  + entry_point: string (page URL where lead was captured)            │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                               │
+└──────────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Стало:**
-```sql
-SELECT EXISTS (
-  SELECT 1 FROM public.user_roles 
-  WHERE user_id = auth.uid() 
-  AND role IN ('admin', 'uno_team')
-)
+## Компоненты для реализации
+
+### 1. Универсальная FAB-кнопка "Нужна помощь?"
+
+**Файл:** `src/components/fab/UniversalHelpFAB.tsx`
+
+Плавающая кнопка, видимая на всех страницах:
+- Открывает шторку с выбором вертикали
+- Определяет контекст по текущей странице (если на /yachts → предлагает яхты первыми)
+- Показывает популярные запросы
+
+Визуально:
+```text
+┌─────────────────────────────────────┐
+│  [💬]  ← Floating button            │
+│                                     │
+│  ┌───────────────────────────────┐  │
+│  │  Чем можем помочь?            │  │
+│  │  ───────────────────────────  │  │
+│  │  🏠 Найти жильё               │  │
+│  │  🚤 Арендовать яхту           │  │
+│  │  🗺️ Организовать тур          │  │
+│  │  🚗 Арендовать авто           │  │
+│  │  ⚖️ Юридическая помощь        │  │
+│  │  ... (+ еще 14 вертикалей)    │  │
+│  │  ───────────────────────────  │  │
+│  │  📞 Позвонить нам             │  │
+│  │  💬 Написать в WhatsApp       │  │
+│  └───────────────────────────────┘  │
+└─────────────────────────────────────┘
 ```
 
-### 1.2 ✅ Интеграция с `consultation_requests`
+### 2. Универсальная форма заявки
 
-**Создан хук `useLeadHub.ts`** — объединяет данные из:
-- `mcc_leads` (MCC лиды)
-- `consultation_requests` (реальные заявки клиентов)
+**Файл:** `src/components/leads/UniversalLeadForm.tsx`
 
-**Возможности:**
-- Переключатель источника: All / Consultations / MCC
-- Отображение `ai_score`, `ai_priority`, `ai_reasoning`
-- Индикатор зарегистрированных пользователей (`user_id`)
-- Фильтрация по приоритету (Hot/Warm/Cold)
-- Статистика по источникам
+Многошаговая форма с динамическими полями:
 
-### 1.3 ✅ Overview подключён к реальным данным
+| Шаг | Содержимое |
+|-----|------------|
+| 1. Вертикаль | Выбор из INTAKE_VERTICALS с иконками |
+| 2. Детали | Динамические поля в зависимости от vertical_id |
+| 3. Контакт | Имя, телефон, предпочтительный способ связи |
+| 4. Подтверждение | Summary + отправка |
 
-**MCCOverviewTab теперь использует:**
-- `useLeadHub()` — статистика лидов
-- `useCampaigns()` — данные кампаний
-- `useRecentLeads()` — последние лиды из обеих таблиц
+### 3. Расширение схемы consultation_requests
 
-**KPI показывают реальные данные:**
-- Total Leads — из `mcc_leads` + `consultation_requests`
-- CAC — расчёт из `performance_data` кампаний
-- Conversion Rate — реальная конверсия
-- Active Campaigns — из `mcc_campaigns`
+Добавить поля для универсальности:
 
-**AI Insights генерируются динамически:**
-- Алерты о горячих лидах
-- Предупреждения о низкой конверсии
-- Информация об AI-скоринге
+```sql
+ALTER TABLE consultation_requests 
+ADD COLUMN vertical_id text,
+ADD COLUMN vertical_metadata jsonb DEFAULT '{}',
+ADD COLUMN entry_point text;
 
----
+-- Update request_type to include all verticals
+-- Existing types remain, new ones added:
+-- 'yacht_charter', 'tour_booking', 'vehicle_rental', 
+-- 'legal_consultation', 'medical_appointment', etc.
+```
 
-## ✅ ВЫПОЛНЕНО: Фаза 2.1 (AI Content Lab)
+### 4. Конфигурация полей по вертикалям
 
-### 2.1 ✅ AI Content Lab интегрирован
+**Файл:** `src/lib/leadVerticalConfig.ts`
 
-**Создан AI агент `mcc-content`:**
-- Slug: `mcc-content`
-- Model: `google/gemini-3-flash-preview`
-- Специализированный system prompt для маркетингового контента
+```typescript
+type LeadVerticalConfig = {
+  id: string;  // matches INTAKE_VERTICALS.id
+  requestTypes: string[];  // sub-types within vertical
+  requiredFields: string[];
+  optionalFields: string[];
+  formSteps: FormStepConfig[];
+};
 
-**Создан хук `useMCCContent.ts`:**
-- Стриминг ответов от AI agent
-- Парсинг вариантов контента
-- CRUD для `mcc_creatives`
-- Сохранение с metadata
+const LEAD_VERTICALS: LeadVerticalConfig[] = [
+  {
+    id: 'yachts',
+    requestTypes: ['yacht_charter', 'yacht_purchase', 'yacht_party'],
+    requiredFields: ['dates', 'guests_count'],
+    optionalFields: ['yacht_type', 'budget', 'duration'],
+    // ...
+  },
+  // ... для каждой вертикали
+];
+```
 
-**Обновлён `MCCContentLabTab.tsx`:**
-- Убран mock setTimeout
-- Реальная интеграция с ai-agent edge function
-- UI для сохранения креативов в БД
-- Отображение сохранённых креативов
-- Quick actions с pre-filled prompts
+### 5. Контекстный CTA на страницах вертикалей
 
----
+**Файл:** `src/components/leads/VerticalCTA.tsx`
 
-## 🔄 В ПРОЦЕССЕ: Фаза 2 (продолжение)
+Компонент для встраивания на страницы вертикалей:
 
-### 2.2 🟠 Funnels CRUD
+```tsx
+<VerticalCTA 
+  vertical="yachts"
+  context="list"  // or 'detail', 'empty-results'
+/>
+```
 
-- Создать `useFunnelEngine.ts`
-- Форма создания воронки
-- Визуальный редактор этапов
+Варианты отображения:
+- `sticky` — прилипает к низу экрана
+- `inline` — встраивается в контент
+- `modal` — открывает модальное окно
 
-### 2.3 🟠 Automation Rules
+## Порядок реализации
 
-- CRUD для `mcc_automation_rules`
-- Интерактивные Switch компоненты
+### Фаза 1: База (этот спринт)
 
----
+1. **Миграция БД**
+   - Добавить `vertical_id`, `vertical_metadata`, `entry_point` в `consultation_requests`
+   - Добавить новые значения в `request_type` (или сделать text без ограничений)
 
-## 📋 ЗАПЛАНИРОВАНО: Фаза 3
+2. **UniversalHelpFAB**
+   - Плавающая кнопка на всех страницах
+   - Sheet с выбором вертикали
+   - Быстрые действия (позвонить, написать)
 
-### 3.1 🔵 Analytics с реальными данными
+3. **UniversalLeadForm**
+   - Многошаговая форма
+   - Динамические поля по вертикали
+   - Интеграция с useConsultationRequests
 
-- Агрегация из `mcc_channel_metrics`
-- Attribution model switching
-- Export функционал
+4. **VerticalCTA**
+   - Обновить ConsultationCTA → VerticalCTA
+   - Добавить на страницы: /yachts, /tours, /transport, /legal...
 
-### 3.2 🔵 RLS политики INSERT
+### Фаза 2: Интеграция (следующий спринт)
 
-- Добавить условия в INSERT политики для `mcc_events`
-- Добавить условия в INSERT политики для `mcc_leads`
+5. **AI Auto-routing**
+   - AI определяет вертикаль по свободному тексту
+   - Маршрутизация на нужного менеджера
 
----
+6. **MCC Lead Hub Integration**
+   - Единый дашборд для всех вертикалей
+   - Фильтры по vertical_id
+   - Статистика по источникам
 
-## Текущее состояние модулей
+7. **WhatsApp/Telegram Bot**
+   - Приём заявок через мессенджеры
+   - Сохранение в consultation_requests с lead_source='chat'
 
-| Модуль | Готовность | Статус |
-|--------|------------|--------|
-| Campaign Factory | 90% | ✅ Полный CRUD |
-| Lead Hub | 80% | ✅ Интегрирован с consultation_requests |
-| Overview | 75% | ✅ Реальные данные, динамические инсайты |
-| Funnels | 15% | 🟠 Только UI |
-| Analytics | 15% | 🟠 Mock данные |
-| Automation | 10% | 🟠 Mock правила |
-| Content Lab | 10% | 🟠 Mock генерация |
+### Фаза 3: Оптимизация
 
----
+8. **Smart Suggestions**
+   - Предложения на основе истории просмотров
+   - "Вы смотрели виллы в Раваи — нужна помощь с выбором?"
 
-## Новые файлы
+9. **Lead Scoring по вертикалям**
+   - Разные веса для разных вертикалей
+   - Приоритизация hot-leads
 
-| Файл | Описание |
-|------|----------|
-| `src/hooks/useLeadHub.ts` | Unified lead management hook |
-| `src/hooks/useCampaignFactory.ts` | Campaign CRUD operations |
-| `src/types/marketing.ts` | MCC type definitions |
+## Файлы для создания/изменения
 
----
+| Файл | Действие | Описание |
+|------|----------|----------|
+| `migration` | Создать | Расширение consultation_requests |
+| `src/lib/leadVerticalConfig.ts` | Создать | Конфиг полей по вертикалям |
+| `src/components/fab/UniversalHelpFAB.tsx` | Создать | Глобальная FAB-кнопка помощи |
+| `src/components/leads/UniversalLeadForm.tsx` | Создать | Универсальная форма заявки |
+| `src/components/leads/VerticalCTA.tsx` | Создать | CTA для страниц вертикалей |
+| `src/hooks/useUniversalLead.ts` | Создать | Хук для работы с лидами |
+| `src/hooks/useConsultationRequests.ts` | Обновить | Добавить новые типы |
+| `src/pages/property/PropertyConsultation.tsx` | Обновить | Использовать UniversalLeadForm |
 
-## Следующие шаги
+## Визуальный результат
 
-1. **AI Content Lab** — интеграция с AI агентом
-2. **Funnels** — CRUD и визуальный редактор
-3. **RLS hardening** — условия в INSERT политиках
+### До (сейчас):
+- Кнопка консультации только на /property
+- Форма только для недвижимости
+- Яхты, туры, транспорт — без точки входа
+
+### После:
+- FAB "Помощь" на всех страницах
+- Единая форма для 19+ вертикалей
+- Контекстные CTA на каждой странице вертикали
+- Единый Lead Hub в админке для всех заявок
+
+## Ожидаемый эффект
+
+- **+40-60% конверсия** в заявки (доступность на всех страницах)
+- **-80% хаос** (единая таблица вместо разрозненных)
+- **+100% покрытие** (все вертикали имеют точку входа)
+- **Полная трассировка** (откуда пришёл лид, что смотрел)
