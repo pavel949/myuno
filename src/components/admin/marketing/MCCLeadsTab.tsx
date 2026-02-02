@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { 
   Search, 
   Filter, 
@@ -16,57 +23,25 @@ import {
   Users,
   Flame,
   Thermometer,
-  Snowflake
+  Snowflake,
+  Database,
+  Brain
 } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { useLeadHub, LeadSource, LeadPriority, UnifiedLead } from '@/hooks/useLeadHub';
+import { formatDistanceToNow } from 'date-fns';
+import { ru, enUS } from 'date-fns/locale';
 
 export function MCCLeadsTab() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const [searchQuery, setSearchQuery] = useState('');
-  const [priorityFilter, setPriorityFilter] = useState<string | null>(null);
+  const [priorityFilter, setPriorityFilter] = useState<LeadPriority | null>(null);
+  const [sourceFilter, setSourceFilter] = useState<LeadSource>('all');
 
-  const { data: leads, isLoading } = useQuery({
-    queryKey: ['mcc-leads', searchQuery, priorityFilter],
-    queryFn: async () => {
-      let query = supabase
-        .from('mcc_leads')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(50);
-      
-      if (priorityFilter) {
-        query = query.eq('priority', priorityFilter);
-      }
-      
-      if (searchQuery) {
-        query = query.or(`email.ilike.%${searchQuery}%,name.ilike.%${searchQuery}%,phone.ilike.%${searchQuery}%`);
-      }
-      
-      const { data, error } = await query;
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  const { data: stats } = useQuery({
-    queryKey: ['mcc-leads-stats'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('mcc_leads')
-        .select('priority, status');
-      
-      if (error) throw error;
-      
-      return {
-        total: data.length,
-        hot: data.filter(l => l.priority === 'hot').length,
-        warm: data.filter(l => l.priority === 'warm').length,
-        cold: data.filter(l => l.priority === 'cold').length,
-        converted: data.filter(l => l.status === 'converted').length,
-      };
-    }
+  const { leads, stats, isLoading } = useLeadHub({
+    source: sourceFilter,
+    priority: priorityFilter,
+    search: searchQuery,
   });
 
   const getPriorityBadge = (priority: string) => {
@@ -94,79 +69,128 @@ export function MCCLeadsTab() {
     return <Badge className={colors[status] || 'bg-muted'} variant="secondary">{status}</Badge>;
   };
 
-  // Mock leads for demo
-  const mockLeads = [
-    { id: '1', name: 'John Davidson', email: 'john.d@gmail.com', phone: '+1234567890', source: 'Google Ads', priority: 'hot', status: 'new', score: 85, created_at: new Date().toISOString() },
-    { id: '2', name: 'Maria Sanchez', email: 'maria.s@yahoo.com', phone: '+0987654321', source: 'Meta Ads', priority: 'warm', status: 'contacted', score: 62, created_at: new Date(Date.now() - 3600000).toISOString() },
-    { id: '3', name: 'Alex Kowalski', email: 'alex.k@proton.me', source: 'Organic', priority: 'cold', status: 'new', score: 34, created_at: new Date(Date.now() - 7200000).toISOString() },
-    { id: '4', name: 'Elena Petrova', email: 'elena.p@mail.ru', phone: '+7999888777', source: 'WhatsApp', priority: 'hot', status: 'engaged', score: 91, created_at: new Date(Date.now() - 86400000).toISOString() },
-    { id: '5', name: 'Tom Williams', email: 'tom.w@outlook.com', source: 'Telegram', priority: 'warm', status: 'qualified', score: 55, created_at: new Date(Date.now() - 172800000).toISOString() },
-  ];
+  const getSourceBadge = (lead: UnifiedLead) => {
+    if (lead.source_table === 'consultation_requests') {
+      return (
+        <Badge variant="outline" className="gap-1 text-xs">
+          <Database className="h-3 w-3" />
+          {lead.request_type || 'Consultation'}
+        </Badge>
+      );
+    }
+    return (
+      <Badge variant="outline" className="text-xs">
+        {lead.source_channel || 'MCC'}
+      </Badge>
+    );
+  };
 
-  const displayLeads = leads?.length ? leads : mockLeads;
+  const getTimeAgo = (dateString: string) => {
+    return formatDistanceToNow(new Date(dateString), { 
+      addSuffix: true, 
+      locale: isRu ? ru : enUS 
+    });
+  };
 
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setPriorityFilter(null)}>
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setPriorityFilter(null); setSourceFilter('all'); }}>
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10">
               <Users className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{stats?.total || mockLeads.length}</p>
+              <p className="text-2xl font-bold">{stats.total}</p>
               <p className="text-xs text-muted-foreground">{isRu ? 'Всего' : 'Total'}</p>
             </div>
           </CardContent>
         </Card>
-        <Card className={`cursor-pointer hover:shadow-md transition-shadow ${priorityFilter === 'hot' ? 'ring-2 ring-destructive' : ''}`} onClick={() => setPriorityFilter(priorityFilter === 'hot' ? null : 'hot')}>
+        
+        <Card 
+          className={`cursor-pointer hover:shadow-md transition-shadow ${priorityFilter === 'hot' ? 'ring-2 ring-destructive' : ''}`} 
+          onClick={() => setPriorityFilter(priorityFilter === 'hot' ? null : 'hot')}
+        >
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-destructive/10">
               <Flame className="h-5 w-5 text-destructive" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{stats?.hot || 2}</p>
+              <p className="text-2xl font-bold">{stats.hot}</p>
               <p className="text-xs text-muted-foreground">Hot</p>
             </div>
           </CardContent>
         </Card>
-        <Card className={`cursor-pointer hover:shadow-md transition-shadow ${priorityFilter === 'warm' ? 'ring-2 ring-warning' : ''}`} onClick={() => setPriorityFilter(priorityFilter === 'warm' ? null : 'warm')}>
+        
+        <Card 
+          className={`cursor-pointer hover:shadow-md transition-shadow ${priorityFilter === 'warm' ? 'ring-2 ring-warning' : ''}`} 
+          onClick={() => setPriorityFilter(priorityFilter === 'warm' ? null : 'warm')}
+        >
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-warning/10">
               <Thermometer className="h-5 w-5 text-warning" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{stats?.warm || 2}</p>
+              <p className="text-2xl font-bold">{stats.warm}</p>
               <p className="text-xs text-muted-foreground">Warm</p>
             </div>
           </CardContent>
         </Card>
-        <Card className={`cursor-pointer hover:shadow-md transition-shadow ${priorityFilter === 'cold' ? 'ring-2 ring-info' : ''}`} onClick={() => setPriorityFilter(priorityFilter === 'cold' ? null : 'cold')}>
+        
+        <Card 
+          className={`cursor-pointer hover:shadow-md transition-shadow ${priorityFilter === 'cold' ? 'ring-2 ring-info' : ''}`} 
+          onClick={() => setPriorityFilter(priorityFilter === 'cold' ? null : 'cold')}
+        >
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-info/10">
               <Snowflake className="h-5 w-5 text-info" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{stats?.cold || 1}</p>
+              <p className="text-2xl font-bold">{stats.cold}</p>
               <p className="text-xs text-muted-foreground">Cold</p>
             </div>
           </CardContent>
         </Card>
+        
         <Card className="cursor-pointer hover:shadow-md transition-shadow">
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-success/10">
               <ChevronRight className="h-5 w-5 text-success" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{stats?.converted || 0}</p>
+              <p className="text-2xl font-bold">{stats.converted}</p>
               <p className="text-xs text-muted-foreground">{isRu ? 'Конверсии' : 'Converted'}</p>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="cursor-pointer hover:shadow-md transition-shadow">
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-chart-5/10">
+              <Brain className="h-5 w-5 text-chart-5" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold">{stats.withAiScore}</p>
+              <p className="text-xs text-muted-foreground">{isRu ? 'AI Скор' : 'AI Scored'}</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Search & Actions */}
+      {/* Source Stats */}
+      <div className="flex gap-2 text-sm text-muted-foreground">
+        <span className="flex items-center gap-1">
+          <Database className="h-4 w-4" />
+          {isRu ? 'Консультации:' : 'Consultations:'} <strong>{stats.fromConsultations}</strong>
+        </span>
+        <span>|</span>
+        <span>
+          MCC Leads: <strong>{stats.fromMCC}</strong>
+        </span>
+      </div>
+
+      {/* Search & Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -178,10 +202,16 @@ export function MCCLeadsTab() {
           />
         </div>
         <div className="flex gap-2">
-          <Button variant="outline">
-            <Filter className="h-4 w-4 mr-2" />
-            {isRu ? 'Фильтры' : 'Filters'}
-          </Button>
+          <Select value={sourceFilter} onValueChange={(v) => setSourceFilter(v as LeadSource)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder={isRu ? 'Источник' : 'Source'} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{isRu ? 'Все источники' : 'All Sources'}</SelectItem>
+              <SelectItem value="consultations">{isRu ? 'Консультации' : 'Consultations'}</SelectItem>
+              <SelectItem value="mcc">MCC Leads</SelectItem>
+            </SelectContent>
+          </Select>
           <Button variant="outline">
             <Sparkles className="h-4 w-4 mr-2" />
             {isRu ? 'AI Скоринг' : 'AI Score'}
@@ -196,76 +226,118 @@ export function MCCLeadsTab() {
       {/* Leads Table */}
       <Card>
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-muted/50">
-                <tr>
-                  <th className="text-left p-4 font-medium text-sm">{isRu ? 'Лид' : 'Lead'}</th>
-                  <th className="text-left p-4 font-medium text-sm">{isRu ? 'Источник' : 'Source'}</th>
-                  <th className="text-left p-4 font-medium text-sm">{isRu ? 'Приоритет' : 'Priority'}</th>
-                  <th className="text-left p-4 font-medium text-sm">{isRu ? 'Статус' : 'Status'}</th>
-                  <th className="text-left p-4 font-medium text-sm">{isRu ? 'Скор' : 'Score'}</th>
-                  <th className="text-left p-4 font-medium text-sm">{isRu ? 'Действия' : 'Actions'}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {displayLeads.map((lead: any) => (
-                  <tr key={lead.id} className="border-t hover:bg-muted/30 transition-colors">
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center font-medium text-primary">
-                          {lead.name?.charAt(0) || lead.email?.charAt(0) || '?'}
-                        </div>
-                        <div>
-                          <p className="font-medium">{lead.name || 'Unknown'}</p>
-                          <p className="text-xs text-muted-foreground">{lead.email}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <Badge variant="outline">{lead.source}</Badge>
-                    </td>
-                    <td className="p-4">
-                      {getPriorityBadge(lead.priority)}
-                    </td>
-                    <td className="p-4">
-                      {getStatusBadge(lead.status)}
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-12 h-2 bg-muted rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-primary rounded-full"
-                            style={{ width: `${lead.score}%` }}
-                          />
-                        </div>
-                        <span className="text-sm font-medium">{lead.score}</span>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex gap-1">
-                        {lead.email && (
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <Mail className="h-4 w-4" />
-                          </Button>
-                        )}
-                        {lead.phone && (
-                          <>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <Phone className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MessageCircle className="h-4 w-4" />
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </td>
+          {isLoading ? (
+            <div className="p-8 text-center text-muted-foreground">
+              {isRu ? 'Загрузка...' : 'Loading...'}
+            </div>
+          ) : leads.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground">
+              {isRu ? 'Лиды не найдены' : 'No leads found'}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="text-left p-4 font-medium text-sm">{isRu ? 'Лид' : 'Lead'}</th>
+                    <th className="text-left p-4 font-medium text-sm">{isRu ? 'Источник' : 'Source'}</th>
+                    <th className="text-left p-4 font-medium text-sm">{isRu ? 'Приоритет' : 'Priority'}</th>
+                    <th className="text-left p-4 font-medium text-sm">{isRu ? 'Статус' : 'Status'}</th>
+                    <th className="text-left p-4 font-medium text-sm">{isRu ? 'AI Скор' : 'AI Score'}</th>
+                    <th className="text-left p-4 font-medium text-sm">{isRu ? 'Время' : 'Time'}</th>
+                    <th className="text-left p-4 font-medium text-sm">{isRu ? 'Действия' : 'Actions'}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {leads.map((lead) => (
+                    <tr key={`${lead.source_table}-${lead.id}`} className="border-t hover:bg-muted/30 transition-colors">
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center font-medium text-primary">
+                            {lead.name?.charAt(0) || lead.email?.charAt(0) || '?'}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium">{lead.name || 'Unknown'}</p>
+                              {lead.user_id && (
+                                <Badge variant="outline" className="text-xs bg-success/10 text-success">
+                                  {isRu ? 'Зарег.' : 'Registered'}
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground">{lead.email}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        {getSourceBadge(lead)}
+                      </td>
+                      <td className="p-4">
+                        {getPriorityBadge(lead.priority)}
+                      </td>
+                      <td className="p-4">
+                        {getStatusBadge(lead.status)}
+                      </td>
+                      <td className="p-4">
+                        {lead.ai_score !== null ? (
+                          <div className="flex items-center gap-2">
+                            <div className="w-12 h-2 bg-muted rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-chart-5 rounded-full"
+                                style={{ width: `${lead.ai_score}%` }}
+                              />
+                            </div>
+                            <span className="text-sm font-medium">{lead.ai_score}</span>
+                            {lead.ai_reasoning && (
+                            <span title={lead.ai_reasoning || undefined}>
+                              <Sparkles className="h-3 w-3 text-chart-5" />
+                            </span>
+                            )}
+                          </div>
+                        ) : lead.score !== null ? (
+                          <div className="flex items-center gap-2">
+                            <div className="w-12 h-2 bg-muted rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-primary rounded-full"
+                                style={{ width: `${lead.score}%` }}
+                              />
+                            </div>
+                            <span className="text-sm font-medium">{lead.score}</span>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground text-xs">—</span>
+                        )}
+                      </td>
+                      <td className="p-4">
+                        <span className="text-xs text-muted-foreground">
+                          {getTimeAgo(lead.created_at)}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex gap-1">
+                          {lead.email && (
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Mail className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {lead.phone && (
+                            <>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <Phone className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MessageCircle className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
