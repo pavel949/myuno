@@ -1,179 +1,325 @@
 
-# План редизайна футера приложения
 
-## Проблема
-Текущий футер (CompactFooter) перегружен элементами и создаёт визуальное нагромождение:
-- 9 отдельных секций в одном компоненте
-- Дублирование футера на главной странице
-- Неоптимальная иерархия элементов
-- Отсутствие стандарта в UX Contract
+# План: Полноценный Campaign Factory для MCC
 
-## Решение: Минималистичный футер
+## Текущее состояние
 
-### Структура нового футера
+Сейчас `MCCCampaignsTab.tsx` — это **UI-заглушка** с mock-данными. Таблица `mcc_campaigns` в базе данных уже существует, но:
+- Нет формы создания/редактирования кампаний
+- Нет реального CRUD
+- Нет связи с креативами (`mcc_creatives`)
+- Нет метрик производительности
+- Нет статусного workflow
+
+## Архитектура решения
 
 ```text
-┌─────────────────────────────────────────────────────────────┐
-│  Социальные сети (Telegram · Instagram · WhatsApp)         │
-├─────────────────────────────────────────────────────────────┤
-│  Ссылки: О нас · FAQ · Помощь · Условия                     │
-├─────────────────────────────────────────────────────────────┤
-│  © 2025 myUNO · Phuket Edition                              │
-└─────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────┐
+│                         CAMPAIGN FACTORY MODULE                           │
+├──────────────────────────────────────────────────────────────────────────┤
+│                                                                           │
+│  ┌─────────────────────┐   ┌─────────────────────┐   ┌────────────────┐  │
+│  │   Campaign List     │   │   Campaign Form     │   │  Campaign      │  │
+│  │   (Grid/Table)      │   │   (Create/Edit)     │   │  Detail View   │  │
+│  └─────────────────────┘   └─────────────────────┘   └────────────────┘  │
+│           │                         │                        │            │
+│           └─────────────┬───────────┴────────────────────────┘            │
+│                         ▼                                                 │
+│  ┌──────────────────────────────────────────────────────────────────┐    │
+│  │                    useCampaignFactory Hook                        │    │
+│  │  - CRUD operations (create, update, delete, duplicate)            │    │
+│  │  - Status transitions (draft → active → paused → completed)       │    │
+│  │  - Creatives management                                           │    │
+│  │  - Performance data aggregation                                   │    │
+│  └──────────────────────────────────────────────────────────────────┘    │
+│                         │                                                 │
+│                         ▼                                                 │
+│  ┌──────────────────────────────────────────────────────────────────┐    │
+│  │                      Supabase Tables                              │    │
+│  │  mcc_campaigns ◄──── mcc_creatives ◄──── mcc_channel_metrics      │    │
+│  └──────────────────────────────────────────────────────────────────┘    │
+│                                                                           │
+└──────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Что УБРАТЬ из футера
+## Компоненты для реализации
 
-| Элемент | Причина удаления | Куда переместить |
-|---------|------------------|------------------|
-| Partner CTA баннер | Слишком громоздкий | Отдельный компонент `ListWithUsBanner` (уже используется на главной) |
-| Trust Badges | Дублируют информацию | `SafetyBanner` на главной странице |
-| Location badge | Избыточен | В раздел About или убрать |
-| Support icons (App, SOS, Help) | Перегружают футер | В раздел Account или навигацию |
+### 1. Хук `useCampaignFactory.ts`
 
-### Что ОСТАВИТЬ в футере (3 секции)
+**Путь:** `src/hooks/useCampaignFactory.ts`
 
-1. **Социальные сети** — компактные иконки в ряд
-2. **Навигационные ссылки** — About · FAQ · Help · Terms · Privacy
-3. **Копирайт** — бренд и версия
+Централизованная логика для работы с кампаниями:
 
----
+```typescript
+// Основные операции
+- useCreateCampaign() — создание новой кампании
+- useUpdateCampaign() — обновление кампании
+- useDeleteCampaign() — удаление (только draft)
+- useDuplicateCampaign() — клонирование кампании
+- useToggleCampaignStatus() — переключение active/paused
 
-## Технические изменения
+// Запросы данных
+- useCampaigns() — список кампаний с фильтрами
+- useCampaignDetail(id) — детали одной кампании
+- useCampaignCreatives(id) — креативы кампании
+- useCampaignMetrics(id) — агрегированные метрики
+```
 
-### Файл 1: `src/components/layout/CompactFooter.tsx`
+### 2. Форма создания/редактирования `CampaignFormSheet.tsx`
 
-Полный рефакторинг — уменьшить с ~228 строк до ~80:
+**Путь:** `src/components/admin/marketing/CampaignFormSheet.tsx`
 
-```tsx
-export function CompactFooter() {
-  const { language } = useLanguage();
-  const isRu = language === 'ru';
+Слайд-панель (Sheet) с формой:
 
-  const navLinks = [
-    { to: '/about', label: isRu ? 'О нас' : 'About' },
-    { to: '/faq', label: 'FAQ' },
-    { to: '/support', label: isRu ? 'Помощь' : 'Help' },
-    { to: '/terms', label: isRu ? 'Условия' : 'Terms' },
-    { to: '/privacy', label: isRu ? 'Конфиденциальность' : 'Privacy' },
-  ];
+| Секция | Поля |
+|--------|------|
+| **Основное** | Название, Описание, Цель (dropdown) |
+| **Таргетинг** | Целевой сегмент (users/providers/owners) |
+| **Каналы** | Мультивыбор: Google, Meta, TikTok, Email, WhatsApp, Telegram |
+| **Бюджет** | Общий бюджет, Дневной лимит, Валюта |
+| **Расписание** | Дата старта, Дата окончания, Timezone |
+| **KPI** | Целевые метрики (leads, conversions, CAC) |
 
-  const socialLinks = [
-    { href: 'https://t.me/myuno_support', icon: Send, label: 'Telegram' },
-    { href: 'https://instagram.com/myuno.app', icon: Instagram, label: 'Instagram' },
-    { href: 'https://wa.me/...', icon: MessageCircle, label: 'WhatsApp' },
-  ];
+Типы целей:
+- `awareness` — Узнаваемость
+- `acquisition` — Привлечение
+- `activation` — Активация
+- `retention` — Удержание
+- `referral` — Реферальная
 
-  return (
-    <footer className="border-t border-border/50 bg-muted/30">
-      <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
-        {/* Социальные сети */}
-        <div className="flex justify-center gap-6">
-          {socialLinks.map(...)}
-        </div>
-        
-        {/* Навигация */}
-        <div className="flex flex-wrap justify-center gap-x-4 gap-y-2">
-          {navLinks.map(...)}
-        </div>
-        
-        {/* Копирайт */}
-        <p className="text-center text-xs text-muted-foreground">
-          © 2025 myUNO · Phuket Edition
-        </p>
-      </div>
-    </footer>
-  );
+### 3. Детальный просмотр `CampaignDetailSheet.tsx`
+
+**Путь:** `src/components/admin/marketing/CampaignDetailSheet.tsx`
+
+Слайд-панель с табами:
+
+| Таб | Содержимое |
+|-----|------------|
+| **Обзор** | KPI карточки, статус, прогресс бюджета |
+| **Креативы** | Список креативов кампании, добавление |
+| **Метрики** | Графики: leads, conversions, spend по дням |
+| **История** | Лог изменений статуса |
+
+### 4. Обновлённый `MCCCampaignsTab.tsx`
+
+**Изменения:**
+- Убрать mock-данные
+- Подключить `useCampaigns()` хук
+- Добавить фильтры по статусу и цели
+- Интегрировать `CampaignFormSheet` и `CampaignDetailSheet`
+- Добавить bulk-actions (пауза/активация нескольких)
+
+## Структура данных кампании
+
+```typescript
+interface CampaignFormData {
+  name: string;
+  description?: string;
+  goal: 'awareness' | 'acquisition' | 'activation' | 'retention' | 'referral';
+  target_segment: 'b2c_users' | 'providers' | 'owners' | 'partners';
+  channels: string[]; // ['google', 'meta', 'email', ...]
+  budget: {
+    total: number;
+    daily_cap?: number;
+    currency: 'USD' | 'THB' | 'RUB';
+  };
+  schedule: {
+    start_date: string; // ISO date
+    end_date?: string;
+    timezone: string;
+  };
+  kpi_targets?: {
+    target_leads?: number;
+    target_conversions?: number;
+    target_cac?: number;
+    target_roas?: number;
+  };
 }
 ```
 
-### Файл 2: `src/pages/Index.tsx`
+## Статусный workflow
 
-Удалить дублирующий инлайн футер (строки 234-238):
-
-```diff
-- {/* Footer - minimal */}
-- <div className="text-center py-3 border-t border-border/50">
--   <p className="text-xs text-muted-foreground">
--     © 2025 myUNO · {t('home.verifiedPartners')}
--   </p>
-- </div>
-```
-
-### Файл 3: `docs/UX_CONTRACT.md`
-
-Добавить секцию о футере:
-
-```markdown
-## 18. Footer Component
-
-### 18.1 CompactFooter (🔴 MUST)
-Все страницы с `showFooter={true}` используют единый минимальный футер.
-
-Обязательные элементы:
-- Социальные ссылки (Telegram, Instagram, WhatsApp)
-- Навигационные ссылки (About, FAQ, Help, Terms, Privacy)
-- Копирайт с брендом
-
-Запрещено добавлять:
-- CTA баннеры (использовать отдельные компоненты)
-- Trust badges (размещать в контенте страницы)
-- Громоздкие секции
-```
-
----
-
-## Визуальное сравнение
-
-### До (текущий):
 ```text
-┌──────────────────────────────────────┐
-│ 🤝 Стать партнёром                   │  ← Крупный баннер
-│    Предложите свои услуги...         │
-├──────────────────────────────────────┤
-│ [✓ G-Trust] [⏰ 24/7] [👥 200+]       │  ← Trust badges
-├──────────────────────────────────────┤
-│ О нас · Как работает · FAQ · Контакты│
-│                                      │
-│ [📱 App] [🆘 SOS] [❓ Help]           │  ← Кнопки
-├──────────────────────────────────────┤
-│ 📍 Phuket, Thailand                  │
-├──────────────────────────────────────┤
-│ [Telegram] [Instagram] [WhatsApp]    │
-├──────────────────────────────────────┤
-│     myUNO                            │
-│ "The only app you need abroad"       │
-├──────────────────────────────────────┤
-│ Условия · Конфиденциальность · ...   │
-│ © 2025 myUNO · Phuket Edition v1.0   │
-└──────────────────────────────────────┘
+┌─────────┐     ┌────────┐     ┌────────┐     ┌───────────┐
+│  draft  │ ──► │ active │ ◄─► │ paused │ ──► │ completed │
+└─────────┘     └────────┘     └────────┘     └───────────┘
+     │               │              │               ▲
+     │               │              │               │
+     └───────────────┴──────────────┴───────────────┘
+                     (manual complete)
 ```
 
-### После (предлагаемый):
+Правила:
+- `draft` → можно удалить, редактировать, запустить
+- `active` → можно только поставить на паузу или завершить
+- `paused` → можно возобновить или завершить
+- `completed` → read-only, только дублирование
+
+## UI-экраны
+
+### Экран 1: Список кампаний (обновлённый)
+
 ```text
-┌──────────────────────────────────────┐
-│   [📱 TG] · [📷 IG] · [💬 WA]         │  ← Компактные иконки
-├──────────────────────────────────────┤
-│ О нас · FAQ · Помощь · Условия       │  ← Одна строка
-├──────────────────────────────────────┤
-│ © 2025 myUNO · Phuket Edition        │
-└──────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│  Campaigns                                    [+ New Campaign]   │
+├──────────────────────────────────────────────────────────────────┤
+│  Filters: [All Status ▼] [All Goals ▼] [Search...]              │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ┌──────────────────────┐  ┌──────────────────────┐             │
+│  │ Summer Phuket 2026   │  │ Villa Retargeting    │             │
+│  │ ● Active | Acquisition│  │ ● Paused | Retention │             │
+│  │ [Google][Meta][TikTok]│  │ [Meta][Email]        │             │
+│  │ ─────────────────────│  │ ─────────────────────│             │
+│  │ Leads: 892  Conv: 127│  │ Leads: 234  Conv: 45 │             │
+│  │ Spend: $2,340/$5,000 │  │ Spend: $890/$1,500   │             │
+│  │ [Pause] [Edit] [...]  │  │ [Resume] [Edit] [...] │             │
+│  └──────────────────────┘  └──────────────────────┘             │
+│                                                                  │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
----
+### Экран 2: Форма создания
 
-## Порядок выполнения
+```text
+┌────────────────────────────────── Sheet ─────────────────────────┐
+│                                                              [X] │
+│  Create Campaign                                                 │
+│  ─────────────────────────────────────────────────────────────── │
+│                                                                  │
+│  Campaign Name *                                                 │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │ Summer Phuket Launch 2026                                │   │
+│  └──────────────────────────────────────────────────────────┘   │
+│                                                                  │
+│  Description                                                     │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │ Main campaign for summer season user acquisition...      │   │
+│  └──────────────────────────────────────────────────────────┘   │
+│                                                                  │
+│  Goal *                           Target Segment *               │
+│  ┌────────────────────────┐       ┌────────────────────────┐    │
+│  │ Acquisition           ▼│       │ B2C Users             ▼│    │
+│  └────────────────────────┘       └────────────────────────┘    │
+│                                                                  │
+│  Channels *                                                      │
+│  [✓ Google] [✓ Meta] [✓ TikTok] [○ Email] [○ WhatsApp]          │
+│                                                                  │
+│  ─── Budget ───────────────────────────────────────────────────  │
+│  Total Budget *     Daily Cap        Currency                    │
+│  ┌──────────┐       ┌──────────┐     ┌──────────┐               │
+│  │ 5000     │       │ 200      │     │ USD     ▼│               │
+│  └──────────┘       └──────────┘     └──────────┘               │
+│                                                                  │
+│  ─── Schedule ─────────────────────────────────────────────────  │
+│  Start Date *                   End Date (optional)              │
+│  ┌──────────────────┐           ┌──────────────────┐            │
+│  │ 2026-02-15       │           │ 2026-04-15       │            │
+│  └──────────────────┘           └──────────────────┘            │
+│                                                                  │
+│  ─────────────────────────────────────────────────────────────── │
+│                                   [Cancel]  [Save as Draft]      │
+└──────────────────────────────────────────────────────────────────┘
+```
 
-1. **Рефакторинг CompactFooter.tsx** — минимализация до 3 секций
-2. **Удаление дубля в Index.tsx** — убрать инлайн футер
-3. **Обновление UX_CONTRACT.md** — добавить стандарт футера
-4. **Проверка всех страниц с `showFooter`** — OwnerLanding и др.
+### Экран 3: Детали кампании
 
----
+```text
+┌────────────────────────────────── Sheet ─────────────────────────┐
+│                                                              [X] │
+│  Summer Phuket Launch 2026                                       │
+│  ● Active | Acquisition | B2C Users                              │
+│  ─────────────────────────────────────────────────────────────── │
+│                                                                  │
+│  [Overview] [Creatives] [Metrics] [History]                      │
+│  ─────────────────────────────────────────────────────────────── │
+│                                                                  │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐    │
+│  │   892      │ │    127     │ │   $2,340   │ │   14.2%    │    │
+│  │   Leads    │ │ Conversions│ │   Spent    │ │    CVR     │    │
+│  └────────────┘ └────────────┘ └────────────┘ └────────────┘    │
+│                                                                  │
+│  Budget Progress                                                 │
+│  ████████████████████░░░░░░░░░░░░░░░░░░░░  $2,340 / $5,000 (47%) │
+│                                                                  │
+│  Channels                                                        │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │ Channel    │ Leads  │ Conv  │ Spend    │ CAC    │ Status  │  │
+│  ├───────────────────────────────────────────────────────────┤  │
+│  │ Google     │  412   │  58   │ $1,240   │ $21.38 │ ● Live  │  │
+│  │ Meta       │  356   │  52   │ $890     │ $17.12 │ ● Live  │  │
+│  │ TikTok     │  124   │  17   │ $210     │ $12.35 │ ● Live  │  │
+│  └───────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  ─────────────────────────────────────────────────────────────── │
+│                            [Pause Campaign]  [Edit]  [Duplicate] │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+## Файлы для создания/изменения
+
+| Файл | Действие | Описание |
+|------|----------|----------|
+| `src/hooks/useCampaignFactory.ts` | Создать | Хук с CRUD операциями |
+| `src/components/admin/marketing/CampaignFormSheet.tsx` | Создать | Форма создания/редактирования |
+| `src/components/admin/marketing/CampaignDetailSheet.tsx` | Создать | Детальный просмотр |
+| `src/components/admin/marketing/CampaignCard.tsx` | Создать | Карточка кампании для grid |
+| `src/components/admin/marketing/MCCCampaignsTab.tsx` | Обновить | Интеграция компонентов |
+| `src/components/admin/marketing/index.ts` | Обновить | Экспорт новых компонентов |
+
+## Технические детали
+
+### Типизация
+
+```typescript
+// src/types/marketing.ts
+export interface Campaign {
+  id: string;
+  name: string;
+  description: string | null;
+  goal: CampaignGoal;
+  target_segment: string | null;
+  channels: string[];
+  budget: CampaignBudget | null;
+  schedule: CampaignSchedule | null;
+  kpi_targets: CampaignKPI | null;
+  ab_variants: any[] | null;
+  performance_data: CampaignPerformance | null;
+  status: CampaignStatus;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type CampaignGoal = 'awareness' | 'acquisition' | 'activation' | 'retention' | 'referral';
+export type CampaignStatus = 'draft' | 'scheduled' | 'active' | 'paused' | 'completed';
+```
+
+### Валидация
+
+Используем Zod для валидации формы:
+- `name` — обязательно, мин. 3 символа
+- `goal` — обязательно
+- `channels` — минимум 1 выбран
+- `budget.total` — положительное число
+- `schedule.start_date` — не в прошлом
+
+## Порядок реализации
+
+1. **Создать типы** — `src/types/marketing.ts`
+2. **Создать хук** — `useCampaignFactory.ts` с базовым CRUD
+3. **Создать форму** — `CampaignFormSheet.tsx`
+4. **Создать карточку** — `CampaignCard.tsx`
+5. **Обновить таб** — `MCCCampaignsTab.tsx` с реальными данными
+6. **Создать детали** — `CampaignDetailSheet.tsx`
+7. **Тестирование** — проверка всех операций
 
 ## Ожидаемый результат
 
-- Футер уменьшится с ~228 строк до ~80
-- Визуально чистый, не перегруженный
-- Соответствует минималистичному стилю платформы
-- Единый стандарт на всех страницах
+- Полнофункциональный Campaign Factory без mock-данных
+- CRUD для кампаний с валидацией
+- Визуальный workflow статусов
+- Связь с креативами и метриками (подготовка)
+- Билингвальный интерфейс (EN/RU)
+- Консистентный UX по паттернам админки (Sheet-based формы)
+
