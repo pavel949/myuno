@@ -1,5 +1,9 @@
 // Unified marketplace types that work with database
 
+// Seller types for C2C marketplace support
+export type SellerType = 'business' | 'individual';
+export type ItemCondition = 'new' | 'like_new' | 'good' | 'fair' | 'for_parts';
+
 export interface MarketplaceProduct {
   id: string;
   category_slug: string;

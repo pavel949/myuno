@@ -4825,18 +4825,24 @@ export type Database = {
         Row: {
           category_slug: string
           commission_rate: number | null
+          condition: string | null
+          contact_phone: string | null
+          contact_whatsapp: string | null
           cover_image: string | null
           created_at: string | null
           currency: string | null
           description_en: string | null
           description_ru: string | null
+          expires_at: string | null
           id: string
           images: string[] | null
           in_stock: boolean | null
           is_active: boolean | null
+          is_negotiable: boolean | null
           is_new: boolean | null
           is_popular: boolean | null
           is_shippable_international: boolean | null
+          location: string | null
           markup_amount: number | null
           name_en: string
           name_ru: string
@@ -4847,6 +4853,8 @@ export type Database = {
           rating: number | null
           recipe: Json | null
           review_count: number | null
+          seller_id: string | null
+          seller_type: string | null
           sort_order: number | null
           subcategory: string | null
           tags: string[] | null
@@ -4858,23 +4866,30 @@ export type Database = {
           vendor_id: string | null
           vendor_name: string | null
           vendor_name_ru: string | null
+          views_count: number | null
           weight_kg: number | null
         }
         Insert: {
           category_slug: string
           commission_rate?: number | null
+          condition?: string | null
+          contact_phone?: string | null
+          contact_whatsapp?: string | null
           cover_image?: string | null
           created_at?: string | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
+          expires_at?: string | null
           id?: string
           images?: string[] | null
           in_stock?: boolean | null
           is_active?: boolean | null
+          is_negotiable?: boolean | null
           is_new?: boolean | null
           is_popular?: boolean | null
           is_shippable_international?: boolean | null
+          location?: string | null
           markup_amount?: number | null
           name_en: string
           name_ru: string
@@ -4885,6 +4900,8 @@ export type Database = {
           rating?: number | null
           recipe?: Json | null
           review_count?: number | null
+          seller_id?: string | null
+          seller_type?: string | null
           sort_order?: number | null
           subcategory?: string | null
           tags?: string[] | null
@@ -4896,23 +4913,30 @@ export type Database = {
           vendor_id?: string | null
           vendor_name?: string | null
           vendor_name_ru?: string | null
+          views_count?: number | null
           weight_kg?: number | null
         }
         Update: {
           category_slug?: string
           commission_rate?: number | null
+          condition?: string | null
+          contact_phone?: string | null
+          contact_whatsapp?: string | null
           cover_image?: string | null
           created_at?: string | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
+          expires_at?: string | null
           id?: string
           images?: string[] | null
           in_stock?: boolean | null
           is_active?: boolean | null
+          is_negotiable?: boolean | null
           is_new?: boolean | null
           is_popular?: boolean | null
           is_shippable_international?: boolean | null
+          location?: string | null
           markup_amount?: number | null
           name_en?: string
           name_ru?: string
@@ -4923,6 +4947,8 @@ export type Database = {
           rating?: number | null
           recipe?: Json | null
           review_count?: number | null
+          seller_id?: string | null
+          seller_type?: string | null
           sort_order?: number | null
           subcategory?: string | null
           tags?: string[] | null
@@ -4934,6 +4960,7 @@ export type Database = {
           vendor_id?: string | null
           vendor_name?: string | null
           vendor_name_ru?: string | null
+          views_count?: number | null
           weight_kg?: number | null
         }
         Relationships: [
@@ -12880,6 +12907,102 @@ export type Database = {
           },
         ]
       }
+      user_listings: {
+        Row: {
+          category_slug: string | null
+          condition: string | null
+          contact_phone: string | null
+          contact_whatsapp: string | null
+          cover_image: string | null
+          created_at: string | null
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          expires_at: string | null
+          favorites_count: number | null
+          id: string
+          images: string[] | null
+          is_negotiable: boolean | null
+          location: string | null
+          moderation_status: string | null
+          original_price: number | null
+          price: number
+          published_at: string | null
+          rejection_reason: string | null
+          show_phone: boolean | null
+          sold_at: string | null
+          status: string | null
+          subcategory: string | null
+          title_en: string
+          title_ru: string | null
+          updated_at: string | null
+          user_id: string
+          views_count: number | null
+        }
+        Insert: {
+          category_slug?: string | null
+          condition?: string | null
+          contact_phone?: string | null
+          contact_whatsapp?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          expires_at?: string | null
+          favorites_count?: number | null
+          id?: string
+          images?: string[] | null
+          is_negotiable?: boolean | null
+          location?: string | null
+          moderation_status?: string | null
+          original_price?: number | null
+          price: number
+          published_at?: string | null
+          rejection_reason?: string | null
+          show_phone?: boolean | null
+          sold_at?: string | null
+          status?: string | null
+          subcategory?: string | null
+          title_en: string
+          title_ru?: string | null
+          updated_at?: string | null
+          user_id: string
+          views_count?: number | null
+        }
+        Update: {
+          category_slug?: string | null
+          condition?: string | null
+          contact_phone?: string | null
+          contact_whatsapp?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          expires_at?: string | null
+          favorites_count?: number | null
+          id?: string
+          images?: string[] | null
+          is_negotiable?: boolean | null
+          location?: string | null
+          moderation_status?: string | null
+          original_price?: number | null
+          price?: number
+          published_at?: string | null
+          rejection_reason?: string | null
+          show_phone?: boolean | null
+          sold_at?: string | null
+          status?: string | null
+          subcategory?: string | null
+          title_en?: string
+          title_ru?: string | null
+          updated_at?: string | null
+          user_id?: string
+          views_count?: number | null
+        }
+        Relationships: []
+      }
       user_loyalty_status: {
         Row: {
           bookings_this_year: number | null
@@ -15272,6 +15395,7 @@ export type Database = {
         | "failed"
         | "cancelled"
         | "refunded"
+      item_condition: "new" | "like_new" | "good" | "fair" | "for_parts"
       listing_application_status:
         | "draft"
         | "pending"
@@ -15280,6 +15404,7 @@ export type Database = {
         | "rejected"
         | "revision_requested"
       listing_type: "property" | "service" | "product"
+      marketplace_seller_type: "business" | "individual"
       order_item_status:
         | "pending"
         | "confirmed"
@@ -15490,6 +15615,7 @@ export const Constants = {
         "cancelled",
         "refunded",
       ],
+      item_condition: ["new", "like_new", "good", "fair", "for_parts"],
       listing_application_status: [
         "draft",
         "pending",
@@ -15499,6 +15625,7 @@ export const Constants = {
         "revision_requested",
       ],
       listing_type: ["property", "service", "product"],
+      marketplace_seller_type: ["business", "individual"],
       order_item_status: [
         "pending",
         "confirmed",
