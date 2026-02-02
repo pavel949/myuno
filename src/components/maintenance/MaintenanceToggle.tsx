@@ -4,6 +4,9 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Construction, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 interface MaintenanceToggleProps {
   className?: string;
@@ -12,6 +15,27 @@ interface MaintenanceToggleProps {
 
 export function MaintenanceToggle({ className, showLabel = true }: MaintenanceToggleProps) {
   const { isMaintenanceMode, setMaintenanceMode } = useMaintenance();
+  const { user } = useAuth();
+  
+  // Check if current user is admin
+  const { data: isAdmin } = useQuery({
+    queryKey: ['user-is-admin', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return false;
+      const { data } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .in('role', ['admin', 'uno_team'])
+        .maybeSingle();
+      return !!data;
+    },
+    enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+
+  // Only show toggle to admins
+  if (!isAdmin) return null;
 
   return (
     <div className={cn("flex items-center gap-3", className)}>
