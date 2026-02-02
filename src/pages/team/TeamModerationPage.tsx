@@ -15,7 +15,8 @@ import { formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
-// Mock moderation queue
+// TODO: Replace with DB query - moderation items should come from moderation_queue table
+// Mock moderation queue for demo purposes
 const MOCK_ITEMS = [
   { id: '1', type: 'review', title: 'Review for Villa Ocean View', user: 'John S.', rating: 4, content: 'Great place, amazing view!', time: new Date(Date.now() - 2 * 3600000) },
   { id: '2', type: 'photo', title: 'Property photos update', user: 'Maria G.', count: 5, time: new Date(Date.now() - 4 * 3600000) },

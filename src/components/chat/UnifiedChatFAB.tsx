@@ -5,6 +5,7 @@ import { MessageCircle, X, Sparkles, Send, Bot, User, Loader2 } from 'lucide-rea
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { COMPANY_CONTACTS } from '@/lib/config/contacts';
 import {
   Drawer,
   DrawerContent,
@@ -31,7 +32,6 @@ interface Message {
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-support-chat`;
 const HIDDEN_ROUTES = ['/auth'];
-const PHONE_NUMBER = '66922407355';
 
 type ActiveView = 'menu' | 'ai';
 
@@ -164,12 +164,12 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
   };
 
   const handleWhatsApp = () => {
-    window.open(`https://wa.me/${PHONE_NUMBER}`, '_blank');
+    window.open(COMPANY_CONTACTS.whatsapp.link, '_blank');
     setIsOpen(false);
   };
 
   const handleTelegram = () => {
-    window.open(`https://t.me/+${PHONE_NUMBER}`, '_blank');
+    window.open(COMPANY_CONTACTS.telegram.number, '_blank');
     setIsOpen(false);
   };
 

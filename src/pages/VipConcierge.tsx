@@ -25,9 +25,7 @@ import { SectionCard } from '@/components/uno/SectionCard';
 import { Button } from '@/components/ui/button';
 import { FadeInUp, AnimatedList, AnimatedItem } from '@/components/layout/AnimatedList';
 import { cn } from '@/lib/utils';
-
-const UNO_CONCIERGE_PHONE = '+66922407355';
-const UNO_WHATSAPP = 'https://wa.me/66922407355';
+import { COMPANY_CONTACTS, getTelLink } from '@/lib/config/contacts';
 
 interface VipService {
   id: string;
@@ -190,7 +188,7 @@ export default function VipConcierge() {
               <Button
                 size="lg"
                 className="flex-1 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white font-semibold shadow-lg"
-                onClick={() => window.location.href = `tel:${UNO_CONCIERGE_PHONE}`}
+                onClick={() => window.location.href = getTelLink()}
               >
                 <Phone className="w-5 h-5 mr-2" />
                 {t('vip.callUs')}
@@ -199,7 +197,7 @@ export default function VipConcierge() {
                 size="lg"
                 variant="outline"
                 className="flex-1 border-purple-500/50 text-purple-600 hover:bg-purple-500/10"
-                onClick={() => window.open(UNO_WHATSAPP, '_blank')}
+                onClick={() => window.open(COMPANY_CONTACTS.whatsapp.link, '_blank')}
               >
                 <MessageCircle className="w-5 h-5 mr-2" />
                 WhatsApp
@@ -239,9 +237,9 @@ export default function VipConcierge() {
             const Icon = service.icon;
             return (
               <AnimatedItem key={service.id}>
-                <div 
+              <div 
                   className="p-4 rounded-2xl border bg-card cursor-pointer hover:border-purple-500/30 transition-colors"
-                  onClick={() => window.open(UNO_WHATSAPP, '_blank')}
+                  onClick={() => window.open(COMPANY_CONTACTS.whatsapp.link, '_blank')}
                 >
                   <div className="flex items-center gap-4">
                     <div className={cn("p-3 rounded-xl", service.bgColor)}>
@@ -275,7 +273,7 @@ export default function VipConcierge() {
             </p>
             <Button
               className="w-full bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white"
-              onClick={() => window.open(UNO_WHATSAPP, '_blank')}
+              onClick={() => window.open(COMPANY_CONTACTS.whatsapp.link, '_blank')}
             >
               <MessageCircle className="w-4 h-4 mr-2" />
               {t('vip.messageWhatsApp')}

@@ -5,6 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { COMPANY_CONTACTS } from '@/lib/config/contacts';
 
 interface BookingDetails {
   propertyTitle: string;
@@ -79,9 +80,7 @@ export function ContactAdminButton({
 
 I would like to discuss payment options for the deposit.`;
 
-    // myUNO WhatsApp number (Thailand)
-    const whatsappNumber = '66922407355';
-    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/${COMPANY_CONTACTS.whatsapp.number}?text=${encodeURIComponent(message)}`;
 
     window.open(whatsappUrl, '_blank');
   };

@@ -9,8 +9,9 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from '@/integrations/supabase/client';
 import { demoRestaurants } from './restaurantsData';
+import { CITY_GEOGRAPHY } from '@/lib/config/geography';
 
-// Demo coordinates for restaurants in Phuket
+// TODO: Replace with DB query - restaurant coordinates should come from restaurants table
 const restaurantCoordinates: Record<string, { lat: number; lng: number }> = {
   'rest-1': { lat: 7.8965, lng: 98.2956 }, // Patong
   'rest-2': { lat: 7.8172, lng: 98.3028 }, // Kata
@@ -64,11 +65,12 @@ export default function RestaurantMap() {
 
     mapboxgl.accessToken = mapboxToken;
 
+    const phuketGeo = CITY_GEOGRAPHY.phuket;
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: 'mapbox://styles/mapbox/streets-v12',
-      center: [98.3388, 7.8804], // Phuket center
-      zoom: 11,
+      center: [phuketGeo.center.lng, phuketGeo.center.lat],
+      zoom: phuketGeo.zoom,
     });
 
     map.addControl(new mapboxgl.NavigationControl(), 'top-right');
