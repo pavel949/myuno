@@ -302,3 +302,102 @@ export function useDeleteReport() {
     },
   });
 }
+
+// Generate PDF for a report
+export function useGeneratePdf() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ reportId, language = 'ru' }: { reportId: string; language?: 'en' | 'ru' }) => {
+      const { data, error } = await supabase.functions.invoke('generate-report-pdf', {
+        body: { reportId, language },
+      });
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['property-reports'] });
+      toast.success('PDF готов к скачиванию');
+    },
+    onError: (error) => {
+      toast.error('Ошибка генерации PDF: ' + error.message);
+    },
+  });
+}
+
+// Send report via email
+export function useSendReportEmail() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ 
+      reportId, 
+      recipientEmails, 
+      language = 'ru' 
+    }: { 
+      reportId: string; 
+      recipientEmails: string[]; 
+      language?: 'en' | 'ru';
+    }) => {
+      const { data, error } = await supabase.functions.invoke('send-property-report', {
+        body: { reportId, recipientEmails, language },
+      });
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['property-reports'] });
+      toast.success('Отчёт отправлен');
+    },
+    onError: (error) => {
+      toast.error('Ошибка отправки: ' + error.message);
+    },
+  });
+}
+
+// Role-based report access check
+export function useCanAccessReportFinancials(propertyId: string) {
+  const { user } = useAuth();
+  
+  return useQuery({
+    queryKey: ['report-financials-access', user?.id, propertyId],
+    queryFn: async () => {
+      if (!user) return { canAccess: false, role: null };
+      
+      // Check if user is owner
+      const { data: property } = await supabase
+        .from('owner_properties')
+        .select('owner_id')
+        .eq('id', propertyId)
+        .single();
+      
+      if (property?.owner_id === user.id) {
+        return { canAccess: true, role: 'owner' };
+      }
+      
+      // Check delegate permissions
+      const { data: delegate } = await supabase
+        .from('property_delegates')
+        .select('role, permissions')
+        .eq('property_id', propertyId)
+        .eq('user_id', user.id)
+        .eq('status', 'accepted')
+        .single();
+      
+      if (delegate) {
+        const permissions = delegate.permissions as string[] || [];
+        const hasFinancials = permissions.includes('financials') || 
+                             permissions.includes('all');
+        return { 
+          canAccess: hasFinancials, 
+          role: delegate.role 
+        };
+      }
+      
+      return { canAccess: false, role: null };
+    },
+    enabled: !!user && !!propertyId,
+  });
+}
