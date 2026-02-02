@@ -11,12 +11,14 @@ import { LocationProvider } from "@/contexts/LocationContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { MaintenanceProvider, useMaintenance } from "@/contexts/MaintenanceContext";
 import { AnimatedRoutes } from "@/components/layout/AnimatedRoutes";
 import { SupportFAB } from "@/components/chat/SupportFAB";
 import { ErrorBoundary, useGlobalErrorHandler } from "@/components/ErrorBoundary";
 import { PrefetchProvider } from "@/components/providers/PrefetchProvider";
 import { defaultQueryClientOptions } from "@/lib/queryConfig";
 import { HintProvider } from "@/components/hints/HintProvider";
+import { UnderConstruction } from "@/components/maintenance/UnderConstruction";
 
 const queryClient = new QueryClient({
   defaultOptions: defaultQueryClientOptions,
@@ -25,6 +27,12 @@ const queryClient = new QueryClient({
 // Inner component to use hooks
 function AppContent() {
   useGlobalErrorHandler();
+  const { isMaintenanceMode, canBypass } = useMaintenance();
+  
+  // Show maintenance page if enabled and user can't bypass
+  if (isMaintenanceMode && !canBypass) {
+    return <UnderConstruction />;
+  }
   
   return (
     <>
@@ -44,23 +52,25 @@ const App = () => (
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
-          <LanguageProvider>
-            <LocationProvider>
-              <CurrencyProvider>
-                <AuthProvider>
-                  <CartProvider>
-                    <TooltipProvider>
-                      <HintProvider>
-                        <PrefetchProvider>
-                          <AppContent />
-                        </PrefetchProvider>
-                      </HintProvider>
-                    </TooltipProvider>
-                    </CartProvider>
-                  </AuthProvider>
-                </CurrencyProvider>
-            </LocationProvider>
-          </LanguageProvider>
+          <MaintenanceProvider>
+            <LanguageProvider>
+              <LocationProvider>
+                <CurrencyProvider>
+                  <AuthProvider>
+                    <CartProvider>
+                      <TooltipProvider>
+                        <HintProvider>
+                          <PrefetchProvider>
+                            <AppContent />
+                          </PrefetchProvider>
+                        </HintProvider>
+                      </TooltipProvider>
+                      </CartProvider>
+                    </AuthProvider>
+                  </CurrencyProvider>
+              </LocationProvider>
+            </LanguageProvider>
+          </MaintenanceProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </HelmetProvider>
