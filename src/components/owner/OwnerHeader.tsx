@@ -15,6 +15,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { RoleContextSwitcher } from '@/components/uno/RoleContextSwitcher';
+import { CurrencySwitcher } from '@/components/uno/CurrencySwitcher';
 
 // Route to breadcrumb mapping
 const routeLabels: Record<string, { en: string; ru: string }> = {
@@ -126,6 +127,7 @@ export function OwnerHeader() {
         >
           <HelpCircle className="h-4 w-4" />
         </Button>
+        <CurrencySwitcher size="sm" />
         <ThemeSwitcher />
         <LanguageSwitcher />
         <Button 

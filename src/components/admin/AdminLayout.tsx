@@ -35,7 +35,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         <AdminSidebar />
         <SidebarInset className="flex-1 flex flex-col">
           <AdminHeader onOpenCommandPalette={() => setCommandPaletteOpen(true)} />
-          <main className="flex-1 overflow-auto">
+          <main className="flex-1 overflow-auto pb-4">
             {children || <Outlet />}
           </main>
         </SidebarInset>

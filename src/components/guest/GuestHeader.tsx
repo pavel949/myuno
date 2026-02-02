@@ -15,6 +15,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { CurrencySwitcher } from '@/components/uno/CurrencySwitcher';
+import { RoleContextSwitcher } from '@/components/uno/RoleContextSwitcher';
 
 const routeLabels: Record<string, { en: string; ru: string }> = {
   '/my-stay': { en: 'Dashboard', ru: 'Обзор' },
@@ -102,6 +103,7 @@ export function GuestHeader() {
       <div className="flex-1" />
 
       <div className="flex items-center gap-1">
+        <RoleContextSwitcher compact />
         <Button 
           variant="ghost" 
           size="icon"
