@@ -1,113 +1,94 @@
 
-# Таксономия Thumbtack для myUNO Home Services
+# План: Полная консистентность данных форм и карточек
 
-## Почему Thumbtack?
+## Выявленные проблемы
 
-**Thumbtack** — крупнейший американский marketplace домашних услуг (оценка $3.2B, 10M+ клиентов). Их таксономия идеально подходит для myUNO по следующим причинам:
+### 1. Разрыв между формами и карточками
 
-| Критерий | Thumbtack | TaskRabbit | Helpling |
-|----------|-----------|------------|----------|
-| Смешанный рынок (мастера + компании) | ✅ | ⚠️ Только фрилансеры | ❌ Только компании |
-| Глубина категорий | 4 домена → 25+ категорий | 8 flat categories | 5 категорий |
-| Локальная адаптация | ✅ Региональные услуги | ⚠️ Только крупные города | ❌ |
-| Подходит для Азии | ✅ | ⚠️ | ❌ |
+| Компонент | Проблема | Влияние |
+|-----------|----------|---------|
+| **VendorProducts.tsx** (строка 813-821) | `CardPreview type="service"` вместо `type="product"` | Ошибочное превью для товаров |
+| **CardPreview.tsx** | Использует `rounded-xl`, карточки на сайте — `rounded-2xl` | Визуальное несоответствие |
+| **HomeServiceProviderCard.tsx** | Показывает `provider_type`, `has_insurance`, `has_guarantee` | **Эти поля отсутствуют в AdminProviders.tsx** |
+| **ProductCard.tsx** | Показывает атрибуты через `useProductAttributes` | **Vendor/Admin формы не имеют редактора атрибутов** |
+| **VendorServices.tsx** | Форма: `name`, `name_ru` | Карточка ожидает: `name_en`, `name_ru` |
 
----
+### 2. Несинхронизированные категории
 
-## Адаптированная таксономия для myUNO
+| Файл | Категории | Проблема |
+|------|-----------|----------|
+| `AdminProviders.tsx` | 16 статичных категорий (`BUSINESS_CATEGORIES`) | Не синхронизированы с `homeServicesTaxonomy.ts` |
+| `ServicesFilters.tsx` | Использует отдельные ID (`ac-service` vs `ac`) | Фильтры не работают |
+| `useHomeServices.ts` | Другие ID (`hvac`, `tech`) | Запросы возвращают пустые результаты |
 
-### Структура: 4 домена → 16 категорий
+### 3. Отсутствующие поля в формах
 
-```
-🏠 HOME MAINTENANCE (Обслуживание дома)
-├── handyman      → Мастер на час (общие работы)
-├── plumbing      → Сантехник
-├── electrical    → Электрик  
-├── ac            → Кондиционеры / HVAC
-├── repair        → Ремонт техники
-└── security      → Системы безопасности
+**Для Providers (в карточке есть, в форме нет):**
+- `provider_type` (individual/company)
+- `response_time_minutes`
+- `has_insurance`
+- `has_guarantee`
+- `languages`
+- `service_domains[]`
 
-✨ CLEANING (Уборка и гигиена)
-├── home-cleaning → Уборка дома
-├── deep-cleaning → Генеральная уборка
-├── laundry       → Прачечная
-├── pest          → Дезинсекция
-└── pool          → Бассейн (химия + чистка)
-
-🌿 OUTDOOR (Двор и территория)
-├── garden        → Садовник / ландшафт
-├── pool-tech     → Техобслуживание бассейна
-└── exterior      → Мойка фасадов / крыш
-
-🚚 LOGISTICS (Логистика)
-├── moving        → Переезд и грузчики
-├── water-delivery→ Доставка воды
-└── road-assistance → Помощь на дороге
-```
+**Для Products (в карточке есть, в форме нет):**
+- Произвольные атрибуты (brand, origin, organic, material)
+- Редактор для таблицы `marketplace_product_attributes`
 
 ---
 
-## Исправление текущих проблем
+## Как это делают глобальные маркетплейсы
 
-### Проблема 1: Несинхронизированные ID
+### Amazon / Ozon
+```text
+┌─────────────────────────────────────────────┐
+│  SELLER CENTER                              │
+│  ┌─────────────────────────────────────────┐│
+│  │ Title: [______________]                 ││
+│  │ Category: [Electronics ▼]               ││
+│  │ ─────────────────────────────────────── ││
+│  │ CATEGORY-SPECIFIC FIELDS (динамически) ││
+│  │ Brand: [______________]                 ││
+│  │ Model: [______________]                 ││
+│  │ Warranty: [12 months ▼]                 ││
+│  │ ─────────────────────────────────────── ││
+│  │ LIVE PREVIEW (точная копия карточки)   ││
+│  │ ┌───────────────────────────────────┐  ││
+│  │ │ [Та же карточка что и в каталоге] │  ││
+│  │ └───────────────────────────────────┘  ││
+│  └─────────────────────────────────────────┘│
+└─────────────────────────────────────────────┘
+```
 
-| Файл | Текущие ID | Нужные ID |
-|------|------------|-----------|
-| ServicesIndex.tsx | `ac`, `repair` | `ac`, `repair` ✓ |
-| ServicesFilters.tsx | `ac-service`, `pest-control`, `gardening` | `ac`, `pest`, `garden` ✗ |
-| useHomeServices.ts | `hvac`, `tech` | Объединить в `ac`, `repair` |
+### Ключевые паттерны
 
-**Решение:** Единый источник правды в `homeServicesTaxonomy.ts`
-
-### Проблема 2: Нет различия мастер/компания
-
-Добавить в `providers`:
-- `provider_type`: `'individual'` | `'company'`
-- `response_time_minutes`: число (для "⚡ Отвечает за 15 мин")
-- `has_insurance`: boolean
-- `has_guarantee`: boolean
-
-### Проблема 3: Дублирование с /cleaning
-
-**Решение:** Cleaning становится поддоменом Home Services:
-- `/services` — главная страница с 4 доменами
-- Домен "Cleaning" показывает контент из `cleaning_services` table
-- `/cleaning` — остается как shortcut (redirect на `/services?domain=cleaning`)
+1. **Single Source of Truth (SSoT)** — один TypeScript интерфейс для формы и карточки
+2. **Live Preview** — превью в форме = реальная карточка каталога
+3. **Registry-Driven Forms** — поля формы определяются схемой категории
+4. **Centralized Adapters** — маппинг DB → UI в одном месте
 
 ---
 
-## Новая структура UI
+## Архитектура решения
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  🔧 Домашние услуги              [🔍] [⚙️]                  │
-│  48 профессионалов                                          │
-├─────────────────────────────────────────────────────────────┤
-│  Domain Tabs:                                               │
-│  [Все] [🏠 Ремонт] [✨ Уборка] [🌿 Двор] [🚚 Логистика]     │
-├─────────────────────────────────────────────────────────────┤
-│  Quick Grid (4 самых популярных в выбранном домене):        │
-│  ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐               │
-│  │   🔨   │ │   🚿   │ │   ⚡   │ │   ❄️   │               │
-│  │ Мастер │ │Сантехн │ │Электрик│ │   AC   │               │
-│  └────────┘ └────────┘ └────────┘ └────────┘               │
-├─────────────────────────────────────────────────────────────┤
-│  Provider Type Toggle:                                       │
-│  [Все] [👤 Мастера] [🏢 Компании]                           │
-├─────────────────────────────────────────────────────────────┤
-│  ┌─────────────────────────────────────────────────────────┐│
-│  │ [Logo] ProFix Electrical    ⭐ 4.9 (156)                ││
-│  │        🏢 Компания • ✅ Верифицирован                   ││
-│  │        ⚡ Электрик • 🛡️ Страховка • ⚡ 30 мин           ││
-│  │        от ฿500/вызов                                    ││
-│  └─────────────────────────────────────────────────────────┘│
-│  ┌─────────────────────────────────────────────────────────┐│
-│  │ [Photo] Сергей М.           ⭐ 4.8 (89)                 ││
-│  │         👤 Частный мастер • 🔨 Мастер на час            ││
-│  │         🇷🇺 Русский • ⚡ 15 мин отклик                   ││
-│  │         от ฿300/час                                     ││
-│  └─────────────────────────────────────────────────────────┘│
-└─────────────────────────────────────────────────────────────┘
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│  src/lib/adapters/contentAdapters.ts                           │
+│  ┌───────────────────────────────────────────────────────────┐ │
+│  │ mapProductToCard(product, lang) → UnifiedContentCardProps │ │
+│  │ mapServiceToCard(service, lang) → UnifiedContentCardProps │ │
+│  │ mapProviderToCard(provider, lang) → HomeServiceCardProps  │ │
+│  └───────────────────────────────────────────────────────────┘ │
+│                              ↓                                  │
+│  ┌───────────────────────┐  ┌───────────────────────────────┐  │
+│  │ VendorProducts.tsx    │  │ MarketIndex.tsx              │  │
+│  │ (Vendor Preview)      │  │ (Public Catalog)             │  │
+│  │ ┌───────────────────┐ │  │ ┌─────────────────────────┐  │  │
+│  │ │UnifiedContentCard │ │  │ │UnifiedContentCard       │  │  │
+│  │ │{...mapProduct()}  │ │  │ │{...mapProduct()}        │  │  │
+│  │ └───────────────────┘ │  │ └─────────────────────────┘  │  │
+│  └───────────────────────┘  └───────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -118,68 +99,229 @@
 
 | Файл | Назначение |
 |------|------------|
-| `src/lib/config/homeServicesTaxonomy.ts` | Единый источник категорий (Thumbtack-based) |
-| `src/components/services/ServiceProviderCard.tsx` | Карточка с визуальным различием мастер/компания |
-| `src/components/services/ProviderTypeToggle.tsx` | Переключатель типа исполнителя |
-| `src/components/services/DomainTabs.tsx` | Табы по доменам |
+| `src/lib/adapters/contentAdapters.ts` | Централизованный маппинг данных из БД в props карточек |
+| `src/components/vendor/AttributeEditor.tsx` | Редактор произвольных атрибутов для товаров |
 
 ### Изменяемые файлы
 
 | Файл | Изменения |
 |------|-----------|
-| `src/pages/services/ServicesIndex.tsx` | Новая структура: Domains → Quick Grid → Type Toggle → Cards |
-| `src/components/filters/ServicesFilters.tsx` | Импорт категорий из taxonomy, добавление providerType |
-| `src/hooks/useHomeServices.ts` | Синхронизация категорий, поддержка provider_type |
+| **AdminProviders.tsx** | Добавить поля: `provider_type`, `has_insurance`, `has_guarantee`, `response_time_minutes`, `languages` |
+| **VendorProducts.tsx** | Заменить `CardPreview type="service"` на `UnifiedContentCard` с адаптером, добавить редактор атрибутов |
+| **VendorServices.tsx** | Использовать `UnifiedContentCard` для превью вместо `CardPreview` |
+| **CardPreview.tsx** | Рефакторинг: обёртка вокруг `UnifiedContentCard` вместо дублирования стилей |
 
-### Миграция БД
+---
 
-```sql
--- Добавить поля для различения типов исполнителей
-ALTER TABLE providers 
-  ADD COLUMN IF NOT EXISTS provider_type TEXT DEFAULT 'company',
-  ADD COLUMN IF NOT EXISTS response_time_minutes INTEGER,
-  ADD COLUMN IF NOT EXISTS has_insurance BOOLEAN DEFAULT false,
-  ADD COLUMN IF NOT EXISTS has_guarantee BOOLEAN DEFAULT false,
-  ADD COLUMN IF NOT EXISTS service_domains TEXT[] DEFAULT '{}';
+## Детальный план изменений
 
--- Нормализовать существующие категории
-UPDATE providers SET business_category = 'ac' WHERE business_category = 'hvac';
-UPDATE providers SET business_category = 'repair' WHERE business_category = 'tech';
+### Шаг 1: Создать централизованные адаптеры
+
+```typescript
+// src/lib/adapters/contentAdapters.ts
+
+import { MarketplaceProduct } from '@/types/marketplace';
+import { Service } from '@/hooks/useServices';
+import { HomeServiceProviderData } from '@/components/services/HomeServiceProviderCard';
+
+export function mapProductToCardProps(
+  product: MarketplaceProduct, 
+  language: string
+): UnifiedContentCardProps {
+  const isRu = language === 'ru';
+  const discount = product.original_price 
+    ? Math.round((1 - product.price / product.original_price) * 100) 
+    : 0;
+    
+  return {
+    variant: 'product',
+    title: isRu ? product.name_ru : product.name_en,
+    subtitle: isRu ? product.vendor_name_ru : product.vendor_name,
+    description: isRu ? product.description_ru : product.description_en,
+    image: product.cover_image,
+    price: `฿${product.price.toLocaleString()}`,
+    originalPrice: product.original_price ? `฿${product.original_price.toLocaleString()}` : undefined,
+    discount: discount > 0 ? discount : undefined,
+    rating: product.rating,
+    reviewCount: product.review_count,
+    isNew: product.is_new,
+    isPopular: product.is_popular,
+  };
+}
+
+export function mapServiceToCardProps(
+  service: Service,
+  language: string
+): UnifiedContentCardProps {
+  const isRu = language === 'ru';
+  return {
+    variant: 'service',
+    title: isRu ? service.name_ru : service.name_en,
+    subtitle: service.provider?.name,
+    description: isRu ? service.description_ru : service.description_en,
+    image: service.images?.[0],
+    price: service.price ? `฿${service.price.toLocaleString()}` : undefined,
+    duration: service.duration_minutes ? `${service.duration_minutes} min` : undefined,
+    rating: service.rating,
+    reviewCount: service.review_count,
+  };
+}
+```
+
+### Шаг 2: Обновить AdminProviders.tsx
+
+Добавить недостающие поля в форму:
+
+```typescript
+const [formData, setFormData] = useState({
+  name: '',
+  description_en: '',
+  description_ru: '',
+  business_category: '',
+  phone: '',
+  email: '',
+  website: '',
+  address: '',
+  is_active: true,
+  is_verified: false,
+  // Новые поля (синхронизация с HomeServiceProviderCard)
+  provider_type: 'company' as 'individual' | 'company',
+  response_time_minutes: '',
+  has_insurance: false,
+  has_guarantee: false,
+  languages: [] as string[],
+  service_domains: [] as string[],
+});
+```
+
+Использовать `ALL_SERVICE_CATEGORIES` из `homeServicesTaxonomy.ts`:
+
+```typescript
+import { ALL_SERVICE_CATEGORIES, PROVIDER_TYPE_OPTIONS } from '@/lib/config/homeServicesTaxonomy';
+
+// В форме:
+<Select value={formData.business_category} onValueChange={...}>
+  {ALL_SERVICE_CATEGORIES.map(cat => (
+    <SelectItem key={cat.id} value={cat.id}>
+      {cat.icon} {isRussian ? cat.labelRu : cat.labelEn}
+    </SelectItem>
+  ))}
+</Select>
+```
+
+### Шаг 3: Создать AttributeEditor
+
+Компонент для управления атрибутами товаров:
+
+```typescript
+// src/components/vendor/AttributeEditor.tsx
+
+interface AttributeEditorProps {
+  productId?: string;
+  attributes: Array<{ key: string; value: string; valueRu: string }>;
+  onChange: (attrs: Array<...>) => void;
+}
+
+// Предустановленные ключи атрибутов
+const ATTRIBUTE_KEYS = ['brand', 'origin', 'organic', 'storage', 'material', 'color', 'size'];
+
+export function AttributeEditor({ attributes, onChange }: AttributeEditorProps) {
+  // Добавление/редактирование/удаление атрибутов
+  // Автокомплит для ключей
+  // Двуязычные значения (EN/RU)
+}
+```
+
+### Шаг 4: Исправить VendorProducts.tsx
+
+Заменить превью (строки 811-822):
+
+```tsx
+// Было:
+<CardPreview 
+  type="service"  // ❌ Ошибка!
+  image={formData.cover_image}
+  ...
+/>
+
+// Станет:
+<UnifiedContentCard 
+  {...mapProductToCardProps({
+    name_en: formData.name_en,
+    name_ru: formData.name_ru,
+    price: parseFloat(formData.price) || 0,
+    cover_image: formData.cover_image,
+    is_new: formData.is_new,
+    is_popular: formData.is_popular,
+    // ... остальные поля
+  }, language)}
+  size="default"
+/>
+```
+
+### Шаг 5: Рефакторинг CardPreview.tsx
+
+Превратить в обёртку над реальными карточками:
+
+```tsx
+// Вместо собственной разметки — использовать реальные карточки
+export function CardPreview(props: CardPreviewProps) {
+  if (props.type === 'product') {
+    return (
+      <UnifiedContentCard 
+        {...mapProductToCardProps(props.formData, props.language)} 
+      />
+    );
+  }
+  if (props.type === 'service') {
+    return (
+      <UnifiedContentCard 
+        {...mapServiceToCardProps(props.formData, props.language)} 
+      />
+    );
+  }
+  // ... property type
+}
 ```
 
 ---
 
 ## Порядок реализации
 
-### Шаг 1: Таксономия и БД
-1. Создать `homeServicesTaxonomy.ts` с Thumbtack-структурой
-2. Миграция БД: добавить `provider_type`, `has_insurance`, `has_guarantee`
-3. Нормализовать `business_category` в существующих записях
+### Фаза 1: Инфраструктура адаптеров
+1. Создать `src/lib/adapters/contentAdapters.ts`
+2. Добавить маппинг-функции для всех типов контента
 
-### Шаг 2: Компоненты
-1. `DomainTabs.tsx` — навигация по 4 доменам
-2. `ProviderTypeToggle.tsx` — переключатель Все/Мастера/Компании
-3. `ServiceProviderCard.tsx` — карточка с бейджами и типом
+### Фаза 2: Синхронизация полей Providers
+1. Обновить `AdminProviders.tsx` — добавить все поля из карточки
+2. Импортировать категории из `homeServicesTaxonomy.ts`
+3. Добавить UI для `provider_type`, `languages`, badges
 
-### Шаг 3: Интеграция
-1. Обновить `ServicesIndex.tsx` с новой структурой
-2. Синхронизировать `ServicesFilters.tsx` с taxonomy
-3. Обновить `useHomeServices.ts` для фильтрации по домену и типу
+### Фаза 3: Атрибуты товаров
+1. Создать `AttributeEditor.tsx`
+2. Интегрировать в `VendorProducts.tsx` и `AdminMarketplaceProducts.tsx`
+3. Сохранение в `marketplace_product_attributes`
 
-### Шаг 4: Проверка
-1. Тестирование фильтров по категориям
-2. Тестирование фильтров по типу исполнителя
-3. Тестирование поиска
-4. Проверка корректной работы на мобильных устройствах
+### Фаза 4: Унификация превью
+1. Рефакторинг `CardPreview.tsx` → обёртка над `UnifiedContentCard`
+2. Обновить все wizard'ы для использования нового превью
+3. Удалить дублирующиеся стили
+
+### Фаза 5: Валидация и тесты
+1. Создать TypeScript тесты на соответствие интерфейсов
+2. Проверить все формы создания/редактирования
+3. Убедиться что превью = реальная карточка
 
 ---
 
 ## Ожидаемый результат
 
-| До | После |
-|----|-------|
-| Плоский список 8 категорий | 4 домена → 16 категорий |
-| Фильтры не работают (разные ID) | Единая таксономия |
-| Мастера и компании выглядят одинаково | Визуальное различие + бейджи |
-| Дублирование с /cleaning | Cleaning как домен внутри Services |
-| Нет информации о скорости отклика | "⚡ 15 мин" badge |
+| Метрика | До | После |
+|---------|-----|-------|
+| Поля в форме Admin Providers | 10 | 16 (+ `provider_type`, `insurance`, `guarantee`, `response_time`, `languages`, `domains`) |
+| Поля в форме Vendor Products | Базовые | + редактор атрибутов (brand, origin, etc.) |
+| Соответствие превью и карточки | ~60% | 100% |
+| Источников правды для категорий | 3+ | 1 (`homeServicesTaxonomy.ts`) |
+| Радиус скругления превью vs карточки | `xl` vs `2xl` | `2xl` везде |
+
+Этот план обеспечит полную консистентность между тем, что заполняет поставщик/админ, и тем, что видит пользователь — как это реализовано в Amazon, Ozon и Airbnb.
