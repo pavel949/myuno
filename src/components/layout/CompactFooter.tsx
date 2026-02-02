@@ -79,9 +79,9 @@ export function CompactFooter() {
     },
     {
       icon: Users,
-      label: isRu ? '500+ Партнёров' : '500+ Partners',
+      label: isRu ? '200+ Партнёров' : '200+ Partners',
       hint: isRu
-        ? 'Более 500 проверенных провайдеров услуг на Пхукете'
+        ? 'Более 200 проверенных провайдеров услуг на Пхукете'
         : 'Over 500 verified service providers in Phuket',
     },
   ];
