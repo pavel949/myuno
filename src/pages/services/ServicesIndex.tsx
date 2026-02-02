@@ -2,88 +2,116 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Wrench } from "lucide-react";
-import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from "@/components/miniapp";
+import { MiniAppLayout, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from "@/components/miniapp";
 import { servicesFilterConfig, FilterValues } from "@/components/filters";
 import { useHomeServices } from "@/hooks/useHomeServices";
-import { matchesFilter, matchesPriceLevel, isOpenNow } from '@/lib/filterUtils';
-import { CrossSellSection } from '@/components/crosssell';
-
-const categories = [
-  { id: "water-delivery", icon: '💧', name: 'Water', nameRu: 'Вода' },
-  { id: "plumbing", icon: '🔧', name: 'Plumbing', nameRu: 'Сантехник' },
-  { id: "electrical", icon: '⚡', name: 'Electrical', nameRu: 'Электрик' },
-  { id: "cleaning", icon: '✨', name: 'Cleaning', nameRu: 'Уборка' },
-  { id: "repair", icon: '🔨', name: 'Repair', nameRu: 'Ремонт' },
-  { id: "ac", icon: '❄️', name: 'AC', nameRu: 'Кондиционеры' },
-  { id: "moving", icon: '🚚', name: 'Moving', nameRu: 'Переезд' },
-  { id: "road-assistance", icon: '🚗', name: 'Road Help', nameRu: 'Помощь на дороге' },
-];
-
-const SERVICE_CATEGORIES: MiniAppCategory[] = [
-  { id: 'all', labelEn: 'All', labelRu: 'Все' },
-  ...categories.map(c => ({ id: c.id, labelEn: c.name, labelRu: c.nameRu })),
-];
+import { DomainTabs, ProviderTypeToggle, HomeServiceProviderCard } from "@/components/services";
+import { CrossSellSection } from "@/components/crosssell";
+import { 
+  SERVICE_DOMAINS, 
+  getCategoriesByDomain, 
+  ALL_SERVICE_CATEGORIES,
+  ServiceDomain,
+  ProviderType 
+} from "@/lib/config/homeServicesTaxonomy";
 
 export default function ServicesIndex() {
   const { language, t } = useLanguage();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedDomain, setSelectedDomain] = useState<ServiceDomain | 'all'>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedProviderType, setSelectedProviderType] = useState<ProviderType | 'all'>('all');
   const [filterValues, setFilterValues] = useState<FilterValues>({});
   
-  const { providers, isLoading, getProviderImage } = useHomeServices();
+  const { providers, isLoading, getProviderImage } = useHomeServices({
+    category: selectedCategory !== 'all' ? selectedCategory : undefined,
+    domain: selectedDomain,
+    providerType: selectedProviderType,
+  });
 
+  // Sync URL params
   useEffect(() => {
+    const domainParam = searchParams.get('domain') as ServiceDomain | null;
     const categoryParam = searchParams.get('category');
-    if (categoryParam) setSelectedCategory(categoryParam);
+    
+    if (domainParam && SERVICE_DOMAINS.some(d => d.id === domainParam)) {
+      setSelectedDomain(domainParam);
+    }
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
   }, [searchParams]);
 
+  // Update URL when domain changes
+  const handleDomainChange = (domain: ServiceDomain | 'all') => {
+    setSelectedDomain(domain);
+    setSelectedCategory('all');
+    
+    const newParams = new URLSearchParams(searchParams);
+    if (domain === 'all') {
+      newParams.delete('domain');
+    } else {
+      newParams.set('domain', domain);
+    }
+    newParams.delete('category');
+    setSearchParams(newParams);
+  };
+
+  // Filter providers by search
   const filteredProviders = useMemo(() => {
     return providers.filter((provider) => {
-      const matchesSearch = provider.name.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = selectedCategory === 'all' || provider.business_category === selectedCategory;
+      const matchesSearch = provider.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (provider.description_en?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (provider.description_ru?.toLowerCase().includes(searchQuery.toLowerCase()));
       
-      if (!matchesSearch || !matchesCategory) return false;
+      if (!matchesSearch) return false;
       
-      // Features filter
+      // Apply modal filter values
       const features = filterValues.features as string[] || [];
       if (features.includes('verified') && !provider.is_verified) return false;
+      if (features.includes('insured') && !provider.has_insurance) return false;
+      if (features.includes('guaranteed') && !provider.has_guarantee) return false;
+      if (features.includes('fast-response') && (!provider.response_time_minutes || provider.response_time_minutes > 30)) return false;
       
-      // Price level filter - use price_per_hour or similar if available
-      const priceLevel = filterValues.priceLevel as string | undefined;
-      if (priceLevel) {
-        const priceMap: Record<string, [number, number]> = {
-          'budget': [0, 500],
-          'mid': [500, 1500],
-          'premium': [1500, 5000],
-          'luxury': [5000, Infinity],
-        };
-        const range = priceMap[priceLevel.toLowerCase()];
-        // Skip price filter if provider doesn't have pricing info
-      }
-      
-      // Service category filter from modal
-      const categoryFilter = filterValues.category as string[] | undefined;
-      if (categoryFilter?.length) {
-        if (!matchesFilter([provider.business_category || ''], categoryFilter)) return false;
-      }
-      
-      // Rating filter
-      const ratingFilter = filterValues.rating as string | undefined;
-      if (ratingFilter) {
-        const minRating = parseFloat(ratingFilter);
-        if ((provider.rating || 0) < minRating) return false;
-      }
+      // Provider type from modal
+      const modalProviderType = filterValues.providerType as string | undefined;
+      if (modalProviderType && provider.provider_type !== modalProviderType) return false;
       
       return true;
     });
-  }, [providers, searchQuery, selectedCategory, filterValues]);
+  }, [providers, searchQuery, filterValues]);
 
-  const quickItems: QuickGridItem[] = categories.slice(0, 4).map(c => ({
+  // Get categories for current domain
+  const currentCategories = useMemo(() => {
+    if (selectedDomain === 'all') {
+      return ALL_SERVICE_CATEGORIES;
+    }
+    return getCategoriesByDomain(selectedDomain);
+  }, [selectedDomain]);
+
+  // Build MiniApp categories for ribbon
+  const categoryRibbon: MiniAppCategory[] = useMemo(() => [
+    { id: 'all', labelEn: 'All', labelRu: 'Все' },
+    ...currentCategories.map(c => ({
+      id: c.id,
+      labelEn: c.labelEn,
+      labelRu: c.labelRu,
+    })),
+  ], [currentCategories]);
+
+  // Quick grid items (first 4 categories of current domain)
+  const quickItems: QuickGridItem[] = currentCategories.slice(0, 4).map(c => ({
     icon: c.icon,
-    label: language === 'ru' ? c.nameRu : c.name,
-    onClick: () => setSelectedCategory(c.id),
+    label: language === 'ru' ? c.labelRu : c.labelEn,
+    onClick: () => {
+      setSelectedCategory(c.id);
+      const newParams = new URLSearchParams(searchParams);
+      newParams.set('category', c.id);
+      setSearchParams(newParams);
+    },
   }));
 
   return (
@@ -98,9 +126,18 @@ export default function ServicesIndex() {
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}
       searchPlaceholder={t('services.searchPlaceholder')}
-      categories={SERVICE_CATEGORIES}
+      categories={categoryRibbon}
       selectedCategory={selectedCategory}
-      onCategoryChange={setSelectedCategory}
+      onCategoryChange={(cat) => {
+        setSelectedCategory(cat);
+        const newParams = new URLSearchParams(searchParams);
+        if (cat === 'all') {
+          newParams.delete('category');
+        } else {
+          newParams.set('category', cat);
+        }
+        setSearchParams(newParams);
+      }}
       filterConfig={servicesFilterConfig}
       filterValues={filterValues}
       onFilterChange={setFilterValues}
@@ -111,23 +148,30 @@ export default function ServicesIndex() {
       emptyIcon={Wrench}
       emptyText={t('services.notFound')}
     >
-      <MiniAppQuickGrid items={quickItems} columns={4} className="mb-6" />
+      {/* Domain Tabs */}
+      <DomainTabs 
+        selectedDomain={selectedDomain} 
+        onDomainChange={handleDomainChange}
+        className="mb-4"
+      />
       
-      <div className="grid gap-4">
+      {/* Quick Grid */}
+      <MiniAppQuickGrid items={quickItems} columns={4} className="mb-4" />
+      
+      {/* Provider Type Toggle */}
+      <ProviderTypeToggle 
+        selectedType={selectedProviderType}
+        onTypeChange={setSelectedProviderType}
+        className="mb-4"
+      />
+      
+      {/* Provider Cards */}
+      <div className="grid gap-3">
         {filteredProviders.map((provider) => (
-          <ItemCard
+          <HomeServiceProviderCard
             key={provider.id}
-            image={getProviderImage(provider)}
-            title={provider.name}
-            subtitle={language === 'ru' ? provider.description_ru || '' : provider.description_en || ''}
-            rating={provider.rating || 0}
-            reviewCount={provider.review_count || 0}
-            location={provider.address || ''}
-            isVerified={provider.is_verified || false}
-            badge={{ 
-              text: language === 'ru' ? 'Доступен' : 'Available', 
-              className: 'bg-green-500 text-white' 
-            }}
+            provider={provider}
+            imageUrl={getProviderImage(provider)}
             onClick={() => navigate(`/services/provider/${provider.id}?category=${provider.business_category}`)}
           />
         ))}

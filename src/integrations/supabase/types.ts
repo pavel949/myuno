@@ -10621,6 +10621,8 @@ export type Database = {
           description_en: string | null
           description_ru: string | null
           email: string | null
+          has_guarantee: boolean | null
+          has_insurance: boolean | null
           has_machine_translation: boolean | null
           id: string
           is_active: boolean | null
@@ -10633,8 +10635,11 @@ export type Database = {
           name: string
           pending_payout: number | null
           phone: string | null
+          provider_type: string | null
           rating: number | null
+          response_time_minutes: number | null
           review_count: number | null
+          service_domains: string[] | null
           total_earnings: number | null
           trust_score: number | null
           updated_at: string
@@ -10650,6 +10655,8 @@ export type Database = {
           description_en?: string | null
           description_ru?: string | null
           email?: string | null
+          has_guarantee?: boolean | null
+          has_insurance?: boolean | null
           has_machine_translation?: boolean | null
           id?: string
           is_active?: boolean | null
@@ -10662,8 +10669,11 @@ export type Database = {
           name: string
           pending_payout?: number | null
           phone?: string | null
+          provider_type?: string | null
           rating?: number | null
+          response_time_minutes?: number | null
           review_count?: number | null
+          service_domains?: string[] | null
           total_earnings?: number | null
           trust_score?: number | null
           updated_at?: string
@@ -10679,6 +10689,8 @@ export type Database = {
           description_en?: string | null
           description_ru?: string | null
           email?: string | null
+          has_guarantee?: boolean | null
+          has_insurance?: boolean | null
           has_machine_translation?: boolean | null
           id?: string
           is_active?: boolean | null
@@ -10691,8 +10703,11 @@ export type Database = {
           name?: string
           pending_payout?: number | null
           phone?: string | null
+          provider_type?: string | null
           rating?: number | null
+          response_time_minutes?: number | null
           review_count?: number | null
+          service_domains?: string[] | null
           total_earnings?: number | null
           trust_score?: number | null
           updated_at?: string
