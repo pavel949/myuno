@@ -44,11 +44,21 @@ import {
   CheckCircle,
   Search,
   Loader2,
-  Package
+  Package,
+  User,
+  Shield,
+  Clock,
+  Languages
 } from 'lucide-react';
+import { 
+  ALL_SERVICE_CATEGORIES, 
+  PROVIDER_TYPE_OPTIONS,
+  SERVICE_DOMAINS,
+  getCategoryById
+} from '@/lib/config/homeServicesTaxonomy';
 
-const BUSINESS_CATEGORIES = [
-  { value: 'services', labelEn: 'Home Services', labelRu: 'Домашние услуги' },
+// Extended business categories: combine home services taxonomy + general verticals
+const GENERAL_CATEGORIES = [
   { value: 'beauty', labelEn: 'Beauty & Spa', labelRu: 'Красота и спа' },
   { value: 'food', labelEn: 'Food & Restaurants', labelRu: 'Еда и рестораны' },
   { value: 'transport', labelEn: 'Transport', labelRu: 'Транспорт' },
@@ -60,10 +70,33 @@ const BUSINESS_CATEGORIES = [
   { value: 'property', labelEn: 'Property', labelRu: 'Недвижимость' },
   { value: 'legal', labelEn: 'Legal Services', labelRu: 'Юридические услуги' },
   { value: 'pets', labelEn: 'Pet Services', labelRu: 'Услуги для питомцев' },
-  { value: 'cleaning', labelEn: 'Cleaning', labelRu: 'Клининг' },
   { value: 'events', labelEn: 'Events', labelRu: 'Мероприятия' },
   { value: 'yachts', labelEn: 'Yachts', labelRu: 'Яхты' },
   { value: 'flowers', labelEn: 'Flowers', labelRu: 'Цветы' },
+];
+
+// Merge home service categories with general categories
+const ALL_BUSINESS_CATEGORIES = [
+  // Home service categories from taxonomy
+  ...ALL_SERVICE_CATEGORIES.map(cat => ({
+    value: cat.id,
+    labelEn: cat.labelEn,
+    labelRu: cat.labelRu,
+    icon: cat.icon,
+    domain: cat.domain,
+  })),
+  // General categories
+  ...GENERAL_CATEGORIES,
+];
+
+// Language options
+const LANGUAGE_OPTIONS = [
+  { value: 'en', labelEn: 'English', labelRu: 'Английский', flag: '🇬🇧' },
+  { value: 'ru', labelEn: 'Russian', labelRu: 'Русский', flag: '🇷🇺' },
+  { value: 'th', labelEn: 'Thai', labelRu: 'Тайский', flag: '🇹🇭' },
+  { value: 'zh', labelEn: 'Chinese', labelRu: 'Китайский', flag: '🇨🇳' },
+  { value: 'de', labelEn: 'German', labelRu: 'Немецкий', flag: '🇩🇪' },
+  { value: 'fr', labelEn: 'French', labelRu: 'Французский', flag: '🇫🇷' },
 ];
 
 export default function AdminProviders() {
@@ -91,6 +124,13 @@ export default function AdminProviders() {
     address: '',
     is_active: true,
     is_verified: false,
+    // New fields for data consistency with HomeServiceProviderCard
+    provider_type: 'company' as 'individual' | 'company',
+    response_time_minutes: '',
+    has_insurance: false,
+    has_guarantee: false,
+    languages: [] as string[],
+    service_domains: [] as string[],
   });
 
   const isRussian = language === 'ru';
@@ -126,6 +166,12 @@ export default function AdminProviders() {
       address: '',
       is_active: true,
       is_verified: false,
+      provider_type: 'company',
+      response_time_minutes: '',
+      has_insurance: false,
+      has_guarantee: false,
+      languages: [],
+      service_domains: [],
     });
     setEditingProvider(null);
   };
@@ -143,6 +189,13 @@ export default function AdminProviders() {
       address: provider.address || '',
       is_active: provider.is_active ?? true,
       is_verified: provider.is_verified ?? false,
+      // New fields
+      provider_type: ((provider as any).provider_type as 'individual' | 'company') || 'company',
+      response_time_minutes: (provider as any).response_time_minutes?.toString() || '',
+      has_insurance: (provider as any).has_insurance ?? false,
+      has_guarantee: (provider as any).has_guarantee ?? false,
+      languages: (provider as any).languages || [],
+      service_domains: (provider as any).service_domains || [],
     });
     setIsDialogOpen(true);
   };
@@ -166,6 +219,12 @@ export default function AdminProviders() {
         address: formData.address || undefined,
         is_active: formData.is_active,
         is_verified: formData.is_verified,
+        // New fields
+        provider_type: formData.provider_type,
+        response_time_minutes: formData.response_time_minutes ? parseInt(formData.response_time_minutes) : null,
+        has_insurance: formData.has_insurance,
+        has_guarantee: formData.has_guarantee,
+        service_domains: formData.service_domains,
       };
 
       if (editingProvider) {
@@ -287,8 +346,14 @@ export default function AdminProviders() {
                       </div>
                       <div className="flex flex-wrap gap-2 mb-2">
                         <Badge variant="outline" className="text-xs">
-                          {BUSINESS_CATEGORIES.find(c => c.value === provider.business_category)?.[isRussian ? 'labelRu' : 'labelEn'] || provider.business_category}
+                          {ALL_BUSINESS_CATEGORIES.find(c => c.value === provider.business_category)?.[isRussian ? 'labelRu' : 'labelEn'] || provider.business_category}
                         </Badge>
+                        {(provider as any).provider_type === 'individual' && (
+                          <Badge variant="secondary" className="text-xs">
+                            <User className="h-3 w-3 mr-1" />
+                            {isRussian ? 'Мастер' : 'Master'}
+                          </Badge>
+                        )}
                         {!provider.is_active && (
                           <Badge variant="secondary" className="text-xs">
                             {isRussian ? 'Неактивен' : 'Inactive'}
@@ -361,10 +426,10 @@ export default function AdminProviders() {
                   <SelectTrigger>
                     <SelectValue placeholder={isRussian ? 'Выберите категорию' : 'Select category'} />
                   </SelectTrigger>
-                  <SelectContent>
-                    {BUSINESS_CATEGORIES.map((cat) => (
+                  <SelectContent className="max-h-[300px]">
+                    {ALL_BUSINESS_CATEGORIES.map((cat) => (
                       <SelectItem key={cat.value} value={cat.value}>
-                        {isRussian ? cat.labelRu : cat.labelEn}
+                        {'icon' in cat ? `${cat.icon} ` : ''}{isRussian ? cat.labelRu : cat.labelEn}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -426,20 +491,108 @@ export default function AdminProviders() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <Label>{isRussian ? 'Активен' : 'Active'}</Label>
-                <Switch
-                  checked={formData.is_active}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
-                />
+              {/* Provider Type Toggle */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  {isRussian ? 'Тип исполнителя' : 'Provider Type'}
+                </Label>
+                <div className="flex gap-2">
+                  {PROVIDER_TYPE_OPTIONS.filter(o => o.id !== 'all').map((opt) => (
+                    <Button
+                      key={opt.id}
+                      type="button"
+                      variant={formData.provider_type === opt.id ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setFormData(prev => ({ ...prev, provider_type: opt.id as 'individual' | 'company' }))}
+                      className="flex-1"
+                    >
+                      <span className="mr-1">{opt.icon}</span>
+                      {isRussian ? opt.labelRu : opt.labelEn}
+                    </Button>
+                  ))}
+                </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <Label>{isRussian ? 'Верифицирован' : 'Verified'}</Label>
-                <Switch
-                  checked={formData.is_verified}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_verified: checked }))}
+              {/* Response Time */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  {isRussian ? 'Время отклика (минуты)' : 'Response Time (minutes)'}
+                </Label>
+                <Input
+                  type="number"
+                  value={formData.response_time_minutes}
+                  onChange={(e) => setFormData(prev => ({ ...prev, response_time_minutes: e.target.value }))}
+                  placeholder="15"
                 />
+                <p className="text-xs text-muted-foreground">
+                  {isRussian ? 'Среднее время ответа на запрос' : 'Average response time to requests'}
+                </p>
+              </div>
+
+              {/* Service Domains (for home services) */}
+              <div className="space-y-2">
+                <Label>{isRussian ? 'Домены услуг' : 'Service Domains'}</Label>
+                <div className="flex flex-wrap gap-2">
+                  {SERVICE_DOMAINS.map((domain) => (
+                    <Button
+                      key={domain.id}
+                      type="button"
+                      variant={formData.service_domains.includes(domain.id) ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => {
+                        const domains = formData.service_domains.includes(domain.id)
+                          ? formData.service_domains.filter(d => d !== domain.id)
+                          : [...formData.service_domains, domain.id];
+                        setFormData(prev => ({ ...prev, service_domains: domains }));
+                      }}
+                    >
+                      <span className="mr-1">{domain.icon}</span>
+                      {isRussian ? domain.labelRu : domain.labelEn}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Badges / Certifications */}
+              <div className="space-y-3 border-t pt-4">
+                <Label className="flex items-center gap-2 text-muted-foreground">
+                  <Shield className="h-4 w-4" />
+                  {isRussian ? 'Сертификаты и бейджи' : 'Certifications & Badges'}
+                </Label>
+                
+                <div className="flex items-center justify-between">
+                  <Label>{isRussian ? 'Активен' : 'Active'}</Label>
+                  <Switch
+                    checked={formData.is_active}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label>{isRussian ? 'Верифицирован' : 'Verified'}</Label>
+                  <Switch
+                    checked={formData.is_verified}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_verified: checked }))}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label>{isRussian ? 'Есть страховка' : 'Has Insurance'}</Label>
+                  <Switch
+                    checked={formData.has_insurance}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, has_insurance: checked }))}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label>{isRussian ? 'Гарантия на работы' : 'Work Guarantee'}</Label>
+                  <Switch
+                    checked={formData.has_guarantee}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, has_guarantee: checked }))}
+                  />
+                </div>
               </div>
             </div>
 

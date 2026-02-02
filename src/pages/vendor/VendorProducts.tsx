@@ -807,17 +807,22 @@ const VendorProducts = () => {
                 </div>
               </WizardStepContent>
 
-              {/* Step 4: Review */}
               <WizardStepContent stepId="review" currentStepId={wizardSteps[currentStep].id}>
                 <CardPreviewSection>
                   <CardPreview 
-                    type="service"
+                    type="product"
                     image={formData.cover_image}
                     title={formData.name_en}
                     titleRu={formData.name_ru}
                     description={formData.description_en}
                     descriptionRu={formData.description_ru}
                     price={formData.price ? parseFloat(formData.price) : undefined}
+                    originalPrice={formData.original_price ? parseFloat(formData.original_price) : undefined}
+                    unit={formData.unit}
+                    unitRu={formData.unit_ru}
+                    isNew={formData.is_new}
+                    isPopular={formData.is_popular}
+                    inStock={formData.in_stock}
                   />
                 </CardPreviewSection>
 

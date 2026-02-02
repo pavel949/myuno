@@ -13,12 +13,30 @@ import {
   Eye,
   Package,
   Map,
-  Building2
+  Building2,
+  ShoppingBag,
+  Tag,
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface BasePreviewProps {
   image?: string;
   isRussian?: boolean;
+}
+
+interface ProductPreviewProps extends BasePreviewProps {
+  type: 'product';
+  title: string;
+  titleRu?: string;
+  description?: string;
+  descriptionRu?: string;
+  price?: number;
+  originalPrice?: number;
+  unit?: string;
+  unitRu?: string;
+  isNew?: boolean;
+  isPopular?: boolean;
+  inStock?: boolean;
 }
 
 interface ServicePreviewProps extends BasePreviewProps {
@@ -63,16 +81,13 @@ interface PropertyPreviewProps extends BasePreviewProps {
   instantBooking?: boolean;
 }
 
-type CardPreviewProps = ServicePreviewProps | TourPreviewProps | PropertyPreviewProps;
+type CardPreviewProps = ProductPreviewProps | ServicePreviewProps | TourPreviewProps | PropertyPreviewProps;
 
 export function CardPreview(props: CardPreviewProps) {
   const { language } = useLanguage();
   const isRussian = props.isRussian ?? language === 'ru';
 
   const getTitle = () => {
-    if (props.type === 'service') {
-      return isRussian ? (props.titleRu || props.title) : props.title;
-    }
     return isRussian ? (props.titleRu || props.title) : props.title;
   };
 
@@ -85,6 +100,7 @@ export function CardPreview(props: CardPreviewProps) {
 
   const getPlaceholderIcon = () => {
     switch (props.type) {
+      case 'product': return ShoppingBag;
       case 'service': return Package;
       case 'tour': return Map;
       case 'property': return Building2;
@@ -108,9 +124,14 @@ export function CardPreview(props: CardPreviewProps) {
   const description = getDescription();
   const hasContent = title || props.image || props.price;
 
+  // Calculate discount for products
+  const discount = props.type === 'product' && (props as ProductPreviewProps).originalPrice && props.price
+    ? Math.round((1 - props.price / (props as ProductPreviewProps).originalPrice!) * 100)
+    : 0;
+
   if (!hasContent) {
     return (
-      <div className="border border-dashed border-border rounded-xl p-6 text-center text-muted-foreground">
+      <div className="border border-dashed border-border rounded-2xl p-6 text-center text-muted-foreground">
         <Eye className="w-8 h-8 mx-auto mb-2 opacity-50" />
         <p className="text-sm">
           {isRussian ? 'Заполните форму для предпросмотра' : 'Fill the form to see preview'}
@@ -120,7 +141,7 @@ export function CardPreview(props: CardPreviewProps) {
   }
 
   return (
-    <div className="border border-border rounded-xl overflow-hidden bg-card shadow-sm">
+    <div className="border border-border rounded-2xl overflow-hidden bg-card shadow-sm">
       {/* Image */}
       <div className="aspect-[16/10] relative bg-muted">
         {props.image ? (
@@ -136,12 +157,36 @@ export function CardPreview(props: CardPreviewProps) {
         )}
         
         {/* Badges */}
-        <div className="absolute top-2 left-2 flex gap-1.5">
+        <div className="absolute top-2 left-2 flex gap-1.5 flex-wrap">
+          {/* Product badges */}
+          {props.type === 'product' && (
+            <>
+              {(props as ProductPreviewProps).isNew && (
+                <Badge className="bg-info text-info-foreground text-xs">
+                  {isRussian ? 'Новинка' : 'New'}
+                </Badge>
+              )}
+              {(props as ProductPreviewProps).isPopular && (
+                <Badge className="bg-amber-500 text-white text-xs">
+                  {isRussian ? 'Хит' : 'Hit'}
+                </Badge>
+              )}
+              {discount > 0 && (
+                <Badge className="bg-destructive text-destructive-foreground text-xs">
+                  -{discount}%
+                </Badge>
+              )}
+            </>
+          )}
+          
+          {/* Property badges */}
           {props.type === 'property' && (props as PropertyPreviewProps).instantBooking && (
             <Badge className="bg-primary text-primary-foreground text-xs">
               {isRussian ? 'Мгновенное' : 'Instant'}
             </Badge>
           )}
+          
+          {/* Tour badges */}
           {props.type === 'tour' && (props as TourPreviewProps).difficulty && (
             <Badge variant="secondary" className="text-xs capitalize">
               {(props as TourPreviewProps).difficulty}
@@ -151,10 +196,19 @@ export function CardPreview(props: CardPreviewProps) {
 
         {/* Verified badge simulation */}
         <div className="absolute top-2 right-2">
-          <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
             <CheckCircle2 className="w-3 h-3 text-white" />
           </div>
         </div>
+        
+        {/* Stock status for products */}
+        {props.type === 'product' && !(props as ProductPreviewProps).inStock && (
+          <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
+            <span className="text-muted-foreground font-medium">
+              {isRussian ? 'Нет в наличии' : 'Out of stock'}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Content */}
@@ -173,6 +227,19 @@ export function CardPreview(props: CardPreviewProps) {
 
         {/* Meta info */}
         <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mb-2">
+          {props.type === 'product' && (
+            <>
+              {(props as ProductPreviewProps).unit && (
+                <span className="flex items-center gap-1">
+                  <Tag className="w-3 h-3" />
+                  {isRussian 
+                    ? (props as ProductPreviewProps).unitRu || (props as ProductPreviewProps).unit
+                    : (props as ProductPreviewProps).unit}
+                </span>
+              )}
+            </>
+          )}
+          
           {props.type === 'service' && (
             <>
               {(props as ServicePreviewProps).durationMinutes && (
@@ -245,20 +312,26 @@ export function CardPreview(props: CardPreviewProps) {
 
         {/* Rating simulation */}
         <div className="flex items-center gap-1 mb-2">
-          <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
           <span className="text-sm font-medium">4.9</span>
           <span className="text-xs text-muted-foreground">(0 {isRussian ? 'отзывов' : 'reviews'})</span>
         </div>
 
         {/* Price */}
         {props.price && props.price > 0 && (
-          <div className="flex items-baseline gap-1">
+          <div className="flex items-baseline gap-2">
             <span className="text-lg font-bold text-primary">
               {props.type === 'property' 
                 ? formatPrice(props.price, (props as PropertyPreviewProps).pricePeriod)
                 : formatPrice(props.price)
               }
             </span>
+            {/* Original price for products */}
+            {props.type === 'product' && (props as ProductPreviewProps).originalPrice && (
+              <span className="text-sm text-muted-foreground line-through">
+                ฿{(props as ProductPreviewProps).originalPrice!.toLocaleString()}
+              </span>
+            )}
           </div>
         )}
       </div>
@@ -272,7 +345,7 @@ export function CardPreviewSection({ children, className }: { children: React.Re
   const isRussian = language === 'ru';
 
   return (
-    <div className={className}>
+    <div className={cn(className)}>
       <div className="flex items-center gap-2 mb-3">
         <Eye className="w-4 h-4 text-primary" />
         <span className="text-sm font-medium">
