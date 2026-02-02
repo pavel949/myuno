@@ -2,6 +2,7 @@ import React, { forwardRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Package, ChevronRight, Trash2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,6 +20,7 @@ interface MiniCartProps {
 export const MiniCart = forwardRef<HTMLButtonElement | HTMLDivElement, MiniCartProps>(({ className }, ref) => {
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { formatPrice } = useCurrency();
   const { getItemsByType, getItemCount, removeItem } = useCart();
   const totalItems = getItemCount();
   
@@ -91,12 +93,12 @@ export const MiniCart = forwardRef<HTMLButtonElement | HTMLDivElement, MiniCartP
                   {language === 'ru' && item.nameRu ? item.nameRu : item.name}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {item.quantity} × ฿{item.price.toLocaleString()}
+                  {item.quantity} × {formatPrice(item.price)}
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-semibold">
-                  ฿{(item.price * item.quantity).toLocaleString()}
+                  {formatPrice(item.price * item.quantity)}
                 </span>
                 <button
                   onClick={(e) => { e.stopPropagation(); removeItem(item.id); }}
@@ -121,7 +123,7 @@ export const MiniCart = forwardRef<HTMLButtonElement | HTMLDivElement, MiniCartP
             <span className="text-sm text-muted-foreground">
               {language === 'ru' ? 'Итого' : 'Subtotal'}
             </span>
-            <span className="font-bold text-lg">฿{subtotal.toLocaleString()}</span>
+            <span className="font-bold text-lg">{formatPrice(subtotal)}</span>
           </div>
           <div className="flex gap-2">
             <Button 

@@ -2,6 +2,7 @@ import React, { forwardRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, Star, Clock, TrendingUp, ArrowRight, Compass } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { useRecommendations } from '@/hooks/useRecommendations';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -41,6 +42,7 @@ const typeRoutes: Record<string, string> = {
 export const ForYouSection = forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(
   function ForYouSection(props, ref) {
   const { language } = useLanguage();
+  const { formatPrice } = useCurrency();
   const navigate = useNavigate();
   const { recommendations, isLoading } = useRecommendations();
 
@@ -182,7 +184,7 @@ export const ForYouSection = forwardRef<HTMLDivElement, React.ComponentPropsWith
                     {item.rating.toFixed(1)}
                   </div>
                   <p className="text-primary font-bold text-sm">
-                    ฿{item.price.toLocaleString()}
+                    {formatPrice(item.price)}
                   </p>
                 </div>
               </div>

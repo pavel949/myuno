@@ -2,12 +2,14 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Compass, ArrowRight, Star } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { Badge } from '@/components/ui/badge';
 import { useTours } from '@/hooks/useTours';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 
 export function ToursSection() {
   const { t, language } = useLanguage();
+  const { formatPrice } = useCurrency();
   const navigate = useNavigate();
   const { tours, isLoading } = useTours({ featured: true, limit: 3 });
 
@@ -63,7 +65,7 @@ export function ToursSection() {
                 <span>•</span>
                 <span>{tour.duration_hours}h</span>
               </div>
-              <p className="text-primary font-bold mt-2">฿{tour.price?.toLocaleString()}</p>
+              <p className="text-primary font-bold mt-2">{formatPrice(tour.price || 0)}</p>
             </div>
           </div>
         ))}

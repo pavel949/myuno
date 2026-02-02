@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { useCart, CartItem } from '@/contexts/CartContext';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -39,6 +40,7 @@ export const StickyCartBar = forwardRef<HTMLDivElement, StickyCartBarProps>(
   ) {
     const navigate = useNavigate();
     const { t } = useLanguage();
+    const { formatPrice } = useCurrency();
     const { items, getItemsByType, getItemsByProvider } = useCart();
 
     // Get relevant cart items based on filters
@@ -85,7 +87,7 @@ export const StickyCartBar = forwardRef<HTMLDivElement, StickyCartBarProps>(
             >
               <ShoppingCart className="w-5 h-5 mr-2" />
               <span>{label} ({totalItems})</span>
-              <span className="ml-auto">฿{totalPrice.toLocaleString()}</span>
+              <span className="ml-auto">{formatPrice(totalPrice)}</span>
             </Button>
           </motion.div>
         )}
