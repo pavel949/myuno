@@ -312,6 +312,16 @@ export function useOrders() {
         data: { order_id: orderId, order_type: input.order_type },
       });
 
+      // Send customer email notification (non-blocking)
+      supabase.functions.invoke('send-order-email', {
+        body: {
+          type: 'order_request_received',
+          order_id: orderId,
+          user_id: user.id,
+          payment_method: input.payment?.method || 'cash',
+        },
+      }).catch(err => console.error('Customer email error:', err));
+
       // Send admin email notification (non-blocking)
       const primaryParticipant = input.participants?.find(p => p.role === 'primary') || input.participants?.[0];
       supabase.functions.invoke('notify-admin-order', {

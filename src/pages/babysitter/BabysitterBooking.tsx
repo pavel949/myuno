@@ -315,6 +315,7 @@ export default function BabysitterBooking() {
           isSubmitting={isSubmitting}
           disabled={!date || !time || !contactData.name || !contactData.phone || !address}
           submitLabel={language === 'ru' ? 'Подтвердить бронь' : 'Confirm Booking'}
+          hint={language === 'ru' ? '🔒 Безопасное бронирование — никаких списаний до подтверждения' : '🔒 Secure booking — no charges until confirmed'}
         />
       </PageContainer>
     </AppLayout>

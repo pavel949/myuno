@@ -4,6 +4,7 @@ import {
   generateOrderConfirmationEmail,
   generateOrderCancellationEmail,
   generateWalletTopUpEmail,
+  generateOrderRequestReceivedEmail,
 } from '../_shared/email-templates.ts';
 
 const corsHeaders = {
@@ -12,13 +13,15 @@ const corsHeaders = {
 };
 
 interface SendOrderEmailPayload {
-  type: 'order_confirmation' | 'order_cancellation' | 'wallet_topup';
+  type: 'order_confirmation' | 'order_cancellation' | 'wallet_topup' | 'order_request_received';
   order_id?: string;
   user_id?: string;
   // For wallet topup
   amount?: number;
   currency?: string;
   new_balance?: number;
+  // For order_request_received
+  payment_method?: 'cash' | 'wallet' | 'stripe' | 'bank_transfer' | 'card' | 'online';
   // Optional overrides
   language?: 'en' | 'ru';
   reason?: string;
@@ -100,10 +103,10 @@ Deno.serve(async (req) => {
           order_type,
           total_amount,
           currency,
-          scheduled_at,
+          start_at,
           order_items (
             item_name,
-            quantity,
+            qty,
             unit_price
           )
         `)
@@ -118,9 +121,9 @@ Deno.serve(async (req) => {
         );
       }
 
-      const items = order.order_items?.map((item: { item_name: string | null; quantity: number; unit_price: number }) => ({
+      const items = order.order_items?.map((item: { item_name: string | null; qty: number; unit_price: number }) => ({
         name: item.item_name || 'Item',
-        quantity: item.quantity || 1,
+        quantity: item.qty || 1,
         price: item.unit_price || 0,
       })) || [];
 
@@ -131,12 +134,61 @@ Deno.serve(async (req) => {
         totalAmount: order.total_amount || 0,
         currency: order.currency || 'THB',
         items,
-        scheduledAt: order.scheduled_at,
+        scheduledAt: order.start_at,
         trackingUrl: `https://uno.ae/orders/${payload.order_id}`,
         language,
       });
 
       logStep('Generated order confirmation email', { orderNumber: order.order_number });
+    }
+
+    // ===== ORDER REQUEST RECEIVED =====
+    else if (payload.type === 'order_request_received' && payload.order_id) {
+      const { data: order, error: orderError } = await supabaseAdmin
+        .from('orders')
+        .select(`
+          order_number,
+          order_type,
+          total_amount,
+          currency,
+          start_at,
+          order_items (
+            item_name,
+            qty,
+            unit_price
+          )
+        `)
+        .eq('id', payload.order_id)
+        .single();
+
+      if (orderError || !order) {
+        logStep('ERROR', `Order not found: ${payload.order_id}`);
+        return new Response(
+          JSON.stringify({ success: false, error: 'Order not found' }),
+          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const items = order.order_items?.map((item: { item_name: string | null; qty: number; unit_price: number }) => ({
+        name: item.item_name || 'Item',
+        quantity: item.qty || 1,
+        price: item.unit_price || 0,
+      })) || [];
+
+      emailContent = generateOrderRequestReceivedEmail({
+        customerName,
+        orderNumber: order.order_number,
+        orderType: order.order_type || 'general',
+        totalAmount: order.total_amount || 0,
+        currency: order.currency || 'THB',
+        paymentMethod: payload.payment_method || 'cash',
+        items,
+        scheduledAt: order.start_at,
+        trackingUrl: `https://uno.ae/bookings`,
+        language,
+      });
+
+      logStep('Generated order request received email', { orderNumber: order.order_number });
     }
 
     // ===== ORDER CANCELLATION =====

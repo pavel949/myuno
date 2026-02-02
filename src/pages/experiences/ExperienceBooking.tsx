@@ -92,6 +92,7 @@ export default function ExperienceBooking() {
           currency={experience.currency || 'THB'}
           continuePath="/experiences"
           continueLabel={isRu ? 'К активностям' : 'Browse Experiences'}
+          paymentMethod={paymentMethod === 'online' ? 'card' : paymentMethod}
         />
       </MiniAppLayout>
     );
@@ -392,6 +393,8 @@ export default function ExperienceBooking() {
         onSubmit={currentStep === 3 ? handleSubmit : handleNext}
         isSubmitting={isSubmitting}
         disabled={currentStep === 0 && (!selectedDate || !selectedTime)}
+        step={currentStep}
+        totalSteps={4}
         submitLabel={
           currentStep === 3 
             ? (isRu ? 'Подтвердить' : 'Confirm')

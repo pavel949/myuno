@@ -398,6 +398,7 @@ export default function YachtBooking() {
         isSubmitting={isSubmitting}
         disabled={!canSubmit}
         submitLabel={language === 'ru' ? 'Забронировать' : 'Confirm Booking'}
+        hint={language === 'ru' ? '🔒 Безопасное бронирование — заполните все поля' : '🔒 Secure booking — complete all fields'}
       />
     </AppLayout>
   );
