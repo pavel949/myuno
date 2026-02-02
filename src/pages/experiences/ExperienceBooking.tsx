@@ -9,23 +9,25 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { useExperience, formatDuration } from '@/hooks/useExperiences';
+import { useBooking } from '@/hooks/useBooking';
 import { 
   BookingStepProgress, 
   BookingContactForm, 
   BookingPaymentSelect,
   BookingBottomBar,
+  BookingConfirmation,
   defaultBookingSteps,
   type ContactFormData,
   type PaymentMethod
 } from '@/components/booking';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-
 export default function ExperienceBooking() {
   const { id } = useParams<{ id: string }>();
   const { t, language } = useLanguage();
   const navigate = useNavigate();
   const { experience, isLoading } = useExperience(id);
+  const { createBooking, isSubmitting } = useBooking();
   const isRu = language === 'ru';
   
   const [currentStep, setCurrentStep] = useState(0);
@@ -40,7 +42,10 @@ export default function ExperienceBooking() {
   });
   const [isContactValid, setIsContactValid] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('online');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [bookingResult, setBookingResult] = useState<{
+    success: boolean;
+    bookingId?: string;
+  } | null>(null);
 
   if (isLoading) {
     return (
@@ -65,6 +70,33 @@ export default function ExperienceBooking() {
   }
 
   const totalPrice = (experience.price || 0) * participants;
+  const experienceTitle = isRu ? experience.title_ru : experience.title_en;
+
+  // Show confirmation screen after successful booking
+  if (bookingResult?.success && bookingResult.bookingId && selectedDate) {
+    return (
+      <MiniAppLayout
+        title={isRu ? 'Подтверждение' : 'Confirmation'}
+        fallbackPath="/experiences"
+        showHero={false}
+        showFilter={false}
+        showCategories={false}
+      >
+        <BookingConfirmation
+          bookingId={bookingResult.bookingId}
+          title={experienceTitle}
+          date={format(selectedDate, 'PPP', { locale: isRu ? ru : undefined })}
+          time={selectedTime || undefined}
+          location={experience.meeting_point}
+          total={totalPrice}
+          currency={experience.currency || 'THB'}
+          continuePath="/experiences"
+          continueLabel={isRu ? 'К активностям' : 'Browse Experiences'}
+        />
+      </MiniAppLayout>
+    );
+  }
+
   const availableTimes = experience.start_times.length > 0 
     ? experience.start_times 
     : ['09:00', '11:00', '14:00', '16:00'];
@@ -92,16 +124,53 @@ export default function ExperienceBooking() {
   };
 
   const handleSubmit = async () => {
-    setIsSubmitting(true);
-    try {
-      // Simulate booking submission
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      toast.success(isRu ? 'Бронирование успешно!' : 'Booking successful!');
-      navigate('/bookings');
-    } catch (error) {
-      toast.error(isRu ? 'Ошибка бронирования' : 'Booking failed');
-    } finally {
-      setIsSubmitting(false);
+    if (!selectedDate || !selectedTime || !contactData.name || !contactData.phone) {
+      return;
+    }
+
+    const scheduledAt = new Date(selectedDate);
+    const [hours, minutes] = selectedTime.split(':').map(Number);
+    scheduledAt.setHours(hours, minutes, 0, 0);
+
+    const experienceTitle = isRu ? experience.title_ru : experience.title_en;
+
+    const result = await createBooking({
+      booking_type: 'tour',
+      scheduled_at: scheduledAt,
+      total_amount: totalPrice,
+      currency: experience.currency || 'THB',
+      notes: `Experience: ${experienceTitle}. Participants: ${participants}`,
+      serviceName: experienceTitle,
+      items: [{
+        item_type: 'experience',
+        item_id: experience.id,
+        item_name: experienceTitle,
+        quantity: participants,
+        unit_price: experience.price || 0,
+        subtotal: totalPrice,
+      }],
+      participants: [{
+        name: contactData.name,
+        phone: contactData.phone,
+        email: contactData.email,
+        is_primary: true,
+      }],
+      payment: {
+        amount: totalPrice,
+        payment_method: paymentMethod === 'online' ? 'card' : paymentMethod,
+      },
+      metadata: {
+        experience_id: experience.id,
+        experience_type: experience.experience_type,
+        duration_minutes: experience.duration_minutes,
+      },
+    });
+
+    if (result.success && result.booking_id) {
+      setBookingResult({
+        success: true,
+        bookingId: result.booking_id,
+      });
     }
   };
 
