@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
+import Papa from 'papaparse';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { autoMapColumn, getTargetFields, importTargets } from '@/lib/importTemplates';
@@ -21,6 +22,112 @@ export interface ImportResult {
   errors: string[];
 }
 
+// Max file size: 10MB to prevent DoS
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
+// Sanitize parsed values to prevent prototype pollution
+function sanitizeValue(value: any): any {
+  if (value === null || value === undefined) return '';
+  if (typeof value === 'object') {
+    // Prevent prototype pollution by not allowing __proto__, constructor, prototype keys
+    if (Array.isArray(value)) {
+      return value.map(sanitizeValue);
+    }
+    const sanitized: Record<string, any> = {};
+    for (const key of Object.keys(value)) {
+      if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+        continue;
+      }
+      sanitized[key] = sanitizeValue(value[key]);
+    }
+    return sanitized;
+  }
+  return value;
+}
+
+// Parse CSV file using Papa Parse (safe, well-maintained library)
+async function parseCSV(file: File): Promise<{ headers: string[]; rows: Record<string, any>[] }> {
+  return new Promise((resolve, reject) => {
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (results) => {
+        if (results.errors.length > 0) {
+          console.warn('CSV parse warnings:', results.errors);
+        }
+        const headers = results.meta.fields || [];
+        const rows = (results.data as Record<string, any>[]).map(row => sanitizeValue(row));
+        resolve({ headers, rows });
+      },
+      error: (error) => {
+        reject(error);
+      }
+    });
+  });
+}
+
+// Parse Excel file using ExcelJS (safer than xlsx)
+async function parseExcel(file: File): Promise<{ headers: string[]; rows: Record<string, any>[] }> {
+  const arrayBuffer = await file.arrayBuffer();
+  const workbook = new ExcelJS.Workbook();
+  
+  const extension = file.name.toLowerCase().split('.').pop();
+  
+  if (extension === 'xlsx') {
+    await workbook.xlsx.load(arrayBuffer);
+  } else if (extension === 'xls') {
+    // ExcelJS doesn't natively support .xls, convert via CSV approach or show error
+    throw new Error('Legacy .xls format is not supported. Please save your file as .xlsx or .csv');
+  } else {
+    await workbook.xlsx.load(arrayBuffer);
+  }
+  
+  const worksheet = workbook.worksheets[0];
+  if (!worksheet || worksheet.rowCount === 0) {
+    throw new Error('Worksheet is empty');
+  }
+  
+  const headers: string[] = [];
+  const rows: Record<string, any>[] = [];
+  
+  // Get headers from first row
+  const headerRow = worksheet.getRow(1);
+  headerRow.eachCell({ includeEmpty: false }, (cell, colNumber) => {
+    headers[colNumber - 1] = String(cell.value || `Column${colNumber}`);
+  });
+  
+  // Get data rows
+  for (let rowIndex = 2; rowIndex <= worksheet.rowCount; rowIndex++) {
+    const row = worksheet.getRow(rowIndex);
+    const rowData: Record<string, any> = {};
+    let hasData = false;
+    
+    row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+      const header = headers[colNumber - 1];
+      if (header) {
+        let value = cell.value;
+        // Handle ExcelJS cell value types
+        if (value && typeof value === 'object' && 'result' in value) {
+          value = value.result; // Formula result
+        }
+        if (value && typeof value === 'object' && 'text' in value) {
+          value = value.text; // Rich text
+        }
+        rowData[header] = sanitizeValue(value ?? '');
+        if (value !== null && value !== undefined && value !== '') {
+          hasData = true;
+        }
+      }
+    });
+    
+    if (hasData) {
+      rows.push(rowData);
+    }
+  }
+  
+  return { headers: headers.filter(Boolean), rows };
+}
+
 export function useDataImport() {
   const [parsedData, setParsedData] = useState<ParsedData | null>(null);
   const [fieldMappings, setFieldMappings] = useState<FieldMapping[]>([]);
@@ -31,46 +138,46 @@ export function useDataImport() {
   const parseFile = useCallback(async (file: File): Promise<ParsedData | null> => {
     setIsLoading(true);
     try {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        
-        reader.onload = (e) => {
-          try {
-            const data = new Uint8Array(e.target?.result as ArrayBuffer);
-            const workbook = XLSX.read(data, { type: 'array' });
-            const sheetName = workbook.SheetNames[0];
-            const sheet = workbook.Sheets[sheetName];
-            const json = XLSX.utils.sheet_to_json<Record<string, any>>(sheet, { defval: '' });
-            
-            if (json.length === 0) {
-              toast.error('File is empty or has no data');
-              resolve(null);
-              return;
-            }
-            
-            const headers = Object.keys(json[0]);
-            const result: ParsedData = {
-              headers,
-              rows: json,
-              fileName: file.name,
-            };
-            
-            setParsedData(result);
-            resolve(result);
-          } catch (err) {
-            console.error('Parse error:', err);
-            toast.error('Failed to parse file');
-            reject(err);
-          }
-        };
-        
-        reader.onerror = () => {
-          toast.error('Failed to read file');
-          reject(new Error('File read error'));
-        };
-        
-        reader.readAsArrayBuffer(file);
-      });
+      // Validate file size to prevent DoS
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error('File is too large. Maximum size is 10MB.');
+        return null;
+      }
+      
+      const extension = file.name.toLowerCase().split('.').pop();
+      let headers: string[];
+      let rows: Record<string, any>[];
+      
+      if (extension === 'csv') {
+        const result = await parseCSV(file);
+        headers = result.headers;
+        rows = result.rows;
+      } else if (extension === 'xlsx' || extension === 'xls') {
+        const result = await parseExcel(file);
+        headers = result.headers;
+        rows = result.rows;
+      } else {
+        toast.error('Unsupported file format. Please use .xlsx or .csv');
+        return null;
+      }
+      
+      if (rows.length === 0) {
+        toast.error('File is empty or has no data');
+        return null;
+      }
+      
+      const result: ParsedData = {
+        headers,
+        rows,
+        fileName: file.name,
+      };
+      
+      setParsedData(result);
+      return result;
+    } catch (err: any) {
+      console.error('Parse error:', err);
+      toast.error(err.message || 'Failed to parse file');
+      return null;
     } finally {
       setIsLoading(false);
     }
