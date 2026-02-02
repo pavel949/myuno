@@ -249,7 +249,7 @@ export default function YachtBooking() {
 
   return (
     <AppLayout>
-      <PageContainer className="pb-32">
+      <PageContainer className="pb-40">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
           <BackButton fallbackPath="/yachts" variant="ghost" />
