@@ -139,13 +139,13 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
         className="relative rounded-2xl overflow-hidden bg-card border border-border shadow-lg cursor-pointer group"
         onClick={onClick}
       >
-        {/* Image Section */}
-        <div className="relative aspect-[4/3] overflow-hidden">
-          <img
-            src={product.cover_image || '/placeholder.svg'}
-            alt={name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          />
+      {/* Image Section */}
+      <div className="relative aspect-[4/3] overflow-hidden">
+        <img
+          src={product.cover_image || '/placeholder.svg'}
+          alt={name}
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+        />
           
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -240,7 +240,7 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
           <img
             src={product.cover_image || '/placeholder.svg'}
             alt={name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           />
           {product.is_new && (
             <Badge className="absolute top-1.5 left-1.5 bg-blue-500 text-white text-[10px] px-1.5 py-0">
@@ -328,7 +328,7 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
   // Grid variant (default) - Professional card design
   return (
     <div className={cn(
-      "bg-card rounded-2xl border border-border overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 group",
+      "bg-card rounded-2xl border border-border overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group",
       compact && "rounded-xl"
     )}>
       {/* Image Container */}
@@ -339,7 +339,7 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
         <img
           src={product.cover_image || '/placeholder.svg'}
           alt={name}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
         />
         
         {/* Subtle gradient for badges readability */}

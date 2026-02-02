@@ -56,7 +56,7 @@ export function HomeProductsSection() {
       {/* CTA to full marketplace */}
       <button
         onClick={() => navigate('/market')}
-        className="w-full py-3 px-4 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary font-medium text-sm flex items-center justify-center gap-2 transition-colors"
+        className="w-full py-3 px-4 rounded-2xl bg-primary/10 hover:bg-primary/20 text-primary font-medium text-sm flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98]"
       >
         <span>{isRu ? 'Открыть весь каталог' : 'Browse Full Catalog'}</span>
         <ChevronRight className="w-4 h-4" />

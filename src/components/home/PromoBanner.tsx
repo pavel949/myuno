@@ -106,7 +106,7 @@ export const PromoBanner = memo(function PromoBanner() {
       >
         <div className="flex items-center gap-4">
           {/* Icon */}
-          <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+          <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 group-hover:scale-[1.03] transition-transform duration-300">
             <Icon className="w-6 h-6 text-white" />
           </div>
 
