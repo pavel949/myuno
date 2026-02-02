@@ -52,7 +52,9 @@ import {
   FileText,
   Anchor,
   Gauge,
-  Bath
+  Bath,
+  Calendar,
+  Shield
 } from 'lucide-react';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
 import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
@@ -66,6 +68,7 @@ import {
   CardPreview,
   CardPreviewSection,
 } from '@/components/vendor';
+import { CancellationPolicySelector } from '@/components/yacht/CancellationPolicySelector';
 
 const yachtTypes = [
   { value: 'yacht', label: 'Yacht', labelRu: 'Яхта' },
@@ -101,6 +104,7 @@ interface YachtFormData {
   bathrooms: string;
   has_crew: boolean;
   is_featured: boolean;
+  cancellation_policy: string;
 }
 
 const initialFormData: YachtFormData = {
@@ -130,6 +134,7 @@ const initialFormData: YachtFormData = {
   bathrooms: '',
   has_crew: true,
   is_featured: false,
+  cancellation_policy: 'moderate',
 };
 
 const VendorYachts = () => {
@@ -267,6 +272,7 @@ const VendorYachts = () => {
       bathrooms: yacht.bathrooms?.toString() || '',
       has_crew: yacht.has_crew ?? true,
       is_featured: yacht.is_featured,
+      cancellation_policy: (yacht as any).cancellation_policy || 'moderate',
     });
     setCurrentStep(0);
     setIsDialogOpen(true);
@@ -280,7 +286,7 @@ const VendorYachts = () => {
 
     setIsSubmitting(true);
     try {
-      const yachtData: Partial<Yacht> = {
+      const yachtData: Partial<Yacht> & { cancellation_policy?: string } = {
         name_en: formData.name_en,
         name_ru: formData.name_ru || formData.name_en,
         description_en: formData.description_en || undefined,
@@ -308,6 +314,7 @@ const VendorYachts = () => {
         bathrooms: formData.bathrooms ? parseInt(formData.bathrooms) : undefined,
         has_crew: formData.has_crew,
         is_featured: formData.is_featured,
+        cancellation_policy: formData.cancellation_policy,
       };
 
       if (editingYacht) {
@@ -535,6 +542,10 @@ const VendorYachts = () => {
                             <DropdownMenuItem onClick={() => openEditDialog(yacht)}>
                               <Edit className="h-4 w-4 mr-2" />
                               {isRussian ? 'Редактировать' : 'Edit'}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => navigate(`/vendor/yachts/${yacht.id}/calendar`)}>
+                              <Calendar className="h-4 w-4 mr-2" />
+                              {isRussian ? 'Календарь' : 'Calendar'}
                             </DropdownMenuItem>
                             <DropdownMenuItem 
                               onClick={() => setDeleteConfirmId(yacht.id)}
@@ -889,6 +900,17 @@ const VendorYachts = () => {
                           <Label>{isRussian ? 'Избранное' : 'Featured'}</Label>
                         </div>
                       </div>
+                    </VendorFormSection>
+
+                    <VendorFormSection
+                      title={isRussian ? 'Политика отмены' : 'Cancellation Policy'}
+                      description={isRussian ? 'Условия возврата средств для клиентов' : 'Refund conditions for customers'}
+                      icon={<Shield className="h-4 w-4" />}
+                    >
+                      <CancellationPolicySelector
+                        value={formData.cancellation_policy}
+                        onChange={(value) => updateField('cancellation_policy', value)}
+                      />
                     </VendorFormSection>
                   </WizardStepContent>
 

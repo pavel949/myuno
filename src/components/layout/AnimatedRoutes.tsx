@@ -349,6 +349,7 @@ const VendorTours = lazy(() => import('@/pages/vendor/VendorTours'));
 const VendorActivities = lazy(() => import('@/pages/vendor/VendorActivities'));
 const VendorExperiences = lazy(() => import('@/pages/vendor/VendorExperiences'));
 const VendorYachts = lazy(() => import('@/pages/vendor/VendorYachts'));
+const VendorYachtCalendar = lazy(() => import('@/pages/vendor/VendorYachtCalendar'));
 const VendorTransport = lazy(() => import('@/pages/vendor/VendorTransport'));
 const VendorBeauty = lazy(() => import('@/pages/vendor/VendorBeauty'));
 const VendorFitness = lazy(() => import('@/pages/vendor/VendorFitness'));
@@ -783,6 +784,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/vendor/activities" element={<VendorActivities />} />
           <Route path="/vendor/experiences" element={<VendorExperiences />} />
           <Route path="/vendor/yachts" element={<VendorYachts />} />
+          <Route path="/vendor/yachts/:id/calendar" element={<VendorYachtCalendar />} />
           <Route path="/vendor/transport" element={<VendorTransport />} />
           <Route path="/vendor/beauty" element={<VendorBeauty />} />
           <Route path="/vendor/fitness" element={<VendorFitness />} />
