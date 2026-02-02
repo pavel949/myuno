@@ -121,6 +121,10 @@ const VeterinaryPage = lazy(() => import('@/pages/expat/VeterinaryPage'));
 
 // Install Page
 const Install = lazy(() => import('@/pages/Install'));
+
+// List With Us (Become a Host/Vendor)
+const ListWithUsPage = lazy(() => import('@/pages/ListWithUsPage'));
+
 // Tours Mini-App (LEGACY - redirects to /experiences)
 const ToursIndex = lazy(() => import('@/pages/tours/ToursIndex'));
 const TourDetail = lazy(() => import('@/pages/tours/TourDetail'));
@@ -484,6 +488,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/support/tickets" element={<LazyPage><MyTickets /></LazyPage>} />
         <Route path="/support/tickets/:ticketId" element={<LazyPage><TicketDetail /></LazyPage>} />
         <Route path="/install" element={<LazyPage><Install /></LazyPage>} />
+        
+        {/* List With Us - Become a Host/Vendor */}
+        <Route path="/list-with-us" element={<ListWithUsPage />} />
         
         {/* Beauty & Spa Mini-App Routes */}
         <Route path="/beauty" element={<LazyPage><BeautySpaIndex /></LazyPage>} />
