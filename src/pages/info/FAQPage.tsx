@@ -218,10 +218,10 @@ export default function FAQPage() {
         {
           q: isRu ? 'Какие способы оплаты доступны?' : isTh ? 'มีวิธีการชำระเงินใดบ้าง?' : 'What payment methods are available?',
           a: isRu 
-            ? 'Мы принимаем банковские карты (Visa, Mastercard), наличные при получении услуги и оплату через UNO Кошелёк (баланс с кэшбеком).'
+            ? 'Мы принимаем банковские карты (Visa, Mastercard), наличные при получении услуги и оплату через myUNO Кошелёк (баланс с кэшбеком).'
             : isTh 
-            ? 'เรารับบัตรธนาคาร (Visa, Mastercard), เงินสดเมื่อรับบริการ และการชำระเงินผ่าน UNO Wallet (ยอดคงเหลือพร้อมเงินคืน)'
-            : 'We accept bank cards (Visa, Mastercard), cash upon service delivery and payment via UNO Wallet (balance with cashback).',
+            ? 'เรารับบัตรธนาคาร (Visa, Mastercard), เงินสดเมื่อรับบริการ และการชำระเงินผ่าน myUNO Wallet (ยอดคงเหลือพร้อมเงินคืน)'
+            : 'We accept bank cards (Visa, Mastercard), cash upon service delivery and payment via myUNO Wallet (balance with cashback).',
         },
         {
           q: isRu ? 'Безопасна ли оплата?' : isTh ? 'การชำระเงินปลอดภัยหรือไม่?' : 'Is payment secure?',
