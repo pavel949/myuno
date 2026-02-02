@@ -2582,6 +2582,7 @@ export type Database = {
           description_ru: string | null
           district: string | null
           email: string | null
+          entity_type: string | null
           id: string
           images: string[] | null
           is_active: boolean | null
@@ -2621,6 +2622,7 @@ export type Database = {
           description_ru?: string | null
           district?: string | null
           email?: string | null
+          entity_type?: string | null
           id?: string
           images?: string[] | null
           is_active?: boolean | null
@@ -2660,6 +2662,7 @@ export type Database = {
           description_ru?: string | null
           district?: string | null
           email?: string | null
+          entity_type?: string | null
           id?: string
           images?: string[] | null
           is_active?: boolean | null
@@ -15261,6 +15264,7 @@ export type Database = {
         | "food"
         | "tour"
         | "medical"
+      education_entity_type: "institution" | "individual"
       intent_status:
         | "pending"
         | "processing"
@@ -15477,6 +15481,7 @@ export const Constants = {
         "tour",
         "medical",
       ],
+      education_entity_type: ["institution", "individual"],
       intent_status: [
         "pending",
         "processing",

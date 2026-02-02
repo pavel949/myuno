@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { GraduationCap, BookOpen } from "lucide-react";
+import { GraduationCap, BookOpen, Building2, User } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
 
@@ -11,6 +11,7 @@ import { useEducationProviders } from "@/hooks/useEducation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { matchesFilter, matchesPriceLevel } from '@/lib/filterUtils';
 
+// Categories now reflect the semantic entity types
 const categories: MiniAppCategory[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '📚' },
   { id: 'tutor', labelEn: 'Tutors', labelRu: 'Репетиторы', icon: '👨‍🏫' },
@@ -51,8 +52,8 @@ export default function EducationIndex() {
       const ages = filterValues.ageGroup as string[] | undefined;
       if (ages?.length && !matchesFilter(provider.age_groups || [], ages)) return false;
       
-      // Tab filter
-      if (activeTab !== 'all' && provider.provider_type !== activeTab) return false;
+      // Tab filter - now uses semantic entity_type
+      if (activeTab !== 'all' && provider.entity_type !== activeTab) return false;
       
       // Subject filter
       const subjects = filterValues.subjects as string[] | undefined;
@@ -90,8 +91,9 @@ export default function EducationIndex() {
     });
   }, [searchQuery, filterValues, language, providers, activeTab]);
 
-  const tutors = filteredProviders.filter(p => p.provider_type === 'tutor');
-  const schools = filteredProviders.filter(p => p.provider_type === 'school');
+  // Use entity_type for semantic separation: institutions vs individuals
+  const tutors = filteredProviders.filter(p => p.entity_type === 'individual' || p.provider_type === 'tutor');
+  const schools = filteredProviders.filter(p => p.entity_type === 'institution' || p.provider_type === 'school');
 
   return (
     <MiniAppLayout
@@ -119,13 +121,13 @@ export default function EducationIndex() {
             <BookOpen className="h-4 w-4 mr-2" />
             {t('education.all')}
           </TabsTrigger>
-          <TabsTrigger value="tutor">
-            <GraduationCap className="h-4 w-4 mr-2" />
+          <TabsTrigger value="individual">
+            <User className="h-4 w-4 mr-2" />
             {t('education.tutors')}
           </TabsTrigger>
-          <TabsTrigger value="school">
-            🏫
-            <span className="ml-2">{t('education.schools')}</span>
+          <TabsTrigger value="institution">
+            <Building2 className="h-4 w-4 mr-2" />
+            {t('education.schools')}
           </TabsTrigger>
         </TabsList>
 
@@ -147,12 +149,12 @@ export default function EducationIndex() {
                   price={provider.price_per_hour || provider.price_per_course}
                   priceUnit={provider.price_per_hour ? `/${language === "ru" ? "час" : "hr"}` : undefined}
                   currency={currencyInfo.symbol}
-                  badge={provider.provider_type === "tutor" 
-                    ? { text: t('education.tutor'), className: "bg-blue-100 text-blue-600" }
-                    : { text: t('education.school'), className: "bg-purple-100 text-purple-600" }
+                  badge={provider.entity_type === "individual" 
+                    ? { text: t('education.tutor'), className: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" }
+                    : { text: t('education.school'), className: "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400" }
                   }
                   tags={provider.subjects?.slice(0, 3) || []}
-                  onClick={() => navigate(`/education/tutor/${provider.id}`)}
+                  onClick={() => navigate(provider.entity_type === 'institution' ? `/education/course/${provider.id}` : `/education/tutor/${provider.id}`)}
                 />
               ))}
               {filteredProviders.length === 0 && (
@@ -164,7 +166,7 @@ export default function EducationIndex() {
           )}
         </TabsContent>
 
-        <TabsContent value="tutor" className="mt-4 space-y-4">
+        <TabsContent value="individual" className="mt-4 space-y-4">
           {isLoading ? (
             Array.from({ length: 3 }).map((_, i) => (
               <Skeleton key={i} className="h-32 w-full rounded-lg" />
@@ -183,7 +185,7 @@ export default function EducationIndex() {
                   priceUnit={`/${language === "ru" ? "час" : "hr"}`}
                   currency={currencyInfo.symbol}
                   badge={tutor.is_online 
-                    ? { text: "Online", className: "bg-green-100 text-green-600" }
+                    ? { text: "Online", className: "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400" }
                     : undefined
                   }
                   tags={tutor.subjects?.slice(0, 3) || []}
@@ -199,7 +201,7 @@ export default function EducationIndex() {
           )}
         </TabsContent>
 
-        <TabsContent value="school" className="mt-4 space-y-4">
+        <TabsContent value="institution" className="mt-4 space-y-4">
           {isLoading ? (
             Array.from({ length: 3 }).map((_, i) => (
               <Skeleton key={i} className="h-32 w-full rounded-lg" />
@@ -218,11 +220,11 @@ export default function EducationIndex() {
                   priceUnit={school.price_per_course ? `/${language === "ru" ? "курс" : "course"}` : `/${language === "ru" ? "час" : "hr"}`}
                   currency={currencyInfo.symbol}
                   badge={school.is_verified 
-                    ? { text: t('education.verified'), className: "bg-emerald-100 text-emerald-600" }
+                    ? { text: t('education.verified'), className: "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400" }
                     : undefined
                   }
                   tags={school.subjects?.slice(0, 3) || []}
-                  onClick={() => navigate(`/education/tutor/${school.id}`)}
+                  onClick={() => navigate(`/education/course/${school.id}`)}
                 />
               ))}
               {schools.length === 0 && (
