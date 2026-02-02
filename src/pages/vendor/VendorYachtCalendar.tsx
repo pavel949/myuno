@@ -8,19 +8,21 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { YachtCalendar, YachtAvailabilityEntry } from '@/components/yacht/YachtCalendar';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { YachtICalSync } from '@/components/yacht/YachtICalSync';
+import { YachtPricingRules } from '@/components/yacht/YachtPricingRules';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { 
   Save, 
-  RefreshCw, 
-  Link2, 
-  ExternalLink, 
-  Calendar, 
   Sailboat,
-  AlertCircle
+  AlertCircle,
+  Calendar,
+  DollarSign,
+  Link2
 } from 'lucide-react';
 
 export default function VendorYachtCalendar() {
@@ -40,6 +42,7 @@ export default function VendorYachtCalendar() {
 
   const [localAvailability, setLocalAvailability] = useState<YachtAvailabilityEntry[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
+  const [activeTab, setActiveTab] = useState('calendar');
 
   // Sync local state with fetched data
   React.useEffect(() => {
@@ -114,7 +117,7 @@ export default function VendorYachtCalendar() {
     <AppLayout>
       <PageContainer>
         <PageHeader 
-          title={isRu ? 'Календарь яхты' : 'Yacht Calendar'}
+          title={isRu ? 'Управление яхтой' : 'Yacht Management'}
           showBack
         />
 
@@ -175,53 +178,52 @@ export default function VendorYachtCalendar() {
           </Card>
         )}
 
-        {/* Calendar */}
-        <YachtCalendar
-          availability={localAvailability}
-          onChange={handleAvailabilityChange}
-          basePriceHalfDay={yacht.price_half_day || 0}
-          basePriceFullDay={yacht.price_full_day || 0}
-          currency="THB"
-          className="mb-4"
-        />
-
-        {/* iCal Sync Section */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="calendar" className="gap-2">
+              <Calendar className="h-4 w-4" />
+              <span className="hidden sm:inline">
+                {isRu ? 'Календарь' : 'Calendar'}
+              </span>
+            </TabsTrigger>
+            <TabsTrigger value="pricing" className="gap-2">
+              <DollarSign className="h-4 w-4" />
+              <span className="hidden sm:inline">
+                {isRu ? 'Цены' : 'Pricing'}
+              </span>
+            </TabsTrigger>
+            <TabsTrigger value="sync" className="gap-2">
               <Link2 className="h-4 w-4" />
-              {isRu ? 'Синхронизация календаря' : 'Calendar Sync'}
-            </CardTitle>
-            <CardDescription>
-              {isRu 
-                ? 'Синхронизируйте с GetMyBoat, Boatsetter и другими платформами' 
-                : 'Sync with GetMyBoat, Boatsetter and other platforms'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Button variant="outline" size="sm" className="gap-2" disabled>
-                <RefreshCw className="h-4 w-4" />
-                {isRu ? 'Импорт iCal' : 'Import iCal'}
-                <Badge variant="secondary" className="ml-1 text-[10px]">
-                  {isRu ? 'Скоро' : 'Soon'}
-                </Badge>
-              </Button>
-              <Button variant="outline" size="sm" className="gap-2" disabled>
-                <ExternalLink className="h-4 w-4" />
-                {isRu ? 'Экспорт iCal' : 'Export iCal'}
-                <Badge variant="secondary" className="ml-1 text-[10px]">
-                  {isRu ? 'Скоро' : 'Soon'}
-                </Badge>
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {isRu 
-                ? 'Вставьте ссылку iCal с другой платформы для автоматической синхронизации занятости' 
-                : 'Paste an iCal link from another platform to automatically sync availability'}
-            </p>
-          </CardContent>
-        </Card>
+              <span className="hidden sm:inline">
+                {isRu ? 'Синхронизация' : 'Sync'}
+              </span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="calendar">
+            <YachtCalendar
+              availability={localAvailability}
+              onChange={handleAvailabilityChange}
+              basePriceHalfDay={yacht.price_half_day || 0}
+              basePriceFullDay={yacht.price_full_day || 0}
+              currency="THB"
+            />
+          </TabsContent>
+
+          <TabsContent value="pricing">
+            <YachtPricingRules
+              yachtId={id!}
+              basePriceHalfDay={yacht.price_half_day || 0}
+              basePriceFullDay={yacht.price_full_day || 0}
+              currency="THB"
+            />
+          </TabsContent>
+
+          <TabsContent value="sync">
+            <YachtICalSync yachtId={id!} />
+          </TabsContent>
+        </Tabs>
       </PageContainer>
     </AppLayout>
   );
