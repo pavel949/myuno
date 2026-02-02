@@ -1,267 +1,179 @@
 
-# Фаза 3: UX-улучшения финансов
+# План редизайна футера приложения
 
-## Обзор улучшений
+## Проблема
+Текущий футер (CompactFooter) перегружен элементами и создаёт визуальное нагромождение:
+- 9 отдельных секций в одном компоненте
+- Дублирование футера на главной странице
+- Неоптимальная иерархия элементов
+- Отсутствие стандарта в UX Contract
 
-Фаза 3 сосредоточена на улучшении пользовательского опыта при работе с расходами и чеками:
+## Решение: Минималистичный футер
 
-| Улучшение | Описание | Приоритет |
-|-----------|----------|-----------|
-| Drag & Drop | Перетаскивание чеков для загрузки | Высокий |
-| Автозаполнение | Подсказки на основе истории расходов | Высокий |
-| Голосовой ввод | Диктовка описания расхода | Средний |
+### Структура нового футера
+
+```text
+┌─────────────────────────────────────────────────────────────┐
+│  Социальные сети (Telegram · Instagram · WhatsApp)         │
+├─────────────────────────────────────────────────────────────┤
+│  Ссылки: О нас · FAQ · Помощь · Условия                     │
+├─────────────────────────────────────────────────────────────┤
+│  © 2025 myUNO · Phuket Edition                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Что УБРАТЬ из футера
+
+| Элемент | Причина удаления | Куда переместить |
+|---------|------------------|------------------|
+| Partner CTA баннер | Слишком громоздкий | Отдельный компонент `ListWithUsBanner` (уже используется на главной) |
+| Trust Badges | Дублируют информацию | `SafetyBanner` на главной странице |
+| Location badge | Избыточен | В раздел About или убрать |
+| Support icons (App, SOS, Help) | Перегружают футер | В раздел Account или навигацию |
+
+### Что ОСТАВИТЬ в футере (3 секции)
+
+1. **Социальные сети** — компактные иконки в ряд
+2. **Навигационные ссылки** — About · FAQ · Help · Terms · Privacy
+3. **Копирайт** — бренд и версия
 
 ---
 
-## 1. Drag & Drop для чеков
+## Технические изменения
 
-### Что будет реализовано
+### Файл 1: `src/components/layout/CompactFooter.tsx`
 
-- Зона перетаскивания файлов с визуальной обратной связью
-- Поддержка на мобильных (касание для выбора остаётся)
-- Визуальный индикатор при наведении файла
-- Обработка невалидных файлов
+Полный рефакторинг — уменьшить с ~228 строк до ~80:
 
-### Компонент: DragDropReceiptUpload
+```tsx
+export function CompactFooter() {
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
 
-```
-┌─────────────────────────────────────┐
-│                                     │
-│   ┌─────────────────────────────┐   │
-│   │   ╭───────────────────────╮ │   │
-│   │   │  📷 Перетащите чек    │ │   │
-│   │   │   или нажмите для     │ │   │
-│   │   │       загрузки        │ │   │
-│   │   ╰───────────────────────╯ │   │
-│   └─────────────────────────────┘   │
-│                                     │
-│   При перетаскивании:               │
-│   ┌─────────────────────────────┐   │
-│   │  ● ● ● ● ● ● ● ● ● ● ● ●  │   │
-│   │       Отпустите файл       │   │
-│   │  ● ● ● ● ● ● ● ● ● ● ● ●  │   │
-│   └─────────────────────────────┘   │
-│                                     │
-└─────────────────────────────────────┘
-```
+  const navLinks = [
+    { to: '/about', label: isRu ? 'О нас' : 'About' },
+    { to: '/faq', label: 'FAQ' },
+    { to: '/support', label: isRu ? 'Помощь' : 'Help' },
+    { to: '/terms', label: isRu ? 'Условия' : 'Terms' },
+    { to: '/privacy', label: isRu ? 'Конфиденциальность' : 'Privacy' },
+  ];
 
----
+  const socialLinks = [
+    { href: 'https://t.me/myuno_support', icon: Send, label: 'Telegram' },
+    { href: 'https://instagram.com/myuno.app', icon: Instagram, label: 'Instagram' },
+    { href: 'https://wa.me/...', icon: MessageCircle, label: 'WhatsApp' },
+  ];
 
-## 2. Автозаполнение на основе истории
-
-### Что будет реализовано
-
-- Хук для получения недавних вендоров
-- Хук для популярных категорий пользователя  
-- Комбобокс с подсказками для поля "Vendor"
-- Быстрые кнопки недавних категорий
-
-### Хук: useExpenseAutocomplete
-
-```typescript
-// Возвращает:
-{
-  recentVendors: ['7-Eleven', 'Big C', 'Makro', ...],
-  frequentCategories: ['cleaning', 'utilities', 'supplies'],
-  suggestVendor: (input: string) => string[],
-  suggestCategory: (vendor: string) => string | null
+  return (
+    <footer className="border-t border-border/50 bg-muted/30">
+      <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
+        {/* Социальные сети */}
+        <div className="flex justify-center gap-6">
+          {socialLinks.map(...)}
+        </div>
+        
+        {/* Навигация */}
+        <div className="flex flex-wrap justify-center gap-x-4 gap-y-2">
+          {navLinks.map(...)}
+        </div>
+        
+        {/* Копирайт */}
+        <p className="text-center text-xs text-muted-foreground">
+          © 2025 myUNO · Phuket Edition
+        </p>
+      </div>
+    </footer>
+  );
 }
 ```
 
-### UI: Поле с подсказками
+### Файл 2: `src/pages/Index.tsx`
 
-```
-┌─────────────────────────────────────┐
-│ Поставщик                           │
-│ ┌─────────────────────────────────┐ │
-│ │ 7-El...                     │ ▼ │ │
-│ └─────────────────────────────────┘ │
-│ ┌─────────────────────────────────┐ │
-│ │ 7-Eleven              (5 раз) │ │ │
-│ │ 7-Eleven Rawai        (3 раз) │ │ │
-│ │ 7-Eleven Chalong      (2 раз) │ │ │
-│ └─────────────────────────────────┘ │
-└─────────────────────────────────────┘
+Удалить дублирующий инлайн футер (строки 234-238):
+
+```diff
+- {/* Footer - minimal */}
+- <div className="text-center py-3 border-t border-border/50">
+-   <p className="text-xs text-muted-foreground">
+-     © 2025 myUNO · {t('home.verifiedPartners')}
+-   </p>
+- </div>
 ```
 
----
+### Файл 3: `docs/UX_CONTRACT.md`
 
-## 3. Голосовой ввод описания
+Добавить секцию о футере:
 
-### Что будет реализовано
+```markdown
+## 18. Footer Component
 
-- Кнопка микрофона рядом с полем описания
-- Использование Web Speech API
-- Поддержка русского и английского языков
-- Fallback для неподдерживаемых браузеров
+### 18.1 CompactFooter (🔴 MUST)
+Все страницы с `showFooter={true}` используют единый минимальный футер.
 
-### UI: Поле с микрофоном
+Обязательные элементы:
+- Социальные ссылки (Telegram, Instagram, WhatsApp)
+- Навигационные ссылки (About, FAQ, Help, Terms, Privacy)
+- Копирайт с брендом
 
-```
-┌─────────────────────────────────────┐
-│ Что купили?                         │
-│ ┌───────────────────────────────┬─┐ │
-│ │ Средства для уборки...        │🎤│ │
-│ └───────────────────────────────┴─┘ │
-│                                     │
-│ При записи:                         │
-│ ┌───────────────────────────────┬─┐ │
-│ │ Моющее средство для пола      │🔴│ │
-│ └───────────────────────────────┴─┘ │
-│         🔊 Говорите...              │
-└─────────────────────────────────────┘
+Запрещено добавлять:
+- CTA баннеры (использовать отдельные компоненты)
+- Trust badges (размещать в контенте страницы)
+- Громоздкие секции
 ```
 
 ---
 
-## План реализации
+## Визуальное сравнение
 
-### Шаг 1: Drag & Drop компонент
-
-**Файл:** `src/components/upload/DragDropReceiptUpload.tsx`
-
-Функции:
-- `onDragEnter`, `onDragOver`, `onDragLeave`, `onDrop` хендлеры
-- Визуальный стейт `isDragging`
-- Валидация типа файла
-- Интеграция с существующим `uploadFile` из DocumentUpload
-- Пульсирующая анимация зоны при перетаскивании
-
-### Шаг 2: Хук автозаполнения
-
-**Файл:** `src/hooks/useExpenseAutocomplete.ts`
-
-Логика:
-- Запрос последних 50 транзакций пользователя
-- Извлечение уникальных vendor_name с подсчётом частоты
-- Группировка по категориям для vendor → category маппинга
-- Fuzzy-поиск для подсказок
-
-### Шаг 3: VendorCombobox компонент
-
-**Файл:** `src/components/owner/expense/VendorCombobox.tsx`
-
-Использует `cmdk` (уже установлен) для:
-- Поиск с подсказками
-- Показ частоты использования
-- Автовыбор категории при выборе вендора
-
-### Шаг 4: VoiceInput компонент
-
-**Файл:** `src/components/ui/voice-input.tsx`
-
-Функции:
-- Проверка поддержки `webkitSpeechRecognition` / `SpeechRecognition`
-- Выбор языка на основе текущей локали
-- Визуальный индикатор записи
-- Кнопка остановки
-
-### Шаг 5: Интеграция в QuickExpense
-
-Обновить `QuickExpense.tsx`:
-- Заменить DocumentUpload на DragDropReceiptUpload
-- Добавить VendorCombobox для поля вендора
-- Добавить VoiceInput к полю описания
-
----
-
-## Технические детали
-
-### DragDropReceiptUpload (ключевой код)
-
-```typescript
-const [isDragging, setIsDragging] = useState(false);
-
-const handleDragOver = (e: React.DragEvent) => {
-  e.preventDefault();
-  setIsDragging(true);
-};
-
-const handleDrop = (e: React.DragEvent) => {
-  e.preventDefault();
-  setIsDragging(false);
-  const file = e.dataTransfer.files[0];
-  if (file) uploadFile(file);
-};
+### До (текущий):
+```text
+┌──────────────────────────────────────┐
+│ 🤝 Стать партнёром                   │  ← Крупный баннер
+│    Предложите свои услуги...         │
+├──────────────────────────────────────┤
+│ [✓ G-Trust] [⏰ 24/7] [👥 200+]       │  ← Trust badges
+├──────────────────────────────────────┤
+│ О нас · Как работает · FAQ · Контакты│
+│                                      │
+│ [📱 App] [🆘 SOS] [❓ Help]           │  ← Кнопки
+├──────────────────────────────────────┤
+│ 📍 Phuket, Thailand                  │
+├──────────────────────────────────────┤
+│ [Telegram] [Instagram] [WhatsApp]    │
+├──────────────────────────────────────┤
+│     myUNO                            │
+│ "The only app you need abroad"       │
+├──────────────────────────────────────┤
+│ Условия · Конфиденциальность · ...   │
+│ © 2025 myUNO · Phuket Edition v1.0   │
+└──────────────────────────────────────┘
 ```
 
-### useExpenseAutocomplete (ключевой код)
-
-```typescript
-const { data: transactions } = useQuery({
-  queryKey: ['expense-autocomplete', user?.id],
-  queryFn: async () => {
-    const { data } = await supabase
-      .from('property_financials')
-      .select('vendor_name, category')
-      .eq('owner_id', user.id)
-      .eq('transaction_type', 'expense')
-      .order('created_at', { ascending: false })
-      .limit(100);
-    return data;
-  }
-});
-
-const recentVendors = useMemo(() => {
-  // Группировка и подсчёт частоты
-  const vendorCounts = new Map<string, number>();
-  transactions?.forEach(t => {
-    if (t.vendor_name) {
-      vendorCounts.set(t.vendor_name, 
-        (vendorCounts.get(t.vendor_name) || 0) + 1);
-    }
-  });
-  return [...vendorCounts.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 10);
-}, [transactions]);
-```
-
-### VoiceInput (ключевой код)
-
-```typescript
-const SpeechRecognition = window.SpeechRecognition || 
-                          window.webkitSpeechRecognition;
-
-const recognition = new SpeechRecognition();
-recognition.lang = language === 'ru' ? 'ru-RU' : 'en-US';
-recognition.continuous = false;
-
-recognition.onresult = (event) => {
-  const transcript = event.results[0][0].transcript;
-  onTranscript(transcript);
-};
+### После (предлагаемый):
+```text
+┌──────────────────────────────────────┐
+│   [📱 TG] · [📷 IG] · [💬 WA]         │  ← Компактные иконки
+├──────────────────────────────────────┤
+│ О нас · FAQ · Помощь · Условия       │  ← Одна строка
+├──────────────────────────────────────┤
+│ © 2025 myUNO · Phuket Edition        │
+└──────────────────────────────────────┘
 ```
 
 ---
 
-## Новые файлы
+## Порядок выполнения
 
-```
-src/components/upload/
-└── DragDropReceiptUpload.tsx    # Drag & Drop зона
-
-src/hooks/
-└── useExpenseAutocomplete.ts    # Автозаполнение
-
-src/components/owner/expense/
-├── VendorCombobox.tsx           # Комбобокс поставщика
-└── index.ts
-
-src/components/ui/
-└── voice-input.tsx              # Голосовой ввод
-```
+1. **Рефакторинг CompactFooter.tsx** — минимализация до 3 секций
+2. **Удаление дубля в Index.tsx** — убрать инлайн футер
+3. **Обновление UX_CONTRACT.md** — добавить стандарт футера
+4. **Проверка всех страниц с `showFooter`** — OwnerLanding и др.
 
 ---
 
-## Итог
+## Ожидаемый результат
 
-После реализации Фазы 3:
-
-| Метрика | До | После |
-|---------|-----|-------|
-| Время ввода расхода | ~60 сек | ~20 сек |
-| Количество нажатий | 8-10 | 3-5 |
-| Удобство на мобильном | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-
-Это завершит полный цикл улучшений модуля управления недвижимостью.
+- Футер уменьшится с ~228 строк до ~80
+- Визуально чистый, не перегруженный
+- Соответствует минималистичному стилю платформы
+- Единый стандарт на всех страницах
