@@ -169,12 +169,12 @@ export function UniversalHelpFAB({ className }: UniversalHelpFABProps) {
                   <p className="text-xs text-muted-foreground px-2 mb-2">
                     {isRu ? 'Или свяжитесь напрямую:' : 'Or contact us directly:'}
                   </p>
-                  <div className="flex gap-2">
+                <div className="flex gap-2">
                     <Button
                       variant="outline"
                       className="flex-1"
                       onClick={() => {
-                        window.open('https://wa.me/66123456789', '_blank');
+                        window.open('https://wa.me/66922407355', '_blank');
                       }}
                     >
                       <MessageCircle className="h-4 w-4 mr-2" />
@@ -184,7 +184,7 @@ export function UniversalHelpFAB({ className }: UniversalHelpFABProps) {
                       variant="outline"
                       className="flex-1"
                       onClick={() => {
-                        window.open('tel:+66123456789', '_blank');
+                        window.open('tel:+66922407355', '_blank');
                       }}
                     >
                       <Phone className="h-4 w-4 mr-2" />

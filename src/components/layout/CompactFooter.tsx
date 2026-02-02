@@ -28,7 +28,7 @@ export function CompactFooter() {
       hoverColor: 'hover:text-[#E4405F]'
     },
     { 
-      href: 'https://wa.me/66XXXXXXXXX', 
+      href: 'https://wa.me/66922407355', 
       icon: MessageCircle, 
       label: 'WhatsApp',
       hoverColor: 'hover:text-[#25D366]'
