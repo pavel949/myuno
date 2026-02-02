@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { triggerRipple } from '@/hooks/useRipple';
@@ -23,11 +23,8 @@ interface MiniAppQuickGridProps {
   className?: string;
 }
 
-export function MiniAppQuickGrid({ 
-  items, 
-  columns = 4,
-  className 
-}: MiniAppQuickGridProps) {
+export const MiniAppQuickGrid = forwardRef<HTMLDivElement, MiniAppQuickGridProps>(
+  function MiniAppQuickGrid({ items, columns = 4, className }, ref) {
   const navigate = useNavigate();
 
   const gridCols = {
@@ -56,7 +53,7 @@ export function MiniAppQuickGrid({
   };
 
   return (
-    <div className={cn("grid gap-3", gridCols[columns], className)}>
+    <div ref={ref} className={cn("grid gap-3", gridCols[columns], className)}>
       {items.map((item, i) => (
         <button
           key={i}
@@ -88,4 +85,4 @@ export function MiniAppQuickGrid({
       ))}
     </div>
   );
-}
+});

@@ -42,7 +42,7 @@ export function AccountActiveStay() {
           currency,
           property:owner_properties(
             id,
-            title_en,
+            title,
             title_ru,
             address,
             images
@@ -90,7 +90,7 @@ export function AccountActiveStay() {
             {property?.images?.[0] ? (
               <img
                 src={property.images[0]}
-                alt={isRussian ? property.title_ru : property.title_en}
+                alt={isRussian ? property.title_ru : property.title}
                 className="w-full h-full object-cover"
               />
             ) : (
@@ -111,8 +111,8 @@ export function AccountActiveStay() {
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <p className="font-semibold text-sm truncate">
-                  {isRussian ? property?.title_ru : property?.title_en}
+              <p className="font-semibold text-sm truncate">
+                  {isRussian ? property?.title_ru : property?.title}
                 </p>
                 <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                   <MapPin className="h-3 w-3" />
