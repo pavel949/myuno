@@ -230,12 +230,6 @@ const Index = () => {
             </>
           )}
 
-          {/* Footer - minimal */}
-          <div className="text-center py-3 border-t border-border/50">
-            <p className="text-xs text-muted-foreground">
-              © 2025 myUNO · {t('home.verifiedPartners')}
-            </p>
-          </div>
         </div>
       </PullToRefresh>
     </AppLayout>
