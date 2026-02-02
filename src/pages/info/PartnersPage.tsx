@@ -15,6 +15,7 @@ import {
   Phone, Mail, ShieldCheck, Crown,
   Car, UtensilsCrossed, Ship, Briefcase
 } from 'lucide-react';
+import { COMPANY_CONTACTS } from '@/lib/config';
 
 export default function PartnersPage() {
   const { language } = useLanguage();
@@ -542,14 +543,14 @@ export default function PartnersPage() {
               <Mail className="w-5 h-5 text-primary" />
               <div>
                 <p className="text-xs text-muted-foreground">{isRu ? 'Email' : 'Email'}</p>
-                <p className="text-sm font-medium">partners@uno.app</p>
+                <p className="text-sm font-medium">{COMPANY_CONTACTS.email.partners}</p>
               </div>
             </div>
             <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
               <Phone className="w-5 h-5 text-primary" />
               <div>
                 <p className="text-xs text-muted-foreground">{isRu ? 'Телефон' : 'Phone'}</p>
-                <p className="text-sm font-medium">+66 92 240 7355</p>
+                <p className="text-sm font-medium">{COMPANY_CONTACTS.phone.display}</p>
               </div>
             </div>
           </div>
