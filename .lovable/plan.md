@@ -58,13 +58,31 @@ SELECT EXISTS (
 
 ---
 
-## 🔄 В ПРОЦЕССЕ: Фаза 2
+## ✅ ВЫПОЛНЕНО: Фаза 2.1 (AI Content Lab)
 
-### 2.1 🟠 AI Content Lab
+### 2.1 ✅ AI Content Lab интегрирован
 
-- Нужен `mcc-content` AI агент
-- Интеграция с `ai-agent` edge function
-- Сохранение в `mcc_creatives`
+**Создан AI агент `mcc-content`:**
+- Slug: `mcc-content`
+- Model: `google/gemini-3-flash-preview`
+- Специализированный system prompt для маркетингового контента
+
+**Создан хук `useMCCContent.ts`:**
+- Стриминг ответов от AI agent
+- Парсинг вариантов контента
+- CRUD для `mcc_creatives`
+- Сохранение с metadata
+
+**Обновлён `MCCContentLabTab.tsx`:**
+- Убран mock setTimeout
+- Реальная интеграция с ai-agent edge function
+- UI для сохранения креативов в БД
+- Отображение сохранённых креативов
+- Quick actions с pre-filled prompts
+
+---
+
+## 🔄 В ПРОЦЕССЕ: Фаза 2 (продолжение)
 
 ### 2.2 🟠 Funnels CRUD
 
