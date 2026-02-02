@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { MessageCircle, X } from 'lucide-react';
+import React, { useState, forwardRef } from 'react';
+import { MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -31,17 +31,18 @@ interface MessageHostButtonProps {
   className?: string;
 }
 
-export const MessageHostButton: React.FC<MessageHostButtonProps> = ({
-  propertyId,
-  propertyTitle,
-  propertyTitleRu,
-  ownerName,
-  variant = 'outline',
-  size = 'default',
-  fullWidth = false,
-  showLabel = true,
-  className,
-}) => {
+export const MessageHostButton = forwardRef<HTMLButtonElement, MessageHostButtonProps>(
+  function MessageHostButton({
+    propertyId,
+    propertyTitle,
+    propertyTitleRu,
+    ownerName,
+    variant = 'outline',
+    size = 'default',
+    fullWidth = false,
+    showLabel = true,
+    className,
+  }, ref) {
   const [isOpen, setIsOpen] = useState(false);
   const { language } = useLanguage();
   const { user } = useAuth();
@@ -74,6 +75,7 @@ export const MessageHostButton: React.FC<MessageHostButtonProps> = ({
   return (
     <>
       <Button
+        ref={ref}
         variant={variant}
         size={size}
         onClick={handleClick}
@@ -109,6 +111,6 @@ export const MessageHostButton: React.FC<MessageHostButtonProps> = ({
       )}
     </>
   );
-};
+});
 
 export default MessageHostButton;
