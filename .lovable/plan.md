@@ -1,119 +1,267 @@
-# Аудит модуля управления недвижимостью Owner
 
-## ✅ Фаза 1: Маркетинговый блок — ЗАВЕРШЕНО
+# Фаза 3: UX-улучшения финансов
 
-### 1.1 База данных (реализовано)
-- ✅ `property_analytics` — статистика просмотров, показов, запросов, бронирований
-- ✅ `property_promotions` — буст-кампании (featured, boost, top_search)
-- ✅ `property_listing_scores` — кэшированные оценки качества листинга
-- ✅ RLS-политики для всех новых таблиц
-- ✅ Добавлены поля `report_frequency`, `report_recipients`, `auto_report_enabled` в owner_properties
+## Обзор улучшений
 
-### 1.2 Хуки и логика (реализовано)
-- ✅ `usePropertyMarketing.ts` — полный набор хуков:
-  - `usePropertyAnalytics` — статистика за период
-  - `usePropertyAnalyticsSummary` — сводка с конверсией
-  - `usePropertyListingScore` — оценка из БД
-  - `calculateListingHealthScore` — расчёт качества листинга на лету
-  - `usePropertyPromotions` — активные кампании
-  - `useCreatePromotion` / `useCancelPromotion` — управление продвижением
-  - `PROMOTION_TIERS` — тарифы буст-кампаний
+Фаза 3 сосредоточена на улучшении пользовательского опыта при работе с расходами и чеками:
 
-### 1.3 Компоненты маркетинга (реализовано)
-- ✅ `ListingHealthScore.tsx` — визуализация качества листинга (0-100%)
-  - Разбивка по категориям: фото, описание, цены, удобства, отзывчивость, отзывы
-  - Список недостающих полей
-  - AI-рекомендации по улучшению (high/medium/low priority)
-  
-- ✅ `ViewsAnalytics.tsx` — аналитика просмотров
-  - Карточки метрик: просмотры, показы, запросы, бронирования
-  - Конверсия просмотры → бронь
-  - График просмотров за 7/30/90 дней
-  - Сравнение с предыдущим периодом (% изменения)
-  
-- ✅ `BoostListingCard.tsx` — платное продвижение
-  - 3 тарифа: Boost (7 дней/฿1,500), Featured (14 дней/฿3,500), Top Search (30 дней/฿5,000)
-  - Диалог подтверждения оплаты
-  - Отображение активной кампании
-  
-- ✅ `MarketingSection.tsx` — секция для PropertyManage
-
-### 1.4 Интеграция (реализовано)
-- ✅ Добавлена вкладка "Продвижение" (Marketing) в PropertyManage с бейджем NEW
-- ✅ Маршрутизация через ?section=marketing
+| Улучшение | Описание | Приоритет |
+|-----------|----------|-----------|
+| Drag & Drop | Перетаскивание чеков для загрузки | Высокий |
+| Автозаполнение | Подсказки на основе истории расходов | Высокий |
+| Голосовой ввод | Диктовка описания расхода | Средний |
 
 ---
 
-## ✅ Существующий функционал
+## 1. Drag & Drop для чеков
 
-### Учёт расходов и чеков (5/5)
-| Функция | Статус |
-|---------|--------|
-| Быстрый расход (QuickExpense) | ✅ Мобильно-адаптированная форма |
-| OCR распознавание | ✅ AI (Gemini) извлекает сумму, дату, вендора |
-| Просмотр чеков | ✅ ReceiptViewer |
-| Экспорт CSV | ✅ Работает |
+### Что будет реализовано
 
-### Делегирование и Co-Host (5/5)
-| Функция | Статус |
-|---------|--------|
-| Система делегирования | ✅ 4 роли: trustee, agent, manager, management_company |
-| Гранулярные права | ✅ view, edit, financials, bookings, maintenance |
-| Приглашения | ✅ InviteTeamMemberDialog |
-| Передача собственности | ✅ useTransferOwnership |
+- Зона перетаскивания файлов с визуальной обратной связью
+- Поддержка на мобильных (касание для выбора остаётся)
+- Визуальный индикатор при наведении файла
+- Обработка невалидных файлов
 
-### OTA-синхронизация (4/5)
-| Функция | Статус |
-|---------|--------|
-| Импорт из OTA | ✅ iCal-ссылки с Airbnb, Booking, VRBO |
-| Экспорт на OTA | ✅ useICalExportUrl |
-| Channel Manager | ✅ 4 вкладки, ConflictResolver |
+### Компонент: DragDropReceiptUpload
 
-### Отчёты (3/5)
-| Функция | Статус |
-|---------|--------|
-| Генерация отчётов | ✅ Ежемесячные, квартальные, годовые |
-| Содержание | ✅ Доходы, расходы, occupancy, bookings |
-| PDF-генерация | ⏳ Не реализовано |
-| Автоотправка | ⏳ Не реализовано |
-
----
-
-## ✅ Фаза 2: Улучшение отчётности — ЗАВЕРШЕНО
-
-### 2.1 Edge Functions (реализовано)
-- ✅ `generate-report-pdf` — генерация HTML-отчёта для печати/PDF
-- ✅ `send-property-report` — отправка отчёта по email через Resend
-- ✅ Storage bucket `property-reports` для хранения отчётов
-
-### 2.2 Хуки (реализовано)
-- ✅ `useGeneratePdf` — генерация PDF по reportId
-- ✅ `useSendReportEmail` — отправка отчёта на email
-- ✅ `useCanAccessReportFinancials` — проверка доступа к финансам по роли
-
-### 2.3 UI (реализовано)
-- ✅ Кнопка "PDF" для генерации отчёта
-- ✅ Кнопка "Скачать" для загрузки готового PDF
-- ✅ Кнопка "Отправить" с диалогом ввода email
-- ✅ Поддержка множественных получателей
+```
+┌─────────────────────────────────────┐
+│                                     │
+│   ┌─────────────────────────────┐   │
+│   │   ╭───────────────────────╮ │   │
+│   │   │  📷 Перетащите чек    │ │   │
+│   │   │   или нажмите для     │ │   │
+│   │   │       загрузки        │ │   │
+│   │   ╰───────────────────────╯ │   │
+│   └─────────────────────────────┘   │
+│                                     │
+│   При перетаскивании:               │
+│   ┌─────────────────────────────┐   │
+│   │  ● ● ● ● ● ● ● ● ● ● ● ●  │   │
+│   │       Отпустите файл       │   │
+│   │  ● ● ● ● ● ● ● ● ● ● ● ●  │   │
+│   └─────────────────────────────┘   │
+│                                     │
+└─────────────────────────────────────┘
+```
 
 ---
 
-## ⏳ Следующие фазы
+## 2. Автозаполнение на основе истории
 
-### Фаза 3: UX-улучшения финансов
-- [ ] Drag-and-drop для чеков
-- [ ] Автозаполнение вендоров/категорий
-- [ ] Голосовой ввод расходов
+### Что будет реализовано
+
+- Хук для получения недавних вендоров
+- Хук для популярных категорий пользователя  
+- Комбобокс с подсказками для поля "Vendor"
+- Быстрые кнопки недавних категорий
+
+### Хук: useExpenseAutocomplete
+
+```typescript
+// Возвращает:
+{
+  recentVendors: ['7-Eleven', 'Big C', 'Makro', ...],
+  frequentCategories: ['cleaning', 'utilities', 'supplies'],
+  suggestVendor: (input: string) => string[],
+  suggestCategory: (vendor: string) => string | null
+}
+```
+
+### UI: Поле с подсказками
+
+```
+┌─────────────────────────────────────┐
+│ Поставщик                           │
+│ ┌─────────────────────────────────┐ │
+│ │ 7-El...                     │ ▼ │ │
+│ └─────────────────────────────────┘ │
+│ ┌─────────────────────────────────┐ │
+│ │ 7-Eleven              (5 раз) │ │ │
+│ │ 7-Eleven Rawai        (3 раз) │ │ │
+│ │ 7-Eleven Chalong      (2 раз) │ │ │
+│ └─────────────────────────────────┘ │
+└─────────────────────────────────────┘
+```
 
 ---
 
-## Итоговая оценка
+## 3. Голосовой ввод описания
 
-| Область | Статус |
-|---------|--------|
-| Расходы/Чеки | ⭐⭐⭐⭐⭐ (5/5) |
-| Co-Host/Делегирование | ⭐⭐⭐⭐⭐ (5/5) |
-| OTA-синхронизация | ⭐⭐⭐⭐☆ (4/5) |
-| Отчёты | ⭐⭐⭐☆☆ (3/5) |
-| Маркетинг | ⭐⭐⭐⭐☆ (4/5) ✅ NEW |
+### Что будет реализовано
+
+- Кнопка микрофона рядом с полем описания
+- Использование Web Speech API
+- Поддержка русского и английского языков
+- Fallback для неподдерживаемых браузеров
+
+### UI: Поле с микрофоном
+
+```
+┌─────────────────────────────────────┐
+│ Что купили?                         │
+│ ┌───────────────────────────────┬─┐ │
+│ │ Средства для уборки...        │🎤│ │
+│ └───────────────────────────────┴─┘ │
+│                                     │
+│ При записи:                         │
+│ ┌───────────────────────────────┬─┐ │
+│ │ Моющее средство для пола      │🔴│ │
+│ └───────────────────────────────┴─┘ │
+│         🔊 Говорите...              │
+└─────────────────────────────────────┘
+```
+
+---
+
+## План реализации
+
+### Шаг 1: Drag & Drop компонент
+
+**Файл:** `src/components/upload/DragDropReceiptUpload.tsx`
+
+Функции:
+- `onDragEnter`, `onDragOver`, `onDragLeave`, `onDrop` хендлеры
+- Визуальный стейт `isDragging`
+- Валидация типа файла
+- Интеграция с существующим `uploadFile` из DocumentUpload
+- Пульсирующая анимация зоны при перетаскивании
+
+### Шаг 2: Хук автозаполнения
+
+**Файл:** `src/hooks/useExpenseAutocomplete.ts`
+
+Логика:
+- Запрос последних 50 транзакций пользователя
+- Извлечение уникальных vendor_name с подсчётом частоты
+- Группировка по категориям для vendor → category маппинга
+- Fuzzy-поиск для подсказок
+
+### Шаг 3: VendorCombobox компонент
+
+**Файл:** `src/components/owner/expense/VendorCombobox.tsx`
+
+Использует `cmdk` (уже установлен) для:
+- Поиск с подсказками
+- Показ частоты использования
+- Автовыбор категории при выборе вендора
+
+### Шаг 4: VoiceInput компонент
+
+**Файл:** `src/components/ui/voice-input.tsx`
+
+Функции:
+- Проверка поддержки `webkitSpeechRecognition` / `SpeechRecognition`
+- Выбор языка на основе текущей локали
+- Визуальный индикатор записи
+- Кнопка остановки
+
+### Шаг 5: Интеграция в QuickExpense
+
+Обновить `QuickExpense.tsx`:
+- Заменить DocumentUpload на DragDropReceiptUpload
+- Добавить VendorCombobox для поля вендора
+- Добавить VoiceInput к полю описания
+
+---
+
+## Технические детали
+
+### DragDropReceiptUpload (ключевой код)
+
+```typescript
+const [isDragging, setIsDragging] = useState(false);
+
+const handleDragOver = (e: React.DragEvent) => {
+  e.preventDefault();
+  setIsDragging(true);
+};
+
+const handleDrop = (e: React.DragEvent) => {
+  e.preventDefault();
+  setIsDragging(false);
+  const file = e.dataTransfer.files[0];
+  if (file) uploadFile(file);
+};
+```
+
+### useExpenseAutocomplete (ключевой код)
+
+```typescript
+const { data: transactions } = useQuery({
+  queryKey: ['expense-autocomplete', user?.id],
+  queryFn: async () => {
+    const { data } = await supabase
+      .from('property_financials')
+      .select('vendor_name, category')
+      .eq('owner_id', user.id)
+      .eq('transaction_type', 'expense')
+      .order('created_at', { ascending: false })
+      .limit(100);
+    return data;
+  }
+});
+
+const recentVendors = useMemo(() => {
+  // Группировка и подсчёт частоты
+  const vendorCounts = new Map<string, number>();
+  transactions?.forEach(t => {
+    if (t.vendor_name) {
+      vendorCounts.set(t.vendor_name, 
+        (vendorCounts.get(t.vendor_name) || 0) + 1);
+    }
+  });
+  return [...vendorCounts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10);
+}, [transactions]);
+```
+
+### VoiceInput (ключевой код)
+
+```typescript
+const SpeechRecognition = window.SpeechRecognition || 
+                          window.webkitSpeechRecognition;
+
+const recognition = new SpeechRecognition();
+recognition.lang = language === 'ru' ? 'ru-RU' : 'en-US';
+recognition.continuous = false;
+
+recognition.onresult = (event) => {
+  const transcript = event.results[0][0].transcript;
+  onTranscript(transcript);
+};
+```
+
+---
+
+## Новые файлы
+
+```
+src/components/upload/
+└── DragDropReceiptUpload.tsx    # Drag & Drop зона
+
+src/hooks/
+└── useExpenseAutocomplete.ts    # Автозаполнение
+
+src/components/owner/expense/
+├── VendorCombobox.tsx           # Комбобокс поставщика
+└── index.ts
+
+src/components/ui/
+└── voice-input.tsx              # Голосовой ввод
+```
+
+---
+
+## Итог
+
+После реализации Фазы 3:
+
+| Метрика | До | После |
+|---------|-----|-------|
+| Время ввода расхода | ~60 сек | ~20 сек |
+| Количество нажатий | 8-10 | 3-5 |
+| Удобство на мобильном | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+
+Это завершит полный цикл улучшений модуля управления недвижимостью.
