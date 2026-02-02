@@ -179,7 +179,7 @@ export default function TransportBooking() {
 
   return (
     <AppLayout>
-      <PageContainer className="pb-32">
+      <PageContainer className="pb-40">
         <PageHeader 
           title={language === 'ru' ? 'Бронирование' : 'Booking'} 
           showBack 

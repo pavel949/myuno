@@ -182,7 +182,7 @@ export default function ExperienceBooking() {
       showFilter={false}
       showCategories={false}
     >
-      <div className="space-y-4 pb-32">
+      <div className="space-y-4 pb-40">
         {/* Experience Summary */}
         <Card>
           <CardContent className="p-4 flex gap-4">

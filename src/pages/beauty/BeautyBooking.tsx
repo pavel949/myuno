@@ -140,7 +140,7 @@ export default function BeautyBooking() {
 
   return (
     <AppLayout showBottomNav={false}>
-      <PageContainer className="pb-32">
+      <PageContainer className="pb-40">
         <PageHeader 
           title={language === 'ru' ? 'Бронирование' : 'Book Appointment'} 
           showBack 

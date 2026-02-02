@@ -28,7 +28,7 @@ export function BookingBottomBar({
     <motion.div
       initial={{ y: 100 }}
       animate={{ y: 0 }}
-      className="fixed bottom-0 left-0 right-0 p-3 sm:p-4 bg-background/95 backdrop-blur-lg border-t z-40 pb-safe"
+      className="fixed bottom-16 md:bottom-0 left-0 right-0 p-3 sm:p-4 bg-background/95 backdrop-blur-lg border-t z-40"
     >
       {showBreakdown && showBreakdown.length > 0 && (
         <div className="mb-3 space-y-1">

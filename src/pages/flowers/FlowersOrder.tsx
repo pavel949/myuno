@@ -304,7 +304,7 @@ const FlowersOrder = () => {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-4 space-y-6 pb-32">
+        <form onSubmit={handleSubmit} className="p-4 space-y-6 pb-40">
           {/* Step Progress */}
           <BookingStepProgress steps={deliveryBookingSteps} currentStep={currentStep} />
 
