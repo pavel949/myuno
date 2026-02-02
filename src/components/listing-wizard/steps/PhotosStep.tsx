@@ -1,8 +1,10 @@
 import React from 'react';
-import { ImagePlus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { MultiImageUpload } from '@/components/upload/ImageUpload';
 import type { ListingApplicationDraft } from '@/hooks/useListingApplication';
+import { AlertCircle } from 'lucide-react';
 
 interface PhotosStepProps {
   draft: ListingApplicationDraft;
@@ -13,32 +15,15 @@ interface PhotosStepProps {
 
 export function PhotosStep({ draft, onChange, onNext, onBack }: PhotosStepProps) {
   const { language } = useLanguage();
+  const { user } = useAuth();
   const isRu = language === 'ru';
   const images = draft.images || [];
   
-  const handleAddImage = () => {
-    // In production, this would open a file picker and upload to storage
-    // For now, we'll use a placeholder flow
-    const url = prompt(isRu ? 'Введите URL изображения:' : 'Enter image URL:');
-    if (url) {
-      const updated = [...images, url];
-      onChange({ 
-        images: updated,
-        cover_image: draft.cover_image || url 
-      });
-    }
-  };
-  
-  const handleRemoveImage = (index: number) => {
-    const updated = images.filter((_, i) => i !== index);
+  const handleImagesChange = (urls: string[]) => {
     onChange({ 
-      images: updated,
-      cover_image: updated[0] || undefined
+      images: urls,
+      cover_image: urls[0] || undefined 
     });
-  };
-  
-  const handleSetCover = (url: string) => {
-    onChange({ cover_image: url });
   };
   
   return (
@@ -49,58 +34,33 @@ export function PhotosStep({ draft, onChange, onNext, onBack }: PhotosStepProps)
           : 'Add photos for your listing. The first photo will be the cover.'}
       </p>
       
-      <div className="grid grid-cols-2 gap-3">
-        {images.map((url, index) => (
-          <div 
-            key={index} 
-            className="relative aspect-square rounded-xl overflow-hidden bg-muted group"
-          >
-            <img 
-              src={url} 
-              alt={`Photo ${index + 1}`}
-              className="w-full h-full object-cover"
-            />
-            {draft.cover_image === url && (
-              <div className="absolute top-2 left-2 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded">
-                {isRu ? 'Обложка' : 'Cover'}
-              </div>
-            )}
-            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-              {draft.cover_image !== url && (
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => handleSetCover(url)}
-                >
-                  {isRu ? 'Обложка' : 'Set cover'}
-                </Button>
-              )}
-              <Button
-                size="icon"
-                variant="destructive"
-                onClick={() => handleRemoveImage(index)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+      {!user && (
+        <div className="flex items-start gap-3 bg-warning/10 border border-warning/30 rounded-xl p-4">
+          <AlertCircle className="h-5 w-5 text-warning shrink-0 mt-0.5" />
+          <div className="text-sm">
+            <p className="font-medium">
+              {isRu ? 'Войдите для загрузки фото' : 'Sign in to upload photos'}
+            </p>
+            <p className="text-muted-foreground mt-1">
+              {isRu 
+                ? 'Вы сможете добавить фотографии после авторизации или использовать ссылки на изображения.'
+                : 'You can add photos after signing in or use image URLs.'}
+            </p>
           </div>
-        ))}
-        
-        <button
-          onClick={handleAddImage}
-          className="aspect-square rounded-xl border-2 border-dashed border-muted-foreground/30 flex flex-col items-center justify-center gap-2 hover:border-primary/50 hover:bg-muted/50 transition-colors"
-        >
-          <ImagePlus className="h-8 w-8 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">
-            {isRu ? 'Добавить фото' : 'Add photo'}
-          </span>
-        </button>
-      </div>
+        </div>
+      )}
+      
+      <MultiImageUpload
+        value={images}
+        onChange={handleImagesChange}
+        folder="listing-applications"
+        maxImages={10}
+      />
       
       <p className="text-xs text-muted-foreground">
         {isRu 
-          ? 'Рекомендуем добавить минимум 3 фотографии'
-          : 'We recommend adding at least 3 photos'}
+          ? 'Рекомендуем добавить минимум 3 фотографии. Максимум 10.'
+          : 'We recommend adding at least 3 photos. Maximum 10.'}
       </p>
       
       <div className="flex gap-3">
