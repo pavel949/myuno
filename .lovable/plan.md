@@ -1,325 +1,262 @@
 
+# Аудит качества Marketing Command Center (MCC)
 
-# План: Полноценный Campaign Factory для MCC
+## Резюме текущего состояния
 
-## Текущее состояние
+MCC представляет собой 7-модульную систему на `/admin/marketing` с базовым функционалом Campaign Factory. Проведённый анализ выявил **критические пробелы в бизнес-логике** и **отсутствие интеграции с существующими данными платформы**.
 
-Сейчас `MCCCampaignsTab.tsx` — это **UI-заглушка** с mock-данными. Таблица `mcc_campaigns` в базе данных уже существует, но:
-- Нет формы создания/редактирования кампаний
-- Нет реального CRUD
-- Нет связи с креативами (`mcc_creatives`)
-- Нет метрик производительности
-- Нет статусного workflow
+---
 
-## Архитектура решения
+## 1. Критические проблемы (P0)
 
-```text
-┌──────────────────────────────────────────────────────────────────────────┐
-│                         CAMPAIGN FACTORY MODULE                           │
-├──────────────────────────────────────────────────────────────────────────┤
-│                                                                           │
-│  ┌─────────────────────┐   ┌─────────────────────┐   ┌────────────────┐  │
-│  │   Campaign List     │   │   Campaign Form     │   │  Campaign      │  │
-│  │   (Grid/Table)      │   │   (Create/Edit)     │   │  Detail View   │  │
-│  └─────────────────────┘   └─────────────────────┘   └────────────────┘  │
-│           │                         │                        │            │
-│           └─────────────┬───────────┴────────────────────────┘            │
-│                         ▼                                                 │
-│  ┌──────────────────────────────────────────────────────────────────┐    │
-│  │                    useCampaignFactory Hook                        │    │
-│  │  - CRUD operations (create, update, delete, duplicate)            │    │
-│  │  - Status transitions (draft → active → paused → completed)       │    │
-│  │  - Creatives management                                           │    │
-│  │  - Performance data aggregation                                   │    │
-│  └──────────────────────────────────────────────────────────────────┘    │
-│                         │                                                 │
-│                         ▼                                                 │
-│  ┌──────────────────────────────────────────────────────────────────┐    │
-│  │                      Supabase Tables                              │    │
-│  │  mcc_campaigns ◄──── mcc_creatives ◄──── mcc_channel_metrics      │    │
-│  └──────────────────────────────────────────────────────────────────┘    │
-│                                                                           │
-└──────────────────────────────────────────────────────────────────────────┘
+### 1.1 🔴 Нет интеграции с существующими лидами
+
+**Проблема:** MCC использует отдельную таблицу `mcc_leads` (0 записей), полностью игнорируя `consultation_requests` (1+ записей с реальными данными).
+
+| Таблица | Записей | Статус |
+|---------|---------|--------|
+| `mcc_leads` | 0 | Пустая |
+| `consultation_requests` | 1+ | Реальные лиды |
+| `mcc_campaigns` | 0 | Пустая |
+
+**Последствия:**
+- Невозможно работать с зарегистрированными пользователями
+- Дублирование данных
+- AI-скоринг (`ai_score`, `ai_priority`) в `consultation_requests` не используется MCC
+
+**Решение:**
+- Добавить `MCCLeadsTab` интеграцию с `consultation_requests`
+- Отобразить `ai_score`, `ai_priority`, `ai_reasoning` из реальных лидов
+- Добавить переключатель источника: MCC Leads / Consultation Requests / All
+
+---
+
+### 1.2 🔴 Mock-данные вместо реальных
+
+**Модули с mock-данными:**
+
+| Модуль | Компонент | Статус |
+|--------|-----------|--------|
+| Overview | `MCCOverviewTab` | Mock KPIs, mock recent leads |
+| Leads | `MCCLeadsTab` | Fallback на `mockLeads` (строка 106) |
+| Funnels | `MCCFunnelsTab` | 100% mock-данные |
+| Content Lab | `MCCContentLabTab` | Mock-генерация (setTimeout) |
+| Analytics | `MCCAnalyticsTab` | 100% mock-данные |
+| Automation | `MCCAutomationTab` | 100% mock правила |
+
+**Проблема:** Только Campaign Factory подключён к реальной БД.
+
+---
+
+### 1.3 🔴 RLS использует устаревшую логику
+
+```sql
+-- Текущая функция is_mcc_admin():
+SELECT 1 FROM public.profiles 
+WHERE id = auth.uid() 
+AND role IN ('admin', 'super_admin')
 ```
 
-## Компоненты для реализации
+**Проблема:** Проверяет `role` напрямую в `profiles`, а не через `user_roles` таблицу. Это нарушает security guidelines проекта.
 
-### 1. Хук `useCampaignFactory.ts`
+**Правильная реализация:**
+```sql
+SELECT EXISTS (
+  SELECT 1 FROM public.user_roles 
+  WHERE user_id = auth.uid() 
+  AND role IN ('admin', 'super_admin')
+)
+```
 
-**Путь:** `src/hooks/useCampaignFactory.ts`
+---
 
-Централизованная логика для работы с кампаниями:
+## 2. Серьёзные проблемы (P1)
+
+### 2.1 🟠 AI Content Lab — заглушка
+
+Текущая реализация в `MCCContentLabTab.tsx`:
 
 ```typescript
-// Основные операции
-- useCreateCampaign() — создание новой кампании
-- useUpdateCampaign() — обновление кампании
-- useDeleteCampaign() — удаление (только draft)
-- useDuplicateCampaign() — клонирование кампании
-- useToggleCampaignStatus() — переключение active/paused
-
-// Запросы данных
-- useCampaigns() — список кампаний с фильтрами
-- useCampaignDetail(id) — детали одной кампании
-- useCampaignCreatives(id) — креативы кампании
-- useCampaignMetrics(id) — агрегированные метрики
+// Строки 37-47: Mock-генерация
+const handleGenerate = async () => {
+  setIsGenerating(true);
+  setTimeout(() => {  // ← Нет реального AI
+    setGeneratedContent([
+      "🌴 Discover Phuket's Hidden Gems...",
+      // Захардкоженный контент
+    ]);
+    setIsGenerating(false);
+  }, 2000);
+};
 ```
 
-### 2. Форма создания/редактирования `CampaignFormSheet.tsx`
+**Решение:** Интегрировать с `ai-agent` edge function и агентом `mcc-content`.
 
-**Путь:** `src/components/admin/marketing/CampaignFormSheet.tsx`
+---
 
-Слайд-панель (Sheet) с формой:
+### 2.2 🟠 Нет связи User ↔ Lead
 
-| Секция | Поля |
-|--------|------|
-| **Основное** | Название, Описание, Цель (dropdown) |
-| **Таргетинг** | Целевой сегмент (users/providers/owners) |
-| **Каналы** | Мультивыбор: Google, Meta, TikTok, Email, WhatsApp, Telegram |
-| **Бюджет** | Общий бюджет, Дневной лимит, Валюта |
-| **Расписание** | Дата старта, Дата окончания, Timezone |
-| **KPI** | Целевые метрики (leads, conversions, CAC) |
+Нет механизма для:
+1. Конвертации `mcc_leads.converted_to` → `auth.users.id`
+2. Отслеживания пользователей, которые уже зарегистрировались
+3. Связи `consultation_requests.user_id` → MCC лид
 
-Типы целей:
-- `awareness` — Узнаваемость
-- `acquisition` — Привлечение
-- `activation` — Активация
-- `retention` — Удержание
-- `referral` — Реферальная
+**Пользователи, уже на платформе:**
+- Данные в `profiles` (registered users)
+- Данные в `consultation_requests` (leads)
+- Нет связки между ними в MCC
 
-### 3. Детальный просмотр `CampaignDetailSheet.tsx`
+---
 
-**Путь:** `src/components/admin/marketing/CampaignDetailSheet.tsx`
+### 2.3 🟠 Funnels и Automation — только UI
 
-Слайд-панель с табами:
+- `MCCFunnelsTab` — визуализация без CRUD
+- `MCCAutomationTab` — mock-правила, Switch не работает
+- Нет связи с `mcc_funnels`, `mcc_automation_rules` таблицами
 
-| Таб | Содержимое |
-|-----|------------|
-| **Обзор** | KPI карточки, статус, прогресс бюджета |
-| **Креативы** | Список креативов кампании, добавление |
-| **Метрики** | Графики: leads, conversions, spend по дням |
-| **История** | Лог изменений статуса |
+---
 
-### 4. Обновлённый `MCCCampaignsTab.tsx`
+## 3. Умеренные проблемы (P2)
 
-**Изменения:**
-- Убрать mock-данные
-- Подключить `useCampaigns()` хук
-- Добавить фильтры по статусу и цели
-- Интегрировать `CampaignFormSheet` и `CampaignDetailSheet`
-- Добавить bulk-actions (пауза/активация нескольких)
+### 3.1 🟡 Linter warnings: RLS Always True
 
-## Структура данных кампании
+```
+WARN: RLS Policy Always True (8 warnings)
+- mcc_events: Anyone can create events (INSERT без условий)
+- mcc_leads: Anyone can create leads (INSERT без условий)
+```
+
+**Риск:** Любой анонимный пользователь может вставлять записи.
+
+---
+
+### 3.2 🟡 Overview KPI — hardcoded значения
 
 ```typescript
-interface CampaignFormData {
-  name: string;
-  description?: string;
-  goal: 'awareness' | 'acquisition' | 'activation' | 'retention' | 'referral';
-  target_segment: 'b2c_users' | 'providers' | 'owners' | 'partners';
-  channels: string[]; // ['google', 'meta', 'email', ...]
-  budget: {
-    total: number;
-    daily_cap?: number;
-    currency: 'USD' | 'THB' | 'RUB';
-  };
-  schedule: {
-    start_date: string; // ISO date
-    end_date?: string;
-    timezone: string;
-  };
-  kpi_targets?: {
-    target_leads?: number;
-    target_conversions?: number;
-    target_cac?: number;
-    target_roas?: number;
-  };
-}
+// MCCOverviewTab.tsx
+<KPICard
+  title="CAC"
+  value="$12.50"  // ← Hardcoded
+  change={-8}
+/>
+<KPICard
+  title="ROAS"
+  value="3.8x"  // ← Hardcoded
+/>
 ```
 
-## Статусный workflow
+---
 
-```text
-┌─────────┐     ┌────────┐     ┌────────┐     ┌───────────┐
-│  draft  │ ──► │ active │ ◄─► │ paused │ ──► │ completed │
-└─────────┘     └────────┘     └────────┘     └───────────┘
-     │               │              │               ▲
-     │               │              │               │
-     └───────────────┴──────────────┴───────────────┘
-                     (manual complete)
+### 3.3 🟡 Нет хука для mcc_leads
+
+Campaign Factory имеет `useCampaignFactory.ts`, но для Leads нет аналогичного хука — используется inline query в компоненте.
+
+---
+
+## 4. Бизнес-логика: что работает ✅
+
+| Функция | Статус | Примечания |
+|---------|--------|------------|
+| CRUD кампаний | ✅ Работает | Полный цикл |
+| Фильтрация кампаний | ✅ Работает | По статусу, цели, поиск |
+| Статусный workflow | ✅ Работает | draft → active ↔ paused → completed |
+| Дублирование | ✅ Работает | С обнулением performance |
+| Валидация форм | ✅ Работает | Zod схема |
+| Билингвальность | ✅ Работает | EN/RU для всех labels |
+
+---
+
+## 5. Рекомендуемый план исправлений
+
+### Фаза 1: Критические (1-2 дня)
+
+1. **Интеграция с consultation_requests**
+   - Добавить `useConsultationLeads()` хук
+   - Объединить данные в `MCCLeadsTab`
+   - Показать AI-скоринг из существующих лидов
+
+2. **Исправить RLS**
+   - Обновить `is_mcc_admin()` на проверку `user_roles`
+   - Добавить условия в INSERT политики
+
+3. **Убрать mock-данные из Overview**
+   - Подключить реальные агрегаты из `mcc_campaigns`
+   - Добавить fallback для пустых данных
+
+### Фаза 2: Серьёзные (3-5 дней)
+
+4. **AI Content Lab**
+   - Создать `mcc-content` AI агент
+   - Интегрировать через `ai-agent` edge function
+   - Сохранять в `mcc_creatives`
+
+5. **Lead Hub полноценный**
+   - Создать `useLeadHub.ts` хук
+   - CRUD для `mcc_leads`
+   - Синхронизация с `consultation_requests`
+
+6. **Funnels CRUD**
+   - Создать `useFunnelEngine.ts`
+   - Форма создания воронки
+   - Визуальный редактор этапов
+
+### Фаза 3: Улучшения (1 неделя+)
+
+7. **Automation Rules**
+   - CRUD для `mcc_automation_rules`
+   - Trigger execution engine
+   - Интеграция с messaging
+
+8. **Analytics с реальными данными**
+   - Агрегация из `mcc_channel_metrics`
+   - Attribution model switching
+   - Export функционал
+
+---
+
+## 6. Архитектурные замечания
+
+### Текущая структура файлов
+
+```
+src/components/admin/marketing/
+├── CampaignCard.tsx         ✅ Готов
+├── CampaignDetailSheet.tsx  ✅ Готов
+├── CampaignFormSheet.tsx    ✅ Готов
+├── MCCAnalyticsTab.tsx      ⚠️ Mock
+├── MCCAutomationTab.tsx     ⚠️ Mock
+├── MCCCampaignsTab.tsx      ✅ Готов
+├── MCCContentLabTab.tsx     ⚠️ Mock
+├── MCCFunnelsTab.tsx        ⚠️ Mock
+├── MCCLeadsTab.tsx          ⚠️ Partial
+├── MCCOverviewTab.tsx       ⚠️ Partial
+└── index.ts
 ```
 
-Правила:
-- `draft` → можно удалить, редактировать, запустить
-- `active` → можно только поставить на паузу или завершить
-- `paused` → можно возобновить или завершить
-- `completed` → read-only, только дублирование
+### Недостающие хуки
 
-## UI-экраны
-
-### Экран 1: Список кампаний (обновлённый)
-
-```text
-┌──────────────────────────────────────────────────────────────────┐
-│  Campaigns                                    [+ New Campaign]   │
-├──────────────────────────────────────────────────────────────────┤
-│  Filters: [All Status ▼] [All Goals ▼] [Search...]              │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  ┌──────────────────────┐  ┌──────────────────────┐             │
-│  │ Summer Phuket 2026   │  │ Villa Retargeting    │             │
-│  │ ● Active | Acquisition│  │ ● Paused | Retention │             │
-│  │ [Google][Meta][TikTok]│  │ [Meta][Email]        │             │
-│  │ ─────────────────────│  │ ─────────────────────│             │
-│  │ Leads: 892  Conv: 127│  │ Leads: 234  Conv: 45 │             │
-│  │ Spend: $2,340/$5,000 │  │ Spend: $890/$1,500   │             │
-│  │ [Pause] [Edit] [...]  │  │ [Resume] [Edit] [...] │             │
-│  └──────────────────────┘  └──────────────────────┘             │
-│                                                                  │
-└──────────────────────────────────────────────────────────────────┘
+```
+src/hooks/
+├── useCampaignFactory.ts    ✅ Существует
+├── useLeadHub.ts            ❌ Нужен
+├── useFunnelEngine.ts       ❌ Нужен
+├── useMCCAnalytics.ts       ❌ Нужен
+├── useMCCAutomation.ts      ❌ Нужен
+└── useMCCContent.ts         ❌ Нужен
 ```
 
-### Экран 2: Форма создания
+---
 
-```text
-┌────────────────────────────────── Sheet ─────────────────────────┐
-│                                                              [X] │
-│  Create Campaign                                                 │
-│  ─────────────────────────────────────────────────────────────── │
-│                                                                  │
-│  Campaign Name *                                                 │
-│  ┌──────────────────────────────────────────────────────────┐   │
-│  │ Summer Phuket Launch 2026                                │   │
-│  └──────────────────────────────────────────────────────────┘   │
-│                                                                  │
-│  Description                                                     │
-│  ┌──────────────────────────────────────────────────────────┐   │
-│  │ Main campaign for summer season user acquisition...      │   │
-│  └──────────────────────────────────────────────────────────┘   │
-│                                                                  │
-│  Goal *                           Target Segment *               │
-│  ┌────────────────────────┐       ┌────────────────────────┐    │
-│  │ Acquisition           ▼│       │ B2C Users             ▼│    │
-│  └────────────────────────┘       └────────────────────────┘    │
-│                                                                  │
-│  Channels *                                                      │
-│  [✓ Google] [✓ Meta] [✓ TikTok] [○ Email] [○ WhatsApp]          │
-│                                                                  │
-│  ─── Budget ───────────────────────────────────────────────────  │
-│  Total Budget *     Daily Cap        Currency                    │
-│  ┌──────────┐       ┌──────────┐     ┌──────────┐               │
-│  │ 5000     │       │ 200      │     │ USD     ▼│               │
-│  └──────────┘       └──────────┘     └──────────┘               │
-│                                                                  │
-│  ─── Schedule ─────────────────────────────────────────────────  │
-│  Start Date *                   End Date (optional)              │
-│  ┌──────────────────┐           ┌──────────────────┐            │
-│  │ 2026-02-15       │           │ 2026-04-15       │            │
-│  └──────────────────┘           └──────────────────┘            │
-│                                                                  │
-│  ─────────────────────────────────────────────────────────────── │
-│                                   [Cancel]  [Save as Draft]      │
-└──────────────────────────────────────────────────────────────────┘
-```
+## 7. Вывод
 
-### Экран 3: Детали кампании
+**MCC построен архитектурно правильно**, но реализован только на 20-25%:
 
-```text
-┌────────────────────────────────── Sheet ─────────────────────────┐
-│                                                              [X] │
-│  Summer Phuket Launch 2026                                       │
-│  ● Active | Acquisition | B2C Users                              │
-│  ─────────────────────────────────────────────────────────────── │
-│                                                                  │
-│  [Overview] [Creatives] [Metrics] [History]                      │
-│  ─────────────────────────────────────────────────────────────── │
-│                                                                  │
-│  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐    │
-│  │   892      │ │    127     │ │   $2,340   │ │   14.2%    │    │
-│  │   Leads    │ │ Conversions│ │   Spent    │ │    CVR     │    │
-│  └────────────┘ └────────────┘ └────────────┘ └────────────┘    │
-│                                                                  │
-│  Budget Progress                                                 │
-│  ████████████████████░░░░░░░░░░░░░░░░░░░░  $2,340 / $5,000 (47%) │
-│                                                                  │
-│  Channels                                                        │
-│  ┌───────────────────────────────────────────────────────────┐  │
-│  │ Channel    │ Leads  │ Conv  │ Spend    │ CAC    │ Status  │  │
-│  ├───────────────────────────────────────────────────────────┤  │
-│  │ Google     │  412   │  58   │ $1,240   │ $21.38 │ ● Live  │  │
-│  │ Meta       │  356   │  52   │ $890     │ $17.12 │ ● Live  │  │
-│  │ TikTok     │  124   │  17   │ $210     │ $12.35 │ ● Live  │  │
-│  └───────────────────────────────────────────────────────────┘  │
-│                                                                  │
-│  ─────────────────────────────────────────────────────────────── │
-│                            [Pause Campaign]  [Edit]  [Duplicate] │
-└──────────────────────────────────────────────────────────────────┘
-```
+| Готовность | Модули |
+|------------|--------|
+| 90%+ | Campaign Factory |
+| 40-50% | Lead Hub, Overview |
+| 10-20% | Funnels, Analytics, Automation, Content Lab |
 
-## Файлы для создания/изменения
+**Главный блокер:** Отсутствие интеграции с существующими данными (`consultation_requests`, `profiles`). Без этого MCC не может работать как "Growth OS" для текущих пользователей платформы.
 
-| Файл | Действие | Описание |
-|------|----------|----------|
-| `src/hooks/useCampaignFactory.ts` | Создать | Хук с CRUD операциями |
-| `src/components/admin/marketing/CampaignFormSheet.tsx` | Создать | Форма создания/редактирования |
-| `src/components/admin/marketing/CampaignDetailSheet.tsx` | Создать | Детальный просмотр |
-| `src/components/admin/marketing/CampaignCard.tsx` | Создать | Карточка кампании для grid |
-| `src/components/admin/marketing/MCCCampaignsTab.tsx` | Обновить | Интеграция компонентов |
-| `src/components/admin/marketing/index.ts` | Обновить | Экспорт новых компонентов |
-
-## Технические детали
-
-### Типизация
-
-```typescript
-// src/types/marketing.ts
-export interface Campaign {
-  id: string;
-  name: string;
-  description: string | null;
-  goal: CampaignGoal;
-  target_segment: string | null;
-  channels: string[];
-  budget: CampaignBudget | null;
-  schedule: CampaignSchedule | null;
-  kpi_targets: CampaignKPI | null;
-  ab_variants: any[] | null;
-  performance_data: CampaignPerformance | null;
-  status: CampaignStatus;
-  created_by: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export type CampaignGoal = 'awareness' | 'acquisition' | 'activation' | 'retention' | 'referral';
-export type CampaignStatus = 'draft' | 'scheduled' | 'active' | 'paused' | 'completed';
-```
-
-### Валидация
-
-Используем Zod для валидации формы:
-- `name` — обязательно, мин. 3 символа
-- `goal` — обязательно
-- `channels` — минимум 1 выбран
-- `budget.total` — положительное число
-- `schedule.start_date` — не в прошлом
-
-## Порядок реализации
-
-1. **Создать типы** — `src/types/marketing.ts`
-2. **Создать хук** — `useCampaignFactory.ts` с базовым CRUD
-3. **Создать форму** — `CampaignFormSheet.tsx`
-4. **Создать карточку** — `CampaignCard.tsx`
-5. **Обновить таб** — `MCCCampaignsTab.tsx` с реальными данными
-6. **Создать детали** — `CampaignDetailSheet.tsx`
-7. **Тестирование** — проверка всех операций
-
-## Ожидаемый результат
-
-- Полнофункциональный Campaign Factory без mock-данных
-- CRUD для кампаний с валидацией
-- Визуальный workflow статусов
-- Связь с креативами и метриками (подготовка)
-- Билингвальный интерфейс (EN/RU)
-- Консистентный UX по паттернам админки (Sheet-based формы)
-
+**Приоритет #1:** Интегрировать `consultation_requests` в Lead Hub и показать реальные данные вместо mock.
