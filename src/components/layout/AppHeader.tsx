@@ -88,8 +88,8 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
                 )}
               </button>
               
-              {/* Profile Avatar */}
-              <Link to="/profile" aria-label={t('nav.profile')}>
+              {/* Profile Avatar - now links to /account */}
+              <Link to="/account" aria-label={t('nav.profile')}>
                 <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center overflow-hidden border-2 border-primary/30 ml-0.5 hover:border-primary/60 transition-colors">
                   <span className="text-sm font-medium">
                     {user.email?.charAt(0).toUpperCase()}

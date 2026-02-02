@@ -7,10 +7,12 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, LogOut } from 'lucide-react';
 import {
   AccountProfileCard,
-  AccountRolesBlock,
   AccountActiveStay,
-  AccountOrdersSummary,
-  AccountQuickLinks,
+  DashboardStatsBar,
+  UpcomingBookingsWidget,
+  RecentPurchasesWidget,
+  DashboardQuickServices,
+  AccountMenu,
 } from '@/components/account';
 
 export default function UserAccountDashboard() {
@@ -62,14 +64,20 @@ export default function UserAccountDashboard() {
         {/* Active Stay (shown only if there's an active booking) */}
         <AccountActiveStay />
 
-        {/* Roles Management */}
-        <AccountRolesBlock />
+        {/* Stats Bar: Bookings | Wallet | Favorites */}
+        <DashboardStatsBar />
 
-        {/* Recent Orders */}
-        <AccountOrdersSummary />
+        {/* Upcoming Bookings */}
+        <UpcomingBookingsWidget />
 
-        {/* Quick Links Grid */}
-        <AccountQuickLinks />
+        {/* Recent Orders/Purchases */}
+        <RecentPurchasesWidget />
+
+        {/* Quick Services Grid */}
+        <DashboardQuickServices />
+
+        {/* Account Menu (Settings, Documents, etc.) */}
+        <AccountMenu />
       </PageContainer>
     </div>
   );
