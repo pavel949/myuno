@@ -33,60 +33,63 @@ export function PWAWelcomeScreen() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-gradient-to-br from-primary via-primary/95 to-primary/90 p-6"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          onClick={handleClose}
         >
           <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
+            initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
-            transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.1 }}
-            className="text-center max-w-sm"
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-gradient-to-br from-primary via-primary/95 to-primary/90 rounded-3xl p-8 text-center max-w-xs w-full shadow-2xl"
           >
             {/* Success Icon */}
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ type: 'spring', damping: 15, stiffness: 200, delay: 0.2 }}
-              className="mx-auto mb-6 w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"
+              transition={{ type: 'spring', damping: 15, stiffness: 200, delay: 0.1 }}
+              className="mx-auto mb-5 w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"
             >
-              <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center">
-                <Check className="w-8 h-8 text-primary" strokeWidth={3} />
+              <div className="w-11 h-11 rounded-full bg-white flex items-center justify-center">
+                <Check className="w-6 h-6 text-primary" strokeWidth={3} />
               </div>
             </motion.div>
 
             {/* App Name */}
             <motion.div
-              initial={{ y: 20, opacity: 0 }}
+              initial={{ y: 15, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.3 }}
+              transition={{ delay: 0.2 }}
+              className="flex flex-col items-center"
             >
-              <div className="flex items-center justify-center gap-2 mb-3">
-                <Sparkles className="w-5 h-5 text-primary-foreground/80" />
-                <span className="text-primary-foreground/80 text-sm font-medium">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Sparkles className="w-4 h-4 text-primary-foreground/80" />
+                <span className="text-primary-foreground/80 text-xs font-medium uppercase tracking-wide">
                   Установлено
                 </span>
-                <Sparkles className="w-5 h-5 text-primary-foreground/80" />
+                <Sparkles className="w-4 h-4 text-primary-foreground/80" />
               </div>
               
-              <h1 className="text-4xl font-bold text-primary-foreground mb-2">
+              <h1 className="text-3xl font-bold text-primary-foreground mb-1">
                 myUNO
               </h1>
               
-              <p className="text-primary-foreground/80 text-lg mb-8">
+              <p className="text-primary-foreground/90 text-base mb-6">
                 Добро пожаловать!
               </p>
             </motion.div>
 
             {/* CTA Button */}
             <motion.div
-              initial={{ y: 20, opacity: 0 }}
+              initial={{ y: 15, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.5 }}
+              transition={{ delay: 0.3 }}
             >
               <Button
                 onClick={handleClose}
                 size="lg"
-                className="bg-white text-primary hover:bg-white/90 font-semibold px-8 py-6 text-lg rounded-xl shadow-lg"
+                className="bg-white text-primary hover:bg-white/90 font-semibold px-6 py-5 text-base rounded-xl shadow-lg w-full"
               >
                 Начать
               </Button>
