@@ -642,6 +642,40 @@ Before submitting a PR for any vertical, verify:
 
 ---
 
+## 18. Footer Component
+
+### 18.1 CompactFooter (🔴 MUST)
+
+All pages with `showFooter={true}` **MUST** use the unified minimal footer (`CompactFooter`).
+
+**Required Elements:**
+- Social links (Telegram, Instagram, WhatsApp) — icon row
+- Navigation links (About, FAQ, Help, Terms, Privacy) — single line
+- Copyright with brand
+
+**Prohibited:**
+- ❌ CTA banners (use dedicated components like `ListWithUsBanner`)
+- ❌ Trust badges (place in page content via `SafetyBanner`)
+- ❌ Large sections or grids
+- ❌ Duplicate inline footers in page content
+
+```tsx
+// ✅ Correct usage
+<AppLayout showFooter>
+  {/* Content - no inline footer needed */}
+</AppLayout>
+
+// ❌ Incorrect - duplicate footer
+<AppLayout showFooter>
+  <div>
+    {/* Content */}
+    <footer>© 2025 myUNO</footer> {/* Remove this */}
+  </div>
+</AppLayout>
+```
+
+---
+
 ## 19. References
 
 - **Component Library**: `/src/components/shared/`
