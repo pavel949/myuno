@@ -215,7 +215,7 @@ export function CalendarSyncManager({ propertyId }: CalendarSyncManagerProps) {
               )}
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button size="sm">
+                  <Button size="sm" type="button">
                     <Plus className="h-4 w-4 mr-2" />
                     {isRu ? 'Добавить' : 'Add'}
                   </Button>
@@ -384,7 +384,7 @@ export function CalendarSyncManager({ propertyId }: CalendarSyncManagerProps) {
               </div>
 
               <div className="flex justify-center">
-                <Button onClick={() => setIsAddDialogOpen(true)}>
+                <Button type="button" onClick={() => setIsAddDialogOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   {isRu ? 'Добавить первый канал' : 'Add First Channel'}
                 </Button>
