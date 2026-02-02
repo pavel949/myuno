@@ -6,6 +6,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { IconBadge } from '@/components/ui/IconBadge';
+import { EmptyState } from '@/components/uno/EmptyState';
 import { 
   useExperiences, 
   formatDuration,
@@ -47,13 +49,13 @@ const ExperienceCard = React.forwardRef<HTMLDivElement, { experience: Experience
             quality={80}
           />
           
-          {/* Type badge */}
+          {/* Type badge - using semantic tokens */}
           <Badge 
             className={cn(
               "absolute top-3 left-3 text-xs",
               isTour 
-                ? "bg-amber-500 text-white" 
-                : "bg-cyan-500 text-white"
+                ? "bg-warning text-warning-foreground" 
+                : "bg-info text-info-foreground"
             )}
           >
             {isTour ? (
@@ -77,10 +79,10 @@ const ExperienceCard = React.forwardRef<HTMLDivElement, { experience: Experience
             </Badge>
           )}
           
-          {/* Featured badge */}
+          {/* Featured badge - using semantic gradient */}
           {experience.is_featured && (
-            <Badge className="absolute bottom-3 left-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs">
-              <Star className="w-3 h-3 mr-1 fill-white" />
+            <Badge className="absolute bottom-3 left-3 bg-gradient-to-r from-warning to-primary text-primary-foreground text-xs">
+              <Star className="w-3 h-3 mr-1 fill-current" />
               {isRu ? 'Топ' : 'Featured'}
             </Badge>
           )}
@@ -303,12 +305,15 @@ export default function ExperiencesIndex() {
       showCategories={false}
     >
       <div className="space-y-4 pb-24">
-        {/* Hero Section */}
-        <div className="bg-gradient-to-br from-primary/10 via-cyan-500/10 to-amber-500/10 rounded-2xl p-4">
+        {/* Hero Section - using semantic tokens */}
+        <div className="bg-gradient-to-br from-primary/10 via-info/10 to-warning/10 rounded-2xl p-4">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-cyan-500 flex items-center justify-center">
-              <Compass className="w-6 h-6 text-white" />
-            </div>
+            <IconBadge 
+              icon={Compass} 
+              size="lg" 
+              variant="gradient"
+              className="w-12 h-12"
+            />
             <div>
               <h1 className="font-bold text-xl">
                 {isRu ? 'Откройте Пхукет' : 'Explore Phuket'}
@@ -377,18 +382,14 @@ export default function ExperiencesIndex() {
             ))}
           </div>
         ) : filteredExperiences.length === 0 ? (
-          <div className="text-center py-12">
-            <Compass className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="font-semibold text-lg mb-2">
-              {isRu ? 'Ничего не найдено' : 'No experiences found'}
-            </h3>
-            <p className="text-muted-foreground text-sm">
-              {isRu 
-                ? 'Попробуйте изменить фильтры'
-                : 'Try adjusting your filters'
-              }
-            </p>
-          </div>
+          <EmptyState
+            icon={Compass}
+            title={isRu ? 'Ничего не найдено' : 'No experiences found'}
+            description={isRu 
+              ? 'Попробуйте изменить фильтры'
+              : 'Try adjusting your filters'
+            }
+          />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <AnimatePresence mode="popLayout">

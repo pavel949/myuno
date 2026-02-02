@@ -1,8 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Package, Users, Plane, Home as HomeIcon, Flame, Star, Sparkles } from 'lucide-react';
-import { AppLayout } from '@/components/layout/AppLayout';
-import { PageContainer } from '@/components/uno/PageContainer';
+import { Package, Users, Plane, Home as HomeIcon, Sparkles } from 'lucide-react';
+import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
@@ -10,7 +9,7 @@ import { EmptyState } from '@/components/uno/EmptyState';
 import { Skeleton } from '@/components/ui/skeleton';
 
 // Unified components
-import { UnifiedHeader, UnifiedFilterRibbon, UnifiedSectionHeader, UnifiedScrollSection, FilterRibbonItem } from '@/components/shared';
+import { UnifiedFilterRibbon, FilterRibbonItem } from '@/components/shared';
 
 // Hooks
 import { useServices } from '@/hooks/useServices';
@@ -95,29 +94,32 @@ export default function Discover() {
 
   const isLoading = categoriesLoading;
 
-  return (
-    <AppLayout showBottomNav>
-      <div className="min-h-screen bg-background pb-24">
-        {/* Unified sticky header with search */}
-        <div className="sticky top-0 z-40">
-          <UnifiedHeader
-            title={isRu ? 'Услуги' : 'Services'}
-            subtitle={isRu ? 'Все сервисы для жизни в Таиланде' : 'All services for life in Thailand'}
-            showBack
-            fallbackPath="/"
-            searchPlaceholder={isRu ? 'Поиск услуг и провайдеров...' : 'Search services & providers...'}
-            onSearchClick={() => navigate('/search')}
-          />
-          
-          {/* Audience Filter Ribbon */}
-          <UnifiedFilterRibbon
-            items={audienceItems}
-            activeId={audienceFilter}
-            onSelect={handleAudienceChange}
-          />
-        </div>
+  // Inline search state
+  const [searchQuery, setSearchQuery] = useState('');
 
-        <PageContainer className="pt-0">
+  return (
+    <MiniAppLayout
+      title={isRu ? 'Услуги' : 'Services'}
+      subtitle={isRu ? 'Все сервисы для жизни в Таиланде' : 'All services for life in Thailand'}
+      fallbackPath="/"
+      searchPlaceholder={isRu ? 'Поиск услуг и провайдеров...' : 'Search services & providers...'}
+      searchValue={searchQuery}
+      onSearchChange={setSearchQuery}
+      showHero={false}
+      showCategories={false}
+      showFilter={false}
+    >
+      {/* Audience Filter Ribbon */}
+      <div className="sticky top-[124px] z-30 -mx-4 bg-background/95 backdrop-blur-sm border-b border-border/30">
+        <UnifiedFilterRibbon
+          items={audienceItems}
+          activeId={audienceFilter}
+          onSelect={handleAudienceChange}
+          className="px-4 py-2 border-0"
+        />
+      </div>
+
+      <div className="pt-2">
           <PullToRefresh onRefresh={handleRefresh} className="min-h-0">
             <div key={refreshKey} className="space-y-6 pt-4">
               
@@ -166,9 +168,8 @@ export default function Discover() {
               )}
             </div>
           </PullToRefresh>
-        </PageContainer>
-      </div>
-    </AppLayout>
+        </div>
+    </MiniAppLayout>
   );
 }
 

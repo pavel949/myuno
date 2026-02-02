@@ -1,10 +1,9 @@
-import React, { useState, useMemo, forwardRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ChevronRight,
   Flame,
   Sparkles,
-  ArrowRight,
   Truck,
   Clock,
   Star,
@@ -12,7 +11,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
-import { AppLayout } from '@/components/layout/AppLayout';
+import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { StickyCartBar } from '@/components/cart/StickyCartBar';
@@ -26,10 +25,10 @@ import { cn } from '@/lib/utils';
 
 // Unified components
 import { 
-  UnifiedHeader, 
   UnifiedFilterRibbon, 
   UnifiedSectionHeader, 
   UnifiedScrollSection,
+  UnifiedFiltersKlook,
   FilterRibbonItem 
 } from '@/components/shared';
 
@@ -187,107 +186,97 @@ const MarketIndex = () => {
   const remainingCategoryCount = Math.max(0, activeCategories.length - 3);
 
   return (
-    <AppLayout showHeader={true} showBottomNav={true}>
-      <div className="min-h-screen bg-background pb-32">
-        
-        {/* Unified sticky header with search */}
-        <div className="sticky top-0 z-40">
-          <UnifiedHeader
-            title={isRu ? 'Маркет' : 'Market'}
-            subtitle={isRu 
-              ? `${allProducts.length}+ товаров от проверенных продавцов`
-              : `${allProducts.length}+ products from verified sellers`
-            }
-            badge={
-              <Badge className="bg-primary/20 text-primary border-0 text-xs">
-                <Sparkles className="w-3 h-3 mr-1" />
-                {isRu ? 'Маркетплейс' : 'Marketplace'}
-              </Badge>
-            }
-            showBack
-            fallbackPath="/"
-            searchPlaceholder={isRu ? 'Искать на myUNO Market' : 'Search on myUNO Market'}
-            searchValue={searchQuery}
-            onSearchChange={setSearchQuery}
-            isSearching={isSearchFocused && searchResults.length > 0}
-            searchResults={renderSearchResults()}
-          />
-          
-          {/* Filter Ribbon - Quick Actions Row */}
-          <UnifiedFilterRibbon
-            items={quickActionItems}
-            onSelect={handleQuickActionSelect}
-            leadingAction={
-              <CategoryDrawer
-                trigger={
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="gap-1.5 px-3 py-2 h-auto rounded-xl border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary font-medium shrink-0"
-                  >
-                    <Menu className="w-4 h-4" />
-                    <span className="text-xs">{isRu ? 'Каталог' : 'Catalog'}</span>
-                  </Button>
-                }
-              />
-            }
-            trailingAction={
-              <>
-                {categoryItems.map(item => (
-                  <button
-                    key={item.id}
-                    onClick={() => handleCategorySelect(item.id)}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium bg-muted/60 hover:bg-muted text-foreground transition-colors shrink-0"
-                  >
-                    <span className="text-base">{item.emoji}</span>
-                    <span className="whitespace-nowrap">{item.label}</span>
-                  </button>
-                ))}
-                {remainingCategoryCount > 0 && (
-                  <CategoryDrawer
-                    trigger={
-                      <Badge
-                        variant="secondary"
-                        className="px-3 py-2 text-xs font-medium cursor-pointer hover:bg-secondary/80 shrink-0"
-                      >
-                        +{remainingCategoryCount} {isRu ? 'ещё' : 'more'}
-                      </Badge>
-                    }
-                  />
-                )}
-              </>
-            }
-          />
-        </div>
+    <MiniAppLayout
+      title={isRu ? 'Маркет' : 'Market'}
+      subtitle={isRu 
+        ? `${allProducts.length}+ товаров от проверенных продавцов`
+        : `${allProducts.length}+ products from verified sellers`
+      }
+      fallbackPath="/"
+      searchPlaceholder={isRu ? 'Искать на myUNO Market' : 'Search on myUNO Market'}
+      searchValue={searchQuery}
+      onSearchChange={setSearchQuery}
+      showHero={false}
+      showCategories={false}
+      showFilter={false}
+    >
+      {/* Filter Ribbon - Quick Actions Row */}
+      <div className="sticky top-[124px] z-30 -mx-4 bg-background/95 backdrop-blur-sm">
+        <UnifiedFilterRibbon
+          items={quickActionItems}
+          onSelect={handleQuickActionSelect}
+          leadingAction={
+            <CategoryDrawer
+              trigger={
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 px-3 py-2 h-auto rounded-xl border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary font-medium shrink-0"
+                >
+                  <Menu className="w-4 h-4" />
+                  <span className="text-xs">{isRu ? 'Каталог' : 'Catalog'}</span>
+                </Button>
+              }
+            />
+          }
+          trailingAction={
+            <>
+              {categoryItems.map(item => (
+                <button
+                  key={item.id}
+                  onClick={() => handleCategorySelect(item.id)}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium bg-muted/60 hover:bg-muted text-foreground transition-colors shrink-0"
+                >
+                  <span className="text-base">{item.emoji}</span>
+                  <span className="whitespace-nowrap">{item.label}</span>
+                </button>
+              ))}
+              {remainingCategoryCount > 0 && (
+                <CategoryDrawer
+                  trigger={
+                    <Badge
+                      variant="secondary"
+                      className="px-3 py-2 text-xs font-medium cursor-pointer hover:bg-secondary/80 shrink-0"
+                    >
+                      +{remainingCategoryCount} {isRu ? 'ещё' : 'more'}
+                    </Badge>
+                  }
+                />
+              )}
+            </>
+          }
+        />
+      </div>
 
-        {/* Promo Banners - Compact */}
-        <div className="px-4 py-3 max-w-7xl mx-auto">
+      <div className="pb-32 -mx-4 px-4">
+        {/* Promo Banners - Compact - using semantic tokens */}
+        <div className="py-3 max-w-7xl mx-auto">
           <div className="grid grid-cols-2 gap-2">
             {/* Free Delivery Banner */}
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200/50 dark:border-emerald-800/50">
-              <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
-                <Truck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-success/10 border border-success/20">
+              <div className="w-8 h-8 rounded-full bg-success/20 flex items-center justify-center shrink-0">
+                <Truck className="w-4 h-4 text-success" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                <p className="text-xs font-semibold text-success">
                   {isRu ? 'Бесплатно' : 'Free delivery'}
                 </p>
-                <p className="text-[10px] text-emerald-600/80 dark:text-emerald-400/80">
+                <p className="text-[10px] text-success/80">
                   {isRu ? `от ฿${freeDeliveryThreshold}` : `from ฿${freeDeliveryThreshold}`}
                 </p>
               </div>
             </div>
 
             {/* Fast Delivery Banner */}
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200/50 dark:border-blue-800/50">
-              <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
-                <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-info/10 border border-info/20">
+              <div className="w-8 h-8 rounded-full bg-info/20 flex items-center justify-center shrink-0">
+                <Clock className="w-4 h-4 text-info" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-semibold text-blue-700 dark:text-blue-300">
+                <p className="text-xs font-semibold text-info">
                   {defaultZone?.estimated_time_minutes || 45} {isRu ? 'мин' : 'min'}
                 </p>
-                <p className="text-[10px] text-blue-600/80 dark:text-blue-400/80">
+                <p className="text-[10px] text-info/80">
                   {isRu ? 'экспресс' : 'express delivery'}
                 </p>
               </div>
@@ -434,7 +423,7 @@ const MarketIndex = () => {
           checkoutPath="/market/checkout"
         />
       </div>
-    </AppLayout>
+    </MiniAppLayout>
   );
 };
 
