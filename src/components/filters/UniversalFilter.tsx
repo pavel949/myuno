@@ -272,7 +272,8 @@ export function UniversalFilter({
         </SheetHeader>
 
         <ScrollArea className="h-[calc(80vh-140px)] sm:h-[calc(85vh-140px)] pr-4">
-          <div className="space-y-5 sm:space-y-6 pb-4">
+          {/* pb-24 ensures content scrolls above the fixed Apply button */}
+          <div className="space-y-5 sm:space-y-6 pb-24">
             {config.sections.map((section, index) => (
               <div key={section.id}>
                 {index > 0 && <Separator className="mb-6" />}

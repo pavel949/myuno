@@ -37,7 +37,7 @@ export function CompactFooter() {
   ];
 
   return (
-    <footer className="border-t border-border/50 bg-muted/30 mt-auto">
+    <footer className="border-t border-border/50 bg-muted/30 mt-auto pb-20 md:pb-0">
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
         {/* Social Links */}
         <div className="flex justify-center gap-6">
