@@ -7,9 +7,10 @@ import DOMPurify from 'dompurify';
  */
 export const sanitizeHtml = (html: string): string => {
   return DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: ['div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong', 'em', 'br', 'svg', 'path'],
-    ALLOWED_ATTR: ['class', 'style', 'fill', 'viewBox', 'd', 'fill-rule', 'clip-rule'],
-    USE_PROFILES: { html: true },
+    ALLOWED_TAGS: ['div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong', 'em', 'br', 'a', 'ul', 'ol', 'li', 'svg', 'path', 'circle', 'rect', 'line', 'polyline', 'polygon', 'g'],
+    ALLOWED_ATTR: ['class', 'style', 'fill', 'viewBox', 'd', 'fill-rule', 'clip-rule', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'cx', 'cy', 'r', 'x', 'y', 'width', 'height', 'href', 'target', 'rel', 'xmlns'],
+    ADD_TAGS: ['svg', 'path', 'circle', 'rect', 'line', 'polyline', 'polygon', 'g'],
+    ADD_ATTR: ['viewBox', 'd', 'fill', 'stroke', 'stroke-width', 'xmlns'],
   });
 };
 
