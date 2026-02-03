@@ -1,228 +1,129 @@
 
+# План: Плавный переход размеров карточек в Best of Phuket
 
-# План: Премиальное стилистическое обновление иконок и карточек
+## Текущая проблема
 
-## Проблема
+Сейчас резкий скачок размеров между Hero и остальными карточками:
 
-На скриншоте видны ключевые визуальные проблемы:
+```text
+┌─────────────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐
+│                 │  │          │  │          │  │          │
+│   w-80, h-48    │  │ w-64,h-36│  │ w-64,h-36│  │ w-64,h-36│
+│   (320x192)     │  │ (256x144)│  │ (256x144)│  │ (256x144)│
+│                 │  │          │  │          │  │          │
+└─────────────────┘  └──────────┘  └──────────┘  └──────────┘
+      Hero               ↑ Резкий скачок на 25%
+```
 
-1. **Категорийные чипы** — плоский `bg-muted/60` без глубины, выглядит дёшево
-2. **Иконки аудиторий** (Tourists, Residents, Owners) — плоские Lucide иконки без контейнеров
-3. **Trust badges** — серые, безликие, не привлекают внимание
-4. **Отсутствие визуальной иерархии** — всё одинаково "плоское"
+**Разница:** Hero на 25% шире и на 33% выше — слишком заметно.
 
 ---
 
-## Стилистическое решение: "Glassmorphism + Soft Containers"
+## Решение: Трёхуровневая система размеров
 
-Вдохновение: Apple iOS, Airbnb, Klook
+Введём промежуточный размер для 2-й и 3-й карточек:
 
-### Принципы
-
-1. **Soft Icon Containers** — иконки внутри мягких цветных контейнеров с inner glow
-2. **Glass Effect** — `backdrop-blur` + полупрозрачные фоны для чипов
-3. **Subtle Gradients** — градиенты вместо плоских цветов
-4. **Micro-shadows** — мягкие тени для глубины
+```text
+┌─────────────────┐  ┌─────────────┐  ┌──────────┐  ┌──────────┐
+│                 │  │             │  │          │  │          │
+│   w-80, h-48    │  │  w-72,h-42  │  │ w-64,h-36│  │ w-64,h-36│
+│   HERO (320)    │  │  MEDIUM(288)│  │STANDARD  │  │STANDARD  │
+│                 │  │             │  │  (256)   │  │  (256)   │
+└─────────────────┘  └─────────────┘  └──────────┘  └──────────┘
+      index=0           index=1,2        index=3+      index=4+
+                     ↑ Плавный переход
+```
 
 ---
 
-## Изменения в компонентах
+## Технические изменения
 
-### 1. Audience Cards (HeroBlock.tsx)
+### 1. Обновить `designTokens.ts`
 
-**Было:**
-```
-┌───────────────────┐
-│  ✈️ (плоская)     │
-│  Туристам         │
-│  Туры • Транспорт │
-└───────────────────┘
-```
-
-**Станет:**
-```
-┌───────────────────────────────┐
-│  ┌────────────────┐           │
-│  │    ✈️          │ ← soft    │
-│  │  sky glow      │   container
-│  └────────────────┘           │
-│  Туристам                     │
-│  Туры • Транспорт • Яхты      │
-└───────────────────────────────┘
-```
-
-**Стили:**
-| Аудитория | Icon Container | Glow Effect |
-|-----------|----------------|-------------|
-| Tourists | `bg-sky-500/20` | `shadow-sky-500/30` |
-| Residents | `bg-emerald-500/20` | `shadow-emerald-500/30` |
-| Owners | `bg-amber-500/20` | `shadow-amber-500/30` |
+Добавить промежуточный размер:
 
 ```typescript
-// Новая структура audienceCards
-{
-  id: 'tourists',
-  icon: Plane,
-  iconColor: 'text-sky-500',
-  iconBg: 'bg-gradient-to-br from-sky-500/20 to-blue-500/30',
-  iconShadow: 'shadow-lg shadow-sky-500/20',
-  gradient: 'from-sky-500/10 via-blue-500/5 to-transparent',
-  borderColor: 'border-sky-500/20 hover:border-sky-500/40',
-}
+export const CAROUSEL_CARD_WIDTHS = {
+  hero: 'w-80',      // 320px - первая карточка
+  medium: 'w-72',    // 288px - вторая карточка (NEW)
+  standard: 'w-64',  // 256px - остальные
+} as const;
+
+export const CAROUSEL_IMAGE_HEIGHTS = {
+  hero: 'h-48',      // 192px
+  medium: 'h-42',    // 168px (NEW)
+  standard: 'h-36',  // 144px
+} as const;
 ```
 
-### 2. Category Chips (ContentPreviewRibbon.tsx)
+### 2. Обновить `DiscoveryCarousel.tsx`
 
-**Было:**
-```
-[🔥 Popular]  ← bg-muted/60, скучный
-```
+Заменить бинарную логику `isHero` на трёхуровневую:
 
-**Станет:**
-```
-[🔥 Popular]  ← glass effect + emoji в цветном контейнере
-```
-
-**Новые стили:**
 ```typescript
-// Glass chip style
-className={cn(
-  "flex items-center gap-2 px-3 py-2 rounded-xl",
-  "bg-white/80 dark:bg-white/10",
-  "backdrop-blur-md",
-  "border border-white/50 dark:border-white/20",
-  "shadow-sm hover:shadow-md",
-  "transition-all duration-200"
-)}
+const getCardSize = (index: number) => {
+  if (index === 0) return 'hero';
+  if (index === 1) return 'medium';
+  return 'standard';
+};
 
-// Emoji container
-<div className="w-6 h-6 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
-  <span className="text-sm">🔥</span>
-</div>
-```
+// В JSX:
+const cardSize = getCardSize(index);
 
-### 3. Trust Badges (HeroBlock.tsx)
-
-**Было:**
-```
-[✓ Verified]  ← bg-card, серый, незаметный
-```
-
-**Станет:**
-```
-[✓ Verified]  ← gold tint + subtle glow
-```
-
-**Новые стили:**
-```typescript
-// Trust badge with gold tint
 <div className={cn(
-  "flex items-center gap-1.5 px-2.5 py-1 rounded-full",
-  "bg-gradient-to-r from-primary/10 to-amber-500/10",
-  "border border-primary/20",
-  "text-[11px] font-medium text-foreground/90",
-  "shadow-sm"
+  CARD_STYLES.interactive,
+  "flex-shrink-0 cursor-pointer",
+  CAROUSEL_CARD_WIDTHS[cardSize]
 )}>
-  <ShieldCheck className="w-3.5 h-3.5 text-primary" />
-  <span>Verified</span>
+  <div className={cn(
+    "relative overflow-hidden",
+    CAROUSEL_IMAGE_HEIGHTS[cardSize]
+  )}>
+    ...
+  </div>
 </div>
 ```
 
----
+### 3. Убрать overlay/белый текст с medium-карточки
 
-## Новые Design Tokens
-
-Добавить в `designTokens.ts`:
-
-```typescript
-// ============ Premium Icon Containers ============
-export const ICON_CONTAINER_STYLES = {
-  soft: {
-    sky: 'bg-gradient-to-br from-sky-500/20 to-blue-500/30 shadow-lg shadow-sky-500/20',
-    emerald: 'bg-gradient-to-br from-emerald-500/20 to-green-500/30 shadow-lg shadow-emerald-500/20',
-    amber: 'bg-gradient-to-br from-amber-500/20 to-orange-500/30 shadow-lg shadow-amber-500/20',
-    rose: 'bg-gradient-to-br from-rose-500/20 to-pink-500/30 shadow-lg shadow-rose-500/20',
-    purple: 'bg-gradient-to-br from-purple-500/20 to-indigo-500/30 shadow-lg shadow-purple-500/20',
-  },
-  solid: {
-    sky: 'bg-gradient-to-br from-sky-400 to-blue-600 text-white shadow-lg shadow-sky-500/30',
-    emerald: 'bg-gradient-to-br from-emerald-400 to-green-600 text-white shadow-lg shadow-emerald-500/30',
-    amber: 'bg-gradient-to-br from-amber-400 to-orange-600 text-white shadow-lg shadow-amber-500/30',
-  },
-} as const;
-
-// ============ Glass Effect Chips ============
-export const CHIP_STYLES = {
-  glass: cn(
-    "bg-white/80 dark:bg-white/10",
-    "backdrop-blur-md",
-    "border border-white/50 dark:border-white/20",
-    "shadow-sm hover:shadow-md",
-    "transition-all duration-200"
-  ),
-  muted: "bg-muted/60 hover:bg-muted",
-  active: cn(
-    "bg-primary/10 border-primary/30",
-    "text-primary font-medium"
-  ),
-} as const;
-```
+Medium-карточка будет иметь:
+- Промежуточный размер
+- Стандартный layout (текст под изображением)
+- Без gradient overlay
 
 ---
 
 ## Визуальное сравнение
 
-### Audience Cards
-
-```text
-БЫЛО:                           СТАНЕТ:
-┌─────────────┐                ┌─────────────────────┐
-│ ✈️ plain    │                │ ┌─────────┐         │
-│ Туристам    │       →        │ │ ✈️      │ glow   │
-│ text...     │                │ └─────────┘         │
-└─────────────┘                │ Туристам            │
-                               │ Туры • Транспорт    │
-                               └─────────────────────┘
-                                ↑ gradient border
+### БЫЛО (резкий скачок):
+```
+[████████████████]  [██████████]  [██████████]
+     320px              256px         256px
+       ↓                  ↓
+   -20% сразу        одинаковые
 ```
 
-### Category Chips
-
-```text
-БЫЛО:                           СТАНЕТ:
-┌────────────────┐             ┌────────────────────┐
-│ 🔥 Popular     │    →        │ [🔥] Popular       │
-│ bg-muted/60   │             │ glass + emoji box │
-└────────────────┘             └────────────────────┘
+### СТАНЕТ (плавный переход):
 ```
-
-### Trust Badges
-
-```text
-БЫЛО:                           СТАНЕТ:
-┌──────────────┐               ┌──────────────────┐
-│ ✓ Verified   │      →        │ ✓ Verified       │
-│ gray, flat   │               │ gold tint + glow │
-└──────────────┘               └──────────────────┘
+[████████████████]  [█████████████]  [██████████]
+     320px              288px            256px
+       ↓                  ↓                ↓
+   -10%               -10%            базовый
 ```
 
 ---
 
 ## Файлы для изменения
 
-| Файл | Изменения |
+| Файл | Изменение |
 |------|-----------|
-| `src/lib/designTokens.ts` | Добавить `ICON_CONTAINER_STYLES`, `CHIP_STYLES` |
-| `src/components/home/HeroBlock.tsx` | Обновить Audience Cards с soft containers |
-| `src/components/home/ContentPreviewRibbon.tsx` | Glass effect для чипов + emoji containers |
-| `src/components/shared/UnifiedFilterRibbon.tsx` | Унифицировать стили чипов |
+| `src/lib/designTokens.ts` | Добавить `medium` размер в CAROUSEL_CARD_WIDTHS |
+| `src/components/home/DiscoveryCarousel.tsx` | Трёхуровневая логика размеров |
 
 ---
 
 ## Ожидаемый результат
 
-1. **Премиальный вид** — уровень iOS/Airbnb
-2. **Визуальная иерархия** — иконки "выделяются", чипы "поддерживают"
-3. **Глубина** — мягкие тени и glow-эффекты создают объём
-4. **Консистентность** — единая система для всех иконок и чипов
-
+1. **Плавный визуальный переход** — Hero → Medium → Standard
+2. **Сохранение Hero-акцента** — первая карточка остаётся выделенной
+3. **Меньше "ступенчатости"** — размеры уменьшаются постепенно
