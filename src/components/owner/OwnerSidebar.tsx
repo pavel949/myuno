@@ -103,9 +103,13 @@ export function OwnerSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
-      {/* Header */}
+      {/* Header - clickable to go to main app */}
       <SidebarHeader className="border-b border-sidebar-border px-4 py-3">
-        <div className="flex items-center gap-3">
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-3 hover:opacity-80 transition-opacity w-full text-left"
+          title={isRussian ? 'На главную' : 'Back to Home'}
+        >
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <Home className="h-5 w-5" />
           </div>
@@ -115,11 +119,11 @@ export function OwnerSidebar() {
                 UNO Property
               </span>
               <span className="text-xs text-sidebar-foreground/60">
-                {isRussian ? 'Управление' : 'Management'}
+                {isRussian ? '← На главную' : '← Back to Home'}
               </span>
             </div>
           )}
-        </div>
+        </button>
       </SidebarHeader>
 
       {/* Navigation */}
