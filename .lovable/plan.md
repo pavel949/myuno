@@ -1,13 +1,34 @@
 
 # План: Унифицированный Airbnb-style загрузчик медиаматериалов
 
+## ✅ РЕАЛИЗОВАНО (Этап 1 + Высокий приоритет)
+
+### Созданные компоненты:
+- `src/components/upload/UnifiedMediaUploader.tsx` - Главный компонент с 4 режимами
+- `src/components/upload/modes/GalleryMode.tsx` - Фотогалерея с DnD
+- `src/components/upload/modes/DocumentMode.tsx` - Документы с камерой
+- `src/components/upload/modes/AvatarMode.tsx` - Круглый аватар
+- `src/components/upload/modes/SingleImageMode.tsx` - Одиночное фото
+- `src/components/upload/shared/UploadDropzone.tsx` - Универсальная dropzone
+- `src/components/upload/shared/UploadProgress.tsx` - Индикатор прогресса
+- `src/components/upload/shared/ImageCompressor.ts` - Утилита сжатия WebP
+- `src/components/upload/shared/DocumentQualityTips.tsx` - Подсказки для документов
+
+### Мигрированные страницы:
+- ✅ `SellPhotosStep` - Marketplace wizard
+- ✅ `MyDocuments` - Профиль пользователя  
+- ✅ `PhotosStep` (listing-wizard) - Листинг
+- ✅ `PhotosStep` (property-wizard) - Собственники
+
+---
+
 ## Обзор
 
 Создание единого компонента загрузки `UnifiedMediaUploader`, который заменит все разрозненные решения на платформе и обеспечит консистентный премиальный UX во всех вертикалях.
 
 ---
 
-## Текущее состояние
+## Исходное состояние
 
 | Компонент | Использование | Проблемы |
 |-----------|--------------|----------|
