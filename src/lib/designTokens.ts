@@ -142,8 +142,16 @@ export const CARD_HEIGHTS = {
 // ============ Carousel Card Widths ============
 export const CAROUSEL_CARD_WIDTHS = {
   hero: 'w-80',           // 320px - featured first card
+  medium: 'w-72',         // 288px - transitional cards
   standard: 'w-64',       // 256px - regular cards
   compact: 'w-56',        // 224px - tight layouts
+} as const;
+
+// ============ Carousel Image Heights ============
+export const CAROUSEL_IMAGE_HEIGHTS = {
+  hero: 'h-48',           // 192px - featured first card
+  medium: 'h-42',         // 168px - transitional cards
+  standard: 'h-36',       // 144px - regular cards
 } as const;
 
 // ============ Premium Icon Containers ============
