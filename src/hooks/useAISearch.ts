@@ -156,7 +156,7 @@ export function useAISearch(
           setIsAILoading(false);
         }
       }
-    }, 600); // Debounce
+    }, 300); // Faster debounce for better UX
 
     return () => {
       isMounted = false;
