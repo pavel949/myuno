@@ -81,7 +81,7 @@ export function OwnerQuickActions() {
 
   const handleAction = (action: QuickAction) => {
     if (action.type === 'expense') {
-      navigate('/owner/expenses/quick');
+      navigate('/owner/quick-expense');
     } else if (action.type === 'inspection') {
       navigate('/owner/inspection');
     } else {
