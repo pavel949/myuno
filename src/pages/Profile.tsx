@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { PremiumButton } from '@/components/uno/PremiumButton';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { SectionCard } from '@/components/uno/SectionCard';
-import { LoadingState } from '@/components/uno/LoadingSpinner';
+import { ProfileSkeleton } from '@/components/ui/page-skeletons';
 import { ReferralCard } from '@/components/uno/ReferralCard';
 import { EmailVerificationBadge } from '@/components/profile/EmailVerificationBadge';
 import { RoleSwitchMenu } from '@/components/profile/RoleSwitchMenu';
@@ -53,7 +53,7 @@ export default function Profile() {
   if (isLoading) {
     return (
       <AppLayout>
-        <LoadingState />
+        <ProfileSkeleton />
       </AppLayout>
     );
   }

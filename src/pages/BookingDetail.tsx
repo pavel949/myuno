@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { LoadingState } from '@/components/uno/LoadingSpinner';
+import { DetailPageSkeleton } from '@/components/ui/page-skeletons';
 import { format, parseISO, isBefore, addDays } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -194,7 +194,7 @@ export default function BookingDetail() {
   if (authLoading || isLoading) {
     return (
       <AppLayout>
-        <LoadingState />
+        <DetailPageSkeleton />
       </AppLayout>
     );
   }

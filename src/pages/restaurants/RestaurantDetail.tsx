@@ -11,7 +11,7 @@ import { useRestaurant } from '@/hooks/useRestaurants';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { SkeletonCard } from '@/components/uno/SkeletonCard';
+import { DetailPageSkeleton } from '@/components/ui/page-skeletons';
 import { cn } from '@/lib/utils';
 import { useViewHistory } from '@/hooks/useViewHistory';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
@@ -51,11 +51,7 @@ export default function RestaurantDetail() {
   if (isLoading) {
     return (
       <AppLayout>
-        <div className="p-4 space-y-4">
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
-        </div>
+        <DetailPageSkeleton />
       </AppLayout>
     );
   }

@@ -8,7 +8,7 @@ import { PremiumButton } from '@/components/uno/PremiumButton';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
-import { LoadingState } from '@/components/uno/LoadingSpinner';
+import { BookingListSkeleton } from '@/components/ui/page-skeletons';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
@@ -151,7 +151,7 @@ export default function Bookings() {
   if (authLoading || isLoading) {
     return (
       <AppLayout>
-        <LoadingState />
+        <BookingListSkeleton />
       </AppLayout>
     );
   }

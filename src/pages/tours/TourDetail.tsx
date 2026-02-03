@@ -3,7 +3,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useTour } from "@/hooks/useTours";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageContainer } from "@/components/uno/PageContainer";
-import { LoadingSpinner } from "@/components/uno/LoadingSpinner";
+import { DetailPageSkeleton } from "@/components/ui/page-skeletons";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Clock, Users, Star, Check, Calendar, MapPin, Shield } from "lucide-react";
@@ -18,7 +18,7 @@ export default function TourDetail() {
   const { language, t } = useLanguage();
   const { tour, isLoading, error } = useTour(id);
 
-  if (isLoading) return <AppLayout><div className="flex items-center justify-center min-h-screen"><LoadingSpinner size="lg" /></div></AppLayout>;
+  if (isLoading) return <AppLayout><DetailPageSkeleton /></AppLayout>;
   if (error || !tour) return <AppLayout><PageContainer><div className="text-center py-12"><p>{t('tours.notFound')}</p><Button onClick={() => navigate('/tours')} className="mt-4">{t('action.back')}</Button></div></PageContainer></AppLayout>;
 
   const tourName = language === 'ru' ? tour.title_ru : tour.title_en;
