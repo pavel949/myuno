@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => ({
         display: 'standalone',
         orientation: 'portrait-primary',
         start_url: '/?source=pwa',
-        id: '/myuno-pwa-v3', // Bumped version to force update
+        id: '/myuno-pwa-v4', // Bumped version to force update
         scope: '/',
         icons: [
           {
