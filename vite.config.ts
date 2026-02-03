@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => ({
         display: 'standalone',
         orientation: 'portrait-primary',
         start_url: '/?source=pwa',
-        id: '/myuno-pwa-v2',
+        id: '/myuno-pwa-v3', // Bumped version to force update
         scope: '/',
         icons: [
           {
@@ -48,16 +48,24 @@ export default defineConfig(({ mode }) => ({
         ]
       },
       workbox: {
+        // Force new SW to activate immediately
+        skipWaiting: true,
+        clientsClaim: true,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        // Clean old caches on new SW activation
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'supabase-cache',
+              cacheName: 'supabase-cache-v2',
               expiration: {
                 maxEntries: 50,
                 maxAgeSeconds: 60 * 60 * 24
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
               }
             }
           }

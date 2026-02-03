@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { RefreshCw, X, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { APP_VERSION, BUILD_TIMESTAMP } from '@/lib/appVersion';
 
 export function PWAUpdatePrompt() {
   const { language } = useLanguage();
@@ -14,16 +15,20 @@ export function PWAUpdatePrompt() {
     updateServiceWorker,
   } = useRegisterSW({
     onRegisteredSW(swUrl, r) {
-      console.log('SW registered:', swUrl);
-      // Check for updates every 30 minutes
+      console.log(`[PWA] SW registered: ${swUrl} | App v${APP_VERSION}`);
+      // Check for updates every 5 minutes (more aggressive)
       if (r) {
+        // Immediate check on registration
+        r.update();
+        
         setInterval(() => {
+          console.log('[PWA] Checking for updates...');
           r.update();
-        }, 30 * 60 * 1000);
+        }, 5 * 60 * 1000); // 5 minutes instead of 30
       }
     },
     onRegisterError(error) {
-      console.error('SW registration error:', error);
+      console.error('[PWA] SW registration error:', error);
     },
   });
 
