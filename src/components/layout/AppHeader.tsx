@@ -77,28 +77,22 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
 
         {/* Right side - Actions */}
         <div className="flex items-center gap-1">
-          {/* Coming Soon Toggle - visible to admins */}
+          {/* Coming Soon Toggle - visible to admins - ALWAYS VISIBLE */}
           {isAdmin && (
             <div className={cn(
-              "flex items-center gap-2 px-3 py-1.5 rounded-full mr-2 transition-colors",
+              "flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-full mr-1 sm:mr-2 transition-colors",
               isMaintenanceMode 
-                ? "bg-warning/20 border border-warning/50" 
+                ? "bg-warning/20 border-2 border-warning" 
                 : "bg-muted/50 border border-border"
             )}>
               <Construction className={cn(
-                "w-4 h-4",
-                isMaintenanceMode ? "text-warning" : "text-muted-foreground"
+                "w-4 h-4 flex-shrink-0",
+                isMaintenanceMode ? "text-warning animate-pulse" : "text-muted-foreground"
               )} />
-              <span className={cn(
-                "text-xs font-medium hidden sm:block",
-                isMaintenanceMode ? "text-warning" : "text-muted-foreground"
-              )}>
-                {language === 'ru' ? 'Скоро' : 'Soon'}
-              </span>
               <Switch
                 checked={isMaintenanceMode}
                 onCheckedChange={setMaintenanceMode}
-                className="scale-75"
+                className="scale-90"
               />
             </div>
           )}
