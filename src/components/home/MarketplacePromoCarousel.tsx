@@ -80,20 +80,25 @@ export const MarketplacePromoCarousel = memo(function MarketplacePromoCarousel()
   if (products.length === 0) return null;
 
   return (
-    <div className="space-y-3">
+    <div className="relative -mx-4 px-4 py-5 bg-gradient-to-br from-emerald-50/80 via-teal-50/40 to-transparent dark:from-emerald-950/20 dark:via-teal-950/10 dark:to-transparent rounded-3xl space-y-3">
       {/* Header with gradient accent */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
-            <ShoppingCart className="w-4 h-4 text-white" />
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
+            <ShoppingCart className="w-5 h-5 text-white" />
           </div>
-          <h2 className="text-base font-semibold">
-            {language === 'ru' ? 'Свежие продукты' : 'Fresh Products'}
-          </h2>
+          <div>
+            <h2 className="text-xl font-bold text-foreground">
+              {language === 'ru' ? 'Свежие продукты' : 'Fresh Products'}
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              {language === 'ru' ? 'Доставка до двери' : 'Delivered to your door'}
+            </p>
+          </div>
         </div>
         <button 
           onClick={() => navigate('/market')}
-          className="text-sm text-primary flex items-center gap-1 hover:underline font-medium"
+          className="text-sm text-primary flex items-center gap-1 hover:underline font-semibold"
         >
           {language === 'ru' ? 'В магазин' : 'Shop'}
           <ArrowRight className="w-4 h-4" />
@@ -127,17 +132,21 @@ export const MarketplacePromoCarousel = memo(function MarketplacePromoCarousel()
           className="flex gap-2.5 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 touch-pan-x"
           style={{ scrollSnapType: 'x mandatory' }}
         >
-          {products.map((product) => {
+          {products.map((product, index) => {
             const quantity = getQuantity(product.id);
             const hasDiscount = product.original_price && product.original_price > product.price;
             const discountPercent = hasDiscount 
               ? Math.round((1 - product.price / product.original_price!) * 100)
               : 0;
+            const isHero = index === 0;
 
             return (
               <div
                 key={product.id}
-                className="flex-shrink-0 w-36 rounded-2xl overflow-hidden bg-card border border-border/50 hover:border-primary/30 transition-all group/card touch-manipulation"
+                className={cn(
+                  "flex-shrink-0 rounded-2xl overflow-hidden bg-card border border-border/50 hover:border-primary/30 hover:shadow-lg transition-all group/card touch-manipulation",
+                  isHero ? "w-44" : "w-36"
+                )}
                 style={{ scrollSnapAlign: 'start' }}
               >
                 {/* Image with click handler */}
@@ -154,7 +163,12 @@ export const MarketplacePromoCarousel = memo(function MarketplacePromoCarousel()
                   
                   {/* Badges */}
                   <div className="absolute top-1.5 left-1.5 flex flex-col gap-1">
-                    {product.is_new && (
+                    {isHero && (
+                      <span className="px-1.5 py-0.5 rounded text-[9px] font-bold text-white bg-gradient-to-r from-amber-500 to-orange-500 shadow-sm">
+                        {language === 'ru' ? 'ХИТ' : 'HOT'}
+                      </span>
+                    )}
+                    {product.is_new && !isHero && (
                       <span className="px-1.5 py-0.5 rounded text-[9px] font-bold text-white bg-blue-500 uppercase">
                         NEW
                       </span>

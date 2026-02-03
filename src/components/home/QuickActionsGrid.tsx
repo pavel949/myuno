@@ -60,8 +60,8 @@ const TOURIST_ACTIONS: QuickAction[] = [
     label: 'Rent',
     labelRu: 'Аренда',
     path: '/property',
-    iconColor: 'text-teal-600',
-    bgColor: 'bg-teal-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-teal-400 to-emerald-600',
   },
   {
     id: 'transport',
@@ -69,8 +69,8 @@ const TOURIST_ACTIONS: QuickAction[] = [
     label: 'Transport',
     labelRu: 'Транспорт',
     path: '/transport',
-    iconColor: 'text-blue-600',
-    bgColor: 'bg-blue-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-blue-400 to-indigo-600',
   },
   {
     id: 'yachts',
@@ -78,8 +78,8 @@ const TOURIST_ACTIONS: QuickAction[] = [
     label: 'Yachts',
     labelRu: 'Яхты',
     path: '/yachts',
-    iconColor: 'text-cyan-600',
-    bgColor: 'bg-cyan-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-cyan-400 to-blue-600',
   },
   {
     id: 'experiences',
@@ -87,8 +87,8 @@ const TOURIST_ACTIONS: QuickAction[] = [
     label: 'Experiences',
     labelRu: 'Впечатления',
     path: '/experiences',
-    iconColor: 'text-amber-600',
-    bgColor: 'bg-amber-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-amber-400 to-orange-600',
   },
   {
     id: 'flowers',
@@ -96,8 +96,8 @@ const TOURIST_ACTIONS: QuickAction[] = [
     label: 'Flowers',
     labelRu: 'Цветы',
     path: '/flowers',
-    iconColor: 'text-rose-500',
-    bgColor: 'bg-rose-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-rose-400 to-pink-600',
   },
   {
     id: 'market',
@@ -105,8 +105,8 @@ const TOURIST_ACTIONS: QuickAction[] = [
     label: 'Market',
     labelRu: 'Маркет',
     path: '/market',
-    iconColor: 'text-violet-600',
-    bgColor: 'bg-violet-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-violet-400 to-purple-600',
   },
   {
     id: 'beauty',
@@ -114,8 +114,8 @@ const TOURIST_ACTIONS: QuickAction[] = [
     label: 'Beauty',
     labelRu: 'Красота',
     path: '/beauty',
-    iconColor: 'text-pink-500',
-    bgColor: 'bg-pink-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-pink-400 to-rose-600',
   },
   {
     id: 'events',
@@ -123,8 +123,8 @@ const TOURIST_ACTIONS: QuickAction[] = [
     label: 'Events',
     labelRu: 'События',
     path: '/events',
-    iconColor: 'text-purple-600',
-    bgColor: 'bg-purple-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-purple-400 to-indigo-600',
   },
 ];
 
@@ -136,8 +136,8 @@ const RESIDENT_ACTIONS: QuickAction[] = [
     label: 'Visa',
     labelRu: 'Визы',
     path: '/visa',
-    iconColor: 'text-purple-600',
-    bgColor: 'bg-purple-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-purple-400 to-indigo-600',
   },
   {
     id: 'property',
@@ -145,8 +145,8 @@ const RESIDENT_ACTIONS: QuickAction[] = [
     label: 'Property',
     labelRu: 'Жильё',
     path: '/property',
-    iconColor: 'text-teal-600',
-    bgColor: 'bg-teal-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-teal-400 to-emerald-600',
   },
   {
     id: 'education',
@@ -154,8 +154,8 @@ const RESIDENT_ACTIONS: QuickAction[] = [
     label: 'Education',
     labelRu: 'Обучение',
     path: '/education',
-    iconColor: 'text-violet-600',
-    bgColor: 'bg-violet-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-violet-400 to-purple-600',
   },
   {
     id: 'medical',
@@ -163,8 +163,8 @@ const RESIDENT_ACTIONS: QuickAction[] = [
     label: 'Medical',
     labelRu: 'Медицина',
     path: '/medical',
-    iconColor: 'text-emerald-600',
-    bgColor: 'bg-emerald-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-emerald-400 to-green-600',
   },
   {
     id: 'legal',
@@ -172,8 +172,8 @@ const RESIDENT_ACTIONS: QuickAction[] = [
     label: 'Legal',
     labelRu: 'Юрист',
     path: '/legal',
-    iconColor: 'text-indigo-600',
-    bgColor: 'bg-indigo-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-indigo-400 to-blue-600',
   },
   {
     id: 'insurance',
@@ -181,8 +181,8 @@ const RESIDENT_ACTIONS: QuickAction[] = [
     label: 'Insurance',
     labelRu: 'Страховка',
     path: '/insurance',
-    iconColor: 'text-sky-600',
-    bgColor: 'bg-sky-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-sky-400 to-cyan-600',
   },
   {
     id: 'banking',
@@ -190,8 +190,8 @@ const RESIDENT_ACTIONS: QuickAction[] = [
     label: 'Banking',
     labelRu: 'Банки',
     path: '/banking',
-    iconColor: 'text-green-600',
-    bgColor: 'bg-green-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-green-400 to-emerald-600',
   },
 ];
 
@@ -203,8 +203,8 @@ const OWNER_ACTIONS: QuickAction[] = [
     label: 'Services',
     labelRu: 'Сервис',
     path: '/services',
-    iconColor: 'text-amber-600',
-    bgColor: 'bg-amber-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-amber-400 to-orange-600',
   },
   {
     id: 'property-management',
@@ -212,8 +212,8 @@ const OWNER_ACTIONS: QuickAction[] = [
     label: 'Management',
     labelRu: 'УК',
     path: '/services?category=property-management',
-    iconColor: 'text-indigo-600',
-    bgColor: 'bg-indigo-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-indigo-400 to-purple-600',
   },
   {
     id: 'rental',
@@ -221,8 +221,8 @@ const OWNER_ACTIONS: QuickAction[] = [
     label: 'Rental',
     labelRu: 'Аренда',
     path: '/property',
-    iconColor: 'text-teal-600',
-    bgColor: 'bg-teal-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-teal-400 to-emerald-600',
   },
   {
     id: 'legal',
@@ -230,8 +230,8 @@ const OWNER_ACTIONS: QuickAction[] = [
     label: 'Legal',
     labelRu: 'Юрист',
     path: '/legal',
-    iconColor: 'text-slate-600',
-    bgColor: 'bg-slate-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-slate-400 to-gray-600',
   },
   {
     id: 'insurance',
@@ -239,8 +239,8 @@ const OWNER_ACTIONS: QuickAction[] = [
     label: 'Insurance',
     labelRu: 'Страховка',
     path: '/insurance',
-    iconColor: 'text-sky-600',
-    bgColor: 'bg-sky-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-sky-400 to-cyan-600',
   },
   {
     id: 'cleaning',
@@ -248,8 +248,8 @@ const OWNER_ACTIONS: QuickAction[] = [
     label: 'Cleaning',
     labelRu: 'Клининг',
     path: '/cleaning',
-    iconColor: 'text-pink-500',
-    bgColor: 'bg-pink-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-pink-400 to-rose-600',
   },
 ];
 
@@ -261,8 +261,8 @@ const VENDOR_ACTIONS: QuickAction[] = [
     label: 'Dashboard',
     labelRu: 'Панель',
     path: '/vendor',
-    iconColor: 'text-purple-600',
-    bgColor: 'bg-purple-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-purple-400 to-indigo-600',
   },
   {
     id: 'vendor-orders',
@@ -270,8 +270,8 @@ const VENDOR_ACTIONS: QuickAction[] = [
     label: 'Orders',
     labelRu: 'Заказы',
     path: '/vendor/orders',
-    iconColor: 'text-blue-600',
-    bgColor: 'bg-blue-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-blue-400 to-indigo-600',
   },
   {
     id: 'vendor-services',
@@ -279,8 +279,8 @@ const VENDOR_ACTIONS: QuickAction[] = [
     label: 'Services',
     labelRu: 'Услуги',
     path: '/vendor/services',
-    iconColor: 'text-amber-600',
-    bgColor: 'bg-amber-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-amber-400 to-orange-600',
   },
   {
     id: 'vendor-calendar',
@@ -288,8 +288,8 @@ const VENDOR_ACTIONS: QuickAction[] = [
     label: 'Calendar',
     labelRu: 'Календарь',
     path: '/vendor/calendar',
-    iconColor: 'text-teal-600',
-    bgColor: 'bg-teal-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-teal-400 to-emerald-600',
   },
   {
     id: 'market',
@@ -297,8 +297,8 @@ const VENDOR_ACTIONS: QuickAction[] = [
     label: 'Market',
     labelRu: 'Маркет',
     path: '/market',
-    iconColor: 'text-violet-600',
-    bgColor: 'bg-violet-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-violet-400 to-purple-600',
   },
   {
     id: 'banking',
@@ -306,8 +306,8 @@ const VENDOR_ACTIONS: QuickAction[] = [
     label: 'Banking',
     labelRu: 'Банки',
     path: '/banking',
-    iconColor: 'text-green-600',
-    bgColor: 'bg-green-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-green-400 to-emerald-600',
   },
 ];
 
@@ -319,8 +319,8 @@ const ADMIN_ACTIONS: QuickAction[] = [
     label: 'Admin',
     labelRu: 'Админ',
     path: '/admin',
-    iconColor: 'text-red-600',
-    bgColor: 'bg-red-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-red-400 to-rose-600',
   },
   {
     id: 'team-dashboard',
@@ -328,8 +328,8 @@ const ADMIN_ACTIONS: QuickAction[] = [
     label: 'Team',
     labelRu: 'Команда',
     path: '/team',
-    iconColor: 'text-emerald-600',
-    bgColor: 'bg-emerald-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-emerald-400 to-green-600',
   },
   {
     id: 'services',
@@ -337,8 +337,8 @@ const ADMIN_ACTIONS: QuickAction[] = [
     label: 'Services',
     labelRu: 'Сервисы',
     path: '/services',
-    iconColor: 'text-amber-600',
-    bgColor: 'bg-amber-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-amber-400 to-orange-600',
   },
   {
     id: 'property',
@@ -346,8 +346,8 @@ const ADMIN_ACTIONS: QuickAction[] = [
     label: 'Property',
     labelRu: 'Жильё',
     path: '/property',
-    iconColor: 'text-teal-600',
-    bgColor: 'bg-teal-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-teal-400 to-emerald-600',
   },
   {
     id: 'market',
@@ -355,8 +355,8 @@ const ADMIN_ACTIONS: QuickAction[] = [
     label: 'Market',
     labelRu: 'Маркет',
     path: '/market',
-    iconColor: 'text-violet-600',
-    bgColor: 'bg-violet-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-violet-400 to-purple-600',
   },
   {
     id: 'legal',
@@ -364,8 +364,8 @@ const ADMIN_ACTIONS: QuickAction[] = [
     label: 'Legal',
     labelRu: 'Юрист',
     path: '/legal',
-    iconColor: 'text-indigo-600',
-    bgColor: 'bg-indigo-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-indigo-400 to-blue-600',
   },
 ];
 
@@ -390,8 +390,8 @@ const DEFAULT_ACTIONS: QuickAction[] = [
     label: 'Flowers',
     labelRu: 'Цветы',
     path: '/flowers',
-    iconColor: 'text-rose-500',
-    bgColor: 'bg-rose-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-rose-400 to-pink-600',
   },
   {
     id: 'restaurants',
@@ -399,8 +399,8 @@ const DEFAULT_ACTIONS: QuickAction[] = [
     label: 'Food',
     labelRu: 'Еда',
     path: '/restaurants',
-    iconColor: 'text-orange-500',
-    bgColor: 'bg-orange-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-orange-400 to-red-500',
   },
   {
     id: 'transfer',
@@ -408,8 +408,8 @@ const DEFAULT_ACTIONS: QuickAction[] = [
     label: 'Transfer',
     labelRu: 'Трансфер',
     path: '/transport/airport',
-    iconColor: 'text-indigo-600',
-    bgColor: 'bg-indigo-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-indigo-400 to-purple-600',
   },
   {
     id: 'beauty',
@@ -417,8 +417,8 @@ const DEFAULT_ACTIONS: QuickAction[] = [
     label: 'Beauty',
     labelRu: 'Красота',
     path: '/beauty',
-    iconColor: 'text-pink-500',
-    bgColor: 'bg-pink-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-pink-400 to-rose-600',
   },
   {
     id: 'transport',
@@ -426,8 +426,8 @@ const DEFAULT_ACTIONS: QuickAction[] = [
     label: 'Transport',
     labelRu: 'Транспорт',
     path: '/transport',
-    iconColor: 'text-blue-600',
-    bgColor: 'bg-blue-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-blue-400 to-indigo-600',
   },
   {
     id: 'property',
@@ -435,8 +435,8 @@ const DEFAULT_ACTIONS: QuickAction[] = [
     label: 'Property',
     labelRu: 'Жильё',
     path: '/property',
-    iconColor: 'text-teal-600',
-    bgColor: 'bg-teal-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-teal-400 to-emerald-600',
   },
   {
     id: 'medical',
@@ -444,8 +444,8 @@ const DEFAULT_ACTIONS: QuickAction[] = [
     label: 'Medical',
     labelRu: 'Медицина',
     path: '/medical',
-    iconColor: 'text-emerald-600',
-    bgColor: 'bg-emerald-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-emerald-400 to-green-600',
   },
   {
     id: 'market',
@@ -453,8 +453,8 @@ const DEFAULT_ACTIONS: QuickAction[] = [
     label: 'Market',
     labelRu: 'Маркет',
     path: '/market',
-    iconColor: 'text-violet-600',
-    bgColor: 'bg-violet-500/10',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-violet-400 to-purple-600',
   },
 ];
 
@@ -600,19 +600,19 @@ export const QuickActionsGrid = memo(function QuickActionsGrid() {
               </Badge>
             )}
             
-            {/* Icon Container - clean monochrome style */}
+            {/* Icon Container - vibrant gradient style */}
             <div className={cn(
-              "w-12 h-12 rounded-xl flex items-center justify-center mb-1.5",
+              "w-14 h-14 rounded-2xl flex items-center justify-center mb-1.5 shadow-lg ring-2 ring-white/20",
               action.bgColor,
-              "group-hover:scale-110 transition-transform"
+              "group-hover:scale-110 group-hover:shadow-xl transition-all duration-200"
             )}>
               <Icon className={cn("w-6 h-6", action.iconColor)} />
             </div>
             
-            {/* Label - single line */}
+            {/* Label - emphasized */}
             <span className={cn(
-              "text-[10px] font-medium text-center leading-tight truncate w-full",
-              "text-muted-foreground group-hover:text-foreground transition-colors"
+              "text-[11px] font-semibold text-center leading-tight truncate w-full",
+              "text-foreground"
             )}>
               {label}
             </span>
