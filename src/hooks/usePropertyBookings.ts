@@ -50,10 +50,13 @@ function mapOrderToBooking(order: any, propertyId: string): PropertyBooking {
   const guestParticipant = order.order_participants?.find((p: any) => p.role === 'guest');
   const propertyItem = order.order_items?.find((i: any) => i.item_type === 'property');
   
+  // Property ID is stored in order_items.metadata.property_id (not resource_id due to FK constraint)
+  const itemPropertyId = propertyItem?.metadata?.property_id || propertyItem?.resource_id;
+  
   return {
     id: order.id,
     order_id: order.id,
-    property_id: propertyItem?.resource_id || propertyId,
+    property_id: itemPropertyId || propertyId,
     owner_id: order.provider_org_id || '',
     guest_name: guestParticipant?.name,
     guest_phone: guestParticipant?.phone,
@@ -83,12 +86,14 @@ export function usePropertyBookings(propertyId?: string) {
 
       // Query orders where vertical = 'property' and user is the owner
       // We need to find orders linked to properties the user owns
+      // Fetch orders with property vertical
+      // Note: property_id is stored in order_items.metadata.property_id
       let query = supabase
         .from('orders')
         .select(`
           *,
           order_items!inner (
-            id, resource_id, item_type, item_name, unit_price, amount, start_at, end_at
+            id, resource_id, item_type, item_name, unit_price, amount, start_at, end_at, metadata
           ),
           order_participants (
             id, role, name, phone, email
@@ -99,20 +104,28 @@ export function usePropertyBookings(propertyId?: string) {
         .is('deleted_at', null)
         .order('start_at', { ascending: true });
 
-      // Filter by specific property if provided
-      if (propertyId) {
-        query = query.eq('order_items.resource_id', propertyId);
-      }
-
+      // Filter by specific property if provided - check in metadata
+      // Note: PostgREST doesn't support filtering by JSONB deeply, so we filter in JS
       const { data, error } = await query;
-      
+
       if (error) {
         errorLog.silent(error, 'fetch_bookings');
         throw error;
       }
 
+      // Filter by property_id in metadata if specified
+      let filteredData = data || [];
+      if (propertyId) {
+        filteredData = filteredData.filter((order) => {
+          const propertyItem = order.order_items?.find((i: any) => i.item_type === 'property');
+          const meta = propertyItem?.metadata as Record<string, unknown> | null;
+          const itemPropertyId = meta?.property_id || propertyItem?.resource_id;
+          return itemPropertyId === propertyId;
+        });
+      }
+
       // Map orders to PropertyBooking format
-      return (data || []).map((order) => 
+      return filteredData.map((order) => 
         mapOrderToBooking(order, propertyId || '')
       );
     },
@@ -151,11 +164,12 @@ export function usePropertyBookings(propertyId?: string) {
       }
 
       // Create order_item linking to property
+      // NOTE: We store property_id in metadata instead of resource_id 
+      // because resource_id has FK constraint to resources table
       const { error: itemError } = await supabase
         .from('order_items')
         .insert({
           order_id: order.id,
-          resource_id: input.property_id,
           item_type: 'property',
           item_name: 'Property Booking',
           unit_price: input.total_amount || 0,
@@ -163,6 +177,9 @@ export function usePropertyBookings(propertyId?: string) {
           qty: 1,
           start_at: `${input.check_in}T14:00:00Z`,
           end_at: `${input.check_out}T12:00:00Z`,
+          metadata: {
+            property_id: input.property_id,
+          },
         });
 
       if (itemError) {
