@@ -66,6 +66,8 @@ export function AddBookingFromCalendarDialog({
   
   const [checkIn, setCheckIn] = useState<Date | undefined>(initialDate);
   const [checkOut, setCheckOut] = useState<Date | undefined>();
+  const [checkInTime, setCheckInTime] = useState('14:00');
+  const [checkOutTime, setCheckOutTime] = useState('11:00');
   const [guestName, setGuestName] = useState('');
   const [guestPhone, setGuestPhone] = useState('');
   const [guestEmail, setGuestEmail] = useState('');
@@ -262,6 +264,8 @@ export function AddBookingFromCalendarDialog({
         property_id: propertyId,
         check_in: format(checkIn, 'yyyy-MM-dd'),
         check_out: format(checkOut, 'yyyy-MM-dd'),
+        check_in_time: checkInTime,
+        check_out_time: checkOutTime,
         guest_name: guestName || undefined,
         guest_phone: guestPhone || undefined,
         guest_email: guestEmail || undefined,
@@ -299,6 +303,8 @@ export function AddBookingFromCalendarDialog({
   const resetForm = () => {
     setCheckIn(undefined);
     setCheckOut(undefined);
+    setCheckInTime('14:00');
+    setCheckOutTime('11:00');
     setGuestName('');
     setGuestPhone('');
     setGuestEmail('');
@@ -312,6 +318,13 @@ export function AddBookingFromCalendarDialog({
     setShowAdvanced(false);
     setUploadedDocs([]);
   };
+
+  // Time options for check-in/out
+  const timeOptions = [
+    '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', 
+    '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', 
+    '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'
+  ];
   
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -416,6 +429,42 @@ export function AddBookingFromCalendarDialog({
               </Popover>
             </div>
           </div>
+          
+          {/* Time Selection - Only show after dates selected */}
+          {checkIn && checkOut && (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs text-muted-foreground flex items-center gap-1">
+                  {isRu ? 'Время заезда' : 'Check-in time'}
+                </Label>
+                <Select value={checkInTime} onValueChange={setCheckInTime}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {timeOptions.map(time => (
+                      <SelectItem key={`in-${time}`} value={time}>{time}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground flex items-center gap-1">
+                  {isRu ? 'Время выезда' : 'Check-out time'}
+                </Label>
+                <Select value={checkOutTime} onValueChange={setCheckOutTime}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {timeOptions.map(time => (
+                      <SelectItem key={`out-${time}`} value={time}>{time}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
           
           {nights > 0 && (
             <div className="text-center py-1 text-sm text-muted-foreground">

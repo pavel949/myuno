@@ -34,6 +34,8 @@ export interface CreateBookingInput {
   guest_email?: string;
   check_in: string;
   check_out: string;
+  check_in_time?: string;  // e.g., "14:00"
+  check_out_time?: string; // e.g., "11:00"
   guests_count?: number;
   total_amount?: number;
   deposit_amount?: number;
@@ -145,8 +147,8 @@ export function usePropertyBookings(propertyId?: string) {
           order_type: 'property',
           vertical: 'property',
           customer_user_id: user.id,
-          start_at: `${input.check_in}T14:00:00Z`,
-          end_at: `${input.check_out}T12:00:00Z`,
+          start_at: `${input.check_in}T${input.check_in_time || '14:00'}:00Z`,
+          end_at: `${input.check_out}T${input.check_out_time || '12:00'}:00Z`,
           total_amount: input.total_amount || 0,
           currency: input.currency || 'THB',
           status: (input.status === 'confirmed' ? 'confirmed' : 'pending') as any,
@@ -157,6 +159,8 @@ export function usePropertyBookings(propertyId?: string) {
             guests_count: input.guests_count,
             deposit_amount: input.deposit_amount,
             documents: input.documents,
+            check_in_time: input.check_in_time || '14:00',
+            check_out_time: input.check_out_time || '11:00',
           },
         })
         .select()
@@ -179,8 +183,8 @@ export function usePropertyBookings(propertyId?: string) {
           unit_price: input.total_amount || 0,
           amount: input.total_amount || 0,
           qty: 1,
-          start_at: `${input.check_in}T14:00:00Z`,
-          end_at: `${input.check_out}T12:00:00Z`,
+          start_at: `${input.check_in}T${input.check_in_time || '14:00'}:00Z`,
+          end_at: `${input.check_out}T${input.check_out_time || '12:00'}:00Z`,
           metadata: {
             property_id: input.property_id,
           },

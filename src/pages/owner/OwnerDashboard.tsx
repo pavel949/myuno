@@ -14,6 +14,7 @@ import {
   CommunicationsSection,
   OwnerPerformanceCard,
   BookingSearchBar,
+  ActiveStaysWidget,
 } from '@/components/owner/dashboard';
 
 // Skeleton components for each section
@@ -75,6 +76,21 @@ function PerformanceSkeleton() {
   return <Skeleton className="h-32 w-full rounded-xl" />;
 }
 
+function ActiveStaysSkeleton() {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <Skeleton className="h-5 w-32" />
+        <Skeleton className="h-5 w-6 rounded-full" />
+      </div>
+      <div className="flex gap-3 overflow-hidden">
+        <Skeleton className="h-28 w-72 rounded-xl shrink-0" />
+        <Skeleton className="h-28 w-72 rounded-xl shrink-0" />
+      </div>
+    </div>
+  );
+}
+
 function CommunicationsSkeleton() {
   return (
     <div className="space-y-3">
@@ -129,6 +145,11 @@ export default function OwnerDashboard() {
       {/* Quick Actions - horizontal scroll */}
       <Suspense fallback={<QuickActionsSkeleton />}>
         <QuickActionsBar />
+      </Suspense>
+
+      {/* Active Stays Widget - Airbnb style "Who's staying now" */}
+      <Suspense fallback={<ActiveStaysSkeleton />}>
+        <ActiveStaysWidget />
       </Suspense>
 
       {/* Portfolio Section - Hero with properties */}
