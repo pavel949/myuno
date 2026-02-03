@@ -269,10 +269,6 @@ const VendorServices = () => {
   return (
     <AppLayout>
       <PageContainer>
-        <PageHeader 
-          title={isRussian ? 'Услуги' : 'Services'}
-          showBack
-        />
 
         {/* Draft restoration banner */}
         {hasDraft && !isDialogOpen && !editingService && (
