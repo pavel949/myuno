@@ -10,6 +10,7 @@ import { UnitFields } from '@/components/property/UnitFields';
 import { PropertyFormData } from '@/hooks/usePropertyWizard';
 import { toast } from 'sonner';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
+import { useTaxonomy } from '@/hooks/useTaxonomy';
 
 interface BasicInfoStepProps {
   formData: PropertyFormData;
@@ -17,16 +18,6 @@ interface BasicInfoStepProps {
   selectedProject: PropertyProject | null;
   setSelectedProject: (project: PropertyProject | null) => void;
 }
-
-const propertyTypes = [
-  { value: 'villa', labelEn: 'Villa', labelRu: 'Вилла' },
-  { value: 'house', labelEn: 'House', labelRu: 'Дом' },
-  { value: 'townhouse', labelEn: 'Townhouse', labelRu: 'Таунхаус' },
-  { value: 'apartment', labelEn: 'Apartment', labelRu: 'Квартира' },
-  { value: 'condo', labelEn: 'Condo', labelRu: 'Кондо' },
-  { value: 'studio', labelEn: 'Studio', labelRu: 'Студия' },
-  { value: 'penthouse', labelEn: 'Penthouse', labelRu: 'Пентхаус' },
-];
 
 export function BasicInfoStep({ 
   formData, 
@@ -36,6 +27,7 @@ export function BasicInfoStep({
 }: BasicInfoStepProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const { options: propertyTypes } = useTaxonomy('property_type');
 
   return (
     <div className="space-y-6">

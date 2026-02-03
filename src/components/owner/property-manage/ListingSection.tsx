@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Home, Bed, Bath, SquareStack, MapPin } from 'lucide-react';
 import { AirbnbStyleImageUpload } from '@/components/upload/AirbnbStyleImageUpload';
 import { PropertyHighlights } from '@/components/property/PropertyHighlights';
-import { PROPERTY_TYPES, PHUKET_DISTRICTS } from '@/lib/propertyTaxonomy';
+import { useTaxonomy } from '@/hooks/useTaxonomy';
 
 interface ListingSectionProps {
   formData: Record<string, any>;
@@ -23,6 +23,10 @@ export function PropertyManageListingSection({
 }: ListingSectionProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  
+  // Dynamic taxonomy data
+  const { options: propertyTypes } = useTaxonomy('property_type');
+  const { options: districts } = useTaxonomy('district');
 
   const handleImagesChange = (urls: string[]) => {
     if (urls.length === 0) {
@@ -109,8 +113,8 @@ export function PropertyManageListingSection({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {PROPERTY_TYPES.map((type) => (
-                        <SelectItem key={type.id} value={type.id}>
+                      {propertyTypes.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
                           {isRu ? type.labelRu : type.labelEn}
                         </SelectItem>
                       ))}
@@ -198,8 +202,8 @@ export function PropertyManageListingSection({
                     <SelectValue placeholder={isRu ? 'Выберите район' : 'Select district'} />
                   </SelectTrigger>
                   <SelectContent>
-                    {PHUKET_DISTRICTS.map((d) => (
-                      <SelectItem key={d.id} value={d.id}>
+                    {districts.map((d) => (
+                      <SelectItem key={d.value} value={d.value}>
                         {isRu ? d.labelRu : d.labelEn}
                       </SelectItem>
                     ))}
