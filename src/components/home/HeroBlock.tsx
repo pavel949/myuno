@@ -1,12 +1,13 @@
 import React, { memo } from 'react';
-import { motion } from 'framer-motion';
-import { ShieldCheck, Layers, Languages, HeartHandshake, MapPin, AlertTriangle, ChevronRight, Shield, Plane, Users, Building2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ShieldCheck, Layers, Languages, HeartHandshake, MapPin, AlertTriangle, ChevronRight, Shield, Plane, Users, Building2, Check } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useUserPersonas, UserPersona } from '@/hooks/useUserPersonas';
+import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { InlineSearch } from '@/components/search/InlineSearch';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-
 interface TrustBadgeProps {
   icon: React.ReactNode;
   label: string;
@@ -35,21 +36,50 @@ interface AudienceCardProps {
   services: string;
   cardGradient: string;
   borderColor: string;
+  activeBorderColor: string;
+  isActive: boolean;
+  isToggleable: boolean;
   onClick: () => void;
 }
 
-const AudienceCard = memo(({ icon, iconBg, title, services, cardGradient, borderColor, onClick }: AudienceCardProps) => (
+const AudienceCard = memo(({ 
+  icon, 
+  iconBg, 
+  title, 
+  services, 
+  cardGradient, 
+  borderColor, 
+  activeBorderColor,
+  isActive, 
+  isToggleable,
+  onClick 
+}: AudienceCardProps) => (
   <motion.button
     whileTap={{ scale: 0.97 }}
     onClick={onClick}
     className={cn(
-      "flex-1 min-w-0 p-3 rounded-2xl text-left transition-all",
-      "bg-gradient-to-br border",
+      "relative flex-1 min-w-0 p-3 rounded-2xl text-left transition-all",
+      "bg-gradient-to-br border-2",
       "hover:shadow-lg active:scale-[0.98]",
       cardGradient,
-      borderColor
+      isActive ? activeBorderColor : borderColor,
+      isActive && "ring-2 ring-offset-2 ring-offset-background"
     )}
   >
+    {/* Active Indicator */}
+    <AnimatePresence>
+      {isActive && isToggleable && (
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0, opacity: 0 }}
+          className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center"
+        >
+          <Check className="w-3 h-3 text-primary-foreground" />
+        </motion.div>
+      )}
+    </AnimatePresence>
+
     <div className={cn(
       "w-10 h-10 rounded-xl flex items-center justify-center mb-2",
       iconBg
@@ -58,6 +88,11 @@ const AudienceCard = memo(({ icon, iconBg, title, services, cardGradient, border
     </div>
     <div className="font-semibold text-sm text-foreground truncate">{title}</div>
     <div className="text-[10px] text-muted-foreground line-clamp-1">{services}</div>
+    
+    {/* Arrow for non-toggleable (owners) */}
+    {!isToggleable && (
+      <ChevronRight className="absolute top-3 right-2 w-4 h-4 text-muted-foreground" />
+    )}
   </motion.button>
 ));
 
@@ -75,35 +110,52 @@ AudienceCard.displayName = 'AudienceCard';
 export const HeroBlock = memo(function HeroBlock() {
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const { personas, togglePersona, isToggling } = useUserPersonas();
   const isRu = language === 'ru';
+
+  // Map audience IDs to persona types
+  const personaMap: Record<string, UserPersona> = {
+    tourists: 'tourist',
+    residents: 'resident',
+    owners: 'property_owner',
+  };
 
   const audienceCards = [
     {
       id: 'tourists',
+      persona: 'tourist' as UserPersona,
+      isToggleable: true,
       icon: <Plane className="w-5 h-5 text-sky-600" />,
       iconBg: 'bg-gradient-to-br from-sky-500/25 to-blue-500/35 shadow-lg shadow-sky-500/20',
       title: { en: 'Tourists', ru: 'Туристам' },
       services: { en: 'Tours • Transport • Yachts', ru: 'Туры • Транспорт • Яхты' },
       cardGradient: 'from-sky-500/10 via-blue-500/5 to-transparent',
-      borderColor: 'border-sky-500/20 hover:border-sky-500/40',
+      borderColor: 'border-sky-500/30 hover:border-sky-500/50',
+      activeBorderColor: 'border-sky-500 ring-sky-500/30',
     },
     {
       id: 'residents',
+      persona: 'resident' as UserPersona,
+      isToggleable: true,
       icon: <Users className="w-5 h-5 text-emerald-600" />,
       iconBg: 'bg-gradient-to-br from-emerald-500/25 to-green-500/35 shadow-lg shadow-emerald-500/20',
       title: { en: 'Residents', ru: 'Резидентам' },
       services: { en: 'Visas • Medical • Banking', ru: 'Визы • Медицина • Банки' },
       cardGradient: 'from-emerald-500/10 via-green-500/5 to-transparent',
-      borderColor: 'border-emerald-500/20 hover:border-emerald-500/40',
+      borderColor: 'border-emerald-500/30 hover:border-emerald-500/50',
+      activeBorderColor: 'border-emerald-500 ring-emerald-500/30',
     },
     {
       id: 'owners',
+      persona: 'property_owner' as UserPersona,
+      isToggleable: false, // Owners navigate to dedicated landing
       icon: <Building2 className="w-5 h-5 text-amber-600" />,
       iconBg: 'bg-gradient-to-br from-amber-500/25 to-orange-500/35 shadow-lg shadow-amber-500/20',
       title: { en: 'Owners', ru: 'Владельцам' },
-      services: { en: 'Property • Cleaning • Legal', ru: 'Недвижимость • Клининг' },
+      services: { en: 'List & manage property', ru: 'Управление объектами' },
       cardGradient: 'from-amber-500/10 via-orange-500/5 to-transparent',
-      borderColor: 'border-amber-500/20 hover:border-amber-500/40',
+      borderColor: 'border-amber-500/30 hover:border-amber-500/50',
+      activeBorderColor: 'border-amber-500 ring-amber-500/30',
     },
   ];
 
@@ -126,10 +178,16 @@ export const HeroBlock = memo(function HeroBlock() {
     },
   ];
 
-  const handleAudienceClick = (audienceId: string) => {
-    // Save preference for personalization
-    localStorage.setItem('uno_audience_preference', audienceId);
-    navigate(`/discover?audience=${audienceId}`);
+  const handleAudienceClick = (card: typeof audienceCards[0]) => {
+    triggerHaptic('light');
+    
+    if (card.isToggleable) {
+      // Toggle persona for tourists/residents
+      togglePersona(card.persona);
+    } else {
+      // Navigate to owner landing page
+      navigate('/owner/landing');
+    }
   };
 
   return (
@@ -179,7 +237,10 @@ export const HeroBlock = memo(function HeroBlock() {
             services={isRu ? card.services.ru : card.services.en}
             cardGradient={card.cardGradient}
             borderColor={card.borderColor}
-            onClick={() => handleAudienceClick(card.id)}
+            activeBorderColor={card.activeBorderColor}
+            isActive={personas.includes(card.persona)}
+            isToggleable={card.isToggleable}
+            onClick={() => handleAudienceClick(card)}
           />
         ))}
       </div>
