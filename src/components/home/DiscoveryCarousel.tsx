@@ -1,9 +1,10 @@
-import React, { useRef, useState, useCallback, memo } from 'react';
+import React, { useRef, useState, useCallback, memo, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Star, Compass, Waves, Shield } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useExperiences, formatDuration } from '@/hooks/useExperiences';
+import { useUserPersonas, UserPersona } from '@/hooks/useUserPersonas';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { Badge } from '@/components/ui/badge';
 import { UnifiedSectionHeader } from '@/components/shared/UnifiedSectionHeader';
@@ -15,6 +16,13 @@ import {
   CAROUSEL_CARD_WIDTHS,
   CAROUSEL_IMAGE_HEIGHTS 
 } from '@/lib/designTokens';
+
+// Category mappings for each persona
+const PERSONA_CATEGORY_SLUGS: Record<UserPersona, Set<string>> = {
+  tourist: new Set(['tours', 'tour', 'yachts', 'yacht', 'transport', 'restaurants', 'events', 'water-activities', 'diving', 'snorkeling']),
+  resident: new Set(['visa', 'medical', 'legal', 'banking', 'insurance', 'education', 'fitness', 'pharmacy']),
+  property_owner: new Set(['cleaning', 'maintenance', 'property-management', 'legal', 'insurance']),
+};
 
 // Get card size tier based on index
 const getCardSize = (index: number): 'hero' | 'medium' | 'standard' => {
@@ -38,9 +46,47 @@ export const DiscoveryCarousel = memo(function DiscoveryCarousel() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const { personas } = useUserPersonas();
   
-  const { experiences, isLoading } = useExperiences({ featured: true, limit: 8 });
+  const { experiences, isLoading } = useExperiences({ featured: true, limit: 12 });
   const isRu = language === 'ru';
+
+  // Filter and prioritize experiences based on selected personas
+  const filteredExperiences = useMemo(() => {
+    if (personas.length === 0) {
+      // No personas selected - show all experiences
+      return experiences;
+    }
+
+    // Get all relevant categories from selected personas
+    const relevantCategories = new Set<string>();
+    personas.forEach(persona => {
+      PERSONA_CATEGORY_SLUGS[persona]?.forEach(cat => relevantCategories.add(cat));
+    });
+
+    // Prioritize experiences matching persona categories
+    const matching: typeof experiences = [];
+    const other: typeof experiences = [];
+
+    experiences.forEach(exp => {
+      const expType = exp.experience_type?.toLowerCase() || '';
+      const category = exp.category?.toLowerCase() || '';
+      
+      // Check if experience matches any relevant category
+      const isRelevant = relevantCategories.has(expType) || 
+                         relevantCategories.has(category) ||
+                         (expType === 'tour' && relevantCategories.has('tours'));
+      
+      if (isRelevant) {
+        matching.push(exp);
+      } else {
+        other.push(exp);
+      }
+    });
+
+    // Return matching first, then others
+    return [...matching, ...other].slice(0, 8);
+  }, [experiences, personas]);
 
   const checkScroll = useCallback(() => {
     if (scrollRef.current) {
@@ -74,7 +120,19 @@ export const DiscoveryCarousel = memo(function DiscoveryCarousel() {
     );
   }
 
-  if (experiences.length === 0) return null;
+  if (filteredExperiences.length === 0) return null;
+
+  // Dynamic title based on personas
+  const getTitle = () => {
+    if (personas.length === 0) return isRu ? 'Лучшее на Пхукете' : 'Best of Phuket';
+    if (personas.includes('tourist') && !personas.includes('resident')) {
+      return isRu ? 'Для туристов' : 'For Tourists';
+    }
+    if (personas.includes('resident') && !personas.includes('tourist')) {
+      return isRu ? 'Для резидентов' : 'For Residents';
+    }
+    return isRu ? 'Рекомендации для вас' : 'Recommended for You';
+  };
 
   return (
     <div className="space-y-4">
@@ -82,8 +140,8 @@ export const DiscoveryCarousel = memo(function DiscoveryCarousel() {
       <UnifiedSectionHeader
         icon={Compass}
         iconColor="text-amber-500"
-        title={isRu ? 'Лучшее на Пхукете' : 'Best of Phuket'}
-        count={experiences.length}
+        title={getTitle()}
+        count={filteredExperiences.length}
         viewAllPath="/experiences"
         viewAllLabel={isRu ? 'Все' : 'All'}
       />
@@ -115,11 +173,19 @@ export const DiscoveryCarousel = memo(function DiscoveryCarousel() {
           className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 touch-pan-x"
           style={{ scrollSnapType: 'x mandatory' }}
         >
-          {experiences.map((experience, index) => {
+          {filteredExperiences.map((experience, index) => {
             const cardSize = getCardSize(index);
             const isHero = cardSize === 'hero';
             const isTour = experience.experience_type === 'tour';
             const title = isRu ? experience.title_ru : experience.title_en;
+            
+            // Check if this experience matches selected personas (for visual hint)
+            const isPersonaMatch = personas.length > 0 && personas.some(persona => {
+              const categories = PERSONA_CATEGORY_SLUGS[persona];
+              const expType = experience.experience_type?.toLowerCase() || '';
+              const category = experience.category?.toLowerCase() || '';
+              return categories?.has(expType) || categories?.has(category);
+            });
             
             // Size-specific values
             const imageWidths = { hero: 320, medium: 288, standard: 256 };
