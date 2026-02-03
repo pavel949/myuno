@@ -29,6 +29,7 @@ const PersonalizedOffersSection = lazy(() => import('@/components/notifications/
 const KnowledgeHubBanner = lazy(() => import('@/components/home/KnowledgeHubBanner').then(m => ({ default: m.KnowledgeHubBanner })));
 const HomeCategoryRibbon = lazy(() => import('@/components/home/HomeCategoryRibbon').then(m => ({ default: m.HomeCategoryRibbon })));
 const HomeProductsSection = lazy(() => import('@/components/home/HomeProductsSection').then(m => ({ default: m.HomeProductsSection })));
+const ContentPreviewRibbon = lazy(() => import('@/components/home/ContentPreviewRibbon').then(m => ({ default: m.ContentPreviewRibbon })));
 import { ListWithUsBanner } from '@/components/home/ListWithUsBanner';
 
 // Lazy load modals (opened by user action)
@@ -151,8 +152,12 @@ const Index = () => {
           {contentMode === 'services' ? (
             /* Services Mode Content */
             <>
+              {/* Content Preview Ribbon - Services categories */}
+              <Suspense fallback={<Skeleton className="h-10 w-full rounded-lg" />}>
+                <ContentPreviewRibbon />
+              </Suspense>
 
-              {/* Quick Access Chips - Owner/Partner/Wallet - prominent position */}
+              {/* Quick Access Chips - Owner/Partner/Wallet */}
               <QuickAccessChips />
 
               {/* Smart Widget & Quick Actions */}
