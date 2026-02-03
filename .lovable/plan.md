@@ -1,195 +1,255 @@
 
-# Taxonomy Management Center (Центр Управления Таксономиями)
+# Рефакторинг AddProperty.tsx: Модуляризация Wizard-компонента
 
-## ✅ СТАТУС: ЗАВЕРШЕНО
+## Текущая проблема
 
-**Все 4 фазы реализованы.** Система готова к использованию.
+Файл `AddProperty.tsx` содержит **1364 строки**, включая:
+- Дублирование UI каждого шага (строки 438-1171) — ~730 строк inline JSX
+- Дублирование логики формы, которая уже есть в `usePropertyWizard.ts`
+- Дублирование initialFormData, ownershipData и других структур
 
----
+При этом **уже существуют готовые компоненты**:
+- `BasicInfoStep.tsx`, `LocationStep.tsx`, `PhotosStep.tsx`
+- `PricingStep.tsx`, `ManagementStep.tsx`, `DescriptionStep.tsx`
+- `usePropertyWizard.ts` — хук с логикой формы
 
-## Что было сделано
+## Целевой результат
 
-### Фаза 1: Инфраструктура ✅
-- [x] Создана таблица `taxonomy_definitions` с 34 типами таксономий
-- [x] Создан универсальный хук `useTaxonomy()` с React Query кешированием
-- [x] Создан хук `useTaxonomyDefinitions()` для мета-данных
-- [x] Добавлены индексы для оптимизации запросов
+**AddProperty.tsx: ~180-220 строк** — только композиция компонентов
 
-### Фаза 2: Интерфейс администратора ✅
-- [x] `AdminTaxonomyManager.tsx` — главная страница с иерархической навигацией
-- [x] `TaxonomyValueEditor.tsx` — редактор с drag-and-drop (dnd-kit)
-- [x] `TaxonomyBulkActions.tsx` — массовые операции, экспорт/импорт JSON
-- [x] Навигация добавлена в AdminSidebar
-
-### Фаза 3: Миграция данных ✅
-- [x] **257 значений** мигрированы в БД из TypeScript файлов
-- [x] **34 типа таксономий** зарегистрированы
-- [x] Все вертикали покрыты: Property, Transport, Yachts, Restaurants, Home Services, Tours
-
-### Фаза 4: Рефакторинг фронтенда ✅
-- [x] `usePropertyFormOptions()` — теперь использует БД с fallback на legacy
-- [x] `useDynamicFilterOptions.ts` — новые хуки для всех вертикалей
-- [x] `useDynamicFormOptions.ts` — новые хуки для форм
-- [x] Обновлены filterConfigs: yacht, transport, restaurant
-- [x] Legacy файлы сохранены как fallback
-
----
-
-## Архитектура
+## Архитектура решения
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    ADMIN TAXONOMY MANAGER                   │
-│                    /admin/taxonomy                          │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                  taxonomy_definitions                       │
-│  (34 types: property_type, district, amenity, etc.)        │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                     lookup_values                           │
-│  (257+ records: all taxonomy values with translations)      │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    UNIVERSAL HOOKS                          │
-├─────────────────────────────────────────────────────────────┤
-│  useTaxonomy('property_type')  → options, CRUD, loading     │
-│  useTaxonomyHierarchy('home_service_domain') → hierarchy    │
-│  useTaxonomyDefinitions() → all types grouped by vertical   │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    DYNAMIC FILTER HOOKS                     │
-├─────────────────────────────────────────────────────────────┤
-│  usePropertyFilterOptions()                                 │
-│  useTransportFilterOptions()                                │
-│  useYachtFilterOptions()                                    │
-│  useHomeServiceFilterOptions()                              │
-│  useRestaurantFilterOptions()                               │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      UI COMPONENTS                          │
-│  PropertyFilters, TransportFilters, YachtFilters, etc.      │
-│  OwnerPropertyForm, AdminPropertyForm, etc.                 │
-└─────────────────────────────────────────────────────────────┘
+AddProperty.tsx (~200 строк)
+    ├── usePropertyWizard() — вся логика формы
+    ├── PropertyWizard — навигация шагов
+    │     ├── OwnershipTypeStep
+    │     ├── WizardBasicInfoStep (обёртка)
+    │     ├── WizardLocationStep (обёртка)
+    │     ├── WizardPhotosStep (обёртка)
+    │     ├── WizardPricingStep (обёртка)
+    │     ├── WizardManagementStep (обёртка)
+    │     └── WizardDescriptionStep (обёртка)
+    ├── AIIntakePanel (новый компонент)
+    ├── LivePropertyPreview
+    └── PropertySubmissionSuccess
 ```
 
----
+## План изменений
 
-## Новые файлы
+### 1. Создать AIIntakePanel компонент
 
-| Файл | Назначение |
-|------|------------|
-| `src/hooks/useTaxonomy.ts` | Универсальный хук для всех компонентов |
-| `src/hooks/useTaxonomyDefinitions.ts` | Хук для мета-данных о типах |
-| `src/hooks/useDynamicFilterOptions.ts` | Хуки для фильтров всех вертикалей |
-| `src/hooks/useDynamicFormOptions.ts` | Хуки для форм с опциями |
-| `src/pages/admin/AdminTaxonomyManager.tsx` | Главная страница управления |
-| `src/components/admin/taxonomy/TaxonomyValueEditor.tsx` | Редактор значений |
-| `src/components/admin/taxonomy/TaxonomyBulkActions.tsx` | Массовые операции |
+**Файл**: `src/components/owner/property-wizard/AIIntakePanel.tsx`
 
----
+Извлечь весь блок AI Intake (строки 1254-1324) в отдельный компонент:
+- Collapsible панель с текстовым полем
+- Интеграция с `useIntakeAgent`
+- Callback `onDataExtracted` для обновления формы
 
-## Типы таксономий в БД
+### 2. Обновить существующие step-компоненты
 
-| Вертикаль | Типы | Значений |
-|-----------|------|----------|
-| **Property** | property_type, district, amenity, view_type, furnishing_level, key_handover_method, deposit_type, cleaning_frequency, payment_model, included_service, extra_service, property_highlight, house_rule, listing_type, bedroom_option | 122 |
-| **Transport** | vehicle_type, fuel_type, transmission_type, vehicle_feature | 25 |
-| **Yachts** | yacht_type, yacht_experience, yacht_amenity | 23 |
-| **Restaurants** | cuisine, dietary_option, restaurant_feature | 24 |
-| **Home Services** | home_service_domain, home_service_category | 20 |
-| **Tours** | tour_type | 12 |
-| **General** | district, provider_type | 25 |
+**BasicInfoStep.tsx** — добавить поле `internal_name`, которое есть в AddProperty, но отсутствует в компоненте
 
----
+**LocationStep.tsx** — уже использует `useTaxonomy`, готов к использованию
 
-## Использование
+**Все остальные** — уже готовы
 
-### В компонентах фильтров
+### 3. Рефакторинг AddProperty.tsx
+
+Заменить inline `renderStep()` на использование готовых компонентов:
 
 ```typescript
-// OLD (hardcoded)
-import { PROPERTY_TYPES } from '@/lib/propertyTaxonomy';
+const renderStep = (stepId: string) => {
+  switch (stepId) {
+    case 'ownership':
+      return <OwnershipTypeStep data={ownershipData} onChange={updateOwnershipData} />;
+    case 'basic':
+      return (
+        <BasicInfoStep
+          formData={formData}
+          updateFormData={updateFormData}
+          selectedProject={selectedProject}
+          setSelectedProject={setSelectedProject}
+        />
+      );
+    case 'location':
+      return <LocationStep formData={formData} updateFormData={updateFormData} />;
+    case 'photos':
+      return <PhotosStep formData={formData} updateFormData={updateFormData} />;
+    case 'pricing':
+      return <PricingStep formData={formData} updateFormData={updateFormData} />;
+    case 'management':
+      return <ManagementStep formData={formData} updateFormData={updateFormData} />;
+    case 'description':
+      return (
+        <DescriptionStep
+          formData={formData}
+          updateFormData={updateFormData}
+          selectedProject={selectedProject}
+        />
+      );
+    default:
+      return null;
+  }
+};
+```
 
-// NEW (dynamic)
-import { usePropertyFilterOptions } from '@/hooks/useDynamicFilterOptions';
+### 4. Интегрировать usePropertyWizard хук
 
-function PropertyFilters() {
-  const { filterConfig, isLoading } = usePropertyFilterOptions();
-  // filterConfig.sections содержит все опции из БД
+Заменить ~200 строк state/effects в AddProperty на один вызов хука:
+
+```typescript
+const {
+  formData,
+  ownershipData,
+  selectedProject,
+  previewData,
+  isSubmitting,
+  hasDraft,
+  lastSaved,
+  // ... actions
+  updateFormData,
+  updateOwnershipData,
+  setSelectedProject,
+  validateStep,
+  handleSubmit,
+} = usePropertyWizard();
+```
+
+### 5. Финальная структура AddProperty.tsx
+
+```typescript
+export default function AddProperty() {
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
+  
+  // Вся логика формы в одном хуке
+  const wizard = usePropertyWizard();
+  
+  // AI Intake
+  const { isProcessing, analyze } = useIntakeAgent();
+  
+  // Success screen
+  if (wizard.showSuccess) {
+    return <PropertySubmissionSuccess ... />;
+  }
+  
+  // Loading clone
+  if (wizard.cloneFromId && wizard.isLoadingSource) {
+    return <LoadingSkeleton />;
+  }
+  
+  return (
+    <PageContainer>
+      <PageHeader ... />
+      
+      {/* Draft Banner */}
+      {wizard.showRestorationBanner && <DraftRestorationBanner ... />}
+      
+      {/* AI Intake Panel */}
+      {!wizard.cloneFromId && (
+        <AIIntakePanel onDataExtracted={wizard.applyPrefillData} />
+      )}
+      
+      {/* Clone Notice */}
+      {wizard.cloneFromId && <CloneNotice />}
+      
+      {/* Main Wizard */}
+      <div className="lg:grid lg:grid-cols-[1fr,320px] lg:gap-6">
+        <PropertyWizard
+          onSubmit={wizard.handleSubmit}
+          isSubmitting={wizard.isSubmitting}
+          validateStep={wizard.validateStep}
+        >
+          {renderStep}
+        </PropertyWizard>
+        
+        {/* Desktop Preview */}
+        <LivePropertyPreview data={wizard.previewData} />
+      </div>
+      
+      {/* Mobile Preview */}
+      <div className="lg:hidden">
+        <LivePropertyPreview data={wizard.previewData} />
+      </div>
+    </PageContainer>
+  );
 }
 ```
 
-### В формах
+## Файлы для изменения
+
+| Файл | Действие | Строки до | Строки после |
+|------|----------|-----------|--------------|
+| `src/pages/owner/AddProperty.tsx` | Рефакторинг | 1364 | ~200 |
+| `src/components/owner/property-wizard/AIIntakePanel.tsx` | Создать | 0 | ~80 |
+| `src/components/owner/property-wizard/steps/BasicInfoStep.tsx` | Дополнить | 188 | ~200 |
+| `src/components/owner/property-wizard/steps/index.ts` | Обновить | - | - |
+| `src/hooks/usePropertyWizard.ts` | Мелкие правки | 406 | ~420 |
+
+## Результат
+
+- **AddProperty.tsx**: 1364 → ~200 строк (сокращение на 85%)
+- **Нулевое дублирование**: UI шагов — в step-компонентах, логика — в хуке
+- **Лучшая поддержка**: изменения в шаге затрагивают только его файл
+- **Тестируемость**: каждый step можно тестировать отдельно
+
+## Технические детали
+
+### usePropertyWizard — небольшие дополнения
+
+Добавить поле `internal_name` в `PropertyFormData` и `initialFormData` (если отсутствует).
+
+### BasicInfoStep — добавить internal_name
 
 ```typescript
-import { usePropertyFormOptions } from '@/hooks/usePropertyFormOptions';
+{/* Internal Name */}
+<div className="space-y-2">
+  <Label>{isRu ? 'Внутреннее название' : 'Internal Name'}</Label>
+  <Input
+    value={formData.internal_name || ''}
+    onChange={(e) => updateFormData({ internal_name: e.target.value })}
+    placeholder={isRu ? 'Только для вас' : 'Private note'}
+  />
+</div>
+```
 
-function PropertyForm() {
-  const { propertyTypes, districts, amenities, isLoading } = usePropertyFormOptions();
-  // Все опции загружаются из БД с fallback на legacy
+### AIIntakePanel — новый компонент
+
+```typescript
+interface AIIntakePanelProps {
+  onDataExtracted: (data: Record<string, any>) => void;
+}
+
+export function AIIntakePanel({ onDataExtracted }: AIIntakePanelProps) {
+  const { language } = useLanguage();
+  const { isProcessing, analyze } = useIntakeAgent();
+  const [text, setText] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  
+  const handleParse = async () => {
+    const result = await analyze({ mode: 'single', rawText: text, forceVertical: 'properties' });
+    if (result?.items?.[0]) {
+      onDataExtracted(result.items[0].extractedFields);
+      setIsOpen(false);
+    }
+  };
+  
+  return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      {/* ... UI ... */}
+    </Collapsible>
+  );
 }
 ```
 
-### Прямое использование хука
+## Сохранение функциональности
 
-```typescript
-import { useTaxonomy } from '@/hooks/useTaxonomy';
-
-function MyComponent() {
-  const { options, isLoading, create, update, delete: remove } = useTaxonomy('yacht_type');
-  // options: TaxonomyOption[]
-  // create/update/delete: mutation functions
-}
-```
-
----
-
-## Для администратора
-
-Доступ: `/admin/taxonomy`
-
-Функционал:
-- ✅ Просмотр всех таксономий по вертикалям
-- ✅ Добавление/редактирование значений
-- ✅ Drag-and-drop сортировка
-- ✅ Активация/деактивация
-- ✅ Экспорт/импорт JSON
-- ✅ Массовые операции
-
----
-
-## Что осталось (опционально)
-
-1. **AI-перевод** — автоматический перевод EN↔RU
-2. **AI Import** — вставка текста и парсинг в структуру
-3. **Удаление legacy файлов** — после полной валидации
-4. **Preview режим** — предпросмотр в фильтрах/формах
-
----
-
-## Результаты
-
-### Для администратора
-| Действие | Раньше | Теперь |
-|----------|--------|--------|
-| Добавить район | Деплой | 30 сек |
-| Изменить иконку | Деплой | 5 сек |
-| Новая категория услуг | Невозможно | 1 мин |
-| Массовая деактивация | Правка кода | 10 сек |
-
-### Для платформы
-- ✅ Single Source of Truth
-- ✅ Гибкость без деплоев
-- ✅ Готовность к мульти-городам (city_id)
-- ✅ Автоматическая локализация
+Все существующие функции сохраняются:
+- AI Intake заполнение формы
+- Клонирование объектов
+- Draft persistence
+- Live preview (desktop/mobile)
+- Валидация шагов
+- Ownership management
+- Property submission с документами
