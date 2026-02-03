@@ -123,11 +123,11 @@ export function usePropertyBookings(propertyId?: string) {
     mutationFn: async (input: CreateBookingInput) => {
       if (!user?.id) throw new Error('Not authenticated');
 
-      // Create order with vertical = 'property'
+      // Create order with order_type = 'property' (matches DB constraint)
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
-          order_type: 'booking',
+          order_type: 'property',
           vertical: 'property',
           customer_user_id: user.id,
           start_at: `${input.check_in}T14:00:00Z`,

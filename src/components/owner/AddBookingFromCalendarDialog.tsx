@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format, differenceInDays, addDays, eachDayOfInterval } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { CalendarIcon, User, Phone, Mail, Users, DollarSign, AlertTriangle } from 'lucide-react';
+import { CalendarIcon, User, Phone, Mail, Users, Banknote, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface AddBookingFromCalendarDialogProps {
@@ -216,10 +216,12 @@ export function AddBookingFromCalendarDialog({
         </DialogHeader>
         
         <div className="space-y-4">
-          {/* Date Selection */}
+          {/* Date Selection - Required */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-xs text-muted-foreground">{isRu ? 'Заезд' : 'Check-in'}</Label>
+              <Label className="text-xs text-muted-foreground">
+                {isRu ? 'Заезд' : 'Check-in'} <span className="text-destructive">*</span>
+              </Label>
               <Popover open={showCheckInPicker} onOpenChange={setShowCheckInPicker}>
                 <PopoverTrigger asChild>
                   <Button
@@ -264,7 +266,9 @@ export function AddBookingFromCalendarDialog({
               </Popover>
             </div>
             <div>
-              <Label className="text-xs text-muted-foreground">{isRu ? 'Выезд' : 'Check-out'}</Label>
+              <Label className="text-xs text-muted-foreground">
+                {isRu ? 'Выезд' : 'Check-out'} <span className="text-destructive">*</span>
+              </Label>
               <Popover open={showCheckOutPicker} onOpenChange={setShowCheckOutPicker}>
                 <PopoverTrigger asChild>
                   <Button
@@ -392,17 +396,21 @@ export function AddBookingFromCalendarDialog({
             </div>
             <div>
               <Label htmlFor="totalAmount" className="flex items-center gap-1.5">
-                <DollarSign className="h-3.5 w-3.5" />
-                {isRu ? 'Сумма' : 'Amount'}
+                <Banknote className="h-3.5 w-3.5" />
+                {isRu ? 'Сумма (฿)' : 'Amount (฿)'}
               </Label>
-              <Input
-                id="totalAmount"
-                type="number"
-                min="0"
-                value={totalAmount}
-                onChange={(e) => setTotalAmount(e.target.value)}
-                placeholder="0"
-              />
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">฿</span>
+                <Input
+                  id="totalAmount"
+                  type="number"
+                  min="0"
+                  value={totalAmount}
+                  onChange={(e) => setTotalAmount(e.target.value)}
+                  placeholder="0"
+                  className="pl-8"
+                />
+              </div>
             </div>
           </div>
           
