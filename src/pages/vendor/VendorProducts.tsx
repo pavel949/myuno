@@ -7,9 +7,7 @@ import { useVendorProducts, VendorProduct } from '@/hooks/useVendorProducts';
 import { useVendorProfile } from '@/hooks/useVendor';
 import { useMarketplaceCategories } from '@/hooks/useMarketplaceCategories';
 import { useFormDraft } from '@/hooks/useFormDraft';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
-import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -345,75 +343,60 @@ const VendorProducts = () => {
 
   if (authLoading || profileLoading) {
     return (
-      <AppLayout>
-        <PageContainer>
-          <div className="space-y-4">
-            <Skeleton className="h-8 w-48" />
-            {[1, 2, 3].map(i => (
-              <Skeleton key={i} className="h-24" />
-            ))}
-          </div>
-        </PageContainer>
-      </AppLayout>
+      <PageContainer>
+        <div className="space-y-4">
+          <Skeleton className="h-8 w-48" />
+          {[1, 2, 3].map(i => (
+            <Skeleton key={i} className="h-24" />
+          ))}
+        </div>
+      </PageContainer>
     );
   }
 
   if (!profile) {
     return (
-      <AppLayout>
-        <PageContainer>
-          <Card>
-            <CardContent className="p-8 text-center">
-              <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-              <h3 className="font-medium mb-1">
-                {isRussian ? 'Профиль не найден' : 'Profile not found'}
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                {isRussian ? 'Пожалуйста, настройте ваш профиль вендора' : 'Please set up your vendor profile first'}
-              </p>
-            </CardContent>
-          </Card>
-        </PageContainer>
-      </AppLayout>
+      <PageContainer>
+        <Card>
+          <CardContent className="p-8 text-center">
+            <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+            <h3 className="font-medium mb-1">
+              {isRussian ? 'Профиль не найден' : 'Profile not found'}
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {isRussian ? 'Пожалуйста, настройте ваш профиль вендора' : 'Please set up your vendor profile first'}
+            </p>
+          </CardContent>
+        </Card>
+      </PageContainer>
     );
   }
 
   if (!marketplaceVendorId) {
     return (
-      <AppLayout>
-        <PageContainer>
-          <PageHeader 
-            title={isRussian ? 'Мои товары' : 'My Products'}
-            showBack
-          />
-          <Card>
-            <CardContent className="p-8 text-center">
-              <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-              <h3 className="font-medium mb-1">
-                {isRussian ? 'Профиль продавца не настроен' : 'Marketplace profile not set up'}
-              </h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                {isRussian 
-                  ? 'Для продажи товаров необходимо подключить профиль маркетплейса.' 
-                  : 'To sell products, you need to set up your marketplace vendor profile.'}
-              </p>
-              <Button onClick={() => navigate('/vendor/onboarding')}>
-                {isRussian ? 'Настроить профиль' : 'Set Up Profile'}
-              </Button>
-            </CardContent>
-          </Card>
-        </PageContainer>
-      </AppLayout>
+      <PageContainer>
+        <Card>
+          <CardContent className="p-8 text-center">
+            <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+            <h3 className="font-medium mb-1">
+              {isRussian ? 'Профиль продавца не настроен' : 'Marketplace profile not set up'}
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              {isRussian 
+                ? 'Для продажи товаров необходимо подключить профиль маркетплейса.' 
+                : 'To sell products, you need to set up your marketplace vendor profile.'}
+            </p>
+            <Button onClick={() => navigate('/vendor/onboarding')}>
+              {isRussian ? 'Настроить профиль' : 'Set Up Profile'}
+            </Button>
+          </CardContent>
+        </Card>
+      </PageContainer>
     );
   }
 
   return (
-    <AppLayout>
-      <PageContainer>
-        <PageHeader 
-          title={isRussian ? 'Мои товары' : 'My Products'}
-          showBack
-        />
+    <PageContainer>
 
         {showDraftBanner && (
           <div className="mb-4">
@@ -879,7 +862,6 @@ const VendorProducts = () => {
           </DialogContent>
         </Dialog>
       </PageContainer>
-    </AppLayout>
   );
 };
 

@@ -3,9 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVendorProfile, useVendorBookings } from '@/hooks/useVendor';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
-import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -108,28 +106,21 @@ const VendorBookings = () => {
 
   if (authLoading || profileLoading) {
     return (
-      <AppLayout>
-        <PageContainer>
-          <div className="space-y-4">
-            <Skeleton className="h-8 w-48" />
-            {[1, 2, 3].map(i => (
-              <Skeleton key={i} className="h-32" />
-            ))}
-          </div>
-        </PageContainer>
-      </AppLayout>
+      <PageContainer>
+        <div className="space-y-4">
+          <Skeleton className="h-8 w-48" />
+          {[1, 2, 3].map(i => (
+            <Skeleton key={i} className="h-32" />
+          ))}
+        </div>
+      </PageContainer>
     );
   }
 
   if (!profile) return null;
 
   return (
-    <AppLayout>
-      <PageContainer>
-        <PageHeader 
-          title={isRussian ? 'Бронирования' : 'Bookings'}
-          showBack
-        />
+    <PageContainer>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
           <TabsList className="grid grid-cols-4 w-full">
@@ -296,7 +287,6 @@ const VendorBookings = () => {
           </DialogContent>
         </Dialog>
       </PageContainer>
-    </AppLayout>
   );
 };
 
