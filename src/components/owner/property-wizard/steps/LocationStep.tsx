@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { MapPin } from 'lucide-react';
 import { ProjectLocationPicker } from '@/components/property/ProjectLocationPicker';
 import { PropertyFormData } from '@/hooks/usePropertyWizard';
-import { PHUKET_DISTRICTS } from '@/lib/propertyTaxonomy';
+import { PHUKET_DISTRICTS } from '@/lib/taxonomies';
 
 interface LocationStepProps {
   formData: PropertyFormData;

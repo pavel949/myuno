@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { FilterOption, FilterConfig, FilterSection } from '@/components/filters/UniversalFilter';
+import { FilterOption, FilterConfig } from '@/components/filters/UniversalFilter';
+import { TAXONOMY_TYPES } from '@/lib/taxonomies';
 
 interface LookupValue {
   id: string;

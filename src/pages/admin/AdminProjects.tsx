@@ -53,7 +53,7 @@ import { TranslatableInput } from '@/components/forms/TranslatableInput';
 import { TranslatableTextarea } from '@/components/forms/TranslatableTextarea';
 import { AirbnbStyleImageUpload } from '@/components/upload/AirbnbStyleImageUpload';
 import { AIIntakeDialog } from '@/components/admin/intake/AIIntakeDialog';
-import { PHUKET_DISTRICTS, ALL_AMENITIES } from '@/lib/propertyTaxonomy';
+import { PHUKET_DISTRICTS, ALL_AMENITIES } from '@/lib/taxonomies';
 
 // Initial empty project form
 const getEmptyProject = (): Partial<CreatePropertyProjectData> => ({

@@ -138,7 +138,7 @@ const demoProperty = {
 };
 
 // Import centralized taxonomy for amenities
-import { getAmenityIcon, getAmenityLabel, normalizeAmenityId } from '@/lib/propertyTaxonomy';
+import { getAmenityIcon, getAmenityLabel, normalizeAmenityId } from '@/lib/taxonomies';
 
 // View type labels
 const viewTypeLabels: Record<string, { en: string; ru: string }> = {

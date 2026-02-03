@@ -71,7 +71,7 @@ import {
   normalizeAmenityId,
   normalizeAmenities,
   normalizeDistrictId,
-} from '@/lib/propertyTaxonomy';
+} from '@/lib/taxonomies';
 
 // Use centralized taxonomy
 const propertyTypes = PROPERTY_TYPES.map(t => ({

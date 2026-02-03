@@ -16,6 +16,9 @@ import {
   ALL_AMENITIES,
   VIEW_TYPES,
   FURNISHING_LEVELS,
+  INCLUDED_SERVICES,
+  EXTRA_SERVICES,
+  PROPERTY_HIGHLIGHTS,
 } from '../propertyTaxonomy';
 import { 
   VEHICLE_CATEGORIES, 
@@ -42,6 +45,9 @@ const STATIC_FALLBACKS: Record<string, readonly StaticTaxonomyItem[]> = {
   [TAXONOMY_TYPES.AMENITY]: ALL_AMENITIES as unknown as StaticTaxonomyItem[],
   [TAXONOMY_TYPES.VIEW_TYPE]: VIEW_TYPES as unknown as StaticTaxonomyItem[],
   [TAXONOMY_TYPES.FURNISHING]: FURNISHING_LEVELS as unknown as StaticTaxonomyItem[],
+  [TAXONOMY_TYPES.INCLUDED_SERVICE]: INCLUDED_SERVICES as unknown as StaticTaxonomyItem[],
+  [TAXONOMY_TYPES.EXTRA_SERVICE]: EXTRA_SERVICES as unknown as StaticTaxonomyItem[],
+  [TAXONOMY_TYPES.PROPERTY_HIGHLIGHT]: PROPERTY_HIGHLIGHTS as unknown as StaticTaxonomyItem[],
   [TAXONOMY_TYPES.VEHICLE_CATEGORY]: VEHICLE_CATEGORIES as unknown as StaticTaxonomyItem[],
   [TAXONOMY_TYPES.TRANSMISSION]: TRANSMISSION_TYPES as unknown as StaticTaxonomyItem[],
   [TAXONOMY_TYPES.FUEL_TYPE]: FUEL_TYPES as unknown as StaticTaxonomyItem[],
@@ -110,9 +116,10 @@ export function useTaxonomyWithFallback(
  */
 export function getTaxonomyLabel(
   lookupType: string,
-  valueKey: string,
+  valueKey: string | null | undefined,
   language: 'en' | 'ru' = 'en'
 ): string {
+  if (!valueKey) return '';
   const fallback = STATIC_FALLBACKS[lookupType];
   if (!fallback) return valueKey;
   
@@ -125,7 +132,8 @@ export function getTaxonomyLabel(
 /**
  * Get icon for a specific value from static fallbacks
  */
-export function getTaxonomyIcon(lookupType: string, valueKey: string): string | undefined {
+export function getTaxonomyIcon(lookupType: string, valueKey: string | null | undefined): string | undefined {
+  if (!valueKey) return undefined;
   const fallback = STATIC_FALLBACKS[lookupType];
   if (!fallback) return undefined;
   
@@ -175,4 +183,20 @@ export function getChipOptions(
     label: language === 'ru' ? item.labelRu : item.labelEn,
     icon: item.icon,
   }));
+}
+
+/**
+ * Get all items for a taxonomy type (static version)
+ */
+export function getTaxonomyItems(lookupType: string): TaxonomyOption[] {
+  const fallback = STATIC_FALLBACKS[lookupType];
+  if (!fallback) return [];
+  return fallback.map(staticToOption);
+}
+
+/**
+ * Check if a taxonomy type has static fallback defined
+ */
+export function hasTaxonomyFallback(lookupType: string): boolean {
+  return !!STATIC_FALLBACKS[lookupType];
 }

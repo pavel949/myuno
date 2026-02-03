@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { 
-  HOME_SERVICE_CATEGORY_IDS, 
-  normalizeCategory, 
-  ServiceDomain,
-  ProviderType 
-} from '@/lib/config/homeServicesTaxonomy';
+  normalizeCategory,
+} from '@/lib/taxonomies';
+import type { ServiceDomain, ProviderType } from '@/lib/config/homeServicesTaxonomy';
+import { HOME_SERVICE_CATEGORY_IDS } from '@/lib/config/homeServicesTaxonomy';
 
 export interface HomeServiceProvider {
   id: string;

@@ -27,7 +27,7 @@ import { cn } from '@/lib/utils';
 
 type RequestType = 'vacation_rental' | 'property_consultation' | 'property_tour' | 'investment_advice';
 
-import { PROPERTY_TYPES as TAXONOMY_PROPERTY_TYPES, PHUKET_DISTRICTS } from '@/lib/propertyTaxonomy';
+import { PROPERTY_TYPES as TAXONOMY_PROPERTY_TYPES, PHUKET_DISTRICTS } from '@/lib/taxonomies';
 
 // Map taxonomy to form options
 const PROPERTY_TYPES = TAXONOMY_PROPERTY_TYPES.map(t => ({

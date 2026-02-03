@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { CACHE_PROFILES, queryKeys } from '@/lib/queryConfig';
-import { normalizeVehicleType } from '@/lib/config/transportTaxonomy';
+import { normalizeVehicleType } from '@/lib/taxonomies';
 
 export interface Vehicle {
   id: string;

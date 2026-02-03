@@ -51,7 +51,7 @@ import {
   PROPERTY_TYPES,
   normalizeDistrictId,
   normalizePropertyType,
-} from '@/lib/propertyTaxonomy';
+} from '@/lib/taxonomies';
 
 // Use centralized taxonomy data
 const districts = PHUKET_DISTRICTS.map(d => d.id);
