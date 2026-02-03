@@ -146,6 +146,28 @@ export const CAROUSEL_CARD_WIDTHS = {
   compact: 'w-56',        // 224px - tight layouts
 } as const;
 
+// ============ Premium Icon Containers ============
+export const ICON_CONTAINER_STYLES = {
+  soft: {
+    sky: 'bg-gradient-to-br from-sky-500/20 to-blue-500/30 shadow-lg shadow-sky-500/20',
+    emerald: 'bg-gradient-to-br from-emerald-500/20 to-green-500/30 shadow-lg shadow-emerald-500/20',
+    amber: 'bg-gradient-to-br from-amber-500/20 to-orange-500/30 shadow-lg shadow-amber-500/20',
+    rose: 'bg-gradient-to-br from-rose-500/20 to-pink-500/30 shadow-lg shadow-rose-500/20',
+    purple: 'bg-gradient-to-br from-purple-500/20 to-indigo-500/30 shadow-lg shadow-purple-500/20',
+  },
+  solid: {
+    sky: 'bg-gradient-to-br from-sky-400 to-blue-600 text-white shadow-lg shadow-sky-500/30',
+    emerald: 'bg-gradient-to-br from-emerald-400 to-green-600 text-white shadow-lg shadow-emerald-500/30',
+    amber: 'bg-gradient-to-br from-amber-400 to-orange-600 text-white shadow-lg shadow-amber-500/30',
+  },
+} as const;
+
+// ============ Glass Effect Chips ============
+export const GLASS_CHIP_STYLES = {
+  base: 'bg-white/80 dark:bg-white/10 backdrop-blur-md border border-white/50 dark:border-white/20 shadow-sm hover:shadow-md transition-all duration-200',
+  active: 'bg-primary/15 border-primary/30 text-primary font-medium shadow-primary/10',
+} as const;
+
 // Type exports for TypeScript support
 export type DesignTokens = typeof DESIGN_TOKENS;
 export type CardStyles = typeof CARD_STYLES;

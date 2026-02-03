@@ -59,24 +59,38 @@ export const ContentPreviewRibbon = memo(function ContentPreviewRibbon() {
           whileTap={{ scale: 0.95 }}
           onClick={() => handleClick('/discover')}
           className={cn(
-            "flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium shrink-0",
-            "bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/20"
+            "flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium shrink-0",
+            "bg-gradient-to-r from-amber-500/15 to-orange-500/15",
+            "border border-amber-500/30 hover:border-amber-500/50",
+            "text-amber-700 dark:text-amber-300",
+            "shadow-sm hover:shadow-md transition-all duration-200"
           )}
         >
-          <Briefcase className="w-4 h-4" />
+          <div className="w-5 h-5 rounded-md bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-sm">
+            <Briefcase className="w-3 h-3 text-white" />
+          </div>
           <span>{isRu ? 'Каталог' : 'Catalog'}</span>
         </motion.button>
 
-        <div className="w-px h-6 bg-border shrink-0" />
+        <div className="w-px h-6 bg-border/50 shrink-0" />
 
         {QUICK_ACTIONS.map((action) => (
           <motion.button
             key={action.id}
             whileTap={{ scale: 0.95 }}
             onClick={() => handleClick(action.path)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium shrink-0 bg-muted/60 hover:bg-muted text-foreground"
+            className={cn(
+              "flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium shrink-0",
+              "bg-white/80 dark:bg-white/10",
+              "backdrop-blur-md",
+              "border border-white/50 dark:border-white/20",
+              "shadow-sm hover:shadow-md",
+              "transition-all duration-200"
+            )}
           >
-            <span className="text-base">{action.emoji}</span>
+            <div className="w-5 h-5 rounded-md bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center">
+              <span className="text-xs">{action.emoji}</span>
+            </div>
             <span>{isRu ? action.labelRu : action.label}</span>
           </motion.button>
         ))}
@@ -89,9 +103,18 @@ export const ContentPreviewRibbon = memo(function ContentPreviewRibbon() {
             key={category.id}
             whileTap={{ scale: 0.95 }}
             onClick={() => handleClick(category.path)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium shrink-0 bg-muted/60 hover:bg-muted text-foreground"
+            className={cn(
+              "flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium shrink-0",
+              "bg-white/80 dark:bg-white/10",
+              "backdrop-blur-md",
+              "border border-white/50 dark:border-white/20",
+              "shadow-sm hover:shadow-md",
+              "transition-all duration-200"
+            )}
           >
-            <span className="text-base">{category.emoji}</span>
+            <div className="w-5 h-5 rounded-md bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center">
+              <span className="text-xs">{category.emoji}</span>
+            </div>
             <span className="whitespace-nowrap">{isRu ? category.labelRu : category.label}</span>
           </motion.button>
         ))}
@@ -100,7 +123,13 @@ export const ContentPreviewRibbon = memo(function ContentPreviewRibbon() {
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={() => handleClick('/discover')}
-            className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-medium shrink-0 bg-secondary hover:bg-secondary/80 text-secondary-foreground"
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium shrink-0",
+              "bg-gradient-to-r from-primary/10 to-amber-500/10",
+              "border border-primary/20 hover:border-primary/40",
+              "text-primary",
+              "shadow-sm hover:shadow-md transition-all duration-200"
+            )}
           >
             <span>+{remainingCount}</span>
             <ChevronRight className="w-3 h-3" />

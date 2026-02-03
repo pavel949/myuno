@@ -13,8 +13,14 @@ interface TrustBadgeProps {
 }
 
 const TrustBadge = memo(({ icon, label }: TrustBadgeProps) => (
-  <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-card text-foreground border border-border shadow-sm text-[10px] font-medium">
-    {icon}
+  <div className={cn(
+    "flex items-center gap-1.5 px-2.5 py-1 rounded-full",
+    "bg-gradient-to-r from-primary/10 to-amber-500/10",
+    "border border-primary/20",
+    "text-[11px] font-medium text-foreground/90",
+    "shadow-sm"
+  )}>
+    <span className="text-primary">{icon}</span>
     <span>{label}</span>
   </div>
 ));
@@ -24,24 +30,32 @@ TrustBadge.displayName = 'TrustBadge';
 interface AudienceCardProps {
   id: string;
   icon: React.ReactNode;
+  iconBg: string;
   title: string;
   services: string;
-  gradient: string;
+  cardGradient: string;
+  borderColor: string;
   onClick: () => void;
 }
 
-const AudienceCard = memo(({ icon, title, services, gradient, onClick }: AudienceCardProps) => (
+const AudienceCard = memo(({ icon, iconBg, title, services, cardGradient, borderColor, onClick }: AudienceCardProps) => (
   <motion.button
     whileTap={{ scale: 0.97 }}
     onClick={onClick}
     className={cn(
       "flex-1 min-w-0 p-3 rounded-2xl text-left transition-all",
-      "bg-gradient-to-br border border-border/50",
-      "hover:shadow-md hover:border-border active:scale-[0.98]",
-      gradient
+      "bg-gradient-to-br border",
+      "hover:shadow-lg active:scale-[0.98]",
+      cardGradient,
+      borderColor
     )}
   >
-    <div className="text-xl mb-1">{icon}</div>
+    <div className={cn(
+      "w-10 h-10 rounded-xl flex items-center justify-center mb-2",
+      iconBg
+    )}>
+      {icon}
+    </div>
     <div className="font-semibold text-sm text-foreground truncate">{title}</div>
     <div className="text-[10px] text-muted-foreground line-clamp-1">{services}</div>
   </motion.button>
@@ -67,23 +81,29 @@ export const HeroBlock = memo(function HeroBlock() {
     {
       id: 'tourists',
       icon: <Plane className="w-5 h-5 text-sky-600" />,
+      iconBg: 'bg-gradient-to-br from-sky-500/25 to-blue-500/35 shadow-lg shadow-sky-500/20',
       title: { en: 'Tourists', ru: 'Туристам' },
       services: { en: 'Tours • Transport • Yachts', ru: 'Туры • Транспорт • Яхты' },
-      gradient: 'from-sky-500/15 to-blue-500/10',
+      cardGradient: 'from-sky-500/10 via-blue-500/5 to-transparent',
+      borderColor: 'border-sky-500/20 hover:border-sky-500/40',
     },
     {
       id: 'residents',
       icon: <Users className="w-5 h-5 text-emerald-600" />,
+      iconBg: 'bg-gradient-to-br from-emerald-500/25 to-green-500/35 shadow-lg shadow-emerald-500/20',
       title: { en: 'Residents', ru: 'Резидентам' },
       services: { en: 'Visas • Medical • Banking', ru: 'Визы • Медицина • Банки' },
-      gradient: 'from-emerald-500/15 to-green-500/10',
+      cardGradient: 'from-emerald-500/10 via-green-500/5 to-transparent',
+      borderColor: 'border-emerald-500/20 hover:border-emerald-500/40',
     },
     {
       id: 'owners',
       icon: <Building2 className="w-5 h-5 text-amber-600" />,
+      iconBg: 'bg-gradient-to-br from-amber-500/25 to-orange-500/35 shadow-lg shadow-amber-500/20',
       title: { en: 'Owners', ru: 'Владельцам' },
       services: { en: 'Property • Cleaning • Legal', ru: 'Недвижимость • Клининг' },
-      gradient: 'from-amber-500/15 to-orange-500/10',
+      cardGradient: 'from-amber-500/10 via-orange-500/5 to-transparent',
+      borderColor: 'border-amber-500/20 hover:border-amber-500/40',
     },
   ];
 
@@ -154,9 +174,11 @@ export const HeroBlock = memo(function HeroBlock() {
             key={card.id}
             id={card.id}
             icon={card.icon}
+            iconBg={card.iconBg}
             title={isRu ? card.title.ru : card.title.en}
             services={isRu ? card.services.ru : card.services.en}
-            gradient={card.gradient}
+            cardGradient={card.cardGradient}
+            borderColor={card.borderColor}
             onClick={() => handleAudienceClick(card.id)}
           />
         ))}
