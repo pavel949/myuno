@@ -158,7 +158,7 @@ serve(async (req) => {
             .from('ledger_accounts')
             .select('id')
             .eq('account_type', 'platform_revenue')
-            .single();
+            .maybeSingle();
 
           if (platformAccount) {
             platformAccountId = platformAccount.id;
@@ -167,7 +167,7 @@ serve(async (req) => {
               .from('ledger_accounts')
               .insert({ account_type: 'platform_revenue', currency: order.currency || 'THB' })
               .select('id')
-              .single();
+              .maybeSingle();
             platformAccountId = newPlatformAccount?.id || null;
           }
 
@@ -178,7 +178,7 @@ serve(async (req) => {
             .select('id')
             .eq('owner_user_id', order.customer_user_id)
             .eq('account_type', 'customer')
-            .single();
+            .maybeSingle();
 
           if (existingCustomerAccount) {
             customerAccountId = existingCustomerAccount.id;
@@ -191,7 +191,7 @@ serve(async (req) => {
                 currency: order.currency || 'THB',
               })
               .select('id')
-              .single();
+              .maybeSingle();
             customerAccountId = newCustomerAccount?.id || null;
           }
 
@@ -203,7 +203,7 @@ serve(async (req) => {
               .select('id')
               .eq('owner_org_id', order.provider_org_id)
               .eq('account_type', 'vendor_balance')
-              .single();
+              .maybeSingle();
 
             if (existingVendorAccount) {
               vendorAccountId = existingVendorAccount.id;
@@ -216,13 +216,14 @@ serve(async (req) => {
                   currency: order.currency || 'THB',
                 })
                 .select('id')
-                .single();
+                .maybeSingle();
               vendorAccountId = newVendorAccount?.id || null;
             }
           }
 
-          // Calculate platform fee (e.g., 10%)
-          const platformFeeRate = 0.10;
+          // Calculate platform fee from system settings (get_platform_fee_percent returns decimal)
+          const { data: feeData } = await supabaseAdmin.rpc('get_platform_fee_percent');
+          const platformFeeRate = feeData ?? 0.10; // Fallback to 10% if function fails
           const totalAmount = order.total_amount || 0;
           const platformFee = Math.round(totalAmount * platformFeeRate * 100) / 100;
           const vendorAmount = totalAmount - platformFee;

@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback, memo, useMemo } from 'react';
+import React, { useRef, useState, useCallback, memo, forwardRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Star, Compass, Waves, Shield } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -39,7 +39,7 @@ const getCardSize = (index: number): 'hero' | 'medium' | 'standard' => {
  * - Unified design tokens
  * - Smooth scroll with navigation buttons
  */
-export const DiscoveryCarousel = memo(function DiscoveryCarousel() {
+export const DiscoveryCarousel = memo(forwardRef<HTMLDivElement, object>(function DiscoveryCarousel(_, ref) {
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const navigate = useNavigate();
@@ -135,7 +135,7 @@ export const DiscoveryCarousel = memo(function DiscoveryCarousel() {
   };
 
   return (
-    <div className="space-y-4">
+    <div ref={ref} className="space-y-4">
       {/* Section Header */}
       <UnifiedSectionHeader
         icon={Compass}
@@ -312,4 +312,4 @@ export const DiscoveryCarousel = memo(function DiscoveryCarousel() {
       </div>
     </div>
   );
-});
+}));

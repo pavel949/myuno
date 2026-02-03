@@ -349,7 +349,7 @@ export function useOrders() {
         .from('orders')
         .select('status')
         .eq('id', orderId)
-        .single();
+        .maybeSingle();
 
       // Update order status
       const { error } = await supabase
