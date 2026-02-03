@@ -26,8 +26,12 @@
 /* UNO SuperApp Premium Dark Design System */
 
 /* Prevent browser back/forward gestures on horizontal overscroll */
+/* Also prevent horizontal scroll caused by elements overflowing viewport */
 html, body {
   overscroll-behavior-x: none;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
 }
 
 @layer base {

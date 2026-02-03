@@ -6,7 +6,8 @@
 
 import { useMemo } from 'react';
 import { useTaxonomy, TaxonomyOption } from '@/hooks/useTaxonomy';
-import { TAXONOMY_TYPES } from './index';
+// Import from dedicated file to prevent circular dependency
+import { TAXONOMY_TYPES } from './taxonomyTypes';
 
 // Import static fallbacks
 import { 
