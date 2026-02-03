@@ -417,34 +417,22 @@ serve(async (req) => {
         if (existingTransaction && existingTransaction.length > 0) {
           logStep("IDEMPOTENCY: Wallet top-up already processed, skipping", { sessionId: session.id, userId });
         } else {
-          const { data: walletData, error: walletError } = await supabaseAdmin
-            .rpc('get_or_create_wallet', { p_user_id: userId });
+          // P0 FIX: Use atomic RPC to eliminate race condition
+          const { data: topupResult, error: topupError } = await supabaseAdmin
+            .rpc('topup_wallet_atomic', {
+              p_user_id: userId,
+              p_amount: amount,
+              p_reference_type: 'stripe_checkout',
+              p_reference_id: session.id
+            });
 
-          if (walletError) {
-            logStep("ERROR", `Failed to get wallet: ${walletError.message}`);
-            throw walletError;
+          if (topupError || !topupResult?.success) {
+            logStep("ERROR", `Failed to top up wallet atomically: ${topupError?.message || topupResult?.error}`);
+            throw new Error('Wallet top-up failed');
           }
 
-          const newBalance = Number(walletData.balance) + amount;
-          await supabaseAdmin
-            .from('wallets')
-            .update({ balance: newBalance })
-            .eq('id', walletData.id);
-
-          await supabaseAdmin
-            .from('wallet_transactions')
-            .insert({
-              wallet_id: walletData.id,
-              user_id: userId,
-              type: 'topup',
-              amount: amount,
-              currency: currency.toUpperCase(),
-              description: `Wallet top up via Stripe`,
-              description_ru: `Пополнение кошелька через Stripe`,
-              reference_type: 'stripe_checkout',
-              reference_id: session.id,
-              status: 'completed',
-            });
+          const newBalance = topupResult.new_balance;
+          logStep("Wallet topped up atomically", { userId, amount, newBalance });
 
           // ===== IDEMPOTENCY CHECK: Notification =====
           const { data: existingWalletNotification } = await supabaseAdmin

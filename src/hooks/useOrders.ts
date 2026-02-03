@@ -6,7 +6,10 @@ import { useToast } from '@/hooks/use-toast';
 import { useUserContext } from '@/hooks/useUserContext';
 import { openWhatsApp } from '@/hooks/useChat';
 import { format } from 'date-fns';
+import { createErrorHandler } from '@/lib/errorHandler';
 import type { Database } from '@/integrations/supabase/types';
+
+const errorLog = createErrorHandler('useOrders');
 
 // Type definitions
 export type OrderType = 
@@ -195,111 +198,73 @@ export function useOrders() {
         ? (input.end_at instanceof Date ? input.end_at.toISOString() : input.end_at)
         : null;
 
-      // Create order - use any to bypass type mismatch with auto-generated types
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          order_type: input.order_type,
-          customer_user_id: user.id,
-          provider_org_id: input.provider_org_id || null,
-          status: 'pending',
-          start_at: startAt,
-          end_at: endAt,
-          total_amount: input.total_amount,
-          currency: input.currency || 'THB',
-          notes: input.notes || null,
-          metadata: input.metadata || null,
-        } as any)
-        .select()
-        .single();
+      // P0 FIX: Use atomic RPC to eliminate zombie records
+      // Prepare items for RPC - cast to Json compatible type
+      const itemsJson = JSON.parse(JSON.stringify(input.items.map(item => ({
+        product_id: item.product_id || null,
+        resource_id: item.resource_id || null,
+        provider_org_id: item.provider_org_id || input.provider_org_id || null,
+        item_name: item.item_name,
+        item_type: item.item_type,
+        qty: item.qty || 1,
+        unit_price: item.unit_price,
+        amount: item.amount,
+        start_at: item.start_at ? (item.start_at instanceof Date ? item.start_at.toISOString() : item.start_at) : null,
+        end_at: item.end_at ? (item.end_at instanceof Date ? item.end_at.toISOString() : item.end_at) : null,
+        metadata: item.metadata || {},
+      }))));
+
+      // Prepare participants for RPC
+      const participantsJson = input.participants 
+        ? JSON.parse(JSON.stringify(input.participants.map((p, idx) => ({
+            role: p.role || (idx === 0 ? 'primary' : 'guest'),
+            name: p.name,
+            phone: p.phone || null,
+            email: p.email || null,
+          }))))
+        : null;
+
+      // Prepare addresses for RPC
+      const addressesJson = input.addresses 
+        ? JSON.parse(JSON.stringify(input.addresses.map(addr => ({
+            address_type: addr.address_type,
+            address_text: addr.address_text,
+            lat: addr.lat || null,
+            lng: addr.lng || null,
+            notes: addr.notes || null,
+          }))))
+        : null;
+
+      // Call atomic RPC
+      const { data: orderResult, error: orderError } = await supabase
+        .rpc('create_order_atomic', {
+          p_order_type: input.order_type,
+          p_customer_user_id: user.id,
+          p_provider_org_id: input.provider_org_id || null,
+          p_start_at: startAt,
+          p_end_at: endAt,
+          p_total_amount: input.total_amount,
+          p_currency: input.currency || 'THB',
+          p_notes: input.notes || null,
+          p_metadata: input.metadata ? JSON.parse(JSON.stringify(input.metadata)) : null,
+          p_items: itemsJson,
+          p_participants: participantsJson,
+          p_addresses: addressesJson,
+          p_payment_method: input.payment?.method || null,
+          p_payment_amount: input.payment?.amount || null,
+        });
 
       if (orderError) throw orderError;
-
-      const orderId = order.id;
-      const orderNumber = order.order_number;
-
-      // Insert order items
-      if (input.items && input.items.length > 0) {
-        const itemsToInsert = input.items.map(item => ({
-          order_id: orderId,
-          product_id: item.product_id || null,
-          resource_id: item.resource_id || null,
-          provider_org_id: item.provider_org_id || input.provider_org_id || null,
-          item_name: item.item_name,
-          item_type: item.item_type,
-          qty: item.qty || 1,
-          unit_price: item.unit_price,
-          amount: item.amount,
-          start_at: item.start_at ? (item.start_at instanceof Date ? item.start_at.toISOString() : item.start_at) : null,
-          end_at: item.end_at ? (item.end_at instanceof Date ? item.end_at.toISOString() : item.end_at) : null,
-          metadata: (item.metadata || {}) as Record<string, unknown>,
-        }));
-
-        const { error: itemsError } = await supabase
-          .from('order_items')
-          .insert(itemsToInsert as any);
-
-        if (itemsError) throw itemsError;
+      
+      // Type assertion for RPC result
+      const result = orderResult as { success: boolean; order_id?: string; order_number?: string; error?: string };
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to create order');
       }
 
-      // Insert participants
-      if (input.participants && input.participants.length > 0) {
-        const participantsToInsert = input.participants.map((p, idx) => ({
-          order_id: orderId,
-          role: p.role || (idx === 0 ? 'primary' : 'guest'),
-          name: p.name,
-          phone: p.phone || null,
-          email: p.email || null,
-        }));
-
-        const { error: participantsError } = await supabase
-          .from('order_participants')
-          .insert(participantsToInsert);
-
-        if (participantsError) throw participantsError;
-      }
-
-      // Insert addresses
-      if (input.addresses && input.addresses.length > 0) {
-        const addressesToInsert = input.addresses.map(addr => ({
-          order_id: orderId,
-          address_type: addr.address_type,
-          address_text: addr.address_text,
-          lat: addr.lat || null,
-          lng: addr.lng || null,
-          notes: addr.notes || null,
-        }));
-
-        const { error: addressesError } = await supabase
-          .from('order_addresses')
-          .insert(addressesToInsert);
-
-        if (addressesError) throw addressesError;
-      }
-
-      // Create payment intent if payment provided
-      if (input.payment) {
-        const { error: paymentError } = await supabase
-          .from('payment_intents')
-          .insert({
-            order_id: orderId,
-            amount: input.payment.amount,
-            currency: input.currency || 'THB',
-            method: input.payment.method,
-            status: input.payment.method === 'cash' ? 'pending' : 'pending',
-          });
-
-        if (paymentError) throw paymentError;
-      }
-
-      // Record initial status in history
-      await supabase.from('order_status_history').insert({
-        order_id: orderId,
-        from_status: null,
-        to_status: 'pending',
-        actor_user_id: user.id,
-        reason: 'Order created',
-      });
+      const orderId = result.order_id!;
+      const orderNumber = result.order_number!;
 
       // Create notification for customer
       await supabase.from('notifications').insert({
@@ -320,7 +285,7 @@ export function useOrders() {
           user_id: user.id,
           payment_method: input.payment?.method || 'cash',
         },
-      }).catch(err => console.error('Customer email error:', err));
+      }).catch(err => errorLog.silent(err, 'send_customer_email'));
 
       // Send admin email notification (non-blocking)
       const primaryParticipant = input.participants?.find(p => p.role === 'primary') || input.participants?.[0];
@@ -343,7 +308,7 @@ export function useOrders() {
           notes: input.notes,
           provider_name: input.providerName,
         },
-      }).catch(err => console.error('Admin notification error:', err));
+      }).catch(err => errorLog.silent(err, 'send_admin_notification'));
 
       toast({ 
         title: t('order.success'),
@@ -369,7 +334,7 @@ export function useOrders() {
       queryClient.invalidateQueries({ queryKey: ['orders', user?.id] });
     },
     onError: (error) => {
-      console.error('Order error:', error);
+      errorLog.error(error, 'create_order');
       toast({ title: t('order.error'), variant: 'destructive' });
     },
   });

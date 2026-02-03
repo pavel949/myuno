@@ -16193,6 +16193,25 @@ export type Database = {
         }
         Returns: string
       }
+      create_order_atomic: {
+        Args: {
+          p_addresses?: Json
+          p_currency?: string
+          p_customer_user_id: string
+          p_end_at?: string
+          p_items?: Json
+          p_metadata?: Json
+          p_notes?: string
+          p_order_type: string
+          p_participants?: Json
+          p_payment_amount?: number
+          p_payment_method?: string
+          p_provider_org_id?: string
+          p_start_at?: string
+          p_total_amount?: number
+        }
+        Returns: Json
+      }
       credit_cashback: { Args: { p_order_id: string }; Returns: Json }
       detect_booking_conflicts: {
         Args: { p_property_id: string }
@@ -16339,6 +16358,10 @@ export type Database = {
         Args: { p_charter_type?: string; p_date: string; p_yacht_id: string }
         Returns: number
       }
+      has_elevated_access: {
+        Args: { p_required_roles?: string[] }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -16412,6 +16435,15 @@ export type Database = {
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       soft_delete_order: { Args: { p_order_id: string }; Returns: boolean }
+      topup_wallet_atomic: {
+        Args: {
+          p_amount: number
+          p_reference_id: string
+          p_reference_type: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       uno_team_can: {
         Args: { _action: string; _user_id: string; _vertical: string }
         Returns: boolean

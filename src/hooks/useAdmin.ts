@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { createErrorHandler } from '@/lib/errorHandler';
+
+const errorLog = createErrorHandler('useAdmin');
 
 // Flexible types to match DB schema - admin tools handle display logic
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -32,7 +35,7 @@ export function useAdminCheck() {
         if (error) throw error;
         if (isMounted) setIsAdmin(data === true);
       } catch (err) {
-        console.error('Error checking admin:', err);
+        errorLog.silent(err, 'check_admin_role');
         if (isMounted) setIsAdmin(false);
       } finally {
         if (isMounted) setIsLoading(false);
@@ -62,7 +65,7 @@ export function useAdminProviders() {
       if (error) throw error;
       if (checkMounted()) setProviders(data || []);
     } catch (err) {
-      console.error('Error fetching providers:', err);
+      errorLog.silent(err, 'fetch_providers');
     } finally {
       if (checkMounted()) setIsLoading(false);
     }
@@ -139,7 +142,7 @@ export function useAdminServices(providerId?: string) {
       if (error) throw error;
       if (checkMounted()) setServices(data || []);
     } catch (err) {
-      console.error('Error fetching services:', err);
+      errorLog.silent(err, 'fetch_services');
     } finally {
       if (checkMounted()) setIsLoading(false);
     }
@@ -212,7 +215,7 @@ export function useAdminCategories() {
         if (error) throw error;
         if (isMounted) setCategories(data || []);
       } catch (err) {
-        console.error('Error fetching categories:', err);
+        errorLog.silent(err, 'fetch_categories');
       } finally {
         if (isMounted) setIsLoading(false);
       }

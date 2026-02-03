@@ -1,6 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthContext';
+import { createErrorHandler } from '@/lib/errorHandler';
+
+const errorLog = createErrorHandler('CartContext');
 
 export interface CartItem {
   id: string;
@@ -92,7 +95,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         options: item.options as Record<string, string> | undefined,
       }));
     } catch (error) {
-      console.error('Error loading cart from database:', error);
+      errorLog.silent(error, 'load_database_cart');
       return [];
     }
   }, [user]);
@@ -124,7 +127,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       // Clear local storage after sync
       localStorage.removeItem(CART_STORAGE_KEY);
     } catch (error) {
-      console.error('Error syncing cart to database:', error);
+      errorLog.silent(error, 'sync_cart_to_database');
     }
   }, [user]);
 
@@ -203,7 +206,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           });
         }
       } catch (error) {
-        console.error('Error adding item to cart:', error);
+        errorLog.silent(error, 'add_item_to_cart');
       }
     }
 
@@ -227,7 +230,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           .eq('user_id', user.id)
           .eq('item_id', id);
       } catch (error) {
-        console.error('Error removing item from cart:', error);
+        errorLog.silent(error, 'remove_item_from_cart');
       }
     }
 
@@ -248,7 +251,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           .eq('user_id', user.id)
           .eq('item_id', id);
       } catch (error) {
-        console.error('Error updating item quantity:', error);
+        errorLog.silent(error, 'update_item_quantity');
       }
     }
 
@@ -265,7 +268,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           .delete()
           .eq('user_id', user.id);
       } catch (error) {
-        console.error('Error clearing cart:', error);
+        errorLog.silent(error, 'clear_cart');
       }
     }
 
@@ -281,7 +284,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           .eq('user_id', user.id)
           .eq('item_type', type);
       } catch (error) {
-        console.error('Error clearing cart by type:', error);
+        errorLog.silent(error, 'clear_cart_by_type');
       }
     }
 
@@ -297,7 +300,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           .eq('user_id', user.id)
           .eq('provider_id', providerId);
       } catch (error) {
-        console.error('Error clearing cart by provider:', error);
+        errorLog.silent(error, 'clear_cart_by_provider');
       }
     }
 
