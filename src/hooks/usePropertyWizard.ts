@@ -1,9 +1,10 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCreateOwnerProperty, useOwnerProperty } from '@/hooks/usePropertyCare';
 import { useSendOwnershipInvite } from '@/hooks/usePropertyOwnership';
 import { useUserContext } from '@/hooks/useUserContext';
+import { useFormDraft } from '@/hooks/useFormDraft';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
@@ -136,7 +137,21 @@ export function usePropertyWizard() {
   const sendInvite = useSendOwnershipInvite();
   const { activeOrgId } = useUserContext();
   
-  const [formData, setFormData] = useState<PropertyFormData>(initialFormData);
+  // Use draft persistence for form data
+  const {
+    formData,
+    setFormData,
+    updateFields: updateFormData,
+    hasDraft,
+    clearDraft,
+    lastSaved,
+    restoreDraft,
+  } = useFormDraft<PropertyFormData>({
+    key: 'owner_property_wizard',
+    initialData: initialFormData,
+    debounceMs: 1000,
+  });
+
   const [ownershipData, setOwnershipData] = useState<OwnershipData>(initialOwnershipData);
   const [selectedProject, setSelectedProject] = useState<PropertyProject | null>(null);
   const [isCloneDataApplied, setIsCloneDataApplied] = useState(false);
@@ -144,10 +159,55 @@ export function usePropertyWizard() {
   const [createdPropertyId, setCreatedPropertyId] = useState<string>();
   const [createdPropertyTitle, setCreatedPropertyTitle] = useState<string>();
 
-  // Update form data
-  const updateFormData = useCallback((updates: Partial<PropertyFormData>) => {
-    setFormData(prev => ({ ...prev, ...updates }));
-  }, []);
+  // Apply clone data when loaded
+  useEffect(() => {
+    if (sourceProperty && !isCloneDataApplied && cloneFromId) {
+      setFormData({
+        title: sourceProperty.title || '',
+        title_ru: sourceProperty.title_ru || '',
+        address: sourceProperty.address || '',
+        district: sourceProperty.district || '',
+        lat: sourceProperty.lat ?? undefined,
+        lng: sourceProperty.lng ?? undefined,
+        property_type: sourceProperty.property_type || 'apartment',
+        bedrooms: sourceProperty.bedrooms || 1,
+        bathrooms: sourceProperty.bathrooms || 1,
+        area_sqm: sourceProperty.area_sqm?.toString() || '',
+        description: sourceProperty.description || '',
+        description_ru: sourceProperty.description_ru || '',
+        cover_image: sourceProperty.cover_image || '',
+        images: sourceProperty.images || [],
+        management_type: sourceProperty.management_type || 'full',
+        is_rented: sourceProperty.is_rented || false,
+        rental_platforms: sourceProperty.rental_platform ? [sourceProperty.rental_platform] : [],
+        custom_platform: '',
+        project_id: sourceProperty.project_id ?? undefined,
+        floor: undefined,
+        unit_number: '',
+        total_floors: undefined,
+        plot_size_sqm: undefined,
+        has_elevator: false,
+        parking_type: '',
+        pool_type: '',
+        garden_type: '',
+        view_type: sourceProperty.view_type || '',
+        furnishing_level: sourceProperty.furnishing_level || '',
+        equipment: sourceProperty.equipment || [],
+        price_per_night: sourceProperty.price_per_night?.toString() || '',
+        min_stay_nights: sourceProperty.min_stay_nights || 1,
+        max_guests: sourceProperty.max_guests || 2,
+        deposit_amount: sourceProperty.deposit_amount?.toString() || '',
+        check_in_time: sourceProperty.check_in_time || '14:00',
+        check_out_time: sourceProperty.check_out_time || '12:00',
+        instant_booking: sourceProperty.instant_booking || false,
+        ownership_form: undefined,
+        is_for_sale: false,
+        sale_price: '',
+      });
+      setIsCloneDataApplied(true);
+      toast.success(isRu ? 'Данные объекта загружены' : 'Property data loaded');
+    }
+  }, [sourceProperty, isCloneDataApplied, cloneFromId, setFormData, isRu]);
 
   // Update ownership data
   const updateOwnershipData = useCallback((updates: Partial<OwnershipData>) => {
@@ -310,6 +370,11 @@ export function usePropertyWizard() {
     instantBooking: formData.instant_booking,
   }), [formData]);
 
+  // Clear draft on successful submission
+  const handleSuccessfulSubmission = useCallback(() => {
+    clearDraft();
+  }, [clearDraft]);
+
   return {
     formData,
     ownershipData,
@@ -323,6 +388,12 @@ export function usePropertyWizard() {
     sourceProperty,
     previewData,
     isSubmitting: createProperty.isPending,
+    // Draft-related
+    hasDraft,
+    lastSaved,
+    clearDraft,
+    restoreDraft,
+    // Actions
     updateFormData,
     updateOwnershipData,
     setSelectedProject,
@@ -330,5 +401,6 @@ export function usePropertyWizard() {
     validateStep,
     handleSubmit,
     setShowSuccess,
+    handleSuccessfulSubmission,
   };
 }

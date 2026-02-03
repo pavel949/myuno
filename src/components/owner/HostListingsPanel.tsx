@@ -7,136 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PropertyListItem } from '@/components/property/PropertyListItem';
 import { 
-  Home, Plus, MapPin, Bed, Clock, CheckCircle, 
-  XCircle, AlertCircle, FileEdit, Eye, ArrowRight,
-  Pencil
+  Home, Plus, Clock, CheckCircle, 
+  XCircle, AlertCircle, FileEdit, ArrowRight
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
-interface PropertyCardProps {
-  property: any;
-  isRu: boolean;
-  onEdit: (id: string) => void;
-  onView: (id: string) => void;
-}
-
-function PropertyCard({ property, isRu, onEdit, onView }: PropertyCardProps) {
-  const getStatusConfig = (approvalStatus?: string) => {
-    switch (approvalStatus) {
-      case 'pending':
-        return {
-          icon: Clock,
-          label: isRu ? 'На рассмотрении' : 'Under Review',
-          color: 'text-yellow-600',
-          bgColor: 'bg-yellow-100 border-yellow-300',
-        };
-      case 'rejected':
-        return {
-          icon: XCircle,
-          label: isRu ? 'Требует доработки' : 'Needs Revision',
-          color: 'text-red-600',
-          bgColor: 'bg-red-100 border-red-300',
-        };
-      case 'approved':
-        return {
-          icon: CheckCircle,
-          label: isRu ? 'Активен' : 'Active',
-          color: 'text-green-600',
-          bgColor: 'bg-green-100 border-green-300',
-        };
-      default:
-        return {
-          icon: FileEdit,
-          label: isRu ? 'Черновик' : 'Draft',
-          color: 'text-muted-foreground',
-          bgColor: 'bg-muted border-border',
-        };
-    }
-  };
-
-  const status = getStatusConfig(property.approval_status);
-  const StatusIcon = status.icon;
-
-  return (
-    <Card className="overflow-hidden hover:shadow-md transition-all group">
-      <div className="flex">
-        <div 
-          className="w-24 h-24 sm:w-32 sm:h-32 bg-muted flex-shrink-0 relative cursor-pointer"
-          onClick={() => onView(property.id)}
-        >
-          {property.cover_image ? (
-            <img 
-              src={property.cover_image} 
-              alt={property.title}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <Home className="h-8 w-8 text-muted-foreground" />
-            </div>
-          )}
-          {/* Status overlay */}
-          <div className={cn(
-            "absolute bottom-0 left-0 right-0 px-2 py-1 flex items-center gap-1 text-xs font-medium",
-            status.bgColor, status.color
-          )}>
-            <StatusIcon className="h-3 w-3" />
-            <span className="truncate">{status.label}</span>
-          </div>
-        </div>
-        
-        <div className="flex-1 p-2.5 flex flex-col justify-between min-w-0">
-          <div className="min-w-0">
-            <h3 className="font-semibold text-sm line-clamp-2 leading-snug mb-1 group-hover:text-primary transition-colors">
-              {isRu && property.title_ru ? property.title_ru : property.title || (isRu ? 'Без названия' : 'Untitled')}
-            </h3>
-            
-            {property.district && (
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <MapPin className="h-3 w-3 flex-shrink-0" />
-                <span className="truncate">{property.district}</span>
-              </div>
-            )}
-            
-            <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-              {property.property_type && (
-                <span className="capitalize truncate max-w-[60px]">{property.property_type}</span>
-              )}
-              {property.bedrooms && (
-                <span className="flex items-center gap-0.5 flex-shrink-0">
-                  <Bed className="h-3 w-3" />
-                  {property.bedrooms}
-                </span>
-              )}
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-1.5 mt-2">
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="h-7 text-xs px-2"
-              onClick={() => onEdit(property.id)}
-            >
-              <Pencil className="h-3 w-3" />
-              <span className="hidden sm:inline ml-1">{isRu ? 'Ред.' : 'Edit'}</span>
-            </Button>
-            <Button 
-              size="sm" 
-              variant="ghost" 
-              className="h-7 text-xs"
-              onClick={() => onView(property.id)}
-            >
-              <Eye className="h-3 w-3 mr-1" />
-              {isRu ? 'Просмотр' : 'View'}
-            </Button>
-          </div>
-        </div>
-      </div>
-    </Card>
-  );
-}
 
 function EmptyState({ 
   title, 
@@ -280,12 +156,13 @@ export function HostListingsPanel() {
             ) : (
               <>
                 {properties?.slice(0, 5).map((property) => (
-                  <PropertyCard 
+                  <PropertyListItem 
                     key={property.id} 
                     property={property} 
-                    isRu={isRu}
+                    mode="owner"
                     onEdit={handleEdit}
                     onView={handleView}
+                    showApprovalStatus
                   />
                 ))}
                 {counts.total > 5 && (
@@ -313,12 +190,13 @@ export function HostListingsPanel() {
               />
             ) : (
               categorizedProperties.drafts.map((property) => (
-                <PropertyCard 
+                <PropertyListItem 
                   key={property.id} 
                   property={property} 
-                  isRu={isRu}
+                  mode="owner"
                   onEdit={handleEdit}
                   onView={handleView}
+                  showApprovalStatus
                 />
               ))
             )}
@@ -344,12 +222,13 @@ export function HostListingsPanel() {
                   </span>
                 </div>
                 {categorizedProperties.pending.map((property) => (
-                  <PropertyCard 
+                  <PropertyListItem 
                     key={property.id} 
                     property={property} 
-                    isRu={isRu}
+                    mode="owner"
                     onEdit={handleEdit}
                     onView={handleView}
+                    showApprovalStatus
                   />
                 ))}
               </>
@@ -367,12 +246,13 @@ export function HostListingsPanel() {
               />
             ) : (
               categorizedProperties.active.map((property) => (
-                <PropertyCard 
+                <PropertyListItem 
                   key={property.id} 
                   property={property} 
-                  isRu={isRu}
+                  mode="owner"
                   onEdit={handleEdit}
                   onView={handleView}
+                  showApprovalStatus
                 />
               ))
             )}
@@ -398,12 +278,13 @@ export function HostListingsPanel() {
                   </span>
                 </div>
                 {categorizedProperties.rejected.map((property) => (
-                  <PropertyCard 
+                  <PropertyListItem 
                     key={property.id} 
                     property={property} 
-                    isRu={isRu}
+                    mode="owner"
                     onEdit={handleEdit}
                     onView={handleView}
+                    showApprovalStatus
                   />
                 ))}
               </>

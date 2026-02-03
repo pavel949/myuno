@@ -8,6 +8,9 @@ export {
   mapServiceFormToCardProps,
   // Home service provider adapters
   mapHomeServiceProviderToCardProps,
+  // Property adapters
+  mapPropertyToCardProps,
+  mapPropertyFormToCardProps,
   // Helpers
   canShowPreview,
   getPreviewPlaceholder,
@@ -15,6 +18,7 @@ export {
   type UnifiedProductCardProps,
   type UnifiedServiceCardProps,
   type HomeServiceProviderCardProps,
+  type UnifiedPropertyCardProps,
 } from './contentAdapters';
 
 // Vehicle adapters
