@@ -1,12 +1,37 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Construction, Wrench, Clock, Bell, Mail } from 'lucide-react';
+import { Construction, Wrench, Clock, Bell, Mail, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { useMaintenance } from '@/contexts/MaintenanceContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { cn } from '@/lib/utils';
 
 export function UnderConstruction() {
   const [email, setEmail] = React.useState('');
   const [subscribed, setSubscribed] = React.useState(false);
+  const { isMaintenanceMode, setMaintenanceMode } = useMaintenance();
+  const { user } = useAuth();
+
+  // Check if current user is admin (for admin toggle on this page)
+  const { data: isAdmin } = useQuery({
+    queryKey: ['user-is-admin-maintenance', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return false;
+      const { data } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .in('role', ['admin', 'uno_team'])
+        .maybeSingle();
+      return !!data;
+    },
+    enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000,
+  });
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,7 +42,35 @@ export function UnderConstruction() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4 relative">
+      {/* Admin toggle - floating at top */}
+      {isAdmin && (
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="absolute top-4 right-4 z-50"
+        >
+          <div className={cn(
+            "flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border-2",
+            isMaintenanceMode 
+              ? "bg-warning/20 border-warning" 
+              : "bg-background border-primary"
+          )}>
+            <ShieldCheck className="w-5 h-5 text-primary" />
+            <div className="flex flex-col">
+              <span className="text-xs font-semibold text-foreground">Admin Mode</span>
+              <span className="text-[10px] text-muted-foreground">
+                {isMaintenanceMode ? 'Site closed' : 'Site open'}
+              </span>
+            </div>
+            <Switch
+              checked={isMaintenanceMode}
+              onCheckedChange={setMaintenanceMode}
+            />
+          </div>
+        </motion.div>
+      )}
+
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
