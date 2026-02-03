@@ -433,7 +433,7 @@ const VendorTransport = () => {
 
         {/* Add/Edit Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="max-w-3xl max-h-[90vh] p-0">
+          <DialogContent className="w-[calc(100vw-16px)] sm:max-w-3xl max-h-[90vh] p-0">
             <DialogHeader className="p-6 pb-0">
               <DialogTitle>
                 {editingVehicle 
