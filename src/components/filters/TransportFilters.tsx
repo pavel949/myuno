@@ -1,14 +1,33 @@
 import { FilterConfig, FilterOption } from './UniversalFilter';
+import {
+  VEHICLE_CATEGORIES,
+  TRANSMISSION_TYPES,
+  FUEL_TYPES,
+} from '@/lib/config/transportTaxonomy';
 
-// ====== VEHICLE TYPES ======
-export const vehicleTypeOptions: FilterOption[] = [
-  { id: 'car', labelEn: 'Car', labelRu: 'Автомобиль', icon: '🚗' },
-  { id: 'motorbike', labelEn: 'Motorbike', labelRu: 'Мотоцикл', icon: '🏍️' },
-  { id: 'suv', labelEn: 'SUV', labelRu: 'Внедорожник', icon: '🚙' },
-  { id: 'van', labelEn: 'Van', labelRu: 'Микроавтобус', icon: '🚐' },
-  { id: 'luxury', labelEn: 'Luxury', labelRu: 'Премиум', icon: '🏎️' },
-  { id: 'electric', labelEn: 'Electric', labelRu: 'Электро', icon: '⚡' },
-];
+// ====== VEHICLE TYPES (from taxonomy) ======
+export const vehicleTypeOptions: FilterOption[] = VEHICLE_CATEGORIES.map(cat => ({
+  id: cat.id,
+  labelEn: cat.labelEn,
+  labelRu: cat.labelRu,
+  icon: cat.icon,
+}));
+
+// ====== TRANSMISSION OPTIONS ======
+export const transmissionOptions: FilterOption[] = TRANSMISSION_TYPES.map(t => ({
+  id: t.id,
+  labelEn: t.labelEn,
+  labelRu: t.labelRu,
+  icon: t.icon,
+}));
+
+// ====== FUEL TYPE OPTIONS ======
+export const fuelTypeOptions: FilterOption[] = FUEL_TYPES.map(f => ({
+  id: f.id,
+  labelEn: f.labelEn,
+  labelRu: f.labelRu,
+  icon: f.icon,
+}));
 
 // ====== TRANSFER TYPES ======
 export const transferTypeOptions: FilterOption[] = [
@@ -56,11 +75,18 @@ export const transportFilterConfig: FilterConfig = {
       options: vehicleTypeOptions,
     },
     {
-      id: 'transferType',
-      titleEn: 'Service Type',
-      titleRu: 'Тип услуги',
+      id: 'transmission',
+      titleEn: 'Transmission',
+      titleRu: 'Трансмиссия',
       type: 'single',
-      options: transferTypeOptions,
+      options: transmissionOptions,
+    },
+    {
+      id: 'fuelType',
+      titleEn: 'Fuel Type',
+      titleRu: 'Тип топлива',
+      type: 'multi',
+      options: fuelTypeOptions,
     },
     {
       id: 'passengers',
