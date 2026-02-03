@@ -53,13 +53,10 @@ export default function PropertyIndex() {
   // Fetch instant booking properties
   const { data: instantBookingProperties, isLoading: isLoadingInstant } = useInstantBookingProperties(10);
 
-  // Fetch real properties from database
+  // Fetch all rental properties from database (filtering done client-side for demo fallback consistency)
   const { data: dbProperties, isLoading } = useProperties({
-    search: searchParams.locations.length === 1 ? searchParams.locations[0] : undefined,
-    propertyType: selectedType,
     listingType: 'rent', // Always show rentals for Airbnb-style
-    bedrooms: filterValues.bedrooms as string,
-  }, 100);
+  }, 200);
 
   // Use DB data or fallback to demo
   const properties = useMemo(() => {
