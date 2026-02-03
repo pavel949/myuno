@@ -48,14 +48,24 @@ export const useDemoMode = () => {
     });
 
     // Store in localStorage for analytics
-    const demoActions = JSON.parse(localStorage.getItem('demo_actions') || '[]');
-    demoActions.push({
-      action,
-      type: demoType,
-      timestamp: new Date().toISOString(),
-      ...metadata,
-    });
-    localStorage.setItem('demo_actions', JSON.stringify(demoActions.slice(-50)));
+    try {
+      const demoActions = JSON.parse(localStorage.getItem('demo_actions') || '[]');
+      demoActions.push({
+        action,
+        type: demoType,
+        timestamp: new Date().toISOString(),
+        ...metadata,
+      });
+      localStorage.setItem('demo_actions', JSON.stringify(demoActions.slice(-50)));
+    } catch {
+      // Reset corrupted localStorage data
+      localStorage.setItem('demo_actions', JSON.stringify([{
+        action,
+        type: demoType,
+        timestamp: new Date().toISOString(),
+        ...metadata,
+      }]));
+    }
   };
 
   return {

@@ -161,10 +161,14 @@ export function useUserPersonas() {
     if (user?.id) {
       const guestPersonas = localStorage.getItem(GUEST_PERSONAS_KEY);
       if (guestPersonas) {
-        const parsed = JSON.parse(guestPersonas) as UserPersona[];
-        if (parsed.length > 0 && dbPersonas.length === 0) {
-          // Migrate guest personas to authenticated user
-          setPersonasMutation.mutate(parsed);
+        try {
+          const parsed = JSON.parse(guestPersonas) as UserPersona[];
+          if (parsed.length > 0 && dbPersonas.length === 0) {
+            // Migrate guest personas to authenticated user
+            setPersonasMutation.mutate(parsed);
+          }
+        } catch {
+          // Ignore corrupted localStorage data
         }
         localStorage.removeItem(GUEST_PERSONAS_KEY);
       }

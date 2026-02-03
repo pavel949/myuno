@@ -3,19 +3,20 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import type { FavoriteItem, FavoriteItemData } from '@/types/favorites';
 
-interface FavoriteItem {
+interface FavoriteRecord {
   id: string;
   item_type: string;
   item_id: string;
-  item_data: any;
+  item_data: FavoriteItemData | null;
   created_at: string;
 }
 
 export function useFavorites(itemType?: string) {
   const { user } = useAuth();
   const { language } = useLanguage();
-  const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
+  const [favorites, setFavorites] = useState<FavoriteRecord[]>([]);
   const [loading, setLoading] = useState(false);
 
   const fetchFavorites = useCallback(async () => {
@@ -39,7 +40,10 @@ export function useFavorites(itemType?: string) {
       const { data, error } = await query;
 
       if (error) throw error;
-      setFavorites(data || []);
+      setFavorites((data || []).map(item => ({
+        ...item,
+        item_data: item.item_data as FavoriteItemData | null
+      })));
     } catch (error) {
       console.error('Error fetching favorites:', error);
     } finally {
@@ -74,7 +78,10 @@ export function useFavorites(itemType?: string) {
 
         if (error) throw error;
         if (isMounted) {
-          setFavorites(data || []);
+          setFavorites((data || []).map(item => ({
+            ...item,
+            item_data: item.item_data as FavoriteItemData | null
+          })));
         }
       } catch (error) {
         console.error('Error fetching favorites:', error);
@@ -96,7 +103,7 @@ export function useFavorites(itemType?: string) {
     return favorites.some(f => f.item_type === type && f.item_id === id);
   }, [favorites]);
 
-  const toggleFavorite = useCallback(async (type: string, id: string, itemData?: any) => {
+  const toggleFavorite = useCallback(async (type: string, id: string, itemData?: FavoriteItemData) => {
     if (!user) {
       toast.error(language === 'ru' ? 'Войдите, чтобы добавить в избранное' : 'Login to add favorites');
       return false;
@@ -118,20 +125,26 @@ export function useFavorites(itemType?: string) {
         setFavorites(prev => prev.filter(f => !(f.item_type === type && f.item_id === id)));
         toast.success(language === 'ru' ? 'Удалено из избранного' : 'Removed from favorites');
       } else {
+        const insertData = {
+          user_id: user.id,
+          item_type: type,
+          item_id: id,
+          item_data: itemData ? JSON.parse(JSON.stringify(itemData)) : null
+        };
+        
         const { data, error } = await supabase
           .from('favorites')
-          .insert({
-            user_id: user.id,
-            item_type: type,
-            item_id: id,
-            item_data: itemData || null
-          })
+          .insert(insertData)
           .select()
           .single();
 
         if (error) throw error;
 
-        setFavorites(prev => [data, ...prev]);
+        const typedData: FavoriteRecord = {
+          ...data,
+          item_data: data.item_data as FavoriteItemData | null
+        };
+        setFavorites(prev => [typedData, ...prev]);
         toast.success(language === 'ru' ? 'Добавлено в избранное' : 'Added to favorites');
       }
 
