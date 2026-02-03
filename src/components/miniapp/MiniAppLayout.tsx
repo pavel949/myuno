@@ -37,6 +37,8 @@ export interface MiniAppLayoutProps {
   onSearchChange?: (value: string) => void;
   searchPlaceholder?: string;
   showSearch?: boolean;
+  searchResults?: ReactNode;
+  isSearching?: boolean;
   categories?: MiniAppCategory[];
   selectedCategory?: string;
   onCategoryChange?: (categoryId: string) => void;
@@ -86,6 +88,8 @@ export function MiniAppLayout({
   onSearchChange,
   searchPlaceholder,
   showSearch = true,
+  searchResults,
+  isSearching,
   
   // Categories
   categories = [],
@@ -214,6 +218,8 @@ export function MiniAppLayout({
           searchValue={showSearch ? searchValue : undefined}
           onSearchChange={showSearch && onSearchChange ? onSearchChange : undefined}
           rightAction={buildHeaderActions()}
+          searchResults={searchResults}
+          isSearching={isSearching}
         />
         
         {/* Category Filter Ribbon */}
