@@ -239,6 +239,7 @@ const AdminYachts = lazy(() => import('@/pages/admin/AdminYachts'));
 const AdminTours = lazy(() => import('@/pages/admin/AdminTours'));
 const AdminActivities = lazy(() => import('@/pages/admin/AdminActivities'));
 const AdminProperties = lazy(() => import('@/pages/admin/AdminProperties'));
+const AdminProjects = lazy(() => import('@/pages/admin/AdminProjects'));
 const AdminRestaurants = lazy(() => import('@/pages/admin/AdminRestaurants'));
 const AdminSalons = lazy(() => import('@/pages/admin/AdminSalons'));
 const AdminClinics = lazy(() => import('@/pages/admin/AdminClinics'));
@@ -694,6 +695,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/admin/tours" element={<AdminTours />} />
           <Route path="/admin/activities" element={<AdminActivities />} />
           <Route path="/admin/properties" element={<AdminProperties />} />
+          <Route path="/admin/projects" element={<AdminProjects />} />
           <Route path="/admin/restaurants" element={<AdminRestaurants />} />
           <Route path="/admin/salons" element={<AdminSalons />} />
           <Route path="/admin/clinics" element={<AdminClinics />} />
