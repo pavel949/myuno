@@ -468,6 +468,18 @@ export default function AddProperty() {
                       lat: project?.lat ?? prev.lat,
                       lng: project?.lng ?? prev.lng,
                     }));
+                    
+                    // Show toast notification when project is selected
+                    if (project) {
+                      const projectName = isRu 
+                        ? (project.name_ru || project.name_en) 
+                        : project.name_en;
+                      toast.success(
+                        isRu 
+                          ? `Данные проекта "${projectName}" загружены` 
+                          : `Project data loaded: "${projectName}"`
+                      );
+                    }
                   }}
                 />
               </CardContent>
@@ -1028,6 +1040,39 @@ export default function AddProperty() {
         );
 
       case 'description':
+        const hasProjectDescription = selectedProject?.description_en || selectedProject?.description_ru;
+        const isDescriptionEmpty = !formData.description && !formData.description_ru;
+        const projectAmenities = selectedProject?.amenities || [];
+        
+        const handleUseProjectDescription = () => {
+          setFormData(prev => ({
+            ...prev,
+            description: selectedProject?.description_en || '',
+            description_ru: selectedProject?.description_ru || '',
+          }));
+          toast.success(
+            isRu 
+              ? 'Описание проекта загружено. Отредактируйте под ваш объект.' 
+              : 'Project description loaded. Customize it for your property.'
+          );
+        };
+        
+        // Amenity labels for display
+        const amenityLabels: Record<string, { en: string; ru: string }> = {
+          pool: { en: 'Pool', ru: 'Бассейн' },
+          gym: { en: 'Gym', ru: 'Спортзал' },
+          security: { en: '24h Security', ru: 'Охрана 24ч' },
+          parking: { en: 'Parking', ru: 'Парковка' },
+          garden: { en: 'Garden', ru: 'Сад' },
+          playground: { en: 'Playground', ru: 'Детская площадка' },
+          restaurant: { en: 'Restaurant', ru: 'Ресторан' },
+          spa: { en: 'Spa', ru: 'Спа' },
+          tennis: { en: 'Tennis Court', ru: 'Теннисный корт' },
+          beach_access: { en: 'Beach Access', ru: 'Доступ к пляжу' },
+          concierge: { en: 'Concierge', ru: 'Консьерж' },
+          shuttle: { en: 'Shuttle Service', ru: 'Трансфер' },
+        };
+        
         return (
           <Card>
             <CardHeader className="pb-3">
@@ -1036,6 +1081,51 @@ export default function AddProperty() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Use Project Description Button */}
+              {hasProjectDescription && isDescriptionEmpty && (
+                <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                  <Sparkles className="h-4 w-4 text-primary flex-shrink-0" />
+                  <p className="text-sm text-muted-foreground flex-1">
+                    {isRu 
+                      ? 'У проекта есть описание. Хотите использовать его как основу?' 
+                      : 'Project has a description. Want to use it as a starting point?'}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleUseProjectDescription}
+                    className="gap-2 flex-shrink-0"
+                  >
+                    <Building2 className="h-4 w-4" />
+                    {isRu ? 'Использовать' : 'Use it'}
+                  </Button>
+                </div>
+              )}
+
+              {/* Project Amenities Reference */}
+              {projectAmenities.length > 0 && (
+                <div className="p-4 bg-muted/50 rounded-lg space-y-2">
+                  <p className="text-sm font-medium">
+                    {isRu ? 'Удобства проекта (доступны вашим гостям):' : 'Project amenities (available to your guests):'}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {projectAmenities.map((amenity) => (
+                      <Badge key={amenity} variant="secondary" className="text-xs">
+                        {amenityLabels[amenity]
+                          ? (isRu ? amenityLabels[amenity].ru : amenityLabels[amenity].en)
+                          : amenity}
+                      </Badge>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {isRu 
+                      ? 'Упомяните эти удобства в описании вашего объекта' 
+                      : 'Mention these amenities in your property description'}
+                  </p>
+                </div>
+              )}
+              
               <TranslatableInput
                 label={isRu ? 'Описание' : 'Description'}
                 value={isRu ? formData.description_ru : formData.description}
