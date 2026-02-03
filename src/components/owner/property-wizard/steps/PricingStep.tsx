@@ -11,6 +11,9 @@ import { PropertyFormData } from '@/hooks/usePropertyWizard';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
 import { TranslatableInput } from '@/components/forms/TranslatableInput';
 import { toast } from 'sonner';
+import { HouseRulesSection } from './HouseRulesSection';
+import { DiscountsSection } from './DiscountsSection';
+import { CancellationPolicySection } from './CancellationPolicySection';
 
 interface PricingStepProps {
   formData: PropertyFormData;
@@ -181,6 +184,15 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
           </div>
         </CardContent>
       </Card>
+
+      {/* House Rules */}
+      <HouseRulesSection formData={formData} updateFormData={updateFormData} />
+
+      {/* Cancellation Policy */}
+      <CancellationPolicySection formData={formData} updateFormData={updateFormData} />
+
+      {/* Long-stay Discounts */}
+      <DiscountsSection formData={formData} updateFormData={updateFormData} />
 
       {/* Sale Option */}
       <Card>
