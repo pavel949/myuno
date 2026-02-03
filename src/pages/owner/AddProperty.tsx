@@ -1,17 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCreateOwnerProperty, useOwnerProperty } from '@/hooks/usePropertyCare';
 import { useSendOwnershipInvite } from '@/hooks/usePropertyOwnership';
 import { useUserContext } from '@/hooks/useUserContext';
 import { useIntakeAgent } from '@/hooks/useIntakeAgent';
+import { useFormDraft } from '@/hooks/useFormDraft';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { PropertyWizard } from '@/components/owner/PropertyWizard';
 import { OwnershipTypeStep, OwnershipType } from '@/components/owner/OwnershipTypeStep';
 import { PropertySubmissionSuccess } from '@/components/owner/PropertySubmissionSuccess';
+import { DraftIndicator, DraftRestorationBanner } from '@/components/vendor/DraftIndicator';
 import { toast } from 'sonner';
-
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -140,7 +141,8 @@ export default function AddProperty() {
     ownership_document_name: '',
   });
 
-  const [formData, setFormData] = useState({
+  // Initial form data structure
+  const initialFormData = {
     title: '',
     title_ru: '',
     internal_name: '',
@@ -186,7 +188,40 @@ export default function AddProperty() {
     ownership_form: undefined as 'freehold' | 'leasehold' | 'company' | 'foreign_company' | undefined,
     is_for_sale: false,
     sale_price: '',
+  };
+
+  // Use draft persistence for form data
+  const {
+    formData,
+    setFormData,
+    hasDraft,
+    lastSaved,
+    clearDraft,
+    restoreDraft,
+  } = useFormDraft({
+    key: 'owner_property_wizard',
+    initialData: initialFormData,
+    debounceMs: 1000,
   });
+
+  // State for showing restoration banner (only on initial load)
+  const [showRestorationBanner, setShowRestorationBanner] = useState(() => {
+    // Only show banner if there's a draft and we're not cloning
+    const hasLocalDraft = localStorage.getItem('vendor_draft_owner_property_wizard');
+    return !!hasLocalDraft && !cloneFromId;
+  });
+
+  const handleRestoreDraft = useCallback(() => {
+    restoreDraft();
+    setShowRestorationBanner(false);
+    toast.success(isRu ? 'Черновик восстановлен' : 'Draft restored');
+  }, [restoreDraft, isRu]);
+
+  const handleDiscardDraft = useCallback(() => {
+    clearDraft();
+    setShowRestorationBanner(false);
+    toast.info(isRu ? 'Черновик удалён' : 'Draft discarded');
+  }, [clearDraft, isRu]);
 
   // Apply cloned property data when loaded
   useEffect(() => {
@@ -380,6 +415,9 @@ export default function AddProperty() {
       }
     }
 
+    // Clear draft on successful submission
+    clearDraft();
+    
     // Show success screen instead of navigating
     setCreatedPropertyId(property?.id);
     setCreatedPropertyTitle(formData.title || formData.title_ru);
@@ -1102,6 +1140,26 @@ export default function AddProperty() {
           : (isRu ? 'Зарегистрируйте недвижимость' : 'Register your property')
         }
       />
+
+      {/* Draft Restoration Banner */}
+      {showRestorationBanner && (
+        <DraftRestorationBanner 
+          onRestore={handleRestoreDraft}
+          onDiscard={handleDiscardDraft}
+        />
+      )}
+
+      {/* Draft Indicator */}
+      {hasDraft && !showRestorationBanner && (
+        <div className="flex justify-end mb-4">
+          <DraftIndicator
+            hasDraft={hasDraft}
+            lastSaved={lastSaved}
+            onClear={handleDiscardDraft}
+            onRestore={handleRestoreDraft}
+          />
+        </div>
+      )}
 
       {/* AI Intake Panel */}
       {!cloneFromId && (

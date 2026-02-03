@@ -30,16 +30,14 @@
 | `OwnerProperties.tsx` | ✅ Заменено на PropertyListItem |
 | `AdminProperties.tsx` | ✅ Заменено на PropertyListItem |
 
----
+## ✅ Завершено полностью
 
-## ⏳ Требует дальнейшей работы
-
-### AddProperty.tsx — полная интеграция с usePropertyWizard
-**Проблема**: AddProperty.tsx дублирует логику формы (собственный useState), вместо использования хука usePropertyWizard.
-
-**Решение**: Рефакторинг AddProperty.tsx для использования хука usePropertyWizard и добавление UI-индикаторов:
-- `DraftIndicator` — показывает "Автосохранено в HH:MM"
-- `DraftRestorationBanner` — предлагает восстановить черновик
+### AddProperty.tsx — полная интеграция с useFormDraft
+**Реализовано**:
+- Заменён `useState` на `useFormDraft` для автосохранения данных формы
+- Добавлен `DraftIndicator` — показывает "Автосохранено в HH:MM"
+- Добавлен `DraftRestorationBanner` — предлагает восстановить черновик при открытии страницы
+- Черновик очищается автоматически при успешной отправке формы
 
 ---
 
@@ -47,6 +45,6 @@
 
 1. ✅ **Единый адаптер** `mapPropertyToCardProps` — 100% консистентность данных
 2. ✅ **Единая карточка** `PropertyListItem` — одинаковый UX везде
-3. ✅ **Сохранение черновиков** — хук usePropertyWizard с useFormDraft
-4. ⏳ **UI индикаторы** — требует интеграции в AddProperty.tsx
-5. ✅ **Меньше дублирования** — 1 компонент вместо 4 реализаций
+3. ✅ **Сохранение черновиков** — хук useFormDraft интегрирован в AddProperty.tsx
+4. ✅ **UI индикаторы** — DraftIndicator и DraftRestorationBanner в AddProperty.tsx
+5. ✅ **Меньше дублирования** — 1 компонент PropertyListItem вместо 4 реализаций
