@@ -36,11 +36,13 @@ export interface CreateBookingInput {
   check_out: string;
   guests_count?: number;
   total_amount?: number;
+  deposit_amount?: number;
   currency?: string;
   source?: string;
   external_id?: string;
   status?: string;
   notes?: string;
+  documents?: string[]; // URLs to attached documents
 }
 
 /**
@@ -153,6 +155,8 @@ export function usePropertyBookings(propertyId?: string) {
             source: input.source || 'manual',
             external_id: input.external_id,
             guests_count: input.guests_count,
+            deposit_amount: input.deposit_amount,
+            documents: input.documents,
           },
         })
         .select()
