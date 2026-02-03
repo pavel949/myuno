@@ -1,26 +1,60 @@
+import { memo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { DollarSign, Clock, Users, Landmark, Building2, Briefcase, BadgeDollarSign } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { DollarSign, Clock, Users, Landmark, Building2, Briefcase, BadgeDollarSign, FileText, Sparkles, Building } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { PropertyFormData } from '@/hooks/usePropertyWizard';
+import { PropertyProject } from '@/hooks/usePropertyProjects';
+import { TranslatableInput } from '@/components/forms/TranslatableInput';
+import { toast } from 'sonner';
 
 interface PricingStepProps {
   formData: PropertyFormData;
   updateFormData: (updates: Partial<PropertyFormData>) => void;
+  selectedProject?: PropertyProject | null;
 }
 
-export function PricingStep({ formData, updateFormData }: PricingStepProps) {
+// Amenity labels for display
+const amenityLabels: Record<string, { en: string; ru: string }> = {
+  pool: { en: 'Pool', ru: 'Бассейн' },
+  gym: { en: 'Gym', ru: 'Спортзал' },
+  security: { en: '24h Security', ru: 'Охрана 24ч' },
+  parking: { en: 'Parking', ru: 'Парковка' },
+  garden: { en: 'Garden', ru: 'Сад' },
+  spa: { en: 'Spa', ru: 'Спа' },
+  beach_access: { en: 'Beach Access', ru: 'Доступ к пляжу' },
+};
+
+const ownershipOptions = [
+  { value: 'freehold', labelEn: 'Freehold', labelRu: 'Фрихолд', icon: <Landmark className="h-4 w-4" /> },
+  { value: 'leasehold', labelEn: 'Leasehold', labelRu: 'Лизхолд', icon: <Clock className="h-4 w-4" /> },
+  { value: 'company', labelEn: 'Thai Company', labelRu: 'Тайская компания', icon: <Building2 className="h-4 w-4" /> },
+  { value: 'foreign_company', labelEn: 'Foreign LLC', labelRu: 'Иностранная компания', icon: <Briefcase className="h-4 w-4" /> },
+];
+
+function PricingStepInner({ formData, updateFormData, selectedProject }: PricingStepProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
-  const ownershipOptions = [
-    { value: 'freehold', labelEn: 'Freehold (Chanote)', labelRu: 'Фрихолд (Чанот)', icon: <Landmark className="h-4 w-4" />, desc: isRu ? 'Полная собственность' : 'Full ownership' },
-    { value: 'leasehold', labelEn: 'Leasehold', labelRu: 'Лизхолд', icon: <Clock className="h-4 w-4" />, desc: isRu ? 'Аренда земли' : 'Land lease' },
-    { value: 'company', labelEn: 'Thai Company', labelRu: 'Тайская компания', icon: <Building2 className="h-4 w-4" />, desc: isRu ? 'Владение через ООО' : 'LLC ownership' },
-    { value: 'foreign_company', labelEn: 'Foreign Company', labelRu: 'Иностранная компания', icon: <Briefcase className="h-4 w-4" />, desc: isRu ? 'Офшор / иностранное ООО' : 'Offshore / foreign LLC' },
-  ];
+  const handleUseProjectDescription = () => {
+    updateFormData({
+      description: selectedProject?.description_en || '',
+      description_ru: selectedProject?.description_ru || '',
+    });
+    toast.success(
+      isRu 
+        ? 'Описание проекта загружено' 
+        : 'Project description loaded'
+    );
+  };
+
+  const projectAmenities = selectedProject?.amenities || [];
+  const hasProjectDescription = selectedProject?.description_en || selectedProject?.description_ru;
+  const isDescriptionEmpty = !formData.description && !formData.description_ru;
 
   return (
     <div className="space-y-6">
@@ -32,13 +66,8 @@ export function PricingStep({ formData, updateFormData }: PricingStepProps) {
             {isRu ? 'Форма собственности' : 'Ownership Structure'}
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <p className="text-sm text-muted-foreground">
-            {isRu 
-              ? 'Укажите юридическую форму владения недвижимостью' 
-              : 'Specify the legal ownership structure of the property'}
-          </p>
-          <div className="grid grid-cols-2 gap-3">
+        <CardContent>
+          <div className="grid grid-cols-2 gap-2">
             {ownershipOptions.map((option) => (
               <button
                 key={option.value}
@@ -50,11 +79,10 @@ export function PricingStep({ formData, updateFormData }: PricingStepProps) {
                     : 'border-muted hover:border-muted-foreground/30'
                 }`}
               >
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2">
                   <span className="text-muted-foreground">{option.icon}</span>
                   <span className="font-medium text-sm">{isRu ? option.labelRu : option.labelEn}</span>
                 </div>
-                <p className="text-xs text-muted-foreground">{option.desc}</p>
               </button>
             ))}
           </div>
@@ -177,33 +205,102 @@ export function PricingStep({ formData, updateFormData }: PricingStepProps) {
           </div>
 
           {formData.is_for_sale && (
-            <>
-              <div className="space-y-2">
-                <Label>{isRu ? 'Цена продажи (THB)' : 'Sale Price (THB)'}</Label>
-                <Input
-                  type="number"
-                  min={0}
-                  value={formData.sale_price}
-                  onChange={(e) => updateFormData({ sale_price: e.target.value })}
-                  placeholder="5000000"
-                  className="text-lg"
-                />
-                {formData.sale_price && Number(formData.sale_price) > 0 && (
-                  <p className="text-sm text-muted-foreground">
-                    ≈ ${(Number(formData.sale_price) / 35).toLocaleString('en-US', { maximumFractionDigits: 0 })} USD
-                  </p>
+            <div className="space-y-2">
+              <Label>{isRu ? 'Цена продажи (THB)' : 'Sale Price (THB)'}</Label>
+              <Input
+                type="number"
+                min={0}
+                value={formData.sale_price}
+                onChange={(e) => updateFormData({ sale_price: e.target.value })}
+                placeholder="5000000"
+                className="text-lg"
+              />
+              {formData.sale_price && Number(formData.sale_price) > 0 && (
+                <p className="text-sm text-muted-foreground">
+                  ≈ ${(Number(formData.sale_price) / 35).toLocaleString('en-US', { maximumFractionDigits: 0 })} USD
+                </p>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Description (moved from separate step) */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            {isRu ? 'Описание объекта' : 'Property Description'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Use Project Description Button */}
+          {hasProjectDescription && isDescriptionEmpty && (
+            <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+              <Sparkles className="h-4 w-4 text-primary flex-shrink-0" />
+              <p className="text-sm text-muted-foreground flex-1">
+                {isRu 
+                  ? 'Использовать описание проекта?' 
+                  : 'Use project description?'}
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleUseProjectDescription}
+              >
+                <Building className="h-4 w-4 mr-1" />
+                {isRu ? 'Да' : 'Yes'}
+              </Button>
+            </div>
+          )}
+
+          {/* Project Amenities Reference */}
+          {projectAmenities.length > 0 && (
+            <div className="p-3 bg-muted/50 rounded-lg space-y-2">
+              <p className="text-sm font-medium">
+                {isRu ? 'Удобства проекта:' : 'Project amenities:'}
+              </p>
+              <div className="flex flex-wrap gap-1">
+                {projectAmenities.slice(0, 5).map((amenity) => (
+                  <Badge key={amenity} variant="secondary" className="text-xs">
+                    {amenityLabels[amenity]
+                      ? (isRu ? amenityLabels[amenity].ru : amenityLabels[amenity].en)
+                      : amenity}
+                  </Badge>
+                ))}
+                {projectAmenities.length > 5 && (
+                  <Badge variant="outline" className="text-xs">
+                    +{projectAmenities.length - 5}
+                  </Badge>
                 )}
               </div>
-
-              <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg space-y-2">
-                <p className="text-sm font-medium text-green-700 dark:text-green-400">
-                  🏷️ {isRu ? 'Комиссия платформы: 5%' : 'Platform Commission: 5%'}
-                </p>
-              </div>
-            </>
+            </div>
           )}
+
+          <TranslatableInput
+            label={isRu ? 'Описание' : 'Description'}
+            value={isRu ? formData.description_ru : formData.description}
+            translatedValue={isRu ? formData.description : formData.description_ru}
+            onChange={(val) => updateFormData({ [isRu ? 'description_ru' : 'description']: val })}
+            onTranslatedChange={(val) => updateFormData({ [isRu ? 'description' : 'description_ru']: val })}
+            placeholder={isRu ? 'Опишите вашу недвижимость...' : 'Describe your property...'}
+            translatedPlaceholder={isRu ? 'Describe your property...' : 'Опишите вашу недвижимость...'}
+            multiline
+            rows={3}
+          />
+
+          <div className="p-4 bg-muted rounded-lg">
+            <p className="text-sm text-muted-foreground">
+              💡 {isRu 
+                ? 'После добавления объект будет проверен модератором UNO за 24 часа.' 
+                : "After adding, the property will be reviewed by UNO within 24 hours."}
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>
   );
 }
+
+export const PricingStep = memo(PricingStepInner);

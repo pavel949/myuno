@@ -1,4 +1,4 @@
-import { Home, MapPin, Upload, DollarSign, Settings, FileText, Users } from 'lucide-react';
+import { Home, MapPin, Upload, DollarSign } from 'lucide-react';
 
 export interface WizardStep {
   id: string;
@@ -9,22 +9,18 @@ export interface WizardStep {
   descriptionRu?: string;
 }
 
+/**
+ * Streamlined 4-step wizard (reduced from 7)
+ * Combines: ownership+basic+management → basic, pricing+description → pricing
+ */
 export const propertyWizardSteps: WizardStep[] = [
-  {
-    id: 'ownership',
-    title: 'Ownership',
-    titleRu: 'Владение',
-    icon: <Users className="h-4 w-4" />,
-    description: 'Property ownership',
-    descriptionRu: 'Тип владения',
-  },
   {
     id: 'basic',
     title: 'Basic Info',
     titleRu: 'Основное',
     icon: <Home className="h-4 w-4" />,
-    description: 'Property type and specs',
-    descriptionRu: 'Тип и характеристики',
+    description: 'Type, specs & ownership',
+    descriptionRu: 'Тип, характеристики и владение',
   },
   {
     id: 'location',
@@ -44,26 +40,10 @@ export const propertyWizardSteps: WizardStep[] = [
   },
   {
     id: 'pricing',
-    title: 'Pricing',
-    titleRu: 'Цены',
+    title: 'Pricing & Submit',
+    titleRu: 'Цены и отправка',
     icon: <DollarSign className="h-4 w-4" />,
-    description: 'Rates and terms',
-    descriptionRu: 'Тарифы и условия',
-  },
-  {
-    id: 'management',
-    title: 'Management',
-    titleRu: 'Управление',
-    icon: <Settings className="h-4 w-4" />,
-    description: 'Service level',
-    descriptionRu: 'Уровень сервиса',
-  },
-  {
-    id: 'description',
-    title: 'Description',
-    titleRu: 'Описание',
-    icon: <FileText className="h-4 w-4" />,
-    description: 'Details & submit',
-    descriptionRu: 'Детали и отправка',
+    description: 'Rates, terms & description',
+    descriptionRu: 'Тарифы, условия и описание',
   },
 ];

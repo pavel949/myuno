@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -108,6 +108,84 @@ export function usePropertyFinancialsFull(propertyId?: string) {
       const { data, error } = await query;
       if (error) throw error;
       return data as unknown as PropertyFinancialFull[];
+    },
+    enabled: !!user,
+  });
+}
+
+/**
+ * Cursor-based paginated financials for scalability
+ * Uses transaction_date as cursor for efficient pagination
+ */
+export function usePropertyFinancialsPaginated(propertyId?: string, pageSize = 50) {
+  const { user } = useAuth();
+
+  return useInfiniteQuery({
+    queryKey: ['property-financials-paginated', user?.id, propertyId, pageSize],
+    queryFn: async ({ pageParam }) => {
+      if (!user) return { data: [], nextCursor: null, hasMore: false };
+      
+      let query = supabase
+        .from('property_financials')
+        .select('*, property:owner_properties(id, title, title_ru)')
+        .eq('owner_id', user.id)
+        .order('transaction_date', { ascending: false })
+        .limit(pageSize + 1); // Fetch one extra to determine if there's more
+      
+      if (propertyId) {
+        query = query.eq('property_id', propertyId);
+      }
+      
+      // Cursor-based pagination using transaction_date
+      if (pageParam) {
+        query = query.lt('transaction_date', pageParam);
+      }
+      
+      const { data, error } = await query;
+      if (error) throw error;
+      
+      const items = data as unknown as PropertyFinancialFull[];
+      const hasMore = items.length > pageSize;
+      const paginatedItems = hasMore ? items.slice(0, pageSize) : items;
+      const nextCursor = hasMore && paginatedItems.length > 0 
+        ? paginatedItems[paginatedItems.length - 1].transaction_date 
+        : null;
+      
+      return {
+        data: paginatedItems,
+        nextCursor,
+        hasMore,
+      };
+    },
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    enabled: !!user,
+  });
+}
+
+/**
+ * Get total count of financials for display
+ */
+export function usePropertyFinancialsCount(propertyId?: string) {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['property-financials-count', user?.id, propertyId],
+    queryFn: async () => {
+      if (!user) return 0;
+      
+      let query = supabase
+        .from('property_financials')
+        .select('id', { count: 'exact', head: true })
+        .eq('owner_id', user.id);
+      
+      if (propertyId) {
+        query = query.eq('property_id', propertyId);
+      }
+      
+      const { count, error } = await query;
+      if (error) throw error;
+      return count || 0;
     },
     enabled: !!user,
   });

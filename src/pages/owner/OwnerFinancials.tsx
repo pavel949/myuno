@@ -4,9 +4,10 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOwnerProperties } from '@/hooks/usePropertyCare';
 import { 
-  usePropertyFinancialsFull, 
+  usePropertyFinancialsPaginated, 
   useFinancialStats,
   useDeleteFinancial,
+  usePropertyFinancialsCount,
   INCOME_CATEGORIES,
   EXPENSE_CATEGORIES,
   PropertyFinancialFull
@@ -39,7 +40,7 @@ import {
   DollarSign, TrendingUp, TrendingDown, Plus,
   ArrowUpCircle, ArrowDownCircle, Receipt, Calendar,
   MoreVertical, Trash2, Edit, Building, BarChart3,
-  Paperclip, Zap, Download
+  Paperclip, Zap, Download, Loader2
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -73,13 +74,28 @@ export default function OwnerFinancials() {
   });
 
   const { data: properties } = useOwnerProperties();
-  const { data: financials, isLoading } = usePropertyFinancialsFull(
+  const { 
+    data: financialsData, 
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = usePropertyFinancialsPaginated(
+    selectedProperty === 'all' ? undefined : selectedProperty
+  );
+  const { data: totalCount } = usePropertyFinancialsCount(
     selectedProperty === 'all' ? undefined : selectedProperty
   );
   const { data: stats } = useFinancialStats(
     selectedProperty === 'all' ? undefined : selectedProperty
   );
   const deleteFinancial = useDeleteFinancial();
+
+  // Flatten paginated data
+  const financials = useMemo(() => {
+    if (!financialsData?.pages) return [];
+    return financialsData.pages.flatMap(page => page.data);
+  }, [financialsData]);
 
   // Filter financials by date range and type
   const filteredFinancials = useMemo(() => {
@@ -367,6 +383,43 @@ export default function OwnerFinancials() {
                   onViewReceipt={item.receipt_url ? () => setViewReceiptUrl(item.receipt_url!) : undefined}
                 />
               ))
+            )}
+            
+            {/* Load More Button */}
+            {hasNextPage && (
+              <div className="pt-4">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => fetchNextPage()}
+                  disabled={isFetchingNextPage}
+                >
+                  {isFetchingNextPage ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {isRu ? 'Загрузка...' : 'Loading...'}
+                    </>
+                  ) : (
+                    <>
+                      {isRu ? 'Загрузить ещё' : 'Load More'}
+                      {totalCount && financials.length < totalCount && (
+                        <span className="ml-2 text-muted-foreground">
+                          ({financials.length} / {totalCount})
+                        </span>
+                      )}
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+            
+            {/* End of list indicator */}
+            {!hasNextPage && financials.length > 0 && (
+              <p className="text-center text-sm text-muted-foreground py-4">
+                {isRu 
+                  ? `Показано ${financials.length} транзакций` 
+                  : `Showing ${financials.length} transactions`}
+              </p>
             )}
           </TabsContent>
         </Tabs>

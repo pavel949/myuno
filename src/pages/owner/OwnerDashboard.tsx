@@ -1,7 +1,9 @@
+import { Suspense, lazy } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Home } from 'lucide-react';
 import { OwnershipInviteBanner } from '@/components/owner/OwnershipInviteBanner';
 import { 
@@ -13,6 +15,74 @@ import {
   OwnerPerformanceCard,
   BookingSearchBar,
 } from '@/components/owner/dashboard';
+
+// Skeleton components for each section
+function SearchBarSkeleton() {
+  return <Skeleton className="h-12 w-full rounded-xl" />;
+}
+
+function QuickActionsSkeleton() {
+  return (
+    <div className="flex gap-2 overflow-hidden">
+      {[1, 2, 3, 4].map(i => (
+        <Skeleton key={i} className="h-16 w-20 rounded-xl flex-shrink-0" />
+      ))}
+    </div>
+  );
+}
+
+function PortfolioSkeleton() {
+  return (
+    <div className="space-y-3">
+      <Skeleton className="h-5 w-32" />
+      <div className="grid grid-cols-2 gap-3">
+        <Skeleton className="h-48 rounded-xl" />
+        <Skeleton className="h-48 rounded-xl" />
+      </div>
+    </div>
+  );
+}
+
+function OperationsSkeleton() {
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-5 w-32" />
+        <Skeleton className="h-4 w-16" />
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        {[1, 2, 3, 4].map(i => (
+          <Skeleton key={i} className="h-16 rounded-xl" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function FinancesSkeleton() {
+  return (
+    <div className="space-y-3">
+      <Skeleton className="h-5 w-24" />
+      <div className="grid grid-cols-2 gap-2">
+        <Skeleton className="h-20 rounded-xl" />
+        <Skeleton className="h-20 rounded-xl" />
+      </div>
+    </div>
+  );
+}
+
+function PerformanceSkeleton() {
+  return <Skeleton className="h-32 w-full rounded-xl" />;
+}
+
+function CommunicationsSkeleton() {
+  return (
+    <div className="space-y-3">
+      <Skeleton className="h-5 w-36" />
+      <Skeleton className="h-24 rounded-xl" />
+    </div>
+  );
+}
 
 export default function OwnerDashboard() {
   const { language } = useLanguage();
@@ -52,25 +122,39 @@ export default function OwnerDashboard() {
       <OwnershipInviteBanner />
 
       {/* Global Booking Search */}
-      <BookingSearchBar />
+      <Suspense fallback={<SearchBarSkeleton />}>
+        <BookingSearchBar />
+      </Suspense>
 
       {/* Quick Actions - horizontal scroll */}
-      <QuickActionsBar />
+      <Suspense fallback={<QuickActionsSkeleton />}>
+        <QuickActionsBar />
+      </Suspense>
 
       {/* Portfolio Section - Hero with properties */}
-      <PortfolioSection />
+      <Suspense fallback={<PortfolioSkeleton />}>
+        <PortfolioSection />
+      </Suspense>
 
       {/* Performance Metrics - Airbnb style */}
-      <OwnerPerformanceCard />
+      <Suspense fallback={<PerformanceSkeleton />}>
+        <OwnerPerformanceCard />
+      </Suspense>
 
       {/* Operations Section - Today's tasks */}
-      <OperationsSection />
+      <Suspense fallback={<OperationsSkeleton />}>
+        <OperationsSection />
+      </Suspense>
 
       {/* Finances Summary */}
-      <FinancesSummary />
+      <Suspense fallback={<FinancesSkeleton />}>
+        <FinancesSummary />
+      </Suspense>
 
       {/* Communications Section */}
-      <CommunicationsSection />
+      <Suspense fallback={<CommunicationsSkeleton />}>
+        <CommunicationsSection />
+      </Suspense>
     </div>
   );
 }
