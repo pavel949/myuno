@@ -1,203 +1,213 @@
 
-# План: Унификация UX и Дизайн-Системы Главной Страницы
+# План: Унификация загрузчиков в стиле Airbnb
 
-## Обзор проблем
+## Текущие проблемы
 
-Главная страница имеет критические проблемы с визуальной консистентностью:
-- Разные радиусы скругления (xl vs 2xl)
-- Несогласованные тени и границы
-- Три разных паттерна заголовков секций
-- Разная высота изображений в карусках
-- Хаотичная система бейджей
-- Переполненность блоками (12 секций)
-- Дублирование контента (рекомендации показываются 2-3 раза)
+### 1. Критические несоответствия Airbnb-стилю
+
+| Проблема | Где встречается | Airbnb-стандарт |
+|----------|-----------------|-----------------|
+| Классический спиннер (`LoadingSpinner`) | TourDetail, Bookings, Profile, BookingDetail, Admin | **Skeleton**, имитирующий структуру контента |
+| `animate-pulse` анимация | Базовый Skeleton компонент | **Shimmer** (переливающийся градиент слева направо) |
+| Разные радиусы скругления | `rounded-md`, `rounded-lg`, `rounded-xl` | Единый `rounded-2xl` для карточек |
+| Несогласованные размеры | Разные aspect-ratio в скелетонах | Фиксированные пропорции по типу контента |
+
+### 2. Дублирование компонентов
+
+В проекте **5 разных реализаций** скелетонов:
+1. `src/components/ui/skeleton.tsx` — базовый с `animate-pulse`
+2. `src/components/ui/skeleton-card.tsx` — варианты карточек
+3. `src/components/ui/ContentSkeleton.tsx` — списки, таблицы
+4. `src/components/uno/SkeletonCard.tsx` — с попыткой shimmer
+5. `src/pages/Index.tsx` — локальные скелетоны главной страницы
+
+### 3. Страницы с устаревшей загрузкой (спиннеры)
+
+```text
+❌ TourDetail.tsx      → LoadingSpinner (строка 21)
+❌ Profile.tsx         → LoadingState (строка 53-58)
+❌ Bookings.tsx        → LoadingState (строка 151-157)
+❌ BookingDetail.tsx   → LoadingState (строка 194-200)
+❌ YachtDetail.tsx     → Ручная пульсация (строки 26-38)
+```
 
 ---
 
-## Фаза 1: Создание унифицированных компонентов
+## Решение: Airbnb-подобная система загрузчиков
 
-### 1.1 Создать `UnifiedSectionHeader`
+### Фаза 1: Обновление базового Skeleton с Shimmer-эффектом
 
-Единый компонент для всех заголовков секций:
-
-```text
-┌─────────────────────────────────────────────────────────────┐
-│  ┌──────┐                                                   │
-│  │ 🎯   │  Заголовок секции            [Смотреть всё →]    │
-│  │icon  │  Подзаголовок                                     │
-│  └──────┘                                                   │
-└─────────────────────────────────────────────────────────────┘
-```
-
-Параметры:
-- `icon`: emoji или LucideIcon
-- `title` / `titleRu`: заголовок
-- `subtitle` / `subtitleRu`: опционально
-- `seeAllPath`: ссылка "Смотреть всё"
-- `variant`: `default` | `gradient` (с фоновой подложкой)
-
-### 1.2 Создать `UnifiedContentCard`
-
-Единая карточка контента с вариантами:
-
-```text
-Варианты:
-┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
-│   [IMAGE 4:3]    │  │   [IMAGE 1:1]    │  │  HERO VARIANT    │
-│                  │  │                  │  │   [IMAGE 16:9]   │
-├──────────────────┤  ├──────────────────┤  │   + overlay      │
-│ Title            │  │ Title            │  │   + big text     │
-│ Subtitle • ⭐4.8 │  │ Price            │  │                  │
-│ Price            │  │ [+] cart         │  │                  │
-└──────────────────┘  └──────────────────┘  └──────────────────┘
-   experience           product              featured
-```
-
-Фиксированные параметры:
-- Радиус: `rounded-2xl` (16px) — везде
-- Тень: `shadow-sm` → `shadow-md` on hover
-- Изображение: `aspect-[4/3]` для опыта, `aspect-square` для товаров
-- Hover: `scale-[1.03]` на изображении, `-translate-y-0.5` на карточке
-
-### 1.3 Унифицировать систему бейджей
-
-Создать `BadgeSystem` в `designTokens.ts`:
-
-| Тип | Цвет | Использование |
-|-----|------|---------------|
-| `new` | `bg-blue-500` | Новый товар/услуга |
-| `hot` | `from-amber-500 to-orange-500` | Популярное |
-| `sale` | `bg-red-500` | Скидка (-X%) |
-| `featured` | `from-primary to-primary-600` | Рекомендуем |
-| `type` | `bg-muted` | Категория (Тур/Активность) |
-| `urgent` | `bg-destructive` | SOS/24/7 |
-
----
-
-## Фаза 2: Упрощение структуры страницы
-
-### 2.1 Новая иерархия (6 блоков вместо 12)
-
-```text
-┌─────────────────────────────────────────────────────────────┐
-│ 1. HERO BLOCK (объединённый)                                │
-│    ┌─────────────────────────────────────────────────────┐  │
-│    │ 📍 Phuket  |  myUNO  |  🔍 Search                   │  │
-│    │ "Экосистема для жизни за рубежом"                   │  │
-│    │ [UNO ALERT 24/7]                                    │  │
-│    └─────────────────────────────────────────────────────┘  │
-├─────────────────────────────────────────────────────────────┤
-│ 2. MODE + CATEGORIES                                        │
-│    [Услуги] [Товары]                                        │
-│    🔥 Популярное  📍 Рядом  🎁 Акции  💅 Красота ...       │
-├─────────────────────────────────────────────────────────────┤
-│ 3. SMART WIDGET (персонализация)                            │
-│    Добрый день! Погода 31°C | Сегодня: Фестиваль           │
-├─────────────────────────────────────────────────────────────┤
-│ 4. QUICK ACTIONS (6 кнопок вместо 9)                        │
-│    [Жильё] [Транспорт] [Яхты] [Туры] [Маркет] [Ещё]        │
-├─────────────────────────────────────────────────────────────┤
-│ 5. DISCOVERY CAROUSEL (единый)                              │
-│    "Лучшее на Пхукете"                                      │
-│    [HERO] [card] [card] [card] →                            │
-├─────────────────────────────────────────────────────────────┤
-│ 6. B2B SECTION (внизу)                                      │
-│    [Владельцам] [Партнёрам] [Кошелёк]                       │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### 2.2 Что объединяем
-
-| Было | Станет |
-|------|--------|
-| HeroBanner + InlineSearch + SafetyBanner | **Unified Hero Block** |
-| ContentModeToggle + CategoryRibbon | **Mode + Categories** (одна секция) |
-| ExperiencesSection + RecommendedCarousel | **Discovery Carousel** (один компонент) |
-| QuickActionsGrid (9 элементов) | **6 ключевых действий** |
-
-### 2.3 Убираем дублирование
-
-- **SmartWidget** остаётся (уникальный персонализированный контент)
-- **RecommendedCarousel** сливается с ExperiencesSection в единый Discovery блок
-- **CategoryRibbon** становится частью Mode Toggle секции
-
----
-
-## Фаза 3: Технические изменения
-
-### 3.1 Новые/обновляемые файлы
-
-| Файл | Действие |
-|------|----------|
-| `src/lib/designTokens.ts` | Добавить `BADGE_SYSTEM`, `CARD_VARIANTS` |
-| `src/components/ui/unified-section-header.tsx` | Создать |
-| `src/components/ui/unified-content-card.tsx` | Создать |
-| `src/components/home/HeroBlock.tsx` | Создать (объединение Hero+Search+Safety) |
-| `src/components/home/DiscoveryCarousel.tsx` | Создать (замена 2 каруселей) |
-| `src/components/home/ExperiencesSection.tsx` | Удалить или рефакторить |
-| `src/components/home/RecommendedCarousel.tsx` | Удалить |
-| `src/components/home/QuickActionsGrid.tsx` | Упростить до 6 элементов |
-| `src/pages/Index.tsx` | Обновить структуру |
-
-### 3.2 Design Tokens (дополнения)
+Заменить `animate-pulse` на `animate-shimmer` с градиентным фоном:
 
 ```typescript
-// designTokens.ts additions
-export const BADGE_SYSTEM = {
-  new: 'bg-blue-500 text-white',
-  hot: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white',
-  sale: 'bg-red-500 text-white',
-  featured: 'bg-gradient-to-r from-primary to-primary-600 text-white',
-  type: 'bg-muted text-foreground',
-  urgent: 'bg-destructive text-destructive-foreground',
-} as const;
+// src/components/ui/skeleton.tsx (обновление)
+const Skeleton = React.forwardRef<...>(({ className, ...props }, ref) => {
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "rounded-2xl bg-muted relative overflow-hidden",
+        "before:absolute before:inset-0",
+        "before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent",
+        "before:animate-shimmer",
+        className
+      )}
+      style={{ backgroundSize: '200% 100%' }}
+      {...props}
+    />
+  );
+});
+```
 
-export const CARD_HEIGHTS = {
-  experience: 'aspect-[4/3]',  // 144px на карточке 192px ширины
-  product: 'aspect-square',     // 1:1
-  hero: 'aspect-[16/9]',        // широкий для hero
-} as const;
+### Фаза 2: Создание унифицированных скелетонов страниц
 
-export const CAROUSEL_CARD_WIDTHS = {
-  hero: 'w-80',      // 320px
-  standard: 'w-64',  // 256px  
-  compact: 'w-56',   // 224px
-} as const;
+Новый файл: `src/components/ui/page-skeletons.tsx`
+
+```text
+┌─────────────────────────────────────────────────────────────┐
+│ 1. DetailPageSkeleton                                       │
+│    ┌─────────────────────────────────────────────────────┐  │
+│    │ [████████████ Hero Image ████████████] aspect-video │  │
+│    ├─────────────────────────────────────────────────────┤  │
+│    │ [████████] Title                                    │  │
+│    │ [████] Subtitle      [███] Badge                    │  │
+│    │                                                     │  │
+│    │ ┌───────┐ ┌───────┐ ┌───────┐ ┌───────┐            │  │
+│    │ │ Stat  │ │ Stat  │ │ Stat  │ │ Stat  │ 4-col grid │  │
+│    │ └───────┘ └───────┘ └───────┘ └───────┘            │  │
+│    │                                                     │  │
+│    │ [██████████████████████████████] Description       │  │
+│    │ [████████████████████████]                         │  │
+│    └─────────────────────────────────────────────────────┘  │
+├─────────────────────────────────────────────────────────────┤
+│ 2. ListPageSkeleton                                         │
+│    ┌─────────────────────────────────────────────────────┐  │
+│    │ [████████] Header                                   │  │
+│    │                                                     │  │
+│    │ ┌──────────────┐  ┌──────────────┐                  │  │
+│    │ │ [Image 4:3]  │  │ [Image 4:3]  │ 2-col grid      │  │
+│    │ │ Title        │  │ Title        │                  │  │
+│    │ │ Subtitle     │  │ Subtitle     │                  │  │
+│    │ └──────────────┘  └──────────────┘                  │  │
+│    │ ┌──────────────┐  ┌──────────────┐                  │  │
+│    │ │ [Image 4:3]  │  │ [Image 4:3]  │                  │  │
+│    │ │ ...          │  │ ...          │                  │  │
+│    │ └──────────────┘  └──────────────┘                  │  │
+│    └─────────────────────────────────────────────────────┘  │
+├─────────────────────────────────────────────────────────────┤
+│ 3. BookingListSkeleton                                      │
+│    ┌─────────────────────────────────────────────────────┐  │
+│    │ ┌──────┐ [████████████] Title     [████] Badge     │  │
+│    │ │ Icon │ [████████] Subtitle      [████] Price     │  │
+│    │ └──────┘                                            │  │
+│    │ ─────────────────────────────────────────────────── │  │
+│    │ ┌──────┐ [████████████] Title     [████] Badge     │  │
+│    │ │ Icon │ [████████] Subtitle      [████] Price     │  │
+│    │ └──────┘                                            │  │
+│    └─────────────────────────────────────────────────────┘  │
+├─────────────────────────────────────────────────────────────┤
+│ 4. ProfileSkeleton                                          │
+│    ┌─────────────────────────────────────────────────────┐  │
+│    │       ┌────────────┐                                │  │
+│    │       │  Avatar    │ w-24 h-24 rounded-full        │  │
+│    │       │ [████████] │                                │  │
+│    │       └────────────┘                                │  │
+│    │       [████████████] Name                           │  │
+│    │       [████████] Email                              │  │
+│    │                                                     │  │
+│    │ ┌─────────────────────────────────────────────────┐ │  │
+│    │ │ [Icon] [████████████████████████████████] ▶     │ │  │
+│    │ │ [Icon] [████████████████████████████████] ▶     │ │  │
+│    │ │ [Icon] [████████████████████████████████] ▶     │ │  │
+│    │ └─────────────────────────────────────────────────┘ │  │
+│    └─────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Фаза 3: Миграция страниц на скелетоны
+
+| Страница | Текущее | Новое |
+|----------|---------|-------|
+| `TourDetail.tsx` | `LoadingSpinner` | `DetailPageSkeleton` |
+| `YachtDetail.tsx` | Ручная пульсация | `DetailPageSkeleton` |
+| `ExperienceDetail.tsx` | Спиннер | `DetailPageSkeleton` |
+| `Profile.tsx` | `LoadingState` | `ProfileSkeleton` |
+| `Bookings.tsx` | `LoadingState` | `BookingListSkeleton` |
+| `BookingDetail.tsx` | `LoadingState` | `DetailPageSkeleton` (variant="booking") |
+
+### Фаза 4: Консолидация компонентов
+
+**Удалить дубликаты:**
+- `src/components/uno/SkeletonCard.tsx` → мигрировать на `skeleton-card.tsx`
+- Локальные скелетоны в `Index.tsx` → вынести в общий модуль
+
+**Единая точка входа:**
+```typescript
+// src/components/ui/skeletons/index.ts
+export { Skeleton } from './skeleton';
+export { SkeletonCard, SkeletonGrid, SkeletonList } from './skeleton-card';
+export { DetailPageSkeleton, ListPageSkeleton, ProfileSkeleton, BookingListSkeleton } from './page-skeletons';
 ```
 
 ---
 
-## Фаза 4: UX Improvements
+## Технические изменения
 
-### 4.1 Визуальная иерархия
+### Файлы для создания
+| Файл | Описание |
+|------|----------|
+| `src/components/ui/page-skeletons.tsx` | Унифицированные скелетоны страниц |
 
-- **Hero Block**: Золотой акцент, крупный текст, встроенный поиск
-- **Mode Toggle**: Яркий индикатор режима (золото/изумруд)
-- **Quick Actions**: 6 элементов в 2 ряда (не 9 в 3 ряда)
-- **Discovery Carousel**: Hero-карточка первой + стандартные
+### Файлы для обновления
+| Файл | Изменение |
+|------|-----------|
+| `src/components/ui/skeleton.tsx` | Shimmer-анимация вместо pulse |
+| `src/pages/tours/TourDetail.tsx` | Заменить спиннер на DetailPageSkeleton |
+| `src/pages/yachts/YachtDetail.tsx` | Заменить ручной скелетон на DetailPageSkeleton |
+| `src/pages/Profile.tsx` | Заменить LoadingState на ProfileSkeleton |
+| `src/pages/Bookings.tsx` | Заменить LoadingState на BookingListSkeleton |
+| `src/pages/BookingDetail.tsx` | Заменить LoadingState на DetailPageSkeleton |
 
-### 4.2 Улучшение Discovery
-
-Единая карусель "Лучшее на Пхукете" с миксом контента:
-- 1 Featured experience (hero card)
-- 2-3 Tours
-- 2-3 Activities
-- Данные из одного запроса с сортировкой по rating
-
-### 4.3 Responsive поведение
-
-| Breakpoint | Quick Actions | Carousel cards |
-|------------|---------------|----------------|
-| < 375px | 2 колонки | 200px |
-| 375-640px | 3 колонки | 240px hero / 200px |
-| > 640px | 3 колонки | 320px hero / 256px |
+### Файлы для удаления/рефакторинга
+| Файл | Действие |
+|------|----------|
+| `src/components/uno/SkeletonCard.tsx` | Удалить (дубликат) |
+| `src/components/uno/LoadingSpinner.tsx` | Обновить LoadingState → использовать скелетоны |
 
 ---
 
-## Ожидаемые результаты
+## Airbnb-стандарты для соблюдения
 
-1. **Уменьшение визуального шума**: 6 секций вместо 12
-2. **Консистентность**: Единые радиусы, тени, бейджи
-3. **Улучшение discovery**: Один сильный discovery-блок вместо 2 слабых
-4. **Ускорение загрузки**: Меньше компонентов = меньше рендеров
-5. **Профессиональный вид**: Klook/Airbnb-level design consistency
+### 1. Shimmer-анимация
+```css
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to { background-position: 200% 0; }
+}
+animation: shimmer 2s infinite linear;
+```
+
+### 2. Единые радиусы
+- Карточки: `rounded-2xl` (16px)
+- Мелкие элементы: `rounded-full` или `rounded-lg`
+- Кнопки в скелетонах: `rounded-xl`
+
+### 3. Пропорции изображений
+- Детальная страница (Hero): `aspect-video` (16:9)
+- Карточки в сетке: `aspect-[4/3]`
+- Продукты: `aspect-square`
+- Аватары: `rounded-full w-10 h-10`
+
+### 4. Контрастность
+- Цвет скелетона: `bg-muted` (низкий контраст с фоном)
+- Shimmer overlay: `via-white/10` (очень мягкий)
+
+---
+
+## Ожидаемый результат
+
+1. **Единообразие**: Все загрузчики выглядят как Airbnb
+2. **Нет спиннеров**: Пользователь видит структуру контента до загрузки
+3. **Плавность**: Shimmer-эффект создаёт ощущение активности
+4. **Меньше CLS**: Layout Shift минимизирован благодаря правильным пропорциям
+5. **Чистый код**: Один источник истины для всех скелетонов
