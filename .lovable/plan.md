@@ -1,129 +1,169 @@
 
-# План: Плавный переход размеров карточек в Best of Phuket
+# План: Адаптивная главная страница на основе выбранных ролей
 
-## Текущая проблема
+## Проблема
 
-Сейчас резкий скачок размеров между Hero и остальными карточками:
+Сейчас существуют **две параллельные системы выбора роли**:
+1. **PersonaSelector** — выбор персон (tourist/resident/property_owner), влияет на QuickActionsGrid
+2. **AudienceCards в HeroBlock** — ведут на `/discover?audience=...`, не связаны с персонами
 
-```text
-┌─────────────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐
-│                 │  │          │  │          │  │          │
-│   w-80, h-48    │  │ w-64,h-36│  │ w-64,h-36│  │ w-64,h-36│
-│   (320x192)     │  │ (256x144)│  │ (256x144)│  │ (256x144)│
-│                 │  │          │  │          │  │          │
-└─────────────────┘  └──────────┘  └──────────┘  └──────────┘
-      Hero               ↑ Резкий скачок на 25%
-```
-
-**Разница:** Hero на 25% шире и на 33% выше — слишком заметно.
+При этом:
+- Карточки аудиторий не используют систему персон
+- Переход для Владельцев ведёт на пустоватую страницу вместо готового лендинга `/owner/landing`
+- Главная страница не адаптируется визуально под выбранные роли
 
 ---
 
-## Решение: Трёхуровневая система размеров
+## Решение: Единая адаптивная система
 
-Введём промежуточный размер для 2-й и 3-й карточек:
+### Концепция
+
+Карточки аудиторий в HeroBlock **становятся визуальными переключателями персон** и одновременно:
+1. **Активируют/деактивируют персону** (toggle)
+2. **Адаптируют контент главной страницы** под выбранные роли
+3. **При необходимости** — ведут на специализированные страницы
 
 ```text
-┌─────────────────┐  ┌─────────────┐  ┌──────────┐  ┌──────────┐
-│                 │  │             │  │          │  │          │
-│   w-80, h-48    │  │  w-72,h-42  │  │ w-64,h-36│  │ w-64,h-36│
-│   HERO (320)    │  │  MEDIUM(288)│  │STANDARD  │  │STANDARD  │
-│                 │  │             │  │  (256)   │  │  (256)   │
-└─────────────────┘  └─────────────┘  └──────────┘  └──────────┘
-      index=0           index=1,2        index=3+      index=4+
-                     ↑ Плавный переход
+┌─────────────────────────────────────────────────────────────┐
+│                    ГЛАВНАЯ СТРАНИЦА                         │
+├─────────────────────────────────────────────────────────────┤
+│  [✓ Турист]   [✓ Резидент]   [  Владелец →]                │
+│     ↓              ↓              ↓                         │
+│  Toggle ON    Toggle ON     Navigate to /owner/landing      │
+├─────────────────────────────────────────────────────────────┤
+│  QuickActions: комбинация Tourist + Resident действий       │
+│  Discovery: туры + медицина + визы (смешанный контент)      │
+│  SmartWidget: персонализированные рекомендации              │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
 ## Технические изменения
 
-### 1. Обновить `designTokens.ts`
+### 1. Обновить HeroBlock.tsx — интеграция с персонами
 
-Добавить промежуточный размер:
+**Логика кликов по карточкам:**
+
+| Роль | Действие при клике |
+|------|-------------------|
+| Турист | Toggle персоны `tourist` |
+| Резидент | Toggle персоны `resident` |
+| Владелец | Navigate → `/owner/landing` (готовая страница) |
 
 ```typescript
-export const CAROUSEL_CARD_WIDTHS = {
-  hero: 'w-80',      // 320px - первая карточка
-  medium: 'w-72',    // 288px - вторая карточка (NEW)
-  standard: 'w-64',  // 256px - остальные
-} as const;
+// В HeroBlock.tsx
+import { useUserPersonas, UserPersona } from '@/hooks/useUserPersonas';
 
-export const CAROUSEL_IMAGE_HEIGHTS = {
-  hero: 'h-48',      // 192px
-  medium: 'h-42',    // 168px (NEW)
-  standard: 'h-36',  // 144px
-} as const;
+const { personas, togglePersona } = useUserPersonas();
+
+const handleAudienceClick = (audienceId: string) => {
+  if (audienceId === 'owners') {
+    // Владельцы — переход на специальный лендинг
+    navigate('/owner/landing');
+  } else {
+    // Tourist/Resident — toggle персоны
+    const personaMap: Record<string, UserPersona> = {
+      tourists: 'tourist',
+      residents: 'resident',
+    };
+    const persona = personaMap[audienceId];
+    if (persona) {
+      togglePersona(persona);
+    }
+  }
+};
 ```
 
-### 2. Обновить `DiscoveryCarousel.tsx`
-
-Заменить бинарную логику `isHero` на трёхуровневую:
+**Визуальное состояние карточек:**
 
 ```typescript
-const getCardSize = (index: number) => {
-  if (index === 0) return 'hero';
-  if (index === 1) return 'medium';
-  return 'standard';
+// Показывать активное состояние для выбранных персон
+const isActive = (audienceId: string) => {
+  const personaMap = { tourists: 'tourist', residents: 'resident' };
+  const persona = personaMap[audienceId];
+  return persona ? personas.includes(persona) : false;
+};
+```
+
+### 2. Убрать отдельный PersonaSelector
+
+Поскольку карточки аудиторий теперь выполняют функцию выбора персон, компонент `PersonaSelector` можно убрать с главной страницы (или оставить в настройках профиля).
+
+### 3. Адаптация DiscoveryCarousel по персонам
+
+Добавить фильтрацию контента по выбранным персонам:
+
+```typescript
+// В DiscoveryCarousel.tsx
+const { personas } = useUserPersonas();
+
+// Категории для каждой персоны
+const PERSONA_CATEGORIES = {
+  tourist: ['tours', 'yachts', 'transport', 'restaurants', 'events'],
+  resident: ['visa', 'medical', 'legal', 'banking', 'insurance'],
+  property_owner: ['cleaning', 'maintenance', 'property-management'],
 };
 
-// В JSX:
-const cardSize = getCardSize(index);
+// Собрать категории из всех выбранных персон
+const relevantCategories = personas.flatMap(p => PERSONA_CATEGORIES[p]);
 
-<div className={cn(
-  CARD_STYLES.interactive,
-  "flex-shrink-0 cursor-pointer",
-  CAROUSEL_CARD_WIDTHS[cardSize]
-)}>
-  <div className={cn(
-    "relative overflow-hidden",
-    CAROUSEL_IMAGE_HEIGHTS[cardSize]
-  )}>
-    ...
-  </div>
-</div>
+// Фильтровать или приоритизировать контент
 ```
 
-### 3. Убрать overlay/белый текст с medium-карточки
+### 4. Визуальные индикаторы активных персон
 
-Medium-карточка будет иметь:
-- Промежуточный размер
-- Стандартный layout (текст под изображением)
-- Без gradient overlay
+Карточки аудиторий показывают состояние:
 
----
-
-## Визуальное сравнение
-
-### БЫЛО (резкий скачок):
-```
-[████████████████]  [██████████]  [██████████]
-     320px              256px         256px
-       ↓                  ↓
-   -20% сразу        одинаковые
-```
-
-### СТАНЕТ (плавный переход):
-```
-[████████████████]  [█████████████]  [██████████]
-     320px              288px            256px
-       ↓                  ↓                ↓
-   -10%               -10%            базовый
+```text
+НЕАКТИВНО:                      АКТИВНО (выбрано):
+┌─────────────────┐             ┌─────────────────┐
+│  ✈️             │             │  ✈️  ✓          │ ← чекмарк
+│  Туристам       │             │  Туристам       │
+│  border-default │             │  border-primary │ ← подсветка
+└─────────────────┘             │  ring-2         │
+                                └─────────────────┘
 ```
 
 ---
 
 ## Файлы для изменения
 
-| Файл | Изменение |
+| Файл | Изменения |
 |------|-----------|
-| `src/lib/designTokens.ts` | Добавить `medium` размер в CAROUSEL_CARD_WIDTHS |
-| `src/components/home/DiscoveryCarousel.tsx` | Трёхуровневая логика размеров |
+| `src/components/home/HeroBlock.tsx` | Интеграция с useUserPersonas, активные состояния, роутинг |
+| `src/components/home/DiscoveryCarousel.tsx` | Фильтрация/приоритизация по персонам |
+| `src/pages/Index.tsx` | Убрать PersonaSelector (опционально) |
+
+---
+
+## UX-поток
+
+```text
+Пользователь на главной странице:
+
+1. Видит 3 карточки: [Туристам] [Резидентам] [Владельцам]
+
+2. Кликает "Туристам":
+   - Карточка получает активное состояние (border-primary, чекмарк)
+   - QuickActions обновляются: Туры, Яхты, Транспорт...
+   - DiscoveryCarousel показывает туристический контент
+   
+3. Кликает "Резидентам" (добавляет):
+   - Обе карточки активны
+   - QuickActions: комбинация Tourist + Resident
+   - DiscoveryCarousel: смешанный контент
+
+4. Кликает "Владельцам":
+   - Переход на /owner/landing с приглашением залистить объект
+```
 
 ---
 
 ## Ожидаемый результат
 
-1. **Плавный визуальный переход** — Hero → Medium → Standard
-2. **Сохранение Hero-акцента** — первая карточка остаётся выделенной
-3. **Меньше "ступенчатости"** — размеры уменьшаются постепенно
+1. **Единая система** — карточки аудиторий = селектор персон
+2. **Множественный выбор** — можно быть и туристом, и резидентом
+3. **Адаптивный контент** — QuickActions + Discovery меняются
+4. **Владельцы** — сразу видят полноценный лендинг с CTA "Разместить объект"
+5. **Визуальный фидбек** — активные роли подсвечены
