@@ -29,9 +29,10 @@ export function VendorLayout({ children }: VendorLayoutProps) {
     <SidebarProvider defaultOpen={!isMobile}>
       <div className="min-h-screen flex w-full bg-background">
         <VendorSidebar />
-        <SidebarInset className="flex-1 flex flex-col">
+        <SidebarInset className="flex-1 flex flex-col min-h-0">
           <VendorHeader />
-          <main className="flex-1 overflow-auto pb-20 md:pb-4">
+          {/* SINGLE SCROLL CONTAINER - P0 Critical */}
+          <main className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain scroll-smooth pb-20 md:pb-4">
             {children || <Outlet />}
           </main>
         </SidebarInset>
