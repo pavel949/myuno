@@ -76,6 +76,21 @@ export function OwnerHeader() {
       {/* Sidebar trigger */}
       <SidebarTrigger data-sidebar="trigger" className="-ml-1" />
       
+      {/* Back to main app button - Desktop */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => navigate('/')}
+        className="hidden md:flex items-center gap-1.5 text-muted-foreground hover:text-foreground"
+        title={isRussian ? 'На главную' : 'Back to Home'}
+      >
+        <Home className="h-4 w-4" />
+        <span className="text-sm">{isRussian ? 'На главную' : 'Home'}</span>
+      </Button>
+      
+      {/* Separator */}
+      <div className="hidden md:block h-5 w-px bg-border" />
+      
       {/* Breadcrumbs */}
       <Breadcrumb className="hidden md:flex">
         <BreadcrumbList>
@@ -84,11 +99,10 @@ export function OwnerHeader() {
               onClick={() => navigate('/owner')}
               className="flex items-center gap-1 cursor-pointer hover:text-foreground"
             >
-              <Home className="h-3.5 w-3.5" />
-              <span className="sr-only">Home</span>
+              <span>{isRussian ? 'Панель' : 'Dashboard'}</span>
             </BreadcrumbLink>
           </BreadcrumbItem>
-          {breadcrumbs.map((crumb) => (
+          {breadcrumbs.slice(1).map((crumb) => (
             <React.Fragment key={crumb.path}>
               <BreadcrumbSeparator>
                 <ChevronRight className="h-3.5 w-3.5" />
@@ -110,8 +124,17 @@ export function OwnerHeader() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      {/* Mobile title */}
-      <h1 className="md:hidden font-semibold text-lg">{pageTitle}</h1>
+      {/* Mobile: Back button + title */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => navigate('/')}
+        className="md:hidden -ml-2"
+        title={isRussian ? 'На главную' : 'Home'}
+      >
+        <Home className="h-4 w-4" />
+      </Button>
+      <h1 className="md:hidden font-semibold text-lg flex-1">{pageTitle}</h1>
 
       {/* Spacer */}
       <div className="flex-1" />
