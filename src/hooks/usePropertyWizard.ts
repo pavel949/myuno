@@ -27,6 +27,7 @@ export interface OwnershipData {
 export interface PropertyFormData {
   title: string;
   title_ru: string;
+  internal_name: string;
   address: string;
   district: string;
   lat?: number;
@@ -70,6 +71,7 @@ export interface PropertyFormData {
 const initialFormData: PropertyFormData = {
   title: '',
   title_ru: '',
+  internal_name: '',
   address: '',
   district: '',
   lat: undefined,
@@ -165,6 +167,7 @@ export function usePropertyWizard() {
       setFormData({
         title: sourceProperty.title || '',
         title_ru: sourceProperty.title_ru || '',
+        internal_name: (sourceProperty as any).internal_name || '',
         address: sourceProperty.address || '',
         district: sourceProperty.district || '',
         lat: sourceProperty.lat ?? undefined,

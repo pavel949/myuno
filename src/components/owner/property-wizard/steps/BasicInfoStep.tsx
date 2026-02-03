@@ -114,18 +114,33 @@ export function BasicInfoStep({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <TranslatableInput
-            label={isRu ? 'Название' : 'Title'}
-            value={isRu ? formData.title_ru : formData.title}
-            translatedValue={isRu ? formData.title : formData.title_ru}
-            onChange={(val) => updateFormData({ [isRu ? 'title_ru' : 'title']: val })}
-            onTranslatedChange={(val) => updateFormData({ [isRu ? 'title' : 'title_ru']: val })}
-            placeholder={isRu ? 'Современная вилла с бассейном' : 'Modern Villa with Pool'}
-            translatedPlaceholder={isRu ? 'Modern Villa with Pool' : 'Современная вилла с бассейном'}
-          />
+              <TranslatableInput
+                label={isRu ? 'Название' : 'Title'}
+                value={isRu ? formData.title_ru : formData.title}
+                translatedValue={isRu ? formData.title : formData.title_ru}
+                onChange={(val) => updateFormData({ [isRu ? 'title_ru' : 'title']: val })}
+                onTranslatedChange={(val) => updateFormData({ [isRu ? 'title' : 'title_ru']: val })}
+                placeholder={isRu ? 'Современная вилла с бассейном' : 'Modern Villa with Pool'}
+                translatedPlaceholder={isRu ? 'Modern Villa with Pool' : 'Современная вилла с бассейном'}
+              />
 
-          <div className="space-y-2">
-            <Label>{isRu ? 'Тип недвижимости' : 'Property Type'} *</Label>
+              {/* Internal Name */}
+              <div className="space-y-2">
+                <Label>{isRu ? 'Внутреннее название' : 'Internal Name'}</Label>
+                <Input
+                  value={formData.internal_name || ''}
+                  onChange={(e) => updateFormData({ internal_name: e.target.value })}
+                  placeholder={isRu ? 'Только для вас (не публикуется)' : 'Private note (not published)'}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {isRu 
+                    ? 'Не отображается гостям. Например: "Дача бабушки"' 
+                    : 'Not shown to guests. E.g.: "Grandma\'s cottage"'}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label>{isRu ? 'Тип недвижимости' : 'Property Type'} *</Label>
             <Select 
               value={formData.property_type}
               onValueChange={(value) => updateFormData({ property_type: value })}
