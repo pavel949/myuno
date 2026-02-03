@@ -155,24 +155,28 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
 
   return (
     <div className={cn("w-full", className)}>
-      {/* Mobile Search Bar */}
+      {/* Mobile Search Bar - Enhanced visibility */}
       <div className="md:hidden">
         <motion.div 
-          className="flex items-center gap-3 p-3 bg-card rounded-full border shadow-lg cursor-pointer"
+          className="flex items-center gap-3 p-3 bg-gradient-to-r from-primary/5 via-primary/10 to-accent/10 rounded-2xl border-2 border-primary/20 shadow-xl cursor-pointer ring-2 ring-primary/10 ring-offset-2 ring-offset-background"
           onClick={() => setIsOpen(true)}
           whileTap={{ scale: 0.98 }}
+          whileHover={{ scale: 1.01 }}
         >
-          <div className="bg-primary/10 p-2.5 rounded-full">
-            <Search className="w-5 h-5 text-primary" />
+          <div className="bg-gradient-to-br from-primary to-primary/80 p-3 rounded-xl shadow-md">
+            <Search className="w-5 h-5 text-primary-foreground" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm truncate">{locationLabel}</p>
-            <p className="text-xs text-muted-foreground truncate">
+            <p className="font-bold text-base text-foreground truncate">{locationLabel}</p>
+            <p className="text-sm text-muted-foreground truncate font-medium">
               {checkIn && checkOut 
                 ? `${formatDate(checkIn)} – ${formatDate(checkOut)} · ${totalGuests} ${language === 'ru' ? 'гост.' : 'guests'}`
-                : language === 'ru' ? 'Любые даты · Гости' : 'Any dates · Guests'
+                : language === 'ru' ? '📅 Выберите даты · 👥 Гости' : '📅 Select dates · 👥 Guests'
               }
             </p>
+          </div>
+          <div className="shrink-0 bg-primary text-primary-foreground px-3 py-1.5 rounded-full text-xs font-semibold">
+            {language === 'ru' ? 'Найти' : 'Search'}
           </div>
         </motion.div>
 
