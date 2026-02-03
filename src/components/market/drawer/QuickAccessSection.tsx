@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useWishlist } from '@/hooks/useWishlist';
+import { useUserCollections } from '@/hooks/useUserCollections';
 import { Badge } from '@/components/ui/badge';
 import { ChevronRight, Flame, Star, Sparkles, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -44,7 +44,7 @@ interface QuickAccessSectionProps {
 export function QuickAccessSection({ onNavigate }: QuickAccessSectionProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { wishlistCount } = useWishlist();
+  const { wishlistCount } = useUserCollections({ itemType: 'product' });
 
   const handleNav = (path: string) => {
     onNavigate();

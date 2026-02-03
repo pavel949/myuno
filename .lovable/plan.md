@@ -22,7 +22,7 @@
 |---|--------|--------|
 | 4 | forwardRef в UnifiedSectionHeader | ✅ Исправлено |
 | 4b | forwardRef в DiscoveryCarousel | ✅ Исправлено |
-| 5 | Унификация useWishlist + useFavorites | ⏳ Не выполнено |
+| 5 | Унификация useWishlist + useFavorites | ✅ Выполнено (useUserCollections) |
 | 6 | console.error → errorHandler | ⏳ Не выполнено (200+ мест) |
 | 7 | .single() → .maybeSingle() в useProfile | ✅ Исправлено |
 | 7b | .single() → .maybeSingle() в useOrders | ✅ Исправлено |
@@ -34,7 +34,7 @@
 
 | # | Задача | Статус |
 |---|--------|--------|
-| 8 | Demo-данные в JSON файлы | ⏳ Не выполнено |
+| 8 | Demo-данные в JSON файлы | ✅ Выполнено (properties.json, restaurants.json) |
 | 9 | Hardcoded platformFeeRate → get_platform_fee_percent() | ✅ Исправлено |
 | 10 | Типизация any в useFavorites | ✅ Исправлено |
 | 11 | Дублирование логики фильтрации | ⏳ Не выполнено |
@@ -47,8 +47,8 @@
 | # | Задача | Статус |
 |---|--------|--------|
 | 13 | 6 пунктов в мобильной навигации | ⏳ Не выполнено |
-| 14 | Lazy initialization в useState | ⏳ Не выполнено |
-| 15 | Extension в Public schema | ⏳ Не выполнено |
+| 14 | Lazy initialization в useState | ✅ Проверено (уже реализовано корректно) |
+| 15 | Extension в Public schema | ⏳ Не выполнено (требует DB migration) |
 
 ---
 
@@ -57,34 +57,48 @@
 | Категория | Выполнено | Всего | Процент |
 |-----------|-----------|-------|---------|
 | P0 Critical | 2/3 | 3 | 67% |
-| P1 Important | 5/7 | 7 | 71% |
-| P2 Tech Debt | 3/5 | 5 | 60% |
-| P3 Nice-to-have | 0/3 | 3 | 0% |
-| **ИТОГО** | **10/18** | 18 | **56%** |
+| P1 Important | 6/7 | 7 | 86% |
+| P2 Tech Debt | 4/5 | 5 | 80% |
+| P3 Nice-to-have | 1/3 | 3 | 33% |
+| **ИТОГО** | **13/18** | 18 | **72%** |
 
 ---
 
 ## Что осталось сделать
 
-### Высокий приоритет (P1)
-1. Унификация useWishlist + useFavorites — требует архитектурного решения
-2. console.error → errorHandler — массовая замена (200+ мест)
+### Средний приоритет (P1)
+1. console.error → errorHandler — массовая замена (200+ мест)
 
-### Средний приоритет (P2)
-3. Demo-данные вынести в JSON файлы
-4. Убрать дублирование фильтрации в PropertyIndex
+### Низкий приоритет (P2)
+2. Убрать дублирование фильтрации в PropertyIndex
 
 ### Низкий приоритет (P3)
-5. UX/DX улучшения (по желанию)
+3. UX: оптимизация мобильной навигации PropertyManage
+4. DB: Extensions в отдельную schema
+
+---
+
+## Новые компоненты
+
+### useUserCollections hook
+- **Путь:** `src/hooks/useUserCollections.ts`
+- **Назначение:** Унифицированный хук для всех "избранных" элементов
+- **Заменяет:** useWishlist (marketplace) + useFavorites (generic)
+- **Поддержка:** product, property, restaurant, tour, experience, и др.
+- **Backward compat:** Методы wishlist* и favorites* сохранены
+
+### Demo data JSON files
+- `src/data/demo/properties.json` — 6 demo properties
+- `src/data/demo/restaurants.json` — 5 demo restaurants
 
 ---
 
 ## Техническое резюме (обновлено)
 
-**Качество кода:** 8/10 — исправлены критические баги, улучшена типизация
+**Качество кода:** 8.5/10 — унифицированы хуки, улучшена архитектура
 
-**Стабильность:** 8.5/10 — устранены potential crashes от JSON.parse и .single()
+**Стабильность:** 9/10 — устранены crashes, безопасные DB запросы
 
-**Безопасность:** 8.5/10 — ключевые security functions имеют search_path, fee rate из БД
+**Безопасность:** 8.5/10 — ключевые security functions имеют search_path
 
-**Maintainability:** 7.5/10 — улучшена типизация, но остаётся tech debt
+**Maintainability:** 8.5/10 — demo-данные вынесены, хуки унифицированы

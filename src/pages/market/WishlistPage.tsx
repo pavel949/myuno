@@ -2,7 +2,7 @@ import React from 'react';
 import { Heart, ArrowLeft, ShoppingBag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useWishlist } from '@/hooks/useWishlist';
+import { useUserCollections } from '@/hooks/useUserCollections';
 import { useMarketplaceProducts } from '@/hooks/useMarketplace';
 import { useCart } from '@/contexts/CartContext';
 import { ProductCard } from '@/components/market/ProductCard';
@@ -12,12 +12,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 export default function WishlistPage() {
   const { language } = useLanguage();
   const navigate = useNavigate();
-  const { wishlist, isLoading: wishlistLoading } = useWishlist();
+  const { wishlist, isLoading: wishlistLoading } = useUserCollections({ itemType: 'product' });
   const { products, isLoading: productsLoading } = useMarketplaceProducts();
   const { addItem, updateQuantity, items } = useCart();
 
   const wishlistProducts = products.filter(p => 
-    wishlist.some(w => w.product_id === p.id)
+    wishlist.some(w => w.item_id === p.id)
   );
 
   const isLoading = wishlistLoading || productsLoading;
