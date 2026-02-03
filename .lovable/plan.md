@@ -1,71 +1,143 @@
-# План аудита и унификации поисковой функциональности myUNO
 
-## ✅ Статус: ЭТАП 1 ЗАВЕРШЁН (3 февраля 2026)
+# Реорганизация главной страницы: превью контента под табами
 
----
+## Проблема
 
-## Выполненные работы
+Сейчас после переключателя «Услуги / Товары» сразу идут кнопки (QuickAccessChips для собственников и партнёров). Пользователь не получает визуального представления о том, что находится внутри каждого раздела.
 
-### ✅ Этап 1: Расширение UnifiedFiltersKlook
-**Файл:** `src/components/shared/UnifiedFiltersKlook.tsx`
-- Добавлены свойства: `inlineQuickFilters`, `showDateRange`, `dateRangeLabels`
-- Добавлены пропсы: `selectedInlineFilters`, `onInlineFiltersChange`, `dateRange`, `onDateRangeChange`
-- Inline quick filters отображаются в sticky bar между датами и категориями
+## Решение
 
-### ✅ Этап 2: Вертикаль-специфичные конфиги
-**Созданы файлы:**
-- `src/lib/filterConfigs/restaurantFiltersKlook.ts` - Open Now, Free Delivery, Cuisines
-- `src/lib/filterConfigs/yachtFiltersKlook.ts` - Dates, Duration, Experiences, Capacity
-- `src/lib/filterConfigs/transportFiltersKlook.ts` - Automatic, Insurance, Delivery
-- `src/lib/filterConfigs/index.ts` - экспорт всех конфигов
+Добавить **Preview-секцию** сразу под табами — компактные визуальные подсказки, показывающие содержимое выбранного раздела.
 
-### ✅ Этап 3: Wrapper-компоненты
-**Созданы:**
-- `src/components/yachts/YachtFiltersKlook.tsx`
-- `src/components/transport/TransportFiltersKlook.tsx`
+```text
+┌──────────────────────────────────────────┐
+│ Persona Selector                          │
+├──────────────────────────────────────────┤
+│ Safety Banner (UNO Alert)                 │
+├──────────────────────────────────────────┤
+│ [🧳 Услуги]  [🛒 Товары]  ← Табы         │
+├──────────────────────────────────────────┤
+│ ⭐ Популярные категории:                  │  ← НОВЫЙ
+│ [🌸 Красота] [🚗 Транспорт] [🧹 Клининг] │     КОМПОНЕНТ
+│ [🏠 Жильё] [⚓ Яхты] [➕ Ещё]             │
+├──────────────────────────────────────────┤
+│ 🏢 Владельцам / 💼 Партнёрам / 💳 Кошелёк │
+├──────────────────────────────────────────┤
+│ ... остальной контент ...                 │
+└──────────────────────────────────────────┘
+```
 
-### ✅ Этап 4: Миграция вертикалей
-**Обновлены:**
-- `src/pages/yachts/YachtsIndex.tsx` → YachtFiltersKlook
-- `src/pages/transport/TransportIndex.tsx` → TransportFiltersKlook
+## Новый компонент: ContentPreviewRibbon
 
----
+### Для режима «Услуги»:
+- Горизонтальная лента из 5-6 популярных категорий услуг
+- Иконки + короткие названия (Красота, Транспорт, Клининг, Яхты, Медицина)
+- Клик ведёт в соответствующий раздел
+- Визуальный стиль: округлённые чипсы с иконками и градиентами
 
-## Новый UX паттерн
+### Для режима «Товары»:
+- Уже есть HomeCategoryRibbon — его нужно переместить сразу под табы
+- Показывает: Каталог, Акции, Хиты, Новинки + топ категории товаров
+
+## Изменения структуры
+
+### До (текущий порядок):
+
+```text
+Services Mode:
+1. QuickAccessChips (Владельцам / Партнёрам)
+2. SmartWidget
+3. QuickActionsGrid
+4. ... остальное
+
+Products Mode:
+1. HomeCategoryRibbon
+2. QuickAccessChips
+3. HomeProductsSection
+```
+
+### После (новый порядок):
+
+```text
+Services Mode:
+1. ContentPreviewRibbon (НОВЫЙ) — категории услуг
+2. QuickAccessChips (Владельцам / Партнёрам)
+3. SmartWidget
+4. QuickActionsGrid
+5. ... остальное
+
+Products Mode:
+1. HomeCategoryRibbon — уже есть, оставляем первым
+2. QuickAccessChips
+3. HomeProductsSection
+```
+
+## Дизайн ContentPreviewRibbon
 
 ```text
 ┌─────────────────────────────────────────────────────────────────┐
-│ [Today][Tomorrow][📅] │ [⏱️ Half][☀️ Full] │ [All][🛥️][⛵]    │  ← sticky bar
-│ 42 results                         [Sort↓] [Filter⚙️]          │
+│  🔥 Популярное                                                   │
+│  ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐               │
+│  │ 💅  │ │ 🚗  │ │ ⚓  │ │ 🏠  │ │ 🌸  │ │ ➕  │  ← скролл     │
+│  │Крас.│ │Транс│ │Яхты │ │Жильё│ │Цветы│ │ Ещё │               │
+│  └─────┘ └─────┘ └─────┘ └─────┘ └─────┘ └─────┘               │
 └─────────────────────────────────────────────────────────────────┘
-         ↑ dates              ↑ inline quick        ↑ categories
-                              filters (NEW!)
 ```
 
----
-
-## Следующие шаги (при необходимости)
-
-### Рестораны
-- [ ] `src/components/restaurants/RestaurantFiltersKlook.tsx`
-- [ ] Обновить `RestaurantsIndex.tsx`
-- [ ] Inline: "Open Now", "Free Delivery", "Fast"
-
-### Beauty/Spa
-- [ ] `src/lib/filterConfigs/beautyFiltersKlook.ts`
-- [ ] `src/components/beauty/BeautyFiltersKlook.tsx`
-- [ ] Time slot picker
+**Стиль чипсов:**
+- Компактные (px-3 py-2)
+- Градиентный фон при наведении
+- Иконки соответствуют цветам из QuickActionsGrid
+- Горизонтальный скролл на мобильных
 
 ---
 
-## Соответствие лидерам рынка
+## Техническая часть
 
-| Вертикаль | Benchmark | Статус |
-|-----------|-----------|--------|
-| Experiences | Klook | ✅ |
-| Property | Airbnb | ✅ |
-| **Yachts** | — | ✅ Даты + длительность добавлены |
-| **Transport** | Turo | ✅ Inline filters добавлены |
-| Restaurants | Uber Eats | 🔄 Следующий этап |
-| Beauty | Booksy | 🔄 Следующий этап |
-| Market | Ozon | ✅ |
+### Файлы для создания
+
+| Файл | Описание |
+|------|----------|
+| `src/components/home/ContentPreviewRibbon.tsx` | Новый компонент с лентой категорий |
+
+### Файлы для изменения
+
+| Файл | Изменения |
+|------|----------|
+| `src/pages/Index.tsx` | Добавить ContentPreviewRibbon под ContentModeToggle |
+
+### Структура ContentPreviewRibbon
+
+```typescript
+// Категории для режима Services
+const SERVICE_CATEGORIES = [
+  { id: 'beauty', icon: Sparkles, label: 'Beauty', labelRu: 'Красота', path: '/beauty', gradient: 'from-pink-400 to-rose-500' },
+  { id: 'transport', icon: Car, label: 'Transport', labelRu: 'Транспорт', path: '/transport', gradient: 'from-blue-400 to-indigo-500' },
+  { id: 'yachts', icon: Anchor, label: 'Yachts', labelRu: 'Яхты', path: '/yachts', gradient: 'from-cyan-400 to-blue-500' },
+  { id: 'property', icon: Home, label: 'Property', labelRu: 'Жильё', path: '/property', gradient: 'from-teal-400 to-emerald-500' },
+  { id: 'flowers', icon: Flower2, label: 'Flowers', labelRu: 'Цветы', path: '/flowers', gradient: 'from-rose-400 to-pink-500' },
+  { id: 'more', icon: MoreHorizontal, label: 'More', labelRu: 'Ещё', path: '/discover', gradient: 'from-gray-400 to-slate-500' },
+];
+```
+
+### Пропсы компонента
+
+```typescript
+interface ContentPreviewRibbonProps {
+  mode: 'services' | 'products';
+}
+```
+
+### Логика отображения
+
+- Если `mode === 'services'` — показываем SERVICE_CATEGORIES
+- Если `mode === 'products'` — компонент не рендерится (используется HomeCategoryRibbon)
+
+---
+
+## Ожидаемый результат
+
+1. Пользователь сразу видит, какие категории доступны в текущем режиме
+2. Визуальная подсказка помогает быстро сориентироваться
+3. Кнопки «Владельцам / Партнёрам» остаются видимыми, но идут после превью
+4. Консистентный UX между режимами Services и Products (оба имеют preview)
