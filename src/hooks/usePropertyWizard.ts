@@ -69,6 +69,24 @@ export interface PropertyFormData {
   ownership_form?: 'freehold' | 'leasehold' | 'company' | 'foreign_company';
   is_for_sale: boolean;
   sale_price: string;
+  // House Rules
+  pets_allowed?: boolean;
+  pet_deposit?: number;
+  smoking_allowed?: boolean;
+  smoking_penalty?: number;
+  parties_allowed?: boolean;
+  max_party_guests?: number;
+  children_friendly?: boolean;
+  has_crib?: boolean;
+  has_high_chair?: boolean;
+  quiet_hours_start?: string;
+  quiet_hours_end?: string;
+  house_rules?: string;
+  house_rules_ru?: string;
+  // Cancellation & Discounts
+  cancellation_policy?: string;
+  weekly_discount?: number;
+  monthly_discount?: number;
 }
 
 const initialFormData: PropertyFormData = {
@@ -113,6 +131,15 @@ const initialFormData: PropertyFormData = {
   ownership_form: undefined,
   is_for_sale: false,
   sale_price: '',
+  // House Rules defaults
+  pets_allowed: false,
+  smoking_allowed: false,
+  parties_allowed: false,
+  children_friendly: true,
+  quiet_hours_start: '22:00',
+  quiet_hours_end: '08:00',
+  // Cancellation & Discounts defaults
+  cancellation_policy: 'flexible',
 };
 
 const initialOwnershipData: OwnershipData = {
