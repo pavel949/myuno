@@ -59,11 +59,11 @@ export default function OwnerPropertyDetail() {
   };
 
   // Calculate protection period
-  const instantBookingEnabledAt = (property as any)?.instant_booking_enabled_at;
+  const instantBookingEnabledAt = property?.instant_booking_enabled_at;
   const protectionEndTime = instantBookingEnabledAt ? new Date(instantBookingEnabledAt) : null;
   const isInProtectionPeriod = protectionEndTime && protectionEndTime > new Date();
   const hoursRemaining = protectionEndTime ? Math.max(0, differenceInHours(protectionEndTime, new Date())) : 0;
-  const isRecentlyApproved = (property as any)?.approval_status === 'approved' && isInProtectionPeriod;
+  const isRecentlyApproved = property?.approval_status === 'approved' && isInProtectionPeriod;
 
   const getServiceStatusIcon = (status: string) => {
     switch (status) {
@@ -149,7 +149,7 @@ export default function OwnerPropertyDetail() {
                 {property.district || property.address}
               </p>
             </div>
-            {getStatusBadge(property.status, (property as any).approval_status)}
+            {getStatusBadge(property.status, property.approval_status)}
           </div>
         </div>
       </div>
@@ -245,7 +245,7 @@ export default function OwnerPropertyDetail() {
                 {isRu ? 'Открыть' : 'View'}
               </Button>
             </div>
-          ) : (property as any).approval_status === 'pending' ? (
+          ) : property.approval_status === 'pending' ? (
             <div className="flex items-center gap-3">
               <Clock className="h-5 w-5 text-amber-500" />
               <div>
@@ -255,14 +255,14 @@ export default function OwnerPropertyDetail() {
                 </p>
               </div>
             </div>
-          ) : (property as any).approval_status === 'rejected' ? (
+          ) : property.approval_status === 'rejected' ? (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <AlertTriangle className="h-5 w-5 text-destructive" />
                 <div>
                   <p className="font-medium">{isRu ? 'Требуется доработка' : 'Revision Required'}</p>
                   <p className="text-sm text-muted-foreground">
-                    {(property as any).rejection_reason || (isRu ? 'Внесите изменения и отправьте на повторную проверку' : 'Make changes and resubmit for review')}
+                    {property.rejection_reason || (isRu ? 'Внесите изменения и отправьте на повторную проверку' : 'Make changes and resubmit for review')}
                   </p>
                 </div>
               </div>
