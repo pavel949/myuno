@@ -1,35 +1,20 @@
+/**
+ * Transport Filters - Database-Driven
+ * Uses useDynamicFilterOptions for all taxonomy data
+ */
+
+import { useTransportFilterOptions } from '@/hooks/useDynamicFilterOptions';
 import { FilterConfig, FilterOption } from './UniversalFilter';
-import {
-  VEHICLE_CATEGORIES,
-  TRANSMISSION_TYPES,
-  FUEL_TYPES,
-} from '@/lib/config/transportTaxonomy';
 
-// ====== VEHICLE TYPES (from taxonomy) ======
-export const vehicleTypeOptions: FilterOption[] = VEHICLE_CATEGORIES.map(cat => ({
-  id: cat.id,
-  labelEn: cat.labelEn,
-  labelRu: cat.labelRu,
-  icon: cat.icon,
-}));
+// Re-export the dynamic hook
+export { useTransportFilterOptions } from '@/hooks/useDynamicFilterOptions';
 
-// ====== TRANSMISSION OPTIONS ======
-export const transmissionOptions: FilterOption[] = TRANSMISSION_TYPES.map(t => ({
-  id: t.id,
-  labelEn: t.labelEn,
-  labelRu: t.labelRu,
-  icon: t.icon,
-}));
+// Legacy static exports (empty, use hook instead)
+export const vehicleTypeOptions: FilterOption[] = [];
+export const transmissionOptions: FilterOption[] = [];
+export const fuelTypeOptions: FilterOption[] = [];
 
-// ====== FUEL TYPE OPTIONS ======
-export const fuelTypeOptions: FilterOption[] = FUEL_TYPES.map(f => ({
-  id: f.id,
-  labelEn: f.labelEn,
-  labelRu: f.labelRu,
-  icon: f.icon,
-}));
-
-// ====== TRANSFER TYPES ======
+// Transfer types - static as they're specific to booking flow
 export const transferTypeOptions: FilterOption[] = [
   { id: 'airport', labelEn: 'Airport Transfer', labelRu: 'Трансфер аэропорт', icon: '✈️' },
   { id: 'hotel', labelEn: 'Hotel Transfer', labelRu: 'Трансфер отель', icon: '🏨' },
@@ -37,19 +22,7 @@ export const transferTypeOptions: FilterOption[] = [
   { id: 'day-trip', labelEn: 'Day Trip', labelRu: 'На весь день', icon: '📅' },
 ];
 
-// ====== VEHICLE FEATURES ======
-export const vehicleFeatureOptions: FilterOption[] = [
-  { id: 'ac', labelEn: 'Air Conditioning', labelRu: 'Кондиционер', icon: '❄️' },
-  { id: 'automatic', labelEn: 'Automatic', labelRu: 'Автомат', icon: '🔄' },
-  { id: 'manual', labelEn: 'Manual', labelRu: 'Механика', icon: '🎛️' },
-  { id: 'gps', labelEn: 'GPS Navigation', labelRu: 'GPS навигатор', icon: '📍' },
-  { id: 'child-seat', labelEn: 'Child Seat', labelRu: 'Детское кресло', icon: '👶' },
-  { id: 'insurance', labelEn: 'Full Insurance', labelRu: 'Полная страховка', icon: '🛡️' },
-  { id: 'driver', labelEn: 'With Driver', labelRu: 'С водителем', icon: '👨‍✈️' },
-  { id: 'unlimited-km', labelEn: 'Unlimited KM', labelRu: 'Без лимита км', icon: '∞' },
-];
-
-// ====== PASSENGER CAPACITY ======
+// Passenger options - static as numeric
 export const passengerOptions: FilterOption[] = [
   { id: '1-2', labelEn: '1-2 Passengers', labelRu: '1-2 пассажира', icon: '👤' },
   { id: '3-4', labelEn: '3-4 Passengers', labelRu: '3-4 пассажира', icon: '👥' },
@@ -57,50 +30,66 @@ export const passengerOptions: FilterOption[] = [
   { id: '8+', labelEn: '8+ Passengers', labelRu: '8+ пассажиров', icon: '👨‍👩‍👧‍👦' },
 ];
 
-// ====== COMPLETE TRANSPORT FILTER CONFIG ======
-export const transportFilterConfig: FilterConfig = {
-  sections: [
-    {
-      id: 'priceLevel',
-      titleEn: 'Price Level',
-      titleRu: 'Уровень цен',
-      type: 'price-level',
-      options: [],
-    },
-    {
-      id: 'vehicleType',
-      titleEn: 'Vehicle Type',
-      titleRu: 'Тип транспорта',
-      type: 'multi',
-      options: vehicleTypeOptions,
-    },
-    {
-      id: 'transmission',
-      titleEn: 'Transmission',
-      titleRu: 'Трансмиссия',
-      type: 'single',
-      options: transmissionOptions,
-    },
-    {
-      id: 'fuelType',
-      titleEn: 'Fuel Type',
-      titleRu: 'Тип топлива',
-      type: 'multi',
-      options: fuelTypeOptions,
-    },
-    {
-      id: 'passengers',
-      titleEn: 'Passengers',
-      titleRu: 'Пассажиры',
-      type: 'single',
-      options: passengerOptions,
-    },
-    {
-      id: 'features',
-      titleEn: 'Features',
-      titleRu: 'Особенности',
-      type: 'multi',
-      options: vehicleFeatureOptions,
-    },
-  ],
-};
+// Vehicle features - static fallback
+export const vehicleFeatureOptions: FilterOption[] = [
+  { id: 'ac', labelEn: 'Air Conditioning', labelRu: 'Кондиционер', icon: '❄️' },
+  { id: 'automatic', labelEn: 'Automatic', labelRu: 'Автомат', icon: '🔄' },
+  { id: 'gps', labelEn: 'GPS Navigation', labelRu: 'GPS навигатор', icon: '📍' },
+  { id: 'child-seat', labelEn: 'Child Seat', labelRu: 'Детское кресло', icon: '👶' },
+  { id: 'insurance', labelEn: 'Full Insurance', labelRu: 'Полная страховка', icon: '🛡️' },
+  { id: 'driver', labelEn: 'With Driver', labelRu: 'С водителем', icon: '👨‍✈️' },
+  { id: 'unlimited-km', labelEn: 'Unlimited KM', labelRu: 'Без лимита км', icon: '∞' },
+];
+
+// Export a function to get the filter config
+export function getTransportFilterConfig(): FilterConfig {
+  return {
+    sections: [
+      {
+        id: 'priceLevel',
+        titleEn: 'Price Level',
+        titleRu: 'Уровень цен',
+        type: 'price-level',
+        options: [],
+      },
+      {
+        id: 'vehicleType',
+        titleEn: 'Vehicle Type',
+        titleRu: 'Тип транспорта',
+        type: 'multi',
+        options: [],
+      },
+      {
+        id: 'transmission',
+        titleEn: 'Transmission',
+        titleRu: 'Трансмиссия',
+        type: 'single',
+        options: [],
+      },
+      {
+        id: 'fuelType',
+        titleEn: 'Fuel Type',
+        titleRu: 'Тип топлива',
+        type: 'multi',
+        options: [],
+      },
+      {
+        id: 'passengers',
+        titleEn: 'Passengers',
+        titleRu: 'Пассажиры',
+        type: 'single',
+        options: passengerOptions,
+      },
+      {
+        id: 'features',
+        titleEn: 'Features',
+        titleRu: 'Особенности',
+        type: 'multi',
+        options: vehicleFeatureOptions,
+      },
+    ],
+  };
+}
+
+// For backwards compatibility
+export const transportFilterConfig = getTransportFilterConfig();

@@ -1,10 +1,14 @@
 /**
  * Yacht-specific Klook filter configuration
- * Optimized for boat/yacht charter booking
+ * Now uses database-driven options via useYachtFilterOptions hook
  */
 
 import { type UnifiedFiltersKlookConfig, type DatePreset } from '@/components/shared/UnifiedFiltersKlook';
 
+// Re-export the dynamic hook
+export { useYachtFilterOptions } from '@/hooks/useDynamicFilterOptions';
+
+// Static configuration that doesn't need DB
 export const YACHT_KLOOK_CONFIG: UnifiedFiltersKlookConfig = {
   // Date filters are critical for yacht booking
   showDateFilters: true,
@@ -14,14 +18,14 @@ export const YACHT_KLOOK_CONFIG: UnifiedFiltersKlookConfig = {
     { id: 'this-week' as DatePreset, labelEn: 'This week', labelRu: 'Эта неделя' },
   ],
   
-  // Inline quick filters for duration
+  // Inline quick filters for duration (static - timing based)
   inlineQuickFilters: [
     { id: 'half-day', labelEn: 'Half Day', labelRu: 'Полдня', icon: '⏱️' },
     { id: 'full-day', labelEn: 'Full Day', labelRu: 'Весь день', icon: '☀️' },
     { id: 'overnight', labelEn: 'Overnight', labelRu: 'С ночёвкой', icon: '🌙' },
   ],
   
-  // Price filter
+  // Price filter (static - currency based)
   showPriceFilter: true,
   pricePresets: [
     { min: 0, max: 50000, labelEn: 'Under ฿50K', labelRu: 'До ฿50K' },
@@ -32,7 +36,7 @@ export const YACHT_KLOOK_CONFIG: UnifiedFiltersKlookConfig = {
   priceRange: { min: 0, max: 500000, step: 5000 },
   currencySymbol: '฿',
   
-  // Sort options
+  // Sort options (static)
   sortOptions: [
     { id: 'rating', labelEn: 'Top Rated', labelRu: 'По рейтингу' },
     { id: 'price_asc', labelEn: 'Price: Low to High', labelRu: 'Цена ↑' },
@@ -40,29 +44,21 @@ export const YACHT_KLOOK_CONFIG: UnifiedFiltersKlookConfig = {
     { id: 'capacity', labelEn: 'Capacity', labelRu: 'Вместимость' },
   ],
   
-  // Quick filter chips in drawer
+  // Quick filter chips in drawer (static - booking options)
   quickFilterOptions: [
     { id: 'instant', labelEn: 'Instant Booking', labelRu: 'Мгновенное бронирование', icon: '⚡' },
     { id: 'crew', labelEn: 'With Crew', labelRu: 'С экипажем', icon: '👨‍✈️' },
     { id: 'catering', labelEn: 'Catering Available', labelRu: 'Кейтеринг', icon: '🍽️' },
   ],
   
-  // Drawer chip sections
+  // Drawer chip sections - will be populated dynamically from useYachtFilterOptions
+  // These are fallbacks for when hook data is not yet loaded
   chipSections: [
     {
       id: 'experiences',
       titleEn: 'Experiences',
       titleRu: 'Впечатления',
-      options: [
-        { id: 'fishing', labelEn: 'Fishing', labelRu: 'Рыбалка', icon: '🎣' },
-        { id: 'sunset', labelEn: 'Sunset Cruise', labelRu: 'Закат', icon: '🌅' },
-        { id: 'party', labelEn: 'Party', labelRu: 'Вечеринка', icon: '🎉' },
-        { id: 'diving', labelEn: 'Diving', labelRu: 'Дайвинг', icon: '🤿' },
-        { id: 'snorkeling', labelEn: 'Snorkeling', labelRu: 'Снорклинг', icon: '🐠' },
-        { id: 'island-hopping', labelEn: 'Island Hopping', labelRu: 'По островам', icon: '🏝️' },
-        { id: 'private', labelEn: 'Private Charter', labelRu: 'Приватно', icon: '👑' },
-        { id: 'romantic', labelEn: 'Romantic', labelRu: 'Романтика', icon: '💕' },
-      ],
+      options: [], // Will be populated from useTaxonomy('yacht_experience')
       initialVisible: 6,
     },
     {
@@ -81,14 +77,7 @@ export const YACHT_KLOOK_CONFIG: UnifiedFiltersKlookConfig = {
       id: 'amenities',
       titleEn: 'Amenities',
       titleRu: 'Удобства',
-      options: [
-        { id: 'kitchen', labelEn: 'Kitchen', labelRu: 'Кухня', icon: '🍳' },
-        { id: 'jacuzzi', labelEn: 'Jacuzzi', labelRu: 'Джакузи', icon: '🛁' },
-        { id: 'water-toys', labelEn: 'Water Toys', labelRu: 'Водные игрушки', icon: '🛟' },
-        { id: 'wifi', labelEn: 'WiFi', labelRu: 'WiFi', icon: '📶' },
-        { id: 'air-con', labelEn: 'Air Conditioning', labelRu: 'Кондиционер', icon: '❄️' },
-        { id: 'music', labelEn: 'Sound System', labelRu: 'Аудиосистема', icon: '🎵' },
-      ],
+      options: [], // Will be populated from useTaxonomy('yacht_amenity')
       initialVisible: 6,
     },
   ],
@@ -114,7 +103,7 @@ export const YACHT_KLOOK_CONFIG: UnifiedFiltersKlookConfig = {
   },
 };
 
-// Category options for horizontal ribbon
+// Legacy static categories - use useYachtFilterOptions().categoryRibbon instead
 export const YACHT_CATEGORIES = [
   { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '🌟' },
   { id: 'yacht', labelEn: 'Yachts', labelRu: 'Яхты', icon: '🛥️' },
