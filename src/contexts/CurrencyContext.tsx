@@ -1,4 +1,8 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { createErrorHandler } from '@/lib/errorHandler';
+
+const errorLog = createErrorHandler('CurrencyContext');
 
 export type Currency = 'THB' | 'USD' | 'EUR' | 'RUB';
 
@@ -7,25 +11,36 @@ interface CurrencyInfo {
   symbol: string;
   name: string;
   nameRu: string;
-  rate: number; // Rate relative to THB
+  rate: number;
+  updatedAt?: string;
 }
 
-// Exchange rates relative to THB (as of January 2026)
-// To convert: priceInTHB * rate = priceInTargetCurrency
-// Example: 1000 THB * 0.029 = 29 USD
-export const currencies: Record<Currency, CurrencyInfo> = {
-  THB: { code: 'THB', symbol: '฿', name: 'Thai Baht', nameRu: 'Тайский бат', rate: 1 },
-  USD: { code: 'USD', symbol: '$', name: 'US Dollar', nameRu: 'Доллар США', rate: 0.029 },    // 1 USD ≈ 34 THB
-  EUR: { code: 'EUR', symbol: '€', name: 'Euro', nameRu: 'Евро', rate: 0.027 },              // 1 EUR ≈ 37 THB
-  RUB: { code: 'RUB', symbol: '₽', name: 'Russian Ruble', nameRu: 'Российский рубль', rate: 2.7 }, // 1 THB ≈ 2.7 RUB
+// Static currency metadata (symbols, names) - doesn't change
+const currencyMeta: Record<Currency, Omit<CurrencyInfo, 'rate' | 'updatedAt'>> = {
+  THB: { code: 'THB', symbol: '฿', name: 'Thai Baht', nameRu: 'Тайский бат' },
+  USD: { code: 'USD', symbol: '$', name: 'US Dollar', nameRu: 'Доллар США' },
+  EUR: { code: 'EUR', symbol: '€', name: 'Euro', nameRu: 'Евро' },
+  RUB: { code: 'RUB', symbol: '₽', name: 'Russian Ruble', nameRu: 'Российский рубль' },
+};
+
+// Fallback rates if DB fetch fails
+const fallbackRates: Record<Currency, number> = {
+  THB: 1,
+  USD: 0.029,
+  EUR: 0.027,
+  RUB: 2.7,
 };
 
 interface CurrencyContextType {
   currency: Currency;
   setCurrency: (currency: Currency) => void;
   currencyInfo: CurrencyInfo;
-  formatPrice: (priceInTHB: number) => string;
+  currencies: Record<Currency, CurrencyInfo>;
+  formatPrice: (priceInTHB: number, showSymbol?: boolean) => string;
   convertPrice: (priceInTHB: number) => number;
+  getCurrencySymbol: (code: string) => string;
+  isLoading: boolean;
+  lastUpdated: string | null;
 }
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
@@ -35,6 +50,50 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem('myuno-currency');
     return (saved as Currency) || 'THB';
   });
+  
+  const [rates, setRates] = useState<Record<Currency, number>>(fallbackRates);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load rates from database
+  const loadRates = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .rpc('get_all_currency_rates');
+
+      if (error) throw error;
+
+      if (data && typeof data === 'object') {
+        const ratesData = data as Record<string, { rate: number; updated_at: string }>;
+        const newRates: Record<Currency, number> = { ...fallbackRates };
+        let latestUpdate: string | null = null;
+
+        Object.entries(ratesData).forEach(([code, info]) => {
+          if (code in currencyMeta) {
+            newRates[code as Currency] = info.rate;
+            if (!latestUpdate || info.updated_at > latestUpdate) {
+              latestUpdate = info.updated_at;
+            }
+          }
+        });
+
+        setRates(newRates);
+        setLastUpdated(latestUpdate);
+      }
+    } catch (error) {
+      errorLog.silent(error, 'load_currency_rates');
+      // Keep using fallback rates
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadRates();
+    // Refresh rates every hour
+    const interval = setInterval(loadRates, 60 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [loadRates]);
 
   useEffect(() => {
     localStorage.setItem('myuno-currency', currency);
@@ -44,19 +103,46 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     setCurrencyState(newCurrency);
   };
 
+  // Build currencies object with current rates
+  const currencies: Record<Currency, CurrencyInfo> = Object.entries(currencyMeta).reduce(
+    (acc, [code, meta]) => ({
+      ...acc,
+      [code]: { ...meta, rate: rates[code as Currency] },
+    }),
+    {} as Record<Currency, CurrencyInfo>
+  );
+
   const currencyInfo = currencies[currency];
 
   const convertPrice = (priceInTHB: number): number => {
     return Math.round(priceInTHB * currencyInfo.rate);
   };
 
-  const formatPrice = (priceInTHB: number): string => {
+  const formatPrice = (priceInTHB: number, showSymbol = true): string => {
     const converted = convertPrice(priceInTHB);
-    return `${currencyInfo.symbol}${converted.toLocaleString()}`;
+    return showSymbol 
+      ? `${currencyInfo.symbol}${converted.toLocaleString()}`
+      : converted.toLocaleString();
+  };
+
+  // Utility to get currency symbol by code (for UI components)
+  const getCurrencySymbol = (code: string): string => {
+    const meta = currencyMeta[code as Currency];
+    return meta?.symbol || code;
   };
 
   return (
-    <CurrencyContext.Provider value={{ currency, setCurrency, currencyInfo, formatPrice, convertPrice }}>
+    <CurrencyContext.Provider value={{ 
+      currency, 
+      setCurrency, 
+      currencyInfo, 
+      currencies,
+      formatPrice, 
+      convertPrice,
+      getCurrencySymbol,
+      isLoading,
+      lastUpdated,
+    }}>
       {children}
     </CurrencyContext.Provider>
   );
@@ -69,3 +155,6 @@ export function useCurrency() {
   }
   return context;
 }
+
+// Re-export for backward compatibility
+export { currencyMeta as currencies };

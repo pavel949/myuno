@@ -2,7 +2,7 @@ import React from 'react';
 import { Calculator, Percent, Calendar, Users } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Badge } from '@/components/ui/badge';
-
+import { getCurrencySymbol } from '@/lib/currencyUtils';
 interface PropertyPriceBreakdownProps {
   pricePerNight?: number;
   weeklyDiscount?: number;
@@ -32,7 +32,7 @@ export function PropertyPriceBreakdown({
 }: PropertyPriceBreakdownProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const symbol = currency === 'THB' ? '฿' : currency === 'USD' ? '$' : currency === 'EUR' ? '€' : currency;
+  const symbol = getCurrencySymbol(currency);
 
   const depositTypeLabels: Record<string, { en: string; ru: string }> = {
     fixed: { en: 'Fixed amount', ru: 'Фиксированная сумма' },

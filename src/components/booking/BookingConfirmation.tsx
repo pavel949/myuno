@@ -3,6 +3,7 @@ import { CheckCircle, Calendar, Clock, MapPin, Download, Share2, Mail, Smartphon
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
+import { getCurrencySymbol } from '@/lib/currencyUtils';
 
 interface BookingConfirmationProps {
   bookingId: string;
@@ -36,7 +37,7 @@ export function BookingConfirmation({
   const navigate = useNavigate();
   const { language } = useLanguage();
 
-  const currencySymbol = currency === 'THB' ? '฿' : currency === 'USD' ? '$' : currency === 'EUR' ? '€' : '₽';
+  const currencySymbol = getCurrencySymbol(currency || 'THB');
   const isCash = paymentMethod === 'cash';
 
   const handleViewBookings = () => {
