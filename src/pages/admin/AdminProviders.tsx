@@ -48,7 +48,8 @@ import {
   User,
   Shield,
   Clock,
-  Languages
+  Languages,
+  Eye
 } from 'lucide-react';
 import { 
   ALL_SERVICE_CATEGORIES, 
@@ -335,9 +336,12 @@ export default function AdminProviders() {
               <Card key={provider.id} className={!provider.is_active ? 'opacity-60' : ''}>
                 <CardContent className="p-4">
                   <div className="flex justify-between items-start">
-                    <div className="flex-1">
+                    <div 
+                      className="flex-1 cursor-pointer"
+                      onClick={() => navigate(`/admin/providers/${provider.id}`)}
+                    >
                       <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-medium">
+                        <h3 className="font-medium hover:text-primary">
                           {provider.name}
                         </h3>
                         {provider.is_verified && (
@@ -372,6 +376,10 @@ export default function AdminProviders() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => navigate(`/admin/providers/${provider.id}`)}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          {isRussian ? 'Подробнее' : 'View Details'}
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => navigate(`/admin/services?provider=${provider.id}`)}>
                           <Package className="h-4 w-4 mr-2" />
                           {isRussian ? 'Услуги' : 'Services'}

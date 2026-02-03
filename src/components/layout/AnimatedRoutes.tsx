@@ -273,6 +273,7 @@ const UserAnalyticsDashboard = lazy(() => import('@/pages/admin/UserAnalyticsDas
 const AdminLocationKnowledge = lazy(() => import('@/pages/admin/AdminLocationKnowledge'));
 const AdminPMCompanies = lazy(() => import('@/pages/admin/AdminPMCompanies'));
 const AdminContracts = lazy(() => import('@/pages/admin/AdminContracts'));
+const AdminProviderDetail = lazy(() => import('@/pages/admin/AdminProviderDetail'));
 
 // Admin Marketplace pages
 const AdminMarketplaceProducts = lazy(() => import('@/pages/admin/AdminMarketplaceProducts'));
@@ -688,6 +689,7 @@ export const AnimatedRoutes: React.FC = () => {
           {/* Legacy routes - kept for backward compatibility */}
           <Route path="/admin/analytics" element={<AdminAnalytics />} />
           <Route path="/admin/providers" element={<AdminProviders />} />
+          <Route path="/admin/providers/:id" element={<AdminProviderDetail />} />
           <Route path="/admin/services" element={<AdminServices />} />
           <Route path="/admin/partner-applications" element={<PartnerApplicationsAdmin />} />
           <Route path="/admin/pitch-deck" element={<InvestorPitchDeck />} />
