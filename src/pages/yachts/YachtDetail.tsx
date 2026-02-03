@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BackButton } from '@/components/uno/BackButton';
-import { Skeleton } from '@/components/ui/skeleton';
+import { DetailPageSkeleton } from '@/components/ui/page-skeletons';
 import { useYacht } from '@/hooks/useYachts';
 import { YachtBookingQuickSelect } from '@/components/yachts/YachtBookingQuickSelect';
 
@@ -26,14 +26,7 @@ export default function YachtDetail() {
   if (isLoading) {
     return (
       <AppLayout>
-        <div className="h-72 bg-muted animate-pulse" />
-        <PageContainer className="-mt-4 relative z-10 bg-background rounded-t-3xl pt-6">
-          <Skeleton className="h-8 w-3/4 mb-4" />
-          <Skeleton className="h-4 w-1/2 mb-6" />
-          <div className="grid grid-cols-4 gap-3 mb-6">
-            {[1,2,3,4].map(i => <Skeleton key={i} className="h-16" />)}
-          </div>
-        </PageContainer>
+        <DetailPageSkeleton />
       </AppLayout>
     );
   }
