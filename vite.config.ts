@@ -77,6 +77,12 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+    // Deduplicate React to prevent multiple instances
+    dedupe: ['react', 'react-dom'],
+  },
+  optimizeDeps: {
+    // Force Vite to pre-bundle React properly
+    include: ['react', 'react-dom', 'react/jsx-runtime'],
   },
   build: {
     rollupOptions: {
