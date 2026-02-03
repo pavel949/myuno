@@ -1,272 +1,248 @@
 
-# Аудит системы управления недвижимостью (Owner Module) — End-to-End
+# Критические функции для Production: Диагностика и План Исправлений
 
-## Резюме
-Модуль управления недвижимостью реализован на **высоком уровне качества** и готов к промышленной эксплуатации. Архитектура следует принципам "One Stop Shop" для владельцев недвижимости на Пхукете, обеспечивая полный цикл управления: от добавления объекта до формирования финансовых отчетов.
+## Резюме состояния
 
----
+После глубокого аудита системы выявлены следующие области, требующие внимания:
 
-## 1. Архитектура и Интеграция в Суперапп
-
-### Структура модуля
-```
-/owner                    → Dashboard (главный хаб)
-/owner/properties         → Список объектов
-/owner/properties/new     → Wizard добавления объекта
-/owner/properties/:id     → Детали объекта
-/owner/properties/:id/manage → Airbnb-style управление (календарь, цены, правила)
-/owner/calendar           → Единый календарь всех объектов
-/owner/financials         → Учет доходов/расходов
-/owner/quick-expense      → Быстрый ввод расхода (mobile-first)
-/owner/reports            → Генерация отчетов
-/owner/portfolio          → Аналитика портфеля
-/owner/team               → Делегирование и команда
-```
-
-### Интеграция с суперапп
-- **OwnerLayout** оборачивает все маршруты `/owner/*`
-- **OwnerSidebar** содержит кнопку "← На главную" для возврата в основное приложение
-- Модуль доступен через роль Owner в системе переключения ролей
-- Точка входа: `/list-with-us` или переключатель в профиле
-
-### Оценка: **9/10**
-Модуль полностью интегрирован в экосистему, с четкой навигацией между разделами.
+| Функция | Статус | Критичность |
+|---------|--------|-------------|
+| AI Поиск | ⚠️ Медленный (600ms debounce + модель) | P0 |
+| Создание недвижимости | ✅ Работает | OK |
+| Система лидов | ⚠️ 1 лид, нет vertical_id | P1 |
+| Аллокация расходов | ✅ 18 записей (14 expense, 4 income) | OK |
+| Заказы/Бронирования | ✅ 20 заказов в разных статусах | OK |
+| Листинг-приложения | ⚠️ 0 записей, wizard не тестирован | P1 |
 
 ---
 
-## 2. Управление объектами (Property Management)
+## 1. AI Поиск — Ускорение (P0 Critical)
 
-### Реализованные функции
+### Проблема
+AI поиск работает медленно из-за:
+1. **600ms debounce** в `useAISearch.ts` (строка 159)
+2. **21 параллельный запрос** к БД в `useGlobalSearch.ts`
+3. Возможная **латентность модели** `google/gemini-3-flash-preview`
 
-| Компонент | Статус | Описание |
-|-----------|--------|----------|
-| PropertyWizard | ✅ | 4-шаговый мастер: Локация → Фото → Цены → Условия |
-| PropertyManage | ✅ | Airbnb-style интерфейс: Listing, Photos, Calendar, Pricing, Rules, Marketing |
-| PropertyCard | ✅ | Унифицированная карточка с режимами owner/vendor/admin |
-| Модерация | ✅ | Статусы pending/approved/rejected с автопубликацией на маркетплейсе |
-| iCal-синхронизация | ✅ | Импорт/экспорт календарей Airbnb, Booking, VRBO |
+### Решение
 
-### Ключевые hooks
-- `useOwnerProperties()` — список объектов владельца
-- `usePropertyCare.ts` — CRUD операции
-- `usePropertyAvailabilityManagement` — управление доступностью
-- `usePublishToMarketplace()` — публикация на UNO маркетплейс
-
-### Таблицы БД
-- `owner_properties` (5 записей, все в статусе pending)
-- `property_availability`
-- `property_external_calendars`
-- `property_bookings`
-
-### Оценка: **9/10**
-Полный функционал, от добавления до публикации. Единственное улучшение — добавить AI-анализ качества листинга.
-
----
-
-## 3. Финансовый модуль
-
-### Компоненты учета расходов
-
-| Файл | Функция |
-|------|---------|
-| `OwnerFinancials.tsx` | Полный журнал транзакций (516 строк) |
-| `QuickExpense.tsx` | Mobile-first быстрый ввод (300 строк) |
-| `FinancialCharts.tsx` | Визуализация: тренды, pie-charts, bar-charts |
-| `FinancesSummary.tsx` | Виджет на дашборде |
-
-### Инновационные UX-решения
-
-1. **Drag & Drop загрузка чеков** (`DragDropReceiptUpload.tsx`)
-   - Поддержка камеры устройства
-   - Drag-and-drop с анимацией
-   - Автозагрузка в Supabase Storage
-
-2. **Голосовой ввод** (`VoiceInput.tsx`)
-   - Web Speech API для RU и EN
-   - Интегрирован в поле описания
-
-3. **Автоподстановка вендоров** (`VendorCombobox.tsx`)
-   - История последних 15 поставщиков
-   - Автоподсказка категории на основе предыдущих трат
-   - Fuzzy-поиск в реальном времени
-
-4. **Быстрые суммы и категории**
-   - Кнопки ฿500/1000/2000/5000/10000
-   - Grid из 9 популярных категорий с иконками
-
-### Категории расходов (22 типа)
+#### 1.1 Уменьшить debounce до 300ms
 ```typescript
-EXPENSE_CATEGORIES: cleaning, maintenance, repair, utilities, electricity, 
-water, internet, insurance, taxes, income_tax, management_fee, platform_fee,
-supplies, shopping, furniture, appliances, depreciation, loan_payment, 
-legal, advertising, other, other_expense
+// src/hooks/useAISearch.ts:159
+- }, 600); // Debounce
++ }, 300); // Faster response for better UX
 ```
 
-### Таблица БД
-- `property_financials` (0 записей — система готова, данные не заполнены)
+#### 1.2 Оптимизировать обычный поиск — объединить запросы
+Создать RPC-функцию для unified search:
+```sql
+CREATE OR REPLACE FUNCTION public.global_search(search_term TEXT, result_limit INT DEFAULT 5)
+RETURNS TABLE (
+  id UUID,
+  type TEXT,
+  title_en TEXT,
+  title_ru TEXT,
+  image TEXT,
+  price NUMERIC,
+  path TEXT
+) AS $$
+  SELECT id, 'yachts'::TEXT, name_en, name_ru, cover_image, price_full_day, '/yachts/' || id
+  FROM yachts WHERE is_active AND approval_status = 'approved' 
+    AND (name_en ILIKE '%' || search_term || '%' OR name_ru ILIKE '%' || search_term || '%')
+  LIMIT result_limit
+  UNION ALL
+  SELECT id, 'property'::TEXT, title_en, title_ru, cover_image, price, '/property/' || id
+  FROM properties WHERE is_active AND approval_status = 'approved'
+    AND (title_en ILIKE '%' || search_term || '%' OR title_ru ILIKE '%' || search_term || '%')
+  LIMIT result_limit
+  -- ... остальные таблицы
+$$ LANGUAGE sql STABLE;
+```
 
-### Оценка: **10/10**
-Лучший в классе UX для ввода расходов. OCR через Gemini запланирован как следующая итерация.
+#### 1.3 Добавить кэширование AI-ответов
+В edge function `ai-smart-search`:
+- Кэшировать популярные запросы в `ai_search_cache` таблицу
+- TTL 24 часа для AI ответов
 
 ---
 
-## 4. Система отчетности
+## 2. Система лидов — Усиление (P1)
 
-### Реализованные функции
+### Текущее состояние
+- 1 лид в `consultation_requests`
+- `vertical_id` = null (не указана вертикаль)
+- Нет демо-данных для тестирования Lead Hub
 
-| Функция | Статус | Файл |
-|---------|--------|------|
-| Генерация отчетов | ✅ | `useGenerateReport()` |
-| PDF-экспорт | ✅ | `useGeneratePdf()` → jsPDF |
-| Email-рассылка | ✅ | `useSendReportEmail()` → Edge Function |
-| Контроль доступа | ✅ | `useCanAccessReportFinancials()` |
+### Решение
 
-### Типы отчетов
-- **Monthly** — за прошлый месяц
-- **Quarterly** — за прошлый квартал
-- **Annual** — за прошлый год
-- **Custom** — произвольный период
+#### 2.1 Заполнить демо-лиды для всех вертикалей
+```sql
+INSERT INTO consultation_requests (name, phone, email, vertical_id, lead_source, entry_point, status, priority, vertical_metadata)
+VALUES
+  ('Иван Петров', '+7999111222', 'ivan@test.com', 'properties', 'website', '/property', 'pending', 'normal', '{"budget_min": 50000, "budget_max": 100000}'::jsonb),
+  ('Maria Chen', '+66891234567', 'maria@test.com', 'yachts', 'cta', '/yachts', 'pending', 'high', '{"charter_type": "full_day", "guests": 8}'::jsonb),
+  ('Олег Сидоров', '+79001234567', 'oleg@test.com', 'tours', 'chat', '/tours', 'pending', 'normal', '{"tour_type": "island_hopping"}'::jsonb),
+  ('Anna Smith', '+1234567890', 'anna@test.com', 'legal', 'website', '/legal', 'contacted', 'normal', '{"service": "visa_extension"}'::jsonb),
+  ('Дмитрий Козлов', '+79112223344', 'dmitry@test.com', 'medical', 'referral', '/medical', 'pending', 'high', '{"specialty": "dental"}'::jsonb);
+```
 
-### Данные отчета (`ReportData`)
+#### 2.2 Интегрировать AI Lead Scoring
+Добавить кнопку "Проанализировать все лиды" в Admin Dashboard:
 ```typescript
-{
-  income: { total, by_category, transactions },
-  expenses: { total, by_category, transactions },
-  occupancy: { nights_booked, total_nights, rate, bookings_count },
-  bookings: [...],
-  maintenance: [...],
-  net_income,
-  roi_percent,
-  mom_change,
-  highlights,
-  recommendations
-}
+// В MCCLeadsTab.tsx или AdminConsultations.tsx
+const { batchScoreLeads } = useLeadsFactory();
+
+<Button onClick={() => batchScoreLeads.mutate({ limit: 10, status: 'pending' })}>
+  🤖 Проанализировать новые лиды
+</Button>
 ```
 
-### Таблица БД
-- `property_reports` (0 записей — структура готова)
+---
 
-### Оценка: **9/10**
-Полный цикл отчетности. Рекомендация: добавить автоматическую ежемесячную генерацию.
+## 3. Листинг Wizard — Валидация end-to-end (P1)
+
+### Текущее состояние
+- 0 заявок в `listing_applications`
+- Wizard реализован (`ListingWizard.tsx`)
+- Hook `useListingApplication.ts` работает с `listing_applications` таблицей
+
+### Решение
+
+#### 3.1 Проверить существование таблицы
+```sql
+-- Проверить схему
+SELECT column_name, data_type FROM information_schema.columns 
+WHERE table_name = 'listing_applications';
+```
+
+#### 3.2 Добавить тестовые заявки
+После подтверждения схемы — создать demo-данные:
+```sql
+INSERT INTO listing_applications (listing_type, status, city, district, estimated_price, applicant_name, applicant_email)
+VALUES 
+  ('property', 'pending', 'Пхукет', 'Rawai', 50000, 'Test Owner', 'owner@test.com'),
+  ('service', 'approved', 'Пхукет', 'Patong', 2000, 'Test Provider', 'provider@test.com');
+```
 
 ---
 
-## 5. Портфельная аналитика
+## 4. Синхронизация данных Property ↔ Owner (P1)
 
-### OwnerPortfolio.tsx
-- KPI-карточки: Доход, Расходы, Чистая прибыль, Загрузка
-- Сравнительная таблица объектов с миниатюрами
-- Pie-chart расходов по категориям
-- Расчет ROI и занятости за 30 дней
+### Проблема
+- 5 объектов в `owner_properties` (все в статусе `pending`)
+- 0 записей в `property_bookings`
+- Нет связи между owner properties и marketplace bookings
 
-### OwnerPerformanceCard
-- Метрики в стиле Airbnb Superhost
-- Рейтинг, отклик, принятие бронирований
+### Решение
 
-### Оценка: **8/10**
-Хорошая аналитика. Улучшение: добавить бенчмарки по рынку Пхукета.
+#### 4.1 Добавить демо-бронирования
+```sql
+-- Получить ID первого owner_property
+INSERT INTO property_bookings (property_id, guest_name, guest_email, guest_phone, check_in, check_out, guests_count, total_price, status, source)
+SELECT 
+  id, 
+  'Demo Guest', 
+  'guest@demo.com', 
+  '+66891234567',
+  CURRENT_DATE + INTERVAL '5 days',
+  CURRENT_DATE + INTERVAL '10 days',
+  2,
+  25000,
+  'confirmed',
+  'direct'
+FROM owner_properties LIMIT 1;
+```
 
----
-
-## 6. Операционное управление
-
-### Реализованные функции
-- `OperationsSection` — задачи на сегодня (check-in, check-out, cleaning, maintenance)
-- `useTodayOperations` — агрегация по типам
-- `CreateServiceTaskDialog` — создание задач из календаря
-- `AddBookingFromCalendarDialog` — ручное добавление бронирований
-
-### Таблицы БД
-- `property_operational_tasks`
-- `property_service_requests`
-- `property_inspections`
-
-### Оценка: **9/10**
-Операции интегрированы с календарем и дашбордом.
+#### 4.2 Проверить триггер создания income записи
+Убедиться что `create_financial_from_booking()` триггер работает при подтверждении бронирования.
 
 ---
 
-## 7. UX и Мобильная адаптивность
+## 5. Финансовая система — Валидация (OK)
 
-### Навигация
-- **Desktop**: `OwnerSidebar` с группами Main/Money/Team
-- **Mobile**: `OwnerMobileNav` с 5 ключевыми пунктами
+### Текущее состояние ✅
+- 18 записей в `property_financials`
+- 14 расходов, 4 дохода
+- `QuickExpense.tsx` использует `errorHandler`
+- Категории расходов корректно типизированы
 
-### Mobile-first паттерны
-- `PropertyThumbnailSelector` — свайп-выбор объекта
-- `QuickCategoryGrid` — тач-оптимизированная сетка 3x3
-- Safe-area поддержка для iPhone
-- Bottom sheet диалоги
-
-### Билингвальность
-- Все компоненты поддерживают RU/EN через `useLanguage()`
-- Тосты через `errorHandler` с двуязычными сообщениями
-
-### Оценка: **9/10**
-Отличная мобильная адаптация.
-
----
-
-## 8. Качество кода
-
-### Положительные аспекты
-- ✅ Централизованная обработка ошибок (`errorHandler.ts`)
-- ✅ Типизированные интерфейсы (`src/types/property.ts`)
-- ✅ React Query с настроенным `staleTime` (30-60 сек)
-- ✅ Lazy-loading страниц
-- ✅ Централизованные таксономии (`useTaxonomyWithFallback`)
-
-### Технический долг
-- ⚠️ В `QuickExpense.tsx:93` остался `console.error` вместо `errorHandler`
-- ⚠️ Таблица `property_financials` пустая — нет demo-данных
-- ⚠️ OCR для чеков пока не интегрирован (только загрузка изображения)
+### Улучшение (P2)
+Добавить OCR для автоматического распознавания чеков:
+```typescript
+// В QuickExpense.tsx после загрузки receipt_url
+const { data } = await supabase.functions.invoke('ai-receipt-ocr', {
+  body: { imageUrl: receiptUrl }
+});
+if (data.vendor) setVendor(data.vendor);
+if (data.amount) setAmount(data.amount);
+```
 
 ---
 
-## 9. Безопасность
+## 6. Важные продакшен-функции — Чеклист
 
-### RLS-политики
-- `owner_properties` — фильтр по `owner_id = auth.uid()`
-- `property_financials` — аналогичная защита
-- `property_delegates` — гранулярные permissions (view, edit, financials, bookings)
+### 6.1 Уже реализовано ✅
+- [x] Создание недвижимости (`useCreateOwnerProperty`)
+- [x] Аллокация расходов на объекты (`property_financials.property_id`)
+- [x] Система заказов (`orders` — 20 записей)
+- [x] Payment intents tracking
+- [x] RLS-политики на критических таблицах
+- [x] Централизованная обработка ошибок
+- [x] Билингвальность (RU/EN)
 
-### Проверка прав
-- `useCanAccessReportFinancials()` — роль-based доступ к финансам
-- Делегаты видят отчеты только при разрешении `financials`
+### 6.2 Требует внимания ⚠️
+- [ ] **AI Search Performance** — debounce 600→300ms
+- [ ] **Lead Vertical Attribution** — заполнить vertical_id
+- [ ] **Listing Wizard E2E** — протестировать полный флоу
+- [ ] **Property Bookings** — добавить demo-данные
+- [ ] **Admin Moderation Queue** — одобрить pending properties
 
----
-
-## 10. Рекомендации по улучшению
-
-### Приоритет P0 (исправить)
-1. Заменить `console.error` на `errorHandler` в `QuickExpense.tsx`
-2. Добавить demo-данные в `property_financials` для тестирования
-
-### Приоритет P1 (улучшить UX)
-3. Интегрировать Gemini OCR для автоматического распознавания чеков
-4. Добавить автоматическую ежемесячную генерацию отчетов
-5. Добавить push-уведомления о задачах на сегодня
-
-### Приоритет P2 (расширить функционал)
-6. Добавить бенчмарки по рынку Пхукета в аналитику
-7. Интегрировать прогнозирование дохода на основе исторических данных
-8. Добавить автоматическую синхронизацию курсов валют (THB/USD/RUB)
+### 6.3 Roadmap (P2)
+- [ ] AI Receipt OCR (Gemini Vision)
+- [ ] Push-уведомления (FCM)
+- [ ] Автоматические месячные отчеты
+- [ ] Market benchmarks для аналитики
 
 ---
 
-## Итоговая оценка
+## Техническая реализация
 
-| Аспект | Оценка |
-|--------|--------|
-| Архитектура и интеграция | 9/10 |
-| Управление объектами | 9/10 |
-| Финансовый модуль | 10/10 |
-| Отчетность | 9/10 |
-| Аналитика | 8/10 |
-| Операции | 9/10 |
-| UX/Mobile | 9/10 |
-| Качество кода | 9/10 |
-| Безопасность | 9/10 |
-| **Общая оценка** | **9.0/10** |
+### Файлы для изменения
 
-**Вердикт**: Система управления недвижимостью **готова к production**. Реализованы все ключевые сценарии владельца: добавление объектов, учет расходов, генерация отчетов, календарь и аналитика. Модуль отлично интегрирован в суперапп и следует единым дизайн-паттернам UNO.
+| Файл | Изменение |
+|------|-----------|
+| `src/hooks/useAISearch.ts` | Debounce 600 → 300ms |
+| `src/hooks/useGlobalSearch.ts` | Оптимизация через RPC |
+| `supabase/functions/ai-smart-search/index.ts` | Добавить кэширование |
+| БД: `consultation_requests` | Seed лидов с vertical_id |
+| БД: `property_bookings` | Seed демо-бронирований |
+
+### Миграции БД
+
+```sql
+-- 1. Создать unified search function
+-- 2. Добавить ai_search_cache таблицу
+-- 3. Seed demo leads
+-- 4. Seed demo bookings
+```
+
+---
+
+## Ожидаемые результаты
+
+| Метрика | До | После |
+|---------|-----|-------|
+| AI Search latency | ~1.2s | ~0.5s |
+| Leads с vertical_id | 0% | 100% |
+| Property bookings | 0 | 5+ demo |
+| Listing applications | 0 | 2+ demo |
+| E2E flows validated | Partial | Full |
+
+---
+
+## Приоритеты реализации
+
+1. **Сейчас (P0)**: AI Search debounce → 300ms
+2. **Сегодня (P1)**: Demo-данные для leads, bookings, listings
+3. **Завтра (P1)**: Unified search RPC function
+4. **Эта неделя (P2)**: AI caching, OCR receipt
