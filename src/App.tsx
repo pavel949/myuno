@@ -19,6 +19,7 @@ import { PrefetchProvider } from "@/components/providers/PrefetchProvider";
 import { defaultQueryClientOptions } from "@/lib/queryConfig";
 import { HintProvider } from "@/components/hints/HintProvider";
 import { UnderConstruction } from "@/components/maintenance/UnderConstruction";
+import { PWAUpdatePrompt } from "@/components/pwa/PWAUpdatePrompt";
 
 const queryClient = new QueryClient({
   defaultOptions: defaultQueryClientOptions,
@@ -39,6 +40,7 @@ function AppContent() {
       <SkipToContent />
       <Toaster />
       <Sonner />
+      <PWAUpdatePrompt />
       <BrowserRouter>
         <AnimatedRoutes />
         <UnifiedChatFAB />
