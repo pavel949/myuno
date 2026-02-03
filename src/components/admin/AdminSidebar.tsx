@@ -11,7 +11,9 @@ import {
   Inbox,
   UserPlus,
   Megaphone,
-  Building2
+  Building2,
+  FileText,
+  Building,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -62,6 +64,22 @@ const navigationItems: NavItem[] = [
     icon: Building2,
     description: 'Residential complexes',
     descriptionRu: 'Жилые комплексы'
+  },
+  { 
+    title: 'PM Companies', 
+    titleRu: 'УК', 
+    path: '/admin/pm-companies', 
+    icon: Building,
+    description: 'Property management',
+    descriptionRu: 'Управляющие компании'
+  },
+  { 
+    title: 'Contracts', 
+    titleRu: 'Контракты', 
+    path: '/admin/contracts', 
+    icon: FileText,
+    description: 'Provider agreements',
+    descriptionRu: 'Договоры с партнёрами'
   },
   { 
     title: 'Operations', 

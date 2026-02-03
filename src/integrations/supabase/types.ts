@@ -7125,6 +7125,7 @@ export type Database = {
           pet_notes_ru: string | null
           pets_allowed: boolean | null
           plot_size_sqm: number | null
+          pm_company_id: string | null
           pool_type: string | null
           prepay_percent: number | null
           price_per_night: number | null
@@ -7274,6 +7275,7 @@ export type Database = {
           pet_notes_ru?: string | null
           pets_allowed?: boolean | null
           plot_size_sqm?: number | null
+          pm_company_id?: string | null
           pool_type?: string | null
           prepay_percent?: number | null
           price_per_night?: number | null
@@ -7423,6 +7425,7 @@ export type Database = {
           pet_notes_ru?: string | null
           pets_allowed?: boolean | null
           plot_size_sqm?: number | null
+          pm_company_id?: string | null
           pool_type?: string | null
           prepay_percent?: number | null
           price_per_night?: number | null
@@ -7481,6 +7484,13 @@ export type Database = {
             columns: ["marketplace_property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_properties_pm_company_id_fkey"
+            columns: ["pm_company_id"]
+            isOneToOne: false
+            referencedRelation: "property_management_companies"
             referencedColumns: ["id"]
           },
         ]
@@ -9913,6 +9923,108 @@ export type Database = {
           },
         ]
       }
+      property_management_companies: {
+        Row: {
+          address: string | null
+          cover_image: string | null
+          created_at: string
+          created_by: string | null
+          default_commission_rate: number | null
+          description: string | null
+          description_ru: string | null
+          email: string | null
+          established_year: number | null
+          has_24_7_support: boolean | null
+          has_emergency_service: boolean | null
+          id: string
+          is_active: boolean | null
+          is_verified: boolean | null
+          languages: string[] | null
+          license_number: string | null
+          logo_url: string | null
+          min_contract_months: number | null
+          name: string
+          name_ru: string | null
+          phone: string | null
+          properties_managed: number | null
+          rating: number | null
+          review_count: number | null
+          service_districts: string[] | null
+          service_types: string[] | null
+          tax_id: string | null
+          updated_at: string
+          verified_at: string | null
+          verified_by: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          cover_image?: string | null
+          created_at?: string
+          created_by?: string | null
+          default_commission_rate?: number | null
+          description?: string | null
+          description_ru?: string | null
+          email?: string | null
+          established_year?: number | null
+          has_24_7_support?: boolean | null
+          has_emergency_service?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          license_number?: string | null
+          logo_url?: string | null
+          min_contract_months?: number | null
+          name: string
+          name_ru?: string | null
+          phone?: string | null
+          properties_managed?: number | null
+          rating?: number | null
+          review_count?: number | null
+          service_districts?: string[] | null
+          service_types?: string[] | null
+          tax_id?: string | null
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          cover_image?: string | null
+          created_at?: string
+          created_by?: string | null
+          default_commission_rate?: number | null
+          description?: string | null
+          description_ru?: string | null
+          email?: string | null
+          established_year?: number | null
+          has_24_7_support?: boolean | null
+          has_emergency_service?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          license_number?: string | null
+          logo_url?: string | null
+          min_contract_months?: number | null
+          name?: string
+          name_ru?: string | null
+          phone?: string | null
+          properties_managed?: number | null
+          rating?: number | null
+          review_count?: number | null
+          service_districts?: string[] | null
+          service_types?: string[] | null
+          tax_id?: string | null
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
       property_management_requests: {
         Row: {
           created_at: string
@@ -10560,6 +10672,108 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      provider_contracts: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          auto_renew: boolean | null
+          bank_account_name: string | null
+          bank_account_number: string | null
+          bank_name: string | null
+          commission_rate: number
+          commission_type: string | null
+          contract_document_url: string | null
+          contract_number: string | null
+          contract_type: string | null
+          created_at: string
+          created_by: string | null
+          entity_id: string
+          entity_type: string
+          id: string
+          max_commission_amount: number | null
+          min_commission_amount: number | null
+          notes: string | null
+          notice_period_days: number | null
+          payment_method: string | null
+          payment_terms: string | null
+          special_terms: string | null
+          status: string | null
+          terminated_at: string | null
+          terminated_by: string | null
+          termination_reason: string | null
+          tiered_rates: Json | null
+          updated_at: string
+          valid_from: string
+          valid_until: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          auto_renew?: boolean | null
+          bank_account_name?: string | null
+          bank_account_number?: string | null
+          bank_name?: string | null
+          commission_rate?: number
+          commission_type?: string | null
+          contract_document_url?: string | null
+          contract_number?: string | null
+          contract_type?: string | null
+          created_at?: string
+          created_by?: string | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          max_commission_amount?: number | null
+          min_commission_amount?: number | null
+          notes?: string | null
+          notice_period_days?: number | null
+          payment_method?: string | null
+          payment_terms?: string | null
+          special_terms?: string | null
+          status?: string | null
+          terminated_at?: string | null
+          terminated_by?: string | null
+          termination_reason?: string | null
+          tiered_rates?: Json | null
+          updated_at?: string
+          valid_from?: string
+          valid_until?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          auto_renew?: boolean | null
+          bank_account_name?: string | null
+          bank_account_number?: string | null
+          bank_name?: string | null
+          commission_rate?: number
+          commission_type?: string | null
+          contract_document_url?: string | null
+          contract_number?: string | null
+          contract_type?: string | null
+          created_at?: string
+          created_by?: string | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          max_commission_amount?: number | null
+          min_commission_amount?: number | null
+          notes?: string | null
+          notice_period_days?: number | null
+          payment_method?: string | null
+          payment_terms?: string | null
+          special_terms?: string | null
+          status?: string | null
+          terminated_at?: string | null
+          terminated_by?: string | null
+          termination_reason?: string | null
+          tiered_rates?: Json | null
+          updated_at?: string
+          valid_from?: string
+          valid_until?: string | null
+        }
+        Relationships: []
       }
       provider_payout_methods: {
         Row: {

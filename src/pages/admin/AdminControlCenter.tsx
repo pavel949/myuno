@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Shield, BarChart3, DollarSign, Settings, FileText } from 'lucide-react';
+import { Users, Shield, BarChart3, DollarSign, Settings, FileText, History } from 'lucide-react';
 import { ControlUsersTab } from '@/components/admin/control/ControlUsersTab';
 import { ControlRolesTab } from '@/components/admin/control/ControlRolesTab';
 import { ControlAnalyticsTab } from '@/components/admin/control/ControlAnalyticsTab';
 import { ControlFinanceTab } from '@/components/admin/control/ControlFinanceTab';
 import { ControlSystemTab } from '@/components/admin/control/ControlSystemTab';
 import { ControlLogsTab } from '@/components/admin/control/ControlLogsTab';
+import { ControlAuditTab } from '@/components/admin/control/ControlAuditTab';
 
 export default function AdminControlCenter() {
   const { language } = useLanguage();
@@ -19,6 +20,7 @@ export default function AdminControlCenter() {
     { id: 'roles', label: isRussian ? 'Роли' : 'Roles', icon: Shield },
     { id: 'analytics', label: isRussian ? 'Аналитика' : 'Analytics', icon: BarChart3 },
     { id: 'finance', label: isRussian ? 'Финансы' : 'Finance', icon: DollarSign },
+    { id: 'audit', label: isRussian ? 'Аудит' : 'Audit', icon: History },
     { id: 'system', label: isRussian ? 'Система' : 'System', icon: Settings },
     { id: 'logs', label: isRussian ? 'Логи' : 'Logs', icon: FileText },
   ];
@@ -68,6 +70,10 @@ export default function AdminControlCenter() {
 
         <TabsContent value="system" className="mt-4">
           <ControlSystemTab />
+        </TabsContent>
+
+        <TabsContent value="audit" className="mt-4">
+          <ControlAuditTab />
         </TabsContent>
 
         <TabsContent value="logs" className="mt-4">
