@@ -37,7 +37,13 @@ export function ProviderDashboardLayout({
 }: ProviderDashboardLayoutProps) {
   return (
     <div 
-      className="flex flex-col h-full min-h-0"
+      className={cn(
+        "flex flex-col min-h-0",
+        // Bottom padding for FAB and nav
+        fabPadding && 'pb-32',
+        footer && 'pb-20',
+        className
+      )}
       role="main"
       aria-label={pageTitle}
     >
@@ -48,27 +54,9 @@ export function ProviderDashboardLayout({
         </header>
       )}
       
-      {/* SINGLE SCROLL CONTAINER - Critical for P0 */}
-      <div 
-        className={cn(
-          'flex-1 overflow-y-auto overflow-x-hidden',
-          // Mobile overscroll safety
-          'overscroll-contain',
-          // Smooth scrolling
-          'scroll-smooth',
-          // Bottom padding for FAB and nav
-          fabPadding && 'pb-32',
-          footer && 'pb-20',
-          className
-        )}
-      >
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.2 }}
-        >
-          {children}
-        </motion.div>
+      {/* Content - NO nested scroll, parent handles scrolling */}
+      <div className="flex-1">
+        {children}
       </div>
       
       {/* Sticky Footer */}
