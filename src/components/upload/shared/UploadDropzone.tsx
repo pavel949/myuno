@@ -207,17 +207,6 @@ export function UploadDropzone({
         </div>
       )}
 
-      {/* Expose methods for parent components */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept={accept}
-        onChange={handleFileSelect}
-        className="hidden"
-        multiple={multiple}
-        disabled={disabled}
-        data-testid="dropzone-file-input"
-      />
     </div>
   );
 }
