@@ -16,3 +16,11 @@ export {
   type UnifiedServiceCardProps,
   type HomeServiceProviderCardProps,
 } from './contentAdapters';
+
+// Vehicle adapters
+export {
+  mapVehicleToCardProps,
+  mapVehicleToBookingContext,
+  getVehicleSpecs,
+  type VehicleCardProps,
+} from './vehicleAdapters';

@@ -1,21 +1,20 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Car, Users, Clock, Gauge } from 'lucide-react';
+import { Car } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { MiniAppLayout, MiniAppQuickGrid, ItemCard, type MiniAppCategory, type QuickGridItem } from '@/components/miniapp';
+import { MiniAppLayout, MiniAppQuickGrid, ItemCard, type QuickGridItem } from '@/components/miniapp';
 import { transportFilterConfig, FilterValues } from '@/components/filters';
 import { useVehicles } from '@/hooks/useVehicles';
-import { matchesFilter, matchesPriceLevel } from '@/lib/filterUtils';
+import { matchesPriceLevel } from '@/lib/filterUtils';
 import { VerticalCTA } from '@/components/leads/VerticalCTA';
 import { CrossSellSection } from '@/components/crosssell';
-
-const VEHICLE_CATEGORIES: MiniAppCategory[] = [
-  { id: 'all', labelEn: 'All', labelRu: 'Все' },
-  { id: 'car', labelEn: 'Cars', labelRu: 'Авто' },
-  { id: 'motorbike', labelEn: 'Bikes', labelRu: 'Мото' },
-  { id: 'suv', labelEn: 'SUV', labelRu: 'Внедорожник' },
-];
+import { 
+  getRibbonCategories, 
+  matchesCategory,
+  normalizeVehicleType,
+} from '@/lib/config/transportTaxonomy';
+import { mapVehicleToCardProps } from '@/lib/adapters/vehicleAdapters';
 
 export default function TransportIndex() {
   const { language } = useLanguage();
@@ -26,10 +25,15 @@ export default function TransportIndex() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterValues, setFilterValues] = useState<FilterValues>({});
 
+  // Get ribbon categories from taxonomy
+  const ribbonCategories = useMemo(() => getRibbonCategories(language), [language]);
+
   const filteredVehicles = useMemo(() => {
     return vehicles.filter(v => {
-      if (selectedCategory !== 'all' && v.vehicle_type !== selectedCategory) return false;
+      // Category filter using taxonomy normalization
+      if (!matchesCategory(v.vehicle_type, selectedCategory)) return false;
       
+      // Search filter
       if (searchQuery) {
         const name = language === 'ru' ? v.name_ru : v.name_en;
         if (!name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
@@ -52,29 +56,33 @@ export default function TransportIndex() {
       const priceLevel = filterValues.priceLevel as string | undefined;
       if (priceLevel && !matchesPriceLevel(v.price_per_day, priceLevel)) return false;
       
-      // Vehicle type filter from modal
+      // Vehicle type filter from modal (using taxonomy normalization)
       const vehicleTypeFilter = filterValues.vehicleType as string[] | undefined;
       if (vehicleTypeFilter?.length) {
-        if (!matchesFilter([v.vehicle_type || ''], vehicleTypeFilter)) return false;
+        const normalizedType = normalizeVehicleType(v.vehicle_type);
+        if (!vehicleTypeFilter.includes(normalizedType)) return false;
       }
       
-      // Features filter
-      const featuresFilter = filterValues.features as string[] | undefined;
-      if (featuresFilter?.length) {
-        if (!matchesFilter(v.features || [], featuresFilter)) return false;
-      }
-      
-      // Transmission filter
+      // Transmission filter (NEW)
       const transmissionFilter = filterValues.transmission as string | undefined;
       if (transmissionFilter) {
         if (v.transmission?.toLowerCase() !== transmissionFilter.toLowerCase()) return false;
       }
       
-      // Rating filter
-      const ratingFilter = filterValues.rating as string | undefined;
-      if (ratingFilter) {
-        const minRating = parseFloat(ratingFilter);
-        if ((v.rating || 0) < minRating) return false;
+      // Fuel type filter (NEW)
+      const fuelTypeFilter = filterValues.fuelType as string[] | undefined;
+      if (fuelTypeFilter?.length) {
+        if (!v.fuel_type || !fuelTypeFilter.includes(v.fuel_type.toLowerCase())) return false;
+      }
+      
+      // Features filter
+      const featuresFilter = filterValues.features as string[] | undefined;
+      if (featuresFilter?.length) {
+        const vehicleFeatures = v.features || [];
+        const hasAllFeatures = featuresFilter.every(f => 
+          vehicleFeatures.some(vf => vf.toLowerCase() === f.toLowerCase())
+        );
+        if (!hasAllFeatures) return false;
       }
       
       // Verified filter
@@ -103,7 +111,7 @@ export default function TransportIndex() {
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}
       searchPlaceholder={language === 'ru' ? 'Поиск транспорта...' : 'Search vehicles...'}
-      categories={VEHICLE_CATEGORIES}
+      categories={ribbonCategories}
       selectedCategory={selectedCategory}
       onCategoryChange={setSelectedCategory}
       filterConfig={transportFilterConfig}
@@ -117,24 +125,26 @@ export default function TransportIndex() {
       <MiniAppQuickGrid items={quickItems} columns={4} className="mb-6" />
       
       <div className="grid gap-4">
-        {filteredVehicles.map((vehicle) => (
-          <ItemCard
-            key={vehicle.id}
-            image={vehicle.cover_image || 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=600'}
-            title={language === 'ru' ? vehicle.name_ru : vehicle.name_en}
-            rating={vehicle.rating ?? undefined}
-            price={vehicle.price_per_day ?? undefined}
-            currency={currencyInfo.symbol}
-            priceLabel={`/${language === 'ru' ? 'день' : 'day'}`}
-            meta={[
-              { icon: Users, label: `${vehicle.capacity || 0}` },
-              { icon: Gauge, label: 'Auto' },
-            ]}
-            tags={vehicle.features?.slice(0, 2) || []}
-            isVerified={vehicle.is_verified}
-            onClick={() => navigate(`/transport/vehicle/${vehicle.id}`)}
-          />
-        ))}
+        {filteredVehicles.map((vehicle) => {
+          const cardProps = mapVehicleToCardProps(vehicle, language, currencyInfo.symbol);
+          return (
+            <ItemCard
+              key={vehicle.id}
+              image={cardProps.image}
+              title={cardProps.title}
+              subtitle={cardProps.subtitle}
+              rating={cardProps.rating}
+              price={cardProps.price}
+              currency={cardProps.currency}
+              priceLabel={cardProps.priceLabel}
+              meta={cardProps.meta}
+              tags={cardProps.tags}
+              badge={cardProps.badge}
+              isVerified={cardProps.isVerified}
+              onClick={() => navigate(`/transport/vehicle/${vehicle.id}`)}
+            />
+          );
+        })}
       </div>
 
       <VerticalCTA vertical="vehicles" className="my-6" />
