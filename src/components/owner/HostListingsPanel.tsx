@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import { PropertyListItem } from '@/components/property/PropertyListItem';
+import { PropertyCard, PropertyCardSkeleton } from '@/components/property/PropertyCard';
 import { 
   Home, Plus, Clock, CheckCircle, 
   XCircle, AlertCircle, FileEdit, ArrowRight
@@ -156,9 +156,10 @@ export function HostListingsPanel() {
             ) : (
               <>
                 {properties?.slice(0, 5).map((property) => (
-                  <PropertyListItem 
+                  <PropertyCard 
                     key={property.id} 
                     property={property} 
+                    variant="list"
                     mode="owner"
                     onEdit={handleEdit}
                     onView={handleView}
@@ -190,9 +191,10 @@ export function HostListingsPanel() {
               />
             ) : (
               categorizedProperties.drafts.map((property) => (
-                <PropertyListItem 
+                <PropertyCard 
                   key={property.id} 
                   property={property} 
+                  variant="list"
                   mode="owner"
                   onEdit={handleEdit}
                   onView={handleView}
@@ -222,9 +224,10 @@ export function HostListingsPanel() {
                   </span>
                 </div>
                 {categorizedProperties.pending.map((property) => (
-                  <PropertyListItem 
+                  <PropertyCard 
                     key={property.id} 
                     property={property} 
+                    variant="list"
                     mode="owner"
                     onEdit={handleEdit}
                     onView={handleView}
@@ -246,9 +249,10 @@ export function HostListingsPanel() {
               />
             ) : (
               categorizedProperties.active.map((property) => (
-                <PropertyListItem 
+                <PropertyCard 
                   key={property.id} 
                   property={property} 
+                  variant="list"
                   mode="owner"
                   onEdit={handleEdit}
                   onView={handleView}
@@ -278,9 +282,10 @@ export function HostListingsPanel() {
                   </span>
                 </div>
                 {categorizedProperties.rejected.map((property) => (
-                  <PropertyListItem 
+                  <PropertyCard 
                     key={property.id} 
                     property={property} 
+                    variant="list"
                     mode="owner"
                     onEdit={handleEdit}
                     onView={handleView}
