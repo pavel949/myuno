@@ -33,6 +33,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+import { createErrorHandler } from '@/lib/errorHandler';
 import { 
   Building2, 
   Plus, 
@@ -82,6 +83,7 @@ const districtOptions = PHUKET_DISTRICTS.map(d => ({
 
 export default function AdminProperties() {
   const navigate = useNavigate();
+  const errorLog = createErrorHandler('AdminProperties');
   const [searchParams] = useSearchParams();
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
@@ -253,8 +255,7 @@ export default function AdminProperties() {
       setIsDialogOpen(false);
       resetForm();
     } catch (error) {
-      console.error('Error saving property:', error);
-      toast.error(isRussian ? 'Ошибка при сохранении' : 'Error saving property');
+      errorLog.error(error, 'save_property');
     } finally {
       setIsSubmitting(false);
     }
@@ -267,8 +268,7 @@ export default function AdminProperties() {
       toast.success(isRussian ? 'Объект удалён' : 'Property deleted');
       setDeleteConfirmId(null);
     } catch (error) {
-      console.error('Error deleting property:', error);
-      toast.error(isRussian ? 'Ошибка при удалении' : 'Error deleting property');
+      errorLog.error(error, 'delete_property');
     }
   };
 

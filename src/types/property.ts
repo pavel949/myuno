@@ -233,6 +233,18 @@ export interface VendorProperty extends Omit<BaseProperty, 'title'> {
   rating?: number;
   review_count?: number;
   available_from?: string;
+  
+  // Booking features
+  instant_booking?: boolean;
+  instant_booking_enabled_at?: string;
+  
+  // Moderation/Approval fields
+  approval_status?: 'draft' | 'pending' | 'approved' | 'rejected';
+  approved_at?: string;
+  approved_by?: string;
+  rejection_reason?: string;
+  reviewed_at?: string;
+  reviewed_by?: string;
 }
 
 /**
