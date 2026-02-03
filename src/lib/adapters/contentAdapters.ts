@@ -7,6 +7,7 @@
 import { MarketplaceProduct } from '@/types/marketplace';
 import { Service } from '@/hooks/useServices';
 import { HomeServiceProvider } from '@/hooks/useHomeServices';
+import type { OwnerProperty, VendorProperty } from '@/types/property';
 
 // ============= UNIFIED CARD PROPS =============
 
@@ -271,13 +272,176 @@ export function mapHomeServiceProviderToCardProps(
   };
 }
 
+// ============= PROPERTY ADAPTERS =============
+
+export interface UnifiedPropertyCardProps {
+  variant: 'property';
+  id: string;
+  title: string;
+  titleRu?: string;
+  internalName?: string;
+  propertyType?: string;
+  coverImage?: string;
+  images?: string[];
+  bedrooms?: number;
+  bathrooms?: number;
+  maxGuests?: number;
+  areaSqm?: number;
+  district?: string;
+  address?: string;
+  price?: number;
+  pricePerNight?: number;
+  pricePeriod?: string;
+  currency: string;
+  rating?: number;
+  reviewCount?: number;
+  isActive?: boolean;
+  isFeatured?: boolean;
+  instantBooking?: boolean;
+  approvalStatus?: string;
+  marketplacePropertyId?: string | null;
+  highlights?: string[];
+}
+
+/**
+ * Type guard to check if property is OwnerProperty
+ */
+function isOwnerProperty(property: OwnerProperty | VendorProperty): property is OwnerProperty {
+  return 'title' in property && !('title_en' in property);
+}
+
+/**
+ * Maps an OwnerProperty or VendorProperty to unified card props
+ * Used by: PropertyListItem, AdminProperties, OwnerProperties
+ */
+export function mapPropertyToCardProps(
+  property: OwnerProperty | VendorProperty,
+  language: string
+): UnifiedPropertyCardProps {
+  const isRu = language === 'ru';
+
+  if (isOwnerProperty(property)) {
+    // OwnerProperty format (title, title_ru)
+    return {
+      variant: 'property',
+      id: property.id,
+      title: isRu ? (property.title_ru || property.title) : property.title,
+      titleRu: property.title_ru,
+      internalName: property.internal_name,
+      propertyType: property.property_type,
+      coverImage: property.cover_image,
+      images: property.images,
+      bedrooms: property.bedrooms,
+      bathrooms: property.bathrooms,
+      maxGuests: property.max_guests,
+      areaSqm: property.area_sqm,
+      district: property.district,
+      address: property.address,
+      price: property.price_per_night,
+      pricePerNight: property.price_per_night,
+      pricePeriod: 'night',
+      currency: property.deposit_currency || 'THB',
+      instantBooking: property.instant_booking,
+      approvalStatus: property.approval_status,
+      marketplacePropertyId: property.marketplace_property_id,
+      highlights: property.highlights,
+    };
+  } else {
+    // VendorProperty format (title_en, title_ru)
+    return {
+      variant: 'property',
+      id: property.id,
+      title: isRu ? (property.title_ru || property.title_en) : property.title_en,
+      titleRu: property.title_ru,
+      internalName: property.internal_name,
+      propertyType: property.property_type,
+      coverImage: property.cover_image,
+      images: property.images,
+      bedrooms: property.bedrooms,
+      bathrooms: property.bathrooms,
+      maxGuests: property.max_guests,
+      areaSqm: property.area_sqm,
+      district: property.district,
+      address: property.address,
+      price: property.price,
+      pricePerNight: property.price,
+      pricePeriod: property.price_period || 'night',
+      currency: property.currency || 'THB',
+      rating: property.rating,
+      reviewCount: property.review_count,
+      isActive: property.is_active,
+      isFeatured: property.is_featured,
+      instantBooking: (property as any).instant_booking,
+      approvalStatus: (property as any).approval_status,
+    };
+  }
+}
+
+/**
+ * Maps property form data to card props for live preview
+ * Used by: AddProperty wizard preview step
+ */
+export function mapPropertyFormToCardProps(
+  formData: {
+    title?: string;
+    title_ru?: string;
+    title_en?: string;
+    internal_name?: string;
+    property_type?: string;
+    cover_image?: string;
+    images?: string[];
+    bedrooms?: number;
+    bathrooms?: number;
+    max_guests?: number;
+    area_sqm?: string | number;
+    district?: string;
+    address?: string;
+    price_per_night?: string | number;
+    price?: string | number;
+    instant_booking?: boolean;
+  },
+  language: string
+): UnifiedPropertyCardProps {
+  const isRu = language === 'ru';
+  const title = formData.title || formData.title_en || '';
+  const titleRu = formData.title_ru;
+  const price = typeof formData.price_per_night === 'string' 
+    ? parseFloat(formData.price_per_night) || undefined
+    : formData.price_per_night || (typeof formData.price === 'string' ? parseFloat(formData.price) : formData.price);
+  const area = typeof formData.area_sqm === 'string' 
+    ? parseFloat(formData.area_sqm) || undefined
+    : formData.area_sqm;
+
+  return {
+    variant: 'property',
+    id: 'preview',
+    title: isRu ? (titleRu || title) : title,
+    titleRu,
+    internalName: formData.internal_name,
+    propertyType: formData.property_type,
+    coverImage: formData.cover_image,
+    images: formData.images,
+    bedrooms: formData.bedrooms,
+    bathrooms: formData.bathrooms,
+    maxGuests: formData.max_guests,
+    areaSqm: area,
+    district: formData.district,
+    address: formData.address,
+    price,
+    pricePerNight: price,
+    pricePeriod: 'night',
+    currency: 'THB',
+    instantBooking: formData.instant_booking,
+  };
+}
+
 // ============= PREVIEW HELPERS =============
 
 /**
  * Checks if form has enough data to show a meaningful preview
  */
-export function canShowPreview(formData: { name_en?: string; cover_image?: string; price?: string | number }): boolean {
-  return Boolean(formData.name_en || formData.cover_image || formData.price);
+export function canShowPreview(formData: { name_en?: string; title?: string; cover_image?: string; price?: string | number }): boolean {
+  return Boolean(formData.name_en || formData.title || formData.cover_image || formData.price);
 }
 
 /**

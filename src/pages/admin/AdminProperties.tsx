@@ -36,17 +36,10 @@ import { toast } from 'sonner';
 import { 
   Building2, 
   Plus, 
-  MoreVertical,
-  Edit,
-  Trash2,
-  Bed,
-  Bath,
-  Ruler,
-  MapPin,
   Loader2,
-  Zap
 } from 'lucide-react';
 import { AirbnbStyleImageUpload } from '@/components/upload/AirbnbStyleImageUpload';
+import { PropertyListItem } from '@/components/property/PropertyListItem';
 import { 
   PROPERTY_TYPES as TAXONOMY_PROPERTY_TYPES, 
   PHUKET_DISTRICTS,
@@ -356,89 +349,15 @@ export default function AdminProperties() {
         ) : (
           <div className="space-y-3">
             {properties.map((property) => (
-              <Card key={property.id} className={!property.is_active ? 'opacity-60' : ''}>
-                <CardContent className="p-4">
-                  <div className="flex gap-3">
-                    {property.cover_image ? (
-                      <img 
-                        src={property.cover_image} 
-                        alt={property.title_en}
-                        className="w-20 h-20 rounded-lg object-cover"
-                      />
-                    ) : (
-                      <div className="w-20 h-20 rounded-lg bg-muted flex items-center justify-center">
-                        <Building2 className="h-8 w-8 text-muted-foreground" />
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-medium truncate">
-                              {isRussian ? property.title_ru : property.title_en}
-                            </h3>
-                            {(property as any).instant_booking && (
-                              <Badge className="bg-amber-500 text-white text-xs">
-                                <Zap className="h-3 w-3 mr-1" />
-                                {isRussian ? 'Мгновенно' : 'Instant'}
-                              </Badge>
-                            )}
-                            {!property.is_active && (
-                              <Badge variant="outline" className="text-xs">
-                                {isRussian ? 'Неактивен' : 'Inactive'}
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="text-xs text-muted-foreground flex items-center gap-1 mb-2">
-                            <MapPin className="h-3 w-3" />
-                            {property.district || property.address || (isRussian ? 'Не указано' : 'Not specified')}
-                          </p>
-                          <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
-                            <span className="flex items-center gap-1">
-                              <Bed className="h-3 w-3" />
-                              {property.bedrooms}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Bath className="h-3 w-3" />
-                              {property.bathrooms}
-                            </span>
-                            {property.area_sqm && (
-                              <span className="flex items-center gap-1">
-                                <Ruler className="h-3 w-3" />
-                                {property.area_sqm}m²
-                              </span>
-                            )}
-                          </div>
-                          <p className="font-bold text-primary">
-                            {property.price ? formatPrice(property.price, property.price_period) : '-'}
-                          </p>
-                        </div>
-
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => openEditDialog(property)}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              {isRussian ? 'Редактировать' : 'Edit'}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              className="text-red-500"
-                              onClick={() => setDeleteConfirmId(property.id)}
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              {isRussian ? 'Удалить' : 'Delete'}
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <PropertyListItem
+                key={property.id}
+                property={property}
+                mode="admin"
+                onEdit={() => openEditDialog(property)}
+                onDelete={() => setDeleteConfirmId(property.id)}
+                showApprovalStatus
+                showInstantBadge
+              />
             ))}
           </div>
         )}
