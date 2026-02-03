@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { MultiImageUpload } from '@/components/upload/ImageUpload';
+import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
 import type { ListingApplicationDraft } from '@/hooks/useListingApplication';
 import { AlertCircle } from 'lucide-react';
 
@@ -19,10 +19,11 @@ export function PhotosStep({ draft, onChange, onNext, onBack }: PhotosStepProps)
   const isRu = language === 'ru';
   const images = draft.images || [];
   
-  const handleImagesChange = (urls: string[]) => {
+  const handleImagesChange = (urls: string | string[]) => {
+    const imageArray = Array.isArray(urls) ? urls : urls ? [urls] : [];
     onChange({ 
-      images: urls,
-      cover_image: urls[0] || undefined 
+      images: imageArray,
+      cover_image: imageArray[0] || undefined 
     });
   };
   
@@ -43,18 +44,24 @@ export function PhotosStep({ draft, onChange, onNext, onBack }: PhotosStepProps)
             </p>
             <p className="text-muted-foreground mt-1">
               {isRu 
-                ? 'Вы сможете добавить фотографии после авторизации или использовать ссылки на изображения.'
-                : 'You can add photos after signing in or use image URLs.'}
+                ? 'Вы сможете добавить фотографии после авторизации.'
+                : 'You can add photos after signing in.'}
             </p>
           </div>
         </div>
       )}
       
-      <MultiImageUpload
+      <UnifiedMediaUploader
+        mode="gallery"
         value={images}
         onChange={handleImagesChange}
         folder="listing-applications"
-        maxImages={10}
+        maxItems={10}
+        enableCloudImport={true}
+        enableUrlImport={true}
+        enableEditing={true}
+        enableQualityTips={true}
+        disabled={!user}
       />
       
       <p className="text-xs text-muted-foreground">

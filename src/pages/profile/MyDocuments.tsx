@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { FileText, Upload, Calendar, MapPin, Shield, Trash2, Eye, Plus, Check, AlertCircle } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { FileText, Calendar, MapPin, Shield, Trash2, Eye, Plus, Check, AlertCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { format, isPast, addMonths } from 'date-fns';
-import { ru, enUS } from 'date-fns/locale';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { SectionCard } from '@/components/uno/SectionCard';
@@ -10,10 +9,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserDocuments, DocumentType, UserDocument } from '@/hooks/useUserDocuments';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
+import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
 import { cn } from '@/lib/utils';
 
 const DOCUMENT_TYPES: { type: DocumentType; labelEn: string; labelRu: string; icon: typeof FileText }[] = [
@@ -37,7 +36,7 @@ export default function MyDocuments() {
     expiry_date: '',
     notes: '',
   });
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileUrl, setFileUrl] = useState<string>('');
 
   const handleEdit = (type: DocumentType) => {
     const existing = getDocument(type);
@@ -48,7 +47,7 @@ export default function MyDocuments() {
       expiry_date: existing?.expiry_date || '',
       notes: existing?.notes || '',
     });
-    setSelectedFile(null);
+    setFileUrl(existing?.file_url || '');
     setEditingType(type);
   };
 
@@ -58,10 +57,11 @@ export default function MyDocuments() {
     await createDocument.mutateAsync({
       document_type: editingType,
       ...formData,
-      file: selectedFile || undefined,
+      file_url: fileUrl || undefined,
     });
     
     setEditingType(null);
+    setFileUrl('');
   };
 
   const handleDelete = async (doc: UserDocument) => {
@@ -229,7 +229,7 @@ export default function MyDocuments() {
 
       {/* Edit Dialog */}
       <Dialog open={!!editingType} onOpenChange={() => setEditingType(null)}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingType && (isRu 
@@ -277,20 +277,16 @@ export default function MyDocuments() {
             </div>
 
             <div>
-              <Label>{isRu ? 'Файл (фото/скан)' : 'File (photo/scan)'}</Label>
+              <Label>{isRu ? 'Фото/скан документа' : 'Document photo/scan'}</Label>
               <div className="mt-2">
-                <label className="flex items-center justify-center gap-2 p-4 border-2 border-dashed rounded-xl cursor-pointer hover:border-primary transition-colors">
-                  <Upload className="w-5 h-5 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">
-                    {selectedFile?.name || (isRu ? 'Выбрать файл' : 'Choose file')}
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/*,.pdf"
-                    className="hidden"
-                    onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                  />
-                </label>
+                <UnifiedMediaUploader
+                  mode="document"
+                  value={fileUrl}
+                  onChange={(url) => setFileUrl(typeof url === 'string' ? url : url[0] || '')}
+                  folder="user-documents"
+                  documentType={editingType || 'other'}
+                  showCamera={true}
+                />
               </div>
             </div>
 
