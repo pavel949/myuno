@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   DollarSign, TrendingUp, Users, CreditCard, PiggyBank, Percent,
-  ArrowUpRight, ArrowDownRight, Settings, Wallet, BarChart3
+  ArrowUpRight, ArrowDownRight, Settings, Wallet, BarChart3, Coins
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -17,6 +17,7 @@ import { ru } from 'date-fns/locale';
 import { CommissionRulesEditor } from '@/components/admin/CommissionRulesEditor';
 import { PayoutManager } from '@/components/admin/PayoutManager';
 import { ProviderFinanceTable } from '@/components/admin/ProviderFinanceTable';
+import { CurrencyRatesEditor } from '@/components/admin/CurrencyRatesEditor';
 
 const COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4', '#84cc16'];
 
@@ -162,11 +163,12 @@ export default function AdminFinance() {
 
         {/* Tabs */}
         <Tabs defaultValue="overview" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Обзор</TabsTrigger>
             <TabsTrigger value="verticals">Вертикали</TabsTrigger>
             <TabsTrigger value="providers">Провайдеры</TabsTrigger>
             <TabsTrigger value="commissions">Комиссии</TabsTrigger>
+            <TabsTrigger value="currencies">Валюты</TabsTrigger>
             <TabsTrigger value="payouts">Выплаты</TabsTrigger>
           </TabsList>
 
@@ -361,6 +363,11 @@ export default function AdminFinance() {
           {/* Commissions Tab */}
           <TabsContent value="commissions">
             <CommissionRulesEditor />
+          </TabsContent>
+
+          {/* Currencies Tab */}
+          <TabsContent value="currencies">
+            <CurrencyRatesEditor />
           </TabsContent>
 
           {/* Payouts Tab */}
