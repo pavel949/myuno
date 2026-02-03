@@ -12,8 +12,16 @@ import {
   CARD_STYLES, 
   IMAGE_STYLES, 
   BADGE_SYSTEM,
-  CAROUSEL_CARD_WIDTHS 
+  CAROUSEL_CARD_WIDTHS,
+  CAROUSEL_IMAGE_HEIGHTS 
 } from '@/lib/designTokens';
+
+// Get card size tier based on index
+const getCardSize = (index: number): 'hero' | 'medium' | 'standard' => {
+  if (index === 0) return 'hero';
+  if (index === 1) return 'medium';
+  return 'standard';
+};
 
 /**
  * DiscoveryCarousel - Unified carousel replacing ExperiencesSection + RecommendedCarousel
@@ -108,9 +116,14 @@ export const DiscoveryCarousel = memo(function DiscoveryCarousel() {
           style={{ scrollSnapType: 'x mandatory' }}
         >
           {experiences.map((experience, index) => {
-            const isHero = index === 0;
+            const cardSize = getCardSize(index);
+            const isHero = cardSize === 'hero';
             const isTour = experience.experience_type === 'tour';
             const title = isRu ? experience.title_ru : experience.title_en;
+            
+            // Size-specific values
+            const imageWidths = { hero: 320, medium: 288, standard: 256 };
+            const imageHeights = { hero: 192, medium: 168, standard: 144 };
             
             return (
               <div
@@ -119,23 +132,23 @@ export const DiscoveryCarousel = memo(function DiscoveryCarousel() {
                 className={cn(
                   CARD_STYLES.interactive,
                   "flex-shrink-0 cursor-pointer",
-                  isHero ? CAROUSEL_CARD_WIDTHS.hero : CAROUSEL_CARD_WIDTHS.standard
+                  CAROUSEL_CARD_WIDTHS[cardSize]
                 )}
                 style={{ scrollSnapAlign: 'start' }}
               >
                 {/* Image Container */}
                 <div className={cn(
                   "relative overflow-hidden",
-                  isHero ? "h-48" : "h-36"
+                  CAROUSEL_IMAGE_HEIGHTS[cardSize]
                 )}>
                   <OptimizedImage
                     src={experience.cover_image || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'}
                     alt={title}
-                    width={isHero ? 320 : 256}
-                    height={isHero ? 192 : 144}
+                    width={imageWidths[cardSize]}
+                    height={imageHeights[cardSize]}
                     className={IMAGE_STYLES.hover}
                     quality={75}
-                    sizes={isHero ? "320px" : "256px"}
+                    sizes={`${imageWidths[cardSize]}px`}
                   />
                   
                   {/* Gradient overlay for hero */}
