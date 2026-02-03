@@ -69,6 +69,10 @@ export interface UnifiedFiltersKlookConfig {
   showDateFilters?: boolean;
   datePresets?: { id: DatePreset; labelEn: string; labelRu: string }[];
   
+  // Date range picker (for Transport, etc.)
+  showDateRange?: boolean;
+  dateRangeLabels?: { fromEn: string; fromRu: string; toEn: string; toRu: string };
+  
   // Price filters (optional)
   showPriceFilter?: boolean;
   pricePresets?: PricePreset[];
@@ -77,6 +81,9 @@ export interface UnifiedFiltersKlookConfig {
   
   // Sort options
   sortOptions: SortOption[];
+  
+  // Inline quick filters (visible in sticky bar, not drawer)
+  inlineQuickFilters?: FilterChipOption[];
   
   // Quick filter chips in drawer
   quickFilterOptions?: FilterChipOption[];
@@ -128,6 +135,10 @@ export interface UnifiedFiltersKlookProps {
   datePreset?: DatePreset;
   onDatePresetChange?: (preset: DatePreset) => void;
   
+  // Date range (optional, for Transport-like verticals)
+  dateRange?: { from: Date | null; to: Date | null };
+  onDateRangeChange?: (range: { from: Date | null; to: Date | null }) => void;
+  
   // Chip selections (keyed by section id)
   chipSelections?: Record<string, string[]>;
   onChipSelectionsChange?: (sectionId: string, selectedIds: string[]) => void;
@@ -135,6 +146,10 @@ export interface UnifiedFiltersKlookProps {
   // Quick filters
   selectedQuickFilters?: string[];
   onQuickFiltersChange?: (filters: string[]) => void;
+  
+  // Inline quick filters (visible in sticky bar)
+  selectedInlineFilters?: string[];
+  onInlineFiltersChange?: (filters: string[]) => void;
   
   // Results
   resultsCount: number;
@@ -228,10 +243,14 @@ export function UnifiedFiltersKlook({
   onDateChange,
   datePreset = 'any',
   onDatePresetChange,
+  dateRange,
+  onDateRangeChange,
   chipSelections = {},
   onChipSelectionsChange,
   selectedQuickFilters = [],
   onQuickFiltersChange,
+  selectedInlineFilters = [],
+  onInlineFiltersChange,
   resultsCount,
   language,
   stickyTop = 'top-14',
@@ -307,9 +326,10 @@ export function UnifiedFiltersKlook({
     if (selectedCategory !== 'all') count++;
     if (config.showDateFilters && datePreset !== 'any') count++;
     count += selectedQuickFilters.length;
+    count += selectedInlineFilters.length;
     Object.values(chipSelections).forEach(arr => { count += arr.length; });
     return count;
-  }, [priceRange, selectedCategory, selectedQuickFilters, chipSelections, datePreset, config]);
+  }, [priceRange, selectedCategory, selectedQuickFilters, selectedInlineFilters, chipSelections, datePreset, config]);
 
   const hasActiveFilters = activeFilterCount > 0;
 
@@ -423,6 +443,39 @@ export function UnifiedFiltersKlook({
                 </button>
               )}
 
+              <div className="w-px h-6 bg-border flex-shrink-0 self-center mx-1" />
+            </>
+          )}
+          
+          {/* Inline Quick Filters (visible in sticky bar, not drawer) */}
+          {config.inlineQuickFilters && config.inlineQuickFilters.length > 0 && (
+            <>
+              {config.inlineQuickFilters.map((filter) => {
+                const isActive = selectedInlineFilters.includes(filter.id);
+                return (
+                  <button
+                    key={filter.id}
+                    onClick={() => {
+                      if (onInlineFiltersChange) {
+                        onInlineFiltersChange(
+                          isActive
+                            ? selectedInlineFilters.filter(f => f !== filter.id)
+                            : [...selectedInlineFilters, filter.id]
+                        );
+                      }
+                    }}
+                    className={cn(
+                      "flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1 whitespace-nowrap border",
+                      isActive
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-background text-foreground border-border hover:border-primary/50"
+                    )}
+                  >
+                    {renderIcon(filter.icon)}
+                    <span>{isRu ? filter.labelRu : filter.labelEn}</span>
+                  </button>
+                );
+              })}
               <div className="w-px h-6 bg-border flex-shrink-0 self-center mx-1" />
             </>
           )}

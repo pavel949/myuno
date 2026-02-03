@@ -1,23 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Anchor, Users, SlidersHorizontal, Sparkles } from 'lucide-react';
+import { Anchor, Users } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Button } from '@/components/ui/button';
-import { MiniAppLayout, MiniAppQuickGrid, ItemCard, type MiniAppCategory } from '@/components/miniapp';
-import { UniversalFilter, ActiveFilters, yachtFilterConfig, FilterValues } from '@/components/filters';
-import { ExperienceFilterChips } from '@/components/yachts/YachtExperienceSelect';
+import { MiniAppLayout, MiniAppQuickGrid, ItemCard } from '@/components/miniapp';
+import { YachtFiltersKlook, type DatePreset, type SortOption } from '@/components/yachts/YachtFiltersKlook';
 import { useYachts } from '@/hooks/useYachts';
 import { matchesFilter, matchesPriceLevel } from '@/lib/filterUtils';
 import { CrossSellSection } from '@/components/crosssell';
 import { VerticalCTA } from '@/components/leads/VerticalCTA';
-
-const YACHT_CATEGORIES: MiniAppCategory[] = [
-  { id: 'all', labelEn: 'All', labelRu: 'Все' },
-  { id: 'yacht', labelEn: 'Yachts', labelRu: 'Яхты' },
-  { id: 'catamaran', labelEn: 'Catamarans', labelRu: 'Катамараны' },
-  { id: 'speedboat', labelEn: 'Speedboats', labelRu: 'Катера' },
-  { id: 'sailing', labelEn: 'Sailing', labelRu: 'Парусные' },
-];
 
 const popularRoutes = [
   { icon: '🏝️', label: 'Phi Phi', path: '/yachts?route=phi-phi' },
@@ -30,32 +20,22 @@ export default function YachtsIndex() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const { yachts, isLoading } = useYachts();
+  
+  // Filter state
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterValues, setFilterValues] = useState<FilterValues>({});
+  const [sortBy, setSortBy] = useState<SortOption>('rating');
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500000]);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [datePreset, setDatePreset] = useState<DatePreset>('any');
+  const [selectedDuration, setSelectedDuration] = useState<string[]>([]);
   const [selectedExperiences, setSelectedExperiences] = useState<string[]>([]);
-
-  const activeFilterCount = useMemo(() => {
-    return Object.values(filterValues).filter(v => 
-      Array.isArray(v) ? v.length > 0 : v !== undefined && v !== null
-    ).length;
-  }, [filterValues]);
-
-  const handleRemoveFilter = (sectionId: string, optionId?: string) => {
-    setFilterValues(prev => {
-      const newValues = { ...prev };
-      if (optionId && Array.isArray(newValues[sectionId])) {
-        newValues[sectionId] = (newValues[sectionId] as string[]).filter(id => id !== optionId);
-        if ((newValues[sectionId] as string[]).length === 0) delete newValues[sectionId];
-      } else {
-        delete newValues[sectionId];
-      }
-      return newValues;
-    });
-  };
+  const [selectedCapacity, setSelectedCapacity] = useState<string[]>([]);
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+  const [selectedQuickFilters, setSelectedQuickFilters] = useState<string[]>([]);
 
   const filteredYachts = useMemo(() => {
-    return yachts.filter(y => {
+    let results = yachts.filter(y => {
       // Category filter
       if (selectedCategory !== 'all' && y.yacht_type !== selectedCategory) return false;
       
@@ -65,29 +45,30 @@ export default function YachtsIndex() {
         if (!name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       }
       
-      // Price level filter
+      // Price filter
       const price = y.price_full_day || y.price_half_day || 0;
-      if (!matchesPriceLevel(price, filterValues.priceLevel as string)) return false;
+      if (price < priceRange[0] || price > priceRange[1]) return false;
       
       // Capacity filter
-      if (filterValues.capacity) {
+      if (selectedCapacity.length > 0) {
         const cap = y.capacity || 0;
-        const capMap: Record<string, boolean> = {
-          '2-6': cap >= 2 && cap <= 6,
-          '7-12': cap >= 7 && cap <= 12,
-          '13-20': cap >= 13 && cap <= 20,
-          '20+': cap > 20,
-        };
-        if (!capMap[filterValues.capacity as string]) return false;
+        const matchesCapacity = selectedCapacity.some(range => {
+          switch (range) {
+            case '2-6': return cap >= 2 && cap <= 6;
+            case '7-12': return cap >= 7 && cap <= 12;
+            case '13-20': return cap >= 13 && cap <= 20;
+            case '20+': return cap > 20;
+            default: return true;
+          }
+        });
+        if (!matchesCapacity) return false;
       }
       
-      // Amenities filter (matching against features_en)
-      const amenitiesFilter = Array.isArray(filterValues.amenities) ? filterValues.amenities : [];
-      if (!matchesFilter(y.features_en, amenitiesFilter)) return false;
+      // Amenities filter
+      if (!matchesFilter(y.features_en, selectedAmenities)) return false;
       
       // Experience filter
       if (selectedExperiences.length > 0) {
-        // Match experiences against yacht features or description
         const yachtFeatures = [...(y.features_en || []), y.name_en || ''].join(' ').toLowerCase();
         const hasExperience = selectedExperiences.some(exp => 
           yachtFeatures.includes(exp.toLowerCase())
@@ -95,16 +76,51 @@ export default function YachtsIndex() {
         if (!hasExperience) return false;
       }
       
+      // Duration filter (inline quick filter)
+      if (selectedDuration.length > 0) {
+        // Check if yacht supports the selected duration options
+        const hasDuration = selectedDuration.some(dur => {
+          switch (dur) {
+            case 'half-day': return y.price_half_day && y.price_half_day > 0;
+            case 'full-day': return y.price_full_day && y.price_full_day > 0;
+            case 'overnight': return y.cabins && y.cabins > 0;
+            default: return true;
+          }
+        });
+        if (!hasDuration) return false;
+      }
+      
+      // Quick filters (drawer)
+      if (selectedQuickFilters.includes('crew') && !y.has_crew) return false;
+      if (selectedQuickFilters.includes('catering') && !y.has_catering) return false;
+      
       return true;
     });
-  }, [yachts, selectedCategory, searchQuery, filterValues, language, selectedExperiences]);
+    
+    // Sort
+    results.sort((a, b) => {
+      switch (sortBy) {
+        case 'price_asc':
+          return (a.price_full_day || 0) - (b.price_full_day || 0);
+        case 'price_desc':
+          return (b.price_full_day || 0) - (a.price_full_day || 0);
+        case 'capacity':
+          return (b.capacity || 0) - (a.capacity || 0);
+        case 'rating':
+        default:
+          if (a.is_featured !== b.is_featured) return a.is_featured ? -1 : 1;
+          return (b.rating || 0) - (a.rating || 0);
+      }
+    });
+    
+    return results;
+  }, [yachts, selectedCategory, searchQuery, sortBy, priceRange, selectedCapacity, selectedAmenities, selectedExperiences, selectedDuration, selectedQuickFilters, language]);
 
   return (
     <MiniAppLayout
       title={language === 'ru' ? 'Яхты и лодки' : 'Yachts & Boats'}
       subtitle={language === 'ru' ? `${filteredYachts.length} вариантов` : `${filteredYachts.length} options`}
       fallbackPath="/"
-      
       heroIcon={Anchor}
       heroTitle={language === 'ru' ? 'Лучшие яхты Пхукета' : 'Best Yachts in Phuket'}
       heroSubtitle={language === 'ru' ? 'Для незабываемых приключений на воде' : 'For unforgettable adventures on the water'}
@@ -112,75 +128,55 @@ export default function YachtsIndex() {
       heroGradientFrom="from-sky-500/20"
       heroGradientVia="via-blue-500/20"
       heroGradientTo="to-indigo-500/20"
-      
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}
       searchPlaceholder={language === 'ru' ? 'Поиск яхт...' : 'Search yachts...'}
-      
-      categories={YACHT_CATEGORIES}
-      selectedCategory={selectedCategory}
-      onCategoryChange={setSelectedCategory}
-      
       isLoading={isLoading}
       isEmpty={filteredYachts.length === 0}
       emptyIcon={Anchor}
       emptyText={language === 'ru' ? 'Яхты не найдены' : 'No yachts found'}
-      
-      filterButton={
-        <UniversalFilter
-          config={yachtFilterConfig}
-          values={filterValues}
-          onChange={setFilterValues}
-          activeCount={activeFilterCount}
-        >
-          <Button variant="outline" size="icon" className="relative shrink-0 h-10 w-10">
-            <SlidersHorizontal className="w-4 h-4" />
-            {activeFilterCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
-                {activeFilterCount}
-              </span>
-            )}
-          </Button>
-        </UniversalFilter>
-      }
-      
-      quickActions={
-        <>
-          <div className="mb-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="w-4 h-4 text-amber-500" />
-              <h3 className="text-sm font-medium">
-                {language === 'ru' ? 'Впечатления' : 'Experiences'}
-              </h3>
-            </div>
-            <ExperienceFilterChips 
-              selected={selectedExperiences}
-              onChange={setSelectedExperiences}
-            />
-          </div>
-
-          <h3 className="text-sm font-medium text-muted-foreground mb-2">
-            {language === 'ru' ? 'Популярные маршруты' : 'Popular Routes'}
-          </h3>
-          <MiniAppQuickGrid items={popularRoutes.map(r => ({
-            ...r,
-            label: language === 'ru' && r.label === 'Sunset' ? 'Закат' : r.label
-          }))} columns={4} />
-        </>
-      }
-      
       resultsCount={filteredYachts.length}
       resultsLabel={language === 'ru' ? 'Доступные яхты' : 'Available Yachts'}
     >
-      <ActiveFilters
-        config={yachtFilterConfig}
-        values={filterValues}
-        onRemove={handleRemoveFilter}
-        onClearAll={() => setFilterValues({})}
-        className="mb-4"
+      {/* Klook-style Unified Filters */}
+      <YachtFiltersKlook
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+        priceRange={priceRange}
+        onPriceRangeChange={setPriceRange}
+        selectedDate={selectedDate}
+        onDateChange={setSelectedDate}
+        datePreset={datePreset}
+        onDatePresetChange={setDatePreset}
+        selectedDuration={selectedDuration}
+        onDurationChange={setSelectedDuration}
+        selectedExperiences={selectedExperiences}
+        onExperiencesChange={setSelectedExperiences}
+        selectedCapacity={selectedCapacity}
+        onCapacityChange={setSelectedCapacity}
+        selectedAmenities={selectedAmenities}
+        onAmenitiesChange={setSelectedAmenities}
+        selectedQuickFilters={selectedQuickFilters}
+        onQuickFiltersChange={setSelectedQuickFilters}
+        resultsCount={filteredYachts.length}
+        language={language}
       />
 
-      <div className="grid gap-4">
+      {/* Quick Routes */}
+      <div className="mt-4">
+        <h3 className="text-sm font-medium text-muted-foreground mb-2">
+          {language === 'ru' ? 'Популярные маршруты' : 'Popular Routes'}
+        </h3>
+        <MiniAppQuickGrid items={popularRoutes.map(r => ({
+          ...r,
+          label: language === 'ru' && r.label === 'Sunset' ? 'Закат' : r.label
+        }))} columns={4} />
+      </div>
+
+      {/* Results Grid */}
+      <div className="grid gap-4 mt-6">
         {filteredYachts.map((yacht) => (
           <ItemCard
             key={yacht.id}
@@ -202,8 +198,8 @@ export default function YachtsIndex() {
           />
         ))}
       </div>
+      
       <VerticalCTA vertical="yachts" className="my-6" />
-
       <CrossSellSection currentVertical="yachts" />
     </MiniAppLayout>
   );
