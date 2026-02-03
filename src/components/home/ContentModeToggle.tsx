@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Briefcase, ShoppingBag } from 'lucide-react';
+import { Briefcase, ShoppingBag, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
@@ -28,17 +28,22 @@ export function ContentModeToggle({ value, onChange, className }: ContentModeTog
   return (
     <div 
       className={cn(
-        "relative flex p-1 bg-secondary rounded-xl border border-border/50",
+        "relative flex p-1.5 bg-gradient-to-r from-secondary via-muted to-secondary rounded-2xl border border-border/50 shadow-sm",
         className
       )}
     >
-      {/* Animated background indicator */}
+      {/* Animated background indicator with color based on mode */}
       <motion.div
-        className="absolute top-1 bottom-1 rounded-lg bg-background shadow-sm"
+        className={cn(
+          "absolute top-1.5 bottom-1.5 rounded-xl shadow-md",
+          value === 'services' 
+            ? "bg-gradient-to-r from-amber-500 to-orange-500" 
+            : "bg-gradient-to-r from-emerald-500 to-teal-500"
+        )}
         initial={false}
         animate={{
-          left: value === 'services' ? '4px' : '50%',
-          width: 'calc(50% - 4px)',
+          left: value === 'services' ? '6px' : '50%',
+          width: 'calc(50% - 6px)',
         }}
         transition={{ type: 'spring', stiffness: 500, damping: 35 }}
       />
@@ -47,28 +52,54 @@ export function ContentModeToggle({ value, onChange, className }: ContentModeTog
       <button
         onClick={() => handleChange('services')}
         className={cn(
-          "relative z-10 flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all",
+          "relative z-10 flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold transition-all",
           value === 'services' 
-            ? "text-foreground shadow-sm" 
-            : "text-foreground/60 hover:text-foreground/80"
+            ? "text-white" 
+            : "text-muted-foreground hover:text-foreground"
         )}
       >
-        <Briefcase className="w-4 h-4" />
+        <Briefcase className={cn(
+          "w-4 h-4 transition-transform",
+          value === 'services' && "animate-pulse"
+        )} />
         <span>{isRu ? 'Услуги' : 'Services'}</span>
+        {value !== 'services' && (
+          <motion.div
+            className="absolute -top-1 -right-1"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            <Sparkles className="w-3 h-3 text-amber-500 animate-pulse" />
+          </motion.div>
+        )}
       </button>
 
       {/* Products tab */}
       <button
         onClick={() => handleChange('products')}
         className={cn(
-          "relative z-10 flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all",
+          "relative z-10 flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold transition-all",
           value === 'products' 
-            ? "text-foreground shadow-sm" 
-            : "text-foreground/60 hover:text-foreground/80"
+            ? "text-white" 
+            : "text-muted-foreground hover:text-foreground"
         )}
       >
-        <ShoppingBag className="w-4 h-4" />
+        <ShoppingBag className={cn(
+          "w-4 h-4 transition-transform",
+          value === 'products' && "animate-pulse"
+        )} />
         <span>{isRu ? 'Товары' : 'Products'}</span>
+        {value !== 'products' && (
+          <motion.div
+            className="absolute -top-1 -right-1"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            <Sparkles className="w-3 h-3 text-emerald-500 animate-pulse" />
+          </motion.div>
+        )}
       </button>
     </div>
   );

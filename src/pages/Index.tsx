@@ -152,7 +152,7 @@ const Index = () => {
               <SafetyBanner />
 
               {/* Smart Widget & Quick Actions */}
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <Suspense fallback={<WidgetSkeleton />}>
                   <SmartWidget />
                 </Suspense>
@@ -160,17 +160,20 @@ const Index = () => {
               </div>
 
               {/* Visual Divider */}
-              <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+              <div className="h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent rounded-full" />
 
               {/* Promotions */}
               <PromoBanner />
 
-              {/* Marketplace Promo Carousel */}
+              {/* Marketplace Promo Carousel - in colored section */}
               <Suspense fallback={<SectionSkeleton />}>
                 <MarketplacePromoCarousel />
               </Suspense>
 
-              {/* Experiences Section - Featured Tours & Activities */}
+              {/* Visual Divider */}
+              <div className="h-1 bg-gradient-to-r from-transparent via-amber-500/20 to-transparent rounded-full" />
+
+              {/* Experiences Section - Featured Tours & Activities in colored section */}
               <Suspense fallback={<SectionSkeleton />}>
                 <ExperiencesSection />
               </Suspense>
