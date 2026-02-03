@@ -1,8 +1,18 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { toast } from '@/hooks/use-toast';
+import { createErrorHandler } from '@/lib/errorHandler';
+
+const errorLog = createErrorHandler('useQuickListing');
+
+// Get language from localStorage for toast messages
+function getLang(): 'ru' | 'en' {
+  if (typeof window !== 'undefined') {
+    return (localStorage.getItem('uno-language') as 'ru' | 'en') || 'en';
+  }
+  return 'en';
+}
 
 export interface QuickListingData {
   category: string;
@@ -20,7 +30,6 @@ export interface QuickListingData {
 
 export function useQuickListing() {
   const { user } = useAuth();
-  const { language } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const submitListing = async (data: QuickListingData): Promise<{ success: boolean; id?: string }> => {
@@ -41,20 +50,20 @@ export function useQuickListing() {
 
       if (error) throw error;
 
-      toast.success(
-        language === 'ru' 
-          ? 'Заявка отправлена на модерацию!' 
-          : 'Listing submitted for review!'
-      );
+      const isRu = getLang() === 'ru';
+      toast({
+        title: isRu ? 'Успешно!' : 'Success!',
+        description: isRu ? 'Заявка отправлена на модерацию!' : 'Listing submitted for review!',
+      });
 
       return { success: true, id: result.id };
     } catch (error) {
-      console.error('Error submitting quick listing:', error);
-      toast.error(
-        language === 'ru' 
-          ? 'Ошибка при отправке заявки' 
-          : 'Error submitting listing'
-      );
+      errorLog.error(error, 'submit_listing', {
+        toastTitle: 'Submission Error',
+        toastTitleRu: 'Ошибка отправки',
+        toastDescription: 'Error submitting listing',
+        toastDescriptionRu: 'Ошибка при отправке заявки',
+      });
       return { success: false };
     } finally {
       setIsSubmitting(false);
@@ -71,7 +80,7 @@ export function useQuickListing() {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching user listings:', error);
+      errorLog.silent(error, 'fetch_listings');
       return [];
     }
 

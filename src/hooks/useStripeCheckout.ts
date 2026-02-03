@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { createErrorHandler } from '@/lib/errorHandler';
+
+const errorLog = createErrorHandler('useStripeCheckout');
 
 interface CheckoutItem {
   name: string;
@@ -21,7 +22,6 @@ interface CreateRestaurantCheckoutParams {
 
 export function useStripeCheckout() {
   const [isProcessing, setIsProcessing] = useState(false);
-  const { language } = useLanguage();
   const isMountedRef = useRef(true);
 
   useEffect(() => {
@@ -42,20 +42,19 @@ export function useStripeCheckout() {
       }
 
       if (response.data?.url) {
-        // Redirect to Stripe Checkout
         window.location.href = response.data.url;
         return true;
       } else {
         throw new Error('No checkout URL received');
       }
     } catch (error) {
-      console.error('Error creating checkout session:', error);
       if (isMountedRef.current) {
-        toast.error(
-          language === 'ru' 
-            ? 'Ошибка при создании платежа' 
-            : 'Error creating payment'
-        );
+        errorLog.error(error, 'create_checkout', {
+          toastTitle: 'Payment Error',
+          toastTitleRu: 'Ошибка платежа',
+          toastDescription: 'Error creating payment',
+          toastDescriptionRu: 'Ошибка при создании платежа',
+        });
       }
       return false;
     } finally {
