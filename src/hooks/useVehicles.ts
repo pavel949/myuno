@@ -1,5 +1,7 @@
-import { useMemo, useCallback } from 'react';
-import { useSupabaseQuery, useSupabaseSingle, QueryFilter } from './useSupabaseQuery';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { CACHE_PROFILES, queryKeys } from '@/lib/queryConfig';
+import { normalizeVehicleType } from '@/lib/config/transportTaxonomy';
 
 export interface Vehicle {
   id: string;
@@ -38,31 +40,51 @@ export interface Vehicle {
   provider_id: string | null;
 }
 
-export function useVehicles(vehicleType?: string) {
-  const filters = useMemo((): QueryFilter[] => {
-    const result: QueryFilter[] = [{ column: 'is_active', value: true }];
-    if (vehicleType && vehicleType !== 'all') {
-      result.push({ column: 'vehicle_type', value: vehicleType });
-    }
-    return result;
-  }, [vehicleType]);
+async function fetchVehicles(vehicleType?: string): Promise<Vehicle[]> {
+  let query = supabase
+    .from('vehicles')
+    .select('*')
+    .eq('is_active', true)
+    .order('is_featured', { ascending: false });
 
-  const { data, isLoading } = useSupabaseQuery<Vehicle>({
-    table: 'vehicles',
-    filters,
-    orderBy: { column: 'is_featured', ascending: false },
+  if (vehicleType && vehicleType !== 'all') {
+    // Normalize the type to match DB values
+    const normalizedType = normalizeVehicleType(vehicleType);
+    query = query.eq('vehicle_type', normalizedType);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data || []) as Vehicle[];
+}
+
+async function fetchVehicleById(id: string): Promise<Vehicle | null> {
+  const { data, error } = await supabase
+    .from('vehicles')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) throw error;
+  return data as Vehicle;
+}
+
+export function useVehicles(vehicleType?: string) {
+  const { data, isLoading } = useQuery({
+    queryKey: queryKeys.vehicles.list({ type: vehicleType }),
+    queryFn: () => fetchVehicles(vehicleType),
+    ...CACHE_PROFILES.SEMI_STATIC, // 10 min stale, vehicles don't change often
   });
 
-  return { vehicles: data, isLoading };
+  return { vehicles: data || [], isLoading };
 }
 
 export function useVehicle(id: string) {
-  const transform = useCallback((data: unknown) => data as Vehicle, []);
-
-  const { data, isLoading } = useSupabaseSingle<Vehicle>({
-    table: 'vehicles',
-    id,
-    transform,
+  const { data, isLoading } = useQuery({
+    queryKey: queryKeys.vehicles.detail(id),
+    queryFn: () => fetchVehicleById(id),
+    enabled: !!id,
+    ...CACHE_PROFILES.STATIC, // 5 min stale for detail view
   });
 
   return { vehicle: data, isLoading };
