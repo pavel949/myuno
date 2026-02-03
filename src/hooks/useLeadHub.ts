@@ -1,6 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { createErrorHandler } from '@/lib/errorHandler';
+
+const errorLog = createErrorHandler('useLeadHub');
 
 export type LeadSource = 'mcc' | 'consultations' | 'all';
 export type LeadPriority = 'hot' | 'warm' | 'cold';
@@ -97,7 +100,7 @@ export function useLeadHub(filters: LeadHubFilters = {}) {
 
         const { data: mccLeads, error: mccError } = await mccQuery;
         if (mccError) {
-          console.error('Error fetching mcc_leads:', mccError);
+          errorLog.silent(mccError, 'fetch_mcc_leads');
         } else if (mccLeads) {
           mccLeads.forEach((lead: any) => {
             unifiedLeads.push({
@@ -136,7 +139,7 @@ export function useLeadHub(filters: LeadHubFilters = {}) {
 
         const { data: consultations, error: consultationsError } = await consultationsQuery;
         if (consultationsError) {
-          console.error('Error fetching consultation_requests:', consultationsError);
+          errorLog.silent(consultationsError, 'fetch_consultations');
         } else if (consultations) {
           consultations.forEach((consultation: any) => {
             const mappedPriority = mapAiPriorityToLeadPriority(consultation.ai_priority);
@@ -250,7 +253,7 @@ export function useLeadHub(filters: LeadHubFilters = {}) {
       toast.success('Lead status updated');
     },
     onError: (error) => {
-      console.error('Error updating lead status:', error);
+      errorLog.silent(error, 'update_lead_status');
       toast.error('Failed to update lead status');
     }
   });
@@ -270,7 +273,7 @@ export function useLeadHub(filters: LeadHubFilters = {}) {
       toast.success('Lead priority updated');
     },
     onError: (error) => {
-      console.error('Error updating lead priority:', error);
+      errorLog.silent(error, 'update_lead_priority');
       toast.error('Failed to update lead priority');
     }
   });

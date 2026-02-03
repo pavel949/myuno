@@ -15,8 +15,14 @@ import { cn } from '@/lib/utils';
 import { 
   Home, Image, Calendar, DollarSign, FileText, 
   Users, MapPin, Zap, Bed, Settings, Save,
-  ChevronLeft, Loader2, Eye, CheckCircle2, Megaphone
+  ChevronLeft, Loader2, Eye, CheckCircle2, Megaphone, MoreHorizontal
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 // Section components
 import { PropertyManageListingSection } from '@/components/owner/property-manage/ListingSection';
@@ -33,6 +39,7 @@ interface MenuSection {
   badge?: string;
 }
 
+// All menu sections - first 4 shown in mobile nav, rest in overflow
 const MENU_SECTIONS: MenuSection[] = [
   { id: 'listing', label: 'Listing', labelRu: 'Объявление', icon: <Home className="h-4 w-4" /> },
   { id: 'photos', label: 'Photos', labelRu: 'Фото', icon: <Image className="h-4 w-4" /> },
@@ -41,6 +48,10 @@ const MENU_SECTIONS: MenuSection[] = [
   { id: 'rules', label: 'Policies & Rules', labelRu: 'Правила', icon: <FileText className="h-4 w-4" /> },
   { id: 'marketing', label: 'Marketing', labelRu: 'Продвижение', icon: <Megaphone className="h-4 w-4" />, badge: 'NEW' },
 ];
+
+// Mobile nav: 4 main items + overflow menu (HIG recommendation: max 5 items)
+const MOBILE_NAV_ITEMS = MENU_SECTIONS.slice(0, 4);
+const OVERFLOW_ITEMS = MENU_SECTIONS.slice(4);
 
 export default function PropertyManage() {
   const { id } = useParams<{ id: string }>();
@@ -334,10 +345,10 @@ export default function PropertyManage() {
           </ScrollArea>
         </aside>
 
-        {/* Mobile Bottom Navigation */}
+        {/* Mobile Bottom Navigation - 4 items + overflow menu (HIG compliant) */}
         <div className="fixed bottom-0 left-0 right-0 md:hidden bg-background border-t z-40 px-2 pb-safe">
           <div className="flex justify-around py-2">
-            {MENU_SECTIONS.map((section) => (
+            {MOBILE_NAV_ITEMS.map((section) => (
               <button
                 key={section.id}
                 onClick={() => handleSectionChange(section.id)}
@@ -352,6 +363,43 @@ export default function PropertyManage() {
                 <span className="text-[10px]">{isRu ? section.labelRu : section.label}</span>
               </button>
             ))}
+            
+            {/* Overflow menu for additional items */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className={cn(
+                    "flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors",
+                    OVERFLOW_ITEMS.some(s => s.id === activeSection)
+                      ? "text-primary"
+                      : "text-muted-foreground"
+                  )}
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="text-[10px]">{isRu ? 'Ещё' : 'More'}</span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                {OVERFLOW_ITEMS.map((section) => (
+                  <DropdownMenuItem
+                    key={section.id}
+                    onClick={() => handleSectionChange(section.id)}
+                    className={cn(
+                      "flex items-center gap-2",
+                      activeSection === section.id && "bg-accent"
+                    )}
+                  >
+                    {section.icon}
+                    <span>{isRu ? section.labelRu : section.label}</span>
+                    {section.badge && (
+                      <Badge variant="secondary" className="ml-auto text-[10px]">
+                        {section.badge}
+                      </Badge>
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
