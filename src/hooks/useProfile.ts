@@ -43,7 +43,7 @@ export function useProfile() {
         .from('profiles')
         .select('id, full_name, phone, avatar_url, preferred_language, email, user_type, emergency_contact_name, emergency_contact_phone, emergency_contact_relationship')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching profile:', error);

@@ -1,4 +1,4 @@
-import React, { memo, ReactNode } from 'react';
+import React, { memo, forwardRef, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, LucideIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -19,7 +19,7 @@ interface UnifiedSectionHeaderProps {
   children?: ReactNode;
 }
 
-export const UnifiedSectionHeader = memo(function UnifiedSectionHeader({
+export const UnifiedSectionHeader = memo(forwardRef<HTMLDivElement, UnifiedSectionHeaderProps>(function UnifiedSectionHeader({
   icon: Icon,
   iconEmoji,
   iconImage,
@@ -31,7 +31,7 @@ export const UnifiedSectionHeader = memo(function UnifiedSectionHeader({
   onViewAll,
   className,
   children,
-}: UnifiedSectionHeaderProps) {
+}, ref) {
   const navigate = useNavigate();
 
   const handleViewAll = () => {
@@ -45,7 +45,7 @@ export const UnifiedSectionHeader = memo(function UnifiedSectionHeader({
   const showViewAll = viewAllPath || onViewAll;
 
   return (
-    <div className={cn("flex items-center justify-between mb-4", className)}>
+    <div ref={ref} className={cn("flex items-center justify-between mb-4", className)}>
       <div className="flex items-center gap-2 min-w-0">
         {/* Icon variants */}
         {iconImage ? (
@@ -89,4 +89,4 @@ export const UnifiedSectionHeader = memo(function UnifiedSectionHeader({
       )}
     </div>
   );
-});
+}));

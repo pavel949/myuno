@@ -5,7 +5,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { PropertyAIAssistant } from './PropertyAIAssistant';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
 interface PropertyAIButtonProps {
   className?: string;
@@ -94,34 +94,30 @@ export function PropertyAIButton({ className, variant = 'floating' }: PropertyAI
         </AnimatePresence>
 
         <SheetTrigger asChild>
-          <motion.div
-            animate={showHint ? { scale: [1, 1.05, 1] } : {}}
-            transition={{ repeat: Infinity, duration: 2 }}
+          <Button
+            size="lg"
+            className={cn(
+              "rounded-full shadow-xl gap-2 pr-5 pl-4 h-12",
+              "bg-gradient-to-r from-primary via-primary to-primary/80",
+              "hover:shadow-2xl hover:scale-105 transition-all duration-300",
+              "border-2 border-primary-foreground/20",
+              showHint && "animate-pulse",
+              className
+            )}
           >
-            <Button
-              size="lg"
-              className={cn(
-                "rounded-full shadow-xl gap-2 pr-5 pl-4 h-12",
-                "bg-gradient-to-r from-primary via-primary to-primary/80",
-                "hover:shadow-2xl hover:scale-105 transition-all duration-300",
-                "border-2 border-primary-foreground/20",
-                className
-              )}
-            >
-              {/* Animated glow ring */}
-              <span className="absolute inset-0 rounded-full bg-primary/30 animate-ping opacity-30" />
-              
-              <div className="relative flex items-center gap-2">
-                <div className="relative">
-                  <Bot className="h-5 w-5" />
-                  <Sparkles className="h-3 w-3 absolute -top-1 -right-1 text-yellow-300" />
-                </div>
-                <span className="text-sm font-semibold">
-                  {isRu ? 'AI-помощник' : 'AI Assistant'}
-                </span>
+            {/* Animated glow ring */}
+            <span className="absolute inset-0 rounded-full bg-primary/30 animate-ping opacity-30" />
+            
+            <div className="relative flex items-center gap-2">
+              <div className="relative">
+                <Bot className="h-5 w-5" />
+                <Sparkles className="h-3 w-3 absolute -top-1 -right-1 text-yellow-300" />
               </div>
-            </Button>
-          </motion.div>
+              <span className="text-sm font-semibold">
+                {isRu ? 'AI-помощник' : 'AI Assistant'}
+              </span>
+            </div>
+          </Button>
         </SheetTrigger>
       </div>
       
