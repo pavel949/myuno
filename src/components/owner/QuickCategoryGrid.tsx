@@ -1,5 +1,4 @@
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Button } from '@/components/ui/button';
 import { 
   Brush, Wrench, Lightbulb, Droplet, Package, 
   Sofa, Plug, FileText, ShoppingBag
@@ -12,15 +11,15 @@ interface QuickCategoryGridProps {
 }
 
 const QUICK_CATEGORIES = [
-  { value: 'cleaning', icon: Brush, labelRu: 'Уборка', labelEn: 'Cleaning', color: 'text-blue-500' },
-  { value: 'repair', icon: Wrench, labelRu: 'Ремонт', labelEn: 'Repair', color: 'text-orange-500' },
-  { value: 'electricity', icon: Lightbulb, labelRu: 'Электричество', labelEn: 'Electricity', color: 'text-yellow-500' },
-  { value: 'water', icon: Droplet, labelRu: 'Вода', labelEn: 'Water', color: 'text-cyan-500' },
-  { value: 'supplies', icon: Package, labelRu: 'Расходники', labelEn: 'Supplies', color: 'text-purple-500' },
-  { value: 'furniture', icon: Sofa, labelRu: 'Мебель', labelEn: 'Furniture', color: 'text-amber-600' },
-  { value: 'appliances', icon: Plug, labelRu: 'Техника', labelEn: 'Appliances', color: 'text-emerald-500' },
-  { value: 'shopping', icon: ShoppingBag, labelRu: 'Закупки', labelEn: 'Shopping', color: 'text-pink-500' },
-  { value: 'other', icon: FileText, labelRu: 'Прочее', labelEn: 'Other', color: 'text-muted-foreground' },
+  { value: 'cleaning', icon: Brush, labelRu: 'Уборка', labelEn: 'Cleaning', color: 'text-blue-500 bg-blue-500/10' },
+  { value: 'repair', icon: Wrench, labelRu: 'Ремонт', labelEn: 'Repair', color: 'text-orange-500 bg-orange-500/10' },
+  { value: 'electricity', icon: Lightbulb, labelRu: 'Свет', labelEn: 'Electric', color: 'text-yellow-500 bg-yellow-500/10' },
+  { value: 'water', icon: Droplet, labelRu: 'Вода', labelEn: 'Water', color: 'text-cyan-500 bg-cyan-500/10' },
+  { value: 'supplies', icon: Package, labelRu: 'Расходники', labelEn: 'Supplies', color: 'text-purple-500 bg-purple-500/10' },
+  { value: 'furniture', icon: Sofa, labelRu: 'Мебель', labelEn: 'Furniture', color: 'text-amber-600 bg-amber-600/10' },
+  { value: 'appliances', icon: Plug, labelRu: 'Техника', labelEn: 'Tech', color: 'text-emerald-500 bg-emerald-500/10' },
+  { value: 'shopping', icon: ShoppingBag, labelRu: 'Закупки', labelEn: 'Shopping', color: 'text-pink-500 bg-pink-500/10' },
+  { value: 'other', icon: FileText, labelRu: 'Прочее', labelEn: 'Other', color: 'text-muted-foreground bg-muted' },
 ];
 
 export function QuickCategoryGrid({
@@ -31,32 +30,37 @@ export function QuickCategoryGrid({
   const isRu = language === 'ru';
 
   return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4">
       {QUICK_CATEGORIES.map((cat) => {
         const Icon = cat.icon;
         const isSelected = selectedCategory === cat.value;
         
         return (
-          <Button
+          <button
             key={cat.value}
             type="button"
-            variant={isSelected ? 'default' : 'outline'}
-            className={cn(
-              'h-auto flex-col gap-1.5 py-3',
-              isSelected && 'ring-2 ring-primary ring-offset-2'
-            )}
             onClick={() => onSelect(cat.value)}
+            className={cn(
+              'flex flex-col items-center gap-1 p-2.5 rounded-xl shrink-0 min-w-[64px] transition-all',
+              'border-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1',
+              isSelected 
+                ? 'border-primary bg-primary text-primary-foreground shadow-md' 
+                : 'border-transparent bg-card hover:bg-muted'
+            )}
           >
             <div className={cn(
-              'p-1.5 rounded-full',
-              isSelected ? 'bg-primary-foreground/20' : 'bg-muted'
+              'w-9 h-9 rounded-lg flex items-center justify-center',
+              isSelected ? 'bg-primary-foreground/20' : cat.color
             )}>
-              <Icon className={cn('h-4 w-4', isSelected ? 'text-primary-foreground' : cat.color)} />
+              <Icon className={cn('h-4 w-4', isSelected && 'text-primary-foreground')} />
             </div>
-            <span className="text-[11px] font-medium leading-tight">
+            <span className={cn(
+              'text-[10px] font-medium leading-tight whitespace-nowrap',
+              isSelected ? 'text-primary-foreground' : 'text-muted-foreground'
+            )}>
               {isRu ? cat.labelRu : cat.labelEn}
             </span>
-          </Button>
+          </button>
         );
       })}
     </div>
