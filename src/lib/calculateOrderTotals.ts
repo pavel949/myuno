@@ -4,7 +4,9 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { createErrorHandler } from '@/lib/errorHandler';
 
+const errorLog = createErrorHandler('calculateOrderTotals');
 export interface OrderTotals {
   baseAmount: number;
   commissionRate: number;
@@ -33,7 +35,7 @@ export async function calculateOrderTotals(
     });
 
     if (error) {
-      console.error('Error calculating order totals:', error);
+      errorLog.silent(error, 'rpc_calculate_order_totals');
       // Fallback to simple calculation
       return fallbackCalculation(baseAmount);
     }
@@ -56,16 +58,19 @@ export async function calculateOrderTotals(
       totalCustomerPays: result.total_customer_pays,
     };
   } catch (error) {
-    console.error('Error in calculateOrderTotals:', error);
+    errorLog.silent(error, 'calculate_totals');
     return fallbackCalculation(baseAmount);
   }
 }
 
 /**
  * Fallback calculation when RPC is unavailable
+ * Uses DEFAULT_PLATFORM_FEE_PERCENT from system_settings
  */
+const DEFAULT_PLATFORM_FEE_PERCENT = 0.10; // Synced from system_settings.platform_fee_percent
+
 function fallbackCalculation(baseAmount: number): OrderTotals {
-  const commissionRate = 0.10; // 10% default
+  const commissionRate = DEFAULT_PLATFORM_FEE_PERCENT;
   const platformFee = Math.round(baseAmount * commissionRate * 100) / 100;
   const vendorAmount = baseAmount - platformFee;
   
@@ -93,13 +98,13 @@ export async function calculateCashback(
     });
 
     if (error) {
-      console.error('Error calculating cashback:', error);
+      errorLog.silent(error, 'rpc_calculate_cashback');
       return 0;
     }
 
     return data || 0;
   } catch (error) {
-    console.error('Error in calculateCashback:', error);
+    errorLog.silent(error, 'calculate_cashback');
     return 0;
   }
 }

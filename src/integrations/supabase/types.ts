@@ -2455,6 +2455,36 @@ export type Database = {
         }
         Relationships: []
       }
+      currency_rates: {
+        Row: {
+          base_currency: string
+          id: string
+          rate: number
+          source: string | null
+          target_currency: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          base_currency?: string
+          id?: string
+          rate: number
+          source?: string | null
+          target_currency: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          base_currency?: string
+          id?: string
+          rate?: number
+          source?: string | null
+          target_currency?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       damage_reports: {
         Row: {
           actual_cost: number | null
@@ -12683,6 +12713,33 @@ export type Database = {
           },
         ]
       }
+      system_settings: {
+        Row: {
+          description: string | null
+          id: string
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value: Json
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       tags: {
         Row: {
           category: string | null
@@ -16285,6 +16342,11 @@ export type Database = {
         }[]
       }
       generate_referral_code: { Args: { p_user_id: string }; Returns: string }
+      get_all_currency_rates: { Args: never; Returns: Json }
+      get_currency_rate: {
+        Args: { p_base?: string; p_target?: string }
+        Returns: number
+      }
       get_latest_ai_artifact: {
         Args: {
           p_artifact_type?: string
@@ -16327,6 +16389,7 @@ export type Database = {
         Args: { p_metadata: Json; p_order_type: string }
         Returns: string
       }
+      get_platform_fee_percent: { Args: never; Returns: number }
       get_product_commission: {
         Args: { p_product_id: string; p_vertical: string }
         Returns: number
@@ -16344,6 +16407,7 @@ export type Database = {
           yearly_count: number
         }[]
       }
+      get_system_setting: { Args: { p_key: string }; Returns: Json }
       get_user_analytics_summary: { Args: { p_days?: number }; Returns: Json }
       get_yacht_availability: {
         Args: { p_month?: string; p_yacht_id: string }

@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Pencil, Building2, Wrench, Package } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { getCurrencySymbol } from '@/lib/currencyUtils';
 import type { ListingApplicationDraft } from '@/hooks/useListingApplication';
 
 interface ReviewStepProps {
@@ -66,7 +67,7 @@ export function ReviewStep({ draft, onEdit, onSubmit, onBack, isLoading }: Revie
             )}
             {draft.price && (
               <p className="text-lg font-bold text-primary">
-                {draft.currency === 'THB' ? '฿' : draft.currency === 'USD' ? '$' : draft.currency === 'RUB' ? '₽' : '€'}
+                {getCurrencySymbol(draft.currency || 'THB')}
                 {draft.price.toLocaleString()}
               </p>
             )}

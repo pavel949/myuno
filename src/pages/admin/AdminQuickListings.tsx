@@ -5,6 +5,7 @@ import {
   MapPin, User, Loader2, ArrowUpRight, Filter
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { getCurrencySymbol } from '@/lib/currencyUtils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
@@ -293,7 +294,7 @@ export default function AdminQuickListings() {
                     {listing.price && (
                       <div className="text-right">
                         <p className="font-bold text-primary">
-                          {listing.currency === 'THB' ? '฿' : listing.currency === 'USD' ? '$' : listing.currency === 'EUR' ? '€' : '₽'}
+                          {getCurrencySymbol(listing.currency || 'THB')}
                           {listing.price.toLocaleString()}
                         </p>
                       </div>

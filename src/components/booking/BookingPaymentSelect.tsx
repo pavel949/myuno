@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { usePaymentMethods } from '@/hooks/usePaymentMethods';
 import { cn } from '@/lib/utils';
+import { getCurrencySymbol } from '@/lib/currencyUtils';
 import {
   Sheet,
   SheetContent,
@@ -102,7 +103,7 @@ export const BookingPaymentSelect = forwardRef<HTMLDivElement, BookingPaymentSel
     }
   }, [selected, defaultMethod, selectedCardId, onCardSelect]);
 
-  const currencySymbol = currency === 'THB' ? '฿' : currency === 'USD' ? '$' : currency === 'EUR' ? '€' : '₽';
+  const currencySymbol = getCurrencySymbol(currency);
   const canUseWallet = walletBalance !== null && walletBalance >= amount;
   
   const selectedCard = paymentMethods.find(c => c.id === selectedCardId);
