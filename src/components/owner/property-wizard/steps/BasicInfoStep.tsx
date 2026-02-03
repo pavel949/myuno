@@ -8,6 +8,7 @@ import { TranslatableInput } from '@/components/forms/TranslatableInput';
 import { ProjectSelector } from '@/components/property/ProjectSelector';
 import { UnitFields } from '@/components/property/UnitFields';
 import { PropertyFormData } from '@/hooks/usePropertyWizard';
+import { toast } from 'sonner';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
 
 interface BasicInfoStepProps {
@@ -58,6 +59,18 @@ export function BasicInfoStep({
                 lat: project?.lat ?? formData.lat,
                 lng: project?.lng ?? formData.lng,
               });
+              
+              // Show toast notification when project is selected
+              if (project) {
+                const projectName = isRu 
+                  ? (project.name_ru || project.name_en) 
+                  : project.name_en;
+                toast.success(
+                  isRu 
+                    ? `Данные проекта "${projectName}" загружены` 
+                    : `Project data loaded: "${projectName}"`
+                );
+              }
             }}
           />
         </CardContent>
