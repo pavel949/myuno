@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { SEOHead, createOrganizationSchema } from '@/components/seo';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { QuickActionsGrid } from '@/components/home/QuickActionsGrid';
+import { HeroBanner } from '@/components/home/HeroBanner';
 import { ContentModeToggle, ContentMode } from '@/components/home/ContentModeToggle';
 import { SafetyBanner } from '@/components/home/SafetyBanner';
 import { supabase } from '@/integrations/supabase/client';
@@ -134,7 +135,10 @@ const Index = () => {
           {/* 1. PWA Install Banner (conditional) */}
           <InstallBanner />
 
-          {/* 2. Search - primary action */}
+          {/* 2. Hero Banner - brand identity */}
+          <HeroBanner />
+
+          {/* 3. Search - primary action */}
           <div data-tour="search">
             <InlineSearch />
           </div>
