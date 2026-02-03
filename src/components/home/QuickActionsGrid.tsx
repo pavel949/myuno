@@ -556,8 +556,8 @@ export const QuickActionsGrid = memo(function QuickActionsGrid() {
       userActions = getActionsForUserType(profile?.user_type);
     }
     
-    // Add fixed actions (More button)
-    return [...userActions.slice(0, 8), ...FIXED_ACTIONS];
+    // Limit to 5 actions + fixed "More" button = 6 total (2 rows x 3 columns)
+    return [...userActions.slice(0, 5), ...FIXED_ACTIONS];
   }, [activeRole, roleLoading, personas, profile?.user_type]);
 
   const handleClick = useCallback((action: QuickAction, e: React.MouseEvent<HTMLButtonElement>) => {

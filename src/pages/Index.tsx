@@ -7,19 +7,16 @@ import { useAuth } from '@/contexts/AuthContext';
 import { SEOHead, createOrganizationSchema } from '@/components/seo';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { QuickActionsGrid } from '@/components/home/QuickActionsGrid';
-import { HeroBanner } from '@/components/home/HeroBanner';
+import { HeroBlock } from '@/components/home/HeroBlock';
 import { ContentModeToggle, ContentMode } from '@/components/home/ContentModeToggle';
-import { SafetyBanner } from '@/components/home/SafetyBanner';
 import { supabase } from '@/integrations/supabase/client';
 import { InstallBanner } from '@/components/pwa/InstallBanner';
 import { PWAWelcomeScreen } from '@/components/pwa/PWAWelcomeScreen';
-import { InlineSearch } from '@/components/search/InlineSearch';
 import { Skeleton } from '@/components/ui/skeleton';
 
-// Lazy load heavier components
+// Lazy load components
 const SmartWidget = lazy(() => import('@/components/home/SmartWidget').then(m => ({ default: m.SmartWidget })));
-const ExperiencesSection = lazy(() => import('@/components/home/ExperiencesSection').then(m => ({ default: m.ExperiencesSection })));
-const RecommendedCarousel = lazy(() => import('@/components/home/RecommendedCarousel').then(m => ({ default: m.RecommendedCarousel })));
+const DiscoveryCarousel = lazy(() => import('@/components/home/DiscoveryCarousel').then(m => ({ default: m.DiscoveryCarousel })));
 const HomeCategoryRibbon = lazy(() => import('@/components/home/HomeCategoryRibbon').then(m => ({ default: m.HomeCategoryRibbon })));
 const HomeProductsSection = lazy(() => import('@/components/home/HomeProductsSection').then(m => ({ default: m.HomeProductsSection })));
 const ContentPreviewRibbon = lazy(() => import('@/components/home/ContentPreviewRibbon').then(m => ({ default: m.ContentPreviewRibbon })));
@@ -28,35 +25,28 @@ const QuickAccessChips = lazy(() => import('@/components/home/QuickAccessChips')
 // Lazy load modals
 const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
 
-// Skeletons
+// Skeletons for consistent loading states
 const RibbonSkeleton = () => (
-  <div className="space-y-2">
-    <div className="flex gap-2 overflow-hidden">
-      {[...Array(4)].map((_, i) => (
-        <Skeleton key={i} className="h-9 w-24 rounded-xl shrink-0" />
-      ))}
-    </div>
-    <div className="flex gap-2 overflow-hidden">
-      {[...Array(5)].map((_, i) => (
-        <Skeleton key={i} className="h-9 w-20 rounded-xl shrink-0" />
-      ))}
-    </div>
+  <div className="flex gap-2 overflow-hidden">
+    {[...Array(5)].map((_, i) => (
+      <Skeleton key={i} className="h-9 w-24 rounded-xl shrink-0" />
+    ))}
   </div>
 );
 
 const SectionSkeleton = () => (
   <div className="space-y-3">
-    <Skeleton className="h-6 w-32" />
-    <div className="flex gap-3 overflow-hidden">
-      <Skeleton className="h-40 w-56 rounded-xl shrink-0" />
-      <Skeleton className="h-40 w-56 rounded-xl shrink-0" />
-      <Skeleton className="h-40 w-56 rounded-xl shrink-0" />
+    <Skeleton className="h-6 w-40" />
+    <div className="flex gap-4 overflow-hidden">
+      <Skeleton className="h-56 w-80 rounded-2xl shrink-0" />
+      <Skeleton className="h-48 w-64 rounded-2xl shrink-0" />
+      <Skeleton className="h-48 w-64 rounded-2xl shrink-0" />
     </div>
   </div>
 );
 
 const WidgetSkeleton = () => (
-  <Skeleton className="h-32 w-full rounded-xl" />
+  <Skeleton className="h-28 w-full rounded-2xl" />
 );
 
 const Index = () => {
@@ -126,81 +116,66 @@ const Index = () => {
       )}
 
       <PullToRefresh onRefresh={handleRefresh}>
-        <div className="px-4 py-4 pb-24 space-y-4" key={refreshKey}>
+        <div className="px-4 py-4 pb-24 space-y-5" key={refreshKey}>
           
           {/* ═══════════════════════════════════════════════════════════
-              ABOVE THE FOLD (4-5 sections - no scroll needed)
+              BLOCK 1: PWA Install + Hero (Brand + Search + Safety)
               ═══════════════════════════════════════════════════════════ */}
-          
-          {/* 1. PWA Install Banner (conditional) */}
           <InstallBanner />
+          <HeroBlock />
 
-          {/* 2. Hero Banner - brand identity */}
-          <HeroBanner />
-
-          {/* 3. Search - primary action */}
-          <div data-tour="search">
-            <InlineSearch />
+          {/* ═══════════════════════════════════════════════════════════
+              BLOCK 2: Mode Toggle + Category Ribbon
+              ═══════════════════════════════════════════════════════════ */}
+          <div className="space-y-3">
+            <ContentModeToggle 
+              value={contentMode} 
+              onChange={setContentMode} 
+            />
+            
+            <Suspense fallback={<RibbonSkeleton />}>
+              {contentMode === 'services' ? (
+                <ContentPreviewRibbon />
+              ) : (
+                <HomeCategoryRibbon />
+              )}
+            </Suspense>
           </div>
 
-          {/* 3. Safety Banner - trust marker */}
-          <SafetyBanner />
-
-          {/* 4. Content Mode Toggle */}
-          <ContentModeToggle 
-            value={contentMode} 
-            onChange={setContentMode} 
-          />
-
-          {/* 5. Category Preview - context for selected mode */}
-          <Suspense fallback={<RibbonSkeleton />}>
-            {contentMode === 'services' ? (
-              <ContentPreviewRibbon />
-            ) : (
-              <HomeCategoryRibbon />
-            )}
-          </Suspense>
-
-          {/* 6. Smart Widget - personalized "Continue where you left off" */}
+          {/* ═══════════════════════════════════════════════════════════
+              BLOCK 3: Smart Widget (personalized context)
+              ═══════════════════════════════════════════════════════════ */}
           <Suspense fallback={<WidgetSkeleton />}>
             <SmartWidget />
           </Suspense>
 
-          {/* ═══════════════════════════════════════════════════════════
-              BELOW THE FOLD (scroll to discover)
-              ═══════════════════════════════════════════════════════════ */}
-
           {/* Visual Divider */}
           <div className="h-1 bg-gradient-to-r from-transparent via-border to-transparent rounded-full" />
 
+          {/* ═══════════════════════════════════════════════════════════
+              BLOCK 4-6: Mode-specific content
+              ═══════════════════════════════════════════════════════════ */}
           {contentMode === 'services' ? (
             <>
-              {/* Quick Actions Grid */}
+              {/* BLOCK 4: Quick Actions (6 items) */}
               <QuickActionsGrid />
 
-              {/* Experiences Section */}
+              {/* BLOCK 5: Discovery Carousel (unified experiences) */}
               <Suspense fallback={<SectionSkeleton />}>
-                <ExperiencesSection />
+                <DiscoveryCarousel />
               </Suspense>
-
-              {/* Recommendations */}
-              <div data-tour="recommended">
-                <Suspense fallback={<SectionSkeleton />}>
-                  <RecommendedCarousel />
-                </Suspense>
-              </div>
 
               {/* Visual Divider before B2B */}
               <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
-              {/* B2B Section - For Owners/Partners (moved down) */}
-              <Suspense fallback={<Skeleton className="h-12 w-full rounded-lg" />}>
+              {/* BLOCK 6: B2B Section */}
+              <Suspense fallback={<Skeleton className="h-12 w-full rounded-xl" />}>
                 <QuickAccessChips />
               </Suspense>
             </>
           ) : (
             <>
-              {/* Product Sections */}
+              {/* Products Mode */}
               <Suspense fallback={<SectionSkeleton />}>
                 <HomeProductsSection />
               </Suspense>
@@ -208,8 +183,8 @@ const Index = () => {
               {/* Visual Divider before B2B */}
               <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
-              {/* B2B Section - For Owners/Partners (moved down) */}
-              <Suspense fallback={<Skeleton className="h-12 w-full rounded-lg" />}>
+              {/* B2B Section */}
+              <Suspense fallback={<Skeleton className="h-12 w-full rounded-xl" />}>
                 <QuickAccessChips />
               </Suspense>
             </>
