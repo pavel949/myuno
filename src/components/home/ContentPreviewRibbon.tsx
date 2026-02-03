@@ -1,10 +1,7 @@
 import React, { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { 
-  Sparkles, Car, Anchor, Home, Flower2, MoreHorizontal,
-  Stethoscope, Scissors, Shield
-} from 'lucide-react';
+import { Car, Anchor, Home, Flower2, MoreHorizontal, Stethoscope, Scissors } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { cn } from '@/lib/utils';
