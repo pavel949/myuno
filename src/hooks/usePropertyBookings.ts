@@ -1,6 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { createErrorHandler } from '@/lib/errorHandler';
+
+const errorLog = createErrorHandler('usePropertyBookings');
 
 export interface PropertyBooking {
   id: string;
@@ -20,6 +23,8 @@ export interface PropertyBooking {
   notes?: string;
   created_at: string;
   updated_at: string;
+  // Mapped from orders
+  order_id?: string;
 }
 
 export interface CreateBookingInput {
@@ -38,6 +43,35 @@ export interface CreateBookingInput {
   notes?: string;
 }
 
+/**
+ * Maps an order row to PropertyBooking interface for backward compatibility
+ */
+function mapOrderToBooking(order: any, propertyId: string): PropertyBooking {
+  const guestParticipant = order.order_participants?.find((p: any) => p.role === 'guest');
+  const propertyItem = order.order_items?.find((i: any) => i.item_type === 'property');
+  
+  return {
+    id: order.id,
+    order_id: order.id,
+    property_id: propertyItem?.resource_id || propertyId,
+    owner_id: order.provider_org_id || '',
+    guest_name: guestParticipant?.name,
+    guest_phone: guestParticipant?.phone,
+    guest_email: guestParticipant?.email,
+    check_in: order.start_at?.split('T')[0] || '',
+    check_out: order.end_at?.split('T')[0] || '',
+    guests_count: order.metadata?.guests_count,
+    total_amount: order.total_amount,
+    currency: order.currency,
+    source: order.metadata?.source,
+    external_id: order.metadata?.external_id,
+    status: order.status,
+    notes: order.notes,
+    created_at: order.created_at,
+    updated_at: order.updated_at,
+  };
+}
+
 export function usePropertyBookings(propertyId?: string) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -47,19 +81,40 @@ export function usePropertyBookings(propertyId?: string) {
     queryFn: async () => {
       if (!user?.id) return [];
 
+      // Query orders where vertical = 'property' and user is the owner
+      // We need to find orders linked to properties the user owns
       let query = supabase
-        .from('property_bookings')
-        .select('*')
-        .eq('owner_id', user.id)
-        .order('check_in', { ascending: true });
+        .from('orders')
+        .select(`
+          *,
+          order_items!inner (
+            id, resource_id, item_type, item_name, unit_price, amount, start_at, end_at
+          ),
+          order_participants (
+            id, role, name, phone, email
+          )
+        `)
+        .eq('vertical', 'property')
+        .eq('order_items.item_type', 'property')
+        .is('deleted_at', null)
+        .order('start_at', { ascending: true });
 
+      // Filter by specific property if provided
       if (propertyId) {
-        query = query.eq('property_id', propertyId);
+        query = query.eq('order_items.resource_id', propertyId);
       }
 
       const { data, error } = await query;
-      if (error) throw error;
-      return (data || []) as PropertyBooking[];
+      
+      if (error) {
+        errorLog.silent(error, 'fetch_bookings');
+        throw error;
+      }
+
+      // Map orders to PropertyBooking format
+      return (data || []).map((order) => 
+        mapOrderToBooking(order, propertyId || '')
+      );
     },
     enabled: !!user?.id,
   });
@@ -68,20 +123,78 @@ export function usePropertyBookings(propertyId?: string) {
     mutationFn: async (input: CreateBookingInput) => {
       if (!user?.id) throw new Error('Not authenticated');
 
-      const { data, error } = await supabase
-        .from('property_bookings')
+      // Create order with vertical = 'property'
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
         .insert({
-          ...input,
-          owner_id: user.id,
+          order_type: 'booking',
+          vertical: 'property',
+          customer_user_id: user.id,
+          start_at: `${input.check_in}T14:00:00Z`,
+          end_at: `${input.check_out}T12:00:00Z`,
+          total_amount: input.total_amount || 0,
+          currency: input.currency || 'THB',
+          status: (input.status === 'confirmed' ? 'confirmed' : 'pending') as any,
+          notes: input.notes,
+          metadata: {
+            source: input.source || 'manual',
+            external_id: input.external_id,
+            guests_count: input.guests_count,
+          },
         })
         .select()
         .single();
 
-      if (error) throw error;
-      return data as PropertyBooking;
+      if (orderError) {
+        errorLog.silent(orderError, 'create_order');
+        throw orderError;
+      }
+
+      // Create order_item linking to property
+      const { error: itemError } = await supabase
+        .from('order_items')
+        .insert({
+          order_id: order.id,
+          resource_id: input.property_id,
+          item_type: 'property',
+          item_name: 'Property Booking',
+          unit_price: input.total_amount || 0,
+          amount: input.total_amount || 0,
+          qty: 1,
+          start_at: `${input.check_in}T14:00:00Z`,
+          end_at: `${input.check_out}T12:00:00Z`,
+        });
+
+      if (itemError) {
+        errorLog.silent(itemError, 'create_order_item');
+        // Rollback: delete order
+        await supabase.from('orders').delete().eq('id', order.id);
+        throw itemError;
+      }
+
+      // Create guest participant if guest info provided
+      if (input.guest_name || input.guest_phone || input.guest_email) {
+        const { error: participantError } = await supabase
+          .from('order_participants')
+          .insert({
+            order_id: order.id,
+            role: 'guest',
+            name: input.guest_name || 'Guest',
+            phone: input.guest_phone,
+            email: input.guest_email,
+          });
+
+        if (participantError) {
+          errorLog.silent(participantError, 'create_participant');
+          // Non-critical, don't rollback
+        }
+      }
+
+      return mapOrderToBooking(order, input.property_id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-bookings', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['all-property-bookings', user?.id] });
     },
   });
 
@@ -89,21 +202,50 @@ export function usePropertyBookings(propertyId?: string) {
     mutationFn: async ({ id, ...updates }: Partial<PropertyBooking> & { id: string }) => {
       if (!user?.id) throw new Error('Not authenticated');
       
-      // Update only if user owns this booking
+      // Update the order
+      const orderUpdates: any = {};
+      if (updates.check_in) orderUpdates.start_at = `${updates.check_in}T14:00:00Z`;
+      if (updates.check_out) orderUpdates.end_at = `${updates.check_out}T12:00:00Z`;
+      if (updates.total_amount !== undefined) orderUpdates.total_amount = updates.total_amount;
+      if (updates.currency) orderUpdates.currency = updates.currency;
+      if (updates.status) orderUpdates.status = updates.status;
+      if (updates.notes !== undefined) orderUpdates.notes = updates.notes;
+
       const { data, error } = await supabase
-        .from('property_bookings')
-        .update(updates)
+        .from('orders')
+        .update(orderUpdates)
         .eq('id', id)
-        .eq('owner_id', user.id) // Security: verify ownership
+        .is('deleted_at', null)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        errorLog.silent(error, 'update_booking');
+        throw error;
+      }
+      
       if (!data) throw new Error('Booking not found or access denied');
-      return data as PropertyBooking;
+
+      // Update guest participant if provided
+      if (updates.guest_name || updates.guest_phone || updates.guest_email) {
+        await supabase
+          .from('order_participants')
+          .upsert({
+            order_id: id,
+            role: 'guest',
+            name: updates.guest_name || 'Guest',
+            phone: updates.guest_phone,
+            email: updates.guest_email,
+          }, {
+            onConflict: 'order_id,role',
+          });
+      }
+
+      return mapOrderToBooking(data, updates.property_id || '');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-bookings', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['all-property-bookings', user?.id] });
     },
   });
 
@@ -111,18 +253,23 @@ export function usePropertyBookings(propertyId?: string) {
     mutationFn: async (id: string) => {
       if (!user?.id) throw new Error('Not authenticated');
       
-      // Delete only if user owns this booking
-      const { error, count } = await supabase
-        .from('property_bookings')
-        .delete()
-        .eq('id', id)
-        .eq('owner_id', user.id); // Security: verify ownership
+      // Soft delete by setting deleted_at
+      const { error } = await supabase
+        .from('orders')
+        .update({ 
+          deleted_at: new Date().toISOString(),
+          deleted_by: user.id,
+        })
+        .eq('id', id);
 
-      if (error) throw error;
-      // Note: count may be null if not using .select(), but the query will simply not delete if not owner
+      if (error) {
+        errorLog.silent(error, 'delete_booking');
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-bookings', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['all-property-bookings', user?.id] });
     },
   });
 
@@ -187,23 +334,65 @@ export function useAllPropertyBookings() {
     queryFn: async () => {
       if (!user?.id) return [];
 
+      // Get all properties owned by user
+      const { data: properties, error: propError } = await supabase
+        .from('owner_properties')
+        .select('id')
+        .eq('owner_id', user.id);
+
+      if (propError) {
+        errorLog.silent(propError, 'fetch_owner_properties');
+        throw propError;
+      }
+
+      if (!properties?.length) return [];
+
+      const propertyIds = properties.map(p => p.id);
+
+      // Get orders for these properties
       const { data, error } = await supabase
-        .from('property_bookings')
+        .from('orders')
         .select(`
           *,
-          owner_properties (
-            id,
-            title,
-            title_ru,
-            address,
-            cover_image
+          order_items!inner (
+            id, resource_id, item_type, item_name, unit_price, amount
+          ),
+          order_participants (
+            id, role, name, phone, email
           )
         `)
-        .eq('owner_id', user.id)
-        .order('check_in', { ascending: true });
+        .eq('vertical', 'property')
+        .eq('order_items.item_type', 'property')
+        .in('order_items.resource_id', propertyIds)
+        .is('deleted_at', null)
+        .order('start_at', { ascending: true });
 
-      if (error) throw error;
-      return data || [];
+      if (error) {
+        errorLog.silent(error, 'fetch_all_bookings');
+        throw error;
+      }
+
+      // Enrich with property data
+      const enrichedData = await Promise.all((data || []).map(async (order) => {
+        const resourceId = order.order_items?.[0]?.resource_id;
+        
+        let propertyData = null;
+        if (resourceId) {
+          const { data: prop } = await supabase
+            .from('owner_properties')
+            .select('id, title, title_ru, address, cover_image')
+            .eq('id', resourceId)
+            .single();
+          propertyData = prop;
+        }
+
+        return {
+          ...mapOrderToBooking(order, resourceId || ''),
+          owner_properties: propertyData,
+        };
+      }));
+
+      return enrichedData;
     },
     enabled: !!user?.id,
   });
@@ -236,25 +425,49 @@ export function useGuestPropertyBookings() {
     queryFn: async () => {
       if (!user?.id) return [];
 
+      // Get orders where user is the customer
       const { data, error } = await supabase
-        .from('property_bookings')
+        .from('orders')
         .select(`
           *,
-          owner_properties (
-            id,
-            title,
-            title_ru,
-            address,
-            cover_image,
-            check_in_time,
-            check_out_time
+          order_items!inner (
+            id, resource_id, item_type, item_name
+          ),
+          order_participants (
+            id, role, name, phone, email
           )
         `)
-        .eq('guest_id', user.id)
-        .order('check_in', { ascending: true });
+        .eq('vertical', 'property')
+        .eq('customer_user_id', user.id)
+        .is('deleted_at', null)
+        .order('start_at', { ascending: true });
 
-      if (error) throw error;
-      return data || [];
+      if (error) {
+        errorLog.silent(error, 'fetch_guest_bookings');
+        throw error;
+      }
+
+      // Enrich with property data
+      const enrichedData = await Promise.all((data || []).map(async (order) => {
+        const resourceId = order.order_items?.[0]?.resource_id;
+        
+        let propertyData = null;
+        if (resourceId) {
+          const { data: prop } = await supabase
+            .from('owner_properties')
+            .select('id, title, title_ru, address, cover_image, check_in_time, check_out_time')
+            .eq('id', resourceId)
+            .single();
+          propertyData = prop;
+        }
+
+        return {
+          ...mapOrderToBooking(order, resourceId || ''),
+          owner_properties: propertyData,
+        };
+      }));
+
+      return enrichedData;
     },
     enabled: !!user?.id,
   });
