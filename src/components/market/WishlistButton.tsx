@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react';
 import { Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useWishlist } from '@/hooks/useWishlist';
+import { useUserCollections } from '@/hooks/useUserCollections';
 import { cn } from '@/lib/utils';
 
 interface WishlistButtonProps {
@@ -13,7 +13,7 @@ interface WishlistButtonProps {
 
 export const WishlistButton = forwardRef<HTMLButtonElement, WishlistButtonProps>(
   function WishlistButton({ productId, variant = 'icon', className, size = 'default' }, ref) {
-  const { isInWishlist, toggleWishlist } = useWishlist();
+  const { isInWishlist, toggleWishlist } = useUserCollections({ itemType: 'product' });
   const isWishlisted = isInWishlist(productId);
 
   const handleClick = async (e: React.MouseEvent) => {
