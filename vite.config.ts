@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === "development" && componentTagger(),
     VitePWA({
-      registerType: 'prompt',
+      registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'icons/*.png'],
       manifest: {
         name: 'myUNO - All Services in One',
@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => ({
         display: 'standalone',
         orientation: 'portrait-primary',
         start_url: '/?source=pwa',
-        id: '/myuno-pwa-v4', // Bumped version to force update
+        id: '/myuno-pwa-v5',
         scope: '/',
         icons: [
           {
@@ -48,18 +48,17 @@ export default defineConfig(({ mode }) => ({
         ]
       },
       workbox: {
-        // Force new SW to activate immediately
         skipWaiting: true,
         clientsClaim: true,
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        // Clean old caches on new SW activation
         cleanupOutdatedCaches: true,
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        // Network-first for app shell and assets to always get fresh content
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'supabase-cache-v2',
+              cacheName: 'supabase-cache-v3',
               expiration: {
                 maxEntries: 50,
                 maxAgeSeconds: 60 * 60 * 24
@@ -68,8 +67,33 @@ export default defineConfig(({ mode }) => ({
                 statuses: [0, 200]
               }
             }
+          },
+          {
+            urlPattern: /\.(?:js|css)$/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'static-assets-v3',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 // 1 hour
+              }
+            }
+          },
+          {
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'images-cache-v3',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 7 // 7 days
+              }
+            }
           }
-        ]
+        ],
+        // Precache critical pages for offline access
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/api/, /^\/supabase/]
       }
     })
   ].filter(Boolean),

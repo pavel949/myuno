@@ -12,6 +12,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { MaintenanceProvider, useMaintenance } from "@/contexts/MaintenanceContext";
+import { PWAInstallProvider } from "@/contexts/PWAInstallContext";
 import { AnimatedRoutes } from "@/components/layout/AnimatedRoutes";
 import { UnifiedChatFAB } from "@/components/chat/UnifiedChatFAB";
 import { ErrorBoundary, useGlobalErrorHandler } from "@/components/ErrorBoundary";
@@ -60,16 +61,18 @@ const App = () => (
                 <CurrencyProvider>
                   <AuthProvider>
                     <CartProvider>
-                      <TooltipProvider>
-                        <HintProvider>
-                          <PrefetchProvider>
-                            <AppContent />
-                          </PrefetchProvider>
-                        </HintProvider>
-                      </TooltipProvider>
-                      </CartProvider>
-                    </AuthProvider>
-                  </CurrencyProvider>
+                      <PWAInstallProvider>
+                        <TooltipProvider>
+                          <HintProvider>
+                            <PrefetchProvider>
+                              <AppContent />
+                            </PrefetchProvider>
+                          </HintProvider>
+                        </TooltipProvider>
+                      </PWAInstallProvider>
+                    </CartProvider>
+                  </AuthProvider>
+                </CurrencyProvider>
               </LocationProvider>
             </LanguageProvider>
           </MaintenanceProvider>
