@@ -12707,6 +12707,54 @@ export type Database = {
         }
         Relationships: []
       }
+      taxonomy_definitions: {
+        Row: {
+          created_at: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          is_system: boolean | null
+          metadata_schema: Json | null
+          name_en: string
+          name_ru: string | null
+          sort_order: number | null
+          supports_hierarchy: boolean | null
+          type_key: string
+          updated_at: string | null
+          vertical: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_system?: boolean | null
+          metadata_schema?: Json | null
+          name_en: string
+          name_ru?: string | null
+          sort_order?: number | null
+          supports_hierarchy?: boolean | null
+          type_key: string
+          updated_at?: string | null
+          vertical?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_system?: boolean | null
+          metadata_schema?: Json | null
+          name_en?: string
+          name_ru?: string | null
+          sort_order?: number | null
+          supports_hierarchy?: boolean | null
+          type_key?: string
+          updated_at?: string | null
+          vertical?: string | null
+        }
+        Relationships: []
+      }
       team_achievements: {
         Row: {
           category: string | null
