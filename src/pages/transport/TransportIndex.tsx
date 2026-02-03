@@ -4,16 +4,11 @@ import { Car } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { MiniAppLayout, MiniAppQuickGrid, ItemCard, type QuickGridItem } from '@/components/miniapp';
-import { transportFilterConfig, FilterValues } from '@/components/filters';
+import { TransportFiltersKlook, type DatePreset, type SortOption } from '@/components/transport/TransportFiltersKlook';
 import { useVehicles } from '@/hooks/useVehicles';
-import { matchesPriceLevel } from '@/lib/filterUtils';
 import { VerticalCTA } from '@/components/leads/VerticalCTA';
 import { CrossSellSection } from '@/components/crosssell';
-import { 
-  getRibbonCategories, 
-  matchesCategory,
-  normalizeVehicleType,
-} from '@/lib/config/transportTaxonomy';
+import { normalizeVehicleType } from '@/lib/config/transportTaxonomy';
 import { mapVehicleToCardProps } from '@/lib/adapters/vehicleAdapters';
 
 export default function TransportIndex() {
@@ -21,17 +16,26 @@ export default function TransportIndex() {
   const { currencyInfo } = useCurrency();
   const navigate = useNavigate();
   const { vehicles, isLoading } = useVehicles();
+  
+  // Filter state
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterValues, setFilterValues] = useState<FilterValues>({});
-
-  // Get ribbon categories from taxonomy
-  const ribbonCategories = useMemo(() => getRibbonCategories(language), [language]);
+  const [sortBy, setSortBy] = useState<SortOption>('price_asc');
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 5000]);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [datePreset, setDatePreset] = useState<DatePreset>('any');
+  const [selectedInlineFilters, setSelectedInlineFilters] = useState<string[]>([]);
+  const [selectedVehicleType, setSelectedVehicleType] = useState<string[]>([]);
+  const [selectedTransmission, setSelectedTransmission] = useState<string[]>([]);
+  const [selectedFuelType, setSelectedFuelType] = useState<string[]>([]);
+  const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
+  const [selectedQuickFilters, setSelectedQuickFilters] = useState<string[]>([]);
 
   const filteredVehicles = useMemo(() => {
-    return vehicles.filter(v => {
-      // Category filter using taxonomy normalization
-      if (!matchesCategory(v.vehicle_type, selectedCategory)) return false;
+    let results = vehicles.filter(v => {
+      // Category filter
+      const normalizedType = normalizeVehicleType(v.vehicle_type);
+      if (selectedCategory !== 'all' && normalizedType !== selectedCategory) return false;
       
       // Search filter
       if (searchQuery) {
@@ -39,58 +43,71 @@ export default function TransportIndex() {
         if (!name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       }
       
-      // Passengers filter
-      if (filterValues.passengers) {
-        const cap = v.capacity || 0;
-        const passMap: Record<string, number[]> = {
-          '1-2': [1, 2],
-          '3-4': [3, 4],
-          '5-7': [5, 6, 7],
-          '8+': [8, 9, 10, 11, 12]
-        };
-        const allowedSeats = passMap[filterValues.passengers as string] || [];
-        if (!allowedSeats.includes(cap)) return false;
+      // Price filter
+      const price = v.price_per_day || 0;
+      if (price < priceRange[0] || price > priceRange[1]) return false;
+      
+      // Vehicle type filter from drawer
+      if (selectedVehicleType.length > 0) {
+        if (!selectedVehicleType.includes(normalizedType)) return false;
       }
       
-      // Price level filter
-      const priceLevel = filterValues.priceLevel as string | undefined;
-      if (priceLevel && !matchesPriceLevel(v.price_per_day, priceLevel)) return false;
-      
-      // Vehicle type filter from modal (using taxonomy normalization)
-      const vehicleTypeFilter = filterValues.vehicleType as string[] | undefined;
-      if (vehicleTypeFilter?.length) {
-        const normalizedType = normalizeVehicleType(v.vehicle_type);
-        if (!vehicleTypeFilter.includes(normalizedType)) return false;
+      // Transmission filter
+      if (selectedTransmission.length > 0) {
+        const trans = v.transmission?.toLowerCase() || '';
+        if (!selectedTransmission.some(t => trans.includes(t))) return false;
       }
       
-      // Transmission filter (NEW)
-      const transmissionFilter = filterValues.transmission as string | undefined;
-      if (transmissionFilter) {
-        if (v.transmission?.toLowerCase() !== transmissionFilter.toLowerCase()) return false;
-      }
-      
-      // Fuel type filter (NEW)
-      const fuelTypeFilter = filterValues.fuelType as string[] | undefined;
-      if (fuelTypeFilter?.length) {
-        if (!v.fuel_type || !fuelTypeFilter.includes(v.fuel_type.toLowerCase())) return false;
+      // Fuel type filter
+      if (selectedFuelType.length > 0) {
+        const fuel = v.fuel_type?.toLowerCase() || '';
+        if (!selectedFuelType.includes(fuel)) return false;
       }
       
       // Features filter
-      const featuresFilter = filterValues.features as string[] | undefined;
-      if (featuresFilter?.length) {
+      if (selectedFeatures.length > 0) {
         const vehicleFeatures = v.features || [];
-        const hasAllFeatures = featuresFilter.every(f => 
+        const hasAllFeatures = selectedFeatures.every(f => 
           vehicleFeatures.some(vf => vf.toLowerCase() === f.toLowerCase())
         );
         if (!hasAllFeatures) return false;
       }
       
-      // Verified filter
-      if (filterValues.verified && !v.is_verified) return false;
+      // Inline quick filters (Automatic, Insurance, Delivery)
+      if (selectedInlineFilters.includes('automatic')) {
+        if (v.transmission?.toLowerCase() !== 'automatic') return false;
+      }
+      if (selectedInlineFilters.includes('insurance')) {
+        // Check if vehicle has insurance in features
+        if (!v.features?.some(f => f.toLowerCase().includes('insurance'))) return false;
+      }
+      if (selectedInlineFilters.includes('delivery')) {
+        if (!v.features?.some(f => f.toLowerCase().includes('delivery'))) return false;
+      }
+      
+      // Quick filters (drawer)
+      if (selectedQuickFilters.includes('verified') && !v.is_verified) return false;
       
       return true;
     });
-  }, [vehicles, selectedCategory, searchQuery, filterValues, language]);
+    
+    // Sort
+    results.sort((a, b) => {
+      switch (sortBy) {
+        case 'price_asc':
+          return (a.price_per_day || 0) - (b.price_per_day || 0);
+        case 'rating':
+          return (b.rating || 0) - (a.rating || 0);
+        case 'newest':
+          // No created_at in Vehicle type, fallback to rating
+          return (b.rating || 0) - (a.rating || 0);
+        default:
+          return 0;
+      }
+    });
+    
+    return results;
+  }, [vehicles, selectedCategory, searchQuery, sortBy, priceRange, selectedVehicleType, selectedTransmission, selectedFuelType, selectedFeatures, selectedInlineFilters, selectedQuickFilters, language]);
 
   const quickItems: QuickGridItem[] = [
     { icon: '🚗', label: language === 'ru' ? 'Аренда' : 'Rental', onClick: () => setSelectedCategory('all') },
@@ -111,19 +128,42 @@ export default function TransportIndex() {
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}
       searchPlaceholder={language === 'ru' ? 'Поиск транспорта...' : 'Search vehicles...'}
-      categories={ribbonCategories}
-      selectedCategory={selectedCategory}
-      onCategoryChange={setSelectedCategory}
-      filterConfig={transportFilterConfig}
-      filterValues={filterValues}
-      onFilterChange={setFilterValues}
       isLoading={isLoading}
       isEmpty={filteredVehicles.length === 0}
       emptyIcon={Car}
       emptyText={language === 'ru' ? 'Транспорт не найден' : 'No vehicles found'}
     >
-      <MiniAppQuickGrid items={quickItems} columns={4} className="mb-6" />
+      {/* Klook-style Unified Filters */}
+      <TransportFiltersKlook
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+        priceRange={priceRange}
+        onPriceRangeChange={setPriceRange}
+        selectedDate={selectedDate}
+        onDateChange={setSelectedDate}
+        datePreset={datePreset}
+        onDatePresetChange={setDatePreset}
+        selectedInlineFilters={selectedInlineFilters}
+        onInlineFiltersChange={setSelectedInlineFilters}
+        selectedVehicleType={selectedVehicleType}
+        onVehicleTypeChange={setSelectedVehicleType}
+        selectedTransmission={selectedTransmission}
+        onTransmissionChange={setSelectedTransmission}
+        selectedFuelType={selectedFuelType}
+        onFuelTypeChange={setSelectedFuelType}
+        selectedFeatures={selectedFeatures}
+        onFeaturesChange={setSelectedFeatures}
+        selectedQuickFilters={selectedQuickFilters}
+        onQuickFiltersChange={setSelectedQuickFilters}
+        resultsCount={filteredVehicles.length}
+        language={language}
+      />
       
+      <MiniAppQuickGrid items={quickItems} columns={4} className="my-6" />
+      
+      {/* Results Grid */}
       <div className="grid gap-4">
         {filteredVehicles.map((vehicle) => {
           const cardProps = mapVehicleToCardProps(vehicle, language, currencyInfo.symbol);
