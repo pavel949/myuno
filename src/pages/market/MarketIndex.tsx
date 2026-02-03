@@ -110,16 +110,26 @@ const MarketIndex = () => {
     }));
   }, [activeCategories, isRu]);
 
-  // Search results
+  // Search results - products and categories
   const searchResults = useMemo(() => {
-    if (searchQuery.length < 2) return [];
+    if (searchQuery.length < 2) return { products: [], categories: [] };
     const query = searchQuery.toLowerCase();
-    return allProducts.filter(p => 
+    
+    const matchedProducts = allProducts.filter(p => 
       p.name_en.toLowerCase().includes(query) ||
       p.name_ru.toLowerCase().includes(query) ||
       p.tags?.some(t => t.toLowerCase().includes(query))
-    ).slice(0, 8);
-  }, [searchQuery, allProducts]);
+    ).slice(0, 6);
+    
+    const matchedCategories = categories.filter(c => 
+      c.name_en.toLowerCase().includes(query) ||
+      c.name_ru.toLowerCase().includes(query)
+    ).slice(0, 4);
+    
+    return { products: matchedProducts, categories: matchedCategories };
+  }, [searchQuery, allProducts, categories]);
+
+  const hasSearchResults = searchResults.products.length > 0 || searchResults.categories.length > 0;
 
   const getQuantity = (productId: string) => {
     return cartItems.find(i => i.id === productId)?.quantity || 0;
@@ -155,38 +165,96 @@ const MarketIndex = () => {
   };
 
   // Render search results dropdown
-  const renderSearchResults = () => (
-    <>
-      {searchResults.map(product => (
-        <button
-          key={product.id}
-          className="w-full flex items-center gap-3 p-3 hover:bg-muted/50 text-left transition-colors border-b border-border/50 last:border-0"
-          onClick={() => {
-            navigate(`/market/product/${product.id}`);
-            setSearchQuery('');
-          }}
-        >
-          <img
-            src={product.cover_image || '/placeholder.svg'}
-            alt=""
-            className="w-12 h-12 rounded-lg object-cover"
-          />
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium line-clamp-1">
-              {isRu ? product.name_ru : product.name_en}
-            </p>
-            <p className="text-sm font-bold text-primary">
-              ฿{product.price.toLocaleString()}
-            </p>
+  const renderSearchResults = () => {
+    // No results found
+    if (!hasSearchResults) {
+      return (
+        <div className="p-6 text-center">
+          <p className="text-muted-foreground text-sm">
+            {isRu ? 'Ничего не найдено' : 'Nothing found'}
+          </p>
+          <p className="text-xs text-muted-foreground/70 mt-1">
+            {isRu ? 'Попробуйте изменить запрос' : 'Try a different search'}
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        {/* Categories section */}
+        {searchResults.categories.length > 0 && (
+          <div className="border-b border-border/50">
+            <div className="px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              {isRu ? 'Категории' : 'Categories'}
+            </div>
+            {searchResults.categories.map(category => (
+              <button
+                key={category.id}
+                className="w-full flex items-center gap-3 p-3 hover:bg-muted/50 text-left transition-colors"
+                onClick={() => {
+                  navigate(`/market/category/${category.slug}`);
+                  setSearchQuery('');
+                }}
+              >
+                <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center text-xl">
+                  {category.icon || getCategoryFallbackIcon(category.slug)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium">
+                    {isRu ? category.name_ru : category.name_en}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {productCounts[category.slug] || 0} {isRu ? 'товаров' : 'items'}
+                  </p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              </button>
+            ))}
           </div>
-        </button>
-      ))}
-    </>
-  );
+        )}
+
+        {/* Products section */}
+        {searchResults.products.length > 0 && (
+          <>
+            {searchResults.categories.length > 0 && (
+              <div className="px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                {isRu ? 'Товары' : 'Products'}
+              </div>
+            )}
+            {searchResults.products.map(product => (
+              <button
+                key={product.id}
+                className="w-full flex items-center gap-3 p-3 hover:bg-muted/50 text-left transition-colors border-b border-border/50 last:border-0"
+                onClick={() => {
+                  navigate(`/market/product/${product.id}`);
+                  setSearchQuery('');
+                }}
+              >
+                <img
+                  src={product.cover_image || '/placeholder.svg'}
+                  alt=""
+                  className="w-12 h-12 rounded-lg object-cover"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium line-clamp-1">
+                    {isRu ? product.name_ru : product.name_en}
+                  </p>
+                  <p className="text-sm font-bold text-primary">
+                    ฿{product.price.toLocaleString()}
+                  </p>
+                </div>
+              </button>
+            ))}
+          </>
+        )}
+      </>
+    );
+  };
 
   const remainingCategoryCount = Math.max(0, activeCategories.length - 3);
 
-  const isSearching = searchQuery.length >= 2 && searchResults.length > 0;
+  const isSearchActive = searchQuery.length >= 2;
 
   return (
     <MiniAppLayout
@@ -199,8 +267,8 @@ const MarketIndex = () => {
       searchPlaceholder={isRu ? 'Искать на myUNO Market' : 'Search on myUNO Market'}
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}
-      searchResults={searchResults.length > 0 ? renderSearchResults() : undefined}
-      isSearching={isSearching}
+      searchResults={isSearchActive ? renderSearchResults() : undefined}
+      isSearching={isSearchActive}
       showHero={false}
       showCategories={false}
       showFilter={false}
