@@ -2,6 +2,9 @@ import React, { Component, ErrorInfo, ReactNode, useEffect } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { createErrorHandler } from '@/lib/errorHandler';
+
+const errorLog = createErrorHandler('ErrorBoundary');
 
 interface Props {
   children: ReactNode;
@@ -25,7 +28,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    errorLog.silent(error, 'component_error');
     this.props.onError?.(error, errorInfo);
   }
 
@@ -97,7 +100,7 @@ export function withErrorBoundary<P extends object>(
 export function useGlobalErrorHandler() {
   useEffect(() => {
     const handleRejection = (event: PromiseRejectionEvent) => {
-      console.error('Unhandled rejection:', event.reason);
+      errorLog.silent(event.reason, 'unhandled_rejection');
       
       // Check for chunk loading errors
       const message = event.reason?.message || String(event.reason);
@@ -118,7 +121,7 @@ export function useGlobalErrorHandler() {
     };
 
     const handleError = (event: ErrorEvent) => {
-      console.error('Global error:', event.error);
+      errorLog.silent(event.error, 'global_error');
       // Prevent crash for recoverable errors
       if (event.error?.message?.includes('dynamically imported')) {
         event.preventDefault();

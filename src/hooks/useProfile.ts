@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { createErrorHandler } from '@/lib/errorHandler';
 
 export type UserType = 'tourist' | 'resident' | 'owner' | 'vendor' | 'admin' | 'uno_team';
 
@@ -33,6 +34,7 @@ export function useProfile() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { setLanguage } = useLanguage();
+  const errorLog = createErrorHandler('useProfile');
 
   const { data: profile, isLoading, error } = useQuery({
     queryKey: ['profile', user?.id],
@@ -46,7 +48,7 @@ export function useProfile() {
         .maybeSingle();
 
       if (error) {
-        console.error('Error fetching profile:', error);
+        errorLog.silent(error, 'fetch_profile');
         throw error;
       }
 
@@ -67,7 +69,7 @@ export function useProfile() {
         .single();
 
       if (error) {
-        console.error('Error updating profile:', error);
+        errorLog.silent(error, 'update_profile');
         throw error;
       }
 
@@ -82,7 +84,7 @@ export function useProfile() {
       }
     },
     onError: (error) => {
-      console.error('Profile update error:', error);
+      errorLog.silent(error, 'update_profile_mutation');
     },
   });
 

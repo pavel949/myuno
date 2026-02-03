@@ -2,6 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { createErrorHandler } from '@/lib/errorHandler';
+
+const errorLog = createErrorHandler('useWishlist');
 
 export interface WishlistItem {
   id: string;
@@ -32,7 +35,7 @@ export function useWishlist() {
       if (error) throw error;
       setWishlist((data || []) as WishlistItem[]);
     } catch (err) {
-      console.error('Error fetching wishlist:', err);
+      errorLog.silent(err, 'fetch_wishlist');
     } finally {
       setIsLoading(false);
     }
@@ -63,7 +66,7 @@ export function useWishlist() {
       toast.success('Added to wishlist');
       return true;
     } catch (err) {
-      console.error('Error adding to wishlist:', err);
+      errorLog.silent(err, 'add_to_wishlist');
       toast.error('Failed to add to wishlist');
       return false;
     }
@@ -85,7 +88,7 @@ export function useWishlist() {
       toast.success('Removed from wishlist');
       return true;
     } catch (err) {
-      console.error('Error removing from wishlist:', err);
+      errorLog.silent(err, 'remove_from_wishlist');
       return false;
     }
   }, [user, fetchWishlist]);

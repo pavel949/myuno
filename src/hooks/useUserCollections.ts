@@ -7,7 +7,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { createErrorHandler } from '@/lib/errorHandler';
 import type { FavoriteItemData } from '@/types/favorites';
+
+const errorLog = createErrorHandler('useUserCollections');
 
 export type CollectionItemType = 
   | 'product' 
@@ -71,7 +74,7 @@ export function useUserCollections(options: UseUserCollectionsOptions = {}) {
         item_data: item.item_data as FavoriteItemData | null
       })));
     } catch (error) {
-      console.error('Error fetching user collections:', error);
+      errorLog.silent(error, 'fetch_collections');
     } finally {
       setIsLoading(false);
     }
@@ -128,7 +131,7 @@ export function useUserCollections(options: UseUserCollectionsOptions = {}) {
       toast.success(language === 'ru' ? 'Добавлено в избранное' : 'Added to favorites');
       return true;
     } catch (error) {
-      console.error('Error adding to collection:', error);
+      errorLog.silent(error, 'add_to_collection');
       toast.error(language === 'ru' ? 'Ошибка. Попробуйте снова' : 'Error. Please try again');
       return false;
     }
@@ -155,7 +158,7 @@ export function useUserCollections(options: UseUserCollectionsOptions = {}) {
       toast.success(language === 'ru' ? 'Удалено из избранного' : 'Removed from favorites');
       return true;
     } catch (error) {
-      console.error('Error removing from collection:', error);
+      errorLog.silent(error, 'remove_from_collection');
       return false;
     }
   }, [user, language]);

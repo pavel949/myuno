@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { createErrorHandler } from '@/lib/errorHandler';
+
+const errorLog = createErrorHandler('useVendor');
 
 export interface VendorProfile {
   id: string;
@@ -154,7 +157,7 @@ export function useVendorProfile() {
       }
     } catch (err) {
       setError(err as Error);
-      console.error('Error fetching vendor profile:', err);
+      errorLog.silent(err, 'fetch_vendor_profile');
     } finally {
       setIsLoading(false);
     }
@@ -218,7 +221,7 @@ export function useVendorProfile() {
         if (isMounted) {
           setError(err as Error);
         }
-        console.error('Error fetching vendor profile:', err);
+        errorLog.silent(err, 'load_vendor_profile');
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -350,7 +353,7 @@ export function useVendorProfile() {
       await fetchProfile();
       return { data: providerData, error: null };
     } catch (error) {
-      console.error('Error creating vendor profile:', error);
+      errorLog.silent(error, 'create_vendor_profile');
       return { data: null, error: error as Error };
     }
   };
@@ -380,7 +383,7 @@ export function useVendorServices(vendorId?: string) {
       if (error) throw error;
       setServices((data || []) as VendorService[]);
     } catch (err) {
-      console.error('Error fetching services:', err);
+      errorLog.silent(err, 'fetch_vendor_services');
     } finally {
       setIsLoading(false);
     }
@@ -409,7 +412,7 @@ export function useVendorServices(vendorId?: string) {
           setServices((data || []) as VendorService[]);
         }
       } catch (err) {
-        console.error('Error fetching services:', err);
+        errorLog.silent(err, 'load_vendor_services');
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -493,7 +496,7 @@ export function useVendorBookings(vendorId?: string, options?: { status?: string
       if (error) throw error;
       setBookings((data || []) as VendorBooking[]);
     } catch (err) {
-      console.error('Error fetching bookings:', err);
+      errorLog.silent(err, 'fetch_vendor_bookings');
     } finally {
       setIsLoading(false);
     }
@@ -530,7 +533,7 @@ export function useVendorBookings(vendorId?: string, options?: { status?: string
           setBookings((data || []) as VendorBooking[]);
         }
       } catch (err) {
-        console.error('Error fetching bookings:', err);
+        errorLog.silent(err, 'load_vendor_bookings');
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -616,7 +619,7 @@ export function useVendorAnalytics(vendorId?: string, days: number = 30) {
         pendingPayout: 0,
       });
     } catch (err) {
-      console.error('Error fetching analytics:', err);
+      errorLog.silent(err, 'fetch_vendor_analytics');
     } finally {
       setIsLoading(false);
     }
@@ -672,7 +675,7 @@ export function useVendorAnalytics(vendorId?: string, days: number = 30) {
           });
         }
       } catch (err) {
-        console.error('Error fetching analytics:', err);
+        errorLog.silent(err, 'load_vendor_analytics');
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -712,7 +715,7 @@ export function useVendorPayouts(vendorId?: string) {
       if (error) throw error;
       setPayouts((data || []) as VendorPayout[]);
     } catch (err) {
-      console.error('Error fetching payouts:', err);
+      errorLog.silent(err, 'fetch_vendor_payouts');
     } finally {
       setIsLoading(false);
     }
@@ -741,7 +744,7 @@ export function useVendorPayouts(vendorId?: string) {
           setPayouts((data || []) as VendorPayout[]);
         }
       } catch (err) {
-        console.error('Error fetching payouts:', err);
+        errorLog.silent(err, 'load_vendor_payouts');
       } finally {
         if (isMounted) {
           setIsLoading(false);

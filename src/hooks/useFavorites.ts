@@ -3,7 +3,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { createErrorHandler } from '@/lib/errorHandler';
 import type { FavoriteItem, FavoriteItemData } from '@/types/favorites';
+
+const errorLog = createErrorHandler('useFavorites');
 
 interface FavoriteRecord {
   id: string;
@@ -45,7 +48,7 @@ export function useFavorites(itemType?: string) {
         item_data: item.item_data as FavoriteItemData | null
       })));
     } catch (error) {
-      console.error('Error fetching favorites:', error);
+      errorLog.silent(error, 'fetch_favorites');
     } finally {
       setLoading(false);
     }
@@ -84,7 +87,7 @@ export function useFavorites(itemType?: string) {
           })));
         }
       } catch (error) {
-        console.error('Error fetching favorites:', error);
+        errorLog.silent(error, 'load_favorites');
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -150,7 +153,7 @@ export function useFavorites(itemType?: string) {
 
       return true;
     } catch (error) {
-      console.error('Error toggling favorite:', error);
+      errorLog.silent(error, 'toggle_favorite');
       toast.error(language === 'ru' ? 'Ошибка. Попробуйте снова' : 'Error. Please try again');
       return false;
     }
