@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 import LocationPickerMap from '@/components/transport/LocationPickerMap';
 import { BackButton } from '@/components/uno/BackButton';
 import { supabase } from '@/integrations/supabase/client';
+import { GrabTransitionCard } from '@/components/transport/GrabTransitionCard';
 
 // Time options generator
 const getTimeOptions = (language: string) => {
@@ -313,15 +314,30 @@ export default function TaxiBooking() {
 
   return (
     <AppLayout showBottomNav={false}>
-      <div className="px-4 py-6">
+      <div className="px-4 py-6 space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center gap-4">
           <BackButton fallbackPath="/transport" variant="ghost" />
           <div className="flex-1">
             <h1 className="text-xl font-display font-bold">
               {language === 'ru' ? 'Вызов такси' : 'Order Taxi'}
             </h1>
           </div>
+        </div>
+
+        {/* Grab Partner Card - Premium CTA */}
+        <GrabTransitionCard 
+          pickupAddress={pickupLocation?.address}
+          destinationAddress={destinationLocation?.address}
+        />
+
+        {/* Divider with "or" */}
+        <div className="flex items-center gap-4">
+          <div className="flex-1 h-px bg-border" />
+          <span className="text-xs text-muted-foreground font-medium uppercase">
+            {language === 'ru' ? 'или через myUNO' : 'or via myUNO'}
+          </span>
+          <div className="flex-1 h-px bg-border" />
         </div>
 
         {/* Location Picker Map Modal */}
