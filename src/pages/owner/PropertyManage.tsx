@@ -85,7 +85,7 @@ export default function PropertyManage() {
         price_per_night: property.price_per_night,
         deposit_amount: property.deposit_amount,
         deposit_currency: property.deposit_currency || 'THB',
-        deposit_type: (property as any).deposit_type || 'fixed',
+        deposit_type: property.deposit_type || 'fixed',
         weekly_discount: property.weekly_discount || 0,
         monthly_discount: property.monthly_discount || 0,
         seasonal_pricing: property.seasonal_pricing || [],
@@ -158,7 +158,7 @@ export default function PropertyManage() {
         parking_spaces: formData.parking_spaces ? Number(formData.parking_spaces) : 1,
         pet_deposit: formData.pet_deposit ? Number(formData.pet_deposit) : null,
         smoking_penalty: formData.smoking_penalty ? Number(formData.smoking_penalty) : null,
-      } as any);
+      });
 
       // Save availability changes
       if (localAvailability.length > 0) {
