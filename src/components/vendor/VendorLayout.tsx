@@ -31,8 +31,14 @@ export function VendorLayout({ children }: VendorLayoutProps) {
         <VendorSidebar />
         <SidebarInset className="flex-1 flex flex-col min-h-0">
           <VendorHeader />
-          {/* SINGLE SCROLL CONTAINER - P0 Critical */}
-          <main className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain scroll-smooth pb-20 md:pb-4">
+          {/* SINGLE SCROLL CONTAINER - Mobile-optimized */}
+          <main 
+            className="flex-1 overflow-y-auto overflow-x-hidden pb-20 md:pb-4"
+            style={{ 
+              WebkitOverflowScrolling: 'touch',
+              touchAction: 'pan-y pinch-zoom'
+            }}
+          >
             {children || <Outlet />}
           </main>
         </SidebarInset>
