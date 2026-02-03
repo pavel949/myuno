@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { errorHandler } from '@/lib/errorHandler';
 
 const QUICK_AMOUNTS = [500, 1000, 2000, 5000, 10000];
 
@@ -90,7 +91,10 @@ export default function QuickExpense() {
         navigate('/owner/financials');
       }, 1500);
     } catch (error) {
-      console.error('Error creating expense:', error);
+      errorHandler.error(error, { 
+        toastTitleRu: 'Ошибка при сохранении расхода', 
+        toastTitle: 'Error saving expense' 
+      });
     } finally {
       setIsSubmitting(false);
     }
