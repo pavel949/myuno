@@ -1,169 +1,74 @@
 
-# План: Адаптивная главная страница на основе выбранных ролей
 
-## Проблема
+# План: Владельцы как toggle-персона + навигация на лендинг
 
-Сейчас существуют **две параллельные системы выбора роли**:
-1. **PersonaSelector** — выбор персон (tourist/resident/property_owner), влияет на QuickActionsGrid
-2. **AudienceCards в HeroBlock** — ведут на `/discover?audience=...`, не связаны с персонами
+## Что делаем
 
-При этом:
-- Карточки аудиторий не используют систему персон
-- Переход для Владельцев ведёт на пустоватую страницу вместо готового лендинга `/owner/landing`
-- Главная страница не адаптируется визуально под выбранные роли
+Карточка "Владельцам" становится toggleable (как Туристы и Резиденты), но с дополнительной логикой — **при первом клике открывается лендинг** `/owner/landing`.
 
----
+## Изменения в `HeroBlock.tsx`
 
-## Решение: Единая адаптивная система
-
-### Концепция
-
-Карточки аудиторий в HeroBlock **становятся визуальными переключателями персон** и одновременно:
-1. **Активируют/деактивируют персону** (toggle)
-2. **Адаптируют контент главной страницы** под выбранные роли
-3. **При необходимости** — ведут на специализированные страницы
-
-```text
-┌─────────────────────────────────────────────────────────────┐
-│                    ГЛАВНАЯ СТРАНИЦА                         │
-├─────────────────────────────────────────────────────────────┤
-│  [✓ Турист]   [✓ Резидент]   [  Владелец →]                │
-│     ↓              ↓              ↓                         │
-│  Toggle ON    Toggle ON     Navigate to /owner/landing      │
-├─────────────────────────────────────────────────────────────┤
-│  QuickActions: комбинация Tourist + Resident действий       │
-│  Discovery: туры + медицина + визы (смешанный контент)      │
-│  SmartWidget: персонализированные рекомендации              │
-└─────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Технические изменения
-
-### 1. Обновить HeroBlock.tsx — интеграция с персонами
-
-**Логика кликов по карточкам:**
-
-| Роль | Действие при клике |
-|------|-------------------|
-| Турист | Toggle персоны `tourist` |
-| Резидент | Toggle персоны `resident` |
-| Владелец | Navigate → `/owner/landing` (готовая страница) |
+### 1. Обновить конфигурацию карточки Owners
 
 ```typescript
-// В HeroBlock.tsx
-import { useUserPersonas, UserPersona } from '@/hooks/useUserPersonas';
+{
+  id: 'owners',
+  persona: 'property_owner' as UserPersona,
+  isToggleable: true,  // ИЗМЕНЕНО: теперь toggle
+  navigateOnFirstActivation: '/owner/landing',  // НОВОЕ: куда вести
+  // остальное без изменений...
+}
+```
 
-const { personas, togglePersona } = useUserPersonas();
+### 2. Обновить логику handleAudienceClick
 
-const handleAudienceClick = (audienceId: string) => {
-  if (audienceId === 'owners') {
-    // Владельцы — переход на специальный лендинг
-    navigate('/owner/landing');
-  } else {
-    // Tourist/Resident — toggle персоны
-    const personaMap: Record<string, UserPersona> = {
-      tourists: 'tourist',
-      residents: 'resident',
-    };
-    const persona = personaMap[audienceId];
-    if (persona) {
-      togglePersona(persona);
-    }
+```typescript
+const handleAudienceClick = (card) => {
+  triggerHaptic('light');
+  
+  const isCurrentlyActive = personas.includes(card.persona);
+  
+  // Всегда toggle персону
+  togglePersona(card.persona);
+  
+  // Навигация при ПЕРВОЙ активации (только если персона была неактивна)
+  if (card.navigateOnFirstActivation && !isCurrentlyActive) {
+    navigate(card.navigateOnFirstActivation);
   }
 };
 ```
 
-**Визуальное состояние карточек:**
+### 3. Обновить AudienceCard — показывать чекмарк для всех toggleable
 
-```typescript
-// Показывать активное состояние для выбранных персон
-const isActive = (audienceId: string) => {
-  const personaMap = { tourists: 'tourist', residents: 'resident' };
-  const persona = personaMap[audienceId];
-  return persona ? personas.includes(persona) : false;
-};
-```
+Убрать стрелку для Owners (так как теперь toggleable), добавить чекмарк как у остальных.
 
-### 2. Убрать отдельный PersonaSelector
+## Поведение
 
-Поскольку карточки аудиторий теперь выполняют функцию выбора персон, компонент `PersonaSelector` можно убрать с главной страницы (или оставить в настройках профиля).
+| Действие | Результат |
+|----------|-----------|
+| Первый клик на "Владельцам" | ✓ Активируется персона + Переход на `/owner/landing` |
+| Повторный клик | ✓ Деактивируется персона (без навигации) |
+| Кликнуть снова | ✓ Активируется персона + снова переход на лендинг |
 
-### 3. Адаптация DiscoveryCarousel по персонам
-
-Добавить фильтрацию контента по выбранным персонам:
-
-```typescript
-// В DiscoveryCarousel.tsx
-const { personas } = useUserPersonas();
-
-// Категории для каждой персоны
-const PERSONA_CATEGORIES = {
-  tourist: ['tours', 'yachts', 'transport', 'restaurants', 'events'],
-  resident: ['visa', 'medical', 'legal', 'banking', 'insurance'],
-  property_owner: ['cleaning', 'maintenance', 'property-management'],
-};
-
-// Собрать категории из всех выбранных персон
-const relevantCategories = personas.flatMap(p => PERSONA_CATEGORIES[p]);
-
-// Фильтровать или приоритизировать контент
-```
-
-### 4. Визуальные индикаторы активных персон
-
-Карточки аудиторий показывают состояние:
+## Визуальный результат
 
 ```text
-НЕАКТИВНО:                      АКТИВНО (выбрано):
-┌─────────────────┐             ┌─────────────────┐
-│  ✈️             │             │  ✈️  ✓          │ ← чекмарк
-│  Туристам       │             │  Туристам       │
-│  border-default │             │  border-primary │ ← подсветка
-└─────────────────┘             │  ring-2         │
-                                └─────────────────┘
+ДО:
+[✓ Турист] [  Резидент] [  Владелец →]
+                              └── стрелка (навигация)
+
+ПОСЛЕ:
+[✓ Турист] [  Резидент] [✓ Владелец]
+                              └── чекмарк (toggle + navigate)
 ```
 
----
+## Комбинированный контент
 
-## Файлы для изменения
+Когда выбраны **Турист + Владелец**:
+- QuickActions: Туры, Яхты, Транспорт + Клининг, Сервис, УК
+- DiscoveryCarousel: смешанный контент для обеих ролей
 
-| Файл | Изменения |
-|------|-----------|
-| `src/components/home/HeroBlock.tsx` | Интеграция с useUserPersonas, активные состояния, роутинг |
-| `src/components/home/DiscoveryCarousel.tsx` | Фильтрация/приоритизация по персонам |
-| `src/pages/Index.tsx` | Убрать PersonaSelector (опционально) |
+## Файл для изменения
 
----
+`src/components/home/HeroBlock.tsx`
 
-## UX-поток
-
-```text
-Пользователь на главной странице:
-
-1. Видит 3 карточки: [Туристам] [Резидентам] [Владельцам]
-
-2. Кликает "Туристам":
-   - Карточка получает активное состояние (border-primary, чекмарк)
-   - QuickActions обновляются: Туры, Яхты, Транспорт...
-   - DiscoveryCarousel показывает туристический контент
-   
-3. Кликает "Резидентам" (добавляет):
-   - Обе карточки активны
-   - QuickActions: комбинация Tourist + Resident
-   - DiscoveryCarousel: смешанный контент
-
-4. Кликает "Владельцам":
-   - Переход на /owner/landing с приглашением залистить объект
-```
-
----
-
-## Ожидаемый результат
-
-1. **Единая система** — карточки аудиторий = селектор персон
-2. **Множественный выбор** — можно быть и туристом, и резидентом
-3. **Адаптивный контент** — QuickActions + Discovery меняются
-4. **Владельцы** — сразу видят полноценный лендинг с CTA "Разместить объект"
-5. **Визуальный фидбек** — активные роли подсвечены
