@@ -38,7 +38,6 @@ interface AudienceCardProps {
   borderColor: string;
   activeBorderColor: string;
   isActive: boolean;
-  isToggleable: boolean;
   onClick: () => void;
 }
 
@@ -51,7 +50,6 @@ const AudienceCard = memo(({
   borderColor, 
   activeBorderColor,
   isActive, 
-  isToggleable,
   onClick 
 }: AudienceCardProps) => (
   <motion.button
@@ -66,9 +64,9 @@ const AudienceCard = memo(({
       isActive && "ring-2 ring-offset-2 ring-offset-background"
     )}
   >
-    {/* Active Indicator */}
+    {/* Active Indicator - shown for all cards */}
     <AnimatePresence>
-      {isActive && isToggleable && (
+      {isActive && (
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -88,11 +86,6 @@ const AudienceCard = memo(({
     </div>
     <div className="font-semibold text-sm text-foreground truncate">{title}</div>
     <div className="text-[10px] text-muted-foreground line-clamp-1">{services}</div>
-    
-    {/* Arrow for non-toggleable (owners) */}
-    {!isToggleable && (
-      <ChevronRight className="absolute top-3 right-2 w-4 h-4 text-muted-foreground" />
-    )}
   </motion.button>
 ));
 
@@ -148,7 +141,8 @@ export const HeroBlock = memo(function HeroBlock() {
     {
       id: 'owners',
       persona: 'property_owner' as UserPersona,
-      isToggleable: false, // Owners navigate to dedicated landing
+      isToggleable: true, // Now toggleable like others
+      navigateOnFirstActivation: '/owner/landing', // Navigate when first activated
       icon: <Building2 className="w-5 h-5 text-amber-600" />,
       iconBg: 'bg-gradient-to-br from-amber-500/25 to-orange-500/35 shadow-lg shadow-amber-500/20',
       title: { en: 'Owners', ru: 'Владельцам' },
@@ -181,12 +175,14 @@ export const HeroBlock = memo(function HeroBlock() {
   const handleAudienceClick = (card: typeof audienceCards[0]) => {
     triggerHaptic('light');
     
-    if (card.isToggleable) {
-      // Toggle persona for tourists/residents
-      togglePersona(card.persona);
-    } else {
-      // Navigate to owner landing page
-      navigate('/owner/landing');
+    const isCurrentlyActive = personas.includes(card.persona);
+    
+    // Always toggle the persona
+    togglePersona(card.persona);
+    
+    // Navigate on first activation (when persona was not active)
+    if ('navigateOnFirstActivation' in card && card.navigateOnFirstActivation && !isCurrentlyActive) {
+      navigate(card.navigateOnFirstActivation);
     }
   };
 
@@ -239,7 +235,6 @@ export const HeroBlock = memo(function HeroBlock() {
             borderColor={card.borderColor}
             activeBorderColor={card.activeBorderColor}
             isActive={personas.includes(card.persona)}
-            isToggleable={card.isToggleable}
             onClick={() => handleAudienceClick(card)}
           />
         ))}
