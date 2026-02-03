@@ -2,6 +2,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { createErrorHandler } from '@/lib/errorHandler';
+
+const errorLog = createErrorHandler('usePropertyCare');
 
 // Re-export types from centralized location for backward compatibility
 export type { 
@@ -100,7 +103,7 @@ export function useCreateOwnerProperty() {
           owner_name: profile?.full_name || undefined,
           owner_email: profile?.email || user.email || undefined,
         },
-      }).catch(err => console.error('Failed to send admin notification email:', err));
+      }).catch(err => errorLog.silent(err, 'notify_admin'));
       
       return result as OwnerProperty;
     },

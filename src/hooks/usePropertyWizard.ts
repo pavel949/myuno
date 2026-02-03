@@ -6,8 +6,11 @@ import { useSendOwnershipInvite } from '@/hooks/usePropertyOwnership';
 import { useUserContext } from '@/hooks/useUserContext';
 import { useFormDraft } from '@/hooks/useFormDraft';
 import { toast } from 'sonner';
+import { createErrorHandler } from '@/lib/errorHandler';
 import { supabase } from '@/integrations/supabase/client';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
+
+const errorLog = createErrorHandler('usePropertyWizard');
 
 export type OwnershipType = 'own' | 'verbal' | 'management_agreement';
 
@@ -347,7 +350,7 @@ export function usePropertyWizard() {
         });
         toast.success(isRu ? 'Приглашение отправлено' : 'Invitation sent');
       } catch (error) {
-        console.error('Failed to send invite:', error);
+        errorLog.silent(error, 'send_invite');
       }
     }
 
