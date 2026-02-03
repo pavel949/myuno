@@ -86,7 +86,7 @@ export function HomeCategoryRibbon() {
           onClick={() => handleQuickAction('/market')}
           className={cn(
             "flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium shrink-0",
-            "bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20"
+            "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20"
           )}
         >
           <Menu className="w-4 h-4" />
@@ -98,13 +98,9 @@ export function HomeCategoryRibbon() {
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={() => handleQuickAction('/market/category/deals')}
-          className={cn(
-            "flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium shrink-0",
-            "bg-gradient-to-r from-orange-100 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30",
-            "hover:from-orange-200 hover:to-amber-200 text-orange-700 dark:text-orange-300"
-          )}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium shrink-0 bg-muted/60 hover:bg-muted text-foreground"
         >
-          <Flame className="w-4 h-4" />
+          <span className="text-base">🔥</span>
           <span>{isRu ? 'Акции' : 'Deals'}</span>
         </motion.button>
 
@@ -113,7 +109,7 @@ export function HomeCategoryRibbon() {
           onClick={() => handleQuickAction('/market/category/popular')}
           className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium shrink-0 bg-muted/60 hover:bg-muted text-foreground"
         >
-          <Star className="w-4 h-4 text-amber-500" />
+          <span className="text-base">⭐</span>
           <span>{isRu ? 'Хиты' : 'Hits'}</span>
         </motion.button>
 
@@ -122,7 +118,7 @@ export function HomeCategoryRibbon() {
           onClick={() => handleQuickAction('/market/category/new')}
           className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium shrink-0 bg-muted/60 hover:bg-muted text-foreground"
         >
-          <Sparkles className="w-4 h-4 text-purple-500" />
+          <span className="text-base">✨</span>
           <span>{isRu ? 'Новинки' : 'New'}</span>
         </motion.button>
       </div>
