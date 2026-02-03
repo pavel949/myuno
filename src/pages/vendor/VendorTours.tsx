@@ -476,7 +476,7 @@ const VendorTours = () => {
           }
           setIsDialogOpen(open);
         }}>
-          <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
+          <DialogContent className="w-[calc(100vw-16px)] sm:max-w-4xl max-h-[90vh] flex flex-col">
             <DialogHeader className="flex-shrink-0">
               <div className="flex items-center justify-between">
                 <DialogTitle>

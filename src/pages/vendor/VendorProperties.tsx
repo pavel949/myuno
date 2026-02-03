@@ -604,7 +604,7 @@ const VendorProperties = () => {
         <Dialog open={isDialogOpen} onOpenChange={(open) => {
           setIsDialogOpen(open);
         }}>
-          <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden">
+          <DialogContent className="w-[calc(100vw-16px)] sm:max-w-4xl max-h-[90vh] p-0 overflow-hidden">
             <DialogHeader className="p-6 pb-0">
               <div className="flex items-center justify-between">
                 <DialogTitle>
