@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -24,6 +24,8 @@ import { VendorAlertPanel } from '@/components/vendor/VendorAlertPanel';
 import { VendorRevenueChart } from '@/components/vendor/VendorRevenueChart';
 import { VendorQuickActions } from '@/components/vendor/VendorQuickActions';
 import { VendorCategoryGrid } from '@/components/vendor/VendorCategoryGrid';
+import { VendorQuickCreateFAB } from '@/components/vendor/wizard';
+import { BulkImportSheet, ImportVertical } from '@/components/vendor/wizard';
 
 const statusColors: Record<string, string> = {
   pending: 'bg-muted text-muted-foreground',
@@ -39,6 +41,10 @@ const VendorDashboard = () => {
   const { language } = useLanguage();
   const { activeOrg, vendorOrgs, isLoading: contextLoading } = useUserContext();
   const { orders, isLoading: ordersLoading, stats } = useVendorOrders();
+
+  // State for FAB actions
+  const [showBulkImport, setShowBulkImport] = useState(false);
+  const [bulkImportVertical, setBulkImportVertical] = useState<ImportVertical>('products');
 
   const isRu = language === 'ru';
   const locale = isRu ? ru : enUS;
@@ -176,6 +182,26 @@ const VendorDashboard = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Quick Create FAB */}
+      <VendorQuickCreateFAB 
+        onBulkImportClick={() => {
+          setBulkImportVertical('products');
+          setShowBulkImport(true);
+        }}
+      />
+
+      {/* Bulk Import Sheet */}
+      <BulkImportSheet
+        open={showBulkImport}
+        onOpenChange={setShowBulkImport}
+        vertical={bulkImportVertical}
+        onImport={async (rows) => {
+          // TODO: Implement bulk import
+          console.log('Importing rows:', rows);
+          return { success: rows.length, failed: 0 };
+        }}
+      />
     </div>
   );
 };
