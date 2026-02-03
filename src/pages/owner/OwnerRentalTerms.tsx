@@ -15,6 +15,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { CancellationPolicySelector } from '@/components/property/CancellationPolicySelector';
+import { createErrorHandler } from '@/lib/errorHandler';
+import { OwnerProperty } from '@/types/property';
 import { 
   Loader2, DollarSign, Clock, Users, FileText, Shield, Zap, Droplets, 
   Sparkles, Car, PawPrint, Baby, Phone, Percent, CalendarDays, Key,
@@ -225,6 +227,7 @@ export default function OwnerRentalTerms() {
   const { language } = useLanguage();
   const { toast } = useToast();
   const isRu = language === 'ru';
+  const errorLog = createErrorHandler('OwnerRentalTerms');
 
   const { data: property, isLoading } = useOwnerProperty(id);
   const updateProperty = useUpdateOwnerProperty();
@@ -235,70 +238,70 @@ export default function OwnerRentalTerms() {
     if (property) {
       setFormData({
         price_per_night: property.price_per_night?.toString() || '',
-        deposit_currency: (property as any).deposit_currency || 'THB',
-        weekly_discount: (property as any).weekly_discount?.toString() || '0',
-        monthly_discount: (property as any).monthly_discount?.toString() || '0',
-        deposit_amount: (property as any).deposit_amount?.toString() || '',
-        deposit_type: (property as any).deposit_type || 'fixed',
+        deposit_currency: property.deposit_currency || 'THB',
+        weekly_discount: property.weekly_discount?.toString() || '0',
+        monthly_discount: property.monthly_discount?.toString() || '0',
+        deposit_amount: property.deposit_amount?.toString() || '',
+        deposit_type: property.deposit_type || 'fixed',
         min_stay_nights: property.min_stay_nights?.toString() || '1',
         max_guests: property.max_guests?.toString() || '',
         instant_booking: property.instant_booking || false,
         cancellation_policy: property.cancellation_policy || 'flexible',
         check_in_time: property.check_in_time || '14:00',
         check_out_time: property.check_out_time || '12:00',
-        early_checkin_price: (property as any).early_checkin_price?.toString() || '',
-        late_checkout_price: (property as any).late_checkout_price?.toString() || '',
-        key_handover: (property as any).key_handover || 'in_person',
-        check_in_instructions: (property as any).check_in_instructions || '',
-        check_in_instructions_ru: (property as any).check_in_instructions_ru || '',
-        electricity_included: (property as any).electricity_included || false,
-        electricity_unit_price: (property as any).electricity_unit_price?.toString() || '7',
-        electricity_provider: (property as any).electricity_provider || 'PEA',
-        electricity_metering: (property as any).electricity_metering || 'meter',
-        electricity_notes: (property as any).electricity_notes || '',
-        electricity_notes_ru: (property as any).electricity_notes_ru || '',
-        water_included: (property as any).water_included ?? true,
-        water_unit_price: (property as any).water_unit_price?.toString() || '',
-        water_notes: (property as any).water_notes || '',
-        water_notes_ru: (property as any).water_notes_ru || '',
-        internet_speed: (property as any).internet_speed || '',
-        internet_provider: (property as any).internet_provider || '',
-        included_services: (property as any).included_services || ['wifi', 'ac'],
-        cleaning_included: (property as any).cleaning_included ?? true,
-        cleaning_frequency: (property as any).cleaning_frequency || 'weekly',
-        extra_cleaning_price: (property as any).extra_cleaning_price?.toString() || '',
-        linen_change_price: (property as any).linen_change_price?.toString() || '',
-        linen_change_frequency: (property as any).linen_change_frequency || 'weekly',
-        transfer_available: (property as any).transfer_available || false,
-        transfer_airport_price: (property as any).transfer_airport_price?.toString() || '',
-        transfer_notes: (property as any).transfer_notes || '',
-        transfer_notes_ru: (property as any).transfer_notes_ru || '',
-        extra_guest_price: (property as any).extra_guest_price?.toString() || '',
-        extra_guest_threshold: (property as any).extra_guest_threshold?.toString() || '',
-        parking_included: (property as any).parking_included ?? true,
-        parking_spaces: (property as any).parking_spaces?.toString() || '1',
-        parking_notes: (property as any).parking_notes || '',
-        pets_allowed: (property as any).pets_allowed || false,
-        pet_deposit: (property as any).pet_deposit?.toString() || '',
-        pet_notes: (property as any).pet_notes || '',
-        pet_notes_ru: (property as any).pet_notes_ru || '',
-        children_friendly: (property as any).children_friendly ?? true,
-        has_crib: (property as any).has_crib || false,
-        has_high_chair: (property as any).has_high_chair || false,
-        quiet_hours_start: (property as any).quiet_hours_start || '22:00',
-        quiet_hours_end: (property as any).quiet_hours_end || '08:00',
-        parties_allowed: (property as any).parties_allowed || false,
-        max_party_guests: (property as any).max_party_guests?.toString() || '',
+        early_checkin_price: property.early_checkin_price?.toString() || '',
+        late_checkout_price: property.late_checkout_price?.toString() || '',
+        key_handover: property.key_handover || 'in_person',
+        check_in_instructions: property.check_in_instructions || '',
+        check_in_instructions_ru: property.check_in_instructions_ru || '',
+        electricity_included: property.electricity_included || false,
+        electricity_unit_price: property.electricity_unit_price?.toString() || '7',
+        electricity_provider: property.electricity_provider || 'PEA',
+        electricity_metering: property.electricity_metering || 'meter',
+        electricity_notes: property.electricity_notes || '',
+        electricity_notes_ru: property.electricity_notes_ru || '',
+        water_included: property.water_included ?? true,
+        water_unit_price: property.water_unit_price?.toString() || '',
+        water_notes: property.water_notes || '',
+        water_notes_ru: property.water_notes_ru || '',
+        internet_speed: property.internet_speed || '',
+        internet_provider: property.internet_provider || '',
+        included_services: (property.included_services as string[]) || ['wifi', 'ac'],
+        cleaning_included: property.cleaning_included ?? true,
+        cleaning_frequency: property.cleaning_frequency || 'weekly',
+        extra_cleaning_price: property.extra_cleaning_price?.toString() || '',
+        linen_change_price: property.linen_change_price?.toString() || '',
+        linen_change_frequency: property.linen_change_frequency || 'weekly',
+        transfer_available: property.transfer_available || false,
+        transfer_airport_price: property.transfer_airport_price?.toString() || '',
+        transfer_notes: property.transfer_notes || '',
+        transfer_notes_ru: property.transfer_notes_ru || '',
+        extra_guest_price: property.extra_guest_price?.toString() || '',
+        extra_guest_threshold: property.extra_guest_threshold?.toString() || '',
+        parking_included: property.parking_included ?? true,
+        parking_spaces: property.parking_spaces?.toString() || '1',
+        parking_notes: property.parking_notes || '',
+        pets_allowed: property.pets_allowed || false,
+        pet_deposit: property.pet_deposit?.toString() || '',
+        pet_notes: property.pet_notes || '',
+        pet_notes_ru: property.pet_notes_ru || '',
+        children_friendly: property.children_friendly ?? true,
+        has_crib: property.has_crib || false,
+        has_high_chair: property.has_high_chair || false,
+        quiet_hours_start: property.quiet_hours_start || '22:00',
+        quiet_hours_end: property.quiet_hours_end || '08:00',
+        parties_allowed: property.parties_allowed || false,
+        max_party_guests: property.max_party_guests?.toString() || '',
         house_rules: property.house_rules || '',
         house_rules_ru: property.house_rules_ru || '',
-        late_checkout_penalty: (property as any).late_checkout_penalty?.toString() || '',
-        smoking_penalty: (property as any).smoking_penalty?.toString() || '',
-        manager_name: (property as any).manager_name || '',
-        manager_phone: (property as any).manager_phone || '',
-        manager_line_id: (property as any).manager_line_id || '',
-        emergency_contact_name: (property as any).emergency_contact_name || '',
-        emergency_contact_phone: (property as any).emergency_contact_phone || '',
-        host_languages: (property as any).host_languages || ['en'],
+        late_checkout_penalty: property.late_checkout_penalty?.toString() || '',
+        smoking_penalty: property.smoking_penalty?.toString() || '',
+        manager_name: property.manager_name || '',
+        manager_phone: property.manager_phone || '',
+        manager_line_id: property.manager_line_id || '',
+        emergency_contact_name: property.emergency_contact_name || '',
+        emergency_contact_phone: property.emergency_contact_phone || '',
+        host_languages: property.host_languages || ['en'],
       });
     }
   }, [property]);
@@ -376,7 +379,7 @@ export default function OwnerRentalTerms() {
         emergency_contact_name: formData.emergency_contact_name || null,
         emergency_contact_phone: formData.emergency_contact_phone || null,
         host_languages: formData.host_languages,
-      } as any);
+      } as Partial<OwnerProperty> & { id: string });
 
       toast({
         title: isRu ? 'Сохранено!' : 'Saved!',
@@ -385,11 +388,7 @@ export default function OwnerRentalTerms() {
 
       navigate(`/owner/properties/${id}`);
     } catch (error) {
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
-        description: isRu ? 'Не удалось сохранить' : 'Failed to save',
-        variant: 'destructive',
-      });
+      errorLog.error(error, 'save_rental_terms');
     }
   };
 
