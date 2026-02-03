@@ -14,6 +14,7 @@ import {
   Building2,
   FileText,
   Building,
+  FolderTree,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -120,6 +121,14 @@ const navigationItems: NavItem[] = [
     icon: Megaphone,
     description: 'Command Center',
     descriptionRu: 'Центр управления'
+  },
+  { 
+    title: 'Taxonomy', 
+    titleRu: 'Таксономии',
+    path: '/admin/taxonomy', 
+    icon: FolderTree,
+    description: 'Categories & lookups',
+    descriptionRu: 'Справочники и категории'
   },
   { 
     title: 'Control', 

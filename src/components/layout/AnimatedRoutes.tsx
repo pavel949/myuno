@@ -253,6 +253,7 @@ const AdminCleaning = lazy(() => import('@/pages/admin/AdminCleaning'));
 const AdminBabysitters = lazy(() => import('@/pages/admin/AdminBabysitters'));
 const AdminFlowers = lazy(() => import('@/pages/admin/AdminFlowers'));
 const AdminLookups = lazy(() => import('@/pages/admin/AdminLookups'));
+const AdminTaxonomyManager = lazy(() => import('@/pages/admin/AdminTaxonomyManager'));
 const AcquisitionMetrics = lazy(() => import('@/pages/admin/AcquisitionMetrics'));
 const AdminTickets = lazy(() => import('@/pages/admin/AdminTickets'));
 const AdminTicketDetail = lazy(() => import('@/pages/admin/AdminTicketDetail'));
@@ -715,6 +716,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/admin/babysitters" element={<AdminBabysitters />} />
           <Route path="/admin/flowers" element={<AdminFlowers />} />
           <Route path="/admin/lookups" element={<AdminLookups />} />
+          <Route path="/admin/taxonomy" element={<AdminTaxonomyManager />} />
           <Route path="/admin/acquisition-metrics" element={<AcquisitionMetrics />} />
           <Route path="/admin/tickets" element={<AdminTickets />} />
           <Route path="/admin/tickets/:ticketId" element={<AdminTicketDetail />} />
