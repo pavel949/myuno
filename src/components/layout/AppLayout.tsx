@@ -28,7 +28,7 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
     ref
   ) => {
     return (
-      <div ref={ref} className={cn("min-h-screen bg-background flex flex-col", className)}>
+      <div ref={ref} className={cn("min-h-screen bg-background flex flex-col overflow-x-hidden", className)}>
         {showHeader && <AppHeader title={title} />}
         
         <main
