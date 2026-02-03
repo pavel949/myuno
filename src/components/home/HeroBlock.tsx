@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import { motion } from 'framer-motion';
-import { ShieldCheck, Layers, Languages, HeartHandshake, MapPin, AlertTriangle, ChevronRight, Shield } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ShieldCheck, Layers, Languages, HeartHandshake, MapPin, AlertTriangle, ChevronRight, Shield, Plane, Users, Building2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { InlineSearch } from '@/components/search/InlineSearch';
 import { Badge } from '@/components/ui/badge';
@@ -21,16 +21,71 @@ const TrustBadge = memo(({ icon, label }: TrustBadgeProps) => (
 
 TrustBadge.displayName = 'TrustBadge';
 
+interface AudienceCardProps {
+  id: string;
+  icon: React.ReactNode;
+  title: string;
+  services: string;
+  gradient: string;
+  onClick: () => void;
+}
+
+const AudienceCard = memo(({ icon, title, services, gradient, onClick }: AudienceCardProps) => (
+  <motion.button
+    whileTap={{ scale: 0.97 }}
+    onClick={onClick}
+    className={cn(
+      "flex-1 min-w-0 p-3 rounded-2xl text-left transition-all",
+      "bg-gradient-to-br border border-border/50",
+      "hover:shadow-md hover:border-border active:scale-[0.98]",
+      gradient
+    )}
+  >
+    <div className="text-xl mb-1">{icon}</div>
+    <div className="font-semibold text-sm text-foreground truncate">{title}</div>
+    <div className="text-[10px] text-muted-foreground line-clamp-1">{services}</div>
+  </motion.button>
+));
+
+AudienceCard.displayName = 'AudienceCard';
+
 /**
  * HeroBlock - Unified header combining:
  * - Location indicator
  * - Brand identity
+ * - Value proposition headline
+ * - Audience cards
  * - Search bar
  * - Safety banner (UNO Alert)
  */
 export const HeroBlock = memo(function HeroBlock() {
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const isRu = language === 'ru';
+
+  const audienceCards = [
+    {
+      id: 'tourists',
+      icon: <Plane className="w-5 h-5 text-sky-600" />,
+      title: { en: 'Tourists', ru: 'Туристам' },
+      services: { en: 'Tours • Transport • Yachts', ru: 'Туры • Транспорт • Яхты' },
+      gradient: 'from-sky-500/15 to-blue-500/10',
+    },
+    {
+      id: 'residents',
+      icon: <Users className="w-5 h-5 text-emerald-600" />,
+      title: { en: 'Residents', ru: 'Резидентам' },
+      services: { en: 'Visas • Medical • Banking', ru: 'Визы • Медицина • Банки' },
+      gradient: 'from-emerald-500/15 to-green-500/10',
+    },
+    {
+      id: 'owners',
+      icon: <Building2 className="w-5 h-5 text-amber-600" />,
+      title: { en: 'Owners', ru: 'Владельцам' },
+      services: { en: 'Property • Cleaning • Legal', ru: 'Недвижимость • Клининг' },
+      gradient: 'from-amber-500/15 to-orange-500/10',
+    },
+  ];
 
   const badges = [
     {
@@ -50,6 +105,12 @@ export const HeroBlock = memo(function HeroBlock() {
       label: '24/7',
     },
   ];
+
+  const handleAudienceClick = (audienceId: string) => {
+    // Save preference for personalization
+    localStorage.setItem('uno_audience_preference', audienceId);
+    navigate(`/discover?audience=${audienceId}`);
+  };
 
   return (
     <motion.div
@@ -75,17 +136,37 @@ export const HeroBlock = memo(function HeroBlock() {
           <span className="text-lg font-display font-bold text-gradient-gold">UNO</span>
         </div>
 
-        {/* Main tagline */}
-        <h1 className="text-base sm:text-lg font-bold text-foreground px-2">
-          {isRu ? 'Экосистема для жизни за рубежом' : 'Ecosystem for life abroad'}
-        </h1>
-
-        {/* Trust badges */}
-        <div className="flex flex-wrap items-center justify-center gap-1.5">
-          {badges.map((badge, index) => (
-            <TrustBadge key={index} icon={badge.icon} label={badge.label} />
-          ))}
+        {/* Main headline */}
+        <div className="space-y-1 px-2">
+          <h1 className="text-base sm:text-lg font-bold text-gradient-gold uppercase tracking-wide">
+            {isRu ? 'Единственное приложение для жизни за рубежом' : 'The only app you need abroad'}
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">
+            {isRu ? 'Все решения в одном месте' : 'All solutions in one place'}
+          </p>
         </div>
+      </div>
+
+      {/* Audience Cards */}
+      <div className="flex gap-2">
+        {audienceCards.map((card) => (
+          <AudienceCard
+            key={card.id}
+            id={card.id}
+            icon={card.icon}
+            title={isRu ? card.title.ru : card.title.en}
+            services={isRu ? card.services.ru : card.services.en}
+            gradient={card.gradient}
+            onClick={() => handleAudienceClick(card.id)}
+          />
+        ))}
+      </div>
+
+      {/* Trust badges */}
+      <div className="flex flex-wrap items-center justify-center gap-1.5">
+        {badges.map((badge, index) => (
+          <TrustBadge key={index} icon={badge.icon} label={badge.label} />
+        ))}
       </div>
 
       {/* Integrated Search */}
