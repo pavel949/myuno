@@ -6,9 +6,9 @@ import { PageHeader } from '@/components/uno/PageHeader';
 import { BackButton } from '@/components/uno/BackButton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PropertyListItem } from '@/components/property/PropertyListItem';
+import { PropertyCard, PropertyCardSkeleton } from '@/components/property/PropertyCard';
 import { Home, Plus, Download } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
+
 
 export default function OwnerProperties() {
   const { language } = useLanguage();
@@ -58,18 +58,7 @@ export default function OwnerProperties() {
       {isLoading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <Card key={i}>
-              <CardContent className="p-4">
-                <div className="flex gap-4">
-                  <Skeleton className="w-24 h-24 rounded-lg" />
-                  <div className="flex-1 space-y-2">
-                    <Skeleton className="h-5 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                    <Skeleton className="h-4 w-2/3" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <PropertyCardSkeleton key={i} variant="list" />
           ))}
         </div>
       ) : !properties?.length ? (
@@ -93,9 +82,10 @@ export default function OwnerProperties() {
       ) : (
         <div className="space-y-4">
           {properties.map((property) => (
-            <PropertyListItem
+            <PropertyCard
               key={property.id}
               property={property}
+              variant="list"
               mode="owner"
               onView={handleView}
               onEdit={handleEdit}

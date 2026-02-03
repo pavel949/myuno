@@ -4,7 +4,7 @@ import { useOwnerProperties } from '@/hooks/usePropertyCare';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ChevronRight, Plus, Home } from 'lucide-react';
-import { PropertyHeroCard, PropertyHeroCardSkeleton } from './PropertyHeroCard';
+import { PropertyCard, PropertyCardSkeleton } from '@/components/property/PropertyCard';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 export function PortfolioSection() {
@@ -21,8 +21,8 @@ export function PortfolioSection() {
           <Skeleton className="h-4 w-16" />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <PropertyHeroCardSkeleton />
-          <PropertyHeroCardSkeleton />
+          <PropertyCardSkeleton variant="hero" />
+          <PropertyCardSkeleton variant="hero" />
         </div>
       </div>
     );
@@ -81,9 +81,11 @@ export function PortfolioSection() {
       {properties.length <= 2 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {properties.map((property) => (
-            <PropertyHeroCard 
+            <PropertyCard 
               key={property.id} 
               property={property}
+              variant="hero"
+              mode="owner"
             />
           ))}
           
@@ -103,7 +105,7 @@ export function PortfolioSection() {
           <div className="flex gap-3 pb-2">
             {properties.slice(0, 5).map((property) => (
               <div key={property.id} className="w-[280px] flex-shrink-0">
-                <PropertyHeroCard property={property} />
+                <PropertyCard property={property} variant="hero" mode="owner" />
               </div>
             ))}
             

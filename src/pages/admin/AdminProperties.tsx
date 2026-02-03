@@ -39,7 +39,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { AirbnbStyleImageUpload } from '@/components/upload/AirbnbStyleImageUpload';
-import { PropertyListItem } from '@/components/property/PropertyListItem';
+import { PropertyCard } from '@/components/property/PropertyCard';
 import { 
   PROPERTY_TYPES as TAXONOMY_PROPERTY_TYPES, 
   PHUKET_DISTRICTS,
@@ -349,9 +349,10 @@ export default function AdminProperties() {
         ) : (
           <div className="space-y-3">
             {properties.map((property) => (
-              <PropertyListItem
+              <PropertyCard
                 key={property.id}
                 property={property}
+                variant="list"
                 mode="admin"
                 onEdit={() => openEditDialog(property)}
                 onDelete={() => setDeleteConfirmId(property.id)}
