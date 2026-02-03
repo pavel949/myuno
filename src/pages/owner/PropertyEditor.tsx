@@ -29,6 +29,7 @@ import {
 import { ImageUpload } from '@/components/upload/ImageUpload';
 import { ProjectLocationPicker } from '@/components/property/ProjectLocationPicker';
 import { useToast } from '@/hooks/use-toast';
+import { createErrorHandler } from '@/lib/errorHandler';
 import { PropertyTeamTab } from '@/components/owner/PropertyTeamTab';
 
 // Extended wizard steps
@@ -214,6 +215,7 @@ export default function PropertyEditor() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const isRu = language === 'ru';
+  const errorLog = createErrorHandler('PropertyEditor');
   
   const { data: property, isLoading } = useOwnerProperty(id);
   const updateProperty = useUpdateOwnerProperty();
@@ -380,12 +382,7 @@ export default function PropertyEditor() {
 
       navigate(`/owner/properties/${id}`);
     } catch (error) {
-      console.error('Error saving property:', error);
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
-        description: isRu ? 'Не удалось сохранить изменения' : 'Failed to save changes',
-        variant: 'destructive',
-      });
+      errorLog.error(error, 'save_property');
     }
   };
 

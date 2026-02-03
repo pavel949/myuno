@@ -10,6 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { createErrorHandler } from '@/lib/errorHandler';
 import { cn } from '@/lib/utils';
 import { 
   Home, Image, Calendar, DollarSign, FileText, 
@@ -48,7 +49,7 @@ export default function PropertyManage() {
   const { language } = useLanguage();
   const { toast } = useToast();
   const isRu = language === 'ru';
-
+  const errorLog = createErrorHandler('PropertyManage');
   const activeSection = searchParams.get('section') || 'listing';
   
   const { data: property, isLoading } = useOwnerProperty(id);
@@ -172,12 +173,7 @@ export default function PropertyManage() {
       
       setHasChanges(false);
     } catch (error) {
-      console.error('Error saving:', error);
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
-        description: isRu ? 'Не удалось сохранить' : 'Failed to save changes',
-        variant: 'destructive',
-      });
+      errorLog.error(error, 'save_property');
     } finally {
       setIsSaving(false);
     }

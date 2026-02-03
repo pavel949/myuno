@@ -20,7 +20,10 @@ import {
   Bot, Wand2, Edit3, ArrowRight
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { createErrorHandler } from '@/lib/errorHandler';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
+const errorLog = createErrorHandler('OwnerPropertyImport');
 
 // Import modes
 type ImportMode = 'url' | 'ai';
@@ -159,7 +162,7 @@ export default function OwnerPropertyImport() {
 
       setStep('preview');
     } catch (error: any) {
-      console.error('Error analyzing URL:', error);
+      errorLog.silent(error, 'analyze_url');
       
       // Check for OTA blocked error
       const errorMessage = error?.message || '';
@@ -202,7 +205,7 @@ export default function OwnerPropertyImport() {
       
       toast.success(isRu ? 'Данные загружены! Проверьте и сохраните объект.' : 'Data loaded! Review and save the property.');
     } catch (error) {
-      console.error('Error creating property:', error);
+      errorLog.error(error, 'create_property');
     }
   };
 
