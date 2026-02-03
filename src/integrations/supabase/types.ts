@@ -16409,6 +16409,8 @@ export type Database = {
         Args: { p_device_id?: string; p_pin: string; p_user_id: string }
         Returns: boolean
       }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
       soft_delete_order: { Args: { p_order_id: string }; Returns: boolean }
       uno_team_can: {
         Args: { _action: string; _user_id: string; _vertical: string }
