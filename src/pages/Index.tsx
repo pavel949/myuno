@@ -151,6 +151,9 @@ const Index = () => {
               {/* Safety Banner - always visible trust marker */}
               <SafetyBanner />
 
+              {/* Quick Access Chips - Owner/Partner/Wallet - prominent position */}
+              <QuickAccessChips />
+
               {/* Smart Widget & Quick Actions */}
               <div className="space-y-4">
                 <Suspense fallback={<WidgetSkeleton />}>
@@ -182,9 +185,6 @@ const Index = () => {
               <Suspense fallback={null}>
                 <KnowledgeHubBanner />
               </Suspense>
-
-              {/* Quick Access Chips - Owner/Partner/Wallet */}
-              <QuickAccessChips />
 
               {/* List With Us CTA */}
               <ListWithUsBanner variant="compact" />
