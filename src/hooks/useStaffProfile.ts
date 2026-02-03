@@ -2,6 +2,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { createErrorHandler } from '@/lib/errorHandler';
+
+const errorLog = createErrorHandler('useStaffProfile');
+
+// Get language for toasts
+function getLang(): 'ru' | 'en' {
+  if (typeof window !== 'undefined') {
+    return (localStorage.getItem('uno-language') as 'ru' | 'en') || 'en';
+  }
+  return 'en';
+}
 
 export interface StaffProfile {
   id: string;
@@ -59,7 +70,16 @@ export function useStaffProfile() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff-profile'] });
-      toast({ title: 'Профиль обновлён' });
+      const isRu = getLang() === 'ru';
+      toast({ title: isRu ? 'Профиль обновлён' : 'Profile updated' });
+    },
+    onError: (error) => {
+      errorLog.error(error, 'update_profile', {
+        toastTitle: 'Update Failed',
+        toastTitleRu: 'Ошибка обновления',
+        toastDescription: 'Failed to update profile',
+        toastDescriptionRu: 'Не удалось обновить профиль',
+      });
     },
   });
 
@@ -76,6 +96,9 @@ export function useStaffProfile() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff-profile'] });
+    },
+    onError: (error) => {
+      errorLog.error(error, 'toggle_availability');
     },
   });
 
