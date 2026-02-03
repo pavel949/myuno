@@ -138,6 +138,9 @@ const Index = () => {
           {/* Persona Selector - personalization by user type */}
           <PersonaSelector />
 
+          {/* Safety Banner - always visible trust marker, outside tabs */}
+          <SafetyBanner />
+
           {/* Content Mode Toggle */}
           <ContentModeToggle 
             value={contentMode} 
@@ -148,8 +151,6 @@ const Index = () => {
           {contentMode === 'services' ? (
             /* Services Mode Content */
             <>
-              {/* Safety Banner - always visible trust marker */}
-              <SafetyBanner />
 
               {/* Quick Access Chips - Owner/Partner/Wallet - prominent position */}
               <QuickAccessChips />
