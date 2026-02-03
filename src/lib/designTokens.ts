@@ -119,8 +119,38 @@ export const BADGE_STYLES = {
   muted: 'bg-background/80 backdrop-blur-sm text-foreground text-[10px] px-2 py-0.5',
 } as const;
 
+// ============ Badge System ============
+export const BADGE_SYSTEM = {
+  new: 'bg-blue-500 text-white text-[10px] font-semibold px-2 py-0.5 shadow-sm',
+  hot: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-semibold px-2 py-0.5 shadow-sm',
+  sale: 'bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 shadow-sm',
+  featured: 'bg-gradient-to-r from-primary to-amber-500 text-white text-[10px] font-semibold px-2 py-0.5 shadow-sm',
+  type: 'bg-muted text-foreground text-[10px] font-medium px-2 py-0.5',
+  urgent: 'bg-destructive text-destructive-foreground text-[10px] font-semibold px-2 py-0.5 animate-pulse',
+  tour: 'bg-amber-500 text-white text-[10px] font-medium px-2 py-0.5',
+  activity: 'bg-cyan-500 text-white text-[10px] font-medium px-2 py-0.5',
+} as const;
+
+// ============ Card Heights (Aspect Ratios) ============
+export const CARD_HEIGHTS = {
+  experience: 'aspect-[4/3]',     // Tours, activities
+  product: 'aspect-square',        // Products, marketplace
+  hero: 'aspect-[16/9]',           // Hero/featured cards
+  compact: 'aspect-[3/2]',         // Compact horizontal
+} as const;
+
+// ============ Carousel Card Widths ============
+export const CAROUSEL_CARD_WIDTHS = {
+  hero: 'w-80',           // 320px - featured first card
+  standard: 'w-64',       // 256px - regular cards
+  compact: 'w-56',        // 224px - tight layouts
+} as const;
+
 // Type exports for TypeScript support
 export type DesignTokens = typeof DESIGN_TOKENS;
 export type CardStyles = typeof CARD_STYLES;
 export type ImageStyles = typeof IMAGE_STYLES;
 export type BadgeStyles = typeof BADGE_STYLES;
+export type BadgeSystem = typeof BADGE_SYSTEM;
+export type CardHeights = typeof CARD_HEIGHTS;
+export type CarouselCardWidths = typeof CAROUSEL_CARD_WIDTHS;
