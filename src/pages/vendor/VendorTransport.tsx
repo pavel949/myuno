@@ -3,9 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVendorVehicles, VendorVehicle } from '@/hooks/useVendorVehicles';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
-import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -266,26 +264,19 @@ const VendorTransport = () => {
 
   if (authLoading) {
     return (
-      <AppLayout>
-        <PageContainer>
-          <div className="space-y-4">
-            <Skeleton className="h-8 w-48" />
-            {[1, 2, 3].map(i => (
-              <Skeleton key={i} className="h-24" />
-            ))}
-          </div>
-        </PageContainer>
-      </AppLayout>
+      <PageContainer>
+        <div className="space-y-4">
+          <Skeleton className="h-8 w-48" />
+          {[1, 2, 3].map(i => (
+            <Skeleton key={i} className="h-24" />
+          ))}
+        </div>
+      </PageContainer>
     );
   }
 
   return (
-    <AppLayout>
-      <PageContainer>
-        <PageHeader 
-          title={isRussian ? 'Мой транспорт' : 'My Vehicles'}
-          showBack
-        />
+    <PageContainer>
 
         <Button 
           className="w-full mb-4" 
@@ -805,7 +796,6 @@ const VendorTransport = () => {
           </DialogContent>
         </Dialog>
       </PageContainer>
-    </AppLayout>
   );
 };
 

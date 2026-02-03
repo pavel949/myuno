@@ -7,9 +7,7 @@ import { useVendorYachts } from '@/hooks/useVendorYachts';
 import { useVendorProfile } from '@/hooks/useVendor';
 import { Yacht } from '@/hooks/useYachts';
 import { useFormDraft } from '@/hooks/useFormDraft';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
-import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -376,46 +374,37 @@ const VendorYachts = () => {
 
   if (authLoading || profileLoading) {
     return (
-      <AppLayout>
-        <PageContainer>
-          <div className="space-y-4">
-            <Skeleton className="h-8 w-48" />
-            {[1, 2, 3].map(i => (
-              <Skeleton key={i} className="h-24" />
-            ))}
-          </div>
-        </PageContainer>
-      </AppLayout>
+      <PageContainer>
+        <div className="space-y-4">
+          <Skeleton className="h-8 w-48" />
+          {[1, 2, 3].map(i => (
+            <Skeleton key={i} className="h-24" />
+          ))}
+        </div>
+      </PageContainer>
     );
   }
 
   if (!profile) {
     return (
-      <AppLayout>
-        <PageContainer>
-          <Card>
-            <CardContent className="p-8 text-center">
-              <Sailboat className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-              <h3 className="font-medium mb-1">
-                {isRussian ? 'Профиль не найден' : 'Profile not found'}
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                {isRussian ? 'Пожалуйста, настройте ваш профиль вендора' : 'Please set up your vendor profile first'}
-              </p>
-            </CardContent>
-          </Card>
-        </PageContainer>
-      </AppLayout>
+      <PageContainer>
+        <Card>
+          <CardContent className="p-8 text-center">
+            <Sailboat className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+            <h3 className="font-medium mb-1">
+              {isRussian ? 'Профиль не найден' : 'Profile not found'}
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {isRussian ? 'Пожалуйста, настройте ваш профиль вендора' : 'Please set up your vendor profile first'}
+            </p>
+          </CardContent>
+        </Card>
+      </PageContainer>
     );
   }
 
   return (
-    <AppLayout>
-      <PageContainer>
-        <PageHeader 
-          title={isRussian ? 'Мои яхты' : 'My Yachts'}
-          showBack
-        />
+    <PageContainer>
 
         {/* Draft restoration banner */}
         {showDraftBanner && (
@@ -1012,7 +1001,6 @@ const VendorYachts = () => {
           </DialogContent>
         </Dialog>
       </PageContainer>
-    </AppLayout>
   );
 };
 
