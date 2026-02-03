@@ -5,7 +5,6 @@ import { usePropertyWizard } from '@/hooks/usePropertyWizard';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { PropertyWizard } from '@/components/owner/PropertyWizard';
-import { OwnershipTypeStep } from '@/components/owner/OwnershipTypeStep';
 import { PropertySubmissionSuccess } from '@/components/owner/PropertySubmissionSuccess';
 import { DraftRestorationBanner } from '@/components/vendor/DraftIndicator';
 import { LivePropertyPreview } from '@/components/property/LivePropertyPreview';
@@ -14,9 +13,7 @@ import {
   BasicInfoStep, 
   LocationStep, 
   PhotosStep, 
-  PricingStep, 
-  ManagementStep, 
-  DescriptionStep 
+  PricingStep
 } from '@/components/owner/property-wizard';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -57,16 +54,9 @@ export default function AddProperty() {
     toast.info(isRu ? 'Черновик удалён' : 'Draft discarded');
   }, [wizard.clearDraft, isRu]);
 
-  // Render step content
+  // Render step content - streamlined 4-step wizard
   const renderStep = useCallback((stepId: string) => {
     switch (stepId) {
-      case 'ownership':
-        return (
-          <OwnershipTypeStep
-            data={wizard.ownershipData}
-            onChange={wizard.updateOwnershipData}
-          />
-        );
       case 'basic':
         return (
           <BasicInfoStep
@@ -74,6 +64,8 @@ export default function AddProperty() {
             updateFormData={wizard.updateFormData}
             selectedProject={wizard.selectedProject}
             setSelectedProject={wizard.setSelectedProject}
+            ownershipData={wizard.ownershipData}
+            updateOwnershipData={wizard.updateOwnershipData}
           />
         );
       case 'location':
@@ -93,20 +85,6 @@ export default function AddProperty() {
       case 'pricing':
         return (
           <PricingStep
-            formData={wizard.formData}
-            updateFormData={wizard.updateFormData}
-          />
-        );
-      case 'management':
-        return (
-          <ManagementStep
-            formData={wizard.formData}
-            updateFormData={wizard.updateFormData}
-          />
-        );
-      case 'description':
-        return (
-          <DescriptionStep
             formData={wizard.formData}
             updateFormData={wizard.updateFormData}
             selectedProject={wizard.selectedProject}

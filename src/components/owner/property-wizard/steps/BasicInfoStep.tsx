@@ -1,13 +1,15 @@
+import { memo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Home, Bed, Bath, SquareStack } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Home, Bed, Bath, SquareStack, FileSignature, MessageCircle, Shield, Users } from 'lucide-react';
 import { TranslatableInput } from '@/components/forms/TranslatableInput';
 import { ProjectSelector } from '@/components/property/ProjectSelector';
 import { UnitFields } from '@/components/property/UnitFields';
-import { PropertyFormData } from '@/hooks/usePropertyWizard';
+import { PropertyFormData, OwnershipData, OwnershipType } from '@/hooks/usePropertyWizard';
 import { toast } from 'sonner';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
 import { useTaxonomy } from '@/hooks/useTaxonomy';
@@ -17,13 +19,59 @@ interface BasicInfoStepProps {
   updateFormData: (updates: Partial<PropertyFormData>) => void;
   selectedProject: PropertyProject | null;
   setSelectedProject: (project: PropertyProject | null) => void;
+  ownershipData?: OwnershipData;
+  updateOwnershipData?: (updates: Partial<OwnershipData>) => void;
 }
 
-export function BasicInfoStep({ 
+interface OwnershipOption {
+  id: OwnershipType;
+  icon: React.ReactNode;
+  titleEn: string;
+  titleRu: string;
+  descEn: string;
+  descRu: string;
+}
+
+const ownershipOptions: OwnershipOption[] = [
+  {
+    id: 'own',
+    icon: <Home className="h-5 w-5" />,
+    titleEn: 'My own property',
+    titleRu: 'Мой объект',
+    descEn: 'I am the legal owner',
+    descRu: 'Я — собственник',
+  },
+  {
+    id: 'management_agreement',
+    icon: <FileSignature className="h-5 w-5" />,
+    titleEn: 'Management Agreement',
+    titleRu: 'Договор управления',
+    descEn: 'I manage under contract',
+    descRu: 'Управление по договору',
+  },
+  {
+    id: 'verbal',
+    icon: <MessageCircle className="h-5 w-5" />,
+    titleEn: 'Verbal Agreement',
+    titleRu: 'Устные договорённости',
+    descEn: 'Managing by arrangement',
+    descRu: 'На основании договорённости',
+  },
+];
+
+const managementTypes = [
+  { value: 'full', labelEn: 'Full Management (70/30)', labelRu: 'Полное управление (70/30)', desc: 'UNO handles everything' },
+  { value: 'partial', labelEn: 'Service Partner (15%)', labelRu: 'Сервис-партнёр (15%)', desc: 'Check-in/out + services' },
+  { value: 'self', labelEn: 'Listing Only (10%)', labelRu: 'Только листинг (10%)', desc: 'Platform listing only' },
+];
+
+function BasicInfoStepInner({ 
   formData, 
   updateFormData,
   selectedProject,
-  setSelectedProject
+  setSelectedProject,
+  ownershipData,
+  updateOwnershipData
 }: BasicInfoStepProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -31,6 +79,67 @@ export function BasicInfoStep({
 
   return (
     <div className="space-y-6">
+      {/* Ownership Type Selection (Compact) */}
+      {ownershipData && updateOwnershipData && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Shield className="h-4 w-4" />
+              {isRu ? 'Право на управление' : 'Management Rights'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-3 gap-2">
+              {ownershipOptions.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => updateOwnershipData({ ownership_type: option.id })}
+                  className={`p-3 rounded-xl border-2 text-center transition-all ${
+                    ownershipData.ownership_type === option.id
+                      ? 'border-primary bg-primary/5'
+                      : 'border-muted hover:border-muted-foreground/30'
+                  }`}
+                >
+                  <div className={`mx-auto w-8 h-8 rounded-full flex items-center justify-center mb-2 ${
+                    ownershipData.ownership_type === option.id 
+                      ? 'bg-primary text-primary-foreground' 
+                      : 'bg-muted'
+                  }`}>
+                    {option.icon}
+                  </div>
+                  <p className="font-medium text-xs">
+                    {isRu ? option.titleRu : option.titleEn}
+                  </p>
+                </button>
+              ))}
+            </div>
+            
+            {/* Quick owner contact for verbal/management */}
+            {ownershipData.ownership_type !== 'own' && (
+              <div className="mt-4 p-3 bg-muted/50 rounded-lg space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  {isRu ? 'Контакты собственника для верификации:' : 'Owner contacts for verification:'}
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <Input
+                    placeholder={isRu ? 'Имя' : 'Name'}
+                    value={ownershipData.actual_owner_name}
+                    onChange={(e) => updateOwnershipData({ actual_owner_name: e.target.value })}
+                  />
+                  <Input
+                    placeholder="Email"
+                    type="email"
+                    value={ownershipData.actual_owner_email}
+                    onChange={(e) => updateOwnershipData({ actual_owner_email: e.target.value })}
+                  />
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Project Selection */}
       <Card>
         <CardHeader className="pb-3">
@@ -52,7 +161,6 @@ export function BasicInfoStep({
                 lng: project?.lng ?? formData.lng,
               });
               
-              // Show toast notification when project is selected
               if (project) {
                 const projectName = isRu 
                   ? (project.name_ru || project.name_en) 
@@ -106,33 +214,27 @@ export function BasicInfoStep({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-              <TranslatableInput
-                label={isRu ? 'Название' : 'Title'}
-                value={isRu ? formData.title_ru : formData.title}
-                translatedValue={isRu ? formData.title : formData.title_ru}
-                onChange={(val) => updateFormData({ [isRu ? 'title_ru' : 'title']: val })}
-                onTranslatedChange={(val) => updateFormData({ [isRu ? 'title' : 'title_ru']: val })}
-                placeholder={isRu ? 'Современная вилла с бассейном' : 'Modern Villa with Pool'}
-                translatedPlaceholder={isRu ? 'Modern Villa with Pool' : 'Современная вилла с бассейном'}
-              />
+          <TranslatableInput
+            label={isRu ? 'Название' : 'Title'}
+            value={isRu ? formData.title_ru : formData.title}
+            translatedValue={isRu ? formData.title : formData.title_ru}
+            onChange={(val) => updateFormData({ [isRu ? 'title_ru' : 'title']: val })}
+            onTranslatedChange={(val) => updateFormData({ [isRu ? 'title' : 'title_ru']: val })}
+            placeholder={isRu ? 'Современная вилла с бассейном' : 'Modern Villa with Pool'}
+            translatedPlaceholder={isRu ? 'Modern Villa with Pool' : 'Современная вилла с бассейном'}
+          />
 
-              {/* Internal Name */}
-              <div className="space-y-2">
-                <Label>{isRu ? 'Внутреннее название' : 'Internal Name'}</Label>
-                <Input
-                  value={formData.internal_name || ''}
-                  onChange={(e) => updateFormData({ internal_name: e.target.value })}
-                  placeholder={isRu ? 'Только для вас (не публикуется)' : 'Private note (not published)'}
-                />
-                <p className="text-xs text-muted-foreground">
-                  {isRu 
-                    ? 'Не отображается гостям. Например: "Дача бабушки"' 
-                    : 'Not shown to guests. E.g.: "Grandma\'s cottage"'}
-                </p>
-              </div>
+          <div className="space-y-2">
+            <Label>{isRu ? 'Внутреннее название' : 'Internal Name'}</Label>
+            <Input
+              value={formData.internal_name || ''}
+              onChange={(e) => updateFormData({ internal_name: e.target.value })}
+              placeholder={isRu ? 'Только для вас (не публикуется)' : 'Private note (not published)'}
+            />
+          </div>
 
-              <div className="space-y-2">
-                <Label>{isRu ? 'Тип недвижимости' : 'Property Type'} *</Label>
+          <div className="space-y-2">
+            <Label>{isRu ? 'Тип недвижимости' : 'Property Type'} *</Label>
             <Select 
               value={formData.property_type}
               onValueChange={(value) => updateFormData({ property_type: value })}
@@ -190,6 +292,50 @@ export function BasicInfoStep({
           </div>
         </CardContent>
       </Card>
+
+      {/* Management Type (Compact) */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            {isRu ? 'Тип управления' : 'Management Type'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {managementTypes.map((type) => (
+            <div
+              key={type.value}
+              onClick={() => updateFormData({ management_type: type.value })}
+              className={`p-3 rounded-xl border-2 cursor-pointer transition-colors ${
+                formData.management_type === type.value 
+                  ? 'border-primary bg-primary/5' 
+                  : 'border-muted hover:border-muted-foreground/30'
+              }`}
+            >
+              <p className="font-medium text-sm">{isRu ? type.labelRu : type.labelEn}</p>
+              <p className="text-xs text-muted-foreground">{type.desc}</p>
+            </div>
+          ))}
+
+          {/* Rental status */}
+          <div className="pt-3 border-t">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-sm">{isRu ? 'Сдаётся через OTA' : 'Listed on OTAs'}</p>
+                <p className="text-xs text-muted-foreground">
+                  {isRu ? 'Airbnb, Booking и т.д.' : 'Airbnb, Booking, etc.'}
+                </p>
+              </div>
+              <Switch
+                checked={formData.is_rented}
+                onCheckedChange={(checked) => updateFormData({ is_rented: checked })}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
+
+export const BasicInfoStep = memo(BasicInfoStepInner);

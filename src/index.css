@@ -306,6 +306,49 @@ html, body {
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+  
+  /* ============ Touch Target Improvements ============ */
+  /* 44px minimum for iOS/Android accessibility */
+  .touch-target-44 {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  /* Owner Calendar touch improvements */
+  .owner-calendar .rdp-day {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  .owner-calendar .rdp-button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  /* Task cards with proper touch targets */
+  .task-card-touch {
+    min-height: 48px;
+    padding: 12px;
+  }
+  
+  /* Operations section improved touch */
+  .operations-card {
+    @apply min-h-[56px] p-3;
+  }
+}
+
+/* Shimmer animation for Skeletons */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer::before {
+  animation: shimmer 1.5s infinite;
 }
 
 /* Print Styles for PDF Export */
