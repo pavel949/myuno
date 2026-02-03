@@ -186,6 +186,8 @@ const MarketIndex = () => {
 
   const remainingCategoryCount = Math.max(0, activeCategories.length - 3);
 
+  const isSearching = searchQuery.length >= 2 && searchResults.length > 0;
+
   return (
     <MiniAppLayout
       title={isRu ? 'Маркет' : 'Market'}
@@ -197,6 +199,8 @@ const MarketIndex = () => {
       searchPlaceholder={isRu ? 'Искать на myUNO Market' : 'Search on myUNO Market'}
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}
+      searchResults={searchResults.length > 0 ? renderSearchResults() : undefined}
+      isSearching={isSearching}
       showHero={false}
       showCategories={false}
       showFilter={false}
