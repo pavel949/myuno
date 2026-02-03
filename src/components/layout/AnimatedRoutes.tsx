@@ -234,7 +234,7 @@ const AdminServices = lazy(() => import('@/pages/admin/AdminServices'));
 const AdminAnalytics = lazy(() => import('@/pages/admin/AdminAnalytics'));
 const InvestorPitchDeck = lazy(() => import('@/pages/admin/InvestorPitchDeck'));
 const InvestorDemo = lazy(() => import('@/pages/admin/InvestorDemo'));
-const OperationsHub = lazy(() => import('@/pages/admin/OperationsHub'));
+const AdminOperations = lazy(() => import('@/pages/admin/AdminOperations'));
 const AdminYachts = lazy(() => import('@/pages/admin/AdminYachts'));
 const AdminTours = lazy(() => import('@/pages/admin/AdminTours'));
 const AdminActivities = lazy(() => import('@/pages/admin/AdminActivities'));
@@ -694,7 +694,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/admin/partner-applications" element={<PartnerApplicationsAdmin />} />
           <Route path="/admin/pitch-deck" element={<InvestorPitchDeck />} />
           <Route path="/admin/investor-demo" element={<InvestorDemo />} />
-          <Route path="/admin/operations" element={<OperationsHub />} />
+          <Route path="/admin/operations" element={<AdminOperations />} />
           <Route path="/admin/yachts" element={<AdminYachts />} />
           <Route path="/admin/tours" element={<AdminTours />} />
           <Route path="/admin/activities" element={<AdminActivities />} />
