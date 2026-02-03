@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bell } from 'lucide-react';
+import { Bell, Construction } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { PremiumButton } from '@/components/uno/PremiumButton';
@@ -12,6 +12,10 @@ import { CurrencySwitcher } from '@/components/uno/CurrencySwitcher';
 import { MiniCart } from '@/components/market/MiniCart';
 import { RoleContextSwitcher } from '@/components/uno/RoleContextSwitcher';
 import { useUserContext } from '@/hooks/useUserContext';
+import { useMaintenance } from '@/contexts/MaintenanceContext';
+import { Switch } from '@/components/ui/switch';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AppHeaderProps {
   title?: string;
@@ -22,10 +26,28 @@ interface AppHeaderProps {
 
 export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick, className }: AppHeaderProps) {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { unreadCount } = useNotifications();
   const navigate = useNavigate();
   const { availableRoles } = useUserContext();
+  const { isMaintenanceMode, setMaintenanceMode } = useMaintenance();
+
+  // Check if current user is admin
+  const { data: isAdmin } = useQuery({
+    queryKey: ['user-is-admin', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return false;
+      const { data } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .in('role', ['admin', 'uno_team'])
+        .maybeSingle();
+      return !!data;
+    },
+    enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000,
+  });
 
   return (
     <header
@@ -55,6 +77,32 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
 
         {/* Right side - Actions */}
         <div className="flex items-center gap-1">
+          {/* Coming Soon Toggle - visible to admins */}
+          {isAdmin && (
+            <div className={cn(
+              "flex items-center gap-2 px-3 py-1.5 rounded-full mr-2 transition-colors",
+              isMaintenanceMode 
+                ? "bg-warning/20 border border-warning/50" 
+                : "bg-muted/50 border border-border"
+            )}>
+              <Construction className={cn(
+                "w-4 h-4",
+                isMaintenanceMode ? "text-warning" : "text-muted-foreground"
+              )} />
+              <span className={cn(
+                "text-xs font-medium hidden sm:block",
+                isMaintenanceMode ? "text-warning" : "text-muted-foreground"
+              )}>
+                {language === 'ru' ? 'Скоро' : 'Soon'}
+              </span>
+              <Switch
+                checked={isMaintenanceMode}
+                onCheckedChange={setMaintenanceMode}
+                className="scale-75"
+              />
+            </div>
+          )}
+
           {/* Switchers */}
           <div className="flex items-center gap-0.5 sm:gap-1 mr-0.5 sm:mr-1">
             <LanguageSwitcher size="sm" />
