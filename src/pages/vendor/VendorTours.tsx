@@ -5,9 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useVendorProfile } from '@/hooks/useVendor';
 import { useVendorTours, VendorTour } from '@/hooks/useVendorTours';
 import { useFormDraft } from '@/hooks/useFormDraft';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
-import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -330,28 +328,21 @@ const VendorTours = () => {
 
   if (authLoading || profileLoading) {
     return (
-      <AppLayout>
-        <PageContainer>
-          <div className="space-y-4">
-            <Skeleton className="h-8 w-48" />
-            {[1, 2, 3].map(i => (
-              <Skeleton key={i} className="h-32" />
-            ))}
-          </div>
-        </PageContainer>
-      </AppLayout>
+      <PageContainer>
+        <div className="space-y-4">
+          <Skeleton className="h-8 w-48" />
+          {[1, 2, 3].map(i => (
+            <Skeleton key={i} className="h-32" />
+          ))}
+        </div>
+      </PageContainer>
     );
   }
 
   if (!profile) return null;
 
   return (
-    <AppLayout>
-      <PageContainer>
-        <PageHeader 
-          title={isRussian ? 'Туры' : 'Tours'}
-          showBack
-        />
+    <PageContainer>
 
         <Button 
           className="w-full mb-4" 
@@ -823,7 +814,6 @@ const VendorTours = () => {
           </DialogContent>
         </Dialog>
       </PageContainer>
-    </AppLayout>
   );
 };
 

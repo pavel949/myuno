@@ -4,9 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVendorProfile } from '@/hooks/useVendor';
 import { useVendorPets, VendorPetService } from '@/hooks/useVendorPets';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
-import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -142,13 +140,11 @@ const VendorPets = () => {
   };
 
   if (authLoading || profileLoading) {
-    return <AppLayout><PageContainer><Skeleton className="h-8 w-48" /></PageContainer></AppLayout>;
+    return <PageContainer><Skeleton className="h-8 w-48" /></PageContainer>;
   }
 
   return (
-    <AppLayout>
-      <PageContainer>
-        <PageHeader title={isRussian ? 'Услуги для питомцев' : 'Pet Services'} showBack />
+    <PageContainer>
 
         <Button className="w-full mb-4" onClick={() => { resetForm(); setIsDialogOpen(true); }}>
           <Plus className="h-4 w-4 mr-2" />{isRussian ? 'Добавить' : 'Add'}
@@ -243,7 +239,6 @@ const VendorPets = () => {
           </DialogContent>
         </Dialog>
       </PageContainer>
-    </AppLayout>
   );
 };
 

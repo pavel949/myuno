@@ -4,9 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVendorProfile } from '@/hooks/useVendor';
 import { useVendorSalons, VendorSalon } from '@/hooks/useVendorSalons';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
-import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -256,25 +254,18 @@ const VendorBeauty = () => {
 
   if (authLoading || profileLoading) {
     return (
-      <AppLayout>
-        <PageContainer>
-          <div className="space-y-4">
-            <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-32 w-full" />
-            <Skeleton className="h-32 w-full" />
-          </div>
-        </PageContainer>
-      </AppLayout>
+      <PageContainer>
+        <div className="space-y-4">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-32 w-full" />
+        </div>
+      </PageContainer>
     );
   }
 
   return (
-    <AppLayout>
-      <PageContainer>
-        <PageHeader 
-          title={isRussian ? 'Мои салоны' : 'My Salons'} 
-          showBack 
-        />
+    <PageContainer>
 
         <div className="flex justify-end mb-4">
           <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
@@ -614,7 +605,6 @@ const VendorBeauty = () => {
           </DialogContent>
         </Dialog>
       </PageContainer>
-    </AppLayout>
   );
 };
 
