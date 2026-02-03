@@ -3,6 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import { usePropertyBookings } from '@/hooks/usePropertyBookings';
 import { usePropertyAvailabilityManagement } from '@/hooks/usePropertyAvailabilityManagement';
+import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -11,10 +12,15 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { format, differenceInDays, addDays, eachDayOfInterval } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { CalendarIcon, User, Phone, Mail, Users, Banknote, AlertTriangle } from 'lucide-react';
+import { 
+  CalendarIcon, User, Phone, Mail, Users, Banknote, AlertTriangle, 
+  ChevronDown, Shield, FileText, Upload, X, Loader2, Calculator
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { formatPriceWithSymbol } from '@/lib/currencyUtils';
 
 interface AddBookingFromCalendarDialogProps {
   open: boolean;
@@ -34,6 +40,19 @@ const BOOKING_SOURCES = [
   { value: 'other', labelEn: 'Other', labelRu: 'Другое' },
 ];
 
+const DOCUMENT_TYPES = [
+  { value: 'passport', labelEn: 'Passport', labelRu: 'Паспорт' },
+  { value: 'contract', labelEn: 'Contract', labelRu: 'Договор' },
+  { value: 'payment', labelEn: 'Payment Receipt', labelRu: 'Чек об оплате' },
+  { value: 'other', labelEn: 'Other', labelRu: 'Другое' },
+];
+
+interface UploadedDocument {
+  url: string;
+  name: string;
+  type: string;
+}
+
 export function AddBookingFromCalendarDialog({
   open,
   onOpenChange,
@@ -52,11 +71,17 @@ export function AddBookingFromCalendarDialog({
   const [guestEmail, setGuestEmail] = useState('');
   const [guestsCount, setGuestsCount] = useState('2');
   const [totalAmount, setTotalAmount] = useState('');
+  const [depositAmount, setDepositAmount] = useState('');
   const [source, setSource] = useState('manual');
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCheckOutPicker, setShowCheckOutPicker] = useState(false);
   const [showCheckInPicker, setShowCheckInPicker] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  
+  // Documents
+  const [uploadedDocs, setUploadedDocs] = useState<UploadedDocument[]>([]);
+  const [isUploadingDoc, setIsUploadingDoc] = useState(false);
   
   const { createBooking, bookings, isCreating } = usePropertyBookings(propertyId);
   const { availability } = usePropertyAvailabilityManagement(propertyId);
@@ -106,6 +131,15 @@ export function AddBookingFromCalendarDialog({
   const hasConflicts = conflictingBookings.length > 0 || blockedDatesInRange.length > 0;
   const nights = checkIn && checkOut ? differenceInDays(checkOut, checkIn) : 0;
   
+  // Calculate price per night
+  const pricePerNight = useMemo(() => {
+    const total = parseFloat(totalAmount) || 0;
+    if (nights > 0 && total > 0) {
+      return Math.round(total / nights);
+    }
+    return 0;
+  }, [totalAmount, nights]);
+  
   // Disable dates that are booked or blocked
   const disabledDates = useMemo(() => {
     const disabled: Date[] = [];
@@ -130,6 +164,75 @@ export function AddBookingFromCalendarDialog({
     
     return disabled;
   }, [bookings, availability]);
+  
+  // Handle document upload
+  const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    setIsUploadingDoc(true);
+    
+    try {
+      for (const file of Array.from(files)) {
+        // Validate file size (max 10MB)
+        if (file.size > 10 * 1024 * 1024) {
+          toast({
+            title: isRu ? 'Ошибка' : 'Error',
+            description: isRu ? 'Файл слишком большой (макс. 10 МБ)' : 'File too large (max 10MB)',
+            variant: 'destructive',
+          });
+          continue;
+        }
+        
+        const fileExt = file.name.split('.').pop()?.toLowerCase();
+        const fileName = `${propertyId}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('booking-documents')
+          .upload(fileName, file);
+        
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          toast({
+            title: isRu ? 'Ошибка загрузки' : 'Upload Error',
+            description: uploadError.message,
+            variant: 'destructive',
+          });
+          continue;
+        }
+        
+        const { data: publicUrl } = supabase.storage
+          .from('booking-documents')
+          .getPublicUrl(fileName);
+        
+        setUploadedDocs(prev => [...prev, {
+          url: publicUrl.publicUrl,
+          name: file.name,
+          type: fileExt?.includes('pdf') ? 'contract' : 'other',
+        }]);
+      }
+      
+      toast({
+        title: isRu ? 'Загружено' : 'Uploaded',
+        description: isRu ? 'Документы успешно загружены' : 'Documents uploaded successfully',
+      });
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: isRu ? 'Ошибка' : 'Error',
+        description: isRu ? 'Не удалось загрузить документ' : 'Failed to upload document',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUploadingDoc(false);
+      // Reset input
+      e.target.value = '';
+    }
+  };
+  
+  const removeDocument = (url: string) => {
+    setUploadedDocs(prev => prev.filter(d => d.url !== url));
+  };
   
   const handleSubmit = async () => {
     if (!checkIn || !checkOut) {
@@ -164,9 +267,11 @@ export function AddBookingFromCalendarDialog({
         guest_email: guestEmail || undefined,
         guests_count: parseInt(guestsCount) || undefined,
         total_amount: parseFloat(totalAmount) || undefined,
+        deposit_amount: parseFloat(depositAmount) || undefined,
         source,
         notes: notes || undefined,
         status: 'confirmed',
+        documents: uploadedDocs.length > 0 ? uploadedDocs.map(d => d.url) : undefined,
       });
       
       toast({
@@ -199,10 +304,13 @@ export function AddBookingFromCalendarDialog({
     setGuestEmail('');
     setGuestsCount('2');
     setTotalAmount('');
+    setDepositAmount('');
     setSource('manual');
     setNotes('');
     setShowCheckInPicker(false);
     setShowCheckOutPicker(false);
+    setShowAdvanced(false);
+    setUploadedDocs([]);
   };
   
   return (
@@ -380,6 +488,61 @@ export function AddBookingFromCalendarDialog({
             </div>
           </div>
           
+          {/* Pricing Section */}
+          <div className="p-3 bg-muted/50 rounded-lg space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="totalAmount" className="flex items-center gap-1.5 text-xs">
+                  <Banknote className="h-3.5 w-3.5" />
+                  {isRu ? 'Сумма (฿)' : 'Total (฿)'}
+                </Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">฿</span>
+                  <Input
+                    id="totalAmount"
+                    type="number"
+                    min="0"
+                    value={totalAmount}
+                    onChange={(e) => setTotalAmount(e.target.value)}
+                    placeholder="0"
+                    className="pl-8"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="depositAmount" className="flex items-center gap-1.5 text-xs">
+                  <Shield className="h-3.5 w-3.5" />
+                  {isRu ? 'Депозит (฿)' : 'Deposit (฿)'}
+                </Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">฿</span>
+                  <Input
+                    id="depositAmount"
+                    type="number"
+                    min="0"
+                    value={depositAmount}
+                    onChange={(e) => setDepositAmount(e.target.value)}
+                    placeholder="0"
+                    className="pl-8"
+                  />
+                </div>
+              </div>
+            </div>
+            
+            {/* Price per night calculation */}
+            {nights > 0 && pricePerNight > 0 && (
+              <div className="flex items-center justify-between text-sm bg-background rounded px-3 py-2">
+                <span className="flex items-center gap-1.5 text-muted-foreground">
+                  <Calculator className="h-3.5 w-3.5" />
+                  {isRu ? 'За ночь' : 'Per night'}
+                </span>
+                <span className="font-medium">
+                  {formatPriceWithSymbol(pricePerNight, 'THB')}
+                </span>
+              </div>
+            )}
+          </div>
+          
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label htmlFor="guestsCount" className="flex items-center gap-1.5">
@@ -395,51 +558,108 @@ export function AddBookingFromCalendarDialog({
               />
             </div>
             <div>
-              <Label htmlFor="totalAmount" className="flex items-center gap-1.5">
-                <Banknote className="h-3.5 w-3.5" />
-                {isRu ? 'Сумма (฿)' : 'Amount (฿)'}
-              </Label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">฿</span>
-                <Input
-                  id="totalAmount"
-                  type="number"
-                  min="0"
-                  value={totalAmount}
-                  onChange={(e) => setTotalAmount(e.target.value)}
-                  placeholder="0"
-                  className="pl-8"
-                />
-              </div>
+              <Label htmlFor="source">{isRu ? 'Источник' : 'Source'}</Label>
+              <Select value={source} onValueChange={setSource}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {BOOKING_SOURCES.map(s => (
+                    <SelectItem key={s.value} value={s.value}>
+                      {isRu ? s.labelRu : s.labelEn}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           
-          <div>
-            <Label htmlFor="source">{isRu ? 'Источник' : 'Source'}</Label>
-            <Select value={source} onValueChange={setSource}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {BOOKING_SOURCES.map(s => (
-                  <SelectItem key={s.value} value={s.value}>
-                    {isRu ? s.labelRu : s.labelEn}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div>
-            <Label htmlFor="notes">{isRu ? 'Заметки' : 'Notes'}</Label>
-            <Textarea
-              id="notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder={isRu ? 'Дополнительная информация...' : 'Additional information...'}
-              rows={2}
-            />
-          </div>
+          {/* Advanced Section (Documents, Notes) */}
+          <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" className="w-full justify-between h-9 px-3">
+                <span className="flex items-center gap-2 text-sm">
+                  <FileText className="h-4 w-4" />
+                  {isRu ? 'Документы и заметки' : 'Documents & Notes'}
+                </span>
+                <ChevronDown className={cn(
+                  "h-4 w-4 transition-transform",
+                  showAdvanced && "rotate-180"
+                )} />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-4 pt-2">
+              {/* Document Upload */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-1.5">
+                  <FileText className="h-3.5 w-3.5" />
+                  {isRu ? 'Документы' : 'Documents'}
+                </Label>
+                
+                {/* Uploaded documents list */}
+                {uploadedDocs.length > 0 && (
+                  <div className="space-y-2">
+                    {uploadedDocs.map((doc, idx) => (
+                      <div key={idx} className="flex items-center gap-2 p-2 bg-muted/50 rounded text-sm">
+                        <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <span className="flex-1 truncate">{doc.name}</span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => removeDocument(doc.url)}
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Upload button */}
+                <div className="relative">
+                  <input
+                    type="file"
+                    multiple
+                    accept=".pdf,.jpg,.jpeg,.png,.webp"
+                    onChange={handleDocumentUpload}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    disabled={isUploadingDoc}
+                  />
+                  <Button
+                    variant="outline"
+                    className="w-full gap-2"
+                    disabled={isUploadingDoc}
+                    type="button"
+                  >
+                    {isUploadingDoc ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4" />
+                    )}
+                    {isRu ? 'Загрузить документ' : 'Upload Document'}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {isRu 
+                    ? 'Паспорт, договор, чеки (PDF, JPG, PNG)' 
+                    : 'Passport, contract, receipts (PDF, JPG, PNG)'}
+                </p>
+              </div>
+              
+              {/* Notes */}
+              <div>
+                <Label htmlFor="notes">{isRu ? 'Заметки' : 'Notes'}</Label>
+                <Textarea
+                  id="notes"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder={isRu ? 'Дополнительная информация...' : 'Additional information...'}
+                  rows={2}
+                />
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
         </div>
         
         <DialogFooter>
