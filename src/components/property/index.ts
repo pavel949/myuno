@@ -1,3 +1,17 @@
+// Unified Property Card
+export { 
+  PropertyCard, 
+  PropertyCardSkeleton,
+  PropertyHeroCard,
+  PropertyHeroCardSkeleton,
+  PropertyListItem,
+  type PropertyCardProps,
+  type PropertyCardVariant,
+  type PropertyCardMode,
+  type PropertyCardStats,
+} from './PropertyCard';
+
+// Other exports
 export { IncludedServices } from './IncludedServices';
 export { ExtraServices } from './ExtraServices';
 export { UtilitiesInfo } from './UtilitiesInfo';
