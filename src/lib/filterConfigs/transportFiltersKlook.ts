@@ -1,10 +1,14 @@
 /**
  * Transport-specific Klook filter configuration
- * Aligned with Turo / Getaround rental patterns
+ * Now uses database-driven options via useTransportFilterOptions hook
  */
 
 import { type UnifiedFiltersKlookConfig, type DatePreset } from '@/components/shared/UnifiedFiltersKlook';
 
+// Re-export the dynamic hook
+export { useTransportFilterOptions } from '@/hooks/useDynamicFilterOptions';
+
+// Static configuration
 export const TRANSPORT_KLOOK_CONFIG: UnifiedFiltersKlookConfig = {
   // Date range for vehicle rental
   showDateFilters: true,
@@ -21,14 +25,14 @@ export const TRANSPORT_KLOOK_CONFIG: UnifiedFiltersKlookConfig = {
     { id: 'this-week' as DatePreset, labelEn: 'This week', labelRu: 'Эта неделя' },
   ],
   
-  // Inline quick filters
+  // Inline quick filters (static - booking options)
   inlineQuickFilters: [
     { id: 'automatic', labelEn: 'Automatic', labelRu: 'Автомат', icon: '🅰️' },
     { id: 'insurance', labelEn: 'Insurance', labelRu: 'Страховка', icon: '🛡️' },
     { id: 'delivery', labelEn: 'Delivery', labelRu: 'Доставка', icon: '🚚' },
   ],
   
-  // Price filter
+  // Price filter (static - currency based)
   showPriceFilter: true,
   pricePresets: [
     { min: 0, max: 500, labelEn: 'Under ฿500', labelRu: 'До ฿500' },
@@ -39,70 +43,48 @@ export const TRANSPORT_KLOOK_CONFIG: UnifiedFiltersKlookConfig = {
   priceRange: { min: 0, max: 5000, step: 100 },
   currencySymbol: '฿/day',
   
-  // Sort options
+  // Sort options (static)
   sortOptions: [
     { id: 'price_asc', labelEn: 'Cheapest', labelRu: 'Дешевле' },
     { id: 'rating', labelEn: 'Top Rated', labelRu: 'По рейтингу' },
     { id: 'newest', labelEn: 'Newest', labelRu: 'Новые' },
   ],
   
-  // Quick filter chips in drawer
+  // Quick filter chips in drawer (static - booking options)
   quickFilterOptions: [
     { id: 'verified', labelEn: 'Verified', labelRu: 'Проверено', icon: '✓' },
     { id: 'instant', labelEn: 'Instant Booking', labelRu: 'Мгновенное', icon: '⚡' },
     { id: 'free-cancel', labelEn: 'Free Cancellation', labelRu: 'Бесплатная отмена', icon: '↩️' },
   ],
   
-  // Drawer chip sections
+  // Drawer chip sections - will be populated dynamically
   chipSections: [
     {
       id: 'vehicleType',
       titleEn: 'Vehicle Type',
       titleRu: 'Тип транспорта',
-      options: [
-        { id: 'car', labelEn: 'Car', labelRu: 'Авто', icon: '🚗' },
-        { id: 'motorbike', labelEn: 'Motorbike', labelRu: 'Мотоцикл', icon: '🏍️' },
-        { id: 'scooter', labelEn: 'Scooter', labelRu: 'Скутер', icon: '🛵' },
-        { id: 'suv', labelEn: 'SUV', labelRu: 'Внедорожник', icon: '🚙' },
-        { id: 'van', labelEn: 'Van', labelRu: 'Минивэн', icon: '🚐' },
-        { id: 'luxury', labelEn: 'Luxury', labelRu: 'Премиум', icon: '🏎️' },
-      ],
+      options: [], // Populated from useTaxonomy('vehicle_type')
       initialVisible: 6,
     },
     {
       id: 'transmission',
       titleEn: 'Transmission',
       titleRu: 'Коробка',
-      options: [
-        { id: 'automatic', labelEn: 'Automatic', labelRu: 'Автомат', icon: '🅰️' },
-        { id: 'manual', labelEn: 'Manual', labelRu: 'Механика', icon: '⚙️' },
-      ],
+      options: [], // Populated from useTaxonomy('transmission_type')
       initialVisible: 2,
     },
     {
       id: 'fuelType',
       titleEn: 'Fuel Type',
       titleRu: 'Тип топлива',
-      options: [
-        { id: 'petrol', labelEn: 'Petrol', labelRu: 'Бензин', icon: '⛽' },
-        { id: 'diesel', labelEn: 'Diesel', labelRu: 'Дизель', icon: '🛢️' },
-        { id: 'electric', labelEn: 'Electric', labelRu: 'Электро', icon: '🔋' },
-        { id: 'hybrid', labelEn: 'Hybrid', labelRu: 'Гибрид', icon: '🌿' },
-      ],
+      options: [], // Populated from useTaxonomy('fuel_type')
       initialVisible: 4,
     },
     {
       id: 'features',
       titleEn: 'Features',
       titleRu: 'Особенности',
-      options: [
-        { id: 'gps', labelEn: 'GPS', labelRu: 'GPS', icon: '📍' },
-        { id: 'bluetooth', labelEn: 'Bluetooth', labelRu: 'Bluetooth', icon: '📶' },
-        { id: 'dashcam', labelEn: 'Dashcam', labelRu: 'Видеорегистратор', icon: '📹' },
-        { id: 'child-seat', labelEn: 'Child Seat', labelRu: 'Детское кресло', icon: '🧒' },
-        { id: 'luggage', labelEn: 'Luggage Space', labelRu: 'Багаж', icon: '🧳' },
-        { id: 'air-con', labelEn: 'Air Conditioning', labelRu: 'Кондиционер', icon: '❄️' },
-      ],
+      options: [], // Populated from useTaxonomy('vehicle_feature')
       initialVisible: 6,
     },
   ],
@@ -128,7 +110,7 @@ export const TRANSPORT_KLOOK_CONFIG: UnifiedFiltersKlookConfig = {
   },
 };
 
-// Category options for horizontal ribbon
+// Legacy static categories - use useTransportFilterOptions().categoryRibbon instead
 export const TRANSPORT_CATEGORIES = [
   { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '🌟' },
   { id: 'car', labelEn: 'Cars', labelRu: 'Авто', icon: '🚗' },
