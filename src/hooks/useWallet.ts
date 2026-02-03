@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { createErrorHandler } from "@/lib/errorHandler";
+
+const errorLog = createErrorHandler('useWallet');
 
 interface WalletData {
   id: string;
@@ -36,7 +39,7 @@ export const useWallet = () => {
         });
       }
     } catch (error) {
-      console.error('Error loading wallet:', error);
+      errorLog.silent(error, 'load_wallet');
     } finally {
       if (isMounted()) {
         setIsLoading(false);
@@ -98,7 +101,7 @@ export const useWallet = () => {
 
       return { success: true, newBalance: result.new_balance };
     } catch (error) {
-      console.error('Error paying from wallet:', error);
+      errorLog.silent(error, 'pay_from_wallet');
       return { success: false, error: 'Payment failed' };
     }
   }, [user]);
