@@ -46,7 +46,7 @@ import {
   PHUKET_DISTRICTS,
   ALL_AMENITIES,
   LISTING_TYPES 
-} from '@/lib/propertyTaxonomy';
+} from '@/lib/taxonomies';
 
 // Use centralized taxonomy
 const propertyTypes = TAXONOMY_PROPERTY_TYPES.map(t => ({

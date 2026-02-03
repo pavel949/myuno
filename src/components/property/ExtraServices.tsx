@@ -2,7 +2,11 @@ import React from 'react';
 import { Plus } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PriceDisplay } from '@/components/uno/PriceDisplay';
-import { EXTRA_SERVICES, getExtraServiceLabel } from '@/lib/propertyTaxonomy';
+import { 
+  TAXONOMY_TYPES, 
+  getTaxonomyLabel, 
+  getTaxonomyIcon 
+} from '@/lib/taxonomies';
 
 interface ExtraService {
   id: string;
@@ -30,11 +34,12 @@ export function ExtraServices({ services, currency = 'THB', className }: ExtraSe
       </h3>
       <div className="space-y-2">
         {services.map((service) => {
-          const serviceDef = EXTRA_SERVICES.find(s => s.id === service.id);
-          const label = serviceDef
-            ? (isRu ? serviceDef.labelRu : serviceDef.labelEn)
-            : getExtraServiceLabel(service.id, isRu ? 'ru' : 'en');
-          const icon = serviceDef?.icon || '➕';
+          const label = getTaxonomyLabel(
+            TAXONOMY_TYPES.EXTRA_SERVICE, 
+            service.id, 
+            isRu ? 'ru' : 'en'
+          );
+          const icon = getTaxonomyIcon(TAXONOMY_TYPES.EXTRA_SERVICE, service.id) || '➕';
           
           return (
             <div

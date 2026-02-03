@@ -11,9 +11,8 @@ import {
   SERVICE_DOMAINS, 
   getCategoriesByDomain, 
   ALL_SERVICE_CATEGORIES,
-  ServiceDomain,
-  ProviderType 
-} from "@/lib/config/homeServicesTaxonomy";
+} from "@/lib/taxonomies";
+import type { ServiceDomain, ProviderType } from "@/lib/config/homeServicesTaxonomy";
 
 export default function ServicesIndex() {
   const { language, t } = useLanguage();

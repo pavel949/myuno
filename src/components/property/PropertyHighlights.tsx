@@ -8,7 +8,7 @@ import {
   ShieldCheck, Baby, Dog, Accessibility, Clock
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { PROPERTY_HIGHLIGHTS } from '@/lib/propertyTaxonomy';
+import { PROPERTY_HIGHLIGHTS } from '@/lib/taxonomies';
 import type { LucideIcon } from 'lucide-react';
 
 interface PropertyHighlightsProps {

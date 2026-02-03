@@ -1,7 +1,11 @@
 import React from 'react';
 import { Check } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { INCLUDED_SERVICES, getIncludedServiceLabel } from '@/lib/propertyTaxonomy';
+import { 
+  TAXONOMY_TYPES, 
+  getTaxonomyLabel, 
+  getTaxonomyIcon,
+} from '@/lib/taxonomies';
 
 interface IncludedServicesProps {
   services: string[];
@@ -22,11 +26,12 @@ export function IncludedServices({ services, className }: IncludedServicesProps)
       </h3>
       <div className="grid grid-cols-2 gap-2">
         {services.map((serviceId) => {
-          const service = INCLUDED_SERVICES.find(s => s.id === serviceId);
-          const label = service 
-            ? (isRu ? service.labelRu : service.labelEn)
-            : getIncludedServiceLabel(serviceId, isRu ? 'ru' : 'en');
-          const icon = service?.icon || '✓';
+          const label = getTaxonomyLabel(
+            TAXONOMY_TYPES.INCLUDED_SERVICE, 
+            serviceId, 
+            isRu ? 'ru' : 'en'
+          );
+          const icon = getTaxonomyIcon(TAXONOMY_TYPES.INCLUDED_SERVICE, serviceId) || '✓';
           
           return (
             <div

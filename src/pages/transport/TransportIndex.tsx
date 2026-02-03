@@ -8,7 +8,7 @@ import { TransportFiltersKlook, type DatePreset, type SortOption } from '@/compo
 import { useVehicles } from '@/hooks/useVehicles';
 import { VerticalCTA } from '@/components/leads/VerticalCTA';
 import { CrossSellSection } from '@/components/crosssell';
-import { normalizeVehicleType } from '@/lib/config/transportTaxonomy';
+import { normalizeVehicleType } from '@/lib/taxonomies';
 import { mapVehicleToCardProps } from '@/lib/adapters/vehicleAdapters';
 
 export default function TransportIndex() {

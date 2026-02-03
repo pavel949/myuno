@@ -4,7 +4,8 @@ import { cn } from '@/lib/utils';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { getCategoryById, ProviderType } from '@/lib/config/homeServicesTaxonomy';
+import { getCategoryById } from '@/lib/taxonomies';
+import type { ProviderType } from '@/lib/config/homeServicesTaxonomy';
 
 export interface HomeServiceProviderData {
   id: string;

@@ -10,7 +10,7 @@ import {
   getFuelLabel,
   getLocalizedFeatures,
   getCategoryConfig,
-} from '@/lib/config/transportTaxonomy';
+} from '@/lib/taxonomies';
 
 export interface VehicleCardProps {
   id: string;
