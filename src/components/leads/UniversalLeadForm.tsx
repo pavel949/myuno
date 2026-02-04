@@ -155,6 +155,24 @@ export function UniversalLeadForm({
 
   return (
     <div className="space-y-6">
+      {/* Trust Header */}
+      <div className="flex items-center justify-center gap-3 py-2 text-[10px] text-muted-foreground border-b border-border/50 pb-4">
+        <span className="flex items-center gap-1">
+          <CheckCircle className="w-3.5 h-3.5 text-primary" />
+          {isRu ? 'Проверено' : 'Verified'}
+        </span>
+        <span className="text-border">•</span>
+        <span className="flex items-center gap-1">
+          🔒
+          {isRu ? 'Защита данных' : 'Data Protection'}
+        </span>
+        <span className="text-border">•</span>
+        <span className="flex items-center gap-1">
+          ⚡
+          {isRu ? 'Ответ 24ч' : '24h Response'}
+        </span>
+      </div>
+      
       {/* Progress indicator */}
       <div className="flex items-center gap-2">
         {['request_type', 'details', 'contact'].map((s, idx) => (

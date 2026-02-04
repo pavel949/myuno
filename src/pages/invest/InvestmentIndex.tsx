@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { VerticalCTA } from '@/components/leads/VerticalCTA';
 import { 
   TrendingUp, 
   Flame, 
@@ -28,6 +29,18 @@ export default function InvestmentIndex() {
   const { language } = useLanguage();
   const { user } = useAuth();
   const isRu = language === 'ru';
+  const [showStickyCTA, setShowStickyCTA] = useState(false);
+
+  // Show sticky CTA after scrolling
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setShowStickyCTA(scrollY > 500);
+    };
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
   
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   
@@ -269,6 +282,15 @@ export default function InvestmentIndex() {
               <ArrowRight className="h-4 w-4" />
             </Button>
           </section>
+
+          {/* Sticky Expert CTA */}
+          {showStickyCTA && (
+            <VerticalCTA
+              vertical="investment"
+              variant="sticky"
+              context="list"
+            />
+          )}
         </div>
       </MiniAppLayout>
     </InvestmentAuthGate>

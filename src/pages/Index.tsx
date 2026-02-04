@@ -23,6 +23,7 @@ const HomeProductsSection = lazy(() => import('@/components/home/HomeProductsSec
 const ContentPreviewRibbon = lazy(() => import('@/components/home/ContentPreviewRibbon').then(m => ({ default: m.ContentPreviewRibbon })));
 const QuickAccessChips = lazy(() => import('@/components/home/QuickAccessChips').then(m => ({ default: m.QuickAccessChips })));
 const OffplanPromoSection = lazy(() => import('@/components/property/OffplanPromoSection').then(m => ({ default: m.OffplanPromoSection })));
+const InvestorPromoCard = lazy(() => import('@/components/home/InvestorPromoCard').then(m => ({ default: m.InvestorPromoCard })));
 
 // Lazy load modals
 const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
@@ -149,6 +150,13 @@ const Index = () => {
               ═══════════════════════════════════════════════════════════ */}
           <Suspense fallback={<WidgetSkeleton />}>
             <SmartWidget />
+          </Suspense>
+
+          {/* ═══════════════════════════════════════════════════════════
+              BLOCK 3.5: Investment Lead Generation CTA
+              ═══════════════════════════════════════════════════════════ */}
+          <Suspense fallback={<WidgetSkeleton />}>
+            <InvestorPromoCard />
           </Suspense>
 
           {/* Visual Divider */}

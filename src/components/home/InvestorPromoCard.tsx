@@ -27,7 +27,7 @@ export const InvestorPromoCard = memo(function InvestorPromoCard() {
   const trustIndicators = [
     { icon: <Star className="w-3 h-3" />, labelEn: 'muUNO Scoring', labelRu: 'muUNO Scoring' },
     { icon: <BarChart3 className="w-3 h-3" />, labelEn: 'Due Diligence', labelRu: 'Due Diligence' },
-    { icon: <Users className="w-3 h-3" />, labelEn: 'Support', labelRu: 'Сопровождение' },
+    { icon: <Coins className="w-3 h-3" />, labelEn: '150+ deals', labelRu: '150+ сделок' },
   ];
 
   return (
