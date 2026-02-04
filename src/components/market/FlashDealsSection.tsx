@@ -53,19 +53,43 @@ export const FlashDealsSection: React.FC<FlashDealsSectionProps> = ({
   const isRu = language === 'ru';
   const cartItems = getItemsByType('product');
 
-  // End time for flash deals (next midnight + 6 hours)
+  // Filter flash deal products - prioritize is_flash_deal flag, fallback to discounted items
+  const flashDealProducts = React.useMemo(() => {
+    // First try products marked as flash deals in DB
+    const markedFlashDeals = products.filter(p => 
+      (p as any).is_flash_deal === true && 
+      p.original_price && 
+      p.original_price > p.price
+    );
+    
+    // If no marked flash deals, fallback to discounted products
+    if (markedFlashDeals.length > 0) {
+      return markedFlashDeals.slice(0, 8);
+    }
+    
+    return products
+      .filter(p => p.original_price && p.original_price > p.price)
+      .slice(0, 8);
+  }, [products]);
+
+  // Get earliest flash deal end time from DB, or default to midnight
   const endTime = React.useMemo(() => {
+    const flashDealEndTimes = flashDealProducts
+      .map(p => (p as any).flash_deal_ends_at)
+      .filter(Boolean)
+      .map(d => new Date(d).getTime());
+    
+    if (flashDealEndTimes.length > 0) {
+      return new Date(Math.min(...flashDealEndTimes));
+    }
+    
+    // Default to next midnight
     const end = new Date();
     end.setHours(23, 59, 59, 999);
     return end;
-  }, []);
+  }, [flashDealProducts]);
 
   const { hours, minutes, seconds } = useCountdown(endTime);
-
-  // Filter products with discounts (simulate flash deals)
-  const flashDealProducts = products
-    .filter(p => p.original_price && p.original_price > p.price)
-    .slice(0, 8);
 
   if (flashDealProducts.length === 0) return null;
 

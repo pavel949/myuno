@@ -5390,10 +5390,12 @@ export type Database = {
           description_en: string | null
           description_ru: string | null
           expires_at: string | null
+          flash_deal_ends_at: string | null
           id: string
           images: string[] | null
           in_stock: boolean | null
           is_active: boolean | null
+          is_flash_deal: boolean | null
           is_negotiable: boolean | null
           is_new: boolean | null
           is_popular: boolean | null
@@ -5407,6 +5409,7 @@ export type Database = {
           pack_quantity: number | null
           price: number
           pricing_type: string | null
+          purchase_count: number | null
           rating: number | null
           recipe: Json | null
           review_count: number | null
@@ -5441,10 +5444,12 @@ export type Database = {
           description_en?: string | null
           description_ru?: string | null
           expires_at?: string | null
+          flash_deal_ends_at?: string | null
           id?: string
           images?: string[] | null
           in_stock?: boolean | null
           is_active?: boolean | null
+          is_flash_deal?: boolean | null
           is_negotiable?: boolean | null
           is_new?: boolean | null
           is_popular?: boolean | null
@@ -5458,6 +5463,7 @@ export type Database = {
           pack_quantity?: number | null
           price: number
           pricing_type?: string | null
+          purchase_count?: number | null
           rating?: number | null
           recipe?: Json | null
           review_count?: number | null
@@ -5492,10 +5498,12 @@ export type Database = {
           description_en?: string | null
           description_ru?: string | null
           expires_at?: string | null
+          flash_deal_ends_at?: string | null
           id?: string
           images?: string[] | null
           in_stock?: boolean | null
           is_active?: boolean | null
+          is_flash_deal?: boolean | null
           is_negotiable?: boolean | null
           is_new?: boolean | null
           is_popular?: boolean | null
@@ -5509,6 +5517,7 @@ export type Database = {
           pack_quantity?: number | null
           price?: number
           pricing_type?: string | null
+          purchase_count?: number | null
           rating?: number | null
           recipe?: Json | null
           review_count?: number | null
@@ -5638,6 +5647,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      marketplace_promotions: {
+        Row: {
+          badge_en: string | null
+          badge_ru: string | null
+          created_at: string | null
+          ends_at: string | null
+          gradient: string | null
+          icon: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          link_path: string
+          sort_order: number | null
+          starts_at: string | null
+          subtitle_en: string | null
+          subtitle_ru: string | null
+          title_en: string
+          title_ru: string
+        }
+        Insert: {
+          badge_en?: string | null
+          badge_ru?: string | null
+          created_at?: string | null
+          ends_at?: string | null
+          gradient?: string | null
+          icon?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          link_path: string
+          sort_order?: number | null
+          starts_at?: string | null
+          subtitle_en?: string | null
+          subtitle_ru?: string | null
+          title_en: string
+          title_ru: string
+        }
+        Update: {
+          badge_en?: string | null
+          badge_ru?: string | null
+          created_at?: string | null
+          ends_at?: string | null
+          gradient?: string | null
+          icon?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          link_path?: string
+          sort_order?: number | null
+          starts_at?: string | null
+          subtitle_en?: string | null
+          subtitle_ru?: string | null
+          title_en?: string
+          title_ru?: string
+        }
+        Relationships: []
       }
       marketplace_reviews: {
         Row: {
