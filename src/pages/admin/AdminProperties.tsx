@@ -113,9 +113,10 @@ export default function AdminProperties() {
     description_en: '',
     description_ru: '',
     property_type: 'apartment',
-    listing_type: 'rent',
+    listing_modes: ['rent'] as string[],
     price: '',
     price_period: 'month',
+    sale_price: '',
     bedrooms: '1',
     bathrooms: '1',
     area_sqm: '',
@@ -126,12 +127,12 @@ export default function AdminProperties() {
     lat: '',
     lng: '',
     cover_image: '',
-      images: [] as string[],
-      amenities: [] as string[],
-      highlights: [] as string[],
-      instant_booking: false,
-      is_active: true,
-    });
+    images: [] as string[],
+    amenities: [] as string[],
+    highlights: [] as string[],
+    instant_booking: false,
+    is_active: true,
+  });
 
   const isRussian = language === 'ru';
 
@@ -156,9 +157,10 @@ export default function AdminProperties() {
       description_en: '',
       description_ru: '',
       property_type: 'apartment',
-      listing_type: 'rent',
+      listing_modes: ['rent'],
       price: '',
       price_period: 'month',
+      sale_price: '',
       bedrooms: '1',
       bathrooms: '1',
       area_sqm: '',
@@ -180,6 +182,11 @@ export default function AdminProperties() {
 
   const openEditDialog = (property: VendorProperty) => {
     setEditingProperty(property);
+    // Parse listing_modes from property - support both old listing_type and new listing_modes
+    const modes = (property as any).listing_modes?.length > 0 
+      ? (property as any).listing_modes 
+      : [property.listing_type || 'rent'];
+    
     setFormData({
       provider_id: property.provider_id || '',
       internal_name: property.internal_name || '',
@@ -188,9 +195,10 @@ export default function AdminProperties() {
       description_en: property.description_en || '',
       description_ru: property.description_ru || '',
       property_type: property.property_type,
-      listing_type: property.listing_type,
+      listing_modes: modes,
       price: property.price?.toString() || '',
       price_period: property.price_period || 'month',
+      sale_price: (property as any).sale_price?.toString() || '',
       bedrooms: property.bedrooms?.toString() || '1',
       bathrooms: property.bathrooms?.toString() || '1',
       area_sqm: property.area_sqm?.toString() || '',
@@ -211,13 +219,32 @@ export default function AdminProperties() {
   };
 
   const handleSubmit = async () => {
-    if (!formData.title_en || !formData.price || !formData.provider_id) {
+    // Validate required fields based on listing modes
+    const needsRentPrice = formData.listing_modes.includes('rent');
+    const needsSalePrice = formData.listing_modes.includes('sale');
+    
+    if (!formData.title_en || !formData.provider_id) {
       toast.error(isRussian ? 'Заполните обязательные поля' : 'Please fill required fields');
+      return;
+    }
+    
+    if (needsRentPrice && !formData.price) {
+      toast.error(isRussian ? 'Укажите цену аренды' : 'Please enter rental price');
+      return;
+    }
+    
+    if (needsSalePrice && !formData.sale_price) {
+      toast.error(isRussian ? 'Укажите цену продажи' : 'Please enter sale price');
       return;
     }
 
     setIsSubmitting(true);
     try {
+      // Determine primary listing_type for backward compatibility
+      const primaryListingType = formData.listing_modes.includes('sale') && !formData.listing_modes.includes('rent') 
+        ? 'sale' 
+        : 'rent';
+      
       const propertyData: any = {
         provider_id: formData.provider_id,
         internal_name: formData.internal_name || undefined,
@@ -226,9 +253,11 @@ export default function AdminProperties() {
         description_en: formData.description_en || undefined,
         description_ru: formData.description_ru || undefined,
         property_type: formData.property_type,
-        listing_type: formData.listing_type,
-        price: parseFloat(formData.price),
+        listing_type: primaryListingType,
+        listing_modes: formData.listing_modes,
+        price: parseFloat(formData.price) || undefined,
         price_period: formData.price_period,
+        sale_price: formData.sale_price ? parseFloat(formData.sale_price) : undefined,
         currency: 'THB',
         bedrooms: parseInt(formData.bedrooms) || 1,
         bathrooms: parseInt(formData.bathrooms) || 1,
@@ -410,22 +439,31 @@ export default function AdminProperties() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>{isRussian ? 'Тип объявления' : 'Listing Type'}</Label>
-                  <Select
-                    value={formData.listing_type}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, listing_type: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {listingTypes.map(type => (
-                        <SelectItem key={type.id} value={type.id}>
-                          {isRussian ? type.labelRu : type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label>{isRussian ? 'Тип объявления' : 'Listing Mode'}</Label>
+                  <div className="flex flex-wrap gap-3 pt-1">
+                    {listingTypes.map(type => (
+                      <label key={type.id} className="flex items-center gap-2 cursor-pointer">
+                        <Checkbox
+                          checked={formData.listing_modes.includes(type.id)}
+                          onCheckedChange={(checked) => {
+                            setFormData(prev => {
+                              const modes = checked
+                                ? [...prev.listing_modes, type.id]
+                                : prev.listing_modes.filter(m => m !== type.id);
+                              // Ensure at least one mode is selected
+                              return { ...prev, listing_modes: modes.length > 0 ? modes : ['rent'] };
+                            });
+                          }}
+                        />
+                        <span className="text-sm">{isRussian ? type.labelRu : type.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {isRussian 
+                      ? 'Можно выбрать оба варианта для объектов на аренду и продажу' 
+                      : 'Select both for properties available for rent and sale'}
+                  </p>
                 </div>
               </div>
 
@@ -508,42 +546,71 @@ export default function AdminProperties() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label>{isRussian ? 'Цена (฿) *' : 'Price (฿) *'}</Label>
-                  <Input
-                    type="number"
-                    value={formData.price}
-                    onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                  />
+              {/* Rental Price - show if rent mode selected */}
+              {formData.listing_modes.includes('rent') && (
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label>{isRussian ? 'Цена аренды (฿) *' : 'Rental Price (฿) *'}</Label>
+                    <Input
+                      type="number"
+                      value={formData.price}
+                      onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                      placeholder={isRussian ? 'Цена аренды' : 'Rental price'}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{isRussian ? 'Период' : 'Period'}</Label>
+                    <Select
+                      value={formData.price_period}
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, price_period: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {pricePeriods.map(period => (
+                          <SelectItem key={period.id} value={period.id}>
+                            {isRussian ? period.labelRu : period.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{isRussian ? 'Площадь (м²)' : 'Area (m²)'}</Label>
+                    <Input
+                      type="number"
+                      value={formData.area_sqm}
+                      onChange={(e) => setFormData(prev => ({ ...prev, area_sqm: e.target.value }))}
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>{isRussian ? 'Период' : 'Period'}</Label>
-                  <Select
-                    value={formData.price_period}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, price_period: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {pricePeriods.map(period => (
-                        <SelectItem key={period.id} value={period.id}>
-                          {isRussian ? period.labelRu : period.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              )}
+
+              {/* Sale Price - show if sale mode selected */}
+              {formData.listing_modes.includes('sale') && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>{isRussian ? 'Цена продажи (฿) *' : 'Sale Price (฿) *'}</Label>
+                    <Input
+                      type="number"
+                      value={formData.sale_price}
+                      onChange={(e) => setFormData(prev => ({ ...prev, sale_price: e.target.value }))}
+                      placeholder={isRussian ? 'Полная стоимость' : 'Full price'}
+                    />
+                  </div>
+                  {!formData.listing_modes.includes('rent') && (
+                    <div className="space-y-2">
+                      <Label>{isRussian ? 'Площадь (м²)' : 'Area (m²)'}</Label>
+                      <Input
+                        type="number"
+                        value={formData.area_sqm}
+                        onChange={(e) => setFormData(prev => ({ ...prev, area_sqm: e.target.value }))}
+                      />
+                    </div>
+                  )}
                 </div>
-                <div className="space-y-2">
-                  <Label>{isRussian ? 'Площадь (м²)' : 'Area (m²)'}</Label>
-                  <Input
-                    type="number"
-                    value={formData.area_sqm}
-                    onChange={(e) => setFormData(prev => ({ ...prev, area_sqm: e.target.value }))}
-                  />
-                </div>
-              </div>
+              )}
 
               <div className="grid grid-cols-4 gap-4">
                 <div className="space-y-2">

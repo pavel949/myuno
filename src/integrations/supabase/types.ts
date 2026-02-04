@@ -7681,6 +7681,7 @@ export type Database = {
           late_checkout_price: number | null
           linen_change_frequency: string | null
           linen_change_price: number | null
+          listing_modes: string[] | null
           lng: number | null
           managed_by: string | null
           managed_by_org_id: string | null
@@ -7835,6 +7836,7 @@ export type Database = {
           late_checkout_price?: number | null
           linen_change_frequency?: string | null
           linen_change_price?: number | null
+          listing_modes?: string[] | null
           lng?: number | null
           managed_by?: string | null
           managed_by_org_id?: string | null
@@ -7989,6 +7991,7 @@ export type Database = {
           late_checkout_price?: number | null
           linen_change_frequency?: string | null
           linen_change_price?: number | null
+          listing_modes?: string[] | null
           lng?: number | null
           managed_by?: string | null
           managed_by_org_id?: string | null
@@ -9262,6 +9265,7 @@ export type Database = {
           is_featured: boolean | null
           is_verified: boolean | null
           lat: number | null
+          listing_modes: string[] | null
           listing_type: string
           lng: number | null
           location_id: string | null
@@ -9278,6 +9282,7 @@ export type Database = {
           review_count: number | null
           reviewed_at: string | null
           reviewed_by: string | null
+          sale_price: number | null
           title_en: string
           title_ru: string
           unit_number: string | null
@@ -9313,6 +9318,7 @@ export type Database = {
           is_featured?: boolean | null
           is_verified?: boolean | null
           lat?: number | null
+          listing_modes?: string[] | null
           listing_type: string
           lng?: number | null
           location_id?: string | null
@@ -9329,6 +9335,7 @@ export type Database = {
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          sale_price?: number | null
           title_en: string
           title_ru: string
           unit_number?: string | null
@@ -9364,6 +9371,7 @@ export type Database = {
           is_featured?: boolean | null
           is_verified?: boolean | null
           lat?: number | null
+          listing_modes?: string[] | null
           listing_type?: string
           lng?: number | null
           location_id?: string | null
@@ -9380,6 +9388,7 @@ export type Database = {
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          sale_price?: number | null
           title_en?: string
           title_ru?: string
           unit_number?: string | null
