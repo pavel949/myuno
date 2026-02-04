@@ -499,7 +499,7 @@ export default function PartnersPage() {
                   ? 'Пройдите полную верификацию и получите знак доверия, который повышает конверсию на 35%'
                   : 'Complete full verification and get a trust badge that increases conversion by 35%'}
               </p>
-              <Link to="/info/g-trust">
+              <Link to="/g-trust">
                 <Button variant="outline" size="sm" className="gap-1">
                   {isRu ? 'Подробнее о G-Trust' : 'Learn about G-Trust'}
                   <ArrowRight className="w-3 h-3" />
