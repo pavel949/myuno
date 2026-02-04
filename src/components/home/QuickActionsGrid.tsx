@@ -253,6 +253,66 @@ const OWNER_ACTIONS: QuickAction[] = [
   },
 ];
 
+// Investor-focused actions
+const INVESTOR_ACTIONS: QuickAction[] = [
+  {
+    id: 'invest',
+    icon: Banknote,
+    label: 'Invest',
+    labelRu: 'Инвестиции',
+    path: '/invest',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-purple-400 to-violet-600',
+    badge: 'ROI 12%',
+    badgeRu: 'ROI 12%',
+  },
+  {
+    id: 'offplan',
+    icon: Building2,
+    label: 'Off-Plan',
+    labelRu: 'Новостройки',
+    path: '/offplan',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-amber-400 to-orange-600',
+  },
+  {
+    id: 'property-buy',
+    icon: Home,
+    label: 'Buy Property',
+    labelRu: 'Купить',
+    path: '/property?mode=buy',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-emerald-400 to-teal-600',
+  },
+  {
+    id: 'legal',
+    icon: Scale,
+    label: 'Legal',
+    labelRu: 'Юрист',
+    path: '/legal',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-slate-400 to-gray-600',
+  },
+  {
+    id: 'banking',
+    icon: Briefcase,
+    label: 'Banking',
+    labelRu: 'Банкинг',
+    path: '/banking',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-blue-400 to-indigo-600',
+  },
+  {
+    id: 'insurance',
+    icon: Shield,
+    label: 'Insurance',
+    labelRu: 'Страховка',
+    path: '/insurance',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-sky-400 to-cyan-600',
+  },
+];
+
 // Vendor-focused actions (service provider tools)
 const VENDOR_ACTIONS: QuickAction[] = [
   {
@@ -471,6 +531,7 @@ function getActionsForPersonas(personas: UserPersona[]): QuickAction[] {
     tourist: TOURIST_ACTIONS,
     resident: RESIDENT_ACTIONS,
     property_owner: OWNER_ACTIONS,
+    investor: INVESTOR_ACTIONS,
   };
 
   for (const persona of personas) {

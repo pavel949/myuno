@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-export type UserPersona = 'tourist' | 'resident' | 'property_owner';
+export type UserPersona = 'tourist' | 'resident' | 'property_owner' | 'investor';
 
 const GUEST_PERSONAS_KEY = 'myuno-guest-personas';
 
@@ -81,6 +81,11 @@ export function useUserPersonas() {
     mutationFn: async (persona: UserPersona) => {
       if (!user?.id) throw new Error('User not authenticated');
       
+      // Investor persona is handled client-side only for now (not in DB schema)
+      if (persona === 'investor') {
+        return { persona, wasActive: dbPersonas.includes(persona) };
+      }
+      
       const isActive = dbPersonas.includes(persona);
       
       if (isActive) {
@@ -88,14 +93,14 @@ export function useUserPersonas() {
           .from('user_personas')
           .delete()
           .eq('user_id', user.id)
-          .eq('persona', persona);
+          .eq('persona', persona as 'tourist' | 'resident' | 'property_owner');
         
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from('user_personas')
           .upsert(
-            { user_id: user.id, persona, is_active: true },
+            { user_id: user.id, persona: persona as 'tourist' | 'resident' | 'property_owner', is_active: true },
             { onConflict: 'user_id,persona' }
           );
         
@@ -132,15 +137,18 @@ export function useUserPersonas() {
     mutationFn: async (newPersonas: UserPersona[]) => {
       if (!user?.id) throw new Error('User not authenticated');
       
+      // Filter out investor persona (client-side only)
+      const dbPersonasToSet = newPersonas.filter(p => p !== 'investor') as ('tourist' | 'resident' | 'property_owner')[];
+      
       await supabase
         .from('user_personas')
         .delete()
         .eq('user_id', user.id);
       
-      if (newPersonas.length > 0) {
+      if (dbPersonasToSet.length > 0) {
         const { error } = await supabase
           .from('user_personas')
-          .insert(newPersonas.map(persona => ({
+          .insert(dbPersonasToSet.map(persona => ({
             user_id: user.id,
             persona,
             is_active: true,
@@ -233,5 +241,12 @@ export const PERSONA_INFO: Record<UserPersona, {
     icon: '🏢',
     color: 'text-amber-600',
     bgColor: 'bg-amber-500/10',
+  },
+  investor: {
+    labelEn: 'Investor',
+    labelRu: 'Инвестор',
+    icon: '📈',
+    color: 'text-purple-600',
+    bgColor: 'bg-purple-500/10',
   },
 };

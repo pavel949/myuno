@@ -22,6 +22,7 @@ const PERSONA_CATEGORY_SLUGS: Record<UserPersona, Set<string>> = {
   tourist: new Set(['tours', 'tour', 'yachts', 'yacht', 'transport', 'restaurants', 'events', 'water-activities', 'diving', 'snorkeling']),
   resident: new Set(['visa', 'medical', 'legal', 'banking', 'insurance', 'education', 'fitness', 'pharmacy']),
   property_owner: new Set(['cleaning', 'maintenance', 'property-management', 'legal', 'insurance']),
+  investor: new Set(['investment', 'real-estate', 'property', 'offplan', 'hotel', 'business']),
 };
 
 // Get card size tier based on index

@@ -1,13 +1,12 @@
 import React, { memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, Layers, HeartHandshake, MapPin, AlertTriangle, Shield, Plane, Users, Building2, Check } from 'lucide-react';
+import { ShieldCheck, Layers, HeartHandshake, MapPin, AlertTriangle, Shield, Plane, Users, Building2, Check, TrendingUp } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserPersonas, UserPersona } from '@/hooks/useUserPersonas';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { InlineSearch } from '@/components/search/InlineSearch';
 import { cn } from '@/lib/utils';
-
 interface TrustBadgeProps {
   icon: React.ReactNode;
   label: string;
@@ -135,8 +134,8 @@ export const HeroBlock = memo(function HeroBlock() {
     {
       id: 'owners',
       persona: 'property_owner' as UserPersona,
-      isToggleable: true, // Now toggleable like others
-      navigateOnFirstActivation: '/owner/landing', // Navigate when first activated
+      isToggleable: true,
+      navigateOnFirstActivation: '/owner/landing',
       icon: <Building2 className="w-5 h-5 text-amber-600" />,
       iconBg: 'bg-gradient-to-br from-amber-500/25 to-orange-500/35 shadow-lg shadow-amber-500/20',
       title: { en: 'Owners', ru: 'Владельцам' },
@@ -144,6 +143,19 @@ export const HeroBlock = memo(function HeroBlock() {
       cardGradient: 'from-amber-500/10 via-orange-500/5 to-transparent',
       borderColor: 'border-amber-500/30 hover:border-amber-500/50',
       activeBorderColor: 'border-amber-500 ring-amber-500/30',
+    },
+    {
+      id: 'investors',
+      persona: 'investor' as UserPersona,
+      isToggleable: true,
+      navigateOnFirstActivation: '/invest',
+      icon: <TrendingUp className="w-5 h-5 text-purple-600" />,
+      iconBg: 'bg-gradient-to-br from-purple-500/25 to-violet-500/35 shadow-lg shadow-purple-500/20',
+      title: { en: 'Investors', ru: 'Инвесторам' },
+      services: { en: 'ROI up to 12%', ru: 'ROI до 12%' },
+      cardGradient: 'from-purple-500/10 via-violet-500/5 to-transparent',
+      borderColor: 'border-purple-500/30 hover:border-purple-500/50',
+      activeBorderColor: 'border-purple-500 ring-purple-500/30',
     },
   ];
 
