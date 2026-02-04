@@ -2639,6 +2639,81 @@ export type Database = {
           },
         ]
       }
+      developers: {
+        Row: {
+          address: string | null
+          average_rating: number | null
+          cover_image: string | null
+          created_at: string | null
+          description_en: string | null
+          description_ru: string | null
+          email: string | null
+          founded_year: number | null
+          id: string
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          logo_url: string | null
+          muuno_score: number | null
+          name_en: string
+          name_ru: string
+          phone: string | null
+          projects_completed: number | null
+          slug: string | null
+          total_units_sold: number | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          average_rating?: number | null
+          cover_image?: string | null
+          created_at?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          email?: string | null
+          founded_year?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          logo_url?: string | null
+          muuno_score?: number | null
+          name_en: string
+          name_ru: string
+          phone?: string | null
+          projects_completed?: number | null
+          slug?: string | null
+          total_units_sold?: number | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          average_rating?: number | null
+          cover_image?: string | null
+          created_at?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          email?: string | null
+          founded_year?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          logo_url?: string | null
+          muuno_score?: number | null
+          name_en?: string
+          name_ru?: string
+          phone?: string | null
+          projects_completed?: number | null
+          slug?: string | null
+          total_units_sold?: number | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
       doctors: {
         Row: {
           available_days: string[] | null
@@ -10730,11 +10805,14 @@ export type Database = {
           cam_fee_per_sqm: number | null
           cam_includes: string[] | null
           cam_payment_day: number | null
+          completion_date: string | null
+          construction_progress: number | null
           cover_image: string | null
           created_at: string | null
           created_by: string | null
           description_en: string | null
           description_ru: string | null
+          developer_id: string | null
           developer_name: string | null
           district: string | null
           funding_goal: number | null
@@ -10764,9 +10842,14 @@ export type Database = {
           muuno_score: number | null
           name_en: string
           name_ru: string
+          price_from: number | null
+          price_to: number | null
+          project_status: string | null
           risk_level: string | null
           roi_projected: number | null
           total_units: number | null
+          units_available: number | null
+          units_sold: number | null
           updated_at: string | null
           video_url: string | null
           year_built: number | null
@@ -10777,11 +10860,14 @@ export type Database = {
           cam_fee_per_sqm?: number | null
           cam_includes?: string[] | null
           cam_payment_day?: number | null
+          completion_date?: string | null
+          construction_progress?: number | null
           cover_image?: string | null
           created_at?: string | null
           created_by?: string | null
           description_en?: string | null
           description_ru?: string | null
+          developer_id?: string | null
           developer_name?: string | null
           district?: string | null
           funding_goal?: number | null
@@ -10811,9 +10897,14 @@ export type Database = {
           muuno_score?: number | null
           name_en: string
           name_ru: string
+          price_from?: number | null
+          price_to?: number | null
+          project_status?: string | null
           risk_level?: string | null
           roi_projected?: number | null
           total_units?: number | null
+          units_available?: number | null
+          units_sold?: number | null
           updated_at?: string | null
           video_url?: string | null
           year_built?: number | null
@@ -10824,11 +10915,14 @@ export type Database = {
           cam_fee_per_sqm?: number | null
           cam_includes?: string[] | null
           cam_payment_day?: number | null
+          completion_date?: string | null
+          construction_progress?: number | null
           cover_image?: string | null
           created_at?: string | null
           created_by?: string | null
           description_en?: string | null
           description_ru?: string | null
+          developer_id?: string | null
           developer_name?: string | null
           district?: string | null
           funding_goal?: number | null
@@ -10858,14 +10952,27 @@ export type Database = {
           muuno_score?: number | null
           name_en?: string
           name_ru?: string
+          price_from?: number | null
+          price_to?: number | null
+          project_status?: string | null
           risk_level?: string | null
           roi_projected?: number | null
           total_units?: number | null
+          units_available?: number | null
+          units_sold?: number | null
           updated_at?: string | null
           video_url?: string | null
           year_built?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "property_projects_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       property_promotions: {
         Row: {

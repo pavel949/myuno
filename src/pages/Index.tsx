@@ -21,6 +21,7 @@ const HomeCategoryRibbon = lazy(() => import('@/components/home/HomeCategoryRibb
 const HomeProductsSection = lazy(() => import('@/components/home/HomeProductsSection').then(m => ({ default: m.HomeProductsSection })));
 const ContentPreviewRibbon = lazy(() => import('@/components/home/ContentPreviewRibbon').then(m => ({ default: m.ContentPreviewRibbon })));
 const QuickAccessChips = lazy(() => import('@/components/home/QuickAccessChips').then(m => ({ default: m.QuickAccessChips })));
+const OffplanPromoSection = lazy(() => import('@/components/property/OffplanPromoSection').then(m => ({ default: m.OffplanPromoSection })));
 
 // Lazy load modals
 const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
@@ -168,7 +169,12 @@ const Index = () => {
               {/* Visual Divider before B2B */}
               <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
-              {/* BLOCK 6: B2B Section */}
+              {/* BLOCK 6: Offplan Promo Section */}
+              <Suspense fallback={<SectionSkeleton />}>
+                <OffplanPromoSection />
+              </Suspense>
+
+              {/* BLOCK 7: B2B Section */}
               <Suspense fallback={<Skeleton className="h-12 w-full rounded-xl" />}>
                 <QuickAccessChips />
               </Suspense>

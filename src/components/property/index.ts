@@ -34,3 +34,6 @@ export { BookingConditionsChips } from './BookingConditionsChips';
 export { PropertyBookingSuccess } from './PropertyBookingSuccess';
 export { ProjectCarouselCard } from './ProjectCarouselCard';
 export { ProjectPromoSection } from './ProjectPromoSection';
+export { OffplanProjectCard } from './OffplanProjectCard';
+export { OffplanPromoSection } from './OffplanPromoSection';
+export { DeveloperBadge } from './DeveloperBadge';

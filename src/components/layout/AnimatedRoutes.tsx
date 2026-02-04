@@ -47,6 +47,10 @@ const PropertyMap = lazy(() => import('@/pages/property/PropertyMap'));
 const PropertyDepositSuccess = lazy(() => import('@/pages/property/PropertyDepositSuccess'));
 const ProjectsIndex = lazy(() => import('@/pages/property/ProjectsIndex'));
 const ProjectDetail = lazy(() => import('@/pages/property/ProjectDetail'));
+const OffplanIndex = lazy(() => import('@/pages/property/OffplanIndex'));
+const OffplanDetail = lazy(() => import('@/pages/property/OffplanDetail'));
+const DevelopersIndex = lazy(() => import('@/pages/property/DevelopersIndex'));
+const DeveloperDetail = lazy(() => import('@/pages/property/DeveloperDetail'));
 
 // Investment Mini-App
 const InvestmentIndex = lazy(() => import('@/pages/invest/InvestmentIndex'));
@@ -532,6 +536,12 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/property/:id/inquiry" element={<LazyPage><PropertyInquiry /></LazyPage>} />
         <Route path="/property/map" element={<LazyPage><PropertyMap /></LazyPage>} />
         <Route path="/complexes" element={<LazyPage><ProjectsIndex /></LazyPage>} />
+        
+        {/* Offplan & Developers Routes */}
+        <Route path="/offplan" element={<LazyPage><OffplanIndex /></LazyPage>} />
+        <Route path="/offplan/:id" element={<LazyPage><OffplanDetail /></LazyPage>} />
+        <Route path="/developers" element={<LazyPage><DevelopersIndex /></LazyPage>} />
+        <Route path="/developers/:id" element={<LazyPage><DeveloperDetail /></LazyPage>} />
         
         {/* Investment Mini-App Routes */}
         <Route path="/invest" element={<LazyPage><InvestmentIndex /></LazyPage>} />
