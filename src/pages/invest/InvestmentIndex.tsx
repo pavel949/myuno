@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useInvestmentProjects, useFeaturedInvestments, INVESTMENT_CATEGORIES } from '@/hooks/useInvestmentProjects';
 import { InvestmentCard, InvestmentAuthGate } from '@/components/invest';
 import { MiniAppLayout } from '@/components/miniapp';
@@ -17,13 +18,15 @@ import {
   ArrowRight,
   FileText,
   Shield,
-  ChevronRight
+  ChevronRight,
+  User
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function InvestmentIndex() {
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { user } = useAuth();
   const isRu = language === 'ru';
   
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -121,6 +124,19 @@ export default function InvestmentIndex() {
       <MiniAppLayout
         title={isRu ? 'Инвестиции' : 'Investment Hub'}
         showSearch={false}
+        headerActions={
+          user ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/invest/dashboard')}
+              className="gap-1.5"
+            >
+              <User className="h-4 w-4" />
+              {isRu ? 'Кабинет' : 'Dashboard'}
+            </Button>
+          ) : null
+        }
       >
         <div className="space-y-6">
           {/* Hero section */}

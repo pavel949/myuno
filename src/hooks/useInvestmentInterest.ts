@@ -21,6 +21,21 @@ export interface InvestmentInterest {
   updated_at: string;
 }
 
+export interface InvestmentProjectSummary {
+  id: string;
+  title_en: string | null;
+  title_ru: string | null;
+  cover_image: string | null;
+  roi_projected: number | null;
+  muuno_score: number | null;
+  district: string | null;
+  project_type: string | null;
+}
+
+export interface InvestmentInterestWithProject extends InvestmentInterest {
+  project: InvestmentProjectSummary | null;
+}
+
 export interface CreateInterestData {
   project_id: string;
   interest_type: 'invest' | 'learn_more' | 'call_request';
@@ -56,7 +71,7 @@ export function useInvestmentInterest(projectId?: string) {
     enabled: !!projectId && !!user?.id,
   });
 
-  // Get all user's interests
+  // Get all user's interests (basic)
   const { data: userInterests, isLoading: loadingInterests } = useQuery({
     queryKey: ['investment-interests', 'user', user?.id],
     queryFn: async () => {
@@ -70,6 +85,30 @@ export function useInvestmentInterest(projectId?: string) {
 
       if (error) throw error;
       return (data || []) as InvestmentInterest[];
+    },
+    enabled: !!user?.id,
+  });
+
+  // Get user's interests with project details (for dashboard)
+  const { data: userInterestsWithProjects, isLoading: loadingInterestsWithProjects } = useQuery({
+    queryKey: ['investment-interests', 'user-full', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+
+      const { data, error } = await supabase
+        .from('investment_interests')
+        .select(`
+          *,
+          project:investment_projects (
+            id, title_en, title_ru, cover_image,
+            roi_projected, muuno_score, district, project_type
+          )
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return (data || []) as InvestmentInterestWithProject[];
     },
     enabled: !!user?.id,
   });
@@ -114,6 +153,8 @@ export function useInvestmentInterest(projectId?: string) {
     checkingInterest,
     userInterests,
     loadingInterests,
+    userInterestsWithProjects,
+    loadingInterestsWithProjects: loadingInterestsWithProjects || loadingInterests,
     createInterest: createInterest.mutateAsync,
     isSubmitting: createInterest.isPending,
     hasExpressedInterest: !!existingInterest,
