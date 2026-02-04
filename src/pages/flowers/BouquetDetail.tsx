@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Star, Heart, Share2, ShoppingCart, Plus, Minus, Flower2, Truck, Clock, Shield, Loader2 } from 'lucide-react';
+import { ArrowLeft, Star, Heart, Share2, ShoppingCart, Plus, Minus, Flower2, Truck, Clock, Shield, Loader2, Zap } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { triggerRipple } from '@/hooks/useRipple';
 import { useBouquet } from '@/hooks/useBouquets';
 import { useCartToast } from '@/hooks/useCartToast';
-
+import { useBuyNowFlowers } from '@/hooks/useBuyNowFlowers';
 const BouquetDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -18,6 +18,7 @@ const BouquetDetail = () => {
   const { addItem, removeItem, updateQuantity, items, getItemsByType } = useCart();
   const [isFavorite, setIsFavorite] = React.useState(false);
   const { showAddedToast } = useCartToast();
+  const { buyNow } = useBuyNowFlowers();
 
   const { bouquet, isLoading } = useBouquet(id || '');
   
@@ -228,18 +229,34 @@ const BouquetDetail = () => {
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-xl border-t border-border z-50">
           <div className="flex items-center gap-3">
             {quantity === 0 ? (
-              <Button
-                onClick={(e) => {
-                  triggerRipple(e);
-                  addToCart();
-                }}
-                className="flex-1 h-12"
-              >
-                <ShoppingCart className="w-5 h-5 mr-2" />
-                {language === 'ru' ? 'Добавить в корзину' : 'Add to cart'}
-              </Button>
+              <>
+                {/* Primary: Buy Now */}
+                <Button
+                  onClick={(e) => {
+                    triggerRipple(e);
+                    buyNow(bouquet);
+                  }}
+                  className="flex-1 h-12 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                >
+                  <Zap className="w-5 h-5 mr-2" />
+                  {language === 'ru' ? 'Купить сейчас' : 'Buy Now'}
+                </Button>
+                
+                {/* Secondary: Add to Cart */}
+                <Button
+                  variant="outline"
+                  onClick={(e) => {
+                    triggerRipple(e);
+                    addToCart();
+                  }}
+                  className="h-12 px-4"
+                >
+                  <ShoppingCart className="w-5 h-5" />
+                </Button>
+              </>
             ) : (
               <>
+                {/* Quantity controls */}
                 <div className="flex items-center gap-2 bg-secondary rounded-lg p-1">
                   <Button
                     size="icon"
@@ -265,13 +282,27 @@ const BouquetDetail = () => {
                     <Plus className="w-4 h-4" />
                   </Button>
                 </div>
+                
+                {/* Buy Now (current quantity) */}
                 <Button
+                  onClick={(e) => {
+                    triggerRipple(e);
+                    buyNow(bouquet, quantity);
+                  }}
+                  className="flex-1 h-12 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                >
+                  <Zap className="w-5 h-5 mr-2" />
+                  {language === 'ru' ? 'Купить' : 'Buy'}
+                </Button>
+                
+                {/* Cart with total */}
+                <Button
+                  variant="outline"
                   onClick={() => navigate('/cart')}
-                  className="flex-1 h-12"
+                  className="h-12"
                 >
                   <ShoppingCart className="w-5 h-5 mr-2" />
-                  {language === 'ru' ? 'Корзина' : 'Cart'}
-                  <span className="ml-auto font-bold">฿{totalPrice.toLocaleString()}</span>
+                  ฿{totalPrice.toLocaleString()}
                 </Button>
               </>
             )}

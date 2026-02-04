@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Calendar, CreditCard, Truck, Gift, Check, Wallet, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -19,6 +19,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { BackButton } from '@/components/uno/BackButton';
 import { AddressPickerInput, BookingStepProgress, deliveryBookingSteps } from '@/components/booking';
 import { useStripeFlowersCheckout } from '@/hooks/useStripeFlowersCheckout';
+import { FlowersBuyNowItem } from '@/hooks/useBuyNowFlowers';
 
 const deliverySlots = [
   { id: 'morning', timeEn: '9:00 - 12:00', timeRu: '9:00 - 12:00', labelEn: 'Morning', labelRu: 'Утро' },
@@ -26,8 +27,14 @@ const deliverySlots = [
   { id: 'evening', timeEn: '17:00 - 21:00', timeRu: '17:00 - 21:00', labelEn: 'Evening', labelRu: 'Вечер' },
 ];
 
+interface BuyNowState {
+  buyNowItem?: FlowersBuyNowItem;
+  isBuyNow?: boolean;
+}
+
 const FlowersOrder = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { language } = useLanguage();
   const { user } = useAuth();
   const { balance, payFromWallet, hasEnoughBalance, isLoading: isWalletLoading } = useWallet();
@@ -35,18 +42,38 @@ const FlowersOrder = () => {
   const { createBooking, isSubmitting } = useBooking();
   const { createFlowersCheckout, isProcessing: isStripeProcessing } = useStripeFlowersCheckout();
   
-  // Get flowers from global cart
+  // Check for Buy Now item in state
+  const buyNowState = location.state as BuyNowState | null;
+  const isBuyNow = buyNowState?.isBuyNow || false;
+  const buyNowItem = buyNowState?.buyNowItem;
+  
+  // Get flowers from global cart OR use Buy Now item
   const flowersInCart = getItemsByType('flowers');
-  const cartItems = flowersInCart.map(item => ({
-    id: item.id,
-    name: item.name,
-    nameRu: item.nameRu || item.name,
-    price: item.price,
-    quantity: item.quantity,
-    providerId: item.providerId,
-    providerName: item.providerName,
-  }));
-  const totalPrice = flowersInCart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  
+  const cartItems = useMemo(() => {
+    if (isBuyNow && buyNowItem) {
+      return [{
+        id: buyNowItem.id,
+        name: buyNowItem.name,
+        nameRu: buyNowItem.nameRu,
+        price: buyNowItem.price,
+        quantity: buyNowItem.quantity,
+        providerId: buyNowItem.providerId,
+        providerName: buyNowItem.providerName,
+      }];
+    }
+    return flowersInCart.map(item => ({
+      id: item.id,
+      name: item.name,
+      nameRu: item.nameRu || item.name,
+      price: item.price,
+      quantity: item.quantity,
+      providerId: item.providerId,
+      providerName: item.providerName,
+    }));
+  }, [isBuyNow, buyNowItem, flowersInCart]);
+  
+  const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const [formData, setFormData] = useState({
     recipientName: '',
@@ -237,8 +264,10 @@ const FlowersOrder = () => {
             });
         }
 
-        // Clear flowers from cart after successful order
-        clearByType('flowers');
+        // Clear flowers from cart after successful order (only if NOT Buy Now)
+        if (!isBuyNow) {
+          clearByType('flowers');
+        }
         
         toast.success(
           formData.paymentMethod === 'wallet'
@@ -255,7 +284,8 @@ const FlowersOrder = () => {
   };
 
   // If cart is empty, show empty state
-  if (flowersInCart.length === 0) {
+  // If no items (neither Buy Now nor cart), show empty state
+  if (cartItems.length === 0) {
     return (
       <AppLayout>
         <div className="min-h-screen bg-background">
