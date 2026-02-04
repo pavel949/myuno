@@ -104,14 +104,14 @@ export function PortfolioSection() {
         <ScrollArea className="w-full">
           <div className="flex gap-3 pb-2">
             {properties.slice(0, 5).map((property) => (
-              <div key={property.id} className="w-[280px] flex-shrink-0">
+              <div key={property.id} className="w-[85vw] max-w-[280px] flex-shrink-0">
                 <PropertyCard property={property} variant="hero" mode="owner" />
               </div>
             ))}
             
             {/* Add new card */}
             <div 
-              className="w-[280px] flex-shrink-0 border-2 border-dashed border-muted-foreground/20 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors"
+              className="w-[85vw] max-w-[280px] flex-shrink-0 border-2 border-dashed border-muted-foreground/20 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors min-h-[200px]"
               onClick={() => navigate('/owner/properties/new')}
             >
               <Plus className="h-8 w-8 text-muted-foreground mb-2" />

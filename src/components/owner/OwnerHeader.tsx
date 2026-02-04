@@ -150,8 +150,11 @@ export function OwnerHeader() {
         >
           <HelpCircle className="h-4 w-4" />
         </Button>
-        <CurrencySwitcher size="sm" />
-        <ThemeSwitcher />
+        {/* Hide currency/theme on mobile to save space */}
+        <div className="hidden sm:flex items-center gap-1">
+          <CurrencySwitcher size="sm" />
+          <ThemeSwitcher />
+        </div>
         <LanguageSwitcher />
         <Button 
           variant="ghost" 

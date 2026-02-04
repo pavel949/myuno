@@ -41,9 +41,9 @@ export function CompetitorSlide({ isRussian }: CompetitorSlideProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="overflow-x-auto"
+          className="table-scroll-container -mx-4 px-4 pb-4"
         >
-          <table className="w-full min-w-[700px]">
+          <table className="w-full min-w-[600px]">
             <thead>
               <tr className="border-b border-white/10">
                 <th className="text-left py-4 px-3 text-slate-400 font-medium text-sm">

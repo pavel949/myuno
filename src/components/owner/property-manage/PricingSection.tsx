@@ -43,7 +43,7 @@ export function PropertyManagePricingSection({ formData, updateFormData }: Prici
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
             <div className="space-y-2">
               <Label>{isRu ? 'Цена за ночь' : 'Price per night'} *</Label>
               <div className="relative">
@@ -87,7 +87,7 @@ export function PropertyManagePricingSection({ formData, updateFormData }: Prici
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
             <div className="space-y-2">
               <Label>{isRu ? 'Недельная скидка (%)' : 'Weekly discount (%)'}</Label>
               <Input
@@ -129,7 +129,7 @@ export function PropertyManagePricingSection({ formData, updateFormData }: Prici
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
             <div className="space-y-2">
               <Label>{isRu ? 'Сумма депозита' : 'Deposit amount'}</Label>
               <Input
@@ -170,7 +170,7 @@ export function PropertyManagePricingSection({ formData, updateFormData }: Prici
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
             <div className="space-y-2">
               <Label>{isRu ? 'Макс. гостей' : 'Max guests'}</Label>
               <Select
@@ -234,7 +234,7 @@ export function PropertyManagePricingSection({ formData, updateFormData }: Prici
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
             <div className="space-y-2">
               <Label>{isRu ? 'Время заезда' : 'Check-in time'}</Label>
               <Select
@@ -269,7 +269,7 @@ export function PropertyManagePricingSection({ formData, updateFormData }: Prici
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
             <div className="space-y-2">
               <Label>{isRu ? 'Ранний заезд (доплата)' : 'Early check-in (fee)'}</Label>
               <Input
