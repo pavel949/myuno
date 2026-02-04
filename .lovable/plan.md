@@ -1,30 +1,43 @@
 
-# План: Реорганизация фильтров недвижимости
+# План: Визуальный каталог комплексов и интеграция пути клиента
+
+## Оценка идеи
+
+### ✅ Почему это хорошо для всех пользователей, не только туристов:
+1. **Туристы** — ищут отпуск, хотят видеть "готовые решения" в комплексах с удобствами
+2. **Резиденты** — ищут долгосрочную аренду, комплексы дают контекст (охрана, бассейн, фитнес)
+3. **Инвесторы** — хотят видеть ROI и доступные юниты на продажу
+4. **Владельцы** — могут добавить свой объект в каталог комплекса
+
+**Рекомендация:** Показывать карусель комплексов ВСЕМ пользователям, но с адаптивным текстом в зависимости от персоны.
+
+---
 
 ## Текущее состояние
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│  ТЕКУЩАЯ СТРУКТУРА ФИЛЬТРОВ                                                 │
+│  СЕЙЧАС: PropertyIndex.tsx                                                  │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
-│  [Все] [🏬 Apartment] [🏢 Condo] [🏡 Villa] [🏘️ Townhouse] ... ← 8 типов  │
-│                                                              [⚙️ Фильтры]   │
+│  [Поиск]                                                                    │
+│  [Тип: Все | Кондо | Вилла | Ещё▾]                                         │
+│  [Спальни: Студия | 1 | 2 | 3...]                                          │
+│  [Теги: ⚡Instant | 🏖️Beach...]                                            │
+│  [📍Локации: Patong | Kata...]                                              │
 │                                                                             │
-│  ─────────────────────────────────────────────────────────────────────────  │
-│  Quick Filters (ленточка):                                                  │
-│  [⚡ Instant] [🏖️ У пляжа] [🌊 Beachfront] [🐕 Pet Friendly] ...           │
+│  [🏢 Комплексы: Chip | Chip | Chip...]  ← МЕЛКИЕ ЧИПЫ                      │
 │                                                                             │
-│  Residences:                                                                │
-│  [Blue Tree] [VIP Kata] [Botanica] ...                                     │
+│  Результаты поиска: Карточки объектов                                      │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 
 ПРОБЛЕМЫ:
-1. ❌ Все 8 типов недвижимости показаны одинаково - нет приоритета
-2. ❌ Спальни только в модальном фильтре (глубоко)
-3. ❌ Теги/локации только в модальном фильтре
-4. ❌ Нет группировки "Ещё типы"
+❌ Комплексы показаны как мелкие чипы — не привлекают внимание
+❌ Нет маркетингового промо-блока "Посмотрите комплексы!"
+❌ Нет карусели с визуальными карточками комплексов
+❌ Карточки комплексов не показывают аренду/продажу
+❌ Нет deep-link для перехода к конкретному комплексу
 ```
 
 ---
@@ -33,79 +46,53 @@
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│  НОВАЯ СТРУКТУРА ФИЛЬТРОВ (Airbnb/Klook стиль)                              │
+│  НОВЫЙ: PropertyIndex.tsx                                                   │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
-│  УРОВЕНЬ 1: Тип недвижимости (приоритетные + dropdown)                     │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │ [Все] [🏢 Кондо] [🏡 Вилла] [📋 Ещё типы ▾] ← dropdown          │   │
-│  │                                                    [⚙️ Фильтры]   │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
+│  [Поиск]                                                                    │
+│  [Тип: Все | Кондо | Вилла | Ещё▾]  [⚙️]                                  │
 │                                                                             │
-│  УРОВЕНЬ 2: Спальни (inline chips)                                         │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │ Спальни: [Студия] [1] [2] [3] [4] [5+]                             │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
+│  ┌───────────────────────────────────────────────────────────────────────┐ │
+│  │ 🏢 Ищете жильё для отпуска или инвестиций?                           │ │
+│  │    Посмотрите наши жилые комплексы!                                  │ │
+│  │                                                                       │ │
+│  │ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐                  │ │
+│  │ │ [Фото]   │ │ [Фото]   │ │ [Фото]   │ │ [Фото]   │ →               │ │
+│  │ │ Patong   │ │ Laguna   │ │ Rawai    │ │ Kamala   │                  │ │
+│  │ │ Tower    │ │ Park     │ │ Beach    │ │ Hills    │                  │ │
+│  │ │ 6 rent   │ │ 4 rent   │ │ 4 rent   │ │ 5 rent   │                  │ │
+│  │ │ 1 sale   │ │ —        │ │ 1 sale   │ │ —        │                  │ │
+│  │ │ от ฿12K  │ │ от ฿42K  │ │ от ฿15K  │ │ от ฿32K  │                  │ │
+│  │ └──────────┘ └──────────┘ └──────────┘ └──────────┘                  │ │
+│  │                                                                       │ │
+│  │ [Смотреть все комплексы →]                                           │ │
+│  └───────────────────────────────────────────────────────────────────────┘ │
 │                                                                             │
-│  УРОВЕНЬ 3: Теги + Локации (scrollable chips)                              │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │ [⚡ Instant] [🏖️ У пляжа] [🌊 Вид на море] [🐕 Pet] [🏊 Pool]...  │   │
-│  │ ─────────────────────────────────────────────────────────────────── │   │
-│  │ 📍 Локации: [Patong] [Kata] [Kamala] [Surin] [Rawai] ...           │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
+│  [Спальни: Студия | 1 | 2 | 3...]                                          │
+│  [Теги: ⚡Instant | 🏖️Beach...]                                            │
+│  [📍Локации: Patong | Kata...]                                              │
 │                                                                             │
-│  УРОВЕНЬ 4: Комплексы (карусель)                                           │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │ 🏢 Комплексы: [Blue Tree|23 ед.] [VIP Kata|8 ед.] [Botanica]...    │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
+│  45 объектов найдено                                                        │
+│  Результаты поиска: Карточки объектов                                      │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Данные в базе (уже готовы!)
+## Данные в БД (уже готовы!)
 
-### Типы недвижимости (lookup_values: property_type)
-| value_key | EN | RU | icon |
-|-----------|-----|-----|------|
-| condo | Condo | Кондо | 🏢 |
-| villa | Villa | Вилла | 🏡 |
-| apartment | Apartment | Квартира | 🏬 |
-| townhouse | Townhouse | Таунхаус | 🏘️ |
-| house | House | Дом | 🏠 |
-| penthouse | Penthouse | Пентхаус | 🌆 |
-| studio | Studio | Студия | 🛏️ |
-| bungalow | Bungalow | Бунгало | 🌴 |
+### property_projects (6 комплексов)
+| Название | Район | Аренда | Продажа | Мин. цена |
+|----------|-------|--------|---------|-----------|
+| Patong Tower | Patong | 6 | 1 | ฿12,000 |
+| Laguna Park | Laguna | 4 | 0 | ฿42,000 |
+| Rawai Beachfront | Rawai | 4 | 1 | ฿15,000 |
+| Kamala Hills | Kamala | 5 | 0 | ฿32,000 |
+| Chalong Bay | Chalong | 2 | 0 | ฿38,000 |
+| Title Legendary | — | 0 | 0 | — |
 
-**Приоритетные:** `condo`, `villa`
-**Остальные:** В dropdown "Ещё типы"
-
-### Спальни (lookup_values: bedroom_option)
-| value_key | EN | icon |
-|-----------|-----|------|
-| studio | Studio | 🛏️ |
-| 1 | 1 Bedroom | 1️⃣ |
-| 2 | 2 Bedrooms | 2️⃣ |
-| 3 | 3 Bedrooms | 3️⃣ |
-| 4 | 4 Bedrooms | 4️⃣ |
-| 5+ | 5+ Bedrooms | 5️⃣ |
-
-### Теги (lookup_values: property_highlight) - 22 тега!
-- ⚡ Instant Book
-- 🏖️ Near Beach / Beachfront / Walk to Beach
-- 🌊 Sea View / Ocean View
-- 🐕 Pet Friendly
-- 🏊 Pool / Private Pool / Infinity Pool
-- 🏋️ Gym
-- ✨ New Listing / Luxury
-- 🧹 Full Service
-- 💎 Designer Interior
-- ✅ Verified
-- ⭐ Featured
-
-### Районы (lookup_values: district) - 22 района
-Все 22 района Пхукета уже в базе с иконками.
+**Вывод:** Данные уже связаны! Можно сразу показывать rent_count / sale_count.
 
 ---
 
@@ -113,31 +100,36 @@
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│  PropertyIndex.tsx                                                          │
+│  НОВЫЕ КОМПОНЕНТЫ                                                           │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
-│  ┌───────────────────────────────────────────────────────────────────────┐ │
-│  │  PropertyTypeSelector (NEW)                                           │ │
-│  │  ├─ [Все] [Кондо] [Вилла]   ← приоритетные таблетки                  │ │
-│  │  └─ [📋 Ещё ▾]              ← DropdownMenu с остальными              │ │
-│  └───────────────────────────────────────────────────────────────────────┘ │
+│  1. ProjectPromoSection.tsx (NEW)                                           │
+│     ├─ Промо-заголовок (адаптивный по персоне)                             │
+│     ├─ ProjectCarousel (горизонтальная карусель)                           │
+│     └─ CTA "Смотреть все комплексы"                                        │
 │                                                                             │
-│  ┌───────────────────────────────────────────────────────────────────────┐ │
-│  │  BedroomChips (NEW)                                                   │ │
-│  │  └─ Scrollable FilterChip[] с multi-select                           │ │
-│  └───────────────────────────────────────────────────────────────────────┘ │
+│  2. ProjectCarouselCard.tsx (NEW)                                           │
+│     ├─ Фото обложки (aspect 16:9)                                          │
+│     ├─ Название + район                                                     │
+│     ├─ Badges: X rent | Y sale                                              │
+│     └─ Мин. цена "от ฿..."                                                  │
 │                                                                             │
-│  ┌───────────────────────────────────────────────────────────────────────┐ │
-│  │  QuickFiltersRibbon (ОБНОВИТЬ)                                        │ │
-│  │  ├─ Теги (property_highlight) ← уже работает                         │ │
-│  │  ├─ ─────────────────────── separator ───────────────────────        │ │
-│  │  └─ Локации (district) ← добавить                                    │ │
-│  └───────────────────────────────────────────────────────────────────────┘ │
+│  3. usePropertyProjectsWithStats.ts (NEW hook)                              │
+│     └─ Агрегация rent_count, sale_count, min_rent_price                    │
 │                                                                             │
-│  ┌───────────────────────────────────────────────────────────────────────┐ │
-│  │  ProjectChips (уже есть)                                              │ │
-│  │  └─ property_projects                                                 │ │
-│  └───────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  ОБНОВЛЯЕМЫЕ ФАЙЛЫ                                                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  4. PropertyIndex.tsx (UPDATE)                                              │
+│     ├─ Добавить ProjectPromoSection после типов                            │
+│     └─ Убрать старые чипы комплексов из QuickFiltersRibbon                 │
+│                                                                             │
+│  5. ProjectsIndex.tsx (UPDATE)                                              │
+│     └─ Deep-link scroll к выбранному комплексу (?highlight=id)             │
+│                                                                             │
+│  6. QuickFiltersRibbon.tsx (UPDATE)                                         │
+│     └─ Удалить секцию проектов (переносится в карусель)                    │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -146,147 +138,159 @@
 
 ## Фазы реализации
 
-### Фаза 1: Новый компонент PropertyTypeSelector
+### Фаза 1: Новый хук с агрегацией данных
 
-**Файл: `src/components/property/PropertyTypeSelector.tsx`** (новый)
-
-Компонент с приоритетными типами + dropdown:
+**Файл:** `src/hooks/usePropertyProjectsWithStats.ts`
 
 ```typescript
-interface PropertyTypeSelectorProps {
-  selectedType: string;
-  onTypeChange: (type: string) => void;
-  propertyTypes: FilterOption[];
-  language: string;
+interface ProjectWithStats {
+  id: string;
+  nameEn: string;
+  nameRu: string;
+  coverImage: string | null;
+  district: string | null;
+  isFeatured: boolean;
+  rentCount: number;
+  saleCount: number;
+  minRentPrice: number | null;
+  minSalePrice: number | null;
 }
 
-// Приоритетные типы (показываем как таблетки)
-const priorityTypes = ['all', 'condo', 'villa'];
-
-// Остальные уходят в dropdown "Ещё типы"
-```
-
-**Компоненты:**
-- 3 таблетки: Все, Кондо, Вилла
-- DropdownMenu с остальными типами (Apartment, Townhouse, House, Penthouse, Studio, Bungalow)
-- При выборе из dropdown, показывать активный тип вместо "Ещё типы"
-
-### Фаза 2: Компонент BedroomChips
-
-**Файл: `src/components/property/BedroomChips.tsx`** (новый)
-
-Inline чипы для выбора спален:
-
-```typescript
-interface BedroomChipsProps {
-  selectedBedrooms: string[];
-  onBedroomsChange: (bedrooms: string[]) => void;
-  language: string;
-}
-```
-
-**Дизайн:**
-- Лейбл "Спальни:" слева
-- Горизонтальный scroll с FilterChip
-- Multi-select (можно выбрать несколько)
-- Компактный размер (size="sm")
-
-### Фаза 3: Обновление QuickFiltersRibbon
-
-**Файл: `src/hooks/usePropertyQuickFilters.ts`**
-
-Добавить загрузку районов:
-
-```typescript
-// Добавить в hook
-const { data: districts } = await supabase
-  .from('lookup_values')
-  .select('id, value_key, value_en, value_ru, icon')
-  .eq('lookup_type', 'district')
-  .eq('is_active', true)
-  .order('sort_order');
-
-return {
-  quickFilters,      // теги (property_highlight)
-  districts,         // районы (district)
-  projects,          // комплексы
-  isLoading,
-};
-```
-
-**Файл: `src/components/property/QuickFiltersRibbon.tsx`**
-
-Добавить секцию локаций:
-
-```typescript
-{/* Tags (existing) */}
-<div className="flex gap-2 overflow-x-auto ...">
-  {quickFilters.map(...)}
-</div>
-
-{/* Separator */}
-{districts.length > 0 && (
-  <div className="flex items-center gap-2 mt-2">
-    <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
-    <div className="flex gap-2 overflow-x-auto ...">
-      {districts.map((district) => (
-        <FilterChip
-          key={district.id}
-          label={language === 'ru' ? district.labelRu : district.labelEn}
-          icon={district.icon}
-          isActive={selectedDistricts.includes(district.id)}
-          onToggle={() => onDistrictToggle(district.id)}
-          size="sm"
-        />
-      ))}
-    </div>
-  </div>
-)}
-```
-
-### Фаза 4: Обновление PropertyIndex
-
-**Файл: `src/pages/property/PropertyIndex.tsx`**
-
-1. Заменить текущий ScrollArea с типами на PropertyTypeSelector
-2. Добавить BedroomChips после типов
-3. Обновить props для QuickFiltersRibbon
-4. Синхронизировать фильтры спален с filterValues
-
-```typescript
-// Новые состояния
-const [selectedBedrooms, setSelectedBedrooms] = useState<string[]>([]);
-const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
-
-// В JSX
-<PropertyTypeSelector
-  selectedType={selectedType}
-  onTypeChange={setSelectedType}
-  propertyTypes={propertyTypes}
-  language={language}
-/>
-
-<BedroomChips
-  selectedBedrooms={selectedBedrooms}
-  onBedroomsChange={setSelectedBedrooms}
-  language={language}
-/>
-
-<QuickFiltersRibbon
-  selectedFilters={quickFilters}
-  selectedDistricts={selectedDistricts}
-  onDistrictToggle={(id) => {
-    setSelectedDistricts(prev => 
-      prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]
-    );
-  }}
-  {...otherProps}
-/>
+// SQL-запрос с агрегацией (как мы проверили выше — работает!)
+SELECT 
+  pp.id, pp.name_en, pp.name_ru, pp.cover_image, pp.district, pp.is_featured,
+  COUNT(p.id) FILTER (WHERE p.listing_type = 'rent') as rent_count,
+  COUNT(p.id) FILTER (WHERE p.listing_type = 'sale') as sale_count,
+  MIN(p.price) FILTER (WHERE p.listing_type = 'rent') as min_rent_price,
+  MIN(p.price) FILTER (WHERE p.listing_type = 'sale') as min_sale_price
+FROM property_projects pp
+LEFT JOIN properties p ON p.project_id = pp.id AND p.is_active = true
+WHERE pp.is_active = true
+GROUP BY pp.id
+ORDER BY pp.is_featured DESC, pp.name_en
 ```
 
 ---
 
-## Визуальный макет (мобильная версия)
+### Фаза 2: Карточка комплекса для карусели
+
+**Файл:** `src/components/property/ProjectCarouselCard.tsx`
+
+Компактная карточка для горизонтальной карусели:
+
+```text
+┌───────────────────────────────────────┐
+│  [Фото комплекса - 16:9]              │
+│                                       │
+│  ⭐ Featured (если is_featured)       │
+└───────────────────────────────────────┘
+  Patong Tower Residence
+  📍 Patong
+  
+  🏠 6 rent  |  💰 1 sale
+  от ฿12,000/мес
+```
+
+**Характеристики:**
+- Ширина фиксированная: 280px (мобильная) / 320px (десктоп)
+- Клик → переход на `/complexes?highlight={id}`
+- Hover эффект: lift + shadow
+
+---
+
+### Фаза 3: Промо-секция с каруселью
+
+**Файл:** `src/components/property/ProjectPromoSection.tsx`
+
+```typescript
+interface ProjectPromoSectionProps {
+  className?: string;
+}
+
+// Адаптивный заголовок по персоне пользователя
+const getPromoText = (personas: UserPersona[], isRu: boolean) => {
+  const isInvestor = personas.includes('property_owner');
+  
+  if (isInvestor) {
+    return {
+      title: isRu ? 'Инвестиционные проекты Пхукета' : 'Phuket Investment Projects',
+      subtitle: isRu ? 'Выберите комплекс для прибыльных вложений' : 'Choose a complex for profitable investment',
+    };
+  }
+  
+  return {
+    title: isRu ? 'Ищете жильё для отпуска или инвестиций?' : 'Looking for vacation or investment property?',
+    subtitle: isRu ? 'Посмотрите наши жилые комплексы!' : 'Check out our residential complexes!',
+  };
+};
+```
+
+**Структура:**
+1. Градиентный фон (primary/5 → accent/5)
+2. Иконка + Заголовок + Подзаголовок
+3. Горизонтальная карусель ProjectCarouselCard[]
+4. CTA кнопка "Смотреть все комплексы →"
+
+---
+
+### Фаза 4: Deep-link в каталоге комплексов
+
+**Файл:** `src/pages/property/ProjectsIndex.tsx`
+
+При переходе с `/property` на `/complexes?highlight=abc123`:
+1. Найти карточку с данным ID
+2. scrollIntoView({ behavior: 'smooth', block: 'center' })
+3. Добавить кратковременную анимацию highlight (ring-2 ring-primary)
+
+```typescript
+const [searchParams] = useSearchParams();
+const highlightId = searchParams.get('highlight');
+
+useEffect(() => {
+  if (highlightId) {
+    const element = document.getElementById(`project-${highlightId}`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      element.classList.add('ring-2', 'ring-primary', 'animate-pulse');
+      setTimeout(() => {
+        element.classList.remove('animate-pulse');
+      }, 2000);
+    }
+  }
+}, [highlightId]);
+```
+
+---
+
+### Фаза 5: Интеграция в PropertyIndex
+
+**Файл:** `src/pages/property/PropertyIndex.tsx`
+
+Расположение компонентов:
+
+```text
+<AirbnbSearchBar />
+<PropertyTypeSelector />  ← Типы (Все/Кондо/Вилла/Ещё)
+
+<ProjectPromoSection />   ← НОВЫЙ БЛОК
+
+<BedroomChips />          ← Спальни
+<QuickFiltersRibbon />    ← Теги + Локации (БЕЗ проектов!)
+
+<PropertyCards />         ← Результаты
+```
+
+---
+
+### Фаза 6: Очистка QuickFiltersRibbon
+
+**Файл:** `src/components/property/QuickFiltersRibbon.tsx`
+
+Удалить секцию "Projects / Complexes Section" (строки 93-123), так как комплексы теперь в визуальной карусели.
+
+---
+
+## Визуальный макет (мобильный)
 
 ```text
 ┌─────────────────────────────────────────────────┐
@@ -298,20 +302,29 @@ const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
 │                                                 │
 │  [Все] [🏢 Кондо] [🏡 Вилла] [📋 Ещё▾] [⚙️]   │
 │                                                 │
+│  ┌─────────────────────────────────────────┐    │
+│  │ 🏢 Ищете жильё для отпуска              │    │
+│  │    или инвестиций?                      │    │
+│  │                                         │    │
+│  │ ┌───────────┐ ┌───────────┐ ┌────────   │    │
+│  │ │ [Фото]    │ │ [Фото]    │ │ [Фото]   │    │
+│  │ │ Patong    │ │ Laguna    │ │ Rawai   →│    │
+│  │ │ Tower     │ │ Park      │ │ Beach    │    │
+│  │ │ ─────     │ │ ─────     │ │ ─────    │    │
+│  │ │ 6 rent    │ │ 4 rent    │ │ 4 rent   │    │
+│  │ │ 1 sale    │ │           │ │ 1 sale   │    │
+│  │ │ от ฿12K   │ │ от ฿42K   │ │ от ฿15K  │    │
+│  │ └───────────┘ └───────────┘ └────────   │    │
+│  │                                         │    │
+│  │ [Смотреть все комплексы →]              │    │
+│  └─────────────────────────────────────────┘    │
+│                                                 │
 │  Спальни:                                       │
 │  [Студия] [1] [2] [3] [4] [5+]                 │
 │                                                 │
-│  [⚡ Instant] [🏖️ У пляжа] [🌊 Sea View]       │
-│  [🐕 Pet] [🏊 Pool] [✅ Verified] ...           │
+│  [⚡ Instant] [🏖️ У пляжа] [🌊 Sea View]...    │
 │                                                 │
-│  📍 [Patong] [Kata] [Kamala] [Rawai]           │
-│     [Surin] [Bang Tao] ...                      │
-│                                                 │
-│  🏢 Комплексы:                                  │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐        │
-│  │ Blue Tree│ │ VIP Kata │ │ Botanica │ →      │
-│  │ 23 ед.   │ │ 8 ед.    │ │ 12 ед.   │        │
-│  └──────────┘ └──────────┘ └──────────┘        │
+│  📍 [Patong] [Kata] [Kamala] [Rawai]...        │
 │                                                 │
 │  ─────────────────────────────────────────────  │
 │  45 объектов найдено            📍 На карте   │
@@ -320,12 +333,7 @@ const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
 │  │ [Фото виллы]                   ❤️       │    │
 │  │ ⚡ Мгновенное                           │    │
 │  └─────────────────────────────────────────┘    │
-│  Kamala                              ⭐ 4.9    │
-│  Luxury Ocean View Villa                       │
-│  4 спален · 3 ванных · 8 гостей               │
-│  ฿85,000/мес                                   │
-│  ⚡ Забронировать сейчас                       │
-│                                                 │
+│  ...                                            │
 └─────────────────────────────────────────────────┘
 ```
 
@@ -333,48 +341,26 @@ const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
 
 ## Файлы для изменения
 
-| Файл | Тип | Изменение |
-|------|-----|-----------|
-| `src/components/property/PropertyTypeSelector.tsx` | NEW | Приоритетные типы + dropdown |
-| `src/components/property/BedroomChips.tsx` | NEW | Inline чипы спален |
-| `src/hooks/usePropertyQuickFilters.ts` | UPDATE | + districts загрузка |
-| `src/components/property/QuickFiltersRibbon.tsx` | UPDATE | + секция локаций |
-| `src/pages/property/PropertyIndex.tsx` | UPDATE | Интеграция новых компонентов |
+| Файл | Тип | Описание |
+|------|-----|----------|
+| `src/hooks/usePropertyProjectsWithStats.ts` | NEW | Хук с агрегацией rent/sale count |
+| `src/components/property/ProjectCarouselCard.tsx` | NEW | Карточка для карусели |
+| `src/components/property/ProjectPromoSection.tsx` | NEW | Промо-блок с каруселью |
+| `src/pages/property/PropertyIndex.tsx` | UPDATE | Интеграция промо-секции |
+| `src/pages/property/ProjectsIndex.tsx` | UPDATE | Deep-link scroll + highlight |
+| `src/components/property/QuickFiltersRibbon.tsx` | UPDATE | Удаление чипов проектов |
+| `src/components/property/index.ts` | UPDATE | Экспорт новых компонентов |
 
 ---
 
-## Технические детали
+## Персона-адаптация
 
-### Props для QuickFiltersRibbon (расширение)
-
-```typescript
-interface QuickFiltersRibbonProps {
-  // Существующие
-  selectedFilters: string[];
-  selectedProjectId?: string | null;
-  onFilterToggle: (filterId: string) => void;
-  onProjectSelect: (projectId: string | null) => void;
-  
-  // Новые
-  selectedDistricts?: string[];
-  onDistrictToggle?: (districtId: string) => void;
-}
-```
-
-### Фильтрация по районам
-
-```typescript
-// В PropertyIndex useMemo для properties
-if (selectedDistricts.length > 0) {
-  const normalizedDistricts = selectedDistricts.map(d => normalizeForFilter(d));
-  if (!normalizedDistricts.some(d => 
-    normalizeForFilter(prop.district || '').includes(d) ||
-    d.includes(normalizeForFilter(prop.district || ''))
-  )) {
-    return false;
-  }
-}
-```
+| Персона | Заголовок промо-блока | Акцент карточки |
+|---------|----------------------|-----------------|
+| Турист | "Ищете жильё для отпуска?" | rent_count, min_rent_price |
+| Резидент | "Выберите комплекс для жизни" | rent_count, удобства |
+| Владелец | "Инвестиционные проекты" | sale_count, ROI метрики (future) |
+| Все | "Жильё для отпуска или инвестиций?" | rent + sale |
 
 ---
 
@@ -382,9 +368,9 @@ if (selectedDistricts.length > 0) {
 
 | Метрика | Значение |
 |---------|----------|
-| Новые файлы | 2 |
-| Обновляемые файлы | 3 |
-| Данные в БД | ✅ Уже готовы (22 тега, 22 района, 8 типов, 6 опций спален) |
-| Риск регрессии | Низкий - существующие чипы сохраняются |
-| UX улучшения | Приоритизация Кондо/Вилла, inline спальни, inline локации |
-
+| Новые файлы | 3 |
+| Обновляемые файлы | 4 |
+| Данные в БД | ✅ Готовы (6 проектов, 20+ связанных объектов) |
+| SQL-агрегация | ✅ Проверена |
+| Риск регрессии | Низкий — старые чипы заменяются, не удаляются фильтры |
+| UX улучшения | Визуальная карусель, промо-блок, deep-link навигация |
