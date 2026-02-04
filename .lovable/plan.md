@@ -1,86 +1,127 @@
 
-# План исправления оставшихся багов (v2)
+# План улучшений UX: Подсказки, Маркетплейс, Аренда недвижимости
 
-## Обзор
-Осталось исправить 5 категорий проблем: битые checkout-роуты, legacy-роуты `/water/*`, мёртвые файлы, и импорты в AnimatedRoutes.
-
----
-
-## Фаза 1: Исправление checkout-роутов в Cart.tsx
-
-**Проблема:** Cart.tsx ссылается на `/experiences/checkout` и `/yachts/checkout`, которых не существует.
-
-**Решение:** Перенаправлять на страницы бронирования с ID:
-- `tour` → `/experiences/:id/book` (используя ID первого товара)
-- `activity` → `/experiences/:id/book`  
-- `yacht` → `/yachts/:id/booking`
-
-```typescript
-// Изменения в handleCheckout()
-case 'tour':
-case 'activity':
-  if (firstItem.providerId) {
-    navigate(`/experiences/${firstItem.providerId}/book`);
-  } else {
-    navigate('/experiences');
-  }
-  break;
-case 'yacht':
-  if (firstItem.providerId) {
-    navigate(`/yachts/${firstItem.providerId}/booking`);
-  } else {
-    navigate('/yachts');
-  }
-  break;
-```
+## Обзор задач
+1. **Главная страница**: Добавить подсказку над переключателем «Услуги/Товары»
+2. **Маркетплейс**: Заменить пустой блок баннерами на богатый `FeaturedBanner`
+3. **Аренда недвижимости**: Убрать инвестиционный контент с верха, добавить релевантные CTA
 
 ---
 
-## Фаза 2: Редиректы для legacy /water/* роутов
+## Фаза 1: Подсказка над переключателем (Index.tsx)
 
-**Проблема:** `/water/:id` и `/water/:id/book` всё ещё рендерят старые компоненты.
+**Проблема**: Пользователь не понимает, что переключатель меняет контент
 
-**Решение:** Добавить redirect-компоненты по аналогии с TourRedirect:
+**Решение**: Добавить микро-текст перед `ContentModeToggle`:
 
-```typescript
-// Новые редиректы
-const WaterDetailRedirect = () => {
-  const { id } = useParams();
-  return <Navigate to={`/experiences/${id}`} replace />;
-};
-const WaterBookRedirect = () => {
-  const { id } = useParams();
-  return <Navigate to={`/experiences/${id}/book`} replace />;
-};
-```
-
-И заменить роуты:
 ```tsx
-<Route path="/water/:id" element={<WaterDetailRedirect />} />
-<Route path="/water/:id/book" element={<WaterBookRedirect />} />
+{/* Перед ContentModeToggle */}
+<div className="text-center">
+  <p className="text-sm font-semibold text-foreground">
+    {isRu ? 'Что вы ищете сегодня?' : 'What are you looking for today?'}
+  </p>
+  <p className="text-xs text-muted-foreground mt-0.5">
+    {isRu ? 'Выберите: услуги или товары' : 'Choose: services or products'}
+  </p>
+</div>
 ```
+
+**Файл**: `src/pages/Index.tsx` (строки 160-173)
 
 ---
 
-## Фаза 3: Удаление legacy файлов
+## Фаза 2: Маркетплейс — Заменить пустой блок
 
-**Файлы для удаления:**
-1. `src/pages/tours/TourDetail.tsx` — заменён на `/experiences/:id`
-2. `src/pages/tours/TourBooking.tsx` — заменён на `/experiences/:id/book`
-3. `src/pages/water/WaterActivityDetail.tsx` — заменён на `/experiences/:id`
-4. `src/pages/water/WaterActivityBooking.tsx` — заменён на `/experiences/:id/book`
+**Проблема**: Текущие «Promo Banners» (строки 326-358) — два маленьких бокса, которые выглядят «пустыми»
+
+**Решение**: Заменить на компонент `FeaturedBanner`, который уже есть:
+
+```tsx
+import { FeaturedBanner } from '@/components/market/FeaturedBanner';
+
+// Заменить promo grid на:
+<div className="py-3 max-w-7xl mx-auto px-4">
+  <FeaturedBanner
+    freeDeliveryThreshold={freeDeliveryThreshold}
+    estimatedTime={defaultZone?.estimated_time_minutes}
+    productCount={allProducts.length}
+    vendorCount={/* считать уникальных */}
+  />
+</div>
+```
+
+**Файл**: `src/pages/market/MarketIndex.tsx` (строки 326-358)
+
+**Дополнительно**: Добавить подсчёт уникальных вендоров из `allProducts`
 
 ---
 
-## Фаза 4: Очистка импортов в AnimatedRoutes.tsx
+## Фаза 3: Аренда — Рефакторинг ProjectPromoSection
 
-Удалить lazy-импорты:
-```diff
-- const TourDetail = lazy(() => import('@/pages/tours/TourDetail'));
-- const TourBooking = lazy(() => import('@/pages/tours/TourBooking'));
-- const WaterActivityDetail = lazy(() => import('@/pages/water/WaterActivityDetail'));
-- const WaterActivityBooking = lazy(() => import('@/pages/water/WaterActivityBooking'));
+**Проблема**: `ProjectPromoSection` показывает инвестиционный контент в режиме аренды — это сбивает с толку
+
+### 3.1 Добавить `mode` prop в ProjectPromoSection
+
+```tsx
+interface ProjectPromoSectionProps {
+  className?: string;
+  mode?: 'rent' | 'buy'; // NEW
+}
 ```
+
+**Логика по режимам**:
+- `rent`: 
+  - Заголовок: «Лучшие комплексы для аренды» 
+  - Показывать проекты со `status: completed` и высоким `rentCount`
+  - CTA: «Смотреть все комплексы»
+- `buy`:
+  - Заголовок: «Жилые комплексы Пхукета»
+  - Показывать все проекты (включая offplan)
+  - CTA: «Смотреть все комплексы»
+
+**Файл**: `src/components/property/ProjectPromoSection.tsx`
+
+### 3.2 Передать mode из PropertyIndex
+
+```tsx
+<ProjectPromoSection mode={propertyMode} />
+```
+
+**Файл**: `src/pages/property/PropertyIndex.tsx` (строка 289)
+
+---
+
+## Фаза 4: Новые CTA для новостроек (внизу страницы аренды)
+
+**Добавить новый компонент**: `OffplanCTASection`
+
+```tsx
+// Новый компонент src/components/property/OffplanCTASection.tsx
+
+export function OffplanCTASection({ className }: { className?: string }) {
+  // Содержит:
+  // 1. Заголовок: "Интересуют новостройки Пхукета?"
+  // 2. Подзаголовок: "Проверьте надёжность проекта с экспертизой muUNO"
+  // 3. Три фича-пункта:
+  //    - "Узнать реальную доходность" → /invest
+  //    - "Проверить риски застройщика" → /offplan
+  //    - "Получить экспертную консультацию" → opens lead form
+  // 4. Два CTA-кнопки:
+  //    - Primary: "Смотреть новостройки" → /offplan
+  //    - Secondary: "Помочь подобрать" → opens consultation form
+}
+```
+
+**Расположение в PropertyIndex**: Перед `CrossSellSection` (после грида объектов)
+
+```tsx
+{/* После property grid, перед CrossSellSection */}
+<OffplanCTASection className="mt-8" />
+
+<CrossSellSection currentVertical="property" className="mt-8 px-4" />
+```
+
+**Файл**: `src/pages/property/PropertyIndex.tsx` (после строки 456)
 
 ---
 
@@ -88,19 +129,18 @@ const WaterBookRedirect = () => {
 
 | Файл | Действие |
 |------|----------|
-| `src/pages/Cart.tsx` | Исправить checkout-логику |
-| `src/components/layout/AnimatedRoutes.tsx` | Удалить импорты, добавить редиректы |
-| `src/pages/tours/TourDetail.tsx` | **УДАЛИТЬ** |
-| `src/pages/tours/TourBooking.tsx` | **УДАЛИТЬ** |
-| `src/pages/water/WaterActivityDetail.tsx` | **УДАЛИТЬ** |
-| `src/pages/water/WaterActivityBooking.tsx` | **УДАЛИТЬ** |
-
-**Всего:** 2 файла на рефакторинг, 4 файла на удаление
+| `src/pages/Index.tsx` | Добавить подсказку над ContentModeToggle |
+| `src/pages/market/MarketIndex.tsx` | Заменить promo banners на FeaturedBanner |
+| `src/components/property/ProjectPromoSection.tsx` | Добавить mode prop, адаптивный контент |
+| `src/pages/property/PropertyIndex.tsx` | Передать mode, добавить OffplanCTASection |
+| `src/components/property/OffplanCTASection.tsx` | **НОВЫЙ** — блок CTA для новостроек |
 
 ---
 
 ## Результат
-- Все checkout-кнопки в корзине будут работать корректно
-- Legacy роуты `/water/:id` и `/tours/:id` будут редиректить на `/experiences`
-- Удалён мёртвый код (~500 строк)
-- Уменьшен размер бандла
+
+- ✅ Пользователь понимает выбор «Услуги/Товары»
+- ✅ Маркетплейс визуально насыщен с первого экрана
+- ✅ Аренда не смешивается с инвестиционным контентом
+- ✅ Новостройки продвигаются через CTA внизу страницы
+- ✅ Путь к проверке надёжности проекта через Investment Hub
