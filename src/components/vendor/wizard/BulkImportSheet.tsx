@@ -135,10 +135,20 @@ export function BulkImportSheet({
     if (result.errors.length > 0) {
       toast.error(isRu ? 'Ошибка парсинга CSV' : 'CSV parsing error');
       console.error('CSV errors:', result.errors);
+      // Don't return - continue with valid rows, but warn user
+    }
+    
+    // Filter out empty rows and ensure data exists
+    const validData = (result.data || []).filter((row: any) => 
+      row && typeof row === 'object' && Object.keys(row).length > 0
+    );
+    
+    if (validData.length === 0) {
+      toast.error(isRu ? 'Нет данных для импорта' : 'No data to import');
       return;
     }
 
-    const parsedRows: ImportRow[] = result.data.map((row: any, index) => {
+    const parsedRows: ImportRow[] = validData.map((row: any, index: number) => {
       const errors: string[] = [];
       
       // Validate required fields

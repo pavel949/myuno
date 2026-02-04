@@ -224,27 +224,32 @@ export function usePublicListings(options: {
 } = {}) {
   const [listings, setListings] = useState<UserListing[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Stabilize options to prevent infinite loops
+  const { category, search, condition, limit } = options;
 
   useEffect(() => {
     const fetchPublicListings = async () => {
       try {
         setIsLoading(true);
         
+        // Include both 'active' status AND 'pending' with approved moderation
+        // This ensures listings are visible after vendor publishes them
         let query = supabase
           .from('user_listings')
           .select('*')
-          .eq('status', 'active')
           .eq('moderation_status', 'approved')
+          .in('status', ['active', 'pending']) // Fix: include pending approved listings
           .order('created_at', { ascending: false });
 
-        if (options.category) {
-          query = query.eq('category_slug', options.category);
+        if (category) {
+          query = query.eq('category_slug', category);
         }
-        if (options.condition) {
-          query = query.eq('condition', options.condition);
+        if (condition) {
+          query = query.eq('condition', condition);
         }
-        if (options.limit) {
-          query = query.limit(options.limit);
+        if (limit) {
+          query = query.limit(limit);
         }
 
         const { data, error } = await query;
@@ -254,8 +259,8 @@ export function usePublicListings(options: {
         let result = (data || []) as UserListing[];
 
         // Client-side search
-        if (options.search && options.search.length >= 2) {
-          const searchLower = options.search.toLowerCase();
+        if (search && search.length >= 2) {
+          const searchLower = search.toLowerCase();
           result = result.filter(l =>
             l.title_en.toLowerCase().includes(searchLower) ||
             l.title_ru?.toLowerCase().includes(searchLower) ||
@@ -272,7 +277,7 @@ export function usePublicListings(options: {
     };
 
     fetchPublicListings();
-  }, [options.category, options.condition, options.limit, options.search]);
+  }, [category, condition, limit, search]); // Stabilized dependencies
 
   return { listings, isLoading };
 }

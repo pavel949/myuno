@@ -36,7 +36,8 @@ export function VendorLayout({ children }: VendorLayoutProps) {
             className="flex-1 overflow-y-auto overflow-x-hidden pb-safe md:pb-4"
             style={{ 
               WebkitOverflowScrolling: 'touch',
-              touchAction: 'pan-y pinch-zoom',
+              // Allow both vertical and horizontal gestures for nested scrollable content
+              touchAction: 'pan-x pan-y pinch-zoom',
               paddingBottom: 'max(env(safe-area-inset-bottom, 20px), 5rem)',
             }}
           >

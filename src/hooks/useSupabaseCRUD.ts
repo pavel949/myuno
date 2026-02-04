@@ -136,7 +136,8 @@ export function useSupabaseCRUD<T extends { id: string }>({
         setIsLoading(false);
       }
     }
-  }, [user, enabled, table, providerId, providerIdField, select, orderByColumn, orderAscending, additionalFilters, handleError]);
+  // Stringify additionalFilters to prevent infinite loop from unstable array reference
+  }, [user, enabled, table, providerId, providerIdField, select, orderByColumn, orderAscending, JSON.stringify(additionalFilters), handleError]);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -193,10 +194,15 @@ export function useSupabaseCRUD<T extends { id: string }>({
 
   const update = useCallback(async (id: string, data: Partial<T>) => {
     try {
+      // Auto-set updated_at timestamp
+      const updateData = {
+        ...data,
+        updated_at: new Date().toISOString(),
+      };
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: result, error: updateError } = await supabase
         .from(table as any)
-        .update(data)
+        .update(updateData)
         .eq('id', id)
         .select()
         .single();
