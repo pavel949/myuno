@@ -13,6 +13,7 @@ import { ImportTargetSelector } from '@/components/admin/data-import/ImportTarge
 import { FileImporter } from '@/components/admin/data-import/FileImporter';
 import { FieldMapper } from '@/components/admin/data-import/FieldMapper';
 import { ImportPreview } from '@/components/admin/data-import/ImportPreview';
+import { BusinessCardScanner } from '@/components/admin/data-import/BusinessCardScanner';
 import { 
   Database, 
   Upload, 
@@ -20,7 +21,8 @@ import {
   Globe,
   CheckCircle,
   ArrowRight,
-  RefreshCw
+  RefreshCw,
+  Camera
 } from 'lucide-react';
 
 export default function AdminDataImport() {
@@ -224,10 +226,14 @@ export default function AdminDataImport() {
             </CardHeader>
             <CardContent>
               <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-3 mb-4">
+                <TabsList className="grid w-full grid-cols-4 mb-4">
                   <TabsTrigger value="file">
                     <Upload className="h-4 w-4 mr-2" />
                     {language === 'ru' ? 'Файл' : 'File'}
+                  </TabsTrigger>
+                  <TabsTrigger value="scanner">
+                    <Camera className="h-4 w-4 mr-2" />
+                    {language === 'ru' ? 'Визитка' : 'Card'}
                   </TabsTrigger>
                   <TabsTrigger value="url" disabled>
                     <Link2 className="h-4 w-4 mr-2" />
@@ -235,7 +241,7 @@ export default function AdminDataImport() {
                   </TabsTrigger>
                   <TabsTrigger value="scrape" disabled>
                     <Globe className="h-4 w-4 mr-2" />
-                    {language === 'ru' ? 'Сайт' : 'Website'}
+                    {language === 'ru' ? 'Сайт' : 'Web'}
                   </TabsTrigger>
                 </TabsList>
                 
@@ -245,6 +251,14 @@ export default function AdminDataImport() {
                     parsedData={parsedData}
                     isLoading={isLoading}
                     onClear={handleReset}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="scanner">
+                  <BusinessCardScanner 
+                    onProviderCreated={(id) => {
+                      console.log('Provider created:', id);
+                    }}
                   />
                 </TabsContent>
                 
