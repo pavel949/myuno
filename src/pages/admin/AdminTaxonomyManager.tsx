@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,7 +15,9 @@ import {
   Database, 
   ChevronRight,
   Loader2,
-  FolderTree
+  FolderTree,
+  Bot,
+  FileText
 } from 'lucide-react';
 import { 
   useTaxonomyDefinitions, 
@@ -54,6 +57,8 @@ export default function AdminTaxonomyManager() {
 
   const totalValues = definitions.reduce((sum, d) => sum + d.value_count, 0);
 
+  const navigate = useNavigate();
+
   return (
     <AdminLayout>
       <div className="p-6 space-y-6">
@@ -62,6 +67,16 @@ export default function AdminTaxonomyManager() {
           <div>
             <h1 className="text-2xl font-bold">{t('Taxonomy Manager', 'Управление таксономиями')}</h1>
             <p className="text-muted-foreground">{t('Single source of truth for all platform categories', 'Единый источник всех категорий платформы')}</p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => navigate('/admin/intake-configs')}>
+              <Bot className="h-4 w-4 mr-2" />
+              {t('AI Intake Configs', 'AI Intake')}
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate('/admin/lead-configs')}>
+              <FileText className="h-4 w-4 mr-2" />
+              {t('Lead Forms', 'Лид-формы')}
+            </Button>
           </div>
         </div>
       {/* Stats Header */}
