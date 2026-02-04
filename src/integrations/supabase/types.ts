@@ -1758,6 +1758,57 @@ export type Database = {
         }
         Relationships: []
       }
+      category_suggestions: {
+        Row: {
+          admin_notes: string | null
+          category_name_en: string
+          category_name_ru: string | null
+          created_at: string
+          description: string | null
+          example_items: string | null
+          id: string
+          merged_to_category_id: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          suggestion_type: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          category_name_en: string
+          category_name_ru?: string | null
+          created_at?: string
+          description?: string | null
+          example_items?: string | null
+          id?: string
+          merged_to_category_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          suggestion_type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          category_name_en?: string
+          category_name_ru?: string | null
+          created_at?: string
+          description?: string | null
+          example_items?: string | null
+          id?: string
+          merged_to_category_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          suggestion_type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       chat_message_flags: {
         Row: {
           action_taken: string | null

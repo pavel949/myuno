@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -7,6 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { UserListingDraft } from '@/types/userListing';
 import { MarketplaceCategory } from '@/hooks/useMarketplace';
+import { CategorySuggestionDialog } from '@/components/category/CategorySuggestionDialog';
+import { Lightbulb, ArrowRight } from 'lucide-react';
+import { AITranslateButton } from '@/components/ui/AITranslateButton';
 
 interface SellBasicInfoStepProps {
   draft: UserListingDraft;
@@ -18,15 +21,26 @@ interface SellBasicInfoStepProps {
 export function SellBasicInfoStep({ draft, categories, onChange, onNext }: SellBasicInfoStepProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const [showSuggestionDialog, setShowSuggestionDialog] = useState(false);
   
   const isValid = draft.title_en.trim().length >= 3;
   
   return (
     <div className="space-y-6">
+      {/* Title field with AI translate */}
       <div className="space-y-2">
-        <Label htmlFor="title">
-          {isRu ? 'Название товара *' : 'Item title *'}
-        </Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="title">
+            {isRu ? 'Название товара *' : 'Item title *'}
+          </Label>
+          <AITranslateButton
+            sourceText={draft.title_ru || ''}
+            sourceLang="ru"
+            targetLang="en"
+            onTranslate={(text) => onChange({ title_en: text })}
+            size="sm"
+          />
+        </div>
         <Input
           id="title"
           placeholder={isRu ? 'Например: iPhone 15 Pro Max 256GB' : 'e.g., iPhone 15 Pro Max 256GB'}
@@ -38,14 +52,44 @@ export function SellBasicInfoStep({ draft, categories, onChange, onNext }: SellB
           {draft.title_en.length}/100
         </p>
       </div>
+
+      {/* Russian title (optional) */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="title_ru">
+            {isRu ? 'Название (на русском)' : 'Title (in Russian)'}
+          </Label>
+          <AITranslateButton
+            sourceText={draft.title_en}
+            sourceLang="en"
+            targetLang="ru"
+            onTranslate={(text) => onChange({ title_ru: text })}
+            size="sm"
+          />
+        </div>
+        <Input
+          id="title_ru"
+          placeholder={isRu ? 'Название на русском' : 'Russian title'}
+          value={draft.title_ru || ''}
+          onChange={(e) => onChange({ title_ru: e.target.value })}
+          maxLength={100}
+        />
+      </div>
       
+      {/* Category with suggestion option */}
       <div className="space-y-2">
         <Label htmlFor="category">
           {isRu ? 'Категория' : 'Category'}
         </Label>
         <Select
           value={draft.category_slug}
-          onValueChange={(value) => onChange({ category_slug: value })}
+          onValueChange={(value) => {
+            if (value === '__suggest__') {
+              setShowSuggestionDialog(true);
+            } else {
+              onChange({ category_slug: value });
+            }
+          }}
         >
           <SelectTrigger>
             <SelectValue placeholder={isRu ? 'Выберите категорию' : 'Select a category'} />
@@ -58,14 +102,39 @@ export function SellBasicInfoStep({ draft, categories, onChange, onNext }: SellB
                   {isRu ? category.name_ru : category.name_en}
                 </SelectItem>
               ))}
+            {/* Suggest category option */}
+            <SelectItem 
+              value="__suggest__" 
+              className="text-primary border-t mt-2 pt-2"
+            >
+              <span className="flex items-center gap-2">
+                <Lightbulb className="h-4 w-4" />
+                {isRu ? 'Предложить новую категорию' : 'Suggest a new category'}
+              </span>
+            </SelectItem>
           </SelectContent>
         </Select>
+        <p className="text-xs text-muted-foreground">
+          {isRu 
+            ? 'Не нашли подходящую? Предложите свою!' 
+            : "Can't find the right one? Suggest your own!"}
+        </p>
       </div>
       
+      {/* Description with AI translate */}
       <div className="space-y-2">
-        <Label htmlFor="description">
-          {isRu ? 'Описание' : 'Description'}
-        </Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="description">
+            {isRu ? 'Описание' : 'Description'}
+          </Label>
+          <AITranslateButton
+            sourceText={draft.description_ru || ''}
+            sourceLang="ru"
+            targetLang="en"
+            onTranslate={(text) => onChange({ description_en: text })}
+            size="sm"
+          />
+        </div>
         <Textarea
           id="description"
           placeholder={isRu 
@@ -80,6 +149,30 @@ export function SellBasicInfoStep({ draft, categories, onChange, onNext }: SellB
           {(draft.description_en || '').length}/2000
         </p>
       </div>
+
+      {/* Russian description */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="description_ru">
+            {isRu ? 'Описание (на русском)' : 'Description (in Russian)'}
+          </Label>
+          <AITranslateButton
+            sourceText={draft.description_en || ''}
+            sourceLang="en"
+            targetLang="ru"
+            onTranslate={(text) => onChange({ description_ru: text })}
+            size="sm"
+          />
+        </div>
+        <Textarea
+          id="description_ru"
+          placeholder={isRu ? 'Описание на русском' : 'Russian description'}
+          value={draft.description_ru || ''}
+          onChange={(e) => onChange({ description_ru: e.target.value })}
+          rows={3}
+          maxLength={2000}
+        />
+      </div>
       
       <Button 
         onClick={onNext} 
@@ -88,7 +181,15 @@ export function SellBasicInfoStep({ draft, categories, onChange, onNext }: SellB
         disabled={!isValid}
       >
         {isRu ? 'Продолжить' : 'Continue'}
+        <ArrowRight className="h-4 w-4 ml-2" />
       </Button>
+
+      {/* Category suggestion dialog */}
+      <CategorySuggestionDialog
+        open={showSuggestionDialog}
+        onOpenChange={setShowSuggestionDialog}
+        type="product"
+      />
     </div>
   );
 }

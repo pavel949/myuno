@@ -53,6 +53,7 @@ import {
   AlertTriangle,
   X,
   Languages,
+  Lightbulb,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
@@ -62,6 +63,7 @@ import { useCanonicalSubmit } from '@/hooks/useCanonicalSubmit';
 import { useCanonicalDraft } from '@/hooks/useCanonicalDraft';
 import { AITranslateButton } from '@/components/ui/AITranslateButton';
 import { TranslateAllButton } from '@/components/wizard/TranslateAllButton';
+import { CategorySuggestionDialog } from '@/components/category/CategorySuggestionDialog';
 
 // ==================== TYPES ====================
 
@@ -678,6 +680,7 @@ interface CategoryStepProps {
 function CategoryStep({ categories, selectedId, onSelect, isLocked, isRu }: CategoryStepProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [showSuggestionDialog, setShowSuggestionDialog] = useState(false);
   
   if (isLocked && selectedId) {
     return (
@@ -787,6 +790,36 @@ function CategoryStep({ categories, selectedId, onSelect, isLocked, isRu }: Cate
       <div className="space-y-1">
         {filteredCategories.map(cat => renderCategory(cat))}
       </div>
+
+      {/* Suggest category option - Etsy/Amazon style */}
+      <div className="pt-4 border-t">
+        <button
+          type="button"
+          onClick={() => setShowSuggestionDialog(true)}
+          className="w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors hover:bg-warning/10 border border-dashed border-warning/30"
+        >
+          <div className="p-2 rounded-full bg-warning/10">
+            <Lightbulb className="h-4 w-4 text-warning" />
+          </div>
+          <div className="flex-1">
+            <p className="font-medium text-warning">
+              {isRu ? 'Не нашли категорию?' : "Can't find your category?"}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {isRu ? 'Предложите свою, и мы добавим её!' : 'Suggest one and we\'ll add it!'}
+            </p>
+          </div>
+          <ChevronRight className="h-4 w-4 text-warning" />
+        </button>
+      </div>
+
+      {/* Category suggestion dialog */}
+      <CategorySuggestionDialog
+        open={showSuggestionDialog}
+        onOpenChange={setShowSuggestionDialog}
+        type="service"
+        initialName={searchQuery}
+      />
     </div>
   );
 }
