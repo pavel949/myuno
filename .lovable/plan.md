@@ -1,342 +1,271 @@
 
-# План: "Попросить myUNO оплатить за вас" — Concierge Advance Payment
+# План: Отображение авансовых кредитов (Concierge Advance) в кошельках и админ-панели
 
 ## Концепция
 
-Новый метод оплаты для клиентов, которые:
-- Не имеют тайских батов физически
-- Не имеют тайского банковского счёта
-- Хотят оплатить картой/криптой, но провайдер принимает только наличные
+Когда myUNO оплачивает за клиента (Concierge Advance), эта информация должна быть видна:
 
-**Схема работы:**
-1. Клиент выбирает "Попросить myUNO оплатить"
-2. Создаётся заказ со статусом `pending_advance`
-3. Создаётся запрос в `consultation_requests` (для координации)
-4. Админ получает уведомление и принимает решение
-5. Если одобрено → myUNO платит провайдеру наличными
-6. Клиент получает уведомление "Предоплата внесена" + ссылку на оплату UNO
-7. Клиент оплачивает UNO (карта/крипто/перевод) + 5% комиссия
-8. После получения денег → заказ `confirmed`
+1. **Клиенту в кошельке** — чтобы он знал о задолженности и мог её погасить
+2. **Админам в финансах** — чтобы отслеживать активные авансы и риски
 
 ---
 
-## Визуальный дизайн
+## Текущая архитектура
 
-```text
-ТЕКУЩИЕ МЕТОДЫ ОПЛАТЫ (FlowersOrder.tsx):
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  [ ] 💳 Из кошелька         Баланс: ฿5,000                                  │
-│  [●] 💳 Банковская карта    Visa, Mastercard, JCB                          │
-│  [ ] ฿  Наличными           Оплата при получении                           │
-└─────────────────────────────────────────────────────────────────────────────┘
+### Таблица orders
+```
+✅ status: pending_advance | awaiting_client_payment | confirmed
+✅ concierge_fee_amount: NUMERIC(10,2) — комиссия 5%
+✅ metadata: JSONB — содержит concierge_advance_requested, total_with_concierge_fee
+```
 
-ПОСЛЕ ДОБАВЛЕНИЯ:
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  [ ] 💳 Из кошелька         Баланс: ฿5,000                                  │
-│  [●] 💳 Банковская карта    Visa, Mastercard, JCB                          │
-│  [ ] ฿  Наличными           Оплата при получении                           │
-│                                                                              │
-│  ┌────────────────────────────────────────────────────────────────────────┐ │
-│  │  ✨ Попросить myUNO оплатить за вас                     +5% сервис    │ │
-│  │                                                                        │ │
-│  │  Нет батов? Нет тайского счёта?                                       │ │
-│  │  myUNO внесёт предоплату провайдеру, вы оплатите нам любым способом   │ │
-│  └────────────────────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────────────────┘
+### Таблица wallet_transactions
+```
+type: topup | payment | refund | bonus | cashback
+reference_type: orders | bookings | etc.
+reference_id: UUID связанного объекта
+```
+
+### consultation_requests
+```
+vertical_id: 'concierge_advance' — уже настроено
 ```
 
 ---
 
-## Поток данных
+## Фаза 1: Добавить тип транзакции "advance"
 
-```text
-                           Клиент                        Система                      Админ
-                              │                             │                           │
-     Выбрать "myUNO Advance"  │                             │                           │
-     ─────────────────────────┼────────────────────────────→│                           │
-                              │                             │                           │
-                              │   1. Создать Order          │                           │
-                              │      status: pending_advance│                           │
-                              │      payment_method: concierge│                         │
-                              │                             │                           │
-                              │   2. Создать Consultation   │                           │
-                              │      Request (vertical_id:  │                           │
-                              │      'concierge_advance')   │                           │
-                              │                             │                           │
-                              │   3. Уведомление админу     │                           │
-                              │────────────────────────────→│──────────────────────────→│
-                              │                             │                           │
-                              │                             │   4. Админ решает:        │
-                              │                             │      Approve / Decline    │
-                              │                             │←──────────────────────────│
-                              │                             │                           │
-                              │   5. Если Approve:          │                           │
-                              │   • myUNO платит провайдеру │                           │
-                              │   • Order: awaiting_client_payment                      │
-                              │   • Отправить клиенту ссылку│                           │
-                              │     на оплату + 5% fee      │                           │
-                              │←────────────────────────────│                           │
-                              │                             │                           │
-     6. Клиент оплачивает     │                             │                           │
-        UNO (карта/крипто)    │                             │                           │
-     ─────────────────────────┼────────────────────────────→│                           │
-                              │                             │                           │
-                              │   7. Order: confirmed       │                           │
-                              │   8. Уведомление клиенту    │                           │
-                              │←────────────────────────────│                           │
-```
-
----
-
-## Архитектура решения
-
-### Новые статусы заказа
-
-```sql
--- Добавить в order_status enum:
-ALTER TYPE public.order_status ADD VALUE IF NOT EXISTS 'pending_advance';
-ALTER TYPE public.order_status ADD VALUE IF NOT EXISTS 'awaiting_client_payment';
-```
-
-### Новый метод оплаты
+Для отображения кредитов в кошельке клиента добавим новый тип транзакции:
 
 ```typescript
-// В BookingPaymentSelect.tsx
-export type PaymentMethod = 'cash' | 'card' | 'wallet' | 'online' | 'promptpay' | 'concierge_advance';
-```
+// useWalletTransactions.ts
+export type TransactionType = 'topup' | 'payment' | 'refund' | 'bonus' | 'cashback' | 'advance';
 
-### Структура consultation_request для advance
-
-```typescript
-{
-  vertical_id: 'concierge_advance',
-  request_type: 'advance_payment',
-  entry_point: 'flowers_checkout', // или 'property_booking', 'yacht_booking'
-  vertical_metadata: {
-    order_id: 'uuid',
-    order_number: 'ORD-XXXX',
-    order_type: 'flowers',
-    base_amount: 2000,           // Сумма заказа
-    concierge_fee: 100,          // 5% комиссия
-    total_client_pays: 2100,     // Итого для клиента
-    provider_receives: 2000,     // Сколько получит провайдер
-    provider_name: 'Phuket Flowers',
-    delivery_address: '...',
-    delivery_date: '2024-02-05',
-    client_payment_method_preference: 'card_usd', // или 'crypto', 'wire_transfer'
-  },
-  status: 'new',
-  priority: 'high',
+// TransactionList.tsx — добавить конфиг:
+advance: {
+  icon: HandCoins, // или CreditCard
+  labelRu: 'Аванс myUNO',
+  labelEn: 'myUNO Advance',
+  colorClass: 'text-violet-500 bg-violet-500/10',
+  isPositive: false, // это долг
 }
 ```
 
 ---
 
-## Фазы реализации
-
-### Фаза 1: Миграция БД
-
-1. Добавить новые статусы в `order_status` enum
-2. Добавить `concierge_fee_amount` в `orders` таблицу
-3. Создать vertical 'concierge_advance' в `lookup_values`
-
-```sql
--- Новые статусы
-ALTER TYPE public.order_status ADD VALUE IF NOT EXISTS 'pending_advance';
-ALTER TYPE public.order_status ADD VALUE IF NOT EXISTS 'awaiting_client_payment';
-
--- Колонка для concierge fee
-ALTER TABLE orders ADD COLUMN IF NOT EXISTS concierge_fee_amount NUMERIC(10,2) DEFAULT 0;
-
--- Vertical для lead tracking
-INSERT INTO lookup_values (lookup_type, value_key, value_en, value_ru, icon, sort_order)
-VALUES ('vertical', 'concierge_advance', 'Concierge Advance', 'Аванс через консьержа', '💸', 20)
-ON CONFLICT (lookup_type, value_key) DO NOTHING;
-```
-
-### Фаза 2: Компонент ConciergeAdvanceOption
-
-Новый UI компонент для отображения опции:
+## Фаза 2: Хук для получения активных авансов пользователя
 
 ```typescript
-// src/components/booking/ConciergeAdvanceOption.tsx
+// src/hooks/useUserAdvances.ts
 
-interface ConciergeAdvanceOptionProps {
-  isSelected: boolean;
-  onSelect: () => void;
+interface UserAdvance {
+  orderId: string;
+  orderNumber: string;
   baseAmount: number;
-  feePercent?: number;  // default 5%
-  currency?: string;
+  conciergeFee: number;
+  totalDue: number;
+  currency: string;
+  status: 'pending_advance' | 'awaiting_client_payment';
+  createdAt: string;
+  vertical: string;
+  providerName?: string;
+}
+
+export function useUserAdvances() {
+  // Получить заказы со статусами pending_advance | awaiting_client_payment
+  // для текущего пользователя
+}
+```
+
+---
+
+## Фаза 3: Блок "Активные авансы" в кошельке
+
+Добавить новую секцию в `Wallet.tsx` после баланса:
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  💳 Баланс: ฿5,000                                                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  ⚠️ Активные авансы                                           Подробнее →  │
+│  ───────────────────────────────────────────────────────────────────────── │
+│                                                                             │
+│  📋 Заказ ORD-XXXX • Цветы                     Ожидает вашей оплаты         │
+│  ┌───────────────────────────────────────────────────────────────────────┐ │
+│  │  Сумма заказа:    ฿2,000                                              │ │
+│  │  Сервис myUNO (5%):  ฿100                                             │ │
+│  │  ─────────────────────────────────                                    │ │
+│  │  К оплате:        ฿2,100                                              │ │
+│  │                                                                        │ │
+│  │  myUNO внесла предоплату провайдеру.                                  │ │
+│  │  Пожалуйста, оплатите нам удобным способом.                           │ │
+│  │                                                                        │ │
+│  │  [Оплатить картой]  [Написать в WhatsApp]                             │ │
+│  └───────────────────────────────────────────────────────────────────────┘ │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Фаза 4: Компонент ActiveAdvancesCard
+
+```typescript
+// src/components/wallet/ActiveAdvancesCard.tsx
+
+interface ActiveAdvancesCardProps {
+  advances: UserAdvance[];
+  onPayClick: (advance: UserAdvance) => void;
 }
 
 // Показывает:
-// - Иконку ✨
-// - "Попросить myUNO оплатить за вас"
-// - Бейдж "+5% сервис"
-// - Объяснение: "Нет батов? myUNO внесёт предоплату..."
-// - Итоговую сумму с комиссией
-```
-
-### Фаза 3: Хук useConciergeAdvance
-
-```typescript
-// src/hooks/useConciergeAdvance.ts
-
-interface ConciergeAdvanceRequest {
-  orderId: string;
-  orderNumber: string;
-  orderType: string;
-  baseAmount: number;
-  currency: string;
-  providerName: string;
-  providerPhone?: string;
-  deliveryDetails: Record<string, unknown>;
-  clientPaymentPreference?: 'card' | 'crypto' | 'wire';
-}
-
-export function useConciergeAdvance() {
-  const createAdvanceRequest = async (params: ConciergeAdvanceRequest) => {
-    const feePercent = 0.05;
-    const conciergeFee = Math.round(params.baseAmount * feePercent * 100) / 100;
-    const totalClientPays = params.baseAmount + conciergeFee;
-    
-    // 1. Update order status
-    await supabase
-      .from('orders')
-      .update({
-        status: 'pending_advance',
-        concierge_fee_amount: conciergeFee,
-        metadata: {
-          ...existingMetadata,
-          concierge_advance_requested: true,
-          total_with_concierge_fee: totalClientPays,
-        }
-      })
-      .eq('id', params.orderId);
-    
-    // 2. Create consultation request
-    await supabase.from('consultation_requests').insert({
-      vertical_id: 'concierge_advance',
-      request_type: 'advance_payment',
-      entry_point: `${params.orderType}_checkout`,
-      vertical_metadata: {
-        order_id: params.orderId,
-        order_number: params.orderNumber,
-        base_amount: params.baseAmount,
-        concierge_fee: conciergeFee,
-        total_client_pays: totalClientPays,
-        provider_name: params.providerName,
-        delivery_details: params.deliveryDetails,
-      },
-      status: 'new',
-      priority: 'high',
-      currency: params.currency,
-      budget_min: params.baseAmount,
-    });
-    
-    // 3. Notify admin (WhatsApp + notification)
-    await notifyAdminAdvanceRequest(params);
-    
-    // 4. Return confirmation for UI
-    return { success: true, totalWithFee: totalClientPays };
-  };
-  
-  return { createAdvanceRequest };
-}
-```
-
-### Фаза 4: Интеграция в FlowersOrder.tsx
-
-```typescript
-// Добавить опцию в RadioGroup
-
-{/* Concierge Advance Option */}
-<ConciergeAdvanceOption
-  isSelected={formData.paymentMethod === 'concierge_advance'}
-  onSelect={() => setFormData({ ...formData, paymentMethod: 'concierge_advance' })}
-  baseAmount={finalTotal}
-  currency="THB"
-/>
-
-// В handleSubmit добавить ветку:
-if (formData.paymentMethod === 'concierge_advance') {
-  // 1. Создать заказ со статусом pending_advance
-  const result = await createOrder({
-    ...orderParams,
-    status: 'pending_advance',
-  });
-  
-  // 2. Создать advance request
-  await createAdvanceRequest({
-    orderId: result.order_id,
-    orderNumber: result.order_number,
-    orderType: 'flowers',
-    baseAmount: finalTotal,
-    providerName: firstProvider?.providerName,
-    deliveryDetails: {
-      address: formData.address,
-      date: formData.deliveryDate,
-      slot: formData.deliverySlot,
-    },
-  });
-  
-  // 3. Показать confirmation screen
-  navigate('/booking/advance-requested', { 
-    state: { 
-      orderNumber: result.order_number,
-      totalWithFee: finalTotal * 1.05,
-    } 
-  });
-}
-```
-
-### Фаза 5: Confirmation Screen
-
-Новая страница `/booking/advance-requested`:
-
-```text
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                                                                             │
-│                            ✅                                               │
-│                                                                             │
-│              Запрос на предоплату отправлен!                               │
-│                                                                             │
-│  ┌───────────────────────────────────────────────────────────────────────┐ │
-│  │  📋 Заказ: ORD-20240205-XXXX                                          │ │
-│  │  💰 Сумма: ฿2,000                                                     │ │
-│  │  ✨ Сервис myUNO (5%): ฿100                                           │ │
-│  │  ───────────────────────────────────────────────────────────────────  │ │
-│  │  💳 К оплате: ฿2,100                                                  │ │
-│  └───────────────────────────────────────────────────────────────────────┘ │
-│                                                                             │
-│  Что дальше?                                                               │
-│                                                                             │
-│  1. Команда myUNO рассмотрит ваш запрос (обычно 1-2 часа)                 │
-│  2. Мы свяжемся с вами для подтверждения                                   │
-│  3. После оплаты провайдеру, вы получите ссылку на оплату                 │
-│  4. Оплатите любым удобным способом (карта, крипто, перевод)              │
-│                                                                             │
-│  [Перейти к заказам]                                                       │
-│                                                                             │
-│  💬 Есть вопросы? Напишите нам в WhatsApp                                  │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
+// - Список активных авансов
+// - Статус каждого (ожидает одобрения / ожидает вашей оплаты)
+// - Сумму с разбивкой
+// - Кнопки действий
 ```
 
 ---
 
-## Где использовать
+## Фаза 5: Админ-панель — метрики авансов
 
-Эту опцию можно добавить во все вертикали, где есть cash payments:
+### Новые метрики в AdminFinance.tsx
 
-| Вертикаль | Файл | Актуально? |
-|-----------|------|------------|
-| **Flowers** | `FlowersOrder.tsx` | ✅ Да — подарки, срочность |
-| **Property Rental** | `DepositPaymentOptions.tsx` | ✅ Да — крупные суммы |
-| **Yacht Charter** | Booking flow | ✅ Да — крупные суммы |
-| **Tours** | `TourBookingCheckout.tsx` | ✅ Да — туристы без батов |
-| **Vehicle Rental** | Booking flow | ✅ Да |
-| **Services** | Various | ⚠️ Опционально |
+```text
+ТЕКУЩИЕ МЕТРИКИ:
+┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐
+│  GMV    │ │ Доход   │ │ Выплаты │ │К выплате│ │Подписки │ │Take Rate│
+└─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────┘
+
+ПОСЛЕ ДОБАВЛЕНИЯ:
+┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐
+│  GMV    │ │ Доход   │ │ Выплаты │ │К выплате│ │ АВАНСЫ  │ │Take Rate│
+└─────────┘ └─────────┘ └─────────┘ └─────────┘ │ ฿25,000 │ └─────────┘
+                                                │ 3 актив │
+                                                └─────────┘
+```
+
+### Обновить useAdminFinance.ts
+
+```typescript
+// Добавить в FinancialSummary:
+interface FinancialSummary {
+  // ... existing
+  activeAdvances: number;       // Сумма активных авансов
+  activeAdvancesCount: number;  // Кол-во
+  conciergeFeesPending: number; // Ожидаемый доход от комиссий 5%
+}
+
+// Новый запрос:
+const { data: advances } = await supabase
+  .from('orders')
+  .select('total_amount, concierge_fee_amount')
+  .in('status', ['pending_advance', 'awaiting_client_payment']);
+
+const activeAdvances = advances?.reduce((sum, o) => sum + (o.total_amount || 0), 0) || 0;
+const conciergeFeesPending = advances?.reduce((sum, o) => sum + (o.concierge_fee_amount || 0), 0) || 0;
+```
+
+---
+
+## Фаза 6: Вкладка "Авансы" в админ-финансах
+
+Добавить новую вкладку в `AdminFinance.tsx`:
+
+```typescript
+<TabsTrigger value="advances">Авансы</TabsTrigger>
+
+<TabsContent value="advances">
+  <ConciergeAdvancesTable />
+</TabsContent>
+```
+
+### Таблица активных авансов
+
+```text
+┌────────────────────────────────────────────────────────────────────────────────┐
+│  📋 Активные авансы                                       Всего: ฿25,000 (3)   │
+├────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  Заказ          │ Клиент        │ Сумма   │ Комиссия │ Статус    │ Дата        │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  ORD-XXXX       │ Иван П.       │ ฿10,000 │ ฿500     │ ⏳ Новый  │ 5 Feb 10:30 │
+│                 │ +7999...      │         │          │           │             │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  ORD-YYYY       │ Мария С.      │ ฿8,000  │ ฿400     │ ✅ Оплачен│ 4 Feb 15:00 │
+│                 │ +7999...      │         │ провайд. │           │             │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  ORD-ZZZZ       │ Alex K.       │ ฿7,000  │ ฿350     │ ⏳ Ожидает│ 3 Feb 09:15 │
+│                 │ alex@...      │         │          │ клиента   │             │
+│                                                                                 │
+└────────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Фаза 7: Добавить vertical в LEAD_VERTICALS
+
+Обновить `leadVerticalConfig.ts` для отображения в консультациях:
+
+```typescript
+// Добавить в LEAD_VERTICALS:
+{
+  id: 'concierge_advance',
+  icon: '💸',
+  nameEn: 'Concierge Advance',
+  nameRu: 'Консьерж-аванс',
+  shortDescEn: 'Advance payment request',
+  shortDescRu: 'Запрос на аванс',
+  ctaTextEn: 'Process Request',
+  ctaTextRu: 'Обработать запрос',
+  popularityScore: 0, // не показывать в FAB
+  requestTypes: [
+    { value: 'advance_payment', labelEn: 'Advance Payment', labelRu: 'Авансовый платёж' },
+  ],
+  fields: [],
+}
+```
+
+---
+
+## Фаза 8: Обновить REQUEST_TYPE_CONFIG в AdminConsultations
+
+```typescript
+// AdminConsultations.tsx
+const REQUEST_TYPE_CONFIG = {
+  // ... existing
+  advance_payment: { 
+    icon: HandCoins, 
+    labelRu: 'Аванс', 
+    labelEn: 'Advance', 
+    color: 'bg-violet-500' 
+  },
+};
+```
+
+---
+
+## Фаза 9: Запись транзакции после оплаты клиентом
+
+Когда админ подтверждает получение оплаты от клиента:
+
+```typescript
+// При изменении статуса на 'confirmed'
+await supabase.from('wallet_transactions').insert({
+  wallet_id: clientWalletId,
+  user_id: clientUserId,
+  type: 'payment', // или 'advance_repayment'
+  amount: totalWithFee,
+  currency: 'THB',
+  description: `Repayment for order ${orderNumber}`,
+  description_ru: `Оплата аванса по заказу ${orderNumber}`,
+  reference_type: 'concierge_advance',
+  reference_id: orderId,
+  status: 'completed',
+});
+```
 
 ---
 
@@ -344,39 +273,56 @@ if (formData.paymentMethod === 'concierge_advance') {
 
 | Файл | Тип | Описание |
 |------|-----|----------|
-| `supabase/migrations/xxx_concierge_advance.sql` | NEW | Новые статусы + колонка + vertical |
-| `src/components/booking/ConciergeAdvanceOption.tsx` | NEW | UI компонент опции |
-| `src/hooks/useConciergeAdvance.ts` | NEW | Логика создания запроса |
-| `src/pages/booking/AdvanceRequested.tsx` | NEW | Confirmation screen |
-| `src/components/booking/BookingPaymentSelect.tsx` | UPDATE | Добавить тип `concierge_advance` |
-| `src/pages/flowers/FlowersOrder.tsx` | UPDATE | Интегрировать опцию |
-| `src/components/layout/AnimatedRoutes.tsx` | UPDATE | Новый маршрут |
+| `src/hooks/useUserAdvances.ts` | NEW | Хук для получения авансов пользователя |
+| `src/components/wallet/ActiveAdvancesCard.tsx` | NEW | Блок активных авансов в кошельке |
+| `src/components/admin/ConciergeAdvancesTable.tsx` | NEW | Таблица авансов для админов |
+| `src/hooks/useWalletTransactions.ts` | UPDATE | Добавить тип 'advance' |
+| `src/components/wallet/TransactionList.tsx` | UPDATE | Конфиг для типа advance |
+| `src/pages/Wallet.tsx` | UPDATE | Добавить ActiveAdvancesCard |
+| `src/hooks/useAdminFinance.ts` | UPDATE | Метрики авансов |
+| `src/pages/admin/AdminFinance.tsx` | UPDATE | Карточка + вкладка авансов |
+| `src/lib/leadVerticalConfig.ts` | UPDATE | Вертикаль concierge_advance |
+| `src/pages/admin/AdminConsultations.tsx` | UPDATE | REQUEST_TYPE_CONFIG |
 
 ---
 
-## Уведомления клиенту
+## Визуальный пример: Кошелёк с авансом
 
-### При создании запроса
-> 📨 **Заголовок:** Запрос на предоплату принят  
-> **Тело:** Команда myUNO рассмотрит ваш запрос на оплату заказа ORD-XXXX. Мы свяжемся с вами в течение 2 часов.
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  💳 Баланс                                                                  │
+│  ฿5,000                                                                     │
+│  Используйте баланс для оплаты услуг                                        │
+└─────────────────────────────────────────────────────────────────────────────┘
 
-### При одобрении (после оплаты провайдеру)
-> 📨 **Заголовок:** Предоплата внесена!  
-> **Тело:** myUNO оплатила ваш заказ ORD-XXXX провайдеру. Пожалуйста, оплатите ฿2,100 (включая сервис 5%) любым удобным способом: [Ссылка на оплату]
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  ⚠️ У вас есть непогашенный аванс                                          │
+│  ───────────────────────────────────────────────────────────────────────── │
+│                                                                             │
+│  💸 myUNO оплатила за вас заказ на цветы                                   │
+│                                                                             │
+│  Сумма: ฿2,000 + сервис ฿100 = ฿2,100                                      │
+│                                                                             │
+│  ┌─────────────────────────────┐  ┌─────────────────────────────┐          │
+│  │  💳 Оплатить картой        │  │  💬 Связаться               │          │
+│  └─────────────────────────────┘  └─────────────────────────────┘          │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
 
-### При получении денег от клиента
-> 📨 **Заголовок:** Оплата получена  
-> **Тело:** Спасибо! Ваш заказ ORD-XXXX полностью оплачен и подтверждён.
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  [Пополнить] [Карты] [История]                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
 
----
-
-## Риски и митигация
-
-| Риск | Вероятность | Митигация |
-|------|-------------|-----------|
-| Клиент не оплачивает после advance | Средняя | 1. Требовать KYC для сумм >5000 THB<br>2. Лимит на первый заказ<br>3. Предоплата 50% от клиента перед advance |
-| Провайдер не выполняет заказ | Низкая | 1. Работа только с verified провайдерами<br>2. Escrow через ledger |
-| Задержка одобрения | Низкая | 1. SLA 2 часа для advance requests<br>2. Автоматическая эскалация |
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  📜 История операций                                                        │
+│  ───────────────────────────────────────────────────────────────────────── │
+│  5 Feb • 💸 Аванс myUNO                                    -฿2,100 (долг)   │
+│         Заказ ORD-XXXX                                                      │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│  4 Feb • ⬇️ Пополнение                                     +฿5,000          │
+│         Stripe                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -384,11 +330,10 @@ if (formData.paymentMethod === 'concierge_advance') {
 
 | Метрика | Значение |
 |---------|----------|
-| Миграции БД | 1 |
-| Новые компоненты | 2 |
-| Новые хуки | 1 |
-| Новые страницы | 1 |
-| Обновляемые файлы | 4 |
+| Новые хуки | 1 (useUserAdvances) |
+| Новые компоненты | 2 (ActiveAdvancesCard, ConciergeAdvancesTable) |
+| Обновляемые файлы | 7 |
+| Сложность | Средняя |
 | Риск регрессии | Низкий — additive changes |
 | Время реализации | ~2-3 часа |
 
@@ -396,11 +341,11 @@ if (formData.paymentMethod === 'concierge_advance') {
 
 ## Порядок реализации
 
-1. **Миграция БД** — статусы, колонка, vertical
-2. **useConciergeAdvance** — логика создания запроса
-3. **ConciergeAdvanceOption** — UI компонент
-4. **AdvanceRequested** — confirmation page
-5. **FlowersOrder** — интеграция (первый use case)
-6. **Тестирование** — проверка flow end-to-end
-7. **Документация** — инструкция для админов
-
+1. **useUserAdvances** — получение данных об авансах
+2. **ActiveAdvancesCard** — отображение в кошельке
+3. **Wallet.tsx** — интеграция карточки
+4. **useAdminFinance** — добавить метрики авансов
+5. **ConciergeAdvancesTable** — таблица для админов
+6. **AdminFinance.tsx** — карточка + вкладка
+7. **leadVerticalConfig + AdminConsultations** — конфиг вертикали
+8. **TransactionList** — отображение типа advance
