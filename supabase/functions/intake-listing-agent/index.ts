@@ -6,8 +6,15 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Vertical configurations (simplified for edge function)
-const VERTICALS = [
+// Vertical configurations - loaded from database with static fallback
+interface VerticalConfig {
+  id: string;
+  table: string;
+  keywords: string[];
+}
+
+// Static fallback for when DB is unavailable
+const STATIC_VERTICALS: VerticalConfig[] = [
   { id: 'yachts', table: 'yachts', keywords: ['yacht', 'яхта', 'boat', 'лодка', 'катер', 'charter', 'чартер', 'catamaran', 'катамаран', 'sailboat', 'парусник'] },
   { id: 'properties', table: 'properties', keywords: ['property', 'недвижимость', 'квартира', 'apartment', 'villa', 'вилла', 'condo', 'кондо', 'house', 'дом', 'rent', 'аренда', 'penthouse'] },
   { id: 'owner_properties', table: 'owner_properties', keywords: ['owner property', 'собственник', 'владелец', 'сдаю', 'my property', 'моя квартира'] },
@@ -33,6 +40,44 @@ const VERTICALS = [
   { id: 'marketplace_vendors', table: 'marketplace_vendors', keywords: ['vendor', 'продавец', 'seller', 'merchant', 'shop'] },
   { id: 'vendor_locations', table: 'vendor_locations', keywords: ['location', 'локация', 'branch', 'филиал', 'office', 'outlet'] },
 ];
+
+// Cache for loaded verticals (per-request scope)
+let cachedVerticals: VerticalConfig[] | null = null;
+
+/**
+ * Load vertical configs from database with static fallback
+ */
+async function loadVerticalConfigs(supabase: any): Promise<VerticalConfig[]> {
+  if (cachedVerticals) return cachedVerticals;
+
+  try {
+    const { data, error } = await supabase
+      .from('sys_intake_configs')
+      .select('vertical_id, target_table, keywords')
+      .eq('is_active', true)
+      .order('sort_order');
+
+    if (error || !data || data.length === 0) {
+      console.log('[INTAKE] Using static verticals fallback');
+      cachedVerticals = STATIC_VERTICALS;
+      return STATIC_VERTICALS;
+    }
+
+    const loaded: VerticalConfig[] = data.map((row: any) => ({
+      id: row.vertical_id,
+      table: row.target_table,
+      keywords: row.keywords || [],
+    }));
+
+    cachedVerticals = loaded;
+    console.log(`[INTAKE] Loaded ${loaded.length} verticals from DB`);
+    return loaded;
+  } catch (err) {
+    console.error('[INTAKE] Error loading verticals:', err);
+    cachedVerticals = STATIC_VERTICALS;
+    return STATIC_VERTICALS;
+  }
+}
 
 // URL detection regex
 const URL_REGEX = /https?:\/\/[^\s<>"{}|\\^`[\]]+/gi;
@@ -95,11 +140,11 @@ interface IntakeResponse {
 /**
  * Detect vertical from content using keyword matching + AI
  */
-function detectVerticalFromKeywords(content: string): { vertical: string; confidence: number } {
+function detectVerticalFromKeywords(content: string, verticals: VerticalConfig[]): { vertical: string; confidence: number } {
   const lowerContent = content.toLowerCase();
   const scores: Record<string, number> = {};
 
-  for (const v of VERTICALS) {
+  for (const v of verticals) {
     let score = 0;
     for (const keyword of v.keywords) {
       if (lowerContent.includes(keyword.toLowerCase())) {
@@ -200,7 +245,7 @@ async function extractFieldsWithAI(
   description: { en: string; ru: string };
   confidence: number;
 }> {
-  const verticalConfig = VERTICALS.find(v => v.id === vertical);
+  // Note: verticalConfig not used in current implementation but kept for future enhancements
   
   const systemPrompt = `You are a data extraction assistant for a marketplace platform. 
 Extract structured information from the provided content for a "${vertical}" listing.
@@ -378,16 +423,17 @@ async function processItem(
   sourceUrl: string | undefined,
   images: string[],
   forceVertical: string | undefined,
-  apiKey: string
+  apiKey: string,
+  verticals: VerticalConfig[]
 ): Promise<IntakeItem> {
   const id = crypto.randomUUID();
   
   // Detect vertical
   let verticalResult: { vertical: string; confidence: number };
-  if (forceVertical && VERTICALS.find(v => v.id === forceVertical)) {
+  if (forceVertical && verticals.find(v => v.id === forceVertical)) {
     verticalResult = { vertical: forceVertical, confidence: 0.99 };
   } else {
-    verticalResult = detectVerticalFromKeywords(content);
+    verticalResult = detectVerticalFromKeywords(content, verticals);
   }
 
   // Extract fields with AI
@@ -499,6 +545,9 @@ serve(async (req) => {
     const items: IntakeItem[] = [];
     const scrapedContent: Record<string, { title: string; content: string; metadata: Record<string, unknown> }> = {};
 
+    // Load vertical configs from DB (with fallback)
+    const verticals = await loadVerticalConfigs(supabase);
+
     // Process based on mode
     if (mode === 'bulk_urls' && urls && urls.length > 0) {
       // Scrape all URLs
@@ -509,7 +558,7 @@ serve(async (req) => {
         const content = scrapedContent[url];
         if (content) {
           const combinedContent = `${content.title}\n\n${content.content}`;
-          const item = await processItem(combinedContent, url, [], forceVertical, LOVABLE_API_KEY);
+          const item = await processItem(combinedContent, url, [], forceVertical, LOVABLE_API_KEY, verticals);
           items.push(item);
         } else {
           // Failed to scrape - create placeholder
@@ -535,7 +584,7 @@ serve(async (req) => {
         const content = Object.entries(row)
           .map(([k, v]) => `${k}: ${v}`)
           .join('\n');
-        const item = await processItem(content, undefined, [], forceVertical, LOVABLE_API_KEY);
+        const item = await processItem(content, undefined, [], forceVertical, LOVABLE_API_KEY, verticals);
         items.push(item);
       }
     } else if (rawText) {
@@ -551,7 +600,7 @@ serve(async (req) => {
         // Split into multiple items
         const textItems = splitBulkText(rawText);
         for (const text of textItems) {
-          const item = await processItem(text, undefined, images || [], forceVertical, LOVABLE_API_KEY);
+          const item = await processItem(text, undefined, images || [], forceVertical, LOVABLE_API_KEY, verticals);
           items.push(item);
         }
       } else {
@@ -560,7 +609,7 @@ serve(async (req) => {
         for (const [url, content] of Object.entries(scrapedContent)) {
           combinedContent += `\n\n--- Content from ${url} ---\n${content.title}\n${content.content}`;
         }
-        const item = await processItem(combinedContent, extractedUrls[0], images || [], forceVertical, LOVABLE_API_KEY);
+        const item = await processItem(combinedContent, extractedUrls[0], images || [], forceVertical, LOVABLE_API_KEY, verticals);
         items.push(item);
       }
     } else {
