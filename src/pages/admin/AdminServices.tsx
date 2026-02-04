@@ -88,12 +88,20 @@ export default function AdminServices() {
 
   const isRussian = language === 'ru';
 
-  // Open dialog if action=new in URL
+  // Handle URL params for provider-first workflow
+  const urlProviderId = searchParams.get('provider');
+  const urlAction = searchParams.get('action');
+
+  // Open dialog if action=new in URL, with provider context
   useEffect(() => {
-    if (searchParams.get('action') === 'new') {
+    if (urlAction === 'new') {
+      resetForm();
+      if (urlProviderId) {
+        setFormData(prev => ({ ...prev, provider_id: urlProviderId }));
+      }
       setIsDialogOpen(true);
     }
-  }, [searchParams]);
+  }, [urlAction, urlProviderId]);
 
   useEffect(() => {
     if (!authLoading && !user) {
