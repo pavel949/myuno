@@ -38,6 +38,7 @@ const VERTICAL_CATALOG_CONFIG: Record<TaxonomyVertical, {
   hierarchyChild?: string;
   path: string;
   queryParam?: string;
+  customHub?: boolean;  // For verticals with custom hub structure (e.g., property)
 }> = {
   yachts: { 
     primaryTaxonomy: 'yacht_type', 
@@ -66,9 +67,10 @@ const VERTICAL_CATALOG_CONFIG: Record<TaxonomyVertical, {
     queryParam: 'category',
   },
   property: { 
-    primaryTaxonomy: 'property_type', 
-    path: '/properties',
+    // Property uses custom hub structure instead of simple taxonomy
+    path: '/property',
     queryParam: 'type',
+    customHub: true, // Flag for special rendering
   },
   medical: { 
     primaryTaxonomy: 'clinic_specialty', 
@@ -191,6 +193,45 @@ export function useSuperAppCatalog() {
               path: `${config.path}?${config.queryParam}=${child.value}`,
             })),
         }));
+      } else if (config.customHub && vertical === 'property') {
+        // Property Hub: custom structure with Rent, Buy, Invest, Off-plan
+        children = [
+          {
+            id: 'property-rent',
+            value: 'rent',
+            label: language === 'ru' ? 'Аренда жилья' : 'Rentals',
+            icon: '🏠',
+            path: '/property?mode=rent',
+          },
+          {
+            id: 'property-buy',
+            value: 'buy',
+            label: language === 'ru' ? 'Покупка жилья' : 'Buy Property',
+            icon: '💰',
+            path: '/property?mode=buy',
+          },
+          {
+            id: 'property-invest',
+            value: 'invest',
+            label: language === 'ru' ? 'Инвестиции' : 'Investments',
+            icon: '📈',
+            path: '/invest',
+          },
+          {
+            id: 'property-offplan',
+            value: 'offplan',
+            label: language === 'ru' ? 'Новостройки' : 'Off-plan',
+            icon: '🏗️',
+            path: '/offplan',
+          },
+          {
+            id: 'property-complexes',
+            value: 'complexes',
+            label: language === 'ru' ? 'Жилые комплексы' : 'Complexes',
+            icon: '🏢',
+            path: '/complexes',
+          },
+        ];
       } else if (config.primaryTaxonomy) {
         // Simple list
         const options = taxonomyDataMap[config.primaryTaxonomy] || [];
