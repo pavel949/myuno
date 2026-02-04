@@ -150,8 +150,9 @@ const Index = () => {
           {/* ═══════════════════════════════════════════════════════════
               BLOCK 4: Quick Actions (persona-driven)
               6 buttons that change based on active persona
+              "More" button leads to /discover (services) or /market (products)
               ═══════════════════════════════════════════════════════════ */}
-          <QuickActionsGrid />
+          <QuickActionsGrid contentMode={contentMode} />
 
           {/* ═══════════════════════════════════════════════════════════
               BLOCK 5: Content Toggle + Category Ribbon
