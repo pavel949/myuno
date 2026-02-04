@@ -16,23 +16,29 @@ import { cn } from '@/lib/utils';
 
 interface ProjectPromoSectionProps {
   className?: string;
+  mode?: 'rent' | 'buy';
 }
 
-export function ProjectPromoSection({ className }: ProjectPromoSectionProps) {
+export function ProjectPromoSection({ className, mode = 'rent' }: ProjectPromoSectionProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { personas } = useUserPersonas();
   const { data: projects, isLoading } = usePropertyProjectsWithStats();
   const isRu = language === 'ru';
 
-  // Don't show if no projects
-  if (!isLoading && (!projects || projects.length === 0)) {
-    return null;
-  }
-
-  // Persona-adaptive promo text
+  // Mode-adaptive promo text
   const getPromoText = () => {
-    const isInvestor = personas.includes('property_owner');
+    if (mode === 'rent') {
+      return {
+        title: isRu ? 'Лучшие комплексы для аренды' : 'Best Complexes for Rent',
+        subtitle: isRu
+          ? 'Проверенные резиденции с инфраструктурой'
+          : 'Verified residences with full amenities',
+      };
+    }
+
+    // Buy mode - show investment angle
+    const isInvestor = personas.includes('property_owner') || personas.includes('investor');
 
     if (isInvestor) {
       return {
@@ -44,9 +50,7 @@ export function ProjectPromoSection({ className }: ProjectPromoSectionProps) {
     }
 
     return {
-      title: isRu
-        ? 'Ищете жильё для отпуска или инвестиций?'
-        : 'Looking for vacation or investment property?',
+      title: isRu ? 'Жилые комплексы Пхукета' : 'Phuket Residential Complexes',
       subtitle: isRu
         ? 'Посмотрите наши жилые комплексы!'
         : 'Check out our residential complexes!',
@@ -55,14 +59,32 @@ export function ProjectPromoSection({ className }: ProjectPromoSectionProps) {
 
   const { title, subtitle } = getPromoText();
 
-  // Sort: featured first, then by rent count
+  // Sort and filter based on mode
   const sortedProjects = React.useMemo(() => {
     if (!projects) return [];
-    return [...projects].sort((a, b) => {
+    
+    let filtered = [...projects];
+    
+    // In rent mode, prefer projects with high rent count
+    if (mode === 'rent') {
+      filtered = filtered.filter(p => p.rentCount > 0);
+    }
+    
+    return filtered.sort((a, b) => {
       if (a.isFeatured !== b.isFeatured) return b.isFeatured ? 1 : -1;
+      
+      if (mode === 'rent') {
+        return b.rentCount - a.rentCount;
+      }
+      
       return (b.rentCount + b.saleCount) - (a.rentCount + a.saleCount);
     });
-  }, [projects]);
+  }, [projects, mode]);
+
+  // Don't show if no projects (check after all hooks)
+  if (!isLoading && (!projects || projects.length === 0)) {
+    return null;
+  }
 
   return (
     <section

@@ -21,6 +21,7 @@ import { PropertyTypeSelector } from '@/components/property/PropertyTypeSelector
 import { BedroomChips } from '@/components/property/BedroomChips';
 import { ProjectPromoSection } from '@/components/property/ProjectPromoSection';
 import { PropertyModeToggle, PropertyMode } from '@/components/property/PropertyModeToggle';
+import { OffplanCTASection } from '@/components/property/OffplanCTASection';
 import { applyQuickFilters } from '@/hooks/usePropertyQuickFilters';
 import { matchesFilter, matchesSingleFilter, normalizeForFilter } from '@/lib/filterUtils';
 import { CrossSellSection } from '@/components/crosssell';
@@ -286,7 +287,7 @@ export default function PropertyIndex() {
 
         {/* Project Promo Section - Visual carousel of complexes */}
         <div className="container max-w-7xl mx-auto px-4 py-3">
-          <ProjectPromoSection />
+          <ProjectPromoSection mode={propertyMode} />
         </div>
 
         {/* Quick Filters Ribbon (Agoda/Airbnb style) */}
@@ -454,6 +455,9 @@ export default function PropertyIndex() {
               )}
             </div>
           )}
+
+          {/* Offplan CTA - Lead generation for new developments */}
+          <OffplanCTASection className="mt-8" />
 
           <CrossSellSection currentVertical="property" className="mt-8 px-4" />
 
