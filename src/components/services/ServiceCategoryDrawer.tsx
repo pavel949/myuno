@@ -7,7 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Menu, Search, X, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
-  ServiceCategoryAccordion,
+  SuperAppCatalogAccordion,
   ServiceQuickAccess,
   ProviderSection,
   ServiceDrawerFooter,
@@ -101,7 +101,7 @@ export function ServiceCategoryDrawer({ className }: ServiceCategoryDrawerProps)
                 {language === 'ru' ? 'Категории' : 'Categories'}
               </span>
             </div>
-            <ServiceCategoryAccordion 
+            <SuperAppCatalogAccordion 
               searchQuery={searchQuery} 
               onNavigate={handleNavigate} 
             />
