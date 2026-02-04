@@ -151,8 +151,8 @@ export default function FullManagement() {
         />
         
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
-          <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mb-6">
-            <CheckCircle className="w-10 h-10 text-green-500" />
+          <div className="w-20 h-20 rounded-full bg-success/20 flex items-center justify-center mb-6">
+            <CheckCircle className="w-10 h-10 text-success" />
           </div>
           
           <h2 className="text-2xl font-bold mb-2">
@@ -222,55 +222,28 @@ export default function FullManagement() {
           </CardContent>
         </Card>
 
-        {/* Benefits */}
-        <div className="space-y-3 mb-6">
-          <h3 className="font-semibold text-lg">
-            {isRu ? 'Почему выбирают нас' : 'Why Choose Us'}
-          </h3>
-          
+        {/* Benefits - Condensed */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
           {[
             { 
               icon: TrendingUp, 
               titleEn: 'Higher Occupancy', 
-              titleRu: 'Высокая заполняемость',
-              descEn: 'Average 85% occupancy rate across our portfolio',
-              descRu: 'Средняя заполняемость 85% по всему портфолио',
+              titleRu: 'Загрузка 85%',
             },
             { 
               icon: Shield, 
               titleEn: 'Verified Guests', 
-              titleRu: 'Проверенные гости',
-              descEn: 'We verify all guests and handle security deposits',
-              descRu: 'Проверяем всех гостей и управляем депозитами',
-            },
-            { 
-              icon: Clock, 
-              titleEn: '24/7 Support', 
-              titleRu: 'Поддержка 24/7',
-              descEn: 'Round-the-clock assistance for guests and owners',
-              descRu: 'Круглосуточная помощь гостям и собственникам',
-            },
-            { 
-              icon: Star, 
-              titleEn: '5-Star Service', 
-              titleRu: '5-звёздочный сервис',
-              descEn: 'Professional service that gets great reviews',
-              descRu: 'Профессиональный сервис с отличными отзывами',
+              titleRu: 'Проверка гостей',
             },
           ].map((benefit, idx) => (
             <Card key={idx}>
-              <CardContent className="flex items-start gap-3 p-4">
+              <CardContent className="flex items-center gap-3 p-3">
                 <div className="p-2 rounded-lg bg-primary/10">
-                  <benefit.icon className="w-5 h-5 text-primary" />
+                  <benefit.icon className="w-4 h-4 text-primary" />
                 </div>
-                <div>
-                  <h4 className="font-medium text-sm">
-                    {isRu ? benefit.titleRu : benefit.titleEn}
-                  </h4>
-                  <p className="text-xs text-muted-foreground">
-                    {isRu ? benefit.descRu : benefit.descEn}
-                  </p>
-                </div>
+                <span className="font-medium text-sm">
+                  {isRu ? benefit.titleRu : benefit.titleEn}
+                </span>
               </CardContent>
             </Card>
           ))}
