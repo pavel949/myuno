@@ -37,6 +37,7 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { ContentCreatorMenu } from '@/components/admin/ContentCreatorMenu';
 
 export default function AdminProviderDetail() {
   const { id } = useParams<{ id: string }>();
@@ -133,10 +134,17 @@ export default function AdminProviderDetail() {
           </div>
           <p className="text-muted-foreground text-sm">{provider.business_category}</p>
         </div>
-        <Button onClick={() => navigate(`/admin/providers?edit=${provider.id}`)}>
-          <Edit className="h-4 w-4 mr-2" />
-          {isRussian ? 'Редактировать' : 'Edit'}
-        </Button>
+        <div className="flex items-center gap-2">
+          <ContentCreatorMenu 
+            providerId={provider.id} 
+            providerName={provider.name}
+            size="sm"
+          />
+          <Button variant="outline" onClick={() => navigate(`/admin/providers?edit=${provider.id}`)}>
+            <Edit className="h-4 w-4 mr-2" />
+            {isRussian ? 'Редактировать' : 'Edit'}
+          </Button>
+        </div>
       </div>
 
       {/* Quick Stats */}
@@ -392,11 +400,20 @@ export default function AdminProviderDetail() {
         {/* Products Tab */}
         <TabsContent value="products" className="mt-4">
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base">{isRussian ? 'Товары' : 'Products'}</CardTitle>
-              <CardDescription>
-                {products.length} {isRussian ? 'товаров' : 'products'} ({activeProductsCount} {isRussian ? 'активных' : 'active'})
-              </CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-base">{isRussian ? 'Товары' : 'Products'}</CardTitle>
+                <CardDescription>
+                  {products.length} {isRussian ? 'товаров' : 'products'} ({activeProductsCount} {isRussian ? 'активных' : 'active'})
+                </CardDescription>
+              </div>
+              <Button 
+                size="sm" 
+                onClick={() => navigate(`/admin/marketplace/products?provider=${provider.id}&action=new`)}
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                {isRussian ? 'Добавить' : 'Add'}
+              </Button>
             </CardHeader>
             <CardContent>
               {products.length === 0 ? (
