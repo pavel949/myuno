@@ -1,190 +1,245 @@
 
-# Аудит и унификация премиального дизайна платформы
+# План: Подключение реальных объектов к карте недвижимости
 
-## Результаты технического аудита
+## Текущее состояние
 
-### Централизованная дизайн-система (Source of Truth)
-Платформа имеет хорошо структурированную систему токенов:
+**Проблема:** Карта `/property/map` использует захардкоженные демо-данные вместо реальных объектов из базы.
 
-| Файл | Назначение | Статус |
-|------|------------|--------|
-| `src/lib/designTokens.ts` | Токены карточек, теней, бейджей | Эталон |
-| `src/lib/motionPresets.ts` | Анимации и переходы | Эталон |
-| `src/index.css` | CSS-переменные, типографика | Эталон |
-
-**Канонические значения:**
-- Радиус карточек: `rounded-2xl` (16px)
-- Радиус компактных: `rounded-xl` (12px)
-- Тень по умолчанию: `shadow-sm`
-- Тень при наведении: `shadow-md`
-- Подъём при наведении: `hover:-translate-y-0.5`
-- Зум изображения: `group-hover:scale-[1.03]`
+**База данных:** В Supabase есть 13+ активных объектов с заполненными координатами (lat, lng) на Пхукете:
+- Kamala: 7.9489, 98.2856
+- Rawai: 7.7812, 98.3234 / 7.7751, 98.3255
+- Nai Harn: 7.7694, 98.3053
+- Chalong: 7.8356, 98.3378
+- Surin: 7.9769, 98.2783
+- Kata: 7.8203, 98.2981
+- и другие...
 
 ---
 
-## Выявленные несоответствия
+## Архитектура решения
 
-### 1. Рассинхрон теней (Shadow Drift)
+```text
+┌─────────────────────────────────────────────────────────────────────┐
+│  PropertyMap.tsx (БЫЛО)                                             │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  const demoProperties = [ ... захардкоженные данные ... ]           │
+│                    │                                                │
+│                    ▼                                                │
+│  <SalonMap salons={demoProperties} />                               │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
 
-| Компонент | Текущее | Каноническое | Проблема |
-|-----------|---------|--------------|----------|
-| `PropertyCard` (hero) | `hover:shadow-lg` | `hover:shadow-md` | Избыточная тень |
-| `ServiceProviderCard` | `hover:shadow-xl` | `hover:shadow-md` | Слишком тяжёлая |
-| `ProjectCard` (featured) | `hover:shadow-xl` | `hover:shadow-lg` | Допустимо для featured |
+                              ▼ ЗАМЕНА
 
-### 2. Разный "подъём" (Lift Effect)
-
-| Компонент | Текущее | Каноническое |
-|-----------|---------|--------------|
-| `ServiceProviderCard` | `hover:-translate-y-1` | `hover:-translate-y-0.5` |
-| `PropertyCard` | Отсутствует | `hover:-translate-y-0.5` |
-| `ItemCard` | Отсутствует | `hover:-translate-y-0.5` |
-
-### 3. Хардкод бейджей (Badge Hardcoding)
-
-| Компонент | Проблема | Решение |
-|-----------|----------|---------|
-| `ProductCard` | `bg-blue-500`, `bg-red-500` | Использовать `BADGE_STYLES.new`, `BADGE_STYLES.discount` |
-| `ProjectCard` | `bg-amber-500`, `bg-emerald-500` | Использовать `BADGE_SYSTEM.featured`, `BADGE_SYSTEM.new` |
-| `ListCard` | `bg-success`, `bg-gold` | Допустимо (семантические токены) |
-
-### 4. Отсутствие унификации вертикалей
-
-| Вертикаль | Текущий компонент | Проблема |
-|-----------|-------------------|----------|
-| Яхты | `ItemCard` | Упрощённый дизайн, нет backdrop-blur |
-| Транспорт | `ItemCard` | То же |
-| Experiences | Inline в странице | Не переиспользуемый |
+┌─────────────────────────────────────────────────────────────────────┐
+│  PropertyMap.tsx (СТАНЕТ)                                           │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  const { data: properties } = usePropertiesForMap()                 │
+│                    │                                                │
+│                    ▼  трансформация в SalonMarker[]                 │
+│  <SalonMap salons={propertyMarkers} icon="🏠" />                    │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## План исправлений
+## Фазы реализации
 
-### Фаза 1: Унификация теней и интерактивности
+### Фаза 1: Новый хук для карты
 
-**Файл: `src/components/property/PropertyCard.tsx`**
+**Файл: `src/hooks/useProperties.ts`**
 
-```text
-Строка 178: hover:shadow-lg → hover:shadow-md hover:-translate-y-0.5
-Строка 277: hover:shadow-md → hover:shadow-md hover:-translate-y-0.5
-Строка 471: hover:shadow-md → hover:shadow-md hover:-translate-y-0.5
-```
-
-**Файл: `src/components/services/ServiceProviderCard.tsx`**
-
-```text
-Строка 136: hover:shadow-xl hover:-translate-y-1 → hover:shadow-md hover:-translate-y-0.5
-Строка 57-62: hover:shadow-lg → hover:shadow-md
-```
-
-**Файл: `src/components/property/ProjectCard.tsx`**
-
-```text
-Строка 44: hover:shadow-xl → hover:shadow-lg hover:-translate-y-0.5 (featured допускает lg)
-Строка 144: hover:shadow-lg → hover:shadow-md hover:-translate-y-0.5
-```
-
-### Фаза 2: Централизация бейджей
-
-**Файл: `src/components/market/ProductCard.tsx`**
+Добавить специализированный хук для карты:
 
 ```typescript
-// Импорт в начало файла
-import { BADGE_STYLES } from '@/lib/designTokens';
-
-// Замены:
-// Строка 53: bg-blue-500 → BADGE_STYLES.new
-// Строка 58: bg-red-500 → BADGE_STYLES.discount
-// Строки 139-153: аналогично
+// Fetch properties with coordinates for map view
+export function usePropertiesForMap(filters: PropertyFilters = {}) {
+  return useQuery({
+    queryKey: ['properties-map', filters],
+    queryFn: async () => {
+      let query = supabase
+        .from('properties')
+        .select(`
+          id,
+          title_en,
+          title_ru,
+          lat,
+          lng,
+          price,
+          price_period,
+          currency,
+          property_type,
+          bedrooms,
+          cover_image,
+          rating,
+          district
+        `)
+        .eq('is_active', true)
+        .not('lat', 'is', null)
+        .not('lng', 'is', null);
+      
+      // Apply filters (type, district, price)
+      if (filters.propertyType && filters.propertyType !== 'all') {
+        query = query.eq('property_type', filters.propertyType);
+      }
+      if (filters.district) {
+        query = query.eq('district', filters.district);
+      }
+      
+      const { data, error } = await query;
+      if (error) throw error;
+      return (data || []) as PropertyMapItem[];
+    },
+  });
+}
 ```
 
-**Файл: `src/components/property/ProjectCard.tsx`**
+### Фаза 2: Обновление PropertyMap.tsx
+
+**Файл: `src/pages/property/PropertyMap.tsx`**
+
+1. Удалить `demoProperties`
+2. Импортировать `usePropertiesForMap`
+3. Трансформировать данные в формат `SalonMarker[]`
+4. Добавить состояние загрузки
 
 ```typescript
-// Импорт
-import { BADGE_SYSTEM } from '@/lib/designTokens';
-
-// Замены:
-// Строка 75: bg-amber-500 → BADGE_SYSTEM.featured
-// Строка 164: bg-amber-500 → BADGE_SYSTEM.featured
-// Строка 169: bg-emerald-500 → BADGE_SYSTEM.new
+// Трансформация property → SalonMarker
+const propertyMarkers: SalonMarker[] = (properties || []).map(p => ({
+  id: p.id,
+  name: p.title_en || 'Property',
+  nameRu: p.title_ru || 'Объект',
+  lat: p.lat!,
+  lng: p.lng!,
+  rating: p.rating || 0,
+  priceFrom: p.price || 0,
+  image: p.cover_image,
+}));
 ```
 
-### Фаза 3: Улучшение ItemCard
+### Фаза 3: Улучшение маркера
 
-**Файл: `src/components/miniapp/ItemCard.tsx`**
+**Файл: `src/components/map/SalonMap.tsx`**
+
+1. Добавить поддержку кастомной иконки через props
+2. Улучшить popup с изображением и ценой
 
 ```typescript
-// Добавить импорт
-import { DESIGN_TOKENS, CARD_STYLES } from '@/lib/designTokens';
+interface SalonMapProps {
+  salons: SalonMarker[];
+  onSalonSelect?: (salonId: string) => void;
+  userLocation?: { lat: number; lng: number } | null;
+  distanceFilter?: number;
+  className?: string;
+  icon?: string; // NEW: '🏠' для недвижимости, '💆' для салонов
+  iconBgColor?: string; // NEW: кастомный цвет фона
+}
 
-// Обновить классы карточек:
-// Строка 89: добавить hover:-translate-y-0.5
-// Строка 178-184: использовать CARD_STYLES.interactive
-// Добавить backdrop-blur на бейджи
+// Замена строки 162:
+<span class="text-white text-lg">${icon || '📍'}</span>
 ```
 
-### Фаза 4: Вынести ExperienceCard в общие компоненты
+### Фаза 4: Улучшенный popup
 
-**Новый файл: `src/components/experiences/ExperienceCard.tsx`**
+**Файл: `src/lib/sanitize.ts`**
 
-Извлечь inline-компонент из `ExperiencesIndex.tsx` (строки 26-152) в отдельный файл с использованием `DESIGN_TOKENS`.
+Расширить `createMapPopupHtml` для поддержки изображения:
+
+```typescript
+export function createMapPopupHtml(options: {
+  name: string;
+  rating?: number;
+  price?: string;
+  image?: string; // NEW
+}): string {
+  const { name, rating, price, image } = options;
+  return `
+    <div class="p-2 min-w-[180px]">
+      ${image ? `<img src="${escapeHtml(image)}" class="w-full h-24 object-cover rounded-lg mb-2" />` : ''}
+      <h3 class="font-semibold text-sm">${escapeHtml(name)}</h3>
+      <div class="flex items-center gap-2 mt-1">
+        ${rating ? `<span class="text-xs">⭐ ${rating}</span>` : ''}
+        ${price ? `<span class="text-xs text-muted-foreground">${price}</span>` : ''}
+      </div>
+    </div>
+  `;
+}
+```
 
 ---
 
-## Файлы для изменения
+## Новые/Изменяемые файлы
 
 | Файл | Изменение |
 |------|-----------|
-| `src/components/property/PropertyCard.tsx` | Тени + подъём |
-| `src/components/services/ServiceProviderCard.tsx` | Тени + подъём |
-| `src/components/property/ProjectCard.tsx` | Тени + бейджи |
-| `src/components/market/ProductCard.tsx` | Бейджи из токенов |
-| `src/components/miniapp/ItemCard.tsx` | Полная унификация |
-| `src/components/miniapp/ListCard.tsx` | Добавить подъём |
-
-## Новые файлы
-
-| Файл | Назначение |
-|------|------------|
-| `src/components/experiences/ExperienceCard.tsx` | Вынесенная карточка впечатлений |
+| `src/hooks/useProperties.ts` | + `usePropertiesForMap()` |
+| `src/pages/property/PropertyMap.tsx` | Реальные данные из Supabase |
+| `src/components/map/SalonMap.tsx` | + props `icon`, `iconBgColor` |
+| `src/lib/sanitize.ts` | Расширить popup с изображением |
 
 ---
 
-## Визуальный стандарт после унификации
+## Визуальный результат
 
 ```text
-┌─────────────────────────────────────────────────────────────┐
-│  КАНОНИЧЕСКАЯ КАРТОЧКА (Premium Standard)                   │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  Базовые классы:                                            │
-│  bg-card border border-border rounded-2xl                   │
-│  shadow-sm overflow-hidden group                            │
-│                                                             │
-│  Интерактивность:                                           │
-│  hover:shadow-md hover:-translate-y-0.5                     │
-│  active:scale-[0.98]                                        │
-│  transition-all duration-200                                │
-│                                                             │
-│  Изображение:                                               │
-│  group-hover:scale-[1.03] transition-transform duration-300 │
-│                                                             │
-│  Бейджи:                                                    │
-│  BADGE_STYLES.new | .hot | .discount | .featured            │
-│  backdrop-blur-sm shadow-sm                                 │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│  /property/map                                                      │
+├─────────────────────────────────────────────────────────────────────┤
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │                                                               │  │
+│  │      🏠 Kamala                                                │  │
+│  │           ↖ 95,000 ฿/мес                                     │  │
+│  │                                                               │  │
+│  │                     🏠 Surin                                  │  │
+│  │                          ↖ 180,000 ฿/мес                     │  │
+│  │                                                               │  │
+│  │  🏠 Kata                           PHUKET MAP                │  │
+│  │       ↖ 250,000 ฿/мес                                        │  │
+│  │                                                               │  │
+│  │              🏠 Chalong                                       │  │
+│  │                   ↖ 38,000 ฿/мес                             │  │
+│  │                                                               │  │
+│  │                        🏠 Rawai × 2                           │  │
+│  │                             ↖ 15k-120k ฿/мес                 │  │
+│  │                                                               │  │
+│  │                    🏠 Nai Harn                                │  │
+│  │                         ↖ 18.5M ฿ (продажа)                  │  │
+│  │                                                               │  │
+│  └───────────────────────────────────────────────────────────────┘  │
+│                                                                     │
+│  [2 км] [5 км] [10 км] [25 км] [Все]                               │
+│                                                                     │
+│  Фильтры: [Все] [Вилла] [Кондо] [Квартира]                        │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+
+                    ▼ Клик на маркер
+
+┌─────────────────────────────────────────────────────────────────────┐
+│  POPUP                                                              │
+├─────────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────────────┐                                        │
+│  │  [Фото виллы]           │                                        │
+│  │  Luxury Tropical Villa  │                                        │
+│  │  ⭐ 4.8  •  ฿120,000/мес │                                        │
+│  │  [Клик → детали]        │                                        │
+│  └─────────────────────────┘                                        │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Ожидаемый результат
+## Техническое резюме
 
-После унификации:
-- Все карточки на платформе будут иметь одинаковый "премиальный" отклик на взаимодействие
-- Бейджи будут синхронизированы по цветовой палитре
-- Вертикали Yachts, Transport, Experiences получат тот же уровень визуального качества, что и Property и Products
-- Изменения токенов в одном месте автоматически применятся ко всем компонентам
+**Изменения:**
+- 4 файла (2 обновления + 2 расширения)
+- Удаление demo-данных
+- Подключение к реальной БД
 
-**Риск регрессии:** Низкий - изменения касаются только hover-состояний и цветов бейджей
+**Данные:** 13+ объектов с координатами уже есть в базе - карта сразу заработает.
+
+**Риск регрессии:** Низкий - SalonMap используется в других местах, но новые props опциональные.
