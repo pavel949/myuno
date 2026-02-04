@@ -8,6 +8,7 @@ import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { InlineSearch } from '@/components/search/InlineSearch';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { InvestorPromoCard } from './InvestorPromoCard';
 interface TrustBadgeProps {
   icon: React.ReactNode;
   label: string;
@@ -239,6 +240,9 @@ export const HeroBlock = memo(function HeroBlock() {
           />
         ))}
       </div>
+
+      {/* Investor Promo Card */}
+      <InvestorPromoCard />
 
       {/* Trust badges */}
       <div className="flex flex-wrap items-center justify-center gap-1.5">
