@@ -7073,6 +7073,7 @@ export type Database = {
       orders: {
         Row: {
           commission_rate_applied: number | null
+          concierge_fee_amount: number | null
           created_at: string | null
           currency: string | null
           customer_user_id: string
@@ -7100,6 +7101,7 @@ export type Database = {
         }
         Insert: {
           commission_rate_applied?: number | null
+          concierge_fee_amount?: number | null
           created_at?: string | null
           currency?: string | null
           customer_user_id: string
@@ -7127,6 +7129,7 @@ export type Database = {
         }
         Update: {
           commission_rate_applied?: number | null
+          concierge_fee_amount?: number | null
           created_at?: string | null
           currency?: string | null
           customer_user_id?: string
@@ -17159,6 +17162,8 @@ export type Database = {
         | "cancelled"
         | "refunded"
         | "disputed"
+        | "pending_advance"
+        | "awaiting_client_payment"
       payment_method: "cash" | "wallet" | "stripe" | "bank_transfer"
       payment_status:
         | "pending"
@@ -17382,6 +17387,8 @@ export const Constants = {
         "cancelled",
         "refunded",
         "disputed",
+        "pending_advance",
+        "awaiting_client_payment",
       ],
       payment_method: ["cash", "wallet", "stripe", "bank_transfer"],
       payment_status: [

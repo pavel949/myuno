@@ -216,6 +216,7 @@ const SOS = lazy(() => import('@/pages/SOS'));
 const VipConcierge = lazy(() => import('@/pages/VipConcierge'));
 const Support = lazy(() => import('@/pages/Support'));
 const OrderTracking = lazy(() => import('@/pages/orders/OrderTracking'));
+const AdvanceRequested = lazy(() => import('@/pages/booking/AdvanceRequested'));
 
 // Knowledge Hub pages
 const KnowledgeHub = lazy(() => import('@/pages/knowledge/KnowledgeHub'));
@@ -516,6 +517,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/support/tickets" element={<LazyPage><MyTickets /></LazyPage>} />
         <Route path="/support/tickets/:ticketId" element={<LazyPage><TicketDetail /></LazyPage>} />
         <Route path="/install" element={<LazyPage><Install /></LazyPage>} />
+        <Route path="/booking/advance-requested" element={<LazyPage><AdvanceRequested /></LazyPage>} />
         
         {/* List With Us - Become a Host/Vendor */}
         <Route path="/list-with-us" element={<ListWithUsPage />} />

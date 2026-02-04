@@ -1,17 +1,19 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Calendar, CreditCard, Truck, Gift, Check, Wallet, Loader2 } from 'lucide-react';
+import { Calendar, CreditCard, Truck, Gift, Check, Wallet, Loader2, Sparkles } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useWallet } from '@/hooks/useWallet';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { useBooking } from '@/hooks/useBooking';
+import { useConciergeAdvance } from '@/hooks/useConciergeAdvance';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { ConciergeAdvanceOption } from '@/components/booking/ConciergeAdvanceOption';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { triggerRipple } from '@/hooks/useRipple';
@@ -41,6 +43,7 @@ const FlowersOrder = () => {
   const { getItemsByType, clearByType } = useCart();
   const { createBooking, isSubmitting } = useBooking();
   const { createFlowersCheckout, isProcessing: isStripeProcessing } = useStripeFlowersCheckout();
+  const { createAdvanceRequest, navigateToAdvanceRequested, calculateFee, isProcessing: isAdvanceProcessing, feePercent } = useConciergeAdvance();
   
   // Check for Buy Now item in state
   const buyNowState = location.state as BuyNowState | null;
@@ -163,6 +166,122 @@ const FlowersOrder = () => {
           toast.error(language === 'ru' ? 'Недостаточно средств на кошельке' : 'Insufficient wallet balance');
           return;
         }
+      }
+
+      // For concierge advance payments
+      if (formData.paymentMethod === 'concierge_advance') {
+        // Create scheduled_at date for concierge advance
+        const scheduledAt = new Date(formData.deliveryDate);
+        const slot = deliverySlots.find(s => s.id === formData.deliverySlot);
+        if (slot) {
+          const startTime = slot.timeEn.split(' - ')[0];
+          const [hours] = startTime.split(':');
+          scheduledAt.setHours(parseInt(hours), 0, 0);
+        }
+
+        // Build items array
+        const items = cartItems.map(item => ({
+          item_type: 'flower',
+          item_id: item.id,
+          item_name: language === 'ru' ? item.nameRu : item.name,
+          quantity: item.quantity,
+          unit_price: item.price,
+          subtotal: item.price * item.quantity,
+        }));
+
+        items.push({
+          item_type: 'delivery',
+          item_id: undefined,
+          item_name: language === 'ru' ? 'Доставка' : 'Delivery',
+          quantity: 1,
+          unit_price: deliveryFee,
+          subtotal: deliveryFee,
+        });
+
+        if (formData.giftWrap) {
+          items.push({
+            item_type: 'gift_wrap',
+            item_id: undefined,
+            item_name: language === 'ru' ? 'Праздничная упаковка' : 'Gift Wrap',
+            quantity: 1,
+            unit_price: giftWrapFee,
+            subtotal: giftWrapFee,
+          });
+        }
+
+        // Create order with pending_advance status
+        const bookingResult = await createBooking({
+          booking_type: 'product',
+          scheduled_at: scheduledAt.toISOString(),
+          total_amount: finalTotal,
+          currency: 'THB',
+          provider_id: firstProvider?.providerId,
+          notes: formData.message || undefined,
+          items,
+          participants: [{
+            name: formData.recipientName,
+            phone: formData.recipientPhone,
+            is_primary: true,
+          }],
+          addresses: [{
+            address_type: 'delivery',
+            address: formData.address,
+          }],
+          payment: {
+            amount: finalTotal,
+            payment_method: 'cash', // Will be changed after advance
+            status: 'pending',
+          },
+          metadata: {
+            delivery_slot: formData.deliverySlot,
+            message_card: formData.message,
+            gift_wrap: formData.giftWrap,
+            recipient_name: formData.recipientName,
+            recipient_phone: formData.recipientPhone,
+            concierge_advance_requested: true,
+          },
+          serviceName: language === 'ru' ? 'Доставка цветов' : 'Flower Delivery',
+          providerName: firstProvider?.providerName,
+          openWhatsAppOnCash: false, // Don't open WhatsApp for concierge advance
+        });
+
+        if (bookingResult.success && bookingResult.booking_id) {
+          // Fetch the order number from the database
+          const { data: orderData } = await supabase
+            .from('orders')
+            .select('order_number')
+            .eq('id', bookingResult.booking_id)
+            .single();
+          
+          const orderNumber = orderData?.order_number || `ORD-${bookingResult.booking_id.substring(0, 8).toUpperCase()}`;
+          
+          // Create concierge advance request
+          const advanceResult = await createAdvanceRequest({
+            orderId: bookingResult.booking_id,
+            orderNumber: orderNumber,
+            orderType: 'flowers',
+            baseAmount: finalTotal,
+            currency: 'THB',
+            providerName: firstProvider?.providerName || 'Flower Shop',
+            deliveryDetails: {
+              address: formData.address,
+              date: formData.deliveryDate,
+              slot: formData.deliverySlot,
+              recipient_name: formData.recipientName,
+              recipient_phone: formData.recipientPhone,
+            },
+          });
+
+          if (advanceResult.success) {
+            // Clear cart if not Buy Now
+            if (!isBuyNow) {
+              clearByType('flowers');
+            }
+            // Navigate to confirmation page
+            navigateToAdvanceRequested(orderNumber, finalTotal, 'flowers');
+          }
+        }
+        return;
       }
 
       // Create scheduled_at date
@@ -548,6 +667,17 @@ const FlowersOrder = () => {
                 </div>
               </label>
             </RadioGroup>
+
+            {/* Concierge Advance Option */}
+            <div className="mt-4 pt-4 border-t border-dashed">
+              <ConciergeAdvanceOption
+                isSelected={formData.paymentMethod === 'concierge_advance'}
+                onSelect={() => setFormData({ ...formData, paymentMethod: 'concierge_advance' })}
+                baseAmount={finalTotal}
+                feePercent={feePercent}
+                currency="THB"
+              />
+            </div>
           </div>
 
           {/* Order Summary */}
@@ -583,14 +713,16 @@ const FlowersOrder = () => {
           <Button 
             type="submit" 
             className="w-full h-14 text-lg"
-            disabled={isSubmitting || isStripeProcessing}
+            disabled={isSubmitting || isStripeProcessing || isAdvanceProcessing}
           >
-            {(isSubmitting || isStripeProcessing) ? (
+            {(isSubmitting || isStripeProcessing || isAdvanceProcessing) ? (
               <Loader2 className="w-5 h-5 animate-spin mr-2" />
             ) : null}
             {formData.paymentMethod === 'card'
               ? (language === 'ru' ? 'Перейти к оплате' : 'Proceed to Payment')
-              : (language === 'ru' ? 'Оформить заказ' : 'Place Order')}
+              : formData.paymentMethod === 'concierge_advance'
+                ? (language === 'ru' ? 'Отправить запрос' : 'Submit Request')
+                : (language === 'ru' ? 'Оформить заказ' : 'Place Order')}
           </Button>
         </form>
       </div>
