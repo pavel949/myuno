@@ -42,23 +42,32 @@ export const createMapPopupHtml = (params: {
   rating?: number | null;
   price?: string;
   description?: string;
+  image?: string;
 }): string => {
   const escapedName = escapeHtml(params.name);
   const escapedRating = escapeHtml(params.rating);
   const escapedPrice = escapeHtml(params.price);
   const escapedDescription = escapeHtml(params.description);
+  const escapedImage = escapeHtml(params.image);
 
   return `
-    <div class="p-2 min-w-[150px]">
-      <h3 class="font-bold text-sm text-gray-900">${escapedName}</h3>
-      ${params.rating ? `
-        <div class="flex items-center gap-1 mt-1">
-          <span class="text-yellow-500">★</span>
-          <span class="text-xs text-gray-600">${escapedRating}</span>
-        </div>
+    <div class="p-2 min-w-[180px] max-w-[220px]">
+      ${params.image ? `
+        <img 
+          src="${escapedImage}" 
+          alt="${escapedName}"
+          class="w-full h-24 object-cover rounded-lg mb-2"
+          onerror="this.style.display='none'"
+        />
       ` : ''}
-      ${params.price ? `<p class="text-xs text-primary mt-1">${escapedPrice}</p>` : ''}
-      ${params.description ? `<p class="text-xs text-muted-foreground mt-1">${escapedDescription}</p>` : ''}
+      <h3 class="font-bold text-sm text-gray-900 line-clamp-2">${escapedName}</h3>
+      <div class="flex items-center gap-2 mt-1">
+        ${params.rating ? `
+          <span class="text-yellow-500 text-xs">★ ${escapedRating}</span>
+        ` : ''}
+        ${params.price ? `<span class="text-xs font-medium text-emerald-600">${escapedPrice}</span>` : ''}
+      </div>
+      ${params.description ? `<p class="text-xs text-gray-500 mt-1 line-clamp-2">${escapedDescription}</p>` : ''}
     </div>
   `;
 };
