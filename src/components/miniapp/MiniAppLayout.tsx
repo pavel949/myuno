@@ -206,7 +206,7 @@ export function MiniAppLayout({
   }));
 
   return (
-    <AppLayout showBottomNav={showBottomNav}>
+    <AppLayout showBottomNav={showBottomNav} className="overflow-x-hidden max-w-full">
       {/* Unified Sticky Header */}
       <div className="sticky top-0 z-40">
         <UnifiedHeader
@@ -235,7 +235,7 @@ export function MiniAppLayout({
         )}
       </div>
 
-      <div className={cn("p-4 pb-4 space-y-4", showBottomNav && "pb-24", contentClassName)}>
+      <div className={cn("p-4 pb-4 space-y-4 overflow-x-hidden max-w-full", showBottomNav && "pb-24", contentClassName)}>
         {/* Hero Section */}
         {showHero && heroIcon && heroTitle && (
           <MiniAppHero

@@ -27,13 +27,13 @@ export function VendorLayout({ children }: VendorLayoutProps) {
 
   return (
     <SidebarProvider defaultOpen={!isMobile}>
-      <div className="min-h-screen flex w-full bg-background">
+      <div className="min-h-screen flex w-full bg-background overflow-x-hidden max-w-[100vw]">
         <VendorSidebar />
-        <SidebarInset className="flex-1 flex flex-col min-h-0">
+        <SidebarInset className="flex-1 flex flex-col min-h-0 min-w-0 max-w-full">
           <VendorHeader />
           {/* SINGLE SCROLL CONTAINER - Mobile-optimized with safe-area support */}
           <main 
-            className="flex-1 overflow-y-auto overflow-x-hidden pb-safe md:pb-4"
+            className="flex-1 overflow-y-auto overflow-x-hidden pb-safe md:pb-4 max-w-full"
             style={{ 
               WebkitOverflowScrolling: 'touch',
               // Allow both vertical and horizontal gestures for nested scrollable content
