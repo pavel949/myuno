@@ -141,13 +141,22 @@ export function useCanonicalDraft<T extends object>({
     };
   }, [autoSave, autoSaveInterval, hasUnsavedChanges, saveDraft]);
   
+  // Use refs to access latest values in unmount cleanup (avoid stale closure)
+  const dataRef = useRef(data);
+  const hasUnsavedChangesRef = useRef(hasUnsavedChanges);
+  
+  useEffect(() => {
+    dataRef.current = data;
+    hasUnsavedChangesRef.current = hasUnsavedChanges;
+  }, [data, hasUnsavedChanges]);
+  
   // Save on unmount if there are changes
   useEffect(() => {
     return () => {
-      if (hasUnsavedChanges) {
+      if (hasUnsavedChangesRef.current) {
         try {
           const draftData = {
-            data,
+            data: dataRef.current,
             savedAt: new Date().toISOString(),
             version: 1,
           };
@@ -157,7 +166,7 @@ export function useCanonicalDraft<T extends object>({
         }
       }
     };
-  }, []);
+  }, [storageKey]);
   
   // Update single field
   const updateField = useCallback(<K extends keyof T>(field: K, value: T[K]) => {

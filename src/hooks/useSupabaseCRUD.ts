@@ -180,13 +180,16 @@ export function useSupabaseCRUD<T extends { id: string }>({
 
       if (insertError) throw insertError;
 
-      if (showToasts) toast.success('Created successfully');
+      const successMsg = isAdmin 
+        ? 'Created and published' 
+        : 'Submitted for moderation';
+      if (showToasts) toast.success(successMsg);
       await fetchItems();
       return { data: result as unknown as T, error: null };
     } catch (err) {
       return { data: null, error: handleError(err, 'Create') };
     }
-  }, [user, table, providerId, providerIdField, fetchItems, showToasts, handleError]);
+  }, [user, table, providerId, providerIdField, fetchItems, showToasts, handleError, isAdmin]);
 
   const update = useCallback(async (id: string, data: Partial<T>) => {
     try {

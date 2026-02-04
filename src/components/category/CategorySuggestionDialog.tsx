@@ -57,33 +57,20 @@ export function CategorySuggestionDialog({
     setIsSubmitting(true);
     
     try {
-      // Using rpc call since table types may not be generated yet
-      const { error } = await supabase.rpc('insert_category_suggestion' as any, {
-        p_user_id: user?.id,
-        p_suggestion_type: type,
-        p_category_name_en: formData.category_name,
-        p_category_name_ru: formData.category_name_ru || null,
-        p_description: formData.description || null,
-        p_example_items: formData.example_items || null,
-      });
-
-      // Fallback to direct insert if RPC doesn't exist
-      if (error && error.code === 'PGRST202') {
-        const { error: insertError } = await supabase
-          .from('category_suggestions' as any)
-          .insert({
-            user_id: user?.id,
-            suggestion_type: type,
-            category_name_en: formData.category_name,
-            category_name_ru: formData.category_name_ru || null,
-            description: formData.description || null,
-            example_items: formData.example_items || null,
-            status: 'pending',
-          });
-        if (insertError) throw insertError;
-      } else if (error) {
-        throw error;
-      }
+      // Direct insert to category_suggestions table
+      const { error: insertError } = await supabase
+        .from('category_suggestions')
+        .insert({
+          user_id: user?.id || null,
+          suggestion_type: type,
+          category_name_en: formData.category_name,
+          category_name_ru: formData.category_name_ru || null,
+          description: formData.description || null,
+          example_items: formData.example_items || null,
+          status: 'pending',
+        });
+      
+      if (insertError) throw insertError;
 
       setIsSuccess(true);
       toast.success(isRu ? 'Заявка отправлена!' : 'Suggestion submitted!');
