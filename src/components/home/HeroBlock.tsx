@@ -52,6 +52,11 @@ export const HeroBlock = memo(function HeroBlock() {
         </Link>
       </div>
 
+      {/* Main headline */}
+      <h1 className="text-center text-2xl sm:text-3xl font-display font-bold text-foreground mt-1">
+        {isRu ? 'За рубежом' : 'Abroad'}
+      </h1>
+
       {/* Search - primary action */}
       <div data-tour="search">
         <InlineSearch />
