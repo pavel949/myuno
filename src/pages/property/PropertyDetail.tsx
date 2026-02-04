@@ -28,6 +28,7 @@ import {
 } from '@/components/property';
 import { ProjectInfoCard } from '@/components/property/ProjectInfoCard';
 import { UnitSpecs } from '@/components/property/UnitSpecs';
+import { ExitIntentModal } from '@/components/leads/ExitIntentModal';
 
 // Demo property data as fallback
 const demoProperty = {
@@ -798,6 +799,13 @@ export default function PropertyDetail() {
           </div>
         </div>
       </div>
+
+      {/* Exit Intent Lead Capture */}
+      <ExitIntentModal
+        vertical="property"
+        projectTitle={isRu ? property.title_ru : property.title_en}
+        projectId={id}
+      />
     </AppLayout>
   );
 }
