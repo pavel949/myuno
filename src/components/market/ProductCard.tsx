@@ -6,6 +6,8 @@ import { MarketplaceProduct } from '@/types/marketplace';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { formatProductUnit, formatPricePerUnit } from '@/utils/formatProductUnit';
+import { BADGE_STYLES } from '@/lib/designTokens';
+import { cn } from '@/lib/utils';
 
 interface ProductCardProps {
   product: MarketplaceProduct;
@@ -50,12 +52,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           />
           {product.is_new && (
-            <Badge className="absolute top-1 left-1 bg-blue-500 text-[10px] px-1.5 py-0">
+            <Badge className={cn("absolute top-1 left-1 text-[10px] px-1.5 py-0", BADGE_STYLES.new)}>
               NEW
             </Badge>
           )}
           {discount > 0 && (
-            <Badge className="absolute top-1 right-1 bg-red-500 text-[10px] px-1.5 py-0">
+            <Badge className={cn("absolute top-1 right-1 text-[10px] px-1.5 py-0", BADGE_STYLES.discount)}>
               -{discount}%
             </Badge>
           )}
@@ -136,19 +138,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {/* Badges */}
         <div className="absolute top-2 left-2 flex flex-col gap-1">
           {product.is_new && (
-            <Badge className="bg-blue-500 text-white text-[10px] px-1.5 py-0">
+            <Badge className={cn("text-[10px] px-1.5 py-0", BADGE_STYLES.new)}>
               NEW
             </Badge>
           )}
           {product.is_popular && !product.is_new && (
-            <Badge className="bg-amber-500 text-white text-[10px] px-1.5 py-0">
+            <Badge className={cn("text-[10px] px-1.5 py-0", BADGE_STYLES.hot)}>
               🔥 HIT
             </Badge>
           )}
         </div>
         
         {discount > 0 && (
-          <Badge className="absolute top-2 right-2 bg-red-500 text-white text-[10px] px-1.5 py-0">
+          <Badge className={cn("absolute top-2 right-2 text-[10px] px-1.5 py-0", BADGE_STYLES.discount)}>
             -{discount}%
           </Badge>
         )}

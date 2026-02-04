@@ -3,6 +3,11 @@
  * Shows cover image, name, stats, and badges
  */
 
+/**
+ * ProjectCard - Rich card component for project catalog display
+ * Shows cover image, name, stats, and badges
+ */
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, MapPin, Calendar, Home, Star, Play } from 'lucide-react';
@@ -11,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
+import { BADGE_SYSTEM } from '@/lib/designTokens';
 
 interface ProjectCardProps {
   project: PropertyProject & { 
@@ -41,7 +47,7 @@ export function ProjectCard({ project, variant = 'default', className }: Project
         onClick={handleClick}
         className={cn(
           "relative overflow-hidden rounded-2xl cursor-pointer group",
-          "transition-all duration-300 hover:shadow-xl",
+          "transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5",
           className
         )}
       >
@@ -72,7 +78,7 @@ export function ProjectCard({ project, variant = 'default', className }: Project
 
         {/* Featured badge */}
         {project.is_featured && (
-          <Badge className="absolute top-3 left-3 bg-amber-500 text-white border-none">
+          <Badge className={cn("absolute top-3 left-3 border-none", BADGE_SYSTEM.featured)}>
             <Star className="h-3 w-3 mr-1" />
             Featured
           </Badge>
@@ -141,7 +147,7 @@ export function ProjectCard({ project, variant = 'default', className }: Project
       onClick={handleClick}
       className={cn(
         "overflow-hidden rounded-2xl bg-card border border-border",
-        "cursor-pointer hover:border-primary/50 hover:shadow-lg transition-all group",
+        "cursor-pointer hover:border-primary/50 hover:shadow-md hover:-translate-y-0.5 transition-all group",
         className
       )}
     >
@@ -161,12 +167,12 @@ export function ProjectCard({ project, variant = 'default', className }: Project
         {/* Badges */}
         <div className="absolute top-2 left-2 flex gap-1.5">
           {project.is_featured && (
-            <Badge className="bg-amber-500 text-white border-none text-xs">
+            <Badge className={cn("border-none text-xs", BADGE_SYSTEM.featured)}>
               Featured
             </Badge>
           )}
           {(project as any).isNew && (
-            <Badge className="bg-emerald-500 text-white border-none text-xs">
+            <Badge className={cn("border-none text-xs", BADGE_SYSTEM.new)}>
               New
             </Badge>
           )}

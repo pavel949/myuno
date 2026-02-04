@@ -175,7 +175,7 @@ function HeroVariant({ cardProps, stats, isRu, onClick }: HeroVariantProps) {
 
   return (
     <Card 
-      className="overflow-hidden cursor-pointer hover:shadow-lg transition-all group"
+      className="overflow-hidden cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all group"
       onClick={onClick}
     >
       {/* Image */}
@@ -275,7 +275,7 @@ function ListVariant({
 
   return (
     <Card className={cn(
-      'overflow-hidden hover:shadow-md transition-all group',
+      'overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all group',
       isInactive && 'opacity-60'
     )}>
       <CardContent className="p-0">
@@ -468,7 +468,7 @@ interface CompactVariantProps {
 function CompactVariant({ cardProps, isRu, onClick }: CompactVariantProps) {
   return (
     <Card 
-      className="overflow-hidden cursor-pointer hover:shadow-md transition-all group"
+      className="overflow-hidden cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all group"
       onClick={onClick}
     >
       <CardContent className="p-2">
