@@ -171,7 +171,7 @@ export const DiscoveryCarousel = memo(forwardRef<HTMLDivElement, object>(functio
         <div
           ref={scrollRef}
           onScroll={checkScroll}
-          className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 touch-pan-x"
+          className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4"
           style={{ scrollSnapType: 'x mandatory' }}
         >
           {filteredExperiences.map((experience, index) => {

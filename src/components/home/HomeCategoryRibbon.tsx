@@ -62,13 +62,13 @@ export function HomeCategoryRibbon() {
     return (
       <div className="space-y-3">
         {/* Quick actions skeleton */}
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide touch-pan-x pb-1">
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="h-9 w-20 rounded-xl bg-muted animate-pulse shrink-0" />
           ))}
         </div>
         {/* Categories skeleton */}
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide touch-pan-x pb-1">
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
           {[...Array(5)].map((_, i) => (
             <div key={i} className="h-9 w-24 rounded-xl bg-muted animate-pulse shrink-0" />
           ))}
@@ -80,7 +80,7 @@ export function HomeCategoryRibbon() {
   return (
     <div className="space-y-2">
       {/* Row 1: Quick Actions */}
-      <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide touch-pan-x pb-1">
+      <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={() => handleQuickAction('/market')}
@@ -124,7 +124,7 @@ export function HomeCategoryRibbon() {
       </div>
 
       {/* Row 2: Top Categories */}
-      <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide touch-pan-x pb-1">
+      <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
         {visibleCategories.map((category) => (
           <motion.button
             key={category.id}

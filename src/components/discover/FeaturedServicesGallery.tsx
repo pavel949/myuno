@@ -97,11 +97,10 @@ export const FeaturedServicesGallery = memo(function FeaturedServicesGallery({
         className="-mx-4 px-4 overflow-x-auto overflow-y-hidden scrollbar-hide"
         style={{ 
           WebkitOverflowScrolling: 'touch',
-          scrollSnapType: 'x mandatory',
-          touchAction: 'pan-x'
+          scrollSnapType: 'x mandatory'
         }}
       >
-        <div className="flex gap-4 pb-2" style={{ touchAction: 'pan-x' }}>
+        <div className="flex gap-4 pb-2">
           {topServices.map((service) => (
             <div 
               key={service.id} 
