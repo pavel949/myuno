@@ -8768,6 +8768,7 @@ export type Database = {
           equipment: string[] | null
           floor: number | null
           furnishing_level: string | null
+          highlights: string[] | null
           id: string
           images: string[] | null
           instant_booking: boolean | null
@@ -8818,6 +8819,7 @@ export type Database = {
           equipment?: string[] | null
           floor?: number | null
           furnishing_level?: string | null
+          highlights?: string[] | null
           id?: string
           images?: string[] | null
           instant_booking?: boolean | null
@@ -8868,6 +8870,7 @@ export type Database = {
           equipment?: string[] | null
           floor?: number | null
           furnishing_level?: string | null
+          highlights?: string[] | null
           id?: string
           images?: string[] | null
           instant_booking?: boolean | null

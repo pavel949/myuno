@@ -16,7 +16,8 @@ import { BackButton } from '@/components/uno/BackButton';
 import { AirbnbSearchBar, SearchParams } from '@/components/property/AirbnbSearchBar';
 import { cn } from '@/lib/utils';
 import { ConsultationCTA } from '@/components/property/ConsultationCTA';
-import { PopularFiltersCards } from '@/components/property/PopularFiltersCards';
+import { QuickFiltersRibbon } from '@/components/property/QuickFiltersRibbon';
+import { applyQuickFilters } from '@/hooks/usePropertyQuickFilters';
 import { matchesFilter, matchesSingleFilter } from '@/lib/filterUtils';
 import { CrossSellSection } from '@/components/crosssell';
 import { PropertyAIButton } from '@/components/property/PropertyAIButton';
@@ -39,6 +40,9 @@ export default function PropertyIndex() {
   const [selectedType, setSelectedType] = useState('all');
   const [filterValues, setFilterValues] = useState<FilterValues>({});
   const [hoveredProperty, setHoveredProperty] = useState<string | null>(null);
+  // Quick filters state (Agoda/Airbnb style)
+  const [quickFilters, setQuickFilters] = useState<string[]>([]);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const { formatPrice } = useCurrency();
 
   // Fetch dynamic filter options from lookup_values (editable in admin)
@@ -58,13 +62,14 @@ export default function PropertyIndex() {
     listingType: 'rent', // Always show rentals for Airbnb-style
   }, 200);
 
-  // Use DB data or fallback to demo
+  // Use DB data or fallback to demo, then apply all filters
   const properties = useMemo(() => {
     const sourceData = dbProperties && dbProperties.length > 0 
       ? dbProperties 
       : demoProperties.filter(p => p.listing_type === 'rent');
     
-    return sourceData.filter(prop => {
+    // First apply standard filters
+    const standardFiltered = sourceData.filter(prop => {
       const matchesLocation = searchParams.locations.length === 0 || 
         searchParams.locations.some(loc => 
           prop.district?.toLowerCase().includes(loc.toLowerCase())
@@ -105,7 +110,10 @@ export default function PropertyIndex() {
       
       return matchesLocation && matchesType && matchesGuests;
     }) as unknown as Property[];
-  }, [dbProperties, searchParams, selectedType, filterValues]);
+
+    // Then apply quick filters (Agoda/Airbnb style)
+    return applyQuickFilters(standardFiltered, quickFilters, selectedProjectId);
+  }, [dbProperties, searchParams, selectedType, filterValues, quickFilters, selectedProjectId]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -114,8 +122,11 @@ export default function PropertyIndex() {
       else if (Array.isArray(value)) count += value.length;
       else if (value) count++;
     });
+    // Also count quick filters
+    count += quickFilters.length;
+    if (selectedProjectId) count++;
     return count;
-  }, [filterValues]);
+  }, [filterValues, quickFilters, selectedProjectId]);
 
   const handleRemoveFilter = (sectionId: string, optionId?: string) => {
     setFilterValues(prev => {
@@ -226,15 +237,21 @@ export default function PropertyIndex() {
           <ConsultationCTA />
         </div>
 
-        {/* Popular Filter Cards */}
-        {activeFilterCount === 0 && (
-          <div className="container max-w-7xl mx-auto px-4 py-3">
-            <PopularFiltersCards 
-              values={filterValues}
-              onChange={setFilterValues}
-            />
-          </div>
-        )}
+        {/* Quick Filters Ribbon (Agoda/Airbnb style) */}
+        <div className="container max-w-7xl mx-auto px-4 py-3">
+          <QuickFiltersRibbon 
+            selectedFilters={quickFilters}
+            selectedProjectId={selectedProjectId}
+            onFilterToggle={(id) => {
+              setQuickFilters(prev => 
+                prev.includes(id) 
+                  ? prev.filter(f => f !== id)
+                  : [...prev, id]
+              );
+            }}
+            onProjectSelect={setSelectedProjectId}
+          />
+        </div>
 
         {/* Results Count */}
         <div className="container max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -360,6 +377,8 @@ export default function PropertyIndex() {
                     setSearchParams({ locations: [], checkIn: undefined, checkOut: undefined, guests: 2 });
                     setSelectedType('all');
                     setFilterValues({});
+                    setQuickFilters([]);
+                    setSelectedProjectId(null);
                   }}>
                     {language === 'ru' ? 'Сбросить фильтры' : 'Clear all filters'}
                   </Button>
