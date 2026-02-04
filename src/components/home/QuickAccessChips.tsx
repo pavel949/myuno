@@ -19,6 +19,14 @@ interface ChipData {
 
 const chips: ChipData[] = [
   {
+    id: 'complexes',
+    icon: Building2,
+    label: 'Complexes',
+    labelRu: 'Комплексы',
+    path: '/complexes',
+    gradient: 'from-sky-500 to-blue-600',
+  },
+  {
     id: 'owner',
     icon: Building2,
     label: 'For Owners',

@@ -45,6 +45,8 @@ const PropertyDetail = lazy(() => import('@/pages/property/PropertyDetail'));
 const PropertyInquiry = lazy(() => import('@/pages/property/PropertyInquiry'));
 const PropertyMap = lazy(() => import('@/pages/property/PropertyMap'));
 const PropertyDepositSuccess = lazy(() => import('@/pages/property/PropertyDepositSuccess'));
+const ProjectsIndex = lazy(() => import('@/pages/property/ProjectsIndex'));
+const ProjectDetail = lazy(() => import('@/pages/property/ProjectDetail'));
 
 // Guest pages
 const GuestMessages = lazy(() => import('@/pages/guest/GuestMessages'));
@@ -520,9 +522,11 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/property" element={<LazyPage><PropertyIndex /></LazyPage>} />
         <Route path="/property/consultation" element={<LazyPage><PropertyConsultation /></LazyPage>} />
         <Route path="/property/deposit-success" element={<LazyPage><PropertyDepositSuccess /></LazyPage>} />
+        <Route path="/property/project/:id" element={<LazyPage><ProjectDetail /></LazyPage>} />
         <Route path="/property/:id" element={<LazyPage><PropertyDetail /></LazyPage>} />
         <Route path="/property/:id/inquiry" element={<LazyPage><PropertyInquiry /></LazyPage>} />
         <Route path="/property/map" element={<LazyPage><PropertyMap /></LazyPage>} />
+        <Route path="/complexes" element={<LazyPage><ProjectsIndex /></LazyPage>} />
         
         {/* Food & Delivery Mini-App Routes (legacy - all redirect to restaurants) */}
         <Route path="/food" element={<Navigate to="/restaurants" replace />} />

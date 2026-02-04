@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -48,6 +49,7 @@ const amenityLabels: Record<string, { en: string; ru: string }> = {
 };
 
 export function ProjectInfoCard({ project, className }: ProjectInfoCardProps) {
+  const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const [expanded, setExpanded] = useState(false);
@@ -55,6 +57,10 @@ export function ProjectInfoCard({ project, className }: ProjectInfoCardProps) {
   const name = isRu ? project.name_ru : project.name_en;
   const description = isRu ? project.description_ru : project.description_en;
   const amenities = project.amenities || [];
+
+  const handleExploreProject = () => {
+    navigate(`/property/project/${project.id}`);
+  };
 
   return (
     <Card className={cn("overflow-hidden", className)}>
@@ -203,6 +209,17 @@ export function ProjectInfoCard({ project, className }: ProjectInfoCardProps) {
             </a>
           </Button>
         )}
+
+        {/* Explore Project Button */}
+        <Button 
+          variant="default" 
+          size="sm" 
+          className="w-full gap-2"
+          onClick={handleExploreProject}
+        >
+          <Building2 className="h-4 w-4" />
+          {isRu ? 'Исследовать комплекс' : 'Explore Complex'}
+        </Button>
       </CardContent>
     </Card>
   );

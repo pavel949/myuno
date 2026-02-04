@@ -444,3 +444,70 @@ export function usePropertiesCount(filters: PropertyFilters = {}) {
     },
   });
 }
+
+// Fetch properties by project ID
+export function usePropertiesByProject(projectId?: string, limit = 20) {
+  return useQuery({
+    queryKey: ['properties-by-project', projectId, limit],
+    queryFn: async () => {
+      if (!projectId) return [];
+
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('project_id', projectId)
+        .eq('is_active', true)
+        .order('is_featured', { ascending: false })
+        .order('price', { ascending: true })
+        .limit(limit);
+
+      if (error) throw error;
+      return (data || []) as Property[];
+    },
+    enabled: !!projectId,
+  });
+}
+
+// Get project statistics (units count, price ranges by bedroom type)
+export function useProjectStats(projectId?: string) {
+  return useQuery({
+    queryKey: ['project-stats', projectId],
+    queryFn: async () => {
+      if (!projectId) return null;
+
+      const { data, error } = await supabase
+        .from('properties')
+        .select('id, bedrooms, price')
+        .eq('project_id', projectId)
+        .eq('is_active', true);
+
+      if (error) throw error;
+
+      const properties = data || [];
+      
+      const stats = {
+        total: properties.length,
+        byBedrooms: {} as Record<string, { count: number; minPrice: number | null; maxPrice: number | null }>,
+      };
+
+      properties.forEach(p => {
+        const key = p.bedrooms === 0 ? 'studio' : `${p.bedrooms}br`;
+        if (!stats.byBedrooms[key]) {
+          stats.byBedrooms[key] = { count: 0, minPrice: null, maxPrice: null };
+        }
+        stats.byBedrooms[key].count++;
+        if (p.price) {
+          if (!stats.byBedrooms[key].minPrice || p.price < stats.byBedrooms[key].minPrice!) {
+            stats.byBedrooms[key].minPrice = p.price;
+          }
+          if (!stats.byBedrooms[key].maxPrice || p.price > stats.byBedrooms[key].maxPrice!) {
+            stats.byBedrooms[key].maxPrice = p.price;
+          }
+        }
+      });
+
+      return stats;
+    },
+    enabled: !!projectId,
+  });
+}

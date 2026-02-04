@@ -3,11 +3,12 @@
  * Dynamic filters loaded from lookup_values + property_projects
  */
 
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { usePropertyQuickFilters, QuickFilter, PropertyProject } from '@/hooks/usePropertyQuickFilters';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Building2, ChevronRight } from 'lucide-react';
+import { Building2, ChevronRight, ExternalLink } from 'lucide-react';
 
 interface QuickFiltersRibbonProps {
   selectedFilters: string[];
@@ -24,6 +25,7 @@ export function QuickFiltersRibbon({
   onProjectSelect,
   className,
 }: QuickFiltersRibbonProps) {
+  const navigate = useNavigate();
   const { language } = useLanguage();
   const { quickFilters, projects, isLoading } = usePropertyQuickFilters();
 
@@ -78,6 +80,7 @@ export function QuickFiltersRibbon({
                 project={project}
                 isSelected={selectedProjectId === project.id}
                 onClick={() => onProjectSelect(selectedProjectId === project.id ? null : project.id)}
+                onNavigate={() => navigate(`/property/project/${project.id}`)}
                 language={language}
               />
             ))}
@@ -116,10 +119,11 @@ interface ProjectChipProps {
   project: PropertyProject;
   isSelected: boolean;
   onClick: () => void;
+  onNavigate: () => void;
   language: string;
 }
 
-function ProjectChip({ project, isSelected, onClick, language }: ProjectChipProps) {
+function ProjectChip({ project, isSelected, onClick, onNavigate, language }: ProjectChipProps) {
   return (
     <button
       onClick={onClick}
@@ -149,7 +153,16 @@ function ProjectChip({ project, isSelected, onClick, language }: ProjectChipProp
           {project.propertyCount} {language === 'ru' ? 'объектов' : 'units'}
         </span>
       </div>
-      <ChevronRight className="w-4 h-4 text-muted-foreground ml-auto" />
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onNavigate();
+        }}
+        className="ml-auto p-1 rounded-md hover:bg-primary/10 transition-colors"
+        title={language === 'ru' ? 'Открыть комплекс' : 'View complex'}
+      >
+        <ExternalLink className="w-3.5 h-3.5 text-muted-foreground hover:text-primary" />
+      </button>
     </button>
   );
 }
