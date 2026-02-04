@@ -26,59 +26,52 @@ const VendorCard: React.FC<VendorCardProps> = ({ vendor, onClick }) => {
     <button
       onClick={onClick}
       className={cn(
-        "w-[200px] shrink-0 text-left",
+        "w-[160px] shrink-0 text-left snap-start",
         "bg-card rounded-2xl border border-border overflow-hidden",
         "shadow-sm hover:shadow-md hover:-translate-y-0.5",
         "transition-all duration-200 group touch-manipulation"
       )}
     >
       {/* Cover / Logo Area */}
-      <div className="relative h-24 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+      <div className="relative h-20 bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
         {vendor.logo_url ? (
           <img
             src={vendor.logo_url}
             alt={name}
-            className="w-16 h-16 rounded-xl object-cover shadow-md"
+            className="w-12 h-12 rounded-xl object-cover shadow-sm"
           />
         ) : (
-          <div className="w-16 h-16 rounded-xl bg-muted flex items-center justify-center">
-            <Store className="w-8 h-8 text-primary" />
+          <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
+            <Store className="w-6 h-6 text-primary" />
           </div>
         )}
         
         {/* Verified Badge */}
         {vendor.verified && (
-          <Badge className="absolute top-2 right-2 bg-success text-success-foreground text-[10px] px-2 py-0.5 gap-1">
-            <CheckCircle2 className="w-3 h-3" />
-            {isRu ? 'Проверен' : 'Verified'}
-          </Badge>
+          <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-success rounded-full flex items-center justify-center">
+            <CheckCircle2 className="w-3 h-3 text-white" />
+          </div>
         )}
       </div>
 
       {/* Content */}
-      <div className="p-3">
-        <h4 className="font-semibold text-sm text-foreground line-clamp-1">
+      <div className="p-2.5">
+        <h4 className="font-semibold text-xs text-foreground line-clamp-1">
           {name}
         </h4>
-        
-        {description && (
-          <p className="text-xs text-muted-foreground line-clamp-2 mt-1 leading-snug">
-            {description}
-          </p>
-        )}
 
         {/* Stats Row */}
-        <div className="flex items-center gap-3 mt-2">
+        <div className="flex items-center gap-2 mt-1.5">
           {vendor.rating && (
-            <div className="flex items-center gap-1 text-xs">
-              <Star className="w-3.5 h-3.5 fill-warning text-warning" />
+            <div className="flex items-center gap-0.5 text-[10px]">
+              <Star className="w-3 h-3 fill-warning text-warning" />
               <span className="font-medium text-foreground">{vendor.rating.toFixed(1)}</span>
             </div>
           )}
           
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Package className="w-3.5 h-3.5" />
-            <span>{productCount} {isRu ? 'товаров' : 'items'}</span>
+          <div className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
+            <Package className="w-3 h-3" />
+            <span>{productCount}</span>
           </div>
         </div>
       </div>
@@ -116,11 +109,11 @@ export const FeaturedVendorsCarousel: React.FC<FeaturedVendorsCarouselProps> = (
       {isLoading ? (
         <div className="flex gap-3 px-4 overflow-hidden">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="w-[200px] h-[180px] rounded-2xl shrink-0" />
+            <Skeleton key={i} className="w-[160px] h-[130px] rounded-2xl shrink-0" />
           ))}
         </div>
       ) : (
-        <UnifiedScrollSection variant="muted">
+        <div className="flex gap-3 px-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory touch-pan-y pb-2">
           {vendors.slice(0, 10).map((vendor) => (
             <VendorCard
               key={vendor.id}
@@ -128,7 +121,7 @@ export const FeaturedVendorsCarousel: React.FC<FeaturedVendorsCarouselProps> = (
               onClick={() => navigate(`/market/vendor/${vendor.slug}`)}
             />
           ))}
-        </UnifiedScrollSection>
+        </div>
       )}
     </section>
   );

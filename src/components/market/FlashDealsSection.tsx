@@ -148,14 +148,14 @@ export const FlashDealsSection: React.FC<FlashDealsSectionProps> = ({
         </div>
       </div>
 
-      {/* Products */}
-      <UnifiedScrollSection>
+      {/* Products - horizontal scroll */}
+      <div className="flex gap-3 px-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory touch-pan-y pb-3">
         {flashDealProducts.map((product, index) => {
           // Simulate stock remaining (visual only)
           const stockPercent = Math.max(10, 100 - (index * 12 + 15));
           
           return (
-            <div key={product.id} className="w-[160px] shrink-0">
+            <div key={product.id} className="w-[150px] shrink-0 snap-start">
               <div className="relative">
                 <ProfessionalProductCard
                   product={product}
@@ -167,21 +167,20 @@ export const FlashDealsSection: React.FC<FlashDealsSectionProps> = ({
                 />
                 
                 {/* Stock Progress Bar */}
-                <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-card via-card to-transparent pt-4">
+                <div className="mt-2">
                   <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1">
-                    <span>{isRu ? 'Осталось' : 'Left'}</span>
-                    <span>{stockPercent}%</span>
+                    <span className="text-destructive font-medium">{isRu ? 'Осталось' : 'Left'} {stockPercent}%</span>
                   </div>
                   <Progress 
                     value={stockPercent} 
-                    className="h-1.5 bg-destructive/20"
+                    className="h-1 bg-destructive/20"
                   />
                 </div>
               </div>
             </div>
           );
         })}
-      </UnifiedScrollSection>
+      </div>
     </section>
   );
 };

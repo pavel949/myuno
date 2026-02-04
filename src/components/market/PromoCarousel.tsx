@@ -48,11 +48,15 @@ export const PromoCarousel: React.FC<PromoCarouselProps> = ({ className }) => {
   if (promotions.length === 0) return null;
 
   return (
-    <div className={cn("px-4 py-2 max-w-7xl mx-auto", className)}>
+    <div className={cn("px-4 py-3 max-w-7xl mx-auto", className)}>
       <Carousel
-        opts={{ align: 'start', loop: true }}
+        opts={{ 
+          align: 'start', 
+          loop: true,
+          dragFree: false,
+        }}
         plugins={[plugin.current]}
-        className="w-full"
+        className="w-full touch-pan-y"
       >
         <CarouselContent className="-ml-2">
           {promotions.map((banner) => {
@@ -68,7 +72,8 @@ export const PromoCarousel: React.FC<PromoCarouselProps> = ({ className }) => {
                     banner.gradient,
                     "p-5 sm:p-6 text-left",
                     "shadow-lg hover:shadow-xl transition-shadow duration-300",
-                    "group touch-manipulation"
+                    "group touch-manipulation",
+                    "min-h-[140px]"
                   )}
                 >
                   {/* Decorative circles */}
@@ -79,30 +84,30 @@ export const PromoCarousel: React.FC<PromoCarouselProps> = ({ className }) => {
                   <div className="relative z-10">
                     {/* Badge */}
                     {(banner.badge_en || banner.badge_ru) && (
-                      <Badge className="bg-white/20 backdrop-blur-sm border-0 text-white text-xs font-medium mb-3">
+                      <Badge className="bg-white/20 backdrop-blur-sm border-0 text-white text-[10px] font-semibold mb-2">
                         {isRu ? banner.badge_ru : banner.badge_en}
                       </Badge>
                     )}
                     
                     {/* Title Row */}
                     <div className="flex items-center gap-3 mb-2">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                        <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                      <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
+                        <Icon className="w-5 h-5 text-white" />
                       </div>
-                      <h3 className="text-xl sm:text-2xl font-bold text-white">
+                      <h3 className="text-lg sm:text-xl font-bold text-white leading-tight">
                         {isRu ? banner.title_ru : banner.title_en}
                       </h3>
                     </div>
                     
                     {/* Subtitle */}
-                    <p className="text-white/80 text-sm sm:text-base mb-4">
+                    <p className="text-white/90 text-sm mb-3 line-clamp-2">
                       {isRu ? banner.subtitle_ru : banner.subtitle_en}
                     </p>
                     
                     {/* CTA */}
-                    <div className="flex items-center gap-2 text-white font-medium text-sm group-hover:gap-3 transition-all">
-                      <span>{isRu ? 'Смотреть' : 'View'}</span>
-                      <ArrowRight className="w-4 h-4" />
+                    <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white font-semibold text-sm px-4 py-2 rounded-xl group-hover:bg-white/30 transition-colors">
+                      <span>{isRu ? 'Смотреть' : 'Shop Now'}</span>
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                     </div>
                   </div>
                 </button>
@@ -112,14 +117,16 @@ export const PromoCarousel: React.FC<PromoCarouselProps> = ({ className }) => {
         </CarouselContent>
         
         {/* Pagination dots */}
-        <div className="flex justify-center gap-1.5 mt-3">
-          {promotions.map((_, index) => (
-            <div
-              key={index}
-              className="w-2 h-2 rounded-full bg-muted-foreground/30 transition-colors"
-            />
-          ))}
-        </div>
+        {promotions.length > 1 && (
+          <div className="flex justify-center gap-1.5 mt-3">
+            {promotions.map((_, index) => (
+              <div
+                key={index}
+                className="w-2 h-2 rounded-full bg-primary/30 transition-colors"
+              />
+            ))}
+          </div>
+        )}
       </Carousel>
     </div>
   );
