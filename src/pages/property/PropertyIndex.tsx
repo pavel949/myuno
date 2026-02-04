@@ -18,6 +18,7 @@ import { ConsultationCTA } from '@/components/property/ConsultationCTA';
 import { QuickFiltersRibbon } from '@/components/property/QuickFiltersRibbon';
 import { PropertyTypeSelector } from '@/components/property/PropertyTypeSelector';
 import { BedroomChips } from '@/components/property/BedroomChips';
+import { ProjectPromoSection } from '@/components/property/ProjectPromoSection';
 import { applyQuickFilters } from '@/hooks/usePropertyQuickFilters';
 import { matchesFilter, matchesSingleFilter, normalizeForFilter } from '@/lib/filterUtils';
 import { CrossSellSection } from '@/components/crosssell';
@@ -240,11 +241,15 @@ export default function PropertyIndex() {
           <ConsultationCTA />
         </div>
 
+        {/* Project Promo Section - Visual carousel of complexes */}
+        <div className="container max-w-7xl mx-auto px-4 py-3">
+          <ProjectPromoSection />
+        </div>
+
         {/* Quick Filters Ribbon (Agoda/Airbnb style) */}
         <div className="container max-w-7xl mx-auto px-4 py-3">
           <QuickFiltersRibbon 
             selectedFilters={quickFilters}
-            selectedProjectId={selectedProjectId}
             selectedDistricts={selectedDistricts}
             onFilterToggle={(id) => {
               setQuickFilters(prev => 
@@ -253,7 +258,6 @@ export default function PropertyIndex() {
                   : [...prev, id]
               );
             }}
-            onProjectSelect={setSelectedProjectId}
             onDistrictToggle={(id) => {
               setSelectedDistricts(prev =>
                 prev.includes(id)

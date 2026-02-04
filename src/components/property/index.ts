@@ -32,3 +32,5 @@ export { TripServicesGrid } from './TripServicesGrid';
 export { BookingTermsCard } from './BookingTermsCard';
 export { BookingConditionsChips } from './BookingConditionsChips';
 export { PropertyBookingSuccess } from './PropertyBookingSuccess';
+export { ProjectCarouselCard } from './ProjectCarouselCard';
+export { ProjectPromoSection } from './ProjectPromoSection';
