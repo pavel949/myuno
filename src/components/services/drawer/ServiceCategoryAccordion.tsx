@@ -8,9 +8,60 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { ChevronRight, Sparkles } from 'lucide-react';
+import { ChevronRight, Sparkles, Plane, Waves, Heart, Home, Globe, Briefcase, Zap, LucideIcon, ShoppingBag } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+
+// Group icons mapping
+const GROUP_ICONS: Record<string, LucideIcon> = {
+  'lifestyle': Sparkles,
+  'lifestyle-leisure': Sparkles,
+  'travel': Plane,
+  'travel-transport': Plane,
+  'water': Waves,
+  'water-sports': Waves,
+  'health': Heart,
+  'health-care': Heart,
+  'home': Home,
+  'home-services': Home,
+  'expat': Globe,
+  'expat-services': Globe,
+  'professional': Briefcase,
+  'quick': Zap,
+  'quick-services': Zap,
+  'shopping': ShoppingBag,
+  'other': Sparkles,
+};
+
+// Group gradient colors
+const GROUP_GRADIENTS: Record<string, string> = {
+  'lifestyle': 'from-purple-500/20 to-pink-500/10',
+  'lifestyle-leisure': 'from-purple-500/20 to-pink-500/10',
+  'travel': 'from-blue-500/20 to-cyan-500/10',
+  'travel-transport': 'from-blue-500/20 to-cyan-500/10',
+  'water': 'from-cyan-500/20 to-teal-500/10',
+  'water-sports': 'from-cyan-500/20 to-teal-500/10',
+  'health': 'from-emerald-500/20 to-green-500/10',
+  'health-care': 'from-emerald-500/20 to-green-500/10',
+  'home': 'from-amber-500/20 to-orange-500/10',
+  'home-services': 'from-amber-500/20 to-orange-500/10',
+  'expat': 'from-indigo-500/20 to-violet-500/10',
+  'expat-services': 'from-indigo-500/20 to-violet-500/10',
+  'professional': 'from-slate-500/20 to-gray-500/10',
+  'quick': 'from-rose-500/20 to-red-500/10',
+  'quick-services': 'from-rose-500/20 to-red-500/10',
+  'shopping': 'from-orange-500/20 to-amber-500/10',
+};
+
+// Get group icon
+function getGroupIcon(slug: string): LucideIcon {
+  return GROUP_ICONS[slug] || GROUP_ICONS[slug.split('-')[0]] || Sparkles;
+}
+
+// Get group gradient
+function getGroupGradient(slug: string): string {
+  return GROUP_GRADIENTS[slug] || GROUP_GRADIENTS[slug.split('-')[0]] || 'from-primary/20 to-primary/10';
+}
 
 interface ServiceCategoryAccordionProps {
   searchQuery: string;
@@ -64,6 +115,8 @@ export function ServiceCategoryAccordion({ searchQuery, onNavigate }: ServiceCat
     <Accordion type="multiple" className="w-full">
       {filteredGroups.map((group) => {
         const hasCategories = group.categories.length > 0;
+        const GroupIcon = getGroupIcon(group.slug);
+        const groupGradient = getGroupGradient(group.slug);
 
         if (!hasCategories) {
           return (
@@ -76,8 +129,8 @@ export function ServiceCategoryAccordion({ searchQuery, onNavigate }: ServiceCat
                 "text-left"
               )}
             >
-              <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center shrink-0">
-                <Sparkles className="w-5 h-5 text-primary" />
+              <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center shrink-0", `bg-gradient-to-br ${groupGradient}`)}>
+                <GroupIcon className="w-5 h-5 text-primary" />
               </div>
               <span className="flex-1 font-medium text-sm">
                 {getName(group)}
@@ -100,8 +153,8 @@ export function ServiceCategoryAccordion({ searchQuery, onNavigate }: ServiceCat
               )}
             >
               <div className="flex items-center gap-3 flex-1">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shrink-0">
-                  <Sparkles className="w-5 h-5 text-primary" />
+                <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center shrink-0", `bg-gradient-to-br ${groupGradient}`)}>
+                  <GroupIcon className="w-5 h-5 text-primary" />
                 </div>
                 <span className="font-medium text-sm">
                   {getName(group)}

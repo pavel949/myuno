@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserCollections } from '@/hooks/useUserCollections';
 import { Badge } from '@/components/ui/badge';
-import { ChevronRight, Flame, Star, Sparkles, Heart, Clock } from 'lucide-react';
+import { ChevronRight, Flame, TrendingUp, Clock, Heart, CalendarCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface QuickAccessLinkProps {
@@ -44,13 +44,14 @@ interface ServiceQuickAccessProps {
 export function ServiceQuickAccess({ onNavigate }: ServiceQuickAccessProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { wishlistCount } = useUserCollections({ itemType: 'experience' }); // Use 'experience' as service-like type
+  const { wishlistCount } = useUserCollections({ itemType: 'experience' });
 
   const handleNav = (path: string) => {
     onNavigate();
     navigate(path);
   };
 
+  // Universal Super-App quick access links
   const links = [
     {
       icon: <Flame className="w-5 h-5 text-orange-600" />,
@@ -59,29 +60,29 @@ export function ServiceQuickAccess({ onNavigate }: ServiceQuickAccessProps) {
       path: '/discover?filter=deals',
     },
     {
-      icon: <Star className="w-5 h-5 text-amber-600" />,
-      iconBg: 'bg-amber-100 dark:bg-amber-900/30',
-      label: language === 'ru' ? 'Топ-мастера' : 'Top Professionals',
-      path: '/services?sort=rating',
+      icon: <TrendingUp className="w-5 h-5 text-emerald-600" />,
+      iconBg: 'bg-emerald-100 dark:bg-emerald-900/30',
+      label: language === 'ru' ? 'Популярное сегодня' : 'Popular Today',
+      path: '/discover?filter=popular',
     },
     {
       icon: <Clock className="w-5 h-5 text-blue-600" />,
       iconBg: 'bg-blue-100 dark:bg-blue-900/30',
-      label: language === 'ru' ? 'Быстрый отклик' : 'Fast Response',
-      path: '/services?filter=fast-response',
-    },
-    {
-      icon: <Sparkles className="w-5 h-5 text-purple-600" />,
-      iconBg: 'bg-purple-100 dark:bg-purple-900/30',
-      label: language === 'ru' ? 'Новые мастера' : 'New Providers',
-      path: '/services?filter=new',
+      label: language === 'ru' ? 'История' : 'History',
+      path: '/history',
     },
     {
       icon: <Heart className="w-5 h-5 text-rose-600" />,
       iconBg: 'bg-rose-100 dark:bg-rose-900/30',
       label: language === 'ru' ? 'Избранное' : 'Favorites',
-      path: '/favorites?type=service',
+      path: '/favorites',
       badge: wishlistCount,
+    },
+    {
+      icon: <CalendarCheck className="w-5 h-5 text-primary" />,
+      iconBg: 'bg-primary/10',
+      label: language === 'ru' ? 'Мои бронирования' : 'My Bookings',
+      path: '/bookings',
     },
   ];
 
