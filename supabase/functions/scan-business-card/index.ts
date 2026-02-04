@@ -46,6 +46,23 @@ serve(async (req) => {
 
     console.log('Processing business card image...');
 
+    // Extract pure base64 and detect mime type from data URL
+    let pureBase64 = imageBase64;
+    let mimeType = 'image/jpeg';
+    
+    if (imageBase64.startsWith('data:')) {
+      const matches = imageBase64.match(/^data:([^;]+);base64,(.+)$/);
+      if (matches) {
+        mimeType = matches[1];
+        pureBase64 = matches[2];
+      } else {
+        // Fallback: just strip the prefix
+        pureBase64 = imageBase64.replace(/^data:[^;]+;base64,/, '');
+      }
+    }
+
+    console.log('Image mime type:', mimeType, 'Base64 length:', pureBase64.length);
+
     // Use Gemini for multimodal OCR and analysis
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -81,7 +98,7 @@ ${VERTICALS.map(v => `- ${v.id}: ${v.nameEn} (keywords: ${v.keywords.join(', ')}
               {
                 type: 'image_url',
                 image_url: {
-                  url: imageBase64.startsWith('data:') ? imageBase64 : `data:image/jpeg;base64,${imageBase64}`
+                  url: `data:${mimeType};base64,${pureBase64}`
                 }
               }
             ]
