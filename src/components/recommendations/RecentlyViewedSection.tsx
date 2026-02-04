@@ -69,7 +69,7 @@ export function RecentlyViewedSection() {
         </button>
       </div>
 
-      <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide touch-pan-x">
+      <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide touch-pan-x snap-x snap-mandatory">
         {recentItems.map((item) => {
           const data = item.item_data || {};
           const title = language === 'ru' 
@@ -81,7 +81,7 @@ export function RecentlyViewedSection() {
               key={item.id}
               onClick={() => handleItemClick(item)}
               className={cn(
-                "flex-shrink-0 w-36 bg-card rounded-xl overflow-hidden border",
+                "flex-shrink-0 w-36 snap-start bg-card rounded-xl overflow-hidden border",
                 "hover:shadow-md transition-all cursor-pointer group touch-manipulation"
               )}
             >

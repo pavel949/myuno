@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+
 import { cn } from '@/lib/utils';
 
 export interface SalonStaff {
@@ -73,104 +73,101 @@ export function StaffPicker({
         {isRu ? 'Выберите мастера' : 'Choose Your Specialist'}
       </h3>
       
-      <ScrollArea className="w-full">
-        <div className="flex gap-3 pb-2">
-          {/* "Any available" option */}
-          {allowAny && (
+      <div className="flex gap-3 pb-2 overflow-x-auto scrollbar-hide touch-pan-x snap-x snap-mandatory -mx-4 px-4">
+        {/* "Any available" option */}
+        {allowAny && (
+          <Card
+            className={cn(
+              'w-28 flex-shrink-0 cursor-pointer transition-all hover:shadow-md snap-start touch-manipulation',
+              !selectedId && 'ring-2 ring-primary'
+            )}
+            onClick={() => handleSelect(undefined)}
+          >
+            <CardContent className="p-3 text-center">
+              <div className="w-14 h-14 mx-auto mb-2 rounded-full bg-muted flex items-center justify-center">
+                {!selectedId && (
+                  <Check className="w-6 h-6 text-primary" />
+                )}
+                {selectedId && (
+                  <span className="text-2xl">👤</span>
+                )}
+              </div>
+              <p className="font-medium text-sm">
+                {isRu ? 'Любой' : 'Any'}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {isRu ? 'свободный' : 'available'}
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Staff members */}
+        {staff.map((member) => {
+          const isSelected = selectedId === member.id;
+          const name = isRu ? member.name_ru : member.name_en;
+          const initials = name.split(' ').map(n => n[0]).join('').slice(0, 2);
+
+          return (
             <Card
+              key={member.id}
               className={cn(
-                'w-28 flex-shrink-0 cursor-pointer transition-all hover:shadow-md',
-                !selectedId && 'ring-2 ring-primary'
+                'w-32 flex-shrink-0 cursor-pointer transition-all hover:shadow-md snap-start touch-manipulation',
+                isSelected && 'ring-2 ring-primary'
               )}
-              onClick={() => handleSelect(undefined)}
+              onClick={() => handleSelect(member.id)}
             >
-              <CardContent className="p-3 text-center">
-                <div className="w-14 h-14 mx-auto mb-2 rounded-full bg-muted flex items-center justify-center">
-                  {!selectedId && (
-                    <Check className="w-6 h-6 text-primary" />
+              <CardContent className="p-3">
+                <div className="relative mb-2">
+                  <Avatar className="w-16 h-16 mx-auto">
+                    <AvatarImage src={member.photo || undefined} alt={name} />
+                    <AvatarFallback className="text-lg">{initials}</AvatarFallback>
+                  </Avatar>
+                  {isSelected && (
+                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
+                      <Check className="w-3 h-3 text-primary-foreground" />
+                    </div>
                   )}
-                  {selectedId && (
-                    <span className="text-2xl">👤</span>
+                  {member.is_featured && (
+                    <Badge 
+                      variant="secondary" 
+                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[10px] px-1.5 py-0"
+                    >
+                      <Award className="w-2.5 h-2.5 mr-0.5" />
+                      Top
+                    </Badge>
                   )}
                 </div>
-                <p className="font-medium text-sm">
-                  {isRu ? 'Любой' : 'Any'}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {isRu ? 'свободный' : 'available'}
-                </p>
-              </CardContent>
-            </Card>
-          )}
 
-          {/* Staff members */}
-          {staff.map((member) => {
-            const isSelected = selectedId === member.id;
-            const name = isRu ? member.name_ru : member.name_en;
-            const initials = name.split(' ').map(n => n[0]).join('').slice(0, 2);
+                <p className="font-medium text-sm text-center truncate">
+                  {name.split(' ')[0]}
+                </p>
 
-            return (
-              <Card
-                key={member.id}
-                className={cn(
-                  'w-32 flex-shrink-0 cursor-pointer transition-all hover:shadow-md',
-                  isSelected && 'ring-2 ring-primary'
-                )}
-                onClick={() => handleSelect(member.id)}
-              >
-                <CardContent className="p-3">
-                  <div className="relative mb-2">
-                    <Avatar className="w-16 h-16 mx-auto">
-                      <AvatarImage src={member.photo || undefined} alt={name} />
-                      <AvatarFallback className="text-lg">{initials}</AvatarFallback>
-                    </Avatar>
-                    {isSelected && (
-                      <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
-                        <Check className="w-3 h-3 text-primary-foreground" />
-                      </div>
-                    )}
-                    {member.is_featured && (
-                      <Badge 
-                        variant="secondary" 
-                        className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[10px] px-1.5 py-0"
-                      >
-                        <Award className="w-2.5 h-2.5 mr-0.5" />
-                        Top
-                      </Badge>
+                {member.rating && (
+                  <div className="flex items-center justify-center gap-1 mt-1">
+                    <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                    <span className="text-xs font-medium">{member.rating.toFixed(1)}</span>
+                    {member.review_count && (
+                      <span className="text-xs text-muted-foreground">
+                        ({member.review_count})
+                      </span>
                     )}
                   </div>
+                )}
 
-                  <p className="font-medium text-sm text-center truncate">
-                    {name.split(' ')[0]}
-                  </p>
-
-                  {member.rating && (
-                    <div className="flex items-center justify-center gap-1 mt-1">
-                      <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                      <span className="text-xs font-medium">{member.rating.toFixed(1)}</span>
-                      {member.review_count && (
-                        <span className="text-xs text-muted-foreground">
-                          ({member.review_count})
-                        </span>
-                      )}
-                    </div>
-                  )}
-
-                  {member.experience_years && (
-                    <div className="flex items-center justify-center gap-1 mt-1 text-xs text-muted-foreground">
-                      <Clock className="w-3 h-3" />
-                      <span>
-                        {member.experience_years} {isRu ? 'лет' : 'yrs'}
-                      </span>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+                {member.experience_years && (
+                  <div className="flex items-center justify-center gap-1 mt-1 text-xs text-muted-foreground">
+                    <Clock className="w-3 h-3" />
+                    <span>
+                      {member.experience_years} {isRu ? 'лет' : 'yrs'}
+                    </span>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
     </div>
   );
 }

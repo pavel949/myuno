@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ChevronRight, Plus, Home } from 'lucide-react';
 import { PropertyCard, PropertyCardSkeleton } from '@/components/property/PropertyCard';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+
 
 export function PortfolioSection() {
   const navigate = useNavigate();
@@ -101,27 +101,24 @@ export function PortfolioSection() {
           </div>
         </div>
       ) : (
-        <ScrollArea className="w-full">
-          <div className="flex gap-3 pb-2">
-            {properties.slice(0, 5).map((property) => (
-              <div key={property.id} className="w-[85vw] max-w-[280px] flex-shrink-0">
-                <PropertyCard property={property} variant="hero" mode="owner" />
-              </div>
-            ))}
-            
-            {/* Add new card */}
-            <div 
-              className="w-[85vw] max-w-[280px] flex-shrink-0 border-2 border-dashed border-muted-foreground/20 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors min-h-[200px]"
-              onClick={() => navigate('/owner/properties/new')}
-            >
-              <Plus className="h-8 w-8 text-muted-foreground mb-2" />
-              <span className="text-sm text-muted-foreground">
-                {isRu ? 'Добавить' : 'Add new'}
-              </span>
+        <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 touch-pan-x snap-x snap-mandatory">
+          {properties.slice(0, 5).map((property) => (
+            <div key={property.id} className="w-[85vw] max-w-[280px] flex-shrink-0 snap-start touch-manipulation">
+              <PropertyCard property={property} variant="hero" mode="owner" />
             </div>
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+          ))}
+          
+          {/* Add new card */}
+          <button 
+            className="w-[85vw] max-w-[280px] flex-shrink-0 snap-start touch-manipulation border-2 border-dashed border-muted-foreground/20 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors min-h-[200px]"
+            onClick={() => navigate('/owner/properties/new')}
+          >
+            <Plus className="h-8 w-8 text-muted-foreground mb-2" />
+            <span className="text-sm text-muted-foreground">
+              {isRu ? 'Добавить' : 'Add new'}
+            </span>
+          </button>
+        </div>
       )}
     </div>
   );
