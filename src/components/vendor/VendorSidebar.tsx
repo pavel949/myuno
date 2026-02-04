@@ -22,7 +22,8 @@ import {
   Calendar,
   Scale,
   Baby,
-  MapPin
+  MapPin,
+  MessageSquare
 } from 'lucide-react';
 import {
   Sidebar,
@@ -35,6 +36,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuBadge,
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -48,6 +50,7 @@ interface NavItem {
   titleRu: string;
   path: string;
   icon: React.ElementType;
+  badge?: number; // Notification badge count
 }
 
 interface NavGroup {
@@ -56,6 +59,12 @@ interface NavGroup {
   items: NavItem[];
   defaultOpen?: boolean;
 }
+
+// Mock badge counts - would come from API in real app
+const getBadgeCounts = () => ({
+  '/vendor/bookings': 3, // Pending orders
+  '/vendor/messages': 2, // Unread messages
+});
 
 const navigationGroups: NavGroup[] = [
   {
@@ -121,6 +130,9 @@ export function VendorSidebar() {
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
 
+  // Get badge counts (mock - would come from API)
+  const badgeCounts = getBadgeCounts();
+
   const isActive = (path: string) => {
     if (path === '/vendor') {
       return location.pathname === '/vendor';
@@ -130,6 +142,10 @@ export function VendorSidebar() {
 
   const getGroupDefaultOpen = (group: NavGroup) => {
     return group.items.some(item => isActive(item.path)) || group.defaultOpen;
+  };
+
+  const getItemBadge = (path: string): number | undefined => {
+    return badgeCounts[path as keyof typeof badgeCounts];
   };
 
   return (
@@ -171,22 +187,30 @@ export function VendorSidebar() {
               <CollapsibleContent>
                 <SidebarGroupContent>
                   <SidebarMenu>
-                    {group.items.map((item) => (
-                      <SidebarMenuItem key={item.path}>
-                        <SidebarMenuButton
-                          onClick={() => navigate(item.path)}
-                          isActive={isActive(item.path)}
-                          tooltip={isRussian ? item.titleRu : item.title}
-                          className={cn(
-                            "transition-all duration-200",
-                            isActive(item.path) && "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                    {group.items.map((item) => {
+                      const badge = getItemBadge(item.path);
+                      return (
+                        <SidebarMenuItem key={item.path}>
+                          <SidebarMenuButton
+                            onClick={() => navigate(item.path)}
+                            isActive={isActive(item.path)}
+                            tooltip={isRussian ? item.titleRu : item.title}
+                            className={cn(
+                              "transition-all duration-200",
+                              isActive(item.path) && "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                            )}
+                          >
+                            <item.icon className="h-4 w-4" />
+                            <span>{isRussian ? item.titleRu : item.title}</span>
+                          </SidebarMenuButton>
+                          {badge && badge > 0 && (
+                            <SidebarMenuBadge className="bg-destructive text-destructive-foreground">
+                              {badge > 9 ? '9+' : badge}
+                            </SidebarMenuBadge>
                           )}
-                        >
-                          <item.icon className="h-4 w-4" />
-                          <span>{isRussian ? item.titleRu : item.title}</span>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
+                        </SidebarMenuItem>
+                      );
+                    })}
                   </SidebarMenu>
                 </SidebarGroupContent>
               </CollapsibleContent>

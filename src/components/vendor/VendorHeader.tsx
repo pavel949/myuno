@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Bell, ChevronRight, Store, HelpCircle } from 'lucide-react';
+import { ChevronRight, Store, HelpCircle } from 'lucide-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,6 +16,9 @@ import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { RoleContextSwitcher } from '@/components/uno/RoleContextSwitcher';
 import { CurrencySwitcher } from '@/components/uno/CurrencySwitcher';
+import { VendorCommandPalette } from './dashboard/VendorCommandPalette';
+import { VendorNotificationBell } from './dashboard/VendorNotificationBell';
+import { VendorAvatarMenu } from './dashboard/VendorAvatarMenu';
 
 const routeLabels: Record<string, { en: string; ru: string }> = {
   '/vendor': { en: 'Dashboard', ru: 'Обзор' },
@@ -110,7 +113,12 @@ export function VendorHeader() {
 
       <h1 className="md:hidden font-semibold text-lg">{pageTitle}</h1>
 
-      <div className="flex-1" />
+      {/* Global Search (⌘K) */}
+      <div className="hidden md:flex flex-1 max-w-md">
+        <VendorCommandPalette />
+      </div>
+
+      <div className="flex-1 md:hidden" />
 
       <div className="flex items-center gap-1">
         <RoleContextSwitcher compact />
@@ -119,20 +127,17 @@ export function VendorHeader() {
           size="icon"
           onClick={() => navigate('/support')}
           title={isRussian ? 'Поддержка' : 'Support'}
+          className="hidden sm:flex"
         >
           <HelpCircle className="h-4 w-4" />
         </Button>
         <CurrencySwitcher size="sm" />
         <ThemeSwitcher />
         <LanguageSwitcher />
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="relative"
-          onClick={() => navigate('/notifications')}
-        >
-          <Bell className="h-4 w-4" />
-        </Button>
+        {/* Live Notifications */}
+        <VendorNotificationBell />
+        {/* Avatar Menu */}
+        <VendorAvatarMenu />
       </div>
     </header>
   );
