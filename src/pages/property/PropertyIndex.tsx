@@ -21,7 +21,6 @@ import { BedroomChips } from '@/components/property/BedroomChips';
 import { applyQuickFilters } from '@/hooks/usePropertyQuickFilters';
 import { matchesFilter, matchesSingleFilter, normalizeForFilter } from '@/lib/filterUtils';
 import { CrossSellSection } from '@/components/crosssell';
-import { PropertyAIButton } from '@/components/property/PropertyAIButton';
 
 // Demo properties loaded from JSON for better maintainability
 import demoPropertiesData from '@/data/demo/properties.json';
@@ -411,9 +410,6 @@ export default function PropertyIndex() {
 
           <CrossSellSection currentVertical="property" className="mt-8 px-4" />
         </main>
-
-        {/* AI Property Assistant - Floating Button */}
-        <PropertyAIButton />
       </div>
     </AppLayout>
   );
