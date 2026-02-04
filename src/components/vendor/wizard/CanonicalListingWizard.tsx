@@ -52,6 +52,7 @@ import {
   Wand2,
   AlertTriangle,
   X,
+  Languages,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
@@ -59,6 +60,8 @@ import { useLookupOptions } from '@/hooks/useLookupValues';
 import { CardPreview, CardPreviewSection } from '../CardPreview';
 import { useCanonicalSubmit } from '@/hooks/useCanonicalSubmit';
 import { useCanonicalDraft } from '@/hooks/useCanonicalDraft';
+import { AITranslateButton } from '@/components/ui/AITranslateButton';
+import { TranslateAllButton } from '@/components/wizard/TranslateAllButton';
 
 // ==================== TYPES ====================
 
@@ -794,6 +797,18 @@ function BasicInfoStep({ data, updateField, errors, isRu }: StepProps) {
   
   return (
     <div className="space-y-6">
+      {/* Translate All Button */}
+      <div className="flex justify-end">
+        <TranslateAllButton
+          formData={data}
+          onUpdate={(updates) => {
+            Object.entries(updates).forEach(([key, value]) => {
+              updateField(key as keyof CanonicalListingData, value);
+            });
+          }}
+        />
+      </div>
+      
       <div>
         <h3 className="font-semibold text-lg mb-1">{isRu ? 'Название' : 'Title'}</h3>
         <p className="text-sm text-muted-foreground mb-4">
@@ -802,7 +817,17 @@ function BasicInfoStep({ data, updateField, errors, isRu }: StepProps) {
         
         <div className="space-y-4">
           <div>
-            <Label>English *</Label>
+            <div className="flex items-center justify-between mb-1">
+              <Label>English *</Label>
+              {data.title_ru && (
+                <AITranslateButton
+                  sourceText={data.title_ru}
+                  sourceLang="ru"
+                  targetLang="en"
+                  onTranslate={(text) => updateField('title_en', text)}
+                />
+              )}
+            </div>
             <Input
               value={data.title_en}
               onChange={(e) => updateField('title_en', e.target.value)}
@@ -816,7 +841,17 @@ function BasicInfoStep({ data, updateField, errors, isRu }: StepProps) {
           </div>
           
           <div>
-            <Label>Русский</Label>
+            <div className="flex items-center justify-between mb-1">
+              <Label>Русский</Label>
+              {data.title_en && (
+                <AITranslateButton
+                  sourceText={data.title_en}
+                  sourceLang="en"
+                  targetLang="ru"
+                  onTranslate={(text) => updateField('title_ru', text)}
+                />
+              )}
+            </div>
             <Input
               value={data.title_ru}
               onChange={(e) => updateField('title_ru', e.target.value)}
@@ -839,12 +874,22 @@ function BasicInfoStep({ data, updateField, errors, isRu }: StepProps) {
           <div>
             <div className="flex items-center justify-between mb-1">
               <Label>English</Label>
-              <span className={cn(
-                'text-xs',
-                data.short_description_en.length > 160 ? 'text-destructive' : 'text-muted-foreground'
-              )}>
-                {data.short_description_en.length}/160
-              </span>
+              <div className="flex items-center gap-2">
+                {data.short_description_ru && (
+                  <AITranslateButton
+                    sourceText={data.short_description_ru}
+                    sourceLang="ru"
+                    targetLang="en"
+                    onTranslate={(text) => updateField('short_description_en', text)}
+                  />
+                )}
+                <span className={cn(
+                  'text-xs',
+                  data.short_description_en.length > 160 ? 'text-destructive' : 'text-muted-foreground'
+                )}>
+                  {data.short_description_en.length}/160
+                </span>
+              </div>
             </div>
             <Textarea
               value={data.short_description_en}
@@ -861,9 +906,19 @@ function BasicInfoStep({ data, updateField, errors, isRu }: StepProps) {
           <div>
             <div className="flex items-center justify-between mb-1">
               <Label>Русский</Label>
-              <span className="text-xs text-muted-foreground">
-                {data.short_description_ru.length}/160
-              </span>
+              <div className="flex items-center gap-2">
+                {data.short_description_en && (
+                  <AITranslateButton
+                    sourceText={data.short_description_en}
+                    sourceLang="en"
+                    targetLang="ru"
+                    onTranslate={(text) => updateField('short_description_ru', text)}
+                  />
+                )}
+                <span className="text-xs text-muted-foreground">
+                  {data.short_description_ru.length}/160
+                </span>
+              </div>
             </div>
             <Textarea
               value={data.short_description_ru}
@@ -883,7 +938,17 @@ function BasicInfoStep({ data, updateField, errors, isRu }: StepProps) {
         
         <div className="space-y-4">
           <div>
-            <Label>English</Label>
+            <div className="flex items-center justify-between mb-1">
+              <Label>English</Label>
+              {data.full_description_ru && (
+                <AITranslateButton
+                  sourceText={data.full_description_ru}
+                  sourceLang="ru"
+                  targetLang="en"
+                  onTranslate={(text) => updateField('full_description_en', text)}
+                />
+              )}
+            </div>
             <Textarea
               value={data.full_description_en}
               onChange={(e) => updateField('full_description_en', e.target.value)}
@@ -893,7 +958,17 @@ function BasicInfoStep({ data, updateField, errors, isRu }: StepProps) {
           </div>
           
           <div>
-            <Label>Русский</Label>
+            <div className="flex items-center justify-between mb-1">
+              <Label>Русский</Label>
+              {data.full_description_en && (
+                <AITranslateButton
+                  sourceText={data.full_description_en}
+                  sourceLang="en"
+                  targetLang="ru"
+                  onTranslate={(text) => updateField('full_description_ru', text)}
+                />
+              )}
+            </div>
             <Textarea
               value={data.full_description_ru}
               onChange={(e) => updateField('full_description_ru', e.target.value)}
