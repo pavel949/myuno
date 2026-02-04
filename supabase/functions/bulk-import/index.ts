@@ -6,18 +6,51 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Allowed tables for bulk import
+// Allowed tables for bulk import - synchronized with src/lib/providerIdMapping.ts
 const ALLOWED_TABLES = [
+  // Core entities
   'providers',
   'marketplace_products',
   'marketplace_vendors',
-  'restaurants',
-  'salons',
+  'vendor_services',
+  
+  // Vertical tables
   'yachts',
   'tours',
-  'services',
+  'water_activities',
+  'restaurants',
+  'salons',
+  'clinics',
+  'gyms',
+  'vehicles',
+  'babysitters',
+  'cleaning_providers',
+  'pet_services',
+  'lawyers',
+  'education_centers',
   'properties',
+  'owner_properties',
+  'flower_shops',
+  'bouquets',
+  'user_listings',
+  
+  // Legacy (deprecated but may have data)
+  'services',
 ];
+
+// Provider ID field mapping - different tables use different FK fields
+const PROVIDER_ID_FIELD: Record<string, string> = {
+  'marketplace_products': 'vendor_id',
+  'vendor_services': 'provider_id',
+  'bouquets': 'shop_id',
+  'owner_properties': 'owner_id',
+  'user_listings': 'user_id',
+  // All other tables use 'provider_id' as default
+};
+
+function getProviderField(table: string): string {
+  return PROVIDER_ID_FIELD[table] || 'provider_id';
+}
 
 serve(async (req) => {
   // Handle CORS preflight
