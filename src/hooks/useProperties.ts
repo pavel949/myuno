@@ -40,6 +40,10 @@ export interface Property {
   view_type?: string;
   furnishing_level?: string;
   equipment?: string[];
+  // Quick filter fields
+  highlights?: string[];
+  monthly_discount?: number;
+  weekly_discount?: number;
 }
 
 export interface PropertyProject {

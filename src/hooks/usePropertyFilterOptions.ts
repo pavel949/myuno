@@ -21,6 +21,7 @@ export function usePropertyFilterOptions() {
   const [propertyTypes, setPropertyTypes] = useState<FilterOption[]>([]);
   const [districts, setDistricts] = useState<FilterOption[]>([]);
   const [amenities, setAmenities] = useState<FilterOption[]>([]);
+  const [highlights, setHighlights] = useState<FilterOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -30,7 +31,7 @@ export function usePropertyFilterOptions() {
       const { data, error } = await supabase
         .from('lookup_values')
         .select('id, lookup_type, value_key, value_en, value_ru, icon, is_active, sort_order')
-        .in('lookup_type', ['property_type', 'district', 'amenity'])
+        .in('lookup_type', ['property_type', 'district', 'amenity', 'property_highlight'])
         .eq('is_active', true)
         .order('sort_order', { ascending: true });
 
@@ -50,6 +51,7 @@ export function usePropertyFilterOptions() {
       const types: FilterOption[] = [];
       const dists: FilterOption[] = [];
       const amens: FilterOption[] = [];
+      const highs: FilterOption[] = [];
 
       (data || []).forEach((item: any) => {
         const option = toFilterOption(item as LookupValue);
@@ -63,12 +65,16 @@ export function usePropertyFilterOptions() {
           case 'amenity':
             amens.push(option);
             break;
+          case 'property_highlight':
+            highs.push(option);
+            break;
         }
       });
 
       setPropertyTypes(types);
       setDistricts(dists);
       setAmenities(amens);
+      setHighlights(highs);
       setIsLoading(false);
     };
 
@@ -143,6 +149,7 @@ export function usePropertyFilterOptions() {
     propertyTypes,
     districts,
     amenities,
+    highlights,
     bedroomOptions,
     listingTypeOptions,
     isLoading,
