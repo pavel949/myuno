@@ -1,53 +1,80 @@
 
-# План: Дашборд инвестора
+# План: Центрирование + Раздел инвестиционного анализа недвижимости
 
-## Концепция
+## Часть 1: Исправление центрирования текста на жёлтом экране
 
-Создаём персональный кабинет инвестора по адресу `/invest/dashboard`, где пользователь видит:
-- Активные заявки на инвестиции и их статусы
-- Сводку по интересующим проектам
-- Общую аналитику (потенциальный ROI, суммы)
-- Быстрые действия
+### Проблема
+На мобильных устройствах текст "myUNO" и "Добро пожаловать!" на экране приветствия PWA может смещаться.
 
-## Визуальный дизайн
+### Решение
+Добавить `w-full` к контейнеру текста и убедиться, что flex-контейнер корректно центрирует содержимое.
+
+**Файл:** `src/components/pwa/PWAWelcomeScreen.tsx`
+- Строка 64: добавить `w-full` к motion.div с текстом
+- Убедиться в явном `text-center w-full` для h1 и p элементов
+
+---
+
+## Часть 2: Раздел инвестиционного анализа для владельцев
+
+### Концепция
+Добавить новый раздел "Инвестиции" (Investment) в меню управления объектом (`PropertyManage`), где владелец сможет:
+1. Указать стоимость покупки объекта
+2. Видеть автоматически подтянутые доходы и расходы
+3. Получить реальный расчёт доходности
+
+### Визуальный дизайн секции
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│  /invest/dashboard                                                          │
+│  📊 Инвестиционный анализ                                                   │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
-│  ┌────────────────────────────────────────────────────────────────────────┐ │
-│  │  👋 Добро пожаловать, [Имя]                                            │ │
-│  │  ───────────────────────────────────────────────────────────────────── │ │
-│  │  📊 3 активных заявки  •  $250,000 общий интерес  •  18% avg ROI       │ │
-│  └────────────────────────────────────────────────────────────────────────┘ │
-│                                                                              │
-│  ┌─ Quick Actions ────────────────────────────────────────────────────────┐ │
-│  │  [🔍 Найти проект]  [📞 Связаться]  [📄 Документы]  [💼 Каталог]       │ │
-│  └────────────────────────────────────────────────────────────────────────┘ │
-│                                                                              │
-│  ┌─ Мои заявки ───────────────────────────────────────────────────────────┐ │
+│  ┌─ Стоимость приобретения ───────────────────────────────────────────────┐ │
 │  │                                                                         │ │
-│  │  ┌───────────────────────────────────────────────────────────────────┐ │ │
-│  │  │  🏢 Ocean View Villas            📍 Kamala                        │ │ │
-│  │  │  ─────────────────────────────────────────────────────────────── │ │ │
-│  │  │  Тип: Инвестиция  •  $50,000 USD                                  │ │ │
-│  │  │  Статус: 🟡 В обработке         Создано: 2 дня назад              │ │ │
-│  │  │  ─────────────────────────────────────────────────────────────── │ │ │
-│  │  │  [Подробнее] [Отменить заявку]                                    │ │ │
-│  │  └───────────────────────────────────────────────────────────────────┘ │ │
+│  │   Цена покупки:        [฿ 5,000,000        ]                           │ │
+│  │   Доп. расходы:        [฿   350,000        ] (налоги, оформление...)   │ │
+│  │   ─────────────────────────────────────────────────────────────────     │ │
+│  │   Общие инвестиции:    ฿ 5,350,000                                      │ │
 │  │                                                                         │ │
-│  │  ┌───────────────────────────────────────────────────────────────────┐ │ │
-│  │  │  🏨 Boutique Hotel Phuket         📍 Kata                          │ │ │
-│  │  │  Тип: Узнать больше                                               │ │ │
-│  │  │  Статус: 🟢 Менеджер связался                                      │ │ │
-│  │  └───────────────────────────────────────────────────────────────────┘ │ │
-│  │                                                                         │ │
-│  └────────────────────────────────────────────────────────────────────────┘ │
+│  └─────────────────────────────────────────────────────────────────────────┘ │
 │                                                                              │
-│  ┌─ Рекомендуемые проекты ────────────────────────────────────────────────┐ │
-│  │  [Карусель InvestmentCard по matching categories]                      │ │
-│  └────────────────────────────────────────────────────────────────────────┘ │
+│  ┌─ Финансовые показатели (за период) ────────────────────────────────────┐ │
+│  │                                                                         │ │
+│  │   ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐               │ │
+│  │   │ Доходы   │  │ Расходы  │  │ Чистый   │  │ Загрузка │               │ │
+│  │   │ ฿320K    │  │ ฿85K     │  │ ฿235K    │  │ 72%      │               │ │
+│  │   │ ↑12%     │  │ ↓5%      │  │ ↑18%     │  │          │               │ │
+│  │   └──────────┘  └──────────┘  └──────────┘  └──────────┘               │ │
+│  │                                                                         │ │
+│  └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│  ┌─ Ключевые метрики инвестора ───────────────────────────────────────────┐ │
+│  │                                                                         │ │
+│  │   ┌────────────────────────────────────────────────────────────────┐   │ │
+│  │   │  ROI (Return on Investment)                                    │   │ │
+│  │   │  ──────────────────────────────────────────────────────────── │   │ │
+│  │   │  ████████████████████░░░░░░░░░░  4.4% годовых                  │   │ │
+│  │   │  Чистая прибыль ฿235K / Инвестиции ฿5.35M                      │   │ │
+│  │   └────────────────────────────────────────────────────────────────┘   │ │
+│  │                                                                         │ │
+│  │   ┌────────────────────────────────────────────────────────────────┐   │ │
+│  │   │  Cap Rate (Ставка капитализации)                               │   │ │
+│  │   │  ──────────────────────────────────────────────────────────── │   │ │
+│  │   │  ████████████████████████░░░░░░  5.9% годовых                  │   │ │
+│  │   │  NOI ฿235K / Цена покупки ฿5M                                  │   │ │
+│  │   └────────────────────────────────────────────────────────────────┘   │ │
+│  │                                                                         │ │
+│  │   ┌────────────────────────────────────────────────────────────────┐   │ │
+│  │   │  Gross Yield (Валовая доходность)                              │   │ │
+│  │   │  ──────────────────────────────────────────────────────────── │   │ │
+│  │   │  ████████████████████████████░░  6.4% годовых                  │   │ │
+│  │   │  Доход ฿320K / Цена покупки ฿5M                                │   │ │
+│  │   └────────────────────────────────────────────────────────────────┘   │ │
+│  │                                                                         │ │
+│  │   Срок окупаемости: ~17 лет                                            │ │
+│  │                                                                         │ │
+│  └─────────────────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -56,107 +83,79 @@
 
 ## Фазы реализации
 
-### Фаза 1: Расширить хук useInvestmentInterest
+### Фаза 1: Миграция базы данных
 
-Добавить JOIN с проектами для получения полной информации:
+Добавить поля в таблицу `owner_properties`:
 
+```sql
+ALTER TABLE owner_properties 
+ADD COLUMN IF NOT EXISTS purchase_price NUMERIC,
+ADD COLUMN IF NOT EXISTS purchase_date DATE,
+ADD COLUMN IF NOT EXISTS acquisition_costs NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS renovation_costs NUMERIC DEFAULT 0;
+
+COMMENT ON COLUMN owner_properties.purchase_price IS 'Property purchase price for ROI calculations';
+COMMENT ON COLUMN owner_properties.acquisition_costs IS 'Additional costs (taxes, legal, furnishing)';
+```
+
+---
+
+### Фаза 2: Создать компонент InvestmentSection
+
+**Файл:** `src/components/owner/property-manage/InvestmentSection.tsx`
+
+Функциональность:
+- Форма ввода `purchase_price`, `purchase_date`, `acquisition_costs`, `renovation_costs`
+- Автоподтягивание данных из `property_financials` (доходы/расходы)
+- Расчёт метрик на клиенте:
+  - **Total Investment** = purchase_price + acquisition_costs + renovation_costs
+  - **Annual Income** = сумма income транзакций за 12 месяцев (или экстраполяция)
+  - **Annual Expenses** = сумма expense транзакций
+  - **NOI** (Net Operating Income) = Income - Expenses
+  - **Gross Yield** = (Annual Income / Purchase Price) * 100
+  - **Cap Rate** = (NOI / Purchase Price) * 100
+  - **ROI** = (NOI / Total Investment) * 100
+  - **Payback Period** = Total Investment / NOI (в годах)
+
+---
+
+### Фаза 3: Интегрировать в PropertyManage
+
+**Файл:** `src/pages/owner/PropertyManage.tsx`
+
+1. Добавить секцию в `MENU_SECTIONS`:
 ```typescript
-// useInvestmentInterest.ts - extend query
-const { data: userInterests } = useQuery({
-  queryKey: ['investment-interests', 'user-full', user?.id],
-  queryFn: async () => {
-    const { data, error } = await supabase
-      .from('investment_interests')
-      .select(`
-        *,
-        project:investment_projects (
-          id, title_en, title_ru, cover_image,
-          roi_projected, muuno_score, district, project_type
-        )
-      `)
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
-    // ...
-  }
-});
+{ id: 'investment', label: 'Investment', labelRu: 'Инвестиции', icon: <TrendingUp />, badge: 'NEW' }
 ```
 
----
-
-### Фаза 2: Создать виджеты дашборда
-
-```text
-src/components/investor/dashboard/
-├── InvestorWelcomeCard.tsx     — Приветствие + сводная статистика
-├── InvestorQuickActions.tsx    — Быстрые действия
-├── InvestorInterestsList.tsx   — Список заявок со статусами
-├── InvestorInterestCard.tsx    — Карточка одной заявки
-├── InvestorRecommendations.tsx — Рекомендованные проекты
-└── index.ts
-```
-
----
-
-### Фаза 3: Создать страницу InvestorDashboard
-
+2. Добавить case в `renderContent()`:
 ```typescript
-// src/pages/invest/InvestorDashboard.tsx
-export default function InvestorDashboard() {
-  const { user } = useAuth();
-  
-  if (!user) {
-    return <InvestorAuthPrompt />;
-  }
-
-  return (
-    <MiniAppLayout title="Мои инвестиции">
-      <div className="space-y-6">
-        <InvestorWelcomeCard />
-        <InvestorQuickActions />
-        <InvestorInterestsList />
-        <InvestorRecommendations />
-      </div>
-    </MiniAppLayout>
-  );
-}
+case 'investment':
+  return <PropertyManageInvestmentSection propertyId={id} />;
 ```
 
 ---
 
-### Фаза 4: Интегрировать маршрут и навигацию
+### Фаза 4: Обновить хуки
 
-1. **AnimatedRoutes.tsx** — добавить `/invest/dashboard`
-2. **InvestmentIndex.tsx** — добавить кнопку "Мой кабинет" в хедер
-3. **AdaptiveBottomNav** — показывать для персоны "investor"
+**Файл:** `src/hooks/usePropertyCare.ts`
+- Добавить поля `purchase_price`, `acquisition_costs`, `renovation_costs` в тип `OwnerProperty`
 
----
-
-## Статусы заявок (визуальные)
-
-| Status | Label RU | Label EN | Color |
-|--------|----------|----------|-------|
-| `new` | Новая | New | 🔵 Blue |
-| `contacted` | Связались | Contacted | 🟢 Green |
-| `in_progress` | В работе | In Progress | 🟡 Amber |
-| `documents_sent` | Документы | Documents Sent | 🟣 Purple |
-| `completed` | Завершено | Completed | ✅ Green |
-| `cancelled` | Отменено | Cancelled | ⚫ Gray |
+**Файл:** `src/hooks/usePropertyFinancials.ts`
+- Добавить хук `usePropertyInvestmentMetrics(propertyId)` для расчёта ROI/Cap Rate
 
 ---
 
-## Сводная статистика (WelcomeCard)
+## Формулы расчёта
 
-```text
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  Рассчитывается на клиенте из userInterests:                                │
-│                                                                              │
-│  • Активные заявки: count where status NOT IN (completed, cancelled)        │
-│  • Общий интерес: SUM(preferred_amount)                                      │
-│  • Средний ROI: AVG(project.roi_projected) where interest exists            │
-│  • Категории: уникальные project_type                                        │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
+| Метрика | Формула | Описание |
+|---------|---------|----------|
+| **Total Investment** | purchase_price + acquisition_costs + renovation_costs | Общие вложения |
+| **Gross Yield** | (Annual Gross Income / Purchase Price) × 100 | Валовая доходность |
+| **Cap Rate** | (NOI / Purchase Price) × 100 | Ставка капитализации |
+| **Cash-on-Cash ROI** | (Annual Cash Flow / Total Investment) × 100 | Возврат на инвестиции |
+| **Payback Period** | Total Investment / Annual Cash Flow | Срок окупаемости |
+| **RevPAR** | Total Revenue / Available Days | Доход на доступный номер |
 
 ---
 
@@ -164,46 +163,32 @@ export default function InvestorDashboard() {
 
 | Файл | Тип | Описание |
 |------|-----|----------|
-| `src/pages/invest/InvestorDashboard.tsx` | NEW | Главная страница дашборда |
-| `src/components/investor/dashboard/InvestorWelcomeCard.tsx` | NEW | Приветствие + статистика |
-| `src/components/investor/dashboard/InvestorQuickActions.tsx` | NEW | Быстрые действия |
-| `src/components/investor/dashboard/InvestorInterestsList.tsx` | NEW | Список заявок |
-| `src/components/investor/dashboard/InvestorInterestCard.tsx` | NEW | Карточка заявки |
-| `src/components/investor/dashboard/InvestorRecommendations.tsx` | NEW | Рекомендации |
-| `src/components/investor/dashboard/index.ts` | NEW | Экспорты |
-| `src/hooks/useInvestmentInterest.ts` | UPDATE | Добавить JOIN с проектами |
-| `src/components/layout/AnimatedRoutes.tsx` | UPDATE | Добавить маршрут |
-| `src/pages/invest/InvestmentIndex.tsx` | UPDATE | Кнопка "Мой кабинет" |
-| `src/pages/invest/index.ts` | UPDATE | Экспорт нового компонента |
+| `src/components/pwa/PWAWelcomeScreen.tsx` | UPDATE | Исправить центрирование |
+| DB Migration | NEW | Добавить поля purchase_price и др. |
+| `src/components/owner/property-manage/InvestmentSection.tsx` | NEW | Раздел инвестанализа |
+| `src/pages/owner/PropertyManage.tsx` | UPDATE | Добавить секцию в меню |
+| `src/hooks/usePropertyCare.ts` | UPDATE | Расширить тип OwnerProperty |
+| `src/hooks/usePropertyFinancials.ts` | UPDATE | Добавить хук расчёта метрик |
 
 ---
 
-## Технические особенности
+## Данные для расчётов
 
-1. **Защита маршрута** — `/invest/dashboard` требует авторизации
-2. **Паттерн OwnerDashboard** — используем Suspense + Skeleton для секций
-3. **Real-time опционально** — можно добавить подписку на изменение статусов
-4. **Билингвальность** — все тексты через `isRu`
-
----
-
-## Расширения (будущее)
-
-- 📈 **Портфельная аналитика** — когда появятся реальные инвестиции
-- 📄 **Документы** — доступ к договорам и due diligence
-- 💬 **Чат с менеджером** — персональная связь
-- 🔔 **Уведомления** — push о смене статуса
+Источники данных:
+1. **Доходы** — `property_financials` WHERE `transaction_type = 'income'` AND `property_id = :id`
+2. **Расходы** — `property_financials` WHERE `transaction_type = 'expense'` AND `property_id = :id`
+3. **Загрузка** — `property_bookings` для расчёта occupancy rate
+4. **Стоимость** — новые поля `purchase_price`, `acquisition_costs` из `owner_properties`
 
 ---
 
-## Порядок реализации
+## Особенности UX
 
-1. **useInvestmentInterest** — расширить с JOIN
-2. **Виджеты dashboard/** — компоненты
-3. **InvestorDashboard** — страница
-4. **AnimatedRoutes** — маршрут
-5. **InvestmentIndex** — кнопка входа в дашборд
-6. **Тестирование** — проверка flow авторизованного пользователя
+1. **Валюта** — показывать в валюте объекта (THB) с возможностью конвертации
+2. **Период** — выбор периода анализа (месяц, квартал, год, всё время)
+3. **Подсказки** — объяснения каждой метрики при наведении
+4. **Экспорт** — возможность скачать отчёт в PDF (расширение)
+5. **Сравнение** — benchmark с рынком Пхукета (будущее)
 
 ---
 
@@ -211,8 +196,8 @@ export default function InvestorDashboard() {
 
 | Метрика | Значение |
 |---------|----------|
-| Новые компоненты | 7 |
-| Обновляемые файлы | 4 |
+| Новые компоненты | 1 |
+| Изменяемые файлы | 4 |
+| Миграция БД | Да (4 поля) |
 | Сложность | Средняя |
 | Риск регрессии | Низкий |
-| Время реализации | ~2-3 часа |
