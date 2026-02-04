@@ -24,8 +24,8 @@ export default defineConfig(({ mode }) => ({
         background_color: '#0a0a0b',
         display: 'standalone',
         orientation: 'portrait-primary',
-        start_url: '/?source=pwa',
-        id: '/myuno-pwa-v6',
+        start_url: '/',
+        id: '/myuno-pwa-2025',
         scope: '/',
         icons: [
           {
