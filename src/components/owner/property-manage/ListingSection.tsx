@@ -5,9 +5,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Home, Bed, Bath, SquareStack, MapPin } from 'lucide-react';
+import { Home, Bed, Bath, MapPin } from 'lucide-react';
 import { AirbnbStyleImageUpload } from '@/components/upload/AirbnbStyleImageUpload';
-import { PropertyHighlights } from '@/components/property/PropertyHighlights';
+import { HighlightsSection } from '@/components/owner/property-manage/HighlightsSection';
 import { useTaxonomy } from '@/hooks/useTaxonomy';
 
 interface ListingSectionProps {
@@ -247,25 +247,11 @@ export function PropertyManageListingSection({
             </CardContent>
           </Card>
 
-          {/* Highlights */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">
-                {isRu ? 'Особенности' : 'Highlights'}
-              </CardTitle>
-              <CardDescription>
-                {isRu 
-                  ? 'Выделите главные преимущества' 
-                  : 'Highlight key features of your property'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <PropertyHighlights
-                highlights={formData.highlights || []}
-                onChange={(highlights) => updateFormData({ highlights })}
-              />
-            </CardContent>
-          </Card>
+          {/* Highlights - Dynamic from lookup_values */}
+          <HighlightsSection
+            highlights={formData.highlights || []}
+            onChange={(highlights) => updateFormData({ highlights })}
+          />
         </TabsContent>
 
         <TabsContent value="photos" className="space-y-4">
