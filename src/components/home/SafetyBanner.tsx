@@ -13,7 +13,7 @@ export function SafetyBanner() {
     <Link to="/sos" className="block">
       <div className={cn(
         "flex items-center gap-3 p-3 rounded-xl",
-        "bg-gradient-to-r from-destructive/10 via-orange-500/10 to-amber-500/10",
+        "bg-gradient-to-r from-destructive/10 via-destructive/5 to-accent/10",
         "border border-destructive/20 hover:border-destructive/40",
         "transition-all hover:shadow-md active:scale-[0.98]"
       )}>

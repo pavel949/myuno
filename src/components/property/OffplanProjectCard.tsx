@@ -37,17 +37,17 @@ const STATUS_CONFIG: Record<ProjectStatus, {
   offplan: {
     label: { en: 'Off-Plan', ru: 'Новостройка' },
     icon: Building2,
-    color: 'bg-blue-500/10 text-blue-600 border-blue-500/30',
+    color: 'bg-primary/10 text-primary border-primary/30',
   },
   under_construction: {
     label: { en: 'Under Construction', ru: 'Строится' },
     icon: HardHat,
-    color: 'bg-amber-500/10 text-amber-600 border-amber-500/30',
+    color: 'bg-accent/10 text-accent-foreground border-accent/30',
   },
   completed: {
     label: { en: 'Completed', ru: 'Готово' },
     icon: CheckCircle2,
-    color: 'bg-green-500/10 text-green-600 border-green-500/30',
+    color: 'bg-secondary/20 text-secondary-foreground border-secondary/30',
   },
 };
 
@@ -115,7 +115,7 @@ export function OffplanProjectCard({
           </Badge>
           
           {project.isFeatured && (
-            <Badge className="bg-amber-500 text-white border-0 gap-1">
+            <Badge className="bg-primary text-primary-foreground border-0 gap-1">
               <Sparkles className="w-3 h-3" />
               {isRu ? 'Топ' : 'Hot'}
             </Badge>
@@ -132,7 +132,7 @@ export function OffplanProjectCard({
         {/* Construction progress (for non-completed) */}
         {project.projectStatus !== 'completed' && project.constructionProgress > 0 && (
           <div className="absolute bottom-0 left-0 right-0 p-3">
-            <div className="flex items-center justify-between text-xs text-white mb-1">
+            <div className="flex items-center justify-between text-xs text-primary-foreground mb-1">
               <span>{isRu ? 'Прогресс' : 'Progress'}</span>
               <span className="font-semibold">{project.constructionProgress}%</span>
             </div>
@@ -183,7 +183,7 @@ export function OffplanProjectCard({
         <div className="flex items-center gap-2 pt-2 border-t border-border/50">
           {/* ROI */}
           {project.roiProjected && (
-            <div className="flex items-center gap-1 text-xs bg-green-500/10 text-green-600 px-2 py-1 rounded-full">
+            <div className="flex items-center gap-1 text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
               <TrendingUp className="w-3 h-3" />
               <span className="font-medium">{project.roiProjected}% ROI</span>
             </div>
