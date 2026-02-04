@@ -881,13 +881,7 @@ const VendorYachts = () => {
                           />
                           <Label>{isRussian ? 'С экипажем' : 'With Crew'}</Label>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={formData.is_featured}
-                            onCheckedChange={(checked) => updateField('is_featured', checked)}
-                          />
-                          <Label>{isRussian ? 'Избранное' : 'Featured'}</Label>
-                        </div>
+                        {/* is_featured removed - admin only */}
                       </div>
                     </VendorFormSection>
 

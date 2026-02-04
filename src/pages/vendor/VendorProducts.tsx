@@ -717,20 +717,7 @@ const VendorProducts = () => {
                           onCheckedChange={(checked) => updateField('in_stock', checked)}
                         />
                       </div>
-                      <div className="flex items-center justify-between">
-                        <Label>{isRussian ? 'Новинка' : 'New arrival'}</Label>
-                        <Switch
-                          checked={formData.is_new}
-                          onCheckedChange={(checked) => updateField('is_new', checked)}
-                        />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <Label>{isRussian ? 'Популярное' : 'Popular'}</Label>
-                        <Switch
-                          checked={formData.is_popular}
-                          onCheckedChange={(checked) => updateField('is_popular', checked)}
-                        />
-                      </div>
+                      {/* is_new, is_popular removed - admin only */}
                     </div>
                   </VendorFormSection>
 

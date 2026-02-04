@@ -283,10 +283,7 @@ const VendorEvents = () => {
                   <Label>{isRussian ? 'Место проведения' : 'Venue'}</Label>
                   <Input value={formData.location_name} onChange={(e) => setFormData(prev => ({ ...prev, location_name: e.target.value }))} />
                 </div>
-                <div className="flex items-center justify-between">
-                  <Label>🔥 {isRussian ? 'Горячее' : 'Hot Event'}</Label>
-                  <Switch checked={formData.is_hot} onCheckedChange={(v) => setFormData(prev => ({ ...prev, is_hot: v }))} />
-                </div>
+                {/* is_hot removed - admin only */}
               </div>
             </ScrollArea>
             <DialogFooter className="p-6 pt-0">
