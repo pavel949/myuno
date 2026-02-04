@@ -1,25 +1,111 @@
 
-# План: Улучшение карточки объекта и пути клиента (Airbnb-стиль)
+# План: Реорганизация фильтров недвижимости
 
-## Выявленные проблемы
+## Текущее состояние
 
-### 1. Бейдж "Instant Booking" использует неверную логику
-| Файл | Текущая логика | Правильная логика |
-|------|----------------|-------------------|
-| `PropertyIndex.tsx` | `property.min_stay_nights === 1` | `property.instant_booking === true` |
-| `PropertyCard.tsx` | Использует `instantBooking` из props | ✓ Корректно |
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  ТЕКУЩАЯ СТРУКТУРА ФИЛЬТРОВ                                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  [Все] [🏬 Apartment] [🏢 Condo] [🏡 Villa] [🏘️ Townhouse] ... ← 8 типов  │
+│                                                              [⚙️ Фильтры]   │
+│                                                                             │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│  Quick Filters (ленточка):                                                  │
+│  [⚡ Instant] [🏖️ У пляжа] [🌊 Beachfront] [🐕 Pet Friendly] ...           │
+│                                                                             │
+│  Residences:                                                                │
+│  [Blue Tree] [VIP Kata] [Botanica] ...                                     │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
 
-### 2. Кнопка бронирования не динамическая
-**Текущее:** Всегда показывает "Забронировать" ("Reserve")
-**Airbnb-стандарт:** 
-- Без дат → "Проверить наличие" ("Check availability")  
-- С датами → "Забронировать" ("Reserve") или "Мгновенное бронирование" ("Instant book")
+ПРОБЛЕМЫ:
+1. ❌ Все 8 типов недвижимости показаны одинаково - нет приоритета
+2. ❌ Спальни только в модальном фильтре (глубоко)
+3. ❌ Теги/локации только в модальном фильтре
+4. ❌ Нет группировки "Ещё типы"
+```
 
-### 3. Карточка в списке не показывает CTA "Check availability"
-Пользователь видит только цену, без призыва к действию
+---
 
-### 4. Мобильная bottom bar не показывает "instant booking"
-Bottom CTA показывает статичный текст без учёта возможности мгновенного бронирования
+## Целевой UX
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  НОВАЯ СТРУКТУРА ФИЛЬТРОВ (Airbnb/Klook стиль)                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  УРОВЕНЬ 1: Тип недвижимости (приоритетные + dropdown)                     │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ [Все] [🏢 Кондо] [🏡 Вилла] [📋 Ещё типы ▾] ← dropdown          │   │
+│  │                                                    [⚙️ Фильтры]   │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  УРОВЕНЬ 2: Спальни (inline chips)                                         │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ Спальни: [Студия] [1] [2] [3] [4] [5+]                             │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  УРОВЕНЬ 3: Теги + Локации (scrollable chips)                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ [⚡ Instant] [🏖️ У пляжа] [🌊 Вид на море] [🐕 Pet] [🏊 Pool]...  │   │
+│  │ ─────────────────────────────────────────────────────────────────── │   │
+│  │ 📍 Локации: [Patong] [Kata] [Kamala] [Surin] [Rawai] ...           │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  УРОВЕНЬ 4: Комплексы (карусель)                                           │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ 🏢 Комплексы: [Blue Tree|23 ед.] [VIP Kata|8 ед.] [Botanica]...    │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Данные в базе (уже готовы!)
+
+### Типы недвижимости (lookup_values: property_type)
+| value_key | EN | RU | icon |
+|-----------|-----|-----|------|
+| condo | Condo | Кондо | 🏢 |
+| villa | Villa | Вилла | 🏡 |
+| apartment | Apartment | Квартира | 🏬 |
+| townhouse | Townhouse | Таунхаус | 🏘️ |
+| house | House | Дом | 🏠 |
+| penthouse | Penthouse | Пентхаус | 🌆 |
+| studio | Studio | Студия | 🛏️ |
+| bungalow | Bungalow | Бунгало | 🌴 |
+
+**Приоритетные:** `condo`, `villa`
+**Остальные:** В dropdown "Ещё типы"
+
+### Спальни (lookup_values: bedroom_option)
+| value_key | EN | icon |
+|-----------|-----|------|
+| studio | Studio | 🛏️ |
+| 1 | 1 Bedroom | 1️⃣ |
+| 2 | 2 Bedrooms | 2️⃣ |
+| 3 | 3 Bedrooms | 3️⃣ |
+| 4 | 4 Bedrooms | 4️⃣ |
+| 5+ | 5+ Bedrooms | 5️⃣ |
+
+### Теги (lookup_values: property_highlight) - 22 тега!
+- ⚡ Instant Book
+- 🏖️ Near Beach / Beachfront / Walk to Beach
+- 🌊 Sea View / Ocean View
+- 🐕 Pet Friendly
+- 🏊 Pool / Private Pool / Infinity Pool
+- 🏋️ Gym
+- ✨ New Listing / Luxury
+- 🧹 Full Service
+- 💎 Designer Interior
+- ✅ Verified
+- ⭐ Featured
+
+### Районы (lookup_values: district) - 22 района
+Все 22 района Пхукета уже в базе с иконками.
 
 ---
 
@@ -27,307 +113,278 @@ Bottom CTA показывает статичный текст без учёта 
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│  ПУТЬ КЛИЕНТА (Текущий → Улучшенный)                                        │
+│  PropertyIndex.tsx                                                          │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
-│  [Список объектов]                                                          │
-│       │                                                                     │
-│       │ СЕЙЧАС: Карточка → клик → детали                                   │
-│       │ СТАНЕТ: Карточка с ⚡ Instant + CTA hint → клик → детали          │
-│       ▼                                                                     │
-│  [Страница деталей]                                                         │
-│       │                                                                     │
-│       │ СЕЙЧАС: Sidebar "Reserve" (даже без дат)                           │
-│       │ СТАНЕТ: Sidebar "Check availability" → выбор дат → "Reserve/Book"  │
-│       ▼                                                                     │
-│  [Форма бронирования]                                                       │
-│       │                                                                     │
-│       │ СЕЙЧАС: ✓ Корректно работает                                       │
-│       ▼                                                                     │
-│  [Оплата депозита]                                                          │
-│       │                                                                     │
-│       │ СЕЙЧАС: ✓ Stripe + PromptPay                                       │
-│       ▼                                                                     │
-│  [Подтверждение]                                                            │
+│  ┌───────────────────────────────────────────────────────────────────────┐ │
+│  │  PropertyTypeSelector (NEW)                                           │ │
+│  │  ├─ [Все] [Кондо] [Вилла]   ← приоритетные таблетки                  │ │
+│  │  └─ [📋 Ещё ▾]              ← DropdownMenu с остальными              │ │
+│  └───────────────────────────────────────────────────────────────────────┘ │
+│                                                                             │
+│  ┌───────────────────────────────────────────────────────────────────────┐ │
+│  │  BedroomChips (NEW)                                                   │ │
+│  │  └─ Scrollable FilterChip[] с multi-select                           │ │
+│  └───────────────────────────────────────────────────────────────────────┘ │
+│                                                                             │
+│  ┌───────────────────────────────────────────────────────────────────────┐ │
+│  │  QuickFiltersRibbon (ОБНОВИТЬ)                                        │ │
+│  │  ├─ Теги (property_highlight) ← уже работает                         │ │
+│  │  ├─ ─────────────────────── separator ───────────────────────        │ │
+│  │  └─ Локации (district) ← добавить                                    │ │
+│  └───────────────────────────────────────────────────────────────────────┘ │
+│                                                                             │
+│  ┌───────────────────────────────────────────────────────────────────────┐ │
+│  │  ProjectChips (уже есть)                                              │ │
+│  │  └─ property_projects                                                 │ │
+│  └───────────────────────────────────────────────────────────────────────┘ │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Фаза 1: Исправление бейджа Instant Booking
+## Фазы реализации
 
-**Файл: `src/pages/property/PropertyIndex.tsx`**
+### Фаза 1: Новый компонент PropertyTypeSelector
 
-Заменить логику на строках 322-327:
+**Файл: `src/components/property/PropertyTypeSelector.tsx`** (новый)
+
+Компонент с приоритетными типами + dropdown:
 
 ```typescript
-// БЫЛО:
-{property.min_stay_nights === 1 && (
-  <Badge className="bg-amber-500 ...">
-    <Zap className="w-3 h-3" />
-    {language === 'ru' ? 'Быстрое' : 'Instant'}
-  </Badge>
-)}
+interface PropertyTypeSelectorProps {
+  selectedType: string;
+  onTypeChange: (type: string) => void;
+  propertyTypes: FilterOption[];
+  language: string;
+}
 
-// СТАНЕТ:
-{property.instant_booking && (
-  <Badge className="bg-amber-500 text-white border-0 text-xs gap-1">
-    <Zap className="w-3 h-3" />
-    {language === 'ru' ? 'Мгновенное' : 'Instant'}
-  </Badge>
-)}
+// Приоритетные типы (показываем как таблетки)
+const priorityTypes = ['all', 'condo', 'villa'];
+
+// Остальные уходят в dropdown "Ещё типы"
 ```
 
----
+**Компоненты:**
+- 3 таблетки: Все, Кондо, Вилла
+- DropdownMenu с остальными типами (Apartment, Townhouse, House, Penthouse, Studio, Bungalow)
+- При выборе из dropdown, показывать активный тип вместо "Ещё типы"
 
-## Фаза 2: Динамическая кнопка в PropertyBookingCard
+### Фаза 2: Компонент BedroomChips
 
-**Файл: `src/components/property/PropertyBookingCard.tsx`**
+**Файл: `src/components/property/BedroomChips.tsx`** (новый)
 
-Обновить логику кнопки Reserve (строки 270-279):
+Inline чипы для выбора спален:
 
 ```typescript
-// БЫЛО:
-<Button size="lg" className="w-full" onClick={handleReserve}>
-  {rentalTerms?.instant_booking && <Zap className="w-4 h-4 mr-2" />}
-  {isRu ? 'Забронировать' : 'Reserve'}
-</Button>
-
-// СТАНЕТ:
-<Button 
-  size="lg" 
-  className="w-full"
-  onClick={handleReserve}
-  disabled={!dateRange?.from || !dateRange?.to || validationErrors.length > 0}
->
-  {!dateRange?.from || !dateRange?.to ? (
-    <>
-      <Calendar className="w-4 h-4 mr-2" />
-      {isRu ? 'Проверить наличие' : 'Check availability'}
-    </>
-  ) : rentalTerms?.instant_booking ? (
-    <>
-      <Zap className="w-4 h-4 mr-2" />
-      {isRu ? 'Мгновенное бронирование' : 'Book instantly'}
-    </>
-  ) : (
-    isRu ? 'Забронировать' : 'Reserve'
-  )}
-</Button>
+interface BedroomChipsProps {
+  selectedBedrooms: string[];
+  onBedroomsChange: (bedrooms: string[]) => void;
+  language: string;
+}
 ```
 
-Также добавить пояснительный текст под кнопкой:
+**Дизайн:**
+- Лейбл "Спальни:" слева
+- Горизонтальный scroll с FilterChip
+- Multi-select (можно выбрать несколько)
+- Компактный размер (size="sm")
+
+### Фаза 3: Обновление QuickFiltersRibbon
+
+**Файл: `src/hooks/usePropertyQuickFilters.ts`**
+
+Добавить загрузку районов:
 
 ```typescript
-// После кнопки, заменить строки 281-284:
-{!nights ? (
-  <p className="text-center text-sm text-muted-foreground">
-    {isRu ? 'Выберите даты для расчёта стоимости' : 'Select dates to see total price'}
-  </p>
-) : (
-  // existing price breakdown
-)}
+// Добавить в hook
+const { data: districts } = await supabase
+  .from('lookup_values')
+  .select('id, value_key, value_en, value_ru, icon')
+  .eq('lookup_type', 'district')
+  .eq('is_active', true)
+  .order('sort_order');
+
+return {
+  quickFilters,      // теги (property_highlight)
+  districts,         // районы (district)
+  projects,          // комплексы
+  isLoading,
+};
 ```
 
----
+**Файл: `src/components/property/QuickFiltersRibbon.tsx`**
 
-## Фаза 3: Улучшение карточки в списке
-
-**Файл: `src/pages/property/PropertyIndex.tsx`**
-
-Добавить визуальную подсказку доступности под ценой (строки 356-360):
+Добавить секцию локаций:
 
 ```typescript
-{/* Price */}
-<p className="pt-1">
-  <span className="font-semibold">{formatPrice(property.price || 0)}</span>
-  <span className="text-muted-foreground">{formatPriceLabel(property.price_period)}</span>
-</p>
-
-{/* NEW: Availability hint */}
-{property.instant_booking && (
-  <p className="text-xs text-amber-600 flex items-center gap-1 mt-1">
-    <Zap className="w-3 h-3" />
-    {language === 'ru' ? 'Забронировать сейчас' : 'Book now'}
-  </p>
-)}
-```
-
----
-
-## Фаза 4: Мобильная bottom bar с динамическим CTA
-
-**Файл: `src/pages/property/PropertyDetail.tsx`**
-
-Обновить bottom bar (строки 778-785):
-
-```typescript
-// БЫЛО:
-<Button size="lg" onClick={() => navigate(`/property/${id}/inquiry`)}>
-  <Calendar className="w-4 h-4 mr-2" />
-  {isRu ? 'Бронировать' : 'Reserve'}
-</Button>
-
-// СТАНЕТ:
-<Button
-  size="lg"
-  className={cn(
-    "flex-shrink-0 px-6",
-    rentalTerms?.instant_booking && "bg-amber-500 hover:bg-amber-600"
-  )}
-  onClick={() => navigate(`/property/${id}/inquiry`)}
->
-  {rentalTerms?.instant_booking ? (
-    <>
-      <Zap className="w-4 h-4 mr-2" />
-      {isRu ? 'Забронировать' : 'Book Now'}
-    </>
-  ) : (
-    <>
-      <Calendar className="w-4 h-4 mr-2" />
-      {isRu ? 'Проверить даты' : 'Check Dates'}
-    </>
-  )}
-</Button>
-```
-
----
-
-## Фаза 5: Индикатор Instant Booking на странице деталей
-
-**Файл: `src/pages/property/PropertyDetail.tsx`**
-
-Уже есть highlight для instant booking (строки 430-443), но можно усилить:
-
-Добавить бейдж рядом с ценой в мобильной bottom bar (строка 760-765):
-
-```typescript
-{/* Price section */}
-<div className="flex-1 min-w-0">
-  <div className="flex items-baseline gap-1">
-    <span className="text-xl font-bold text-foreground">
-      ฿{pricePerNight.toLocaleString()}
-    </span>
-    <span className="text-sm text-muted-foreground">
-      /{isRu ? 'ночь' : 'night'}
-    </span>
-  </div>
-  {rentalTerms?.instant_booking && (
-    <Badge className="mt-0.5 bg-amber-500/10 text-amber-600 border-amber-500/20 text-xs gap-1">
-      <Zap className="w-3 h-3" />
-      {isRu ? 'Мгновенное бронирование' : 'Instant Book'}
-    </Badge>
-  )}
+{/* Tags (existing) */}
+<div className="flex gap-2 overflow-x-auto ...">
+  {quickFilters.map(...)}
 </div>
+
+{/* Separator */}
+{districts.length > 0 && (
+  <div className="flex items-center gap-2 mt-2">
+    <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
+    <div className="flex gap-2 overflow-x-auto ...">
+      {districts.map((district) => (
+        <FilterChip
+          key={district.id}
+          label={language === 'ru' ? district.labelRu : district.labelEn}
+          icon={district.icon}
+          isActive={selectedDistricts.includes(district.id)}
+          onToggle={() => onDistrictToggle(district.id)}
+          size="sm"
+        />
+      ))}
+    </div>
+  </div>
+)}
+```
+
+### Фаза 4: Обновление PropertyIndex
+
+**Файл: `src/pages/property/PropertyIndex.tsx`**
+
+1. Заменить текущий ScrollArea с типами на PropertyTypeSelector
+2. Добавить BedroomChips после типов
+3. Обновить props для QuickFiltersRibbon
+4. Синхронизировать фильтры спален с filterValues
+
+```typescript
+// Новые состояния
+const [selectedBedrooms, setSelectedBedrooms] = useState<string[]>([]);
+const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
+
+// В JSX
+<PropertyTypeSelector
+  selectedType={selectedType}
+  onTypeChange={setSelectedType}
+  propertyTypes={propertyTypes}
+  language={language}
+/>
+
+<BedroomChips
+  selectedBedrooms={selectedBedrooms}
+  onBedroomsChange={setSelectedBedrooms}
+  language={language}
+/>
+
+<QuickFiltersRibbon
+  selectedFilters={quickFilters}
+  selectedDistricts={selectedDistricts}
+  onDistrictToggle={(id) => {
+    setSelectedDistricts(prev => 
+      prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]
+    );
+  }}
+  {...otherProps}
+/>
+```
+
+---
+
+## Визуальный макет (мобильная версия)
+
+```text
+┌─────────────────────────────────────────────────┐
+│  ← Аренда жилья                                 │
+├─────────────────────────────────────────────────┤
+│  ┌─────────────────────────────────────────┐    │
+│  │  🔍 Куда • Даты • 2 гостя              │    │
+│  └─────────────────────────────────────────┘    │
+│                                                 │
+│  [Все] [🏢 Кондо] [🏡 Вилла] [📋 Ещё▾] [⚙️]   │
+│                                                 │
+│  Спальни:                                       │
+│  [Студия] [1] [2] [3] [4] [5+]                 │
+│                                                 │
+│  [⚡ Instant] [🏖️ У пляжа] [🌊 Sea View]       │
+│  [🐕 Pet] [🏊 Pool] [✅ Verified] ...           │
+│                                                 │
+│  📍 [Patong] [Kata] [Kamala] [Rawai]           │
+│     [Surin] [Bang Tao] ...                      │
+│                                                 │
+│  🏢 Комплексы:                                  │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐        │
+│  │ Blue Tree│ │ VIP Kata │ │ Botanica │ →      │
+│  │ 23 ед.   │ │ 8 ед.    │ │ 12 ед.   │        │
+│  └──────────┘ └──────────┘ └──────────┘        │
+│                                                 │
+│  ─────────────────────────────────────────────  │
+│  45 объектов найдено            📍 На карте   │
+├─────────────────────────────────────────────────┤
+│  ┌─────────────────────────────────────────┐    │
+│  │ [Фото виллы]                   ❤️       │    │
+│  │ ⚡ Мгновенное                           │    │
+│  └─────────────────────────────────────────┘    │
+│  Kamala                              ⭐ 4.9    │
+│  Luxury Ocean View Villa                       │
+│  4 спален · 3 ванных · 8 гостей               │
+│  ฿85,000/мес                                   │
+│  ⚡ Забронировать сейчас                       │
+│                                                 │
+└─────────────────────────────────────────────────┘
 ```
 
 ---
 
 ## Файлы для изменения
 
-| Файл | Изменение |
-|------|-----------|
-| `src/pages/property/PropertyIndex.tsx` | Бейдж instant_booking + CTA hint |
-| `src/components/property/PropertyBookingCard.tsx` | Динамическая кнопка |
-| `src/pages/property/PropertyDetail.tsx` | Мобильный CTA + бейдж |
+| Файл | Тип | Изменение |
+|------|-----|-----------|
+| `src/components/property/PropertyTypeSelector.tsx` | NEW | Приоритетные типы + dropdown |
+| `src/components/property/BedroomChips.tsx` | NEW | Inline чипы спален |
+| `src/hooks/usePropertyQuickFilters.ts` | UPDATE | + districts загрузка |
+| `src/components/property/QuickFiltersRibbon.tsx` | UPDATE | + секция локаций |
+| `src/pages/property/PropertyIndex.tsx` | UPDATE | Интеграция новых компонентов |
 
 ---
 
-## Визуальный результат
+## Технические детали
 
-```text
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  КАРТОЧКА В СПИСКЕ (после улучшений)                                        │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  ┌─────────────────────────────────────────────────────────────┐            │
-│  │  [Фото виллы]                                    ❤️          │            │
-│  │                                                             │            │
-│  │  ⚡ Мгновенное            ← бейдж для instant_booking=true  │            │
-│  │  ★ Популярное            ← бейдж для is_featured=true      │            │
-│  └─────────────────────────────────────────────────────────────┘            │
-│  Kamala                                              ⭐ 4.9                  │
-│  Luxury Ocean View Villa                                                    │
-│  4 спален · 3 ванных · 8 гостей                                            │
-│  ฿85,000/мес                                                                │
-│  ⚡ Забронировать сейчас      ← новый CTA hint                              │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
+### Props для QuickFiltersRibbon (расширение)
 
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  BOOKING CARD (Sidebar на десктопе)                                         │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ฿3,500 / ночь                                                              │
-│                                                                             │
-│  ┌───────────────┬───────────────┐                                          │
-│  │ Заезд         │ Выезд         │                                          │
-│  │ Дата          │ Дата          │  ← пустые поля                          │
-│  └───────────────┴───────────────┘                                          │
-│                                                                             │
-│  ┌───────────────────────────────┐                                          │
-│  │ 📅 Проверить наличие         │  ← динамическая кнопка                   │
-│  └───────────────────────────────┘                                          │
-│                                                                             │
-│  Выберите даты для расчёта стоимости                                        │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-                    ▼ После выбора дат
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  BOOKING CARD (с датами)                                                    │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ฿3,500 / ночь                                                              │
-│                                                                             │
-│  ┌───────────────┬───────────────┐                                          │
-│  │ Заезд         │ Выезд         │                                          │
-│  │ 15 янв       │ 22 янв        │  ← заполненные даты                      │
-│  └───────────────┴───────────────┘                                          │
-│                                                                             │
-│  ┌───────────────────────────────┐                                          │
-│  │ ⚡ Мгновенное бронирование   │  ← для instant_booking=true              │
-│  └───────────────────────────────┘                                          │
-│            или                                                              │
-│  ┌───────────────────────────────┐                                          │
-│  │ Забронировать                │  ← для instant_booking=false             │
-│  └───────────────────────────────┘                                          │
-│                                                                             │
-│  ฿3,500 × 7 ночей                               ฿24,500                     │
-│  Скидка 10% (неделя)                           -฿2,450                      │
-│  ─────────────────────────────────────────────                              │
-│  Итого                                          ฿22,050                     │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  МОБИЛЬНЫЙ BOTTOM BAR (после улучшений)                                     │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ฿3,500/ночь                    📞  💬  ┌──────────────────────┐           │
-│  ⚡ Мгновенное бронирование              │ ⚡ Забронировать    │           │
-│                                          └──────────────────────┘           │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
+```typescript
+interface QuickFiltersRibbonProps {
+  // Существующие
+  selectedFilters: string[];
+  selectedProjectId?: string | null;
+  onFilterToggle: (filterId: string) => void;
+  onProjectSelect: (projectId: string | null) => void;
+  
+  // Новые
+  selectedDistricts?: string[];
+  onDistrictToggle?: (districtId: string) => void;
+}
 ```
 
----
+### Фильтрация по районам
 
-## Данные в базе
-
-Аудит показал, что в базе уже есть 4 объекта с `instant_booking = true`:
-- Luxury Tropical Villa Rawai
-- Investment Villa Nai Harn
-- Premium Villa Layan
-- Luxury Penthouse Surin
-
-После внедрения изменений эти объекты сразу получат визуальные индикаторы.
+```typescript
+// В PropertyIndex useMemo для properties
+if (selectedDistricts.length > 0) {
+  const normalizedDistricts = selectedDistricts.map(d => normalizeForFilter(d));
+  if (!normalizedDistricts.some(d => 
+    normalizeForFilter(prop.district || '').includes(d) ||
+    d.includes(normalizeForFilter(prop.district || ''))
+  )) {
+    return false;
+  }
+}
+```
 
 ---
 
 ## Техническое резюме
 
-**Изменения:** 3 файла
-**Риск регрессии:** Низкий - изменения касаются только UI/UX, не затрагивают логику бронирования
-**Результат:** Путь клиента соответствует Airbnb-стандарту с динамическими CTA и визуальными индикаторами доступности
+| Метрика | Значение |
+|---------|----------|
+| Новые файлы | 2 |
+| Обновляемые файлы | 3 |
+| Данные в БД | ✅ Уже готовы (22 тега, 22 района, 8 типов, 6 опций спален) |
+| Риск регрессии | Низкий - существующие чипы сохраняются |
+| UX улучшения | Приоритизация Кондо/Вилла, inline спальни, inline локации |
+
