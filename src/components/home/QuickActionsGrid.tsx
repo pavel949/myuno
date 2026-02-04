@@ -52,7 +52,7 @@ interface QuickAction {
 // ACTIONS BY USER TYPE
 // ============================================
 
-// Tourist-focused actions (leisure, exploration)
+// Tourist-focused actions (leisure, exploration) - PRIORITY ORDER for tourists
 const TOURIST_ACTIONS: QuickAction[] = [
   {
     id: 'property',
@@ -64,31 +64,13 @@ const TOURIST_ACTIONS: QuickAction[] = [
     bgColor: 'bg-gradient-to-br from-teal-400 to-emerald-600',
   },
   {
-    id: 'transport',
-    icon: Car,
-    label: 'Transport',
-    labelRu: 'Транспорт',
-    path: '/transport',
+    id: 'transfer',
+    icon: Plane,
+    label: 'Transfer',
+    labelRu: 'Трансфер',
+    path: '/transport/airport-transfer',
     iconColor: 'text-white',
-    bgColor: 'bg-gradient-to-br from-blue-400 to-indigo-600',
-  },
-  {
-    id: 'yachts',
-    icon: Anchor,
-    label: 'Yachts',
-    labelRu: 'Яхты',
-    path: '/yachts',
-    iconColor: 'text-white',
-    bgColor: 'bg-gradient-to-br from-cyan-400 to-blue-600',
-  },
-  {
-    id: 'experiences',
-    icon: Compass,
-    label: 'Experiences',
-    labelRu: 'Впечатления',
-    path: '/experiences',
-    iconColor: 'text-white',
-    bgColor: 'bg-gradient-to-br from-amber-400 to-orange-600',
+    bgColor: 'bg-gradient-to-br from-indigo-400 to-purple-600',
   },
   {
     id: 'flowers',
@@ -100,13 +82,31 @@ const TOURIST_ACTIONS: QuickAction[] = [
     bgColor: 'bg-gradient-to-br from-rose-400 to-pink-600',
   },
   {
-    id: 'market',
-    icon: ShoppingBag,
-    label: 'Market',
-    labelRu: 'Маркет',
-    path: '/market',
+    id: 'transport',
+    icon: Car,
+    label: 'Transport',
+    labelRu: 'Транспорт',
+    path: '/transport',
     iconColor: 'text-white',
-    bgColor: 'bg-gradient-to-br from-violet-400 to-purple-600',
+    bgColor: 'bg-gradient-to-br from-blue-400 to-indigo-600',
+  },
+  {
+    id: 'experiences',
+    icon: Compass,
+    label: 'Experiences',
+    labelRu: 'Впечатления',
+    path: '/experiences',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-amber-400 to-orange-600',
+  },
+  {
+    id: 'yachts',
+    icon: Anchor,
+    label: 'Yachts',
+    labelRu: 'Яхты',
+    path: '/yachts',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-cyan-400 to-blue-600',
   },
   {
     id: 'beauty',
@@ -118,13 +118,13 @@ const TOURIST_ACTIONS: QuickAction[] = [
     bgColor: 'bg-gradient-to-br from-pink-400 to-rose-600',
   },
   {
-    id: 'events',
-    icon: Calendar,
-    label: 'Events',
-    labelRu: 'События',
-    path: '/events',
+    id: 'restaurants',
+    icon: Utensils,
+    label: 'Food',
+    labelRu: 'Еда',
+    path: '/restaurants',
     iconColor: 'text-white',
-    bgColor: 'bg-gradient-to-br from-purple-400 to-indigo-600',
+    bgColor: 'bg-gradient-to-br from-orange-400 to-red-500',
   },
 ];
 
@@ -429,38 +429,27 @@ const ADMIN_ACTIONS: QuickAction[] = [
   },
 ];
 
-// Fixed action (only "More" - SOS moved to SafetyBanner)
-const FIXED_ACTIONS: QuickAction[] = [
-  {
-    id: 'more',
-    icon: MoreHorizontal,
-    label: 'More',
-    labelRu: 'Ещё',
-    path: '/discover',
-    iconColor: 'text-muted-foreground',
-    bgColor: 'bg-muted',
-  },
-];
+// "More" button - path is determined dynamically based on contentMode
+const getMoreAction = (contentMode: 'services' | 'products'): QuickAction => ({
+  id: 'more',
+  icon: MoreHorizontal,
+  label: 'More',
+  labelRu: 'Ещё',
+  path: contentMode === 'products' ? '/market' : '/discover',
+  iconColor: 'text-muted-foreground',
+  bgColor: 'bg-muted',
+});
 
-// Default actions for guests (not logged in) - Flowers first!
+// Default actions for guests (not logged in) - TOURIST PRIORITY: Property, Transfer, Flowers, Transport
 const DEFAULT_ACTIONS: QuickAction[] = [
   {
-    id: 'flowers',
-    icon: Flower2,
-    label: 'Flowers',
-    labelRu: 'Цветы',
-    path: '/flowers',
+    id: 'property',
+    icon: Home,
+    label: 'Property',
+    labelRu: 'Жильё',
+    path: '/property',
     iconColor: 'text-white',
-    bgColor: 'bg-gradient-to-br from-rose-400 to-pink-600',
-  },
-  {
-    id: 'restaurants',
-    icon: Utensils,
-    label: 'Food',
-    labelRu: 'Еда',
-    path: '/restaurants',
-    iconColor: 'text-white',
-    bgColor: 'bg-gradient-to-br from-orange-400 to-red-500',
+    bgColor: 'bg-gradient-to-br from-teal-400 to-emerald-600',
   },
   {
     id: 'transfer',
@@ -472,13 +461,13 @@ const DEFAULT_ACTIONS: QuickAction[] = [
     bgColor: 'bg-gradient-to-br from-indigo-400 to-purple-600',
   },
   {
-    id: 'beauty',
-    icon: Sparkles,
-    label: 'Beauty',
-    labelRu: 'Красота',
-    path: '/beauty',
+    id: 'flowers',
+    icon: Flower2,
+    label: 'Flowers',
+    labelRu: 'Цветы',
+    path: '/flowers',
     iconColor: 'text-white',
-    bgColor: 'bg-gradient-to-br from-pink-400 to-rose-600',
+    bgColor: 'bg-gradient-to-br from-rose-400 to-pink-600',
   },
   {
     id: 'transport',
@@ -490,13 +479,31 @@ const DEFAULT_ACTIONS: QuickAction[] = [
     bgColor: 'bg-gradient-to-br from-blue-400 to-indigo-600',
   },
   {
-    id: 'property',
-    icon: Home,
-    label: 'Property',
-    labelRu: 'Жильё',
-    path: '/property',
+    id: 'experiences',
+    icon: Compass,
+    label: 'Experiences',
+    labelRu: 'Впечатления',
+    path: '/experiences',
     iconColor: 'text-white',
-    bgColor: 'bg-gradient-to-br from-teal-400 to-emerald-600',
+    bgColor: 'bg-gradient-to-br from-amber-400 to-orange-600',
+  },
+  {
+    id: 'restaurants',
+    icon: Utensils,
+    label: 'Food',
+    labelRu: 'Еда',
+    path: '/restaurants',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-orange-400 to-red-500',
+  },
+  {
+    id: 'beauty',
+    icon: Sparkles,
+    label: 'Beauty',
+    labelRu: 'Красота',
+    path: '/beauty',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-pink-400 to-rose-600',
   },
   {
     id: 'medical',
@@ -506,15 +513,6 @@ const DEFAULT_ACTIONS: QuickAction[] = [
     path: '/medical',
     iconColor: 'text-white',
     bgColor: 'bg-gradient-to-br from-emerald-400 to-green-600',
-  },
-  {
-    id: 'market',
-    icon: ShoppingBag,
-    label: 'Market',
-    labelRu: 'Маркет',
-    path: '/market',
-    iconColor: 'text-white',
-    bgColor: 'bg-gradient-to-br from-violet-400 to-purple-600',
   },
 ];
 
@@ -592,7 +590,13 @@ function getActionsForRole(role: AppRole): QuickAction[] {
   }
 }
 
-export const QuickActionsGrid = memo(function QuickActionsGrid() {
+interface QuickActionsGridProps {
+  contentMode?: 'services' | 'products';
+}
+
+export const QuickActionsGrid = memo(function QuickActionsGrid({ 
+  contentMode = 'services' 
+}: QuickActionsGridProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { profile } = useProfile();
@@ -617,9 +621,10 @@ export const QuickActionsGrid = memo(function QuickActionsGrid() {
       userActions = getActionsForUserType(profile?.user_type);
     }
     
-    // Limit to 5 actions + fixed "More" button = 6 total (2 rows x 3 columns)
-    return [...userActions.slice(0, 5), ...FIXED_ACTIONS];
-  }, [activeRole, roleLoading, personas, profile?.user_type]);
+    // Limit to 5 actions + dynamic "More" button based on contentMode
+    const moreAction = getMoreAction(contentMode);
+    return [...userActions.slice(0, 5), moreAction];
+  }, [activeRole, roleLoading, personas, profile?.user_type, contentMode]);
 
   const handleClick = useCallback((action: QuickAction, e: React.MouseEvent<HTMLButtonElement>) => {
     triggerRipple(e);
