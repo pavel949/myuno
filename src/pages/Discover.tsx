@@ -120,7 +120,7 @@ export default function Discover() {
       title={isRu ? 'Услуги' : 'Services'}
       subtitle={isRu ? 'Все сервисы для жизни в Таиланде' : 'All services for life in Thailand'}
       fallbackPath="/"
-      searchPlaceholder={isRu ? 'Поиск услуг и провайдеров...' : 'Search services & providers...'}
+      searchPlaceholder={isRu ? 'Поиск услуг...' : 'Search services...'}
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}
       showHero={false}
@@ -128,65 +128,66 @@ export default function Discover() {
       showFilter={false}
     >
       {/* Audience Filter Ribbon */}
-      <div className="-mx-4 -mt-4 bg-background/95 backdrop-blur-sm border-b border-border/30">
+      <div className="-mx-4 -mt-4 mb-4 sticky top-0 z-10 bg-background/95 backdrop-blur-md border-b border-border/30">
         <UnifiedFilterRibbon
           items={audienceItems}
           activeId={audienceFilter}
           onSelect={handleAudienceChange}
-          className="px-4 py-2 border-0"
+          className="border-0"
         />
       </div>
 
-      <div className="pt-2">
-        <PullToRefresh onRefresh={handleRefresh} className="min-h-0">
-          <div key={refreshKey} className="space-y-6 pt-4">
-            
-            {isLoading ? (
-              <LoadingSkeleton />
-            ) : filteredGroups.length === 0 && filteredThematicSections.length === 0 ? (
-              <EmptyState
-                icon={Package}
-                title={isRu ? 'Ничего не найдено' : 'Nothing found'}
-                description={isRu ? 'Попробуйте другой фильтр' : 'Try a different filter'}
-              />
-            ) : (
-              <>
-                {/* 1. Top Apps Grid (2x2 hero cards) - only on "All" filter */}
-                {audienceFilter === 'all' && (
-                  <TopAppsGrid />
-                )}
+      <PullToRefresh onRefresh={handleRefresh} className="min-h-0">
+        <div key={refreshKey} className="space-y-8 pb-24">
+          
+          {isLoading ? (
+            <LoadingSkeleton />
+          ) : filteredGroups.length === 0 && filteredThematicSections.length === 0 ? (
+            <EmptyState
+              icon={Package}
+              title={isRu ? 'Ничего не найдено' : 'Nothing found'}
+              description={isRu ? 'Попробуйте другой фильтр' : 'Try a different filter'}
+            />
+          ) : (
+            <>
+              {/* 1. Top Apps Grid (2x2 hero cards) - only on "All" filter */}
+              {audienceFilter === 'all' && (
+                <TopAppsGrid />
+              )}
 
-                {/* 2. Featured Services Gallery - only on "All" filter */}
-                {audienceFilter === 'all' && (
-                  <FeaturedServicesGallery
-                    services={services}
-                    isLoading={servicesLoading}
-                    viewAllPath="/services"
-                  />
-                )}
+              {/* 2. Featured Services Gallery - only on "All" filter */}
+              {audienceFilter === 'all' && services.length > 0 && (
+                <FeaturedServicesGallery
+                  services={services}
+                  isLoading={servicesLoading}
+                  viewAllPath="/services"
+                />
+              )}
 
-                {/* 3. Mini-Apps Grid (if filtered by audience) */}
-                {audienceFilter !== 'all' && (
-                  <MiniAppsGrid
-                    groups={filteredGroups}
-                    getName={getName}
-                    language={language}
-                    isFeatured={isFeatured}
-                    getCount={getCount}
-                  />
-                )}
+              {/* 3. Mini-Apps Grid (if filtered by audience) */}
+              {audienceFilter !== 'all' && (
+                <MiniAppsGrid
+                  groups={filteredGroups}
+                  getName={getName}
+                  language={language}
+                  isFeatured={isFeatured}
+                  getCount={getCount}
+                />
+              )}
 
-                {/* 4. Thematic Sections (collapsible) */}
-                <div className="space-y-4">
-                  {filteredThematicSections.map(section => (
-                    <ThematicSection key={section.id} section={section} />
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        </PullToRefresh>
-      </div>
+              {/* 4. Thematic Sections (collapsible) */}
+              <div className="space-y-2">
+                <h2 className="text-lg font-bold text-foreground px-1">
+                  {isRu ? 'Все категории' : 'All Categories'}
+                </h2>
+                {filteredThematicSections.map(section => (
+                  <ThematicSection key={section.id} section={section} />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </PullToRefresh>
     </MiniAppLayout>
   );
 }
