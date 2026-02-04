@@ -1,358 +1,190 @@
 
-# План: Полнофункциональный UX для проектов/комплексов
+# Аудит и унификация премиального дизайна платформы
 
-## Обзор
-Создание полноценного опыта просмотра жилых комплексов для гостей (Agoda/Airbnb style) + улучшение интеграции проектов по всей платформе.
+## Результаты технического аудита
 
----
+### Централизованная дизайн-система (Source of Truth)
+Платформа имеет хорошо структурированную систему токенов:
 
-## Текущее состояние (Аудит)
+| Файл | Назначение | Статус |
+|------|------------|--------|
+| `src/lib/designTokens.ts` | Токены карточек, теней, бейджей | Эталон |
+| `src/lib/motionPresets.ts` | Анимации и переходы | Эталон |
+| `src/index.css` | CSS-переменные, типографика | Эталон |
 
-### Что уже есть:
-
-| Компонент | Статус | Комментарий |
-|-----------|--------|-------------|
-| Admin Panel (`AdminProjects.tsx`) | Готово | AI Intake, медиа, юрлицо, CAM-сборы |
-| Выбор проекта для owner | Готово | `ProjectSelector.tsx` |
-| Info-карточка в объекте | Готово | `ProjectInfoCard.tsx` |
-| Фильтр по проектам в поиске | Готово | `QuickFiltersRibbon.tsx` |
-| База данных | Готово | 38 полей, медиа, juristic data |
-
-### Что отсутствует:
-
-| Функция | Статус |
-|---------|--------|
-| Страница проекта для гостей | НЕТ |
-| Каталог всех комплексов | НЕТ |
-| Кнопка "Исследовать комплекс" в объекте | НЕТ |
-| Fullscreen галерея проекта | НЕТ |
+**Канонические значения:**
+- Радиус карточек: `rounded-2xl` (16px)
+- Радиус компактных: `rounded-xl` (12px)
+- Тень по умолчанию: `shadow-sm`
+- Тень при наведении: `shadow-md`
+- Подъём при наведении: `hover:-translate-y-0.5`
+- Зум изображения: `group-hover:scale-[1.03]`
 
 ---
 
-## Архитектура решения
+## Выявленные несоответствия
+
+### 1. Рассинхрон теней (Shadow Drift)
+
+| Компонент | Текущее | Каноническое | Проблема |
+|-----------|---------|--------------|----------|
+| `PropertyCard` (hero) | `hover:shadow-lg` | `hover:shadow-md` | Избыточная тень |
+| `ServiceProviderCard` | `hover:shadow-xl` | `hover:shadow-md` | Слишком тяжёлая |
+| `ProjectCard` (featured) | `hover:shadow-xl` | `hover:shadow-lg` | Допустимо для featured |
+
+### 2. Разный "подъём" (Lift Effect)
+
+| Компонент | Текущее | Каноническое |
+|-----------|---------|--------------|
+| `ServiceProviderCard` | `hover:-translate-y-1` | `hover:-translate-y-0.5` |
+| `PropertyCard` | Отсутствует | `hover:-translate-y-0.5` |
+| `ItemCard` | Отсутствует | `hover:-translate-y-0.5` |
+
+### 3. Хардкод бейджей (Badge Hardcoding)
+
+| Компонент | Проблема | Решение |
+|-----------|----------|---------|
+| `ProductCard` | `bg-blue-500`, `bg-red-500` | Использовать `BADGE_STYLES.new`, `BADGE_STYLES.discount` |
+| `ProjectCard` | `bg-amber-500`, `bg-emerald-500` | Использовать `BADGE_SYSTEM.featured`, `BADGE_SYSTEM.new` |
+| `ListCard` | `bg-success`, `bg-gold` | Допустимо (семантические токены) |
+
+### 4. Отсутствие унификации вертикалей
+
+| Вертикаль | Текущий компонент | Проблема |
+|-----------|-------------------|----------|
+| Яхты | `ItemCard` | Упрощённый дизайн, нет backdrop-blur |
+| Транспорт | `ItemCard` | То же |
+| Experiences | Inline в странице | Не переиспользуемый |
+
+---
+
+## План исправлений
+
+### Фаза 1: Унификация теней и интерактивности
+
+**Файл: `src/components/property/PropertyCard.tsx`**
 
 ```text
-┌─────────────────────────────────────────────────────────────────────┐
-│                         ГОСТЕВОЙ ОПЫТ                               │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  /complexes ─────────────────────────────────────────────────────►  │
-│  │                                                                  │
-│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
-│  │  │ The Title   │  │ Laguna Park │  │ Kamala      │              │
-│  │  │ [VIDEO]     │  │ [PHOTO]     │  │ [PHOTO]     │              │
-│  │  │ 12 units    │  │ 8 units     │  │ 5 units     │              │
-│  │  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘              │
-│  │         │                │                │                      │
-│  │         ▼                ▼                ▼                      │
-│  │  /property/project/:id ──────────────────────────────────────►  │
-│  │  │                                                               │
-│  │  │  ┌─────────────────────────────────────────────────────┐     │
-│  │  │  │ HERO MEDIA (Video/Photo Carousel)                   │     │
-│  │  │  │ "The Title Legendary"                               │     │
-│  │  │  │ Rawai • 2023 • 150 units • Sansiri Developer        │     │
-│  │  │  └─────────────────────────────────────────────────────┘     │
-│  │  │  ┌─────────────────────────────────────────────────────┐     │
-│  │  │  │ AMENITIES GRID: Pool, Gym, Security, Parking...    │     │
-│  │  │  └─────────────────────────────────────────────────────┘     │
-│  │  │  ┌─────────────────────────────────────────────────────┐     │
-│  │  │  │ AVAILABLE UNITS: [Scroll carousel of properties]   │     │
-│  │  │  │ Studio from ฿8k • 1BR from ฿15k • 2BR from ฿25k    │     │
-│  │  │  └─────────────────────────────────────────────────────┘     │
-│  │  │  ┌─────────────────────────────────────────────────────┐     │
-│  │  │  │ LOCATION MAP + Infrastructure                       │     │
-│  │  │  └─────────────────────────────────────────────────────┘     │
-│  │  │                                                               │
-│  └──┴───────────────────────────────────────────────────────────►  │
-│                                                                     │
-├─────────────────────────────────────────────────────────────────────┤
-│                         ИНТЕГРАЦИЯ                                  │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  PropertyDetail.tsx:                                                │
-│  ┌─────────────────────────────────────────────────────────────┐   │
-│  │ ProjectInfoCard                                              │   │
-│  │ [Исследовать комплекс] → /property/project/:id               │   │
-│  └─────────────────────────────────────────────────────────────┘   │
-│                                                                     │
-│  QuickFiltersRibbon.tsx:                                           │
-│  ┌─────────────────────────────────────────────────────────────┐   │
-│  │ [The Title] [Laguna] [Kamala] → фильтрация + клик → детали  │   │
-│  └─────────────────────────────────────────────────────────────┘   │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
+Строка 178: hover:shadow-lg → hover:shadow-md hover:-translate-y-0.5
+Строка 277: hover:shadow-md → hover:shadow-md hover:-translate-y-0.5
+Строка 471: hover:shadow-md → hover:shadow-md hover:-translate-y-0.5
 ```
 
----
+**Файл: `src/components/services/ServiceProviderCard.tsx`**
 
-## Фазы реализации
-
-### Фаза 1: Страница проекта для гостей
-
-**Новый файл: `src/pages/property/ProjectDetail.tsx`**
-
-Полнофункциональная витрина комплекса:
-
-1. **Hero Section**
-   - Видео-баннер (autoplay, muted) если есть video_url
-   - Fallback на cover_image с кнопкой "Все фото"
-   - Название, район, год, застройщик, кол-во юнитов
-
-2. **Amenities Grid**
-   - Визуальная сетка удобств территории (pool, gym, security...)
-   - Иконки + подписи на 2 языках
-
-3. **Available Units Section**
-   - Загрузка properties WHERE project_id = current
-   - Горизонтальная карусель с PropertyCard
-   - Счётчики: "12 доступных квартир"
-   - Диапазоны цен по типам (Studio от X, 1BR от Y...)
-
-4. **Location Section**
-   - Карта с маркером комплекса
-   - Инфраструктура рядом (если заполнена)
-
-5. **Photo Gallery**
-   - Полноэкранный просмотр images[]
-   - Lightbox с navigation
-
----
-
-### Фаза 2: Каталог комплексов
-
-**Новый файл: `src/pages/property/ProjectsIndex.tsx`**
-
-Лендинг со всеми ЖК Пхукета:
-
-1. **Hero Section**
-   - "Жилые комплексы Пхукета"
-   - Subtitle: "Выберите резиденцию для вашего идеального отдыха"
-
-2. **Featured Projects Carousel**
-   - Большие карточки (is_featured = true)
-   - Видео-превью где доступно
-
-3. **All Projects Grid**
-   - Rich-карточки с cover_image
-   - Счётчики: "8 вилл доступно", "От 15,000 ฿/ночь"
-   - Бейджи: Featured, New (по created_at)
-
-4. **Filter/Search**
-   - Поиск по названию
-   - Фильтр по району (district)
-   - Сортировка (по популярности, по цене, по количеству юнитов)
-
----
-
-### Фаза 3: Компоненты проекта
-
-**Новый файл: `src/components/property/ProjectHeroMedia.tsx`**
-
-Медиа-компонент для hero section:
-- Поддержка video_url (YouTube embed или direct)
-- Fallback на cover_image
-- Кнопка "Все фото" → открывает галерею
-
-**Новый файл: `src/components/property/ProjectAmenitiesGrid.tsx`**
-
-Визуальная сетка удобств территории:
-- Mapping amenities[] на иконки
-- 2/3/4 колонки адаптивно
-
-**Новый файл: `src/components/property/ProjectUnitsSection.tsx`**
-
-Секция с доступными юнитами:
-- Горизонтальная карусель PropertyCard
-- Статистика по типам и ценам
-- CTA "Смотреть все" → /property?project=uuid
-
-**Новый файл: `src/components/property/ProjectGalleryModal.tsx`**
-
-Fullscreen галерея:
-- Swipe navigation
-- Zoom
-- Counter (1/12)
-
----
-
-### Фаза 4: Интеграция в существующие страницы
-
-**Файл: `src/components/property/ProjectInfoCard.tsx`**
-
-Добавить кнопку навигации:
-```tsx
-<Button onClick={() => navigate(`/property/project/${project.id}`)}>
-  <ExternalLink className="h-4 w-4 mr-2" />
-  {isRu ? 'Исследовать комплекс' : 'Explore Complex'}
-</Button>
+```text
+Строка 136: hover:shadow-xl hover:-translate-y-1 → hover:shadow-md hover:-translate-y-0.5
+Строка 57-62: hover:shadow-lg → hover:shadow-md
 ```
 
-**Файл: `src/components/property/QuickFiltersRibbon.tsx`**
+**Файл: `src/components/property/ProjectCard.tsx`**
 
-Сделать ProjectChip ссылкой:
-- Primary click → фильтрация (как сейчас)
-- Secondary action (иконка) → navigate to project page
-
-**Файл: `src/components/layout/AnimatedRoutes.tsx`**
-
-Добавить новые маршруты:
-```tsx
-<Route path="/complexes" element={<LazyPage><ProjectsIndex /></LazyPage>} />
-<Route path="/property/project/:id" element={<LazyPage><ProjectDetail /></LazyPage>} />
+```text
+Строка 44: hover:shadow-xl → hover:shadow-lg hover:-translate-y-0.5 (featured допускает lg)
+Строка 144: hover:shadow-lg → hover:shadow-md hover:-translate-y-0.5
 ```
+
+### Фаза 2: Централизация бейджей
+
+**Файл: `src/components/market/ProductCard.tsx`**
+
+```typescript
+// Импорт в начало файла
+import { BADGE_STYLES } from '@/lib/designTokens';
+
+// Замены:
+// Строка 53: bg-blue-500 → BADGE_STYLES.new
+// Строка 58: bg-red-500 → BADGE_STYLES.discount
+// Строки 139-153: аналогично
+```
+
+**Файл: `src/components/property/ProjectCard.tsx`**
+
+```typescript
+// Импорт
+import { BADGE_SYSTEM } from '@/lib/designTokens';
+
+// Замены:
+// Строка 75: bg-amber-500 → BADGE_SYSTEM.featured
+// Строка 164: bg-amber-500 → BADGE_SYSTEM.featured
+// Строка 169: bg-emerald-500 → BADGE_SYSTEM.new
+```
+
+### Фаза 3: Улучшение ItemCard
+
+**Файл: `src/components/miniapp/ItemCard.tsx`**
+
+```typescript
+// Добавить импорт
+import { DESIGN_TOKENS, CARD_STYLES } from '@/lib/designTokens';
+
+// Обновить классы карточек:
+// Строка 89: добавить hover:-translate-y-0.5
+// Строка 178-184: использовать CARD_STYLES.interactive
+// Добавить backdrop-blur на бейджи
+```
+
+### Фаза 4: Вынести ExperienceCard в общие компоненты
+
+**Новый файл: `src/components/experiences/ExperienceCard.tsx`**
+
+Извлечь inline-компонент из `ExperiencesIndex.tsx` (строки 26-152) в отдельный файл с использованием `DESIGN_TOKENS`.
 
 ---
 
-### Фаза 5: Улучшение хуков
+## Файлы для изменения
 
-**Файл: `src/hooks/useProperties.ts`**
-
-Добавить фильтр по project_id:
-```tsx
-export function usePropertiesByProject(projectId: string) {
-  return useQuery({
-    queryKey: ['properties-by-project', projectId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('project_id', projectId)
-        .eq('is_active', true)
-        .order('price');
-      
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!projectId,
-  });
-}
-```
-
-**Файл: `src/hooks/usePropertyProjects.ts`**
-
-Добавить статистику:
-```tsx
-export function useProjectStats(projectId: string) {
-  // Считаем юниты, min/max цены по типам
-}
-```
-
----
+| Файл | Изменение |
+|------|-----------|
+| `src/components/property/PropertyCard.tsx` | Тени + подъём |
+| `src/components/services/ServiceProviderCard.tsx` | Тени + подъём |
+| `src/components/property/ProjectCard.tsx` | Тени + бейджи |
+| `src/components/market/ProductCard.tsx` | Бейджи из токенов |
+| `src/components/miniapp/ItemCard.tsx` | Полная унификация |
+| `src/components/miniapp/ListCard.tsx` | Добавить подъём |
 
 ## Новые файлы
 
 | Файл | Назначение |
 |------|------------|
-| `src/pages/property/ProjectDetail.tsx` | Страница проекта для гостей |
-| `src/pages/property/ProjectsIndex.tsx` | Каталог всех комплексов |
-| `src/components/property/ProjectHeroMedia.tsx` | Hero с video/photo |
-| `src/components/property/ProjectAmenitiesGrid.tsx` | Сетка удобств |
-| `src/components/property/ProjectUnitsSection.tsx` | Карусель юнитов |
-| `src/components/property/ProjectGalleryModal.tsx` | Fullscreen галерея |
-| `src/components/property/ProjectCard.tsx` | Rich-карточка для каталога |
+| `src/components/experiences/ExperienceCard.tsx` | Вынесенная карточка впечатлений |
 
 ---
 
-## Изменяемые файлы
-
-| Файл | Изменение |
-|------|-----------|
-| `src/components/layout/AnimatedRoutes.tsx` | Новые маршруты |
-| `src/components/property/ProjectInfoCard.tsx` | Кнопка "Исследовать" |
-| `src/components/property/QuickFiltersRibbon.tsx` | Ссылка на проект |
-| `src/hooks/useProperties.ts` | usePropertiesByProject() |
-| `src/hooks/usePropertyProjects.ts` | useProjectStats() |
-
----
-
-## UX Flow для гостя
+## Визуальный стандарт после унификации
 
 ```text
-Гость ищет жильё на Пхукете
-           │
-           ▼
-   ┌───────────────────────────────────────────┐
-   │  /property                                │
-   │  QuickFiltersRibbon: [The Title] [Laguna] │
-   └───────────────────┬───────────────────────┘
-                       │ Клик на "The Title"
-                       ▼
-           ┌───────────────────────┐
-           │ Два варианта:         │
-           │ A) Фильтровать список │
-           │ B) Открыть проект →   │
-           └───────────────────────┘
-                       │ B
-                       ▼
-   ┌───────────────────────────────────────────┐
-   │  /property/project/:id                    │
-   │  • Hero video/photo                       │
-   │  • "The Title Legendary"                  │
-   │  • Amenities: Pool, Gym, Security...      │
-   │  • 12 доступных юнитов [карусель]         │
-   │  • Карта + инфраструктура                 │
-   └───────────────────┬───────────────────────┘
-                       │ Клик на юнит
-                       ▼
-   ┌───────────────────────────────────────────┐
-   │  /property/:unitId                        │
-   │  PropertyDetail + ProjectInfoCard         │
-   └───────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│  КАНОНИЧЕСКАЯ КАРТОЧКА (Premium Standard)                   │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Базовые классы:                                            │
+│  bg-card border border-border rounded-2xl                   │
+│  shadow-sm overflow-hidden group                            │
+│                                                             │
+│  Интерактивность:                                           │
+│  hover:shadow-md hover:-translate-y-0.5                     │
+│  active:scale-[0.98]                                        │
+│  transition-all duration-200                                │
+│                                                             │
+│  Изображение:                                               │
+│  group-hover:scale-[1.03] transition-transform duration-300 │
+│                                                             │
+│  Бейджи:                                                    │
+│  BADGE_STYLES.new | .hot | .discount | .featured            │
+│  backdrop-blur-sm shadow-sm                                 │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Альтернативный путь: Каталог комплексов
+## Ожидаемый результат
 
-```text
-Гость хочет жить в конкретном комплексе
-           │
-           ▼
-   ┌───────────────────────────────────────────┐
-   │  /complexes                               │
-   │  "Жилые комплексы Пхукета"                │
-   │                                           │
-   │  Featured: [The Title] [Laguna]           │
-   │                                           │
-   │  All Projects:                            │
-   │  ┌────────┐ ┌────────┐ ┌────────┐        │
-   │  │ Patong │ │ Rawai  │ │ Kamala │        │
-   │  │ 15 un. │ │ 8 un.  │ │ 5 un.  │        │
-   │  └────────┘ └────────┘ └────────┘        │
-   └───────────────────┬───────────────────────┘
-                       │ Клик
-                       ▼
-   ┌───────────────────────────────────────────┐
-   │  /property/project/:id                    │
-   │  (та же страница проекта)                 │
-   └───────────────────────────────────────────┘
-```
+После унификации:
+- Все карточки на платформе будут иметь одинаковый "премиальный" отклик на взаимодействие
+- Бейджи будут синхронизированы по цветовой палитре
+- Вертикали Yachts, Transport, Experiences получат тот же уровень визуального качества, что и Property и Products
+- Изменения токенов в одном месте автоматически применятся ко всем компонентам
 
----
-
-## Навигация (добавить в меню)
-
-В Discover или отдельной секции Home:
-```text
-🏢 Комплексы  →  /complexes
-```
-
-В QuickFiltersRibbon добавить секцию:
-```text
-🏢 Комплексы: [The Title ↗] [Laguna ↗] [Kamala ↗]
-              ↑ иконка External = переход на страницу проекта
-```
-
----
-
-## Техническое резюме
-
-**Всего:**
-- 7 новых файлов (pages + components)
-- 5 изменяемых файлов
-- 2 новых маршрута
-- 2 новых хука
-
-**Существующая инфраструктура:** Админка проектов полностью готова, база данных содержит все необходимые поля (медиа, amenities, juristic). Нужен только frontend для гостевого опыта.
-
-**Риск регрессии:** Низкий — создаём новые страницы, минимально трогаем существующий код.
+**Риск регрессии:** Низкий - изменения касаются только hover-состояний и цветов бейджей
