@@ -1,27 +1,27 @@
-import React, { useState, memo } from 'react';
+import React, { memo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { TrendingUp, ChevronRight, Building2, Hotel, Briefcase, Star, BarChart3, Users } from 'lucide-react';
+import { TrendingUp, ChevronRight, Building2, Hotel, Briefcase, Star, BarChart3, Users, Anchor, Coins } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { InvestorLeadForm } from '@/components/invest/InvestorLeadForm';
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
 
 export const InvestorPromoCard = memo(function InvestorPromoCard() {
+  const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleClick = () => {
     triggerHaptic('medium');
-    setIsDialogOpen(true);
+    navigate('/invest');
   };
 
   const categories = [
-    { icon: <Building2 className="w-3.5 h-3.5" />, labelEn: 'Off-plan', labelRu: 'Новостройки' },
+    { icon: <Building2 className="w-3.5 h-3.5" />, labelEn: 'Real Estate', labelRu: 'Недвижимость' },
     { icon: <Hotel className="w-3.5 h-3.5" />, labelEn: 'Hotels', labelRu: 'Отели' },
     { icon: <Briefcase className="w-3.5 h-3.5" />, labelEn: 'Business', labelRu: 'Бизнес' },
+    { icon: <Anchor className="w-3.5 h-3.5" />, labelEn: 'Yachts', labelRu: 'Яхты' },
   ];
 
   const trustIndicators = [
@@ -112,35 +112,6 @@ export const InvestorPromoCard = memo(function InvestorPromoCard() {
           <ChevronRight className="w-5 h-5 text-purple-500 flex-shrink-0 mt-1" />
         </div>
       </motion.button>
-
-      {/* Lead Capture Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <div className="flex items-center gap-3 mb-1">
-              <div className={cn(
-                "w-10 h-10 rounded-xl flex items-center justify-center",
-                "bg-gradient-to-br from-purple-500 to-violet-600"
-              )}>
-                <TrendingUp className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <DialogTitle className="text-lg">
-                  {isRu ? 'Инвестиции в недвижимость Пхукета' : 'Phuket Real Estate Investment'}
-                </DialogTitle>
-              </div>
-            </div>
-            <DialogDescription>
-              {isRu 
-                ? 'Получите персональную консультацию от экспертов muUNO'
-                : 'Get a personal consultation from muUNO experts'
-              }
-            </DialogDescription>
-          </DialogHeader>
-
-          <InvestorLeadForm onSuccess={() => setIsDialogOpen(false)} />
-        </DialogContent>
-      </Dialog>
     </>
   );
 });
