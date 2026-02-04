@@ -1,111 +1,152 @@
 
+# Подробный аудит кодовой базы myUNO
 
-# План дизайн-аудита и исправлений после рефакторинга
-
-## 📋 Результаты аудита
-
-### ✅ Что работает корректно
-| Элемент | Статус |
-|---------|--------|
-| Главная страница (/) | ✅ Отображается |
-| Discovery (/discover) | ✅ Работает |
-| Market (/market) | ✅ Работает |
-| Property (/property) | ✅ Навигация работает |
-| Transport (/transport/taxi) | ✅ Работает |
-| Experiences (/experiences) | ✅ Работает |
-| Bottom Navigation | ✅ Кликабельна, маршруты верные |
-| TopAppsGrid карточки | ✅ Кликабельны |
-| ContentModeToggle | ✅ Анимации работают |
-| ThematicSections | ✅ Сворачивание работает |
-| InlineSearch | ✅ Работает с AI |
-| PersonaSelectorBlock | ✅ Отображается |
-
-### ❌ Выявленные проблемы
-
-#### 1. **КРИТИЧНО: Отсутствует крупный заголовок "ЗА РУБЕЖОМ" / "ABROAD"**
-- **Где**: Главная страница (HeroBlock)
-- **Проблема**: В HeroBlock есть только логотип "my UNO" и локация, но нет главного заголовка
-- **Ожидание**: Крупный заголовок между брендом и поиском
-
-#### 2. **Свайп галерей**
-- **Статус**: Исправлен в прошлом сообщении (удалено `touch-pan-x`)
-- **Нужна проверка**: Необходим ручной тест на мобильном устройстве
+## Резюме
+Обнаружено **47+ критических проблем** в категориях: битые ссылки, мёртвый код, хардкод данных, дублирование дизайна, React-ошибки и архитектурные несоответствия.
 
 ---
 
-## 🛠️ План исправлений
+## 🔴 КРИТИЧЕСКИЕ БАГИ (ведут к 404)
 
-### Задача 1: Добавить крупный заголовок на главную страницу
+### Мёртвые ссылки в UI
+| Компонент | Путь | Статус |
+|-----------|------|--------|
+| `QuickStatsRibbon.tsx` | `/exchange` | ❌ 404 |
+| `QuickStatsRibbon.tsx` | `/beaches` | ❌ 404 |
+| `QuickStatsRibbon.tsx` | `/taxi` | ❌ 404 (должен → `/transport/taxi`) |
+| `ThematicSection.tsx` | `/accounting` | ❌ 404 |
+| `DashboardQuickServices.tsx` | `/taxi` | ❌ 404 |
+| `DashboardQuickServices.tsx` | `/tours` | ⚠️ Редирект на `/experiences` |
+| `Cart.tsx` | `/tours/checkout` | ❌ 404 |
+| `Cart.tsx` | `/yachts/checkout` | ❌ 404 |
+| `Cart.tsx` | `/activities/checkout` | ❌ 404 |
+| `Profile.tsx` | `/admin/users` | ❌ 404 (должен → `/admin/user-analytics`) |
+| `Profile.tsx` | `/profile/documents` | ❌ 404 |
+| `VendorCommandPalette.tsx` | `/vendor/customers` | ❌ 404 |
+| `VendorCommandPalette.tsx` | `/vendor/services/new` | ❌ 404 |
+| `PetTransport.tsx` | `/pets/transport/quote` | ❌ 404 |
 
-**Файл**: `src/components/home/HeroBlock.tsx`
-
-**Текущая структура**:
-```
-[Локация: Пхукет] [Бренд: my UNO] [SOS]
-[Поиск]
-```
-
-**Новая структура**:
-```
-[Локация: Пхукет] [Бренд: my UNO] [SOS]
-[КРУПНЫЙ ЗАГОЛОВОК: "ЗА РУБЕЖОМ" / "ABROAD"]
-[Поиск]
-```
-
-**Изменения**:
-```typescript
-// После строки с брендом и SOS, добавить:
-<h1 className="text-center text-2xl sm:text-3xl font-display font-bold text-foreground mt-2">
-  {isRu ? 'За рубежом' : 'Abroad'}
-</h1>
-```
-
-**Стилизация заголовка**:
-- Размер: `text-2xl` на мобильных, `text-3xl` на десктопе
-- Шрифт: `font-display font-bold`
-- Цвет: `text-foreground` (для читаемости на любой теме)
-- Выравнивание: по центру
-- Анимация: плавное появление вместе с остальным блоком
+### Лишние редиректы (глюк "Airport Transfer")
+- `QuickActionsGrid.tsx:470` → `/transport/airport` → редирект на `/transport/airport-transfer`
+- `MiniAppsFAB.tsx:18` → `/transport/airport` → редирект
+- **Решение**: Заменить все `/transport/airport` на `/transport/airport-transfer`
 
 ---
 
-### Задача 2: Обновить версию приложения для сброса кэша
+## 🟠 МЁРТВЫЙ КОД (увеличивает бандл)
 
-**Файл**: `src/lib/appVersion.ts`
-
-**Изменение**:
-```typescript
-export const APP_VERSION = '2.4.2'; // было 2.4.1
-```
-
----
-
-## 📝 Технические детали
-
-### Структура HeroBlock после изменений
-
-```text
-┌─────────────────────────────────────────────┐
-│ 📍 Пхукет      [my UNO]         [SOS]       │ ← Header row
-├─────────────────────────────────────────────┤
-│           ЗА РУБЕЖОМ / ABROAD               │ ← NEW: Main headline
-├─────────────────────────────────────────────┤
-│     [🔍 Поиск или задайте вопрос...]        │ ← Search
-└─────────────────────────────────────────────┘
-```
-
-### Проверочный чек-лист после изменений
-- [ ] Заголовок отображается на главной странице
-- [ ] Заголовок переключается между RU/EN
-- [ ] Свайп в галереях работает корректно
-- [ ] Вертикальный скролл страницы не блокируется
-- [ ] Все маршруты в bottom nav работают
-- [ ] Карточки TopAppsGrid кликабельны
-- [ ] ContentModeToggle переключается с анимацией
+### Неиспользуемые компоненты
+| Файл | Причина |
+|------|---------|
+| `src/components/layout/BottomNav.tsx` | Дублирует `AdaptiveBottomNav.tsx`, нигде не рендерится |
+| `src/components/home/HeroBanner.tsx` | Дублирует `HeroBlock.tsx`, не импортируется |
+| `src/pages/tours/ToursIndex.tsx` | Роут `/tours` всегда редиректит на `/experiences` |
+| `src/pages/tours/TourDetail.tsx` | То же |
+| `src/pages/tours/TourBooking.tsx` | То же |
+| `src/pages/water/WaterActivitiesIndex.tsx` | Роут `/water` редиректит на `/experiences` |
 
 ---
 
-## ⚠️ Консольные ошибки (не критичные)
+## 🟡 ХАРДКОД ДАННЫХ (не обновляется из БД)
 
-Обнаружены системные предупреждения Lovable (CORS, postMessage) — это ожидаемое поведение preview-окружения и не влияет на работу приложения.
+### Статичные счётчики
+| Файл | Проблема |
+|------|----------|
+| `ThematicSection.tsx:153-184` | Хардкод `count: 45`, `count: 1200` и т.д. |
+| `TopAppsGrid.tsx:30-70` | Хардкод `countLabel: '1,200+'` |
+| `QuickStatsRibbon.tsx:26-60` | Хардкод курса `฿34.5`, статуса пляжа `✓ Safe`, такси `~10 min` |
 
+### Мок-данные вместо БД
+| Файл | Проблема |
+|------|----------|
+| `restaurantsData.ts` (500+ строк) | Полный каталог ресторанов — статичный массив |
+| `TransportBooking.tsx:26` | `TODO: Replace with DB query` — транспорт не из БД |
+| `CleaningDetail.tsx:11` | `TODO: Replace with DB query` |
+
+---
+
+## 🟣 ДУБЛИРОВАНИЕ ДИЗАЙНА
+
+### Карточки товаров
+- `ProductCard.tsx` vs `ProfessionalProductCard.tsx` — два разных дизайна для одной функции
+
+### Навигация
+- `BottomNav.tsx` vs `AdaptiveBottomNav.tsx` — два разных набора иконок и логики
+
+### Property Cards
+- `PropertyCard.tsx`, `PropertyListItem.tsx`, `PropertyPreviewCard.tsx` — 3 варианта (частично консолидированы)
+
+---
+
+## ⚠️ REACT ОШИБКИ
+
+### Console Warning (активный)
+```
+Warning: Function components cannot be given refs.
+Check the render method of `QuickStatsRibbon`.
+```
+**Причина**: Компонент `QuickStatChip` обёрнут в `memo()`, но используется без `forwardRef`
+
+### Проблема с PullToRefresh
+`Index.tsx:127` — использует `key={refreshKey}`, что уничтожает весь DOM при обновлении, вызывая "моргание" экрана
+
+---
+
+## 🔧 TODO/FIXME в коде (незавершённые функции)
+
+| Файл | Строка | Проблема |
+|------|--------|----------|
+| `VendorDashboard.tsx` | 326 | `TODO: Implement bulk import` |
+| `TransportBooking.tsx` | 26 | `TODO: Replace with DB query` |
+| `TeamSupportPage.tsx` | 19 | `TODO: Replace with DB query` |
+| `StaffDashboard.tsx` | 77 | `TODO: Open modal for completion` |
+| `RestaurantMap.tsx` | 14 | `TODO: Replace with DB query` |
+| `MyApplicationsWidget.tsx` | 101 | `TODO: Navigate to application detail` |
+
+---
+
+## 🔧 ПЛАН ИСПРАВЛЕНИЯ
+
+### Фаза 1: Критические баги (404)
+1. Удалить или перенаправить `/exchange`, `/beaches`, `/accounting`
+2. Заменить все `/taxi` → `/transport/taxi`
+3. Заменить все `/transport/airport` → `/transport/airport-transfer`
+4. Добавить checkout-роуты: `/yachts/checkout`, `/experiences/checkout`
+5. Исправить `/admin/users` → `/admin/user-analytics`
+
+### Фаза 2: Очистка мёртвого кода
+1. Удалить `BottomNav.tsx`
+2. Удалить `HeroBanner.tsx`
+3. Удалить legacy pages: `tours/*.tsx`, `water/WaterActivitiesIndex.tsx`
+
+### Фаза 3: Исправление React-ошибок
+1. Добавить `forwardRef` в `QuickStatChip`
+2. Убрать `key={refreshKey}` из Index.tsx — использовать мягкое обновление
+
+### Фаза 4: Замена хардкода
+1. Использовать `useCategoryCounts()` в ThematicSection и TopAppsGrid
+2. Перенести `restaurantsData.ts` в БД
+3. Создать API для QuickStats (курс, погода)
+
+### Фаза 5: Консолидация дизайна
+1. Объединить ProductCard + ProfessionalProductCard
+2. Удалить дублирующий BottomNav
+
+---
+
+## Технические детали
+
+**Файлы для удаления:**
+- `src/components/layout/BottomNav.tsx`
+- `src/components/home/HeroBanner.tsx`
+
+**Файлы для рефакторинга:**
+- `src/components/home/QuickStatsRibbon.tsx` (forwardRef + динамические данные)
+- `src/pages/Cart.tsx` (checkout роуты)
+- `src/components/discover/ThematicSection.tsx` (убрать хардкод)
+- `src/components/discover/TopAppsGrid.tsx` (убрать хардкод)
+- `src/components/account/DashboardQuickServices.tsx` (исправить пути)
+- `src/components/fab/MiniAppsFAB.tsx` (исправить `/transport/airport`)
+- `src/components/home/QuickActionsGrid.tsx` (исправить `/transport/airport`)
+
+**Оценка объёма:** ~15-20 файлов требуют изменений
