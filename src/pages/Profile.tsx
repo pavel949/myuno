@@ -70,7 +70,7 @@ export default function Profile() {
   const menuItems = [
     { icon: User, label: language === 'ru' ? 'Редактировать профиль' : 'Edit Profile', onClick: () => navigate('/profile/edit') },
     { icon: Settings, label: language === 'ru' ? 'Настройки и данные' : 'Settings & Data', onClick: () => navigate('/profile/settings') },
-    { icon: FileText, label: language === 'ru' ? 'Мои документы' : 'My Documents', onClick: () => navigate('/profile/documents') },
+    { icon: FileText, label: language === 'ru' ? 'Мои документы' : 'My Documents', onClick: () => navigate('/profile/settings') },
     { icon: MessageCircle, label: language === 'ru' ? 'Чат поддержки' : 'Support Chat', onClick: () => navigate('/support') },
     { icon: Wallet, label: language === 'ru' ? 'Кошелёк' : 'Wallet', onClick: () => navigate('/wallet') },
     { icon: Heart, label: language === 'ru' ? 'Избранное' : 'Favorites', onClick: () => navigate('/favorites') },
@@ -82,7 +82,7 @@ export default function Profile() {
   const adminItems = [
     { icon: Shield, label: language === 'ru' ? 'Панель управления' : 'Admin Dashboard', onClick: () => navigate('/admin') },
     { icon: ShieldCheck, label: language === 'ru' ? 'Заявки партнёров' : 'Partner Applications', onClick: () => navigate('/admin/partner-applications') },
-    { icon: Settings, label: language === 'ru' ? 'Пользователи' : 'User Analytics', onClick: () => navigate('/admin/users') },
+    { icon: Settings, label: language === 'ru' ? 'Пользователи' : 'User Analytics', onClick: () => navigate('/admin/user-analytics') },
     { icon: CreditCard, label: language === 'ru' ? 'Финансы' : 'Finance', onClick: () => navigate('/admin/finance') },
     { icon: FileText, label: language === 'ru' ? 'Модерация контента' : 'Content Moderation', onClick: () => navigate('/admin/moderation') },
   ];

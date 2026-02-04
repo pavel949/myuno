@@ -10,11 +10,12 @@ import { CACHE_PROFILES } from '@/lib/queryConfig';
 // Route to module mapping for code prefetching
 const routeModules: Record<string, () => Promise<unknown>> = {
   '/yachts': () => import('@/pages/yachts/YachtsIndex'),
-  '/tours': () => import('@/pages/tours/ToursIndex'),
+  '/tours': () => import('@/pages/experiences/ExperiencesIndex'), // Legacy - redirects to experiences
   '/property': () => import('@/pages/property/PropertyIndex'),
   '/transport': () => import('@/pages/transport/TransportIndex'),
   '/flowers': () => import('@/pages/flowers/FlowersIndex'),
-  '/water': () => import('@/pages/water/WaterActivitiesIndex'),
+  '/water': () => import('@/pages/experiences/ExperiencesIndex'), // Legacy - redirects to experiences
+  '/experiences': () => import('@/pages/experiences/ExperiencesIndex'),
   '/events': () => import('@/pages/events/EventsIndex'),
   '/restaurants': () => import('@/pages/restaurants/RestaurantsIndex'),
   '/beauty': () => import('@/pages/beauty/BeautySpaIndex'),

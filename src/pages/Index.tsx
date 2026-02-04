@@ -123,8 +123,8 @@ const Index = () => {
         </Suspense>
       )}
 
-      <PullToRefresh onRefresh={handleRefresh}>
-        <div className="px-4 py-4 pb-24 space-y-4" key={refreshKey}>
+      <PullToRefresh onRefresh={handleRefresh} key={refreshKey}>
+        <div className="px-4 py-4 pb-24 space-y-4">
           
           {/* ═══════════════════════════════════════════════════════════
               BLOCK 1: PWA Install + Hero (Brand + Search + SOS)

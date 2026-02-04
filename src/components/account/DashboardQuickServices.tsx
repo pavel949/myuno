@@ -14,8 +14,8 @@ interface QuickService {
 }
 
 const QUICK_SERVICES: QuickService[] = [
-  { path: '/taxi', icon: '🚕', labelEn: 'Taxi', labelRu: 'Такси', color: 'bg-yellow-100 dark:bg-yellow-900/30' },
-  { path: '/tours', icon: '🏝️', labelEn: 'Tours', labelRu: 'Туры', color: 'bg-blue-100 dark:bg-blue-900/30' },
+  { path: '/transport/taxi', icon: '🚕', labelEn: 'Taxi', labelRu: 'Такси', color: 'bg-yellow-100 dark:bg-yellow-900/30' },
+  { path: '/experiences', icon: '🏝️', labelEn: 'Tours', labelRu: 'Туры', color: 'bg-blue-100 dark:bg-blue-900/30' },
   { path: '/beauty', icon: '💆', labelEn: 'Beauty', labelRu: 'Красота', color: 'bg-pink-100 dark:bg-pink-900/30' },
   { path: '/cleaning', icon: '🧹', labelEn: 'Cleaning', labelRu: 'Уборка', color: 'bg-green-100 dark:bg-green-900/30' },
   { path: '/restaurants', icon: '🍽️', labelEn: 'Food', labelRu: 'Еда', color: 'bg-orange-100 dark:bg-orange-900/30' },

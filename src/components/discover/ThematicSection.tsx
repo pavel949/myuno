@@ -150,11 +150,11 @@ export const THEMATIC_SECTIONS: ThematicSectionData[] = [
     emoji: '🌴',
     defaultOpen: true,
     categories: [
-      { id: 'yachts', slug: 'yachts', nameEn: 'Yachts & Boats', nameRu: 'Яхты и катера', icon: '⛵', path: '/yachts', count: 45 },
-      { id: 'tours', slug: 'tours', nameEn: 'Tours & Excursions', nameRu: 'Туры и экскурсии', icon: '🗺️', path: '/tours', count: 120 },
-      { id: 'restaurants', slug: 'restaurants', nameEn: 'Restaurants', nameRu: 'Рестораны', icon: '🍽️', path: '/restaurants', count: 200 },
-      { id: 'events', slug: 'events', nameEn: 'Events', nameRu: 'События', icon: '🎉', path: '/events', count: 30 },
-      { id: 'beauty', slug: 'beauty', nameEn: 'Beauty & SPA', nameRu: 'Красота и SPA', icon: '💆', path: '/beauty', count: 150 },
+      { id: 'yachts', slug: 'yachts', nameEn: 'Yachts & Boats', nameRu: 'Яхты и катера', icon: '⛵', path: '/yachts' },
+      { id: 'experiences', slug: 'experiences', nameEn: 'Tours & Experiences', nameRu: 'Туры и впечатления', icon: '🗺️', path: '/experiences' },
+      { id: 'restaurants', slug: 'restaurants', nameEn: 'Restaurants', nameRu: 'Рестораны', icon: '🍽️', path: '/restaurants' },
+      { id: 'events', slug: 'events', nameEn: 'Events', nameRu: 'События', icon: '🎉', path: '/events' },
+      { id: 'beauty', slug: 'beauty', nameEn: 'Beauty & SPA', nameRu: 'Красота и SPA', icon: '💆', path: '/beauty' },
     ],
   },
   {
@@ -164,11 +164,11 @@ export const THEMATIC_SECTIONS: ThematicSectionData[] = [
     emoji: '🏠',
     defaultOpen: false,
     categories: [
-      { id: 'property', slug: 'property', nameEn: 'Property Rental', nameRu: 'Аренда жилья', icon: '🏡', path: '/property', count: 1200 },
-      { id: 'transport', slug: 'transport', nameEn: 'Transport', nameRu: 'Транспорт', icon: '🚗', path: '/transport', count: 100 },
-      { id: 'medical', slug: 'medical', nameEn: 'Medical', nameRu: 'Медицина', icon: '🏥', path: '/medical', count: 50 },
-      { id: 'education', slug: 'education', nameEn: 'Education', nameRu: 'Образование', icon: '📚', path: '/education', count: 25 },
-      { id: 'fitness', slug: 'fitness', nameEn: 'Fitness', nameRu: 'Фитнес', icon: '💪', path: '/fitness', count: 40 },
+      { id: 'property', slug: 'property', nameEn: 'Property Rental', nameRu: 'Аренда жилья', icon: '🏡', path: '/property' },
+      { id: 'transport', slug: 'transport', nameEn: 'Transport', nameRu: 'Транспорт', icon: '🚗', path: '/transport' },
+      { id: 'medical', slug: 'medical', nameEn: 'Medical', nameRu: 'Медицина', icon: '🏥', path: '/medical' },
+      { id: 'education', slug: 'education', nameEn: 'Education', nameRu: 'Образование', icon: '📚', path: '/education' },
+      { id: 'fitness', slug: 'fitness', nameEn: 'Fitness', nameRu: 'Фитнес', icon: '💪', path: '/fitness' },
     ],
   },
   {
@@ -178,10 +178,10 @@ export const THEMATIC_SECTIONS: ThematicSectionData[] = [
     emoji: '💼',
     defaultOpen: false,
     categories: [
-      { id: 'legal', slug: 'legal', nameEn: 'Legal Services', nameRu: 'Юридические услуги', icon: '⚖️', path: '/legal', count: 30 },
-      { id: 'insurance', slug: 'insurance', nameEn: 'Insurance', nameRu: 'Страхование', icon: '🛡️', path: '/insurance', count: 15 },
-      { id: 'banking', slug: 'banking', nameEn: 'Banking', nameRu: 'Банки', icon: '🏦', path: '/banking', count: 10 },
-      { id: 'accounting', slug: 'accounting', nameEn: 'Accounting', nameRu: 'Бухгалтерия', icon: '📊', path: '/accounting', count: 20 },
+      { id: 'legal', slug: 'legal', nameEn: 'Legal Services', nameRu: 'Юридические услуги', icon: '⚖️', path: '/legal' },
+      { id: 'insurance', slug: 'insurance', nameEn: 'Insurance', nameRu: 'Страхование', icon: '🛡️', path: '/insurance' },
+      { id: 'banking', slug: 'banking', nameEn: 'Banking', nameRu: 'Банки', icon: '🏦', path: '/banking' },
+      { id: 'services', slug: 'services', nameEn: 'Business Services', nameRu: 'Бизнес-услуги', icon: '📊', path: '/services?category=business' },
     ],
   },
 ];
