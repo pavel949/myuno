@@ -1,245 +1,333 @@
 
-# План: Подключение реальных объектов к карте недвижимости
+# План: Улучшение карточки объекта и пути клиента (Airbnb-стиль)
 
-## Текущее состояние
+## Выявленные проблемы
 
-**Проблема:** Карта `/property/map` использует захардкоженные демо-данные вместо реальных объектов из базы.
+### 1. Бейдж "Instant Booking" использует неверную логику
+| Файл | Текущая логика | Правильная логика |
+|------|----------------|-------------------|
+| `PropertyIndex.tsx` | `property.min_stay_nights === 1` | `property.instant_booking === true` |
+| `PropertyCard.tsx` | Использует `instantBooking` из props | ✓ Корректно |
 
-**База данных:** В Supabase есть 13+ активных объектов с заполненными координатами (lat, lng) на Пхукете:
-- Kamala: 7.9489, 98.2856
-- Rawai: 7.7812, 98.3234 / 7.7751, 98.3255
-- Nai Harn: 7.7694, 98.3053
-- Chalong: 7.8356, 98.3378
-- Surin: 7.9769, 98.2783
-- Kata: 7.8203, 98.2981
-- и другие...
+### 2. Кнопка бронирования не динамическая
+**Текущее:** Всегда показывает "Забронировать" ("Reserve")
+**Airbnb-стандарт:** 
+- Без дат → "Проверить наличие" ("Check availability")  
+- С датами → "Забронировать" ("Reserve") или "Мгновенное бронирование" ("Instant book")
+
+### 3. Карточка в списке не показывает CTA "Check availability"
+Пользователь видит только цену, без призыва к действию
+
+### 4. Мобильная bottom bar не показывает "instant booking"
+Bottom CTA показывает статичный текст без учёта возможности мгновенного бронирования
 
 ---
 
 ## Архитектура решения
 
 ```text
-┌─────────────────────────────────────────────────────────────────────┐
-│  PropertyMap.tsx (БЫЛО)                                             │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  const demoProperties = [ ... захардкоженные данные ... ]           │
-│                    │                                                │
-│                    ▼                                                │
-│  <SalonMap salons={demoProperties} />                               │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-
-                              ▼ ЗАМЕНА
-
-┌─────────────────────────────────────────────────────────────────────┐
-│  PropertyMap.tsx (СТАНЕТ)                                           │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  const { data: properties } = usePropertiesForMap()                 │
-│                    │                                                │
-│                    ▼  трансформация в SalonMarker[]                 │
-│  <SalonMap salons={propertyMarkers} icon="🏠" />                    │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  ПУТЬ КЛИЕНТА (Текущий → Улучшенный)                                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  [Список объектов]                                                          │
+│       │                                                                     │
+│       │ СЕЙЧАС: Карточка → клик → детали                                   │
+│       │ СТАНЕТ: Карточка с ⚡ Instant + CTA hint → клик → детали          │
+│       ▼                                                                     │
+│  [Страница деталей]                                                         │
+│       │                                                                     │
+│       │ СЕЙЧАС: Sidebar "Reserve" (даже без дат)                           │
+│       │ СТАНЕТ: Sidebar "Check availability" → выбор дат → "Reserve/Book"  │
+│       ▼                                                                     │
+│  [Форма бронирования]                                                       │
+│       │                                                                     │
+│       │ СЕЙЧАС: ✓ Корректно работает                                       │
+│       ▼                                                                     │
+│  [Оплата депозита]                                                          │
+│       │                                                                     │
+│       │ СЕЙЧАС: ✓ Stripe + PromptPay                                       │
+│       ▼                                                                     │
+│  [Подтверждение]                                                            │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Фазы реализации
+## Фаза 1: Исправление бейджа Instant Booking
 
-### Фаза 1: Новый хук для карты
+**Файл: `src/pages/property/PropertyIndex.tsx`**
 
-**Файл: `src/hooks/useProperties.ts`**
-
-Добавить специализированный хук для карты:
+Заменить логику на строках 322-327:
 
 ```typescript
-// Fetch properties with coordinates for map view
-export function usePropertiesForMap(filters: PropertyFilters = {}) {
-  return useQuery({
-    queryKey: ['properties-map', filters],
-    queryFn: async () => {
-      let query = supabase
-        .from('properties')
-        .select(`
-          id,
-          title_en,
-          title_ru,
-          lat,
-          lng,
-          price,
-          price_period,
-          currency,
-          property_type,
-          bedrooms,
-          cover_image,
-          rating,
-          district
-        `)
-        .eq('is_active', true)
-        .not('lat', 'is', null)
-        .not('lng', 'is', null);
-      
-      // Apply filters (type, district, price)
-      if (filters.propertyType && filters.propertyType !== 'all') {
-        query = query.eq('property_type', filters.propertyType);
-      }
-      if (filters.district) {
-        query = query.eq('district', filters.district);
-      }
-      
-      const { data, error } = await query;
-      if (error) throw error;
-      return (data || []) as PropertyMapItem[];
-    },
-  });
-}
-```
+// БЫЛО:
+{property.min_stay_nights === 1 && (
+  <Badge className="bg-amber-500 ...">
+    <Zap className="w-3 h-3" />
+    {language === 'ru' ? 'Быстрое' : 'Instant'}
+  </Badge>
+)}
 
-### Фаза 2: Обновление PropertyMap.tsx
-
-**Файл: `src/pages/property/PropertyMap.tsx`**
-
-1. Удалить `demoProperties`
-2. Импортировать `usePropertiesForMap`
-3. Трансформировать данные в формат `SalonMarker[]`
-4. Добавить состояние загрузки
-
-```typescript
-// Трансформация property → SalonMarker
-const propertyMarkers: SalonMarker[] = (properties || []).map(p => ({
-  id: p.id,
-  name: p.title_en || 'Property',
-  nameRu: p.title_ru || 'Объект',
-  lat: p.lat!,
-  lng: p.lng!,
-  rating: p.rating || 0,
-  priceFrom: p.price || 0,
-  image: p.cover_image,
-}));
-```
-
-### Фаза 3: Улучшение маркера
-
-**Файл: `src/components/map/SalonMap.tsx`**
-
-1. Добавить поддержку кастомной иконки через props
-2. Улучшить popup с изображением и ценой
-
-```typescript
-interface SalonMapProps {
-  salons: SalonMarker[];
-  onSalonSelect?: (salonId: string) => void;
-  userLocation?: { lat: number; lng: number } | null;
-  distanceFilter?: number;
-  className?: string;
-  icon?: string; // NEW: '🏠' для недвижимости, '💆' для салонов
-  iconBgColor?: string; // NEW: кастомный цвет фона
-}
-
-// Замена строки 162:
-<span class="text-white text-lg">${icon || '📍'}</span>
-```
-
-### Фаза 4: Улучшенный popup
-
-**Файл: `src/lib/sanitize.ts`**
-
-Расширить `createMapPopupHtml` для поддержки изображения:
-
-```typescript
-export function createMapPopupHtml(options: {
-  name: string;
-  rating?: number;
-  price?: string;
-  image?: string; // NEW
-}): string {
-  const { name, rating, price, image } = options;
-  return `
-    <div class="p-2 min-w-[180px]">
-      ${image ? `<img src="${escapeHtml(image)}" class="w-full h-24 object-cover rounded-lg mb-2" />` : ''}
-      <h3 class="font-semibold text-sm">${escapeHtml(name)}</h3>
-      <div class="flex items-center gap-2 mt-1">
-        ${rating ? `<span class="text-xs">⭐ ${rating}</span>` : ''}
-        ${price ? `<span class="text-xs text-muted-foreground">${price}</span>` : ''}
-      </div>
-    </div>
-  `;
-}
+// СТАНЕТ:
+{property.instant_booking && (
+  <Badge className="bg-amber-500 text-white border-0 text-xs gap-1">
+    <Zap className="w-3 h-3" />
+    {language === 'ru' ? 'Мгновенное' : 'Instant'}
+  </Badge>
+)}
 ```
 
 ---
 
-## Новые/Изменяемые файлы
+## Фаза 2: Динамическая кнопка в PropertyBookingCard
+
+**Файл: `src/components/property/PropertyBookingCard.tsx`**
+
+Обновить логику кнопки Reserve (строки 270-279):
+
+```typescript
+// БЫЛО:
+<Button size="lg" className="w-full" onClick={handleReserve}>
+  {rentalTerms?.instant_booking && <Zap className="w-4 h-4 mr-2" />}
+  {isRu ? 'Забронировать' : 'Reserve'}
+</Button>
+
+// СТАНЕТ:
+<Button 
+  size="lg" 
+  className="w-full"
+  onClick={handleReserve}
+  disabled={!dateRange?.from || !dateRange?.to || validationErrors.length > 0}
+>
+  {!dateRange?.from || !dateRange?.to ? (
+    <>
+      <Calendar className="w-4 h-4 mr-2" />
+      {isRu ? 'Проверить наличие' : 'Check availability'}
+    </>
+  ) : rentalTerms?.instant_booking ? (
+    <>
+      <Zap className="w-4 h-4 mr-2" />
+      {isRu ? 'Мгновенное бронирование' : 'Book instantly'}
+    </>
+  ) : (
+    isRu ? 'Забронировать' : 'Reserve'
+  )}
+</Button>
+```
+
+Также добавить пояснительный текст под кнопкой:
+
+```typescript
+// После кнопки, заменить строки 281-284:
+{!nights ? (
+  <p className="text-center text-sm text-muted-foreground">
+    {isRu ? 'Выберите даты для расчёта стоимости' : 'Select dates to see total price'}
+  </p>
+) : (
+  // existing price breakdown
+)}
+```
+
+---
+
+## Фаза 3: Улучшение карточки в списке
+
+**Файл: `src/pages/property/PropertyIndex.tsx`**
+
+Добавить визуальную подсказку доступности под ценой (строки 356-360):
+
+```typescript
+{/* Price */}
+<p className="pt-1">
+  <span className="font-semibold">{formatPrice(property.price || 0)}</span>
+  <span className="text-muted-foreground">{formatPriceLabel(property.price_period)}</span>
+</p>
+
+{/* NEW: Availability hint */}
+{property.instant_booking && (
+  <p className="text-xs text-amber-600 flex items-center gap-1 mt-1">
+    <Zap className="w-3 h-3" />
+    {language === 'ru' ? 'Забронировать сейчас' : 'Book now'}
+  </p>
+)}
+```
+
+---
+
+## Фаза 4: Мобильная bottom bar с динамическим CTA
+
+**Файл: `src/pages/property/PropertyDetail.tsx`**
+
+Обновить bottom bar (строки 778-785):
+
+```typescript
+// БЫЛО:
+<Button size="lg" onClick={() => navigate(`/property/${id}/inquiry`)}>
+  <Calendar className="w-4 h-4 mr-2" />
+  {isRu ? 'Бронировать' : 'Reserve'}
+</Button>
+
+// СТАНЕТ:
+<Button
+  size="lg"
+  className={cn(
+    "flex-shrink-0 px-6",
+    rentalTerms?.instant_booking && "bg-amber-500 hover:bg-amber-600"
+  )}
+  onClick={() => navigate(`/property/${id}/inquiry`)}
+>
+  {rentalTerms?.instant_booking ? (
+    <>
+      <Zap className="w-4 h-4 mr-2" />
+      {isRu ? 'Забронировать' : 'Book Now'}
+    </>
+  ) : (
+    <>
+      <Calendar className="w-4 h-4 mr-2" />
+      {isRu ? 'Проверить даты' : 'Check Dates'}
+    </>
+  )}
+</Button>
+```
+
+---
+
+## Фаза 5: Индикатор Instant Booking на странице деталей
+
+**Файл: `src/pages/property/PropertyDetail.tsx`**
+
+Уже есть highlight для instant booking (строки 430-443), но можно усилить:
+
+Добавить бейдж рядом с ценой в мобильной bottom bar (строка 760-765):
+
+```typescript
+{/* Price section */}
+<div className="flex-1 min-w-0">
+  <div className="flex items-baseline gap-1">
+    <span className="text-xl font-bold text-foreground">
+      ฿{pricePerNight.toLocaleString()}
+    </span>
+    <span className="text-sm text-muted-foreground">
+      /{isRu ? 'ночь' : 'night'}
+    </span>
+  </div>
+  {rentalTerms?.instant_booking && (
+    <Badge className="mt-0.5 bg-amber-500/10 text-amber-600 border-amber-500/20 text-xs gap-1">
+      <Zap className="w-3 h-3" />
+      {isRu ? 'Мгновенное бронирование' : 'Instant Book'}
+    </Badge>
+  )}
+</div>
+```
+
+---
+
+## Файлы для изменения
 
 | Файл | Изменение |
 |------|-----------|
-| `src/hooks/useProperties.ts` | + `usePropertiesForMap()` |
-| `src/pages/property/PropertyMap.tsx` | Реальные данные из Supabase |
-| `src/components/map/SalonMap.tsx` | + props `icon`, `iconBgColor` |
-| `src/lib/sanitize.ts` | Расширить popup с изображением |
+| `src/pages/property/PropertyIndex.tsx` | Бейдж instant_booking + CTA hint |
+| `src/components/property/PropertyBookingCard.tsx` | Динамическая кнопка |
+| `src/pages/property/PropertyDetail.tsx` | Мобильный CTA + бейдж |
 
 ---
 
 ## Визуальный результат
 
 ```text
-┌─────────────────────────────────────────────────────────────────────┐
-│  /property/map                                                      │
-├─────────────────────────────────────────────────────────────────────┤
-│  ┌───────────────────────────────────────────────────────────────┐  │
-│  │                                                               │  │
-│  │      🏠 Kamala                                                │  │
-│  │           ↖ 95,000 ฿/мес                                     │  │
-│  │                                                               │  │
-│  │                     🏠 Surin                                  │  │
-│  │                          ↖ 180,000 ฿/мес                     │  │
-│  │                                                               │  │
-│  │  🏠 Kata                           PHUKET MAP                │  │
-│  │       ↖ 250,000 ฿/мес                                        │  │
-│  │                                                               │  │
-│  │              🏠 Chalong                                       │  │
-│  │                   ↖ 38,000 ฿/мес                             │  │
-│  │                                                               │  │
-│  │                        🏠 Rawai × 2                           │  │
-│  │                             ↖ 15k-120k ฿/мес                 │  │
-│  │                                                               │  │
-│  │                    🏠 Nai Harn                                │  │
-│  │                         ↖ 18.5M ฿ (продажа)                  │  │
-│  │                                                               │  │
-│  └───────────────────────────────────────────────────────────────┘  │
-│                                                                     │
-│  [2 км] [5 км] [10 км] [25 км] [Все]                               │
-│                                                                     │
-│  Фильтры: [Все] [Вилла] [Кондо] [Квартира]                        │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  КАРТОЧКА В СПИСКЕ (после улучшений)                                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────────────────────────────────────────────────┐            │
+│  │  [Фото виллы]                                    ❤️          │            │
+│  │                                                             │            │
+│  │  ⚡ Мгновенное            ← бейдж для instant_booking=true  │            │
+│  │  ★ Популярное            ← бейдж для is_featured=true      │            │
+│  └─────────────────────────────────────────────────────────────┘            │
+│  Kamala                                              ⭐ 4.9                  │
+│  Luxury Ocean View Villa                                                    │
+│  4 спален · 3 ванных · 8 гостей                                            │
+│  ฿85,000/мес                                                                │
+│  ⚡ Забронировать сейчас      ← новый CTA hint                              │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
 
-                    ▼ Клик на маркер
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  BOOKING CARD (Sidebar на десктопе)                                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ฿3,500 / ночь                                                              │
+│                                                                             │
+│  ┌───────────────┬───────────────┐                                          │
+│  │ Заезд         │ Выезд         │                                          │
+│  │ Дата          │ Дата          │  ← пустые поля                          │
+│  └───────────────┴───────────────┘                                          │
+│                                                                             │
+│  ┌───────────────────────────────┐                                          │
+│  │ 📅 Проверить наличие         │  ← динамическая кнопка                   │
+│  └───────────────────────────────┘                                          │
+│                                                                             │
+│  Выберите даты для расчёта стоимости                                        │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
 
-┌─────────────────────────────────────────────────────────────────────┐
-│  POPUP                                                              │
-├─────────────────────────────────────────────────────────────────────┤
-│  ┌─────────────────────────┐                                        │
-│  │  [Фото виллы]           │                                        │
-│  │  Luxury Tropical Villa  │                                        │
-│  │  ⭐ 4.8  •  ฿120,000/мес │                                        │
-│  │  [Клик → детали]        │                                        │
-│  └─────────────────────────┘                                        │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
+                    ▼ После выбора дат
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  BOOKING CARD (с датами)                                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ฿3,500 / ночь                                                              │
+│                                                                             │
+│  ┌───────────────┬───────────────┐                                          │
+│  │ Заезд         │ Выезд         │                                          │
+│  │ 15 янв       │ 22 янв        │  ← заполненные даты                      │
+│  └───────────────┴───────────────┘                                          │
+│                                                                             │
+│  ┌───────────────────────────────┐                                          │
+│  │ ⚡ Мгновенное бронирование   │  ← для instant_booking=true              │
+│  └───────────────────────────────┘                                          │
+│            или                                                              │
+│  ┌───────────────────────────────┐                                          │
+│  │ Забронировать                │  ← для instant_booking=false             │
+│  └───────────────────────────────┘                                          │
+│                                                                             │
+│  ฿3,500 × 7 ночей                               ฿24,500                     │
+│  Скидка 10% (неделя)                           -฿2,450                      │
+│  ─────────────────────────────────────────────                              │
+│  Итого                                          ฿22,050                     │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  МОБИЛЬНЫЙ BOTTOM BAR (после улучшений)                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ฿3,500/ночь                    📞  💬  ┌──────────────────────┐           │
+│  ⚡ Мгновенное бронирование              │ ⚡ Забронировать    │           │
+│                                          └──────────────────────┘           │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## Данные в базе
+
+Аудит показал, что в базе уже есть 4 объекта с `instant_booking = true`:
+- Luxury Tropical Villa Rawai
+- Investment Villa Nai Harn
+- Premium Villa Layan
+- Luxury Penthouse Surin
+
+После внедрения изменений эти объекты сразу получат визуальные индикаторы.
 
 ---
 
 ## Техническое резюме
 
-**Изменения:**
-- 4 файла (2 обновления + 2 расширения)
-- Удаление demo-данных
-- Подключение к реальной БД
-
-**Данные:** 13+ объектов с координатами уже есть в базе - карта сразу заработает.
-
-**Риск регрессии:** Низкий - SalonMap используется в других местах, но новые props опциональные.
+**Изменения:** 3 файла
+**Риск регрессии:** Низкий - изменения касаются только UI/UX, не затрагивают логику бронирования
+**Результат:** Путь клиента соответствует Airbnb-стандарту с динамическими CTA и визуальными индикаторами доступности
