@@ -31,16 +31,23 @@ export default function ServicesIndex() {
     providerType: selectedProviderType,
   });
 
-  // Sync URL params
+  // Sync URL params on mount and when URL changes
   useEffect(() => {
     const domainParam = searchParams.get('domain') as ServiceDomain | null;
     const categoryParam = searchParams.get('category');
     
+    // Set domain from URL
     if (domainParam && SERVICE_DOMAINS.some(d => d.id === domainParam)) {
       setSelectedDomain(domainParam);
+    } else if (!domainParam) {
+      setSelectedDomain('all');
     }
+    
+    // Set category from URL - this is critical for direct links like /services?category=electrical
     if (categoryParam) {
       setSelectedCategory(categoryParam);
+    } else {
+      setSelectedCategory('all');
     }
   }, [searchParams]);
 
