@@ -11,3 +11,8 @@ export { FeaturedProvidersCarousel } from './FeaturedProvidersCarousel';
 export { PopularServicesSection, ServiceCard } from './PopularServicesSection';
 export { RecentlyViewedServices } from './RecentlyViewedServices';
 export { AllProvidersGrid } from './AllProvidersGrid';
+
+// Premium sections
+export { FlashServicesSection } from './FlashServicesSection';
+export { VerticalShowcaseSection } from './VerticalShowcaseSection';
+export { PartnerCTACard } from './PartnerCTACard';

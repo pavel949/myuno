@@ -1,3 +1,17 @@
+/**
+ * Discover Page - Klook-style Super-App Service Marketplace
+ * Structure:
+ * 1. Hero Promo Carousel
+ * 2. Quick Category Icons (IconBadge)
+ * 3. Flash Deals with urgency
+ * 4. Vertical Showcases (Yachts, Property, Beauty)
+ * 5. Featured Providers with trust signals
+ * 6. Partner CTA
+ * 7. Popular Services
+ * 8. Recently Viewed
+ * 9. Cross-sell
+ */
+
 import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Wrench, Sparkles, Plane, Users, Home as HomeIcon } from 'lucide-react';
@@ -17,7 +31,7 @@ import { useServices } from '@/hooks/useServices';
 import { useCategories } from '@/hooks/useCategories';
 import { useHomeServices } from '@/hooks/useHomeServices';
 
-// New marketplace components
+// Service marketplace components
 import {
   ServiceCategoryDrawer,
   ServicePromoCarousel,
@@ -25,10 +39,12 @@ import {
   FeaturedProvidersCarousel,
   PopularServicesSection,
   RecentlyViewedServices,
-  AllProvidersGrid,
+  FlashServicesSection,
+  VerticalShowcaseSection,
+  PartnerCTACard,
 } from '@/components/services';
 
-// Legacy components (for filtered views)
+// Legacy components (for filtered views only)
 import { MiniAppsGrid } from '@/components/discover/MiniAppsGrid';
 import { ThematicSection, THEMATIC_SECTIONS } from '@/components/discover/ThematicSection';
 import { useFeaturedCategories } from '@/hooks/useFeaturedCategories';
@@ -152,46 +168,42 @@ export default function Discover() {
       </div>
 
       <PullToRefresh onRefresh={handleRefresh} className="min-h-0">
-        <div key={refreshKey} className="space-y-6 pb-24">
+        <div key={refreshKey} className="space-y-4 pb-24">
           
           {isLoading ? (
             <LoadingSkeleton />
           ) : showMarketplaceView ? (
-            /* MARKETPLACE VIEW - Full featured */
+            /* KLOOK-STYLE MARKETPLACE VIEW */
             <>
-              {/* 1. Promo Carousel */}
+              {/* 1. Hero Promo Carousel */}
               <ServicePromoCarousel />
               
-              {/* 2. Quick Service Icons (4x2 grid) */}
+              {/* 2. Quick Category Icons with IconBadge */}
               <QuickServiceIcons />
               
-              {/* 3. Featured Providers Carousel */}
+              {/* 3. Flash Deals with urgency */}
+              <FlashServicesSection />
+              
+              {/* 4. Premium Vertical Showcases */}
+              <VerticalShowcaseSection />
+              
+              {/* 5. Featured Providers with trust signals */}
               <FeaturedProvidersCarousel />
               
-              {/* 4. Popular Services Section */}
+              {/* 6. Partner CTA - attract providers */}
+              <PartnerCTACard />
+              
+              {/* 7. Popular Services */}
               <PopularServicesSection />
               
-              {/* 5. Recently Viewed Services */}
+              {/* 8. Recently Viewed */}
               <RecentlyViewedServices />
               
-              {/* 6. Thematic Sections (collapsible categories) */}
-              <div className="space-y-2 px-4">
-                <h2 className="text-lg font-bold text-foreground">
-                  {isRu ? 'Все категории' : 'All Categories'}
-                </h2>
-                {THEMATIC_SECTIONS.map(section => (
-                  <ThematicSection key={section.id} section={section} />
-                ))}
-              </div>
-              
-              {/* 7. All Providers Grid */}
-              <AllProvidersGrid />
-              
-              {/* 8. Cross-Sell Section */}
+              {/* 9. Cross-sell to other verticals */}
               <CrossSellSection currentVertical="services" />
             </>
           ) : (
-            /* FILTERED VIEW - Legacy structure */
+            /* FILTERED VIEW - Legacy structure for audience segments */
             <>
               {filteredGroups.length === 0 && filteredThematicSections.length === 0 ? (
                 <EmptyState
@@ -256,22 +268,29 @@ function LoadingSkeleton() {
         </div>
       </div>
       
+      {/* Flash deals skeleton */}
+      <div className="px-4">
+        <Skeleton className="h-6 w-48 mb-4" />
+        <div className="flex gap-3 overflow-hidden">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="w-[160px] h-[180px] rounded-2xl shrink-0" />
+          ))}
+        </div>
+      </div>
+      
+      {/* Vertical showcases skeleton */}
+      <div className="px-4 space-y-3">
+        <Skeleton className="h-[120px] rounded-2xl" />
+        <Skeleton className="h-[120px] rounded-2xl" />
+        <Skeleton className="h-[120px] rounded-2xl" />
+      </div>
+      
       {/* Featured providers skeleton */}
       <div className="px-4">
         <Skeleton className="h-6 w-40 mb-4" />
         <div className="flex gap-3 overflow-hidden">
           {Array.from({ length: 3 }).map((_, i) => (
             <Skeleton key={i} className="w-[200px] h-[220px] rounded-2xl shrink-0" />
-          ))}
-        </div>
-      </div>
-      
-      {/* Popular services skeleton */}
-      <div className="px-4">
-        <Skeleton className="h-6 w-44 mb-4" />
-        <div className="flex gap-3 overflow-hidden">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="w-[180px] h-[200px] rounded-2xl shrink-0" />
           ))}
         </div>
       </div>
