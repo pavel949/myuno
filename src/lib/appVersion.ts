@@ -1,6 +1,6 @@
 // App version for PWA cache busting
 // Update this version when deploying significant changes
-export const APP_VERSION = '2.4.3';
+export const APP_VERSION = '2.5.0';
 export const BUILD_TIMESTAMP = new Date().toISOString();
 
 // Force immediate cache clear and reload on version mismatch
