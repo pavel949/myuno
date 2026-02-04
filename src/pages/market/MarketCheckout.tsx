@@ -11,6 +11,8 @@ import { useBooking } from '@/hooks/useBooking';
 import { useDeliverySettings } from '@/hooks/useMarketplace';
 import { useProfile } from '@/hooks/useProfile';
 import { useUserAddresses } from '@/hooks/useUserAddresses';
+import { useConciergeAdvance } from '@/hooks/useConciergeAdvance';
+import { useStripeMarketCheckout } from '@/hooks/useStripeMarketCheckout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,8 +26,11 @@ import {
   BookingPaymentSelect,
   BookingBottomBar,
   BookingConfirmation,
+  BookingStepProgress,
+  deliveryBookingSteps,
   type PaymentMethod 
 } from '@/components/booking';
+import { ConciergeAdvanceOption } from '@/components/booking/ConciergeAdvanceOption';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { 
   DeliveryTypeSelector, 
@@ -144,6 +149,8 @@ const MarketCheckout = () => {
   const { zones: shippingZones, calculateFee: calculateInternationalFee } = useInternationalShippingZones();
   const { profile } = useProfile();
   const { addresses, defaultAddress, createAddressAsync } = useUserAddresses();
+  const { createAdvanceRequest, navigateToAdvanceRequested, calculateFee, feePercent } = useConciergeAdvance();
+  const { createMarketCheckout, isProcessing: isStripeProcessing } = useStripeMarketCheckout();
   
   // Check for Buy Now mode
   const locationState = location.state as { 
@@ -257,6 +264,14 @@ const MarketCheckout = () => {
     intlFormData.city && intlFormData.address && intlFormData.postalCode && selectedZone;
   const isFormValid = deliveryType === 'local' ? isLocalFormValid : isIntlFormValid;
 
+  // Calculate current step for progress indicator
+  const getCurrentStep = (): number => {
+    if (paymentMethod) return 2;
+    if (deliveryType && (isLocalFormValid || isIntlFormValid)) return 1;
+    if (localFormData.name || intlFormData.name) return 1;
+    return 0;
+  };
+
   // Auth redirect
   if (!authLoading && !user) {
     navigate('/auth', { state: { from: '/market/checkout' } });
@@ -284,6 +299,36 @@ const MarketCheckout = () => {
   const handleSubmit = async () => {
     if (!isFormValid) return;
 
+    const formData = deliveryType === 'local' ? localFormData : intlFormData;
+    const fullAddress = deliveryType === 'local' 
+      ? localFormData.address 
+      : `${intlFormData.address}, ${intlFormData.city}, ${intlFormData.postalCode}, ${intlFormData.country}`;
+
+    // 1. Card → Stripe Checkout redirect
+    if (paymentMethod === 'card') {
+      const stripeItems = cartItems.map(item => ({
+        id: item.id,
+        name: language === 'ru' ? (item.nameRu || item.name) : item.name,
+        quantity: item.quantity,
+        price: item.price,
+      }));
+
+      await createMarketCheckout({
+        items: stripeItems,
+        delivery_fee: deliveryFee,
+        total_amount: total,
+        currency: 'THB',
+        recipient_name: formData.name,
+        recipient_phone: formData.phone,
+        delivery_address: fullAddress,
+        delivery_type: deliveryType,
+        shipping_zone: selectedZone?.zone_name_en,
+        store_id: storeInfo?.storeId,
+        store_name: storeInfo?.storeName,
+      });
+      return;
+    }
+
     const items = cartItems.map(item => ({
       item_type: 'product',
       item_id: item.id,
@@ -307,10 +352,8 @@ const MarketCheckout = () => {
       });
     }
 
-    const formData = deliveryType === 'local' ? localFormData : intlFormData;
-    const fullAddress = deliveryType === 'local' 
-      ? localFormData.address 
-      : `${intlFormData.address}, ${intlFormData.city}, ${intlFormData.postalCode}, ${intlFormData.country}`;
+    // Determine status based on payment method
+    const bookingStatus = paymentMethod === 'concierge_advance' ? 'pending' : 'pending';
 
     const result = await createBooking({
       booking_type: 'product',
@@ -335,11 +378,41 @@ const MarketCheckout = () => {
       }],
       payment: {
         amount: total,
-        payment_method: paymentMethod,
+        payment_method: paymentMethod === 'concierge_advance' ? 'cash' : paymentMethod,
       },
     });
 
-    if (result.success) {
+    if (result.success && result.booking_id) {
+      // 3. Concierge Advance → create advance request and navigate
+      if (paymentMethod === 'concierge_advance') {
+        const advanceResult = await createAdvanceRequest({
+          orderId: result.booking_id,
+          orderNumber: result.booking_id.slice(0, 8).toUpperCase(),
+          orderType: 'market',
+          baseAmount: total,
+          currency: 'THB',
+          providerName: storeInfo?.storeName || 'Market Store',
+          deliveryDetails: {
+            address: fullAddress,
+            delivery_type: deliveryType,
+            recipient: formData.name,
+          },
+        });
+
+        if (advanceResult.success) {
+          // Only clear cart if not Buy Now mode
+          if (!isBuyNow) {
+            clearByType('product');
+          }
+          navigateToAdvanceRequested(
+            result.booking_id.slice(0, 8).toUpperCase(),
+            total,
+            'market'
+          );
+          return;
+        }
+      }
+
       // Save address if checkbox is checked and it's a new address
       if (saveNewAddress && !selectedAddressId && localFormData.address) {
         try {
@@ -394,6 +467,13 @@ const MarketCheckout = () => {
           title={language === 'ru' ? 'Оформление заказа' : 'Checkout'} 
           showBack 
           fallbackPath="/market"
+        />
+
+        {/* Step Progress Indicator */}
+        <BookingStepProgress 
+          steps={deliveryBookingSteps} 
+          currentStep={getCurrentStep()} 
+          className="mb-4"
         />
 
         {/* Free Delivery Progress - only for local delivery */}
@@ -578,13 +658,29 @@ const MarketCheckout = () => {
             {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
           </h3>
           <BookingPaymentSelect
-            selected={paymentMethod}
-            onSelect={setPaymentMethod}
+            selected={paymentMethod === 'concierge_advance' ? 'cash' : paymentMethod}
+            onSelect={(method) => {
+              if (method !== 'concierge_advance') {
+                setPaymentMethod(method);
+              }
+            }}
             amount={total}
             currency="THB"
             showWallet
             showCash
+            showOnline
           />
+          
+          {/* Concierge Advance Option */}
+          <div className="mt-4">
+            <ConciergeAdvanceOption
+              isSelected={paymentMethod === 'concierge_advance'}
+              onSelect={() => setPaymentMethod('concierge_advance')}
+              baseAmount={total}
+              feePercent={feePercent}
+              currency="THB"
+            />
+          </div>
         </div>
 
         {/* Order Summary */}
@@ -632,9 +728,9 @@ const MarketCheckout = () => {
 
         {/* Bottom Bar */}
         <BookingBottomBar
-          total={total}
+          total={paymentMethod === 'concierge_advance' ? calculateFee(total).totalWithFee : total}
           onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
+          isSubmitting={isSubmitting || isStripeProcessing}
           disabled={!isFormValid}
           submitLabel={language === 'ru' ? 'Оформить заказ' : 'Place Order'}
         />
