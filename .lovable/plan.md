@@ -1,212 +1,294 @@
 
-# План: Промо-карточка "Инвесторам" с Lead Generation
 
-## Концепция
+# План: "Купить сейчас" для цветов
 
-Создать привлекательную полноширинную карточку под тремя AudienceCards, которая:
+## Анализ текущего состояния
 
-1. **Визуально выделяется** — градиент, иконки, premium-вид
-2. **Собирает лиды** — при клике открывает форму регистрации интереса
-3. **Не требует авторизации** — минимальные поля для первого контакта
-4. **Квалифицирует инвестора** — собираем бюджет, интерес, контакт
+### Что есть сейчас:
+
+1. **BouquetDetail.tsx** — страница букета с единственной опцией "Добавить в корзину"
+2. **FlowersOrder.tsx** — страница оформления, которая берёт товары из корзины (`getItemsByType('flowers')`)
+3. **useBuyNow.ts** — хук для маркетплейса, но завязан только на тип `product` и путь `/market/checkout`
+4. **Корзина** — единая для всех типов товаров (CartContext)
+
+### Проблема:
+
+- Пользователь видит букет и хочет сразу купить, но вынужден:
+  1. Добавить в корзину
+  2. Перейти в корзину
+  3. Нажать "Оформить"
+  4. Только тогда попасть на страницу заказа
+
+**Это 3 лишних клика для импульсивной покупки подарка!**
 
 ---
 
-## Визуальный дизайн
+## Рекомендация
+
+**Добавить кнопку "Купить сейчас"** рядом с "В корзину", которая:
+- Сразу переводит на страницу оформления с этим букетом
+- Не затрагивает содержимое корзины
+- Позволяет быстро завершить покупку
+
+**Корзину оставить** — она нужна для:
+- Сбора нескольких букетов
+- Заказов для разных получателей
+- Сравнения перед покупкой
+
+---
+
+## Архитектура решения
 
 ```text
-ТЕКУЩИЙ HEROBLOCK:
-┌─────────────────────────────────────────────────────────────────────┐
-│  [myUNO brand + headline]                                           │
-│                                                                     │
-│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐                   │
-│  │ ✈️ Туристам │ │ 🏠 Резидентам│ │ 🏢 Владельцам│                   │
-│  └─────────────┘ └─────────────┘ └─────────────┘                   │
-│                                                                     │
-│  [Trust badges]                                                     │
-│  [Search]                                                           │
-│  [UNO Alert]                                                        │
-└─────────────────────────────────────────────────────────────────────┘
-
-НОВЫЙ HEROBLOCK (с промо-карточкой):
-┌─────────────────────────────────────────────────────────────────────┐
-│  [myUNO brand + headline]                                           │
-│                                                                     │
-│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐                   │
-│  │ ✈️ Туристам │ │ 🏠 Резидентам│ │ 🏢 Владельцам│                   │
-│  └─────────────┘ └─────────────┘ └─────────────┘                   │
-│                                                                     │
-│  ┌─────────────────────────────────────────────────────────────────┐
-│  │ 📈 ИНВЕСТИЦИИ В ПХУКЕТ                          [до 12% ROI] →  │
-│  │                                                                  │
-│  │ 🏗️ Новостройки  •  🏨 Отели  •  💼 Бизнес                       │
-│  │                                                                  │
-│  │ Получите экспертный анализ и доступ к закрытым сделкам         │
-│  │                                                                  │
-│  │ ⭐ muUNO Scoring  •  📊 Due Diligence  •  🤝 Сопровождение      │
-│  └─────────────────────────────────────────────────────────────────┘
-│                                                                     │
-│  [Trust badges]                                                     │
-│  [Search]                                                           │
-│  [UNO Alert]                                                        │
-└─────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  BOTTOM BAR (BouquetDetail.tsx)                                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  СЕЙЧАС:                                                                    │
+│  ┌─────────────────────────────────────────────────────────────────┐       │
+│  │  [В корзину]                                                    │       │
+│  └─────────────────────────────────────────────────────────────────┘       │
+│                                                                             │
+│  ПОСЛЕ:                                                                     │
+│  ┌─────────────────────────────────────────────────────────────────┐       │
+│  │  ⚡ [Купить сейчас]  ·  🛒 [В корзину]                          │       │
+│  │  (Primary, gold)      (Outline, secondary)                      │       │
+│  └─────────────────────────────────────────────────────────────────┘       │
+│                                                                             │
+│  Когда товар УЖЕ в корзине:                                                │
+│  ┌─────────────────────────────────────────────────────────────────┐       │
+│  │  [-] 2 [+]  ·  ⚡ [Купить сейчас]  ·  [Корзина ฿X,XXX]          │       │
+│  └─────────────────────────────────────────────────────────────────┘       │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Форма сбора лидов (Lead Capture Dialog)
-
-При клике на карточку открывается простая форма:
+## Поток данных
 
 ```text
-┌───────────────────────────────────────────────────────────────────┐
-│  📈 Инвестиции в недвижимость Пхукета                             │
-│                                                                    │
-│  Получите персональную консультацию от экспертов muUNO            │
-├────────────────────────────────────────────────────────────────────┤
-│                                                                    │
-│  Что вас интересует? (множественный выбор)                        │
-│  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐               │
-│  │ 🏗️ Новостройки│ │ 🏨 Отели     │ │ 💼 Бизнес    │               │
-│  └──────────────┘ └──────────────┘ └──────────────┘               │
-│                                                                    │
-│  Планируемый бюджет (USD)                                         │
-│  [▼ Выберите диапазон                                   ]         │
-│  • $50,000 - $150,000                                              │
-│  • $150,000 - $500,000                                             │
-│  • $500,000 - $1,000,000                                           │
-│  • $1,000,000+                                                     │
-│                                                                    │
-│  Имя *                                                             │
-│  [                                                       ]         │
-│                                                                    │
-│  Email или телефон *                                               │
-│  [                                                       ]         │
-│                                                                    │
-│  Комментарий (опционально)                                         │
-│  [                                                       ]         │
-│                                                                    │
-│  ☐ Согласен на обработку персональных данных                      │
-│                                                                    │
-│  [     Получить консультацию     ]                                │
-│                                                                    │
-│  🔒 Данные защищены. Ответим в течение 24 часов.                  │
-└────────────────────────────────────────────────────────────────────┘
+BouquetDetail.tsx                    FlowersOrder.tsx
+       │                                    │
+       ├── "В корзину"                      │
+       │   └── addItem(bouquet)             │
+       │       └── → /cart → checkout ──────┼── getItemsByType('flowers')
+       │                                    │
+       ├── "Купить сейчас"                  │
+       │   └── navigate('/flowers/order', { │
+       │         state: {                   │
+       │           buyNowItem: bouquet,     │
+       │           isBuyNow: true           │
+       │         }                          │
+       │       })                           │
+       │                                    │
+       └────────────────────────────────────┼── location.state.buyNowItem
+                                            │   ? [buyNowItem]
+                                            │   : getItemsByType('flowers')
 ```
 
 ---
 
-## Архитектура компонентов
+## Фазы реализации
 
-```text
-src/components/home/
-├── HeroBlock.tsx                    # UPDATE: добавить InvestorPromoCard
-└── InvestorPromoCard.tsx            # NEW: промо-карточка + dialog
+### Фаза 1: Создать хук useBuyNowFlowers.ts
 
-src/components/invest/
-└── InvestorLeadForm.tsx             # NEW: форма сбора лидов
-```
-
----
-
-## Фаза 1: Промо-карточка InvestorPromoCard.tsx
-
-### Дизайн карточки
+Специализированный хук для цветов:
 
 ```typescript
-// Визуальные элементы:
-- Градиентный фон: from-purple-600/10 via-violet-500/10 to-indigo-600/10
-- Иконка TrendingUp в круге
-- Заголовок + Badge "до 12% ROI"
-- Теги категорий (Новостройки, Отели, Бизнес)
-- Подзаголовок с value proposition
-- Trust indicators (Scoring, Due Diligence, Сопровождение)
-- Стрелка ChevronRight справа
-- Hover эффект: подсветка границы
-```
+interface FlowersBuyNowItem {
+  id: string;
+  type: 'flowers';
+  name: string;
+  nameRu: string;
+  price: number;
+  currency: string;
+  image?: string;
+  providerId: string;
+  providerName: string;
+  providerNameRu: string;
+  quantity: number;
+  shopId: string;
+}
 
-### Поведение при клике
+export function useBuyNowFlowers() {
+  const navigate = useNavigate();
 
-```typescript
-onClick = () => {
-  // Открыть Dialog с формой
-  setIsDialogOpen(true);
-  
-  // Аналитика
-  trackEvent('investor_promo_clicked', { location: 'hero_block' });
+  const buyNow = useCallback((bouquet: Bouquet, quantity = 1) => {
+    const buyNowItem: FlowersBuyNowItem = {
+      id: `bouquet-${bouquet.id}`,
+      type: 'flowers',
+      name: bouquet.name_en,
+      nameRu: bouquet.name_ru,
+      price: bouquet.price,
+      currency: '฿',
+      image: bouquet.image || undefined,
+      providerId: bouquet.shop?.provider_id || 'flowers-shop',
+      providerName: bouquet.shop?.name_en || 'Phuket Flowers',
+      providerNameRu: bouquet.shop?.name_ru || 'Цветы Пхукета',
+      quantity,
+      shopId: bouquet.shop_id,
+    };
+
+    navigate('/flowers/order', {
+      state: {
+        buyNowItem,
+        isBuyNow: true,
+      },
+    });
+  }, [navigate]);
+
+  return { buyNow };
 }
 ```
 
 ---
 
-## Фаза 2: Форма сбора лидов InvestorLeadForm.tsx
+### Фаза 2: Обновить FlowersOrder.tsx
 
-### Поля формы
-
-| Поле | Тип | Обязательное | Описание |
-|------|-----|--------------|----------|
-| interests | checkbox[] | Да (min 1) | Новостройки, Отели, Бизнес, Другое |
-| budget_range | select | Нет | Диапазон бюджета |
-| name | text | Да | Имя |
-| contact | text | Да | Email или телефон |
-| notes | textarea | Нет | Комментарий |
-| consent | checkbox | Да | Согласие на обработку данных |
-
-### Сохранение данных
-
-Использовать существующую таблицу `consultation_requests` с vertical_id = 'investment':
+Добавить поддержку Buy Now:
 
 ```typescript
-const submitLead = async (data: InvestorLeadData) => {
-  await supabase.from('consultation_requests').insert({
-    vertical_id: 'investment',
-    entry_point: 'hero_promo_card',
-    lead_source: 'organic',
-    name: data.name,
-    contact_method: isEmail(data.contact) ? 'email' : 'phone',
-    email: isEmail(data.contact) ? data.contact : null,
-    phone: !isEmail(data.contact) ? data.contact : null,
-    notes: data.notes,
-    vertical_metadata: {
-      interests: data.interests,
-      budget_range: data.budgetRange,
-    },
-    status: 'new',
-  });
+const FlowersOrder = () => {
+  const location = useLocation();
+  const { getItemsByType, clearByType } = useCart();
+  
+  // Check for Buy Now item in state
+  const buyNowState = location.state as { buyNowItem?: FlowersBuyNowItem; isBuyNow?: boolean } | null;
+  const isBuyNow = buyNowState?.isBuyNow || false;
+  const buyNowItem = buyNowState?.buyNowItem;
+
+  // Use Buy Now item OR cart items
+  const cartItems = useMemo(() => {
+    if (isBuyNow && buyNowItem) {
+      return [{
+        id: buyNowItem.id,
+        name: buyNowItem.name,
+        nameRu: buyNowItem.nameRu,
+        price: buyNowItem.price,
+        quantity: buyNowItem.quantity,
+        providerId: buyNowItem.providerId,
+        providerName: buyNowItem.providerName,
+      }];
+    }
+    return getItemsByType('flowers').map(item => ({...}));
+  }, [isBuyNow, buyNowItem, getItemsByType]);
+  
+  // Empty state should check for both scenarios
+  if (cartItems.length === 0) {
+    // Show empty state
+  }
+  
+  // After successful order, don't clear cart if it was Buy Now
+  if (result.success) {
+    if (!isBuyNow) {
+      clearByType('flowers');
+    }
+    navigate('/bookings');
+  }
 };
 ```
 
 ---
 
-## Фаза 3: Интеграция в HeroBlock.tsx
+### Фаза 3: Обновить BouquetDetail.tsx
 
-### Расположение
+Новый Bottom Bar с двумя кнопками:
 
 ```tsx
-{/* Audience Cards */}
-<div className="flex gap-2">
-  {audienceCards.map((card) => (
-    <AudienceCard key={card.id} {...card} />
-  ))}
-</div>
+import { useBuyNowFlowers } from '@/hooks/useBuyNowFlowers';
+import { Zap } from 'lucide-react';
 
-{/* NEW: Investor Promo Card */}
-<InvestorPromoCard />
+const BouquetDetail = () => {
+  const { buyNow } = useBuyNowFlowers();
+  
+  // ...existing code...
 
-{/* Trust badges */}
-<div className="flex flex-wrap items-center justify-center gap-1.5">
-  {badges.map(...)}
-</div>
+  return (
+    // ...
+    
+    {/* Bottom Bar */}
+    <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-xl border-t z-50">
+      <div className="flex items-center gap-3">
+        {quantity === 0 ? (
+          <>
+            {/* Primary: Buy Now */}
+            <Button
+              onClick={() => buyNow(bouquet)}
+              className="flex-1 h-12 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+            >
+              <Zap className="w-5 h-5 mr-2" />
+              {language === 'ru' ? 'Купить сейчас' : 'Buy Now'}
+            </Button>
+            
+            {/* Secondary: Add to Cart */}
+            <Button
+              variant="outline"
+              onClick={addToCart}
+              className="h-12 px-4"
+            >
+              <ShoppingCart className="w-5 h-5" />
+            </Button>
+          </>
+        ) : (
+          <>
+            {/* Quantity controls */}
+            <div className="flex items-center gap-2 bg-secondary rounded-lg p-1">
+              <Button size="icon" variant="ghost" onClick={removeFromCart}>
+                <Minus className="w-4 h-4" />
+              </Button>
+              <span className="w-8 text-center font-bold">{quantity}</span>
+              <Button size="icon" variant="ghost" onClick={addToCart}>
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            {/* Buy Now (current quantity) */}
+            <Button
+              onClick={() => buyNow(bouquet, quantity)}
+              className="flex-1 h-12 bg-gradient-to-r from-amber-500 to-orange-500"
+            >
+              <Zap className="w-5 h-5 mr-2" />
+              {language === 'ru' ? 'Купить' : 'Buy'}
+            </Button>
+            
+            {/* Cart with total */}
+            <Button
+              variant="outline"
+              onClick={() => navigate('/cart')}
+              className="h-12"
+            >
+              <ShoppingCart className="w-5 h-5 mr-2" />
+              ฿{totalPrice.toLocaleString()}
+            </Button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
 ```
 
 ---
 
-## Фаза 4: Добавить investor vertical в lookup_values
+## Визуальный дизайн Bottom Bar
 
-```sql
-INSERT INTO lookup_values (lookup_type, value_key, value_en, value_ru, icon, sort_order)
-VALUES ('vertical', 'investment', 'Investment', 'Инвестиции', '📈', 15)
-ON CONFLICT (lookup_type, value_key) DO NOTHING;
+```text
+СОСТОЯНИЕ 1: Товар НЕ в корзине
+┌─────────────────────────────────────────────────────────────────┐
+│  ┌──────────────────────────────────────┐  ┌──────────────────┐ │
+│  │ ⚡ Купить сейчас                     │  │  🛒              │ │
+│  │ (gradient gold, primary)             │  │  (outline)       │ │
+│  └──────────────────────────────────────┘  └──────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+
+СОСТОЯНИЕ 2: Товар УЖЕ в корзине
+┌─────────────────────────────────────────────────────────────────┐
+│  ┌─────────────┐  ┌────────────────────────┐  ┌───────────────┐ │
+│  │ [-] 2 [+]   │  │ ⚡ Купить              │  │ 🛒 ฿4,500     │ │
+│  │ (controls)  │  │ (gradient gold)        │  │ (outline)     │ │
+│  └─────────────┘  └────────────────────────┘  └───────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -215,82 +297,21 @@ ON CONFLICT (lookup_type, value_key) DO NOTHING;
 
 | Файл | Тип | Описание |
 |------|-----|----------|
-| `src/components/home/InvestorPromoCard.tsx` | NEW | Промо-карточка с Dialog |
-| `src/components/invest/InvestorLeadForm.tsx` | NEW | Форма сбора лидов |
-| `src/components/home/HeroBlock.tsx` | UPDATE | Добавить InvestorPromoCard |
-| `supabase/migrations/xxx.sql` | NEW | Добавить vertical 'investment' |
-
----
-
-## Дизайн-токены карточки
-
-```typescript
-// Цветовая схема
-const colors = {
-  gradient: 'from-purple-600/10 via-violet-500/10 to-indigo-600/10',
-  border: 'border-purple-500/30 hover:border-purple-500/50',
-  iconBg: 'bg-gradient-to-br from-purple-500 to-violet-600',
-  badge: 'bg-emerald-500 text-white',
-};
-
-// Анимация
-const animation = {
-  hover: 'hover:shadow-lg hover:shadow-purple-500/10',
-  tap: 'active:scale-[0.99]',
-};
-```
-
----
-
-## Аналитика и метрики
-
-### События для отслеживания
-
-| Событие | Когда | Данные |
-|---------|-------|--------|
-| `investor_promo_viewed` | Карточка в viewport | - |
-| `investor_promo_clicked` | Клик на карточку | - |
-| `investor_lead_form_opened` | Dialog открыт | - |
-| `investor_lead_submitted` | Форма отправлена | interests, budget_range |
-| `investor_lead_abandoned` | Dialog закрыт без отправки | step |
-
----
-
-## Мобильная адаптация
-
-```text
-МОБИЛЬНЫЙ ВИД:
-┌─────────────────────────────────────────────────┐
-│  [myUNO brand]                                  │
-│                                                 │
-│  ┌─────────┐ ┌─────────┐ ┌─────────┐           │
-│  │Туристам │ │Резидент │ │Владелец │           │
-│  └─────────┘ └─────────┘ └─────────┘           │
-│                                                 │
-│  ┌───────────────────────────────────────────┐ │
-│  │ 📈 Инвестиции в Пхукет         [12% ROI]→ │ │
-│  │                                           │ │
-│  │ 🏗️ Новостройки • 🏨 Отели • 💼 Бизнес    │ │
-│  │                                           │ │
-│  │ Экспертный анализ и закрытые сделки      │ │
-│  └───────────────────────────────────────────┘ │
-│                                                 │
-│  [Trust badges]                                 │
-│  [Search]                                       │
-│  [UNO Alert]                                    │
-└─────────────────────────────────────────────────┘
-```
+| `src/hooks/useBuyNowFlowers.ts` | NEW | Хук Buy Now для цветов |
+| `src/pages/flowers/BouquetDetail.tsx` | UPDATE | Новый Bottom Bar с двумя кнопками |
+| `src/pages/flowers/FlowersOrder.tsx` | UPDATE | Поддержка Buy Now через location.state |
 
 ---
 
 ## Преимущества решения
 
-1. **Не ломает текущий UI** — добавляется между карточками и badges
-2. **Lead Generation** — собираем контакты без обязательной регистрации
-3. **Квалификация** — знаем бюджет и интересы до звонка
-4. **Интеграция** — используем существующую систему consultation_requests
-5. **Аналитика** — полный трекинг воронки
-6. **Масштабируемость** — легко добавить A/B тесты
+| Аспект | Текущее | После изменений |
+|--------|---------|-----------------|
+| Клики до оплаты | 4+ | 2 |
+| Корзина | Обязательна | Опциональна |
+| Импульсивные покупки | Затруднены | Оптимизированы |
+| Сложные заказы | Возможны | Сохранены через корзину |
+| Конверсия | Базовая | Повышенная |
 
 ---
 
@@ -298,9 +319,9 @@ const animation = {
 
 | Метрика | Значение |
 |---------|----------|
-| Новые компоненты | 2 (InvestorPromoCard, InvestorLeadForm) |
-| Обновляемые файлы | 1 (HeroBlock.tsx) |
-| Миграции БД | 1 (lookup_values) |
-| Использует существующее | consultation_requests, Dialog, Input |
-| Риск регрессии | Минимальный — additive change |
-| Время реализации | ~1-2 часа |
+| Новые файлы | 1 (useBuyNowFlowers.ts) |
+| Обновляемые файлы | 2 |
+| Сложность | Низкая |
+| Риск регрессии | Минимальный |
+| Время реализации | ~30 минут |
+
