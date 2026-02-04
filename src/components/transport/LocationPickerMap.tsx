@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo, forwardRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from '@/integrations/supabase/client';
@@ -62,13 +62,17 @@ const cityPopularLocations: Record<string, typeof defaultPopularLocations> = {
   ],
 };
 
-const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
+/**
+ * LocationPickerMap - Mapbox-based location picker for taxi booking
+ * Uses forwardRef to properly handle ref passing from parent components
+ */
+const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
   isOpen,
   onClose,
   onLocationSelect,
   type,
   initialLocation,
-}) => {
+}, ref) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markerRef = useRef<mapboxgl.Marker | null>(null);
@@ -237,7 +241,7 @@ const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
   }, [mapboxToken, isOpen, initialLocation, mapCenter, updateMarker, reverseGeocode]);
 
   // Get current location
-  const getCurrentLocation = () => {
+  const getCurrentLocation = useCallback(() => {
     if (!navigator.geolocation) return;
     
     setIsGettingLocation(true);
@@ -262,10 +266,10 @@ const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
       },
       { enableHighAccuracy: true }
     );
-  };
+  }, [updateMarker, reverseGeocode]);
 
   // Select popular location
-  const selectPopularLocation = async (location: typeof popularLocations[0]) => {
+  const selectPopularLocation = useCallback(async (location: typeof popularLocations[0]) => {
     if (map.current) {
       map.current.flyTo({ center: [location.lng, location.lat], zoom: 16 });
     }
@@ -276,10 +280,10 @@ const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
       lat: location.lat,
       lng: location.lng,
     });
-  };
+  }, [updateMarker, language]);
 
   // Search for location
-  const searchLocation = async () => {
+  const searchLocation = useCallback(async () => {
     if (!searchQuery.trim() || !mapboxToken) return;
     
     try {
@@ -306,20 +310,20 @@ const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
     } catch (err) {
       console.error('Search error:', err);
     }
-  };
+  }, [searchQuery, mapboxToken, cityConfig, mapCenter, updateMarker]);
 
   // Confirm selection
-  const handleConfirm = () => {
+  const handleConfirm = useCallback(() => {
     if (selectedLocation) {
       onLocationSelect(selectedLocation);
       onClose();
     }
-  };
+  }, [selectedLocation, onLocationSelect, onClose]);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-background">
+    <div ref={ref} className="fixed inset-0 z-50 bg-background">
       {/* Header */}
       <div className="absolute top-0 left-0 right-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="px-4 py-3 flex items-center gap-3">
@@ -384,17 +388,17 @@ const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
 
       {/* Bottom panel */}
       <div className="absolute bottom-0 left-0 right-0 z-10 bg-background/95 backdrop-blur-sm border-t border-border rounded-t-2xl">
-        {/* Popular locations */}
+        {/* Popular locations - FIXED: Added touch-pan-y and snap for stable mobile scrolling */}
         <div className="px-4 py-3">
           <p className="text-xs text-muted-foreground mb-2">
             {language === 'ru' ? 'Популярные места' : 'Popular locations'}
           </p>
-          <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4">
+          <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide snap-x snap-mandatory touch-pan-y">
             {popularLocations.slice(0, 5).map((location) => (
               <button
                 key={location.id}
                 onClick={() => selectPopularLocation(location)}
-                className="flex-shrink-0 px-3 py-2 rounded-full bg-muted text-sm hover:bg-primary/20 transition-colors"
+                className="flex-shrink-0 px-3 py-2 rounded-full bg-muted text-sm hover:bg-primary/20 transition-colors snap-start"
               >
                 {language === 'ru' ? location.nameRu : location.nameEn}
               </button>
@@ -438,6 +442,8 @@ const LocationPickerMap: React.FC<LocationPickerMapProps> = ({
       </div>
     </div>
   );
-};
+});
+
+LocationPickerMap.displayName = 'LocationPickerMap';
 
 export default LocationPickerMap;

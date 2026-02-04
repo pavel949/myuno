@@ -157,10 +157,11 @@ export default function TaxiBooking() {
     }
   }, [vehicleTypes, formData.vehicleType]);
 
-  const selectedVehicle = useMemo(() => 
-    vehicleTypes.find(v => v.id === formData.vehicleType),
-    [vehicleTypes, formData.vehicleType]
-  );
+  // BUGFIX: Safe vehicle lookup with fallback to prevent crashes when vehicleTypes not loaded
+  const selectedVehicle = useMemo(() => {
+    if (!vehicleTypes.length) return null;
+    return vehicleTypes.find(v => v.id === formData.vehicleType) || vehicleTypes[0] || null;
+  }, [vehicleTypes, formData.vehicleType]);
 
   const estimatedDistance = useMemo(() => 
     pickupLocation && destinationLocation 
@@ -169,12 +170,13 @@ export default function TaxiBooking() {
     [pickupLocation, destinationLocation]
   );
 
-  const estimatedPrice = useMemo(() => 
-    selectedVehicle 
-      ? selectedVehicle.base_price + (estimatedDistance * selectedVehicle.price_per_km)
-      : 0,
-    [selectedVehicle, estimatedDistance]
-  );
+  // BUGFIX: Safe price calculation - prevent NaN when selectedVehicle is null
+  const estimatedPrice = useMemo(() => {
+    if (!selectedVehicle) return 0;
+    const basePrice = selectedVehicle.base_price ?? 0;
+    const pricePerKm = selectedVehicle.price_per_km ?? 0;
+    return basePrice + (estimatedDistance * pricePerKm);
+  }, [selectedVehicle, estimatedDistance]);
 
   const timeOptions = useMemo(() => getTimeOptions(language), [language]);
 
@@ -280,9 +282,11 @@ export default function TaxiBooking() {
             {language === 'ru' ? 'Такси вызвано!' : 'Taxi Ordered!'}
           </h2>
           <p className="text-muted-foreground text-center max-w-sm mb-4">
-            {language === 'ru' 
-              ? `${selectedVehicle?.name_ru} • ~${selectedVehicle?.eta_minutes || 5} мин`
-              : `${selectedVehicle?.name_en} • ~${selectedVehicle?.eta_minutes || 5} min`}
+            {selectedVehicle 
+              ? (language === 'ru' 
+                  ? `${selectedVehicle.name_ru} • ~${selectedVehicle.eta_minutes || 5} мин`
+                  : `${selectedVehicle.name_en} • ~${selectedVehicle.eta_minutes || 5} min`)
+              : (language === 'ru' ? '~5 мин' : '~5 min')}
           </p>
           <p className="text-muted-foreground text-center max-w-sm mb-8">
             {language === 'ru' 
@@ -441,14 +445,15 @@ export default function TaxiBooking() {
               <Clock className="w-4 h-4" />
               {language === 'ru' ? 'Время подачи' : 'Pickup Time'}
             </Label>
-            <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4">
+            {/* BUGFIX: Added touch-pan-y, snap-x and scrollbar-hide to fix mobile scroll blocking */}
+            <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide snap-x snap-mandatory touch-pan-y">
               {timeOptions.map((option) => (
                 <button
                   key={option.id}
                   type="button"
                   onClick={() => setFormData({ ...formData, scheduledTime: option.value })}
                   className={cn(
-                    "flex-shrink-0 px-4 py-2 rounded-full border-2 transition-all text-sm font-medium",
+                    "flex-shrink-0 px-4 py-2 rounded-full border-2 transition-all text-sm font-medium snap-start",
                     formData.scheduledTime === option.value
                       ? "border-primary bg-primary/10 text-primary"
                       : "border-border bg-card hover:border-primary/30"
