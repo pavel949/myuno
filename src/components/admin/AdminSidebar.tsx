@@ -15,6 +15,8 @@ import {
   FileText,
   Building,
   FolderTree,
+  TrendingUp,
+  HardHat,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -65,6 +67,22 @@ const navigationItems: NavItem[] = [
     icon: Building2,
     description: 'Residential complexes',
     descriptionRu: 'Жилые комплексы'
+  },
+  { 
+    title: 'Investments', 
+    titleRu: 'Инвестиции', 
+    path: '/admin/investments', 
+    icon: TrendingUp,
+    description: 'Investment projects',
+    descriptionRu: 'Инвест-проекты'
+  },
+  { 
+    title: 'Developers', 
+    titleRu: 'Застройщики', 
+    path: '/admin/developers', 
+    icon: HardHat,
+    description: 'Builder registry',
+    descriptionRu: 'Реестр застройщиков'
   },
   { 
     title: 'PM Companies', 

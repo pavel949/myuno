@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
 import { 
-  usePropertyProjects, 
+  useAdminPropertyProjects, 
   useCreatePropertyProject, 
   useUpdatePropertyProject,
   PropertyProject,
-  CreatePropertyProjectData
+  CreatePropertyProjectData,
+  ProjectStatus
 } from '@/hooks/usePropertyProjects';
+import { useAdminDevelopers } from '@/hooks/useAdminDevelopers';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -20,6 +22,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Progress } from '@/components/ui/progress';
 import {
   Dialog,
   DialogContent,
@@ -32,6 +35,13 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { toast } from 'sonner';
 import { 
   Building2, 
@@ -48,12 +58,21 @@ import {
   Mail,
   CreditCard,
   FileText,
+  HardHat,
+  CheckCircle,
+  TrendingUp,
 } from 'lucide-react';
 import { TranslatableInput } from '@/components/forms/TranslatableInput';
 import { TranslatableTextarea } from '@/components/forms/TranslatableTextarea';
 import { AirbnbStyleImageUpload } from '@/components/upload/AirbnbStyleImageUpload';
 import { AIIntakeDialog } from '@/components/admin/intake/AIIntakeDialog';
 import { PHUKET_DISTRICTS, ALL_AMENITIES } from '@/lib/taxonomies';
+
+const PROJECT_STATUS_OPTIONS: { value: ProjectStatus; label: string; labelRu: string; icon: React.ReactNode }[] = [
+  { value: 'offplan', label: 'Off-Plan', labelRu: 'Офф-план', icon: <Building2 className="h-4 w-4" /> },
+  { value: 'under_construction', label: 'Under Construction', labelRu: 'Строится', icon: <HardHat className="h-4 w-4" /> },
+  { value: 'completed', label: 'Completed', labelRu: 'Сдан', icon: <CheckCircle className="h-4 w-4" /> },
+];
 
 // Initial empty project form
 const getEmptyProject = (): Partial<CreatePropertyProjectData> => ({
@@ -77,15 +96,52 @@ export default function AdminProjects() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { isAdmin, isLoading: adminLoading } = useAdminCheck();
-  const { data: projects, isLoading } = usePropertyProjects();
+  const { data: projects, isLoading } = useAdminPropertyProjects();
+  const { data: developers } = useAdminDevelopers();
   const createProject = useCreatePropertyProject();
   const updateProject = useUpdatePropertyProject();
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<PropertyProject | null>(null);
   const [formData, setFormData] = useState<Partial<CreatePropertyProjectData>>(getEmptyProject());
   const [isAIIntakeOpen, setIsAIIntakeOpen] = useState(false);
+  
+  // Filter projects by status and search
+  const filteredProjects = useMemo(() => {
+    if (!projects) return [];
+    
+    return projects.filter(p => {
+      // Status filter
+      if (statusFilter !== 'all' && p.project_status !== statusFilter) return false;
+      
+      // Search filter
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        return (
+          p.name_en.toLowerCase().includes(q) ||
+          p.name_ru.toLowerCase().includes(q) ||
+          p.address?.toLowerCase().includes(q) ||
+          p.district?.toLowerCase().includes(q) ||
+          p.developer_name?.toLowerCase().includes(q)
+        );
+      }
+      
+      return true;
+    });
+  }, [projects, searchQuery, statusFilter]);
+
+  // Stats by status
+  const stats = useMemo(() => {
+    if (!projects) return { total: 0, offplan: 0, construction: 0, completed: 0 };
+    return {
+      total: projects.length,
+      offplan: projects.filter(p => p.project_status === 'offplan').length,
+      construction: projects.filter(p => p.project_status === 'under_construction').length,
+      completed: projects.filter(p => p.project_status === 'completed').length,
+    };
+  }, [projects]);
   
   // Juristic person fields (extended)
   const [juristicData, setJuristicData] = useState({
@@ -108,18 +164,6 @@ export default function AdminProjects() {
     cam_includes: [] as string[],
   });
 
-  // Filter projects
-  const filteredProjects = projects?.filter(p => {
-    if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
-    return (
-      p.name_en.toLowerCase().includes(q) ||
-      p.name_ru.toLowerCase().includes(q) ||
-      p.address?.toLowerCase().includes(q) ||
-      p.district?.toLowerCase().includes(q) ||
-      p.developer_name?.toLowerCase().includes(q)
-    );
-  }) || [];
 
   const handleOpenCreate = () => {
     setEditingProject(null);
