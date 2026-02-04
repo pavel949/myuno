@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAdminProviders } from '@/hooks/useAdmin';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Package, Home, ShoppingCart, LayoutGrid, Table2 } from 'lucide-react';
+import { Search, Package, Home, ShoppingCart, Table2, Building2 } from 'lucide-react';
 import { CatalogServicesTab } from '@/components/admin/catalog/CatalogServicesTab';
 import { CatalogPropertiesTab } from '@/components/admin/catalog/CatalogPropertiesTab';
 import { CatalogProductsTab } from '@/components/admin/catalog/CatalogProductsTab';
 import { UnifiedCatalogTable } from '@/components/admin/catalog/UnifiedCatalogTable';
+import { ContentCreatorMenu } from '@/components/admin/ContentCreatorMenu';
+import { Badge } from '@/components/ui/badge';
 
 export default function AdminUnifiedCatalog() {
   const { language } = useLanguage();
@@ -15,6 +18,10 @@ export default function AdminUnifiedCatalog() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [activeTab, setActiveTab] = useState('data');
+  const [selectedProviderId, setSelectedProviderId] = useState<string>('');
+  
+  const { providers } = useAdminProviders();
+  const selectedProvider = providers.find(p => p.id === selectedProviderId);
 
   return (
     <div className="p-4 md:p-6 space-y-4">
@@ -27,6 +34,38 @@ export default function AdminUnifiedCatalog() {
           <p className="text-muted-foreground text-sm">
             {isRussian ? 'Все объекты и товары в одном месте' : 'All services and products in one place'}
           </p>
+        </div>
+        
+        {/* Provider Selector + Create Menu */}
+        <div className="flex items-center gap-2">
+          <Select value={selectedProviderId} onValueChange={setSelectedProviderId}>
+            <SelectTrigger className="w-[220px]">
+              <Building2 className="h-4 w-4 mr-2 text-muted-foreground" />
+              <SelectValue placeholder={isRussian ? 'Выберите провайдера' : 'Select provider'} />
+            </SelectTrigger>
+            <SelectContent className="max-h-[300px]">
+              <SelectItem value="">
+                {isRussian ? 'Все провайдеры' : 'All providers'}
+              </SelectItem>
+              {providers.map((provider) => (
+                <SelectItem key={provider.id} value={provider.id}>
+                  <div className="flex items-center gap-2">
+                    <span className="truncate max-w-[180px]">{provider.name}</span>
+                    {provider.is_verified && (
+                      <Badge variant="secondary" className="h-4 px-1 text-[10px]">✓</Badge>
+                    )}
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          {selectedProviderId && (
+            <ContentCreatorMenu 
+              providerId={selectedProviderId} 
+              providerName={selectedProvider?.name}
+            />
+          )}
         </div>
       </div>
 
