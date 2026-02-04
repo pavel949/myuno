@@ -100,9 +100,20 @@ export function useProviderDetails(providerId: string | null) {
         .from('providers')
         .select('*')
         .eq('id', providerId)
-        .single();
+        .maybeSingle();
 
       if (providerError) throw providerError;
+      
+      if (!providerData) {
+        setProvider(null);
+        setServices([]);
+        setProducts([]);
+        setContracts([]);
+        setBookings([]);
+        setIsLoading(false);
+        return;
+      }
+      
       setProvider(providerData);
 
       // Fetch services
@@ -112,21 +123,17 @@ export function useProviderDetails(providerId: string | null) {
         .eq('provider_id', providerId)
         .order('created_at', { ascending: false });
 
-      if (servicesError) throw servicesError;
-      setServices((servicesData || []).map((s: any) => ({ ...s, is_featured: false })));
+      if (!servicesError) {
+        setServices((servicesData || []).map((s: any) => ({ ...s, is_featured: false })));
+      }
 
       // Fetch products (if provider is linked to marketplace vendor)
-      const { data: vendorLinkData } = await supabase
-        .from('providers')
-        .select('marketplace_vendor_id')
-        .eq('id', providerId)
-        .single();
-
-      if (vendorLinkData?.marketplace_vendor_id) {
+      // Use the already-fetched providerData instead of a redundant query
+      if (providerData.marketplace_vendor_id) {
         const { data: productsData, error: productsError } = await supabase
           .from('marketplace_products')
           .select('id, name_en, name_ru, price, currency, is_active, created_at')
-          .eq('vendor_id', vendorLinkData.marketplace_vendor_id)
+          .eq('vendor_id', providerData.marketplace_vendor_id)
           .order('created_at', { ascending: false })
           .limit(50);
 
