@@ -7,6 +7,7 @@
  * - Duplicate record prevention
  * - Loading state management
  * - Optimistic locking
+ * - Provider ID field mapping for different table schemas
  */
 import { useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,10 +15,14 @@ import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useAuth } from '@/contexts/AuthContext';
+import { getProviderIdField, prepareDataWithProviderId } from '@/lib/providerIdMapping';
+import { APPROVAL_STATUSES } from '@/lib/approvalStatus';
 
 interface UseCanonicalSubmitOptions {
   tableName: string;
   providerId: string;
+  /** Marketplace vendor ID (for products) */
+  vendorId?: string;
   editingId?: string | null;
   onSuccess?: () => void;
   onError?: (error: Error) => void;
@@ -36,6 +41,7 @@ interface SubmitResult {
 export function useCanonicalSubmit({
   tableName,
   providerId,
+  vendorId,
   editingId,
   onSuccess,
   onError,
@@ -81,10 +87,16 @@ export function useCanonicalSubmit({
     if (editingId) return false; // Editing existing record, no duplicate check
     
     try {
+      // Get the correct provider ID field for this table
+      const providerIdField = getProviderIdField(tableName);
+      const idValue = providerIdField === 'vendor_id' ? vendorId : providerId;
+      
+      if (!idValue) return false;
+      
       let query = supabase
         .from(tableName as any)
         .select('id')
-        .eq('provider_id', providerId);
+        .eq(providerIdField, idValue);
       
       // Add checks for each duplicate field
       duplicateCheckFields.forEach(field => {
@@ -105,7 +117,7 @@ export function useCanonicalSubmit({
       console.error('Duplicate check failed:', e);
       return false;
     }
-  }, [tableName, providerId, editingId, duplicateCheckFields]);
+  }, [tableName, providerId, vendorId, editingId, duplicateCheckFields]);
   
   /**
    * Main submit function with all P0 protections
@@ -149,32 +161,41 @@ export function useCanonicalSubmit({
         return { success: false, error };
       }
       
-      // Prepare data with provider_id and approval status
-      const submissionData: Record<string, unknown> = {
+      // Prepare data with correct provider ID field based on table schema
+      const baseData: Record<string, unknown> = {
         ...data,
-        provider_id: providerId,
         updated_at: new Date().toISOString(),
       };
       
+      // Use the mapping utility to set the correct provider ID field
+      const submissionData = prepareDataWithProviderId(tableName, baseData, {
+        providerId,
+        vendorId,
+        userId: user?.id,
+      });
+      
       // Admin-created content is auto-approved
       if (isAdmin) {
-        submissionData.approval_status = 'approved';
+        submissionData.approval_status = APPROVAL_STATUSES.APPROVED;
         submissionData.is_verified = true;
         submissionData.created_by_uno_team = true;
         submissionData.uno_team_creator_id = user?.id;
       } else {
-        submissionData.approval_status = 'pending';
+        submissionData.approval_status = APPROVAL_STATUSES.PENDING;
       }
       
       let result;
       
       if (editingId) {
-        // Update existing record
+        // Update existing record - use correct provider ID field for ownership check
+        const providerIdField = getProviderIdField(tableName);
+        const idValue = providerIdField === 'vendor_id' ? vendorId : providerId;
+        
         const { data: updated, error } = await supabase
           .from(tableName as any)
           .update(submissionData)
           .eq('id', editingId)
-          .eq('provider_id', providerId) // Security: ensure ownership
+          .eq(providerIdField, idValue) // Security: ensure ownership
           .select()
           .single();
         
