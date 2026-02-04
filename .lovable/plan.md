@@ -1,444 +1,354 @@
 
-# План: Investment Hub — Mini-App для инвестиций
+# План: Интеграция Investment Hub с недвижимостью Пхукета
 
-## Концепция
+## Обзор текущего состояния
 
-Создать полноценную инвестиционную платформу в стиле CrunchBase/AngelList, интегрированную в myUNO как мини-приложение. Платформа объединяет:
+### Что уже есть:
+- **property_projects** — 6 комплексов с полями: `developer_name`, `investment_enabled`, `funding_goal`, `min_investment`, `roi_projected`, `muuno_score`, `risk_level`
+- **investment_projects** — отдельная таблица с `property_project_id` (FK к property_projects)
+- **5 застройщиков** в базе: Phuket Premier Developers, Laguna Phuket Development, Andaman Luxury Homes, и др.
+- **11 категорий инвестиций** в lookup_values (включая Off-Plan Property, Hospitality, Yacht Charter и др.)
+- **Компоненты**: InvestmentCard, MuunoScoreWidget, FundingProgress, ScoreBreakdown
 
-1. **Инвесторов** — ищут проекты для вложений
-2. **Фаундеров/Девелоперов** — привлекают финансирование
-3. **muUNO** — выступает как эксперт-посредник со скорингом и due diligence
+### Проблемы текущей архитектуры:
+1. Нет таблицы `developers` — застройщики хранятся как текст в `property_projects.developer_name`
+2. Нет связи между investment_projects и property_projects в UI
+3. Нет специализированного каталога новостроек с фильтрами
+4. ProjectCard и ProjectCarouselCard не показывают инвестиционные метрики
+5. Нет карусели "Новостройки Пхукета" на главном экране
 
 ---
 
-## Архитектура данных
+## Архитектура решения
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│  НОВЫЕ ТАБЛИЦЫ                                                              │
+│  УРОВЕНЬ ДАННЫХ                                                             │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
-│  investment_projects                                                        │
-│  ├─ id, type, status, industry, title, description                        │
-│  ├─ funding_goal, amount_raised, min_investment                            │
-│  ├─ roi_projected, investment_term_months                                  │
-│  ├─ muuno_score (0-100), risk_level (low/medium/high)                     │
-│  ├─ founder_id, developer_id                                               │
-│  └─ property_project_id (FK → property_projects для недвижимости)         │
+│  developers (НОВАЯ ТАБЛИЦА)                                                 │
+│  ├─ id, name_en, name_ru, slug                                             │
+│  ├─ logo_url, cover_image                                                  │
+│  ├─ description_en, description_ru                                         │
+│  ├─ founded_year, projects_completed                                       │
+│  ├─ total_units_sold, average_rating                                       │
+│  ├─ website, phone, email                                                  │
+│  ├─ is_verified, is_featured                                               │
+│  └─ muuno_developer_score (0-100)                                          │
 │                                                                             │
-│  investment_interests                                                       │
-│  ├─ id, user_id, project_id                                                │
-│  ├─ interest_type ('invest' | 'learn_more')                               │
-│  ├─ preferred_amount, status                                               │
-│  └─ notes                                                                   │
+│  property_projects (ОБНОВЛЕНИЕ)                                             │
+│  ├─ developer_id (FK → developers)  ← НОВОЕ                                │
+│  ├─ project_status: 'offplan' | 'under_construction' | 'completed'         │
+│  ├─ completion_date, construction_progress (0-100%)                        │
+│  ├─ price_from, price_to                                                   │
+│  └─ ... (существующие поля сохраняются)                                   │
 │                                                                             │
-│  investment_categories (lookup_values extension)                           │
-│  └─ real_estate_offplan, hospitality, restaurant, retail,                 │
-│     tech_startup, franchise, agriculture, marine, wellness                │
-│                                                                             │
-│  investment_team_members                                                    │
-│  ├─ id, project_id, name, role, bio, photo                                │
-│  └─ linkedin_url                                                            │
-│                                                                             │
-│  investment_documents                                                       │
-│  ├─ id, project_id, type ('pitch_deck' | 'financials' | 'legal')          │
-│  ├─ file_url, is_public                                                    │
-│  └─ requires_nda                                                            │
+│  investment_projects (СВЯЗЬ)                                                │
+│  └─ property_project_id (FK) ← уже есть!                                   │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Типы инвестиционных проектов (Phuket/Thailand-specific)
-
-| Тип | EN | RU | Описание |
-|-----|----|----|----------|
-| `real_estate_offplan` | Off-Plan Property | Новостройки | Проекты на стадии строительства |
-| `real_estate_rental` | Rental Business | Арендный бизнес | Готовые арендные активы |
-| `hospitality` | Hospitality | Гостиничный | Отели, хостелы, апартаменты |
-| `restaurant` | Restaurant & F&B | Рестораны | HoReCa проекты |
-| `retail` | Retail | Ритейл | Магазины, ТЦ |
-| `yacht_charter` | Yacht Charter | Яхтенный чартер | Яхтинг бизнес |
-| `marine_tourism` | Marine Tourism | Морской туризм | Дайвинг, экскурсии |
-| `wellness` | Wellness & Spa | Велнес | Спа, фитнес, йога |
-| `tech_startup` | Tech Startup | Технологии | Digital проекты |
-| `franchise` | Franchise | Франшиза | Франчайзинговые проекты |
-| `agriculture` | Agriculture | Агро | Фермы, плантации |
-
 ---
 
-## muUNO Investment Scoring Methodology™
+## Визуальная архитектура
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│  СКОРИНГ НЕДВИЖИМОСТИ (0-100)                                               │
+│  ГЛАВНЫЙ ЭКРАН (Index.tsx)                                                  │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
-│  1. ЛОКАЦИЯ (25%)                                                           │
-│     ├─ Район Пхукета (Premium: Kamala, Surin, Bang Tao)                   │
-│     ├─ Близость к пляжу                                                    │
-│     ├─ Инфраструктура                                                       │
-│     └─ Транспортная доступность                                            │
-│                                                                             │
-│  2. ДЕВЕЛОПЕР (25%)                                                         │
-│     ├─ Track record (завершённые проекты)                                  │
-│     ├─ Финансовая устойчивость                                             │
-│     ├─ Репутация (отзывы, судебные дела)                                   │
-│     └─ Escrow account наличие                                              │
-│                                                                             │
-│  3. ФИНАНСОВАЯ МОДЕЛЬ (30%)                                                 │
-│     ├─ ROI vs рынок (сравнение с аналогами)                                │
-│     ├─ Срок окупаемости                                                     │
-│     ├─ Прозрачность ценообразования                                        │
-│     └─ Гарантии доходности                                                  │
-│                                                                             │
-│  4. РЫНОЧНЫЙ СПРОС (20%)                                                    │
-│     ├─ Заполняемость в районе                                              │
-│     ├─ Сезонность                                                           │
-│     ├─ Конкуренция                                                          │
-│     └─ Тренды туризма                                                       │
-│                                                                             │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  СКОРИНГ БИЗНЕСА (0-100)                                                    │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  1. КОМАНДА (30%)                                                           │
-│     ├─ Опыт в индустрии                                                    │
-│     ├─ Track record основателей                                            │
-│     └─ Полнота команды                                                      │
-│                                                                             │
-│  2. РЫНОК (25%)                                                             │
-│     ├─ TAM/SAM/SOM                                                          │
-│     ├─ Конкурентная среда                                                   │
-│     └─ Барьеры входа                                                        │
-│                                                                             │
-│  3. ФИНАНСЫ (25%)                                                           │
-│     ├─ Unit economics                                                       │
-│     ├─ Runway / Burn rate                                                   │
-│     └─ Выход на прибыльность                                               │
-│                                                                             │
-│  4. ПРОДУКТ (20%)                                                           │
-│     ├─ Готовность MVP                                                       │
-│     ├─ Traction                                                             │
-│     └─ Уникальность (moat)                                                 │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-РИСК-УРОВНИ:
-- 85-100: 🟢 Low Risk — Verified, strong fundamentals
-- 60-84:  🟡 Medium Risk — Good potential, some concerns
-- 40-59:  🟠 Elevated Risk — Significant uncertainties
-- 0-39:   🔴 High Risk — Not recommended for passive investors
-```
-
----
-
-## Роль "Investor" (Инвестор)
-
-### База данных
-
-Роль `investor` уже поддерживается в `app_role` enum (можно добавить при необходимости):
-
-```sql
--- Добавить роль investor (если нет)
-ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'investor';
-
--- Добавить персону investor  
--- В user_personas таблица уже поддерживает произвольные персоны
-```
-
-### Персона-адаптация
-
-| Персона | Отображение на главной | Quick Actions |
-|---------|------------------------|---------------|
-| `investor` | Карточка "Инвесторам" + Investment Promo | Portfolio, Opportunities, Deal Flow |
-
----
-
-## UX Flow
-
-```text
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  ТОЧКИ ВХОДА                                                                │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  1. Главный экран (Index.tsx)                                              │
-│     ├─ Новая AudienceCard "Инвесторам" в HeroBlock                        │
-│     └─ QuickAccessChips → "Инвестиции" чип                                 │
-│                                                                             │
-│  2. Property мини-app                                                       │
-│     └─ ProjectPromoSection → "Инвестировать в новостройки"                 │
-│                                                                             │
-│  3. Discover (/discover)                                                    │
-│     └─ Категория "Инвестиции" в списке сервисов                           │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  ГЛАВНЫЙ КАТАЛОГ (/invest)                                                  │
-├─────────────────────────────────────────────────────────────────────────────┤
+│  [HeroBlock с AudienceCards]                                                │
 │                                                                             │
 │  ┌───────────────────────────────────────────────────────────────────────┐ │
-│  │  🏆 muUNO Investment Hub                                              │ │
-│  │  Инвестируйте с экспертизой                                          │ │
+│  │ 🏗️ НОВОСТРОЙКИ ПХУКЕТА                           [Смотреть все →]   │ │
+│  │                                                                       │ │
+│  │ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐      │ │
+│  │ │ [Рендер]    │ │ [Рендер]    │ │ [Рендер]    │ │ [Рендер]    │  →   │ │
+│  │ │             │ │             │ │             │ │             │      │ │
+│  │ │ 🏗️ Offplan │ │ 🔨 Строится│ │ ✅ Готово   │ │ 🏗️ Offplan │      │ │
+│  │ ├─────────────┤ ├─────────────┤ ├─────────────┤ ├─────────────┤      │ │
+│  │ │ Kamala      │ │ Laguna      │ │ Patong      │ │ Rawai       │      │ │
+│  │ │ Residence   │ │ Park        │ │ Tower       │ │ Beach       │      │ │
+│  │ │─────────────│ │─────────────│ │─────────────│ │─────────────│      │ │
+│  │ │ 🏛️ Andaman │ │ 🏛️ Laguna  │ │ 🏛️ Premier │ │ 🏛️ Southern│      │ │
+│  │ │ от ฿4.5M   │ │ от ฿6.2M   │ │ от ฿3.8M   │ │ от ฿5.1M   │      │ │
+│  │ │ ROI 8%     │ │ ROI 6%     │ │ ROI 7%     │ │ ROI 9%     │      │ │
+│  │ │ ⭐85 Score │ │ ⭐78 Score │ │ ⭐82 Score │ │ ⭐88 Score │      │ │
+│  │ └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘      │ │
 │  └───────────────────────────────────────────────────────────────────────┘ │
 │                                                                             │
-│  [Ищу инвестиции] ─── toggle ─── [Хочу инвестировать]                      │
-│                                                                             │
-│  Категории:                                                                 │
-│  [🏗️ Новостройки] [🏨 Отели] [🍽️ HoReCa] [⛵ Яхты] [💼 Бизнес]            │
-│                                                                             │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │  🔥 HOT DEALS — Топ проекты                                          │  │
-│  │  ┌───────────┐ ┌───────────┐ ┌───────────┐                           │  │
-│  │  │ [Фото]    │ │ [Фото]    │ │ [Фото]    │ →                        │  │
-│  │  │ Kamala    │ │ Restaurant│ │ Yacht     │                           │  │
-│  │  │ Residence │ │ "Ocean"   │ │ Charter   │                           │  │
-│  │  │ ───────── │ │ ───────── │ │ ───────── │                           │  │
-│  │  │ ROI 8%    │ │ ROI 25%   │ │ ROI 15%   │                           │  │
-│  │  │ Min $50K  │ │ Min $30K  │ │ Min $100K │                           │  │
-│  │  │ ●●●●○ 85  │ │ ●●●○○ 72  │ │ ●●●●● 91  │  ← muUNO Score           │  │
-│  │  └───────────┘ └───────────┘ └───────────┘                           │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
-│                                                                             │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │  🏗️ НОВОСТРОЙКИ — Off-Plan Projects                                  │  │
-│  │  Linked from property_projects                                        │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
-│                                                                             │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │  💼 БИЗНЕС — Существующий и стартапы                                  │  │
-│  │  Restaurants, Hotels, Retail, Tech                                    │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
-│                                                                             │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │  📊 ХОЧУ ПРИВЛЕЧЬ ИНВЕСТИЦИИ                                         │  │
-│  │  Подайте заявку на размещение вашего проекта                        │  │
-│  │  [Подать заявку]                                                      │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
+│  [QuickAccessChips + QuickActionsGrid]                                      │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Страница проекта (/invest/:id)
+## Новая карточка новостройки
 
 ```text
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  ДЕТАЛЬНАЯ СТРАНИЦА ПРОЕКТА (CrunchBase-style)                              │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  [Hero: Фото/Видео проекта]                                                │
-│                                                                             │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │  Kamala Luxury Residences                                            │  │
-│  │  🏗️ Off-Plan Property · 📍 Kamala, Phuket                           │  │
-│  │                                                                       │  │
-│  │  muUNO Score: ●●●●○ 85/100 🟢 Low Risk                               │  │
-│  │  [Смотреть детали скоринга]                                          │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
-│                                                                             │
-│  ┌─────────────────────────┐  ┌─────────────────────────────────────────┐  │
-│  │ FUNDING PROGRESS        │  │ KEY METRICS                             │  │
-│  │ ████████░░░ 78%        │  │ 💰 Min Investment: $50,000              │  │
-│  │ $3.9M / $5M            │  │ 📈 Projected ROI: 8% annual             │  │
-│  │ 12 инвесторов          │  │ ⏱️ Term: 36 months                      │  │
-│  │                         │  │ 🎯 Exit: Rental income + resale         │  │
-│  │ [Выразить интерес]     │  │                                         │  │
-│  └─────────────────────────┘  └─────────────────────────────────────────┘  │
-│                                                                             │
-│  ═════════════════════════════════════════════════════════════════════════  │
-│                                                                             │
-│  TABS: [Обзор] [Финансы] [Команда] [Документы] [Локация]                   │
-│                                                                             │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │  ОБЗОР                                                                │  │
-│  │  Описание проекта, USP, стадия, сроки                               │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
-│                                                                             │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │  ФИНАНСОВАЯ МОДЕЛЬ                                                    │  │
-│  │  ├─ График ROI                                                        │  │
-│  │  ├─ Cash flow projection                                             │  │
-│  │  └─ Сравнение с рынком                                               │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
-│                                                                             │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │  КОМАНДА / ДЕВЕЛОПЕР                                                  │  │
-│  │  ┌────────┐ ┌────────┐ ┌────────┐                                    │  │
-│  │  │ [Фото] │ │ [Фото] │ │ [Фото] │                                    │  │
-│  │  │ CEO    │ │ CFO    │ │ Dev Dir│                                    │  │
-│  │  └────────┘ └────────┘ └────────┘                                    │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
-│                                                                             │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │  ДОКУМЕНТЫ                                                            │  │
-│  │  📄 Pitch Deck (PDF)                     [Скачать]                   │  │
-│  │  📊 Financial Projections (требует NDA)  [Запросить]                 │  │
-│  │  📋 Legal Structure                       [Скачать]                   │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
-│                                                                             │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │  muUNO SCORE BREAKDOWN                                                │  │
-│  │  ├─ Локация:       ████████░░ 80%                                    │  │
-│  │  ├─ Девелопер:     █████████░ 90%                                    │  │
-│  │  ├─ Фин. модель:   ████████░░ 85%                                    │  │
-│  │  └─ Рыночный спрос:███████░░░ 75%                                    │  │
-│  │                                                                       │  │
-│  │  ⚠️ Риски:                                                           │  │
-│  │  • Задержка строительства (типично 6-12 мес)                        │  │
-│  │  • Валютные риски (THB/USD)                                         │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
-│                                                                             │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │                    [Выразить интерес]                                 │  │
-│  │          Наш эксперт свяжется с вами в течение 24 часов              │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Файловая структура
-
-```text
-src/pages/invest/
-├── InvestmentIndex.tsx        # Главный каталог
-├── InvestmentDetail.tsx       # Страница проекта
-├── RaiseFunding.tsx           # Форма подачи заявки на финансирование
-└── InvestorProfile.tsx        # Профиль инвестора (future)
-
-src/components/invest/
-├── InvestmentCard.tsx         # Карточка проекта для каталога
-├── InvestmentHero.tsx         # Hero секция с фильтрами
-├── InvestmentFilters.tsx      # Фильтры (тип, минимум, ROI)
-├── FundingProgress.tsx        # Прогресс-бар сбора
-├── MuunoScoreWidget.tsx       # Визуализация скоринга
-├── ScoreBreakdown.tsx         # Детали скоринга
-├── InvestmentTeam.tsx         # Секция команды
-├── InvestmentDocuments.tsx    # Документы проекта
-├── FinancialChart.tsx         # Графики ROI/Cash flow
-├── InterestForm.tsx           # Форма выражения интереса
-├── RaisingPromoSection.tsx    # Блок "Привлечь инвестиции"
-└── index.ts                   # Экспорты
-
-src/hooks/
-├── useInvestmentProjects.ts   # CRUD для проектов
-├── useInvestmentInterest.ts   # Отслеживание интереса
-└── useInvestmentScoring.ts    # Логика скоринга muUNO
+┌───────────────────────────────────────┐
+│  [Рендер/Фото комплекса]              │
+│                                       │
+│  🏗️ Offplan  ───  ⚡ Горячее          │  ← Статус проекта + Badge
+│                                       │
+│  ████████░░░░░░░░ 45%                 │  ← Прогресс строительства
+└───────────────────────────────────────┘
+  Kamala Luxury Residence
+  📍 Kamala · 🏛️ Andaman Luxury Homes   ← Застройщик!
+  
+  Цена: от ฿4,500,000
+  
+  ┌─────────┬─────────┬─────────┐
+  │ ROI 8%  │ Q2 2025 │ Score 85│
+  │ годовых │ сдача   │ muUNO   │
+  └─────────┴─────────┴─────────┘
+  
+  [Подробнее] [Инвестировать]
 ```
 
 ---
 
 ## Фазы реализации
 
-### Фаза 1: Инфраструктура данных
+### Фаза 1: Расширение базы данных
 
-**Шаг 1.1:** Создать таблицы БД
+**1.1 Создать таблицу developers**
 ```sql
--- investment_projects
--- investment_interests  
--- investment_team_members
--- investment_documents
+CREATE TABLE public.developers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name_en TEXT NOT NULL,
+  name_ru TEXT NOT NULL,
+  slug TEXT UNIQUE,
+  logo_url TEXT,
+  cover_image TEXT,
+  description_en TEXT,
+  description_ru TEXT,
+  founded_year INTEGER,
+  projects_completed INTEGER DEFAULT 0,
+  total_units_sold INTEGER DEFAULT 0,
+  average_rating NUMERIC(2,1) DEFAULT 0,
+  website TEXT,
+  phone TEXT,
+  email TEXT,
+  address TEXT,
+  is_verified BOOLEAN DEFAULT false,
+  is_featured BOOLEAN DEFAULT false,
+  muuno_score INTEGER CHECK (muuno_score BETWEEN 0 AND 100),
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Миграция существующих застройщиков
+INSERT INTO developers (name_en, name_ru, slug)
+SELECT DISTINCT 
+  developer_name, 
+  developer_name, 
+  lower(replace(developer_name, ' ', '-'))
+FROM property_projects 
+WHERE developer_name IS NOT NULL;
 ```
 
-**Шаг 1.2:** Добавить lookup_values для категорий
+**1.2 Обновить property_projects**
 ```sql
-INSERT INTO lookup_values (lookup_type, value_key, value_en, value_ru, icon)
-VALUES 
-  ('investment_category', 'real_estate_offplan', 'Off-Plan Property', 'Новостройки', '🏗️'),
-  ('investment_category', 'hospitality', 'Hospitality', 'Отели', '🏨'),
-  ...
+ALTER TABLE property_projects 
+ADD COLUMN developer_id UUID REFERENCES developers(id),
+ADD COLUMN project_status TEXT DEFAULT 'offplan' 
+  CHECK (project_status IN ('offplan', 'under_construction', 'completed')),
+ADD COLUMN completion_date DATE,
+ADD COLUMN construction_progress INTEGER DEFAULT 0 
+  CHECK (construction_progress BETWEEN 0 AND 100),
+ADD COLUMN price_from NUMERIC,
+ADD COLUMN price_to NUMERIC,
+ADD COLUMN units_available INTEGER DEFAULT 0,
+ADD COLUMN units_sold INTEGER DEFAULT 0;
+
+-- Связать существующие проекты с застройщиками
+UPDATE property_projects pp
+SET developer_id = d.id
+FROM developers d
+WHERE pp.developer_name = d.name_en;
 ```
 
-**Шаг 1.3:** Добавить персону `investor`
+---
+
+### Фаза 2: Хуки и типы
+
+**2.1 Новый hook: useDevelopers.ts**
 ```typescript
-// useUserPersonas.ts
-export type UserPersona = 'tourist' | 'resident' | 'property_owner' | 'investor';
+interface Developer {
+  id: string;
+  nameEn: string;
+  nameRu: string;
+  logoUrl: string | null;
+  projectsCompleted: number;
+  isVerified: boolean;
+  muunoScore: number | null;
+}
+
+export function useDevelopers() { ... }
+export function useDeveloper(id: string) { ... }
 ```
 
-### Фаза 2: Core Components
+**2.2 Обновить usePropertyProjectsWithStats.ts**
+Добавить поля: `developerName`, `developerLogo`, `projectStatus`, `completionDate`, `constructionProgress`, `priceFrom`, `roiProjected`, `muunoScore`
 
-**Шаг 2.1:** Создать базовые UI компоненты
-- `InvestmentCard.tsx`
-- `MuunoScoreWidget.tsx`
-- `FundingProgress.tsx`
+**2.3 Новый hook: useOffplanProjects.ts**
+Специализированный hook для новостроек с фильтрами:
+- По застройщику
+- По району
+- По статусу (offplan/under_construction)
+- По ценовому диапазону
+- По muUNO Score
 
-**Шаг 2.2:** Реализовать хуки
-- `useInvestmentProjects.ts`
-- `useInvestmentScoring.ts`
+---
 
-### Фаза 3: Страницы
+### Фаза 3: UI Компоненты
 
-**Шаг 3.1:** Главный каталог `/invest`
-- Фильтры по категориям
-- Карусели Hot Deals / Новостройки / Бизнес
-- CTA для привлечения инвестиций
+**3.1 OffplanProjectCard.tsx** (НОВЫЙ)
+Расширенная карточка для новостроек:
+- Статус проекта (badge)
+- Прогресс строительства (progress bar)
+- Информация о застройщике
+- muUNO Score
+- Цена "от"
+- ROI
+- Дата сдачи
 
-**Шаг 3.2:** Детальная страница `/invest/:id`
-- Табы с информацией
-- Скоринг и риски
-- Форма интереса
+**3.2 OffplanPromoSection.tsx** (НОВЫЙ)
+Промо-блок для главного экрана:
+- Заголовок "Новостройки Пхукета"
+- Горизонтальная карусель OffplanProjectCard
+- CTA "Смотреть все"
 
-**Шаг 3.3:** Форма подачи `/invest/raise`
-- Wizard для бизнеса и недвижимости
-- Загрузка документов
-- Валидация
+**3.3 DeveloperBadge.tsx** (НОВЫЙ)
+Компактный бейдж застройщика:
+- Лого + название
+- Verified галочка
+- Кликабельный → страница застройщика
 
-### Фаза 4: Интеграция в главный экран
+**3.4 Обновить ProjectCarouselCard.tsx**
+Добавить: застройщик, статус проекта, muUNO Score (опционально)
 
-**Шаг 4.1:** Добавить AudienceCard "Инвесторам" в HeroBlock
+---
+
+### Фаза 4: Страницы
+
+**4.1 /offplan — Каталог новостроек**
+```text
+[Hero: Новостройки Пхукета 2024-2025]
+
+Фильтры:
+[Район ▾] [Застройщик ▾] [Цена ▾] [Статус ▾] [muUNO Score ▾]
+
+Сортировка:
+[По Score] [По цене] [По дате сдачи]
+
+Результаты:
+┌────────────┐ ┌────────────┐ ┌────────────┐
+│ [Project1] │ │ [Project2] │ │ [Project3] │
+└────────────┘ └────────────┘ └────────────┘
+```
+
+**4.2 /offplan/:id — Детали новостройки**
+Расширенная страница проекта:
+- Галерея рендеров и 3D-туры
+- Информация о застройщике
+- График строительства (timeline)
+- Планировки и цены
+- muUNO Scoring breakdown
+- Инвестиционные метрики
+- Документы проекта
+- CTA: "Записаться на просмотр" / "Инвестировать"
+
+**4.3 /developers — Каталог застройщиков**
+Список всех застройщиков с:
+- Лого, название, рейтинг
+- Количество проектов
+- muUNO Score
+- Кнопка "Проекты"
+
+**4.4 /developers/:id — Страница застройщика**
+- Профиль компании
+- Портфолио проектов
+- Статистика
+- Отзывы
+
+---
+
+### Фаза 5: Интеграция
+
+**5.1 Обновить главный экран (Index.tsx)**
+Добавить `OffplanPromoSection` после QuickAccessChips
+
+**5.2 Обновить HeroBlock.tsx**
+Добавить 4-ю AudienceCard "Инвесторам":
 ```typescript
 {
   id: 'investors',
   persona: 'investor',
-  icon: <TrendingUp className="w-5 h-5 text-emerald-600" />,
+  icon: <TrendingUp className="w-5 h-5 text-purple-600" />,
   title: { en: 'Investors', ru: 'Инвесторам' },
-  services: { en: 'Projects • ROI • Due Diligence', ru: 'Проекты • ROI • Экспертиза' },
+  services: { en: 'Off-plan • ROI • Due Diligence', ru: 'Новостройки • ROI • Экспертиза' },
 }
 ```
 
-**Шаг 4.2:** Добавить чип в QuickAccessChips
-```typescript
-{
-  id: 'invest',
-  icon: TrendingUp,
-  label: 'Invest',
-  labelRu: 'Инвестиции',
-  path: '/invest',
-  gradient: 'from-emerald-500 to-green-600',
-}
-```
+**5.3 Связать InvestmentIndex с новостройками**
+- Секция "Новостройки" использует данные из property_projects с investment_enabled=true
+- Клик на карточку → /offplan/:id или /invest/:id в зависимости от наличия investment_project
 
-**Шаг 4.3:** Добавить INVESTOR_ACTIONS в QuickActionsGrid
-
-### Фаза 5: Связь с недвижимостью
-
-**Шаг 5.1:** Расширить `property_projects` полями для инвестиций
-```sql
-ALTER TABLE property_projects ADD COLUMN IF NOT EXISTS
-  investment_enabled boolean DEFAULT false,
-  funding_goal numeric,
-  min_investment numeric,
-  roi_projected numeric,
-  muuno_score integer,
-  ...
-```
-
-**Шаг 5.2:** Интегрировать в ProjectPromoSection
+**5.4 Обновить ProjectDetail.tsx**
+Добавить секцию "Инвестиционные возможности" если `investment_enabled=true`
 
 ---
 
-## Технические требования
+## Навигация и связи
 
-| Требование | Решение |
-|------------|---------|
-| RLS политики | Публичный просмотр, авторизация для interest |
-| Скоринг | Серверная функция или Edge Function |
-| Уведомления | Integration с notification_events |
-| Лиды | Integration с consultation_requests |
-| Аналитика | Tracking просмотров и конверсий |
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  ТОЧКИ ВХОДА                                                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  Главный экран → OffplanPromoSection → /offplan                            │
+│                                                                             │
+│  HeroBlock → AudienceCard "Инвесторам" → /invest                           │
+│                                                                             │
+│  QuickAccessChips → "Инвестиции" → /invest                                 │
+│                                                                             │
+│  /property → ProjectPromoSection → /complexes                              │
+│                                                                             │
+│  /complexes/:id → "Инвестировать" → /invest/:investmentId                  │
+│                                                                             │
+│  /invest → "Новостройки" секция → /offplan                                 │
+│                                                                             │
+│  /offplan/:id → DeveloperBadge → /developers/:developerId                  │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Файлы для создания/изменения
+
+| Файл | Тип | Описание |
+|------|-----|----------|
+| `supabase/migrations/xxx_developers.sql` | NEW | Таблица developers + обновление property_projects |
+| `src/hooks/useDevelopers.ts` | NEW | CRUD для застройщиков |
+| `src/hooks/useOffplanProjects.ts` | NEW | Хук для новостроек с фильтрами |
+| `src/components/property/OffplanProjectCard.tsx` | NEW | Карточка новостройки |
+| `src/components/property/OffplanPromoSection.tsx` | NEW | Промо-блок для главной |
+| `src/components/property/DeveloperBadge.tsx` | NEW | Бейдж застройщика |
+| `src/pages/property/OffplanIndex.tsx` | NEW | Каталог новостроек |
+| `src/pages/property/OffplanDetail.tsx` | NEW | Детали новостройки |
+| `src/pages/property/DevelopersIndex.tsx` | NEW | Каталог застройщиков |
+| `src/pages/property/DeveloperDetail.tsx` | NEW | Страница застройщика |
+| `src/pages/Index.tsx` | UPDATE | Добавить OffplanPromoSection |
+| `src/components/home/HeroBlock.tsx` | UPDATE | Добавить AudienceCard "Инвесторам" |
+| `src/hooks/usePropertyProjectsWithStats.ts` | UPDATE | Добавить поля застройщика и инвестиций |
+| `src/components/property/ProjectCarouselCard.tsx` | UPDATE | Показывать застройщика |
+| `src/pages/invest/InvestmentIndex.tsx` | UPDATE | Связь с новостройками |
+| `src/components/layout/AnimatedRoutes.tsx` | UPDATE | Новые маршруты |
 
 ---
 
@@ -446,19 +356,20 @@ ALTER TABLE property_projects ADD COLUMN IF NOT EXISTS
 
 | Метрика | Значение |
 |---------|----------|
-| Новые таблицы | 4 (investment_projects, interests, team, documents) |
-| Новые страницы | 3 (/invest, /invest/:id, /invest/raise) |
-| Новые компоненты | 12+ |
-| Новые хуки | 3 |
-| Интеграции | property_projects, user_personas, consultation_requests |
-| Персона | investor (новая) |
-| Сложность | Высокая — полноценный CrunchBase-lite |
+| Новые таблицы | 1 (developers) |
+| Обновляемые таблицы | 1 (property_projects) |
+| Новые страницы | 4 (/offplan, /offplan/:id, /developers, /developers/:id) |
+| Новые компоненты | 4 |
+| Новые хуки | 2 |
+| Обновляемые файлы | 7 |
+| Риск регрессии | Низкий — новая функциональность, не ломает существующее |
 
 ---
 
-## Приоритет реализации
+## Порядок реализации
 
-1. **MVP (2-3 дня):** Каталог + карточки + детальная страница (read-only)
-2. **v1.0 (1 неделя):** + Скоринг + Interest form + Интеграция с главной
-3. **v1.5 (2 недели):** + Raise funding wizard + Документы + Team
-4. **v2.0 (1 месяц):** + Investor dashboard + Portfolio tracking + Analytics
+1. **Фаза 1**: Миграция БД (developers + property_projects)
+2. **Фаза 2**: Хуки (useDevelopers, useOffplanProjects, обновить usePropertyProjectsWithStats)
+3. **Фаза 3**: UI компоненты (OffplanProjectCard, DeveloperBadge, OffplanPromoSection)
+4. **Фаза 4**: Страницы (OffplanIndex, OffplanDetail, DevelopersIndex, DeveloperDetail)
+5. **Фаза 5**: Интеграция (Index.tsx, HeroBlock.tsx, InvestmentIndex.tsx, маршруты)
