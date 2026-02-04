@@ -4,7 +4,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Menu, Search, X, Wrench } from 'lucide-react';
+import { Menu, Search, X, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   ServiceCategoryAccordion,
@@ -52,14 +52,14 @@ export function ServiceCategoryDrawer({ className }: ServiceCategoryDrawerProps)
         <SheetHeader className="px-4 py-4 border-b border-border/50">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-amber-500 flex items-center justify-center">
-              <Wrench className="w-5 h-5 text-white" />
+              <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div>
               <SheetTitle className="text-left text-base">
-                {language === 'ru' ? 'Каталог услуг' : 'Service Catalog'}
+                {language === 'ru' ? 'myUNO Каталог' : 'myUNO Catalog'}
               </SheetTitle>
               <p className="text-xs text-muted-foreground">
-                {language === 'ru' ? 'Все категории услуг' : 'All service categories'}
+                {language === 'ru' ? 'Все сервисы для жизни' : 'All services for living abroad'}
               </p>
             </div>
           </div>
