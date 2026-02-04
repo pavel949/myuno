@@ -3,8 +3,8 @@
  * Featured carousel + all projects grid with search/filter
  */
 
-import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Building2, Search, SlidersHorizontal } from 'lucide-react';
 import { usePropertyProjects } from '@/hooks/usePropertyProjects';
@@ -35,12 +35,34 @@ const districts = [
 
 export default function ProjectsIndex() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
   const { data: projects, isLoading } = usePropertyProjects();
   const [search, setSearch] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState('all');
+  
+  // Deep-link highlight support
+  const highlightId = searchParams.get('highlight');
+
+  // Handle scroll to highlighted project
+  useEffect(() => {
+    if (highlightId && !isLoading && projects) {
+      // Small delay to ensure DOM is ready
+      const timer = setTimeout(() => {
+        const element = document.getElementById(`project-${highlightId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          element.classList.add('ring-2', 'ring-primary', 'animate-pulse');
+          setTimeout(() => {
+            element.classList.remove('animate-pulse');
+          }, 2000);
+        }
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [highlightId, isLoading, projects]);
 
   // Filter and categorize projects
   const { featured, filtered } = useMemo(() => {
@@ -197,10 +219,13 @@ export default function ProjectsIndex() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filtered.map((project) => (
-                  <ProjectCard 
+                  <div 
                     key={project.id} 
-                    project={project}
-                  />
+                    id={`project-${project.id}`}
+                    className="transition-all duration-300"
+                  >
+                    <ProjectCard project={project} />
+                  </div>
                 ))}
               </div>
             )}
