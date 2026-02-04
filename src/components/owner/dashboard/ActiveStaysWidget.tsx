@@ -6,7 +6,7 @@ import { useOwnerProperties } from '@/hooks/usePropertyCare';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+
 import { Skeleton } from '@/components/ui/skeleton';
 import { format, differenceInDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -102,96 +102,93 @@ export function ActiveStaysWidget() {
         </h3>
       </div>
       
-      <ScrollArea className="w-full">
-        <div className="flex gap-3 pb-2">
-          {activeStays.map((stay) => (
-            <Card 
-              key={stay.bookingId}
-              className="shrink-0 w-72 overflow-hidden cursor-pointer hover:shadow-md transition-shadow border-l-4 border-l-green-500"
-              onClick={() => navigate(`/owner/bookings/${stay.bookingId}`)}
-            >
-              <CardContent className="p-0">
-                <div className="flex gap-3 p-3">
-                  {/* Property Image */}
-                  <div className="shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-muted">
-                    {stay.propertyImage ? (
-                      <img 
-                        src={stay.propertyImage} 
-                        alt={stay.propertyName}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <MapPin className="h-6 w-6 text-muted-foreground" />
-                      </div>
+      <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 touch-pan-x snap-x snap-mandatory">
+        {activeStays.map((stay) => (
+          <Card 
+            key={stay.bookingId}
+            className="shrink-0 w-[85vw] max-w-[288px] snap-start touch-manipulation overflow-hidden cursor-pointer hover:shadow-md transition-shadow border-l-4 border-l-green-500"
+            onClick={() => navigate(`/owner/bookings/${stay.bookingId}`)}
+          >
+            <CardContent className="p-0">
+              <div className="flex gap-3 p-3">
+                {/* Property Image */}
+                <div className="shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-muted">
+                  {stay.propertyImage ? (
+                    <img 
+                      src={stay.propertyImage} 
+                      alt={stay.propertyName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <MapPin className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                  )}
+                </div>
+                
+                {/* Details */}
+                <div className="flex-1 min-w-0">
+                  {/* Guest Name */}
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    <span className="font-medium truncate">{stay.guestName}</span>
+                    {stay.guestsCount && stay.guestsCount > 1 && (
+                      <Badge variant="outline" className="text-[10px] px-1 py-0">
+                        <Users className="h-2.5 w-2.5 mr-0.5" />
+                        {stay.guestsCount}
+                      </Badge>
                     )}
                   </div>
                   
-                  {/* Details */}
-                  <div className="flex-1 min-w-0">
-                    {/* Guest Name */}
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                      <span className="font-medium truncate">{stay.guestName}</span>
-                      {stay.guestsCount && stay.guestsCount > 1 && (
-                        <Badge variant="outline" className="text-[10px] px-1 py-0">
-                          <Users className="h-2.5 w-2.5 mr-0.5" />
-                          {stay.guestsCount}
-                        </Badge>
-                      )}
-                    </div>
-                    
-                    {/* Property */}
-                    <p className="text-xs text-muted-foreground truncate mb-1.5">
-                      {stay.propertyName}
-                    </p>
-                    
-                    {/* Dates & Remaining */}
-                    <div className="flex items-center gap-2 text-xs">
-                      <Calendar className="h-3 w-3 text-muted-foreground shrink-0" />
-                      <span className="text-muted-foreground">
-                        {format(stay.checkOut, 'd MMM', { locale: isRu ? ru : undefined })}
-                      </span>
-                      <Badge 
-                        variant={stay.daysRemaining <= 1 ? 'destructive' : 'secondary'}
-                        className="text-[10px] px-1.5 py-0"
-                      >
-                        {stay.daysRemaining === 0 
-                          ? (isRu ? 'Выезд сегодня' : 'Checkout today')
-                          : stay.daysRemaining === 1
-                            ? (isRu ? '1 день' : '1 day left')
-                            : `${stay.daysRemaining} ${isRu ? 'дн.' : 'days'}`
-                        }
-                      </Badge>
-                    </div>
-                  </div>
+                  {/* Property */}
+                  <p className="text-xs text-muted-foreground truncate mb-1.5">
+                    {stay.propertyName}
+                  </p>
                   
-                  <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 self-center" />
+                  {/* Dates & Remaining */}
+                  <div className="flex items-center gap-2 text-xs">
+                    <Calendar className="h-3 w-3 text-muted-foreground shrink-0" />
+                    <span className="text-muted-foreground">
+                      {format(stay.checkOut, 'd MMM', { locale: isRu ? ru : undefined })}
+                    </span>
+                    <Badge 
+                      variant={stay.daysRemaining <= 1 ? 'destructive' : 'secondary'}
+                      className="text-[10px] px-1.5 py-0"
+                    >
+                      {stay.daysRemaining === 0 
+                        ? (isRu ? 'Выезд сегодня' : 'Checkout today')
+                        : stay.daysRemaining === 1
+                          ? (isRu ? '1 день' : '1 day left')
+                          : `${stay.daysRemaining} ${isRu ? 'дн.' : 'days'}`
+                      }
+                    </Badge>
+                  </div>
                 </div>
                 
-                {/* Quick contact action */}
-                {stay.guestPhone && (
-                  <div className="border-t px-3 py-2 bg-muted/30">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 text-xs gap-1.5 px-2"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        window.open(`tel:${stay.guestPhone}`, '_blank');
-                      }}
-                    >
-                      <Phone className="h-3 w-3" />
-                      {stay.guestPhone}
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+                <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 self-center" />
+              </div>
+              
+              {/* Quick contact action */}
+              {stay.guestPhone && (
+                <div className="border-t px-3 py-2 bg-muted/30">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-xs gap-1.5 px-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(`tel:${stay.guestPhone}`, '_blank');
+                    }}
+                  >
+                    <Phone className="h-3 w-3" />
+                    {stay.guestPhone}
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </section>
   );
 }

@@ -4,7 +4,7 @@ import { useOwnerProperties } from '@/hooks/usePropertyCare';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+
 import { Home, ArrowRight, Plus, CheckCircle2, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -107,65 +107,61 @@ export function PropertiesBlock() {
         </div>
 
         {/* Property thumbnails scroll - compact */}
-        <ScrollArea className="w-full">
-          <div className="flex gap-2 pb-1">
-            {properties.slice(0, 6).map((property) => {
-              const status = getStatusIndicator(property);
-              const title = isRu ? (property.title_ru || property.title) : property.title;
-              
-              return (
-                <button
-                  key={property.id}
-                  className="relative shrink-0 group"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/owner/properties/${property.id}`);
-                  }}
-                >
-                  <div className="w-14 h-14 rounded-lg overflow-hidden bg-muted">
-                    {property.cover_image ? (
-                      <img 
-                        src={property.cover_image} 
-                        alt={title}
-                        className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
-                        loading="lazy"
-                        onError={(e) => {
-                          // Hide broken image and show fallback
-                          e.currentTarget.style.display = 'none';
-                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                        }}
-                      />
-                    ) : null}
-                    <div className={cn(
-                      "w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5",
-                      property.cover_image ? "hidden" : ""
-                    )}>
-                      <Home className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                  </div>
-                  
-                  {/* Status dot */}
-                  <div className={cn(
-                    "absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-background",
-                    status.bg
-                  )} />
-                </button>
-              );
-            })}
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-3 px-3 touch-pan-x snap-x">
+          {properties.slice(0, 6).map((property) => {
+            const status = getStatusIndicator(property);
+            const title = isRu ? (property.title_ru || property.title) : property.title;
             
-            {/* Add new button */}
-            <button
-              className="w-14 h-14 rounded-lg border-2 border-dashed border-muted-foreground/30 flex items-center justify-center shrink-0 hover:border-primary/50 hover:bg-muted/50 transition-colors"
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate('/owner/properties/new');
-              }}
-            >
-              <Plus className="h-5 w-5 text-muted-foreground" />
-            </button>
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+            return (
+              <button
+                key={property.id}
+                className="relative shrink-0 group snap-start touch-manipulation"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/owner/properties/${property.id}`);
+                }}
+              >
+                <div className="w-14 h-14 rounded-lg overflow-hidden bg-muted">
+                  {property.cover_image ? (
+                    <img 
+                      src={property.cover_image} 
+                      alt={title}
+                      className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                      }}
+                    />
+                  ) : null}
+                  <div className={cn(
+                    "w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5",
+                    property.cover_image ? "hidden" : ""
+                  )}>
+                    <Home className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                </div>
+                
+                {/* Status dot */}
+                <div className={cn(
+                  "absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-background",
+                  status.bg
+                )} />
+              </button>
+            );
+          })}
+          
+          {/* Add new button */}
+          <button
+            className="w-14 h-14 rounded-lg border-2 border-dashed border-muted-foreground/30 flex items-center justify-center shrink-0 snap-start touch-manipulation hover:border-primary/50 hover:bg-muted/50 transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate('/owner/properties/new');
+            }}
+          >
+            <Plus className="h-5 w-5 text-muted-foreground" />
+          </button>
+        </div>
       </CardContent>
     </Card>
   );

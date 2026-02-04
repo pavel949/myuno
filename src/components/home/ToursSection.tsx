@@ -30,12 +30,12 @@ export function ToursSection() {
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>
-      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
+      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 touch-pan-x snap-x snap-mandatory">
         {tours.map((tour) => (
           <div 
             key={tour.id}
             onClick={() => navigate(`/tours/${tour.id}`)}
-            className="flex-shrink-0 w-64 bg-card rounded-2xl overflow-hidden border hover:shadow-lg transition-all cursor-pointer group"
+            className="flex-shrink-0 w-64 snap-start touch-manipulation bg-card rounded-2xl overflow-hidden border hover:shadow-lg transition-all cursor-pointer group"
           >
             <div className="relative h-36 overflow-hidden">
               <OptimizedImage 

@@ -1,5 +1,4 @@
 import React, { memo, ReactNode } from 'react';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 
 interface UnifiedScrollSectionProps {
@@ -23,16 +22,13 @@ export const UnifiedScrollSection = memo(function UnifiedScrollSection({
   
   return (
     <section className={cn("py-4", bgClass, className)}>
-      <ScrollArea className="w-full">
-        <div className={cn(
-          "flex gap-3 pb-2",
-          !noPadding && "px-4",
-          "max-w-7xl mx-auto"
-        )}>
-          {children}
-        </div>
-        <ScrollBar orientation="horizontal" className="invisible" />
-      </ScrollArea>
+      <div className={cn(
+        "flex gap-3 pb-2 overflow-x-auto scrollbar-hide touch-pan-x snap-x snap-mandatory",
+        !noPadding && "-mx-4 px-4",
+        "max-w-7xl mx-auto"
+      )}>
+        {children}
+      </div>
     </section>
   );
 });

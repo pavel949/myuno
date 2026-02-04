@@ -4,7 +4,7 @@ import { ChevronRight, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getCrossSellLinks } from '@/lib/crossSellConfig';
 import { CrossSellCard } from './CrossSellCard';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+
 import { cn } from '@/lib/utils';
 
 interface CrossSellSectionProps {
@@ -56,20 +56,17 @@ export const CrossSellSection = memo(function CrossSellSection({
       </div>
 
       {variant === 'scroll' ? (
-        <ScrollArea className="-mx-4 px-4">
-          <div className="flex gap-3 pb-2">
-            {links.map((link, index) => (
-              <div key={link.id} className="w-[110px] flex-shrink-0">
-                <CrossSellCard
-                  link={link}
-                  fromVertical={currentVertical}
-                  index={index}
-                />
-              </div>
-            ))}
-          </div>
-          <ScrollBar orientation="horizontal" className="invisible" />
-        </ScrollArea>
+        <div className="flex gap-3 pb-2 overflow-x-auto scrollbar-hide -mx-4 px-4 touch-pan-x snap-x snap-mandatory">
+          {links.map((link, index) => (
+            <div key={link.id} className="w-[110px] flex-shrink-0 snap-start touch-manipulation">
+              <CrossSellCard
+                link={link}
+                fromVertical={currentVertical}
+                index={index}
+              />
+            </div>
+          ))}
+        </div>
       ) : (
         <div className="grid grid-cols-4 gap-3">
           {links.map((link, index) => (
