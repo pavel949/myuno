@@ -467,7 +467,7 @@ const DEFAULT_ACTIONS: QuickAction[] = [
     icon: Plane,
     label: 'Transfer',
     labelRu: 'Трансфер',
-    path: '/transport/airport',
+    path: '/transport/airport-transfer',
     iconColor: 'text-white',
     bgColor: 'bg-gradient-to-br from-indigo-400 to-purple-600',
   },

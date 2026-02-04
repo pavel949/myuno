@@ -138,7 +138,6 @@ const Install = lazy(() => import('@/pages/Install'));
 const ListWithUsPage = lazy(() => import('@/pages/ListWithUsPage'));
 
 // Tours Mini-App (LEGACY - redirects to /experiences)
-const ToursIndex = lazy(() => import('@/pages/tours/ToursIndex'));
 const TourDetail = lazy(() => import('@/pages/tours/TourDetail'));
 const TourBooking = lazy(() => import('@/pages/tours/TourBooking'));
 
@@ -151,11 +150,14 @@ const TourBookRedirect = () => {
   const { id } = useParams();
   return <Navigate to={`/experiences/${id}/book`} replace />;
 };
+// Legacy /tours index redirects to /experiences
+const ToursIndexRedirect = () => <Navigate to="/experiences" replace />;
 
-// Water Activities Mini-App
-const WaterActivitiesIndex = lazy(() => import('@/pages/water/WaterActivitiesIndex'));
+// Water Activities Mini-App (LEGACY - redirects to /experiences)
 const WaterActivityDetail = lazy(() => import('@/pages/water/WaterActivityDetail'));
 const WaterActivityBooking = lazy(() => import('@/pages/water/WaterActivityBooking'));
+// Legacy /water index redirects to /experiences
+const WaterIndexRedirect = () => <Navigate to="/experiences" replace />;
 
 // Experiences Mini-App (unified tours + activities)
 const ExperiencesIndex = lazy(() => import('@/pages/experiences/ExperiencesIndex'));
@@ -388,7 +390,6 @@ const VendorBabysitters = lazy(() => import('@/pages/vendor/VendorBabysitters'))
 const VendorFlowers = lazy(() => import('@/pages/vendor/VendorFlowers'));
 const VendorLocations = lazy(() => import('@/pages/vendor/VendorLocations'));
 const VendorProducts = lazy(() => import('@/pages/vendor/VendorProducts'));
-const VendorOrders = lazy(() => import('@/pages/vendor/VendorOrders'));
 const VendorMessages = lazy(() => import('@/pages/vendor/VendorMessages'));
 const VendorSettings = lazy(() => import('@/pages/vendor/VendorSettings'));
 
@@ -469,7 +470,7 @@ const prefetchRoutes = () => {
       // Prefetch most common user journeys
       import('@/pages/property/PropertyIndex');
       import('@/pages/restaurants/RestaurantsIndex');
-      import('@/pages/tours/ToursIndex');
+      import('@/pages/experiences/ExperiencesIndex');
       import('@/pages/beauty/BeautySpaIndex');
     });
   }
@@ -851,7 +852,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/vendor/flowers" element={<VendorFlowers />} />
           <Route path="/vendor/locations" element={<VendorLocations />} />
           <Route path="/vendor/products" element={<VendorProducts />} />
-          <Route path="/vendor/orders" element={<VendorOrders />} />
+          <Route path="/vendor/orders" element={<VendorBookings />} />
           <Route path="/vendor/messages" element={<VendorMessages />} />
           <Route path="/vendor/settings" element={<VendorSettings />} />
         </Route>

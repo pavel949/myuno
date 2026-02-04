@@ -99,16 +99,16 @@ const Cart = () => {
         navigate('/market/checkout');
         break;
       case 'tour':
-        // Tour checkout - navigate to tours checkout
-        navigate('/tours/checkout');
+        // Tour checkout - navigate to experiences checkout
+        navigate('/experiences/checkout');
         break;
       case 'yacht':
         // Yacht checkout - navigate to yachts checkout
         navigate('/yachts/checkout');
         break;
       case 'activity':
-        // Activity checkout
-        navigate('/activities/checkout');
+        // Activity checkout - redirect to experiences
+        navigate('/experiences/checkout');
         break;
       default:
         navigate('/');
