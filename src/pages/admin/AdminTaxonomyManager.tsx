@@ -24,6 +24,7 @@ import {
 } from '@/hooks/useTaxonomyDefinitions';
 import TaxonomyValueEditor from '@/components/admin/taxonomy/TaxonomyValueEditor';
 import TaxonomyBulkActions from '@/components/admin/taxonomy/TaxonomyBulkActions';
+import TaxonomySchemaEditor from '@/components/admin/taxonomy/TaxonomySchemaEditor';
 
 export default function AdminTaxonomyManager() {
   const { language } = useLanguage();
@@ -241,9 +242,7 @@ export default function AdminTaxonomyManager() {
                   <TaxonomyValueEditor typeKey={selectedType} />
                 </TabsContent>
                 <TabsContent value="settings">
-                  <div className="text-center py-8 text-muted-foreground">
-                    {t('Type settings coming soon', 'Настройки типа скоро появятся')}
-                  </div>
+                  <TaxonomySchemaEditor typeKey={selectedType} />
                 </TabsContent>
               </Tabs>
             ) : (
