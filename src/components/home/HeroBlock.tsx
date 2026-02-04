@@ -106,7 +106,8 @@ export const HeroBlock = memo(function HeroBlock() {
     owners: 'property_owner',
   };
 
-  const audienceCards = [
+  // Main audience cards (first row)
+  const mainAudienceCards = [
     {
       id: 'tourists',
       persona: 'tourist' as UserPersona,
@@ -144,20 +145,22 @@ export const HeroBlock = memo(function HeroBlock() {
       borderColor: 'border-amber-500/30 hover:border-amber-500/50',
       activeBorderColor: 'border-amber-500 ring-amber-500/30',
     },
-    {
-      id: 'investors',
-      persona: 'investor' as UserPersona,
-      isToggleable: true,
-      navigateOnFirstActivation: '/invest',
-      icon: <TrendingUp className="w-5 h-5 text-purple-600" />,
-      iconBg: 'bg-gradient-to-br from-purple-500/25 to-violet-500/35 shadow-lg shadow-purple-500/20',
-      title: { en: 'Investors', ru: 'Инвесторам' },
-      services: { en: 'ROI up to 12%', ru: 'ROI до 12%' },
-      cardGradient: 'from-purple-500/10 via-violet-500/5 to-transparent',
-      borderColor: 'border-purple-500/30 hover:border-purple-500/50',
-      activeBorderColor: 'border-purple-500 ring-purple-500/30',
-    },
   ];
+
+  // Investor card (second row, full width)
+  const investorCard = {
+    id: 'investors',
+    persona: 'investor' as UserPersona,
+    isToggleable: true,
+    navigateOnFirstActivation: '/invest',
+    icon: <TrendingUp className="w-5 h-5 text-purple-600" />,
+    iconBg: 'bg-gradient-to-br from-purple-500/25 to-violet-500/35 shadow-lg shadow-purple-500/20',
+    title: { en: 'Investors', ru: 'Инвесторам' },
+    services: { en: 'Real estate & business investments with ROI up to 12%', ru: 'Инвестиции в недвижимость и бизнес с доходностью до 12%' },
+    cardGradient: 'from-purple-500/10 via-violet-500/5 to-transparent',
+    borderColor: 'border-purple-500/30 hover:border-purple-500/50',
+    activeBorderColor: 'border-purple-500 ring-purple-500/30',
+  };
 
   // Compact single-line badges
   const badges = [
@@ -167,7 +170,7 @@ export const HeroBlock = memo(function HeroBlock() {
     { icon: <Layers className="w-3 h-3" />, label: isRu ? 'Всё здесь' : 'All-in-one' },
   ];
 
-  const handleAudienceClick = (card: typeof audienceCards[0]) => {
+  const handleAudienceClick = (card: typeof mainAudienceCards[0] | typeof investorCard) => {
     triggerHaptic('light');
     
     const isCurrentlyActive = personas.includes(card.persona);
@@ -227,9 +230,9 @@ export const HeroBlock = memo(function HeroBlock() {
         ))}
       </div>
 
-      {/* Audience Cards - for personalization */}
+      {/* Audience Cards - Row 1: Main personas */}
       <div className="flex gap-2">
-        {audienceCards.map((card) => (
+        {mainAudienceCards.map((card) => (
           <AudienceCard
             key={card.id}
             id={card.id}
@@ -245,6 +248,51 @@ export const HeroBlock = memo(function HeroBlock() {
           />
         ))}
       </div>
+
+      {/* Audience Cards - Row 2: Investor (full width) */}
+      <motion.button
+        whileTap={{ scale: 0.98 }}
+        onClick={() => handleAudienceClick(investorCard)}
+        className={cn(
+          "relative w-full p-4 rounded-2xl text-left transition-all",
+          "bg-gradient-to-br border-2",
+          "hover:shadow-lg active:scale-[0.99]",
+          investorCard.cardGradient,
+          personas.includes(investorCard.persona) ? investorCard.activeBorderColor : investorCard.borderColor,
+          personas.includes(investorCard.persona) && "ring-2 ring-offset-2 ring-offset-background"
+        )}
+      >
+        {/* Active Indicator */}
+        <AnimatePresence>
+          {personas.includes(investorCard.persona) && (
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              className="absolute top-3 right-3 w-5 h-5 rounded-full bg-primary flex items-center justify-center"
+            >
+              <Check className="w-3 h-3 text-primary-foreground" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="flex items-center gap-4">
+          <div className={cn(
+            "w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0",
+            investorCard.iconBg
+          )}>
+            {investorCard.icon}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="font-semibold text-base text-foreground">
+              {isRu ? investorCard.title.ru : investorCard.title.en}
+            </div>
+            <div className="text-sm text-muted-foreground">
+              {isRu ? investorCard.services.ru : investorCard.services.en}
+            </div>
+          </div>
+        </div>
+      </motion.button>
     </motion.div>
   );
 });
