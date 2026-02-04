@@ -7540,6 +7540,7 @@ export type Database = {
       owner_properties: {
         Row: {
           accessibility_features: string[] | null
+          acquisition_costs: number | null
           actual_owner_email: string | null
           actual_owner_name: string | null
           actual_owner_phone: string | null
@@ -7655,9 +7656,12 @@ export type Database = {
           price_per_night: number | null
           project_id: string | null
           property_type: string
+          purchase_date: string | null
+          purchase_price: number | null
           quiet_hours_end: string | null
           quiet_hours_start: string | null
           rejection_reason: string | null
+          renovation_costs: number | null
           rental_platform: string | null
           report_frequency: string | null
           report_recipients: string[] | null
@@ -7690,6 +7694,7 @@ export type Database = {
         }
         Insert: {
           accessibility_features?: string[] | null
+          acquisition_costs?: number | null
           actual_owner_email?: string | null
           actual_owner_name?: string | null
           actual_owner_phone?: string | null
@@ -7805,9 +7810,12 @@ export type Database = {
           price_per_night?: number | null
           project_id?: string | null
           property_type?: string
+          purchase_date?: string | null
+          purchase_price?: number | null
           quiet_hours_end?: string | null
           quiet_hours_start?: string | null
           rejection_reason?: string | null
+          renovation_costs?: number | null
           rental_platform?: string | null
           report_frequency?: string | null
           report_recipients?: string[] | null
@@ -7840,6 +7848,7 @@ export type Database = {
         }
         Update: {
           accessibility_features?: string[] | null
+          acquisition_costs?: number | null
           actual_owner_email?: string | null
           actual_owner_name?: string | null
           actual_owner_phone?: string | null
@@ -7955,9 +7964,12 @@ export type Database = {
           price_per_night?: number | null
           project_id?: string | null
           property_type?: string
+          purchase_date?: string | null
+          purchase_price?: number | null
           quiet_hours_end?: string | null
           quiet_hours_start?: string | null
           rejection_reason?: string | null
+          renovation_costs?: number | null
           rental_platform?: string | null
           report_frequency?: string | null
           report_recipients?: string[] | null

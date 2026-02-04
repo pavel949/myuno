@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils';
 import { 
   Home, Image, Calendar, DollarSign, FileText, 
   Users, MapPin, Zap, Bed, Settings, Save,
-  ChevronLeft, Loader2, Eye, CheckCircle2, Megaphone, MoreHorizontal
+  ChevronLeft, Loader2, Eye, CheckCircle2, Megaphone, MoreHorizontal, TrendingUp
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -29,6 +29,7 @@ import { PropertyManageListingSection } from '@/components/owner/property-manage
 import { PropertyManageCalendarSection } from '@/components/owner/property-manage/CalendarSection';
 import { PropertyManagePricingSection } from '@/components/owner/property-manage/PricingSection';
 import { PropertyManageRulesSection } from '@/components/owner/property-manage/RulesSection';
+import { PropertyManageInvestmentSection } from '@/components/owner/property-manage/InvestmentSection';
 import { PropertyManageMarketingSection } from '@/components/owner/marketing';
 
 interface MenuSection {
@@ -46,7 +47,8 @@ const MENU_SECTIONS: MenuSection[] = [
   { id: 'calendar', label: 'Calendar', labelRu: 'Календарь', icon: <Calendar className="h-4 w-4" /> },
   { id: 'pricing', label: 'Pricing', labelRu: 'Цены', icon: <DollarSign className="h-4 w-4" /> },
   { id: 'rules', label: 'Policies & Rules', labelRu: 'Правила', icon: <FileText className="h-4 w-4" /> },
-  { id: 'marketing', label: 'Marketing', labelRu: 'Продвижение', icon: <Megaphone className="h-4 w-4" />, badge: 'NEW' },
+  { id: 'investment', label: 'Investment', labelRu: 'Инвестиции', icon: <TrendingUp className="h-4 w-4" />, badge: 'NEW' },
+  { id: 'marketing', label: 'Marketing', labelRu: 'Продвижение', icon: <Megaphone className="h-4 w-4" /> },
 ];
 
 // Mobile nav: 4 main items + overflow menu (HIG recommendation: max 5 items)
@@ -230,6 +232,10 @@ export default function PropertyManage() {
       case 'marketing':
         return id ? (
           <PropertyManageMarketingSection propertyId={id} />
+        ) : null;
+      case 'investment':
+        return id ? (
+          <PropertyManageInvestmentSection propertyId={id} />
         ) : null;
       default:
         return null;

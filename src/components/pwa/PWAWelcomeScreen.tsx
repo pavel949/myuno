@@ -61,9 +61,9 @@ export function PWAWelcomeScreen() {
               initial={{ y: 15, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="flex flex-col items-center"
+              className="flex flex-col items-center w-full"
             >
-              <div className="flex items-center justify-center gap-2 mb-2">
+              <div className="flex items-center justify-center gap-2 mb-2 w-full">
                 <Sparkles className="w-4 h-4 text-primary-foreground/80" />
                 <span className="text-primary-foreground/80 text-xs font-medium uppercase tracking-wide">
                   Установлено
