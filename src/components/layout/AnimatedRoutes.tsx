@@ -252,6 +252,8 @@ const AdminTours = lazy(() => import('@/pages/admin/AdminTours'));
 const AdminActivities = lazy(() => import('@/pages/admin/AdminActivities'));
 const AdminProperties = lazy(() => import('@/pages/admin/AdminProperties'));
 const AdminProjects = lazy(() => import('@/pages/admin/AdminProjects'));
+const AdminInvestments = lazy(() => import('@/pages/admin/AdminInvestments'));
+const AdminDevelopers = lazy(() => import('@/pages/admin/AdminDevelopers'));
 const AdminRestaurants = lazy(() => import('@/pages/admin/AdminRestaurants'));
 const AdminSalons = lazy(() => import('@/pages/admin/AdminSalons'));
 const AdminClinics = lazy(() => import('@/pages/admin/AdminClinics'));
@@ -727,6 +729,8 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/admin/activities" element={<AdminActivities />} />
           <Route path="/admin/properties" element={<AdminProperties />} />
           <Route path="/admin/projects" element={<AdminProjects />} />
+          <Route path="/admin/investments" element={<AdminInvestments />} />
+          <Route path="/admin/developers" element={<AdminDevelopers />} />
           <Route path="/admin/pm-companies" element={<AdminPMCompanies />} />
           <Route path="/admin/contracts" element={<AdminContracts />} />
           <Route path="/admin/restaurants" element={<AdminRestaurants />} />

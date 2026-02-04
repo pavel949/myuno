@@ -3,6 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
+export type ProjectStatus = 'offplan' | 'under_construction' | 'completed';
+
 export interface PropertyProject {
   id: string;
   name_en: string;
@@ -13,6 +15,7 @@ export interface PropertyProject {
   district?: string;
   lat?: number;
   lng?: number;
+  developer_id?: string;
   developer_name?: string;
   year_built?: number;
   total_units?: number;
@@ -23,6 +26,20 @@ export interface PropertyProject {
   infrastructure?: string[];
   is_active?: boolean;
   is_featured?: boolean;
+  // Off-plan specific fields
+  project_status?: ProjectStatus;
+  completion_date?: string;
+  construction_progress?: number;
+  price_from?: number;
+  price_to?: number;
+  investment_enabled?: boolean;
+  funding_goal?: number;
+  min_investment?: number;
+  roi_projected?: number;
+  muuno_score?: number;
+  risk_level?: string;
+  units_available?: number;
+  units_sold?: number;
   created_by?: string;
   created_at?: string;
   updated_at?: string;
@@ -56,6 +73,22 @@ export function usePropertyProjects() {
         .select('*')
         .eq('is_active', true)
         .order('name_en');
+
+      if (error) throw error;
+      return data as PropertyProject[];
+    },
+  });
+}
+
+// Admin: fetch all projects including inactive
+export function useAdminPropertyProjects() {
+  return useQuery({
+    queryKey: ['admin-property-projects'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('property_projects')
+        .select('*')
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       return data as PropertyProject[];
