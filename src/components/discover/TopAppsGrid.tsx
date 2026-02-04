@@ -85,14 +85,16 @@ const TopAppCard = memo(function TopAppCard({ app, isRu, onClick, index }: TopAp
       transition={{ delay: index * 0.05 }}
       whileTap={{ scale: 0.97 }}
       onClick={onClick}
+      type="button"
       className={cn(
         "relative flex flex-col items-start justify-between p-4 rounded-2xl",
         "bg-gradient-to-br border border-border/40",
         "hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5",
         "transition-all duration-200 active:scale-[0.98]",
-        "aspect-[4/3] text-left group",
+        "aspect-[4/3] text-left group cursor-pointer",
         app.gradient
       )}
+      style={{ touchAction: 'manipulation' }}
     >
       {/* Icon */}
       <div className={cn(
