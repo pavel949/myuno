@@ -32,7 +32,7 @@ export function OperationsSection() {
           <Skeleton className="h-5 w-32" />
           <Skeleton className="h-4 w-16" />
         </div>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
           {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-16 rounded-xl" />)}
         </div>
       </div>
@@ -98,7 +98,7 @@ export function OperationsSection() {
       </div>
 
       {/* Task type cards - grid layout */}
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
         {taskCounts.map(({ type, count }) => {
           const config = TASK_TYPE_CONFIG[type] || { icon: CalendarCheck, color: 'text-muted-foreground', bgColor: 'bg-muted', label: type, labelRu: type };
           const Icon = config.icon;

@@ -141,7 +141,7 @@ export default function ServiceRequest() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {serviceTypes.map((type) => (
                 <button
                   key={type.value}

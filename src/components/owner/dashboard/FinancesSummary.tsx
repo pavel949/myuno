@@ -26,7 +26,7 @@ export function FinancesSummary() {
           <Skeleton className="h-5 w-24" />
           <Skeleton className="h-4 w-16" />
         </div>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
           <Skeleton className="h-20 rounded-xl" />
           <Skeleton className="h-20 rounded-xl" />
         </div>
@@ -51,7 +51,7 @@ export function FinancesSummary() {
       </div>
 
       {/* Main metrics */}
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
         {/* Income */}
         <Card className="p-4 bg-gradient-to-br from-success/5 to-transparent border-success/20">
           <div className="flex items-center gap-1.5 mb-1">

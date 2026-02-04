@@ -84,7 +84,7 @@ export default function TeamLeadsPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-2">
           <Card className="p-3 text-center bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200">
             <p className="text-xl font-bold">{stats.pending}</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'Новые' : 'New'}</p>

@@ -482,7 +482,7 @@ export default function PropertyEditor() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label className="flex items-center gap-1">
                       <Bed className="h-3 w-3" />

@@ -274,7 +274,7 @@ export default function PropertyManage() {
               <ChevronLeft className="h-5 w-5" />
             </Button>
             <div className="truncate">
-              <h1 className="text-sm font-medium truncate max-w-[200px]">
+              <h1 className="text-sm font-medium truncate max-w-[150px] xs:max-w-[200px] sm:max-w-none">
                 {isRu && property.title_ru ? property.title_ru : property.title}
               </h1>
               <p className="text-xs text-muted-foreground">

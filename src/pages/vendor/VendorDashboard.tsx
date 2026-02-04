@@ -158,7 +158,7 @@ const VendorDashboard = () => {
     return (
       <div className="p-4 space-y-4">
         <Skeleton className="h-16 w-full" />
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
           {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-20" />)}
         </div>
       </div>
@@ -195,7 +195,7 @@ const VendorDashboard = () => {
       </Card>
 
       {/* KPI Cards with Comparison */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
         <VendorKPICard 
           title={isRu ? 'Выручка' : 'Revenue'} 
           value={formatCurrency(stats.totalRevenue)} 

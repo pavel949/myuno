@@ -97,7 +97,7 @@ export default function TeamDashboard() {
             <CardTitle className="text-sm">{isRu ? 'Быстрые действия' : 'Quick Actions'}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
               {filteredActions.map(action => {
                 const Icon = action.icon;
                 return (
