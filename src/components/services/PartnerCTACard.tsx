@@ -43,7 +43,7 @@ export function PartnerCTACard() {
   return (
     <section className="px-4 py-3">
       <button
-        onClick={() => navigate('/info/become-partner')}
+        onClick={() => navigate('/become-partner')}
         className={cn(
           "relative w-full rounded-2xl overflow-hidden",
           "bg-gradient-to-br from-primary via-primary/90 to-accent",

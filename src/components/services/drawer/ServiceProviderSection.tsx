@@ -27,7 +27,7 @@ export function ProviderSection({ onNavigate }: ServiceProviderSectionProps) {
       
       {/* Become a provider */}
       <button
-        onClick={() => handleNav('/become-provider')}
+        onClick={() => handleNav('/become-partner')}
         className={cn(
           "w-full flex items-center gap-3 px-4 py-3",
           "hover:bg-muted/50 active:bg-muted transition-colors"
@@ -49,7 +49,7 @@ export function ProviderSection({ onNavigate }: ServiceProviderSectionProps) {
       
       {/* Provider dashboard */}
       <button
-        onClick={() => handleNav('/provider/dashboard')}
+        onClick={() => handleNav('/vendor')}
         className={cn(
           "w-full flex items-center gap-3 px-4 py-3",
           "hover:bg-muted/50 active:bg-muted transition-colors"
