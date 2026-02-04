@@ -31,7 +31,7 @@ export const UnifiedFilterRibbon = memo(function UnifiedFilterRibbon({
   scrollable = true,
 }: UnifiedFilterRibbonProps) {
   const containerClass = scrollable 
-    ? "flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1"
+    ? "flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1 touch-pan-y snap-x snap-mandatory"
     : "flex items-center gap-2 flex-wrap";
 
   return (

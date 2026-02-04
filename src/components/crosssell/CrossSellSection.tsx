@@ -56,7 +56,7 @@ export const CrossSellSection = memo(function CrossSellSection({
       </div>
 
       {variant === 'scroll' ? (
-        <div className="flex gap-3 pb-2 overflow-x-auto scrollbar-hide -mx-4 px-4 touch-pan-x snap-x snap-mandatory">
+        <div className="flex gap-3 pb-2 overflow-x-auto scrollbar-hide -mx-4 px-4 touch-pan-y snap-x snap-mandatory">
           {links.map((link, index) => (
             <div key={link.id} className="w-[110px] flex-shrink-0 snap-start touch-manipulation">
               <CrossSellCard

@@ -113,7 +113,7 @@ export const ProductSection = forwardRef<HTMLElement, ProductSectionProps>(funct
 
       {/* Products */}
       {variant === 'scroll' ? (
-        <div className="flex gap-3 overflow-x-auto pb-3 -mx-4 px-4 scrollbar-hide snap-x snap-mandatory">
+        <div className="flex gap-3 overflow-x-auto pb-3 -mx-4 px-4 scrollbar-hide snap-x snap-mandatory touch-pan-y">
           {displayProducts.map((product, index) => (
             <div 
               key={product.id} 

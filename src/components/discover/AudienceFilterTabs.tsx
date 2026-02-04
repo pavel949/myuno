@@ -32,8 +32,7 @@ export const AudienceFilterTabs = memo(function AudienceFilterTabs({
 }: AudienceFilterTabsProps) {
   return (
     <div 
-      className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide touch-pan-x"
-      style={{ scrollSnapType: 'x mandatory' }}
+      className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide touch-pan-y snap-x snap-mandatory"
     >
       {TABS.map((tab) => {
         const Icon = tab.icon;
