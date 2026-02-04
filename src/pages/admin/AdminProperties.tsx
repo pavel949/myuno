@@ -41,6 +41,7 @@ import {
 } from 'lucide-react';
 import { AirbnbStyleImageUpload } from '@/components/upload/AirbnbStyleImageUpload';
 import { PropertyCard } from '@/components/property/PropertyCard';
+import { HighlightsSection } from '@/components/owner/property-manage/HighlightsSection';
 import { 
   PROPERTY_TYPES as TAXONOMY_PROPERTY_TYPES, 
   PHUKET_DISTRICTS,
@@ -125,11 +126,12 @@ export default function AdminProperties() {
     lat: '',
     lng: '',
     cover_image: '',
-    images: [] as string[],
-    amenities: [] as string[],
-    instant_booking: false,
-    is_active: true,
-  });
+      images: [] as string[],
+      amenities: [] as string[],
+      highlights: [] as string[],
+      instant_booking: false,
+      is_active: true,
+    });
 
   const isRussian = language === 'ru';
 
@@ -169,6 +171,7 @@ export default function AdminProperties() {
       cover_image: '',
       images: [],
       amenities: [],
+      highlights: [],
       instant_booking: false,
       is_active: true,
     });
@@ -200,6 +203,7 @@ export default function AdminProperties() {
       cover_image: property.cover_image || '',
       images: property.images || [],
       amenities: property.amenities || [],
+      highlights: (property as any).highlights || [],
       instant_booking: (property as any).instant_booking ?? false,
       is_active: property.is_active ?? true,
     });
@@ -238,6 +242,7 @@ export default function AdminProperties() {
         cover_image: formData.cover_image || undefined,
         images: formData.images.length > 0 ? formData.images : undefined,
         amenities: formData.amenities.length > 0 ? formData.amenities : undefined,
+        highlights: formData.highlights.length > 0 ? formData.highlights : undefined,
         instant_booking: formData.instant_booking,
         is_active: formData.is_active,
       };
@@ -609,6 +614,12 @@ export default function AdminProperties() {
                   ))}
                 </div>
               </div>
+
+              {/* Property Highlights - Dynamic from lookup_values */}
+              <HighlightsSection
+                highlights={formData.highlights}
+                onChange={(highlights) => setFormData(prev => ({ ...prev, highlights }))}
+              />
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
