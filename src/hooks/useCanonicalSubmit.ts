@@ -93,9 +93,9 @@ export function useCanonicalSubmit({
         }
       });
       
-      const { data: existing, error } = await query.limit(1).single();
+      const { data: existing, error } = await query.limit(1).maybeSingle();
       
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('Duplicate check error:', error);
         return false;
       }
@@ -235,6 +235,8 @@ export function useCanonicalSubmit({
     onSuccess,
     onError,
     isRu,
+    isAdmin,
+    user?.id,
   ]);
   
   /**
