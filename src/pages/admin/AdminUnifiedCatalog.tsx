@@ -38,13 +38,13 @@ export default function AdminUnifiedCatalog() {
         
         {/* Provider Selector + Create Menu */}
         <div className="flex items-center gap-2">
-          <Select value={selectedProviderId} onValueChange={setSelectedProviderId}>
+          <Select value={selectedProviderId || '_all'} onValueChange={(v) => setSelectedProviderId(v === '_all' ? '' : v)}>
             <SelectTrigger className="w-[220px]">
               <Building2 className="h-4 w-4 mr-2 text-muted-foreground" />
               <SelectValue placeholder={isRussian ? 'Выберите провайдера' : 'Select provider'} />
             </SelectTrigger>
             <SelectContent className="max-h-[300px]">
-              <SelectItem value="">
+              <SelectItem value="_all">
                 {isRussian ? 'Все провайдеры' : 'All providers'}
               </SelectItem>
               {providers.map((provider) => (
