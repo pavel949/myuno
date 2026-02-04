@@ -2,6 +2,7 @@
  * SuperAppCatalogAccordion
  * Taxonomy-driven catalog accordion for the Super-App drawer
  * Uses useSuperAppCatalog to display all verticals from the canonical taxonomy system
+ * Icons rendered via IconBadge for professional Lucide icons
  */
 
 import React from 'react';
@@ -16,21 +17,23 @@ import {
 } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { IconBadge, InlineIcon } from '@/components/ui/IconBadge';
 import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // Vertical gradient colors for visual distinction
 const VERTICAL_GRADIENTS: Record<string, string> = {
-  yachts: 'from-blue-500/20 to-cyan-500/10',
-  tours: 'from-amber-500/20 to-orange-500/10',
-  restaurants: 'from-rose-500/20 to-pink-500/10',
-  property: 'from-emerald-500/20 to-green-500/10',
-  transport: 'from-indigo-500/20 to-violet-500/10',
-  home_services: 'from-amber-500/20 to-yellow-500/10',
-  salons: 'from-pink-500/20 to-purple-500/10',
-  medical: 'from-teal-500/20 to-emerald-500/10',
-  pets: 'from-orange-500/20 to-amber-500/10',
-  events: 'from-purple-500/20 to-indigo-500/10',
+  yachts: 'from-blue-500 to-cyan-400',
+  tours: 'from-amber-500 to-orange-400',
+  restaurants: 'from-rose-500 to-pink-400',
+  property: 'from-emerald-500 to-green-400',
+  transport: 'from-indigo-500 to-violet-400',
+  home_services: 'from-amber-500 to-yellow-400',
+  salons: 'from-pink-500 to-purple-400',
+  medical: 'from-teal-500 to-emerald-400',
+  pets: 'from-orange-500 to-amber-400',
+  events: 'from-purple-500 to-indigo-400',
+  general: 'from-primary to-accent',
 };
 
 interface SuperAppCatalogAccordionProps {
@@ -55,7 +58,7 @@ export function SuperAppCatalogAccordion({ searchQuery, onNavigate }: SuperAppCa
       <div className="px-4 py-2 space-y-3">
         {[1, 2, 3, 4, 5].map(i => (
           <div key={i} className="flex items-center gap-3">
-            <Skeleton className="w-9 h-9 rounded-xl" />
+            <Skeleton className="w-10 h-10 rounded-xl" />
             <Skeleton className="h-4 w-32" />
           </div>
         ))}
@@ -92,7 +95,7 @@ function CatalogSectionItem({
   section: CatalogSection;
   onItemClick: (path: string) => void;
 }) {
-  const gradient = VERTICAL_GRADIENTS[section.vertical] || 'from-primary/20 to-primary/10';
+  const gradient = VERTICAL_GRADIENTS[section.vertical] || 'from-primary to-accent';
   const hasChildren = section.children.length > 0;
   const childCount = section.hasHierarchy 
     ? section.children.reduce((acc, c) => acc + (c.children?.length || 1), 0)
@@ -109,12 +112,12 @@ function CatalogSectionItem({
           "text-left border-0"
         )}
       >
-        <div className={cn(
-          "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-lg",
-          `bg-gradient-to-br ${gradient}`
-        )}>
-          {section.icon}
-        </div>
+        <IconBadge 
+          icon={section.icon} 
+          size="sm" 
+          variant="gradient" 
+          gradient={gradient}
+        />
         <span className="flex-1 font-medium text-sm">
           {section.nameRu}
         </span>
@@ -132,12 +135,12 @@ function CatalogSectionItem({
         )}
       >
         <div className="flex items-center gap-3 flex-1">
-          <div className={cn(
-            "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-lg",
-            `bg-gradient-to-br ${gradient}`
-          )}>
-            {section.icon}
-          </div>
+          <IconBadge 
+            icon={section.icon} 
+            size="sm" 
+            variant="gradient" 
+            gradient={gradient}
+          />
           <span className="font-medium text-sm">
             {section.nameRu}
           </span>
@@ -203,9 +206,11 @@ function CatalogHierarchyItems({
               )}
             >
               <div className="flex items-center gap-3 flex-1">
-                <div className="w-7 h-7 rounded-lg bg-muted/50 flex items-center justify-center shrink-0">
-                  <span className="text-sm">{parent.icon}</span>
-                </div>
+                <IconBadge 
+                  icon={parent.icon || '📁'} 
+                  size="xs" 
+                  variant="muted"
+                />
                 <span className="flex-1 text-sm text-muted-foreground">
                   {parent.label}
                 </span>
@@ -254,9 +259,14 @@ function CatalogItemButton({
       )}
     >
       {!isNested && item.icon && (
-        <div className="w-7 h-7 rounded-lg bg-muted/50 flex items-center justify-center shrink-0">
-          <span className="text-sm">{item.icon}</span>
-        </div>
+        <IconBadge 
+          icon={item.icon} 
+          size="xs" 
+          variant="muted"
+        />
+      )}
+      {isNested && item.icon && (
+        <InlineIcon icon={item.icon} size="xs" className="text-muted-foreground" />
       )}
       <span className={cn(
         "flex-1",
@@ -274,7 +284,7 @@ function CatalogItemButton({
           HOT
         </Badge>
       )}
-      <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+      <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
     </button>
   );
 }
