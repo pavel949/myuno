@@ -7,6 +7,7 @@ import { useUserContext } from '@/hooks/useUserContext';
 import { openWhatsApp } from '@/hooks/useChat';
 import { format } from 'date-fns';
 import { createErrorHandler } from '@/lib/errorHandler';
+import { getLocalizedRpcError, isRpcError } from '@/lib/rpcErrorMessages';
 import type { Database } from '@/integrations/supabase/types';
 
 const errorLog = createErrorHandler('useOrders');
@@ -254,13 +255,18 @@ export function useOrders() {
           p_payment_amount: input.payment?.amount || null,
         });
 
-      if (orderError) throw orderError;
+      if (orderError) {
+        // P0 FIX: Better error handling with localized messages
+        const errorMessage = getLocalizedRpcError(orderError, language as 'en' | 'ru');
+        throw new Error(errorMessage);
+      }
       
       // Type assertion for RPC result
       const result = orderResult as { success: boolean; order_id?: string; order_number?: string; error?: string };
       
       if (!result.success) {
-        throw new Error(result.error || 'Failed to create order');
+        const errorMessage = getLocalizedRpcError(result.error || 'order_creation_failed', language as 'en' | 'ru');
+        throw new Error(errorMessage);
       }
 
       const orderId = result.order_id!;
@@ -335,7 +341,13 @@ export function useOrders() {
     },
     onError: (error) => {
       errorLog.error(error, 'create_order');
-      toast({ title: t('order.error'), variant: 'destructive' });
+      // P0 FIX: Use localized error message instead of generic one
+      const localizedError = getLocalizedRpcError(error, language as 'en' | 'ru');
+      toast({ 
+        title: t('order.error'), 
+        description: localizedError,
+        variant: 'destructive' 
+      });
     },
   });
 
