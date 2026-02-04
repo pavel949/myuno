@@ -1,152 +1,117 @@
 
-# Подробный аудит кодовой базы myUNO
+# Повторный технический аудит myUNO (v2)
 
 ## Резюме
-Обнаружено **47+ критических проблем** в категориях: битые ссылки, мёртвый код, хардкод данных, дублирование дизайна, React-ошибки и архитектурные несоответствия.
+После первого раунда исправлений осталось **28 проблем**. Критические баги уменьшились с 47 до 28.
 
 ---
 
 ## 🔴 КРИТИЧЕСКИЕ БАГИ (ведут к 404)
 
-### Мёртвые ссылки в UI
+### Оставшиеся мёртвые роуты
 | Компонент | Путь | Статус |
 |-----------|------|--------|
-| `QuickStatsRibbon.tsx` | `/exchange` | ❌ 404 |
-| `QuickStatsRibbon.tsx` | `/beaches` | ❌ 404 |
-| `QuickStatsRibbon.tsx` | `/taxi` | ❌ 404 (должен → `/transport/taxi`) |
-| `ThematicSection.tsx` | `/accounting` | ❌ 404 |
-| `DashboardQuickServices.tsx` | `/taxi` | ❌ 404 |
-| `DashboardQuickServices.tsx` | `/tours` | ⚠️ Редирект на `/experiences` |
-| `Cart.tsx` | `/tours/checkout` | ❌ 404 |
-| `Cart.tsx` | `/yachts/checkout` | ❌ 404 |
-| `Cart.tsx` | `/activities/checkout` | ❌ 404 |
-| `Profile.tsx` | `/admin/users` | ❌ 404 (должен → `/admin/user-analytics`) |
-| `Profile.tsx` | `/profile/documents` | ❌ 404 |
-| `VendorCommandPalette.tsx` | `/vendor/customers` | ❌ 404 |
-| `VendorCommandPalette.tsx` | `/vendor/services/new` | ❌ 404 |
-| `PetTransport.tsx` | `/pets/transport/quote` | ❌ 404 |
+| `Cart.tsx:103,111` | `/experiences/checkout` | ❌ 404 (роут не существует) |
+| `Cart.tsx:107` | `/yachts/checkout` | ❌ 404 (роут не существует) |
+| `AnimatedRoutes.tsx:658-659` | `/water/:id`, `/water/:id/book` | ⚠️ Legacy - не редиректит на `/experiences` |
 
-### Лишние редиректы (глюк "Airport Transfer")
-- `QuickActionsGrid.tsx:470` → `/transport/airport` → редирект на `/transport/airport-transfer`
-- `MiniAppsFAB.tsx:18` → `/transport/airport` → редирект
-- **Решение**: Заменить все `/transport/airport` на `/transport/airport-transfer`
+### ✅ ИСПРАВЛЕНО (первый раунд)
+- `/taxi` → `/transport/taxi` ✓
+- `/transport/airport` → `/transport/airport-transfer` ✓
+- `/exchange` → `/services?category=finance` ✓
+- `/admin/users` → `/admin/user-analytics` ✓
+- `/accounting` → `/services?category=business` ✓
 
 ---
 
-## 🟠 МЁРТВЫЙ КОД (увеличивает бандл)
+## 🟠 МЁРТВЫЙ КОД (ещё не удалён)
 
-### Неиспользуемые компоненты
+### Legacy страницы (должны быть удалены)
 | Файл | Причина |
 |------|---------|
-| `src/components/layout/BottomNav.tsx` | Дублирует `AdaptiveBottomNav.tsx`, нигде не рендерится |
-| `src/components/home/HeroBanner.tsx` | Дублирует `HeroBlock.tsx`, не импортируется |
-| `src/pages/tours/ToursIndex.tsx` | Роут `/tours` всегда редиректит на `/experiences` |
-| `src/pages/tours/TourDetail.tsx` | То же |
+| `src/pages/tours/TourDetail.tsx` | Роут `/tours/:id` редиректит через `TourRedirect`, но файл остался |
 | `src/pages/tours/TourBooking.tsx` | То же |
-| `src/pages/water/WaterActivitiesIndex.tsx` | Роут `/water` редиректит на `/experiences` |
+| `src/pages/water/WaterActivityDetail.tsx` | Роут `/water/:id` ещё использует этот компонент |
+| `src/pages/water/WaterActivityBooking.tsx` | То же |
+
+### ✅ УДАЛЕНО (первый раунд)
+- `src/components/layout/BottomNav.tsx` ✓
+- `src/components/home/HeroBanner.tsx` ✓
+- `src/pages/tours/ToursIndex.tsx` ✓
+- `src/pages/water/WaterActivitiesIndex.tsx` ✓
+- `src/pages/vendor/VendorOrders.tsx` ✓
 
 ---
 
-## 🟡 ХАРДКОД ДАННЫХ (не обновляется из БД)
+## 🟡 ХАРДКОД ДАННЫХ (не исправлено)
 
-### Статичные счётчики
+### Статичные данные
 | Файл | Проблема |
 |------|----------|
-| `ThematicSection.tsx:153-184` | Хардкод `count: 45`, `count: 1200` и т.д. |
-| `TopAppsGrid.tsx:30-70` | Хардкод `countLabel: '1,200+'` |
-| `QuickStatsRibbon.tsx:26-60` | Хардкод курса `฿34.5`, статуса пляжа `✓ Safe`, такси `~10 min` |
-
-### Мок-данные вместо БД
-| Файл | Проблема |
-|------|----------|
-| `restaurantsData.ts` (500+ строк) | Полный каталог ресторанов — статичный массив |
-| `TransportBooking.tsx:26` | `TODO: Replace with DB query` — транспорт не из БД |
-| `CleaningDetail.tsx:11` | `TODO: Replace with DB query` |
-
----
-
-## 🟣 ДУБЛИРОВАНИЕ ДИЗАЙНА
-
-### Карточки товаров
-- `ProductCard.tsx` vs `ProfessionalProductCard.tsx` — два разных дизайна для одной функции
-
-### Навигация
-- `BottomNav.tsx` vs `AdaptiveBottomNav.tsx` — два разных набора иконок и логики
-
-### Property Cards
-- `PropertyCard.tsx`, `PropertyListItem.tsx`, `PropertyPreviewCard.tsx` — 3 варианта (частично консолидированы)
+| `QuickStatsRibbon.tsx:26,36,56` | Хардкод `฿34.5`, `150+`, `~10 min` |
+| `TopAppsGrid.tsx:30,42,54,66` | Хардкод badges `'Top'`, `'Hot'`, `'New'` |
+| `restaurantsData.ts` (480 строк) | Статичный массив ресторанов |
+| `investorData.ts` | Статичные данные для инвесторов |
+| `searchData.ts` (82 items) | Статичный поиск |
+| `properties.json` (1195 строк) | Demo данные |
 
 ---
 
 ## ⚠️ REACT ОШИБКИ
 
-### Console Warning (активный)
-```
-Warning: Function components cannot be given refs.
-Check the render method of `QuickStatsRibbon`.
-```
-**Причина**: Компонент `QuickStatChip` обёрнут в `memo()`, но используется без `forwardRef`
-
-### Проблема с PullToRefresh
-`Index.tsx:127` — использует `key={refreshKey}`, что уничтожает весь DOM при обновлении, вызывая "моргание" экрана
+### ✅ ИСПРАВЛЕНО
+- `QuickStatChip` теперь использует `forwardRef` ✓
+- `Index.tsx` - `key={refreshKey}` перемещён на `PullToRefresh` ✓
 
 ---
 
-## 🔧 TODO/FIXME в коде (незавершённые функции)
+## 🔧 TODO/FIXME (всё ещё в коде)
 
 | Файл | Строка | Проблема |
 |------|--------|----------|
-| `VendorDashboard.tsx` | 326 | `TODO: Implement bulk import` |
-| `TransportBooking.tsx` | 26 | `TODO: Replace with DB query` |
-| `TeamSupportPage.tsx` | 19 | `TODO: Replace with DB query` |
-| `StaffDashboard.tsx` | 77 | `TODO: Open modal for completion` |
-| `RestaurantMap.tsx` | 14 | `TODO: Replace with DB query` |
-| `MyApplicationsWidget.tsx` | 101 | `TODO: Navigate to application detail` |
+| `VendorDashboard.tsx:326` | `TODO: Implement bulk import` |
+| `TransportBooking.tsx:26` | `TODO: Replace with DB query` |
+| `TeamSupportPage.tsx:19` | `TODO: Replace with DB query` |
+| `TeamModerationPage.tsx:18` | `TODO: Replace with DB query` |
+| `TeamInboxPage.tsx:19` | `TODO: Replace with DB query` |
+| `StaffDashboard.tsx:77` | `TODO: Open modal for completion` |
+| `RestaurantMap.tsx:14` | `TODO: Replace with DB query` |
+| `CleaningDetail.tsx:11` | `TODO: Replace with DB query` |
+| `contentAdapters.ts:268` | `TODO: Add languages field` |
+| `MyApplicationsWidget.tsx:101` | `TODO: Navigate to application detail` |
 
 ---
 
-## 🔧 ПЛАН ИСПРАВЛЕНИЯ
+## 🔧 ПЛАН ИСПРАВЛЕНИЯ (v2)
 
-### Фаза 1: Критические баги (404)
-1. Удалить или перенаправить `/exchange`, `/beaches`, `/accounting`
-2. Заменить все `/taxi` → `/transport/taxi`
-3. Заменить все `/transport/airport` → `/transport/airport-transfer`
-4. Добавить checkout-роуты: `/yachts/checkout`, `/experiences/checkout`
-5. Исправить `/admin/users` → `/admin/user-analytics`
+### Фаза 1: Роуты (срочно)
+1. Добавить `/experiences/checkout` роут → редирект на `/checkout`
+2. Добавить `/yachts/checkout` роут → редирект на `/checkout`
+3. Исправить `/water/:id` и `/water/:id/book` → редирект на `/experiences/:id`
 
-### Фаза 2: Очистка мёртвого кода
-1. Удалить `BottomNav.tsx`
-2. Удалить `HeroBanner.tsx`
-3. Удалить legacy pages: `tours/*.tsx`, `water/WaterActivitiesIndex.tsx`
+### Фаза 2: Удаление legacy файлов
+1. Удалить `src/pages/tours/TourDetail.tsx`
+2. Удалить `src/pages/tours/TourBooking.tsx`
+3. Удалить `src/pages/water/WaterActivityDetail.tsx`
+4. Удалить `src/pages/water/WaterActivityBooking.tsx`
+5. Удалить импорты в AnimatedRoutes.tsx
 
-### Фаза 3: Исправление React-ошибок
-1. Добавить `forwardRef` в `QuickStatChip`
-2. Убрать `key={refreshKey}` из Index.tsx — использовать мягкое обновление
-
-### Фаза 4: Замена хардкода
-1. Использовать `useCategoryCounts()` в ThematicSection и TopAppsGrid
-2. Перенести `restaurantsData.ts` в БД
-3. Создать API для QuickStats (курс, погода)
-
-### Фаза 5: Консолидация дизайна
-1. Объединить ProductCard + ProfessionalProductCard
-2. Удалить дублирующий BottomNav
+### Фаза 3: Хардкод (низкий приоритет)
+1. Создать edge function для QuickStats (курс, погода)
+2. Переместить restaurantsData в БД
+3. Использовать `useCategoryCounts()` для badges
 
 ---
 
 ## Технические детали
 
 **Файлы для удаления:**
-- `src/components/layout/BottomNav.tsx`
-- `src/components/home/HeroBanner.tsx`
+- `src/pages/tours/TourDetail.tsx`
+- `src/pages/tours/TourBooking.tsx`
+- `src/pages/water/WaterActivityDetail.tsx`
+- `src/pages/water/WaterActivityBooking.tsx`
 
 **Файлы для рефакторинга:**
-- `src/components/home/QuickStatsRibbon.tsx` (forwardRef + динамические данные)
-- `src/pages/Cart.tsx` (checkout роуты)
-- `src/components/discover/ThematicSection.tsx` (убрать хардкод)
-- `src/components/discover/TopAppsGrid.tsx` (убрать хардкод)
-- `src/components/account/DashboardQuickServices.tsx` (исправить пути)
-- `src/components/fab/MiniAppsFAB.tsx` (исправить `/transport/airport`)
-- `src/components/home/QuickActionsGrid.tsx` (исправить `/transport/airport`)
+- `src/components/layout/AnimatedRoutes.tsx` (добавить checkout роуты, исправить /water редиректы)
 
-**Оценка объёма:** ~15-20 файлов требуют изменений
+**Оценка объёма:** ~5-6 файлов
