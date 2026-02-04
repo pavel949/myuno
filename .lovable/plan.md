@@ -1,244 +1,269 @@
 
-
-# Редизайн каталога как Супер-Апп — Полная логика
+# План: Рефакторинг каталога на каноническую таксономию
 
 ## Проблема
-Текущий `ServiceCategoryDrawer` позиционируется как "каталог домашних услуг" (🔧 Wrench, текст "мастера"), хотя `useCategories()` уже возвращает **ВСЕ 39 категорий** супер-аппа включая:
-- 🛥️ Яхты и лодки (Travel & Transport)
-- ✈️ Туры и экскурсии (Travel & Transport)
-- 🍽️ Рестораны (Lifestyle & Leisure)
-- 🎭 Мероприятия (Lifestyle & Leisure)
-- 🏥 Медицина (Health & Care)
-- и т.д.
+Текущий `ServiceCategoryAccordion` использует неправильный источник данных:
+- **Сейчас**: `useCategories()` → таблицы `category_groups` + `categories` (вертикали платформы)
+- **Должно быть**: `useTaxonomy()` / `useTaxonomyHierarchy()` → таблица `lookup_values` (справочник)
 
-## Решение: Супер-Апп Каталог
+Хардкод `GROUP_ICONS` и `GROUP_GRADIENTS` — антипаттерн, данные должны идти из БД.
 
-### Новая структура каталога
+---
+
+## Архитектура канонической системы
+
+```text
+taxonomy_definitions (мета-справочник)
+├── type_key: "home_service_domain"    → icon: "🏠", vertical: "home_services"
+├── type_key: "home_service_category"  → icon: "🔧", vertical: "home_services"  
+├── type_key: "yacht_type"             → icon: "🛥️", vertical: "yachts"
+├── type_key: "tour_type"              → icon: "✈️", vertical: "tours"
+├── type_key: "cuisine"                → icon: "🍽️", vertical: "restaurants"
+└── ...
+
+lookup_values (справочник значений)
+├── lookup_type: "home_service_domain"
+│   ├── maintenance (Ремонт) → icon: "🏠"
+│   ├── cleaning (Уборка)    → icon: "✨"
+│   ├── outdoor (Двор)       → icon: "🌿"
+│   └── logistics (Переезд)  → icon: "🚚"
+│
+└── lookup_type: "home_service_category"
+    ├── handyman   → metadata: {domain: "maintenance"}
+    ├── plumbing   → metadata: {domain: "maintenance"}
+    ├── electrical → metadata: {domain: "maintenance"}
+    ├── home-cleaning → metadata: {domain: "cleaning"}
+    └── ...
+```
+
+---
+
+## Решение: Новый SuperAppCatalogAccordion
+
+### Структура каталога (по вертикалям)
 
 ```text
 ┌─────────────────────────────────────────────────────┐
-│  HEADER: 🌟 myUNO Каталог                          │
-│  "Все сервисы для жизни за рубежом"                │
-├─────────────────────────────────────────────────────┤
-│  🔍 Поиск по всем категориям...                    │
-├─────────────────────────────────────────────────────┤
 │  ⚡ БЫСТРЫЙ ДОСТУП                                  │
-│  🔥 Акции и скидки                                  │
-│  ⭐ Популярное сегодня                              │
-│  ❤️ Избранное (3)                                   │
-│  🕐 История                                         │
+│  🔥 Акции | ⭐ Популярное | ❤️ Избранное | 📅 Мои записи│
 ├─────────────────────────────────────────────────────┤
-│  📍 ВСЕ СЕРВИСЫ (из БД)                            │
+│  📍 ВСЕ ВЕРТИКАЛИ (из taxonomy_definitions)         │
 │                                                     │
-│  ▼ Lifestyle & Leisure (5)                         │
-│     🍽️ Рестораны                                   │
-│     💅 Красота и СПА                               │
-│     🎭 Мероприятия                                 │
-│     🛒 Маркетплейс                                 │
-│     🍕 Доставка еды                                │
+│  ▼ 🛥️ Яхты                                          │
+│     └── yacht_type: [Катамаран, Спидбот, ...]       │
 │                                                     │
-│  ▼ Travel & Transport (2)                          │
-│     🛥️ Яхты и лодки         ⭐HOT                  │
-│     🧳 Экскурсии                                   │
+│  ▼ ✈️ Туры                                          │
+│     └── tour_type: [Острова, Сафари, ...]           │
 │                                                     │
-│  ▼ Water Sports (1)                                │
-│     🏄 Водный спорт                                │
+│  ▼ 🍽️ Рестораны                                     │
+│     └── cuisine: [Тайская, Итальянская, ...]        │
 │                                                     │
-│  ▼ Health & Care (4)                               │
-│     🏥 Медицина                                    │
-│     💊 Аптека                                      │
-│     🐕 Питомцы                                     │
-│     🏋️ Фитнес                                     │
+│  ▼ 🔧 Домашние услуги                               │
+│     ├── 🏠 Ремонт                                   │
+│     │   └── [Сантехник, Электрик, Кондиционеры...]  │
+│     ├── ✨ Уборка                                   │
+│     │   └── [Уборка дома, Генеральная, Прачечная...] │
+│     ├── 🌿 Двор                                     │
+│     │   └── [Садовник, Бассейн, Мойка...]           │
+│     └── 🚚 Переезд                                  │
+│         └── [Переезд, Доставка воды, Авто...]       │
 │                                                     │
-│  ▼ Home & Services (16)                            │
-│     🏠 Недвижимость                                │
-│     🧹 Уборка                                      │
-│     🔧 Сантехника, Электрика...                    │
+│  ▼ 🚗 Транспорт                                     │
+│     └── vehicle_type: [Авто, Мото, Велосипед...]    │
 │                                                     │
-│  ▼ Expat Services (4)                              │
-│     🏦 Банки и финансы                             │
-│     📋 Визы и иммиграция                           │
-│     ...                                             │
+│  ▼ 🏥 Медицина                                      │
+│     └── (простой переход)                           │
 │                                                     │
-│  ▼ Professional (4)                                │
-│     ⚖️ Юридические                                 │
-│     🎓 Образование                                 │
-│     ...                                             │
-│                                                     │
-│  ▼ Quick Services (3)                              │
-│     🚗 Трансферы                                   │
-│     🚙 Аренда транспорта                           │
-│     💐 Цветы                                       │
-├─────────────────────────────────────────────────────┤
-│  👨‍💼 ДЛЯ ПАРТНЁРОВ                                │
-│  🏪 Стать продавцом                                 │
-│  🔧 Стать исполнителем                              │
-├─────────────────────────────────────────────────────┤
-│  FOOTER: RU/EN | v2.5.0                            │
+│  ... (другие вертикали)                             │
 └─────────────────────────────────────────────────────┘
 ```
 
-### Типы сервисов (Service Types) — Бизнес-логика
-
-Для понимания flow покупателя, каждая категория имеет тип:
-
-| Тип | Описание | Flow | Примеры |
-|-----|----------|------|---------|
-| `booking` | Бронирование на дату/время | Calendar → Slots → Pay | Яхты, Туры, Рестораны, Отели |
-| `order` | Заказ с доставкой | Cart → Checkout → Deliver | Цветы, Аптека, Маркетплейс |
-| `request` | Запрос услуги | Form → Match → Contact | Сантехник, Электрик, Юрист |
-| `subscription` | Подписка | Plan → Pay → Access | Фитнес, Образование |
-| `consultation` | Консультация | Request → Call → Follow-up | Медицина, Страхование, Визы |
-
-Это определяется полем `mini_app_type` в БД + маппинг:
-
-```typescript
-const SERVICE_FLOW_MAP: Record<string, ServiceFlowType> = {
-  'yachts': 'booking',
-  'tours': 'booking',
-  'restaurants': 'booking',
-  'property': 'booking',
-  'flowers': 'order',
-  'pharmacy': 'order',
-  'marketplace': 'order',
-  'market': 'order',
-  'services': 'request',  // Home services
-  'cleaning': 'request',
-  'plumbing': 'request',
-  'medical': 'consultation',
-  'legal': 'consultation',
-  'fitness': 'subscription',
-  'education': 'subscription',
-};
-```
-
 ---
 
-## Изменения
+## Файлы для создания
 
-### Фаза 1: Обновить ServiceCategoryDrawer
-
-**Файл**: `src/components/services/ServiceCategoryDrawer.tsx`
-
-Изменения:
-- Иконка: `Wrench` → `Sparkles` или `Grid3X3` (универсальный каталог)
-- Заголовок: "Каталог услуг" → "myUNO Каталог"
-- Подзаголовок: "Все категории услуг" → "Все сервисы для жизни"
-
-### Фаза 2: Редизайн ServiceCategoryAccordion
-
-**Файл**: `src/components/services/drawer/ServiceCategoryAccordion.tsx`
-
-Изменения:
-- Использовать **иконку категории** из БД вместо generic Sparkles
-- Добавить **счётчик провайдеров/услуг** для каждой категории
-- Показывать бейджи `NEW`, `HOT` более заметно
-
-```tsx
-// Использовать иконку из category, а не generic Sparkles
-const Icon = category.icon; // Уже есть в useCategories!
-
-<div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10">
-  <Icon className="w-5 h-5 text-primary" />
-</div>
-```
-
-### Фаза 3: Редизайн QuickAccess — Универсальные ссылки
-
-**Файл**: `src/components/services/drawer/ServiceQuickAccess.tsx`
-
-Убрать ссылки только на `/services` (мастера), добавить универсальные:
-
-```tsx
-const links = [
-  { icon: Flame, label: 'Акции', path: '/discover?filter=deals' },
-  { icon: TrendingUp, label: 'Популярное', path: '/discover?filter=popular' },
-  { icon: Clock, label: 'История', path: '/history' },
-  { icon: Heart, label: 'Избранное', path: '/favorites' },
-  { icon: CalendarCheck, label: 'Мои бронирования', path: '/bookings' }, // NEW
-];
-```
-
-### Фаза 4: Редизайн QuickServiceIcons — Топ-категории супер-аппа
-
-**Файл**: `src/components/services/QuickServiceIcons.tsx`
-
-Убрать хардкод домашних услуг, показывать **топ категории по популярности**:
-
-```tsx
-// БЫЛО: хардкод cleaning, plumbing...
-const SERVICE_SLUGS = ['cleaning', 'plumbing', 'electrical', ...];
-
-// СТАНЕТ: топ категории из всех вертикалей
-const TOP_CATEGORIES = [
-  'yachts',      // 🛥️ Яхты
-  'tours',       // ✈️ Туры  
-  'restaurants', // 🍽️ Рестораны
-  'transport',   // 🚗 Транспорт
-  'beauty-spa',  // 💅 Красота
-  'cleaning',    // 🧹 Уборка
-  'medical',     // 🏥 Медицина
-  'flowers',     // 💐 Цветы
-];
-
-// Или загружать из БД: is_featured = true, сортировать по популярности
-```
-
-### Фаза 5: Добавить иконки групп
-
-В `ServiceCategoryAccordion` каждая группа использует generic `Sparkles`. Нужен маппинг:
-
-```tsx
-const GROUP_ICONS: Record<string, LucideIcon> = {
-  'lifestyle': Sparkles,
-  'travel': Plane,
-  'water': Waves,
-  'health': Heart,
-  'home': Home,
-  'expat-services': Globe,
-  'professional': Briefcase,
-  'quick-services': Zap,
-};
-```
-
----
+| Файл | Описание |
+|------|----------|
+| `src/components/services/drawer/SuperAppCatalogAccordion.tsx` | Новый аккордеон на основе `useTaxonomyDefinitions` + `useTaxonomyHierarchy` |
+| `src/hooks/useSuperAppCatalog.ts` | Хук для агрегации данных каталога из разных таксономий |
 
 ## Файлы для редактирования
 
 | Файл | Изменения |
 |------|-----------|
-| `src/components/services/ServiceCategoryDrawer.tsx` | Новый header (иконка, заголовок) |
-| `src/components/services/drawer/ServiceCategoryAccordion.tsx` | Иконки категорий + иконки групп |
-| `src/components/services/drawer/ServiceQuickAccess.tsx` | Универсальные ссылки |
-| `src/components/services/QuickServiceIcons.tsx` | Топ-категории супер-аппа |
-| `src/hooks/useCategories.ts` | Добавить groupIcon в CategoryGroup |
+| `src/components/services/ServiceCategoryDrawer.tsx` | Заменить `ServiceCategoryAccordion` на `SuperAppCatalogAccordion` |
+| `src/components/services/drawer/index.ts` | Экспорт нового компонента |
 
 ---
 
-## Визуальные улучшения (Klook/Airbnb уровень)
+## Детали реализации
 
-1. **Группы с цветовым кодированием**:
-   - Lifestyle: Фиолетовый gradient
-   - Travel: Синий gradient
-   - Health: Зелёный gradient
-   - Home: Amber gradient
+### 1. Хук `useSuperAppCatalog.ts`
 
-2. **Анимации**:
-   - Плавное раскрытие аккордеона (framer-motion)
-   - Hover эффекты на категориях
+```typescript
+// Агрегирует данные из taxonomy_definitions и lookup_values
+// для построения структуры каталога
 
-3. **Счётчики**:
-   - Количество провайдеров/услуг в каждой категории
-   - Бейджи: "50+ мастеров", "Открыто сейчас"
+export function useSuperAppCatalog() {
+  const { groupedByVertical } = useTaxonomyDefinitions();
+  
+  // Для каждой вертикали загружаем её категории
+  const yachtTypes = useTaxonomy('yacht_type');
+  const tourTypes = useTaxonomy('tour_type');
+  const cuisines = useTaxonomy('cuisine');
+  const serviceDomains = useTaxonomy('home_service_domain');
+  const serviceCategories = useTaxonomy('home_service_category');
+  const vehicleTypes = useTaxonomy('vehicle_type');
+  // ...
+  
+  // Структурируем для отображения
+  const catalog: CatalogSection[] = [
+    {
+      id: 'yachts',
+      icon: '🛥️',
+      nameEn: 'Yachts',
+      nameRu: 'Яхты',
+      path: '/yachts',
+      children: yachtTypes.options.map(opt => ({
+        id: opt.value,
+        label: language === 'ru' ? opt.labelRu : opt.labelEn,
+        icon: opt.icon,
+        path: `/yachts?type=${opt.value}`,
+      })),
+    },
+    {
+      id: 'home_services',
+      icon: '🔧',
+      nameEn: 'Home Services',
+      nameRu: 'Домашние услуги',
+      // Двухуровневая иерархия: домены → категории
+      children: serviceDomains.options.map(domain => ({
+        id: domain.value,
+        label: language === 'ru' ? domain.labelRu : domain.labelEn,
+        icon: domain.icon,
+        children: serviceCategories.options
+          .filter(cat => cat.metadata?.domain === domain.value)
+          .map(cat => ({
+            id: cat.value,
+            label: language === 'ru' ? cat.labelRu : cat.labelEn,
+            icon: cat.icon,
+            path: `/services?category=${cat.value}`,
+          })),
+      })),
+    },
+    // ... другие вертикали
+  ];
+  
+  return { catalog, isLoading };
+}
+```
+
+### 2. Компонент `SuperAppCatalogAccordion.tsx`
+
+```tsx
+// Использует useSuperAppCatalog для построения UI
+// Поддерживает:
+// - Простые вертикали (1 уровень: Яхты → типы яхт)
+// - Сложные вертикали (2 уровня: Домашние услуги → Домены → Категории)
+// - Поиск по всем уровням
+// - Счётчики провайдеров/услуг из БД
+
+export function SuperAppCatalogAccordion({ searchQuery, onNavigate }) {
+  const { catalog, isLoading } = useSuperAppCatalog();
+  const { language } = useLanguage();
+  
+  // Иконки и градиенты берутся из taxonomy_definitions.icon
+  // НЕ хардкодятся в компоненте!
+  
+  return (
+    <Accordion type="multiple">
+      {catalog.map(section => (
+        <AccordionItem key={section.id} value={section.id}>
+          <AccordionTrigger>
+            <span>{section.icon}</span>
+            <span>{language === 'ru' ? section.nameRu : section.nameEn}</span>
+            <Badge>{section.children.length}</Badge>
+          </AccordionTrigger>
+          <AccordionContent>
+            {/* Рекурсивный рендер для вложенных уровней */}
+            <CatalogChildren items={section.children} onNavigate={onNavigate} />
+          </AccordionContent>
+        </AccordionItem>
+      ))}
+    </Accordion>
+  );
+}
+```
+
+### 3. Маппинг вертикаль → таксономия
+
+```typescript
+// В useSuperAppCatalog.ts
+
+const VERTICAL_TAXONOMY_MAP: Record<string, string[]> = {
+  yachts: ['yacht_type', 'yacht_experience', 'yacht_amenity'],
+  tours: ['tour_type'],
+  restaurants: ['cuisine', 'restaurant_feature', 'dietary_option'],
+  home_services: ['home_service_domain', 'home_service_category'],
+  transport: ['vehicle_type', 'fuel_type', 'transmission_type'],
+  property: ['property_type', 'district', 'amenity'],
+  events: ['event_category'],
+  medical: [], // Простой переход без подкатегорий
+  pets: ['pet_type'],
+  // ...
+};
+```
+
+---
+
+## Преимущества
+
+1. **0 хардкода** — все данные из `taxonomy_definitions` и `lookup_values`
+2. **Единый источник правды** — каноническая система таксономий
+3. **Админ-редактируемость** — добавление категорий через AdminTaxonomyManager
+4. **Иерархия** — поддержка 1-2-3 уровневых структур
+5. **Консистентность** — одни и те же данные в каталоге, фильтрах, формах
+
+---
+
+## Миграционный путь
+
+1. Создать `useSuperAppCatalog.ts` — агрегация данных
+2. Создать `SuperAppCatalogAccordion.tsx` — новый компонент
+3. Заменить в `ServiceCategoryDrawer.tsx`
+4. Удалить хардкод `GROUP_ICONS`, `GROUP_GRADIENTS`
+5. Опционально: Удалить старый `ServiceCategoryAccordion.tsx`
+
+---
+
+## Связи с БД
+
+```text
+taxonomy_definitions
+│
+├── type_key: "home_service_domain"
+│   vertical: "home_services"
+│   icon: "🔧"
+│
+└── type_key: "home_service_category"
+    vertical: "home_services"
+    icon: "🛠️"
+    metadata_schema: {fields: ["domain"]}
+         │
+         ▼
+    lookup_values
+    ├── value_key: "handyman", metadata: {domain: "maintenance"}
+    ├── value_key: "plumbing", metadata: {domain: "maintenance"}
+    ├── value_key: "home-cleaning", metadata: {domain: "cleaning"}
+    └── ...
+```
 
 ---
 
 ## Результат
 
-- **Единый каталог** всех 39 категорий супер-аппа
-- **Иконки из БД** для каждой категории (не generic Sparkles)
-- **Группы с правильными иконками** (Lifestyle, Travel, Health...)
-- **Топ-категории** на главном экране (яхты, туры, рестораны — не только мастера)
-- **Универсальный Quick Access** (бронирования, история, избранное)
-- **UX уровня Klook/Airbnb** с цветовым кодированием и анимациями
-
+- **Каталог на основе канонической таксономии** (не хардкод)
+- **Вертикали из `taxonomy_definitions`** (yachts, tours, restaurants, home_services...)
+- **Категории из `lookup_values`** с parent-child иерархией через metadata
+- **Иконки и названия из БД** — редактируются в Admin
+- **Единообразие** — те же данные что в формах, фильтрах, админке
