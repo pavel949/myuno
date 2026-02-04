@@ -5,27 +5,27 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useWeather } from '@/hooks/useWeather';
 import { useTodayEvents, useSmartRecommendations } from '@/hooks/useTodayEvents';
 import { Skeleton } from '@/components/ui/skeleton';
+import { QuickStatsRibbon } from './QuickStatsRibbon';
 
 interface WeatherIconProps {
   condition: string;
   isLoading?: boolean;
 }
 
-// Memoized weather icon component - simplified without ref forwarding
 const WeatherIcon = memo(function WeatherIcon({ condition, isLoading }: WeatherIconProps) {
   if (isLoading) {
-    return <Skeleton className="w-8 h-8 rounded-full" />;
+    return <Skeleton className="w-6 h-6 rounded-full" />;
   }
   
   switch (condition) {
     case 'sunny':
-      return <Sun className="w-8 h-8 text-amber-400" />;
+      return <Sun className="w-6 h-6 text-amber-400" />;
     case 'cloudy':
-      return <Cloud className="w-8 h-8 text-slate-400" />;
+      return <Cloud className="w-6 h-6 text-slate-400" />;
     case 'rainy':
-      return <CloudRain className="w-8 h-8 text-blue-400" />;
+      return <CloudRain className="w-6 h-6 text-blue-400" />;
     default:
-      return <Sun className="w-8 h-8 text-amber-400" />;
+      return <Sun className="w-6 h-6 text-amber-400" />;
   }
 });
 WeatherIcon.displayName = 'WeatherIcon';
@@ -40,7 +40,6 @@ export const SmartWidget = memo(function SmartWidget() {
   const [currentHour, setCurrentHour] = useState(() => new Date().getHours());
 
   useEffect(() => {
-    // Only update when hour changes (affects greeting)
     const checkHour = () => {
       const hour = new Date().getHours();
       if (hour !== currentHour) {
@@ -52,13 +51,11 @@ export const SmartWidget = memo(function SmartWidget() {
     return () => clearInterval(timer);
   }, [currentHour]);
 
-  // Get one random recommendation - only recalculate when recommendations change
   const recommendation = useMemo(() => {
     if (!recommendations || recommendations.length === 0) return null;
     return recommendations[Math.floor(Math.random() * recommendations.length)];
   }, [recommendations]);
 
-  // Get first event of the day
   const todayEvent = todayEvents?.[0] || null;
 
   const greeting = useMemo(() => {
@@ -79,48 +76,39 @@ export const SmartWidget = memo(function SmartWidget() {
 
   return (
     <div className="relative overflow-hidden rounded-xl bg-card border border-border">
-      <div className="p-3">
-        {/* Header with greeting and weather */}
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <p className="text-xs text-muted-foreground mb-1">{greeting}</p>
-            <h2 className="text-lg font-semibold text-foreground">
-              {isRu ? 'Пхукет сегодня' : 'Phuket Today'}
-            </h2>
-          </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-background/50 backdrop-blur-sm border border-border/50">
+      <div className="p-3 space-y-3">
+        {/* Compact Header: Greeting + Weather in one row */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
             <WeatherIcon condition={weather?.condition || 'sunny'} isLoading={isWeatherLoading} />
-            <div className="text-right">
-              {isWeatherLoading ? (
-                <>
-                  <Skeleton className="h-4 w-12 mb-1" />
-                  <Skeleton className="h-3 w-16" />
-                </>
-              ) : (
-                <>
-                  <p className="text-sm font-bold text-foreground flex items-center gap-1">
-                    <Thermometer className="w-3 h-3" />
-                    {weather?.temp || 31}°C
-                  </p>
-                  <p className="text-[10px] text-muted-foreground">
-                    {isRu ? weather?.descriptionRu : weather?.description}
-                  </p>
-                </>
-              )}
-            </div>
+            {isWeatherLoading ? (
+              <Skeleton className="h-5 w-12" />
+            ) : (
+              <span className="text-base font-bold text-foreground">
+                {weather?.temp || 31}°C
+              </span>
+            )}
+            <span className="text-muted-foreground">•</span>
+            <span className="text-sm text-muted-foreground">{greeting}</span>
           </div>
+          <span className="text-sm font-medium text-foreground">
+            {isRu ? 'Пхукет сегодня' : 'Phuket Today'}
+          </span>
         </div>
 
+        {/* Quick Stats Ribbon */}
+        <QuickStatsRibbon />
+
         {/* Content grid */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2">
           {/* Today's Event */}
           <button
             onClick={handleEventClick}
-            className="flex flex-col p-3 rounded-xl bg-background/50 backdrop-blur-sm border border-border/50 hover:border-primary/30 transition-all group text-left"
+            className="flex flex-col p-2.5 rounded-xl bg-background/50 backdrop-blur-sm border border-border/50 hover:border-primary/30 transition-all group text-left"
           >
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                <Calendar className="w-4 h-4 text-purple-500" />
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <div className="w-6 h-6 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                <Calendar className="w-3 h-3 text-purple-500" />
               </div>
               <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
                 {isRu ? 'Сегодня' : 'Today'}
@@ -155,18 +143,18 @@ export const SmartWidget = memo(function SmartWidget() {
           {/* Daily Recommendation */}
           <button
             onClick={handleRecClick}
-            className="flex flex-col p-3 rounded-xl bg-background/50 backdrop-blur-sm border border-border/50 hover:border-primary/30 transition-all group text-left"
+            className="flex flex-col p-2.5 rounded-xl bg-background/50 backdrop-blur-sm border border-border/50 hover:border-primary/30 transition-all group text-left"
           >
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-lg">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center text-lg">
                 {isRecsLoading ? (
-                  <Skeleton className="w-5 h-5 rounded" />
+                  <Skeleton className="w-4 h-4 rounded" />
                 ) : (
-                  recommendation?.icon || <Sparkles className="w-4 h-4 text-primary" />
+                  recommendation?.icon || <Sparkles className="w-3 h-3 text-primary" />
                 )}
               </div>
               <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
-                {isRu ? 'Рекомендуем' : 'For You'}
+                {isRu ? 'Для вас' : 'For You'}
               </span>
             </div>
             {isRecsLoading ? (

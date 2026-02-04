@@ -13,14 +13,15 @@ import { UnifiedFilterRibbon, FilterRibbonItem } from '@/components/shared';
 
 // Hooks
 import { useServices } from '@/hooks/useServices';
-import { useCategories, CategoryGroup, Category } from '@/hooks/useCategories';
+import { useCategories } from '@/hooks/useCategories';
 import { useFeaturedCategories } from '@/hooks/useFeaturedCategories';
 import { useCategoryCounts } from '@/hooks/useCategoryCounts';
 
 // Components
 import { MiniAppsGrid } from '@/components/discover/MiniAppsGrid';
 import { FeaturedServicesGallery } from '@/components/discover/FeaturedServicesGallery';
-import { CategoryGroupSection } from '@/components/discover/CategoryGroupSection';
+import { TopAppsGrid } from '@/components/discover/TopAppsGrid';
+import { ThematicSection, THEMATIC_SECTIONS } from '@/components/discover/ThematicSection';
 
 export type AudienceFilter = 'all' | 'tourists' | 'residents' | 'owners';
 
@@ -72,6 +73,23 @@ export default function Discover() {
       .filter(group => group.categories.length > 0);
   }, [groups, audienceFilter]);
 
+  // Filter thematic sections based on audience
+  const filteredThematicSections = useMemo(() => {
+    if (audienceFilter === 'all') return THEMATIC_SECTIONS;
+    
+    const audienceMap: Record<AudienceFilter, string[]> = {
+      all: [],
+      tourists: ['leisure'],
+      residents: ['life'],
+      owners: ['business', 'life'],
+    };
+    
+    const allowedSections = audienceMap[audienceFilter];
+    return THEMATIC_SECTIONS.filter(section => 
+      allowedSections.length === 0 || allowedSections.includes(section.id)
+    );
+  }, [audienceFilter]);
+
   // Handlers
   const handleAudienceChange = useCallback((value: string) => {
     const filter = value as AudienceFilter;
@@ -109,7 +127,7 @@ export default function Discover() {
       showCategories={false}
       showFilter={false}
     >
-      {/* Audience Filter Ribbon - uses negative margin to align with layout padding */}
+      {/* Audience Filter Ribbon */}
       <div className="-mx-4 -mt-4 bg-background/95 backdrop-blur-sm border-b border-border/30">
         <UnifiedFilterRibbon
           items={audienceItems}
@@ -120,20 +138,35 @@ export default function Discover() {
       </div>
 
       <div className="pt-2">
-          <PullToRefresh onRefresh={handleRefresh} className="min-h-0">
-            <div key={refreshKey} className="space-y-6 pt-4">
-              
-              {isLoading ? (
-                <LoadingSkeleton />
-              ) : filteredGroups.length === 0 ? (
-                <EmptyState
-                  icon={Package}
-                  title={isRu ? 'Ничего не найдено' : 'Nothing found'}
-                  description={isRu ? 'Попробуйте другой фильтр' : 'Try a different filter'}
-                />
-              ) : (
-                <>
-                  {/* 1. Mini-Apps Grid (full booking experience) */}
+        <PullToRefresh onRefresh={handleRefresh} className="min-h-0">
+          <div key={refreshKey} className="space-y-6 pt-4">
+            
+            {isLoading ? (
+              <LoadingSkeleton />
+            ) : filteredGroups.length === 0 && filteredThematicSections.length === 0 ? (
+              <EmptyState
+                icon={Package}
+                title={isRu ? 'Ничего не найдено' : 'Nothing found'}
+                description={isRu ? 'Попробуйте другой фильтр' : 'Try a different filter'}
+              />
+            ) : (
+              <>
+                {/* 1. Top Apps Grid (2x2 hero cards) - only on "All" filter */}
+                {audienceFilter === 'all' && (
+                  <TopAppsGrid />
+                )}
+
+                {/* 2. Featured Services Gallery - only on "All" filter */}
+                {audienceFilter === 'all' && (
+                  <FeaturedServicesGallery
+                    services={services}
+                    isLoading={servicesLoading}
+                    viewAllPath="/services"
+                  />
+                )}
+
+                {/* 3. Mini-Apps Grid (if filtered by audience) */}
+                {audienceFilter !== 'all' && (
                   <MiniAppsGrid
                     groups={filteredGroups}
                     getName={getName}
@@ -141,34 +174,19 @@ export default function Discover() {
                     isFeatured={isFeatured}
                     getCount={getCount}
                   />
-                  
-                  {/* 2. Featured Services Gallery */}
-                  {audienceFilter === 'all' && (
-                    <FeaturedServicesGallery
-                      services={services}
-                      isLoading={servicesLoading}
-                      viewAllPath="/services"
-                    />
-                  )}
-                  
-                  {/* 3. Other Categories (non-mini-app) grouped */}
-                  <div className="space-y-6">
-                    {filteredGroups.map(group => (
-                      <CategoryGroupSection
-                        key={group.id}
-                        group={group}
-                        getName={getName}
-                        language={language}
-                        getCount={getCount}
-                        excludeMiniApps={true}
-                      />
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-          </PullToRefresh>
-        </div>
+                )}
+
+                {/* 4. Thematic Sections (collapsible) */}
+                <div className="space-y-4">
+                  {filteredThematicSections.map(section => (
+                    <ThematicSection key={section.id} section={section} />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </PullToRefresh>
+      </div>
     </MiniAppLayout>
   );
 }
@@ -177,17 +195,11 @@ export default function Discover() {
 function LoadingSkeleton() {
   return (
     <div className="space-y-8">
-      {/* Mini-apps skeleton */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Skeleton className="w-10 h-10 rounded-xl" />
-          <div className="space-y-1">
-            <Skeleton className="h-5 w-32" />
-            <Skeleton className="h-3 w-24" />
-          </div>
-        </div>
-        <div className="grid grid-cols-4 gap-3">
-          {Array.from({ length: 8 }).map((_, i) => (
+      {/* Top Apps skeleton */}
+      <div className="space-y-3">
+        <Skeleton className="h-5 w-32" />
+        <div className="grid grid-cols-2 gap-3">
+          {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="aspect-square rounded-2xl" />
           ))}
         </div>
@@ -203,11 +215,14 @@ function LoadingSkeleton() {
         </div>
       </div>
       
-      {/* Categories skeleton */}
+      {/* Thematic sections skeleton */}
       <div className="space-y-3">
-        <Skeleton className="h-4 w-32" />
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-16 rounded-xl" />
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="space-y-2">
+            <Skeleton className="h-5 w-40" />
+            <Skeleton className="h-14 rounded-xl" />
+            <Skeleton className="h-14 rounded-xl" />
+          </div>
         ))}
       </div>
     </div>

@@ -1,4 +1,4 @@
-// Index page - Main home screen
+// Index page - Main home screen with contextual funnel architecture
 import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -9,11 +9,13 @@ import { SEOHead, createOrganizationSchema } from '@/components/seo';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { QuickActionsGrid } from '@/components/home/QuickActionsGrid';
 import { HeroBlock } from '@/components/home/HeroBlock';
+import { PersonaSelectorBlock } from '@/components/home/PersonaSelectorBlock';
 import { ContentModeToggle, ContentMode } from '@/components/home/ContentModeToggle';
 import { supabase } from '@/integrations/supabase/client';
 import { InstallBanner } from '@/components/pwa/InstallBanner';
 import { PWAWelcomeScreen } from '@/components/pwa/PWAWelcomeScreen';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useUserPersonas } from '@/hooks/useUserPersonas';
 
 // Lazy load components
 const SmartWidget = lazy(() => import('@/components/home/SmartWidget').then(m => ({ default: m.SmartWidget })));
@@ -22,7 +24,6 @@ const HomeCategoryRibbon = lazy(() => import('@/components/home/HomeCategoryRibb
 const HomeProductsSection = lazy(() => import('@/components/home/HomeProductsSection').then(m => ({ default: m.HomeProductsSection })));
 const ContentPreviewRibbon = lazy(() => import('@/components/home/ContentPreviewRibbon').then(m => ({ default: m.ContentPreviewRibbon })));
 const QuickAccessChips = lazy(() => import('@/components/home/QuickAccessChips').then(m => ({ default: m.QuickAccessChips })));
-const OffplanPromoSection = lazy(() => import('@/components/property/OffplanPromoSection').then(m => ({ default: m.OffplanPromoSection })));
 const InvestorPromoCard = lazy(() => import('@/components/home/InvestorPromoCard').then(m => ({ default: m.InvestorPromoCard })));
 
 // Lazy load modals
@@ -49,7 +50,7 @@ const SectionSkeleton = () => (
 );
 
 const WidgetSkeleton = () => (
-  <Skeleton className="h-28 w-full rounded-2xl" />
+  <Skeleton className="h-40 w-full rounded-2xl" />
 );
 
 const Index = () => {
@@ -57,6 +58,7 @@ const Index = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { personas } = useUserPersonas();
   const [refreshKey, setRefreshKey] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(() => {
     return !localStorage.getItem('myuno-onboarding-complete');
@@ -64,6 +66,9 @@ const Index = () => {
   const [contentMode, setContentMode] = useState<ContentMode>(() => {
     return (localStorage.getItem('myuno-content-mode') as ContentMode) || 'services';
   });
+
+  // Check if investor persona is active
+  const isInvestorActive = personas.includes('investor');
 
   const handleRefresh = useCallback(async () => {
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -119,16 +124,38 @@ const Index = () => {
       )}
 
       <PullToRefresh onRefresh={handleRefresh}>
-        <div className="px-4 py-4 pb-24 space-y-5" key={refreshKey}>
+        <div className="px-4 py-4 pb-24 space-y-4" key={refreshKey}>
           
           {/* ═══════════════════════════════════════════════════════════
-              BLOCK 1: PWA Install + Hero (Brand + Search + Safety)
+              BLOCK 1: PWA Install + Hero (Brand + Search + SOS)
+              Compact header - only essential elements
               ═══════════════════════════════════════════════════════════ */}
           <InstallBanner />
           <HeroBlock />
 
           {/* ═══════════════════════════════════════════════════════════
-              BLOCK 2: Mode Toggle + Category Ribbon
+              BLOCK 2: Smart Widget (Phuket Today + Quick Stats)
+              Immediately visible context and quick actions
+              ═══════════════════════════════════════════════════════════ */}
+          <Suspense fallback={<WidgetSkeleton />}>
+            <SmartWidget />
+          </Suspense>
+
+          {/* ═══════════════════════════════════════════════════════════
+              BLOCK 3: Persona Selector
+              Who are you? Tourist | Resident | Owner | Investor
+              ═══════════════════════════════════════════════════════════ */}
+          <PersonaSelectorBlock />
+
+          {/* ═══════════════════════════════════════════════════════════
+              BLOCK 4: Quick Actions (persona-driven)
+              6 buttons that change based on active persona
+              ═══════════════════════════════════════════════════════════ */}
+          <QuickActionsGrid />
+
+          {/* ═══════════════════════════════════════════════════════════
+              BLOCK 5: Content Toggle + Category Ribbon
+              Services / Products mode switch
               ═══════════════════════════════════════════════════════════ */}
           <div className="space-y-3">
             <ContentModeToggle 
@@ -146,44 +173,27 @@ const Index = () => {
           </div>
 
           {/* ═══════════════════════════════════════════════════════════
-              BLOCK 3: Smart Widget (personalized context)
-              ═══════════════════════════════════════════════════════════ */}
-          <Suspense fallback={<WidgetSkeleton />}>
-            <SmartWidget />
-          </Suspense>
-
-          {/* ═══════════════════════════════════════════════════════════
-              BLOCK 3.5: Investment Lead Generation CTA
-              ═══════════════════════════════════════════════════════════ */}
-          <Suspense fallback={<WidgetSkeleton />}>
-            <InvestorPromoCard />
-          </Suspense>
-
-          {/* Visual Divider */}
-          <div className="h-1 bg-gradient-to-r from-transparent via-border to-transparent rounded-full" />
-
-          {/* ═══════════════════════════════════════════════════════════
-              BLOCK 4-6: Mode-specific content
+              BLOCK 6: Featured Content
+              Mode-specific content sections
               ═══════════════════════════════════════════════════════════ */}
           {contentMode === 'services' ? (
             <>
-              {/* BLOCK 4: Quick Actions (6 items) */}
-              <QuickActionsGrid />
-
-              {/* BLOCK 5: Discovery Carousel (unified experiences) */}
+              {/* Discovery Carousel (unified experiences) */}
               <Suspense fallback={<SectionSkeleton />}>
                 <DiscoveryCarousel />
               </Suspense>
 
+              {/* Investment CTA - only if investor persona is active */}
+              {isInvestorActive && (
+                <Suspense fallback={<WidgetSkeleton />}>
+                  <InvestorPromoCard />
+                </Suspense>
+              )}
+
               {/* Visual Divider before B2B */}
               <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
-              {/* BLOCK 6: Offplan Promo Section */}
-              <Suspense fallback={<SectionSkeleton />}>
-                <OffplanPromoSection />
-              </Suspense>
-
-              {/* BLOCK 7: B2B Section */}
+              {/* B2B Section */}
               <Suspense fallback={<Skeleton className="h-12 w-full rounded-xl" />}>
                 <QuickAccessChips />
               </Suspense>
