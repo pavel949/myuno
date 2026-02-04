@@ -1,4 +1,4 @@
-import { useState, useEffect, memo, useCallback } from 'react';
+import { useState, useEffect, memo, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Gift, Percent, Sparkles, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -65,10 +65,14 @@ export const PromoBanner = memo(function PromoBanner() {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  
+  // Touch swipe support
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
+  const minSwipeDistance = 50;
 
   useEffect(() => {
     if (isPaused) return;
-    // Increased interval to 8 seconds to reduce DOM updates
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % promos.length);
     }, 8000);
@@ -87,11 +91,47 @@ export const PromoBanner = memo(function PromoBanner() {
   const prev = useCallback(() => goTo((currentIndex - 1 + promos.length) % promos.length), [currentIndex, goTo]);
   const next = useCallback(() => goTo((currentIndex + 1) % promos.length), [currentIndex, goTo]);
 
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchEndX.current = null;
+    setIsPaused(true);
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    if (touchStartX.current === null || touchEndX.current === null) {
+      setTimeout(() => setIsPaused(false), 3000);
+      return;
+    }
+    
+    const distance = touchStartX.current - touchEndX.current;
+    const isSwipe = Math.abs(distance) > minSwipeDistance;
+    
+    if (isSwipe) {
+      if (distance > 0) {
+        next(); // Swipe left = next
+      } else {
+        prev(); // Swipe right = prev
+      }
+    } else {
+      setTimeout(() => setIsPaused(false), 3000);
+    }
+    
+    touchStartX.current = null;
+    touchEndX.current = null;
+  }, [next, prev]);
+
   return (
     <div 
-      className="relative overflow-hidden rounded-2xl"
+      className="relative overflow-hidden rounded-2xl touch-pan-y"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       {/* Background gradient */}
       <div className={cn(
