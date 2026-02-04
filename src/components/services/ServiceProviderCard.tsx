@@ -53,14 +53,14 @@ export const ServiceProviderCard = memo(function ServiceProviderCard({
     return (
       <button
         onClick={onClick}
-        className={cn(
-          "w-full flex items-center gap-4 p-4",
-          "bg-card border border-border/50 rounded-2xl",
-          "hover:shadow-lg hover:border-primary/30",
-          "active:scale-[0.99]",
-          "transition-all duration-200",
-          "text-left group"
-        )}
+      className={cn(
+        "w-full flex items-center gap-4 p-4",
+        "bg-card border border-border/50 rounded-2xl",
+        "hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30",
+        "active:scale-[0.99]",
+        "transition-all duration-200",
+        "text-left group"
+      )}
       >
         {/* Circular Avatar */}
         <Avatar className="w-16 h-16 ring-2 ring-primary/20">
@@ -133,7 +133,7 @@ export const ServiceProviderCard = memo(function ServiceProviderCard({
       className={cn(
         "w-[260px] shrink-0 rounded-2xl overflow-hidden",
         "bg-card border border-border/50",
-        "hover:shadow-xl hover:-translate-y-1 hover:border-primary/30",
+        "hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30",
         "active:scale-[0.98]",
         "transition-all duration-200",
         "text-left group"

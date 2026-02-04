@@ -87,7 +87,7 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
         onClick={handleClick}
         className={cn(
           "relative overflow-hidden rounded-2xl bg-card border border-border/50 transition-all",
-          isAvailable && "cursor-pointer hover:border-primary/30 hover:shadow-md active:scale-[0.98]",
+          isAvailable && "cursor-pointer hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98]",
           !isAvailable && "opacity-60",
           className
         )}
@@ -177,7 +177,7 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
       onClick={handleClick}
       className={cn(
         "bg-card rounded-2xl overflow-hidden shadow-sm border",
-        isAvailable && "cursor-pointer hover:shadow-md hover:border-primary/30 active:scale-[0.98]",
+        isAvailable && "cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 active:scale-[0.98]",
         !isAvailable && "opacity-60",
         "transition-all",
         className

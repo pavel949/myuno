@@ -49,7 +49,7 @@ export function ListCard({
       onClick={handleClick}
       className={cn(
         "cursor-pointer bg-card rounded-2xl overflow-hidden shadow-sm border",
-        "hover:shadow-md hover:border-primary/30 transition-all active:scale-[0.98]",
+        "hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 transition-all active:scale-[0.98]",
         className
       )}
     >

@@ -36,7 +36,7 @@ const ExperienceCard = React.forwardRef<HTMLDivElement, { experience: Experience
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
-        className="bg-card rounded-2xl overflow-hidden border hover:shadow-lg transition-all cursor-pointer group"
+        className="bg-card rounded-2xl overflow-hidden border hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
         onClick={() => navigate(`/experiences/${experience.id}`)}
       >
         <div className="relative h-44 overflow-hidden">
