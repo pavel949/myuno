@@ -1,4 +1,5 @@
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
+import type { SalonMarker } from '@/components/map/SalonMap';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Property {
@@ -510,4 +511,83 @@ export function useProjectStats(projectId?: string) {
     },
     enabled: !!projectId,
   });
+}
+
+// ==================== MAP QUERIES ====================
+
+export interface PropertyMapItem {
+  id: string;
+  title_en: string | null;
+  title_ru: string | null;
+  lat: number;
+  lng: number;
+  price: number | null;
+  price_period: string | null;
+  currency: string | null;
+  property_type: string | null;
+  bedrooms: number | null;
+  cover_image: string | null;
+  rating: number | null;
+  district: string | null;
+}
+
+/**
+ * Fetch properties with coordinates for map view
+ * Returns only active properties with valid lat/lng
+ */
+export function usePropertiesForMap(filters: PropertyFilters = {}) {
+  return useQuery({
+    queryKey: ['properties-map', filters],
+    queryFn: async () => {
+      let query = supabase
+        .from('properties')
+        .select(`
+          id,
+          title_en,
+          title_ru,
+          lat,
+          lng,
+          price,
+          price_period,
+          currency,
+          property_type,
+          bedrooms,
+          cover_image,
+          rating,
+          district
+        `)
+        .eq('is_active', true)
+        .not('lat', 'is', null)
+        .not('lng', 'is', null);
+
+      // Apply type filter
+      if (filters.propertyType && filters.propertyType !== 'all') {
+        query = query.eq('property_type', filters.propertyType);
+      }
+      // Apply district filter
+      if (filters.district) {
+        query = query.eq('district', filters.district);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return (data || []) as PropertyMapItem[];
+    },
+  });
+}
+
+/**
+ * Transform PropertyMapItem[] to SalonMarker[] for use in SalonMap component
+ */
+export function transformPropertiesToMarkers(properties: PropertyMapItem[]): SalonMarker[] {
+  return properties.map(p => ({
+    id: p.id,
+    name: p.title_en || 'Property',
+    nameRu: p.title_ru || 'Объект',
+    lat: p.lat,
+    lng: p.lng,
+    rating: p.rating || 0,
+    priceFrom: p.price || 0,
+    image: p.cover_image || undefined,
+  }));
 }

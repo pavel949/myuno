@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Sliders, MapPin, BedDouble, Bath } from 'lucide-react';
+import { ArrowLeft, Sliders, MapPin, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
-import SalonMap, { SalonMarker } from '@/components/map/SalonMap';
+import SalonMap from '@/components/map/SalonMap';
 import { FilterChip } from '@/components/uno/FilterChip';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,60 +14,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { CITY_GEOGRAPHY } from '@/lib/config/geography';
-
-// TODO: Replace with DB query - demo property markers should come from owner_properties table
-const demoProperties: SalonMarker[] = [
-  {
-    id: 'prop-1',
-    name: 'Luxury Ocean View Villa',
-    nameRu: 'Роскошная вилла с видом на океан',
-    lat: 7.9519,
-    lng: 98.2815,
-    rating: 4.9,
-    priceFrom: 85000,
-    image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=600',
-  },
-  {
-    id: 'prop-2',
-    name: 'Modern Condo in Patong',
-    nameRu: 'Современное кондо в Патонге',
-    lat: 7.8924,
-    lng: 98.2970,
-    rating: 4.7,
-    priceFrom: 25000,
-    image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600',
-  },
-  {
-    id: 'prop-3',
-    name: 'Cozy Studio near Beach',
-    nameRu: 'Уютная студия у пляжа',
-    lat: 7.8202,
-    lng: 98.3052,
-    rating: 4.5,
-    priceFrom: 1500,
-    image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600',
-  },
-  {
-    id: 'prop-4',
-    name: 'Beachfront Apartment',
-    nameRu: 'Апартаменты на берегу',
-    lat: 7.7771,
-    lng: 98.3341,
-    rating: 4.8,
-    priceFrom: 35000,
-    image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600',
-  },
-  {
-    id: 'prop-5',
-    name: 'Traditional Thai House',
-    nameRu: 'Традиционный тайский дом',
-    lat: 7.8501,
-    lng: 98.3502,
-    rating: 4.6,
-    priceFrom: 4500000,
-    image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600',
-  },
-];
+import { usePropertiesForMap, transformPropertiesToMarkers } from '@/hooks/useProperties';
 
 const distanceOptions = [
   { value: 2, labelEn: '2 km', labelRu: '2 км' },
@@ -82,6 +29,8 @@ const propertyTypes = [
   { id: 'villa', labelEn: 'Villa', labelRu: 'Вилла' },
   { id: 'apartment', labelEn: 'Apartment', labelRu: 'Квартира' },
   { id: 'condo', labelEn: 'Condo', labelRu: 'Кондо' },
+  { id: 'townhouse', labelEn: 'Townhouse', labelRu: 'Таунхаус' },
+  { id: 'house', labelEn: 'House', labelRu: 'Дом' },
 ];
 
 export default function PropertyMap() {
@@ -91,6 +40,14 @@ export default function PropertyMap() {
   const [distanceFilter, setDistanceFilter] = useState<number>(50);
   const [selectedType, setSelectedType] = useState('all');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  // Fetch real properties from database
+  const { data: properties, isLoading } = usePropertiesForMap({
+    propertyType: selectedType !== 'all' ? selectedType : undefined,
+  });
+
+  // Transform to map markers
+  const propertyMarkers = transformPropertiesToMarkers(properties || []);
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -131,6 +88,11 @@ export default function PropertyMap() {
           
           <h1 className="font-display font-semibold">
             {language === 'ru' ? 'Карта объектов' : 'Property Map'}
+            {properties && properties.length > 0 && (
+              <span className="ml-2 text-xs text-muted-foreground font-normal">
+                ({properties.length})
+              </span>
+            )}
           </h1>
           
           <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
@@ -221,14 +183,47 @@ export default function PropertyMap() {
           ))}
         </div>
 
-        {/* Map */}
-        <SalonMap
-          salons={demoProperties}
-          onSalonSelect={handlePropertySelect}
-          userLocation={userLocation}
-          distanceFilter={distanceFilter}
-          className="flex-1"
-        />
+        {/* Loading state */}
+        {isLoading && (
+          <div className="flex-1 flex items-center justify-center bg-card">
+            <div className="flex flex-col items-center gap-3">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              <span className="text-sm text-muted-foreground">
+                {language === 'ru' ? 'Загрузка объектов...' : 'Loading properties...'}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Empty state */}
+        {!isLoading && propertyMarkers.length === 0 && (
+          <div className="flex-1 flex items-center justify-center bg-card">
+            <div className="text-center p-6">
+              <MapPin className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
+              <h3 className="font-medium text-lg mb-2">
+                {language === 'ru' ? 'Объекты не найдены' : 'No properties found'}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {language === 'ru' 
+                  ? 'Попробуйте изменить фильтры'
+                  : 'Try adjusting your filters'}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Map with real data */}
+        {!isLoading && propertyMarkers.length > 0 && (
+          <SalonMap
+            salons={propertyMarkers}
+            onSalonSelect={handlePropertySelect}
+            userLocation={userLocation}
+            distanceFilter={distanceFilter}
+            className="flex-1"
+            icon="🏠"
+            iconBgColor="bg-emerald-600"
+          />
+        )}
       </div>
     </AppLayout>
   );

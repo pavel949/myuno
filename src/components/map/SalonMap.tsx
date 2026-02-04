@@ -25,6 +25,10 @@ interface SalonMapProps {
   userLocation?: { lat: number; lng: number } | null;
   distanceFilter?: number; // in km
   className?: string;
+  /** Custom marker icon emoji (default: 💆 for salons) */
+  icon?: string;
+  /** Custom marker background color class (default: bg-primary) */
+  iconBgColor?: string;
 }
 
 const SalonMap: React.FC<SalonMapProps> = ({
@@ -33,6 +37,8 @@ const SalonMap: React.FC<SalonMapProps> = ({
   userLocation,
   distanceFilter,
   className = '',
+  icon = '💆',
+  iconBgColor = 'bg-primary',
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
@@ -158,16 +164,17 @@ const SalonMap: React.FC<SalonMapProps> = ({
       const el = document.createElement('div');
       el.className = 'salon-marker';
       el.innerHTML = `
-        <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center shadow-lg cursor-pointer transform hover:scale-110 transition-transform border-2 border-white">
-          <span class="text-white text-lg">💆</span>
+        <div class="w-10 h-10 rounded-full ${iconBgColor} flex items-center justify-center shadow-lg cursor-pointer transform hover:scale-110 transition-transform border-2 border-white">
+          <span class="text-white text-lg">${icon}</span>
         </div>
       `;
 
-      const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(
+      const popup = new mapboxgl.Popup({ offset: 25, maxWidth: '240px' }).setHTML(
         createMapPopupHtml({
           name: language === 'ru' ? salon.nameRu : salon.name,
           rating: salon.rating,
           price: `฿${escapeHtml(salon.priceFrom)}+`,
+          image: salon.image,
         })
       );
 
@@ -203,7 +210,7 @@ const SalonMap: React.FC<SalonMapProps> = ({
         el.removeEventListener('click', handler);
       });
     };
-  }, [filteredSalons, mapboxToken, language, onSalonSelect, userLocation]);
+  }, [filteredSalons, mapboxToken, language, onSalonSelect, userLocation, icon, iconBgColor]);
 
   if (isLoading) {
     return (
