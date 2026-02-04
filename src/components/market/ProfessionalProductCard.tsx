@@ -327,15 +327,15 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
 
   // Grid variant (default) - Professional card design
   return (
-    <div className={cn(
-      "bg-card rounded-2xl border border-border overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group",
-      compact && "rounded-xl"
-    )}>
+    <div 
+      className={cn(
+        "bg-card rounded-2xl border border-border overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group cursor-pointer",
+        compact && "rounded-xl"
+      )}
+      onClick={onClick}
+    >
       {/* Image Container */}
-      <div 
-        className="relative aspect-square cursor-pointer overflow-hidden"
-        onClick={onClick}
-      >
+      <div className="relative aspect-square overflow-hidden">
         <img
           src={product.cover_image || '/placeholder.svg'}
           alt={name}

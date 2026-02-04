@@ -123,11 +123,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
   // Grid variant (default)
   return (
-    <div className="bg-card rounded-2xl border border-border overflow-hidden group hover:shadow-md transition-all">
+    <div 
+      className="bg-card rounded-2xl border border-border overflow-hidden group hover:shadow-md transition-all cursor-pointer"
+      onClick={onClick}
+    >
       {/* Image */}
-      <div 
-        className="relative aspect-square cursor-pointer overflow-hidden"
-        onClick={onClick}
+      <div className="relative aspect-square overflow-hidden"
       >
         <img
           src={product.cover_image || '/placeholder.svg'}
