@@ -387,7 +387,7 @@ export function UnifiedFiltersKlook({
       {/* Sticky Filter Bar */}
       <div className={cn("sticky z-20 bg-background/95 backdrop-blur-sm border-b -mx-4 px-4 py-2", stickyTop)}>
         {/* Date Quick Filters (if enabled) */}
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide touch-pan-x pb-2 -mx-1 px-1">
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide touch-pan-y snap-x snap-mandatory pb-2 -mx-1 px-1">
           {config.showDateFilters && datePresets.map((preset) => (
             <button
               key={preset.id}

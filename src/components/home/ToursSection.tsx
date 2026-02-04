@@ -30,7 +30,7 @@ export function ToursSection() {
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>
-      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 touch-pan-x snap-x snap-mandatory">
+      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 touch-pan-y snap-x snap-mandatory">
         {tours.map((tour) => (
           <div 
             key={tour.id}

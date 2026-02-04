@@ -107,7 +107,7 @@ export function OffplanPromoSection({
         <div 
           className={cn(
             "flex gap-4 overflow-x-auto scrollbar-hide pb-4",
-            "-mx-4 px-4 snap-x snap-mandatory touch-pan-x"
+            "-mx-4 px-4 snap-x snap-mandatory touch-pan-y"
           )}
         >
           {displayProjects.map((project) => (

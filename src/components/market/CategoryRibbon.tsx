@@ -92,7 +92,7 @@ export function CategoryRibbon() {
     <div className="bg-card border-b border-border/50">
       <div className="px-3 py-2.5 max-w-7xl mx-auto space-y-2">
         {/* Row 1: Quick Actions */}
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide touch-pan-y snap-x snap-mandatory">
           {/* Catalog Button with Drawer */}
           <CategoryDrawer
             trigger={
@@ -128,7 +128,7 @@ export function CategoryRibbon() {
         </div>
 
         {/* Row 2: Top Categories */}
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide touch-pan-y snap-x snap-mandatory">
           {visibleCategories.map(category => (
             <RibbonButton
               key={category.id}
