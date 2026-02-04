@@ -77,13 +77,17 @@ export interface Category {
 }
 
 // Mini-app category slugs - categories with full booking flow
+// Includes both slugs and mini_app_types to ensure proper matching
 const MINI_APP_SLUGS = new Set([
+  // Core verticals (slugs)
   'yachts', 'tours', 'restaurants', 'property', 'real-estate',
   'beauty', 'beauty-spa', 'fitness', 'medical', 'events',
   'education', 'kids-education', 'flowers', 'flower-delivery',
   'pharmacy', 'pets', 'transport', 'market', 'marketplace',
   'cleaning', 'water', 'babysitter',
-  'insurance', 'legal', 'visa',  // Added for expat services
+  'insurance', 'legal', 'visa', 'veterinary', 'banking',
+  // Mini-app types (from DB)
+  'food', 'food-delivery', 'transfers', 'services',
 ]);
 
 interface RawCategoryGroup {
