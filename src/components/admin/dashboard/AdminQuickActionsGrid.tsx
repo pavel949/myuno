@@ -3,12 +3,15 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
-  Plus, UserPlus, Home, Ship, Utensils, FileText, 
-  BarChart3, Settings, Users, DollarSign, Ticket,
-  MessageSquare
+  Plus, UserPlus, FileText, 
+  BarChart3, Users, DollarSign, Ticket,
+  MessageSquare, Package
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+// Consolidated Quick Actions - Provider-First Strategy
+// Removed direct vertical shortcuts (+ Yacht, + Property, etc.)
+// All content creation now flows through: Catalog → Select Provider → ContentCreatorMenu
 const QUICK_ACTIONS = [
   { 
     id: 'moderation', 
@@ -34,25 +37,11 @@ const QUICK_ACTIONS = [
     href: '/admin/providers?action=new',
   },
   { 
-    id: 'add-property', 
-    icon: Home, 
-    label: 'Add Property', 
-    labelRu: '+ Объект', 
-    href: '/admin/properties?action=new',
-  },
-  { 
-    id: 'add-yacht', 
-    icon: Ship, 
-    label: 'Add Yacht', 
-    labelRu: '+ Яхта', 
-    href: '/admin/yachts?action=new',
-  },
-  { 
-    id: 'add-restaurant', 
-    icon: Utensils, 
-    label: 'Add Restaurant', 
-    labelRu: '+ Ресторан', 
-    href: '/admin/restaurants?action=new',
+    id: 'catalog', 
+    icon: Package, 
+    label: 'Catalog', 
+    labelRu: 'Каталог', 
+    href: '/admin/catalog',
   },
   { 
     id: 'analytics', 

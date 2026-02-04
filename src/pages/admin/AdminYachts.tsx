@@ -70,10 +70,25 @@ export default function AdminYachts() {
   const [filterProviderId, setFilterProviderId] = useState<string>('');
   const { yachts, isLoading: yachtsLoading, createYacht, updateYacht, deleteYacht } = useAdminYachts(filterProviderId || undefined);
   
-  const [isDialogOpen, setIsDialogOpen] = useState(searchParams.get('action') === 'new');
+  // Get URL params for provider-first workflow
+  const urlProviderId = searchParams.get('provider');
+  const urlAction = searchParams.get('action');
+  
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingYacht, setEditingYacht] = useState<Yacht | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  
+  // Auto-open dialog with provider context from URL
+  React.useEffect(() => {
+    if (urlAction === 'new') {
+      resetForm();
+      if (urlProviderId) {
+        setFormData(prev => ({ ...prev, provider_id: urlProviderId }));
+      }
+      setIsDialogOpen(true);
+    }
+  }, [urlAction, urlProviderId]);
 
   const [formData, setFormData] = useState({
     provider_id: '',

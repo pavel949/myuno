@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Plus, Edit, Trash2, Image, Loader2 } from 'lucide-react';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -61,6 +62,7 @@ const defaultFormData: BouquetFormData = {
 };
 
 export default function AdminBouquets() {
+  const [searchParams] = useSearchParams();
   const { language } = useLanguage();
   const isRussian = language === 'ru';
   const { items, isLoading, createItem, updateItem, deleteItem } = useAdminBouquets();
@@ -69,6 +71,25 @@ export default function AdminBouquets() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<AdminBouquet | null>(null);
   const [formData, setFormData] = useState<BouquetFormData>(defaultFormData);
+
+  // Handle URL params for provider-first workflow
+  const urlProviderId = searchParams.get('provider');
+  const urlAction = searchParams.get('action');
+
+  // Auto-open dialog with provider context from URL
+  useEffect(() => {
+    if (urlAction === 'new' && !shopsLoading && shops.length > 0) {
+      // If provider_id is passed, find matching shop
+      if (urlProviderId) {
+        const matchingShop = (shops as FlowerShop[]).find(s => s.provider_id === urlProviderId);
+        if (matchingShop) {
+          setFormData({ ...defaultFormData, shop_id: matchingShop.id });
+        }
+      }
+      setEditingItem(null);
+      setIsDialogOpen(true);
+    }
+  }, [urlAction, urlProviderId, shopsLoading, shops]);
 
   const handleCreate = () => {
     setEditingItem(null);
