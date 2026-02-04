@@ -8,7 +8,7 @@
  * Shows cover image, name, stats, and badges
  */
 
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, MapPin, Calendar, Home, Star, Play } from 'lucide-react';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
@@ -28,7 +28,8 @@ interface ProjectCardProps {
   className?: string;
 }
 
-export function ProjectCard({ project, variant = 'default', className }: ProjectCardProps) {
+export const ProjectCard = forwardRef<HTMLDivElement, ProjectCardProps>(
+  function ProjectCard({ project, variant = 'default', className }, ref) {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -44,6 +45,7 @@ export function ProjectCard({ project, variant = 'default', className }: Project
   if (variant === 'featured') {
     return (
       <div
+        ref={ref}
         onClick={handleClick}
         className={cn(
           "relative overflow-hidden rounded-2xl cursor-pointer group",
@@ -109,6 +111,7 @@ export function ProjectCard({ project, variant = 'default', className }: Project
   if (variant === 'compact') {
     return (
       <div
+        ref={ref}
         onClick={handleClick}
         className={cn(
           "flex items-center gap-3 p-3 rounded-xl bg-card border border-border",
@@ -144,6 +147,7 @@ export function ProjectCard({ project, variant = 'default', className }: Project
   // Default variant
   return (
     <div
+      ref={ref}
       onClick={handleClick}
       className={cn(
         "overflow-hidden rounded-2xl bg-card border border-border",
@@ -219,6 +223,6 @@ export function ProjectCard({ project, variant = 'default', className }: Project
       </div>
     </div>
   );
-}
+});
 
 export default ProjectCard;
