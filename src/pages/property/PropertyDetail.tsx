@@ -777,11 +777,23 @@ export default function PropertyDetail() {
             />
             <Button
               size="lg"
-              className="flex-shrink-0 px-6"
+              className={cn(
+                "flex-shrink-0 px-6",
+                rentalTerms?.instant_booking && "bg-amber-500 hover:bg-amber-600"
+              )}
               onClick={() => navigate(`/property/${id}/inquiry`)}
             >
-              <Calendar className="w-4 h-4 mr-2" />
-              {isRu ? 'Бронировать' : 'Reserve'}
+              {rentalTerms?.instant_booking ? (
+                <>
+                  <Zap className="w-4 h-4 mr-2" />
+                  {isRu ? 'Забронировать' : 'Book Now'}
+                </>
+              ) : (
+                <>
+                  <Calendar className="w-4 h-4 mr-2" />
+                  {isRu ? 'Проверить даты' : 'Check Dates'}
+                </>
+              )}
             </Button>
           </div>
         </div>
