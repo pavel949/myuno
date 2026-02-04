@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plane, Home, Building2, Check, Sparkles } from 'lucide-react';
+import { Plane, Home, Building2, Check, Sparkles, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserPersonas, UserPersona, PERSONA_INFO } from '@/hooks/useUserPersonas';
@@ -18,6 +18,7 @@ const PERSONA_ICONS: Record<UserPersona, React.ElementType> = {
   tourist: Plane,
   resident: Home,
   property_owner: Building2,
+  investor: TrendingUp,
 };
 
 const PersonaChip = memo(function PersonaChip({ 

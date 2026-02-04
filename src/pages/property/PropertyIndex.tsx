@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Home, BedDouble, Bath, Users, SlidersHorizontal, Zap, MapPin, Star, Heart } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
@@ -20,6 +20,7 @@ import { QuickFiltersRibbon } from '@/components/property/QuickFiltersRibbon';
 import { PropertyTypeSelector } from '@/components/property/PropertyTypeSelector';
 import { BedroomChips } from '@/components/property/BedroomChips';
 import { ProjectPromoSection } from '@/components/property/ProjectPromoSection';
+import { PropertyModeToggle, PropertyMode } from '@/components/property/PropertyModeToggle';
 import { applyQuickFilters } from '@/hooks/usePropertyQuickFilters';
 import { matchesFilter, matchesSingleFilter, normalizeForFilter } from '@/lib/filterUtils';
 import { CrossSellSection } from '@/components/crosssell';
@@ -33,6 +34,13 @@ const demoProperties = demoPropertiesData;
 export default function PropertyIndex() {
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const [searchParamsUrl, setSearchParamsUrl] = useSearchParams();
+  
+  // Property mode: rent or buy
+  const [propertyMode, setPropertyMode] = useState<PropertyMode>(
+    (searchParamsUrl.get('mode') as PropertyMode) || 'rent'
+  );
+  
   const [searchParams, setSearchParams] = useState<SearchParams>({
     locations: [],
     checkIn: undefined,
@@ -49,6 +57,16 @@ export default function PropertyIndex() {
   const [selectedBedrooms, setSelectedBedrooms] = useState<string[]>([]);
   const [showStickyCTA, setShowStickyCTA] = useState(false);
   const { formatPrice } = useCurrency();
+
+  // Update URL when mode changes
+  useEffect(() => {
+    if (propertyMode === 'buy') {
+      setSearchParamsUrl({ mode: 'buy' });
+    } else {
+      searchParamsUrl.delete('mode');
+      setSearchParamsUrl(searchParamsUrl);
+    }
+  }, [propertyMode, setSearchParamsUrl]);
 
   // Show sticky CTA after scrolling
   useEffect(() => {
@@ -75,14 +93,15 @@ export default function PropertyIndex() {
 
   // Fetch all rental properties from database (filtering done client-side for demo fallback consistency)
   const { data: dbProperties, isLoading } = useProperties({
-    listingType: 'rent', // Always show rentals for Airbnb-style
+    listingType: propertyMode === 'buy' ? 'sale' : 'rent',
   }, 200);
 
   // Use DB data or fallback to demo, then apply all filters
   const properties = useMemo(() => {
+    const targetListingType = propertyMode === 'buy' ? 'sale' : 'rent';
     const sourceData = dbProperties && dbProperties.length > 0 
       ? dbProperties 
-      : demoProperties.filter(p => p.listing_type === 'rent');
+      : demoProperties.filter(p => p.listing_type === targetListingType);
     
     // First apply standard filters
     const standardFiltered = sourceData.filter(prop => {
@@ -139,7 +158,7 @@ export default function PropertyIndex() {
 
     // Then apply quick filters (Agoda/Airbnb style)
     return applyQuickFilters(standardFiltered, quickFilters, selectedProjectId);
-  }, [dbProperties, searchParams, selectedType, filterValues, quickFilters, selectedProjectId, selectedBedrooms, selectedDistricts]);
+  }, [dbProperties, searchParams, selectedType, filterValues, quickFilters, selectedProjectId, selectedBedrooms, selectedDistricts, propertyMode]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -187,11 +206,22 @@ export default function PropertyIndex() {
         {/* Sticky Header with Search */}
         <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b">
           <div className="container max-w-7xl mx-auto px-4 py-4">
-            <div className="flex items-center gap-4 mb-4">
-              <BackButton fallbackPath="/" variant="ghost" size="sm" />
-              <h1 className="text-xl font-bold">
-                {language === 'ru' ? 'Аренда жилья' : 'Vacation Rentals'}
-              </h1>
+            <div className="flex items-center justify-between gap-4 mb-4">
+              <div className="flex items-center gap-3">
+                <BackButton fallbackPath="/" variant="ghost" size="sm" />
+                <h1 className="text-xl font-bold">
+                  {propertyMode === 'buy' 
+                    ? (language === 'ru' ? 'Купить недвижимость' : 'Buy Property')
+                    : (language === 'ru' ? 'Аренда жилья' : 'Vacation Rentals')
+                  }
+                </h1>
+              </div>
+              {/* Rent/Buy Toggle */}
+              <PropertyModeToggle 
+                value={propertyMode} 
+                onChange={setPropertyMode}
+                className="w-48"
+              />
             </div>
             
             {/* Airbnb-style Search Bar */}
@@ -249,9 +279,9 @@ export default function PropertyIndex() {
           </div>
         )}
 
-        {/* Consultation CTA */}
+        {/* Consultation CTA - Context-aware based on mode */}
         <div className="container max-w-7xl mx-auto px-4 py-2">
-          <ConsultationCTA />
+          <ConsultationCTA context={propertyMode === 'buy' ? 'purchase' : 'rental'} />
         </div>
 
         {/* Project Promo Section - Visual carousel of complexes */}
