@@ -1,178 +1,143 @@
 
-# План исправлений системы ввода данных
+# Аудит мобильной адаптивности платформы
 
-## Резюме проблем
+## Обзор проблемы
 
-| Проблема | Влияние | Приоритет |
-|----------|---------|-----------|
-| 16 провайдеров без `marketplace_vendor_id` | Не могут продавать товары | P0 |
-| 36 яхт без `provider_id` | Невидимы в vendor dashboard | P0 |
-| `bulk-import` — 9 таблиц vs 20+ в mapping | AI intake ломается для clinics, gyms, etc. | P0 |
-| Рассинхрон таблиц между Edge Functions | intake-listing-agent имеет 24+ вертикали, bulk-import — только 9 | P1 |
+Данные «обрезаются» или не умещаются на мобильных экранах (320px–390px) из-за нескольких системных причин в архитектуре CSS.
 
 ---
 
-## Фаза 1: Синхронизация Edge Functions (P0)
+## Выявленные проблемы
 
-### 1.1 Обновление `bulk-import/index.ts`
+### P0 — Критические (блокируют контент)
 
-**Текущее состояние (строки 10-20):**
-```typescript
-const ALLOWED_TABLES = [
-  'providers',
-  'marketplace_products',
-  'marketplace_vendors',
-  'restaurants',
-  'salons',
-  'yachts',
-  'tours',
-  'services',
-  'properties',
-];
+| # | Проблема | Файлы | Описание |
+|---|----------|-------|----------|
+| 1 | **Двойной scroll-контейнер** | `PropertyManage.tsx:407-412` | `overflow-auto` на `main` + вложенный `ScrollArea` создают конфликт жестов прокрутки на iOS/Android |
+| 2 | **`overflow-x-hidden` скрывает контент** | `AppLayout.tsx:31`, `index.css:30-35` | Широкие элементы (таблицы, карточки) обрезаются без возможности прокрутки |
+| 3 | **Фиксированные ширины > viewport** | `CompetitorSlide.tsx:46` — `min-w-[700px]`, `PortfolioSection.tsx:107,114` — `w-[280px]` | На экране 320px карточки/таблицы выходят за границы |
+| 4 | **Перегруженный header** | `AppHeader.tsx:79-105`, `OwnerHeader.tsx:143-164` | 6-7 элементов в ряд (язык, валюта, тема, уведомления, роль) не умещаются на 375px |
+
+### P1 — Средние (ухудшают UX)
+
+| # | Проблема | Файлы | Описание |
+|---|----------|-------|----------|
+| 5 | **Негибкие grid-cols** | Многие формы и секции | `grid-cols-2` или `grid-cols-3` без `xs:grid-cols-1` на узких экранах |
+| 6 | **Длинные заголовки без truncate** | `PropertyManage.tsx:369`, `UnifiedHeader.tsx:70` | Русский текст длиннее английского, переполняет строку |
+| 7 | **Карусели с фиксированной шириной** | `ServiceProviderCard.tsx:134` — `w-[260px]` | На узком экране видна только 1 карточка с обрезанным краем |
+
+---
+
+## План исправлений
+
+### Фаза 1: Архитектура прокрутки (P0)
+
+**1.1 PropertyManage.tsx** — убрать двойной scroll:
+```tsx
+// Было (строки 407-412):
+<main className="flex-1 overflow-auto pb-20 md:pb-6">
+  <ScrollArea className="h-[calc(100vh-56px)]">
+    <div className="p-4 md:p-6 max-w-4xl">
+
+// Станет:
+<main className="flex-1 overflow-y-auto pb-20 md:pb-6">
+  <div className="p-4 md:p-6 max-w-4xl mx-auto">
 ```
 
-**Исправление — добавить все таблицы из `providerIdMapping.ts`:**
-```typescript
-const ALLOWED_TABLES = [
-  // Core
-  'providers',
-  'marketplace_products',
-  'marketplace_vendors',
-  'vendor_services',
-  
-  // Verticals
-  'yachts',
-  'tours',
-  'water_activities',
-  'restaurants',
-  'salons',
-  'clinics',
-  'gyms',
-  'vehicles',
-  'babysitters',
-  'cleaning_providers',
-  'pet_services',
-  'lawyers',
-  'education_centers',
-  'properties',
-  'owner_properties',
-  'flower_shops',
-  'bouquets',
-  'user_listings',
-  
-  // Deprecated but may have data
-  'services',
-];
-```
+**1.2 index.css** — разрешить горизонтальный scroll для таблиц:
+```css
+/* Было: */
+html, body { overflow-x: hidden; }
 
-### 1.2 Добавить provider_id mapping в bulk-import
-
-Добавить поддержку правильного FK на основе таблицы:
-```typescript
-const PROVIDER_ID_FIELD: Record<string, string> = {
-  'marketplace_products': 'vendor_id',
-  'vendor_services': 'provider_id',
-  'bouquets': 'shop_id',
-  'owner_properties': 'owner_id',
-  'user_listings': 'user_id',
-  // Default: 'provider_id'
-};
-
-function getProviderField(table: string): string {
-  return PROVIDER_ID_FIELD[table] || 'provider_id';
+/* Добавить класс для таблиц: */
+.table-scroll-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 ```
 
----
+### Фаза 2: Фиксированные ширины (P0)
 
-## Фаза 2: Миграция legacy данных (P0)
+**2.1 PortfolioSection.tsx** — адаптивные карточки:
+```tsx
+// Было (строки 107, 114):
+<div className="w-[280px] flex-shrink-0">
 
-### 2.1 SQL скрипт для orphan providers
-
-Создать marketplace_vendor для каждого провайдера без связи:
-
-```sql
--- Для каждого провайдера без marketplace_vendor создаём запись
-INSERT INTO marketplace_vendors (slug, name_en, name_ru, is_active, is_verified)
-SELECT 
-  LOWER(REGEXP_REPLACE(p.name, '[^a-zA-Z0-9]+', '-', 'g')) || '-' || SUBSTRING(p.id::text, 1, 8),
-  p.name,
-  COALESCE(p.name_ru, p.name),
-  p.is_active,
-  p.is_verified
-FROM providers p
-WHERE p.marketplace_vendor_id IS NULL;
-
--- Связать обратно
-UPDATE providers p
-SET marketplace_vendor_id = mv.id
-FROM marketplace_vendors mv
-WHERE mv.slug LIKE LOWER(REGEXP_REPLACE(p.name, '[^a-zA-Z0-9]+', '-', 'g')) || '-%'
-  AND p.marketplace_vendor_id IS NULL;
+// Станет:
+<div className="w-[85vw] max-w-[280px] flex-shrink-0">
 ```
 
-### 2.2 SQL скрипт для orphan yachts
-
-Присвоить системного провайдера или первого активного:
-
-```sql
--- Получить ID первого активного провайдера с яхтами
-WITH system_provider AS (
-  SELECT id FROM providers 
-  WHERE is_active = true 
-  ORDER BY created_at ASC 
-  LIMIT 1
-)
-UPDATE yachts 
-SET provider_id = (SELECT id FROM system_provider)
-WHERE provider_id IS NULL;
+**2.2 CompetitorSlide.tsx** — обёртка для таблицы:
+```tsx
+// Строка 44-46:
+<motion.div className="overflow-x-auto -mx-4 px-4 pb-4">
+  <table className="w-full min-w-[600px]">
 ```
 
----
+### Фаза 3: Оптимизация Header (P1)
 
-## Фаза 3: Валидация и защита (P1)
-
-### 3.1 Добавить проверку в useIntakeAgent
-
-Уже реализовано в предыдущем commit — проверить что работает:
-```typescript
-// P0 FIX: Validate table before calling bulk-import
-if (!isValidIntakeTable(item.detectedVertical)) {
-  const errorMsg = `Unknown vertical table: ${item.detectedVertical}`;
-  toast.error(errorMsg);
-  return false;
-}
+**3.1 AppHeader.tsx** — группировка на мобильных:
+```tsx
+// Скрыть второстепенные на mobile:
+<div className="hidden sm:flex items-center gap-0.5">
+  <CurrencySwitcher size="sm" />
+  <ThemeSwitcher size="sm" />
+</div>
+// Оставить только: Language, Cart, Notifications, Avatar
 ```
 
-### 3.2 Синхронизировать VERTICALS в intake-listing-agent
+**3.2 OwnerHeader.tsx** — аналогично скрыть Currency, Theme в sidebar
 
-Убедиться что все таблицы из VERTICALS массива (строки 10-35 в edge function) присутствуют в ALLOWED_TABLES bulk-import.
+### Фаза 4: Grid-адаптивность (P1)
+
+**Паттерн для всех grid-секций:**
+```tsx
+// Было:
+<div className="grid grid-cols-2 gap-3">
+
+// Станет:
+<div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
+```
+
+Применить к файлам:
+- `PropertyManagePricingSection.tsx`
+- `PropertyManageRulesSection.tsx`  
+- `ListingSection.tsx`
+- Все формы с полями в 2 колонки
 
 ---
 
 ## Файлы для изменения
 
-| Файл | Действие | Описание |
-|------|----------|----------|
-| `supabase/functions/bulk-import/index.ts` | Редактирование | Расширить ALLOWED_TABLES до 20+ таблиц |
-| Database | SQL Insert | Миграция 16 orphan providers |
-| Database | SQL Update | Миграция 36 orphan yachts |
+| Файл | Действие |
+|------|----------|
+| `src/pages/owner/PropertyManage.tsx` | Убрать двойной ScrollArea |
+| `src/index.css` | Добавить `.table-scroll-container` |
+| `src/components/layout/AppHeader.tsx` | Скрыть переключатели на mobile |
+| `src/components/owner/OwnerHeader.tsx` | Скрыть переключатели на mobile |
+| `src/components/owner/dashboard/PortfolioSection.tsx` | Адаптивная ширина карточек |
+| `src/components/pitch/slides/CompetitorSlide.tsx` | Scroll-обёртка для таблицы |
+| 10+ form-секций | `grid-cols-1 xs:grid-cols-2` |
 
 ---
 
-## Проверочный чеклист после реализации
+## Ожидаемый результат
 
-1. [ ] Edge function bulk-import поддерживает все 20+ вертикалей
-2. [ ] Все 16 providers имеют marketplace_vendor_id
-3. [ ] Все 36 yachts имеют provider_id  
-4. [ ] AI Intake создаёт записи для clinics, gyms, pet_services
-5. [ ] Vendor dashboard показывает все записи провайдера
+| До | После |
+|----|-------|
+| Контент обрезается справа | Полная видимость или горизонтальный scroll |
+| Невозможно прокрутить таблицы | Нативный touch-scroll для таблиц |
+| Header элементы наслаиваются | Чистый header с 4 иконками |
+| Формы сжаты на 320px | 1 колонка на узких экранах |
 
 ---
 
-## Важные ограничения
+## Техническое резюме
 
-- **НЕ трогаем** `useVendor.ts` — уже содержит P0 fix для новых провайдеров
-- **НЕ трогаем** `useCanonicalSubmit.ts` — уже использует mapping
-- **НЕ трогаем** `providerIdMapping.ts` — источник истины для таблиц
-- Миграция данных выполняется через SQL Insert tool, не через миграции схемы
+**Корневые причины:**
+1. `overflow-x: hidden` на `html/body` — «заплатка» вместо решения
+2. Двойные scroll-контейнеры — конфликт touch-событий
+3. `w-[Npx]` без `max-w` или `vw` единиц
+4. Отсутствие `xs:` breakpoint в grid-классах
+
+**Приоритет:** Фазы 1-2 (P0) решают 80% проблем с обрезанием данных.
