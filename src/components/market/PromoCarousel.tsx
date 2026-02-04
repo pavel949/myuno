@@ -39,8 +39,8 @@ export const PromoCarousel: React.FC<PromoCarouselProps> = ({ className }) => {
 
   if (isLoading) {
     return (
-      <div className={cn("px-4 py-3 max-w-7xl mx-auto", className)}>
-        <Skeleton className="w-full h-40 rounded-2xl" />
+      <div className={cn("px-4 py-2 max-w-7xl mx-auto", className)}>
+        <Skeleton className="w-full h-32 rounded-2xl" />
       </div>
     );
   }
@@ -48,7 +48,7 @@ export const PromoCarousel: React.FC<PromoCarouselProps> = ({ className }) => {
   if (promotions.length === 0) return null;
 
   return (
-    <div className={cn("px-4 py-3 max-w-7xl mx-auto", className)}>
+    <div className={cn("px-4 py-2 max-w-7xl mx-auto", className)}>
       <Carousel
         opts={{ align: 'start', loop: true }}
         plugins={[plugin.current]}

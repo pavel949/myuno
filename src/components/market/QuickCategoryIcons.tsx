@@ -51,8 +51,8 @@ export const QuickCategoryIcons: React.FC<QuickCategoryIconsProps> = ({
   };
 
   return (
-    <div className={cn("py-4", className)}>
-      <div className="grid grid-cols-4 gap-3 px-4 max-w-7xl mx-auto">
+    <div className={cn("py-2", className)}>
+      <div className="grid grid-cols-4 gap-2 px-4 max-w-7xl mx-auto">
         {displayCategories.map((category) => {
           const emoji = category.icon || getCategoryEmoji(category.slug);
           const count = productCounts[category.slug] || 0;
@@ -65,7 +65,7 @@ export const QuickCategoryIcons: React.FC<QuickCategoryIconsProps> = ({
             >
               {/* Icon Circle */}
               <div className={cn(
-                "w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center",
+                "w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center",
                 "bg-primary/10 hover:bg-primary/20",
                 "shadow-sm hover:shadow-md",
                 "transform transition-all duration-200",
@@ -76,10 +76,10 @@ export const QuickCategoryIcons: React.FC<QuickCategoryIconsProps> = ({
                   <img 
                     src={category.image_url} 
                     alt=""
-                    className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
+                    className="w-6 h-6 sm:w-8 sm:h-8 object-contain"
                   />
                 ) : (
-                  <span className="text-2xl sm:text-3xl">{emoji}</span>
+                  <span className="text-xl sm:text-2xl">{emoji}</span>
                 )}
               </div>
               
