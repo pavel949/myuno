@@ -2,7 +2,7 @@
  * CategorySuggestionDialog - Allows vendors to suggest new categories
  * Similar to Etsy's "Request a category" feature
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -75,13 +75,6 @@ export function CategorySuggestionDialog({
       setIsSuccess(true);
       toast.success(isRu ? 'Заявка отправлена!' : 'Suggestion submitted!');
       
-      // Reset after delay
-      setTimeout(() => {
-        setIsSuccess(false);
-        setFormData({ category_name: '', category_name_ru: '', description: '', example_items: '' });
-        onOpenChange(false);
-      }, 2000);
-      
     } catch (error) {
       console.error('Error submitting suggestion:', error);
       toast.error(isRu ? 'Ошибка отправки' : 'Submission failed');
@@ -89,6 +82,18 @@ export function CategorySuggestionDialog({
       setIsSubmitting(false);
     }
   };
+  
+  // Reset and close after success (outside try block to only run on success)
+  useEffect(() => {
+    if (isSuccess) {
+      const timer = setTimeout(() => {
+        setIsSuccess(false);
+        setFormData({ category_name: '', category_name_ru: '', description: '', example_items: '' });
+        onOpenChange(false);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isSuccess, onOpenChange]);
 
   if (isSuccess) {
     return (

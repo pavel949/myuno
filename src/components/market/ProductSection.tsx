@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, Sparkles, TrendingUp } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -20,7 +20,7 @@ interface ProductSectionProps {
   icon?: 'sparkles' | 'trending';
 }
 
-export const ProductSection: React.FC<ProductSectionProps> = ({
+export const ProductSection = forwardRef<HTMLElement, ProductSectionProps>(function ProductSection({
   title,
   titleRu,
   products,
@@ -29,7 +29,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   variant = 'scroll',
   isLoading = false,
   icon,
-}) => {
+}, ref) {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { addItem, removeItem, getItemsByType } = useCart();
@@ -85,7 +85,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   const IconComponent = icon === 'sparkles' ? Sparkles : icon === 'trending' ? TrendingUp : null;
 
   return (
-    <section className="space-y-4">
+    <section ref={ref} className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -149,4 +149,4 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
       )}
     </section>
   );
-};
+});
