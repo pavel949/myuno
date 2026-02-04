@@ -7,7 +7,6 @@ import {
   Star,
   Menu,
 } from 'lucide-react';
-import { FeaturedBanner } from '@/components/market/FeaturedBanner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
@@ -16,6 +15,11 @@ import { Badge } from '@/components/ui/badge';
 import { StickyCartBar } from '@/components/cart/StickyCartBar';
 import { ProfessionalProductCard } from '@/components/market';
 import { CategoryDrawer } from '@/components/market/CategoryDrawer';
+import { PromoCarousel } from '@/components/market/PromoCarousel';
+import { QuickCategoryIcons } from '@/components/market/QuickCategoryIcons';
+import { FlashDealsSection } from '@/components/market/FlashDealsSection';
+import { FeaturedVendorsCarousel } from '@/components/market/FeaturedVendorsCarousel';
+import { RecentlyViewedProducts } from '@/components/market/RecentlyViewedProducts';
 import { useDeliverySettings } from '@/hooks/useMarketplace';
 import { useMarketIndexData } from '@/hooks/useMarketIndexData';
 import { MarketplaceProduct } from '@/types/marketplace';
@@ -28,7 +32,6 @@ import {
   UnifiedFilterRibbon, 
   UnifiedSectionHeader, 
   UnifiedScrollSection,
-  UnifiedFiltersKlook,
   FilterRibbonItem 
 } from '@/components/shared';
 
@@ -63,7 +66,6 @@ const MarketIndex = () => {
   const isRu = language === 'ru';
   
   const [searchQuery, setSearchQuery] = useState('');
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   // Fetch data - optimized: single fetch for products, derive popular/new client-side
   const { 
@@ -327,17 +329,23 @@ const MarketIndex = () => {
       </div>
 
       <div className="pb-32 -mx-4 px-4">
-        {/* Featured Banner - Rich header with stats */}
-        <div className="py-3 max-w-7xl mx-auto">
-          <FeaturedBanner
-            freeDeliveryThreshold={freeDeliveryThreshold}
-            estimatedTime={defaultZone?.estimated_time_minutes}
-            productCount={allProducts.length}
-            vendorCount={uniqueVendorCount}
-          />
-        </div>
+        {/* 1. Hero Promo Carousel */}
+        <PromoCarousel className="-mx-4" />
 
-        {/* Popular Products Section */}
+        {/* 2. Quick Category Icons Grid (2x4) */}
+        <QuickCategoryIcons 
+          categories={activeCategories} 
+          productCounts={productCounts}
+          maxItems={8}
+        />
+
+        {/* 3. Flash Deals Section with Countdown */}
+        <FlashDealsSection 
+          products={allProducts} 
+          className="-mx-4"
+        />
+
+        {/* 4. Bestsellers Section */}
         {popularProducts.length > 0 && (
           <section className="py-4">
             <div className="px-4 max-w-7xl mx-auto">
@@ -367,10 +375,13 @@ const MarketIndex = () => {
           </section>
         )}
 
-        {/* New Arrivals Section */}
+        {/* 5. Featured Vendors Carousel */}
+        <FeaturedVendorsCarousel className="-mx-4" />
+
+        {/* 6. New Arrivals Section */}
         {newProducts.length > 0 && (
-          <section className="py-4 bg-muted/30">
-            <div className="px-4 max-w-7xl mx-auto">
+          <section className="py-4 bg-muted/30 -mx-4 px-4">
+            <div className="max-w-7xl mx-auto">
               <UnifiedSectionHeader
                 icon={Sparkles}
                 iconColor="text-purple-500"
@@ -397,7 +408,7 @@ const MarketIndex = () => {
           </section>
         )}
 
-        {/* Categories with Products - Alternating background */}
+        {/* 7. Categories with Products - Alternating background */}
         {activeCategories.slice(0, 6).map((category, index) => {
           const categoryProducts = allProducts
             .filter(p => p.category_slug === category.slug)
@@ -408,8 +419,8 @@ const MarketIndex = () => {
           const isMuted = index % 2 === 1;
           
           return (
-            <section key={category.id} className={cn("py-4 border-t border-border/50", isMuted && "bg-muted/30")}>
-              <div className="px-4 max-w-7xl mx-auto">
+            <section key={category.id} className={cn("py-4 border-t border-border/50 -mx-4 px-4", isMuted && "bg-muted/30")}>
+              <div className="max-w-7xl mx-auto">
                 <UnifiedSectionHeader
                   iconEmoji={category.icon || getCategoryFallbackIcon(category.slug)}
                   iconImage={category.image_url || undefined}
@@ -438,8 +449,11 @@ const MarketIndex = () => {
           );
         })}
 
-        {/* All Products Grid */}
-        <section className="py-6 px-4 max-w-7xl mx-auto">
+        {/* 8. Recently Viewed Products */}
+        <RecentlyViewedProducts className="-mx-4 px-4" />
+
+        {/* 9. All Products Grid */}
+        <section className="py-6 max-w-7xl mx-auto">
           <UnifiedSectionHeader
             title={isRu ? 'Все товары' : 'All Products'}
             count={allProducts.length}
@@ -470,8 +484,8 @@ const MarketIndex = () => {
           )}
         </section>
 
-        {/* Cross-sell to other services */}
-        <section className="py-6 px-4 max-w-7xl mx-auto">
+        {/* 10. Cross-sell to other services */}
+        <section className="py-6 max-w-7xl mx-auto">
           <CrossSellSection currentVertical="marketplace" maxItems={4} />
         </section>
 
