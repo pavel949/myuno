@@ -207,6 +207,12 @@ export interface OwnerProperty extends BaseProperty {
   prepay_percent?: number;
   balance_due_days?: number;
   security_deposit_required?: boolean;
+  
+  // Investment analysis fields
+  purchase_price?: number;
+  purchase_date?: string;
+  acquisition_costs?: number;
+  renovation_costs?: number;
 }
 
 /**
