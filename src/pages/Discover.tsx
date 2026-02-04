@@ -109,8 +109,8 @@ export default function Discover() {
       showCategories={false}
       showFilter={false}
     >
-      {/* Audience Filter Ribbon */}
-      <div className="sticky top-[124px] z-30 -mx-4 bg-background/95 backdrop-blur-sm border-b border-border/30">
+      {/* Audience Filter Ribbon - uses negative margin to align with layout padding */}
+      <div className="-mx-4 -mt-4 bg-background/95 backdrop-blur-sm border-b border-border/30">
         <UnifiedFilterRibbon
           items={audienceItems}
           activeId={audienceFilter}
