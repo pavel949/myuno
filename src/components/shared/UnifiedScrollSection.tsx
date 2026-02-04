@@ -24,8 +24,8 @@ export const UnifiedScrollSection = memo(function UnifiedScrollSection({
     <section className={cn("py-4", bgClass, className)}>
       <div className={cn(
         "flex gap-3 pb-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory",
-        "touch-pan-y", // Allow vertical scroll while horizontal swipe works
-        !noPadding && "-mx-4 px-4",
+        "touch-pan-y overscroll-x-contain", // Allow vertical scroll while horizontal swipe works
+        !noPadding && "px-4",
         "max-w-7xl mx-auto"
       )}>
         {children}
