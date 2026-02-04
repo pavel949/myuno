@@ -4018,6 +4018,335 @@ export type Database = {
           },
         ]
       }
+      investment_documents: {
+        Row: {
+          created_at: string
+          document_type: string
+          download_count: number | null
+          file_size: number | null
+          file_type: string | null
+          file_url: string
+          id: string
+          is_public: boolean | null
+          name_en: string
+          name_ru: string | null
+          project_id: string
+          requires_interest: boolean | null
+          requires_nda: boolean | null
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          document_type?: string
+          download_count?: number | null
+          file_size?: number | null
+          file_type?: string | null
+          file_url: string
+          id?: string
+          is_public?: boolean | null
+          name_en: string
+          name_ru?: string | null
+          project_id: string
+          requires_interest?: boolean | null
+          requires_nda?: boolean | null
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          document_type?: string
+          download_count?: number | null
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          is_public?: boolean | null
+          name_en?: string
+          name_ru?: string | null
+          project_id?: string
+          requires_interest?: boolean | null
+          requires_nda?: boolean | null
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investment_documents_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "investment_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      investment_interests: {
+        Row: {
+          admin_notes: string | null
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          contacted_at: string | null
+          converted_at: string | null
+          created_at: string
+          id: string
+          interest_type: string
+          notes: string | null
+          preferred_amount: number | null
+          preferred_currency: string | null
+          priority: string | null
+          project_id: string
+          source: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          utm_campaign: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          contacted_at?: string | null
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          interest_type?: string
+          notes?: string | null
+          preferred_amount?: number | null
+          preferred_currency?: string | null
+          priority?: string | null
+          project_id: string
+          source?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          utm_campaign?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          contacted_at?: string | null
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          interest_type?: string
+          notes?: string | null
+          preferred_amount?: number | null
+          preferred_currency?: string | null
+          priority?: string | null
+          project_id?: string
+          source?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          utm_campaign?: string | null
+          utm_source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investment_interests_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "investment_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      investment_projects: {
+        Row: {
+          address: string | null
+          amount_raised: number | null
+          closed_at: string | null
+          cover_image: string | null
+          created_at: string
+          currency: string
+          description_en: string | null
+          description_ru: string | null
+          developer_id: string | null
+          district: string | null
+          exit_strategy: string | null
+          founder_id: string | null
+          funded_at: string | null
+          funding_goal: number | null
+          id: string
+          images: string[] | null
+          industry: string | null
+          investment_term_months: number | null
+          investors_count: number | null
+          is_featured: boolean | null
+          is_hot: boolean | null
+          is_verified: boolean | null
+          lat: number | null
+          lng: number | null
+          max_investment: number | null
+          min_investment: number | null
+          muuno_score: number | null
+          project_type: string
+          property_project_id: string | null
+          published_at: string | null
+          risk_factors: string[] | null
+          risk_level: string | null
+          roi_projected: number | null
+          score_breakdown: Json | null
+          slug: string | null
+          status: string
+          title_en: string
+          title_ru: string
+          updated_at: string
+          views_count: number | null
+        }
+        Insert: {
+          address?: string | null
+          amount_raised?: number | null
+          closed_at?: string | null
+          cover_image?: string | null
+          created_at?: string
+          currency?: string
+          description_en?: string | null
+          description_ru?: string | null
+          developer_id?: string | null
+          district?: string | null
+          exit_strategy?: string | null
+          founder_id?: string | null
+          funded_at?: string | null
+          funding_goal?: number | null
+          id?: string
+          images?: string[] | null
+          industry?: string | null
+          investment_term_months?: number | null
+          investors_count?: number | null
+          is_featured?: boolean | null
+          is_hot?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          max_investment?: number | null
+          min_investment?: number | null
+          muuno_score?: number | null
+          project_type?: string
+          property_project_id?: string | null
+          published_at?: string | null
+          risk_factors?: string[] | null
+          risk_level?: string | null
+          roi_projected?: number | null
+          score_breakdown?: Json | null
+          slug?: string | null
+          status?: string
+          title_en: string
+          title_ru: string
+          updated_at?: string
+          views_count?: number | null
+        }
+        Update: {
+          address?: string | null
+          amount_raised?: number | null
+          closed_at?: string | null
+          cover_image?: string | null
+          created_at?: string
+          currency?: string
+          description_en?: string | null
+          description_ru?: string | null
+          developer_id?: string | null
+          district?: string | null
+          exit_strategy?: string | null
+          founder_id?: string | null
+          funded_at?: string | null
+          funding_goal?: number | null
+          id?: string
+          images?: string[] | null
+          industry?: string | null
+          investment_term_months?: number | null
+          investors_count?: number | null
+          is_featured?: boolean | null
+          is_hot?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          max_investment?: number | null
+          min_investment?: number | null
+          muuno_score?: number | null
+          project_type?: string
+          property_project_id?: string | null
+          published_at?: string | null
+          risk_factors?: string[] | null
+          risk_level?: string | null
+          roi_projected?: number | null
+          score_breakdown?: Json | null
+          slug?: string | null
+          status?: string
+          title_en?: string
+          title_ru?: string
+          updated_at?: string
+          views_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investment_projects_property_project_id_fkey"
+            columns: ["property_project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      investment_team_members: {
+        Row: {
+          bio_en: string | null
+          bio_ru: string | null
+          created_at: string
+          id: string
+          is_primary: boolean | null
+          linkedin_url: string | null
+          name: string
+          photo: string | null
+          project_id: string
+          role: string
+          sort_order: number | null
+          website_url: string | null
+        }
+        Insert: {
+          bio_en?: string | null
+          bio_ru?: string | null
+          created_at?: string
+          id?: string
+          is_primary?: boolean | null
+          linkedin_url?: string | null
+          name: string
+          photo?: string | null
+          project_id: string
+          role: string
+          sort_order?: number | null
+          website_url?: string | null
+        }
+        Update: {
+          bio_en?: string | null
+          bio_ru?: string | null
+          created_at?: string
+          id?: string
+          is_primary?: boolean | null
+          linkedin_url?: string | null
+          name?: string
+          photo?: string | null
+          project_id?: string
+          role?: string
+          sort_order?: number | null
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investment_team_members_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "investment_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       juristic_contacts: {
         Row: {
           contact_type: string
@@ -10408,9 +10737,11 @@ export type Database = {
           description_ru: string | null
           developer_name: string | null
           district: string | null
+          funding_goal: number | null
           id: string
           images: string[] | null
           infrastructure: string[] | null
+          investment_enabled: boolean | null
           is_active: boolean | null
           is_featured: boolean | null
           juristic_address: string | null
@@ -10429,8 +10760,12 @@ export type Database = {
           juristic_whatsapp: string | null
           lat: number | null
           lng: number | null
+          min_investment: number | null
+          muuno_score: number | null
           name_en: string
           name_ru: string
+          risk_level: string | null
+          roi_projected: number | null
           total_units: number | null
           updated_at: string | null
           video_url: string | null
@@ -10449,9 +10784,11 @@ export type Database = {
           description_ru?: string | null
           developer_name?: string | null
           district?: string | null
+          funding_goal?: number | null
           id?: string
           images?: string[] | null
           infrastructure?: string[] | null
+          investment_enabled?: boolean | null
           is_active?: boolean | null
           is_featured?: boolean | null
           juristic_address?: string | null
@@ -10470,8 +10807,12 @@ export type Database = {
           juristic_whatsapp?: string | null
           lat?: number | null
           lng?: number | null
+          min_investment?: number | null
+          muuno_score?: number | null
           name_en: string
           name_ru: string
+          risk_level?: string | null
+          roi_projected?: number | null
           total_units?: number | null
           updated_at?: string | null
           video_url?: string | null
@@ -10490,9 +10831,11 @@ export type Database = {
           description_ru?: string | null
           developer_name?: string | null
           district?: string | null
+          funding_goal?: number | null
           id?: string
           images?: string[] | null
           infrastructure?: string[] | null
+          investment_enabled?: boolean | null
           is_active?: boolean | null
           is_featured?: boolean | null
           juristic_address?: string | null
@@ -10511,8 +10854,12 @@ export type Database = {
           juristic_whatsapp?: string | null
           lat?: number | null
           lng?: number | null
+          min_investment?: number | null
+          muuno_score?: number | null
           name_en?: string
           name_ru?: string
+          risk_level?: string | null
+          roi_projected?: number | null
           total_units?: number | null
           updated_at?: string | null
           video_url?: string | null
@@ -16653,6 +17000,7 @@ export type Database = {
         | "finance"
         | "support"
         | "sales"
+        | "investor"
       booking_status:
         | "draft"
         | "submitted"
@@ -16869,6 +17217,7 @@ export const Constants = {
         "finance",
         "support",
         "sales",
+        "investor",
       ],
       booking_status: [
         "draft",

@@ -48,6 +48,11 @@ const PropertyDepositSuccess = lazy(() => import('@/pages/property/PropertyDepos
 const ProjectsIndex = lazy(() => import('@/pages/property/ProjectsIndex'));
 const ProjectDetail = lazy(() => import('@/pages/property/ProjectDetail'));
 
+// Investment Mini-App
+const InvestmentIndex = lazy(() => import('@/pages/invest/InvestmentIndex'));
+const InvestmentDetail = lazy(() => import('@/pages/invest/InvestmentDetail'));
+const RaiseFunding = lazy(() => import('@/pages/invest/RaiseFunding'));
+
 // Guest pages
 const GuestMessages = lazy(() => import('@/pages/guest/GuestMessages'));
 const GuestTripDetail = lazy(() => import('@/pages/guest/GuestTripDetail'));
@@ -527,6 +532,11 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/property/:id/inquiry" element={<LazyPage><PropertyInquiry /></LazyPage>} />
         <Route path="/property/map" element={<LazyPage><PropertyMap /></LazyPage>} />
         <Route path="/complexes" element={<LazyPage><ProjectsIndex /></LazyPage>} />
+        
+        {/* Investment Mini-App Routes */}
+        <Route path="/invest" element={<LazyPage><InvestmentIndex /></LazyPage>} />
+        <Route path="/invest/raise" element={<LazyPage><RaiseFunding /></LazyPage>} />
+        <Route path="/invest/:id" element={<LazyPage><InvestmentDetail /></LazyPage>} />
         
         {/* Food & Delivery Mini-App Routes (legacy - all redirect to restaurants) */}
         <Route path="/food" element={<Navigate to="/restaurants" replace />} />

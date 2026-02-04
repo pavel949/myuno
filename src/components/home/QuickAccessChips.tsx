@@ -1,6 +1,6 @@
 import React, { memo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Sparkles, Wallet } from 'lucide-react';
+import { Building2, Sparkles, Wallet, TrendingUp } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { triggerRipple } from '@/hooks/useRipple';
@@ -25,6 +25,14 @@ const chips: ChipData[] = [
     labelRu: 'Комплексы',
     path: '/complexes',
     gradient: 'from-sky-500 to-blue-600',
+  },
+  {
+    id: 'invest',
+    icon: TrendingUp,
+    label: 'Invest',
+    labelRu: 'Инвестиции',
+    path: '/invest',
+    gradient: 'from-emerald-500 to-green-600',
   },
   {
     id: 'owner',
