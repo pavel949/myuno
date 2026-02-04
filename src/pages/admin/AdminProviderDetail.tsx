@@ -34,10 +34,12 @@ import {
   Plus,
   ExternalLink,
   AlertTriangle,
-  TrendingUp
+  TrendingUp,
+  Handshake
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ContentCreatorMenu } from '@/components/admin/ContentCreatorMenu';
+import { ProviderContractEditor } from '@/components/admin/ProviderContractEditor';
 
 export default function AdminProviderDetail() {
   const { id } = useParams<{ id: string }>();
@@ -216,10 +218,14 @@ export default function AdminProviderDetail() {
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5 max-w-2xl">
+        <TabsList className="grid w-full grid-cols-6 max-w-3xl">
           <TabsTrigger value="overview" className="gap-1">
             <Building2 className="h-4 w-4" />
             <span className="hidden sm:inline">{isRussian ? 'Обзор' : 'Overview'}</span>
+          </TabsTrigger>
+          <TabsTrigger value="collaboration" className="gap-1">
+            <Handshake className="h-4 w-4" />
+            <span className="hidden sm:inline">{isRussian ? 'Условия' : 'Terms'}</span>
           </TabsTrigger>
           <TabsTrigger value="services" className="gap-1">
             <Package className="h-4 w-4" />
@@ -330,6 +336,16 @@ export default function AdminProviderDetail() {
                 </div>
               </CardContent>
             </Card>
+          </div>
+        </TabsContent>
+
+        {/* Collaboration Tab - Inline Contract Editor */}
+        <TabsContent value="collaboration" className="mt-4">
+          <div className="max-w-2xl">
+            <ProviderContractEditor 
+              providerId={provider.id} 
+              providerName={provider.name}
+            />
           </div>
         </TabsContent>
 

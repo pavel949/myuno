@@ -14,13 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { CategorySelector, GENERAL_CATEGORIES } from '@/components/admin/CategorySelector';
 import {
   Dialog,
   DialogContent,
@@ -60,36 +54,20 @@ import {
   getCategoryById
 } from '@/lib/config/homeServicesTaxonomy';
 
-// Extended business categories: combine home services taxonomy + general verticals
-const GENERAL_CATEGORIES = [
-  { value: 'beauty', labelEn: 'Beauty & Spa', labelRu: 'Красота и спа' },
-  { value: 'food', labelEn: 'Food & Restaurants', labelRu: 'Еда и рестораны' },
-  { value: 'transport', labelEn: 'Transport', labelRu: 'Транспорт' },
-  { value: 'medical', labelEn: 'Medical', labelRu: 'Медицина' },
-  { value: 'fitness', labelEn: 'Fitness', labelRu: 'Фитнес' },
-  { value: 'education', labelEn: 'Education', labelRu: 'Образование' },
-  { value: 'tours', labelEn: 'Tours & Excursions', labelRu: 'Туры и экскурсии' },
-  { value: 'water', labelEn: 'Water Activities', labelRu: 'Водные развлечения' },
-  { value: 'property', labelEn: 'Property', labelRu: 'Недвижимость' },
-  { value: 'legal', labelEn: 'Legal Services', labelRu: 'Юридические услуги' },
-  { value: 'pets', labelEn: 'Pet Services', labelRu: 'Услуги для питомцев' },
-  { value: 'events', labelEn: 'Events', labelRu: 'Мероприятия' },
-  { value: 'yachts', labelEn: 'Yachts', labelRu: 'Яхты' },
-  { value: 'flowers', labelEn: 'Flowers', labelRu: 'Цветы' },
-];
-
-// Merge home service categories with general categories
+// Combined business categories for display
 const ALL_BUSINESS_CATEGORIES = [
-  // Home service categories from taxonomy
   ...ALL_SERVICE_CATEGORIES.map(cat => ({
     value: cat.id,
     labelEn: cat.labelEn,
     labelRu: cat.labelRu,
     icon: cat.icon,
-    domain: cat.domain,
   })),
-  // General categories
-  ...GENERAL_CATEGORIES,
+  ...GENERAL_CATEGORIES.map(cat => ({
+    value: cat.id,
+    labelEn: cat.labelEn,
+    labelRu: cat.labelRu,
+    icon: cat.icon,
+  })),
 ];
 
 // Language options
@@ -449,21 +427,14 @@ export default function AdminProviders() {
 
               <div className="space-y-2">
                 <Label>{isRussian ? 'Категория *' : 'Category *'}</Label>
-                <Select
+                <CategorySelector
                   value={formData.business_category}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, business_category: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={isRussian ? 'Выберите категорию' : 'Select category'} />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-[300px]">
-                    {ALL_BUSINESS_CATEGORIES.map((cat) => (
-                      <SelectItem key={cat.value} value={cat.value}>
-                        {'icon' in cat ? `${cat.icon} ` : ''}{isRussian ? cat.labelRu : cat.labelEn}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onChange={(value) => setFormData(prev => ({ 
+                    ...prev, 
+                    business_category: typeof value === 'string' ? value : value[0] || '' 
+                  }))}
+                  placeholder={isRussian ? 'Выберите категорию' : 'Select category'}
+                />
               </div>
 
               <div className="space-y-2">
