@@ -42,34 +42,42 @@
     <!-- Early version check - runs BEFORE React loads -->
     <script>
       (function() {
-        var CURRENT_VERSION = '2.5.0';
+        var CURRENT_VERSION = '2.5.1';
         var stored = localStorage.getItem('app_version');
         
-        if (stored && stored !== CURRENT_VERSION) {
-          console.log('[myUNO] Outdated version detected, clearing caches...');
+        // Always clear caches on first load of a new version
+        if (stored !== CURRENT_VERSION) {
+          console.log('[myUNO] Version mismatch, clearing everything...');
           localStorage.setItem('app_version', CURRENT_VERSION);
+          localStorage.setItem('last_cache_cleanup', Date.now().toString());
           
           // Clear all caches
           if ('caches' in window) {
             caches.keys().then(function(keys) {
               return Promise.all(keys.map(function(key) {
+                console.log('[myUNO] Deleting:', key);
                 return caches.delete(key);
               }));
             }).then(function() {
-              // Unregister service workers
+              // Unregister all service workers
               if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.getRegistrations().then(function(regs) {
-                  regs.forEach(function(reg) { reg.unregister(); });
+                  Promise.all(regs.map(function(reg) { 
+                    return reg.unregister(); 
+                  })).then(function() {
+                    // Hard reload after everything is cleared
+                    if (stored) {
+                      window.location.reload(true);
+                    }
+                  });
                 });
+              } else if (stored) {
+                window.location.reload(true);
               }
-              // Hard reload
-              window.location.reload(true);
             });
-          } else {
+          } else if (stored) {
             window.location.reload(true);
           }
-        } else if (!stored) {
-          localStorage.setItem('app_version', CURRENT_VERSION);
         }
       })();
     </script>

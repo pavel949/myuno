@@ -66,12 +66,11 @@ interface QuickStatChipProps {
   onClick: () => void;
 }
 
-const QuickStatChip = memo(function QuickStatChip({ stat, isRu, onClick }: QuickStatChipProps) {
+function QuickStatChipComponent({ stat, isRu, onClick }: QuickStatChipProps) {
   const Icon = stat.icon;
   
   return (
-    <motion.button
-      whileTap={{ scale: 0.95 }}
+    <button
       onClick={onClick}
       className={cn(
         "flex items-center gap-1.5 px-3 py-1.5 rounded-full",
@@ -87,9 +86,11 @@ const QuickStatChip = memo(function QuickStatChip({ stat, isRu, onClick }: Quick
       <span className="text-xs font-medium text-foreground whitespace-nowrap">
         {stat.value}
       </span>
-    </motion.button>
+    </button>
   );
-});
+}
+
+const QuickStatChip = memo(QuickStatChipComponent);
 
 export const QuickStatsRibbon = memo(function QuickStatsRibbon() {
   const navigate = useNavigate();
