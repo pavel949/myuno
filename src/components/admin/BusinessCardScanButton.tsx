@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Camera, Upload, Loader2, Sparkles, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -48,6 +48,23 @@ export function BusinessCardScanButton({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // CRITICAL: Sync video element with stream when both are ready
+  useEffect(() => {
+    if (stream && videoRef.current) {
+      videoRef.current.srcObject = stream;
+      videoRef.current.play().catch(console.error);
+    }
+  }, [stream, isCameraActive]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [stream]);
 
   const stopCamera = useCallback(() => {
     if (stream) {
@@ -140,24 +157,41 @@ export function BusinessCardScanButton({
     }
   }, [isRu, toast, processImage]);
 
+  // CRITICAL: getUserMedia called directly in click handler for gesture context
   const startCamera = useCallback(async () => {
     try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
-      });
-      setStream(mediaStream);
+      // First set camera active to render the video element
       setIsCameraActive(true);
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-      }
-    } catch (err) {
-      console.error('Camera access error:', err);
-      toast({
-        title: isRu ? 'Ошибка камеры' : 'Camera Error',
-        description: isRu ? 'Не удалось получить доступ к камере' : 'Failed to access camera',
-        variant: 'destructive',
+      
+      // Then request camera access - directly in click handler
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { 
+          facingMode: 'environment', 
+          width: { ideal: 1920 }, 
+          height: { ideal: 1080 } 
+        }
       });
+      
+      setStream(mediaStream);
+    } catch (err: any) {
+      console.error('Camera access error:', err);
+      setIsCameraActive(false);
+      
+      if (err.name === 'NotAllowedError') {
+        toast({
+          title: isRu ? 'Доступ запрещён' : 'Access Denied',
+          description: isRu 
+            ? 'Разрешите доступ к камере в настройках браузера' 
+            : 'Please allow camera access in browser settings',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: isRu ? 'Ошибка камеры' : 'Camera Error',
+          description: isRu ? 'Не удалось получить доступ к камере' : 'Failed to access camera',
+          variant: 'destructive',
+        });
+      }
     }
   }, [isRu, toast]);
 
