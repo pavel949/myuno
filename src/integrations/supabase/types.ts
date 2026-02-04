@@ -12800,6 +12800,57 @@ export type Database = {
           },
         ]
       }
+      service_promotions: {
+        Row: {
+          category_slug: string | null
+          created_at: string | null
+          ends_at: string | null
+          gradient: string | null
+          id: string
+          image_url: string
+          is_active: boolean | null
+          link_path: string
+          sort_order: number | null
+          starts_at: string | null
+          subtitle_en: string | null
+          subtitle_ru: string | null
+          title_en: string
+          title_ru: string
+        }
+        Insert: {
+          category_slug?: string | null
+          created_at?: string | null
+          ends_at?: string | null
+          gradient?: string | null
+          id?: string
+          image_url: string
+          is_active?: boolean | null
+          link_path: string
+          sort_order?: number | null
+          starts_at?: string | null
+          subtitle_en?: string | null
+          subtitle_ru?: string | null
+          title_en: string
+          title_ru: string
+        }
+        Update: {
+          category_slug?: string | null
+          created_at?: string | null
+          ends_at?: string | null
+          gradient?: string | null
+          id?: string
+          image_url?: string
+          is_active?: boolean | null
+          link_path?: string
+          sort_order?: number | null
+          starts_at?: string | null
+          subtitle_en?: string | null
+          subtitle_ru?: string | null
+          title_en?: string
+          title_ru?: string
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           approval_status: string | null
