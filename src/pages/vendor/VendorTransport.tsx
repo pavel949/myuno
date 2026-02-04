@@ -766,18 +766,7 @@ const VendorTransport = () => {
                     />
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>{isRussian ? 'Избранное' : 'Featured'}</Label>
-                      <p className="text-sm text-muted-foreground">
-                        {isRussian ? 'Показывать в топе' : 'Show at the top'}
-                      </p>
-                    </div>
-                    <Switch
-                      checked={formData.is_featured}
-                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_featured: checked }))}
-                    />
-                  </div>
+                  {/* is_featured removed - admin only */}
                 </div>
               </div>
             </ScrollArea>

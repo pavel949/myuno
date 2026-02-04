@@ -559,13 +559,7 @@ const VendorBeauty = () => {
                     onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
                   />
                 </div>
-                <div className="flex items-center justify-between">
-                  <Label>{isRussian ? 'Рекомендуемый' : 'Featured'}</Label>
-                  <Switch
-                    checked={formData.is_featured}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_featured: checked })}
-                  />
-                </div>
+                {/* is_featured removed - admin only */}
               </div>
             </ScrollArea>
             <DialogFooter>
