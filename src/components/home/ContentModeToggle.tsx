@@ -26,16 +26,33 @@ export function ContentModeToggle({ value, onChange, className }: ContentModeTog
   };
 
   return (
-    <div 
+    <motion.div 
+      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
       className={cn(
-        "relative flex p-1.5 bg-gradient-to-r from-secondary via-muted to-secondary rounded-2xl border border-border/50 shadow-sm",
+        "relative flex p-1.5 rounded-2xl border shadow-lg overflow-hidden",
+        "bg-gradient-to-r from-card via-background to-card",
+        "border-primary/20",
         className
       )}
     >
+      {/* Subtle shimmer effect */}
+      <motion.div
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+        animate={{ x: ['-100%', '100%'] }}
+        transition={{ 
+          duration: 3, 
+          repeat: Infinity, 
+          repeatDelay: 2,
+          ease: "easeInOut" 
+        }}
+      />
+
       {/* Animated background indicator with color based on mode */}
       <motion.div
         className={cn(
-          "absolute top-1.5 bottom-1.5 rounded-xl shadow-md",
+          "absolute top-1.5 bottom-1.5 rounded-xl shadow-lg",
           value === 'services' 
             ? "bg-gradient-to-r from-amber-500 to-orange-500" 
             : "bg-gradient-to-r from-emerald-500 to-teal-500"
@@ -45,62 +62,68 @@ export function ContentModeToggle({ value, onChange, className }: ContentModeTog
           left: value === 'services' ? '6px' : '50%',
           width: 'calc(50% - 6px)',
         }}
-        transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+      />
+
+      {/* Glow effect behind active button */}
+      <motion.div
+        className={cn(
+          "absolute top-1/2 -translate-y-1/2 w-24 h-24 rounded-full blur-2xl opacity-30",
+          value === 'services' 
+            ? "bg-amber-500" 
+            : "bg-emerald-500"
+        )}
+        animate={{
+          left: value === 'services' ? '10%' : '60%',
+        }}
+        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       />
 
       {/* Services tab */}
-      <button
+      <motion.button
         onClick={() => handleChange('services')}
+        whileTap={{ scale: 0.97 }}
         className={cn(
-          "relative z-10 flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold transition-all",
+          "relative z-10 flex-1 flex items-center justify-center gap-2.5 py-3.5 px-4 rounded-xl text-sm font-bold transition-all",
           value === 'services' 
             ? "text-white" 
             : "text-muted-foreground hover:text-foreground"
         )}
       >
-        <Briefcase className={cn(
-          "w-4 h-4 transition-transform",
-          value === 'services' && "animate-pulse"
-        )} />
-        <span>{isRu ? 'Услуги' : 'Services'}</span>
-        {value !== 'services' && (
-          <motion.div
-            className="absolute -top-1 -right-1"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.5 }}
-          >
-            <Sparkles className="w-3 h-3 text-amber-500 animate-pulse" />
-          </motion.div>
-        )}
-      </button>
+        <motion.div
+          animate={value === 'services' ? { 
+            rotate: [0, -10, 10, -5, 5, 0],
+            scale: [1, 1.1, 1]
+          } : {}}
+          transition={{ duration: 0.5 }}
+        >
+          <Briefcase className="w-5 h-5" />
+        </motion.div>
+        <span className="tracking-wide">{isRu ? 'Услуги' : 'Services'}</span>
+      </motion.button>
 
       {/* Products tab */}
-      <button
+      <motion.button
         onClick={() => handleChange('products')}
+        whileTap={{ scale: 0.97 }}
         className={cn(
-          "relative z-10 flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold transition-all",
+          "relative z-10 flex-1 flex items-center justify-center gap-2.5 py-3.5 px-4 rounded-xl text-sm font-bold transition-all",
           value === 'products' 
             ? "text-white" 
             : "text-muted-foreground hover:text-foreground"
         )}
       >
-        <ShoppingBag className={cn(
-          "w-4 h-4 transition-transform",
-          value === 'products' && "animate-pulse"
-        )} />
-        <span>{isRu ? 'Товары' : 'Products'}</span>
-        {value !== 'products' && (
-          <motion.div
-            className="absolute -top-1 -right-1"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.5 }}
-          >
-            <Sparkles className="w-3 h-3 text-emerald-500 animate-pulse" />
-          </motion.div>
-        )}
-      </button>
-    </div>
+        <motion.div
+          animate={value === 'products' ? { 
+            rotate: [0, -10, 10, -5, 5, 0],
+            scale: [1, 1.1, 1]
+          } : {}}
+          transition={{ duration: 0.5 }}
+        >
+          <ShoppingBag className="w-5 h-5" />
+        </motion.div>
+        <span className="tracking-wide">{isRu ? 'Товары' : 'Products'}</span>
+      </motion.button>
+    </motion.div>
   );
 }
