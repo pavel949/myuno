@@ -1,39 +1,53 @@
 
-# План: Инвестиционный хаб с гейтом регистрации
+# План: Дашборд инвестора
 
 ## Концепция
 
-При клике на "Инвестиции" пользователь переходит на `/invest`, где:
-- **Авторизованные** — видят полный контент
-- **Неавторизованные** — видят контент размыто за диалогом регистрации
+Создаём персональный кабинет инвестора по адресу `/invest/dashboard`, где пользователь видит:
+- Активные заявки на инвестиции и их статусы
+- Сводку по интересующим проектам
+- Общую аналитику (потенциальный ROI, суммы)
+- Быстрые действия
 
 ## Визуальный дизайн
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────┐
+│  /invest/dashboard                                                          │
+├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
-│   ╔════════════════════════════════════════════════════════════════════╗    │
-│   ║                                                                     ║    │
-│   ║                        🔒 ДИАЛОГ                                   ║    │
-│   ║                                                                     ║    │
-│   ║   Профессиональный инвестиционный анализ                          ║    │
-│   ║                                                                     ║    │
-│   ║   Данный раздел содержит независимый экспертный                   ║    │
-│   ║   анализ инвестиционных возможностей и рисков.                    ║    │
-│   ║                                                                     ║    │
-│   ║   Для доступа к материалам требуется регистрация.                 ║    │
-│   ║                                                                     ║    │
-│   ║   ─────────────────────────────────────────────                   ║    │
-│   ║                                                                     ║    │
-│   ║   [Форма регистрации / входа]                                     ║    │
-│   ║                                                                     ║    │
-│   ╚════════════════════════════════════════════════════════════════════╝    │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │  👋 Добро пожаловать, [Имя]                                            │ │
+│  │  ───────────────────────────────────────────────────────────────────── │ │
+│  │  📊 3 активных заявки  •  $250,000 общий интерес  •  18% avg ROI       │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
 │                                                                              │
-│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  │
-│   ░░░  РАЗМЫТЫЙ КОНТЕНТ INVESTOR HUB  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  │
-│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  │
-│   ░░░  Hot Deals • Off-plan • Business  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  │
-│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  │
+│  ┌─ Quick Actions ────────────────────────────────────────────────────────┐ │
+│  │  [🔍 Найти проект]  [📞 Связаться]  [📄 Документы]  [💼 Каталог]       │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│  ┌─ Мои заявки ───────────────────────────────────────────────────────────┐ │
+│  │                                                                         │ │
+│  │  ┌───────────────────────────────────────────────────────────────────┐ │ │
+│  │  │  🏢 Ocean View Villas            📍 Kamala                        │ │ │
+│  │  │  ─────────────────────────────────────────────────────────────── │ │ │
+│  │  │  Тип: Инвестиция  •  $50,000 USD                                  │ │ │
+│  │  │  Статус: 🟡 В обработке         Создано: 2 дня назад              │ │ │
+│  │  │  ─────────────────────────────────────────────────────────────── │ │ │
+│  │  │  [Подробнее] [Отменить заявку]                                    │ │ │
+│  │  └───────────────────────────────────────────────────────────────────┘ │ │
+│  │                                                                         │ │
+│  │  ┌───────────────────────────────────────────────────────────────────┐ │ │
+│  │  │  🏨 Boutique Hotel Phuket         📍 Kata                          │ │ │
+│  │  │  Тип: Узнать больше                                               │ │ │
+│  │  │  Статус: 🟢 Менеджер связался                                      │ │ │
+│  │  └───────────────────────────────────────────────────────────────────┘ │ │
+│  │                                                                         │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│  ┌─ Рекомендуемые проекты ────────────────────────────────────────────────┐ │
+│  │  [Карусель InvestmentCard по matching categories]                      │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -42,146 +56,104 @@
 
 ## Фазы реализации
 
-### Фаза 1: Обновить InvestorPromoCard
+### Фаза 1: Расширить хук useInvestmentInterest
 
-Изменить поведение при клике:
-- Было: открывает лид-форму диалогом
-- Станет: навигация на `/invest`
+Добавить JOIN с проектами для получения полной информации:
 
 ```typescript
-// InvestorPromoCard.tsx
-const handleClick = () => {
-  triggerHaptic('medium');
-  navigate('/invest'); // Вместо setIsDialogOpen(true)
-};
-```
-
-Также расширить категории (не только недвижимость):
-```typescript
-const categories = [
-  { icon: Building2, labelEn: 'Real Estate', labelRu: 'Недвижимость' },
-  { icon: Hotel, labelEn: 'Hospitality', labelRu: 'Отели' },
-  { icon: Briefcase, labelEn: 'Business', labelRu: 'Бизнес' },
-  { icon: Anchor, labelEn: 'Yachts', labelRu: 'Яхты' },
-  { icon: Coins, labelEn: 'Crypto', labelRu: 'Криптовалюта' },
-];
+// useInvestmentInterest.ts - extend query
+const { data: userInterests } = useQuery({
+  queryKey: ['investment-interests', 'user-full', user?.id],
+  queryFn: async () => {
+    const { data, error } = await supabase
+      .from('investment_interests')
+      .select(`
+        *,
+        project:investment_projects (
+          id, title_en, title_ru, cover_image,
+          roi_projected, muuno_score, district, project_type
+        )
+      `)
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+    // ...
+  }
+});
 ```
 
 ---
 
-### Фаза 2: Создать InvestmentAuthGate
+### Фаза 2: Создать виджеты дашборда
 
-Новый компонент для гейтинга контента:
+```text
+src/components/investor/dashboard/
+├── InvestorWelcomeCard.tsx     — Приветствие + сводная статистика
+├── InvestorQuickActions.tsx    — Быстрые действия
+├── InvestorInterestsList.tsx   — Список заявок со статусами
+├── InvestorInterestCard.tsx    — Карточка одной заявки
+├── InvestorRecommendations.tsx — Рекомендованные проекты
+└── index.ts
+```
+
+---
+
+### Фаза 3: Создать страницу InvestorDashboard
 
 ```typescript
-// src/components/invest/InvestmentAuthGate.tsx
-
-interface InvestmentAuthGateProps {
-  children: React.ReactNode;
-}
-
-export function InvestmentAuthGate({ children }: InvestmentAuthGateProps) {
-  const { user, isLoading } = useAuth();
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
+// src/pages/invest/InvestorDashboard.tsx
+export default function InvestorDashboard() {
+  const { user } = useAuth();
   
-  useEffect(() => {
-    if (!isLoading && !user) {
-      setShowAuthDialog(true);
-    }
-  }, [user, isLoading]);
+  if (!user) {
+    return <InvestorAuthPrompt />;
+  }
 
   return (
-    <>
-      {/* Контент хаба с размытием если не авторизован */}
-      <div className={cn(
-        "transition-all",
-        !user && !isLoading && "blur-sm pointer-events-none select-none"
-      )}>
-        {children}
+    <MiniAppLayout title="Мои инвестиции">
+      <div className="space-y-6">
+        <InvestorWelcomeCard />
+        <InvestorQuickActions />
+        <InvestorInterestsList />
+        <InvestorRecommendations />
       </div>
-
-      {/* Диалог авторизации */}
-      <Dialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-          {/* Disclaimer + Auth Form */}
-        </DialogContent>
-      </Dialog>
-    </>
+    </MiniAppLayout>
   );
 }
 ```
 
 ---
 
-### Фаза 3: Создать InvestmentAuthForm
+### Фаза 4: Интегрировать маршрут и навигацию
 
-Компактная форма регистрации/входа для диалога:
-
-```typescript
-// src/components/invest/InvestmentAuthForm.tsx
-
-// Поддерживает:
-// - Переключение между Login/Signup
-// - Multi-step signup (как в Auth.tsx)
-// - Редирект на текущую страницу после успеха
-```
+1. **AnimatedRoutes.tsx** — добавить `/invest/dashboard`
+2. **InvestmentIndex.tsx** — добавить кнопку "Мой кабинет" в хедер
+3. **AdaptiveBottomNav** — показывать для персоны "investor"
 
 ---
 
-### Фаза 4: Обновить InvestmentIndex
+## Статусы заявок (визуальные)
 
-Обернуть контент в InvestmentAuthGate:
-
-```typescript
-// InvestmentIndex.tsx
-export default function InvestmentIndex() {
-  return (
-    <InvestmentAuthGate>
-      <MiniAppLayout>
-        {/* Существующий контент */}
-      </MiniAppLayout>
-    </InvestmentAuthGate>
-  );
-}
-```
+| Status | Label RU | Label EN | Color |
+|--------|----------|----------|-------|
+| `new` | Новая | New | 🔵 Blue |
+| `contacted` | Связались | Contacted | 🟢 Green |
+| `in_progress` | В работе | In Progress | 🟡 Amber |
+| `documents_sent` | Документы | Documents Sent | 🟣 Purple |
+| `completed` | Завершено | Completed | ✅ Green |
+| `cancelled` | Отменено | Cancelled | ⚫ Gray |
 
 ---
 
-## Архитектура диалога
+## Сводная статистика (WelcomeCard)
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│  Dialog (не закрываемый без авторизации)                                    │
-├─────────────────────────────────────────────────────────────────────────────┤
+│  Рассчитывается на клиенте из userInterests:                                │
 │                                                                              │
-│  ┌────────────────────────────────────────────────────────────────────────┐ │
-│  │  🔒 Иконка + Заголовок                                                 │ │
-│  │  "Профессиональный инвестиционный анализ"                             │ │
-│  └────────────────────────────────────────────────────────────────────────┘ │
-│                                                                              │
-│  ┌────────────────────────────────────────────────────────────────────────┐ │
-│  │  Disclaimer:                                                           │ │
-│  │  • Независимый экспертный анализ возможностей и рисков                │ │
-│  │  • muUNO Scoring™ — объективная оценка проектов                       │ │
-│  │  • Due Diligence материалы                                            │ │
-│  │  • Для просмотра требуется регистрация                                │ │
-│  └────────────────────────────────────────────────────────────────────────┘ │
-│                                                                              │
-│  ┌────────────────────────────────────────────────────────────────────────┐ │
-│  │  Tabs: [Вход] [Регистрация]                                           │ │
-│  │  ────────────────────────────────────────────────────────────────────  │ │
-│  │                                                                        │ │
-│  │  [Email field]                                                         │ │
-│  │  [Password field]                                                      │ │
-│  │                                                                        │ │
-│  │  [Войти / Зарегистрироваться]                                         │ │
-│  │                                                                        │ │
-│  │  ─── или ───                                                          │ │
-│  │                                                                        │ │
-│  │  [G] Продолжить с Google                                              │ │
-│  └────────────────────────────────────────────────────────────────────────┘ │
-│                                                                              │
-│  🔐 Данные защищены. Мы не передаём их третьим лицам.                       │
+│  • Активные заявки: count where status NOT IN (completed, cancelled)        │
+│  • Общий интерес: SUM(preferred_amount)                                      │
+│  • Средний ROI: AVG(project.roi_projected) where interest exists            │
+│  • Категории: уникальные project_type                                        │
 │                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -192,47 +164,46 @@ export default function InvestmentIndex() {
 
 | Файл | Тип | Описание |
 |------|-----|----------|
-| `src/components/invest/InvestmentAuthGate.tsx` | NEW | Гейт с размытием и диалогом |
-| `src/components/invest/InvestmentAuthForm.tsx` | NEW | Компактная форма входа/регистрации |
-| `src/pages/invest/InvestmentIndex.tsx` | UPDATE | Обернуть в InvestmentAuthGate |
-| `src/components/home/InvestorPromoCard.tsx` | UPDATE | Навигация вместо диалога |
+| `src/pages/invest/InvestorDashboard.tsx` | NEW | Главная страница дашборда |
+| `src/components/investor/dashboard/InvestorWelcomeCard.tsx` | NEW | Приветствие + статистика |
+| `src/components/investor/dashboard/InvestorQuickActions.tsx` | NEW | Быстрые действия |
+| `src/components/investor/dashboard/InvestorInterestsList.tsx` | NEW | Список заявок |
+| `src/components/investor/dashboard/InvestorInterestCard.tsx` | NEW | Карточка заявки |
+| `src/components/investor/dashboard/InvestorRecommendations.tsx` | NEW | Рекомендации |
+| `src/components/investor/dashboard/index.ts` | NEW | Экспорты |
+| `src/hooks/useInvestmentInterest.ts` | UPDATE | Добавить JOIN с проектами |
+| `src/components/layout/AnimatedRoutes.tsx` | UPDATE | Добавить маршрут |
+| `src/pages/invest/InvestmentIndex.tsx` | UPDATE | Кнопка "Мой кабинет" |
+| `src/pages/invest/index.ts` | UPDATE | Экспорт нового компонента |
 
 ---
 
-## Особенности UX
+## Технические особенности
 
-1. **Диалог нельзя закрыть** без авторизации (hideCloseButton + onInteractOutside preventDefault)
-2. **Кнопка "Назад"** в диалоге ведёт на главную страницу
-3. **После успешной авторизации** — диалог закрывается, контент разблюривается
-4. **Поддержка Google OAuth** для быстрой регистрации
+1. **Защита маршрута** — `/invest/dashboard` требует авторизации
+2. **Паттерн OwnerDashboard** — используем Suspense + Skeleton для секций
+3. **Real-time опционально** — можно добавить подписку на изменение статусов
+4. **Билингвальность** — все тексты через `isRu`
 
 ---
 
-## Расширенные категории инвестиций
+## Расширения (будущее)
 
-```text
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  Категории в InvestorPromoCard и InvestmentIndex:                           │
-│                                                                              │
-│  🏢 Недвижимость       — Off-plan, Ready-to-move, Rental pools             │
-│  🏨 Отели              — Hospitality investments, Hotel shares              │
-│  💼 Бизнес             — F&B, Retail, Services                              │
-│  ⚓ Яхты               — Charter business, Boat shares                     │
-│  🪙 Криптовалюта       — Crypto funds, DeFi                                 │
-│  🌾 Земля              — Land banking, Agricultural                         │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
+- 📈 **Портфельная аналитика** — когда появятся реальные инвестиции
+- 📄 **Документы** — доступ к договорам и due diligence
+- 💬 **Чат с менеджером** — персональная связь
+- 🔔 **Уведомления** — push о смене статуса
 
 ---
 
 ## Порядок реализации
 
-1. **InvestmentAuthForm** — компактная форма входа/регистрации
-2. **InvestmentAuthGate** — обёртка с размытием и диалогом
-3. **InvestmentIndex** — интеграция гейта
-4. **InvestorPromoCard** — изменение поведения клика + категории
-5. **Тестирование** — проверка flow неавторизованного пользователя
+1. **useInvestmentInterest** — расширить с JOIN
+2. **Виджеты dashboard/** — компоненты
+3. **InvestorDashboard** — страница
+4. **AnimatedRoutes** — маршрут
+5. **InvestmentIndex** — кнопка входа в дашборд
+6. **Тестирование** — проверка flow авторизованного пользователя
 
 ---
 
@@ -240,8 +211,8 @@ export default function InvestmentIndex() {
 
 | Метрика | Значение |
 |---------|----------|
-| Новые компоненты | 2 (InvestmentAuthGate, InvestmentAuthForm) |
-| Обновляемые файлы | 2 |
+| Новые компоненты | 7 |
+| Обновляемые файлы | 4 |
 | Сложность | Средняя |
 | Риск регрессии | Низкий |
-| Время реализации | ~1.5-2 часа |
+| Время реализации | ~2-3 часа |
