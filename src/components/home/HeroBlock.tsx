@@ -213,12 +213,9 @@ export const HeroBlock = memo(function HeroBlock() {
 
         {/* Main headline */}
         <div className="space-y-1 px-2">
-          <h1 className="text-base sm:text-lg font-bold text-gradient-gold uppercase tracking-wide">
-            {isRu ? 'Единственное приложение для жизни за рубежом' : 'The only app you need abroad'}
+          <h1 className="text-lg sm:text-xl font-bold text-foreground">
+            {isRu ? 'За рубежом' : 'Abroad'}
           </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground">
-            {isRu ? 'Все решения в одном месте' : 'All solutions in one place'}
-          </p>
         </div>
       </div>
 
