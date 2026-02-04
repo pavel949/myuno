@@ -36,7 +36,8 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
-  Wand2
+  Wand2,
+  Languages
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
@@ -46,6 +47,8 @@ import { CardPreview, CardPreviewSection } from '../CardPreview';
 import { VendorFormSection } from '../VendorFormSection';
 import { CompactField } from '../FormFieldWithHelp';
 import { DraftIndicator } from '../DraftIndicator';
+import { AITranslateButton } from '@/components/ui/AITranslateButton';
+import { TranslateAllButton } from '@/components/wizard/TranslateAllButton';
 
 export type EntryType = 'product' | 'service' | 'listing';
 
@@ -461,6 +464,18 @@ interface StepProps {
 function BasicInfoStep({ formData, updateField, errors, isRu }: StepProps) {
   return (
     <div className="space-y-4">
+      {/* Translate All Button */}
+      <div className="flex justify-end">
+        <TranslateAllButton
+          formData={formData}
+          onUpdate={(updates) => {
+            Object.entries(updates).forEach(([key, value]) => {
+              updateField(key as keyof WizardFormData, value);
+            });
+          }}
+        />
+      </div>
+      
       <VendorFormSection title={isRu ? 'Название' : 'Name'}>
         <Tabs defaultValue="en" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-2">
@@ -469,36 +484,82 @@ function BasicInfoStep({ formData, updateField, errors, isRu }: StepProps) {
           </TabsList>
           <TabsContent value="en">
             <CompactField label="Name" error={errors?.name_en}>
-              <Input
-                value={formData.name_en}
-                onChange={(e) => updateField('name_en', e.target.value)}
-                placeholder="Enter name..."
-              />
+              <div className="flex gap-2">
+                <Input
+                  value={formData.name_en}
+                  onChange={(e) => updateField('name_en', e.target.value)}
+                  placeholder="Enter name..."
+                  className="flex-1"
+                />
+                {formData.name_ru && (
+                  <AITranslateButton
+                    sourceText={formData.name_ru}
+                    sourceLang="ru"
+                    targetLang="en"
+                    onTranslate={(text) => updateField('name_en', text)}
+                  />
+                )}
+              </div>
             </CompactField>
             <CompactField label="Description" className="mt-3">
-              <Textarea
-                value={formData.description_en}
-                onChange={(e) => updateField('description_en', e.target.value)}
-                placeholder="Description..."
-                className="min-h-[100px]"
-              />
+              <div className="relative">
+                <Textarea
+                  value={formData.description_en}
+                  onChange={(e) => updateField('description_en', e.target.value)}
+                  placeholder="Description..."
+                  className="min-h-[100px]"
+                />
+                {formData.description_ru && (
+                  <div className="absolute top-2 right-2">
+                    <AITranslateButton
+                      sourceText={formData.description_ru}
+                      sourceLang="ru"
+                      targetLang="en"
+                      onTranslate={(text) => updateField('description_en', text)}
+                    />
+                  </div>
+                )}
+              </div>
             </CompactField>
           </TabsContent>
           <TabsContent value="ru">
             <CompactField label="Название">
-              <Input
-                value={formData.name_ru}
-                onChange={(e) => updateField('name_ru', e.target.value)}
-                placeholder="Введите название..."
-              />
+              <div className="flex gap-2">
+                <Input
+                  value={formData.name_ru}
+                  onChange={(e) => updateField('name_ru', e.target.value)}
+                  placeholder="Введите название..."
+                  className="flex-1"
+                />
+                {formData.name_en && (
+                  <AITranslateButton
+                    sourceText={formData.name_en}
+                    sourceLang="en"
+                    targetLang="ru"
+                    onTranslate={(text) => updateField('name_ru', text)}
+                  />
+                )}
+              </div>
             </CompactField>
             <CompactField label="Описание" className="mt-3">
-              <Textarea
-                value={formData.description_ru}
-                onChange={(e) => updateField('description_ru', e.target.value)}
-                placeholder="Описание..."
-                className="min-h-[100px]"
-              />
+              <div className="relative">
+                <Textarea
+                  value={formData.description_ru}
+                  onChange={(e) => updateField('description_ru', e.target.value)}
+                  placeholder="Описание..."
+                  className="min-h-[100px]"
+                />
+                {formData.description_en && (
+                  <div className="absolute top-2 right-2">
+                    <AITranslateButton
+                      sourceText={formData.description_en}
+                      sourceLang="en"
+                      targetLang="ru"
+                      onTranslate={(text) => updateField('description_ru', text)}
+                    />
+                  </div>
+                )}
+              </div>
             </CompactField>
           </TabsContent>
         </Tabs>
