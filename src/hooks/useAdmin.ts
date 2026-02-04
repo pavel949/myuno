@@ -83,7 +83,9 @@ export function useAdminProviders() {
       .insert({
         ...providerData,
         is_active: providerData.is_active ?? true,
-        is_verified: providerData.is_verified ?? false,
+        is_verified: true, // Admin-created providers are auto-verified
+        approval_status: 'approved', // Auto-approved
+        created_by_uno_team: true,
         rating: 0,
         review_count: 0,
         pending_payout: 0,
@@ -163,6 +165,9 @@ export function useAdminServices(providerId?: string) {
         max_capacity: serviceData.max_capacity || 1,
         is_active: serviceData.is_active ?? true,
         is_featured: serviceData.is_featured ?? false,
+        is_verified: true, // Admin-created services are auto-verified
+        approval_status: 'approved', // Auto-approved
+        created_by_uno_team: true,
       } as any)
       .select()
       .single();

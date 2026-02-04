@@ -12,6 +12,8 @@ import { useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface UseCanonicalSubmitOptions {
   tableName: string;
@@ -41,6 +43,8 @@ export function useCanonicalSubmit({
   debounceMs = 2000,
 }: UseCanonicalSubmitOptions) {
   const { language } = useLanguage();
+  const { user } = useAuth();
+  const { isAdmin } = useIsAdmin();
   const isRu = language === 'ru';
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -145,12 +149,22 @@ export function useCanonicalSubmit({
         return { success: false, error };
       }
       
-      // Prepare data with provider_id
-      const submissionData = {
+      // Prepare data with provider_id and approval status
+      const submissionData: Record<string, unknown> = {
         ...data,
         provider_id: providerId,
         updated_at: new Date().toISOString(),
       };
+      
+      // Admin-created content is auto-approved
+      if (isAdmin) {
+        submissionData.approval_status = 'approved';
+        submissionData.is_verified = true;
+        submissionData.created_by_uno_team = true;
+        submissionData.uno_team_creator_id = user?.id;
+      } else {
+        submissionData.approval_status = 'pending';
+      }
       
       let result;
       
@@ -181,10 +195,11 @@ export function useCanonicalSubmit({
         result = inserted;
       }
       
-      toast.success(isRu 
-        ? (editingId ? 'Запись обновлена' : 'Отправлено на модерацию')
-        : (editingId ? 'Record updated' : 'Submitted for moderation')
-      );
+      const successMessage = isAdmin 
+        ? (isRu ? (editingId ? 'Запись обновлена' : 'Запись создана и опубликована') : (editingId ? 'Record updated' : 'Record created and published'))
+        : (isRu ? (editingId ? 'Запись обновлена' : 'Отправлено на модерацию') : (editingId ? 'Record updated' : 'Submitted for moderation'));
+      
+      toast.success(successMessage);
       
       onSuccess?.();
       return { success: true, id: result.id };

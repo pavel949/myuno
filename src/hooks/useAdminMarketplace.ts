@@ -56,7 +56,14 @@ export function useAdminMarketplaceProducts(filters: ProductFilters = {}) {
     mutationFn: async (product: Partial<MarketplaceProduct>) => {
       const { data, error } = await supabase
         .from('marketplace_products')
-        .insert(product as any)
+        .insert({
+          ...product,
+          is_active: product.is_active ?? true,
+          is_verified: true, // Admin-created products are auto-verified
+          approval_status: 'approved', // Auto-approved
+          created_by_uno_team: true,
+          in_stock: product.in_stock ?? true,
+        } as any)
         .select()
         .single();
       if (error) throw error;
@@ -331,7 +338,13 @@ export function useAdminMarketplaceVendors() {
     mutationFn: async (vendor: Partial<MarketplaceVendor>) => {
       const { data, error } = await supabase
         .from('marketplace_vendors')
-        .insert(vendor as any)
+        .insert({
+          ...vendor,
+          is_active: vendor.is_active ?? true,
+          is_verified: true, // Admin-created vendors are auto-verified
+          approval_status: 'approved', // Auto-approved
+          created_by_uno_team: true,
+        } as any)
         .select()
         .single();
       if (error) throw error;
