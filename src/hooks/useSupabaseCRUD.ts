@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { toast } from 'sonner';
 
 interface AdditionalFilter {
@@ -48,6 +49,7 @@ export function useSupabaseCRUD<T extends { id: string }>({
   additionalFilters = [],
 }: UseSupabaseCRUDOptions): CRUDResult<T> {
   const { user } = useAuth();
+  const { isAdmin } = useIsAdmin();
   const [items, setItems] = useState<T[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -157,9 +159,16 @@ export function useSupabaseCRUD<T extends { id: string }>({
         insertData[providerIdField] = providerId;
       }
       
-      // Auto-set pending status for vendor-created content (moderation workflow)
-      if (providerId && !('approval_status' in insertData)) {
-        insertData.approval_status = 'pending';
+      // Admin-created content is auto-approved; vendor content goes to moderation
+      if (!('approval_status' in insertData)) {
+        if (isAdmin) {
+          insertData.approval_status = 'approved';
+          insertData.is_verified = true;
+          insertData.created_by_uno_team = true;
+          insertData.uno_team_creator_id = user?.id;
+        } else if (providerId) {
+          insertData.approval_status = 'pending';
+        }
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

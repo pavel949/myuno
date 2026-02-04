@@ -1248,9 +1248,11 @@ export type Database = {
       }
       bouquets: {
         Row: {
+          approval_status: string | null
           category: string | null
           colors: string[] | null
           created_at: string
+          created_by_uno_team: boolean | null
           currency: string | null
           description_en: string | null
           description_ru: string | null
@@ -1260,17 +1262,21 @@ export type Database = {
           images: string[] | null
           is_active: boolean | null
           is_popular: boolean | null
+          is_verified: boolean | null
           name_en: string
           name_ru: string
           price: number
           shop_id: string
           size: string | null
           stock_quantity: number | null
+          uno_team_creator_id: string | null
         }
         Insert: {
+          approval_status?: string | null
           category?: string | null
           colors?: string[] | null
           created_at?: string
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -1280,17 +1286,21 @@ export type Database = {
           images?: string[] | null
           is_active?: boolean | null
           is_popular?: boolean | null
+          is_verified?: boolean | null
           name_en: string
           name_ru: string
           price: number
           shop_id: string
           size?: string | null
           stock_quantity?: number | null
+          uno_team_creator_id?: string | null
         }
         Update: {
+          approval_status?: string | null
           category?: string | null
           colors?: string[] | null
           created_at?: string
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -1300,12 +1310,14 @@ export type Database = {
           images?: string[] | null
           is_active?: boolean | null
           is_popular?: boolean | null
+          is_verified?: boolean | null
           name_en?: string
           name_ru?: string
           price?: number
           shop_id?: string
           size?: string | null
           stock_quantity?: number | null
+          uno_team_creator_id?: string | null
         }
         Relationships: [
           {
@@ -4910,6 +4922,7 @@ export type Database = {
       }
       marketplace_products: {
         Row: {
+          approval_status: string | null
           category_slug: string
           commission_rate: number | null
           condition: string | null
@@ -4917,6 +4930,7 @@ export type Database = {
           contact_whatsapp: string | null
           cover_image: string | null
           created_at: string | null
+          created_by_uno_team: boolean | null
           currency: string | null
           description_en: string | null
           description_ru: string | null
@@ -4929,6 +4943,7 @@ export type Database = {
           is_new: boolean | null
           is_popular: boolean | null
           is_shippable_international: boolean | null
+          is_verified: boolean | null
           location: string | null
           markup_amount: number | null
           name_en: string
@@ -4949,6 +4964,7 @@ export type Database = {
           unit_measure: string | null
           unit_ru: string | null
           unit_value: number | null
+          uno_team_creator_id: string | null
           updated_at: string | null
           vendor_id: string | null
           vendor_name: string | null
@@ -4957,6 +4973,7 @@ export type Database = {
           weight_kg: number | null
         }
         Insert: {
+          approval_status?: string | null
           category_slug: string
           commission_rate?: number | null
           condition?: string | null
@@ -4964,6 +4981,7 @@ export type Database = {
           contact_whatsapp?: string | null
           cover_image?: string | null
           created_at?: string | null
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -4976,6 +4994,7 @@ export type Database = {
           is_new?: boolean | null
           is_popular?: boolean | null
           is_shippable_international?: boolean | null
+          is_verified?: boolean | null
           location?: string | null
           markup_amount?: number | null
           name_en: string
@@ -4996,6 +5015,7 @@ export type Database = {
           unit_measure?: string | null
           unit_ru?: string | null
           unit_value?: number | null
+          uno_team_creator_id?: string | null
           updated_at?: string | null
           vendor_id?: string | null
           vendor_name?: string | null
@@ -5004,6 +5024,7 @@ export type Database = {
           weight_kg?: number | null
         }
         Update: {
+          approval_status?: string | null
           category_slug?: string
           commission_rate?: number | null
           condition?: string | null
@@ -5011,6 +5032,7 @@ export type Database = {
           contact_whatsapp?: string | null
           cover_image?: string | null
           created_at?: string | null
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -5023,6 +5045,7 @@ export type Database = {
           is_new?: boolean | null
           is_popular?: boolean | null
           is_shippable_international?: boolean | null
+          is_verified?: boolean | null
           location?: string | null
           markup_amount?: number | null
           name_en?: string
@@ -5043,6 +5066,7 @@ export type Database = {
           unit_measure?: string | null
           unit_ru?: string | null
           unit_value?: number | null
+          uno_team_creator_id?: string | null
           updated_at?: string | null
           vendor_id?: string | null
           vendor_name?: string | null
@@ -5267,13 +5291,16 @@ export type Database = {
         Row: {
           address: string | null
           address_ru: string | null
+          approval_status: string | null
           cover_image: string | null
           created_at: string
+          created_by_uno_team: boolean | null
           description_en: string | null
           description_ru: string | null
           email: string | null
           id: string
           is_active: boolean
+          is_verified: boolean | null
           logo_url: string | null
           name_en: string
           name_ru: string
@@ -5281,6 +5308,7 @@ export type Database = {
           rating: number | null
           review_count: number
           slug: string
+          uno_team_creator_id: string | null
           updated_at: string
           verified: boolean
           website: string | null
@@ -5288,13 +5316,16 @@ export type Database = {
         Insert: {
           address?: string | null
           address_ru?: string | null
+          approval_status?: string | null
           cover_image?: string | null
           created_at?: string
+          created_by_uno_team?: boolean | null
           description_en?: string | null
           description_ru?: string | null
           email?: string | null
           id?: string
           is_active?: boolean
+          is_verified?: boolean | null
           logo_url?: string | null
           name_en: string
           name_ru: string
@@ -5302,6 +5333,7 @@ export type Database = {
           rating?: number | null
           review_count?: number
           slug: string
+          uno_team_creator_id?: string | null
           updated_at?: string
           verified?: boolean
           website?: string | null
@@ -5309,13 +5341,16 @@ export type Database = {
         Update: {
           address?: string | null
           address_ru?: string | null
+          approval_status?: string | null
           cover_image?: string | null
           created_at?: string
+          created_by_uno_team?: boolean | null
           description_en?: string | null
           description_ru?: string | null
           email?: string | null
           id?: string
           is_active?: boolean
+          is_verified?: boolean | null
           logo_url?: string | null
           name_en?: string
           name_ru?: string
@@ -5323,6 +5358,7 @@ export type Database = {
           rating?: number | null
           review_count?: number
           slug?: string
+          uno_team_creator_id?: string | null
           updated_at?: string
           verified?: boolean
           website?: string | null
@@ -10858,10 +10894,12 @@ export type Database = {
       providers: {
         Row: {
           address: string | null
+          approval_status: string | null
           business_category: string | null
           commission_rate: number | null
           cover_image: string | null
           created_at: string
+          created_by_uno_team: boolean | null
           description_en: string | null
           description_ru: string | null
           email: string | null
@@ -10886,16 +10924,19 @@ export type Database = {
           service_domains: string[] | null
           total_earnings: number | null
           trust_score: number | null
+          uno_team_creator_id: string | null
           updated_at: string
           user_id: string | null
           website: string | null
         }
         Insert: {
           address?: string | null
+          approval_status?: string | null
           business_category?: string | null
           commission_rate?: number | null
           cover_image?: string | null
           created_at?: string
+          created_by_uno_team?: boolean | null
           description_en?: string | null
           description_ru?: string | null
           email?: string | null
@@ -10920,16 +10961,19 @@ export type Database = {
           service_domains?: string[] | null
           total_earnings?: number | null
           trust_score?: number | null
+          uno_team_creator_id?: string | null
           updated_at?: string
           user_id?: string | null
           website?: string | null
         }
         Update: {
           address?: string | null
+          approval_status?: string | null
           business_category?: string | null
           commission_rate?: number | null
           cover_image?: string | null
           created_at?: string
+          created_by_uno_team?: boolean | null
           description_en?: string | null
           description_ru?: string | null
           email?: string | null
@@ -10954,6 +10998,7 @@ export type Database = {
           service_domains?: string[] | null
           total_earnings?: number | null
           trust_score?: number | null
+          uno_team_creator_id?: string | null
           updated_at?: string
           user_id?: string | null
           website?: string | null
@@ -12172,6 +12217,7 @@ export type Database = {
           category_id: string | null
           commission_rate: number | null
           created_at: string
+          created_by_uno_team: boolean | null
           currency: string | null
           description_en: string | null
           description_ru: string | null
@@ -12179,6 +12225,7 @@ export type Database = {
           id: string
           images: string[] | null
           is_active: boolean | null
+          is_verified: boolean | null
           languages: string[] | null
           location_id: string | null
           name_en: string
@@ -12189,6 +12236,7 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           tags: string[] | null
+          uno_team_creator_id: string | null
           updated_at: string
         }
         Insert: {
@@ -12196,6 +12244,7 @@ export type Database = {
           category_id?: string | null
           commission_rate?: number | null
           created_at?: string
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -12203,6 +12252,7 @@ export type Database = {
           id?: string
           images?: string[] | null
           is_active?: boolean | null
+          is_verified?: boolean | null
           languages?: string[] | null
           location_id?: string | null
           name_en: string
@@ -12213,6 +12263,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           tags?: string[] | null
+          uno_team_creator_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -12220,6 +12271,7 @@ export type Database = {
           category_id?: string | null
           commission_rate?: number | null
           created_at?: string
+          created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
@@ -12227,6 +12279,7 @@ export type Database = {
           id?: string
           images?: string[] | null
           is_active?: boolean | null
+          is_verified?: boolean | null
           languages?: string[] | null
           location_id?: string | null
           name_en?: string
@@ -12237,6 +12290,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           tags?: string[] | null
+          uno_team_creator_id?: string | null
           updated_at?: string
         }
         Relationships: [
