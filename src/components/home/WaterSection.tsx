@@ -20,7 +20,7 @@ export function WaterSection() {
           <h2 className="text-lg font-semibold">{t('water.title')}</h2>
         </div>
         <button 
-          onClick={() => navigate('/water')}
+          onClick={() => navigate('/experiences?type=activity')}
           className="text-sm text-primary flex items-center gap-1"
         >
           {t('action.viewAll')}

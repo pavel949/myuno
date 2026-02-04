@@ -140,10 +140,10 @@ export default function DeliveryIndex() {
           </div>
         </div>
 
-        {/* Quick Order Button */}
+        {/* Quick Order Button - leads to first delivery type */}
         <Button 
           className="w-full h-14 text-base gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
-          onClick={() => navigate('/delivery/new')}
+          onClick={() => navigate('/delivery?type=express')}
         >
           <Zap className="w-5 h-5" />
           {language === 'ru' ? 'Заказать доставку' : 'Order Delivery'}
@@ -160,7 +160,7 @@ export default function DeliveryIndex() {
               return (
                 <button
                   key={type.id}
-                  onClick={() => navigate(`/delivery/new?type=${type.id}`)}
+                  onClick={() => navigate(`/delivery?type=${type.id}`)}
                   className="relative bg-card rounded-2xl border border-border/50 p-4 text-left hover:border-primary/30 transition-all active:scale-[0.98]"
                 >
                   {type.isPopular && (
@@ -200,7 +200,7 @@ export default function DeliveryIndex() {
               return (
                 <button
                   key={service.id}
-                  onClick={() => navigate(`/delivery/new?service=${service.id}`)}
+                  onClick={() => navigate(`/delivery?service=${service.id}`)}
                   className="flex-shrink-0 w-40 bg-card rounded-2xl overflow-hidden border border-border/50 hover:border-primary/30 transition-all"
                 >
                   <div className="h-24 relative">

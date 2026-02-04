@@ -23,7 +23,7 @@ export function ToursSection() {
           <h2 className="text-lg font-semibold">{t('tours.title')}</h2>
         </div>
         <button 
-          onClick={() => navigate('/tours')}
+          onClick={() => navigate('/experiences?type=tour')}
           className="text-sm text-primary flex items-center gap-1"
         >
           {t('action.viewAll')}
