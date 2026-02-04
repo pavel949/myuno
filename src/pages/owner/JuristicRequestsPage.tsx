@@ -55,7 +55,7 @@ export default function JuristicRequestsPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <Card className="p-3 text-center">
           <div className="text-2xl font-bold">{stats.total}</div>
           <div className="text-xs text-muted-foreground">{isRu ? 'Всего' : 'Total'}</div>

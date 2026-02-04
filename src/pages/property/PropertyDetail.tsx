@@ -282,7 +282,7 @@ export default function PropertyDetail() {
         <div className="relative">
           {images.length >= 5 ? (
             // Grid layout for 5+ images
-            <div className="grid grid-cols-4 grid-rows-2 gap-2 h-[50vh] min-h-[300px] max-h-[500px]">
+            <div className="grid grid-cols-2 md:grid-cols-4 grid-rows-2 gap-2 h-[50vh] min-h-[300px] max-h-[500px]">
               <div 
                 className="col-span-2 row-span-2 relative cursor-pointer overflow-hidden rounded-l-xl"
                 onClick={() => setActiveImage(0)}
@@ -464,7 +464,7 @@ export default function PropertyDetail() {
           <Separator />
 
           {/* Specs Grid - Compact */}
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 xs:grid-cols-4 gap-2">
             {[
               { icon: BedDouble, value: property.bedrooms || 0, label: isRu ? 'Спальни' : 'Beds' },
               { icon: Bath, value: property.bathrooms || 0, label: isRu ? 'Ванные' : 'Baths' },

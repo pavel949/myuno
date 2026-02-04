@@ -123,7 +123,7 @@ const VendorBookings = () => {
     <PageContainer>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
-          <TabsList className="grid grid-cols-4 w-full">
+          <TabsList className="grid grid-cols-2 xs:grid-cols-4 w-full">
             <TabsTrigger value="all">{isRussian ? 'Все' : 'All'}</TabsTrigger>
             <TabsTrigger value="pending">{isRussian ? 'Новые' : 'New'}</TabsTrigger>
             <TabsTrigger value="confirmed">{isRussian ? 'Активные' : 'Active'}</TabsTrigger>

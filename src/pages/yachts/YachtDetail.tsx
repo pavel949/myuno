@@ -129,7 +129,7 @@ export default function YachtDetail() {
         </div>
 
         {/* Quick Info */}
-        <div className="grid grid-cols-4 gap-3 p-4 bg-muted/50 rounded-xl mb-6">
+        <div className="grid grid-cols-2 xs:grid-cols-4 gap-3 p-4 bg-muted/50 rounded-xl mb-6">
           <div className="text-center">
             <Users className="w-5 h-5 mx-auto text-muted-foreground mb-1" />
             <p className="text-sm font-medium">{yacht.capacity}</p>

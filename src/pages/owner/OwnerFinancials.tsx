@@ -241,7 +241,7 @@ export default function OwnerFinancials() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 gap-3 mb-6">
+      <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 mb-6">
         <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">

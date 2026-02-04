@@ -313,7 +313,7 @@ export default function ReportsPage() {
 
                     {/* Quick Stats */}
                     {report.data && (
-                      <div className="grid grid-cols-3 gap-4 pt-3 border-t">
+                      <div className="grid grid-cols-1 xs:grid-cols-3 gap-4 pt-3 border-t">
                         <div>
                           <p className="text-xs text-muted-foreground mb-1">
                             {isRu ? 'Доход' : 'Income'}

@@ -36,7 +36,7 @@ function PortfolioSkeleton() {
   return (
     <div className="space-y-3">
       <Skeleton className="h-5 w-32" />
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
         <Skeleton className="h-48 rounded-xl" />
         <Skeleton className="h-48 rounded-xl" />
       </div>
@@ -51,7 +51,7 @@ function OperationsSkeleton() {
         <Skeleton className="h-5 w-32" />
         <Skeleton className="h-4 w-16" />
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
         {[1, 2, 3, 4].map(i => (
           <Skeleton key={i} className="h-16 rounded-xl" />
         ))}
@@ -64,7 +64,7 @@ function FinancesSkeleton() {
   return (
     <div className="space-y-3">
       <Skeleton className="h-5 w-24" />
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
         <Skeleton className="h-20 rounded-xl" />
         <Skeleton className="h-20 rounded-xl" />
       </div>
