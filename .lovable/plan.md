@@ -1,190 +1,233 @@
 
-# План исправления каруселей и мобильного UX платформы
+# План улучшения поиска недвижимости для гостей
 
-## Диагноз проблемы
+## Обзор текущей ситуации
 
-### Корневая причина
-`ScrollArea` от Radix UI создаёт вложенные `div`-контейнеры с `overflow: hidden`, которые перехватывают touch-события и блокируют клики на мобильных устройствах. Это особенно критично в комбинации с `overflow-x: hidden` на layout-уровне.
+### Что есть сейчас:
+1. **PopularFiltersCards** — жёстко захардкожены 4 района + 4 удобства, не из базы
+2. **usePropertyFilterOptions** — загружает property_type, district, amenity из lookup_values
+3. **property_highlights** — есть в lookup_values (13 тегов), но НЕ используются в поиске для гостей
+4. **properties.highlights** — колонка НЕ существует в базе (только в TypeScript типах)
+5. **instant_booking, is_featured, is_verified** — есть в базе, но не выведены как быстрые фильтры
+6. **property_projects** — таблица комплексов существует, связь через project_id
 
-### Почему `RecommendedCarousel` работает, а `PortfolioSection` — нет
-
-| Компонент | Метод | Touch-события | Клики |
-|-----------|-------|---------------|-------|
-| RecommendedCarousel | Нативный `overflow-x-auto` | Работают | Работают |
-| PortfolioSection | Radix `ScrollArea` | Конфликтуют | Блокируются |
-| ActiveStaysWidget | Radix `ScrollArea` | Конфликтуют | Блокируются |
-
----
-
-## Стандарт карусели для платформы (Airbnb/Klook Style)
-
-### Эталонный паттерн (из RecommendedCarousel)
-
-```tsx
-<div
-  className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 touch-pan-x snap-x snap-mandatory"
->
-  <div className="flex-shrink-0 w-[85vw] max-w-[280px] snap-start touch-manipulation">
-    <Card onClick={...} />
-  </div>
-</div>
-```
-
-### Правила:
-
-1. **Контейнер:**
-   - `overflow-x-auto` — нативный горизонтальный scroll
-   - `scrollbar-hide` — скрыть scrollbar (визуально чище)
-   - `-mx-4 px-4` — "bleed-to-edge" эффект (карточки выходят за padding)
-   - `touch-pan-x` — разрешить горизонтальный swipe
-   - `snap-x snap-mandatory` — snap-точки для плавной остановки
-
-2. **Элементы:**
-   - `flex-shrink-0` — не сжиматься
-   - `w-[85vw] max-w-[280px]` — адаптивная ширина (85% экрана, max 280px)
-   - `snap-start` — привязка к началу карточки
-   - `touch-manipulation` — оптимизация touch-событий
-
-3. **Клики:**
-   - Использовать `<button>` или `onClick` с `e.stopPropagation()` для вложенных действий
+### Что требуется по запросу (стиль Agoda/Airbnb):
+- Мгновенное бронирование ⚡
+- Пешком до пляжа 🏖️
+- Полное обслуживание 🧹
+- Можно с питомцами 🐕
+- Новый объект ✨
+- Вид на море 🌊
+- Дизайнерский ремонт 💎
+- Скидка/Акция 🏷️
+- Выбор комплекса (The Title Legendary и др.)
+- Мульти-выбор типов жилья
 
 ---
 
-## Файлы для исправления
+## Архитектура решения
 
-### Фаза 1: Owner Dashboard (P0 — критично)
+### Источники данных для быстрых фильтров:
 
-| Файл | Проблема | Решение |
-|------|----------|---------|
-| `src/components/owner/dashboard/PortfolioSection.tsx` | ScrollArea блокирует клики | Заменить на нативный scroll |
-| `src/components/owner/dashboard/ActiveStaysWidget.tsx` | ScrollArea блокирует клики | Заменить на нативный scroll |
-| `src/components/owner/dashboard/PropertiesBlock.tsx` | ScrollArea блокирует клики | Заменить на нативный scroll |
-
-### Фаза 2: Shared Components (P1)
-
-| Файл | Проблема | Решение |
-|------|----------|---------|
-| `src/components/shared/UnifiedScrollSection.tsx` | ScrollArea — общий компонент | Заменить на нативный scroll |
-| `src/components/crosssell/CrossSellSection.tsx` | ScrollArea в scroll-режиме | Заменить на нативный scroll |
-| `src/components/market/QuickSubcategories.tsx` | ScrollArea для категорий | Заменить на нативный scroll |
-| `src/components/beauty/StaffPicker.tsx` | ScrollArea для выбора мастера | Заменить на нативный scroll |
-
-### Фаза 3: Home Sections (P1)
-
-| Файл | Проблема | Решение |
-|------|----------|---------|
-| `src/components/home/WaterSection.tsx` | Использует overflow-x-auto (OK) | Добавить snap-x |
-| `src/components/home/ToursSection.tsx` | Использует overflow-x-auto (OK) | Добавить snap-x |
-| `src/components/recommendations/RecentlyViewedSection.tsx` | Использует overflow-x-auto (OK) | Добавить snap-x |
+| Тег | Источник данных | Логика фильтрации |
+|-----|-----------------|-------------------|
+| Мгновенное бронирование | `properties.instant_booking = true` | Boolean поле |
+| Пешком до пляжа | `lookup_values.property_highlight: beach_close` | Массив highlights |
+| Вид на море | `properties.view_type = 'sea'` ИЛИ amenities contains 'sea-view' | Поле + amenities |
+| Можно с питомцами | `lookup_values.amenity: pet-friendly` | Массив amenities |
+| Новый объект | `properties.created_at > now() - 30 days` | Вычисляемое |
+| Полное обслуживание | `lookup_values.property_highlight: full_service` | Добавить в таксономию |
+| Дизайнерский ремонт | `lookup_values.property_highlight: designer_interior` | Добавить в таксономию |
+| Скидка/Акция | `properties.monthly_discount > 0` ИЛИ специальный флаг | Вычисляемое |
+| Проверено | `properties.is_verified = true` | Boolean поле |
+| Популярное | `properties.is_featured = true` | Boolean поле |
+| Комплекс X | `properties.project_id = X` | UUID связь |
 
 ---
 
-## Детали изменений
+## Фазы реализации
 
-### 1. PortfolioSection.tsx (строки 104-124)
+### Фаза 1: Миграция базы данных
 
-Было:
-```tsx
-<ScrollArea className="w-full">
-  <div className="flex gap-3 pb-2">
-    {properties.slice(0, 5).map((property) => (
-      <div key={property.id} className="w-[85vw] max-w-[280px] flex-shrink-0">
-        <PropertyCard property={property} variant="hero" mode="owner" />
-      </div>
-    ))}
-  </div>
-  <ScrollBar orientation="horizontal" />
-</ScrollArea>
+**1.1 Добавить колонку highlights в таблицу properties:**
+```sql
+ALTER TABLE properties 
+ADD COLUMN IF NOT EXISTS highlights TEXT[] DEFAULT '{}';
 ```
 
-Станет:
-```tsx
-<div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 touch-pan-x snap-x snap-mandatory">
-  {properties.slice(0, 5).map((property) => (
-    <div 
-      key={property.id} 
-      className="w-[85vw] max-w-[280px] flex-shrink-0 snap-start"
-      onClick={() => navigate(`/owner/properties/${property.id}/manage`)}
-    >
-      <PropertyCard property={property} variant="hero" mode="owner" />
-    </div>
-  ))}
-  {/* Add new card */}
-  <button 
-    className="w-[85vw] max-w-[280px] flex-shrink-0 snap-start border-2 border-dashed ..."
-    onClick={() => navigate('/owner/properties/new')}
-  >
-    ...
-  </button>
-</div>
-```
-
-### 2. ActiveStaysWidget.tsx (строки 105-194)
-
-Было:
-```tsx
-<ScrollArea className="w-full">
-  <div className="flex gap-3 pb-2">
-    {activeStays.map((stay) => (
-      <Card className="shrink-0 w-72" onClick={...}>
-```
-
-Станет:
-```tsx
-<div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 touch-pan-x snap-x snap-mandatory">
-  {activeStays.map((stay) => (
-    <Card 
-      className="shrink-0 w-[85vw] max-w-[288px] snap-start touch-manipulation"
-      onClick={...}
-    >
-```
-
-### 3. UnifiedScrollSection.tsx (общий компонент)
-
-Было:
-```tsx
-<ScrollArea className="w-full">
-  <div className={cn("flex gap-3 pb-2", ...)}>
-    {children}
-  </div>
-  <ScrollBar orientation="horizontal" className="invisible" />
-</ScrollArea>
-```
-
-Станет:
-```tsx
-<div className={cn(
-  "flex gap-3 overflow-x-auto scrollbar-hide pb-2 touch-pan-x snap-x snap-mandatory",
-  !noPadding && "-mx-4 px-4",
-  className
-)}>
-  {children}
-</div>
+**1.2 Расширить lookup_values новыми тегами:**
+```sql
+INSERT INTO lookup_values (lookup_type, value_key, value_en, value_ru, icon, sort_order, is_active)
+VALUES 
+  ('property_highlight', 'full_service', 'Full Service', 'Полное обслуживание', '🧹', 14, true),
+  ('property_highlight', 'designer_interior', 'Designer Interior', 'Дизайнерский ремонт', '💎', 15, true),
+  ('property_highlight', 'pet_friendly', 'Pet Friendly', 'Можно с питомцами', '🐕', 16, true),
+  ('property_highlight', 'walking_to_beach', 'Walk to Beach', 'Пешком до пляжа', '🚶', 17, true),
+  ('property_highlight', 'new_listing', 'New Listing', 'Новый объект', '🆕', 18, true),
+  ('property_highlight', 'special_offer', 'Special Offer', 'Акция', '🏷️', 19, true)
+ON CONFLICT DO NOTHING;
 ```
 
 ---
 
-## Чеклист после реализации
+### Фаза 2: Создать hook для быстрых фильтров
 
-- [ ] PortfolioSection — карточки кликабельны
-- [ ] ActiveStaysWidget — карточки гостей кликабельны
-- [ ] PropertiesBlock — миниатюры кликабельны
-- [ ] UnifiedScrollSection — работает во всех местах использования
-- [ ] CrossSellSection — кликабельны кросс-продажи
-- [ ] QuickSubcategories — кнопки категорий работают
-- [ ] StaffPicker — выбор мастера работает
-- [ ] Snap-эффект при прокрутке (плавная остановка)
-- [ ] Touch-swipe работает плавно
-- [ ] Нет горизонтального overflow на уровне страницы
+**Файл: `src/hooks/usePropertyQuickFilters.ts`**
+
+Этот hook будет:
+1. Загружать property_highlights из lookup_values
+2. Загружать property_projects для фильтра по комплексам
+3. Добавлять "вычисляемые" теги (Instant, New, Discount)
+4. Группировать по категориям (Booking, Location, Features, Complexes)
+
+```text
+Структура:
+interface QuickFilter {
+  id: string;
+  type: 'boolean' | 'highlight' | 'amenity' | 'computed' | 'project';
+  labelEn: string;
+  labelRu: string;
+  icon: string;
+  field?: string; // для boolean: 'instant_booking', 'is_verified'
+  value?: string; // для highlight/amenity: value_key
+  projectId?: string; // для комплексов
+}
+```
+
+---
+
+### Фаза 3: Обновить PopularFiltersCards
+
+**Файл: `src/components/property/PopularFiltersCards.tsx`**
+
+Заменить статический массив на динамические данные:
+1. Использовать `usePropertyQuickFilters()`
+2. Добавить горизонтальный scroll для всех фильтров
+3. Разделить на секции: "Особенности", "Комплексы", "Районы"
+4. Стиль как у Agoda — компактные чипы с иконками
+
+```text
+Визуальная структура:
+┌──────────────────────────────────────────────────────┐
+│ ⚡ Мгновенное  🏖️ У пляжа  🌊 Море  🐕 Питомцы  ✨ Новое │
+├──────────────────────────────────────────────────────┤
+│ 🏢 The Title  🏢 Laguna Park  🏢 Kamala Hills        │
+└──────────────────────────────────────────────────────┘
+```
+
+---
+
+### Фаза 4: Обновить логику фильтрации
+
+**Файл: `src/pages/property/PropertyIndex.tsx`**
+
+Добавить обработку новых типов фильтров:
+
+```text
+filterValues = {
+  quickFilters: ['instant_book', 'sea_view', 'pet_friendly'],
+  project: 'uuid-of-project',
+  propertyType: ['villa', 'condo'],
+  ...
+}
+```
+
+Логика фильтрации:
+- `instant_book` → `property.instant_booking === true`
+- `sea_view` → `property.view_type === 'sea'` ИЛИ `property.amenities.includes('sea-view')` ИЛИ `property.highlights?.includes('sea_view')`
+- `pet_friendly` → `property.amenities.includes('pet-friendly')`
+- `new_listing` → `isAfter(property.created_at, subDays(new Date(), 30))`
+- `project:uuid` → `property.project_id === uuid`
+
+---
+
+### Фаза 5: Обновить форму редактирования объекта
+
+**Файлы:**
+- `src/components/owner/property-manage/HighlightsSection.tsx` (создать)
+- `src/pages/owner/PropertyManage.tsx` (добавить секцию)
+
+Добавить селектор highlights для владельцев:
+- Загружать опции из lookup_values (property_highlight)
+- Ограничение 6 тегов (как сейчас в PropertyHighlights)
+- Сохранять в `properties.highlights[]`
+
+---
+
+### Фаза 6: Добавить фильтр по комплексам
+
+**Компонент: ProjectFilterSection**
+
+Горизонтальная карусель с карточками комплексов:
+```text
+┌────────────┐ ┌────────────┐ ┌────────────┐
+│ 🏢 Title   │ │ 🏢 Laguna  │ │ 🏢 Kamala  │
+│ Legendary  │ │ Park       │ │ Hills      │
+│  12 units  │ │   8 units  │ │   5 units  │
+└────────────┘ └────────────┘ └────────────┘
+```
+
+При клике → фильтрация `project_id = selected`
+
+---
+
+## Структура файлов
+
+### Новые файлы:
+```text
+src/hooks/usePropertyQuickFilters.ts      # Hook для быстрых фильтров
+src/components/property/QuickFiltersRibbon.tsx  # UI компонент
+src/components/property/ProjectsCarousel.tsx    # Карусель комплексов
+src/components/owner/property-manage/HighlightsSection.tsx # Редактор тегов
+```
+
+### Изменяемые файлы:
+```text
+src/pages/property/PropertyIndex.tsx      # Интеграция фильтров
+src/components/property/PopularFiltersCards.tsx # Рефакторинг
+src/hooks/usePropertyFilterOptions.ts     # Добавить highlights
+```
+
+---
+
+## Итоговый UX (Agoda/Airbnb стиль)
+
+```text
+┌─────────────────────────────────────────────────────────┐
+│  🔍 Поиск жилья на Пхукете                               │
+├─────────────────────────────────────────────────────────┤
+│  📍 Куда · 📅 Даты · 👥 Гости          [Найти]          │
+├─────────────────────────────────────────────────────────┤
+│  🏠 Все  🏡 Вилла  🏢 Кондо  🏬 Апарты  ⚙️ Фильтры      │
+├─────────────────────────────────────────────────────────┤
+│  ⚡ Мгновенное  🏖️ У пляжа  🌊 Море  🐕 Питомцы  ✨ Новое │
+│  🧹 Сервис  💎 Дизайн  🏷️ Акция  ✅ Проверено           │
+├─────────────────────────────────────────────────────────┤
+│  🏢 Комплексы: [Title Legendary] [Laguna] [Kamala Hills]│
+├─────────────────────────────────────────────────────────┤
+│  ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐                        │
+│  │Villa│ │Condo│ │House│ │Villa│ ...                    │
+│  └─────┘ └─────┘ └─────┘ └─────┘                        │
+└─────────────────────────────────────────────────────────┘
+```
 
 ---
 
 ## Техническое резюме
 
-**Проблема**: Radix `ScrollArea` создаёт дополнительные слои DOM, которые перехватывают pointer-события на touch-устройствах.
+| Компонент | Действие |
+|-----------|----------|
+| База данных | Добавить `highlights TEXT[]` в properties |
+| lookup_values | Добавить 6 новых property_highlight |
+| usePropertyQuickFilters | Создать hook для динамических фильтров |
+| QuickFiltersRibbon | Горизонтальные чипы с мульти-выбором |
+| ProjectsCarousel | Карусель комплексов для быстрого выбора |
+| PropertyIndex | Интегрировать новую логику фильтрации |
+| PropertyManage | Добавить редактор highlights для владельцев |
 
-**Решение**: Заменить `ScrollArea` на нативный CSS-паттерн с `overflow-x-auto`, `touch-pan-x`, и `snap-x`.
-
-**Затронутые файлы**: 10 компонентов
-
-**Риск регрессии**: Низкий — заменяем сложный компонент на более простой нативный CSS.
+**Преимущества:**
+- Все теги редактируются через Admin Panel (lookup_values)
+- Владельцы могут устанавливать highlights при листинге
+- Гости видят релевантные быстрые фильтры
+- Комплексы выделены отдельной секцией
+- Мульти-выбор типов жилья работает
