@@ -1,27 +1,20 @@
 import React, { memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, Layers, Languages, HeartHandshake, MapPin, AlertTriangle, ChevronRight, Shield, Plane, Users, Building2, Check } from 'lucide-react';
+import { ShieldCheck, Layers, HeartHandshake, MapPin, AlertTriangle, Shield, Plane, Users, Building2, Check } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserPersonas, UserPersona } from '@/hooks/useUserPersonas';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { InlineSearch } from '@/components/search/InlineSearch';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { InvestorPromoCard } from './InvestorPromoCard';
+
 interface TrustBadgeProps {
   icon: React.ReactNode;
   label: string;
 }
 
 const TrustBadge = memo(({ icon, label }: TrustBadgeProps) => (
-  <div className={cn(
-    "flex items-center gap-1.5 px-2.5 py-1 rounded-full",
-    "bg-gradient-to-r from-primary/10 to-amber-500/10",
-    "border border-primary/20",
-    "text-[11px] font-medium text-foreground/90",
-    "shadow-sm"
-  )}>
+  <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted/50 border border-border text-[10px] font-medium text-muted-foreground">
     <span className="text-primary">{icon}</span>
     <span>{label}</span>
   </div>
@@ -154,23 +147,12 @@ export const HeroBlock = memo(function HeroBlock() {
     },
   ];
 
+  // Compact single-line badges
   const badges = [
-    {
-      icon: <ShieldCheck className="w-3 h-3" />,
-      label: isRu ? 'Верифицировано' : 'Verified',
-    },
-    {
-      icon: <Layers className="w-3 h-3" />,
-      label: isRu ? 'Всё в одном' : 'All-in-one',
-    },
-    {
-      icon: <Languages className="w-3 h-3" />,
-      label: 'RU / EN',
-    },
-    {
-      icon: <HeartHandshake className="w-3 h-3" />,
-      label: '24/7',
-    },
+    { icon: <ShieldCheck className="w-3 h-3" />, label: isRu ? 'Проверено' : 'Verified' },
+    { icon: <Shield className="w-3 h-3" />, label: isRu ? 'Гарантия' : 'Guaranteed' },
+    { icon: <HeartHandshake className="w-3 h-3" />, label: '24/7' },
+    { icon: <Layers className="w-3 h-3" />, label: isRu ? 'Всё здесь' : 'All-in-one' },
   ];
 
   const handleAudienceClick = (card: typeof audienceCards[0]) => {
@@ -194,32 +176,46 @@ export const HeroBlock = memo(function HeroBlock() {
       transition={{ duration: 0.4, ease: 'easeOut' }}
       className="space-y-4"
     >
-      {/* Brand Header */}
-      <div className="flex flex-col items-center justify-center text-center space-y-2">
-        {/* Location indicator */}
-        <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
-          <MapPin className="w-3 h-3 text-primary flex-shrink-0" />
-          <span className="font-medium">{isRu ? 'Пхукет, Таиланд' : 'Phuket, Thailand'}</span>
+      {/* Compact Header: Location + Brand + SOS */}
+      <div className="flex items-center justify-between">
+        {/* Left: Location */}
+        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+          <MapPin className="w-3 h-3 text-primary" />
+          <span className="font-medium">{isRu ? 'Пхукет' : 'Phuket'}</span>
         </div>
 
-        {/* Brand logo */}
-        <div className="flex items-center justify-center gap-1.5">
-          <span className="text-sm font-medium text-muted-foreground">my</span>
-          <div className="w-7 h-7 rounded-lg gradient-gold flex items-center justify-center flex-shrink-0">
-            <span className="text-xs font-bold text-primary-foreground">U</span>
+        {/* Center: Brand */}
+        <div className="flex items-center gap-1">
+          <span className="text-xs font-medium text-muted-foreground">my</span>
+          <div className="w-6 h-6 rounded-md gradient-gold flex items-center justify-center">
+            <span className="text-[10px] font-bold text-primary-foreground">U</span>
           </div>
-          <span className="text-lg font-display font-bold text-gradient-gold">UNO</span>
+          <span className="text-base font-display font-bold text-gradient-gold">UNO</span>
         </div>
 
-        {/* Main headline */}
-        <div className="space-y-1 px-2">
-          <h1 className="text-lg sm:text-xl font-bold text-foreground">
-            {isRu ? 'За рубежом' : 'Abroad'}
-          </h1>
-        </div>
+        {/* Right: SOS Button */}
+        <Link 
+          to="/sos" 
+          className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-destructive/10 border border-destructive/30 hover:bg-destructive/20 transition-colors"
+        >
+          <AlertTriangle className="w-3 h-3 text-destructive" />
+          <span className="text-[10px] font-bold text-destructive">SOS</span>
+        </Link>
       </div>
 
-      {/* Audience Cards */}
+      {/* Search - primary action */}
+      <div data-tour="search">
+        <InlineSearch />
+      </div>
+
+      {/* Trust badges - single compact line */}
+      <div className="flex items-center justify-center gap-1">
+        {badges.map((badge, index) => (
+          <TrustBadge key={index} icon={badge.icon} label={badge.label} />
+        ))}
+      </div>
+
+      {/* Audience Cards - for personalization */}
       <div className="flex gap-2">
         {audienceCards.map((card) => (
           <AudienceCard
@@ -237,55 +233,6 @@ export const HeroBlock = memo(function HeroBlock() {
           />
         ))}
       </div>
-
-      {/* Investor Promo Card */}
-      <InvestorPromoCard />
-
-      {/* Trust badges */}
-      <div className="flex flex-wrap items-center justify-center gap-1.5">
-        {badges.map((badge, index) => (
-          <TrustBadge key={index} icon={badge.icon} label={badge.label} />
-        ))}
-      </div>
-
-      {/* Integrated Search */}
-      <div data-tour="search">
-        <InlineSearch />
-      </div>
-
-      {/* Safety Banner (UNO Alert) */}
-      <Link to="/sos" className="block">
-        <div className={cn(
-          "flex items-center gap-3 p-3 rounded-2xl",
-          "bg-gradient-to-r from-destructive/10 via-orange-500/10 to-amber-500/10",
-          "border border-destructive/20 hover:border-destructive/40",
-          "transition-all hover:shadow-md active:scale-[0.98]"
-        )}>
-          {/* Icon */}
-          <div className="p-2.5 rounded-xl bg-destructive/20 flex-shrink-0">
-            <AlertTriangle className="w-5 h-5 text-destructive" />
-          </div>
-          
-          {/* Content */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-sm text-foreground">
-                UNO ALERT
-              </span>
-              <Badge className="bg-destructive text-destructive-foreground text-[10px] px-1.5 py-0 animate-pulse">
-                24/7
-              </Badge>
-            </div>
-            <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5">
-              <Shield className="w-3 h-3" />
-              {isRu ? 'Экстренная помощь и поддержка' : 'Emergency help & support'}
-            </p>
-          </div>
-          
-          {/* Arrow */}
-          <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-        </div>
-      </Link>
     </motion.div>
   );
 });
