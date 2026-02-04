@@ -24,7 +24,7 @@ export const SubcategoryChips = forwardRef<HTMLDivElement, SubcategoryChipsProps
     if (subcategories.length <= 1) return null;
 
     return (
-      <div ref={ref} className={cn("overflow-x-auto scrollbar-hide -mx-4 px-4", className)}>
+      <div ref={ref} className={cn("overflow-x-auto scrollbar-hide -mx-4 px-4 touch-pan-y snap-x snap-mandatory", className)}>
         <div className="flex gap-2 pb-1">
           {subcategories.map((sub) => {
             const isActive = selectedId === sub.id;

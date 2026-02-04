@@ -328,7 +328,7 @@ const MarketIndex = () => {
         />
       </div>
 
-      <div className="pb-32 -mx-4">
+      <div className="pb-32">
         {/* 1. Quick Category Icons Grid first - Amazon style */}
         <QuickCategoryIcons 
           categories={activeCategories} 
