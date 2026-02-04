@@ -99,9 +99,13 @@ export function useUserListings() {
 
   const updateListing = async (id: string, updates: Partial<UserListingDraft>): Promise<boolean> => {
     try {
+      // Always set updated_at timestamp
       const { error: updateError } = await supabase
         .from('user_listings')
-        .update(updates)
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString(),
+        })
         .eq('id', id);
 
       if (updateError) throw updateError;

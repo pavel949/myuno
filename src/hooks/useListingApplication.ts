@@ -221,8 +221,15 @@ export function useListingApplication(): UseListingApplicationReturn {
     }
   }, [user, draft, applicationId, navigate]);
   
+  // Track max reached step to allow only backward navigation or forward to previously visited
+  const [maxReachedStep, setMaxReachedStep] = useState(0);
+  
   const nextStep = useCallback(() => {
-    setCurrentStep(prev => prev + 1);
+    setCurrentStep(prev => {
+      const next = prev + 1;
+      setMaxReachedStep(max => Math.max(max, next));
+      return next;
+    });
   }, []);
   
   const prevStep = useCallback(() => {
@@ -230,8 +237,11 @@ export function useListingApplication(): UseListingApplicationReturn {
   }, []);
   
   const goToStep = useCallback((step: number) => {
-    setCurrentStep(step);
-  }, []);
+    // Only allow jumping to previously visited steps
+    if (step <= maxReachedStep) {
+      setCurrentStep(step);
+    }
+  }, [maxReachedStep]);
   
   return {
     draft,

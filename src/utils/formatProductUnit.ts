@@ -33,26 +33,33 @@ const measureLabels: Record<string, { en: string; ru: string }> = {
  *   - pack_quantity: 6, unit_value: 500, unit_measure: 'ml' → "6×500ml" / "6×500мл"
  */
 export function formatProductUnit(
-  product: ProductUnitData,
+  product: ProductUnitData | null | undefined,
   language: 'en' | 'ru' = 'en'
 ): string {
+  // Guard against null/undefined product
+  if (!product) return '';
+  
   const { unit_value, unit_measure, pack_quantity, unit, unit_ru } = product;
   
   // If we have precise unit data, use it
   if (unit_value && unit_measure) {
     const measureLabel = measureLabels[unit_measure]?.[language] || unit_measure;
     
+    // Handle edge case: unit_value could be string from DB
+    const numericValue = typeof unit_value === 'string' ? parseFloat(unit_value) : unit_value;
+    if (isNaN(numericValue)) return '';
+    
     if (pack_quantity && pack_quantity > 1) {
       // Multi-pack: "6×500ml"
-      return `${pack_quantity}×${unit_value}${measureLabel}`;
+      return `${pack_quantity}×${numericValue}${measureLabel}`;
     }
     
     // Single unit: "500g"
-    return `${unit_value}${measureLabel}`;
+    return `${numericValue}${measureLabel}`;
   }
   
   // Pack quantity without unit value: "6 pcs"
-  if (pack_quantity) {
+  if (pack_quantity && pack_quantity > 0) {
     const pcLabel = language === 'ru' ? 'шт' : 'pcs';
     return `${pack_quantity} ${pcLabel}`;
   }
@@ -66,12 +73,19 @@ export function formatProductUnit(
  * Useful for comparing products of different sizes
  */
 export function formatPricePerUnit(
-  product: ProductUnitData & { price: number },
+  product: (ProductUnitData & { price: number }) | null | undefined,
   language: 'en' | 'ru' = 'en'
 ): string | null {
+  // Guard against null/undefined product
+  if (!product) return null;
+  
   const { unit_value, unit_measure, price } = product;
   
   if (!unit_value || !unit_measure || !price) return null;
+  
+  // Handle edge case: unit_value could be string from DB
+  const numericValue = typeof unit_value === 'string' ? parseFloat(unit_value) : unit_value;
+  if (isNaN(numericValue) || numericValue <= 0) return null;
   
   // Calculate price per standard unit
   let standardUnit: string;
@@ -80,11 +94,11 @@ export function formatPricePerUnit(
   switch (unit_measure) {
     case 'g':
       standardUnit = language === 'ru' ? 'кг' : 'kg';
-      multiplier = 1000 / unit_value;
+      multiplier = 1000 / numericValue;
       break;
     case 'ml':
       standardUnit = language === 'ru' ? 'л' : 'L';
-      multiplier = 1000 / unit_value;
+      multiplier = 1000 / numericValue;
       break;
     case 'kg':
     case 'L':

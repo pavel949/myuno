@@ -118,16 +118,24 @@ export function useCanonicalDraft<T extends object>({
   }, []);
   
   // Debounced save on data change
+  // Use ref to avoid race condition with hasUnsavedChanges stale closure
+  const pendingSaveRef = useRef(false);
+  
   useEffect(() => {
     if (!autoSave) return;
+    
+    // Mark that we have pending changes
+    pendingSaveRef.current = true;
     
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
     
     debounceTimerRef.current = setTimeout(() => {
-      if (hasUnsavedChanges) {
+      // Check ref at execution time, not at closure time
+      if (pendingSaveRef.current) {
         saveDraft();
+        pendingSaveRef.current = false;
       }
     }, debounceMs);
     
@@ -136,14 +144,15 @@ export function useCanonicalDraft<T extends object>({
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [data, autoSave, debounceMs, hasUnsavedChanges, saveDraft]);
+  }, [data, autoSave, debounceMs, saveDraft]);
   
-  // Periodic auto-save
+  // Periodic auto-save - use ref to avoid stale closure
   useEffect(() => {
     if (!autoSave) return;
     
     autoSaveTimerRef.current = setInterval(() => {
-      if (hasUnsavedChanges) {
+      // Check current state via ref at execution time
+      if (hasUnsavedChangesRef.current) {
         saveDraft();
       }
     }, autoSaveInterval);
@@ -153,7 +162,7 @@ export function useCanonicalDraft<T extends object>({
         clearInterval(autoSaveTimerRef.current);
       }
     };
-  }, [autoSave, autoSaveInterval, hasUnsavedChanges, saveDraft]);
+  }, [autoSave, autoSaveInterval, saveDraft]);
   
   // Use refs to access latest values in unmount cleanup (avoid stale closure)
   const dataRef = useRef(data);
