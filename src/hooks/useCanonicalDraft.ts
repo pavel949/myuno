@@ -97,11 +97,25 @@ export function useCanonicalDraft<T extends object>({
       lastSavedDataRef.current = JSON.stringify(data);
     } catch (e) {
       console.error('Failed to save draft:', e);
-    } finally {
-      // Small delay for visual feedback
-      setTimeout(() => setIsSaving(false), 300);
     }
+    // Cleanup-safe visual feedback handled by ref
   }, [data, storageKey]);
+  
+  // Delayed isSaving reset with cleanup
+  const savingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  const saveDraftWithFeedback = useCallback(() => {
+    saveDraft();
+    if (savingTimeoutRef.current) clearTimeout(savingTimeoutRef.current);
+    savingTimeoutRef.current = setTimeout(() => setIsSaving(false), 300);
+  }, [saveDraft]);
+  
+  // Cleanup saving timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (savingTimeoutRef.current) clearTimeout(savingTimeoutRef.current);
+    };
+  }, []);
   
   // Debounced save on data change
   useEffect(() => {
