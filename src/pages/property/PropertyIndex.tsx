@@ -319,10 +319,10 @@ export default function PropertyIndex() {
                           {language === 'ru' ? 'Популярное' : 'Guest favorite'}
                         </Badge>
                       )}
-                      {property.min_stay_nights === 1 && (
+                      {property.instant_booking && (
                         <Badge className="bg-amber-500 text-white border-0 text-xs gap-1">
                           <Zap className="w-3 h-3" />
-                          {language === 'ru' ? 'Быстрое' : 'Instant'}
+                          {language === 'ru' ? 'Мгновенное' : 'Instant'}
                         </Badge>
                       )}
                     </div>
@@ -358,6 +358,14 @@ export default function PropertyIndex() {
                       <span className="font-semibold">{formatPrice(property.price || 0)}</span>
                       <span className="text-muted-foreground">{formatPriceLabel(property.price_period)}</span>
                     </p>
+                    
+                    {/* Instant booking CTA hint */}
+                    {property.instant_booking && (
+                      <p className="text-xs text-amber-600 flex items-center gap-1 mt-1">
+                        <Zap className="w-3 h-3" />
+                        {language === 'ru' ? 'Забронировать сейчас' : 'Book now'}
+                      </p>
+                    )}
                   </div>
                 </div>
               ))}

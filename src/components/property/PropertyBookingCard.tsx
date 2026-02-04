@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, Zap, Info, ChevronDown, ChevronUp } from 'lucide-react';
+import { Users, Zap, Info, ChevronDown, ChevronUp, Calendar as CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -267,20 +267,34 @@ export function PropertyBookingCard({
           </div>
         )}
         
-        {/* Reserve Button */}
+        {/* Reserve Button - Dynamic CTA */}
         <Button 
           size="lg" 
-          className="w-full"
+          className={cn(
+            "w-full",
+            rentalTerms?.instant_booking && dateRange?.from && dateRange?.to && "bg-amber-500 hover:bg-amber-600"
+          )}
           onClick={handleReserve}
           disabled={!dateRange?.from || !dateRange?.to || validationErrors.length > 0}
         >
-          {rentalTerms?.instant_booking && <Zap className="w-4 h-4 mr-2" />}
-          {isRu ? 'Забронировать' : 'Reserve'}
+          {!dateRange?.from || !dateRange?.to ? (
+            <>
+              <CalendarIcon className="w-4 h-4 mr-2" />
+              {isRu ? 'Проверить наличие' : 'Check availability'}
+            </>
+          ) : rentalTerms?.instant_booking ? (
+            <>
+              <Zap className="w-4 h-4 mr-2" />
+              {isRu ? 'Мгновенное бронирование' : 'Book instantly'}
+            </>
+          ) : (
+            isRu ? 'Забронировать' : 'Reserve'
+          )}
         </Button>
         
         {!nights ? (
           <p className="text-center text-sm text-muted-foreground">
-            {isRu ? 'Выберите даты для расчёта' : "You won't be charged yet"}
+            {isRu ? 'Выберите даты для расчёта стоимости' : 'Select dates to see total price'}
           </p>
         ) : (
           <>
