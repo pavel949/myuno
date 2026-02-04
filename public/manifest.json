@@ -2,12 +2,12 @@
   "name": "myUNO",
   "short_name": "myUNO",
   "description": "Все услуги в одном приложении",
-  "start_url": "/?source=pwa",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0b",
   "theme_color": "#d4af37",
   "scope": "/",
-  "id": "myuno-app",
+  "id": "myuno-pwa-2025",
   "orientation": "portrait-primary",
   "icons": [
     {

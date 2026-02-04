@@ -1,6 +1,6 @@
 // App version for PWA cache busting
-// Update this version when deploying significant changes
-export const APP_VERSION = '2.5.1';
+// Increment this when deploying significant changes
+export const APP_VERSION = '3.0.0';
 export const BUILD_TIMESTAMP = new Date().toISOString();
 
 // Force cache clear function - can be called manually
@@ -25,40 +25,32 @@ export async function forceCleanAllCaches(): Promise<void> {
     }));
   }
   
-  // 3. Clear sessionStorage cache flags
+  // 3. Clear sessionStorage 
   sessionStorage.clear();
   
   console.log('[myUNO] All caches cleared');
 }
 
-// Force immediate cache clear and reload on version mismatch
+// Immediately clean caches on module load
 if (typeof window !== 'undefined') {
-  console.log(`[myUNO] Version: ${APP_VERSION} | Built: ${BUILD_TIMESTAMP}`);
+  console.log(`[myUNO] v${APP_VERSION} | ${BUILD_TIMESTAMP}`);
   
   const storedVersion = localStorage.getItem('app_version');
-  const lastCleanup = localStorage.getItem('last_cache_cleanup');
-  const now = Date.now();
   
-  // Force cleanup if version changed OR if it's been more than 1 hour since last cleanup
-  const needsCleanup = 
-    (storedVersion && storedVersion !== APP_VERSION) ||
-    (!lastCleanup || now - parseInt(lastCleanup) > 60 * 60 * 1000);
-  
-  if (needsCleanup) {
-    console.log('[myUNO] Cleanup needed, clearing all caches...');
+  // Always clean if version differs
+  if (storedVersion !== APP_VERSION) {
+    console.log(`[myUNO] Version mismatch: ${storedVersion} → ${APP_VERSION}`);
     
-    // Clear all caches immediately
+    // Synchronously mark new version to prevent loops
+    localStorage.setItem('app_version', APP_VERSION);
+    localStorage.setItem('last_cache_cleanup', Date.now().toString());
+    
+    // Clean and reload
     forceCleanAllCaches().then(() => {
-      localStorage.setItem('app_version', APP_VERSION);
-      localStorage.setItem('last_cache_cleanup', now.toString());
-      
-      // Only reload if version actually changed
-      if (storedVersion && storedVersion !== APP_VERSION) {
-        console.log('[myUNO] Version changed, reloading...');
-        window.location.reload();
+      if (storedVersion) {
+        console.log('[myUNO] Reloading for new version...');
+        window.location.replace(window.location.origin + '/');
       }
     });
-  } else {
-    localStorage.setItem('app_version', APP_VERSION);
   }
 }
