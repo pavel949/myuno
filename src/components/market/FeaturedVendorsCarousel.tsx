@@ -102,7 +102,7 @@ export const FeaturedVendorsCarousel: React.FC<FeaturedVendorsCarouselProps> = (
   if (!isLoading && vendors.length === 0) return null;
 
   return (
-    <section className={cn("py-4 bg-muted/30", className)}>
+    <section className={cn("py-3 bg-muted/30", className)}>
       <div className="px-4 max-w-7xl mx-auto">
         <UnifiedSectionHeader
           icon={CheckCircle2}

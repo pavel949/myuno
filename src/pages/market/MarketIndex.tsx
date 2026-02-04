@@ -281,7 +281,7 @@ const MarketIndex = () => {
       showFilter={false}
     >
       {/* Filter Ribbon - Quick Actions Row */}
-      <div className="sticky top-[124px] z-30 -mx-4 bg-background/95 backdrop-blur-sm">
+      <div className="sticky top-0 z-30 -mx-4 bg-background/95 backdrop-blur-sm border-b border-border/30">
         <UnifiedFilterRibbon
           items={quickActionItems}
           onSelect={handleQuickActionSelect}
@@ -328,26 +328,23 @@ const MarketIndex = () => {
         />
       </div>
 
-      <div className="pb-32 -mx-4 px-4">
-        {/* 1. Hero Promo Carousel */}
-        <PromoCarousel className="-mx-4" />
-
-        {/* 2. Quick Category Icons Grid (2x4) */}
+      <div className="pb-32 -mx-4">
+        {/* 1. Quick Category Icons Grid first - Amazon style */}
         <QuickCategoryIcons 
           categories={activeCategories} 
           productCounts={productCounts}
           maxItems={8}
         />
 
+        {/* 2. Hero Promo Carousel */}
+        <PromoCarousel />
+
         {/* 3. Flash Deals Section with Countdown */}
-        <FlashDealsSection 
-          products={allProducts} 
-          className="-mx-4"
-        />
+        <FlashDealsSection products={allProducts} />
 
         {/* 4. Bestsellers Section */}
         {popularProducts.length > 0 && (
-          <section className="py-4">
+          <section className="py-3">
             <div className="px-4 max-w-7xl mx-auto">
               <UnifiedSectionHeader
                 icon={Flame}
@@ -376,12 +373,12 @@ const MarketIndex = () => {
         )}
 
         {/* 5. Featured Vendors Carousel */}
-        <FeaturedVendorsCarousel className="-mx-4" />
+        <FeaturedVendorsCarousel />
 
         {/* 6. New Arrivals Section */}
         {newProducts.length > 0 && (
-          <section className="py-4 bg-muted/30 -mx-4 px-4">
-            <div className="max-w-7xl mx-auto">
+          <section className="py-3 bg-muted/30">
+            <div className="px-4 max-w-7xl mx-auto">
               <UnifiedSectionHeader
                 icon={Sparkles}
                 iconColor="text-purple-500"
@@ -419,8 +416,8 @@ const MarketIndex = () => {
           const isMuted = index % 2 === 1;
           
           return (
-            <section key={category.id} className={cn("py-4 border-t border-border/50 -mx-4 px-4", isMuted && "bg-muted/30")}>
-              <div className="max-w-7xl mx-auto">
+            <section key={category.id} className={cn("py-3 border-t border-border/30", isMuted && "bg-muted/30")}>
+              <div className="px-4 max-w-7xl mx-auto">
                 <UnifiedSectionHeader
                   iconEmoji={category.icon || getCategoryFallbackIcon(category.slug)}
                   iconImage={category.image_url || undefined}
@@ -450,10 +447,10 @@ const MarketIndex = () => {
         })}
 
         {/* 8. Recently Viewed Products */}
-        <RecentlyViewedProducts className="-mx-4 px-4" />
+        <RecentlyViewedProducts />
 
         {/* 9. All Products Grid */}
-        <section className="py-6 max-w-7xl mx-auto">
+        <section className="py-4 px-4 max-w-7xl mx-auto">
           <UnifiedSectionHeader
             title={isRu ? 'Все товары' : 'All Products'}
             count={allProducts.length}
