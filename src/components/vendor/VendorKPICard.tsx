@@ -13,20 +13,32 @@ interface VendorKPICardProps {
   trend?: 'up' | 'down' | 'neutral';
   href?: string;
   loading?: boolean;
+  /** Previous period value for automatic comparison calculation */
+  previousValue?: number;
 }
 
 export function VendorKPICard({
   title,
   value,
-  change,
+  change: externalChange,
   changeLabel,
   icon: Icon,
   iconColor = 'text-primary',
-  trend,
+  trend: externalTrend,
   href,
   loading = false,
+  previousValue,
 }: VendorKPICardProps) {
   const navigate = useNavigate();
+
+  // Calculate change if previousValue provided
+  let change = externalChange;
+  let trend = externalTrend;
+  
+  if (previousValue !== undefined && previousValue > 0 && typeof value === 'number') {
+    change = ((value - previousValue) / previousValue) * 100;
+    trend = change > 0 ? 'up' : change < 0 ? 'down' : 'neutral';
+  }
 
   const TrendIcon = trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : Minus;
   const trendColorClass = trend === 'up' 

@@ -1,7 +1,7 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import {
   AreaChart,
   Area,
@@ -11,6 +11,8 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import { VendorPeriodSelector, Period } from './dashboard/VendorPeriodSelector';
+import { cn } from '@/lib/utils';
 
 interface RevenueDataPoint {
   date: string;
@@ -21,9 +23,18 @@ interface RevenueDataPoint {
 interface VendorRevenueChartProps {
   data: RevenueDataPoint[];
   loading?: boolean;
+  period?: Period;
+  onPeriodChange?: (period: Period) => void;
+  previousPeriodRevenue?: number;
 }
 
-export function VendorRevenueChart({ data, loading }: VendorRevenueChartProps) {
+export function VendorRevenueChart({ 
+  data, 
+  loading, 
+  period = '7d',
+  onPeriodChange,
+  previousPeriodRevenue 
+}: VendorRevenueChartProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
@@ -57,18 +68,47 @@ export function VendorRevenueChart({ data, loading }: VendorRevenueChartProps) {
   const totalRevenue = data.reduce((sum, d) => sum + d.revenue, 0);
   const totalOrders = data.reduce((sum, d) => sum + d.orders, 0);
 
+  // Calculate comparison percentage
+  let changePercent: number | null = null;
+  let trend: 'up' | 'down' | 'neutral' = 'neutral';
+  
+  if (previousPeriodRevenue !== undefined && previousPeriodRevenue > 0) {
+    changePercent = ((totalRevenue - previousPeriodRevenue) / previousPeriodRevenue) * 100;
+    trend = changePercent > 0 ? 'up' : changePercent < 0 ? 'down' : 'neutral';
+  }
+
+  const TrendIcon = trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : Minus;
+  const trendColor = trend === 'up' ? 'text-success' : trend === 'down' ? 'text-destructive' : 'text-muted-foreground';
+
   return (
     <Card>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
             <TrendingUp className="h-4 w-4 text-success" />
-            {isRu ? 'Доход за неделю' : 'Weekly Revenue'}
+            {isRu ? 'Доход' : 'Revenue'}
           </CardTitle>
-          <div className="text-right">
-            <p className="text-lg font-bold text-success">{formatCurrency(totalRevenue)}</p>
-            <p className="text-xs text-muted-foreground">{totalOrders} {isRu ? 'заказов' : 'orders'}</p>
+          {onPeriodChange && (
+            <VendorPeriodSelector 
+              value={period} 
+              onChange={onPeriodChange}
+              compact
+            />
+          )}
+        </div>
+        <div className="flex items-center justify-between mt-1">
+          <div className="flex items-baseline gap-2">
+            <p className="text-2xl font-bold text-success">{formatCurrency(totalRevenue)}</p>
+            {changePercent !== null && (
+              <div className={cn("flex items-center gap-0.5 text-sm font-medium", trendColor)}>
+                <TrendIcon className="h-3.5 w-3.5" />
+                <span>{changePercent > 0 ? '+' : ''}{changePercent.toFixed(1)}%</span>
+              </div>
+            )}
           </div>
+          <p className="text-sm text-muted-foreground">
+            {totalOrders} {isRu ? 'заказов' : 'orders'}
+          </p>
         </div>
       </CardHeader>
       <CardContent className="pt-0">

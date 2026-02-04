@@ -6,6 +6,7 @@ import { useUserContext } from '@/hooks/useUserContext';
 import { useVendorOrders } from '@/hooks/useOrders';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { 
   DollarSign, 
@@ -13,10 +14,18 @@ import {
   CheckCircle,
   Clock,
   Building2,
-  ShoppingBag
+  ShoppingBag,
+  Eye,
+  MoreHorizontal
 } from 'lucide-react';
 import { format, subDays } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 // Professional components
 import { VendorKPICard } from '@/components/vendor/VendorKPICard';
@@ -26,6 +35,8 @@ import { VendorQuickActions } from '@/components/vendor/VendorQuickActions';
 import { VendorCategoryGrid } from '@/components/vendor/VendorCategoryGrid';
 import { VendorQuickCreateFAB } from '@/components/vendor/wizard';
 import { BulkImportSheet, ImportVertical } from '@/components/vendor/wizard';
+import { VendorOnboardingChecklist } from '@/components/vendor/dashboard/VendorOnboardingChecklist';
+import { Period, getPeriodDateRange, getComparisonPeriodRange } from '@/components/vendor/dashboard/VendorPeriodSelector';
 
 const statusColors: Record<string, string> = {
   pending: 'bg-muted text-muted-foreground',
@@ -45,6 +56,12 @@ const VendorDashboard = () => {
   // State for FAB actions
   const [showBulkImport, setShowBulkImport] = useState(false);
   const [bulkImportVertical, setBulkImportVertical] = useState<ImportVertical>('products');
+  
+  // Period selector state
+  const [chartPeriod, setChartPeriod] = useState<Period>('7d');
+  
+  // Onboarding state (would normally come from API)
+  const [showOnboarding, setShowOnboarding] = useState(true);
 
   const isRu = language === 'ru';
   const locale = isRu ? ru : enUS;
@@ -63,11 +80,17 @@ const VendorDashboard = () => {
 
   const isLoading = authLoading || contextLoading;
 
-  // Chart data
+  // Get period date ranges
+  const { start: periodStart, end: periodEnd } = getPeriodDateRange(chartPeriod);
+  const { start: prevStart, end: prevEnd } = getComparisonPeriodRange(chartPeriod);
+
+  // Chart data based on selected period
   const chartData = useMemo(() => {
     if (!orders) return [];
     const data = [];
-    for (let i = 6; i >= 0; i--) {
+    const days = Math.ceil((periodEnd.getTime() - periodStart.getTime()) / (24 * 60 * 60 * 1000));
+    
+    for (let i = days - 1; i >= 0; i--) {
       const date = subDays(new Date(), i);
       const dateStr = format(date, 'yyyy-MM-dd');
       const dayOrders = orders.filter(o => 
@@ -80,7 +103,18 @@ const VendorDashboard = () => {
       });
     }
     return data;
-  }, [orders]);
+  }, [orders, chartPeriod, periodStart, periodEnd]);
+
+  // Calculate previous period revenue for comparison
+  const previousPeriodRevenue = useMemo(() => {
+    if (!orders) return 0;
+    return orders
+      .filter(o => {
+        const orderDate = new Date(o.created_at);
+        return orderDate >= prevStart && orderDate <= prevEnd;
+      })
+      .reduce((sum, o) => sum + (o.total_amount || 0), 0);
+  }, [orders, prevStart, prevEnd]);
 
   const recentOrders = useMemo(() => {
     if (!orders) return [];
@@ -108,6 +142,15 @@ const VendorDashboard = () => {
     );
   };
 
+  // Determine completed onboarding steps
+  const completedOnboardingSteps = useMemo(() => {
+    const steps: string[] = [];
+    if (user?.user_metadata?.name) steps.push('profile');
+    if (stats.completedCount > 0) steps.push('first-listing');
+    // Add more checks as needed
+    return steps;
+  }, [user, stats]);
+
   if (isLoading) {
     return (
       <div className="p-4 space-y-4">
@@ -124,6 +167,14 @@ const VendorDashboard = () => {
 
   return (
     <div className="p-4 pb-24 space-y-4">
+      {/* Onboarding Checklist */}
+      {showOnboarding && (
+        <VendorOnboardingChecklist 
+          completedSteps={completedOnboardingSteps}
+          onDismiss={() => setShowOnboarding(false)}
+        />
+      )}
+
       {/* Org Header */}
       <Card>
         <CardContent className="p-4 flex items-center gap-3">
@@ -140,20 +191,57 @@ const VendorDashboard = () => {
         </CardContent>
       </Card>
 
-      {/* KPI Cards */}
+      {/* KPI Cards with Comparison */}
       <div className="grid grid-cols-2 gap-3">
-        <VendorKPICard title={isRu ? 'Выручка' : 'Revenue'} value={formatCurrency(stats.totalRevenue)} icon={DollarSign} iconColor="text-success" loading={ordersLoading} href="/vendor/analytics" />
-        <VendorKPICard title={isRu ? 'Заказы' : 'Orders'} value={stats.pendingCount + stats.confirmedCount + stats.completedCount} icon={Calendar} iconColor="text-info" loading={ordersLoading} href="/vendor/bookings" />
-        <VendorKPICard title={isRu ? 'Завершено' : 'Completed'} value={stats.completedCount} icon={CheckCircle} iconColor="text-success" loading={ordersLoading} />
-        <VendorKPICard title={isRu ? 'Ожидает' : 'Pending'} value={stats.pendingCount} icon={Clock} iconColor="text-warning" loading={ordersLoading} />
+        <VendorKPICard 
+          title={isRu ? 'Выручка' : 'Revenue'} 
+          value={formatCurrency(stats.totalRevenue)} 
+          icon={DollarSign} 
+          iconColor="text-success" 
+          loading={ordersLoading} 
+          href="/vendor/analytics"
+          change={previousPeriodRevenue > 0 ? ((stats.totalRevenue - previousPeriodRevenue) / previousPeriodRevenue) * 100 : undefined}
+          trend={previousPeriodRevenue > 0 ? (stats.totalRevenue > previousPeriodRevenue ? 'up' : stats.totalRevenue < previousPeriodRevenue ? 'down' : 'neutral') : undefined}
+        />
+        <VendorKPICard 
+          title={isRu ? 'Заказы' : 'Orders'} 
+          value={stats.pendingCount + stats.confirmedCount + stats.completedCount} 
+          icon={Calendar} 
+          iconColor="text-info" 
+          loading={ordersLoading} 
+          href="/vendor/bookings" 
+        />
+        <VendorKPICard 
+          title={isRu ? 'Завершено' : 'Completed'} 
+          value={stats.completedCount} 
+          icon={CheckCircle} 
+          iconColor="text-success" 
+          loading={ordersLoading} 
+        />
+        <VendorKPICard 
+          title={isRu ? 'Ожидает' : 'Pending'} 
+          value={stats.pendingCount} 
+          icon={Clock} 
+          iconColor="text-warning" 
+          loading={ordersLoading} 
+        />
       </div>
 
       <VendorAlertPanel newOrders={stats.pendingCount} pendingConfirmation={stats.pendingCount} unreadMessages={0} loading={ordersLoading} />
-      <VendorRevenueChart data={chartData} loading={ordersLoading} />
+      
+      {/* Revenue Chart with Period Selector */}
+      <VendorRevenueChart 
+        data={chartData} 
+        loading={ordersLoading}
+        period={chartPeriod}
+        onPeriodChange={setChartPeriod}
+        previousPeriodRevenue={previousPeriodRevenue}
+      />
+      
       <VendorQuickActions />
       <VendorCategoryGrid />
 
-      {/* Recent Orders */}
+      {/* Recent Orders with Inline Actions */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
@@ -168,7 +256,7 @@ const VendorDashboard = () => {
             <p className="text-center py-6 text-sm text-muted-foreground">{isRu ? 'Нет заказов' : 'No orders'}</p>
           ) : (
             recentOrders.map(order => (
-              <div key={order.id} className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
+              <div key={order.id} className="flex items-center justify-between p-3 rounded-lg border bg-muted/30 group">
                 <div>
                   <p className="font-medium text-sm">{order.order_number || order.id.slice(0, 8)}</p>
                   <p className="text-xs text-muted-foreground">{format(new Date(order.created_at), 'd MMM, HH:mm', { locale })}</p>
@@ -176,6 +264,31 @@ const VendorDashboard = () => {
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium">{formatCurrency(order.total_amount)}</span>
                   {getStatusBadge(order.status)}
+                  
+                  {/* Inline Actions */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => navigate(`/vendor/bookings/${order.id}`)}>
+                        <Eye className="h-4 w-4 mr-2" />
+                        {isRu ? 'Просмотр' : 'View'}
+                      </DropdownMenuItem>
+                      {order.status === 'pending' && (
+                        <DropdownMenuItem onClick={() => {}}>
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          {isRu ? 'Подтвердить' : 'Confirm'}
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             ))
