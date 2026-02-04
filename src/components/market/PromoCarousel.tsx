@@ -1,9 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Truck, Zap, Shield } from 'lucide-react';
+import { ArrowRight, Truck, Zap, Shield, Gift, Star, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useMarketplacePromotions } from '@/hooks/useMarketplacePromotions';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import {
   Carousel,
@@ -12,58 +13,15 @@ import {
 } from '@/components/ui/carousel';
 import Autoplay from 'embla-carousel-autoplay';
 
-interface PromoBanner {
-  id: string;
-  title_en: string;
-  title_ru: string;
-  subtitle_en: string;
-  subtitle_ru: string;
-  badge_en?: string;
-  badge_ru?: string;
-  gradient: string;
-  icon: React.ElementType;
-  link_path: string;
-}
-
-// Static promotional banners (can be replaced with DB data later)
-const PROMO_BANNERS: PromoBanner[] = [
-  {
-    id: 'free-delivery',
-    title_en: 'Free Delivery',
-    title_ru: 'Бесплатная доставка',
-    subtitle_en: 'On orders over ฿1,500',
-    subtitle_ru: 'При заказе от ฿1,500',
-    badge_en: 'Limited Time',
-    badge_ru: 'Ограничено',
-    gradient: 'from-emerald-500 via-emerald-600 to-teal-600',
-    icon: Truck,
-    link_path: '/market/category/deals',
-  },
-  {
-    id: 'flash-deals',
-    title_en: 'Flash Deals',
-    title_ru: 'Молниеносные скидки',
-    subtitle_en: 'Up to 50% off selected items',
-    subtitle_ru: 'Скидки до 50% на избранные товары',
-    badge_en: 'Hot',
-    badge_ru: 'Горячо',
-    gradient: 'from-orange-500 via-red-500 to-pink-500',
-    icon: Zap,
-    link_path: '/market/category/deals',
-  },
-  {
-    id: 'quality-guarantee',
-    title_en: 'Quality Guaranteed',
-    title_ru: 'Гарантия качества',
-    subtitle_en: 'Fresh products from verified vendors',
-    subtitle_ru: 'Свежие продукты от проверенных продавцов',
-    badge_en: 'Trust',
-    badge_ru: 'Доверие',
-    gradient: 'from-blue-500 via-indigo-500 to-purple-500',
-    icon: Shield,
-    link_path: '/market/vendors',
-  },
-];
+// Icon mapping for dynamic icons from DB
+const ICON_MAP: Record<string, React.ElementType> = {
+  Truck,
+  Zap,
+  Shield,
+  Gift,
+  Star,
+  Sparkles,
+};
 
 interface PromoCarouselProps {
   className?: string;
@@ -72,11 +30,22 @@ interface PromoCarouselProps {
 export const PromoCarousel: React.FC<PromoCarouselProps> = ({ className }) => {
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { promotions, isLoading } = useMarketplacePromotions();
   const isRu = language === 'ru';
 
   const plugin = React.useRef(
     Autoplay({ delay: 5000, stopOnInteraction: true })
   );
+
+  if (isLoading) {
+    return (
+      <div className={cn("px-4 py-3 max-w-7xl mx-auto", className)}>
+        <Skeleton className="w-full h-40 rounded-2xl" />
+      </div>
+    );
+  }
+
+  if (promotions.length === 0) return null;
 
   return (
     <div className={cn("px-4 py-3 max-w-7xl mx-auto", className)}>
@@ -86,8 +55,8 @@ export const PromoCarousel: React.FC<PromoCarouselProps> = ({ className }) => {
         className="w-full"
       >
         <CarouselContent className="-ml-2">
-          {PROMO_BANNERS.map((banner) => {
-            const Icon = banner.icon;
+          {promotions.map((banner) => {
+            const Icon = ICON_MAP[banner.icon] || Truck;
             
             return (
               <CarouselItem key={banner.id} className="pl-2 basis-full">
@@ -144,7 +113,7 @@ export const PromoCarousel: React.FC<PromoCarouselProps> = ({ className }) => {
         
         {/* Pagination dots */}
         <div className="flex justify-center gap-1.5 mt-3">
-          {PROMO_BANNERS.map((_, index) => (
+          {promotions.map((_, index) => (
             <div
               key={index}
               className="w-2 h-2 rounded-full bg-muted-foreground/30 transition-colors"
