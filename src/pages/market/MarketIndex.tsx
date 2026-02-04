@@ -4,11 +4,10 @@ import {
   ChevronRight,
   Flame,
   Sparkles,
-  Truck,
-  Clock,
   Star,
   Menu,
 } from 'lucide-react';
+import { FeaturedBanner } from '@/components/market/FeaturedBanner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
@@ -77,6 +76,12 @@ const MarketIndex = () => {
   const { freeDeliveryThreshold, defaultZone } = useDeliverySettings();
 
   const cartItems = getItemsByType('product');
+  
+  // Calculate unique vendor count
+  const uniqueVendorCount = useMemo(() => {
+    const vendors = new Set(allProducts.map(p => p.vendor_name).filter(Boolean));
+    return vendors.size || 1;
+  }, [allProducts]);
 
   // Product counts per category
   const productCounts = useMemo(() => {
@@ -322,39 +327,14 @@ const MarketIndex = () => {
       </div>
 
       <div className="pb-32 -mx-4 px-4">
-        {/* Promo Banners - Compact - using semantic tokens */}
+        {/* Featured Banner - Rich header with stats */}
         <div className="py-3 max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 gap-2">
-            {/* Free Delivery Banner */}
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-success/10 border border-success/20">
-              <div className="w-8 h-8 rounded-full bg-success/20 flex items-center justify-center shrink-0">
-                <Truck className="w-4 h-4 text-success" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-success">
-                  {isRu ? 'Бесплатно' : 'Free delivery'}
-                </p>
-                <p className="text-[10px] text-success/80">
-                  {isRu ? `от ฿${freeDeliveryThreshold}` : `from ฿${freeDeliveryThreshold}`}
-                </p>
-              </div>
-            </div>
-
-            {/* Fast Delivery Banner */}
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-info/10 border border-info/20">
-              <div className="w-8 h-8 rounded-full bg-info/20 flex items-center justify-center shrink-0">
-                <Clock className="w-4 h-4 text-info" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-info">
-                  {defaultZone?.estimated_time_minutes || 45} {isRu ? 'мин' : 'min'}
-                </p>
-                <p className="text-[10px] text-info/80">
-                  {isRu ? 'экспресс' : 'express delivery'}
-                </p>
-              </div>
-            </div>
-          </div>
+          <FeaturedBanner
+            freeDeliveryThreshold={freeDeliveryThreshold}
+            estimatedTime={defaultZone?.estimated_time_minutes}
+            productCount={allProducts.length}
+            vendorCount={uniqueVendorCount}
+          />
         </div>
 
         {/* Popular Products Section */}

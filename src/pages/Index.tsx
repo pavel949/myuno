@@ -54,7 +54,7 @@ const WidgetSkeleton = () => (
 );
 
 const Index = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -158,6 +158,16 @@ const Index = () => {
               Services / Products mode switch
               ═══════════════════════════════════════════════════════════ */}
           <div className="space-y-3">
+            {/* User guidance hint */}
+            <div className="text-center">
+              <p className="text-sm font-semibold text-foreground">
+                {language === 'ru' ? 'Что вы ищете сегодня?' : 'What are you looking for today?'}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {language === 'ru' ? 'Выберите: услуги или товары' : 'Choose: services or products'}
+              </p>
+            </div>
+            
             <ContentModeToggle 
               value={contentMode} 
               onChange={setContentMode} 
