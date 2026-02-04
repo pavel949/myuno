@@ -28,6 +28,14 @@ export interface PropertyProject {
   coverImage?: string;
 }
 
+export interface DistrictOption {
+  id: string;
+  valueKey: string;
+  labelEn: string;
+  labelRu: string;
+  icon?: string;
+}
+
 interface LookupValueRow {
   id: string;
   value_key: string;
@@ -42,6 +50,7 @@ interface LookupValueRow {
 export function usePropertyQuickFilters() {
   const [quickFilters, setQuickFilters] = useState<QuickFilter[]>([]);
   const [projects, setProjects] = useState<PropertyProject[]>([]);
+  const [districts, setDistricts] = useState<DistrictOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -69,6 +78,18 @@ export function usePropertyQuickFilters() {
 
       if (projectsError) {
         console.error('Error fetching property projects:', projectsError);
+      }
+
+      // Fetch districts from lookup_values
+      const { data: districtsData, error: districtsError } = await supabase
+        .from('lookup_values')
+        .select('id, value_key, value_en, value_ru, icon')
+        .eq('lookup_type', 'district')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true });
+
+      if (districtsError) {
+        console.error('Error fetching districts:', districtsError);
       }
 
       // Count properties per project
@@ -113,6 +134,19 @@ export function usePropertyQuickFilters() {
         .filter((p) => p.propertyCount > 0); // Only show projects with properties
 
       setProjects(projectsList);
+
+      // Transform districts
+      const districtsList: DistrictOption[] = (districtsData || []).map(
+        (d: { id: string; value_key: string; value_en: string; value_ru: string | null; icon: string | null }) => ({
+          id: d.id,
+          valueKey: d.value_key,
+          labelEn: d.value_en,
+          labelRu: d.value_ru || d.value_en,
+          icon: d.icon || '📍',
+        })
+      );
+
+      setDistricts(districtsList);
       setIsLoading(false);
     };
 
@@ -122,6 +156,7 @@ export function usePropertyQuickFilters() {
   return {
     quickFilters,
     projects,
+    districts,
     isLoading,
   };
 }

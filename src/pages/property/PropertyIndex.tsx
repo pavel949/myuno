@@ -10,15 +10,16 @@ import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
 import { useProperties, useInstantBookingProperties, Property } from '@/hooks/useProperties';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
 import { AirbnbSearchBar, SearchParams } from '@/components/property/AirbnbSearchBar';
 import { cn } from '@/lib/utils';
 import { ConsultationCTA } from '@/components/property/ConsultationCTA';
 import { QuickFiltersRibbon } from '@/components/property/QuickFiltersRibbon';
+import { PropertyTypeSelector } from '@/components/property/PropertyTypeSelector';
+import { BedroomChips } from '@/components/property/BedroomChips';
 import { applyQuickFilters } from '@/hooks/usePropertyQuickFilters';
-import { matchesFilter, matchesSingleFilter } from '@/lib/filterUtils';
+import { matchesFilter, matchesSingleFilter, normalizeForFilter } from '@/lib/filterUtils';
 import { CrossSellSection } from '@/components/crosssell';
 import { PropertyAIButton } from '@/components/property/PropertyAIButton';
 
@@ -43,6 +44,8 @@ export default function PropertyIndex() {
   // Quick filters state (Agoda/Airbnb style)
   const [quickFilters, setQuickFilters] = useState<string[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
+  const [selectedBedrooms, setSelectedBedrooms] = useState<string[]>([]);
   const { formatPrice } = useCurrency();
 
   // Fetch dynamic filter options from lookup_values (editable in admin)
@@ -77,27 +80,37 @@ export default function PropertyIndex() {
       const matchesType = selectedType === 'all' || prop.property_type === selectedType;
       const matchesGuests = !searchParams.guests || (prop.max_guests || 0) >= searchParams.guests;
       
-      // Bedroom filter - now supports multi-select
-      if (filterValues.bedrooms) {
-        const bedroomFilters = Array.isArray(filterValues.bedrooms) 
-          ? filterValues.bedrooms as string[]
-          : [filterValues.bedrooms as string];
-        
+      // Bedroom filter - from inline chips (priority) or modal filter
+      const bedroomsToCheck = selectedBedrooms.length > 0 
+        ? selectedBedrooms 
+        : (filterValues.bedrooms 
+            ? (Array.isArray(filterValues.bedrooms) ? filterValues.bedrooms as string[] : [filterValues.bedrooms as string])
+            : []);
+      
+      if (bedroomsToCheck.length > 0) {
         const propBedrooms = prop.bedrooms ?? 0;
-        const matchesBedrooms = bedroomFilters.some(filter => {
+        const matchesBedrooms = bedroomsToCheck.some(filter => {
           if (filter === 'studio') return propBedrooms === 0;
-          if (filter === '4+') return propBedrooms >= 4;
+          if (filter === '5+' || filter === '4+') return propBedrooms >= parseInt(filter.replace('+', ''));
           return propBedrooms === parseInt(filter);
         });
         if (!matchesBedrooms) return false;
       }
 
-      // District filter - multi-select
-      if (filterValues.district) {
-        const districtFilters = Array.isArray(filterValues.district)
-          ? filterValues.district as string[]
-          : [filterValues.district as string];
-        if (!matchesSingleFilter(prop.district, districtFilters)) return false;
+      // District filter - from chips (priority) or modal filter
+      const districtsToCheck = selectedDistricts.length > 0
+        ? selectedDistricts
+        : (filterValues.district
+            ? (Array.isArray(filterValues.district) ? filterValues.district as string[] : [filterValues.district as string])
+            : []);
+      
+      if (districtsToCheck.length > 0) {
+        const normalizedDistricts = districtsToCheck.map(d => normalizeForFilter(d));
+        const propDistrict = normalizeForFilter(prop.district || '');
+        const matchesDistrict = normalizedDistricts.some(d => 
+          propDistrict.includes(d) || d.includes(propDistrict)
+        );
+        if (!matchesDistrict) return false;
       }
 
       // Amenities filter - multi-select (must have ALL selected)
@@ -113,7 +126,7 @@ export default function PropertyIndex() {
 
     // Then apply quick filters (Agoda/Airbnb style)
     return applyQuickFilters(standardFiltered, quickFilters, selectedProjectId);
-  }, [dbProperties, searchParams, selectedType, filterValues, quickFilters, selectedProjectId]);
+  }, [dbProperties, searchParams, selectedType, filterValues, quickFilters, selectedProjectId, selectedBedrooms, selectedDistricts]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -122,12 +135,14 @@ export default function PropertyIndex() {
       else if (Array.isArray(value)) count += value.length;
       else if (value) count++;
     });
+    // Count inline chips
+    count += selectedBedrooms.length;
+    count += selectedDistricts.length;
     // Also count quick filters
     count += quickFilters.length;
     if (selectedProjectId) count++;
     return count;
-  }, [filterValues, quickFilters, selectedProjectId]);
-
+  }, [filterValues, quickFilters, selectedProjectId, selectedBedrooms, selectedDistricts]);
   const handleRemoveFilter = (sectionId: string, optionId?: string) => {
     setFilterValues(prev => {
       const newValues = { ...prev };
@@ -172,32 +187,14 @@ export default function PropertyIndex() {
               className="mb-4"
             />
 
-            {/* Property Type Pills */}
+            {/* Property Type Selector - Priority types + dropdown */}
             <div className="flex items-center gap-2">
-              <ScrollArea className="flex-1">
-                <div className="flex gap-2 pb-2">
-                  {propertyTypePills.map((type) => (
-                    <button
-                      key={type.id}
-                      onClick={() => setSelectedType(type.id)}
-                      className={cn(
-                        "flex flex-col items-center gap-1 px-4 py-2 rounded-xl text-sm whitespace-nowrap transition-all border",
-                        selectedType === type.id
-                          ? "border-primary bg-primary/5 text-primary font-medium"
-                          : "border-transparent hover:border-border text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      {type.icon && (
-                        typeof type.icon === 'string' 
-                          ? <span className="text-lg">{type.icon}</span>
-                          : <type.icon className="w-5 h-5" />
-                      )}
-                      <span className="text-xs">{language === 'ru' ? type.labelRu : type.labelEn}</span>
-                    </button>
-                  ))}
-                </div>
-                <ScrollBar orientation="horizontal" />
-              </ScrollArea>
+              <PropertyTypeSelector
+                selectedType={selectedType}
+                onTypeChange={setSelectedType}
+                propertyTypes={propertyTypes}
+                className="flex-1"
+              />
 
               {/* Filter Button */}
               <UniversalFilter
@@ -217,6 +214,13 @@ export default function PropertyIndex() {
                 </Button>
               </UniversalFilter>
             </div>
+
+            {/* Bedroom Chips - Inline filter */}
+            <BedroomChips
+              selectedBedrooms={selectedBedrooms}
+              onBedroomsChange={setSelectedBedrooms}
+              className="mt-3"
+            />
           </div>
         </header>
 
@@ -242,6 +246,7 @@ export default function PropertyIndex() {
           <QuickFiltersRibbon 
             selectedFilters={quickFilters}
             selectedProjectId={selectedProjectId}
+            selectedDistricts={selectedDistricts}
             onFilterToggle={(id) => {
               setQuickFilters(prev => 
                 prev.includes(id) 
@@ -250,6 +255,13 @@ export default function PropertyIndex() {
               );
             }}
             onProjectSelect={setSelectedProjectId}
+            onDistrictToggle={(id) => {
+              setSelectedDistricts(prev =>
+                prev.includes(id)
+                  ? prev.filter(d => d !== id)
+                  : [...prev, id]
+              );
+            }}
           />
         </div>
 
@@ -387,6 +399,8 @@ export default function PropertyIndex() {
                     setFilterValues({});
                     setQuickFilters([]);
                     setSelectedProjectId(null);
+                    setSelectedBedrooms([]);
+                    setSelectedDistricts([]);
                   }}>
                     {language === 'ru' ? 'Сбросить фильтры' : 'Clear all filters'}
                   </Button>

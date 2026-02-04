@@ -6,28 +6,33 @@
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
-import { usePropertyQuickFilters, QuickFilter, PropertyProject } from '@/hooks/usePropertyQuickFilters';
+import { usePropertyQuickFilters, QuickFilter, PropertyProject, DistrictOption } from '@/hooks/usePropertyQuickFilters';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Building2, ChevronRight, ExternalLink } from 'lucide-react';
+import { Building2, ChevronRight, ExternalLink, MapPin } from 'lucide-react';
+import { FilterChip } from '@/components/uno/FilterChip';
 
 interface QuickFiltersRibbonProps {
   selectedFilters: string[];
   selectedProjectId?: string | null;
+  selectedDistricts?: string[];
   onFilterToggle: (filterId: string) => void;
   onProjectSelect: (projectId: string | null) => void;
+  onDistrictToggle?: (districtId: string) => void;
   className?: string;
 }
 
 export function QuickFiltersRibbon({
   selectedFilters,
   selectedProjectId,
+  selectedDistricts = [],
   onFilterToggle,
   onProjectSelect,
+  onDistrictToggle,
   className,
 }: QuickFiltersRibbonProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { quickFilters, projects, isLoading } = usePropertyQuickFilters();
+  const { quickFilters, projects, districts, isLoading } = usePropertyQuickFilters();
 
   if (isLoading) {
     return (
@@ -43,18 +48,47 @@ export function QuickFiltersRibbon({
 
   return (
     <div className={cn("space-y-3", className)}>
-      {/* Quick Filter Chips */}
+      {/* Quick Filter Chips (Tags) */}
       <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 touch-pan-x">
         {quickFilters.map((filter) => (
           <FilterChip
             key={filter.id}
-            filter={filter}
-            isSelected={selectedFilters.includes(filter.id)}
-            onClick={() => onFilterToggle(filter.id)}
-            language={language}
+            label={language === 'ru' ? filter.labelRu : filter.labelEn}
+            icon={filter.icon}
+            isActive={selectedFilters.includes(filter.id)}
+            onToggle={() => onFilterToggle(filter.id)}
+            size="sm"
           />
         ))}
       </div>
+
+      {/* Districts Section */}
+      {districts.length > 0 && onDistrictToggle && (
+        <div className="flex items-center gap-2">
+          <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mr-4 pr-4 touch-pan-x">
+            {districts.map((district) => (
+              <FilterChip
+                key={district.id}
+                label={language === 'ru' ? district.labelRu : district.labelEn}
+                isActive={selectedDistricts.includes(district.valueKey)}
+                onToggle={() => onDistrictToggle(district.valueKey)}
+                size="sm"
+              />
+            ))}
+          </div>
+          {selectedDistricts.length > 0 && (
+            <button
+              onClick={() => {
+                selectedDistricts.forEach((d) => onDistrictToggle(d));
+              }}
+              className="text-xs text-primary hover:underline shrink-0"
+            >
+              {language === 'ru' ? 'Сброс' : 'Clear'}
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Projects / Complexes Section */}
       {projects.length > 0 && (
@@ -91,29 +125,7 @@ export function QuickFiltersRibbon({
   );
 }
 
-interface FilterChipProps {
-  filter: QuickFilter;
-  isSelected: boolean;
-  onClick: () => void;
-  language: string;
-}
-
-function FilterChip({ filter, isSelected, onClick, language }: FilterChipProps) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        "flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all border flex-shrink-0 touch-manipulation",
-        isSelected
-          ? "border-primary bg-primary text-primary-foreground shadow-sm"
-          : "border-border bg-background hover:border-primary/50 hover:bg-accent/50 text-foreground"
-      )}
-    >
-      <span className="text-base">{filter.icon}</span>
-      <span>{language === 'ru' ? filter.labelRu : filter.labelEn}</span>
-    </button>
-  );
-}
+// Removed local FilterChip - using uno/FilterChip instead
 
 interface ProjectChipProps {
   project: PropertyProject;
