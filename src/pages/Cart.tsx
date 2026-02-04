@@ -99,16 +99,21 @@ const Cart = () => {
         navigate('/market/checkout');
         break;
       case 'tour':
-        // Tour checkout - navigate to experiences checkout
-        navigate('/experiences/checkout');
+      case 'activity':
+        // Tour/Activity checkout - navigate to experience booking with item ID
+        if (firstItem.providerId) {
+          navigate(`/experiences/${firstItem.providerId}/book`);
+        } else {
+          navigate('/experiences');
+        }
         break;
       case 'yacht':
-        // Yacht checkout - navigate to yachts checkout
-        navigate('/yachts/checkout');
-        break;
-      case 'activity':
-        // Activity checkout - redirect to experiences
-        navigate('/experiences/checkout');
+        // Yacht checkout - navigate to yacht booking with item ID
+        if (firstItem.providerId) {
+          navigate(`/yachts/${firstItem.providerId}/booking`);
+        } else {
+          navigate('/yachts');
+        }
         break;
       default:
         navigate('/');

@@ -137,11 +137,8 @@ const Install = lazy(() => import('@/pages/Install'));
 // List With Us (Become a Host/Vendor)
 const ListWithUsPage = lazy(() => import('@/pages/ListWithUsPage'));
 
-// Tours Mini-App (LEGACY - redirects to /experiences)
-const TourDetail = lazy(() => import('@/pages/tours/TourDetail'));
-const TourBooking = lazy(() => import('@/pages/tours/TourBooking'));
-
-// Redirect helpers for legacy /tours/:id routes
+// Tours & Water Activities Mini-Apps (LEGACY - all redirect to /experiences)
+// Redirect helpers for legacy routes
 const TourRedirect = () => {
   const { id } = useParams();
   return <Navigate to={`/experiences/${id}`} replace />;
@@ -150,14 +147,14 @@ const TourBookRedirect = () => {
   const { id } = useParams();
   return <Navigate to={`/experiences/${id}/book`} replace />;
 };
-// Legacy /tours index redirects to /experiences
-const ToursIndexRedirect = () => <Navigate to="/experiences" replace />;
-
-// Water Activities Mini-App (LEGACY - redirects to /experiences)
-const WaterActivityDetail = lazy(() => import('@/pages/water/WaterActivityDetail'));
-const WaterActivityBooking = lazy(() => import('@/pages/water/WaterActivityBooking'));
-// Legacy /water index redirects to /experiences
-const WaterIndexRedirect = () => <Navigate to="/experiences" replace />;
+const WaterDetailRedirect = () => {
+  const { id } = useParams();
+  return <Navigate to={`/experiences/${id}`} replace />;
+};
+const WaterBookRedirect = () => {
+  const { id } = useParams();
+  return <Navigate to={`/experiences/${id}/book`} replace />;
+};
 
 // Experiences Mini-App (unified tours + activities)
 const ExperiencesIndex = lazy(() => import('@/pages/experiences/ExperiencesIndex'));
@@ -655,8 +652,8 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* Water Activities Mini-App Routes (legacy - redirect to experiences) */}
         <Route path="/water" element={<Navigate to="/experiences?type=activity" replace />} />
-        <Route path="/water/:id" element={<LazyPage><WaterActivityDetail /></LazyPage>} />
-        <Route path="/water/:id/book" element={<LazyPage><WaterActivityBooking /></LazyPage>} />
+        <Route path="/water/:id" element={<WaterDetailRedirect />} />
+        <Route path="/water/:id/book" element={<WaterBookRedirect />} />
         
         {/* Pharmacy Mini-App Routes */}
         <Route path="/pharmacy" element={<LazyPage><PharmacyIndex /></LazyPage>} />
