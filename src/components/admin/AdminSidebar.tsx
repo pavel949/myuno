@@ -145,8 +145,8 @@ const navigationItems: NavItem[] = [
     titleRu: 'Таксономии',
     path: '/admin/taxonomy', 
     icon: FolderTree,
-    description: 'Categories & lookups',
-    descriptionRu: 'Справочники и категории'
+    description: 'Categories & configs',
+    descriptionRu: 'Справочники и конфиги'
   },
   { 
     title: 'Control', 
