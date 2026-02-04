@@ -37,24 +37,24 @@ export const InvestorPromoCard = memo(function InvestorPromoCard() {
         onClick={handleClick}
         className={cn(
           "relative w-full p-4 rounded-2xl text-left transition-all overflow-hidden",
-          "bg-gradient-to-br from-purple-600/10 via-violet-500/10 to-indigo-600/10",
-          "border-2 border-purple-500/30 hover:border-purple-500/50",
-          "hover:shadow-lg hover:shadow-purple-500/10",
+          "bg-gradient-to-br from-primary/10 via-accent/10 to-secondary/10",
+          "border-2 border-primary/30 hover:border-primary/50",
+          "hover:shadow-lg hover:shadow-primary/10",
           "active:scale-[0.99]"
         )}
       >
         {/* Background decorative elements */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-purple-500/10 to-transparent rounded-full blur-2xl" />
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-violet-500/10 to-transparent rounded-full blur-xl" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/10 to-transparent rounded-full blur-2xl" />
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-accent/10 to-transparent rounded-full blur-xl" />
 
         <div className="relative flex items-start gap-3">
           {/* Icon */}
           <div className={cn(
             "w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0",
-            "bg-gradient-to-br from-purple-500 to-violet-600",
-            "shadow-lg shadow-purple-500/30"
+            "bg-gradient-to-br from-primary to-accent",
+            "shadow-lg shadow-primary/30"
           )}>
-            <TrendingUp className="w-6 h-6 text-white" />
+            <TrendingUp className="w-6 h-6 text-primary-foreground" />
           </div>
 
           {/* Content */}
@@ -64,7 +64,7 @@ export const InvestorPromoCard = memo(function InvestorPromoCard() {
               <h3 className="font-bold text-sm text-foreground">
                 {isRu ? 'Инвестиции в Пхукет' : 'Invest in Phuket'}
               </h3>
-              <Badge className="bg-emerald-500 text-white text-[10px] px-2 py-0.5 flex-shrink-0">
+              <Badge variant="default" className="bg-primary text-primary-foreground text-[10px] px-2 py-0.5 flex-shrink-0">
                 {isRu ? 'до 12% ROI' : 'up to 12% ROI'}
               </Badge>
             </div>
@@ -99,7 +99,7 @@ export const InvestorPromoCard = memo(function InvestorPromoCard() {
               {trustIndicators.map((indicator, index) => (
                 <span
                   key={index}
-                  className="inline-flex items-center gap-1 text-[10px] text-purple-600 dark:text-purple-400"
+                  className="inline-flex items-center gap-1 text-[10px] text-primary"
                 >
                   {indicator.icon}
                   {isRu ? indicator.labelRu : indicator.labelEn}
@@ -109,7 +109,7 @@ export const InvestorPromoCard = memo(function InvestorPromoCard() {
           </div>
 
           {/* Arrow */}
-          <ChevronRight className="w-5 h-5 text-purple-500 flex-shrink-0 mt-1" />
+          <ChevronRight className="w-5 h-5 text-primary flex-shrink-0 mt-1" />
         </div>
       </motion.button>
     </>

@@ -3,7 +3,7 @@
  * Shows logo, name, verified status
  */
 
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Building2, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -19,21 +19,23 @@ interface DeveloperBadgeProps {
   size?: 'sm' | 'md';
 }
 
-export function DeveloperBadge({
-  developerId,
-  developerName,
-  developerLogo,
-  isVerified = false,
-  className,
-  showLink = true,
-  size = 'sm',
-}: DeveloperBadgeProps) {
+export const DeveloperBadge = forwardRef<HTMLDivElement, DeveloperBadgeProps>(
+  function DeveloperBadge({
+    developerId,
+    developerName,
+    developerLogo,
+    isVerified = false,
+    className,
+    showLink = true,
+    size = 'sm',
+  }, ref) {
   const { language } = useLanguage();
   
   if (!developerName) return null;
 
   const content = (
     <div
+      ref={ref}
       className={cn(
         "flex items-center gap-1.5 text-muted-foreground",
         showLink && developerId && "hover:text-primary transition-colors cursor-pointer",
@@ -74,6 +76,6 @@ export function DeveloperBadge({
   }
 
   return content;
-}
+});
 
 export default DeveloperBadge;
