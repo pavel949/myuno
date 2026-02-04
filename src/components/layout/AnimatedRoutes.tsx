@@ -55,6 +55,7 @@ const DeveloperDetail = lazy(() => import('@/pages/property/DeveloperDetail'));
 // Investment Mini-App
 const InvestmentIndex = lazy(() => import('@/pages/invest/InvestmentIndex'));
 const InvestmentDetail = lazy(() => import('@/pages/invest/InvestmentDetail'));
+const InvestorDashboard = lazy(() => import('@/pages/invest/InvestorDashboard'));
 const RaiseFunding = lazy(() => import('@/pages/invest/RaiseFunding'));
 
 // Guest pages
@@ -549,6 +550,7 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* Investment Mini-App Routes */}
         <Route path="/invest" element={<LazyPage><InvestmentIndex /></LazyPage>} />
+        <Route path="/invest/dashboard" element={<LazyPage><InvestorDashboard /></LazyPage>} />
         <Route path="/invest/raise" element={<LazyPage><RaiseFunding /></LazyPage>} />
         <Route path="/invest/:id" element={<LazyPage><InvestmentDetail /></LazyPage>} />
         
