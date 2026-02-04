@@ -63,7 +63,7 @@ export function HeroBanner() {
 
       {/* Main tagline */}
       <h1 className="text-lg sm:text-xl font-bold text-foreground w-full px-2">
-        {isRu ? 'За рубежом как дома' : 'Abroad like home'}
+        {isRu ? 'Суперапп для экспатов' : 'Superapp for expats'}
       </h1>
 
       {/* Trust badges - all 4 values */}
