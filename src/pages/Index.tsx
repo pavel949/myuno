@@ -1,3 +1,4 @@
+// Index page - Main home screen
 import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
