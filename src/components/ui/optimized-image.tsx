@@ -153,7 +153,8 @@ export const OptimizedImage = memo(forwardRef<HTMLDivElement, OptimizedImageProp
           height={height}
           loading={priority ? 'eager' : 'lazy'}
           decoding={priority ? 'sync' : 'async'}
-          fetchPriority={priority ? 'high' : 'auto'}
+          // @ts-expect-error - fetchpriority is valid HTML but not in React types
+          fetchpriority={priority ? 'high' : 'auto'}
           onLoad={handleLoad}
           onError={handleError}
           className={cn(
