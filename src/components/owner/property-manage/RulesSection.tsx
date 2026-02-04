@@ -119,7 +119,7 @@ export function PropertyManageRulesSection({ formData, updateFormData }: RulesSe
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Quiet Hours */}
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
             <div className="space-y-2">
               <Label>{isRu ? 'Тихие часы с' : 'Quiet hours from'}</Label>
               <Select

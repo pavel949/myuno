@@ -97,11 +97,13 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
             </div>
           )}
 
-          {/* Switchers */}
+          {/* Switchers - hide currency/theme on mobile */}
           <div className="flex items-center gap-0.5 sm:gap-1 mr-0.5 sm:mr-1">
             <LanguageSwitcher size="sm" />
-            <CurrencySwitcher size="sm" />
-            <ThemeSwitcher size="sm" />
+            <div className="hidden sm:flex items-center gap-0.5">
+              <CurrencySwitcher size="sm" />
+              <ThemeSwitcher size="sm" />
+            </div>
           </div>
           
           {/* Mini Cart with dropdown */}

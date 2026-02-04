@@ -404,12 +404,10 @@ export default function PropertyManage() {
         </div>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto pb-20 md:pb-6">
-          <ScrollArea className="h-[calc(100vh-56px)]">
-            <div className="p-4 md:p-6 max-w-4xl">
-              {renderSection()}
-            </div>
-          </ScrollArea>
+        <main className="flex-1 overflow-y-auto pb-20 md:pb-6">
+          <div className="p-4 md:p-6 max-w-4xl mx-auto">
+            {renderSection()}
+          </div>
         </main>
       </div>
     </div>

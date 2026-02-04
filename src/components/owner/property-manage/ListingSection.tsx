@@ -72,7 +72,7 @@ export function PropertyManageListingSection({
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label>{isRu ? 'Название (EN)' : 'Title (EN)'} *</Label>
                   <Input
@@ -102,7 +102,7 @@ export function PropertyManageListingSection({
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label>{isRu ? 'Тип недвижимости' : 'Property Type'}</Label>
                   <Select
@@ -132,7 +132,7 @@ export function PropertyManageListingSection({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <Bed className="h-3 w-3" />
