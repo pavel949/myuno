@@ -1,218 +1,99 @@
 
+# План: Унификация Checkout маркетплейса с FlowersOrder
 
-# Редизайн главной страницы Маркетплейса myUNO
-
-## Визия
-Трансформировать текущий MarketIndex в **премиальный e-commerce хаб** уровня Ozon/Amazon с учётом дизайн-стиля UNO (градиенты, rounded-2xl, микро-анимации, trust-первый подход).
-
----
-
-## Текущие проблемы
-
-| Проблема | Описание |
-|----------|----------|
-| Слабый визуальный вход | FeaturedBanner статичен, нет "wow-эффекта" |
-| Категории спрятаны | Ribbon слишком текстовый, нет визуальных превью |
-| Нет срочности | Отсутствует блок "Успей купить" / Flash Deals |
-| Однообразие секций | Все карусели выглядят одинаково |
-| Нет персонализации | Нет "Недавно просмотренные" / рекомендации |
-| Нет доверия вендорам | Вендоры не показаны как бренды |
+## Проблема
+`MarketCheckout` значительно беднее по функционалу чем `FlowersOrder`:
+- **Нет Concierge Advance** (кредитование от myUNO)
+- **Нет Stripe Card payment** (только cash/wallet)
+- **Нет BookingStepProgress** (подсказки для покупателя)
 
 ---
 
-## Новая структура (сверху вниз)
+## Решение: Портирование функций из FlowersOrder в MarketCheckout
 
-```text
-┌─────────────────────────────────────────────────┐
-│  STICKY HEADER (search + cart)                  │ ← MiniAppLayout
-├─────────────────────────────────────────────────┤
-│  FILTER RIBBON (Каталог | Акции | Хиты | Новинки)│ ← Sticky
-├─────────────────────────────────────────────────┤
-│  HERO PROMO CAROUSEL                            │ ← Новый!
-│  [Story-banner 1] [Story-banner 2] [Banner 3]   │
-├─────────────────────────────────────────────────┤
-│  QUICK CATEGORY GRID (2x4 icons)                │ ← Вместо текстового ribbon
-│  🥬 Овощи  🥛 Молочка  🥩 Мясо  🦐 Морепродукты │
-│  🥖 Выпечка 🥤 Напитки  🍿 Снеки  🌿 Органик    │
-├─────────────────────────────────────────────────┤
-│  FLASH DEALS (⚡ Успей за 2:34:15)              │ ← Новый! Countdown
-│  [Card] [Card] [Card] [Card] →                  │
-├─────────────────────────────────────────────────┤
-│  BESTSELLERS (🔥 Хиты продаж)                   │
-│  [Card] [Card] [Card] [Card] →                  │
-├─────────────────────────────────────────────────┤
-│  FEATURED VENDORS (✓ Проверенные продавцы)     │ ← Новый!
-│  [VendorCard] [VendorCard] [VendorCard] →       │
-├─────────────────────────────────────────────────┤
-│  NEW ARRIVALS (✨ Новинки)                      │
-│  [Card] [Card] [Card] [Card] →                  │
-├─────────────────────────────────────────────────┤
-│  CATEGORIES WITH PRODUCTS (Dynamic)             │
-│  🥬 Овощи и фрукты [Card] [Card] →              │
-│  🥛 Молочные продукты [Card] [Card] →           │
-├─────────────────────────────────────────────────┤
-│  RECENTLY VIEWED (👀 Недавно смотрели)         │ ← Новый! LocalStorage
-├─────────────────────────────────────────────────┤
-│  ALL PRODUCTS GRID                              │
-│  [Grid 2x2 / 3x3 / 4x4]                         │
-├─────────────────────────────────────────────────┤
-│  CROSS-SELL SECTION                             │
-└─────────────────────────────────────────────────┘
-```
-
----
-
-## Новые компоненты
-
-### 1. PromoCarousel (Hero Story-banners)
-**Файл:** `src/components/market/PromoCarousel.tsx`
-
-```text
-┌─────────────────────────────────────┐
-│  🎉 MEGA SALE -50%                  │
-│  на все морепродукты               │
-│  [Смотреть →]                       │
-│  ▄▄▄ ▃ ▃ ▃   ← pagination dots     │
-└─────────────────────────────────────┘
-```
-
-- Полноэкранная ширина, aspect-ratio 16:9
-- Автоматическая смена (5 сек)
-- Gradient overlay для читаемости текста
-- Источник: таблица `marketplace_promotions` (новая)
-
-### 2. QuickCategoryIcons
-**Файл:** `src/components/market/QuickCategoryIcons.tsx`
-
-- Сетка 4x2 с круглыми иконками (как в Amazon App)
-- Эмодзи в центре, название под ним
-- Размер: w-16 h-16 с эффектом lift on hover
-
-### 3. FlashDealsSection
-**Файл:** `src/components/market/FlashDealsSection.tsx`
-
-- Заголовок с **живым countdown-таймером**
-- Красный акцент `bg-destructive`
-- Карточки с прогресс-баром "Осталось 23%"
-- Источник: товары с `is_flash_deal: true`
-
-### 4. FeaturedVendorsCarousel
-**Файл:** `src/components/market/FeaturedVendorsCarousel.tsx`
-
-- Карточки вендоров: логотип, имя, рейтинг, кол-во товаров
-- Бейдж "Проверен myUNO"
-- Источник: таблица `marketplace_vendors`
-
-### 5. RecentlyViewedSection
-**Файл:** `src/components/market/RecentlyViewedSection.tsx`
-
-- Хранение в LocalStorage (последние 10 товаров)
-- Показывать только если есть история
-
----
-
-## Изменения в существующих компонентах
-
-### MarketIndex.tsx — Полная реструктуризация
+### Фаза 1: Добавить BookingStepProgress
+Добавить визуальный прогресс-бар с шагами
 
 ```tsx
-// Новая структура
-<MiniAppLayout>
-  <FilterRibbon />           {/* существует */}
+// Импорт
+import { BookingStepProgress, deliveryBookingSteps } from '@/components/booking';
+
+// Логика определения шага
+const getCurrentStep = () => {
+  if (paymentMethod) return 2;
+  if (deliveryType && (isLocalFormValid || isIntlFormValid)) return 2;
+  if (localFormData.name || intlFormData.name) return 1;
+  return 0;
+};
+
+// В JSX после PageHeader
+<BookingStepProgress steps={deliveryBookingSteps} currentStep={getCurrentStep()} />
+```
+
+### Фаза 2: Добавить Stripe Checkout
+Создать хук `useStripeMarketCheckout.ts` (аналогично `useStripeFlowersCheckout`)
+
+```tsx
+// src/hooks/useStripeMarketCheckout.ts
+export function useStripeMarketCheckout() {
+  // Вызов edge function create-market-checkout
+  // Возврат URL для redirect на Stripe
+}
+```
+
+Создать edge function `create-market-checkout/index.ts` (аналогично flowers):
+- Принимает items, delivery_fee, total_amount, recipient данные
+- Создаёт Stripe Checkout Session
+- Возвращает URL
+
+### Фаза 3: Добавить Concierge Advance
+Добавить опцию кредитования в `BookingPaymentSelect`
+
+```tsx
+// Импорты
+import { useConciergeAdvance } from '@/hooks/useConciergeAdvance';
+import { ConciergeAdvanceOption } from '@/components/booking/ConciergeAdvanceOption';
+
+// В секции Payment
+{paymentMethod === 'concierge_advance' && (
+  <ConciergeAdvanceOption
+    isSelected={true}
+    onSelect={() => setPaymentMethod('concierge_advance')}
+    baseAmount={total}
+    feePercent={feePercent}
+    currency="THB"
+  />
+)}
+```
+
+### Фаза 4: Обработка всех payment methods в handleSubmit
+
+```tsx
+const handleSubmit = async () => {
+  // 1. Card → Stripe Checkout redirect
+  if (paymentMethod === 'card') {
+    await createMarketCheckout({ ... });
+    return;
+  }
   
-  <PromoCarousel />           {/* НОВЫЙ */}
-  <QuickCategoryIcons />      {/* НОВЫЙ */}
-  <FlashDealsSection />       {/* НОВЫЙ */}
-  <BestsellersSection />      {/* рефакторинг */}
-  <FeaturedVendorsCarousel /> {/* НОВЫЙ */}
-  <NewArrivalsSection />      {/* рефакторинг */}
-  <CategoriesWithProducts />  {/* существует */}
-  <RecentlyViewedSection />   {/* НОВЫЙ */}
-  <AllProductsGrid />         {/* существует */}
-  <CrossSellSection />        {/* существует */}
-</MiniAppLayout>
+  // 2. Wallet → payFromWallet + createBooking
+  if (paymentMethod === 'wallet') {
+    const result = await payFromWallet(...);
+    if (!result.success) return;
+  }
+  
+  // 3. Concierge Advance → createBooking + createAdvanceRequest
+  if (paymentMethod === 'concierge_advance') {
+    const bookingResult = await createBooking({ status: 'pending_advance', ... });
+    await createAdvanceRequest({ orderId: bookingResult.booking_id, ... });
+    navigateToAdvanceRequested(...);
+    return;
+  }
+  
+  // 4. Cash → createBooking (existing flow)
+  await createBooking({ ... });
+};
 ```
-
-### ProfessionalProductCard — Дополнения
-
-- Добавить **"Купили 100+ раз"** (social proof)
-- Добавить **Quick View** overlay при hover
-- Добавить сохранение в `recentlyViewed` при клике
-
----
-
-## Миграция базы данных
-
-### Новая таблица: `marketplace_promotions`
-
-```sql
-CREATE TABLE marketplace_promotions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  title_en TEXT NOT NULL,
-  title_ru TEXT NOT NULL,
-  subtitle_en TEXT,
-  subtitle_ru TEXT,
-  image_url TEXT NOT NULL,
-  gradient TEXT DEFAULT 'from-primary/80 to-primary/60',
-  link_path TEXT NOT NULL,
-  is_active BOOLEAN DEFAULT true,
-  sort_order INTEGER DEFAULT 0,
-  starts_at TIMESTAMPTZ,
-  ends_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ DEFAULT now()
-);
-```
-
-### Новые поля в `marketplace_products`
-
-```sql
-ALTER TABLE marketplace_products 
-ADD COLUMN IF NOT EXISTS is_flash_deal BOOLEAN DEFAULT false,
-ADD COLUMN IF NOT EXISTS flash_deal_ends_at TIMESTAMPTZ,
-ADD COLUMN IF NOT EXISTS purchase_count INTEGER DEFAULT 0;
-```
-
----
-
-## Дизайн-токены UNO (применение)
-
-| Элемент | Токен |
-|---------|-------|
-| Hero Carousel | `rounded-2xl`, `shadow-xl`, gradient overlays |
-| Category Icons | `rounded-full`, `bg-primary/10 hover:bg-primary/20`, lift effect |
-| Flash Badge | `bg-destructive`, `animate-pulse` |
-| Vendor Card | `rounded-2xl`, `shadow-sm → shadow-md on hover` |
-| Section Headers | `UnifiedSectionHeader` с иконками |
-
----
-
-## Порядок выполнения
-
-### Фаза 1: Визуальные улучшения (без БД)
-1. `QuickCategoryIcons.tsx` — сетка иконок категорий
-2. `RecentlyViewedSection.tsx` — LocalStorage
-3. Рефакторинг секций в MarketIndex
-
-### Фаза 2: Динамический контент (с БД)
-4. Миграция: таблица `marketplace_promotions`
-5. `PromoCarousel.tsx` — hero carousel
-6. `useMarketplacePromotions.ts` — хук
-
-### Фаза 3: Продвинутые фичи
-7. Миграция: поля `is_flash_deal`, `purchase_count`
-8. `FlashDealsSection.tsx` — countdown + progress
-9. `FeaturedVendorsCarousel.tsx` — вендоры
-
----
-
-## Результат
-
-- Визуальный WOW-эффект с первого экрана
-- Путь до товара: 1 клик (Quick Icons)
-- Срочность покупки (Flash Deals)
-- Доверие к вендорам (Verified Badges)
-- Персонализация (Recently Viewed)
-- Полное соответствие дизайн-системе UNO
 
 ---
 
@@ -220,19 +101,21 @@ ADD COLUMN IF NOT EXISTS purchase_count INTEGER DEFAULT 0;
 
 | Файл | Описание |
 |------|----------|
-| `src/components/market/PromoCarousel.tsx` | Hero story-banners |
-| `src/components/market/QuickCategoryIcons.tsx` | Сетка 4x2 иконок |
-| `src/components/market/FlashDealsSection.tsx` | Таймер + акции |
-| `src/components/market/FeaturedVendorsCarousel.tsx` | Карусель вендоров |
-| `src/components/market/RecentlyViewedSection.tsx` | Недавно смотрели |
-| `src/hooks/useRecentlyViewed.ts` | LocalStorage хук |
-| `src/hooks/useMarketplacePromotions.ts` | Хук для промо |
+| `supabase/functions/create-market-checkout/index.ts` | Stripe Checkout для маркетплейса |
+| `src/hooks/useStripeMarketCheckout.ts` | Хук для вызова edge function |
 
-## Файлы для рефакторинга
+## Файлы для редактирования
 
 | Файл | Изменения |
 |------|-----------|
-| `src/pages/market/MarketIndex.tsx` | Новая структура секций |
-| `src/components/market/ProfessionalProductCard.tsx` | Social proof + Quick View |
-| `src/components/market/FeaturedBanner.tsx` | Удалить (заменён на PromoCarousel) |
+| `src/pages/market/MarketCheckout.tsx` | Добавить BookingStepProgress, Stripe, Concierge Advance |
 
+---
+
+## Результат
+
+- ✅ **Единый UX** между Flowers и Market checkout
+- ✅ **4 способа оплаты**: Cash, Wallet, Card (Stripe), Concierge Advance
+- ✅ **Визуальные подсказки** через BookingStepProgress
+- ✅ **Buy Now** полностью работает с оплатой картой
+- ✅ **Кредитование** доступно для пользователей без тайского счёта
