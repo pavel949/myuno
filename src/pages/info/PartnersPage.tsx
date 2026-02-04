@@ -286,7 +286,7 @@ export default function PartnersPage() {
               ))}
             </div>
 
-            <Link to="/provider/onboarding">
+            <Link to="/vendor/onboarding">
               <Button size="lg" className="gap-2">
                 {isRu ? 'Подать заявку' : 'Apply Now'}
                 <ArrowRight className="w-4 h-4" />
@@ -371,7 +371,7 @@ export default function PartnersPage() {
                 ? 'Мы предлагаем индивидуальные условия сотрудничества для каждой категории партнёров. Комиссия обсуждается лично и зависит от объёма, категории услуг и уровня верификации.'
                 : 'We offer individual partnership terms for each category. Commission is discussed personally and depends on volume, service category, and verification level.'}
             </p>
-            <Link to="/provider/onboarding">
+            <Link to="/vendor/onboarding">
               <Button variant="outline" size="sm" className="gap-2">
                 {isRu ? 'Узнать условия' : 'Get Terms'}
                 <ArrowRight className="w-4 h-4" />
@@ -524,7 +524,7 @@ export default function PartnersPage() {
                 ? 'Присоединяйтесь к сотням успешных партнёров myUNO'
                 : 'Join hundreds of successful myUNO partners'}
             </p>
-            <Link to="/provider/onboarding">
+            <Link to="/vendor/onboarding">
               <Button size="lg" className="gap-2">
                 {isRu ? 'Стать партнёром' : 'Become a Partner'}
                 <ArrowRight className="w-4 h-4" />

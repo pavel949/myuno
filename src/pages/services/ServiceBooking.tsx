@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBooking } from "@/hooks/useBooking";
+import { useProviderDetails } from "@/hooks/useProviderDetails";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageContainer } from "@/components/uno/PageContainer";
 import { PageHeader } from "@/components/uno/PageHeader";
@@ -22,10 +23,12 @@ import { ru } from "date-fns/locale";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Home, CheckCircle2, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const services = [
+// Fallback services for when no provider data is available
+const fallbackServices = [
   { id: "s1", nameEn: "Faucet installation", nameRu: "Установка смесителя", price: 1500, duration: "1 час" },
   { id: "s2", nameEn: "Pipe replacement", nameRu: "Замена труб", price: 3000, duration: "2-4 часа" },
   { id: "s3", nameEn: "Drain cleaning", nameRu: "Прочистка канализации", price: 2000, duration: "1-2 часа" },
@@ -40,6 +43,38 @@ export default function ServiceBooking() {
   const { getItemsByProvider, clearByProvider } = useCart();
   const { createBooking, isSubmitting } = useBooking();
 
+  // Fetch provider and services from database
+  const { provider: dbProvider, services: dbServices, isLoading: providerLoading } = useProviderDetails(id || null);
+
+  // Use database data or fallback
+  const services = useMemo(() => {
+    if (dbServices && dbServices.length > 0) {
+      return dbServices.map(s => ({
+        id: s.id,
+        nameEn: s.name_en,
+        nameRu: s.name_ru,
+        price: s.price || 0,
+        duration: '1 час',
+      }));
+    }
+    return fallbackServices;
+  }, [dbServices]);
+
+  const providerInfo = useMemo(() => {
+    if (dbProvider) {
+      return {
+        id: dbProvider.id,
+        name: dbProvider.name,
+        image: dbProvider.logo_url || "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop",
+      };
+    }
+    return {
+      id: id,
+      name: language === "ru" ? "Специалист" : "Specialist",
+      image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop",
+    };
+  }, [dbProvider, language, id]);
+
   // Form state
   const [date, setDate] = useState<Date | undefined>(addDays(new Date(), 1));
   const [time, setTime] = useState<string>("");
@@ -48,12 +83,6 @@ export default function ServiceBooking() {
   const [contactData, setContactData] = useState<ContactFormData>({ name: "", phone: "" });
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
   const [bookingResult, setBookingResult] = useState<{ success: boolean; bookingId?: string } | null>(null);
-
-  const provider = {
-    id: id,
-    name: language === "ru" ? "Алексей Мастеров" : "Alex Masters",
-    image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop",
-  };
 
   // Load services from cart on mount
   useEffect(() => {
@@ -78,6 +107,22 @@ export default function ServiceBooking() {
     return null;
   }
 
+  // Loading state
+  if (providerLoading) {
+    return (
+      <AppLayout>
+        <PageContainer className="pb-32">
+          <PageHeader title={language === 'ru' ? 'Загрузка...' : 'Loading...'} showBack />
+          <div className="space-y-4 mt-4">
+            <Skeleton className="h-20 w-full rounded-xl" />
+            <Skeleton className="h-40 w-full rounded-xl" />
+            <Skeleton className="h-40 w-full rounded-xl" />
+          </div>
+        </PageContainer>
+      </AppLayout>
+    );
+  }
+
   const toggleService = (serviceId: string) => {
     setSelectedServices(prev => 
       prev.includes(serviceId) 
@@ -97,7 +142,7 @@ export default function ServiceBooking() {
       <AppLayout>
         <BookingConfirmation
           bookingId={bookingResult.bookingId}
-          title={provider.name}
+          title={providerInfo.name}
           date={date ? format(date, 'PPP', { locale: language === 'ru' ? ru : undefined }) : undefined}
           time={time}
           location={address}
@@ -177,12 +222,12 @@ export default function ServiceBooking() {
         {/* Provider Info */}
         <div className="flex items-center gap-3 p-4 bg-card rounded-xl border mt-4 mb-6">
           <img
-            src={provider.image}
-            alt={provider.name}
+            src={providerInfo.image}
+            alt={providerInfo.name}
             className="w-12 h-12 rounded-full object-cover"
           />
           <div>
-            <h3 className="font-semibold">{provider.name}</h3>
+            <h3 className="font-semibold">{providerInfo.name}</h3>
             <p className="text-sm text-muted-foreground">
               {language === "ru" ? "Сантехник" : "Plumber"}
             </p>

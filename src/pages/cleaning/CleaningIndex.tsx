@@ -73,8 +73,8 @@ export default function CleaningIndex() {
   }, [searchQuery, filterValues, language, services]);
 
   const quickItems: QuickGridItem[] = [
-    { icon: '🏠', label: language === 'ru' ? 'Заказать' : 'Book', sublabel: language === 'ru' ? 'Уборку' : 'Cleaning', onClick: () => navigate('/services/booking/cleaning') },
-    { icon: '👔', label: language === 'ru' ? 'Прачечная' : 'Laundry', sublabel: language === 'ru' ? 'Забор' : 'Pickup', onClick: () => navigate('/services/booking/laundry') },
+    { icon: '🏠', label: language === 'ru' ? 'Заказать' : 'Book', sublabel: language === 'ru' ? 'Уборку' : 'Cleaning', onClick: () => setSelectedType('home') },
+    { icon: '👔', label: language === 'ru' ? 'Прачечная' : 'Laundry', sublabel: language === 'ru' ? 'Забор' : 'Pickup', onClick: () => setSelectedType('laundry') },
     { icon: '✨', label: language === 'ru' ? 'Генеральная' : 'Deep', onClick: () => setSelectedType('deep') },
     { icon: '🏢', label: language === 'ru' ? 'Офис' : 'Office', onClick: () => setSelectedType('office') },
   ];
