@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { IntakeItem } from '@/hooks/useIntakeAgent';
-import { INTAKE_VERTICALS } from '@/lib/intakeVerticals';
+import { useIntakeConfigs } from '@/hooks/useIntakeConfigs';
 import {
   Dialog,
   DialogContent,
@@ -16,7 +16,7 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { IntakeVerticalBadge } from './IntakeVerticalBadge';
 import { IntakeConfidenceBar } from './IntakeConfidenceBar';
-import { Save } from 'lucide-react';
+import { Save, Loader2 } from 'lucide-react';
 
 interface IntakeItemEditorProps {
   item: IntakeItem | null;
@@ -28,10 +28,22 @@ interface IntakeItemEditorProps {
 export function IntakeItemEditor({ item, open, onOpenChange, onSave }: IntakeItemEditorProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const { data: intakeConfigs, isLoading: configsLoading } = useIntakeConfigs();
   
   const [editedFields, setEditedFields] = useState<Record<string, any>>({});
   const [editedTitle, setEditedTitle] = useState({ en: '', ru: '' });
   const [editedDescription, setEditedDescription] = useState({ en: '', ru: '' });
+
+  // Find vertical from DB-driven configs
+  const vertical = useMemo(() => 
+    item ? intakeConfigs?.find(v => v.id === item.detectedVertical) : undefined,
+    [item, intakeConfigs]
+  );
+
+  const allFields = useMemo(() => 
+    vertical ? [...vertical.requiredFields, ...vertical.optionalFields] : [],
+    [vertical]
+  );
 
   // Initialize when item changes
   React.useEffect(() => {
@@ -48,8 +60,17 @@ export function IntakeItemEditor({ item, open, onOpenChange, onSave }: IntakeIte
 
   if (!item) return null;
 
-  const vertical = INTAKE_VERTICALS.find(v => v.id === item.detectedVertical);
-  const allFields = vertical ? [...vertical.requiredFields, ...vertical.optionalFields] : [];
+  if (configsLoading) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-2xl">
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   const handleFieldChange = (key: string, value: any) => {
     setEditedFields(prev => ({ ...prev, [key]: value }));

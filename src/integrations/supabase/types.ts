@@ -13290,6 +13290,114 @@ export type Database = {
           },
         ]
       }
+      sys_intake_configs: {
+        Row: {
+          created_at: string | null
+          field_labels: Json
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          keywords: string[]
+          name_en: string
+          name_ru: string
+          optional_fields: string[]
+          required_fields: string[]
+          sort_order: number | null
+          target_table: string
+          updated_at: string | null
+          vertical_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          field_labels?: Json
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          keywords?: string[]
+          name_en: string
+          name_ru: string
+          optional_fields?: string[]
+          required_fields?: string[]
+          sort_order?: number | null
+          target_table: string
+          updated_at?: string | null
+          vertical_id: string
+        }
+        Update: {
+          created_at?: string | null
+          field_labels?: Json
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          keywords?: string[]
+          name_en?: string
+          name_ru?: string
+          optional_fields?: string[]
+          required_fields?: string[]
+          sort_order?: number | null
+          target_table?: string
+          updated_at?: string | null
+          vertical_id?: string
+        }
+        Relationships: []
+      }
+      sys_lead_configs: {
+        Row: {
+          created_at: string | null
+          cta_text_en: string | null
+          cta_text_ru: string | null
+          fields: Json
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name_en: string
+          name_ru: string
+          popularity_score: number | null
+          request_types: Json
+          short_desc_en: string | null
+          short_desc_ru: string | null
+          sort_order: number | null
+          updated_at: string | null
+          vertical_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          cta_text_en?: string | null
+          cta_text_ru?: string | null
+          fields?: Json
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name_en: string
+          name_ru: string
+          popularity_score?: number | null
+          request_types?: Json
+          short_desc_en?: string | null
+          short_desc_ru?: string | null
+          sort_order?: number | null
+          updated_at?: string | null
+          vertical_id: string
+        }
+        Update: {
+          created_at?: string | null
+          cta_text_en?: string | null
+          cta_text_ru?: string | null
+          fields?: Json
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name_en?: string
+          name_ru?: string
+          popularity_score?: number | null
+          request_types?: Json
+          short_desc_en?: string | null
+          short_desc_ru?: string | null
+          sort_order?: number | null
+          updated_at?: string | null
+          vertical_id?: string
+        }
+        Relationships: []
+      }
       system_settings: {
         Row: {
           description: string | null
