@@ -49,8 +49,10 @@ import {
   Shield,
   Clock,
   Languages,
-  Eye
+  Eye,
+  Sparkles
 } from 'lucide-react';
+import { BusinessCardScanButton, ScannedProviderData } from '@/components/admin/BusinessCardScanButton';
 import { 
   ALL_SERVICE_CATEGORIES, 
   PROVIDER_TYPE_OPTIONS,
@@ -416,6 +418,26 @@ export default function AdminProviders() {
             </DialogHeader>
 
             <div className="space-y-4 py-4">
+              {/* Business Card Scanner Button - only for new providers */}
+              {!editingProvider && (
+                <BusinessCardScanButton
+                  onDataExtracted={(data: ScannedProviderData) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      name: data.name || prev.name,
+                      business_category: data.business_category || prev.business_category,
+                      description_en: data.description_en || prev.description_en,
+                      description_ru: data.description_ru || prev.description_ru,
+                      phone: data.phone || prev.phone,
+                      email: data.email || prev.email,
+                      website: data.website || prev.website,
+                      address: data.address || prev.address,
+                    }));
+                  }}
+                  className="w-full"
+                />
+              )}
+
               <div className="space-y-2">
                 <Label>{isRussian ? 'Название *' : 'Name *'}</Label>
                 <Input
