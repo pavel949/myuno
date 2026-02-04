@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useInvestmentProjects, useFeaturedInvestments, INVESTMENT_CATEGORIES } from '@/hooks/useInvestmentProjects';
-import { InvestmentCard } from '@/components/invest';
+import { InvestmentCard, InvestmentAuthGate } from '@/components/invest';
 import { MiniAppLayout } from '@/components/miniapp';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -106,7 +106,7 @@ export default function InvestmentIndex() {
   };
 
   return (
-    <>
+    <InvestmentAuthGate>
       <Helmet>
         <title>{isRu ? 'Инвестиции | myUNO' : 'Invest | myUNO'}</title>
         <meta 
@@ -255,6 +255,6 @@ export default function InvestmentIndex() {
           </section>
         </div>
       </MiniAppLayout>
-    </>
+    </InvestmentAuthGate>
   );
 }

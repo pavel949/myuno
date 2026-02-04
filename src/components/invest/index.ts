@@ -4,3 +4,5 @@ export { FundingProgress } from './FundingProgress';
 export { ScoreBreakdown } from './ScoreBreakdown';
 export { InterestForm } from './InterestForm';
 export { InvestorLeadForm } from './InvestorLeadForm';
+export { InvestmentAuthGate } from './InvestmentAuthGate';
+export { InvestmentAuthForm } from './InvestmentAuthForm';
