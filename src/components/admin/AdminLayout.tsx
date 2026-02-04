@@ -31,11 +31,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <SidebarProvider defaultOpen={!isMobile}>
-      <div className="min-h-screen flex w-full bg-background">
+      <div className="min-h-screen flex w-full bg-background overflow-x-hidden max-w-[100vw]">
         <AdminSidebar />
-        <SidebarInset className="flex-1 flex flex-col">
+        <SidebarInset className="flex-1 flex flex-col min-w-0 max-w-full">
           <AdminHeader onOpenCommandPalette={() => setCommandPaletteOpen(true)} />
-          <main className="flex-1 overflow-auto pb-4">
+          <main className="flex-1 overflow-y-auto overflow-x-hidden pb-4 max-w-full">
             {children || <Outlet />}
           </main>
         </SidebarInset>

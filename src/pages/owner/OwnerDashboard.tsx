@@ -133,7 +133,7 @@ export default function OwnerDashboard() {
   }
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="p-4 space-y-6 overflow-x-hidden max-w-full">
       {/* Ownership Invites Banner */}
       <OwnershipInviteBanner />
 

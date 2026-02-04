@@ -31,7 +31,7 @@ export function TeamLayout({
     <AppLayout 
       title={title || (isRu ? 'Команда myUNO' : 'myUNO Team')}
     >
-      <div className="flex h-[calc(100vh-64px)]">
+      <div className="flex h-[calc(100vh-64px)] overflow-x-hidden max-w-full">
         {/* Desktop Sidebar */}
         {showSidebar && (
           <TeamSidebar className="hidden lg:flex" />
@@ -39,7 +39,7 @@ export function TeamLayout({
         
         {/* Main Content */}
         <main className={cn(
-          "flex-1 overflow-auto pb-16 lg:pb-0",
+          "flex-1 overflow-y-auto overflow-x-hidden pb-16 lg:pb-0 min-w-0 max-w-full",
           !fullWidth && "container",
           className
         )}>
