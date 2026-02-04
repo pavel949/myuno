@@ -15,6 +15,7 @@ import { BackButton } from '@/components/uno/BackButton';
 import { AirbnbSearchBar, SearchParams } from '@/components/property/AirbnbSearchBar';
 import { cn } from '@/lib/utils';
 import { ConsultationCTA } from '@/components/property/ConsultationCTA';
+import { VerticalCTA } from '@/components/leads/VerticalCTA';
 import { QuickFiltersRibbon } from '@/components/property/QuickFiltersRibbon';
 import { PropertyTypeSelector } from '@/components/property/PropertyTypeSelector';
 import { BedroomChips } from '@/components/property/BedroomChips';
@@ -46,7 +47,19 @@ export default function PropertyIndex() {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
   const [selectedBedrooms, setSelectedBedrooms] = useState<string[]>([]);
+  const [showStickyCTA, setShowStickyCTA] = useState(false);
   const { formatPrice } = useCurrency();
+
+  // Show sticky CTA after scrolling
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setShowStickyCTA(scrollY > 800);
+    };
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Fetch dynamic filter options from lookup_values (editable in admin)
   const { filterConfig, propertyTypes } = usePropertyFilterOptions();
@@ -413,6 +426,15 @@ export default function PropertyIndex() {
           )}
 
           <CrossSellSection currentVertical="property" className="mt-8 px-4" />
+
+          {/* Sticky Expert CTA */}
+          {showStickyCTA && (
+            <VerticalCTA
+              vertical="property"
+              variant="sticky"
+              context="list"
+            />
+          )}
         </main>
       </div>
     </AppLayout>
