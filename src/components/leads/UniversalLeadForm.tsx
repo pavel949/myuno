@@ -4,8 +4,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useUniversalLead, UniversalLeadInput } from '@/hooks/useUniversalLead';
+import { useLeadConfigByVertical } from '@/hooks/useLeadConfigs';
 import { 
-  getLeadVerticalById, 
   LeadVerticalConfig, 
   LeadFormField,
   LeadSource 
@@ -36,7 +36,8 @@ import {
   Plus,
   Phone,
   MessageCircle,
-  Mail
+  Mail,
+  Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -65,7 +66,8 @@ export function UniversalLeadForm({
   const { submitLead, isSubmitting } = useUniversalLead();
   const isRu = language === 'ru';
 
-  const vertical = getLeadVerticalById(verticalId);
+  // Use DB-driven config with fallback
+  const { config: vertical, isLoading: configLoading } = useLeadConfigByVertical(verticalId);
   
   const [step, setStep] = useState<FormStep>(
     preselectedRequestType ? 'details' : 'request_type'
@@ -86,6 +88,15 @@ export function UniversalLeadForm({
   const updateFormData = (key: string, value: unknown) => {
     setFormData(prev => ({ ...prev, [key]: value }));
   };
+
+  // Loading state for config
+  if (configLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   if (!vertical) {
     return <div className="text-center text-muted-foreground">Vertical not found</div>;

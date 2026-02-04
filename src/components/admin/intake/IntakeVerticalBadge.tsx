@@ -1,7 +1,7 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { INTAKE_VERTICALS } from '@/lib/intakeVerticals';
+import { useIntakeConfigs } from '@/hooks/useIntakeConfigs';
 import { cn } from '@/lib/utils';
 
 interface IntakeVerticalBadgeProps {
@@ -13,8 +13,9 @@ interface IntakeVerticalBadgeProps {
 export function IntakeVerticalBadge({ verticalId, confidence, size = 'md' }: IntakeVerticalBadgeProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const { data: intakeConfigs } = useIntakeConfigs();
   
-  const vertical = INTAKE_VERTICALS.find(v => v.id === verticalId);
+  const vertical = intakeConfigs?.find(v => v.id === verticalId);
   
   if (!vertical) {
     return (
