@@ -25,17 +25,19 @@
 
 /* UNO SuperApp Premium Dark Design System */
 
-/* Prevent browser back/forward gestures on horizontal overscroll */
+/* Prevent browser back/forward gestures and horizontal overflow - mobile app feel */
 html, body {
   overscroll-behavior-x: none;
+  overflow-x: hidden;
   width: 100%;
   max-width: 100vw;
 }
 
-/* Allow horizontal scroll for wide content like tables */
+/* Allow horizontal scroll ONLY for specific wide content like tables */
 .table-scroll-container {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  max-width: 100vw;
 }
 
 @layer base {

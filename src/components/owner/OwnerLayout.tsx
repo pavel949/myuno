@@ -31,11 +31,11 @@ export function OwnerLayout({ children }: OwnerLayoutProps) {
 
   return (
     <SidebarProvider defaultOpen={!isMobile}>
-      <div className="min-h-screen flex w-full bg-background">
+      <div className="min-h-screen flex w-full bg-background overflow-x-hidden">
         <OwnerSidebar />
         <SidebarInset className="flex-1 flex flex-col">
           <OwnerHeader />
-          <main className="flex-1 overflow-auto pb-20 md:pb-4">
+          <main className="flex-1 overflow-y-auto overflow-x-hidden pb-20 md:pb-4">
             {children || <Outlet />}
           </main>
         </SidebarInset>
