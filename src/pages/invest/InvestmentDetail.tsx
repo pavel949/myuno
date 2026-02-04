@@ -10,6 +10,7 @@ import {
   InterestForm 
 } from '@/components/invest';
 import { INVESTMENT_CATEGORIES } from '@/hooks/useInvestmentProjects';
+import { ExitIntentModal } from '@/components/leads/ExitIntentModal';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -353,6 +354,13 @@ export default function InvestmentDetail() {
             currency={project.currency}
           />
         </div>
+
+        {/* Exit Intent Modal */}
+        <ExitIntentModal
+          vertical="investment"
+          projectId={project.id}
+          projectTitle={title}
+        />
       </div>
     </>
   );
