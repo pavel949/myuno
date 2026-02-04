@@ -61,7 +61,7 @@ export function HeroBanner() {
         <span className="text-lg font-display font-bold text-gradient-gold">UNO</span>
       </div>
 
-      {/* Main tagline */}
+      {/* Main tagline - Updated */}
       <h1 className="text-lg sm:text-xl font-bold text-foreground w-full px-2">
         {isRu ? 'За рубежом' : 'Abroad'}
       </h1>
