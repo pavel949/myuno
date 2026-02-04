@@ -1,233 +1,358 @@
 
-# План улучшения поиска недвижимости для гостей
+# План: Полнофункциональный UX для проектов/комплексов
 
-## Обзор текущей ситуации
+## Обзор
+Создание полноценного опыта просмотра жилых комплексов для гостей (Agoda/Airbnb style) + улучшение интеграции проектов по всей платформе.
 
-### Что есть сейчас:
-1. **PopularFiltersCards** — жёстко захардкожены 4 района + 4 удобства, не из базы
-2. **usePropertyFilterOptions** — загружает property_type, district, amenity из lookup_values
-3. **property_highlights** — есть в lookup_values (13 тегов), но НЕ используются в поиске для гостей
-4. **properties.highlights** — колонка НЕ существует в базе (только в TypeScript типах)
-5. **instant_booking, is_featured, is_verified** — есть в базе, но не выведены как быстрые фильтры
-6. **property_projects** — таблица комплексов существует, связь через project_id
+---
 
-### Что требуется по запросу (стиль Agoda/Airbnb):
-- Мгновенное бронирование ⚡
-- Пешком до пляжа 🏖️
-- Полное обслуживание 🧹
-- Можно с питомцами 🐕
-- Новый объект ✨
-- Вид на море 🌊
-- Дизайнерский ремонт 💎
-- Скидка/Акция 🏷️
-- Выбор комплекса (The Title Legendary и др.)
-- Мульти-выбор типов жилья
+## Текущее состояние (Аудит)
+
+### Что уже есть:
+
+| Компонент | Статус | Комментарий |
+|-----------|--------|-------------|
+| Admin Panel (`AdminProjects.tsx`) | Готово | AI Intake, медиа, юрлицо, CAM-сборы |
+| Выбор проекта для owner | Готово | `ProjectSelector.tsx` |
+| Info-карточка в объекте | Готово | `ProjectInfoCard.tsx` |
+| Фильтр по проектам в поиске | Готово | `QuickFiltersRibbon.tsx` |
+| База данных | Готово | 38 полей, медиа, juristic data |
+
+### Что отсутствует:
+
+| Функция | Статус |
+|---------|--------|
+| Страница проекта для гостей | НЕТ |
+| Каталог всех комплексов | НЕТ |
+| Кнопка "Исследовать комплекс" в объекте | НЕТ |
+| Fullscreen галерея проекта | НЕТ |
 
 ---
 
 ## Архитектура решения
 
-### Источники данных для быстрых фильтров:
-
-| Тег | Источник данных | Логика фильтрации |
-|-----|-----------------|-------------------|
-| Мгновенное бронирование | `properties.instant_booking = true` | Boolean поле |
-| Пешком до пляжа | `lookup_values.property_highlight: beach_close` | Массив highlights |
-| Вид на море | `properties.view_type = 'sea'` ИЛИ amenities contains 'sea-view' | Поле + amenities |
-| Можно с питомцами | `lookup_values.amenity: pet-friendly` | Массив amenities |
-| Новый объект | `properties.created_at > now() - 30 days` | Вычисляемое |
-| Полное обслуживание | `lookup_values.property_highlight: full_service` | Добавить в таксономию |
-| Дизайнерский ремонт | `lookup_values.property_highlight: designer_interior` | Добавить в таксономию |
-| Скидка/Акция | `properties.monthly_discount > 0` ИЛИ специальный флаг | Вычисляемое |
-| Проверено | `properties.is_verified = true` | Boolean поле |
-| Популярное | `properties.is_featured = true` | Boolean поле |
-| Комплекс X | `properties.project_id = X` | UUID связь |
+```text
+┌─────────────────────────────────────────────────────────────────────┐
+│                         ГОСТЕВОЙ ОПЫТ                               │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  /complexes ─────────────────────────────────────────────────────►  │
+│  │                                                                  │
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
+│  │  │ The Title   │  │ Laguna Park │  │ Kamala      │              │
+│  │  │ [VIDEO]     │  │ [PHOTO]     │  │ [PHOTO]     │              │
+│  │  │ 12 units    │  │ 8 units     │  │ 5 units     │              │
+│  │  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘              │
+│  │         │                │                │                      │
+│  │         ▼                ▼                ▼                      │
+│  │  /property/project/:id ──────────────────────────────────────►  │
+│  │  │                                                               │
+│  │  │  ┌─────────────────────────────────────────────────────┐     │
+│  │  │  │ HERO MEDIA (Video/Photo Carousel)                   │     │
+│  │  │  │ "The Title Legendary"                               │     │
+│  │  │  │ Rawai • 2023 • 150 units • Sansiri Developer        │     │
+│  │  │  └─────────────────────────────────────────────────────┘     │
+│  │  │  ┌─────────────────────────────────────────────────────┐     │
+│  │  │  │ AMENITIES GRID: Pool, Gym, Security, Parking...    │     │
+│  │  │  └─────────────────────────────────────────────────────┘     │
+│  │  │  ┌─────────────────────────────────────────────────────┐     │
+│  │  │  │ AVAILABLE UNITS: [Scroll carousel of properties]   │     │
+│  │  │  │ Studio from ฿8k • 1BR from ฿15k • 2BR from ฿25k    │     │
+│  │  │  └─────────────────────────────────────────────────────┘     │
+│  │  │  ┌─────────────────────────────────────────────────────┐     │
+│  │  │  │ LOCATION MAP + Infrastructure                       │     │
+│  │  │  └─────────────────────────────────────────────────────┘     │
+│  │  │                                                               │
+│  └──┴───────────────────────────────────────────────────────────►  │
+│                                                                     │
+├─────────────────────────────────────────────────────────────────────┤
+│                         ИНТЕГРАЦИЯ                                  │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  PropertyDetail.tsx:                                                │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │ ProjectInfoCard                                              │   │
+│  │ [Исследовать комплекс] → /property/project/:id               │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+│                                                                     │
+│  QuickFiltersRibbon.tsx:                                           │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │ [The Title] [Laguna] [Kamala] → фильтрация + клик → детали  │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
 ## Фазы реализации
 
-### Фаза 1: Миграция базы данных
+### Фаза 1: Страница проекта для гостей
 
-**1.1 Добавить колонку highlights в таблицу properties:**
-```sql
-ALTER TABLE properties 
-ADD COLUMN IF NOT EXISTS highlights TEXT[] DEFAULT '{}';
+**Новый файл: `src/pages/property/ProjectDetail.tsx`**
+
+Полнофункциональная витрина комплекса:
+
+1. **Hero Section**
+   - Видео-баннер (autoplay, muted) если есть video_url
+   - Fallback на cover_image с кнопкой "Все фото"
+   - Название, район, год, застройщик, кол-во юнитов
+
+2. **Amenities Grid**
+   - Визуальная сетка удобств территории (pool, gym, security...)
+   - Иконки + подписи на 2 языках
+
+3. **Available Units Section**
+   - Загрузка properties WHERE project_id = current
+   - Горизонтальная карусель с PropertyCard
+   - Счётчики: "12 доступных квартир"
+   - Диапазоны цен по типам (Studio от X, 1BR от Y...)
+
+4. **Location Section**
+   - Карта с маркером комплекса
+   - Инфраструктура рядом (если заполнена)
+
+5. **Photo Gallery**
+   - Полноэкранный просмотр images[]
+   - Lightbox с navigation
+
+---
+
+### Фаза 2: Каталог комплексов
+
+**Новый файл: `src/pages/property/ProjectsIndex.tsx`**
+
+Лендинг со всеми ЖК Пхукета:
+
+1. **Hero Section**
+   - "Жилые комплексы Пхукета"
+   - Subtitle: "Выберите резиденцию для вашего идеального отдыха"
+
+2. **Featured Projects Carousel**
+   - Большие карточки (is_featured = true)
+   - Видео-превью где доступно
+
+3. **All Projects Grid**
+   - Rich-карточки с cover_image
+   - Счётчики: "8 вилл доступно", "От 15,000 ฿/ночь"
+   - Бейджи: Featured, New (по created_at)
+
+4. **Filter/Search**
+   - Поиск по названию
+   - Фильтр по району (district)
+   - Сортировка (по популярности, по цене, по количеству юнитов)
+
+---
+
+### Фаза 3: Компоненты проекта
+
+**Новый файл: `src/components/property/ProjectHeroMedia.tsx`**
+
+Медиа-компонент для hero section:
+- Поддержка video_url (YouTube embed или direct)
+- Fallback на cover_image
+- Кнопка "Все фото" → открывает галерею
+
+**Новый файл: `src/components/property/ProjectAmenitiesGrid.tsx`**
+
+Визуальная сетка удобств территории:
+- Mapping amenities[] на иконки
+- 2/3/4 колонки адаптивно
+
+**Новый файл: `src/components/property/ProjectUnitsSection.tsx`**
+
+Секция с доступными юнитами:
+- Горизонтальная карусель PropertyCard
+- Статистика по типам и ценам
+- CTA "Смотреть все" → /property?project=uuid
+
+**Новый файл: `src/components/property/ProjectGalleryModal.tsx`**
+
+Fullscreen галерея:
+- Swipe navigation
+- Zoom
+- Counter (1/12)
+
+---
+
+### Фаза 4: Интеграция в существующие страницы
+
+**Файл: `src/components/property/ProjectInfoCard.tsx`**
+
+Добавить кнопку навигации:
+```tsx
+<Button onClick={() => navigate(`/property/project/${project.id}`)}>
+  <ExternalLink className="h-4 w-4 mr-2" />
+  {isRu ? 'Исследовать комплекс' : 'Explore Complex'}
+</Button>
 ```
 
-**1.2 Расширить lookup_values новыми тегами:**
-```sql
-INSERT INTO lookup_values (lookup_type, value_key, value_en, value_ru, icon, sort_order, is_active)
-VALUES 
-  ('property_highlight', 'full_service', 'Full Service', 'Полное обслуживание', '🧹', 14, true),
-  ('property_highlight', 'designer_interior', 'Designer Interior', 'Дизайнерский ремонт', '💎', 15, true),
-  ('property_highlight', 'pet_friendly', 'Pet Friendly', 'Можно с питомцами', '🐕', 16, true),
-  ('property_highlight', 'walking_to_beach', 'Walk to Beach', 'Пешком до пляжа', '🚶', 17, true),
-  ('property_highlight', 'new_listing', 'New Listing', 'Новый объект', '🆕', 18, true),
-  ('property_highlight', 'special_offer', 'Special Offer', 'Акция', '🏷️', 19, true)
-ON CONFLICT DO NOTHING;
+**Файл: `src/components/property/QuickFiltersRibbon.tsx`**
+
+Сделать ProjectChip ссылкой:
+- Primary click → фильтрация (как сейчас)
+- Secondary action (иконка) → navigate to project page
+
+**Файл: `src/components/layout/AnimatedRoutes.tsx`**
+
+Добавить новые маршруты:
+```tsx
+<Route path="/complexes" element={<LazyPage><ProjectsIndex /></LazyPage>} />
+<Route path="/property/project/:id" element={<LazyPage><ProjectDetail /></LazyPage>} />
 ```
 
 ---
 
-### Фаза 2: Создать hook для быстрых фильтров
+### Фаза 5: Улучшение хуков
 
-**Файл: `src/hooks/usePropertyQuickFilters.ts`**
+**Файл: `src/hooks/useProperties.ts`**
 
-Этот hook будет:
-1. Загружать property_highlights из lookup_values
-2. Загружать property_projects для фильтра по комплексам
-3. Добавлять "вычисляемые" теги (Instant, New, Discount)
-4. Группировать по категориям (Booking, Location, Features, Complexes)
+Добавить фильтр по project_id:
+```tsx
+export function usePropertiesByProject(projectId: string) {
+  return useQuery({
+    queryKey: ['properties-by-project', projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('project_id', projectId)
+        .eq('is_active', true)
+        .order('price');
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!projectId,
+  });
+}
+```
 
-```text
-Структура:
-interface QuickFilter {
-  id: string;
-  type: 'boolean' | 'highlight' | 'amenity' | 'computed' | 'project';
-  labelEn: string;
-  labelRu: string;
-  icon: string;
-  field?: string; // для boolean: 'instant_booking', 'is_verified'
-  value?: string; // для highlight/amenity: value_key
-  projectId?: string; // для комплексов
+**Файл: `src/hooks/usePropertyProjects.ts`**
+
+Добавить статистику:
+```tsx
+export function useProjectStats(projectId: string) {
+  // Считаем юниты, min/max цены по типам
 }
 ```
 
 ---
 
-### Фаза 3: Обновить PopularFiltersCards
+## Новые файлы
 
-**Файл: `src/components/property/PopularFiltersCards.tsx`**
+| Файл | Назначение |
+|------|------------|
+| `src/pages/property/ProjectDetail.tsx` | Страница проекта для гостей |
+| `src/pages/property/ProjectsIndex.tsx` | Каталог всех комплексов |
+| `src/components/property/ProjectHeroMedia.tsx` | Hero с video/photo |
+| `src/components/property/ProjectAmenitiesGrid.tsx` | Сетка удобств |
+| `src/components/property/ProjectUnitsSection.tsx` | Карусель юнитов |
+| `src/components/property/ProjectGalleryModal.tsx` | Fullscreen галерея |
+| `src/components/property/ProjectCard.tsx` | Rich-карточка для каталога |
 
-Заменить статический массив на динамические данные:
-1. Использовать `usePropertyQuickFilters()`
-2. Добавить горизонтальный scroll для всех фильтров
-3. Разделить на секции: "Особенности", "Комплексы", "Районы"
-4. Стиль как у Agoda — компактные чипы с иконками
+---
+
+## Изменяемые файлы
+
+| Файл | Изменение |
+|------|-----------|
+| `src/components/layout/AnimatedRoutes.tsx` | Новые маршруты |
+| `src/components/property/ProjectInfoCard.tsx` | Кнопка "Исследовать" |
+| `src/components/property/QuickFiltersRibbon.tsx` | Ссылка на проект |
+| `src/hooks/useProperties.ts` | usePropertiesByProject() |
+| `src/hooks/usePropertyProjects.ts` | useProjectStats() |
+
+---
+
+## UX Flow для гостя
 
 ```text
-Визуальная структура:
-┌──────────────────────────────────────────────────────┐
-│ ⚡ Мгновенное  🏖️ У пляжа  🌊 Море  🐕 Питомцы  ✨ Новое │
-├──────────────────────────────────────────────────────┤
-│ 🏢 The Title  🏢 Laguna Park  🏢 Kamala Hills        │
-└──────────────────────────────────────────────────────┘
+Гость ищет жильё на Пхукете
+           │
+           ▼
+   ┌───────────────────────────────────────────┐
+   │  /property                                │
+   │  QuickFiltersRibbon: [The Title] [Laguna] │
+   └───────────────────┬───────────────────────┘
+                       │ Клик на "The Title"
+                       ▼
+           ┌───────────────────────┐
+           │ Два варианта:         │
+           │ A) Фильтровать список │
+           │ B) Открыть проект →   │
+           └───────────────────────┘
+                       │ B
+                       ▼
+   ┌───────────────────────────────────────────┐
+   │  /property/project/:id                    │
+   │  • Hero video/photo                       │
+   │  • "The Title Legendary"                  │
+   │  • Amenities: Pool, Gym, Security...      │
+   │  • 12 доступных юнитов [карусель]         │
+   │  • Карта + инфраструктура                 │
+   └───────────────────┬───────────────────────┘
+                       │ Клик на юнит
+                       ▼
+   ┌───────────────────────────────────────────┐
+   │  /property/:unitId                        │
+   │  PropertyDetail + ProjectInfoCard         │
+   └───────────────────────────────────────────┘
 ```
 
 ---
 
-### Фаза 4: Обновить логику фильтрации
-
-**Файл: `src/pages/property/PropertyIndex.tsx`**
-
-Добавить обработку новых типов фильтров:
+## Альтернативный путь: Каталог комплексов
 
 ```text
-filterValues = {
-  quickFilters: ['instant_book', 'sea_view', 'pet_friendly'],
-  project: 'uuid-of-project',
-  propertyType: ['villa', 'condo'],
-  ...
-}
-```
-
-Логика фильтрации:
-- `instant_book` → `property.instant_booking === true`
-- `sea_view` → `property.view_type === 'sea'` ИЛИ `property.amenities.includes('sea-view')` ИЛИ `property.highlights?.includes('sea_view')`
-- `pet_friendly` → `property.amenities.includes('pet-friendly')`
-- `new_listing` → `isAfter(property.created_at, subDays(new Date(), 30))`
-- `project:uuid` → `property.project_id === uuid`
-
----
-
-### Фаза 5: Обновить форму редактирования объекта
-
-**Файлы:**
-- `src/components/owner/property-manage/HighlightsSection.tsx` (создать)
-- `src/pages/owner/PropertyManage.tsx` (добавить секцию)
-
-Добавить селектор highlights для владельцев:
-- Загружать опции из lookup_values (property_highlight)
-- Ограничение 6 тегов (как сейчас в PropertyHighlights)
-- Сохранять в `properties.highlights[]`
-
----
-
-### Фаза 6: Добавить фильтр по комплексам
-
-**Компонент: ProjectFilterSection**
-
-Горизонтальная карусель с карточками комплексов:
-```text
-┌────────────┐ ┌────────────┐ ┌────────────┐
-│ 🏢 Title   │ │ 🏢 Laguna  │ │ 🏢 Kamala  │
-│ Legendary  │ │ Park       │ │ Hills      │
-│  12 units  │ │   8 units  │ │   5 units  │
-└────────────┘ └────────────┘ └────────────┘
-```
-
-При клике → фильтрация `project_id = selected`
-
----
-
-## Структура файлов
-
-### Новые файлы:
-```text
-src/hooks/usePropertyQuickFilters.ts      # Hook для быстрых фильтров
-src/components/property/QuickFiltersRibbon.tsx  # UI компонент
-src/components/property/ProjectsCarousel.tsx    # Карусель комплексов
-src/components/owner/property-manage/HighlightsSection.tsx # Редактор тегов
-```
-
-### Изменяемые файлы:
-```text
-src/pages/property/PropertyIndex.tsx      # Интеграция фильтров
-src/components/property/PopularFiltersCards.tsx # Рефакторинг
-src/hooks/usePropertyFilterOptions.ts     # Добавить highlights
+Гость хочет жить в конкретном комплексе
+           │
+           ▼
+   ┌───────────────────────────────────────────┐
+   │  /complexes                               │
+   │  "Жилые комплексы Пхукета"                │
+   │                                           │
+   │  Featured: [The Title] [Laguna]           │
+   │                                           │
+   │  All Projects:                            │
+   │  ┌────────┐ ┌────────┐ ┌────────┐        │
+   │  │ Patong │ │ Rawai  │ │ Kamala │        │
+   │  │ 15 un. │ │ 8 un.  │ │ 5 un.  │        │
+   │  └────────┘ └────────┘ └────────┘        │
+   └───────────────────┬───────────────────────┘
+                       │ Клик
+                       ▼
+   ┌───────────────────────────────────────────┐
+   │  /property/project/:id                    │
+   │  (та же страница проекта)                 │
+   └───────────────────────────────────────────┘
 ```
 
 ---
 
-## Итоговый UX (Agoda/Airbnb стиль)
+## Навигация (добавить в меню)
 
+В Discover или отдельной секции Home:
 ```text
-┌─────────────────────────────────────────────────────────┐
-│  🔍 Поиск жилья на Пхукете                               │
-├─────────────────────────────────────────────────────────┤
-│  📍 Куда · 📅 Даты · 👥 Гости          [Найти]          │
-├─────────────────────────────────────────────────────────┤
-│  🏠 Все  🏡 Вилла  🏢 Кондо  🏬 Апарты  ⚙️ Фильтры      │
-├─────────────────────────────────────────────────────────┤
-│  ⚡ Мгновенное  🏖️ У пляжа  🌊 Море  🐕 Питомцы  ✨ Новое │
-│  🧹 Сервис  💎 Дизайн  🏷️ Акция  ✅ Проверено           │
-├─────────────────────────────────────────────────────────┤
-│  🏢 Комплексы: [Title Legendary] [Laguna] [Kamala Hills]│
-├─────────────────────────────────────────────────────────┤
-│  ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐                        │
-│  │Villa│ │Condo│ │House│ │Villa│ ...                    │
-│  └─────┘ └─────┘ └─────┘ └─────┘                        │
-└─────────────────────────────────────────────────────────┘
+🏢 Комплексы  →  /complexes
+```
+
+В QuickFiltersRibbon добавить секцию:
+```text
+🏢 Комплексы: [The Title ↗] [Laguna ↗] [Kamala ↗]
+              ↑ иконка External = переход на страницу проекта
 ```
 
 ---
 
 ## Техническое резюме
 
-| Компонент | Действие |
-|-----------|----------|
-| База данных | Добавить `highlights TEXT[]` в properties |
-| lookup_values | Добавить 6 новых property_highlight |
-| usePropertyQuickFilters | Создать hook для динамических фильтров |
-| QuickFiltersRibbon | Горизонтальные чипы с мульти-выбором |
-| ProjectsCarousel | Карусель комплексов для быстрого выбора |
-| PropertyIndex | Интегрировать новую логику фильтрации |
-| PropertyManage | Добавить редактор highlights для владельцев |
+**Всего:**
+- 7 новых файлов (pages + components)
+- 5 изменяемых файлов
+- 2 новых маршрута
+- 2 новых хука
 
-**Преимущества:**
-- Все теги редактируются через Admin Panel (lookup_values)
-- Владельцы могут устанавливать highlights при листинге
-- Гости видят релевантные быстрые фильтры
-- Комплексы выделены отдельной секцией
-- Мульти-выбор типов жилья работает
+**Существующая инфраструктура:** Админка проектов полностью готова, база данных содержит все необходимые поля (медиа, amenities, juristic). Нужен только frontend для гостевого опыта.
+
+**Риск регрессии:** Низкий — создаём новые страницы, минимально трогаем существующий код.
