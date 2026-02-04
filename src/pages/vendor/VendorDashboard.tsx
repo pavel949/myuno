@@ -36,7 +36,9 @@ import { VendorCategoryGrid } from '@/components/vendor/VendorCategoryGrid';
 import { VendorQuickCreateFAB } from '@/components/vendor/wizard';
 import { BulkImportSheet, ImportVertical } from '@/components/vendor/wizard';
 import { VendorOnboardingChecklist } from '@/components/vendor/dashboard/VendorOnboardingChecklist';
+import { VendorModerationQueue } from '@/components/vendor/dashboard/VendorModerationQueue';
 import { Period, getPeriodDateRange, getComparisonPeriodRange } from '@/components/vendor/dashboard/VendorPeriodSelector';
+import { useVendorProfile } from '@/hooks/useVendor';
 
 const statusColors: Record<string, string> = {
   pending: 'bg-muted text-muted-foreground',
@@ -51,6 +53,7 @@ const VendorDashboard = () => {
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
   const { activeOrg, vendorOrgs, isLoading: contextLoading } = useUserContext();
+  const { profile: vendorProfile } = useVendorProfile();
   const { orders, isLoading: ordersLoading, stats } = useVendorOrders();
 
   // State for FAB actions
@@ -239,6 +242,16 @@ const VendorDashboard = () => {
       />
       
       <VendorQuickActions />
+      
+      {/* Moderation Queue - P2 improvement */}
+      {vendorProfile?.id && (
+        <VendorModerationQueue 
+          providerId={vendorProfile.id}
+          vendorId={(activeOrg?.metadata as any)?.marketplace_vendor_id}
+          limit={5}
+        />
+      )}
+      
       <VendorCategoryGrid />
 
       {/* Recent Orders with Inline Actions */}

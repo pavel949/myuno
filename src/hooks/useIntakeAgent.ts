@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { isValidIntakeTable, VALID_INTAKE_TABLES } from '@/lib/providerIdMapping';
 
 export interface ExtractedField {
   value: any;
@@ -209,6 +210,13 @@ export function useIntakeAgent() {
       }
       if (!fields.description_ru && item.suggestedDescription?.ru) {
         fields.description_ru = item.suggestedDescription.ru;
+      }
+
+      // P0 FIX: Validate table before calling bulk-import
+      if (!isValidIntakeTable(item.detectedVertical)) {
+        const errorMsg = `Unknown vertical table: ${item.detectedVertical}. Valid tables: ${VALID_INTAKE_TABLES.slice(0, 5).join(', ')}...`;
+        toast.error(errorMsg);
+        return false;
       }
 
       // Call bulk-import to create the listing

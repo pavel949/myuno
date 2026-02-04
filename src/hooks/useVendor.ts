@@ -288,6 +288,19 @@ export function useVendorProfile() {
     if (!user) return { error: new Error('Not authenticated') };
 
     try {
+      // P0 FIX: Check for existing provider to prevent duplicates
+      const { data: existingProvider } = await supabase
+        .from('providers')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (existingProvider) {
+        // Provider already exists - just refetch and return
+        await fetchProfile();
+        return { data: existingProvider, error: null };
+      }
+
       // 1. Create provider in legacy table
       const { data: providerData, error: providerError } = await supabase
         .from('providers')
@@ -310,6 +323,46 @@ export function useVendorProfile() {
 
       if (providerError) throw providerError;
 
+      // 1.5 P0 FIX: Auto-create marketplace_vendor for product selling
+      // Generate slug from business name
+      let marketplaceVendorId: string | null = null;
+      try {
+        const slug = profileData.business_name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, '')
+          .slice(0, 50) + '-' + Date.now().toString(36);
+        
+        const { data: vendorData, error: vendorError } = await supabase
+          .from('marketplace_vendors')
+          .insert({
+            slug,
+            name_en: profileData.business_name,
+            name_ru: profileData.business_name_ru || profileData.business_name,
+            description_en: profileData.description || null,
+            description_ru: profileData.description_ru || null,
+            logo_url: null,
+            is_active: true,
+            is_verified: false,
+            approval_status: 'pending',
+          })
+          .select('id')
+          .single();
+
+        if (!vendorError && vendorData) {
+          marketplaceVendorId = vendorData.id;
+          
+          // Link marketplace_vendor to provider
+          await supabase
+            .from('providers')
+            .update({ marketplace_vendor_id: marketplaceVendorId })
+            .eq('id', providerData.id);
+        }
+      } catch (mvError) {
+        // Log but don't fail - marketplace_vendor is optional
+        console.warn('Could not create marketplace_vendor:', mvError);
+      }
+
       // 2. Create org in new Clean Core system with verticals in metadata
       const { data: orgData, error: orgError } = await supabase
         .from('orgs')
@@ -324,6 +377,7 @@ export function useVendorProfile() {
           is_active: true,
           metadata: { 
             legacy_provider_id: providerData.id,
+            marketplace_vendor_id: marketplaceVendorId,
             verticals: profileData.verticals || [profileData.business_category],
           },
         })
