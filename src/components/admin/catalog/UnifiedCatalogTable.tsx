@@ -149,13 +149,14 @@ export function UnifiedCatalogTable() {
   });
 
   const getItemPath = (item: UnifiedCatalogItem) => {
+    // Route to list pages with edit parameter - these pages handle editing via modals
     switch (item.type) {
       case 'service':
-        return `/admin/services/${item.id}`;
+        return `/admin/services?edit=${item.id}`;
       case 'product':
-        return `/admin/marketplace/products/${item.id}`;
+        return `/admin/marketplace/products?edit=${item.id}`;
       case 'property':
-        return `/admin/properties/${item.id}`;
+        return `/admin/properties?edit=${item.id}`;
     }
   };
 
