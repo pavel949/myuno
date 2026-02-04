@@ -41,7 +41,7 @@ export interface BookingAddress {
 
 export interface BookingPayment {
   amount: number;
-  payment_method: 'cash' | 'card' | 'wallet' | 'online' | 'promptpay';
+  payment_method: 'cash' | 'card' | 'wallet' | 'online' | 'promptpay' | 'concierge_advance';
   status?: 'pending' | 'paid' | 'failed' | 'refunded';
 }
 
@@ -119,6 +119,8 @@ const mapPaymentMethod = (method: BookingPayment['payment_method']): PaymentMeth
     'card': 'stripe',
     'wallet': 'wallet',
     'online': 'stripe',
+    'promptpay': 'stripe',
+    'concierge_advance': 'cash', // Concierge handles cash payment to provider
   };
   return mapping[method] || 'cash';
 };

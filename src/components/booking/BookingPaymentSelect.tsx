@@ -13,7 +13,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 
-export type PaymentMethod = 'cash' | 'card' | 'wallet' | 'online' | 'promptpay';
+export type PaymentMethod = 'cash' | 'card' | 'wallet' | 'online' | 'promptpay' | 'concierge_advance';
 
 interface PaymentOption {
   id: PaymentMethod;
