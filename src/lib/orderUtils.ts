@@ -6,6 +6,7 @@
 import { format, formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import type { OrderStatus, OrderType } from '@/types/orders';
+import { getCurrencySymbol } from '@/lib/config/currencies';
 
 /**
  * Format order date for display
@@ -47,9 +48,11 @@ export function formatAmount(
   currency: string = 'THB',
   locale: string = 'en-US'
 ): string {
-  // For THB, use simpler formatting
-  if (currency === 'THB') {
-    return `฿${amount.toLocaleString(locale)}`;
+  const symbol = getCurrencySymbol(currency);
+  
+  // For THB and RUB, use simpler formatting (no decimals)
+  if (['THB', 'RUB'].includes(currency)) {
+    return `${symbol}${amount.toLocaleString(locale)}`;
   }
   
   return new Intl.NumberFormat(locale, {

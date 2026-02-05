@@ -110,3 +110,9 @@ export {
 // ============= TAXONOMY TYPE CONSTANTS =============
 // Re-export from dedicated file to prevent circular dependencies
 export { TAXONOMY_TYPES, type TaxonomyType } from './taxonomyTypes';
+
+// ============= CANONICAL SOURCES OF TRUTH =============
+// Re-export for unified access across the application
+export { VERTICALS, type VerticalId, getVerticalById, getVerticalByTable, getAllVerticalIds, normalizeVerticalId } from '../verticals';
+export { PRICING_MODELS, type PricingModelId, getPricingModelById, getAllPricingModelIds, formatPriceWithModel, getPricingModelsForVertical } from '../pricing';
+export { CURRENCIES, type CurrencyCode, getCurrencySymbol, getCurrencyByCode, formatCurrencyAmount } from '../config/currencies';

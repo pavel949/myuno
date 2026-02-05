@@ -12,12 +12,17 @@ export const STORAGE_KEYS = {
 
 export const CURRENCY = {
   DEFAULT: 'THB',
-  SYMBOLS: {
-    THB: '฿',
-    USD: '$',
-    EUR: '€',
-    RUB: '₽',
-    GBP: '£',
+  // DEPRECATED: Use getCurrencySymbol() from src/lib/config/currencies.ts
+  // Kept for backward compatibility during migration
+  get SYMBOLS() {
+    console.warn('CURRENCY.SYMBOLS is deprecated. Use getCurrencySymbol() from src/lib/config/currencies.ts');
+    return {
+      THB: '฿',
+      USD: '$',
+      EUR: '€',
+      RUB: '₽',
+      GBP: '£',
+    };
   },
 } as const;
 

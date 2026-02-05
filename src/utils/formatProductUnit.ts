@@ -3,6 +3,8 @@
  * Handles: weight (g, kg), volume (ml, L), pieces (pc/pcs)
  */
 
+import { getCurrencySymbol } from '@/lib/config/currencies';
+
 export interface ProductUnitData {
   unit_value?: number | null;
   unit_measure?: string | null;
@@ -109,7 +111,7 @@ export function formatPricePerUnit(
   }
   
   const pricePerUnit = Math.round(price * multiplier);
-  return `฿${pricePerUnit}/${standardUnit}`;
+  return `${getCurrencySymbol('THB')}${pricePerUnit}/${standardUnit}`;
 }
 
 /**

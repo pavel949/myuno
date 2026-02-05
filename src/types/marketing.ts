@@ -107,8 +107,12 @@ export const CHANNEL_LABELS: Record<CampaignChannel, { en: string; ru: string; i
   push: { en: 'Push Notifications', ru: 'Push-уведомления' },
 };
 
+// DEPRECATED: Use getCurrencySymbol() from src/lib/config/currencies.ts
+// Kept for backward compatibility during migration
+import { getCurrencySymbol as getSymbol } from '@/lib/config/currencies';
+
 export const CURRENCY_SYMBOLS: Record<Currency, string> = {
-  USD: '$',
-  THB: '฿',
-  RUB: '₽',
+  USD: getSymbol('USD'),
+  THB: getSymbol('THB'),
+  RUB: getSymbol('RUB'),
 };

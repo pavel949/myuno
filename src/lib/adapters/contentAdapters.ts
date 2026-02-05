@@ -8,6 +8,7 @@ import { MarketplaceProduct } from '@/types/marketplace';
 import { Service } from '@/hooks/useServices';
 import { HomeServiceProvider } from '@/hooks/useHomeServices';
 import type { OwnerProperty, VendorProperty } from '@/types/property';
+import { getCurrencySymbol } from '@/lib/config/currencies';
 
 // ============= UNIFIED CARD PROPS =============
 
@@ -101,8 +102,8 @@ export function mapProductToCardProps(
     description: isRu ? (product.description_ru || product.description_en || undefined) : (product.description_en || undefined),
     image: product.cover_image || undefined,
     images: product.images || undefined,
-    price: `฿${price.toLocaleString()}`,
-    originalPrice: originalPrice ? `฿${originalPrice.toLocaleString()}` : undefined,
+    price: `${getCurrencySymbol(product.currency || 'THB')}${price.toLocaleString()}`,
+    originalPrice: originalPrice ? `${getCurrencySymbol(product.currency || 'THB')}${originalPrice.toLocaleString()}` : undefined,
     discount: discount > 0 ? discount : undefined,
     currency: product.currency || 'THB',
     rating: product.rating,
@@ -181,7 +182,7 @@ export function mapServiceToCardProps(
     description: isRu ? (service.description_ru || service.description_en || undefined) : (service.description_en || undefined),
     image: service.images?.[0],
     images: service.images || undefined,
-    price: service.price ? `฿${service.price.toLocaleString()}` : undefined,
+    price: service.price ? `${getCurrencySymbol(service.currency || 'THB')}${service.price.toLocaleString()}` : undefined,
     currency: service.currency || 'THB',
     duration: service.duration_minutes ? `${service.duration_minutes} ${isRu ? 'мин' : 'min'}` : undefined,
     durationMinutes: service.duration_minutes || undefined,
