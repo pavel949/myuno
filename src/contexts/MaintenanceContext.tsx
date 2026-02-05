@@ -12,9 +12,16 @@ const MaintenanceContext = createContext<MaintenanceContextType | undefined>(und
 
 const MAINTENANCE_KEY = 'myuno_maintenance_mode';
 const BYPASS_KEY = 'myuno_maintenance_bypass';
+const SIMULATION_BYPASS_KEY = 'myuno_simulation_mode';
 
 // Admin routes that should always bypass maintenance
 const ADMIN_ROUTE_PREFIXES = ['/admin', '/owner', '/vendor', '/team'];
+
+// Check if running in simulation mode (for Wave testing)
+const isSimulationMode = () => {
+  return localStorage.getItem(SIMULATION_BYPASS_KEY) === 'true' ||
+         new URLSearchParams(window.location.search).get('simulation') === 'true';
+};
 
 export function MaintenanceProvider({ children }: { children: ReactNode }) {
   const [isMaintenanceMode, setIsMaintenanceMode] = useState(() => {
@@ -27,13 +34,19 @@ export function MaintenanceProvider({ children }: { children: ReactNode }) {
     const urlParams = new URLSearchParams(window.location.search);
     const hasQueryBypass = urlParams.get('admin') === 'true';
     const hasStoredBypass = localStorage.getItem(BYPASS_KEY) === 'true';
+    const hasSimulationBypass = isSimulationMode();
     
     // If query param exists, persist it
     if (hasQueryBypass && !hasStoredBypass) {
       localStorage.setItem(BYPASS_KEY, 'true');
     }
     
-    return hasQueryBypass || hasStoredBypass;
+    // Simulation mode auto-bypasses
+    if (hasSimulationBypass) {
+      localStorage.setItem(SIMULATION_BYPASS_KEY, 'true');
+    }
+    
+    return hasQueryBypass || hasStoredBypass || hasSimulationBypass;
   });
 
   // Check if current route is an admin route (always bypass)
