@@ -3,22 +3,29 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserContext, type AppRole } from '@/hooks/useUserContext';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
+import { AccessDenied } from './AccessDenied';
 
 interface RoleGuardProps {
   children: React.ReactNode;
   allowedRoles: AppRole[];
   fallbackPath?: string;
+  /** If true, shows AccessDenied page instead of redirecting */
+  showAccessDenied?: boolean;
 }
 
 /**
  * Route guard component that checks authentication and role permissions.
  * Uses Airbnb-style "soft" navigation - checks if user HAS the role, not active role.
  * This allows users with multiple roles to freely navigate between dashboards.
+ * 
+ * When showAccessDenied is true, displays an informative access denied page
+ * instead of silently redirecting, helping users understand why they can't access.
  */
 export function RoleGuard({ 
   children, 
   allowedRoles, 
-  fallbackPath = '/' 
+  fallbackPath = '/',
+  showAccessDenied = true,
 }: RoleGuardProps) {
   const location = useLocation();
   const { user, isLoading: authLoading } = useAuth();
@@ -42,6 +49,16 @@ export function RoleGuard({
   const hasAllowedRole = allowedRoles.some(role => hasRole(role));
 
   if (!hasAllowedRole) {
+    // Show informative access denied page instead of redirect
+    if (showAccessDenied) {
+      return (
+        <AccessDenied 
+          requiredRoles={allowedRoles} 
+          currentPath={location.pathname}
+        />
+      );
+    }
+    // Fallback to redirect behavior
     return <Navigate to={fallbackPath} replace />;
   }
 
