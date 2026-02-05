@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Plane, MapPin, Users, Check, ArrowRight, Briefcase, Shield, Star, ChevronLeft, Loader2, User, Calendar, Clock, CreditCard, Handshake } from 'lucide-react';
+import { Plane, MapPin, Users, Check, ArrowRight, Briefcase, Shield, Star, ChevronLeft, Loader2, User, Calendar, Clock, CreditCard, Handshake, LocateFixed } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,6 +16,7 @@ import { cn, transliterate } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useGeolocation } from '@/hooks/useGeolocation';
 
 const terminals = [
   { id: 'domestic', nameEn: 'Domestic Terminal', nameRu: 'Внутренний терминал', icon: '🏠' },
@@ -35,6 +36,7 @@ export default function AirportTransferBooking() {
   const { vehicleTypes, isLoading: isLoadingVehicles } = useVehicleTypes('airport_transfer');
   const { createOrder, isCreating } = useOrders();
   const { profile } = useProfile();
+  const { latitude, longitude, loading: geoLoading, getPosition, hasLocation, supported: geoSupported } = useGeolocation();
 
   // Track if user manually edited the meeting sign name
   const meetingSignManuallyEdited = useRef(false);
@@ -61,6 +63,33 @@ export default function AirportTransferBooking() {
     meetingSignName: '', // Name for meeting sign (transliterated)
     paymentMethod: 'stripe' as TransferPaymentMethod,
   });
+
+  // State for reverse geocoding
+  const [isReverseGeocoding, setIsReverseGeocoding] = useState(false);
+
+  // Reverse geocode when location is obtained
+  useEffect(() => {
+    if (hasLocation && latitude && longitude && isReverseGeocoding) {
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.display_name) {
+            const parts = data.display_name.split(',').slice(0, 4).join(',');
+            setFormData(prev => ({ ...prev, destinationAddress: parts }));
+          }
+          setIsReverseGeocoding(false);
+        })
+        .catch(() => {
+          setFormData(prev => ({ ...prev, destinationAddress: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}` }));
+          setIsReverseGeocoding(false);
+        });
+    }
+  }, [hasLocation, latitude, longitude, isReverseGeocoding]);
+
+  const handleUseCurrentLocation = () => {
+    setIsReverseGeocoding(true);
+    getPosition();
+  };
 
   // Set default vehicle type when loaded
   useEffect(() => {
@@ -443,14 +472,45 @@ export default function AirportTransferBooking() {
             <div className="space-y-2">
               <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <MapPin className="w-4 h-4" />
-                {language === 'ru' ? 'Адрес назначения' : 'Destination Address'}
+                {formData.direction === 'from-airport'
+                  ? (language === 'ru' ? 'Куда доставить' : 'Drop-off Address')
+                  : (language === 'ru' ? 'Откуда забрать' : 'Pick-up Address')}
               </Label>
-              <Input
-                value={formData.destinationAddress}
-                onChange={(e) => setFormData({ ...formData, destinationAddress: e.target.value })}
-                placeholder={language === 'ru' ? 'Название отеля или адрес' : 'Hotel name or address'}
-                className="h-11"
-              />
+              <div className="flex gap-2">
+                <Input
+                  value={formData.destinationAddress}
+                  onChange={(e) => setFormData({ ...formData, destinationAddress: e.target.value })}
+                  placeholder={language === 'ru' ? 'Название отеля или адрес' : 'Hotel name or address'}
+                  className="h-11 flex-1"
+                />
+                {geoSupported && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-11 w-11 shrink-0"
+                    onClick={handleUseCurrentLocation}
+                    disabled={geoLoading || isReverseGeocoding}
+                  >
+                    {(geoLoading || isReverseGeocoding) ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <LocateFixed className="h-4 w-4" />
+                    )}
+                  </Button>
+                )}
+              </div>
+              {geoSupported && (
+                <button
+                  type="button"
+                  onClick={handleUseCurrentLocation}
+                  disabled={geoLoading || isReverseGeocoding}
+                  className="text-xs text-primary hover:underline flex items-center gap-1 disabled:opacity-50"
+                >
+                  <LocateFixed className="h-3 w-3" />
+                  {language === 'ru' ? 'Использовать моё местоположение' : 'Use my current location'}
+                </button>
+              )}
             </div>
 
             {/* Flight Number */}
