@@ -1,11 +1,15 @@
 /**
  * LifeSituationSelector - "What do you need right now?" entry point
- * Non-invasive overlay on home page
+ * Per UX Contract §2: 
+ * - Horizontal scroll or 2×N cards
+ * - Max 6-8 situations
+ * - No nesting, no filters
  */
 import React, { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useLifeSituations } from '@/hooks/useLifeSituations';
+import { useLifeSituationContext } from '@/contexts/LifeSituationContext';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import * as LucideIcons from 'lucide-react';
@@ -23,13 +27,23 @@ export const LifeSituationSelector = memo(function LifeSituationSelector({
   const { language } = useLanguage();
   const navigate = useNavigate();
   const { data: situations, isLoading } = useLifeSituations();
+  const { setLifeSituation, isActive } = useLifeSituationContext();
   const isRussian = language === 'ru';
 
-  const handleSelect = (code: string) => {
+  const handleSelect = (situation: {
+    code: string;
+    title_en: string;
+    title_ru: string;
+    color: string;
+  }) => {
+    // Per UX Contract §3.1: Set context, then navigate
+    const title = isRussian ? situation.title_ru : situation.title_en;
+    setLifeSituation(situation.code, title, situation.color);
+    
     if (onSelect) {
-      onSelect(code);
+      onSelect(situation.code);
     } else {
-      navigate(`/life-flow/${code}`);
+      navigate(`/life-flow/${situation.code}`);
     }
   };
 
@@ -54,9 +68,12 @@ export const LifeSituationSelector = memo(function LifeSituationSelector({
 
   if (!situations?.length) return null;
 
+  // Per UX Contract §2.2: Max 6-8 situations
+  const displayedSituations = situations.slice(0, 8);
+
   return (
     <section className={cn("space-y-3", className)}>
-      {/* Header */}
+      {/* Header per UX Contract §2.1 */}
       <div className="flex items-center gap-2">
         <Sparkles className="w-5 h-5 text-primary" />
         <h2 className="text-base font-semibold">
@@ -64,23 +81,26 @@ export const LifeSituationSelector = memo(function LifeSituationSelector({
         </h2>
       </div>
 
-      {/* Horizontal scroll chips */}
+      {/* Horizontal scroll chips - UX Contract §2.2 */}
       <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide touch-pan-y snap-x snap-mandatory">
-        {situations.map((situation) => {
+        {displayedSituations.map((situation) => {
           const Icon = getIcon(situation.icon);
+          const isSelected = isActive(situation.code);
+          
           return (
             <button
               key={situation.id}
-              onClick={() => handleSelect(situation.code)}
+              onClick={() => handleSelect(situation)}
               className={cn(
                 "flex-shrink-0 flex flex-col items-center justify-center gap-2",
                 "w-24 h-20 rounded-xl border transition-all duration-200",
                 "bg-card hover:bg-accent/50 hover:border-primary/30",
                 "shadow-sm hover:shadow-md",
-                "snap-start"
+                "snap-start",
+                isSelected && "ring-2 ring-primary border-primary"
               )}
               style={{
-                borderColor: `${situation.color}30`,
+                borderColor: isSelected ? situation.color : `${situation.color}30`,
               }}
             >
               <div
