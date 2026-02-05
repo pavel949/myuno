@@ -19,14 +19,33 @@ const fallbackWeather: WeatherData = {
 };
 
 async function fetchWeather(): Promise<WeatherData> {
-  const { data, error } = await supabase.functions.invoke('get-weather');
-  
-  if (error) {
-    console.error('Error fetching weather:', error);
+  try {
+    const { data, error } = await supabase.functions.invoke('get-weather');
+    
+    if (error) {
+      // Log at debug level to avoid console noise during development
+      if (import.meta.env.DEV) {
+        console.debug('[Weather] Service unavailable, using fallback:', error.message);
+      }
+      return fallbackWeather;
+    }
+    
+    // Handle edge function returning error in data
+    if (data?.error) {
+      if (import.meta.env.DEV) {
+        console.debug('[Weather] API returned error, using fallback:', data.error);
+      }
+      return { ...fallbackWeather, ...data };
+    }
+    
+    return data as WeatherData;
+  } catch (err) {
+    // Silently fallback on network errors (404, CORS, etc.)
+    if (import.meta.env.DEV) {
+      console.debug('[Weather] Network error, using fallback');
+    }
     return fallbackWeather;
   }
-  
-  return data as WeatherData;
 }
 
 export function useWeather() {

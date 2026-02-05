@@ -47,7 +47,10 @@ export function PWAInstallProvider({ children }: { children: ReactNode }) {
 
     // Listen for install prompt - save globally
     const handleBeforeInstall = (e: Event) => {
-      console.log('[PWA] beforeinstallprompt event received');
+      // Use debug level to reduce console noise
+      if (import.meta.env.DEV) {
+        console.debug('[PWA] beforeinstallprompt event received');
+      }
       e.preventDefault();
       const promptEvent = e as BeforeInstallPromptEvent;
       globalDeferredPrompt = promptEvent;
@@ -59,7 +62,10 @@ export function PWAInstallProvider({ children }: { children: ReactNode }) {
 
     // Listen for app installed
     const handleAppInstalled = () => {
-      console.log('[PWA] App installed successfully');
+      // Use debug level to reduce console noise
+      if (import.meta.env.DEV) {
+        console.debug('[PWA] App installed successfully');
+      }
       setIsInstalled(true);
       globalDeferredPrompt = null;
       setDeferredPrompt(null);
@@ -78,16 +84,23 @@ export function PWAInstallProvider({ children }: { children: ReactNode }) {
     const prompt = deferredPrompt || globalDeferredPrompt;
     
     if (!prompt) {
-      console.log('[PWA] No install prompt available');
+      // Use debug level to reduce console noise
+      if (import.meta.env.DEV) {
+        console.debug('[PWA] No install prompt available');
+      }
       return false;
     }
 
     try {
-      console.log('[PWA] Triggering install prompt');
+      if (import.meta.env.DEV) {
+        console.debug('[PWA] Triggering install prompt');
+      }
       await prompt.prompt();
       const { outcome } = await prompt.userChoice;
       
-      console.log('[PWA] User choice:', outcome);
+      if (import.meta.env.DEV) {
+        console.debug('[PWA] User choice:', outcome);
+      }
       
       if (outcome === 'accepted') {
         setIsInstalled(true);
@@ -98,7 +111,10 @@ export function PWAInstallProvider({ children }: { children: ReactNode }) {
       }
       return false;
     } catch (error) {
-      console.error('[PWA] Error installing:', error);
+      // Use debug level for expected errors
+      if (import.meta.env.DEV) {
+        console.debug('[PWA] Install prompt error:', error);
+      }
       return false;
     }
   }, [deferredPrompt]);

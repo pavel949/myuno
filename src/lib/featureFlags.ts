@@ -112,6 +112,14 @@ const FLAGS: Record<string, FeatureFlag> = {
     rolloutPercentage: 0,
     environments: ['development'],
   },
+  
+  // Test Mode Features (Wave testing)
+  TEST_MODE_UTILITIES: {
+    key: 'test_mode_utilities',
+    enabled: import.meta.env.VITE_TEST_MODE === 'true',
+    description: 'Test utilities for Wave testing (account switching, state clearing)',
+    environments: ['development', 'staging'],
+  },
 } as const;
 
 /**
