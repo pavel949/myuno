@@ -150,12 +150,12 @@ const navigationItems: NavItem[] = [
     descriptionRu: 'Справочники и конфиги'
   },
   { 
-    title: 'Life Situations', 
-    titleRu: 'Life Situations',
+    title: 'LifeOS', 
+    titleRu: 'LifeOS',
     path: '/admin/life-situations', 
     icon: Sparkles,
-    description: 'Contextual navigation',
-    descriptionRu: 'Контекстная навигация'
+    description: 'Catalog orchestration',
+    descriptionRu: 'Оркестрация каталога'
   },
   { 
     title: 'Control', 
