@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUnifiedCatalog, CatalogItemType, UnifiedCatalogItem } from '@/hooks/useUnifiedCatalog';
 import { useBulkSelection } from '@/hooks/useBulkSelection';
@@ -30,6 +30,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { getCatalogItemIcon, getNameInitials } from '@/lib/utils/catalogIconMapper';
+import { cn } from '@/lib/utils';
 
 const typeIcons: Record<CatalogItemType, React.ReactNode> = {
   service: <Package className="h-4 w-4 text-blue-500" />,
@@ -42,6 +44,27 @@ const typeLabels: Record<CatalogItemType, { en: string; ru: string }> = {
   product: { en: 'Product', ru: 'Товар' },
   property: { en: 'Property', ru: 'Недвижимость' },
 };
+
+// Smart avatar component that shows relevant icons based on item name
+function CatalogItemAvatar({ item }: { item: UnifiedCatalogItem }) {
+  const itemName = item.name_ru || item.name_en;
+  const { icon: ItemIcon, color } = getCatalogItemIcon(itemName, item.type);
+  const initials = getNameInitials(itemName);
+  
+  return (
+    <Avatar className="h-10 w-10 rounded-lg">
+      <AvatarImage src={item.image} className="object-cover" />
+      <AvatarFallback className={cn(
+        "rounded-lg",
+        item.type === 'service' && "bg-blue-50 dark:bg-blue-950",
+        item.type === 'product' && "bg-green-50 dark:bg-green-950",
+        item.type === 'property' && "bg-orange-50 dark:bg-orange-950"
+      )}>
+        <ItemIcon className={cn("h-5 w-5", color)} />
+      </AvatarFallback>
+    </Avatar>
+  );
+}
 
 export function UnifiedCatalogTable() {
   const { language } = useLanguage();
@@ -260,12 +283,7 @@ export function UnifiedCatalogTable() {
                     />
                   </TableCell>
                   <TableCell>
-                    <Avatar className="h-10 w-10 rounded-md">
-                      <AvatarImage src={item.image} className="object-cover" />
-                      <AvatarFallback className="rounded-md bg-muted">
-                        {typeIcons[item.type]}
-                      </AvatarFallback>
-                    </Avatar>
+                    <CatalogItemAvatar item={item} />
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col">
