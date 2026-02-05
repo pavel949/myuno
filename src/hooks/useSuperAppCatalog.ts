@@ -51,7 +51,7 @@ const VERTICAL_CATALOG_CONFIG: Record<TaxonomyVertical, {
     queryParam: 'type',
   },
   restaurants: { 
-    primaryTaxonomy: 'restaurant_cuisine', 
+    primaryTaxonomy: 'cuisine', 
     path: '/restaurants',
     queryParam: 'cuisine',
   },
@@ -62,7 +62,7 @@ const VERTICAL_CATALOG_CONFIG: Record<TaxonomyVertical, {
     queryParam: 'category',
   },
   transport: { 
-    primaryTaxonomy: 'vehicle_category', 
+    primaryTaxonomy: 'vehicle_type', 
     path: '/transport',
     queryParam: 'category',
   },
@@ -147,9 +147,9 @@ export function useSuperAppCatalog() {
   // Fetch all taxonomies we need for the catalog
   const yachtTypes = useTaxonomy('yacht_type');
   const tourTypes = useTaxonomy('tour_type');
-  const cuisines = useTaxonomy('restaurant_cuisine');
+  const cuisines = useTaxonomy('cuisine');
   const propertyTypes = useTaxonomy('property_type');
-  const vehicleCategories = useTaxonomy('vehicle_category');
+  const vehicleCategories = useTaxonomy('vehicle_type');
   const serviceDomains = useTaxonomy('home_service_domain');
   const serviceCategories = useTaxonomy('home_service_category');
   const clinicSpecialties = useTaxonomy('clinic_specialty');
@@ -161,9 +161,9 @@ export function useSuperAppCatalog() {
   const taxonomyDataMap: Record<string, TaxonomyOption[]> = useMemo(() => ({
     yacht_type: yachtTypes.options,
     tour_type: tourTypes.options,
-    restaurant_cuisine: cuisines.options,
+    cuisine: cuisines.options,
     property_type: propertyTypes.options,
-    vehicle_category: vehicleCategories.options,
+    vehicle_type: vehicleCategories.options,
     home_service_domain: serviceDomains.options,
     home_service_category: serviceCategories.options,
     clinic_specialty: clinicSpecialties.options,
