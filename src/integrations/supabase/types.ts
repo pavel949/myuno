@@ -1666,6 +1666,7 @@ export type Database = {
           entity_type: string
           id: string
           life_situation_id: string | null
+          role_scope: string[] | null
           rules: Json | null
           updated_at: string | null
           weight: number | null
@@ -1676,6 +1677,7 @@ export type Database = {
           entity_type: string
           id?: string
           life_situation_id?: string | null
+          role_scope?: string[] | null
           rules?: Json | null
           updated_at?: string | null
           weight?: number | null
@@ -1686,6 +1688,7 @@ export type Database = {
           entity_type?: string
           id?: string
           life_situation_id?: string | null
+          role_scope?: string[] | null
           rules?: Json | null
           updated_at?: string | null
           weight?: number | null
@@ -17257,6 +17260,22 @@ export type Database = {
       }
     }
     Views: {
+      life_os_catalog: {
+        Row: {
+          currency: string | null
+          entity_id: string | null
+          entity_type: string | null
+          is_active: boolean | null
+          location: string | null
+          price: number | null
+          provider_id: string | null
+          title: string | null
+          title_en: string | null
+          title_ru: string | null
+          trust_level: string | null
+        }
+        Relationships: []
+      }
       v_marketplace_listings: {
         Row: {
           address: string | null
@@ -18240,6 +18259,28 @@ export type Database = {
           entity_id: string
           entity_type: string
           rules: Json
+          weight: number
+        }[]
+      }
+      resolve_life_os_context: {
+        Args: {
+          p_life_code: string
+          p_limit?: number
+          p_locale?: string
+          p_user_role?: string
+        }
+        Returns: {
+          currency: string
+          entity_id: string
+          entity_type: string
+          location: string
+          price: number
+          provider_id: string
+          role_scope: string[]
+          rules: Json
+          title: string
+          title_localized: string
+          trust_level: string
           weight: number
         }[]
       }
