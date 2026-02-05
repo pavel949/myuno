@@ -32,16 +32,15 @@ import { toast } from 'sonner';
 import { Plus, Trash2, Search, AlertTriangle, Users, Weight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ChangeImpactModal } from './ChangeImpactModal';
+import { ENTITY_TYPES, getEntityType, type EntityTypeDefinition } from '@/lib/config/entityTypes';
 
-const ENTITY_TYPES = [
-  { value: 'property', label: 'Properties', labelRu: 'Недвижимость' },
-  { value: 'service', label: 'Services', labelRu: 'Услуги' },
-  { value: 'yacht', label: 'Yachts', labelRu: 'Яхты' },
-  { value: 'transport', label: 'Transport', labelRu: 'Транспорт' },
-  { value: 'restaurant', label: 'Restaurants', labelRu: 'Рестораны' },
-  { value: 'tour', label: 'Tours', labelRu: 'Туры' },
-  { value: 'experience', label: 'Experiences', labelRu: 'Впечатления' },
-];
+// Get entity types from centralized config
+const ENTITY_TYPE_OPTIONS = Object.values(ENTITY_TYPES).map((def: EntityTypeDefinition) => ({
+  value: def.type,
+  label: def.pluralEn,
+  labelRu: def.pluralRu,
+  icon: def.icon,
+}));
 
 const ROLE_SCOPES: { value: LifeOSRole; label: string; color: string }[] = [
   { value: 'guest', label: 'Guest', color: 'bg-blue-500/10 text-blue-700 border-blue-200' },
@@ -381,7 +380,7 @@ export function LifeOSMappingsTab() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{isRussian ? 'Все типы' : 'All types'}</SelectItem>
-            {ENTITY_TYPES.map((t) => (
+            {ENTITY_TYPE_OPTIONS.map((t) => (
               <SelectItem key={t.value} value={t.value}>
                 {isRussian ? t.labelRu : t.label}
               </SelectItem>
@@ -429,13 +428,13 @@ export function LifeOSMappingsTab() {
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    {ENTITY_TYPES.map((t) => (
-                      <SelectItem key={t.value} value={t.value}>
-                        {isRussian ? t.labelRu : t.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
+          <SelectContent>
+            {ENTITY_TYPE_OPTIONS.map((t) => (
+              <SelectItem key={t.value} value={t.value}>
+                {isRussian ? t.labelRu : t.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
                 </Select>
               </div>
 
@@ -461,7 +460,7 @@ export function LifeOSMappingsTab() {
                   step={5}
                 />
                 {newMapping.weight > 80 && (
-                  <div className="flex items-center gap-2 text-amber-600 text-sm">
+                  <div className="flex items-center gap-2 text-warning text-sm">
                     <AlertTriangle className="w-4 h-4" />
                     {isRussian ? 'Высокий приоритет требует подтверждения' : 'High weight requires confirmation'}
                   </div>

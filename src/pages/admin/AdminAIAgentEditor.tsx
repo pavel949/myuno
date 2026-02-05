@@ -9,6 +9,7 @@ import {
   useAIAgentStats,
   type AIAgentKnowledge 
 } from '@/hooks/useAIAgents';
+import { AIAgentLogsPanel } from '@/components/admin/ai-agents/AIAgentLogsPanel';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -30,7 +31,8 @@ import {
   MessageSquare,
   Check,
   Clock,
-  Star
+  Star,
+  ScrollText
 } from 'lucide-react';
 import {
   Select,
@@ -255,9 +257,13 @@ export default function AdminAIAgentEditor() {
             <BookOpen className="h-4 w-4" />
             {isRussian ? 'База знаний' : 'Knowledge'}
           </TabsTrigger>
+          <TabsTrigger value="logs" className="gap-2">
+            <ScrollText className="h-4 w-4" />
+            {isRussian ? 'Логи' : 'Logs'}
+          </TabsTrigger>
           <TabsTrigger value="history" className="gap-2">
             <History className="h-4 w-4" />
-            {isRussian ? 'История' : 'History'}
+            {isRussian ? 'Версии' : 'Versions'}
           </TabsTrigger>
         </TabsList>
 
@@ -482,6 +488,11 @@ export default function AdminAIAgentEditor() {
               {isRussian ? 'Опубликовать' : 'Publish'}
             </Button>
           </div>
+        </TabsContent>
+
+        {/* Logs Tab */}
+        <TabsContent value="logs" className="mt-4">
+          {id && <AIAgentLogsPanel agentId={id} />}
         </TabsContent>
 
         {/* History Tab */}

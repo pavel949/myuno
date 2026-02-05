@@ -17,3 +17,7 @@ export type {
 
 // Trust and social proof components
 export { TrustBadge, TrustSignalsRow, SocialProofBadge } from './TrustSignalsBadges';
+
+// Provider input validation hints
+export { ProviderFieldHints, ProviderFormValidationSummary, useFormValidationHints } from './ProviderFieldHints';
+export { ProviderFieldHint } from './ProviderFieldHint';
