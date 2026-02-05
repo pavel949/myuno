@@ -37,3 +37,7 @@ export { ProjectPromoSection } from './ProjectPromoSection';
 export { OffplanProjectCard } from './OffplanProjectCard';
 export { OffplanPromoSection } from './OffplanPromoSection';
 export { DeveloperBadge } from './DeveloperBadge';
+
+// Canonical Property Form (shared across Admin/Vendor/Owner)
+export { CanonicalPropertyForm } from './canonical-form';
+export type { CanonicalPropertyFormData } from './canonical-form';
