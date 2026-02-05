@@ -1,210 +1,216 @@
 
-# План: Объединение таблиц недвижимости
 
-## Резюме решения
-
-Предлагается **объединить таблицы `owner_properties` и `properties` в одну таблицу** с разграничением доступа через RLS-политики и view'ы. Это устранит дублирование данных и решит проблему "один объект = аренда + продажа".
+# 🏗️ Стратегический План Работ myUNO
+## Системный инженер: Анализ и Приоритизация
 
 ---
 
-## Архитектура: До и После
+## Текущее Состояние Платформы
 
-### Текущее состояние (ДВЕ таблицы)
 ```text
-┌─────────────────────────┐     ┌───────────────────────┐
-│    owner_properties     │────▶│      properties       │
-│  (Бэк-офис владельца)   │ 1:1 │  (Витрина маркетп.)  │
-├─────────────────────────┤     ├───────────────────────┤
-│ owner_id                │     │ provider_id           │
-│ purchase_price          │     │ listing_type          │
-│ ical_token              │     │ rating, review_count  │
-│ house_rules             │     │ is_active, is_featured│
-│ electricity_*, water_*  │     │ price, currency       │
-│ 115+ полей              │     │ 20+ полей             │
-└─────────────────────────┘     └───────────────────────┘
-     ↓ sync trigger ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                    myUNO Platform Status                        │
+├─────────────────────────────────────────────────────────────────┤
+│  LifeOS............... ✅ ACTIVE (Manual Mode)                  │
+│  AI Infrastructure.... ✅ 8 agents operational                  │
+│  Catalog.............. ⚠️  Needs hygiene                        │
+│  Security............. ⚠️  6 linter issues                      │
+│  Technical Debt....... ⚠️  130 TODO markers                     │
+│  Public Status........ 🔒 Coming Soon (Maintenance)             │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-### Целевое состояние (ОДНА таблица + Views)
+---
+
+## Фаза 1: КРИТИЧЕСКИЕ ИСПРАВЛЕНИЯ (P0)
+**Срок: 1-2 дня | Риск: Высокий если не исправить**
+
+### 1.1 Безопасность БД
+Линтер выявил 6 проблем:
+- **3 ERROR**: `SECURITY DEFINER` views (потенциальный обход RLS)
+- **2 WARN**: Overly permissive RLS (`USING (true)` для UPDATE/DELETE)
+- **1 WARN**: Функции без `search_path`
+
+**Действия:**
+- Audit всех views с `SECURITY DEFINER`
+- Переработать на `SECURITY INVOKER` где возможно
+- Ужесточить RLS политики для записи/удаления
+
+### 1.2 UX-Баги из Ревью
+Выявленные проблемы:
+- Raw slugs вместо человеческих названий (`babysitter` → "Няни")
+- Truncated titles на карточках
+- Процентные индикаторы без пояснений (85% — это что?)
+- Смешанные языки при переключении EN/RU
+
+**Действия:**
+- Создать lookup-таблицу `entity_type_labels` (EN/RU)
+- Добавить CSS-правила для полных заголовков
+- Добавить "Match" prefix к процентам
+
+---
+
+## Фаза 2: СТАБИЛИЗАЦИЯ КАТАЛОГА (P1)
+**Срок: 3-5 дней | Риск: Средний**
+
+### 2.1 Объединение Properties
+Согласно `.lovable/plan.md`:
+- `owner_properties` + `properties` → единая `unified_properties`
+- `listing_modes text[]` для аренды + продажи
+- Views для разграничения доступа
+
 ```text
-┌──────────────────────────────────────────────────────────┐
-│                 unified_properties                        │
-│  (ВСЕ данные: и бэк-офис, и маркетплейс)                │
-├──────────────────────────────────────────────────────────┤
-│ id, owner_id (nullable), provider_id (nullable)          │
-│ listing_modes: text[] = ['rent', 'sale']  ◀── массив!   │
-│ price (для аренды), sale_price (для продажи)             │
-│ is_active, is_featured, rating, review_count             │
-│ house_rules, electricity_*, water_*, ical_token          │
-│ purchase_price, acquisition_costs (скрыто от витрины)    │
-└──────────────────────────────────────────────────────────┘
-          ↓                          ↓
-┌─────────────────────┐    ┌─────────────────────────┐
-│ v_owner_properties  │    │ v_marketplace_listings  │
-│ (VIEW для владельца)│    │ (VIEW для гостей)       │
-│ ВСЕ поля            │    │ Только публичные поля   │
-│ RLS: owner_id=user  │    │ Без финансов/документов │
-└─────────────────────┘    └─────────────────────────┘
+[owner_properties] ─┬─▶ [unified_properties] ◀─┬─ [properties]
+                    │                          │
+                    ▼                          ▼
+          [v_owner_properties]       [v_marketplace_listings]
 ```
+
+### 2.2 Taxonomy Normalization
+Применить созданные lookup-таблицы:
+- `taxonomy_normalization` → нормализация значений
+- `entity_classification_hints` → разделение tours/experiences
+- Интеграция с фильтрами без изменения source data
+
+### 2.3 Удаление Дублей в Каталоге
+Experiences vs Tours vs Water Activities:
+- Добавить classification hints
+- Provider guidance в формах
+- Не мержить таблицы — только классификация
 
 ---
 
-## Шаги реализации
+## Фаза 3: ТЕХНИЧЕСКИЙ ДОЛГ (P2)
+**Срок: 5-7 дней | Параллельно с другими фазами**
 
-### Шаг 1: Расширение таблицы `properties`
-Добавляем недостающие поля из `owner_properties`:
+### 3.1 TODO/FIXME Cleanup (130 маркеров)
+Приоритетные файлы:
+| Файл | Проблема | Действие |
+|------|----------|----------|
+| `TransportBooking.tsx` | Demo vehicles hardcoded | Подключить к `transport_vehicles` |
+| `TeamInboxPage.tsx` | Mock tasks | Создать `team_tasks` таблицу или убрать UI |
+| `CleaningDetail.tsx` | Hardcoded services | Фильтр по `services.category='cleaning'` |
+| `RestaurantMap.tsx` | Hardcoded coordinates | Добавить lat/lng в `restaurants` |
 
-```sql
-ALTER TABLE properties
-  -- Ownership
-  ADD COLUMN owner_id uuid REFERENCES auth.users(id),
-  ADD COLUMN management_type text,
-  ADD COLUMN ownership_type text,
-  -- Listing modes (решает проблему rent+sale)
-  ADD COLUMN listing_modes text[] DEFAULT ARRAY['rent'],
-  ADD COLUMN sale_price numeric,
-  ADD COLUMN sale_currency text DEFAULT 'THB',
-  -- All rental terms (70+ полей)
-  ADD COLUMN house_rules text,
-  ADD COLUMN electricity_included boolean,
-  -- ... остальные поля из owner_properties
-  -- Financial (только для owner view)
-  ADD COLUMN purchase_price numeric,
-  ADD COLUMN acquisition_costs numeric,
-  ADD COLUMN ical_token text;
-```
+### 3.2 Deprecated Files Cleanup
+Устаревшие файлы для удаления/рефакторинга:
+- `useLifeSituations.ts` → замена на `useLifeOS.ts`
+- `currencyUtils.ts` → замена на `@/lib/config/currencies`
+- `CURRENCY.SYMBOLS` константа → `getCurrencySymbol()`
 
-### Шаг 2: Миграция данных
-```sql
--- Копируем данные из owner_properties в properties
-UPDATE properties p
-SET 
-  owner_id = op.owner_id,
-  house_rules = op.house_rules,
-  electricity_included = op.electricity_included,
-  -- ...все остальные поля
-FROM owner_properties op
-WHERE op.marketplace_property_id = p.id;
-
--- Добавляем объекты без marketplace_property_id
-INSERT INTO properties (...)
-SELECT ... FROM owner_properties 
-WHERE marketplace_property_id IS NULL;
-```
-
-### Шаг 3: Создание View для разграничения доступа
-```sql
--- View для владельцев (все поля)
-CREATE VIEW v_owner_properties AS
-SELECT * FROM properties
-WHERE owner_id IS NOT NULL;
-
--- View для маркетплейса (скрываем финансы)
-CREATE VIEW v_marketplace_listings AS
-SELECT 
-  id, title_en, title_ru, property_type, listing_modes,
-  price, sale_price, bedrooms, bathrooms, area_sqm,
-  cover_image, images, rating, review_count,
-  is_active, is_featured, district
-FROM properties
-WHERE is_active = true;
-```
-
-### Шаг 4: RLS политики
-```sql
--- Владелец видит свои объекты
-CREATE POLICY owner_select ON properties
-  FOR SELECT USING (owner_id = auth.uid());
-
--- Публичные листинги для всех
-CREATE POLICY public_select ON properties
-  FOR SELECT USING (is_active = true AND owner_id IS NULL);
-
--- Только владелец редактирует
-CREATE POLICY owner_update ON properties
-  FOR UPDATE USING (owner_id = auth.uid());
-```
-
-### Шаг 5: Рефакторинг хуков
-- `useOwnerProperties` → работает с view `v_owner_properties`
-- `useProperties` → работает с view `v_marketplace_listings`  
-- `useVendorProperties` → работает с `properties` где `provider_id = user`
-
-### Шаг 6: Удаление старой таблицы
-```sql
-DROP TABLE owner_properties CASCADE;
-```
+### 3.3 AI Agent Consolidation
+Согласно `deployment_order.md`:
+- Удалить legacy duplicates (`ai-owner-assistant`, `ai-property-assistant`)
+- Направить всё через canonical `ai-agent` function
+- Добавить `correlation_id` и `agent_version` в логи
 
 ---
 
-## Решение проблемы "Аренда + Продажа"
+## Фаза 4: АДМИН-ИНСТРУМЕНТЫ (P2)
+**Срок: 3-4 дня | Зависит от Фазы 2**
 
-**До (ограничение):**
-```sql
-listing_type text = 'rent'  -- только один вариант
-```
+### 4.1 LifeOS Admin Улучшения
+Уже реализовано:
+- ✅ Health monitoring
+- ✅ Governance rules
+- ✅ AI Analyst (read-only)
+- ✅ Change impact preview
 
-**После (гибкость):**
-```sql
-listing_modes text[] = ARRAY['rent', 'sale']  -- оба режима
-price numeric        -- цена аренды
-sale_price numeric   -- цена продажи
-```
+Доработать:
+- Entity labels в маппингах (RU/EN)
+- Bulk operations (массовое изменение weight)
+- Export/Import маппингов
 
-**В UI:**
+### 4.2 Provider Dashboard Hints
+Применить `provider_input_rules`:
+- Inline hints в формах создания
+- Soft warnings (не блокирующие)
+- Suggestions для улучшения качества
+
+### 4.3 AI Observability Dashboard
+Per `admin_ai_observability_spec.md`:
+- Enhanced stats cards
+- Error tracking panel
+- Model usage breakdown
+
+---
+
+## Фаза 5: ПРЕДЗАПУСК (P1)
+**Срок: 2-3 дня | Перед снятием Coming Soon**
+
+### 5.1 Mobile UX Audit
+Пройти все критические paths:
+- Home → LifeOS → Entity → Booking
+- Search → Results → Detail
+- Auth → Profile → Wallet
+
+### 5.2 Performance Check
+- Lazy loading валидация
+- Image optimization
+- Bundle size analysis
+
+### 5.3 Coming Soon → Live
+Когда готово:
 ```typescript
-// Фильтр каталога теперь работает через ANY
-.filter('listing_modes', 'cs', `{${mode}}`);
+// MaintenanceContext.tsx
+const [isMaintenanceMode] = useState(false);
 ```
 
 ---
 
-## Затрагиваемые файлы
+## Матрица Приоритетов
 
-### Миграции
-- `supabase/migrations/XXX_unify_properties.sql` — создать
-
-### Хуки (рефакторинг)
-- `src/hooks/usePropertyCare.ts` → изменить таблицу
-- `src/hooks/useOwnerProperties.ts` → использовать view
-- `src/hooks/useProperties.ts` → использовать view
-- `src/hooks/useVendorProperties.ts` → адаптировать
-
-### Типы
-- `src/types/property.ts` → объединить интерфейсы
-
-### Компоненты (минимальные изменения)
-- `src/lib/verticals.ts` → изменить `table: 'properties'`
-- Формы уже используют канонический компонент
+```text
+                     IMPACT
+              Low            High
+         ┌─────────────┬─────────────┐
+    Easy │  P3: Docs   │ P1: UX Bugs │
+EFFORT   │  Labels     │ Security    │
+         ├─────────────┼─────────────┤
+    Hard │  P4: Later  │ P2: Catalog │
+         │  New AI     │ Properties  │
+         └─────────────┴─────────────┘
+```
 
 ---
 
-## Преимущества
+## Порядок Выполнения
 
-| Аспект | Сейчас | После объединения |
-|--------|--------|-------------------|
-| Синхронизация | Триггеры, дублирование | Не нужна |
-| Аренда + Продажа | Ограничено | Массив `listing_modes` |
-| Количество таблиц | 2 | 1 |
-| Сложность запросов | JOIN через `marketplace_property_id` | Прямые запросы |
-| RLS политики | Отдельные на 2 таблицы | Единые |
+```text
+Week 1:
+├── Day 1-2: Security fixes (P0)
+├── Day 3-4: UX bugs + entity labels (P0/P1)
+└── Day 5: Mobile audit (P1)
+
+Week 2:
+├── Day 1-3: Properties unification (P1)
+├── Day 4-5: TODO cleanup (P2)
+└── Day 5: Provider hints (P2)
+
+Week 3:
+├── Day 1-2: AI consolidation (P2)
+├── Day 3: Admin improvements (P2)
+├── Day 4: Performance check (P1)
+└── Day 5: Going Live 🚀
+```
 
 ---
 
-## Риски и митигация
+## Рекомендация
 
-1. **Обратная совместимость** — создаём views с теми же именами
-2. **Существующие данные** — миграция сначала копирует, потом удаляет
-3. **Большая миграция** — разбиваем на 3-4 этапа
+**Начать с Фазы 1 (Security + UX Bugs)** — это lowest-effort, highest-impact.
+
+После этого переходить к Properties unification, так как это blocking issue для корректной работы Owner Dashboard и Marketplace.
+
+LifeOS уже стабилен и функционален — не трогать без необходимости.
 
 ---
 
-## Технические детали миграции
+## Команда для Старта
 
-Миграция выполняется в 4 этапа:
-1. Добавление новых колонок в `properties`
-2. Копирование данных из `owner_properties`
-3. Создание Views и RLS
-4. Удаление `owner_properties`
+Если хотите начать — выберите:
+1. **"Исправить безопасность"** — Security fixes (P0)
+2. **"Исправить UX баги"** — Entity labels + truncation (P0)
+3. **"Объединить properties"** — Catalog merge (P1)
+4. **"Убрать TODO"** — Technical debt (P2)
 
-Оценка времени: ~2-3 часа на код, тестирование отдельно.
