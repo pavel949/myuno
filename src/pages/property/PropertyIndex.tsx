@@ -262,55 +262,33 @@ export default function PropertyIndex() {
           </div>
         </header>
 
-        {/* Active Filters */}
-        {activeFilterCount > 0 && (
-          <div className="container max-w-7xl mx-auto px-4 py-2">
-            <ActiveFilters
-              config={filterConfig}
-              values={filterValues}
-              onRemove={handleRemoveFilter}
-              onClearAll={() => setFilterValues({})}
-            />
-          </div>
-        )}
-
-        {/* Consultation CTA - Context-aware based on mode */}
-        <div className="container max-w-7xl mx-auto px-4 py-2">
-          <ConsultationCTA context={propertyMode === 'buy' ? 'purchase' : 'rental'} />
+        {/* Project Promo Section - Right after header for discoverability */}
+        <div className="container max-w-7xl mx-auto px-4 pt-3 pb-2">
+          <ProjectPromoSection mode={propertyMode} />
         </div>
 
         {/* Results Count + Quick Filter Tags */}
         <div className="container max-w-7xl mx-auto px-4 py-2">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              {properties.length} {language === 'ru' ? 'объектов' : 'places'}
+              {properties.length} {language === 'ru' ? 'объектов найдено' : 'places found'}
             </p>
+            {activeFilterCount > 0 && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-xs h-7"
+                onClick={() => {
+                  setFilterValues({});
+                  setQuickFilters([]);
+                  setSelectedDistricts([]);
+                  setSelectedBedrooms([]);
+                }}
+              >
+                {language === 'ru' ? 'Сбросить фильтры' : 'Clear filters'}
+              </Button>
+            )}
           </div>
-          
-          {/* Quick Filters as suggestion tags - below results count */}
-          <QuickFiltersRibbon 
-            selectedFilters={quickFilters}
-            selectedDistricts={selectedDistricts}
-            onFilterToggle={(id) => {
-              setQuickFilters(prev => 
-                prev.includes(id) 
-                  ? prev.filter(f => f !== id)
-                  : [...prev, id]
-              );
-            }}
-            onDistrictToggle={(id) => {
-              setSelectedDistricts(prev =>
-                prev.includes(id)
-                  ? prev.filter(d => d !== id)
-                  : [...prev, id]
-              );
-            }}
-          />
-        </div>
-
-        {/* Project Promo Section - Visual carousel of complexes */}
-        <div className="container max-w-7xl mx-auto px-4 py-2">
-          <ProjectPromoSection mode={propertyMode} />
         </div>
 
         {/* Property Grid - Airbnb Style */}
