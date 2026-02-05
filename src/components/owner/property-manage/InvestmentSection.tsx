@@ -10,7 +10,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { formatPriceWithSymbol } from '@/lib/currencyUtils';
+import { getCurrencySymbol, formatCurrencyAmount } from '@/lib/config/currencies';
+
+// Helper to maintain backward compatibility with formatPriceWithSymbol calls
+const formatPriceWithSymbol = (amount: number, currency: string = 'THB') => 
+  formatCurrencyAmount(amount, currency);
 import { toast } from 'sonner';
 import { 
   TrendingUp, DollarSign, Calculator, PiggyBank, 

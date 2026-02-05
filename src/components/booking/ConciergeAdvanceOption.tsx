@@ -1,7 +1,7 @@
 import { Sparkles, HelpCircle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
-import { getCurrencySymbol } from '@/lib/currencyUtils';
+import { getCurrencySymbol } from '@/lib/config/currencies';
 import {
   Tooltip,
   TooltipContent,

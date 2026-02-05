@@ -5,7 +5,7 @@ import {
   MapPin, User, Loader2, ArrowUpRight, Filter
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { getCurrencySymbol } from '@/lib/currencyUtils';
+import { getCurrencySymbol } from '@/lib/config/currencies';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck } from '@/hooks/useAdmin';

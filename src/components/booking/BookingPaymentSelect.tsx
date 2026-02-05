@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { usePaymentMethods } from '@/hooks/usePaymentMethods';
 import { cn } from '@/lib/utils';
-import { getCurrencySymbol } from '@/lib/currencyUtils';
+import { getCurrencySymbol } from '@/lib/config/currencies';
 import {
   Sheet,
   SheetContent,

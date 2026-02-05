@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Pencil, Building2, Wrench, Package } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { getCurrencySymbol } from '@/lib/currencyUtils';
+import { getCurrencySymbol } from '@/lib/config/currencies';
 import type { ListingApplicationDraft } from '@/hooks/useListingApplication';
 
 interface ReviewStepProps {

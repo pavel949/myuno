@@ -1,3 +1,7 @@
+/**
+ * @deprecated This function is deprecated. Use ai-agent with agentSlug='property-search' instead.
+ * This file now proxies to the canonical ai-agent function for backward compatibility.
+ */
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -5,355 +9,65 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-interface ChatMessage {
-  role: "user" | "assistant" | "system";
-  content: string;
-}
-
-interface ChatRequest {
-  messages: ChatMessage[];
-  context?: {
-    budget?: { min?: number; max?: number };
-    dates?: { checkIn?: string; checkOut?: string };
-    guests?: number;
-    preferences?: string[];
-  };
-}
-
-const PHUKET_KNOWLEDGE_BASE = `
-# РЫНОК АРЕНДЫ НЕДВИЖИМОСТИ НА ПХУКЕТЕ — ПОЛНАЯ БАЗА ЗНАНИЙ
-
-## РАЙОНЫ ПХУКЕТА (от запада к востоку)
-
-### ЗАПАДНОЕ ПОБЕРЕЖЬЕ (пляжи, туристы, дороже)
-
-**Банг Тао / Лагуна (Bang Tao / Laguna)**
-- Целевая аудитория: Семьи, длительная аренда, экспаты
-- Особенности: Крупнейший пляж 6км, лагуна с отелями, гольф
-- Цены: Виллы 80,000-300,000 THB/мес, Кондо 25,000-60,000 THB/мес
-- Популярные комплексы: Laguna, Boat Avenue, Bangtao Beach Gardens
-- Плюсы: Спокойно, инфраструктура, качественные комплексы
-- Минусы: Далеко от аэропорта, дорого
-
-**Сурин (Surin)**
-- Целевая аудитория: Состоятельные туристы, молодёжь
-- Особенности: "Миллионерский ряд", люксовые виллы на холмах
-- Цены: Виллы 100,000-500,000+ THB/мес, Кондо редко
-- Популярные места: Surin Heights, Twin Palms residences
-- Плюсы: Престижно, красивые виды, пляжные клубы
-- Минусы: Очень дорого, крутые дороги
-
-**Камала (Kamala)**
-- Целевая аудитория: Семьи, пенсионеры, спокойный отдых
-- Особенности: Тихий район, местные жители, мусульманская деревня
-- Цены: Виллы 50,000-150,000 THB/мес, Кондо 20,000-45,000 THB/мес
-- Популярные комплексы: Kamala Falls, Zen Space
-- Плюсы: Тихо, дешевле Сурина, хороший пляж
-- Минусы: Меньше инфраструктуры
-
-**Патонг (Patong)**
-- Целевая аудитория: Тусовщики, короткий отдых, бюджетные туристы
-- Особенности: Главный туристический центр, Bangla Road
-- Цены: Кондо 15,000-40,000 THB/мес, Виллы редко
-- Популярные комплексы: Patong Tower, The Deck
-- Плюсы: Всё рядом, ночная жизнь, пляж
-- Минусы: Шумно, много туристов, пробки
-
-**Карон / Ката (Karon / Kata)**
-- Целевая аудитория: Семьи, пары, туристы средней руки
-- Особенности: Хорошие пляжи, более спокойно чем Патонг
-- Цены: Кондо 18,000-35,000 THB/мес, Виллы 45,000-120,000 THB/мес
-- Популярные комплексы: Kata Gardens, The Heights
-- Плюсы: Баланс тусовки и покоя, красивые виды
-- Минусы: Холмистая местность, сложные дороги
-
-**Раваи / Най Харн (Rawai / Nai Harn)**
-- Целевая аудитория: Экспаты, длительная аренда, русскоязычные
-- Особенности: Много русских, рыбацкая деревня, южная оконечность
-- Цены: Виллы 35,000-100,000 THB/мес, Кондо 15,000-35,000 THB/мес
-- Популярные комплексы: Rawai VIP Villas, Serenity, Calypso
-- Плюсы: Дешевле, много русских заведений, семейно
-- Минусы: Далеко от аэропорта (1+ час), пляж Раваи не для купания
-
-### ВОСТОЧНОЕ ПОБЕРЕЖЬЕ (дешевле, местные)
-
-**Пхукет Таун (Phuket Town)**
-- Целевая аудитория: Digital nomads, длительная аренда, бюджет
-- Особенности: Административный центр, Old Town, Central Festival
-- Цены: Кондо 8,000-25,000 THB/мес, Дома 15,000-40,000 THB/мес
-- Плюсы: Дёшево, аутентично, хорошие кафе и рестораны
-- Минусы: Нет пляжа (30 минут до моря), жарче
-
-**Чалонг (Chalong)**
-- Целевая аудитория: Семьи с детьми, длительная аренда
-- Особенности: Центральное расположение, много школ
-- Цены: Виллы 30,000-80,000 THB/мес, Таунхаусы 15,000-35,000 THB/мес
-- Популярные комплексы: Land & House, Chaofa West
-- Плюсы: Удобно до всего, школы, магазины
-- Минусы: Не у моря
-
-## ТИПЫ НЕДВИЖИМОСТИ
-
-### ВИЛЛЫ
-- **Pool Villa**: С бассейном, 2-6 спален, 50,000-300,000 THB/мес
-- **Garden Villa**: Без бассейна, дешевле на 30-40%
-- **Sea View Villa**: С видом на море, премиум +50-100%
-- **Townhouse/Townhome**: Рядная застройка, 20,000-50,000 THB/мес
-
-### КОНДОМИНИУМЫ
-- **Studio**: 25-35 кв.м, 10,000-25,000 THB/мес
-- **1 Bedroom**: 35-55 кв.м, 15,000-40,000 THB/мес
-- **2 Bedroom**: 55-90 кв.м, 25,000-60,000 THB/мес
-- **Penthouse**: 100+ кв.м, 60,000-150,000 THB/мес
-
-## СЕЗОННОСТЬ И ЦЕНЫ
-
-### HIGH SEASON (Ноябрь - Апрель)
-- Цены +30-50% от базовых
-- Бронировать за 2-3 месяца
-- Пик: Новый год, Китайский новый год
-- Минимальный срок: обычно 1 месяц
-
-### LOW SEASON (Май - Октябрь)
-- Цены базовые или -10-20%
-- Возможны скидки при длительной аренде
-- Дожди: обычно 1-2 часа в день
-- Легче найти хорошие варианты
-
-## ЧТО ВХОДИТ В АРЕНДУ (типично)
-
-### ОБЫЧНО ВКЛЮЧЕНО:
-- Мебель и техника
-- Кондиционеры
-- Wi-Fi интернет
-- Бассейн (в комплексах)
-- Охрана (в комплексах)
-- Парковка
-
-### ОБЫЧНО НЕ ВКЛЮЧЕНО:
-- Электричество: 4-8 THB/kWh (кондо 2,000-5,000 THB/мес, вилла 5,000-15,000 THB/мес)
-- Вода: 500-1,500 THB/мес
-- Уборка: 500-1,000 THB за раз
-- Обслуживание бассейна (для вилл): 3,000-5,000 THB/мес
-- Сад (для вилл): 2,000-5,000 THB/мес
-
-## ДЕПОЗИТЫ И ПЛАТЕЖИ
-
-### СТАНДАРТНЫЕ УСЛОВИЯ:
-- Депозит: 1-2 месяца аренды
-- Предоплата: 1 месяц
-- Итого при заселении: 2-3 месяца
-
-### ВОЗВРАТ ДЕПОЗИТА:
-- Обычно в течение 7-30 дней после выезда
-- Вычеты за: поломки, повреждения, счета
-- Всегда: фото при заселении и выезде!
-
-## РИСКИ И НА ЧТО ОБРАЩАТЬ ВНИМАНИЕ
-
-### КРАСНЫЕ ФЛАГИ:
-⚠️ Нет договора или только на тайском
-⚠️ Предоплата без осмотра
-⚠️ Слишком низкая цена (мошенничество)
-⚠️ Нет фото или только рендеры
-⚠️ Владелец не отвечает / давит на быстрое решение
-
-### ОБЯЗАТЕЛЬНО ПРОВЕРИТЬ:
-✅ Есть ли горячая вода
-✅ Работают ли все кондиционеры
-✅ Давление воды
-✅ Wi-Fi скорость (тест!)
-✅ Состояние мебели и техники
-✅ Шум от дороги / соседей
-✅ Парковка
-✅ Безопасность района
-
-### ЧАСТЫЕ ПРОБЛЕМЫ:
-- Плесень в сезон дождей
-- Насекомые (особенно виллы)
-- Перебои с водой
-- Шумные соседи / стройки
-- Дорогое электричество из-за старых кондеев
-
-## ТРАНСПОРТ И ЛОКАЦИЯ
-
-### БЕЗ ТРАНСПОРТА — ПРОБЛЕМЫ:
-- Такси дорогое (200-500 THB за поездку)
-- Grab работает, но тоже дорого
-- Общественного транспорта нет
-
-### РЕШЕНИЕ:
-- Аренда байка: 3,000-5,000 THB/мес
-- Аренда авто: 15,000-25,000 THB/мес
-- Выбирать локацию с инфраструктурой
-
-## РЕКОМЕНДАЦИИ ПО БЮДЖЕТУ
-
-### ЭКОНОМ (до 25,000 THB/мес):
-- Пхукет Таун: кондо/студия
-- Раваи: простая вилла без бассейна
-- Чалонг: таунхаус
-
-### СРЕДНИЙ (25,000-60,000 THB/мес):
-- Ката/Карон: хороший кондо с видом
-- Камала: вилла с бассейном
-- Банг Тао: кондо в хорошем комплексе
-
-### ПРЕМИУМ (60,000-150,000 THB/мес):
-- Сурин: вилла с видом
-- Банг Тао: вилла 3-4 спальни
-- Лагуна: резиденции
-
-### ЛЮКС (150,000+ THB/мес):
-- Сурин/Камала: виллы на первой линии
-- Эксклюзивные поместья
-
-## ПОЛЕЗНЫЕ ВОПРОСЫ ГОСТЮ
-
-1. "Какой бюджет на аренду в месяц?" → помогает сузить выбор
-2. "Сколько человек будет жить?" → определяет размер
-3. "Нужен ли бассейн?" → вилла vs кондо
-4. "Есть ли дети? Какого возраста?" → школы, безопасность
-5. "Будет ли транспорт?" → важность локации
-6. "Какой срок аренды?" → влияет на цену
-7. "Важен ли вид на море?" → +50-100% к цене
-8. "Предпочитаете тусовку или покой?" → район
-9. "Нужна ли русскоязычная среда?" → Раваи, Ката
-`;
-
-const SYSTEM_PROMPT = `Ты — AI-консультант по аренде недвижимости на Пхукете для платформы myUNO.
-
-${PHUKET_KNOWLEDGE_BASE}
-
-## ТВОИ ЗАДАЧИ:
-
-1. **Понять потребности гостя** — задавай уточняющие вопросы:
-   - Бюджет, даты, количество гостей
-   - Предпочтения по району и типу жилья
-   - Особые требования (дети, животные, работа из дома)
-
-2. **Дать экспертные рекомендации**:
-   - Подходящие районы с объяснением почему
-   - Типы недвижимости в их бюджете
-   - Конкретные комплексы если знаешь
-
-3. **Предупредить о рисках**:
-   - На что обращать внимание при осмотре
-   - Типичные проблемы в выбранном районе
-   - Сезонные нюансы
-
-4. **Помочь с практикой**:
-   - Что включено/не включено в аренду
-   - Какие доп. расходы ожидать
-   - Условия депозита
-
-## ПРАВИЛА:
-
-1. **Всегда уточняй** — не давай советы без понимания потребностей
-2. **Будь конкретным** — называй районы, цены, комплексы
-3. **Честно предупреждай** — о минусах районов, скрытых расходах
-4. **Язык** — отвечай на том языке, на котором пишет гость
-5. **Апселл UNO** — естественно предлагай помощь UNO (осмотр, проверка, сопровождение)
-
-## ФОРМАТ ОТВЕТОВ:
-
-- Короткие абзацы, легко читать
-- Используй эмодзи для навигации (📍 районы, 💰 цены, ⚠️ предупреждения)
-- Если гость новичок — объясняй термины
-- Если опытный — переходи к деталям
-
-## КОНТАКТ UNO:
-
-Если гостю нужна помощь с осмотром или бронированием:
-WhatsApp: +66922407355
-Время работы: 9:00-21:00 (Таиланд)`;
-
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { messages, context } = await req.json() as ChatRequest;
+    const body = await req.json();
+    const { messages, context } = body;
 
     if (!messages || messages.length === 0) {
-      return new Response(
-        JSON.stringify({ error: "No messages provided" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "No messages provided" }), {
+        status: 400, 
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
-    }
-
-    // Build context string if provided
-    let contextStr = "";
-    if (context) {
-      const parts = [];
-      if (context.budget) {
-        parts.push(`Бюджет: ${context.budget.min || '?'}-${context.budget.max || '?'} THB/мес`);
-      }
-      if (context.dates) {
-        parts.push(`Даты: ${context.dates.checkIn || '?'} - ${context.dates.checkOut || '?'}`);
-      }
-      if (context.guests) {
-        parts.push(`Гостей: ${context.guests}`);
-      }
-      if (context.preferences?.length) {
-        parts.push(`Предпочтения: ${context.preferences.join(', ')}`);
-      }
-      if (parts.length > 0) {
-        contextStr = `\n\nКОНТЕКСТ ПОИСКА ГОСТЯ:\n${parts.join('\n')}`;
-      }
-    }
-
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    // Forward to canonical ai-agent with appropriate slug
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const response = await fetch(`${supabaseUrl}/functions/v1/ai-agent`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Authorization": req.headers.get("Authorization") || "",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT + contextStr },
-          ...messages.map(m => ({ role: m.role, content: m.content }))
-        ],
-        stream: true,
-        temperature: 0.7,
-        max_tokens: 1000,
+        agentSlug: "property-search",
+        messages,
+        context,
       }),
     });
 
     if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Слишком много запросов. Подождите немного." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "Сервис временно недоступен" }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
       const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-      throw new Error("AI gateway error");
+      console.error("[ai-property-assistant] Proxy error:", response.status, errorText);
+      return new Response(errorText, {
+        status: response.status,
+        headers: { 
+          ...corsHeaders, 
+          "Content-Type": response.headers.get("Content-Type") || "application/json",
+          "X-Deprecation-Warning": "This endpoint is deprecated. Use /ai-agent with agentSlug='property-search'.",
+        },
+      });
     }
 
+    // Stream response back with deprecation warning
     return new Response(response.body, {
-      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+      headers: { 
+        ...corsHeaders, 
+        "Content-Type": "text/event-stream",
+        "X-Deprecation-Warning": "This endpoint is deprecated. Use /ai-agent with agentSlug='property-search'.",
+      },
     });
-
   } catch (error) {
-    console.error("Property Assistant error:", error);
-    return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    console.error("[ai-property-assistant] Error:", error);
+    return new Response(JSON.stringify({ 
+      error: error instanceof Error ? error.message : "Unknown error" 
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });
