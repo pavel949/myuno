@@ -11,6 +11,7 @@ import {
   getLocalizedFeatures,
   getCategoryConfig,
 } from '@/lib/taxonomies';
+import { getCurrencySymbol } from '@/lib/config/currencies';
 
 export interface VehicleCardProps {
   id: string;
@@ -36,11 +37,11 @@ const DEFAULT_VEHICLE_IMAGE = 'https://images.unsplash.com/photo-1621007947382-b
  */
 export function mapVehicleToCardProps(
   vehicle: Vehicle,
-  language: string,
-  currencySymbol: string = '฿'
+  language: string
 ): VehicleCardProps {
   const lang = language === 'ru' ? 'ru' : 'en';
   const categoryConfig = getCategoryConfig(vehicle.vehicle_type);
+  const currencySymbol = getCurrencySymbol(vehicle.currency || 'THB');
   
   // Build meta array with real data from DB
   const meta: VehicleCardProps['meta'] = [];

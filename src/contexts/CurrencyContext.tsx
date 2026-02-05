@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { createErrorHandler } from '@/lib/errorHandler';
+import { CURRENCIES, getCurrencySymbol, type CurrencyCode } from '@/lib/config/currencies';
 
 const errorLog = createErrorHandler('CurrencyContext');
 
+// Subset of currencies supported for user display/conversion
 export type Currency = 'THB' | 'USD' | 'EUR' | 'RUB';
 
 interface CurrencyInfo {
@@ -15,12 +17,12 @@ interface CurrencyInfo {
   updatedAt?: string;
 }
 
-// Static currency metadata (symbols, names) - doesn't change
+// Use canonical currency definitions from src/lib/config/currencies.ts
 const currencyMeta: Record<Currency, Omit<CurrencyInfo, 'rate' | 'updatedAt'>> = {
-  THB: { code: 'THB', symbol: '฿', name: 'Thai Baht', nameRu: 'Тайский бат' },
-  USD: { code: 'USD', symbol: '$', name: 'US Dollar', nameRu: 'Доллар США' },
-  EUR: { code: 'EUR', symbol: '€', name: 'Euro', nameRu: 'Евро' },
-  RUB: { code: 'RUB', symbol: '₽', name: 'Russian Ruble', nameRu: 'Российский рубль' },
+  THB: { code: 'THB', symbol: CURRENCIES.THB.symbol, name: CURRENCIES.THB.nameEn, nameRu: CURRENCIES.THB.nameRu },
+  USD: { code: 'USD', symbol: CURRENCIES.USD.symbol, name: CURRENCIES.USD.nameEn, nameRu: CURRENCIES.USD.nameRu },
+  EUR: { code: 'EUR', symbol: CURRENCIES.EUR.symbol, name: CURRENCIES.EUR.nameEn, nameRu: CURRENCIES.EUR.nameRu },
+  RUB: { code: 'RUB', symbol: CURRENCIES.RUB.symbol, name: CURRENCIES.RUB.nameEn, nameRu: CURRENCIES.RUB.nameRu },
 };
 
 // Fallback rates if DB fetch fails
@@ -126,9 +128,9 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   };
 
   // Utility to get currency symbol by code (for UI components)
-  const getCurrencySymbol = (code: string): string => {
-    const meta = currencyMeta[code as Currency];
-    return meta?.symbol || code;
+  // Use canonical getCurrencySymbol from currencies.ts
+  const getCurrencySymbolFn = (code: string): string => {
+    return getCurrencySymbol(code);
   };
 
   return (
@@ -139,7 +141,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
       currencies,
       formatPrice, 
       convertPrice,
-      getCurrencySymbol,
+      getCurrencySymbol: getCurrencySymbolFn,
       isLoading,
       lastUpdated,
     }}>

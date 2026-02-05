@@ -45,3 +45,11 @@ export const TAXONOMY_TYPES = {
 } as const;
 
 export type TaxonomyType = typeof TAXONOMY_TYPES[keyof typeof TAXONOMY_TYPES];
+
+// ============= CROSS-REFERENCES TO CANONICAL SOURCES =============
+// These SoT files should be used for their respective domains:
+// - Verticals: src/lib/verticals.ts
+// - Pricing Models: src/lib/pricing.ts
+// - Currencies: src/lib/config/currencies.ts
+// - Auth Roles: src/types/auth.ts
+// - Order Statuses: src/types/orders.ts

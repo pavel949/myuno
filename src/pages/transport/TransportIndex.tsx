@@ -166,7 +166,7 @@ export default function TransportIndex() {
       {/* Results Grid */}
       <div className="grid gap-4">
         {filteredVehicles.map((vehicle) => {
-          const cardProps = mapVehicleToCardProps(vehicle, language, currencyInfo.symbol);
+          const cardProps = mapVehicleToCardProps(vehicle, language);
           return (
             <ItemCard
               key={vehicle.id}
