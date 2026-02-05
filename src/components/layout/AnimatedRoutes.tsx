@@ -713,7 +713,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/partner-agreement" element={<LazyPage><PartnerAgreementPage /></LazyPage>} />
         <Route path="/partner-terms" element={<LazyPage><PartnerAgreementPage /></LazyPage>} />
         <Route path="/dispute-resolution" element={<LazyPage><DisputeResolutionPage /></LazyPage>} />
-        <Route path="/view-history" element={<LazyPage><ViewHistory /></LazyPage>} />
+        <Route path="/view-history" element={<Navigate to="/history" replace />} />
         
         {/* Admin Routes - Protected with AdminLayout */}
         <Route element={<AdminRouteLayout />}>
