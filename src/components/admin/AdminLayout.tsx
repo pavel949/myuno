@@ -4,6 +4,7 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/s
 import { AdminSidebar } from './AdminSidebar';
 import { AdminHeader } from './AdminHeader';
 import { AdminCommandPalette, useAdminCommandPalette } from './AdminCommandPalette';
+import { AdminMobileBottomNav } from './AdminMobileBottomNav';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useMaintenance } from '@/contexts/MaintenanceContext';
 
@@ -39,21 +40,14 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         <AdminSidebar />
         <SidebarInset className="flex-1 flex flex-col min-w-0 max-w-full">
           <AdminHeader onOpenCommandPalette={() => setCommandPaletteOpen(true)} />
-          <main className="flex-1 overflow-y-auto overflow-x-hidden pb-4 max-w-full">
+          <main className={`flex-1 overflow-y-auto overflow-x-hidden max-w-full ${isMobile ? 'pb-20' : 'pb-4'}`}>
             {children || <Outlet />}
           </main>
         </SidebarInset>
-        
-        {/* Mobile floating sidebar trigger - always visible on mobile */}
-        {isMobile && (
-          <div className="fixed bottom-4 left-4 z-50">
-            <SidebarTrigger 
-              className="h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center"
-              data-sidebar="trigger"
-            />
-          </div>
-        )}
       </div>
+      
+      {/* Mobile Bottom Navigation */}
+      {isMobile && <AdminMobileBottomNav />}
       
       {/* Command Palette */}
       <AdminCommandPalette 

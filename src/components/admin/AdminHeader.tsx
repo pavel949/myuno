@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Bell, Search, ChevronRight, ChevronLeft, Home, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Search, ChevronRight, Home, ArrowLeft, ArrowRight } from 'lucide-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,6 +16,7 @@ import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { RoleContextSwitcher } from '@/components/uno/RoleContextSwitcher';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { AdminNotificationsDropdown } from './AdminNotificationsDropdown';
 
 interface AdminHeaderProps {
   onOpenCommandPalette?: () => void;
@@ -228,10 +229,7 @@ export function AdminHeader({ onOpenCommandPalette }: AdminHeaderProps) {
         <RoleContextSwitcher compact />
         <ThemeSwitcher />
         <LanguageSwitcher />
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-4 w-4" />
-          <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-destructive" />
-        </Button>
+        <AdminNotificationsDropdown />
       </div>
     </header>
   );

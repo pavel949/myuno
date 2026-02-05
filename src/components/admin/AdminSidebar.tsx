@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -7,6 +7,7 @@ import {
   Layers,
   LogOut,
   ChevronRight,
+  ChevronDown,
   Bot,
   Inbox,
   UserPlus,
@@ -33,137 +34,66 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 
 interface NavItem {
   title: string;
   titleRu: string;
   path: string;
   icon: React.ElementType;
-  description: string;
-  descriptionRu: string;
 }
 
-// 5 mega-sections as per the plan
-const navigationItems: NavItem[] = [
-  { 
-    title: 'Dashboard', 
-    titleRu: 'Дашборд', 
-    path: '/admin', 
-    icon: LayoutDashboard,
-    description: 'KPIs, alerts, overview',
-    descriptionRu: 'KPI, алерты, обзор'
+interface NavGroup {
+  id: string;
+  title: string;
+  titleRu: string;
+  items: NavItem[];
+}
+
+// Storage key for group states
+const SIDEBAR_GROUPS_KEY = 'myuno_admin_sidebar_groups';
+
+// Grouped navigation items
+const navigationGroups: NavGroup[] = [
+  {
+    id: 'content',
+    title: 'Content',
+    titleRu: 'Контент',
+    items: [
+      { title: 'Dashboard', titleRu: 'Дашборд', path: '/admin', icon: LayoutDashboard },
+      { title: 'Catalog', titleRu: 'Каталог', path: '/admin/catalog', icon: Package },
+      { title: 'Projects', titleRu: 'Проекты / ЖК', path: '/admin/projects', icon: Building2 },
+      { title: 'Investments', titleRu: 'Инвестиции', path: '/admin/investments', icon: TrendingUp },
+      { title: 'Developers', titleRu: 'Застройщики', path: '/admin/developers', icon: HardHat },
+      { title: 'PM Companies', titleRu: 'УК', path: '/admin/pm-companies', icon: Building },
+      { title: 'Contracts', titleRu: 'Контракты', path: '/admin/contracts', icon: FileText },
+    ],
   },
-  { 
-    title: 'Catalog', 
-    titleRu: 'Каталог', 
-    path: '/admin/catalog', 
-    icon: Package,
-    description: 'All services & products',
-    descriptionRu: 'Все объекты и товары'
+  {
+    id: 'operations',
+    title: 'Operations',
+    titleRu: 'Операции',
+    items: [
+      { title: 'Operations', titleRu: 'Операции', path: '/admin/operations', icon: Layers },
+      { title: 'Intake', titleRu: 'Приём', path: '/admin/intake', icon: Inbox },
+      { title: 'AI Agents', titleRu: 'AI Агенты', path: '/admin/ai-agents', icon: Bot },
+      { title: 'Acquisition', titleRu: 'Привлечение', path: '/admin/vendor-prospects', icon: UserPlus },
+      { title: 'Marketing', titleRu: 'Маркетинг', path: '/admin/marketing', icon: Megaphone },
+    ],
   },
-  { 
-    title: 'Projects', 
-    titleRu: 'Проекты / ЖК', 
-    path: '/admin/projects', 
-    icon: Building2,
-    description: 'Residential complexes',
-    descriptionRu: 'Жилые комплексы'
-  },
-  { 
-    title: 'Investments', 
-    titleRu: 'Инвестиции', 
-    path: '/admin/investments', 
-    icon: TrendingUp,
-    description: 'Investment projects',
-    descriptionRu: 'Инвест-проекты'
-  },
-  { 
-    title: 'Developers', 
-    titleRu: 'Застройщики', 
-    path: '/admin/developers', 
-    icon: HardHat,
-    description: 'Builder registry',
-    descriptionRu: 'Реестр застройщиков'
-  },
-  { 
-    title: 'PM Companies', 
-    titleRu: 'УК', 
-    path: '/admin/pm-companies', 
-    icon: Building,
-    description: 'Property management',
-    descriptionRu: 'Управляющие компании'
-  },
-  { 
-    title: 'Contracts', 
-    titleRu: 'Контракты', 
-    path: '/admin/contracts', 
-    icon: FileText,
-    description: 'Provider agreements',
-    descriptionRu: 'Договоры с партнёрами'
-  },
-  { 
-    title: 'Operations', 
-    titleRu: 'Операции', 
-    path: '/admin/operations', 
-    icon: Layers,
-    description: 'Moderation, leads, bookings',
-    descriptionRu: 'Модерация, лиды, заказы'
-  },
-  { 
-    title: 'Intake', 
-    titleRu: 'Приём', 
-    path: '/admin/intake', 
-    icon: Inbox,
-    description: 'AI listing creation',
-    descriptionRu: 'AI-создание листингов'
-  },
-  { 
-    title: 'AI Agents', 
-    titleRu: 'AI Агенты', 
-    path: '/admin/ai-agents', 
-    icon: Bot,
-    description: 'Manage AI assistants',
-    descriptionRu: 'Управление AI-агентами'
-  },
-  { 
-    title: 'Acquisition', 
-    titleRu: 'Привлечение', 
-    path: '/admin/vendor-prospects', 
-    icon: UserPlus,
-    description: 'Vendor prospecting',
-    descriptionRu: 'Привлечение вендоров'
-  },
-  { 
-    title: 'Marketing', 
-    titleRu: 'Маркетинг', 
-    path: '/admin/marketing', 
-    icon: Megaphone,
-    description: 'Command Center',
-    descriptionRu: 'Центр управления'
-  },
-  { 
-    title: 'Taxonomy', 
-    titleRu: 'Таксономии',
-    path: '/admin/taxonomy', 
-    icon: FolderTree,
-    description: 'Categories & configs',
-    descriptionRu: 'Справочники и конфиги'
-  },
-  { 
-    title: 'LifeOS', 
-    titleRu: 'LifeOS',
-    path: '/admin/life-situations', 
-    icon: Sparkles,
-    description: 'Catalog orchestration',
-    descriptionRu: 'Оркестрация каталога'
-  },
-  { 
-    title: 'Control', 
-    titleRu: 'Управление',
-    path: '/admin/control', 
-    icon: Cog,
-    description: 'Users, analytics, system',
-    descriptionRu: 'Пользователи, аналитика'
+  {
+    id: 'system',
+    title: 'System',
+    titleRu: 'Система',
+    items: [
+      { title: 'Taxonomy', titleRu: 'Таксономии', path: '/admin/taxonomy', icon: FolderTree },
+      { title: 'LifeOS', titleRu: 'LifeOS', path: '/admin/life-situations', icon: Sparkles },
+      { title: 'Control', titleRu: 'Управление', path: '/admin/control', icon: Cog },
+    ],
   },
 ];
 
@@ -173,8 +103,23 @@ export function AdminSidebar() {
   const { language } = useLanguage();
   const isRussian = language === 'ru';
   const { user, signOut } = useAuth();
-  const { state, isMobile, openMobile } = useSidebar();
+  const { state, isMobile } = useSidebar();
   
+  // Load group states from localStorage
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
+    try {
+      const stored = localStorage.getItem(SIDEBAR_GROUPS_KEY);
+      if (stored) return JSON.parse(stored);
+    } catch {}
+    // Default: all groups open
+    return { content: true, operations: true, system: true };
+  });
+
+  // Save group states to localStorage
+  useEffect(() => {
+    localStorage.setItem(SIDEBAR_GROUPS_KEY, JSON.stringify(openGroups));
+  }, [openGroups]);
+
   // On mobile, always show full content when sidebar is open
   // On desktop, respect the collapsed state
   const isCollapsed = isMobile ? false : state === 'collapsed';
@@ -184,6 +129,20 @@ export function AdminSidebar() {
       return location.pathname === '/admin';
     }
     return location.pathname.startsWith(path);
+  };
+
+  // Find which group contains the active route and ensure it's open
+  useEffect(() => {
+    const activeGroup = navigationGroups.find(group =>
+      group.items.some(item => isActive(item.path))
+    );
+    if (activeGroup && !openGroups[activeGroup.id]) {
+      setOpenGroups(prev => ({ ...prev, [activeGroup.id]: true }));
+    }
+  }, [location.pathname]);
+
+  const toggleGroup = (groupId: string) => {
+    setOpenGroups(prev => ({ ...prev, [groupId]: !prev[groupId] }));
   };
 
   return (
@@ -203,59 +162,100 @@ export function AdminSidebar() {
         </div>
       </SidebarHeader>
 
-      {/* Navigation - 4 main sections */}
+      {/* Navigation - Collapsible Groups */}
       <SidebarContent className="px-3 py-4">
-        <SidebarMenu className="space-y-2">
-          {navigationItems.map((item) => (
-            <SidebarMenuItem key={item.path}>
-              <SidebarMenuButton
-                onClick={() => navigate(item.path)}
-                isActive={isActive(item.path)}
-                tooltip={isRussian ? item.titleRu : item.title}
-                className={cn(
-                  "h-auto py-3 px-3 transition-all duration-200 rounded-xl",
-                  isActive(item.path) 
-                    ? "bg-primary text-primary-foreground shadow-md" 
-                    : "hover:bg-sidebar-accent"
+        {navigationGroups.map((group) => (
+          <Collapsible
+            key={group.id}
+            open={isCollapsed ? false : openGroups[group.id]}
+            onOpenChange={() => !isCollapsed && toggleGroup(group.id)}
+          >
+            {/* Group Header */}
+            {!isCollapsed && (
+              <CollapsibleTrigger className="flex w-full items-center justify-between px-3 py-2 text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wider hover:text-sidebar-foreground transition-colors">
+                <span>{isRussian ? group.titleRu : group.title}</span>
+                {openGroups[group.id] ? (
+                  <ChevronDown className="h-3 w-3" />
+                ) : (
+                  <ChevronRight className="h-3 w-3" />
                 )}
-              >
-                <div className="flex items-center gap-3 w-full">
-                  <div className={cn(
-                    "flex h-9 w-9 items-center justify-center rounded-lg shrink-0",
-                    isActive(item.path) 
-                      ? "bg-primary-foreground/20" 
-                      : "bg-sidebar-accent"
-                  )}>
-                    <item.icon className="h-5 w-5" />
-                  </div>
-                  {!isCollapsed && (
-                    <div className="flex flex-col flex-1 min-w-0">
-                      <span className="font-semibold text-sm">
-                        {isRussian ? item.titleRu : item.title}
-                      </span>
-                      <span className={cn(
-                        "text-xs truncate",
+              </CollapsibleTrigger>
+            )}
+
+            <CollapsibleContent className="space-y-1">
+              <SidebarMenu>
+                {group.items.map((item) => (
+                  <SidebarMenuItem key={item.path}>
+                    <SidebarMenuButton
+                      onClick={() => navigate(item.path)}
+                      isActive={isActive(item.path)}
+                      tooltip={isRussian ? item.titleRu : item.title}
+                      className={cn(
+                        "h-auto py-2.5 px-3 transition-all duration-200 rounded-xl",
                         isActive(item.path) 
-                          ? "text-primary-foreground/70" 
-                          : "text-sidebar-foreground/60"
-                      )}>
-                        {isRussian ? item.descriptionRu : item.description}
-                      </span>
-                    </div>
-                  )}
-                  {!isCollapsed && (
-                    <ChevronRight className={cn(
-                      "h-4 w-4 shrink-0",
-                      isActive(item.path) 
-                        ? "text-primary-foreground/50" 
-                        : "text-sidebar-foreground/30"
-                    )} />
-                  )}
-                </div>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
+                          ? "bg-primary text-primary-foreground shadow-md" 
+                          : "hover:bg-sidebar-accent"
+                      )}
+                    >
+                      <div className="flex items-center gap-3 w-full">
+                        <div className={cn(
+                          "flex h-8 w-8 items-center justify-center rounded-lg shrink-0",
+                          isActive(item.path) 
+                            ? "bg-primary-foreground/20" 
+                            : "bg-sidebar-accent"
+                        )}>
+                          <item.icon className="h-4 w-4" />
+                        </div>
+                        {!isCollapsed && (
+                          <span className="font-medium text-sm truncate">
+                            {isRussian ? item.titleRu : item.title}
+                          </span>
+                        )}
+                      </div>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </CollapsibleContent>
+
+            {/* In collapsed mode, show items without group headers */}
+            {isCollapsed && (
+              <SidebarMenu className="space-y-1">
+                {group.items.map((item) => (
+                  <SidebarMenuItem key={item.path}>
+                    <SidebarMenuButton
+                      onClick={() => navigate(item.path)}
+                      isActive={isActive(item.path)}
+                      tooltip={isRussian ? item.titleRu : item.title}
+                      className={cn(
+                        "h-auto py-2.5 px-3 transition-all duration-200 rounded-xl",
+                        isActive(item.path) 
+                          ? "bg-primary text-primary-foreground shadow-md" 
+                          : "hover:bg-sidebar-accent"
+                      )}
+                    >
+                      <div className="flex items-center justify-center w-full">
+                        <div className={cn(
+                          "flex h-8 w-8 items-center justify-center rounded-lg",
+                          isActive(item.path) 
+                            ? "bg-primary-foreground/20" 
+                            : "bg-sidebar-accent"
+                        )}>
+                          <item.icon className="h-4 w-4" />
+                        </div>
+                      </div>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            )}
+
+            {/* Divider between groups */}
+            {!isCollapsed && group.id !== 'system' && (
+              <div className="my-3 mx-3 h-px bg-sidebar-border/50" />
+            )}
+          </Collapsible>
+        ))}
       </SidebarContent>
 
       {/* Footer */}
