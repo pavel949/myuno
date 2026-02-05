@@ -17,6 +17,7 @@ import {
   FolderTree,
   TrendingUp,
   HardHat,
+  Sparkles,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -147,6 +148,14 @@ const navigationItems: NavItem[] = [
     icon: FolderTree,
     description: 'Categories & configs',
     descriptionRu: 'Справочники и конфиги'
+  },
+  { 
+    title: 'Life Situations', 
+    titleRu: 'Life Situations',
+    path: '/admin/life-situations', 
+    icon: Sparkles,
+    description: 'Contextual navigation',
+    descriptionRu: 'Контекстная навигация'
   },
   { 
     title: 'Control', 

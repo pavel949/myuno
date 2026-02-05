@@ -316,6 +316,10 @@ const AdminIntake = lazy(() => import('@/pages/admin/AdminIntake'));
 const AdminIntakeConfigs = lazy(() => import('@/pages/admin/AdminIntakeConfigs'));
 const AdminLeadConfigs = lazy(() => import('@/pages/admin/AdminLeadConfigs'));
 const AdminVendorProspects = lazy(() => import('@/pages/admin/AdminVendorProspects'));
+const AdminLifeSituations = lazy(() => import('@/pages/admin/AdminLifeSituations'));
+
+// Life Flow public page
+const LifeFlowPage = lazy(() => import('@/pages/LifeFlowPage'));
 const MarketingDashboard = lazy(() => import('@/pages/admin/marketing/MarketingDashboard'));
 
 // Experience Categories Management
@@ -528,6 +532,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/support/tickets/:ticketId" element={<LazyPage><TicketDetail /></LazyPage>} />
         <Route path="/install" element={<LazyPage><Install /></LazyPage>} />
         <Route path="/booking/advance-requested" element={<LazyPage><AdvanceRequested /></LazyPage>} />
+        
+        {/* Life Flow - Contextual navigation by life situation */}
+        <Route path="/life-flow/:code" element={<LazyPage><LifeFlowPage /></LazyPage>} />
         
         {/* List With Us - Become a Host/Vendor */}
         <Route path="/list-with-us" element={<ListWithUsPage />} />
@@ -798,6 +805,8 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/admin/marketing" element={<MarketingDashboard />} />
           {/* Experience Categories */}
           <Route path="/admin/experience-categories" element={<ExperienceCategoriesPage />} />
+          {/* Life Situations Management */}
+          <Route path="/admin/life-situations" element={<AdminLifeSituations />} />
         </Route>
         
         {/* Staff Routes - Protected */}
