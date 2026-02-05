@@ -8092,6 +8092,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "owner_properties_marketplace_property_id_fkey"
+            columns: ["marketplace_property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_properties_marketplace_property_id_fkey"
+            columns: ["marketplace_property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "owner_properties_pm_company_id_fkey"
             columns: ["pm_company_id"]
             isOneToOne: false
@@ -9238,6 +9252,7 @@ export type Database = {
       }
       properties: {
         Row: {
+          acquisition_costs: number | null
           address: string | null
           amenities: string[] | null
           approval_status: string | null
@@ -9245,52 +9260,124 @@ export type Database = {
           available_from: string | null
           bathrooms: number | null
           bedrooms: number | null
+          beds: Json | null
+          building_management_contact: string | null
+          building_name: string | null
+          building_year: number | null
+          cancellation_policy: string | null
+          chanote_number: string | null
+          check_in_time: string | null
+          check_out_time: string | null
+          cleaning_frequency: string | null
+          cleaning_included: boolean | null
           commission_rate: number | null
           cover_image: string | null
           created_at: string
           created_by_uno_team: boolean | null
           currency: string | null
+          deposit_amount: number | null
+          deposit_currency: string | null
+          deposit_type: string | null
           description_en: string | null
           description_ru: string | null
           district: string | null
+          electricity_included: boolean | null
+          electricity_meter_id: string | null
+          electricity_metering: string | null
+          electricity_notes: string | null
+          electricity_notes_ru: string | null
+          electricity_provider: string | null
+          electricity_unit_price: number | null
           equipment: string[] | null
+          extra_cleaning_price: number | null
+          extra_services: Json | null
           floor: number | null
           furnishing_level: string | null
           highlights: string[] | null
+          house_rules: string | null
+          house_rules_ru: string | null
+          ical_export_enabled: boolean | null
+          ical_last_sync: string | null
+          ical_token: string | null
           id: string
           images: string[] | null
+          included_services: Json | null
           instant_booking: boolean | null
           internal_name: string | null
           is_active: boolean | null
           is_featured: boolean | null
+          is_rented: boolean | null
           is_verified: boolean | null
+          juristic_office_contact: string | null
           lat: number | null
+          legacy_owner_property_id: string | null
+          linen_change_frequency: string | null
+          linen_change_price: number | null
           listing_modes: string[] | null
           listing_type: string
           lng: number | null
           location_id: string | null
+          management_type: string | null
           max_guests: number | null
           min_stay_nights: number | null
+          monthly_discount: number | null
+          mortgage_amount: number | null
+          mortgage_bank: string | null
+          mortgage_interest_rate: number | null
+          mortgage_monthly_payment: number | null
+          notes: string | null
+          owner_id: string | null
           ownership_form: string | null
+          ownership_type: string | null
+          parking_spaces: number | null
+          parking_type: string | null
+          pet_deposit: number | null
+          pet_monthly_fee: number | null
+          pet_policy: string | null
+          pool_size: string | null
           price: number | null
+          price_per_night: number | null
           price_period: string | null
           project_id: string | null
           property_type: string
           provider_id: string | null
+          purchase_currency: string | null
+          purchase_date: string | null
+          purchase_price: number | null
           rating: number | null
           rejection_reason: string | null
+          rental_platform: string | null
           review_count: number | null
           reviewed_at: string | null
           reviewed_by: string | null
+          rooms: Json | null
           sale_price: number | null
+          seasonal_pricing: Json | null
+          smoking_policy: string | null
+          status: string | null
+          tabien_baan: string | null
+          title: string | null
           title_en: string
           title_ru: string
+          total_floors: number | null
           unit_number: string | null
           uno_team_creator_id: string | null
           updated_at: string
+          verified_at: string | null
+          verified_by: string | null
           view_type: string | null
+          water_included: boolean | null
+          water_meter_id: string | null
+          water_notes: string | null
+          water_notes_ru: string | null
+          water_unit_price: number | null
+          weekly_discount: number | null
+          wifi_included: boolean | null
+          wifi_provider: string | null
+          wifi_speed: string | null
         }
         Insert: {
+          acquisition_costs?: number | null
           address?: string | null
           amenities?: string[] | null
           approval_status?: string | null
@@ -9298,52 +9385,124 @@ export type Database = {
           available_from?: string | null
           bathrooms?: number | null
           bedrooms?: number | null
+          beds?: Json | null
+          building_management_contact?: string | null
+          building_name?: string | null
+          building_year?: number | null
+          cancellation_policy?: string | null
+          chanote_number?: string | null
+          check_in_time?: string | null
+          check_out_time?: string | null
+          cleaning_frequency?: string | null
+          cleaning_included?: boolean | null
           commission_rate?: number | null
           cover_image?: string | null
           created_at?: string
           created_by_uno_team?: boolean | null
           currency?: string | null
+          deposit_amount?: number | null
+          deposit_currency?: string | null
+          deposit_type?: string | null
           description_en?: string | null
           description_ru?: string | null
           district?: string | null
+          electricity_included?: boolean | null
+          electricity_meter_id?: string | null
+          electricity_metering?: string | null
+          electricity_notes?: string | null
+          electricity_notes_ru?: string | null
+          electricity_provider?: string | null
+          electricity_unit_price?: number | null
           equipment?: string[] | null
+          extra_cleaning_price?: number | null
+          extra_services?: Json | null
           floor?: number | null
           furnishing_level?: string | null
           highlights?: string[] | null
+          house_rules?: string | null
+          house_rules_ru?: string | null
+          ical_export_enabled?: boolean | null
+          ical_last_sync?: string | null
+          ical_token?: string | null
           id?: string
           images?: string[] | null
+          included_services?: Json | null
           instant_booking?: boolean | null
           internal_name?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
+          is_rented?: boolean | null
           is_verified?: boolean | null
+          juristic_office_contact?: string | null
           lat?: number | null
+          legacy_owner_property_id?: string | null
+          linen_change_frequency?: string | null
+          linen_change_price?: number | null
           listing_modes?: string[] | null
           listing_type: string
           lng?: number | null
           location_id?: string | null
+          management_type?: string | null
           max_guests?: number | null
           min_stay_nights?: number | null
+          monthly_discount?: number | null
+          mortgage_amount?: number | null
+          mortgage_bank?: string | null
+          mortgage_interest_rate?: number | null
+          mortgage_monthly_payment?: number | null
+          notes?: string | null
+          owner_id?: string | null
           ownership_form?: string | null
+          ownership_type?: string | null
+          parking_spaces?: number | null
+          parking_type?: string | null
+          pet_deposit?: number | null
+          pet_monthly_fee?: number | null
+          pet_policy?: string | null
+          pool_size?: string | null
           price?: number | null
+          price_per_night?: number | null
           price_period?: string | null
           project_id?: string | null
           property_type: string
           provider_id?: string | null
+          purchase_currency?: string | null
+          purchase_date?: string | null
+          purchase_price?: number | null
           rating?: number | null
           rejection_reason?: string | null
+          rental_platform?: string | null
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          rooms?: Json | null
           sale_price?: number | null
+          seasonal_pricing?: Json | null
+          smoking_policy?: string | null
+          status?: string | null
+          tabien_baan?: string | null
+          title?: string | null
           title_en: string
           title_ru: string
+          total_floors?: number | null
           unit_number?: string | null
           uno_team_creator_id?: string | null
           updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
           view_type?: string | null
+          water_included?: boolean | null
+          water_meter_id?: string | null
+          water_notes?: string | null
+          water_notes_ru?: string | null
+          water_unit_price?: number | null
+          weekly_discount?: number | null
+          wifi_included?: boolean | null
+          wifi_provider?: string | null
+          wifi_speed?: string | null
         }
         Update: {
+          acquisition_costs?: number | null
           address?: string | null
           amenities?: string[] | null
           approval_status?: string | null
@@ -9351,50 +9510,121 @@ export type Database = {
           available_from?: string | null
           bathrooms?: number | null
           bedrooms?: number | null
+          beds?: Json | null
+          building_management_contact?: string | null
+          building_name?: string | null
+          building_year?: number | null
+          cancellation_policy?: string | null
+          chanote_number?: string | null
+          check_in_time?: string | null
+          check_out_time?: string | null
+          cleaning_frequency?: string | null
+          cleaning_included?: boolean | null
           commission_rate?: number | null
           cover_image?: string | null
           created_at?: string
           created_by_uno_team?: boolean | null
           currency?: string | null
+          deposit_amount?: number | null
+          deposit_currency?: string | null
+          deposit_type?: string | null
           description_en?: string | null
           description_ru?: string | null
           district?: string | null
+          electricity_included?: boolean | null
+          electricity_meter_id?: string | null
+          electricity_metering?: string | null
+          electricity_notes?: string | null
+          electricity_notes_ru?: string | null
+          electricity_provider?: string | null
+          electricity_unit_price?: number | null
           equipment?: string[] | null
+          extra_cleaning_price?: number | null
+          extra_services?: Json | null
           floor?: number | null
           furnishing_level?: string | null
           highlights?: string[] | null
+          house_rules?: string | null
+          house_rules_ru?: string | null
+          ical_export_enabled?: boolean | null
+          ical_last_sync?: string | null
+          ical_token?: string | null
           id?: string
           images?: string[] | null
+          included_services?: Json | null
           instant_booking?: boolean | null
           internal_name?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
+          is_rented?: boolean | null
           is_verified?: boolean | null
+          juristic_office_contact?: string | null
           lat?: number | null
+          legacy_owner_property_id?: string | null
+          linen_change_frequency?: string | null
+          linen_change_price?: number | null
           listing_modes?: string[] | null
           listing_type?: string
           lng?: number | null
           location_id?: string | null
+          management_type?: string | null
           max_guests?: number | null
           min_stay_nights?: number | null
+          monthly_discount?: number | null
+          mortgage_amount?: number | null
+          mortgage_bank?: string | null
+          mortgage_interest_rate?: number | null
+          mortgage_monthly_payment?: number | null
+          notes?: string | null
+          owner_id?: string | null
           ownership_form?: string | null
+          ownership_type?: string | null
+          parking_spaces?: number | null
+          parking_type?: string | null
+          pet_deposit?: number | null
+          pet_monthly_fee?: number | null
+          pet_policy?: string | null
+          pool_size?: string | null
           price?: number | null
+          price_per_night?: number | null
           price_period?: string | null
           project_id?: string | null
           property_type?: string
           provider_id?: string | null
+          purchase_currency?: string | null
+          purchase_date?: string | null
+          purchase_price?: number | null
           rating?: number | null
           rejection_reason?: string | null
+          rental_platform?: string | null
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          rooms?: Json | null
           sale_price?: number | null
+          seasonal_pricing?: Json | null
+          smoking_policy?: string | null
+          status?: string | null
+          tabien_baan?: string | null
+          title?: string | null
           title_en?: string
           title_ru?: string
+          total_floors?: number | null
           unit_number?: string | null
           uno_team_creator_id?: string | null
           updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
           view_type?: string | null
+          water_included?: boolean | null
+          water_meter_id?: string | null
+          water_notes?: string | null
+          water_notes_ru?: string | null
+          water_unit_price?: number | null
+          weekly_discount?: number | null
+          wifi_included?: boolean | null
+          wifi_provider?: string | null
+          wifi_speed?: string | null
         }
         Relationships: [
           {
@@ -10332,6 +10562,20 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_inquiries_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_inquiries_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
             referencedColumns: ["id"]
           },
         ]
@@ -12798,6 +13042,20 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_orders_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_orders_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
             referencedColumns: ["id"]
           },
           {
@@ -16913,7 +17171,595 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      v_marketplace_listings: {
+        Row: {
+          address: string | null
+          amenities: string[] | null
+          approval_status: string | null
+          area_sqm: number | null
+          available_from: string | null
+          bathrooms: number | null
+          bedrooms: number | null
+          cancellation_policy: string | null
+          check_in_time: string | null
+          check_out_time: string | null
+          cover_image: string | null
+          created_at: string | null
+          currency: string | null
+          deposit_amount: number | null
+          deposit_currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          district: string | null
+          equipment: string[] | null
+          floor: number | null
+          furnishing_level: string | null
+          highlights: string[] | null
+          house_rules: string | null
+          house_rules_ru: string | null
+          id: string | null
+          images: string[] | null
+          instant_booking: boolean | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          lat: number | null
+          listing_modes: string[] | null
+          listing_type: string | null
+          lng: number | null
+          max_guests: number | null
+          min_stay_nights: number | null
+          monthly_discount: number | null
+          owner_id: string | null
+          price: number | null
+          price_per_night: number | null
+          price_period: string | null
+          project_id: string | null
+          property_type: string | null
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          sale_price: number | null
+          seasonal_pricing: Json | null
+          title: string | null
+          title_en: string | null
+          title_ru: string | null
+          unit_number: string | null
+          updated_at: string | null
+          view_type: string | null
+          weekly_discount: number | null
+        }
+        Insert: {
+          address?: string | null
+          amenities?: string[] | null
+          approval_status?: string | null
+          area_sqm?: number | null
+          available_from?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          cancellation_policy?: string | null
+          check_in_time?: string | null
+          check_out_time?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          deposit_amount?: number | null
+          deposit_currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          equipment?: string[] | null
+          floor?: number | null
+          furnishing_level?: string | null
+          highlights?: string[] | null
+          house_rules?: string | null
+          house_rules_ru?: string | null
+          id?: string | null
+          images?: string[] | null
+          instant_booking?: boolean | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          listing_modes?: string[] | null
+          listing_type?: string | null
+          lng?: number | null
+          max_guests?: number | null
+          min_stay_nights?: number | null
+          monthly_discount?: number | null
+          owner_id?: string | null
+          price?: number | null
+          price_per_night?: number | null
+          price_period?: string | null
+          project_id?: string | null
+          property_type?: string | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          sale_price?: number | null
+          seasonal_pricing?: Json | null
+          title?: string | null
+          title_en?: string | null
+          title_ru?: string | null
+          unit_number?: string | null
+          updated_at?: string | null
+          view_type?: string | null
+          weekly_discount?: number | null
+        }
+        Update: {
+          address?: string | null
+          amenities?: string[] | null
+          approval_status?: string | null
+          area_sqm?: number | null
+          available_from?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          cancellation_policy?: string | null
+          check_in_time?: string | null
+          check_out_time?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          deposit_amount?: number | null
+          deposit_currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          equipment?: string[] | null
+          floor?: number | null
+          furnishing_level?: string | null
+          highlights?: string[] | null
+          house_rules?: string | null
+          house_rules_ru?: string | null
+          id?: string | null
+          images?: string[] | null
+          instant_booking?: boolean | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          listing_modes?: string[] | null
+          listing_type?: string | null
+          lng?: number | null
+          max_guests?: number | null
+          min_stay_nights?: number | null
+          monthly_discount?: number | null
+          owner_id?: string | null
+          price?: number | null
+          price_per_night?: number | null
+          price_period?: string | null
+          project_id?: string | null
+          property_type?: string | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          sale_price?: number | null
+          seasonal_pricing?: Json | null
+          title?: string | null
+          title_en?: string | null
+          title_ru?: string | null
+          unit_number?: string | null
+          updated_at?: string | null
+          view_type?: string | null
+          weekly_discount?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_properties_project"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_owner_properties: {
+        Row: {
+          acquisition_costs: number | null
+          address: string | null
+          amenities: string[] | null
+          approval_status: string | null
+          area_sqm: number | null
+          available_from: string | null
+          bathrooms: number | null
+          bedrooms: number | null
+          beds: Json | null
+          building_management_contact: string | null
+          building_name: string | null
+          building_year: number | null
+          cancellation_policy: string | null
+          chanote_number: string | null
+          check_in_time: string | null
+          check_out_time: string | null
+          cleaning_frequency: string | null
+          cleaning_included: boolean | null
+          commission_rate: number | null
+          cover_image: string | null
+          created_at: string | null
+          created_by_uno_team: boolean | null
+          currency: string | null
+          deposit_amount: number | null
+          deposit_currency: string | null
+          deposit_type: string | null
+          description_en: string | null
+          description_ru: string | null
+          district: string | null
+          electricity_included: boolean | null
+          electricity_meter_id: string | null
+          electricity_metering: string | null
+          electricity_notes: string | null
+          electricity_notes_ru: string | null
+          electricity_provider: string | null
+          electricity_unit_price: number | null
+          equipment: string[] | null
+          extra_cleaning_price: number | null
+          extra_services: Json | null
+          floor: number | null
+          furnishing_level: string | null
+          highlights: string[] | null
+          house_rules: string | null
+          house_rules_ru: string | null
+          ical_export_enabled: boolean | null
+          ical_last_sync: string | null
+          ical_token: string | null
+          id: string | null
+          images: string[] | null
+          included_services: Json | null
+          instant_booking: boolean | null
+          internal_name: string | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_rented: boolean | null
+          is_verified: boolean | null
+          juristic_office_contact: string | null
+          lat: number | null
+          legacy_owner_property_id: string | null
+          linen_change_frequency: string | null
+          linen_change_price: number | null
+          listing_modes: string[] | null
+          listing_type: string | null
+          lng: number | null
+          location_id: string | null
+          management_type: string | null
+          max_guests: number | null
+          min_stay_nights: number | null
+          monthly_discount: number | null
+          mortgage_amount: number | null
+          mortgage_bank: string | null
+          mortgage_interest_rate: number | null
+          mortgage_monthly_payment: number | null
+          notes: string | null
+          owner_id: string | null
+          ownership_form: string | null
+          ownership_type: string | null
+          parking_spaces: number | null
+          parking_type: string | null
+          pet_deposit: number | null
+          pet_monthly_fee: number | null
+          pet_policy: string | null
+          pool_size: string | null
+          price: number | null
+          price_per_night: number | null
+          price_period: string | null
+          project_id: string | null
+          property_type: string | null
+          provider_id: string | null
+          purchase_currency: string | null
+          purchase_date: string | null
+          purchase_price: number | null
+          rating: number | null
+          rejection_reason: string | null
+          rental_platform: string | null
+          review_count: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          rooms: Json | null
+          sale_price: number | null
+          seasonal_pricing: Json | null
+          smoking_policy: string | null
+          status: string | null
+          tabien_baan: string | null
+          title: string | null
+          title_en: string | null
+          title_ru: string | null
+          total_floors: number | null
+          unit_number: string | null
+          uno_team_creator_id: string | null
+          updated_at: string | null
+          verified_at: string | null
+          verified_by: string | null
+          view_type: string | null
+          water_included: boolean | null
+          water_meter_id: string | null
+          water_notes: string | null
+          water_notes_ru: string | null
+          water_unit_price: number | null
+          weekly_discount: number | null
+          wifi_included: boolean | null
+          wifi_provider: string | null
+          wifi_speed: string | null
+        }
+        Insert: {
+          acquisition_costs?: number | null
+          address?: string | null
+          amenities?: string[] | null
+          approval_status?: string | null
+          area_sqm?: number | null
+          available_from?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          beds?: Json | null
+          building_management_contact?: string | null
+          building_name?: string | null
+          building_year?: number | null
+          cancellation_policy?: string | null
+          chanote_number?: string | null
+          check_in_time?: string | null
+          check_out_time?: string | null
+          cleaning_frequency?: string | null
+          cleaning_included?: boolean | null
+          commission_rate?: number | null
+          cover_image?: string | null
+          created_at?: string | null
+          created_by_uno_team?: boolean | null
+          currency?: string | null
+          deposit_amount?: number | null
+          deposit_currency?: string | null
+          deposit_type?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          electricity_included?: boolean | null
+          electricity_meter_id?: string | null
+          electricity_metering?: string | null
+          electricity_notes?: string | null
+          electricity_notes_ru?: string | null
+          electricity_provider?: string | null
+          electricity_unit_price?: number | null
+          equipment?: string[] | null
+          extra_cleaning_price?: number | null
+          extra_services?: Json | null
+          floor?: number | null
+          furnishing_level?: string | null
+          highlights?: string[] | null
+          house_rules?: string | null
+          house_rules_ru?: string | null
+          ical_export_enabled?: boolean | null
+          ical_last_sync?: string | null
+          ical_token?: string | null
+          id?: string | null
+          images?: string[] | null
+          included_services?: Json | null
+          instant_booking?: boolean | null
+          internal_name?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_rented?: boolean | null
+          is_verified?: boolean | null
+          juristic_office_contact?: string | null
+          lat?: number | null
+          legacy_owner_property_id?: string | null
+          linen_change_frequency?: string | null
+          linen_change_price?: number | null
+          listing_modes?: string[] | null
+          listing_type?: string | null
+          lng?: number | null
+          location_id?: string | null
+          management_type?: string | null
+          max_guests?: number | null
+          min_stay_nights?: number | null
+          monthly_discount?: number | null
+          mortgage_amount?: number | null
+          mortgage_bank?: string | null
+          mortgage_interest_rate?: number | null
+          mortgage_monthly_payment?: number | null
+          notes?: string | null
+          owner_id?: string | null
+          ownership_form?: string | null
+          ownership_type?: string | null
+          parking_spaces?: number | null
+          parking_type?: string | null
+          pet_deposit?: number | null
+          pet_monthly_fee?: number | null
+          pet_policy?: string | null
+          pool_size?: string | null
+          price?: number | null
+          price_per_night?: number | null
+          price_period?: string | null
+          project_id?: string | null
+          property_type?: string | null
+          provider_id?: string | null
+          purchase_currency?: string | null
+          purchase_date?: string | null
+          purchase_price?: number | null
+          rating?: number | null
+          rejection_reason?: string | null
+          rental_platform?: string | null
+          review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          rooms?: Json | null
+          sale_price?: number | null
+          seasonal_pricing?: Json | null
+          smoking_policy?: string | null
+          status?: string | null
+          tabien_baan?: string | null
+          title?: string | null
+          title_en?: string | null
+          title_ru?: string | null
+          total_floors?: number | null
+          unit_number?: string | null
+          uno_team_creator_id?: string | null
+          updated_at?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+          view_type?: string | null
+          water_included?: boolean | null
+          water_meter_id?: string | null
+          water_notes?: string | null
+          water_notes_ru?: string | null
+          water_unit_price?: number | null
+          weekly_discount?: number | null
+          wifi_included?: boolean | null
+          wifi_provider?: string | null
+          wifi_speed?: string | null
+        }
+        Update: {
+          acquisition_costs?: number | null
+          address?: string | null
+          amenities?: string[] | null
+          approval_status?: string | null
+          area_sqm?: number | null
+          available_from?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          beds?: Json | null
+          building_management_contact?: string | null
+          building_name?: string | null
+          building_year?: number | null
+          cancellation_policy?: string | null
+          chanote_number?: string | null
+          check_in_time?: string | null
+          check_out_time?: string | null
+          cleaning_frequency?: string | null
+          cleaning_included?: boolean | null
+          commission_rate?: number | null
+          cover_image?: string | null
+          created_at?: string | null
+          created_by_uno_team?: boolean | null
+          currency?: string | null
+          deposit_amount?: number | null
+          deposit_currency?: string | null
+          deposit_type?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          electricity_included?: boolean | null
+          electricity_meter_id?: string | null
+          electricity_metering?: string | null
+          electricity_notes?: string | null
+          electricity_notes_ru?: string | null
+          electricity_provider?: string | null
+          electricity_unit_price?: number | null
+          equipment?: string[] | null
+          extra_cleaning_price?: number | null
+          extra_services?: Json | null
+          floor?: number | null
+          furnishing_level?: string | null
+          highlights?: string[] | null
+          house_rules?: string | null
+          house_rules_ru?: string | null
+          ical_export_enabled?: boolean | null
+          ical_last_sync?: string | null
+          ical_token?: string | null
+          id?: string | null
+          images?: string[] | null
+          included_services?: Json | null
+          instant_booking?: boolean | null
+          internal_name?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_rented?: boolean | null
+          is_verified?: boolean | null
+          juristic_office_contact?: string | null
+          lat?: number | null
+          legacy_owner_property_id?: string | null
+          linen_change_frequency?: string | null
+          linen_change_price?: number | null
+          listing_modes?: string[] | null
+          listing_type?: string | null
+          lng?: number | null
+          location_id?: string | null
+          management_type?: string | null
+          max_guests?: number | null
+          min_stay_nights?: number | null
+          monthly_discount?: number | null
+          mortgage_amount?: number | null
+          mortgage_bank?: string | null
+          mortgage_interest_rate?: number | null
+          mortgage_monthly_payment?: number | null
+          notes?: string | null
+          owner_id?: string | null
+          ownership_form?: string | null
+          ownership_type?: string | null
+          parking_spaces?: number | null
+          parking_type?: string | null
+          pet_deposit?: number | null
+          pet_monthly_fee?: number | null
+          pet_policy?: string | null
+          pool_size?: string | null
+          price?: number | null
+          price_per_night?: number | null
+          price_period?: string | null
+          project_id?: string | null
+          property_type?: string | null
+          provider_id?: string | null
+          purchase_currency?: string | null
+          purchase_date?: string | null
+          purchase_price?: number | null
+          rating?: number | null
+          rejection_reason?: string | null
+          rental_platform?: string | null
+          review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          rooms?: Json | null
+          sale_price?: number | null
+          seasonal_pricing?: Json | null
+          smoking_policy?: string | null
+          status?: string | null
+          tabien_baan?: string | null
+          title?: string | null
+          title_en?: string | null
+          title_ru?: string | null
+          total_floors?: number | null
+          unit_number?: string | null
+          uno_team_creator_id?: string | null
+          updated_at?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+          view_type?: string | null
+          water_included?: boolean | null
+          water_meter_id?: string | null
+          water_notes?: string | null
+          water_notes_ru?: string | null
+          water_unit_price?: number | null
+          weekly_discount?: number | null
+          wifi_included?: boolean | null
+          wifi_provider?: string | null
+          wifi_speed?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_properties_project"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       add_team_points: {

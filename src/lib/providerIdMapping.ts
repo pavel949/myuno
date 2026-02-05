@@ -35,9 +35,8 @@ export const PROVIDER_ID_MAPPING: Record<string, ProviderIdConfig> = {
   'lawyers': { field: 'provider_id', type: 'provider' },
   'education_centers': { field: 'provider_id', type: 'provider' },
   
-  // Properties use owner_id (links to property owners/users)
-  'properties': { field: 'provider_id', type: 'provider' },
-  'owner_properties': { field: 'owner_id', type: 'owner' },
+  // Properties - unified table supports both owner_id and provider_id
+  'properties': { field: 'owner_id', type: 'owner' },
   
   // Flower shops and bouquets
   'flower_shops': { field: 'provider_id', type: 'provider' },

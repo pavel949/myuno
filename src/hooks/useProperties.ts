@@ -268,14 +268,14 @@ export function useProperty(id?: string) {
   });
 }
 
-// Get property with linked owner data (rental terms) and project info
+// Get property with rental terms (unified table - no JOIN needed)
 export function usePropertyWithRentalTerms(marketplacePropertyId?: string) {
   return useQuery({
     queryKey: ['property-with-terms', marketplacePropertyId],
     queryFn: async () => {
       if (!marketplacePropertyId) return null;
 
-      // Get property from marketplace
+      // Get property from unified table - all data is now in one place
       const { data: property, error: propError } = await supabase
         .from('properties')
         .select('*')
@@ -298,84 +298,45 @@ export function usePropertyWithRentalTerms(marketplacePropertyId?: string) {
         projectData = project as PropertyProject | null;
       }
 
-      // Try to get linked owner property for rental terms (all extended fields)
-      const { data: ownerProperty } = await supabase
-        .from('owner_properties')
-        .select(`
-          price_per_night,
-          min_stay_nights,
-          max_guests,
-          deposit_amount,
-          deposit_currency,
-          deposit_type,
-          check_in_time,
-          check_out_time,
-          house_rules,
-          house_rules_ru,
-          cancellation_policy,
-          instant_booking,
-          weekly_discount,
-          monthly_discount,
-          seasonal_pricing,
-          electricity_included,
-          electricity_unit_price,
-          electricity_provider,
-          electricity_metering,
-          electricity_notes,
-          electricity_notes_ru,
-          water_included,
-          water_unit_price,
-          water_notes,
-          water_notes_ru,
-          included_services,
-          extra_services,
-          cleaning_included,
-          cleaning_frequency,
-          extra_cleaning_price,
-          linen_change_price,
-          linen_change_frequency,
-          early_checkin_price,
-          late_checkout_price,
-          late_checkout_penalty,
-          key_handover,
-          check_in_instructions,
-          check_in_instructions_ru,
-          transfer_available,
-          transfer_airport_price,
-          transfer_notes,
-          transfer_notes_ru,
-          extra_guest_price,
-          extra_guest_threshold,
-          internet_speed,
-          internet_provider,
-          manager_name,
-          manager_phone,
-          manager_line_id,
-          parking_included,
-          parking_spaces,
-          parking_notes,
-          pets_allowed,
-          pet_deposit,
-          pet_notes,
-          pet_notes_ru,
-          parties_allowed,
-          max_party_guests,
-          quiet_hours_start,
-          quiet_hours_end,
-          children_friendly,
-          has_crib,
-          has_high_chair,
-          smoking_penalty,
-          emergency_contact_name,
-          emergency_contact_phone,
-          host_languages
-        `)
-        .eq('marketplace_property_id', marketplacePropertyId)
-        .single();
+      // With unified table, rental terms are directly on the property
+      const rentalTerms: PropertyRentalTerms = {
+        price_per_night: property.price_per_night,
+        min_stay_nights: property.min_stay_nights,
+        max_guests: property.max_guests,
+        deposit_amount: property.deposit_amount,
+        deposit_currency: property.deposit_currency,
+        deposit_type: property.deposit_type,
+        check_in_time: property.check_in_time,
+        check_out_time: property.check_out_time,
+        house_rules: property.house_rules,
+        house_rules_ru: property.house_rules_ru,
+        cancellation_policy: property.cancellation_policy,
+        instant_booking: property.instant_booking,
+        weekly_discount: property.weekly_discount,
+        monthly_discount: property.monthly_discount,
+        seasonal_pricing: property.seasonal_pricing as Record<string, unknown> | undefined,
+        electricity_included: property.electricity_included,
+        electricity_unit_price: property.electricity_unit_price,
+        electricity_provider: property.electricity_provider,
+        electricity_metering: property.electricity_metering,
+        electricity_notes: property.electricity_notes,
+        electricity_notes_ru: property.electricity_notes_ru,
+        water_included: property.water_included,
+        water_unit_price: property.water_unit_price,
+        water_notes: property.water_notes,
+        water_notes_ru: property.water_notes_ru,
+        included_services: property.included_services as string[] | string | undefined,
+        extra_services: property.extra_services as Array<{ id: string; price: number; currency: string }> | string | undefined,
+        cleaning_included: property.cleaning_included,
+        cleaning_frequency: property.cleaning_frequency,
+        extra_cleaning_price: property.extra_cleaning_price,
+        linen_change_price: property.linen_change_price,
+        linen_change_frequency: property.linen_change_frequency,
+      };
 
       return {
         ...property,
-        rentalTerms: ownerProperty || null,
+        rentalTerms,
         project: projectData,
       } as Property & { rentalTerms: PropertyRentalTerms | null; project: PropertyProject | null };
     },
