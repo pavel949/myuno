@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Plane, MapPin, Clock, Users, Check, ArrowRight, Briefcase, Shield, Star, ChevronLeft, Loader2, User } from 'lucide-react';
+import { Plane, MapPin, Users, Check, ArrowRight, Briefcase, Shield, Star, ChevronLeft, Loader2, User, Calendar, Clock } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,11 +10,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useBooking } from '@/hooks/useBooking';
-import { useVehicleTypes, useTransportDestinations } from '@/hooks/useTransportConfig';
+import { useVehicleTypes } from '@/hooks/useTransportConfig';
 import { useProfile } from '@/hooks/useProfile';
 import { cn, transliterate } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const terminals = [
   { id: 'domestic', nameEn: 'Domestic Terminal', nameRu: 'Внутренний терминал', icon: '🏠' },
@@ -31,21 +32,18 @@ export default function AirportTransferBooking() {
   const { toast } = useToast();
   
   const { vehicleTypes, isLoading: isLoadingVehicles } = useVehicleTypes('airport_transfer');
-  const { destinations, isLoading: isLoadingDestinations } = useTransportDestinations('airport_transfer');
   const { createBooking, isSubmitting } = useBooking();
   const { profile } = useProfile();
 
   // Track if user manually edited the meeting sign name
   const meetingSignManuallyEdited = useRef(false);
 
-  const [step, setStep] = useState(1);
   const [isSuccess, setIsSuccess] = useState(false);
   
   const [formData, setFormData] = useState({
     direction: (searchParams.get('direction') as TransferDirection) || 'from-airport',
     terminal: '',
-    destination: '',
-    customAddress: '',
+    destinationAddress: '',
     flightNumber: '',
     arrivalDate: '',
     arrivalTime: '',
@@ -80,6 +78,11 @@ export default function AirportTransferBooking() {
     }
   }, [profile]);
 
+  const selectedVehicle = useMemo(() => 
+    vehicleTypes.find(v => v.id === formData.vehicleType),
+    [vehicleTypes, formData.vehicleType]
+  );
+
   // Auto-transliterate name for meeting sign (only if not manually edited)
   useEffect(() => {
     if (!meetingSignManuallyEdited.current && formData.name) {
@@ -90,18 +93,9 @@ export default function AirportTransferBooking() {
     }
   }, [formData.name]);
 
-  const selectedDestination = useMemo(() => 
-    destinations.find(d => d.id === formData.destination),
-    [destinations, formData.destination]
-  );
-  
-  const selectedVehicle = useMemo(() => 
-    vehicleTypes.find(v => v.id === formData.vehicleType),
-    [vehicleTypes, formData.vehicleType]
-  );
-  
-  const basePrice = selectedDestination?.base_price || 0;
-  const totalPrice = Math.round(basePrice * (selectedVehicle?.price_multiplier || 1));
+  // Base price for transfers (flat rate, can be fetched from config later)
+  const basePrice = selectedVehicle?.base_price || 800;
+  const totalPrice = basePrice;
 
   const handleDirectionChange = (dir: TransferDirection) => {
     setFormData({ ...formData, direction: dir });
@@ -118,10 +112,6 @@ export default function AirportTransferBooking() {
       navigate('/auth');
       return;
     }
-
-    const destinationAddress = formData.destination === 'custom' 
-      ? formData.customAddress 
-      : (language === 'ru' ? selectedDestination?.name_ru : selectedDestination?.name_en);
 
     const result = await createBooking({
       booking_type: 'transport',
@@ -142,7 +132,7 @@ export default function AirportTransferBooking() {
         },
         {
           address_type: formData.direction === 'from-airport' ? 'dropoff' : 'pickup',
-          address: destinationAddress || '',
+          address: formData.destinationAddress,
         },
       ],
       metadata: {
@@ -154,7 +144,7 @@ export default function AirportTransferBooking() {
         passengers: parseInt(formData.passengers),
         luggage: parseInt(formData.luggage),
         meeting_sign_name: formData.meetingSignName,
-        destination_address: destinationAddress,
+        destination_address: formData.destinationAddress,
       },
     });
 
@@ -184,17 +174,9 @@ export default function AirportTransferBooking() {
     }
   };
 
-  const canProceedStep1 = formData.direction && formData.terminal && formData.destination && 
-    (formData.destination !== 'custom' || formData.customAddress);
-  
-  const canProceedStep2 = formData.flightNumber && formData.arrivalDate && formData.arrivalTime && 
+  const canSubmit = formData.direction && formData.terminal && formData.destinationAddress &&
+    formData.flightNumber && formData.arrivalDate && formData.arrivalTime && 
     formData.passengers && formData.vehicleType;
-
-  // Get destination address for display
-  const destinationAddressDisplay = useMemo(() => {
-    if (formData.destination === 'custom') return formData.customAddress;
-    return language === 'ru' ? selectedDestination?.name_ru : selectedDestination?.name_en;
-  }, [formData.destination, formData.customAddress, selectedDestination, language]);
 
   if (isSuccess) {
     return (
@@ -240,7 +222,7 @@ export default function AirportTransferBooking() {
                   <p className="text-xs text-muted-foreground">
                     {language === 'ru' ? 'Адрес назначения' : 'Destination'}
                   </p>
-                  <p className="font-medium">{destinationAddressDisplay}</p>
+                  <p className="font-medium">{formData.destinationAddress}</p>
                 </div>
               </div>
             </div>
@@ -264,7 +246,7 @@ export default function AirportTransferBooking() {
     );
   }
 
-  if (isLoadingVehicles || isLoadingDestinations) {
+  if (isLoadingVehicles) {
     return (
       <AppLayout showBottomNav={false}>
         <div className="flex items-center justify-center min-h-[60vh]">
@@ -277,7 +259,7 @@ export default function AirportTransferBooking() {
   return (
     <AppLayout showBottomNav={false}>
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-primary/20 via-primary/10 to-background pb-6">
+      <div className="relative bg-gradient-to-br from-primary/20 via-primary/10 to-background pb-4">
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-20 -right-20 w-60 h-60 bg-primary/10 rounded-full blur-3xl" />
           <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-gold/10 rounded-full blur-2xl" />
@@ -286,7 +268,7 @@ export default function AirportTransferBooking() {
         <div className="relative px-4 pt-4">
           <div className="flex items-center gap-4 mb-4">
             <button 
-              onClick={() => step > 1 ? setStep(step - 1) : navigate('/transport')} 
+              onClick={() => navigate('/transport')} 
               className="w-10 h-10 flex items-center justify-center rounded-full bg-background/80 backdrop-blur-sm border border-border/50 text-foreground hover:bg-background transition-colors"
             >
               <ChevronLeft className="w-5 h-5" />
@@ -304,454 +286,301 @@ export default function AirportTransferBooking() {
               <span className="text-sm font-semibold text-gold">4.9</span>
             </div>
           </div>
-
-          {/* Progress Steps */}
-          <div className="flex items-center gap-2 mb-4">
-            {[1, 2, 3].map((s) => (
-              <div key={s} className="flex-1 flex items-center gap-2">
-                <div
-                  className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all",
-                    s < step ? "bg-primary text-primary-foreground" :
-                    s === step ? "bg-primary text-primary-foreground ring-4 ring-primary/20" :
-                    "bg-muted text-muted-foreground"
-                  )}
-                >
-                  {s < step ? <Check className="w-4 h-4" /> : s}
-                </div>
-                {s < 3 && (
-                  <div className={cn(
-                    "flex-1 h-1 rounded-full transition-colors",
-                    s < step ? "bg-primary" : "bg-muted"
-                  )} />
-                )}
-              </div>
-            ))}
-          </div>
-
-          <div className="flex justify-between text-xs text-muted-foreground mb-2">
-            <span className={cn(step >= 1 && "text-primary font-medium")}>
-              {language === 'ru' ? 'Маршрут' : 'Route'}
-            </span>
-            <span className={cn(step >= 2 && "text-primary font-medium")}>
-              {language === 'ru' ? 'Детали' : 'Details'}
-            </span>
-            <span className={cn(step >= 3 && "text-primary font-medium")}>
-              {language === 'ru' ? 'Оплата' : 'Payment'}
-            </span>
-          </div>
         </div>
       </div>
 
-      <div className="px-4 py-4">
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Step 1: Route */}
-          {step === 1 && (
-            <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
-              {/* Direction Toggle */}
-              <div className="space-y-3">
-                <Label className="text-sm font-medium text-muted-foreground">
-                  {language === 'ru' ? 'Направление' : 'Direction'}
-                </Label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => handleDirectionChange('from-airport')}
-                    className={cn(
-                      "p-4 rounded-2xl border-2 transition-all text-left relative overflow-hidden group",
-                      formData.direction === 'from-airport'
-                        ? "border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-lg shadow-primary/10"
-                        : "border-border/50 bg-card hover:border-primary/50"
-                    )}
-                  >
-                    {formData.direction === 'from-airport' && (
-                      <div className="absolute top-2 right-2">
-                        <Check className="w-4 h-4 text-primary" />
-                      </div>
-                    )}
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Plane className="w-4 h-4 text-primary" />
-                      </div>
-                      <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                        <MapPin className="w-4 h-4 text-muted-foreground" />
-                      </div>
+      <ScrollArea className="flex-1">
+        <div className="px-4 py-4 pb-32">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Direction Toggle */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-muted-foreground">
+                {language === 'ru' ? 'Направление' : 'Direction'}
+              </Label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleDirectionChange('from-airport')}
+                  className={cn(
+                    "p-3 rounded-xl border-2 transition-all text-left relative",
+                    formData.direction === 'from-airport'
+                      ? "border-primary bg-primary/10"
+                      : "border-border/50 bg-card hover:border-primary/50"
+                  )}
+                >
+                  {formData.direction === 'from-airport' && (
+                    <div className="absolute top-2 right-2">
+                      <Check className="w-3 h-3 text-primary" />
                     </div>
-                    <p className="font-semibold text-sm">
-                      {language === 'ru' ? 'Из аэропорта' : 'From Airport'}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {language === 'ru' ? 'Встретим с табличкой' : 'Meet & greet service'}
-                    </p>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDirectionChange('to-airport')}
-                    className={cn(
-                      "p-4 rounded-2xl border-2 transition-all text-left relative overflow-hidden group",
-                      formData.direction === 'to-airport'
-                        ? "border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-lg shadow-primary/10"
-                        : "border-border/50 bg-card hover:border-primary/50"
-                    )}
-                  >
-                    {formData.direction === 'to-airport' && (
-                      <div className="absolute top-2 right-2">
-                        <Check className="w-4 h-4 text-primary" />
-                      </div>
-                    )}
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                        <MapPin className="w-4 h-4 text-muted-foreground" />
-                      </div>
-                      <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Plane className="w-4 h-4 text-primary" />
-                      </div>
+                  )}
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <Plane className="w-4 h-4 text-primary" />
+                    <ArrowRight className="w-3 h-3 text-muted-foreground" />
+                    <MapPin className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                  <p className="font-medium text-sm">
+                    {language === 'ru' ? 'Из аэропорта' : 'From Airport'}
+                  </p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDirectionChange('to-airport')}
+                  className={cn(
+                    "p-3 rounded-xl border-2 transition-all text-left relative",
+                    formData.direction === 'to-airport'
+                      ? "border-primary bg-primary/10"
+                      : "border-border/50 bg-card hover:border-primary/50"
+                  )}
+                >
+                  {formData.direction === 'to-airport' && (
+                    <div className="absolute top-2 right-2">
+                      <Check className="w-3 h-3 text-primary" />
                     </div>
-                    <p className="font-semibold text-sm">
-                      {language === 'ru' ? 'В аэропорт' : 'To Airport'}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {language === 'ru' ? 'Заберём вовремя' : 'Pickup on time'}
-                    </p>
-                  </button>
-                </div>
+                  )}
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <MapPin className="w-4 h-4 text-muted-foreground" />
+                    <ArrowRight className="w-3 h-3 text-muted-foreground" />
+                    <Plane className="w-4 h-4 text-primary" />
+                  </div>
+                  <p className="font-medium text-sm">
+                    {language === 'ru' ? 'В аэропорт' : 'To Airport'}
+                  </p>
+                </button>
               </div>
+            </div>
 
-              {/* Terminal Selection */}
-              <div className="space-y-3">
-                <Label className="text-sm font-medium text-muted-foreground">
-                  {language === 'ru' ? 'Терминал' : 'Terminal'}
-                </Label>
-                <div className="grid grid-cols-2 gap-3">
-                  {terminals.map((terminal) => (
-                    <button
-                      key={terminal.id}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, terminal: terminal.id })}
-                      className={cn(
-                        "p-4 rounded-2xl border-2 transition-all text-center relative",
-                        formData.terminal === terminal.id
-                          ? "border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-lg shadow-primary/10"
-                          : "border-border/50 bg-card hover:border-primary/50"
-                      )}
-                    >
-                      {formData.terminal === terminal.id && (
-                        <div className="absolute top-2 right-2">
-                          <Check className="w-4 h-4 text-primary" />
-                        </div>
-                      )}
-                      <span className="text-2xl mb-2 block">{terminal.icon}</span>
-                      <p className="font-medium text-sm">
-                        {language === 'ru' ? terminal.nameRu : terminal.nameEn}
-                      </p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Destination */}
-              <div className="space-y-3">
-                <Label className="text-sm font-medium text-muted-foreground">
-                  {language === 'ru' ? 'Пункт назначения' : 'Destination'}
-                </Label>
-                <div className="grid grid-cols-2 gap-2">
-                  {destinations.map((dest) => (
-                    <button
-                      key={dest.id}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, destination: dest.id })}
-                      className={cn(
-                        "p-3 rounded-xl border-2 transition-all text-left",
-                        formData.destination === dest.id
-                          ? "border-primary bg-primary/10"
-                          : "border-border/50 bg-card hover:border-primary/50"
-                      )}
-                    >
-                      <p className="font-medium text-sm">
-                        {language === 'ru' ? dest.name_ru : dest.name_en}
-                      </p>
-                      <div className="flex items-center justify-between mt-1">
-                        <span className="text-xs text-muted-foreground">
-                          {dest.duration_minutes} min
-                        </span>
-                        <span className="text-sm font-semibold text-primary">
-                          ฿{dest.base_price}
-                        </span>
-                      </div>
-                    </button>
-                  ))}
+            {/* Terminal Selection */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-muted-foreground">
+                {language === 'ru' ? 'Терминал' : 'Terminal'}
+              </Label>
+              <div className="grid grid-cols-2 gap-2">
+                {terminals.map((terminal) => (
                   <button
+                    key={terminal.id}
                     type="button"
-                    onClick={() => setFormData({ ...formData, destination: 'custom' })}
+                    onClick={() => setFormData({ ...formData, terminal: terminal.id })}
                     className={cn(
-                      "p-3 rounded-xl border-2 transition-all text-left",
-                      formData.destination === 'custom'
+                      "p-3 rounded-xl border-2 transition-all text-center relative",
+                      formData.terminal === terminal.id
                         ? "border-primary bg-primary/10"
                         : "border-border/50 bg-card hover:border-primary/50"
                     )}
                   >
-                    <p className="font-medium text-sm">
-                      {language === 'ru' ? 'Другое место' : 'Other Location'}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {language === 'ru' ? 'Укажите адрес' : 'Enter address'}
+                    {formData.terminal === terminal.id && (
+                      <div className="absolute top-2 right-2">
+                        <Check className="w-3 h-3 text-primary" />
+                      </div>
+                    )}
+                    <span className="text-xl mb-1 block">{terminal.icon}</span>
+                    <p className="font-medium text-xs">
+                      {language === 'ru' ? terminal.nameRu : terminal.nameEn}
                     </p>
                   </button>
-                </div>
-
-                {formData.destination === 'custom' && (
-                  <Input
-                    value={formData.customAddress}
-                    onChange={(e) => setFormData({ ...formData, customAddress: e.target.value })}
-                    placeholder={language === 'ru' ? 'Введите адрес...' : 'Enter address...'}
-                    className="mt-2"
-                  />
-                )}
+                ))}
               </div>
-
-              <Button
-                type="button"
-                className="w-full"
-                disabled={!canProceedStep1}
-                onClick={() => setStep(2)}
-              >
-                {language === 'ru' ? 'Продолжить' : 'Continue'}
-              </Button>
             </div>
-          )}
 
-          {/* Step 2: Details */}
-          {step === 2 && (
-            <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
-              {/* Flight Number */}
-              <div className="space-y-3">
-                <Label>{language === 'ru' ? 'Номер рейса' : 'Flight Number'}</Label>
+            {/* Destination Address */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <MapPin className="w-4 h-4" />
+                {language === 'ru' ? 'Адрес назначения' : 'Destination Address'}
+              </Label>
+              <Input
+                value={formData.destinationAddress}
+                onChange={(e) => setFormData({ ...formData, destinationAddress: e.target.value })}
+                placeholder={language === 'ru' ? 'Название отеля или адрес' : 'Hotel name or address'}
+                className="h-11"
+              />
+            </div>
+
+            {/* Flight Number */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Plane className="w-4 h-4" />
+                {language === 'ru' ? 'Номер рейса' : 'Flight Number'}
+              </Label>
+              <Input
+                value={formData.flightNumber}
+                onChange={(e) => setFormData({ ...formData, flightNumber: e.target.value.toUpperCase() })}
+                placeholder="TG 925"
+                className="h-11"
+              />
+            </div>
+
+            {/* Date & Time */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  {language === 'ru' ? 'Дата' : 'Date'}
+                </Label>
                 <Input
-                  value={formData.flightNumber}
-                  onChange={(e) => setFormData({ ...formData, flightNumber: e.target.value.toUpperCase() })}
-                  placeholder="TG 925"
+                  type="date"
+                  value={formData.arrivalDate}
+                  onChange={(e) => setFormData({ ...formData, arrivalDate: e.target.value })}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="h-11"
                 />
               </div>
-
-              {/* Date & Time */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label>{language === 'ru' ? 'Дата' : 'Date'}</Label>
-                  <Input
-                    type="date"
-                    value={formData.arrivalDate}
-                    onChange={(e) => setFormData({ ...formData, arrivalDate: e.target.value })}
-                    min={new Date().toISOString().split('T')[0]}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{language === 'ru' ? 'Время' : 'Time'}</Label>
-                  <Input
-                    type="time"
-                    value={formData.arrivalTime}
-                    onChange={(e) => setFormData({ ...formData, arrivalTime: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              {/* Passengers & Luggage */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <Users className="w-4 h-4" />
-                    {language === 'ru' ? 'Пассажиры' : 'Passengers'}
-                  </Label>
-                  <Input
-                    type="number"
-                    min="1"
-                    max="8"
-                    value={formData.passengers}
-                    onChange={(e) => setFormData({ ...formData, passengers: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <Briefcase className="w-4 h-4" />
-                    {language === 'ru' ? 'Багаж' : 'Luggage'}
-                  </Label>
-                  <Input
-                    type="number"
-                    min="0"
-                    max="10"
-                    value={formData.luggage}
-                    onChange={(e) => setFormData({ ...formData, luggage: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              {/* Vehicle Type */}
-              <div className="space-y-3">
-                <Label>{language === 'ru' ? 'Тип автомобиля' : 'Vehicle Type'}</Label>
-                <div className="space-y-2">
-                  {vehicleTypes
-                    .filter(v => v.max_passengers >= parseInt(formData.passengers))
-                    .map((vehicle) => {
-                      const price = Math.round(basePrice * vehicle.price_multiplier);
-                      return (
-                        <button
-                          key={vehicle.id}
-                          type="button"
-                          onClick={() => setFormData({ ...formData, vehicleType: vehicle.id })}
-                          className={cn(
-                            "w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all",
-                            formData.vehicleType === vehicle.id
-                              ? "border-primary bg-primary/10"
-                              : "border-border/50 bg-card"
-                          )}
-                        >
-                          <span className="text-2xl">{vehicle.icon || '🚗'}</span>
-                          <div className="flex-1 text-left">
-                            <p className="font-medium">
-                              {language === 'ru' ? vehicle.name_ru : vehicle.name_en}
-                            </p>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                              <span>{language === 'ru' ? `до ${vehicle.max_passengers} чел.` : `up to ${vehicle.max_passengers}`}</span>
-                              {vehicle.features && (
-                                <span>• {vehicle.features.slice(0, 2).join(', ')}</span>
-                              )}
-                            </div>
-                          </div>
-                          <p className="font-bold text-primary">฿{price}</p>
-                        </button>
-                      );
-                    })}
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <Button type="button" variant="outline" onClick={() => setStep(1)}>
-                  {language === 'ru' ? 'Назад' : 'Back'}
-                </Button>
-                <Button
-                  type="button"
-                  className="flex-1"
-                  disabled={!canProceedStep2}
-                  onClick={() => setStep(3)}
-                >
-                  {language === 'ru' ? 'Продолжить' : 'Continue'}
-                </Button>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  {language === 'ru' ? 'Время' : 'Time'}
+                </Label>
+                <Input
+                  type="time"
+                  value={formData.arrivalTime}
+                  onChange={(e) => setFormData({ ...formData, arrivalTime: e.target.value })}
+                  className="h-11"
+                />
               </div>
             </div>
-          )}
 
-          {/* Step 3: Contact & Payment */}
-          {step === 3 && (
-            <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
-              {/* Summary */}
-              <div className="p-4 rounded-xl bg-card border border-border/50">
-                <h3 className="font-semibold mb-3">
-                  {language === 'ru' ? 'Детали трансфера' : 'Transfer Details'}
-                </h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">{language === 'ru' ? 'Рейс' : 'Flight'}</span>
-                    <span>{formData.flightNumber}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">{language === 'ru' ? 'Дата' : 'Date'}</span>
-                    <span>{formData.arrivalDate} {formData.arrivalTime}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">{language === 'ru' ? 'Автомобиль' : 'Vehicle'}</span>
-                    <span>{language === 'ru' ? selectedVehicle?.name_ru : selectedVehicle?.name_en}</span>
-                  </div>
-                  <div className="pt-2 border-t border-border/50">
-                    <div className="flex items-start gap-2">
-                      <MapPin className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">
-                          {language === 'ru' ? 'Адрес назначения' : 'Destination Address'}
-                        </p>
-                        <p className="font-medium">{destinationAddressDisplay}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex justify-between font-bold text-lg pt-2 border-t border-border/50">
-                    <span>{language === 'ru' ? 'Итого' : 'Total'}</span>
-                    <span className="text-primary">฿{totalPrice}</span>
-                  </div>
-                </div>
+            {/* Passengers & Luggage */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  {language === 'ru' ? 'Пассажиры' : 'Passengers'}
+                </Label>
+                <Input
+                  type="number"
+                  min="1"
+                  max="8"
+                  value={formData.passengers}
+                  onChange={(e) => setFormData({ ...formData, passengers: e.target.value })}
+                  className="h-11"
+                />
               </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Briefcase className="w-4 h-4" />
+                  {language === 'ru' ? 'Багаж' : 'Luggage'}
+                </Label>
+                <Input
+                  type="number"
+                  min="0"
+                  max="10"
+                  value={formData.luggage}
+                  onChange={(e) => setFormData({ ...formData, luggage: e.target.value })}
+                  className="h-11"
+                />
+              </div>
+            </div>
 
-              {/* Contact Info */}
-              <div className="space-y-3">
-                <Label>{language === 'ru' ? 'Контактные данные' : 'Contact Information'}</Label>
+            {/* Vehicle Type - Compact */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-muted-foreground">
+                {language === 'ru' ? 'Тип автомобиля' : 'Vehicle Type'}
+              </Label>
+              <div className="flex gap-2 overflow-x-auto pb-1 touch-pan-y snap-x scrollbar-hide">
+                {vehicleTypes
+                  .filter(v => v.max_passengers >= parseInt(formData.passengers))
+                  .map((vehicle) => (
+                    <button
+                      key={vehicle.id}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, vehicleType: vehicle.id })}
+                      className={cn(
+                        "flex-shrink-0 flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all min-w-[80px]",
+                        formData.vehicleType === vehicle.id
+                          ? "border-primary bg-primary/10"
+                          : "border-border/50 bg-card"
+                      )}
+                    >
+                      <span className="text-xl">{vehicle.icon || '🚗'}</span>
+                      <p className="font-medium text-xs text-center">
+                        {language === 'ru' ? vehicle.name_ru : vehicle.name_en}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {language === 'ru' ? `до ${vehicle.max_passengers}` : `up to ${vehicle.max_passengers}`}
+                      </p>
+                    </button>
+                  ))}
+              </div>
+            </div>
+
+            {/* Contact Info - Compact */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <User className="w-4 h-4" />
+                {language === 'ru' ? 'Контактные данные' : 'Contact Info'}
+              </Label>
+              <div className="space-y-2">
                 <Input
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder={language === 'ru' ? 'Ваше имя' : 'Your name'}
+                  className="h-11"
                 />
-                <Input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder={language === 'ru' ? 'Телефон' : 'Phone'}
-                />
-                <Input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="Email"
-                />
-              </div>
-
-              {/* Meeting Sign Name - only for 'from-airport' direction */}
-              {formData.direction === 'from-airport' && (
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <User className="w-4 h-4" />
-                    {language === 'ru' ? 'Имя для таблички встречающего' : 'Name for meeting sign'}
-                  </Label>
+                <div className="grid grid-cols-2 gap-2">
                   <Input
-                    value={formData.meetingSignName}
-                    onChange={(e) => {
-                      meetingSignManuallyEdited.current = true;
-                      setFormData({ ...formData, meetingSignName: e.target.value });
-                    }}
-                    placeholder={language === 'ru' ? 'Имя латиницей, как в паспорте' : 'Name in Latin letters'}
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder={language === 'ru' ? 'Телефон' : 'Phone'}
+                    className="h-11"
                   />
-                  <p className="text-xs text-muted-foreground">
-                    {language === 'ru' 
-                      ? 'Водитель будет ждать вас с этим именем на табличке'
-                      : 'Driver will hold a sign with this name'}
-                  </p>
+                  <Input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="Email"
+                    className="h-11"
+                  />
                 </div>
-              )}
-
-              {/* Notes */}
-              <div className="space-y-2">
-                <Label>{language === 'ru' ? 'Примечания' : 'Notes'}</Label>
-                <Textarea
-                  value={formData.notes}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  placeholder={language === 'ru' ? 'Детские кресла, особые пожелания...' : 'Child seats, special requests...'}
-                />
-              </div>
-
-              <div className="flex gap-3">
-                <Button type="button" variant="outline" onClick={() => setStep(2)}>
-                  {language === 'ru' ? 'Назад' : 'Back'}
-                </Button>
-                <Button
-                  type="submit"
-                  className="flex-1"
-                  disabled={isSubmitting || !formData.name || !formData.phone}
-                >
-                  {isSubmitting 
-                    ? (language === 'ru' ? 'Бронирование...' : 'Booking...') 
-                    : (language === 'ru' ? `Забронировать за ฿${totalPrice}` : `Book for ฿${totalPrice}`)}
-                </Button>
               </div>
             </div>
-          )}
-        </form>
+
+            {/* Meeting Sign Name - only for 'from-airport' direction */}
+            {formData.direction === 'from-airport' && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-muted-foreground">
+                  {language === 'ru' ? 'Имя на табличке' : 'Name on sign'}
+                </Label>
+                <Input
+                  value={formData.meetingSignName}
+                  onChange={(e) => {
+                    meetingSignManuallyEdited.current = true;
+                    setFormData({ ...formData, meetingSignName: e.target.value });
+                  }}
+                  placeholder={language === 'ru' ? 'Латиницей, как в паспорте' : 'In Latin letters'}
+                  className="h-11"
+                />
+              </div>
+            )}
+
+            {/* Notes */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-muted-foreground">
+                {language === 'ru' ? 'Примечания' : 'Notes'}
+              </Label>
+              <Textarea
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                placeholder={language === 'ru' ? 'Детские кресла, особые пожелания...' : 'Child seats, special requests...'}
+                className="resize-none"
+                rows={2}
+              />
+            </div>
+          </form>
+        </div>
+      </ScrollArea>
+
+      {/* Fixed Bottom CTA */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-lg border-t border-border/50 safe-area-inset-bottom">
+        <Button
+          type="submit"
+          className="w-full h-12"
+          disabled={isSubmitting || !canSubmit || !formData.name || !formData.phone}
+          onClick={handleSubmit}
+        >
+          {isSubmitting 
+            ? (language === 'ru' ? 'Бронирование...' : 'Booking...') 
+            : (language === 'ru' ? `Забронировать • ฿${totalPrice}` : `Book Transfer • ฿${totalPrice}`)}
+        </Button>
       </div>
     </AppLayout>
   );
