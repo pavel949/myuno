@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { useBooking } from "@/hooks/useBooking";
+import { useOrders } from "@/hooks/useOrders";
+import { useCleaningService } from "@/hooks/useCleaningServices";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageContainer } from "@/components/uno/PageContainer";
 import { PageHeader } from "@/components/uno/PageHeader";
@@ -16,38 +17,32 @@ import {
   BookingStepProgress,
   serviceBookingSteps,
   type ContactFormData,
-  type PaymentMethod 
+  type PaymentMethod as UIPaymentMethod,
 } from "@/components/booking";
 import { addDays, format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { Sparkles } from "lucide-react";
-
-const cleaningServices: Record<string, { nameEn: string; nameRu: string; price: number; duration: string }> = {
-  'clean-1': { nameEn: 'Regular Home Cleaning', nameRu: 'Регулярная уборка', price: 800, duration: '2-3h' },
-  'clean-2': { nameEn: 'Deep Cleaning', nameRu: 'Генеральная уборка', price: 2500, duration: '4-6h' },
-  'clean-3': { nameEn: 'Laundry & Ironing', nameRu: 'Стирка и глажка', price: 200, duration: '24h' },
-  'clean-4': { nameEn: 'Office Cleaning', nameRu: 'Уборка офиса', price: 1500, duration: '3-4h' },
-  'clean-5': { nameEn: 'Move-in/out Cleaning', nameRu: 'Уборка при въезде/выезде', price: 3000, duration: '5-7h' },
-  'clean-6': { nameEn: 'Dry Cleaning', nameRu: 'Химчистка', price: 300, duration: '48h' },
-};
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CleaningBooking() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
-  const { createBooking, isSubmitting } = useBooking();
+  const { createOrder, isCreating } = useOrders();
+  
+  // P0 FIX: Fetch service from database instead of hardcoded object
+  const { service, isLoading: serviceLoading } = useCleaningService(id);
 
-  const service = cleaningServices[id || 'clean-1'] || cleaningServices['clean-1'];
   const serviceFee = 50;
-  const totalAmount = service.price + serviceFee;
+  const totalAmount = (service?.price || 0) + serviceFee;
 
   // Form state
   const [date, setDate] = useState<Date | undefined>(addDays(new Date(), 1));
   const [time, setTime] = useState<string>("");
   const [address, setAddress] = useState<string>("");
   const [contactData, setContactData] = useState<ContactFormData>({ name: "", phone: "" });
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
+  const [paymentMethod, setPaymentMethod] = useState<UIPaymentMethod>("cash");
   const [bookingResult, setBookingResult] = useState<{ success: boolean; bookingId?: string } | null>(null);
 
   // Calculate current step based on filled fields
@@ -65,6 +60,22 @@ export default function CleaningBooking() {
   if (!authLoading && !user) {
     navigate('/auth', { state: { from: `/cleaning/${id}/book` } });
     return null;
+  }
+  
+  // Loading state
+  if (serviceLoading || !service) {
+    return (
+      <AppLayout>
+        <PageContainer>
+          <PageHeader title={language === 'ru' ? 'Загрузка...' : 'Loading...'} showBack />
+          <div className="space-y-4 mt-4">
+            <Skeleton className="h-20 w-full rounded-xl" />
+            <Skeleton className="h-40 w-full rounded-xl" />
+            <Skeleton className="h-40 w-full rounded-xl" />
+          </div>
+        </PageContainer>
+      </AppLayout>
+    );
   }
 
   // Success state
@@ -94,50 +105,56 @@ export default function CleaningBooking() {
     const [hours, minutes] = time.split(':').map(Number);
     scheduledAt.setHours(hours, minutes, 0, 0);
 
-    const items = [
-      {
-        item_type: 'service',
-        item_id: id || 'clean-1',
-        item_name: language === 'ru' ? service.nameRu : service.nameEn,
-        quantity: 1,
-        unit_price: service.price,
-        subtotal: service.price,
-      },
-      {
-        item_type: 'fee',
-        item_id: 'service_fee',
-        item_name: language === 'ru' ? 'Сервисный сбор' : 'Service fee',
-        quantity: 1,
-        unit_price: serviceFee,
-        subtotal: serviceFee,
-      },
-    ];
+    // Map UI payment method to useOrders payment method
+    const orderPaymentMethod = paymentMethod === 'card' || paymentMethod === 'online' ? 'stripe' : 
+                               paymentMethod === 'promptpay' ? 'stripe' :
+                               paymentMethod === 'concierge_advance' ? 'wallet' : 
+                               paymentMethod as 'cash' | 'wallet';
 
-    const result = await createBooking({
-      booking_type: 'service',
-      scheduled_at: scheduledAt,
+    // P0 FIX: Use createOrder (orders table) instead of deprecated createBooking
+    const result = await createOrder({
+      order_type: 'cleaning',
+      provider_org_id: service.providerId,
+      start_at: scheduledAt,
       total_amount: totalAmount,
       currency: 'THB',
       notes: contactData.notes,
-      items,
+      items: [
+        {
+          product_id: service.id,
+          item_name: language === 'ru' ? service.nameRu : service.nameEn,
+          item_type: 'cleaning_service',
+          qty: 1,
+          unit_price: service.price,
+          amount: service.price,
+        },
+        {
+          item_name: language === 'ru' ? 'Сервисный сбор' : 'Service fee',
+          item_type: 'platform_fee',
+          qty: 1,
+          unit_price: serviceFee,
+          amount: serviceFee,
+        },
+      ],
       participants: [{
+        role: 'primary',
         name: contactData.name,
         phone: contactData.phone,
         email: contactData.email,
-        is_primary: true,
       }],
       addresses: [{
         address_type: 'service',
-        address: address,
+        address_text: address,
       }],
       payment: {
+        method: orderPaymentMethod,
         amount: totalAmount,
-        payment_method: paymentMethod,
       },
+      serviceName: language === 'ru' ? service.nameRu : service.nameEn,
     });
 
     if (result.success) {
-      setBookingResult({ success: true, bookingId: result.booking_id });
+      setBookingResult({ success: true, bookingId: result.order_id });
     }
   };
 
@@ -247,7 +264,7 @@ export default function CleaningBooking() {
         <BookingBottomBar
           total={totalAmount}
           onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
+          isSubmitting={isCreating}
           disabled={!date || !time || !contactData.name || !contactData.phone || !address}
           submitLabel={language === 'ru' ? 'Подтвердить заказ' : 'Confirm Order'}
           hint={language === 'ru' ? '🔒 Безопасное бронирование — заполните форму' : '🔒 Secure booking — complete the form'}

@@ -19,6 +19,7 @@ interface PropertyDepositRequest {
   guest_name: string;
   guest_phone: string;
   guest_email: string;
+  provider_org_id?: string;
 }
 
 const logStep = (step: string, details?: Record<string, unknown>) => {
@@ -75,6 +76,7 @@ serve(async (req) => {
       guest_name,
       guest_phone,
       guest_email,
+      provider_org_id,
     } = body;
 
     logStep("Request body parsed", { 
@@ -93,6 +95,75 @@ serve(async (req) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
       );
     }
+
+    // P0 FIX: Create order in database BEFORE Stripe checkout
+    // Use service role client for RPC call
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    const orderItems = [{
+      product_id: property_id,
+      resource_id: property_id,
+      provider_org_id: provider_org_id || null,
+      item_name: property_title,
+      item_type: 'property_rental',
+      qty: nights,
+      unit_price: Math.round(total_amount / nights),
+      amount: total_amount,
+      start_at: `${check_in}T14:00:00.000Z`,
+      end_at: `${check_out}T12:00:00.000Z`,
+      metadata: { guests, deposit_amount },
+    }];
+
+    const orderParticipants = [{
+      role: 'primary',
+      name: guest_name,
+      phone: guest_phone || null,
+      email: guest_email || user.email || null,
+    }];
+
+    const { data: orderResult, error: orderError } = await supabaseAdmin.rpc('create_order_atomic', {
+      p_order_type: 'property',
+      p_customer_user_id: user.id,
+      p_provider_org_id: provider_org_id || null,
+      p_start_at: `${check_in}T14:00:00.000Z`,
+      p_end_at: `${check_out}T12:00:00.000Z`,
+      p_total_amount: total_amount,
+      p_currency: 'THB',
+      p_notes: `Deposit: ${deposit_amount} THB (10%)`,
+      p_metadata: { 
+        deposit_amount, 
+        deposit_percent: 10,
+        remaining_amount: total_amount - deposit_amount,
+        payment_status: 'pending_deposit',
+      },
+      p_items: orderItems,
+      p_participants: orderParticipants,
+      p_addresses: null,
+      p_payment_method: 'stripe',
+      p_payment_amount: deposit_amount,
+    });
+
+    if (orderError) {
+      logStep("ERROR: Order creation failed", { error: orderError.message });
+      return new Response(
+        JSON.stringify({ error: "Failed to create booking record" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+      );
+    }
+
+    const order = orderResult as { success: boolean; order_id?: string; order_number?: string; error?: string };
+    if (!order.success || !order.order_id) {
+      logStep("ERROR: Order creation unsuccessful", { result: order });
+      return new Response(
+        JSON.stringify({ error: order.error || "Failed to create booking" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+      );
+    }
+
+    logStep("Order created in database", { orderId: order.order_id, orderNumber: order.order_number });
 
     // Initialize Stripe
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
@@ -149,7 +220,7 @@ serve(async (req) => {
         },
       ],
       mode: "payment",
-      success_url: `${origin}/property/deposit-success?session_id={CHECKOUT_SESSION_ID}&property_id=${property_id}`,
+      success_url: `${origin}/property/deposit-success?session_id={CHECKOUT_SESSION_ID}&property_id=${property_id}&order_id=${order.order_id}`,
       cancel_url: `${origin}/property/${property_id}/inquiry?canceled=true`,
       metadata: {
         type: "property_deposit",
@@ -165,13 +236,15 @@ serve(async (req) => {
         guest_name,
         guest_phone,
         guest_email: guest_email || user.email || "",
+        order_id: order.order_id,
+        order_number: order.order_number || "",
       },
     });
 
     logStep("Checkout session created", { sessionId: session.id, url: session.url });
 
     return new Response(
-      JSON.stringify({ url: session.url, sessionId: session.id }),
+      JSON.stringify({ url: session.url, sessionId: session.id, orderId: order.order_id, orderNumber: order.order_number }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
     );
   } catch (error: unknown) {
