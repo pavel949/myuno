@@ -33,7 +33,7 @@ interface LaunchSwitchProps {
  * - Compact variant: Small toggle for header placement
  */
 export function LaunchSwitch({ className, variant = 'full' }: LaunchSwitchProps) {
-  const { isMaintenanceMode, setMaintenanceMode } = useMaintenance();
+  const { isMaintenanceMode, setMaintenanceMode, isAdminRoute } = useMaintenance();
   const { user } = useAuth();
   
   // Check if current user is admin

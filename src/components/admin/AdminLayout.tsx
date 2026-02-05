@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
+import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { AdminSidebar } from './AdminSidebar';
 import { AdminHeader } from './AdminHeader';
 import { AdminCommandPalette, useAdminCommandPalette } from './AdminCommandPalette';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useMaintenance } from '@/contexts/MaintenanceContext';
 
 interface AdminLayoutProps {
   children?: React.ReactNode;
@@ -13,6 +14,9 @@ interface AdminLayoutProps {
 export function AdminLayout({ children }: AdminLayoutProps) {
   const isMobile = useIsMobile();
   const { open: commandPaletteOpen, setOpen: setCommandPaletteOpen } = useAdminCommandPalette();
+  
+  // Ensure admin routes always bypass maintenance mode
+  const { canBypass } = useMaintenance();
 
   // Keyboard shortcut Ctrl+B to toggle sidebar
   useEffect(() => {
@@ -39,6 +43,16 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             {children || <Outlet />}
           </main>
         </SidebarInset>
+        
+        {/* Mobile floating sidebar trigger - always visible on mobile */}
+        {isMobile && (
+          <div className="fixed bottom-4 left-4 z-50">
+            <SidebarTrigger 
+              className="h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center"
+              data-sidebar="trigger"
+            />
+          </div>
+        )}
       </div>
       
       {/* Command Palette */}
