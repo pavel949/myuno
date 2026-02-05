@@ -5,7 +5,7 @@
  * by reusing the Owner Wizard step components. It ensures consistent data
  * collection across all roles.
  */
-import { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PropertyFormData, OwnershipData } from '@/hooks/usePropertyWizard';
 import { PropertyProject } from '@/hooks/usePropertyProjects';

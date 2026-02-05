@@ -4,7 +4,7 @@
  * Used in: Owner Dashboard, Admin Properties, Property Lists
  */
 
-import { forwardRef } from 'react';
+import React, { forwardRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { mapPropertyToCardProps, type UnifiedPropertyCardProps } from '@/lib/adapters';
