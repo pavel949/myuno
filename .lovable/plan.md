@@ -1,219 +1,298 @@
 
-# План оптимизации модуля бронирования недвижимости — Airbnb Pattern
+# План: Каталог "Решение Проблем" для Домашних Услуг (Фаза 1)
 
-## Анализ текущих проблем
+## Обзор
 
-### 1. "Scrambled" верхний фильтр
-Сейчас sticky header содержит **4 ряда интерактивных элементов**:
-- Ряд 1: BackButton + Заголовок + PropertyModeToggle (Аренда/Покупка)
-- Ряд 2: AirbnbSearchBar (полноэкранная поисковая строка)
-- Ряд 3: PropertyTypeSelector (pills) + кнопка Filters
-- Ряд 4: BedroomChips (ещё один ряд chips)
+Реализация каталога домашних услуг с фокусом на **решениях бытовых проблем** вместо списка мастеров. На первом этапе заявки обрабатываются вручную администратором через систему лидов с уведомлениями в WhatsApp.
 
-**Результат:** Огромный sticky header занимает ~40% экрана на мобильных.
-
-### 2. "Огромные карточки локаций"
-В `AirbnbSearchBar.tsx` селектор локаций использует `grid-cols-2` с крупными карточками (`p-4 rounded-2xl`):
-```tsx
-// Строки 240-261 — мобильная версия
-<motion.button className="flex items-center gap-3 p-4 rounded-2xl...">
-  <span className="text-2xl">{loc.icon}</span>
-  <span className="text-sm font-medium">...</span>
-</motion.button>
+```text
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                          ПОЛЬЗОВАТЕЛЬСКИЙ ПУТЬ                               │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  [Домашние услуги] → [Категория: AC] → [Чистка кондиционера]                │
+│                            │                    │                            │
+│                            ▼                    ▼                            │
+│                      Карточки функций     Форма заказа                      │
+│                      (цена, время)        (адрес, дата, контакт)            │
+│                                                 │                            │
+│                                                 ▼                            │
+│                                           ┌─────────────────┐                │
+│                                           │ consultation_   │                │
+│                                           │ requests        │                │
+│                                           │ (vertical_id:   │                │
+│                                           │  home_services) │                │
+│                                           └────────┬────────┘                │
+│                                                    │                         │
+│                              ┌─────────────────────┴──────────────────┐      │
+│                              ▼                                        ▼      │
+│                    [Admin: /admin/consultations]           [WhatsApp: +66922407355]  │
+│                    (Фильтр по vertical_id)                  (Уведомление)    │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
 ```
-Карточки слишком громоздкие, занимают много места и сложны для сканирования.
-
-### 3. Дублирование фильтров
-- Районы есть в AirbnbSearchBar И в QuickFiltersRibbon
-- Спальни есть отдельно BedroomChips И в UniversalFilter
-- PropertyTypeSelector дублирует опции из фильтра
 
 ---
 
-## Референс: Airbnb Pattern
+## Фаза 1: Канонические Функции (Static Config)
 
-```text
-┌─────────────────────────────────────────────┐
-│  [←]  Homes in Phuket         [Map] [Filter]│  ← Компактный header
-├─────────────────────────────────────────────┤
-│  🏠 All │ 🏢 Condo │ 🏡 Villa │ ••• │       │  ← Категории (1 ряд)
-├─────────────────────────────────────────────┤
-│ ┌─────────────────────────────────────────┐ │
-│ │ 🔍 Anywhere · Any week · Add guests     │ │  ← Компактный search
-│ └─────────────────────────────────────────┘ │
-├─────────────────────────────────────────────┤
-│        [PROPERTY CARDS GRID]                │
-└─────────────────────────────────────────────┘
-```
+### 1.1 Создать конфигурацию функций услуг
 
-**Ключевые принципы Airbnb:**
-1. Search bar — компактный, открывается в модал
-2. Категории — один горизонтальный ряд с иконками
-3. Фильтры — консолидированы в одну кнопку/модал
-4. Локации — список, а не крупные карточки
+**Файл:** `src/lib/config/homeServiceFunctions.ts`
+
+Определяет ~35 канонических бытовых проблем и их решений:
+
+| Категория | Функция | Цена от (THB) | Время | Что входит |
+|-----------|---------|---------------|-------|------------|
+| **ac** | ac_cleaning | 800 | 1-2ч | Промывка фильтров, дезинфекция, проверка давления |
+| **ac** | ac_install | 3,500 | 3-5ч | Монтаж блоков, прокладка трассы, пуско-наладка |
+| **ac** | ac_repair | 1,500 | 1-3ч | Диагностика, замена деталей |
+| **ac** | ac_gas_refill | 600 | 30м | Заправка фреоном, проверка утечек |
+| **plumbing** | leak_repair | 1,200 | 1-2ч | Устранение течи, замена прокладок |
+| **plumbing** | faucet_install | 1,500 | 1ч | Демонтаж старого, установка нового |
+| **plumbing** | drain_cleaning | 2,000 | 1-2ч | Прочистка канализации, профилактика |
+| **plumbing** | toilet_repair | 1,000 | 1ч | Ремонт сливного механизма |
+| **plumbing** | water_heater | 2,500 | 2-3ч | Установка/ремонт водонагревателя |
+| **electrical** | socket_install | 500 | 30м | Установка розетки/выключателя |
+| **electrical** | wiring_repair | 2,000 | 2-4ч | Ремонт проводки, поиск замыкания |
+| **electrical** | chandelier_install | 1,000 | 1ч | Монтаж люстры/светильника |
+| **electrical** | breaker_repair | 1,500 | 1-2ч | Ремонт автоматов, щитка |
+| **handyman** | furniture_assembly | 500 | 1-2ч | Сборка мебели IKEA и др. |
+| **handyman** | door_repair | 800 | 1ч | Ремонт/регулировка дверей |
+| **handyman** | lock_change | 1,200 | 30м-1ч | Замена замков |
+| **handyman** | tv_mounting | 800 | 1ч | Монтаж ТВ на стену |
+| **repair** | washing_machine | 1,500 | 1-2ч | Ремонт стиральной машины |
+| **repair** | fridge_repair | 2,000 | 1-3ч | Ремонт холодильника |
+| **repair** | oven_repair | 1,500 | 1-2ч | Ремонт духовки/плиты |
+
+И еще ~15 функций для cleaning, pool, garden, pest, security и др.
 
 ---
 
-## План реализации
+## Фаза 2: Новый UI Каталога
 
-### ФАЗА 1: Рефакторинг Header (Критическая)
+### 2.1 Создать хук `useServiceFunctions`
 
-**Файл:** `src/pages/property/PropertyIndex.tsx`
+**Файл:** `src/hooks/useServiceFunctions.ts`
 
-**Изменения:**
-1. **Консолидация header до 2 рядов:**
-   - Ряд 1: BackButton + Title + [Map] + [Filter button]
-   - Ряд 2: Категории + Rent/Buy toggle (интегрирован в категории)
+```typescript
+// Читает статические данные из homeServiceFunctions.ts
+// Группирует по категориям
+// Возвращает: { functions, byCategory, getFunction, isLoading }
+```
 
-2. **Перенос BedroomChips внутрь UniversalFilter** — убрать отдельный ряд
+### 2.2 Создать компонент карточки функции
 
-3. **QuickFiltersRibbon** — убрать из header, разместить как горизонтальные tags после результатов
+**Файл:** `src/components/services/ServiceFunctionCard.tsx`
 
 ```text
-Было:                           Станет:
-├─ BackButton + Title + Mode    ├─ BackButton + Title + Map + Filter
-├─ AirbnbSearchBar              ├─ CompactSearchBar (кликабельный)
-├─ PropertyTypeSelector + Filt  ├─ CategoryRibbon (Rent|Buy + Types)
-├─ BedroomChips                 └─ [RESULTS]
-└─ QuickFiltersRibbon
+┌─────────────────────────────────────────────────────────────────┐
+│ ❄️  Чистка кондиционера                                        │
+│     Промывка фильтров, дезинфекция, проверка давления          │
+│                                                                 │
+│     ⏱ 1-2 часа                              от ฿800            │
+│                                         [Заказать →]           │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-### ФАЗА 2: Редизайн SearchBar (Airbnb-style)
-
-**Файл:** `src/components/property/AirbnbSearchBar.tsx`
+### 2.3 Рефакторинг ServicesIndex.tsx
 
 **Изменения:**
+- Импорт `useServiceFunctions` вместо `useHomeServices` для главного списка
+- Заменить `HomeServiceProviderCard` на `ServiceFunctionCard`
+- Быстрый поиск по названию функции
+- При клике на функцию → переход на страницу заказа
 
-1. **Компактный вид (collapsed):**
-```tsx
-// Новый компактный вид — одна строка
-<div className="flex items-center gap-2 px-4 py-2.5 bg-card rounded-full border shadow-sm">
-  <Search className="w-4 h-4 text-muted-foreground" />
-  <span className="text-sm font-medium truncate">Anywhere</span>
-  <span className="text-muted-foreground">·</span>
-  <span className="text-sm text-muted-foreground">Any week</span>
-  <span className="text-muted-foreground">·</span>
-  <span className="text-sm text-muted-foreground">Add guests</span>
-</div>
+---
+
+## Фаза 3: Форма Заказа Услуги
+
+### 3.1 Создать страницу заказа
+
+**Файл:** `src/pages/services/ServiceFunctionOrder.tsx`
+
+**Компоненты формы (1 экран):**
+1. **Выбранная услуга** (readonly): название, описание, цена от
+2. **Дата и время**: выбор предпочтительной даты/времени
+3. **Адрес**: Input + кнопка геолокации (как в трансферах)
+4. **Описание проблемы**: Textarea для деталей
+5. **Контактные данные**: Имя, телефон, предпочтительный способ связи
+6. **CTA**: "Отправить заявку"
+
+### 3.2 Интеграция с Universal Lead System
+
+При отправке заявки → вызов `useUniversalLead`:
+
+```typescript
+submitLead({
+  vertical_id: 'home_services',
+  request_type: 'service_order',
+  lead_source: 'cta',
+  entry_point: `/services/order/${functionId}`,
+  name: formData.name,
+  phone: formData.phone,
+  notes: formData.problemDescription,
+  vertical_metadata: {
+    function_id: 'ac_cleaning',
+    function_name: 'AC Cleaning',
+    category: 'ac',
+    service_address: formData.address,
+    preferred_date: formData.date,
+    preferred_time: formData.time,
+    base_price: 800,
+    estimated_time: '1-2ч',
+  },
+});
 ```
 
-2. **Селектор локаций — список вместо карточек:**
-```tsx
-// Компактный список вместо grid
-<div className="space-y-1 max-h-[300px] overflow-y-auto">
-  {locations.map((loc) => (
-    <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted">
-      <span className="text-lg w-6">{loc.icon}</span>
-      <span className="text-sm">{loc.label}</span>
-      {selected && <Check className="w-4 h-4 ml-auto text-primary" />}
-    </button>
-  ))}
-</div>
+---
+
+## Фаза 4: WhatsApp Уведомления
+
+### 4.1 Создать Edge Function для уведомлений о лидах
+
+**Файл:** `supabase/functions/notify-lead-whatsapp/index.ts`
+
+Вызывается после создания записи в `consultation_requests`:
+
+```text
+🛠️ *НОВАЯ ЗАЯВКА: ДОМАШНИЕ УСЛУГИ*
+
+📋 *Услуга:* Чистка кондиционера
+💰 *Цена от:* ฿800
+⏱ *Время:* 1-2 часа
+
+👤 *Клиент:* Иван Петров
+📱 *Телефон:* +7 999 123-45-67
+💬 *Связь:* WhatsApp
+
+📍 *Адрес:* Patong Beach, Phuket
+📅 *Дата:* 15 января 2026, 10:00
+
+📝 *Описание:*
+Кондиционер плохо охлаждает, давно не чистили.
+
+🔗 Открыть: https://uno.ae/admin/consultations
 ```
 
-3. **Размеры карточек:**
-   - Было: `p-4 rounded-2xl text-2xl` (48px+ height)
-   - Станет: `px-3 py-2.5 rounded-lg text-lg` (40px height)
+### 4.2 Триггер на создание лида
 
-### ФАЗА 3: Unified Category Ribbon
+Модифицировать `useUniversalLead.ts` для вызова Edge Function после успешного создания:
 
-**Новый файл:** `src/components/property/PropertyCategoryRibbon.tsx`
+```typescript
+onSuccess: async (data, variables) => {
+  // Existing code...
+  
+  // Send WhatsApp notification for home_services
+  if (variables.vertical_id === 'home_services') {
+    await supabase.functions.invoke('notify-lead-whatsapp', {
+      body: { leadId: data.id },
+    });
+  }
+};
+```
 
-Объединяет:
-- PropertyModeToggle (Rent/Buy)
-- PropertyTypeSelector (All/Condo/Villa/...)
-- Иконки категорий Airbnb-style
+---
 
-```tsx
-interface PropertyCategoryRibbonProps {
-  mode: 'rent' | 'buy';
-  onModeChange: (mode: 'rent' | 'buy') => void;
-  selectedType: string;
-  onTypeChange: (type: string) => void;
-  types: PropertyTypeOption[];
+## Фаза 5: Интеграция в Админку
+
+### 5.1 Расширить LeadVerticalConfig
+
+**Файл:** `src/lib/leadVerticalConfig.ts`
+
+Добавить вертикаль `home_services`:
+
+```typescript
+{
+  id: 'home_services',
+  icon: '🔧',
+  nameEn: 'Home Services',
+  nameRu: 'Домашние услуги',
+  shortDescEn: 'Repairs and maintenance',
+  shortDescRu: 'Ремонт и обслуживание',
+  ctaTextEn: 'Request Service',
+  ctaTextRu: 'Заказать услугу',
+  popularityScore: 75,
+  requestTypes: [
+    { value: 'service_order', labelEn: 'Service Order', labelRu: 'Заказ услуги' },
+    { value: 'urgent_repair', labelEn: 'Urgent Repair', labelRu: 'Срочный ремонт' },
+    { value: 'consultation', labelEn: 'Consultation', labelRu: 'Консультация' },
+  ],
+  fields: [...],
 }
-
-// Визуал:
-// [🏠 Rent] [🏢 Buy] | [All] [Condo] [Villa] [House] [•••]
 ```
 
-**Дизайн по Airbnb:**
-- Категории с иконками сверху, текст снизу
-- Underline indicator для активной категории
-- Плавный scroll с `touch-pan-y`
+### 5.2 AdminConsultations - Фильтр по вертикали
 
-### ФАЗА 4: Консолидация фильтров
+Уже поддерживается! Фильтр `verticalId` в `useAdminConsultations` позволит фильтровать по `home_services`.
 
-**Файл:** `src/components/filters/UniversalFilter.tsx`
-
-**Добавить секции:**
-1. **Спальни** — перенести из BedroomChips
-2. **Районы** — основной UI здесь, убрать дублирование
-3. **Amenities** — уже есть
-4. **Price Range** — уже есть
-
-**QuickFiltersRibbon** — трансформировать в "быстрые теги" ПОСЛЕ списка результатов, как "Popular filters" suggestion.
-
-### ФАЗА 5: Итоговая структура страницы
-
-```text
-┌─────────────────────────────────────────────┐
-│ [←]  Аренда жилья              [🗺] [⚙️3]  │  Header (compact)
-├─────────────────────────────────────────────┤
-│ 🔍 Весь Пхукет · Выберите даты · 2 гостя   │  Search (collapsed)
-├─────────────────────────────────────────────┤
-│ [Аренда] [Покупка] │ 🏠All 🏢Condo 🏡Villa…│  Categories
-├─────────────────────────────────────────────┤
-│ Консультация CTA                            │  (compact banner)
-├─────────────────────────────────────────────┤
-│ 142 объекта найдено                         │  Results count
-├─────────────────────────────────────────────┤
-│ [Beachfront] [Pool] [Sea View] [Pet OK]    │  Quick filter tags
-├─────────────────────────────────────────────┤
-│ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐            │
-│ │     │ │     │ │     │ │     │            │  Property Grid
-│ │ 📷  │ │ 📷  │ │ 📷  │ │ 📷  │            │
-│ └─────┘ └─────┘ └─────┘ └─────┘            │
-└─────────────────────────────────────────────┘
-```
+Админ увидит:
+- Badge: "🔧 Домашние услуги"
+- В деталях: Функция (AC Cleaning), адрес, описание проблемы
+- Заметки клиента и внутренние заметки
+- Статусы: Новая → Связались → В работе → Завершена
 
 ---
 
-## Технические детали
+## Маршрутизация
 
-### Файлы для изменения
+### Новые маршруты
+
+| Путь | Компонент | Описание |
+|------|-----------|----------|
+| `/services` | ServicesIndex (обновлённый) | Каталог функций |
+| `/services/order/:functionId` | ServiceFunctionOrder | Форма заказа |
+
+---
+
+## Файлы для создания/изменения
 
 | Файл | Действие |
 |------|----------|
-| `src/pages/property/PropertyIndex.tsx` | Реструктуризация layout, удаление BedroomChips из header |
-| `src/components/property/AirbnbSearchBar.tsx` | Компактный режим + список локаций |
-| `src/components/property/PropertyCategoryRibbon.tsx` | **Новый** — объединённый ribbon |
-| `src/components/property/BedroomChips.tsx` | Удалить или интегрировать в filter |
-| `src/components/property/QuickFiltersRibbon.tsx` | Перенести после результатов |
-| `src/components/filters/UniversalFilter.tsx` | Добавить bedroom/district sections |
-
-### Метрики улучшения
-
-| Метрика | Было | Станет |
-|---------|------|--------|
-| Высота sticky header | ~220px | ~120px |
-| Рядов фильтров | 4 | 2 |
-| Размер location card | 80x48px | 100% x 40px (список) |
-| Дублирование фильтров | 3 места | 1 место (UniversalFilter) |
-
-### Совместимость с бэкендом
-
-- PropertyTypeSelector уже использует `usePropertyFilterOptions()` → lookup_values
-- Районы из `lookup_values` (type: district)
-- Amenities из `lookup_values` (type: amenity)
-- **Никаких изменений БД не требуется**
+| `src/lib/config/homeServiceFunctions.ts` | **Создать** - канонические функции |
+| `src/hooks/useServiceFunctions.ts` | **Создать** - хук для функций |
+| `src/components/services/ServiceFunctionCard.tsx` | **Создать** - карточка решения |
+| `src/pages/services/ServiceFunctionOrder.tsx` | **Создать** - форма заказа |
+| `supabase/functions/notify-lead-whatsapp/index.ts` | **Создать** - уведомления |
+| `src/pages/services/ServicesIndex.tsx` | **Изменить** - каталог функций |
+| `src/hooks/useUniversalLead.ts` | **Изменить** - вызов уведомления |
+| `src/lib/leadVerticalConfig.ts` | **Изменить** - добавить вертикаль |
+| `src/components/layout/AnimatedRoutes.tsx` | **Изменить** - добавить маршрут |
+| `supabase/config.toml` | **Изменить** - регистрация функции |
 
 ---
 
-## Ожидаемый результат
+## Техническая Архитектура
 
-✅ Компактный header — больше места для контента  
-✅ Список локаций вместо громоздких карточек  
-✅ Единый паттерн категорий Airbnb-style  
-✅ Консолидированные фильтры без дублирования  
-✅ Профессиональный индустриальный UX  
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                            АРХИТЕКТУРА ДАННЫХ                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  homeServiceFunctions.ts          consultation_requests                    │
+│  ┌─────────────────────┐          ┌──────────────────────────────┐         │
+│  │ id: 'ac_cleaning'   │          │ vertical_id: 'home_services' │         │
+│  │ category: 'ac'      │   →      │ request_type: 'service_order'│         │
+│  │ base_price: 800     │          │ vertical_metadata: {         │         │
+│  │ estimated_time: ... │          │   function_id: 'ac_cleaning',│         │
+│  │ includes: [...]     │          │   service_address: '...',    │         │
+│  └─────────────────────┘          │   preferred_date: '...'      │         │
+│                                   │ }                            │         │
+│                                   └──────────────────────────────┘         │
+│                                              │                              │
+│                                              ▼                              │
+│                                   notify-lead-whatsapp                      │
+│                                   (WhatsApp → +66922407355)                 │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Ожидаемый Результат
+
+1. **UX**: Пользователь видит "Чистка кондиционера - от ฿800, 1-2 часа" и сразу заказывает
+2. **Admin Flow**: Заявка появляется в /admin/consultations с полным описанием задачи
+3. **Оповещения**: WhatsApp уведомление на +66922407355 с деталями заявки
+4. **Масштабируемость**: Новые функции добавляются в конфиг без изменения БД
+5. **Будущее**: Фаза 2 добавит привязку провайдеров к функциям и автоматическое назначение
