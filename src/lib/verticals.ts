@@ -29,15 +29,15 @@
  }
  
  export const VERTICALS = {
-   PROPERTY: {
-     id: 'property',
-     plural: 'properties',
-     table: 'owner_properties',
-     icon: '🏠',
-     labelEn: 'Property',
-     labelRu: 'Недвижимость',
-     bookable: true,
-   },
+  PROPERTY: {
+    id: 'property',
+    plural: 'properties',
+    table: 'properties',
+    icon: '🏠',
+    labelEn: 'Property',
+    labelRu: 'Недвижимость',
+    bookable: true,
+  },
    YACHT: {
      id: 'yacht',
      plural: 'yachts',

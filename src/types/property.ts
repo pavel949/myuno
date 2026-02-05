@@ -40,6 +40,8 @@ export interface PropertyReference {
  */
 export interface OwnerProperty extends BaseProperty {
   owner_id: string;
+  provider_id?: string;
+  title_en?: string;
   title_ru?: string;
   description?: string;
   description_ru?: string;
@@ -51,8 +53,16 @@ export interface OwnerProperty extends BaseProperty {
   internal_name?: string;
   notes?: string;
   marketplace_property_id?: string;
+  legacy_owner_property_id?: string;
   
-  // Project/Unit fields
+  // Listing modes (unified: rent, sale, or both)
+  listing_type?: string;
+  listing_modes?: string[];
+  is_active?: boolean;
+  is_featured?: boolean;
+  is_verified?: boolean;
+  rating?: number;
+  review_count?: number;
   project_id?: string;
   floor?: number;
   unit_number?: string;

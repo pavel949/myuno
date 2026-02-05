@@ -29,8 +29,9 @@ export function useOwnerProperties() {
     queryKey: ['owner-properties', user?.id],
     queryFn: async () => {
       if (!user) return [];
+      // Query unified properties table filtering by owner_id
       const { data, error } = await supabase
-        .from('owner_properties')
+        .from('properties')
         .select('*')
         .eq('owner_id', user.id)
         .order('created_at', { ascending: false });
@@ -50,8 +51,9 @@ export function useOwnerProperty(id: string | undefined) {
     queryKey: ['owner-property', id],
     queryFn: async () => {
       if (!id || !user) return null;
+      // Query unified properties table
       const { data, error } = await supabase
-        .from('owner_properties')
+        .from('properties')
         .select('*')
         .eq('id', id)
         .eq('owner_id', user.id) // Security: verify ownership
@@ -80,14 +82,20 @@ export function useCreateOwnerProperty() {
         .single();
       
       // Ensure approval_status is 'pending' for moderation workflow
+      // Insert into unified properties table with owner_id
       const insertData = { 
         ...data, 
         owner_id: user.id,
         approval_status: data.approval_status || 'pending',
+        // Set title_en/title_ru from title for marketplace compatibility
+        title_en: data.title || data.address || 'New Property',
+        title_ru: data.title_ru || data.title || 'Новый объект',
+        listing_type: 'rent',
+        listing_modes: data.listing_modes || ['rent'],
       };
       
       const { data: result, error } = await supabase
-        .from('owner_properties')
+        .from('properties')
         .insert(insertData as any)
         .select()
         .single();
@@ -98,7 +106,7 @@ export function useCreateOwnerProperty() {
       supabase.functions.invoke('notify-admin-property-submission', {
         body: {
           property_id: result.id,
-          property_title: result.title || result.title_ru || 'Без названия',
+          property_title: result.title || result.title_en || result.title_ru || 'Без названия',
           owner_id: user.id,
           owner_name: profile?.full_name || undefined,
           owner_email: profile?.email || user.email || undefined,
@@ -125,8 +133,9 @@ export function useUpdateOwnerProperty() {
     mutationFn: async ({ id, ...data }: Partial<OwnerProperty> & { id: string }) => {
       if (!user) throw new Error('Not authenticated');
       
+      // Update in unified properties table
       const { data: result, error } = await supabase
-        .from('owner_properties')
+        .from('properties')
         .update(data)
         .eq('id', id)
         .eq('owner_id', user.id) // Security: verify ownership
@@ -140,12 +149,13 @@ export function useUpdateOwnerProperty() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['owner-properties'] });
       queryClient.invalidateQueries({ queryKey: ['owner-property'] });
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
       toast.success('Объект обновлён!');
     },
   });
 }
 
-// Publish owner property to marketplace
+// Publish owner property to marketplace (now just updates listing status)
 export function usePublishToMarketplace() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -160,57 +170,50 @@ export function usePublishToMarketplace() {
     }) => {
       if (!user) throw new Error('Not authenticated');
 
-      // Get owner property data with ownership verification
-      const { data: ownerProperty, error: fetchError } = await supabase
-        .from('owner_properties')
-        .select('*')
-        .eq('id', data.ownerPropertyId)
-        .eq('owner_id', user.id) // Security: verify ownership
-        .single();
-
-      if (fetchError || !ownerProperty) throw new Error('Property not found or access denied');
-
-      // Create marketplace listing
-      const { data: marketplaceProperty, error: createError } = await supabase
+      // With unified table, we just update the property to be active/approved
+      const updateData: Record<string, unknown> = {
+        is_active: true,
+        listing_type: data.listingType,
+        price: data.price,
+        price_period: data.listingType === 'rent' ? data.pricePeriod : 'total',
+      };
+      
+      // Add to listing_modes array if not already there
+      const { data: currentProperty, error: fetchError } = await supabase
         .from('properties')
-        .insert({
-          title_en: ownerProperty.title,
-          title_ru: ownerProperty.title_ru || ownerProperty.title,
-          description_en: ownerProperty.description,
-          description_ru: ownerProperty.description_ru,
-          address: ownerProperty.address,
-          district: ownerProperty.district,
-          property_type: ownerProperty.property_type,
-          listing_type: data.listingType,
-          bedrooms: ownerProperty.bedrooms,
-          bathrooms: ownerProperty.bathrooms,
-          area_sqm: ownerProperty.area_sqm,
-          cover_image: ownerProperty.cover_image,
-          images: ownerProperty.images,
-          price: data.price,
-          price_period: data.listingType === 'rent' ? data.pricePeriod : 'total',
-          currency: 'THB',
-          is_active: true,
-          ownership_form: data.listingType === 'sale' ? (data.ownershipForm || (ownerProperty as any).ownership_form) : null,
-        } as any)
+        .select('listing_modes')
+        .eq('id', data.ownerPropertyId)
+        .eq('owner_id', user.id)
+        .single();
+        
+      if (fetchError) throw new Error('Property not found or access denied');
+      
+      const currentModes = (currentProperty?.listing_modes as string[]) || [];
+      if (!currentModes.includes(data.listingType)) {
+        updateData.listing_modes = [...currentModes, data.listingType];
+      }
+      
+      if (data.listingType === 'sale') {
+        updateData.sale_price = data.price;
+        updateData.ownership_form = data.ownershipForm;
+      }
+
+      const { data: result, error: updateError } = await supabase
+        .from('properties')
+        .update(updateData)
+        .eq('id', data.ownerPropertyId)
+        .eq('owner_id', user.id)
         .select()
         .single();
 
-      if (createError) throw createError;
-
-      // Link marketplace property to owner property
-      const { error: updateError } = await supabase
-        .from('owner_properties')
-        .update({ marketplace_property_id: marketplaceProperty.id } as any)
-        .eq('id', data.ownerPropertyId);
-
       if (updateError) throw updateError;
 
-      return marketplaceProperty;
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['owner-properties'] });
       queryClient.invalidateQueries({ queryKey: ['owner-property'] });
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
       toast.success('Объект опубликован на маркетплейсе!');
     },
     onError: (error) => {
@@ -228,9 +231,10 @@ export function usePropertyInspections(propertyId?: string) {
     queryFn: async () => {
       if (!user) return [];
       
+      // Note: property_inspections still references owner_properties FK until DB migration updates it
       let query = supabase
         .from('property_inspections')
-        .select('*, property:owner_properties(*)')
+        .select('*')
         .eq('owner_id', user.id)
         .order('scheduled_at', { ascending: false });
       
@@ -280,9 +284,10 @@ export function useServiceRequests(propertyId?: string) {
     queryFn: async () => {
       if (!user) return [];
       
+      // Note: property_service_requests still references owner_properties FK until DB migration updates it
       let query = supabase
         .from('property_service_requests')
-        .select('*, property:owner_properties(*)')
+        .select('*')
         .eq('owner_id', user.id)
         .order('created_at', { ascending: false });
       
@@ -332,9 +337,10 @@ export function usePropertyFinancials(propertyId?: string) {
     queryFn: async () => {
       if (!user) return [];
       
+      // Note: property_financials still references owner_properties FK until DB migration updates it
       let query = supabase
         .from('property_financials')
-        .select('*, property:owner_properties(*)')
+        .select('*')
         .eq('owner_id', user.id)
         .order('transaction_date', { ascending: false });
       
@@ -360,7 +366,7 @@ export function usePropertyCareStats() {
       if (!user) return null;
 
       const [properties, inspections, requests, financials] = await Promise.all([
-        supabase.from('owner_properties').select('id, status').eq('owner_id', user.id),
+        supabase.from('properties').select('id, status').eq('owner_id', user.id),
         supabase.from('property_inspections').select('id, status').eq('owner_id', user.id),
         supabase.from('property_service_requests').select('id, status').eq('owner_id', user.id),
         supabase.from('property_financials').select('amount, transaction_type').eq('owner_id', user.id),
