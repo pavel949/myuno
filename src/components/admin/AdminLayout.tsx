@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { AdminSidebar } from './AdminSidebar';
 import { AdminHeader } from './AdminHeader';
 import { AdminCommandPalette, useAdminCommandPalette } from './AdminCommandPalette';
 import { AdminMobileBottomNav } from './AdminMobileBottomNav';
+import { AdminKeyboardShortcuts } from './AdminKeyboardShortcuts';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useMaintenance } from '@/contexts/MaintenanceContext';
 
@@ -15,6 +16,7 @@ interface AdminLayoutProps {
 export function AdminLayout({ children }: AdminLayoutProps) {
   const isMobile = useIsMobile();
   const { open: commandPaletteOpen, setOpen: setCommandPaletteOpen } = useAdminCommandPalette();
+  const [newItemCallback, setNewItemCallback] = useState<(() => void) | undefined>();
   
   // Ensure admin routes always bypass maintenance mode
   const { canBypass } = useMaintenance();
@@ -54,6 +56,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         open={commandPaletteOpen} 
         onOpenChange={setCommandPaletteOpen} 
       />
+      
+      {/* Keyboard Shortcuts */}
+      <AdminKeyboardShortcuts onNewItem={newItemCallback} />
     </SidebarProvider>
   );
 }
