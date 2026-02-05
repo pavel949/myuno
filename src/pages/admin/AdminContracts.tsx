@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useProviderContracts, ProviderContract, ContractInsert } from '@/hooks/useProviderContracts';
+ import { useContractEntities } from '@/hooks/useContractEntities';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -75,6 +76,7 @@ export default function AdminContracts() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { contracts, isLoading, createContract, updateContract, deleteContract, activateContract } = useProviderContracts();
+   const { getEntityName, getEntitiesByType, isLoading: entitiesLoading } = useContractEntities();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -206,7 +208,7 @@ export default function AdminContracts() {
     other: contracts.filter(c => ['suspended', 'terminated', 'expired'].includes(c.status)).length,
   };
 
-  if (isLoading) {
+  if (isLoading || entitiesLoading) {
     return (
       <div className="p-4 md:p-6 space-y-4">
         <Skeleton className="h-8 w-48" />
@@ -300,6 +302,9 @@ export default function AdminContracts() {
                       <span className="font-medium">
                         {contract.contract_number || `#${contract.id.slice(0, 8)}`}
                       </span>
+                       <span className="text-muted-foreground">
+                         {getEntityName(contract.entity_type, contract.entity_id, isRu)}
+                       </span>
                       {getStatusBadge(contract.status)}
                       <Badge variant="outline">
                         {ENTITY_TYPE_OPTIONS.find(t => t.value === contract.entity_type)?.[isRu ? 'labelRu' : 'labelEn']}
@@ -383,7 +388,7 @@ export default function AdminContracts() {
                 <Label>{isRu ? 'Тип сущности' : 'Entity Type'}</Label>
                 <Select 
                   value={formData.entity_type} 
-                  onValueChange={(v) => setFormData(prev => ({ ...prev, entity_type: v as any }))}
+                  onValueChange={(v) => setFormData(prev => ({ ...prev, entity_type: v as any, entity_id: '' }))}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -398,12 +403,22 @@ export default function AdminContracts() {
                 </Select>
               </div>
               <div>
-                <Label>Entity ID *</Label>
-                <Input
-                  value={formData.entity_id || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, entity_id: e.target.value }))}
-                  placeholder="UUID"
-                />
+                <Label>{isRu ? 'Компания' : 'Company'} *</Label>
+                <Select 
+                  value={formData.entity_id || ''} 
+                  onValueChange={(v) => setFormData(prev => ({ ...prev, entity_id: v }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={isRu ? 'Выберите...' : 'Select...'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getEntitiesByType(formData.entity_type || 'provider').map(entity => (
+                      <SelectItem key={entity.id} value={entity.id}>
+                        {isRu && entity.name_ru ? entity.name_ru : entity.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
