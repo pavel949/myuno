@@ -62,13 +62,50 @@ interface ServiceCardProps {
   compact?: boolean;
 }
 
+// Category-based fallback images for services without photos
+const SERVICE_CATEGORY_IMAGES: Record<string, string> = {
+  cleaning: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400',
+  electrical: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400',
+  plumbing: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=400',
+  gardening: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400',
+  pool: 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?w=400',
+  beauty: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400',
+  massage: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400',
+  fitness: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400',
+  repair: 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=400',
+  transport: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=400',
+  default: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=400',
+};
+
+function getServiceFallbackImage(service: Service): string {
+  // If service has images, use them
+  if (service.images?.[0]) return service.images[0];
+  
+  // Try to determine category from service name or category
+  const nameLower = (service.name_en || '').toLowerCase();
+  const categorySlug = service.category?.slug?.toLowerCase() || '';
+  
+  if (nameLower.includes('clean') || categorySlug.includes('clean')) return SERVICE_CATEGORY_IMAGES.cleaning;
+  if (nameLower.includes('electr') || categorySlug.includes('electr')) return SERVICE_CATEGORY_IMAGES.electrical;
+  if (nameLower.includes('plumb') || nameLower.includes('pipe')) return SERVICE_CATEGORY_IMAGES.plumbing;
+  if (nameLower.includes('garden') || nameLower.includes('landscape') || nameLower.includes('palm') || nameLower.includes('irrigation')) return SERVICE_CATEGORY_IMAGES.gardening;
+  if (nameLower.includes('pool')) return SERVICE_CATEGORY_IMAGES.pool;
+  if (nameLower.includes('beauty') || nameLower.includes('spa') || nameLower.includes('nail') || nameLower.includes('hair')) return SERVICE_CATEGORY_IMAGES.beauty;
+  if (nameLower.includes('massage')) return SERVICE_CATEGORY_IMAGES.massage;
+  if (nameLower.includes('fitness') || nameLower.includes('gym') || nameLower.includes('yoga')) return SERVICE_CATEGORY_IMAGES.fitness;
+  if (nameLower.includes('repair') || nameLower.includes('fix')) return SERVICE_CATEGORY_IMAGES.repair;
+  if (nameLower.includes('transport') || nameLower.includes('taxi') || nameLower.includes('driver')) return SERVICE_CATEGORY_IMAGES.transport;
+  
+  return SERVICE_CATEGORY_IMAGES.default;
+}
+
 export function ServiceCard({ service, onClick, compact = false }: ServiceCardProps) {
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
 
   const name = isRu ? service.name_ru : service.name_en;
-  const image = service.images?.[0] || 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400';
+  const image = getServiceFallbackImage(service);
 
   return (
     <button
