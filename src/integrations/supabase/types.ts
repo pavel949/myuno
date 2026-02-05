@@ -1701,6 +1701,13 @@ export type Database = {
             referencedRelation: "life_situations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "catalog_life_map_life_situation_id_fkey"
+            columns: ["life_situation_id"]
+            isOneToOne: false
+            referencedRelation: "lifeos_health_view"
+            referencedColumns: ["situation_id"]
+          },
         ]
       }
       categories: {
@@ -4987,6 +4994,36 @@ export type Database = {
           title_en?: string
           title_ru?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      lifeos_governance: {
+        Row: {
+          description: string | null
+          id: string
+          is_readonly: boolean | null
+          key: string
+          updated_at: string | null
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          is_readonly?: boolean | null
+          key: string
+          updated_at?: string | null
+          updated_by?: string | null
+          value: Json
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          is_readonly?: boolean | null
+          key?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          value?: Json
         }
         Relationships: []
       }
@@ -17271,6 +17308,30 @@ export type Database = {
           title: string | null
           title_ru: string | null
           trust_level: string | null
+        }
+        Relationships: []
+      }
+      lifeos_health_view: {
+        Row: {
+          avg_weight: number | null
+          entity_overuse_count: number | null
+          entity_type_count: number | null
+          flag_low_coverage: boolean | null
+          flag_no_primary: boolean | null
+          flag_primary_overload: boolean | null
+          flag_weight_out_of_range: boolean | null
+          health_score: number | null
+          is_active: boolean | null
+          last_updated_at: string | null
+          max_weight: number | null
+          min_weight: number | null
+          primary_count: number | null
+          secondary_count: number | null
+          situation_code: string | null
+          situation_id: string | null
+          title_en: string | null
+          title_ru: string | null
+          total_entities: number | null
         }
         Relationships: []
       }
