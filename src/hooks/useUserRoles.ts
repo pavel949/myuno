@@ -72,7 +72,7 @@ export function useUserRoles() {
       
       const { data, error } = await supabase
         .from('user_roles')
-        .insert({ user_id: user.id, role })
+        .insert({ user_id: user.id, role: role as any })
         .select()
         .single();
       
@@ -92,7 +92,7 @@ export function useUserRoles() {
         .from('user_roles')
         .delete()
         .eq('user_id', user.id)
-        .eq('role', role);
+        .eq('role', role as any);
       
       if (error) throw error;
     },
