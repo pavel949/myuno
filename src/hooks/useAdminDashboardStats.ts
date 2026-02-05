@@ -32,7 +32,10 @@ export function useAdminDashboardStats() {
   return useQuery({
     queryKey: ['admin-dashboard-stats'],
     queryFn: async (): Promise<DashboardStats> => {
-      // Parallel queries for performance
+      // Use GET with count:'exact' instead of HEAD requests to avoid errors
+      const countOptions = { count: 'exact' as const, head: false };
+      
+      // Parallel queries for performance - using proper count method
       const [
         providersRes,
         servicesRes,
@@ -49,34 +52,34 @@ export function useAdminDashboardStats() {
         unoTeamRes,
         bookingsRes,
       ] = await Promise.all([
-        supabase.from('providers').select('id, is_active, is_verified', { count: 'exact', head: true }),
-        supabase.from('services').select('id', { count: 'exact', head: true }),
-        supabase.from('yachts').select('id', { count: 'exact', head: true }),
-        supabase.from('tours').select('id', { count: 'exact', head: true }),
-        supabase.from('properties').select('id', { count: 'exact', head: true }),
-        supabase.from('restaurants').select('id', { count: 'exact', head: true }),
-        supabase.from('salons').select('id', { count: 'exact', head: true }),
-        supabase.from('clinics').select('id', { count: 'exact', head: true }),
-        supabase.from('gyms').select('id', { count: 'exact', head: true }),
-        supabase.from('vehicles').select('id', { count: 'exact', head: true }),
-        supabase.from('events').select('id', { count: 'exact', head: true }),
-        supabase.from('profiles').select('id', { count: 'exact', head: true }),
-        supabase.from('user_roles').select('id', { count: 'exact', head: true }).eq('role', 'uno_team'),
-        supabase.from('bookings').select('id, status', { count: 'exact', head: true }),
+        supabase.from('providers').select('id', countOptions).limit(1),
+        supabase.from('services').select('id', countOptions).limit(1),
+        supabase.from('yachts').select('id', countOptions).limit(1),
+        supabase.from('tours').select('id', countOptions).limit(1),
+        supabase.from('properties').select('id', countOptions).limit(1),
+        supabase.from('restaurants').select('id', countOptions).limit(1),
+        supabase.from('salons').select('id', countOptions).limit(1),
+        supabase.from('clinics').select('id', countOptions).limit(1),
+        supabase.from('gyms').select('id', countOptions).limit(1),
+        supabase.from('vehicles').select('id', countOptions).limit(1),
+        supabase.from('events').select('id', countOptions).limit(1),
+        supabase.from('profiles').select('id', countOptions).limit(1),
+        supabase.from('user_roles').select('id', countOptions).eq('role', 'uno_team').limit(1),
+        supabase.from('bookings').select('id', countOptions).limit(1),
       ]);
 
       // Get pending moderation counts
       const [pendingPropertiesRes, pendingYachtsRes, pendingToursRes] = await Promise.all([
-        supabase.from('owner_properties').select('id', { count: 'exact', head: true }).eq('approval_status', 'pending'),
-        supabase.from('yachts').select('id', { count: 'exact', head: true }).eq('approval_status', 'pending'),
-        supabase.from('tours').select('id', { count: 'exact', head: true }).eq('approval_status', 'pending'),
+        supabase.from('owner_properties').select('id', countOptions).eq('approval_status', 'pending').limit(1),
+        supabase.from('yachts').select('id', countOptions).eq('approval_status', 'pending').limit(1),
+        supabase.from('tours').select('id', countOptions).eq('approval_status', 'pending').limit(1),
       ]);
 
       // Get active/pending providers counts
       const [activeProvidersRes, pendingProvidersRes, pendingBookingsRes] = await Promise.all([
-        supabase.from('providers').select('id', { count: 'exact', head: true }).eq('is_active', true),
-        supabase.from('providers').select('id', { count: 'exact', head: true }).eq('is_verified', false),
-        supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('status', 'submitted'),
+        supabase.from('providers').select('id', countOptions).eq('is_active', true).limit(1),
+        supabase.from('providers').select('id', countOptions).eq('is_verified', false).limit(1),
+        supabase.from('bookings').select('id', countOptions).eq('status', 'submitted').limit(1),
       ]);
 
       const pendingProperties = pendingPropertiesRes.count || 0;

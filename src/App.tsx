@@ -33,6 +33,7 @@ function AppContent() {
   const { isMaintenanceMode, canBypass } = useMaintenance();
   
   // Show maintenance page if enabled and user can't bypass
+  // Admin routes (/admin/*, /owner/*, etc.) always bypass via context
   if (isMaintenanceMode && !canBypass) {
     return <UnderConstruction />;
   }
