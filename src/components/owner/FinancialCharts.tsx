@@ -9,6 +9,7 @@ import { PropertyFinancialFull, INCOME_CATEGORIES, EXPENSE_CATEGORIES } from '@/
 import { format, parseISO, startOfMonth, endOfMonth, eachMonthOfInterval, subMonths } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { TrendingUp, PieChart as PieChartIcon, BarChart3 } from 'lucide-react';
+import { getCurrencySymbol } from '@/lib/config/currencies';
 
 interface FinancialChartsProps {
   financials: PropertyFinancialFull[];
@@ -113,7 +114,7 @@ export function FinancialCharts({ financials, dateRange }: FinancialChartsProps)
   }, [financials, isRu]);
 
   // Format currency for tooltip
-  const formatCurrency = (value: number) => `฿${value.toLocaleString()}`;
+  const formatCurrency = (value: number) => `${getCurrencySymbol('THB')}${value.toLocaleString()}`;
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload) return null;

@@ -3,6 +3,7 @@ import { Star, MapPin, Clock, BadgeCheck, Palmtree } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { triggerRipple } from '@/hooks/useRipple';
+import { getCurrencySymbol } from '@/lib/config/currencies';
 
 type CardVariant = 'vertical' | 'horizontal' | 'compact' | 'featured';
 
@@ -34,7 +35,7 @@ export const UnifiedCard = memo(function UnifiedCard({
   rating,
   reviewCount,
   price,
-  currency = '฿',
+  currency = 'THB',
   priceLabel,
   location,
   duration,
@@ -47,6 +48,7 @@ export const UnifiedCard = memo(function UnifiedCard({
   variant = 'vertical',
 }: UnifiedCardProps) {
   const { t } = useLanguage();
+  const currencySymbol = getCurrencySymbol(currency);
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     triggerRipple(e);
@@ -93,7 +95,7 @@ export const UnifiedCard = memo(function UnifiedCard({
           <h3 className="font-medium text-xs text-foreground line-clamp-2 leading-tight">{title}</h3>
           {price !== undefined && (
             <span className="text-xs font-semibold text-primary">
-              {currency}{price.toLocaleString()}
+              {currencySymbol}{price.toLocaleString()}
             </span>
           )}
         </div>
@@ -168,7 +170,7 @@ export const UnifiedCard = memo(function UnifiedCard({
             </div>
             {price !== undefined && (
               <span className="text-sm font-bold text-primary flex-shrink-0">
-                {currency}{price.toLocaleString()}
+                {currencySymbol}{price.toLocaleString()}
               </span>
             )}
           </div>
@@ -247,7 +249,7 @@ export const UnifiedCard = memo(function UnifiedCard({
                 <div className="text-right flex-shrink-0">
                   <div className="px-4 py-2 rounded-xl glass">
                     <span className="text-2xl font-bold text-primary">
-                      {currency}{price.toLocaleString()}
+                      {currencySymbol}{price.toLocaleString()}
                     </span>
                     {priceLabel && (
                       <span className="block text-xs text-muted-foreground">{priceLabel}</span>
@@ -314,7 +316,7 @@ export const UnifiedCard = memo(function UnifiedCard({
           <div className="absolute bottom-3 right-3">
             <div className="px-3 py-1.5 rounded-lg glass">
               <span className="text-lg font-bold text-primary">
-                {currency}{price.toLocaleString()}
+                {currencySymbol}{price.toLocaleString()}
               </span>
               {priceLabel && (
                 <span className="text-xs text-muted-foreground ml-1">{priceLabel}</span>

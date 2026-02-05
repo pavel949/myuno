@@ -40,6 +40,7 @@ import {
 } from '@/components/market/DeliveryTypeSelector';
 import { InternationalAddressForm } from '@/components/market/InternationalAddressForm';
 import { SavedAddressSelector } from '@/components/market/SavedAddressSelector';
+import { getCurrencySymbol } from '@/lib/config/currencies';
 
 // Order Item Card Component
 interface OrderItemProps {
@@ -78,7 +79,7 @@ const OrderItemCard = ({ item, language, showShippingWarning }: OrderItemProps) 
         {language === 'ru' && item.nameRu ? item.nameRu : item.name}
       </p>
       <p className="text-xs text-muted-foreground">
-        ฿{item.price.toLocaleString()} × {item.quantity}
+        {getCurrencySymbol('THB')}{item.price.toLocaleString()} × {item.quantity}
       </p>
       {showShippingWarning && (
         <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1 mt-0.5">
@@ -88,7 +89,7 @@ const OrderItemCard = ({ item, language, showShippingWarning }: OrderItemProps) 
       )}
     </div>
     <div className="text-right flex-shrink-0">
-      <p className="font-semibold text-sm">฿{(item.price * item.quantity).toLocaleString()}</p>
+      <p className="font-semibold text-sm">{getCurrencySymbol('THB')}{(item.price * item.quantity).toLocaleString()}</p>
       {item.weightKg && (
         <p className="text-xs text-muted-foreground">~{(item.weightKg * item.quantity).toFixed(1)} kg</p>
       )}
@@ -123,16 +124,16 @@ const FreeDeliveryProgress = ({ subtotal, threshold, remaining, language }: Free
             <Truck className="w-5 h-5 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">
               {language === 'ru' 
-                ? `Ещё ฿${remaining.toLocaleString()} до бесплатной доставки`
-                : `฿${remaining.toLocaleString()} more for free delivery`}
+                ? `Ещё ${getCurrencySymbol('THB')}${remaining.toLocaleString()} до бесплатной доставки`
+                : `${getCurrencySymbol('THB')}${remaining.toLocaleString()} more for free delivery`}
             </span>
           </>
         )}
       </div>
       <Progress value={progress} className="h-2" />
       <div className="flex justify-between mt-1 text-xs text-muted-foreground">
-        <span>฿0</span>
-        <span>฿{threshold.toLocaleString()}</span>
+        <span>{getCurrencySymbol('THB')}0</span>
+        <span>{getCurrencySymbol('THB')}{threshold.toLocaleString()}</span>
       </div>
     </div>
   );
@@ -689,7 +690,7 @@ const MarketCheckout = () => {
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">{language === 'ru' ? 'Товары' : 'Subtotal'}</span>
-              <span>฿{subtotal.toLocaleString()}</span>
+              <span>{getCurrencySymbol('THB')}{subtotal.toLocaleString()}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground flex items-center gap-1">
@@ -705,7 +706,7 @@ const MarketCheckout = () => {
               {deliveryFee === 0 ? (
                 <span className="text-primary font-medium">{language === 'ru' ? 'Бесплатно' : 'Free'}</span>
               ) : (
-                <span>฿{deliveryFee.toLocaleString()}</span>
+                <span>{getCurrencySymbol('THB')}{deliveryFee.toLocaleString()}</span>
               )}
             </div>
             {deliveryType === 'international' && selectedZone && (
@@ -721,7 +722,7 @@ const MarketCheckout = () => {
             <Separator />
             <div className="flex justify-between font-semibold text-base">
               <span>{language === 'ru' ? 'Итого' : 'Total'}</span>
-              <span className="text-primary">฿{total.toLocaleString()}</span>
+              <span className="text-primary">{getCurrencySymbol('THB')}{total.toLocaleString()}</span>
             </div>
           </div>
         </div>

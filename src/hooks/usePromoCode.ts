@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { getCurrencySymbol } from '@/lib/config/currencies';
 
 export interface PromoCode {
   id: string;
@@ -52,10 +53,11 @@ export function usePromoCode() {
 
       // Check min order amount
       if (orderAmount < promo.min_order_amount) {
+        const symbol = getCurrencySymbol('THB');
         setError(
           language === 'ru' 
-            ? `Минимальная сумма заказа: ฿${promo.min_order_amount}` 
-            : `Minimum order: ฿${promo.min_order_amount}`
+            ? `Минимальная сумма заказа: ${symbol}${promo.min_order_amount}` 
+            : `Minimum order: ${symbol}${promo.min_order_amount}`
         );
         return null;
       }

@@ -5,6 +5,7 @@
  import { useLanguage } from '@/contexts/LanguageContext';
  import { cn } from '@/lib/utils';
  import type { LocalizedServiceFunction } from '@/hooks/useServiceFunctions';
+ import { getCurrencySymbol } from '@/lib/config/currencies';
  
  interface ServiceFunctionCardProps {
    fn: LocalizedServiceFunction;
@@ -17,10 +18,7 @@
    const isRu = language === 'ru';
  
    const formatPrice = (price: number, currency: string) => {
-     if (currency === 'THB') {
-       return `฿${price.toLocaleString()}`;
-     }
-     return `${currency} ${price.toLocaleString()}`;
+     return `${getCurrencySymbol(currency)}${price.toLocaleString()}`;
    };
  
    if (compact) {
@@ -108,8 +106,7 @@
    const isRu = language === 'ru';
  
    const formatPrice = (price: number, currency: string) => {
-     if (currency === 'THB') return `฿${price.toLocaleString()}`;
-     return `${currency} ${price.toLocaleString()}`;
+     return `${getCurrencySymbol(currency)}${price.toLocaleString()}`;
    };
  
    return (

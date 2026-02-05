@@ -5,6 +5,7 @@ import { usePromoCode, PromoCode } from '@/hooks/usePromoCode';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { getCurrencySymbol } from '@/lib/config/currencies';
 
 interface PromoCodeInputProps {
   subtotal: number;
@@ -47,7 +48,7 @@ export function PromoCodeInput({ subtotal, onPromoApplied, className }: PromoCod
                 {appliedPromo.code}
               </span>
               <span className="text-sm text-green-600 dark:text-green-500 ml-2">
-                −฿{discount}
+                −{getCurrencySymbol('THB')}{discount}
               </span>
             </div>
           </div>

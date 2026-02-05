@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Users, Building2, ShoppingCart, DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getCurrencySymbol } from '@/lib/config/currencies';
 
 interface KPICardProps {
   title: string;
@@ -78,9 +79,10 @@ export function AdminKPIGrid() {
   }
 
   const formatCurrency = (value: number) => {
-    if (value >= 1000000) return `฿${(value / 1000000).toFixed(1)}M`;
-    if (value >= 1000) return `฿${(value / 1000).toFixed(0)}K`;
-    return `฿${value.toFixed(0)}`;
+    const symbol = getCurrencySymbol('THB');
+    if (value >= 1000000) return `${symbol}${(value / 1000000).toFixed(1)}M`;
+    if (value >= 1000) return `${symbol}${(value / 1000).toFixed(0)}K`;
+    return `${symbol}${value.toFixed(0)}`;
   };
 
   const kpis = [

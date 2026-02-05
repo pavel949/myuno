@@ -18,6 +18,7 @@ import {
   Tag,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getCurrencySymbol } from '@/lib/config/currencies';
 
 interface BasePreviewProps {
   image?: string;
@@ -108,15 +109,16 @@ export function CardPreview(props: CardPreviewProps) {
   };
 
   const formatPrice = (price: number, period?: string) => {
+    const symbol = getCurrencySymbol('THB');
     if (props.type === 'property' && period) {
       const periodLabels: Record<string, string> = {
         day: isRussian ? '/день' : '/day',
         month: isRussian ? '/мес' : '/mo',
         year: isRussian ? '/год' : '/yr',
       };
-      return `฿${price.toLocaleString()}${periodLabels[period] || ''}`;
+      return `${symbol}${price.toLocaleString()}${periodLabels[period] || ''}`;
     }
-    return `฿${price.toLocaleString()}`;
+    return `${symbol}${price.toLocaleString()}`;
   };
 
   const PlaceholderIcon = getPlaceholderIcon();
@@ -329,7 +331,7 @@ export function CardPreview(props: CardPreviewProps) {
             {/* Original price for products */}
             {props.type === 'product' && (props as ProductPreviewProps).originalPrice && (
               <span className="text-sm text-muted-foreground line-through">
-                ฿{(props as ProductPreviewProps).originalPrice!.toLocaleString()}
+                {getCurrencySymbol('THB')}{(props as ProductPreviewProps).originalPrice!.toLocaleString()}
               </span>
             )}
           </div>

@@ -6,6 +6,7 @@ import { useMarketplaceProducts } from '@/hooks/useMarketplace';
 import { useCart } from '@/contexts/CartContext';
 import { useCartToast } from '@/hooks/useCartToast';
 import { cn } from '@/lib/utils';
+import { getCurrencySymbol } from '@/lib/config/currencies';
 
 export const MarketplacePromoCarousel = memo(function MarketplacePromoCarousel() {
   const { language } = useLanguage();
@@ -202,11 +203,11 @@ export const MarketplacePromoCarousel = memo(function MarketplacePromoCarousel()
                   {/* Price row */}
                   <div className="flex items-center gap-1.5">
                     <span className="font-bold text-sm text-foreground">
-                      ฿{product.price.toLocaleString()}
+                      {getCurrencySymbol(product.currency || 'THB')}{product.price.toLocaleString()}
                     </span>
                     {hasDiscount && (
                       <span className="text-[10px] text-muted-foreground line-through">
-                        ฿{product.original_price!.toLocaleString()}
+                        {getCurrencySymbol(product.currency || 'THB')}{product.original_price!.toLocaleString()}
                       </span>
                     )}
                   </div>

@@ -2,7 +2,7 @@ import React from 'react';
 import { Calculator, Percent, Calendar, Users } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Badge } from '@/components/ui/badge';
-import { getCurrencySymbol } from '@/lib/currencyUtils';
+import { getCurrencySymbol } from '@/lib/config/currencies';
 interface PropertyPriceBreakdownProps {
   pricePerNight?: number;
   weeklyDiscount?: number;
@@ -125,7 +125,7 @@ export function PropertyPriceBreakdown({
                 </p>
               </div>
               <p className="text-lg font-bold">
-                {depositCurrency === 'THB' || !depositCurrency ? '฿' : depositCurrency}
+                {getCurrencySymbol(depositCurrency || 'THB')}
                 {depositAmount.toLocaleString()}
               </p>
             </div>
