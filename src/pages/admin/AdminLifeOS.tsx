@@ -6,18 +6,21 @@
  * 1. Situations - Registry management
  * 2. Mappings - Core control (entity→situation)
  * 3. Resolver Preview - Safety testing
- * 4. Quality - Trust monitoring
- * 5. Audit - Change history
+ * 4. Health - Monitoring & governance
+ * 5. Quality - Trust monitoring
+ * 6. Audit - Change history
  */
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Sparkles, Link2, Eye, ShieldCheck, History } from 'lucide-react';
+import { Sparkles, Link2, Eye, ShieldCheck, History, Activity } from 'lucide-react';
 import { LifeOSSituationsTab } from '@/components/admin/lifeos/LifeOSSituationsTab';
 import { LifeOSMappingsTab } from '@/components/admin/lifeos/LifeOSMappingsTab';
 import { LifeOSResolverPreviewTab } from '@/components/admin/lifeos/LifeOSResolverPreviewTab';
 import { LifeOSQualityTab } from '@/components/admin/lifeos/LifeOSQualityTab';
 import { LifeOSAuditTab } from '@/components/admin/lifeos/LifeOSAuditTab';
+import { LifeOSHealthTab } from '@/components/admin/lifeos/LifeOSHealthTab';
+import { ManualModeBadge } from '@/components/admin/lifeos/ManualModeBadge';
 
 export default function AdminLifeOS() {
   const { language } = useLanguage();
@@ -44,10 +47,16 @@ export default function AdminLifeOS() {
       description: isRussian ? 'Тест' : 'Test'
     },
     { 
+      id: 'health', 
+      label: isRussian ? 'Здоровье' : 'Health', 
+      icon: Activity,
+      description: isRussian ? 'Мониторинг' : 'Monitor'
+    },
+    { 
       id: 'quality', 
       label: isRussian ? 'Качество' : 'Quality', 
       icon: ShieldCheck,
-      description: isRussian ? 'Мониторинг' : 'Monitor'
+      description: isRussian ? 'Доверие' : 'Trust'
     },
     { 
       id: 'audit', 
@@ -60,7 +69,7 @@ export default function AdminLifeOS() {
   return (
     <div className="p-4 md:p-6 space-y-4">
       {/* Header */}
-      <div>
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-primary/10">
             <Sparkles className="w-6 h-6 text-primary" />
@@ -76,6 +85,7 @@ export default function AdminLifeOS() {
             </p>
           </div>
         </div>
+        <ManualModeBadge />
       </div>
 
       {/* Tabs */}
@@ -103,6 +113,10 @@ export default function AdminLifeOS() {
 
         <TabsContent value="preview" className="mt-4">
           <LifeOSResolverPreviewTab />
+        </TabsContent>
+
+        <TabsContent value="health" className="mt-4">
+          <LifeOSHealthTab />
         </TabsContent>
 
         <TabsContent value="quality" className="mt-4">

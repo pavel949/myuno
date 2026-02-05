@@ -1,13 +1,23 @@
 /**
  * LifeOS Mappings Tab - Core Control Module
  * Per LIFE OS Contract: READ-ONLY catalog access, ORCHESTRATION only
+ * Now with GOVERNANCE guardrails and change-impact preview
  */
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAdminLifeSituations, useAdminCatalogMappings, LifeSituation, type LifeOSRole } from '@/hooks/useLifeOS';
+import { useAdminLifeSituations, type LifeOSRole } from '@/hooks/useLifeOS';
+import { 
+  useGovernanceConfig, 
+  validateMapping, 
+  validateDelete, 
+  calculateChangeImpact,
+  logGovernanceAction,
+  type ValidationResult,
+  type ChangeImpact,
+} from '@/hooks/useLifeOSGovernance';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,8 +29,9 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetFooter
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { Plus, Trash2, Search, Filter, ExternalLink, AlertTriangle, Users, Weight, Check } from 'lucide-react';
+import { Plus, Trash2, Search, AlertTriangle, Users, Weight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ChangeImpactModal } from './ChangeImpactModal';
 
 const ENTITY_TYPES = [
   { value: 'property', label: 'Properties', labelRu: 'Недвижимость' },
@@ -56,12 +67,26 @@ export function LifeOSMappingsTab() {
   const isRussian = language === 'ru';
   const queryClient = useQueryClient();
 
+  // Governance config
+  const { data: governanceConfig } = useGovernanceConfig();
+
   // State
   const [selectedSituationId, setSelectedSituationId] = useState<string>('all');
   const [entityTypeFilter, setEntityTypeFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedMappings, setSelectedMappings] = useState<Set<string>>(new Set());
+
+  // Change impact modal state
+  const [impactModalOpen, setImpactModalOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<{
+    type: 'create' | 'delete';
+    mappingId?: string;
+    data?: typeof newMapping;
+  } | null>(null);
+  const [currentValidation, setCurrentValidation] = useState<ValidationResult | null>(null);
+  const [currentImpact, setCurrentImpact] = useState<ChangeImpact | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // New mapping state
   const [newMapping, setNewMapping] = useState({
@@ -110,8 +135,8 @@ export function LifeOSMappingsTab() {
     });
   }, [allMappings, selectedSituationId, entityTypeFilter, searchQuery]);
 
-  // Handlers
-  const handleCreate = async () => {
+  // Handlers with governance validation
+  const handleCreateWithValidation = useCallback(async () => {
     if (!newMapping.life_situation_id || !newMapping.entity_id.trim()) {
       toast.error(isRussian ? 'Заполните обязательные поля' : 'Fill required fields');
       return;
@@ -128,29 +153,55 @@ export function LifeOSMappingsTab() {
       return;
     }
 
-    // Warning for high weight
-    if (newMapping.weight > 80) {
-      // Will be handled by confirmation dialog
+    // Validate with governance rules
+    if (governanceConfig) {
+      const validation = await validateMapping(newMapping, governanceConfig);
+      const impact = await calculateChangeImpact('create', {
+        life_situation_id: newMapping.life_situation_id,
+        priority_type: newMapping.priority_type,
+      }, governanceConfig);
+
+      // If blocked or has warnings, show modal
+      if (validation.blocked || validation.warnings.length > 0) {
+        setCurrentValidation(validation);
+        setCurrentImpact(impact);
+        setPendingAction({ type: 'create', data: { ...newMapping } });
+        setImpactModalOpen(true);
+        return;
+      }
     }
 
-    const { error } = await supabase.from('catalog_life_map').insert({
-      life_situation_id: newMapping.life_situation_id,
-      entity_type: newMapping.entity_type,
-      entity_id: newMapping.entity_id.trim(),
-      weight: newMapping.weight,
-      role_scope: newMapping.role_scope,
-      rules: { priority_type: newMapping.priority_type },
-    });
+    // Direct create if no issues
+    await executeCreate(newMapping);
+  }, [newMapping, allMappings, governanceConfig, isRussian]);
 
-    if (error) {
-      toast.error(isRussian ? 'Ошибка создания' : 'Failed to create');
-      return;
+  const executeCreate = async (mapping: typeof newMapping) => {
+    setIsSaving(true);
+    try {
+      const { error } = await supabase.from('catalog_life_map').insert({
+        life_situation_id: mapping.life_situation_id,
+        entity_type: mapping.entity_type,
+        entity_id: mapping.entity_id.trim(),
+        weight: mapping.weight,
+        role_scope: mapping.role_scope,
+        rules: { priority_type: mapping.priority_type },
+      });
+
+      if (error) {
+        toast.error(isRussian ? 'Ошибка создания' : 'Failed to create');
+        return;
+      }
+
+      await logGovernanceAction('CREATE', false, null, mapping.entity_id, { mapping });
+      toast.success(isRussian ? 'Маппинг создан' : 'Mapping created');
+      setIsCreateOpen(false);
+      setImpactModalOpen(false);
+      resetNewMapping();
+      queryClient.invalidateQueries({ queryKey: ['lifeos-all-mappings'] });
+      queryClient.invalidateQueries({ queryKey: ['lifeos-health'] });
+    } finally {
+      setIsSaving(false);
     }
-
-    toast.success(isRussian ? 'Маппинг создан' : 'Mapping created');
-    setIsCreateOpen(false);
-    resetNewMapping();
-    queryClient.invalidateQueries({ queryKey: ['lifeos-all-mappings'] });
   };
 
   const resetNewMapping = () => {
@@ -165,6 +216,13 @@ export function LifeOSMappingsTab() {
   };
 
   const handleUpdateWeight = async (id: string, weight: number) => {
+    // Check weight bounds from governance
+    if (governanceConfig) {
+      if (weight > 85) {
+        toast.warning(isRussian ? 'Вес выше 85 требует осторожности' : 'Weight above 85 requires caution');
+      }
+    }
+
     const { error } = await supabase
       .from('catalog_life_map')
       .update({ weight })
@@ -175,21 +233,72 @@ export function LifeOSMappingsTab() {
       return;
     }
     queryClient.invalidateQueries({ queryKey: ['lifeos-all-mappings'] });
+    queryClient.invalidateQueries({ queryKey: ['lifeos-health'] });
   };
 
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase
-      .from('catalog_life_map')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      toast.error(isRussian ? 'Ошибка удаления' : 'Failed to delete');
+  const handleDeleteWithValidation = useCallback(async (id: string) => {
+    if (!governanceConfig) {
+      await executeDelete(id);
       return;
     }
 
-    toast.success(isRussian ? 'Маппинг удалён' : 'Mapping deleted');
-    queryClient.invalidateQueries({ queryKey: ['lifeos-all-mappings'] });
+    const validation = await validateDelete(id, governanceConfig);
+    
+    // Find mapping to get situation info
+    const mapping = allMappings?.find(m => m.id === id);
+    if (mapping) {
+      const impact = await calculateChangeImpact('delete', {
+        life_situation_id: mapping.life_situation_id,
+        priority_type: (mapping.rules as any)?.priority_type,
+      }, governanceConfig);
+
+      if (validation.blocked || validation.warnings.length > 0) {
+        setCurrentValidation(validation);
+        setCurrentImpact(impact);
+        setPendingAction({ type: 'delete', mappingId: id });
+        setImpactModalOpen(true);
+        return;
+      }
+    }
+
+    await executeDelete(id);
+  }, [governanceConfig, allMappings]);
+
+  const executeDelete = async (id: string) => {
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from('catalog_life_map')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        toast.error(isRussian ? 'Ошибка удаления' : 'Failed to delete');
+        return;
+      }
+
+      await logGovernanceAction('DELETE', false, null, id, {});
+      toast.success(isRussian ? 'Маппинг удалён' : 'Mapping deleted');
+      setImpactModalOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['lifeos-all-mappings'] });
+      queryClient.invalidateQueries({ queryKey: ['lifeos-health'] });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleImpactConfirm = async () => {
+    if (!pendingAction) return;
+
+    if (pendingAction.type === 'create' && pendingAction.data) {
+      await executeCreate(pendingAction.data);
+    } else if (pendingAction.type === 'delete' && pendingAction.mappingId) {
+      await executeDelete(pendingAction.mappingId);
+    }
+
+    setPendingAction(null);
+    setCurrentValidation(null);
+    setCurrentImpact(null);
   };
 
   const handleBulkDelete = async () => {
@@ -403,7 +512,7 @@ export function LifeOSMappingsTab() {
               </div>
             </div>
             <SheetFooter className="mt-6">
-              <Button className="w-full" onClick={handleCreate}>
+              <Button className="w-full" onClick={handleCreateWithValidation}>
                 {isRussian ? 'Создать маппинг' : 'Create Mapping'}
               </Button>
             </SheetFooter>
@@ -537,7 +646,7 @@ export function LifeOSMappingsTab() {
                       <Button 
                         size="icon" 
                         variant="ghost"
-                        onClick={() => handleDelete(mapping.id)}
+                        onClick={() => handleDeleteWithValidation(mapping.id)}
                       >
                         <Trash2 className="w-4 h-4 text-destructive" />
                       </Button>
@@ -549,6 +658,17 @@ export function LifeOSMappingsTab() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Change Impact Modal */}
+      <ChangeImpactModal
+        open={impactModalOpen}
+        onOpenChange={setImpactModalOpen}
+        onConfirm={handleImpactConfirm}
+        action={pendingAction?.type || 'create'}
+        impact={currentImpact}
+        validation={currentValidation}
+        isLoading={isSaving}
+      />
     </div>
   );
 }

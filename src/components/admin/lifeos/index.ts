@@ -3,3 +3,6 @@ export { LifeOSMappingsTab } from './LifeOSMappingsTab';
 export { LifeOSResolverPreviewTab } from './LifeOSResolverPreviewTab';
 export { LifeOSQualityTab } from './LifeOSQualityTab';
 export { LifeOSAuditTab } from './LifeOSAuditTab';
+export { LifeOSHealthTab } from './LifeOSHealthTab';
+export { ManualModeBadge } from './ManualModeBadge';
+export { ChangeImpactModal } from './ChangeImpactModal';
