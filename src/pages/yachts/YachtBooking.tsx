@@ -18,7 +18,8 @@ import { BookingSummary } from '@/components/booking/BookingSummary';
 import { BookingBottomBar } from '@/components/booking/BookingBottomBar';
 import { BookingConfirmation } from '@/components/booking/BookingConfirmation';
 import { BackButton } from '@/components/uno/BackButton';
-import { YachtExperienceSelect, YACHT_EXPERIENCES } from '@/components/yachts/YachtExperienceSelect';
+import { YachtExperienceSelect } from '@/components/yachts/YachtExperienceSelect';
+import { useYachtExperiences } from '@/hooks/useYachtExperiences';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface BookNowData {
@@ -38,17 +39,12 @@ export default function YachtBooking() {
   const { createBooking, isSubmitting } = useBooking();
   const { yacht, isLoading } = useYacht(id || '');
   const { checkYachtAvailability, isChecking, lastResult } = useAvailabilityCheck();
+  const { data: yachtExperiences = [] } = useYachtExperiences();
 
   const [availabilityError, setAvailabilityError] = useState<string | null>(null);
 
   // Get pre-filled data from location state (Book Now flow)
   const bookNowData = (location.state as { bookNowData?: BookNowData })?.bookNowData;
-
-  // Auth redirect
-  if (!authLoading && !user) {
-    navigate('/auth', { state: { from: `/yachts/${id}/booking` } });
-    return null;
-  }
 
   // Determine if half day from URL params or bookNowData
   const isHalfDay = bookNowData?.charterType === 'half_day' || searchParams.get('type') === 'half';
@@ -72,8 +68,15 @@ export default function YachtBooking() {
   const [selectedExperiences, setSelectedExperiences] = useState<string[]>([]);
   const [bookingResult, setBookingResult] = useState<{ bookingId: string } | null>(null);
 
+  // Auth redirect - must be after all hooks
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/auth', { state: { from: `/yachts/${id}/booking` } });
+    }
+  }, [authLoading, user, navigate, id]);
+
   // Loading state
-  if (isLoading) {
+  if (isLoading || authLoading) {
     return (
       <AppLayout>
         <PageContainer className="flex items-center justify-center min-h-[60vh]">
@@ -81,6 +84,11 @@ export default function YachtBooking() {
         </PageContainer>
       </AppLayout>
     );
+  }
+  
+  // Auth check after loading
+  if (!user) {
+    return null;
   }
 
   // Not found state
@@ -100,7 +108,7 @@ export default function YachtBooking() {
 
   // Calculate experiences total
   const experiencesTotal = selectedExperiences.reduce((sum, expId) => {
-    const exp = YACHT_EXPERIENCES.find(e => e.id === expId);
+    const exp = yachtExperiences.find(e => e.id === expId);
     return sum + (exp?.price || 0);
   }, 0);
 
@@ -146,7 +154,7 @@ export default function YachtBooking() {
 
     // Build experiences list for notes
     const experienceNames = selectedExperiences.map(expId => {
-      const exp = YACHT_EXPERIENCES.find(e => e.id === expId);
+      const exp = yachtExperiences.find(e => e.id === expId);
       return exp ? (language === 'ru' ? exp.labelRu : exp.labelEn) : '';
     }).filter(Boolean).join(', ');
 
@@ -168,7 +176,7 @@ export default function YachtBooking() {
           subtotal: basePrice,
         },
         ...selectedExperiences.map(expId => {
-          const exp = YACHT_EXPERIENCES.find(e => e.id === expId)!;
+          const exp = yachtExperiences.find(e => e.id === expId)!;
           return {
             item_type: 'yacht-experience',
             item_name: language === 'ru' ? exp.labelRu : exp.labelEn,
@@ -374,7 +382,7 @@ export default function YachtBooking() {
                 price: basePrice,
               },
               ...selectedExperiences.map(expId => {
-                const exp = YACHT_EXPERIENCES.find(e => e.id === expId)!;
+                const exp = yachtExperiences.find(e => e.id === expId)!;
                 return {
                   name: language === 'ru' ? exp.labelRu : exp.labelEn,
                   quantity: 1,

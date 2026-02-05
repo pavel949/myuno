@@ -1,141 +1,12 @@
 import React, { useState } from 'react';
 import { Check } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useYachtExperiences, type YachtExperience } from '@/hooks/useYachtExperiences';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
-export interface YachtExperience {
-  id: string;
-  icon: string;
-  labelEn: string;
-  labelRu: string;
-  descEn: string;
-  descRu: string;
-  price: number; // Additional price in THB
-  popular?: boolean;
-}
-
-export const YACHT_EXPERIENCES: YachtExperience[] = [
-  {
-    id: 'sunset-dinner',
-    icon: '🌅',
-    labelEn: 'Sunset Dinner',
-    labelRu: 'Ужин на закате',
-    descEn: 'Romantic dinner with sea view',
-    descRu: 'Романтический ужин с видом на море',
-    price: 8000,
-    popular: true,
-  },
-  {
-    id: 'fishing',
-    icon: '🎣',
-    labelEn: 'Fishing Trip',
-    labelRu: 'Рыбалка',
-    descEn: 'Deep sea fishing with equipment',
-    descRu: 'Морская рыбалка со снаряжением',
-    price: 5000,
-  },
-  {
-    id: 'water-toys',
-    icon: '🎢',
-    labelEn: 'Water Toys',
-    labelRu: 'Водные игрушки',
-    descEn: 'Banana, tube, wakeboard & more',
-    descRu: 'Банан, ватрушка, вейкборд и др.',
-    price: 6000,
-    popular: true,
-  },
-  {
-    id: 'jet-ski',
-    icon: '🏍️',
-    labelEn: 'Jet Ski',
-    labelRu: 'Гидроскутер',
-    descEn: '1 hour jet ski rental',
-    descRu: 'Аренда гидроцикла на 1 час',
-    price: 4000,
-  },
-  {
-    id: 'corporate',
-    icon: '💼',
-    labelEn: 'Corporate Event',
-    labelRu: 'Корпоратив',
-    descEn: 'Team building & business events',
-    descRu: 'Тимбилдинг и деловые мероприятия',
-    price: 15000,
-  },
-  {
-    id: 'birthday',
-    icon: '🎂',
-    labelEn: 'Birthday Party',
-    labelRu: 'День рождения',
-    descEn: 'Cake, decorations & celebration',
-    descRu: 'Торт, декор и праздник',
-    price: 10000,
-    popular: true,
-  },
-  {
-    id: 'romantic',
-    icon: '🥂',
-    labelEn: 'Romantic Date',
-    labelRu: 'Романтическое свидание',
-    descEn: 'Champagne, flowers & private setup',
-    descRu: 'Шампанское, цветы и приватная обстановка',
-    price: 12000,
-  },
-  {
-    id: 'snorkeling',
-    icon: '🤿',
-    labelEn: 'Snorkeling Adventure',
-    labelRu: 'Снорклинг-приключение',
-    descEn: 'Equipment & guide to best spots',
-    descRu: 'Снаряжение и гид к лучшим местам',
-    price: 3000,
-  },
-  {
-    id: 'photoshoot',
-    icon: '📸',
-    labelEn: 'Photo Session',
-    labelRu: 'Фотосессия',
-    descEn: 'Professional photographer onboard',
-    descRu: 'Профессиональный фотограф на борту',
-    price: 8000,
-  },
-  {
-    id: 'yoga',
-    icon: '🧘',
-    labelEn: 'Yacht Yoga',
-    labelRu: 'Йога на воде',
-    descEn: 'Sunrise yoga with instructor',
-    descRu: 'Йога на рассвете с инструктором',
-    price: 5000,
-  },
-  {
-    id: 'family',
-    icon: '👨‍👩‍👧‍👦',
-    labelEn: 'Family Cruise',
-    labelRu: 'Семейный круиз',
-    descEn: 'Kid-friendly activities & menu',
-    descRu: 'Детские развлечения и меню',
-    price: 4000,
-  },
-  {
-    id: 'karaoke',
-    icon: '🎤',
-    labelEn: 'Karaoke Party',
-    labelRu: 'Караоке-вечеринка',
-    descEn: 'Professional sound system & songs',
-    descRu: 'Проф. звук и большой выбор песен',
-    price: 5000,
-  },
-  {
-    id: 'bachelor',
-    icon: '🍾',
-    labelEn: 'Bachelor/Bachelorette',
-    labelRu: 'Мальчишник/Девичник',
-    descEn: 'Special party package',
-    descRu: 'Специальный праздничный пакет',
-    price: 15000,
-  },
-];
+// Re-export type for consumers
+export type { YachtExperience };
 
 interface YachtExperienceSelectProps {
   selected: string[];
@@ -145,6 +16,7 @@ interface YachtExperienceSelectProps {
 
 export function YachtExperienceSelect({ selected, onChange, className }: YachtExperienceSelectProps) {
   const { language } = useLanguage();
+  const { data: experiences = [], isLoading } = useYachtExperiences();
 
   const toggleExperience = (id: string) => {
     if (selected.includes(id)) {
@@ -156,10 +28,23 @@ export function YachtExperienceSelect({ selected, onChange, className }: YachtEx
 
   const getTotal = () => {
     return selected.reduce((sum, id) => {
-      const exp = YACHT_EXPERIENCES.find(e => e.id === id);
+      const exp = experiences.find(e => e.id === id);
       return sum + (exp?.price || 0);
     }, 0);
   };
+  
+  if (isLoading) {
+    return (
+      <div className={cn("space-y-4", className)}>
+        <Skeleton className="h-6 w-40" />
+        <div className="grid grid-cols-2 gap-3">
+          {[1, 2, 3, 4].map(i => (
+            <Skeleton key={i} className="h-28 rounded-xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={cn("space-y-4", className)}>
@@ -181,7 +66,7 @@ export function YachtExperienceSelect({ selected, onChange, className }: YachtEx
       </p>
 
       <div className="grid grid-cols-2 gap-3">
-        {YACHT_EXPERIENCES.map((exp) => {
+        {experiences.map((exp) => {
           const isSelected = selected.includes(exp.id);
           return (
             <button
@@ -246,6 +131,7 @@ interface ExperienceFilterChipsProps {
 export function ExperienceFilterChips({ selected, onChange }: ExperienceFilterChipsProps) {
   const { language } = useLanguage();
   const [showAll, setShowAll] = useState(false);
+  const { data: experiences = [] } = useYachtExperiences();
 
   const toggleExperience = (id: string) => {
     if (selected.includes(id)) {
@@ -256,8 +142,8 @@ export function ExperienceFilterChips({ selected, onChange }: ExperienceFilterCh
   };
 
   // Show popular first, then others if expanded
-  const popularExperiences = YACHT_EXPERIENCES.filter(e => e.popular);
-  const otherExperiences = YACHT_EXPERIENCES.filter(e => !e.popular);
+  const popularExperiences = experiences.filter(e => e.popular);
+  const otherExperiences = experiences.filter(e => !e.popular);
   const displayExperiences = showAll 
     ? [...popularExperiences, ...otherExperiences]
     : popularExperiences;

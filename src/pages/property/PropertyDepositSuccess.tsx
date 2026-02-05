@@ -15,7 +15,9 @@ export default function PropertyDepositSuccess() {
 
   const sessionId = searchParams.get('session_id');
   const propertyId = searchParams.get('property_id');
-  const bookingId = searchParams.get('booking_id');
+  const orderId = searchParams.get('order_id');
+  // Support legacy booking_id param as well
+  const bookingId = orderId || searchParams.get('booking_id');
 
   return (
     <AppLayout showBottomNav={false}>
@@ -83,27 +85,27 @@ export default function PropertyDepositSuccess() {
           <TripServicesGrid 
             variant="compact" 
             maxItems={6}
-            bookingId={bookingId || undefined}
+            bookingId={orderId || undefined}
             propertyId={propertyId || undefined}
           />
         </div>
 
         {/* Action Buttons */}
         <div className="flex flex-col gap-3 w-full max-w-sm">
-          {bookingId && (
-            <Button onClick={() => navigate(`/trip/${bookingId}`)} className="w-full gap-2">
+          {orderId && (
+            <Button onClick={() => navigate(`/orders/${orderId}`)} className="w-full gap-2">
               <ArrowRight className="w-4 h-4" />
-              {isRu ? 'Моя поездка' : 'My Trip'}
+              {isRu ? 'Детали заказа' : 'Order Details'}
             </Button>
           )}
           
           <Button 
-            variant={bookingId ? 'outline' : 'default'}
-            onClick={() => navigate('/bookings')} 
+            variant={orderId ? 'outline' : 'default'}
+            onClick={() => navigate('/orders')} 
             className="w-full gap-2"
           >
             <Calendar className="w-4 h-4" />
-            {isRu ? 'Мои бронирования' : 'My Bookings'}
+            {isRu ? 'Мои заказы' : 'My Orders'}
           </Button>
           
           <Button variant="ghost" onClick={() => navigate('/property')} className="w-full gap-2">
