@@ -13,9 +13,10 @@ const BYPASS_KEY = 'myuno_maintenance_bypass';
 
 export function MaintenanceProvider({ children }: { children: ReactNode }) {
   const [isMaintenanceMode, setIsMaintenanceMode] = useState(() => {
-    // Check localStorage for maintenance mode state
+    // Check localStorage for maintenance mode state, default to TRUE (Coming Soon)
     const stored = localStorage.getItem(MAINTENANCE_KEY);
-    return stored === 'true';
+    // If never set, default to maintenance mode ON
+    return stored === null ? true : stored === 'true';
   });
 
   const [canBypass, setCanBypass] = useState(() => {

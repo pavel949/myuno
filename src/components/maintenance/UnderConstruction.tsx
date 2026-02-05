@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Construction, Wrench, Clock, Bell, Mail, ShieldCheck } from 'lucide-react';
+import { Rocket, Sparkles, Clock, Bell, Mail, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
@@ -94,34 +94,34 @@ export function UnderConstruction() {
         {/* Icon */}
         <motion.div
           animate={{ 
-            rotate: [0, -10, 10, -10, 0],
+            scale: [1, 1.05, 1],
           }}
           transition={{ 
             duration: 2,
             repeat: Infinity,
-            repeatDelay: 3
+            repeatDelay: 1
           }}
           className="mx-auto w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center"
         >
-          <Construction className="w-12 h-12 text-primary" />
+          <Clock className="w-12 h-12 text-primary" />
         </motion.div>
 
         {/* Title */}
         <div className="space-y-3">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-            Under Construction
+            Coming Soon
           </h1>
           <p className="text-lg text-muted-foreground">
-            We're building something amazing for you
+            myUNO is launching soon in Phuket
           </p>
         </div>
 
         {/* Features preview */}
         <div className="grid grid-cols-3 gap-4 py-4">
           {[
-            { icon: Wrench, label: 'New Features' },
-            { icon: Clock, label: 'Coming Soon' },
-            { icon: Bell, label: 'Stay Tuned' },
+            { icon: Rocket, label: 'Launching Soon' },
+            { icon: Sparkles, label: 'New Experience' },
+            { icon: Bell, label: 'Get Notified' },
           ].map((item, i) => (
             <motion.div
               key={item.label}
