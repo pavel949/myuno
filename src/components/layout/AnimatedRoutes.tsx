@@ -114,6 +114,8 @@ const ServicesIndex = lazy(() => import('@/pages/services/ServicesIndex'));
 const ServiceProviderDetail = lazy(() => import('@/pages/services/ServiceProviderDetail'));
 const ServiceBooking = lazy(() => import('@/pages/services/ServiceBooking'));
 const ServicesMap = lazy(() => import('@/pages/services/ServicesMap'));
+const ServiceFunctionOrder = lazy(() => import('@/pages/services/ServiceFunctionOrder'));
+const ServiceOrderSuccess = lazy(() => import('@/pages/services/ServiceOrderSuccess'));
 
 // Legal & Business Services Mini-App
 const LegalServicesIndex = lazy(() => import('@/pages/legal/LegalServicesIndex'));
@@ -619,6 +621,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/services/provider/:id" element={<LazyPage><ServiceProviderDetail /></LazyPage>} />
         <Route path="/services/booking/:id" element={<LazyPage><ServiceBooking /></LazyPage>} />
         <Route path="/services/map" element={<LazyPage><ServicesMap /></LazyPage>} />
+        <Route path="/services/order/:functionId" element={<LazyPage><ServiceFunctionOrder /></LazyPage>} />
+        <Route path="/services/order/success" element={<LazyPage><ServiceOrderSuccess /></LazyPage>} />
         
         {/* Legal & Business Services Mini-App Routes */}
         <Route path="/legal" element={<LazyPage><LegalServicesIndex /></LazyPage>} />
