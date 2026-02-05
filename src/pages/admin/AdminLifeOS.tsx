@@ -9,11 +9,12 @@
  * 4. Health - Monitoring & governance
  * 5. Quality - Trust monitoring
  * 6. Audit - Change history
+ * 7. AI Insights - Read-only analysis (NO AUTO-EXECUTION)
  */
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Sparkles, Link2, Eye, ShieldCheck, History, Activity } from 'lucide-react';
+import { Sparkles, Link2, Eye, ShieldCheck, History, Activity, Brain } from 'lucide-react';
 import { LifeOSSituationsTab } from '@/components/admin/lifeos/LifeOSSituationsTab';
 import { LifeOSMappingsTab } from '@/components/admin/lifeos/LifeOSMappingsTab';
 import { LifeOSResolverPreviewTab } from '@/components/admin/lifeos/LifeOSResolverPreviewTab';
@@ -21,6 +22,7 @@ import { LifeOSQualityTab } from '@/components/admin/lifeos/LifeOSQualityTab';
 import { LifeOSAuditTab } from '@/components/admin/lifeos/LifeOSAuditTab';
 import { LifeOSHealthTab } from '@/components/admin/lifeos/LifeOSHealthTab';
 import { ManualModeBadge } from '@/components/admin/lifeos/ManualModeBadge';
+import { LifeOSAIPanel } from '@/components/admin/lifeos/LifeOSAIPanel';
 
 export default function AdminLifeOS() {
   const { language } = useLanguage();
@@ -63,6 +65,12 @@ export default function AdminLifeOS() {
       label: isRussian ? 'Аудит' : 'Audit', 
       icon: History,
       description: isRussian ? 'Журнал' : 'Log'
+    },
+    { 
+      id: 'ai', 
+      label: isRussian ? 'ИИ Аналитик' : 'AI Insights', 
+      icon: Brain,
+      description: isRussian ? 'Только чтение' : 'Read-Only'
     },
   ];
 
@@ -125,6 +133,10 @@ export default function AdminLifeOS() {
 
         <TabsContent value="audit" className="mt-4">
           <LifeOSAuditTab />
+        </TabsContent>
+
+        <TabsContent value="ai" className="mt-4">
+          <LifeOSAIPanel />
         </TabsContent>
       </Tabs>
     </div>

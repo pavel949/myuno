@@ -6,3 +6,4 @@ export { LifeOSAuditTab } from './LifeOSAuditTab';
 export { LifeOSHealthTab } from './LifeOSHealthTab';
 export { ManualModeBadge } from './ManualModeBadge';
 export { ChangeImpactModal } from './ChangeImpactModal';
+export { LifeOSAIPanel } from './LifeOSAIPanel';
