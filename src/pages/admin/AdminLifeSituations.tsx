@@ -1,13 +1,14 @@
 /**
- * AdminLifeSituations - Admin panel for Life Situations management
- * Allows admins to:
- * - View/edit life situations
- * - Assign entities to life situations
- * - Adjust weights
+ * AdminLifeSituations - LIFE OS Admin Control Panel
+ * Per LIFE OS Contract §Admin UX Contract:
+ * - Map entities to life situations
+ * - Adjust weight (priority)
+ * - Toggle visibility
+ * - Manage role_scope (guest/resident/owner/investor)
  */
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAdminLifeSituations, useAdminCatalogMappings, LifeSituation } from '@/hooks/useLifeSituations';
+import { useAdminLifeSituations, useAdminCatalogMappings, LifeSituation, CatalogLifeMap, type LifeOSRole } from '@/hooks/useLifeOS';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,10 +18,11 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Plus, Trash2, Link2, Settings2, Sparkles } from 'lucide-react';
+import { Plus, Trash2, Link2, Settings2, Sparkles, Users } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -33,6 +35,13 @@ const ENTITY_TYPES = [
   { value: 'restaurant', label: 'Restaurants' },
   { value: 'tour', label: 'Tours' },
   { value: 'experience', label: 'Experiences' },
+];
+
+const ROLE_SCOPES: { value: LifeOSRole; label: string; color: string }[] = [
+  { value: 'guest', label: 'Guest', color: 'bg-blue-100 text-blue-800' },
+  { value: 'resident', label: 'Resident', color: 'bg-green-100 text-green-800' },
+  { value: 'owner', label: 'Owner', color: 'bg-purple-100 text-purple-800' },
+  { value: 'investor', label: 'Investor', color: 'bg-amber-100 text-amber-800' },
 ];
 
 export default function AdminLifeSituations() {
@@ -50,6 +59,7 @@ export default function AdminLifeSituations() {
     entity_type: 'service',
     entity_id: '',
     weight: 50,
+    role_scope: ['guest', 'resident', 'owner', 'investor'] as LifeOSRole[],
   });
 
   const getIcon = (iconName: string): LucideIcon => {
@@ -83,6 +93,7 @@ export default function AdminLifeSituations() {
       entity_type: newMapping.entity_type,
       entity_id: newMapping.entity_id.trim(),
       weight: newMapping.weight,
+      role_scope: newMapping.role_scope,
     });
 
     if (error) {
@@ -96,8 +107,22 @@ export default function AdminLifeSituations() {
 
     toast.success('Mapping added');
     setIsAddMappingOpen(false);
-    setNewMapping({ entity_type: 'service', entity_id: '', weight: 50 });
+    setNewMapping({ entity_type: 'service', entity_id: '', weight: 50, role_scope: ['guest', 'resident', 'owner', 'investor'] });
     queryClient.invalidateQueries({ queryKey: ['admin-catalog-mappings', selectedSituation.id] });
+  };
+
+  const handleUpdateRoleScope = async (mappingId: string, roleScope: LifeOSRole[]) => {
+    const { error } = await supabase
+      .from('catalog_life_map')
+      .update({ role_scope: roleScope })
+      .eq('id', mappingId);
+
+    if (error) {
+      toast.error('Failed to update role scope');
+      return;
+    }
+
+    queryClient.invalidateQueries({ queryKey: ['admin-catalog-mappings', selectedSituation?.id] });
   };
 
   const handleDeleteMapping = async (mappingId: string) => {
@@ -312,6 +337,36 @@ export default function AdminLifeSituations() {
                               step={5}
                             />
                           </div>
+                          {/* Role Scope Selection */}
+                          <div className="space-y-2">
+                            <Label className="flex items-center gap-2">
+                              <Users className="w-4 h-4" />
+                              Visible to Roles
+                            </Label>
+                            <div className="flex flex-wrap gap-2">
+                              {ROLE_SCOPES.map((role) => (
+                                <label
+                                  key={role.value}
+                                  className="flex items-center gap-2 cursor-pointer"
+                                >
+                                  <Checkbox
+                                    checked={newMapping.role_scope.includes(role.value)}
+                                    onCheckedChange={(checked) => {
+                                      setNewMapping((m) => ({
+                                        ...m,
+                                        role_scope: checked
+                                          ? [...m.role_scope, role.value]
+                                          : m.role_scope.filter((r) => r !== role.value),
+                                      }));
+                                    }}
+                                  />
+                                  <span className={cn('text-xs px-2 py-0.5 rounded', role.color)}>
+                                    {role.label}
+                                  </span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
                           <Button className="w-full" onClick={handleAddMapping}>
                             Add Mapping
                           </Button>
@@ -332,32 +387,64 @@ export default function AdminLifeSituations() {
                       mappings?.map((mapping) => (
                         <div
                           key={mapping.id}
-                          className="flex items-center gap-3 p-3 rounded-lg border bg-card"
+                          className="flex flex-col gap-2 p-3 rounded-lg border bg-card"
                         >
-                          <Badge variant="outline">{mapping.entity_type}</Badge>
-                          <code className="text-xs flex-1 truncate">
-                            {mapping.entity_id}
-                          </code>
-                          <div className="flex items-center gap-2 w-32">
-                            <Slider
-                              value={[mapping.weight]}
-                              onValueChange={([v]) =>
-                                handleUpdateWeight(mapping.id, v)
-                              }
-                              min={0}
-                              max={100}
-                              step={5}
-                              className="flex-1"
-                            />
-                            <span className="text-xs w-8">{mapping.weight}%</span>
+                          <div className="flex items-center gap-3">
+                            <Badge variant="outline">{mapping.entity_type}</Badge>
+                            <code className="text-xs flex-1 truncate">
+                              {mapping.entity_id}
+                            </code>
+                            <div className="flex items-center gap-2 w-32">
+                              <Slider
+                                value={[mapping.weight]}
+                                onValueChange={([v]) =>
+                                  handleUpdateWeight(mapping.id, v)
+                                }
+                                min={0}
+                                max={100}
+                                step={5}
+                                className="flex-1"
+                              />
+                              <span className="text-xs w-8">{mapping.weight}%</span>
+                            </div>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => handleDeleteMapping(mapping.id)}
+                            >
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
                           </div>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => handleDeleteMapping(mapping.id)}
-                          >
-                            <Trash2 className="w-4 h-4 text-destructive" />
-                          </Button>
+                          {/* Role Scope Display & Edit */}
+                          <div className="flex items-center gap-2 pl-2">
+                            <Users className="w-3 h-3 text-muted-foreground" />
+                            <div className="flex flex-wrap gap-1">
+                              {ROLE_SCOPES.map((role) => {
+                                const isActive = mapping.role_scope?.includes(role.value) ?? true;
+                                return (
+                                  <button
+                                    key={role.value}
+                                    onClick={() => {
+                                      const currentScope = mapping.role_scope || ['guest', 'resident', 'owner', 'investor'];
+                                      const newScope = isActive
+                                        ? currentScope.filter((r) => r !== role.value)
+                                        : [...currentScope, role.value];
+                                      if (newScope.length > 0) {
+                                        handleUpdateRoleScope(mapping.id, newScope as LifeOSRole[]);
+                                      }
+                                    }}
+                                    className={cn(
+                                      'text-[10px] px-1.5 py-0.5 rounded transition-opacity',
+                                      role.color,
+                                      !isActive && 'opacity-30'
+                                    )}
+                                  >
+                                    {role.label}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
                         </div>
                       ))
                     )}

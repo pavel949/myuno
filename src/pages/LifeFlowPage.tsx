@@ -1,13 +1,23 @@
 /**
- * LifeFlowPage - Life Situation resolver page
+ * LifeFlowPage - LIFE OS resolver page
  * Per UX Contract §4.2: Header → Suggested Blocks → Explore More
  * Per UX Contract §4.1: NEVER show "No results" - always guided fallback
+ * 
+ * Enhanced with LIFE OS:
+ * - Role-aware catalog resolution
+ * - Locale-aware title display
+ * - AI-readable context structure
  */
 import React from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useLifeSituationContext } from '@/contexts/LifeSituationContext';
-import { useLifeSituations, useResolveLifeSituation } from '@/hooks/useLifeSituations';
+import { 
+  useLifeSituations, 
+  useResolveLifeOSContext,
+  getLifeOSAIContext,
+  type LifeOSCatalogItem 
+} from '@/hooks/useLifeOS';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -15,7 +25,7 @@ import { LifeSituationBadge } from '@/components/life-flow/LifeSituationBadge';
 import { GuidedFallback } from '@/components/life-flow/GuidedFallback';
 import { 
   ArrowLeft, Package, Home, Ship, Car, UtensilsCrossed, 
-  Compass, MapPin, ArrowRight, ChevronRight 
+  Compass, MapPin, ArrowRight, ChevronRight, Shield
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import * as LucideIcons from 'lucide-react';
@@ -46,7 +56,8 @@ export default function LifeFlowPage() {
   const { setLifeSituation } = useLifeSituationContext();
 
   const { data: situations } = useLifeSituations();
-  const { data: catalogItems, isLoading } = useResolveLifeSituation(code || null);
+  // Use enhanced LIFE OS resolver with role and locale support
+  const { data: catalogItems, isLoading } = useResolveLifeOSContext(code || null, { limit: 50 });
 
   const currentSituation = situations?.find((s) => s.code === code);
 
@@ -57,6 +68,14 @@ export default function LifeFlowPage() {
       setLifeSituation(currentSituation.code, title, currentSituation.color);
     }
   }, [currentSituation, isRussian, setLifeSituation]);
+
+  // Log AI context for debugging/future AI integration
+  React.useEffect(() => {
+    if (currentSituation && catalogItems?.length) {
+      const aiContext = getLifeOSAIContext(currentSituation, catalogItems);
+      console.debug('[LIFE OS] AI Context:', aiContext);
+    }
+  }, [currentSituation, catalogItems]);
 
   // Group items by entity type and split by priority (UX Contract §4.3)
   const { primaryBlocks, secondaryBlocks } = React.useMemo(() => {
@@ -150,16 +169,23 @@ export default function LifeFlowPage() {
                 isPrimary && "p-4"
               )}
             >
-              <EntityIcon className={cn(
-                "text-muted-foreground mb-2",
-                isPrimary ? "w-6 h-6" : "w-5 h-5"
-              )} />
-              <p className="text-xs text-muted-foreground">
-                {isRussian ? config.labelRu : config.labelEn}
-              </p>
+              <div className="flex items-start justify-between mb-2">
+                <EntityIcon className={cn(
+                  "text-muted-foreground",
+                  isPrimary ? "w-6 h-6" : "w-5 h-5"
+                )} />
+                {item.trust_level === 'verified' && (
+                  <Shield className="w-3 h-3 text-primary" />
+                )}
+              </div>
               <p className={cn("font-medium truncate", isPrimary ? "text-sm" : "text-xs")}>
-                ID: {item.entity_id.slice(0, 8)}...
+                {item.title_localized || item.title || `ID: ${item.entity_id.slice(0, 8)}...`}
               </p>
+              {item.price && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  {item.currency} {item.price.toLocaleString()}
+                </p>
+              )}
               {/* Relevance indicator */}
               <div className="mt-2 flex items-center gap-1">
                 <div className="flex-1 h-1 rounded-full bg-muted overflow-hidden">
