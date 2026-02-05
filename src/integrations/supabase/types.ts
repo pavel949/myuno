@@ -9480,12 +9480,17 @@ export type Database = {
       }
       properties: {
         Row: {
+          accessibility_features: string[] | null
           acquisition_costs: number | null
+          actual_owner_email: string | null
+          actual_owner_name: string | null
+          actual_owner_phone: string | null
           address: string | null
           amenities: string[] | null
           approval_status: string | null
           area_sqm: number | null
           available_from: string | null
+          balance_due_days: number | null
           bathrooms: number | null
           bedrooms: number | null
           beds: Json | null
@@ -9494,14 +9499,19 @@ export type Database = {
           building_year: number | null
           cancellation_policy: string | null
           chanote_number: string | null
+          check_in_instructions: string | null
+          check_in_instructions_ru: string | null
           check_in_time: string | null
           check_out_time: string | null
+          children_friendly: boolean | null
           cleaning_frequency: string | null
           cleaning_included: boolean | null
+          commercial_terms_redacted: boolean | null
           commission_rate: number | null
           cover_image: string | null
           created_at: string
           created_by_uno_team: boolean | null
+          created_on_behalf: boolean | null
           currency: string | null
           deposit_amount: number | null
           deposit_currency: string | null
@@ -9509,6 +9519,7 @@ export type Database = {
           description_en: string | null
           description_ru: string | null
           district: string | null
+          early_checkin_price: number | null
           electricity_included: boolean | null
           electricity_meter_id: string | null
           electricity_metering: string | null
@@ -9516,12 +9527,19 @@ export type Database = {
           electricity_notes_ru: string | null
           electricity_provider: string | null
           electricity_unit_price: number | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
           equipment: string[] | null
           extra_cleaning_price: number | null
+          extra_guest_price: number | null
+          extra_guest_threshold: number | null
           extra_services: Json | null
           floor: number | null
           furnishing_level: string | null
+          has_crib: boolean | null
+          has_high_chair: boolean | null
           highlights: string[] | null
+          host_languages: string[] | null
           house_rules: string | null
           house_rules_ru: string | null
           ical_export_enabled: boolean | null
@@ -9532,12 +9550,17 @@ export type Database = {
           included_services: Json | null
           instant_booking: boolean | null
           internal_name: string | null
+          internet_provider: string | null
+          internet_speed: string | null
           is_active: boolean | null
           is_featured: boolean | null
           is_rented: boolean | null
           is_verified: boolean | null
           juristic_office_contact: string | null
+          key_handover: string | null
           lat: number | null
+          late_checkout_penalty: number | null
+          late_checkout_price: number | null
           legacy_owner_property_id: string | null
           linen_change_frequency: string | null
           linen_change_price: number | null
@@ -9545,24 +9568,45 @@ export type Database = {
           listing_type: string
           lng: number | null
           location_id: string | null
+          managed_by_org_id: string | null
+          management_document_name: string | null
+          management_document_url: string | null
           management_type: string | null
+          manager_line_id: string | null
+          manager_name: string | null
+          manager_phone: string | null
           max_guests: number | null
+          max_party_guests: number | null
           min_stay_nights: number | null
           monthly_discount: number | null
           mortgage_amount: number | null
           mortgage_bank: string | null
           mortgage_interest_rate: number | null
           mortgage_monthly_payment: number | null
+          nearby_places: Json | null
           notes: string | null
           owner_id: string | null
           ownership_form: string | null
+          ownership_transferred_at: string | null
           ownership_type: string | null
+          ownership_verification_notes: string | null
+          ownership_verification_status: string | null
+          ownership_verified_at: string | null
+          ownership_verified_by: string | null
+          parking_included: boolean | null
+          parking_notes: string | null
           parking_spaces: number | null
           parking_type: string | null
+          parties_allowed: boolean | null
+          payment_model: string | null
           pet_deposit: number | null
           pet_monthly_fee: number | null
+          pet_notes: string | null
+          pet_notes_ru: string | null
           pet_policy: string | null
+          pets_allowed: boolean | null
           pool_size: string | null
+          prepay_percent: number | null
           price: number | null
           price_per_night: number | null
           price_period: string | null
@@ -9572,15 +9616,21 @@ export type Database = {
           purchase_currency: string | null
           purchase_date: string | null
           purchase_price: number | null
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
           rating: number | null
           rejection_reason: string | null
+          renovation_costs: number | null
           rental_platform: string | null
           review_count: number | null
           reviewed_at: string | null
           reviewed_by: string | null
           rooms: Json | null
+          safety_features: string[] | null
           sale_price: number | null
           seasonal_pricing: Json | null
+          security_deposit_required: boolean | null
+          smoking_penalty: number | null
           smoking_policy: string | null
           status: string | null
           tabien_baan: string | null
@@ -9588,6 +9638,10 @@ export type Database = {
           title_en: string
           title_ru: string
           total_floors: number | null
+          transfer_airport_price: number | null
+          transfer_available: boolean | null
+          transfer_notes: string | null
+          transfer_notes_ru: string | null
           unit_number: string | null
           uno_team_creator_id: string | null
           updated_at: string
@@ -9605,12 +9659,17 @@ export type Database = {
           wifi_speed: string | null
         }
         Insert: {
+          accessibility_features?: string[] | null
           acquisition_costs?: number | null
+          actual_owner_email?: string | null
+          actual_owner_name?: string | null
+          actual_owner_phone?: string | null
           address?: string | null
           amenities?: string[] | null
           approval_status?: string | null
           area_sqm?: number | null
           available_from?: string | null
+          balance_due_days?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
           beds?: Json | null
@@ -9619,14 +9678,19 @@ export type Database = {
           building_year?: number | null
           cancellation_policy?: string | null
           chanote_number?: string | null
+          check_in_instructions?: string | null
+          check_in_instructions_ru?: string | null
           check_in_time?: string | null
           check_out_time?: string | null
+          children_friendly?: boolean | null
           cleaning_frequency?: string | null
           cleaning_included?: boolean | null
+          commercial_terms_redacted?: boolean | null
           commission_rate?: number | null
           cover_image?: string | null
           created_at?: string
           created_by_uno_team?: boolean | null
+          created_on_behalf?: boolean | null
           currency?: string | null
           deposit_amount?: number | null
           deposit_currency?: string | null
@@ -9634,6 +9698,7 @@ export type Database = {
           description_en?: string | null
           description_ru?: string | null
           district?: string | null
+          early_checkin_price?: number | null
           electricity_included?: boolean | null
           electricity_meter_id?: string | null
           electricity_metering?: string | null
@@ -9641,12 +9706,19 @@ export type Database = {
           electricity_notes_ru?: string | null
           electricity_provider?: string | null
           electricity_unit_price?: number | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
           equipment?: string[] | null
           extra_cleaning_price?: number | null
+          extra_guest_price?: number | null
+          extra_guest_threshold?: number | null
           extra_services?: Json | null
           floor?: number | null
           furnishing_level?: string | null
+          has_crib?: boolean | null
+          has_high_chair?: boolean | null
           highlights?: string[] | null
+          host_languages?: string[] | null
           house_rules?: string | null
           house_rules_ru?: string | null
           ical_export_enabled?: boolean | null
@@ -9657,12 +9729,17 @@ export type Database = {
           included_services?: Json | null
           instant_booking?: boolean | null
           internal_name?: string | null
+          internet_provider?: string | null
+          internet_speed?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
           is_rented?: boolean | null
           is_verified?: boolean | null
           juristic_office_contact?: string | null
+          key_handover?: string | null
           lat?: number | null
+          late_checkout_penalty?: number | null
+          late_checkout_price?: number | null
           legacy_owner_property_id?: string | null
           linen_change_frequency?: string | null
           linen_change_price?: number | null
@@ -9670,24 +9747,45 @@ export type Database = {
           listing_type: string
           lng?: number | null
           location_id?: string | null
+          managed_by_org_id?: string | null
+          management_document_name?: string | null
+          management_document_url?: string | null
           management_type?: string | null
+          manager_line_id?: string | null
+          manager_name?: string | null
+          manager_phone?: string | null
           max_guests?: number | null
+          max_party_guests?: number | null
           min_stay_nights?: number | null
           monthly_discount?: number | null
           mortgage_amount?: number | null
           mortgage_bank?: string | null
           mortgage_interest_rate?: number | null
           mortgage_monthly_payment?: number | null
+          nearby_places?: Json | null
           notes?: string | null
           owner_id?: string | null
           ownership_form?: string | null
+          ownership_transferred_at?: string | null
           ownership_type?: string | null
+          ownership_verification_notes?: string | null
+          ownership_verification_status?: string | null
+          ownership_verified_at?: string | null
+          ownership_verified_by?: string | null
+          parking_included?: boolean | null
+          parking_notes?: string | null
           parking_spaces?: number | null
           parking_type?: string | null
+          parties_allowed?: boolean | null
+          payment_model?: string | null
           pet_deposit?: number | null
           pet_monthly_fee?: number | null
+          pet_notes?: string | null
+          pet_notes_ru?: string | null
           pet_policy?: string | null
+          pets_allowed?: boolean | null
           pool_size?: string | null
+          prepay_percent?: number | null
           price?: number | null
           price_per_night?: number | null
           price_period?: string | null
@@ -9697,15 +9795,21 @@ export type Database = {
           purchase_currency?: string | null
           purchase_date?: string | null
           purchase_price?: number | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
           rating?: number | null
           rejection_reason?: string | null
+          renovation_costs?: number | null
           rental_platform?: string | null
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           rooms?: Json | null
+          safety_features?: string[] | null
           sale_price?: number | null
           seasonal_pricing?: Json | null
+          security_deposit_required?: boolean | null
+          smoking_penalty?: number | null
           smoking_policy?: string | null
           status?: string | null
           tabien_baan?: string | null
@@ -9713,6 +9817,10 @@ export type Database = {
           title_en: string
           title_ru: string
           total_floors?: number | null
+          transfer_airport_price?: number | null
+          transfer_available?: boolean | null
+          transfer_notes?: string | null
+          transfer_notes_ru?: string | null
           unit_number?: string | null
           uno_team_creator_id?: string | null
           updated_at?: string
@@ -9730,12 +9838,17 @@ export type Database = {
           wifi_speed?: string | null
         }
         Update: {
+          accessibility_features?: string[] | null
           acquisition_costs?: number | null
+          actual_owner_email?: string | null
+          actual_owner_name?: string | null
+          actual_owner_phone?: string | null
           address?: string | null
           amenities?: string[] | null
           approval_status?: string | null
           area_sqm?: number | null
           available_from?: string | null
+          balance_due_days?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
           beds?: Json | null
@@ -9744,14 +9857,19 @@ export type Database = {
           building_year?: number | null
           cancellation_policy?: string | null
           chanote_number?: string | null
+          check_in_instructions?: string | null
+          check_in_instructions_ru?: string | null
           check_in_time?: string | null
           check_out_time?: string | null
+          children_friendly?: boolean | null
           cleaning_frequency?: string | null
           cleaning_included?: boolean | null
+          commercial_terms_redacted?: boolean | null
           commission_rate?: number | null
           cover_image?: string | null
           created_at?: string
           created_by_uno_team?: boolean | null
+          created_on_behalf?: boolean | null
           currency?: string | null
           deposit_amount?: number | null
           deposit_currency?: string | null
@@ -9759,6 +9877,7 @@ export type Database = {
           description_en?: string | null
           description_ru?: string | null
           district?: string | null
+          early_checkin_price?: number | null
           electricity_included?: boolean | null
           electricity_meter_id?: string | null
           electricity_metering?: string | null
@@ -9766,12 +9885,19 @@ export type Database = {
           electricity_notes_ru?: string | null
           electricity_provider?: string | null
           electricity_unit_price?: number | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
           equipment?: string[] | null
           extra_cleaning_price?: number | null
+          extra_guest_price?: number | null
+          extra_guest_threshold?: number | null
           extra_services?: Json | null
           floor?: number | null
           furnishing_level?: string | null
+          has_crib?: boolean | null
+          has_high_chair?: boolean | null
           highlights?: string[] | null
+          host_languages?: string[] | null
           house_rules?: string | null
           house_rules_ru?: string | null
           ical_export_enabled?: boolean | null
@@ -9782,12 +9908,17 @@ export type Database = {
           included_services?: Json | null
           instant_booking?: boolean | null
           internal_name?: string | null
+          internet_provider?: string | null
+          internet_speed?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
           is_rented?: boolean | null
           is_verified?: boolean | null
           juristic_office_contact?: string | null
+          key_handover?: string | null
           lat?: number | null
+          late_checkout_penalty?: number | null
+          late_checkout_price?: number | null
           legacy_owner_property_id?: string | null
           linen_change_frequency?: string | null
           linen_change_price?: number | null
@@ -9795,24 +9926,45 @@ export type Database = {
           listing_type?: string
           lng?: number | null
           location_id?: string | null
+          managed_by_org_id?: string | null
+          management_document_name?: string | null
+          management_document_url?: string | null
           management_type?: string | null
+          manager_line_id?: string | null
+          manager_name?: string | null
+          manager_phone?: string | null
           max_guests?: number | null
+          max_party_guests?: number | null
           min_stay_nights?: number | null
           monthly_discount?: number | null
           mortgage_amount?: number | null
           mortgage_bank?: string | null
           mortgage_interest_rate?: number | null
           mortgage_monthly_payment?: number | null
+          nearby_places?: Json | null
           notes?: string | null
           owner_id?: string | null
           ownership_form?: string | null
+          ownership_transferred_at?: string | null
           ownership_type?: string | null
+          ownership_verification_notes?: string | null
+          ownership_verification_status?: string | null
+          ownership_verified_at?: string | null
+          ownership_verified_by?: string | null
+          parking_included?: boolean | null
+          parking_notes?: string | null
           parking_spaces?: number | null
           parking_type?: string | null
+          parties_allowed?: boolean | null
+          payment_model?: string | null
           pet_deposit?: number | null
           pet_monthly_fee?: number | null
+          pet_notes?: string | null
+          pet_notes_ru?: string | null
           pet_policy?: string | null
+          pets_allowed?: boolean | null
           pool_size?: string | null
+          prepay_percent?: number | null
           price?: number | null
           price_per_night?: number | null
           price_period?: string | null
@@ -9822,15 +9974,21 @@ export type Database = {
           purchase_currency?: string | null
           purchase_date?: string | null
           purchase_price?: number | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
           rating?: number | null
           rejection_reason?: string | null
+          renovation_costs?: number | null
           rental_platform?: string | null
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           rooms?: Json | null
+          safety_features?: string[] | null
           sale_price?: number | null
           seasonal_pricing?: Json | null
+          security_deposit_required?: boolean | null
+          smoking_penalty?: number | null
           smoking_policy?: string | null
           status?: string | null
           tabien_baan?: string | null
@@ -9838,6 +9996,10 @@ export type Database = {
           title_en?: string
           title_ru?: string
           total_floors?: number | null
+          transfer_airport_price?: number | null
+          transfer_available?: boolean | null
+          transfer_notes?: string | null
+          transfer_notes_ru?: string | null
           unit_number?: string | null
           uno_team_creator_id?: string | null
           updated_at?: string
@@ -10877,7 +11039,21 @@ export type Database = {
             foreignKeyName: "property_inspections_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
-            referencedRelation: "owner_properties"
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_inspections_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_inspections_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
             referencedColumns: ["id"]
           },
         ]
@@ -17577,30 +17753,22 @@ export type Database = {
       }
       v_marketplace_listings: {
         Row: {
-          address: string | null
           amenities: string[] | null
-          approval_status: string | null
           area_sqm: number | null
           available_from: string | null
           bathrooms: number | null
           bedrooms: number | null
           cancellation_policy: string | null
-          check_in_time: string | null
-          check_out_time: string | null
+          children_friendly: boolean | null
           cover_image: string | null
           created_at: string | null
           currency: string | null
-          deposit_amount: number | null
-          deposit_currency: string | null
           description_en: string | null
           description_ru: string | null
           district: string | null
-          equipment: string[] | null
           floor: number | null
           furnishing_level: string | null
           highlights: string[] | null
-          house_rules: string | null
-          house_rules_ru: string | null
           id: string | null
           images: string[] | null
           instant_booking: boolean | null
@@ -17613,10 +17781,10 @@ export type Database = {
           lng: number | null
           max_guests: number | null
           min_stay_nights: number | null
-          monthly_discount: number | null
-          owner_id: string | null
+          ownership_form: string | null
+          parking_included: boolean | null
+          pets_allowed: boolean | null
           price: number | null
-          price_per_night: number | null
           price_period: string | null
           project_id: string | null
           property_type: string | null
@@ -17624,40 +17792,28 @@ export type Database = {
           rating: number | null
           review_count: number | null
           sale_price: number | null
-          seasonal_pricing: Json | null
-          title: string | null
           title_en: string | null
           title_ru: string | null
           unit_number: string | null
-          updated_at: string | null
           view_type: string | null
-          weekly_discount: number | null
         }
         Insert: {
-          address?: string | null
           amenities?: string[] | null
-          approval_status?: string | null
           area_sqm?: number | null
           available_from?: string | null
           bathrooms?: number | null
           bedrooms?: number | null
           cancellation_policy?: string | null
-          check_in_time?: string | null
-          check_out_time?: string | null
+          children_friendly?: boolean | null
           cover_image?: string | null
           created_at?: string | null
           currency?: string | null
-          deposit_amount?: number | null
-          deposit_currency?: string | null
           description_en?: string | null
           description_ru?: string | null
           district?: string | null
-          equipment?: string[] | null
           floor?: number | null
           furnishing_level?: string | null
           highlights?: string[] | null
-          house_rules?: string | null
-          house_rules_ru?: string | null
           id?: string | null
           images?: string[] | null
           instant_booking?: boolean | null
@@ -17670,10 +17826,10 @@ export type Database = {
           lng?: number | null
           max_guests?: number | null
           min_stay_nights?: number | null
-          monthly_discount?: number | null
-          owner_id?: string | null
+          ownership_form?: string | null
+          parking_included?: boolean | null
+          pets_allowed?: boolean | null
           price?: number | null
-          price_per_night?: number | null
           price_period?: string | null
           project_id?: string | null
           property_type?: string | null
@@ -17681,40 +17837,28 @@ export type Database = {
           rating?: number | null
           review_count?: number | null
           sale_price?: number | null
-          seasonal_pricing?: Json | null
-          title?: string | null
           title_en?: string | null
           title_ru?: string | null
           unit_number?: string | null
-          updated_at?: string | null
           view_type?: string | null
-          weekly_discount?: number | null
         }
         Update: {
-          address?: string | null
           amenities?: string[] | null
-          approval_status?: string | null
           area_sqm?: number | null
           available_from?: string | null
           bathrooms?: number | null
           bedrooms?: number | null
           cancellation_policy?: string | null
-          check_in_time?: string | null
-          check_out_time?: string | null
+          children_friendly?: boolean | null
           cover_image?: string | null
           created_at?: string | null
           currency?: string | null
-          deposit_amount?: number | null
-          deposit_currency?: string | null
           description_en?: string | null
           description_ru?: string | null
           district?: string | null
-          equipment?: string[] | null
           floor?: number | null
           furnishing_level?: string | null
           highlights?: string[] | null
-          house_rules?: string | null
-          house_rules_ru?: string | null
           id?: string | null
           images?: string[] | null
           instant_booking?: boolean | null
@@ -17727,10 +17871,10 @@ export type Database = {
           lng?: number | null
           max_guests?: number | null
           min_stay_nights?: number | null
-          monthly_discount?: number | null
-          owner_id?: string | null
+          ownership_form?: string | null
+          parking_included?: boolean | null
+          pets_allowed?: boolean | null
           price?: number | null
-          price_per_night?: number | null
           price_period?: string | null
           project_id?: string | null
           property_type?: string | null
@@ -17738,14 +17882,10 @@ export type Database = {
           rating?: number | null
           review_count?: number | null
           sale_price?: number | null
-          seasonal_pricing?: Json | null
-          title?: string | null
           title_en?: string | null
           title_ru?: string | null
           unit_number?: string | null
-          updated_at?: string | null
           view_type?: string | null
-          weekly_discount?: number | null
         }
         Relationships: [
           {
@@ -17766,12 +17906,17 @@ export type Database = {
       }
       v_owner_properties: {
         Row: {
+          accessibility_features: string[] | null
           acquisition_costs: number | null
+          actual_owner_email: string | null
+          actual_owner_name: string | null
+          actual_owner_phone: string | null
           address: string | null
           amenities: string[] | null
           approval_status: string | null
           area_sqm: number | null
           available_from: string | null
+          balance_due_days: number | null
           bathrooms: number | null
           bedrooms: number | null
           beds: Json | null
@@ -17780,14 +17925,19 @@ export type Database = {
           building_year: number | null
           cancellation_policy: string | null
           chanote_number: string | null
+          check_in_instructions: string | null
+          check_in_instructions_ru: string | null
           check_in_time: string | null
           check_out_time: string | null
+          children_friendly: boolean | null
           cleaning_frequency: string | null
           cleaning_included: boolean | null
+          commercial_terms_redacted: boolean | null
           commission_rate: number | null
           cover_image: string | null
           created_at: string | null
           created_by_uno_team: boolean | null
+          created_on_behalf: boolean | null
           currency: string | null
           deposit_amount: number | null
           deposit_currency: string | null
@@ -17795,6 +17945,7 @@ export type Database = {
           description_en: string | null
           description_ru: string | null
           district: string | null
+          early_checkin_price: number | null
           electricity_included: boolean | null
           electricity_meter_id: string | null
           electricity_metering: string | null
@@ -17802,12 +17953,19 @@ export type Database = {
           electricity_notes_ru: string | null
           electricity_provider: string | null
           electricity_unit_price: number | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
           equipment: string[] | null
           extra_cleaning_price: number | null
+          extra_guest_price: number | null
+          extra_guest_threshold: number | null
           extra_services: Json | null
           floor: number | null
           furnishing_level: string | null
+          has_crib: boolean | null
+          has_high_chair: boolean | null
           highlights: string[] | null
+          host_languages: string[] | null
           house_rules: string | null
           house_rules_ru: string | null
           ical_export_enabled: boolean | null
@@ -17818,12 +17976,17 @@ export type Database = {
           included_services: Json | null
           instant_booking: boolean | null
           internal_name: string | null
+          internet_provider: string | null
+          internet_speed: string | null
           is_active: boolean | null
           is_featured: boolean | null
           is_rented: boolean | null
           is_verified: boolean | null
           juristic_office_contact: string | null
+          key_handover: string | null
           lat: number | null
+          late_checkout_penalty: number | null
+          late_checkout_price: number | null
           legacy_owner_property_id: string | null
           linen_change_frequency: string | null
           linen_change_price: number | null
@@ -17831,24 +17994,45 @@ export type Database = {
           listing_type: string | null
           lng: number | null
           location_id: string | null
+          managed_by_org_id: string | null
+          management_document_name: string | null
+          management_document_url: string | null
           management_type: string | null
+          manager_line_id: string | null
+          manager_name: string | null
+          manager_phone: string | null
           max_guests: number | null
+          max_party_guests: number | null
           min_stay_nights: number | null
           monthly_discount: number | null
           mortgage_amount: number | null
           mortgage_bank: string | null
           mortgage_interest_rate: number | null
           mortgage_monthly_payment: number | null
+          nearby_places: Json | null
           notes: string | null
           owner_id: string | null
           ownership_form: string | null
+          ownership_transferred_at: string | null
           ownership_type: string | null
+          ownership_verification_notes: string | null
+          ownership_verification_status: string | null
+          ownership_verified_at: string | null
+          ownership_verified_by: string | null
+          parking_included: boolean | null
+          parking_notes: string | null
           parking_spaces: number | null
           parking_type: string | null
+          parties_allowed: boolean | null
+          payment_model: string | null
           pet_deposit: number | null
           pet_monthly_fee: number | null
+          pet_notes: string | null
+          pet_notes_ru: string | null
           pet_policy: string | null
+          pets_allowed: boolean | null
           pool_size: string | null
+          prepay_percent: number | null
           price: number | null
           price_per_night: number | null
           price_period: string | null
@@ -17858,15 +18042,21 @@ export type Database = {
           purchase_currency: string | null
           purchase_date: string | null
           purchase_price: number | null
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
           rating: number | null
           rejection_reason: string | null
+          renovation_costs: number | null
           rental_platform: string | null
           review_count: number | null
           reviewed_at: string | null
           reviewed_by: string | null
           rooms: Json | null
+          safety_features: string[] | null
           sale_price: number | null
           seasonal_pricing: Json | null
+          security_deposit_required: boolean | null
+          smoking_penalty: number | null
           smoking_policy: string | null
           status: string | null
           tabien_baan: string | null
@@ -17874,6 +18064,10 @@ export type Database = {
           title_en: string | null
           title_ru: string | null
           total_floors: number | null
+          transfer_airport_price: number | null
+          transfer_available: boolean | null
+          transfer_notes: string | null
+          transfer_notes_ru: string | null
           unit_number: string | null
           uno_team_creator_id: string | null
           updated_at: string | null
@@ -17891,12 +18085,17 @@ export type Database = {
           wifi_speed: string | null
         }
         Insert: {
+          accessibility_features?: string[] | null
           acquisition_costs?: number | null
+          actual_owner_email?: string | null
+          actual_owner_name?: string | null
+          actual_owner_phone?: string | null
           address?: string | null
           amenities?: string[] | null
           approval_status?: string | null
           area_sqm?: number | null
           available_from?: string | null
+          balance_due_days?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
           beds?: Json | null
@@ -17905,14 +18104,19 @@ export type Database = {
           building_year?: number | null
           cancellation_policy?: string | null
           chanote_number?: string | null
+          check_in_instructions?: string | null
+          check_in_instructions_ru?: string | null
           check_in_time?: string | null
           check_out_time?: string | null
+          children_friendly?: boolean | null
           cleaning_frequency?: string | null
           cleaning_included?: boolean | null
+          commercial_terms_redacted?: boolean | null
           commission_rate?: number | null
           cover_image?: string | null
           created_at?: string | null
           created_by_uno_team?: boolean | null
+          created_on_behalf?: boolean | null
           currency?: string | null
           deposit_amount?: number | null
           deposit_currency?: string | null
@@ -17920,6 +18124,7 @@ export type Database = {
           description_en?: string | null
           description_ru?: string | null
           district?: string | null
+          early_checkin_price?: number | null
           electricity_included?: boolean | null
           electricity_meter_id?: string | null
           electricity_metering?: string | null
@@ -17927,12 +18132,19 @@ export type Database = {
           electricity_notes_ru?: string | null
           electricity_provider?: string | null
           electricity_unit_price?: number | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
           equipment?: string[] | null
           extra_cleaning_price?: number | null
+          extra_guest_price?: number | null
+          extra_guest_threshold?: number | null
           extra_services?: Json | null
           floor?: number | null
           furnishing_level?: string | null
+          has_crib?: boolean | null
+          has_high_chair?: boolean | null
           highlights?: string[] | null
+          host_languages?: string[] | null
           house_rules?: string | null
           house_rules_ru?: string | null
           ical_export_enabled?: boolean | null
@@ -17943,12 +18155,17 @@ export type Database = {
           included_services?: Json | null
           instant_booking?: boolean | null
           internal_name?: string | null
+          internet_provider?: string | null
+          internet_speed?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
           is_rented?: boolean | null
           is_verified?: boolean | null
           juristic_office_contact?: string | null
+          key_handover?: string | null
           lat?: number | null
+          late_checkout_penalty?: number | null
+          late_checkout_price?: number | null
           legacy_owner_property_id?: string | null
           linen_change_frequency?: string | null
           linen_change_price?: number | null
@@ -17956,24 +18173,45 @@ export type Database = {
           listing_type?: string | null
           lng?: number | null
           location_id?: string | null
+          managed_by_org_id?: string | null
+          management_document_name?: string | null
+          management_document_url?: string | null
           management_type?: string | null
+          manager_line_id?: string | null
+          manager_name?: string | null
+          manager_phone?: string | null
           max_guests?: number | null
+          max_party_guests?: number | null
           min_stay_nights?: number | null
           monthly_discount?: number | null
           mortgage_amount?: number | null
           mortgage_bank?: string | null
           mortgage_interest_rate?: number | null
           mortgage_monthly_payment?: number | null
+          nearby_places?: Json | null
           notes?: string | null
           owner_id?: string | null
           ownership_form?: string | null
+          ownership_transferred_at?: string | null
           ownership_type?: string | null
+          ownership_verification_notes?: string | null
+          ownership_verification_status?: string | null
+          ownership_verified_at?: string | null
+          ownership_verified_by?: string | null
+          parking_included?: boolean | null
+          parking_notes?: string | null
           parking_spaces?: number | null
           parking_type?: string | null
+          parties_allowed?: boolean | null
+          payment_model?: string | null
           pet_deposit?: number | null
           pet_monthly_fee?: number | null
+          pet_notes?: string | null
+          pet_notes_ru?: string | null
           pet_policy?: string | null
+          pets_allowed?: boolean | null
           pool_size?: string | null
+          prepay_percent?: number | null
           price?: number | null
           price_per_night?: number | null
           price_period?: string | null
@@ -17983,15 +18221,21 @@ export type Database = {
           purchase_currency?: string | null
           purchase_date?: string | null
           purchase_price?: number | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
           rating?: number | null
           rejection_reason?: string | null
+          renovation_costs?: number | null
           rental_platform?: string | null
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           rooms?: Json | null
+          safety_features?: string[] | null
           sale_price?: number | null
           seasonal_pricing?: Json | null
+          security_deposit_required?: boolean | null
+          smoking_penalty?: number | null
           smoking_policy?: string | null
           status?: string | null
           tabien_baan?: string | null
@@ -17999,6 +18243,10 @@ export type Database = {
           title_en?: string | null
           title_ru?: string | null
           total_floors?: number | null
+          transfer_airport_price?: number | null
+          transfer_available?: boolean | null
+          transfer_notes?: string | null
+          transfer_notes_ru?: string | null
           unit_number?: string | null
           uno_team_creator_id?: string | null
           updated_at?: string | null
@@ -18016,12 +18264,17 @@ export type Database = {
           wifi_speed?: string | null
         }
         Update: {
+          accessibility_features?: string[] | null
           acquisition_costs?: number | null
+          actual_owner_email?: string | null
+          actual_owner_name?: string | null
+          actual_owner_phone?: string | null
           address?: string | null
           amenities?: string[] | null
           approval_status?: string | null
           area_sqm?: number | null
           available_from?: string | null
+          balance_due_days?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
           beds?: Json | null
@@ -18030,14 +18283,19 @@ export type Database = {
           building_year?: number | null
           cancellation_policy?: string | null
           chanote_number?: string | null
+          check_in_instructions?: string | null
+          check_in_instructions_ru?: string | null
           check_in_time?: string | null
           check_out_time?: string | null
+          children_friendly?: boolean | null
           cleaning_frequency?: string | null
           cleaning_included?: boolean | null
+          commercial_terms_redacted?: boolean | null
           commission_rate?: number | null
           cover_image?: string | null
           created_at?: string | null
           created_by_uno_team?: boolean | null
+          created_on_behalf?: boolean | null
           currency?: string | null
           deposit_amount?: number | null
           deposit_currency?: string | null
@@ -18045,6 +18303,7 @@ export type Database = {
           description_en?: string | null
           description_ru?: string | null
           district?: string | null
+          early_checkin_price?: number | null
           electricity_included?: boolean | null
           electricity_meter_id?: string | null
           electricity_metering?: string | null
@@ -18052,12 +18311,19 @@ export type Database = {
           electricity_notes_ru?: string | null
           electricity_provider?: string | null
           electricity_unit_price?: number | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
           equipment?: string[] | null
           extra_cleaning_price?: number | null
+          extra_guest_price?: number | null
+          extra_guest_threshold?: number | null
           extra_services?: Json | null
           floor?: number | null
           furnishing_level?: string | null
+          has_crib?: boolean | null
+          has_high_chair?: boolean | null
           highlights?: string[] | null
+          host_languages?: string[] | null
           house_rules?: string | null
           house_rules_ru?: string | null
           ical_export_enabled?: boolean | null
@@ -18068,12 +18334,17 @@ export type Database = {
           included_services?: Json | null
           instant_booking?: boolean | null
           internal_name?: string | null
+          internet_provider?: string | null
+          internet_speed?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
           is_rented?: boolean | null
           is_verified?: boolean | null
           juristic_office_contact?: string | null
+          key_handover?: string | null
           lat?: number | null
+          late_checkout_penalty?: number | null
+          late_checkout_price?: number | null
           legacy_owner_property_id?: string | null
           linen_change_frequency?: string | null
           linen_change_price?: number | null
@@ -18081,24 +18352,45 @@ export type Database = {
           listing_type?: string | null
           lng?: number | null
           location_id?: string | null
+          managed_by_org_id?: string | null
+          management_document_name?: string | null
+          management_document_url?: string | null
           management_type?: string | null
+          manager_line_id?: string | null
+          manager_name?: string | null
+          manager_phone?: string | null
           max_guests?: number | null
+          max_party_guests?: number | null
           min_stay_nights?: number | null
           monthly_discount?: number | null
           mortgage_amount?: number | null
           mortgage_bank?: string | null
           mortgage_interest_rate?: number | null
           mortgage_monthly_payment?: number | null
+          nearby_places?: Json | null
           notes?: string | null
           owner_id?: string | null
           ownership_form?: string | null
+          ownership_transferred_at?: string | null
           ownership_type?: string | null
+          ownership_verification_notes?: string | null
+          ownership_verification_status?: string | null
+          ownership_verified_at?: string | null
+          ownership_verified_by?: string | null
+          parking_included?: boolean | null
+          parking_notes?: string | null
           parking_spaces?: number | null
           parking_type?: string | null
+          parties_allowed?: boolean | null
+          payment_model?: string | null
           pet_deposit?: number | null
           pet_monthly_fee?: number | null
+          pet_notes?: string | null
+          pet_notes_ru?: string | null
           pet_policy?: string | null
+          pets_allowed?: boolean | null
           pool_size?: string | null
+          prepay_percent?: number | null
           price?: number | null
           price_per_night?: number | null
           price_period?: string | null
@@ -18108,15 +18400,21 @@ export type Database = {
           purchase_currency?: string | null
           purchase_date?: string | null
           purchase_price?: number | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
           rating?: number | null
           rejection_reason?: string | null
+          renovation_costs?: number | null
           rental_platform?: string | null
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           rooms?: Json | null
+          safety_features?: string[] | null
           sale_price?: number | null
           seasonal_pricing?: Json | null
+          security_deposit_required?: boolean | null
+          smoking_penalty?: number | null
           smoking_policy?: string | null
           status?: string | null
           tabien_baan?: string | null
@@ -18124,6 +18422,10 @@ export type Database = {
           title_en?: string | null
           title_ru?: string | null
           total_floors?: number | null
+          transfer_airport_price?: number | null
+          transfer_available?: boolean | null
+          transfer_notes?: string | null
+          transfer_notes_ru?: string | null
           unit_number?: string | null
           uno_team_creator_id?: string | null
           updated_at?: string | null
