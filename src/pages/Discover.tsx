@@ -13,8 +13,8 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Wrench, Sparkles, Plane, Users, Home as HomeIcon } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Wrench, Sparkles } from 'lucide-react';
 import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,13 +23,13 @@ import { EmptyState } from '@/components/uno/EmptyState';
 import { Skeleton } from '@/components/ui/skeleton';
 
 // Unified components
-import { UnifiedFilterRibbon, FilterRibbonItem } from '@/components/shared';
 import { CrossSellSection } from '@/components/crosssell';
 
 // Hooks
 import { useServices } from '@/hooks/useServices';
 import { useCategories } from '@/hooks/useCategories';
 import { useHomeServices } from '@/hooks/useHomeServices';
+import { useUserPersonas, UserPersona } from '@/hooks/useUserPersonas';
 
 // Service marketplace components
 import {
@@ -50,27 +50,26 @@ import { ThematicSection, THEMATIC_SECTIONS } from '@/components/discover/Themat
 import { useFeaturedCategories } from '@/hooks/useFeaturedCategories';
 import { useCategoryCounts } from '@/hooks/useCategoryCounts';
 
-export type AudienceFilter = 'all' | 'tourists' | 'residents' | 'owners';
-
-const AUDIENCE_CATEGORIES: Record<AudienceFilter, Set<string>> = {
-  all: new Set(),
-  tourists: new Set(['yachts', 'tours', 'transport', 'restaurants', 'events', 'water-activities', 'beauty-spa']),
-  residents: new Set(['legal', 'insurance', 'medical', 'banking', 'education', 'fitness', 'veterinary']),
-  owners: new Set(['real-estate', 'cleaning', 'storage', 'maintenance', 'property-management']),
+// Map UserPersona to audience filter for category filtering
+const PERSONA_TO_CATEGORIES: Record<UserPersona, Set<string>> = {
+  tourist: new Set(['yachts', 'tours', 'transport', 'restaurants', 'events', 'water-activities', 'beauty-spa']),
+  resident: new Set(['legal', 'insurance', 'medical', 'banking', 'education', 'fitness', 'veterinary']),
+  property_owner: new Set(['real-estate', 'cleaning', 'storage', 'maintenance', 'property-management']),
+  investor: new Set(['real-estate', 'banking', 'legal', 'insurance']),
 };
 
 export default function Discover() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [searchParams, setSearchParams] = useSearchParams();
   const isRu = language === 'ru';
   
-  const initialAudience = (searchParams.get('audience') as AudienceFilter) || 'all';
-  const [audienceFilter, setAudienceFilter] = useState<AudienceFilter>(initialAudience);
   const [refreshKey, setRefreshKey] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Get saved persona from global state
+  const { personas } = useUserPersonas();
+  
   // Data hooks
   const { groups, getName, isLoading: categoriesLoading, refetch: refetchCategories } = useCategories();
   const { isFeatured } = useFeaturedCategories();
@@ -78,61 +77,52 @@ export default function Discover() {
   const { services, isLoading: servicesLoading, refetch: refetchServices } = useServices({ limit: 20 });
   const { providers, isLoading: providersLoading } = useHomeServices();
 
-  // Filter items for ribbon
-  const audienceItems: FilterRibbonItem[] = useMemo(() => [
-    { id: 'all', label: isRu ? 'Все' : 'All', icon: Sparkles, variant: 'primary' as const },
-    { id: 'tourists', label: isRu ? 'Туристам' : 'Tourists', icon: Plane },
-    { id: 'residents', label: isRu ? 'Резидентам' : 'Residents', icon: Users },
-    { id: 'owners', label: isRu ? 'Владельцам' : 'Owners', icon: HomeIcon },
-  ], [isRu]);
-
-  // Filter groups based on audience
-  const filteredGroups = useMemo(() => {
-    if (audienceFilter === 'all') return groups;
+  // Determine if we should show filtered view based on saved personas
+  const hasSpecificPersona = personas.length > 0;
+  
+  // Get combined categories for all selected personas
+  const personaCategories = useMemo(() => {
+    if (personas.length === 0) return new Set<string>();
     
-    const audienceCategories = AUDIENCE_CATEGORIES[audienceFilter];
+    const combined = new Set<string>();
+    personas.forEach(persona => {
+      PERSONA_TO_CATEGORIES[persona]?.forEach(cat => combined.add(cat));
+    });
+    return combined;
+  }, [personas]);
+
+  // Filter groups based on saved personas (only if personas selected)
+  const filteredGroups = useMemo(() => {
+    if (!hasSpecificPersona) return groups;
     
     return groups
       .map(group => ({
         ...group,
         categories: (group.categories || []).filter(cat => 
-          audienceCategories.has(cat.slug) || audienceCategories.has(cat.miniAppType || '')
+          personaCategories.has(cat.slug) || personaCategories.has(cat.miniAppType || '')
         )
       }))
       .filter(group => group.categories.length > 0);
-  }, [groups, audienceFilter]);
+  }, [groups, hasSpecificPersona, personaCategories]);
 
-  // Filter thematic sections based on audience
+  // Filter thematic sections based on personas
   const filteredThematicSections = useMemo(() => {
-    if (audienceFilter === 'all') return THEMATIC_SECTIONS;
+    if (!hasSpecificPersona) return THEMATIC_SECTIONS;
     
-    const audienceMap: Record<AudienceFilter, string[]> = {
-      all: [],
-      tourists: ['leisure'],
-      residents: ['life'],
-      owners: ['business', 'life'],
+    const personaSectionMap: Record<UserPersona, string[]> = {
+      tourist: ['leisure'],
+      resident: ['life'],
+      property_owner: ['business', 'life'],
+      investor: ['business'],
     };
     
-    const allowedSections = audienceMap[audienceFilter];
-    return THEMATIC_SECTIONS.filter(section => 
-      allowedSections.length === 0 || allowedSections.includes(section.id)
-    );
-  }, [audienceFilter]);
-
-  // Handlers
-  const handleAudienceChange = useCallback((value: string) => {
-    const filter = value as AudienceFilter;
-    setAudienceFilter(filter);
-    setSearchParams(prev => {
-      const params = new URLSearchParams(prev);
-      if (filter === 'all') {
-        params.delete('audience');
-      } else {
-        params.set('audience', filter);
-      }
-      return params;
+    const allowedSections = new Set<string>();
+    personas.forEach(persona => {
+      personaSectionMap[persona]?.forEach(s => allowedSections.add(s));
     });
-  }, [setSearchParams]);
+    
+    return THEMATIC_SECTIONS.filter(section => allowedSections.has(section.id));
+  }, [hasSpecificPersona, personas]);
 
   const handleRefresh = useCallback(async () => {
     await Promise.all([refetchCategories(), refetchServices()]);
@@ -141,8 +131,8 @@ export default function Discover() {
 
   const isLoading = categoriesLoading;
 
-  // Show marketplace view for "All" filter, legacy view for filtered
-  const showMarketplaceView = audienceFilter === 'all';
+  // Always show marketplace view (no filter ribbon needed - persona is set on home page)
+  const showMarketplaceView = true;
 
   return (
     <MiniAppLayout
@@ -156,15 +146,9 @@ export default function Discover() {
       showCategories={false}
       showFilter={false}
     >
-      {/* Filter Ribbon with Category Drawer */}
-      <div className="-mx-4 -mt-4 mb-4 sticky top-0 z-10 bg-background/95 backdrop-blur-md border-b border-border/30">
-        <UnifiedFilterRibbon
-          items={audienceItems}
-          activeId={audienceFilter}
-          onSelect={handleAudienceChange}
-          leadingAction={<ServiceCategoryDrawer />}
-          className="border-0"
-        />
+      {/* Category Drawer only (no audience filter - it's set on home page) */}
+      <div className="-mx-4 -mt-4 mb-4 sticky top-0 z-10 bg-background/95 backdrop-blur-md border-b border-border/30 px-4 py-2">
+        <ServiceCategoryDrawer />
       </div>
 
       <PullToRefresh onRefresh={handleRefresh} className="min-h-0">
