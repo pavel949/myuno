@@ -20,7 +20,11 @@ import {
   ChevronDown, Shield, FileText, Upload, X, Loader2, Calculator
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { formatPriceWithSymbol } from '@/lib/currencyUtils';
+import { getCurrencySymbol, formatCurrencyAmount } from '@/lib/config/currencies';
+
+// Helper to maintain backward compatibility with formatPriceWithSymbol calls
+const formatPriceWithSymbol = (amount: number, currency: string = 'THB') => 
+  formatCurrencyAmount(amount, currency);
 
 interface AddBookingFromCalendarDialogProps {
   open: boolean;

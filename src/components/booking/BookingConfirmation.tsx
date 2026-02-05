@@ -3,7 +3,7 @@ import { CheckCircle, Calendar, Clock, MapPin, Download, Share2, Mail, Smartphon
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
-import { getCurrencySymbol } from '@/lib/currencyUtils';
+import { getCurrencySymbol } from '@/lib/config/currencies';
 
 interface BookingConfirmationProps {
   bookingId: string;

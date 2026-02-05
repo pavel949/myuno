@@ -10,15 +10,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from '@/integrations/supabase/client';
 import { demoRestaurants } from './restaurantsData';
 import { CITY_GEOGRAPHY } from '@/lib/config/geography';
-
-// TODO: Replace with DB query - restaurant coordinates should come from restaurants table
-const restaurantCoordinates: Record<string, { lat: number; lng: number }> = {
-  'rest-1': { lat: 7.8965, lng: 98.2956 }, // Patong
-  'rest-2': { lat: 7.8172, lng: 98.3028 }, // Kata
-  'rest-3': { lat: 7.7817, lng: 98.3156 }, // Rawai
-  'rest-4': { lat: 7.9518, lng: 98.2831 }, // Kamala
-  'rest-5': { lat: 7.8425, lng: 98.3397 }, // Chalong
-};
+import { useRestaurantCoordinates } from '@/hooks/useRestaurantCoordinates';
 
 export default function RestaurantMap() {
   const navigate = useNavigate();
@@ -29,6 +21,9 @@ export default function RestaurantMap() {
   const [selectedRestaurant, setSelectedRestaurant] = useState<string | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapboxToken, setMapboxToken] = useState<string | null>(null);
+  
+  // Fetch coordinates from DB instead of hardcoded
+  const { data: restaurantCoordinates = {} } = useRestaurantCoordinates();
 
   const mode = searchParams.get('mode') || 'delivery';
 

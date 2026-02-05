@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useLifeSituations } from '@/hooks/useLifeSituations';
+import { useLifeSituations } from '@/hooks/useLifeOS';
 import { useLifeSituationContext } from '@/contexts/LifeSituationContext';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';

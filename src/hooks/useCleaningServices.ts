@@ -36,14 +36,84 @@ export interface CleaningServiceFull {
   provider_id?: string;
 }
 
- // Fallback data
- const FALLBACK_SERVICES: CleaningService[] = [
-   { id: 'clean-regular', nameEn: 'Regular Home Cleaning', nameRu: 'Регулярная уборка', price: 800, duration: '2-3h' },
-   { id: 'clean-deep', nameEn: 'Deep Cleaning', nameRu: 'Генеральная уборка', price: 2500, duration: '4-6h' },
-   { id: 'clean-office', nameEn: 'Office Cleaning', nameRu: 'Уборка офиса', price: 1500, duration: '3-4h' },
-   { id: 'clean-movein', nameEn: 'Move-in/out Cleaning', nameRu: 'Уборка при въезде/выезде', price: 3000, duration: '5-7h' },
-   { id: 'clean-dry', nameEn: 'Dry Cleaning', nameRu: 'Химчистка', price: 300, duration: '48h' },
- ];
+// Extended type for detail page
+export interface CleaningServiceDetail {
+  id: string;
+  type: string;
+  nameEn: string;
+  nameRu: string;
+  descEn: string;
+  descRu: string;
+  image: string;
+  priceFrom: number;
+  duration: string;
+  rating: number;
+  reviewCount: number;
+  provider: string;
+  includes: string[];
+  includesRu: string[];
+}
+
+// Fallback data
+const FALLBACK_SERVICES: CleaningService[] = [
+  { id: 'clean-regular', nameEn: 'Regular Home Cleaning', nameRu: 'Регулярная уборка', price: 800, duration: '2-3h' },
+  { id: 'clean-deep', nameEn: 'Deep Cleaning', nameRu: 'Генеральная уборка', price: 2500, duration: '4-6h' },
+  { id: 'clean-office', nameEn: 'Office Cleaning', nameRu: 'Уборка офиса', price: 1500, duration: '3-4h' },
+  { id: 'clean-movein', nameEn: 'Move-in/out Cleaning', nameRu: 'Уборка при въезде/выезде', price: 3000, duration: '5-7h' },
+  { id: 'clean-dry', nameEn: 'Dry Cleaning', nameRu: 'Химчистка', price: 300, duration: '48h' },
+];
+
+// Fallback detail data for CleaningDetail page
+export const FALLBACK_CLEANING_DETAIL: CleaningServiceDetail[] = [
+  {
+    id: 'clean-1',
+    type: 'home',
+    nameEn: 'Regular Home Cleaning',
+    nameRu: 'Регулярная уборка',
+    descEn: 'Weekly or bi-weekly home cleaning service. Our professional team will thoroughly clean your home including floors, surfaces, bathrooms, and kitchen.',
+    descRu: 'Еженедельная уборка дома. Наша профессиональная команда тщательно уберёт ваш дом, включая полы, поверхности, ванные комнаты и кухню.',
+    image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800',
+    priceFrom: 800,
+    duration: '2-3h',
+    rating: 4.9,
+    reviewCount: 234,
+    provider: 'Clean House Phuket',
+    includes: ['Floor cleaning', 'Surface dusting', 'Bathroom cleaning', 'Kitchen cleaning', 'Trash removal'],
+    includesRu: ['Мытьё полов', 'Протирка поверхностей', 'Уборка ванной', 'Уборка кухни', 'Вынос мусора'],
+  },
+  {
+    id: 'clean-2',
+    type: 'deep',
+    nameEn: 'Deep Cleaning',
+    nameRu: 'Генеральная уборка',
+    descEn: 'Complete deep clean of your entire home.',
+    descRu: 'Полная генеральная уборка вашего дома.',
+    image: 'https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?w=800',
+    priceFrom: 2500,
+    duration: '4-6h',
+    rating: 4.8,
+    reviewCount: 156,
+    provider: 'Pro Cleaners',
+    includes: ['All regular cleaning', 'Inside appliances', 'Window cleaning', 'Detailed furniture', 'Cabinet interiors'],
+    includesRu: ['Вся обычная уборка', 'Внутри техники', 'Мытьё окон', 'Детальная чистка мебели', 'Внутри шкафов'],
+  },
+  {
+    id: 'clean-3',
+    type: 'laundry',
+    nameEn: 'Laundry & Ironing',
+    nameRu: 'Стирка и глажка',
+    descEn: 'Pickup, wash, iron and deliver.',
+    descRu: 'Заберём, постираем, погладим и доставим.',
+    image: 'https://images.unsplash.com/photo-1545173168-9f1947eebb7f?w=800',
+    priceFrom: 200,
+    duration: '24h',
+    rating: 4.7,
+    reviewCount: 312,
+    provider: 'Fresh Laundry',
+    includes: ['Pickup service', 'Washing', 'Ironing', 'Delivery', 'Premium detergents'],
+    includesRu: ['Забор белья', 'Стирка', 'Глажка', 'Доставка', 'Премиальные средства'],
+  },
+];
  
 /**
  * Hook for CleaningBooking page - simplified format
@@ -145,4 +215,39 @@ export function useCleaningService(serviceId?: string) {
    const service = services?.find(s => s.id === serviceId) || services?.[0];
    
    return { service, isLoading, services };
- }
+}
+
+/**
+ * Get single service by ID for detail page
+ */
+export function useCleaningServiceById(id: string) {
+  const { services, isLoading } = useCleaningServices();
+  
+  // Try to find in DB services first
+  const dbService = services?.find(s => s.id === id);
+  
+  if (dbService) {
+    // Transform to detail format
+    const detail: CleaningServiceDetail = {
+      id: dbService.id,
+      type: dbService.service_type || 'home',
+      nameEn: dbService.name_en,
+      nameRu: dbService.name_ru,
+      descEn: dbService.description_en || '',
+      descRu: dbService.description_ru || dbService.description_en || '',
+      image: dbService.cover_image || 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800',
+      priceFrom: dbService.price,
+      duration: dbService.duration_hours ? `${dbService.duration_hours}h` : '2-3h',
+      rating: dbService.rating || 4.8,
+      reviewCount: dbService.review_count || 0,
+      provider: 'UNO Services',
+      includes: dbService.features || [],
+      includesRu: dbService.features || [],
+    };
+    return { service: detail, isLoading };
+  }
+  
+  // Fall back to static data
+  const fallback = FALLBACK_CLEANING_DETAIL.find(s => s.id === id) || FALLBACK_CLEANING_DETAIL[0];
+  return { service: fallback, isLoading };
+}
