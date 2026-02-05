@@ -9,6 +9,7 @@ import { format, addDays, addWeeks, addMonths } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import type { DateRange } from 'react-day-picker';
 
 interface AirbnbSearchBarProps {
   onSearch: (params: SearchParams) => void;
@@ -182,9 +183,10 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
         </motion.div>
 
         {/* Mobile Full Screen Modal - Using Portal */}
-        {isOpen && createPortal(
-          <AnimatePresence>
+        <AnimatePresence>
+          {isOpen && createPortal(
             <motion.div 
+              key="search-modal"
               className="fixed inset-0 z-[100] bg-background"
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
@@ -227,14 +229,9 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
 
                 {/* Tab Content */}
                 <div className="flex-1 overflow-y-auto">
-                  <AnimatePresence mode="wait">
                     {/* Location Tab */}
                     {mobileTab === 'location' && (
-                      <motion.div 
-                        key="location"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
+                      <div 
                         className="p-4 space-y-4"
                       >
                         <h3 className="text-xl font-bold">{language === 'ru' ? 'Куда вы едете?' : 'Where are you going?'}</h3>
@@ -280,16 +277,12 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                             })}
                           </div>
                         )}
-                      </motion.div>
+                      </div>
                     )}
 
                     {/* Dates Tab */}
                     {mobileTab === 'dates' && (
-                      <motion.div 
-                        key="dates"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
+                      <div 
                         className="p-4 space-y-4"
                       >
                         <h3 className="text-xl font-bold">{language === 'ru' ? 'Когда поездка?' : 'When is your trip?'}</h3>
@@ -330,8 +323,8 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                         <div className="flex justify-center">
                           <CalendarComponent
                             mode="range"
-                            selected={{ from: checkIn, to: checkOut }}
-                            onSelect={(range) => {
+                            selected={{ from: checkIn, to: checkOut } as DateRange}
+                            onSelect={(range: DateRange | undefined) => {
                               setCheckIn(range?.from);
                               setCheckOut(range?.to);
                               if (range?.to) {
@@ -346,26 +339,20 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                         </div>
 
                         {checkIn && checkOut && (
-                          <motion.div 
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
+                          <div 
                             className="text-center p-3 bg-primary/5 rounded-xl"
                           >
                             <p className="text-sm font-medium text-primary">
                               {formatDate(checkIn)} – {formatDate(checkOut)}
                             </p>
-                          </motion.div>
+                          </div>
                         )}
-                      </motion.div>
+                      </div>
                     )}
 
                     {/* Guests Tab */}
                     {mobileTab === 'guests' && (
-                      <motion.div 
-                        key="guests"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
+                      <div 
                         className="p-4 space-y-4"
                       >
                         <h3 className="text-xl font-bold">{language === 'ru' ? 'Кто едет?' : "Who's coming?"}</h3>
@@ -385,9 +372,8 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                             onChange={setChildren}
                           />
                         </div>
-                      </motion.div>
+                      </div>
                     )}
-                  </AnimatePresence>
                 </div>
 
                 {/* Footer */}
@@ -401,10 +387,10 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                   </Button>
                 </div>
               </div>
-            </motion.div>
-          </AnimatePresence>,
-          document.body
-        )}
+            </motion.div>,
+            document.body
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Desktop Search Bar with Backdrop */}
@@ -528,8 +514,8 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
               </div>
               <CalendarComponent
                 mode="range"
-                selected={{ from: checkIn, to: checkOut }}
-                onSelect={(range) => {
+                selected={{ from: checkIn, to: checkOut } as DateRange}
+                onSelect={(range: DateRange | undefined) => {
                   setCheckIn(range?.from);
                   setCheckOut(range?.to);
                   if (range?.to) {
@@ -567,8 +553,8 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
             <PopoverContent className="w-auto p-4" align="center" sideOffset={8}>
               <CalendarComponent
                 mode="range"
-                selected={{ from: checkIn, to: checkOut }}
-                onSelect={(range) => {
+                selected={{ from: checkIn, to: checkOut } as DateRange}
+                onSelect={(range: DateRange | undefined) => {
                   setCheckIn(range?.from);
                   setCheckOut(range?.to);
                   if (range?.to) {
