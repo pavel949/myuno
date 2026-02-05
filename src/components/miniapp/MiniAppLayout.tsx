@@ -235,7 +235,7 @@ export function MiniAppLayout({
         )}
       </div>
 
-      <div className={cn("p-4 pb-4 space-y-4 max-w-full", showBottomNav && "pb-24", contentClassName)}>
+      <div className={cn("px-4 md:px-6 lg:px-8 pb-4 space-y-4 w-full", showBottomNav && "pb-24", contentClassName)}>
         {/* Hero Section */}
         {showHero && heroIcon && heroTitle && (
           <MiniAppHero
