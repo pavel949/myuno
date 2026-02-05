@@ -11355,6 +11355,64 @@ export type Database = {
           },
         ]
       }
+      property_manager_assignments: {
+        Row: {
+          assigned_by: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          manager_user_id: string
+          notes: string | null
+          permissions: Json | null
+          property_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_by?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          manager_user_id: string
+          notes?: string | null
+          permissions?: Json | null
+          property_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_by?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          manager_user_id?: string
+          notes?: string | null
+          permissions?: Json | null
+          property_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_manager_assignments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_manager_assignments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_manager_assignments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_meters: {
         Row: {
           created_at: string | null

@@ -18,29 +18,30 @@
   * - admin/ombudsman: Administrative roles
   * - finance/support/sales/investor: Specialized platform roles
   */
- export type AppRole = 
-   // Base roles
-   | 'guest'
-   | 'user'
-   // User personas
-   | 'tourist'
-   | 'resident'
-   // Business roles
-   | 'partner'
-   | 'owner'
-   | 'property_owner'
-   | 'vendor'
-   // Platform operators
-   | 'staff'
-   | 'uno_team'
-   // Administrative roles
-   | 'admin'
-   | 'ombudsman'
-   // Specialized platform roles
-   | 'finance'
-   | 'support'
-   | 'sales'
-   | 'investor';
+export type AppRole = 
+  // Base roles
+  | 'guest'
+  | 'user'
+  // User personas
+  | 'tourist'
+  | 'resident'
+  // Business roles
+  | 'partner'
+  | 'owner'
+  | 'property_owner'
+  | 'property_manager'
+  | 'vendor'
+  // Platform operators
+  | 'staff'
+  | 'uno_team'
+  // Administrative roles
+  | 'admin'
+  | 'ombudsman'
+  // Specialized platform roles
+  | 'finance'
+  | 'support'
+  | 'sales'
+  | 'investor';
  
  /** Roles that grant administrative access */
  export const ADMIN_ROLES: AppRole[] = ['admin', 'ombudsman'];
@@ -55,7 +56,7 @@
  export const ADMIN_ONLY_ROLES: AppRole[] = ['admin', 'ombudsman', 'staff', 'uno_team', 'finance', 'support', 'sales'];
  
  /** Roles available for context switching in UI */
- export const SWITCHABLE_ROLES: AppRole[] = ['user', 'vendor', 'owner', 'admin', 'staff', 'uno_team'];
+ export const SWITCHABLE_ROLES: AppRole[] = ['user', 'vendor', 'owner', 'property_manager', 'admin', 'staff', 'uno_team'];
  
  /** Role metadata for UI display */
  export interface RoleMetadata {
@@ -121,9 +122,18 @@
      color: 'from-teal-400 to-teal-500',
      defaultPath: '/owner',
      descriptionEn: 'Manage your properties and bookings',
-     descriptionRu: 'Управляйте своей недвижимостью и бронированиями',
-   },
-   vendor: {
+      descriptionRu: 'Управляйте своей недвижимостью и бронированиями',
+    },
+    property_manager: {
+      labelEn: 'Property Manager',
+      labelRu: 'Управляющий',
+      icon: 'UserCog',
+      color: 'from-teal-500 to-cyan-600',
+      defaultPath: '/manager',
+      descriptionEn: 'Manage assigned properties and guests',
+      descriptionRu: 'Управляйте назначенными объектами и гостями',
+    },
+    vendor: {
      labelEn: 'Service Provider',
      labelRu: 'Поставщик услуг',
      icon: 'Store',

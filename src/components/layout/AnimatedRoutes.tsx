@@ -4,12 +4,13 @@ import { AnimatePresence } from 'framer-motion';
 import { PageTransition } from './PageTransition';
 import { ScrollToTop } from './ScrollToTop';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
-import { AdminGuard, VendorGuard, OwnerGuard, TeamGuard, AuthGuard } from '@/components/auth/RoleGuard';
+import { AdminGuard, VendorGuard, OwnerGuard, TeamGuard, AuthGuard, ManagerGuard } from '@/components/auth';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { AdaptiveBottomNav } from './AdaptiveBottomNav';
 import { OwnerLayout } from '@/components/owner/OwnerLayout';
 import { VendorLayout } from '@/components/vendor/VendorLayout';
 import { GuestLayout } from '@/components/guest/GuestLayout';
+import { ManagerLayout } from '@/components/manager/ManagerLayout';
 import { useNavigationDirection } from '@/hooks/useNavigationDirection';
 
 // Core pages - load eagerly for fast initial navigation
@@ -348,6 +349,13 @@ const VendorRouteLayout = () => (
   </VendorGuard>
 );
 
+// Manager route wrapper with layout
+const ManagerRouteLayout = () => (
+  <ManagerGuard>
+    <ManagerLayout />
+  </ManagerGuard>
+);
+
 // Guest route wrapper with layout
 const GuestRouteLayout = () => (
   <AuthGuard>
@@ -455,6 +463,10 @@ const TeamInboxPage = lazy(() => import('@/pages/team/TeamInboxPage'));
 const TeamSupportPage = lazy(() => import('@/pages/team/TeamSupportPage'));
 const TeamLeadsPage = lazy(() => import('@/pages/team/TeamLeadsPage'));
 const TeamModerationPage = lazy(() => import('@/pages/team/TeamModerationPage'));
+
+// Property Manager pages
+const ManagerDashboard = lazy(() => import('@/pages/manager/ManagerDashboard'));
+const ManagerProperties = lazy(() => import('@/pages/manager/ManagerProperties'));
 
 // Demo pages
 const DemoIndex = lazy(() => import('@/pages/demo/DemoIndex'));
@@ -824,6 +836,20 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/team/support" element={<LazyPage><TeamGuard><TeamSupportPage /></TeamGuard></LazyPage>} />
         <Route path="/team/leads" element={<LazyPage><TeamGuard><TeamLeadsPage /></TeamGuard></LazyPage>} />
         <Route path="/team/moderation" element={<LazyPage><TeamGuard><TeamModerationPage /></TeamGuard></LazyPage>} />
+        
+        {/* Property Manager Routes - Protected with ManagerLayout */}
+        <Route element={<ManagerRouteLayout />}>
+          <Route path="/manager" element={<ManagerDashboard />} />
+          <Route path="/manager/properties" element={<ManagerProperties />} />
+          <Route path="/manager/properties/:id" element={<ManagerProperties />} />
+          <Route path="/manager/calendar" element={<ManagerDashboard />} />
+          <Route path="/manager/bookings" element={<ManagerDashboard />} />
+          <Route path="/manager/guests" element={<ManagerDashboard />} />
+          <Route path="/manager/messages" element={<ManagerDashboard />} />
+          <Route path="/manager/pricing" element={<ManagerDashboard />} />
+          <Route path="/manager/settings" element={<ManagerDashboard />} />
+          <Route path="/manager/help" element={<ManagerDashboard />} />
+        </Route>
         
         {/* Guest Routes - Protected with GuestLayout */}
         <Route element={<GuestRouteLayout />}>
