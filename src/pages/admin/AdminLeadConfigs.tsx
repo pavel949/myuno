@@ -459,7 +459,6 @@ export default function AdminLeadConfigs() {
             </CardContent>
           </Card>
         </div>
-      </div>
     </div>
   );
 }

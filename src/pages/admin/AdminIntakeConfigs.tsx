@@ -430,7 +430,6 @@ export default function AdminIntakeConfigs() {
             </CardContent>
           </Card>
         </div>
-      </div>
     </div>
   );
 }
