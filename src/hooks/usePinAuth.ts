@@ -6,32 +6,30 @@ const PIN_USER_KEY = 'uno_pin_user_id';
 const PIN_EMAIL_KEY = 'uno_pin_email';
 const PIN_REFRESH_TOKEN_KEY = 'uno_pin_refresh_token';
 
-export function usePinAuth() {
-  const { user, session } = useAuth();
-  const [hasPin, setHasPin] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [savedUserId, setSavedUserId] = useState<string | null>(null);
-  const [savedEmail, setSavedEmail] = useState<string | null>(null);
-  const [hasRefreshToken, setHasRefreshToken] = useState(false);
-  const [pinCheckComplete, setPinCheckComplete] = useState(false);
-
-  // Check for saved PIN login data on mount
-  useEffect(() => {
+// Read localStorage synchronously to prevent flicker
+function getInitialPinState() {
+  try {
     const userId = localStorage.getItem(PIN_USER_KEY);
     const email = localStorage.getItem(PIN_EMAIL_KEY);
     const refreshToken = localStorage.getItem(PIN_REFRESH_TOKEN_KEY);
-    
-    // Debug disabled for production
-    
-    setSavedUserId(userId);
-    setSavedEmail(email);
-    setHasRefreshToken(!!refreshToken);
-    
-    // If no user in localStorage, we can skip PIN check quickly
-    if (!userId) {
-      setIsLoading(false);
-    }
-  }, []);
+    return { userId, email, hasRefreshToken: !!refreshToken };
+  } catch {
+    return { userId: null, email: null, hasRefreshToken: false };
+  }
+}
+
+export function usePinAuth() {
+  const { user, session } = useAuth();
+  
+  // Initialize synchronously from localStorage to prevent flash
+  const initialState = getInitialPinState();
+  
+  const [hasPin, setHasPin] = useState(false);
+  const [isLoading, setIsLoading] = useState(!!initialState.userId); // Only load if there's a user to check
+  const [savedUserId, setSavedUserId] = useState<string | null>(initialState.userId);
+  const [savedEmail, setSavedEmail] = useState<string | null>(initialState.email);
+  const [hasRefreshToken, setHasRefreshToken] = useState(initialState.hasRefreshToken);
+  const [pinCheckComplete, setPinCheckComplete] = useState(!initialState.userId); // Complete immediately if no user
 
   // CRITICAL: Update stored refresh token when session changes (e.g., after password login)
   // This keeps PIN login working after the user logs in with password
@@ -66,10 +64,8 @@ export function usePinAuth() {
     let isMounted = true;
     
     const checkPinStatus = async () => {
-      // Determine which user ID to check - prioritize savedUserId for PIN login flow
       const userIdToCheck = savedUserId || user?.id;
       
-      // If no user ID available, finish loading immediately
       if (!userIdToCheck) {
         if (isMounted) {
           setHasPin(false);
@@ -80,8 +76,6 @@ export function usePinAuth() {
       }
 
       try {
-        
-        
         const { data, error } = await supabase
           .from('user_pins')
           .select('id')
@@ -90,14 +84,11 @@ export function usePinAuth() {
 
         if (error) throw error;
         
-        
-        
         if (isMounted) {
           setHasPin(!!data);
           setPinCheckComplete(true);
         }
       } catch (error) {
-        console.error('[usePinAuth] Error checking PIN:', error);
         if (isMounted) {
           setHasPin(false);
           setPinCheckComplete(true);

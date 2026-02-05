@@ -55,13 +55,10 @@ export const PinLogin: React.FC<PinLoginProps> = ({ onSuccess, onSwitchToEmail }
     setError(false);
 
     try {
-      console.log('[PinLogin] Verifying PIN...');
       await verifyPin(pin);
-      console.log('[PinLogin] PIN verified successfully');
       toast.success(language === 'en' ? 'Welcome back!' : 'С возвращением!');
       onSuccess();
     } catch (err: any) {
-      console.error('[PinLogin] PIN verification error:', err);
       setError(true);
       
       const errorMessage = err?.message || '';
@@ -76,7 +73,6 @@ export const PinLogin: React.FC<PinLoginProps> = ({ onSuccess, onSwitchToEmail }
         errorMessage.includes('Not Found');
       
       if (isSessionError) {
-        console.log('[PinLogin] Session error detected, switching to email login');
         toast.error(language === 'en' ? 'Session expired. Please login with password.' : 'Сессия истекла. Войдите с паролем.');
         onSwitchToEmail();
         return;

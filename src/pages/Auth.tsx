@@ -49,36 +49,54 @@ export default function Auth() {
     searchParams.get('redirect') || 
     '/';
 
-  const [view, setView] = useState<AuthView>('email-auth');
+  // Determine initial view based on PIN availability - single source of truth
+  const [view, setView] = useState<AuthView>(() => {
+    // Start with a loading-safe default
+    return 'email-auth';
+  });
+  
+  // Track if we've already handled the authenticated user
+  const [authHandled, setAuthHandled] = useState(false);
 
+  // Single unified effect for view management - prevents race conditions
   useEffect(() => {
-    if (!pinLoading && canUsePinLogin) {
-      setView('pin-login');
-    }
-  }, [canUsePinLogin, pinLoading]);
-
-  useEffect(() => {
-    // Don't do anything while PIN status is loading
+    // Wait for PIN loading to complete before making any decisions
     if (pinLoading) return;
     
-    if (user && !showPinSetup) {
-      // If user came from PIN login (canUsePinLogin was true), they already have a PIN
-      // Don't show setup again - redirect them directly
-      if (canUsePinLogin) {
+    // Case 1: User is authenticated
+    if (user) {
+      // Prevent re-processing on subsequent renders
+      if (authHandled) return;
+      
+      // If user already has PIN and came via PIN login, go directly to app
+      if (hasPin && canUsePinLogin) {
+        setAuthHandled(true);
         navigate(redirectPath, { replace: true });
         return;
       }
       
+      // If user has no PIN, show PIN setup
       if (!hasPin) {
-        // User is authenticated but has no PIN - show setup
+        setAuthHandled(true);
         setShowPinSetup(true);
         setView('pin-setup');
-      } else {
-        // User has PIN - redirect to intended destination
-        navigate(redirectPath, { replace: true });
+        return;
       }
+      
+      // User has PIN but didn't use PIN login (used email) - redirect
+      setAuthHandled(true);
+      navigate(redirectPath, { replace: true });
+      return;
     }
-  }, [user, hasPin, pinLoading, navigate, showPinSetup, redirectPath, canUsePinLogin]);
+    
+    // Case 2: User is NOT authenticated
+    // Show PIN login if they have saved credentials, otherwise email auth
+    if (canUsePinLogin) {
+      setView('pin-login');
+    } else {
+      setView('email-auth');
+    }
+  }, [user, hasPin, pinLoading, canUsePinLogin, navigate, redirectPath, authHandled]);
 
   const validateStep = (step: SignupStep) => {
     const newErrors: typeof errors = {};

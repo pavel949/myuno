@@ -48,21 +48,16 @@ export const PinSetup: React.FC<PinSetupProps> = ({ onComplete, onSkip }) => {
   const texts = t[language];
 
   const handleFirstPin = useCallback((pin: string) => {
-    console.log('[PinSetup] First PIN entered, moving to confirm step');
     setFirstPin(pin);
     setStep('confirm');
     setError(false);
-    setInputKey(prev => prev + 1); // Force remount
+    setInputKey(prev => prev + 1);
   }, []);
 
   const handleConfirmPin = useCallback(async (pin: string) => {
-    console.log('[PinSetup] Confirm PIN entered, checking match');
-    
     if (pin !== firstPin) {
-      console.log('[PinSetup] PIN mismatch');
       setError(true);
       toast.error(texts.pinMismatch);
-      // Reset to enter step
       setTimeout(() => {
         setStep('enter');
         setFirstPin('');
@@ -71,7 +66,6 @@ export const PinSetup: React.FC<PinSetupProps> = ({ onComplete, onSkip }) => {
       return;
     }
 
-    console.log('[PinSetup] PINs match, saving...');
     setIsLoading(true);
     
     try {
@@ -79,7 +73,7 @@ export const PinSetup: React.FC<PinSetupProps> = ({ onComplete, onSkip }) => {
       toast.success(texts.success);
       onComplete();
     } catch (err) {
-      console.error('[PinSetup] Error setting up PIN:', err);
+      console.error('[PinSetup] Error:', err);
       toast.error(texts.error);
       setError(true);
       setTimeout(() => {
