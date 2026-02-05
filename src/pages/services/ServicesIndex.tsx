@@ -1,49 +1,30 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Wrench } from "lucide-react";
+import { Wrench, Zap, Clock, ChevronRight } from "lucide-react";
 import { MiniAppLayout, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from "@/components/miniapp";
 import { servicesFilterConfig, FilterValues } from "@/components/filters";
-import { useHomeServices } from "@/hooks/useHomeServices";
-import { DomainTabs, ProviderTypeToggle, HomeServiceProviderCard } from "@/components/services";
+import { useServiceFunctions, type LocalizedServiceFunction } from "@/hooks/useServiceFunctions";
+import { ServiceFunctionCard } from "@/components/services";
 import { CrossSellSection } from "@/components/crosssell";
-import { 
-  SERVICE_DOMAINS, 
-  getCategoriesByDomain, 
-  ALL_SERVICE_CATEGORIES,
-} from "@/lib/taxonomies";
-import type { ServiceDomain, ProviderType } from "@/lib/config/homeServicesTaxonomy";
+import { SERVICE_CATEGORIES, type ServiceCategory } from "@/lib/config/homeServiceFunctions";
+import { Badge } from "@/components/ui/badge";
 
 export default function ServicesIndex() {
   const { language, t } = useLanguage();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const isRu = language === 'ru';
   
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDomain, setSelectedDomain] = useState<ServiceDomain | 'all'>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedProviderType, setSelectedProviderType] = useState<ProviderType | 'all'>('all');
   const [filterValues, setFilterValues] = useState<FilterValues>({});
   
-  const { providers, isLoading, getProviderImage } = useHomeServices({
-    category: selectedCategory !== 'all' ? selectedCategory : undefined,
-    domain: selectedDomain,
-    providerType: selectedProviderType,
-  });
+  const { functions, categories, byCategory, popular, search, getFunctionsByCategory } = useServiceFunctions();
 
   // Sync URL params on mount and when URL changes
   useEffect(() => {
-    const domainParam = searchParams.get('domain') as ServiceDomain | null;
     const categoryParam = searchParams.get('category');
-    
-    // Set domain from URL
-    if (domainParam && SERVICE_DOMAINS.some(d => d.id === domainParam)) {
-      setSelectedDomain(domainParam);
-    } else if (!domainParam) {
-      setSelectedDomain('all');
-    }
-    
-    // Set category from URL - this is critical for direct links like /services?category=electrical
     if (categoryParam) {
       setSelectedCategory(categoryParam);
     } else {
@@ -51,87 +32,64 @@ export default function ServicesIndex() {
     }
   }, [searchParams]);
 
-  // Update URL when domain changes
-  const handleDomainChange = (domain: ServiceDomain | 'all') => {
-    setSelectedDomain(domain);
-    setSelectedCategory('all');
+  // Filter functions by search and category
+  const filteredFunctions = useMemo(() => {
+    let result: LocalizedServiceFunction[] = [];
     
-    const newParams = new URLSearchParams(searchParams);
-    if (domain === 'all') {
-      newParams.delete('domain');
+    if (selectedCategory === 'all') {
+      result = functions;
     } else {
-      newParams.set('domain', domain);
+      result = getFunctionsByCategory(selectedCategory as ServiceCategory);
     }
-    newParams.delete('category');
-    setSearchParams(newParams);
-  };
-
-  // Filter providers by search
-  const filteredProviders = useMemo(() => {
-    return providers.filter((provider) => {
-      const matchesSearch = provider.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (provider.description_en?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (provider.description_ru?.toLowerCase().includes(searchQuery.toLowerCase()));
-      
-      if (!matchesSearch) return false;
-      
-      // Apply modal filter values
-      const features = filterValues.features as string[] || [];
-      if (features.includes('verified') && !provider.is_verified) return false;
-      if (features.includes('insured') && !provider.has_insurance) return false;
-      if (features.includes('guaranteed') && !provider.has_guarantee) return false;
-      if (features.includes('fast-response') && (!provider.response_time_minutes || provider.response_time_minutes > 30)) return false;
-      
-      // Provider type from modal
-      const modalProviderType = filterValues.providerType as string | undefined;
-      if (modalProviderType && provider.provider_type !== modalProviderType) return false;
-      
-      return true;
-    });
-  }, [providers, searchQuery, filterValues]);
-
-  // Get categories for current domain
-  const currentCategories = useMemo(() => {
-    if (selectedDomain === 'all') {
-      return ALL_SERVICE_CATEGORIES;
+    
+    if (searchQuery.trim()) {
+      result = search(searchQuery);
     }
-    return getCategoriesByDomain(selectedDomain);
-  }, [selectedDomain]);
+    
+    // Filter by urgency if set
+    const urgentOnly = String(filterValues.urgentOnly) === 'true';
+    if (urgentOnly) {
+      result = result.filter(f => f.isUrgent);
+    }
+    
+    return result;
+  }, [functions, selectedCategory, searchQuery, filterValues, getFunctionsByCategory, search]);
 
   // Build MiniApp categories for ribbon
   const categoryRibbon: MiniAppCategory[] = useMemo(() => [
-    { id: 'all', labelEn: 'All', labelRu: 'Все' },
-    ...currentCategories.map(c => ({
-      id: c.id,
-      labelEn: c.labelEn,
-      labelRu: c.labelRu,
+    { id: 'all', labelEn: 'All Services', labelRu: 'Все услуги' },
+    ...categories.map(c => ({
+      id: c.id as string,
+      labelEn: SERVICE_CATEGORIES.find(sc => sc.id === c.id)?.nameEn || c.name,
+      labelRu: SERVICE_CATEGORIES.find(sc => sc.id === c.id)?.nameRu || c.name,
     })),
-  ], [currentCategories]);
+  ], [categories]);
 
-  // Quick grid items (first 4 categories of current domain)
-  const quickItems: QuickGridItem[] = currentCategories.slice(0, 4).map(c => ({
-    icon: c.icon,
-    label: language === 'ru' ? c.labelRu : c.labelEn,
+  // Quick grid items (popular functions)
+  const quickItems: QuickGridItem[] = popular.slice(0, 4).map(fn => ({
+    icon: fn.icon,
+    label: fn.name,
     onClick: () => {
-      setSelectedCategory(c.id);
-      const newParams = new URLSearchParams(searchParams);
-      newParams.set('category', c.id);
-      setSearchParams(newParams);
+      navigate(`/services/order/${fn.id}`);
     },
   }));
 
+  const handleFunctionClick = (fn: LocalizedServiceFunction) => {
+    navigate(`/services/order/${fn.id}`);
+  };
+
   return (
     <MiniAppLayout
-      title={t('services.homeTitle')}
-      subtitle={`${filteredProviders.length} ${t('services.professionals')}`}
+      title={isRu ? 'Домашние услуги' : 'Home Services'}
+      subtitle={`${filteredFunctions.length} ${isRu ? 'услуг' : 'services'}`}
       heroIcon={Wrench}
-      heroTitle={t('services.heroTitle')}
-      heroSubtitle={t('services.heroSubtitle')}
+      heroTitle={isRu ? 'Решим любую проблему' : 'We Fix Any Problem'}
+      heroSubtitle={isRu ? 'Мастера на все руки' : 'Professional home services'}
       heroImage="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800"
       heroGradient={{ from: 'from-amber-500/20', via: 'via-orange-500/20', to: 'to-primary/20' }}
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}
-      searchPlaceholder={t('services.searchPlaceholder')}
+      searchPlaceholder={isRu ? 'Поиск услуг...' : 'Search services...'}
       categories={categoryRibbon}
       selectedCategory={selectedCategory}
       onCategoryChange={(cat) => {
@@ -147,41 +105,99 @@ export default function ServicesIndex() {
       filterConfig={servicesFilterConfig}
       filterValues={filterValues}
       onFilterChange={setFilterValues}
-      showMapButton
-      onMapClick={() => navigate("/services/map")}
-      isLoading={isLoading}
-      isEmpty={filteredProviders.length === 0}
+      isLoading={false}
+      isEmpty={filteredFunctions.length === 0}
       emptyIcon={Wrench}
-      emptyText={t('services.notFound')}
+      emptyText={isRu ? 'Услуги не найдены' : 'No services found'}
     >
-      {/* Domain Tabs */}
-      <DomainTabs 
-        selectedDomain={selectedDomain} 
-        onDomainChange={handleDomainChange}
-        className="mb-4"
-      />
-      
       {/* Quick Grid */}
       <MiniAppQuickGrid items={quickItems} columns={4} className="mb-4" />
       
-      {/* Provider Type Toggle */}
-      <ProviderTypeToggle 
-        selectedType={selectedProviderType}
-        onTypeChange={setSelectedProviderType}
-        className="mb-4"
-      />
+      {/* Popular Section */}
+      {selectedCategory === 'all' && !searchQuery && (
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <Zap className="h-4 w-4 text-primary" />
+            <h3 className="font-semibold text-sm">
+              {isRu ? 'Популярные услуги' : 'Popular Services'}
+            </h3>
+          </div>
+          <div className="grid gap-2">
+            {popular.slice(0, 4).map((fn) => (
+              <ServiceFunctionCard
+                key={fn.id}
+                fn={fn}
+                onClick={() => handleFunctionClick(fn)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
       
-      {/* Provider Cards */}
-      <div className="grid gap-3">
-        {filteredProviders.map((provider) => (
-          <HomeServiceProviderCard
-            key={provider.id}
-            provider={provider}
-            imageUrl={getProviderImage(provider)}
-            onClick={() => navigate(`/services/provider/${provider.id}?category=${provider.business_category}`)}
+      {/* Category Header when filtered */}
+      {selectedCategory !== 'all' && (
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-xl">
+            {categories.find(c => c.id === selectedCategory)?.icon}
+          </span>
+          <h3 className="font-semibold">
+            {categories.find(c => c.id === selectedCategory)?.name}
+          </h3>
+          <Badge variant="secondary" className="ml-auto">
+            {filteredFunctions.length} {isRu ? 'услуг' : 'services'}
+          </Badge>
+        </div>
+      )}
+      
+      {/* Function Cards */}
+      <div className="grid gap-3 mb-6">
+        {(selectedCategory === 'all' && !searchQuery ? filteredFunctions.slice(0, 10) : filteredFunctions).map((fn) => (
+          <ServiceFunctionCard
+            key={fn.id}
+            fn={fn}
+            onClick={() => handleFunctionClick(fn)}
           />
         ))}
       </div>
+      
+      {/* Show all categories when in "all" view */}
+      {selectedCategory === 'all' && !searchQuery && (
+        <div className="space-y-6">
+          {categories.map(category => {
+            const categoryFunctions = getFunctionsByCategory(category.id);
+            if (categoryFunctions.length === 0) return null;
+            
+            return (
+              <div key={category.id}>
+                <button
+                  onClick={() => {
+                    setSelectedCategory(category.id);
+                    setSearchParams(new URLSearchParams({ category: category.id }));
+                  }}
+                  className="flex items-center gap-2 mb-3 w-full"
+                >
+                  <span className="text-lg">{category.icon}</span>
+                  <h3 className="font-semibold text-sm">{category.name}</h3>
+                  <Badge variant="outline" className="ml-2 text-xs">
+                    {categoryFunctions.length}
+                  </Badge>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto" />
+                </button>
+                <div className="grid gap-2">
+                  {categoryFunctions.slice(0, 3).map((fn) => (
+                    <ServiceFunctionCard
+                      key={fn.id}
+                      fn={fn}
+                      onClick={() => handleFunctionClick(fn)}
+                      compact
+                    />
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       <CrossSellSection currentVertical="services" />
     </MiniAppLayout>

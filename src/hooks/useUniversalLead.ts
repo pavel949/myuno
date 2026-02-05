@@ -35,6 +35,9 @@ export interface UniversalLeadInput {
   notes?: string;
 }
 
+// Verticals that should trigger WhatsApp notifications
+const WHATSAPP_NOTIFICATION_VERTICALS = ['home_services'];
+
 export function useUniversalLead() {
   const { user } = useAuth();
   const { language } = useLanguage();
@@ -83,6 +86,17 @@ export function useUniversalLead() {
         .single();
 
       if (error) throw error;
+      
+      // Trigger WhatsApp notification for specific verticals
+      if (data && WHATSAPP_NOTIFICATION_VERTICALS.includes(input.vertical_id)) {
+        // Fire and forget - don't block the main flow
+        supabase.functions.invoke('notify-lead-whatsapp', {
+          body: { leadId: data.id },
+        }).catch(err => {
+          console.error('Failed to send WhatsApp notification:', err);
+        });
+      }
+      
       return data;
     },
     onSuccess: (_, variables) => {

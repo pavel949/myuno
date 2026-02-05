@@ -2,6 +2,7 @@ export { DomainTabs } from './DomainTabs';
 export { ProviderTypeToggle } from './ProviderTypeToggle';
 export { HomeServiceProviderCard, type HomeServiceProviderData } from './HomeServiceProviderCard';
 export { ServiceProviderCard } from './ServiceProviderCard';
+export { ServiceFunctionCard, ServiceFunctionQuickCard } from './ServiceFunctionCard';
 
 // New marketplace components
 export { ServiceCategoryDrawer } from './ServiceCategoryDrawer';

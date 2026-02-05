@@ -98,3 +98,6 @@ verify_jwt = false
 
 [functions.send-property-report]
 verify_jwt = false
+
+[functions.notify-lead-whatsapp]
+verify_jwt = false

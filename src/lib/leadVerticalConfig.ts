@@ -625,6 +625,55 @@ export const LEAD_VERTICALS: LeadVerticalConfig[] = [
   },
 ];
 
+// Add home_services vertical to the list
+LEAD_VERTICALS.push({
+  id: 'home_services',
+  icon: '🔧',
+  nameEn: 'Home Services',
+  nameRu: 'Домашние услуги',
+  shortDescEn: 'Repairs and maintenance',
+  shortDescRu: 'Ремонт и обслуживание',
+  ctaTextEn: 'Request Service',
+  ctaTextRu: 'Заказать услугу',
+  popularityScore: 75,
+  requestTypes: [
+    { value: 'service_order', labelEn: 'Service Order', labelRu: 'Заказ услуги' },
+    { value: 'urgent_repair', labelEn: 'Urgent Repair', labelRu: 'Срочный ремонт' },
+    { value: 'consultation', labelEn: 'Consultation', labelRu: 'Консультация' },
+  ],
+  fields: [
+    {
+      key: 'service_address',
+      type: 'text',
+      labelEn: 'Service Address',
+      labelRu: 'Адрес',
+      placeholderEn: 'Enter address for service',
+      placeholderRu: 'Укажите адрес для вызова мастера',
+      required: true,
+    },
+    {
+      key: 'preferred_date',
+      type: 'date',
+      labelEn: 'Preferred Date',
+      labelRu: 'Предпочтительная дата',
+      required: false,
+    },
+    {
+      key: 'preferred_time',
+      type: 'select',
+      labelEn: 'Preferred Time',
+      labelRu: 'Удобное время',
+      options: [
+        { value: 'morning', labelEn: 'Morning (9:00-12:00)', labelRu: 'Утро (9:00-12:00)' },
+        { value: 'afternoon', labelEn: 'Afternoon (12:00-17:00)', labelRu: 'День (12:00-17:00)' },
+        { value: 'evening', labelEn: 'Evening (17:00-20:00)', labelRu: 'Вечер (17:00-20:00)' },
+        { value: 'urgent', labelEn: 'ASAP', labelRu: 'Срочно' },
+      ],
+    },
+    COMMON_FIELDS.notes,
+  ],
+});
+
 // Helper functions
 export function getLeadVerticalById(id: string): LeadVerticalConfig | undefined {
   return LEAD_VERTICALS.find(v => v.id === id);
@@ -652,6 +701,7 @@ export function detectVerticalFromPath(pathname: string): string | null {
     '/fitness': 'gyms',
     '/water-activities': 'water_activities',
     '/restaurants': 'restaurants',
+    '/services': 'home_services',
   };
 
   for (const [path, vertical] of Object.entries(pathMappings)) {
