@@ -72,6 +72,28 @@ interface SmallPersonaCardProps {
   onClick: () => void;
 }
 
+// Active indicator component to avoid ref issues with AnimatePresence
+const ActiveIndicator = memo(function ActiveIndicator({ size = 'small' }: { size?: 'small' | 'large' }) {
+  const sizeClass = size === 'large' 
+    ? 'top-2.5 right-2.5 w-5 h-5' 
+    : 'top-1.5 right-1.5 w-4 h-4';
+  const iconSize = size === 'large' ? 'w-3 h-3' : 'w-2.5 h-2.5';
+  
+  return (
+    <motion.div
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      exit={{ scale: 0, opacity: 0 }}
+      className={cn(
+        "absolute rounded-full bg-primary flex items-center justify-center",
+        sizeClass
+      )}
+    >
+      <Check className={cn(iconSize, "text-primary-foreground")} />
+    </motion.div>
+  );
+});
+
 const SmallPersonaCard = memo(function SmallPersonaCard({ 
   card, 
   isActive, 
@@ -92,17 +114,8 @@ const SmallPersonaCard = memo(function SmallPersonaCard({
       )}
     >
       {/* Active Indicator */}
-      <AnimatePresence>
-        {isActive && (
-          <motion.div
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-primary flex items-center justify-center"
-          >
-            <Check className="w-2.5 h-2.5 text-primary-foreground" />
-          </motion.div>
-        )}
+      <AnimatePresence mode="wait">
+        {isActive && <ActiveIndicator key="indicator" size="small" />}
       </AnimatePresence>
 
       <div className={cn(
@@ -173,17 +186,8 @@ export const PersonaSelectorBlock = memo(function PersonaSelectorBlock() {
         )}
       >
         {/* Active Indicator */}
-        <AnimatePresence>
-          {personas.includes(INVESTOR_PERSONA.persona) && (
-            <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0, opacity: 0 }}
-              className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-primary flex items-center justify-center"
-            >
-              <Check className="w-3 h-3 text-primary-foreground" />
-            </motion.div>
-          )}
+        <AnimatePresence mode="wait">
+          {personas.includes(INVESTOR_PERSONA.persona) && <ActiveIndicator key="investor-indicator" size="large" />}
         </AnimatePresence>
 
         <div className="flex items-center gap-3">
