@@ -1,8 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { 
+  type AppRole, 
+  ROLE_METADATA, 
+  SELF_ACTIVATABLE_ROLES,
+  SWITCHABLE_ROLES 
+} from '@/types/auth';
 
-export type AppRole = 'guest' | 'user' | 'tourist' | 'resident' | 'partner' | 'owner' | 'property_owner' | 'vendor' | 'staff' | 'admin' | 'ombudsman' | 'uno_team';
+// Re-export AppRole for backward compatibility
+export type { AppRole } from '@/types/auth';
 
 export interface UserRole {
   id: string;
@@ -12,121 +19,32 @@ export interface UserRole {
 }
 
 // Role metadata for UI
+// Map ROLE_METADATA to legacy ROLE_CONFIG format for backward compatibility
 export const ROLE_CONFIG: Record<AppRole, {
   labelEn: string;
   labelRu: string;
   icon: string;
   color: string;
   path: string;
-  description?: {
-    en: string;
-    ru: string;
-  };
-}> = {
-  guest: {
-    labelEn: 'Guest',
-    labelRu: 'Гость',
-    icon: 'User',
-    color: 'from-gray-400 to-gray-500',
-    path: '/',
-  },
-  user: {
-    labelEn: 'Client',
-    labelRu: 'Клиент',
-    icon: 'User',
-    color: 'from-blue-400 to-blue-500',
-    path: '/',
-    description: {
-      en: 'Browse services and make bookings',
-      ru: 'Просматривайте услуги и делайте заказы',
-    },
-  },
-  tourist: {
-    labelEn: 'Tourist',
-    labelRu: 'Турист',
-    icon: 'Plane',
-    color: 'from-cyan-400 to-cyan-500',
-    path: '/',
-  },
-  resident: {
-    labelEn: 'Resident',
-    labelRu: 'Резидент',
-    icon: 'Home',
-    color: 'from-green-400 to-green-500',
-    path: '/',
-  },
-  partner: {
-    labelEn: 'Partner',
-    labelRu: 'Партнёр',
-    icon: 'Handshake',
-    color: 'from-indigo-400 to-indigo-500',
-    path: '/vendor',
-  },
-  owner: {
-    labelEn: 'Owner',
-    labelRu: 'Владелец',
-    icon: 'Building',
-    color: 'from-amber-400 to-amber-500',
-    path: '/owner',
-  },
-  property_owner: {
-    labelEn: 'Property Owner',
-    labelRu: 'Владелец недвижимости',
-    icon: 'Building2',
-    color: 'from-teal-400 to-teal-500',
-    path: '/owner',
-    description: {
-      en: 'Manage your properties and bookings',
-      ru: 'Управляйте своей недвижимостью и бронированиями',
-    },
-  },
-  vendor: {
-    labelEn: 'Service Provider',
-    labelRu: 'Поставщик услуг',
-    icon: 'Store',
-    color: 'from-purple-400 to-purple-500',
-    path: '/vendor',
-    description: {
-      en: 'Offer tours, activities, and services',
-      ru: 'Предлагайте туры, впечатления и услуги',
-    },
-  },
-  staff: {
-    labelEn: 'Staff',
-    labelRu: 'Сотрудник',
-    icon: 'UserCog',
-    color: 'from-orange-400 to-orange-500',
-    path: '/admin',
-  },
-  admin: {
-    labelEn: 'Admin',
-    labelRu: 'Администратор',
-    icon: 'Shield',
-    color: 'from-red-400 to-red-500',
-    path: '/admin',
-  },
-  ombudsman: {
-    labelEn: 'Ombudsman',
-    labelRu: 'Омбудсмен',
-    icon: 'Scale',
-    color: 'from-slate-400 to-slate-500',
-    path: '/admin',
-  },
-  uno_team: {
-    labelEn: 'myUNO Team',
-    labelRu: 'Команда myUNO',
-    icon: 'Headphones',
-    color: 'from-emerald-400 to-emerald-500',
-    path: '/team',
-    description: {
-      en: 'Process leads, contact clients, coordinate with providers',
-      ru: 'Обработка заявок, связь с клиентами, координация с поставщиками',
-    },
-  },
-};
+  description?: { en: string; ru: string };
+}> = Object.fromEntries(
+  Object.entries(ROLE_METADATA).map(([role, meta]) => [
+    role,
+    {
+      labelEn: meta.labelEn,
+      labelRu: meta.labelRu,
+      icon: meta.icon,
+      color: meta.color,
+      path: meta.defaultPath,
+      ...(meta.descriptionEn && meta.descriptionRu ? {
+        description: { en: meta.descriptionEn, ru: meta.descriptionRu }
+      } : {}),
+    }
+  ])
+) as Record<AppRole, { labelEn: string; labelRu: string; icon: string; color: string; path: string; description?: { en: string; ru: string } }>;
 
-// Roles that users can self-activate
-export const ACTIVATABLE_ROLES: AppRole[] = ['property_owner', 'vendor'];
+// Re-export from canonical source
+export const ACTIVATABLE_ROLES: AppRole[] = [...SELF_ACTIVATABLE_ROLES];
 
 export function useUserRoles() {
   const { user } = useAuth();
@@ -191,7 +109,7 @@ export function useUserRoles() {
 
   // Get available roles for switching (only roles user has)
   const switchableRoles = activeRoles.filter(role => 
-    ['user', 'property_owner', 'vendor', 'admin', 'staff'].includes(role)
+    SWITCHABLE_ROLES.includes(role as AppRole)
   );
 
   return {

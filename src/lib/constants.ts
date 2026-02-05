@@ -172,3 +172,10 @@ export const OWNER_COMMISSION = {
     premium: 10,
   },
 } as const;
+
+/**
+ * @deprecated Use OrderStatus from src/types/orders.ts instead
+ * This constant is kept for backward compatibility during migration.
+ * New code should use OrderStatus and ORDER_STATUS_CONFIG.
+ */
+export const LEGACY_BOOKING_STATUS = BOOKING_STATUS;

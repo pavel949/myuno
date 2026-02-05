@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { CACHE_PROFILES } from '@/lib/queryConfig';
+import { type AppRole } from '@/types/auth';
 
 export interface Org {
   id: string;
@@ -38,7 +39,8 @@ export interface UserActiveContext {
   updated_at: string;
 }
 
-export type AppRole = 'user' | 'vendor' | 'owner' | 'admin' | 'staff' | 'uno_team';
+// Re-export for backward compatibility
+export type { AppRole } from '@/types/auth';
 
 /**
  * Hook for managing user's active context (role + org) stored in database

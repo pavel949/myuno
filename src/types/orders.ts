@@ -17,6 +17,8 @@
  * ```
  */
 
+import type { AppRole } from './auth';
+
 /**
  * All supported order types in the system.
  * Maps to different verticals/mini-apps.
@@ -44,15 +46,25 @@ export type OrderType =
  * Order lifecycle status.
  * Transitions are tracked in `order_status_history` table.
  */
-export type OrderStatus = 
-  | 'draft'        // Order started but not submitted
-  | 'pending'      // Awaiting confirmation
-  | 'confirmed'    // Confirmed by provider
-  | 'in_progress'  // Service is being delivered
-  | 'completed'    // Successfully completed
-  | 'cancelled'    // Cancelled by user or provider
-  | 'refunded'     // Payment refunded
-  | 'disputed';    // Under dispute resolution
+/**
+ * Order lifecycle status.
+ * Synchronized with public.order_status ENUM in database.
+ * Transitions are tracked in `order_status_history` table.
+ */
+export type OrderStatus =
+  | 'draft'           // Order started but not submitted
+  | 'pending'         // Awaiting confirmation
+  | 'pending_deposit' // Awaiting deposit payment (property)
+  | 'deposit_paid'    // Deposit received, awaiting full payment
+  | 'confirmed'       // Confirmed by provider
+  | 'in_progress'     // Service is being delivered
+  | 'checked_in'      // Guest has checked in (property)
+  | 'checked_out'     // Guest has checked out (property)
+  | 'completed'       // Successfully completed
+  | 'cancelled'       // Cancelled by user or provider
+  | 'refunded'        // Payment refunded
+  | 'disputed'        // Under dispute resolution
+  | 'no_show';        // Guest did not show up
 
 /**
  * Supported payment methods
@@ -219,10 +231,15 @@ export interface StatusConfig {
 export const ORDER_STATUS_CONFIG: Record<OrderStatus, StatusConfig> = {
   draft: { labelEn: 'Draft', labelRu: 'Черновик', color: 'text-muted-foreground', bgColor: 'bg-muted' },
   pending: { labelEn: 'Pending', labelRu: 'Ожидание', color: 'text-yellow-600', bgColor: 'bg-yellow-500/20' },
+  pending_deposit: { labelEn: 'Awaiting Deposit', labelRu: 'Ожидание депозита', color: 'text-amber-600', bgColor: 'bg-amber-500/20' },
+  deposit_paid: { labelEn: 'Deposit Paid', labelRu: 'Депозит оплачен', color: 'text-blue-500', bgColor: 'bg-blue-400/20' },
   confirmed: { labelEn: 'Confirmed', labelRu: 'Подтверждён', color: 'text-blue-600', bgColor: 'bg-blue-500/20' },
   in_progress: { labelEn: 'In Progress', labelRu: 'В процессе', color: 'text-purple-600', bgColor: 'bg-purple-500/20' },
+  checked_in: { labelEn: 'Checked In', labelRu: 'Заехал', color: 'text-teal-600', bgColor: 'bg-teal-500/20' },
+  checked_out: { labelEn: 'Checked Out', labelRu: 'Выехал', color: 'text-slate-600', bgColor: 'bg-slate-500/20' },
   completed: { labelEn: 'Completed', labelRu: 'Завершён', color: 'text-green-600', bgColor: 'bg-green-500/20' },
   cancelled: { labelEn: 'Cancelled', labelRu: 'Отменён', color: 'text-red-600', bgColor: 'bg-red-500/20' },
   refunded: { labelEn: 'Refunded', labelRu: 'Возврат', color: 'text-orange-600', bgColor: 'bg-orange-500/20' },
   disputed: { labelEn: 'Disputed', labelRu: 'Спор', color: 'text-red-600', bgColor: 'bg-red-500/20' },
+  no_show: { labelEn: 'No Show', labelRu: 'Неявка', color: 'text-gray-600', bgColor: 'bg-gray-500/20' },
 };
