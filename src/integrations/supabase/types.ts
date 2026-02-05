@@ -17265,12 +17265,10 @@ export type Database = {
           currency: string | null
           entity_id: string | null
           entity_type: string | null
-          is_active: boolean | null
           location: string | null
           price: number | null
           provider_id: string | null
           title: string | null
-          title_en: string | null
           title_ru: string | null
           trust_level: string | null
         }
