@@ -1,5 +1,5 @@
 import { Resend } from 'https://esm.sh/resend@2.0.0';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.2';
+import { createClient } from '../_shared/supabase.ts';
 import {
   generateOrderConfirmationEmail,
   generateOrderCancellationEmail,
