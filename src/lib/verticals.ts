@@ -1,0 +1,237 @@
+ /**
+  * @module Verticals
+  * @description Canonical registry of all business verticals
+  * 
+  * This is the SINGLE SOURCE OF TRUTH for vertical identifiers.
+  * All other files must import from here.
+  * 
+  * Convention: Use SINGULAR form for `id` (database, orders, internal systems)
+  * Use `plural` for URL slugs and UI labels where appropriate
+  */
+ 
+ export interface VerticalDefinition {
+   /** Singular ID - used in database, orders, internal systems */
+   id: string;
+   /** Plural form - used in URLs and some UI contexts */
+   plural: string;
+   /** Primary database table name */
+   table: string;
+   /** Emoji icon for quick visual identification */
+   icon: string;
+   /** English label */
+   labelEn: string;
+   /** Russian label */
+   labelRu: string;
+   /** Whether this vertical supports booking/ordering */
+   bookable: boolean;
+   /** Related order_type value (if different from id) */
+   orderType?: string;
+ }
+ 
+ export const VERTICALS = {
+   PROPERTY: {
+     id: 'property',
+     plural: 'properties',
+     table: 'owner_properties',
+     icon: '🏠',
+     labelEn: 'Property',
+     labelRu: 'Недвижимость',
+     bookable: true,
+   },
+   YACHT: {
+     id: 'yacht',
+     plural: 'yachts',
+     table: 'yachts',
+     icon: '🚤',
+     labelEn: 'Yachts',
+     labelRu: 'Яхты',
+     bookable: true,
+   },
+   VEHICLE: {
+     id: 'vehicle',
+     plural: 'vehicles',
+     table: 'vehicles',
+     icon: '🚗',
+     labelEn: 'Transport',
+     labelRu: 'Транспорт',
+     bookable: true,
+   },
+   TOUR: {
+     id: 'tour',
+     plural: 'tours',
+     table: 'tours',
+     icon: '🗺️',
+     labelEn: 'Tours',
+     labelRu: 'Туры',
+     bookable: true,
+   },
+   EXPERIENCE: {
+     id: 'experience',
+     plural: 'experiences',
+     table: 'experiences',
+     icon: '✨',
+     labelEn: 'Experiences',
+     labelRu: 'Впечатления',
+     bookable: true,
+     orderType: 'activity',
+   },
+   CLEANING: {
+     id: 'cleaning',
+     plural: 'cleaning',
+     table: 'cleaning_providers',
+     icon: '🧹',
+     labelEn: 'Cleaning',
+     labelRu: 'Уборка',
+     bookable: true,
+   },
+   BABYSITTER: {
+     id: 'babysitter',
+     plural: 'babysitters',
+     table: 'babysitters',
+     icon: '👶',
+     labelEn: 'Babysitters',
+     labelRu: 'Няни',
+     bookable: true,
+   },
+   BEAUTY: {
+     id: 'beauty',
+     plural: 'salons',
+     table: 'salons',
+     icon: '💇',
+     labelEn: 'Beauty & Spa',
+     labelRu: 'Красота и Spa',
+     bookable: true,
+   },
+   RESTAURANT: {
+     id: 'restaurant',
+     plural: 'restaurants',
+     table: 'restaurants',
+     icon: '🍽️',
+     labelEn: 'Restaurants',
+     labelRu: 'Рестораны',
+     bookable: true,
+     orderType: 'food',
+   },
+   MEDICAL: {
+     id: 'medical',
+     plural: 'clinics',
+     table: 'clinics',
+     icon: '🏥',
+     labelEn: 'Medical',
+     labelRu: 'Медицина',
+     bookable: true,
+   },
+   LEGAL: {
+     id: 'legal',
+     plural: 'legal',
+     table: 'legal_services',
+     icon: '⚖️',
+     labelEn: 'Legal',
+     labelRu: 'Юридические услуги',
+     bookable: true,
+   },
+   EDUCATION: {
+     id: 'education',
+     plural: 'education',
+     table: 'education_providers',
+     icon: '📚',
+     labelEn: 'Education',
+     labelRu: 'Образование',
+     bookable: true,
+   },
+   FITNESS: {
+     id: 'fitness',
+     plural: 'gyms',
+     table: 'gyms',
+     icon: '🏋️',
+     labelEn: 'Fitness',
+     labelRu: 'Фитнес',
+     bookable: true,
+     orderType: 'activity',
+   },
+   EVENT: {
+     id: 'event',
+     plural: 'events',
+     table: 'events',
+     icon: '🎉',
+     labelEn: 'Events',
+     labelRu: 'События',
+     bookable: true,
+   },
+   WATER_ACTIVITY: {
+     id: 'water_activity',
+     plural: 'water_activities',
+     table: 'water_activities',
+     icon: '🏄',
+     labelEn: 'Water Activities',
+     labelRu: 'Водные активности',
+     bookable: true,
+     orderType: 'activity',
+   },
+   PET_SERVICE: {
+     id: 'pet_service',
+     plural: 'pets',
+     table: 'pet_services',
+     icon: '🐾',
+     labelEn: 'Pet Services',
+     labelRu: 'Услуги для животных',
+     bookable: true,
+   },
+   FLOWER: {
+     id: 'flower',
+     plural: 'flowers',
+     table: 'flower_shops',
+     icon: '💐',
+     labelEn: 'Flowers',
+     labelRu: 'Цветы',
+     bookable: true,
+     orderType: 'flowers',
+   },
+   INSURANCE: {
+     id: 'insurance',
+     plural: 'insurance',
+     table: 'insurance_providers',
+     icon: '🛡️',
+     labelEn: 'Insurance',
+     labelRu: 'Страхование',
+     bookable: false,
+   },
+ } as const;
+ 
+ export type VerticalKey = keyof typeof VERTICALS;
+ export type VerticalId = typeof VERTICALS[VerticalKey]['id'];
+ 
+ // Helper functions
+ export function getVerticalById(id: string): VerticalDefinition | undefined {
+   return Object.values(VERTICALS).find(v => v.id === id || v.plural === id);
+ }
+ 
+ export function getVerticalByPlural(plural: string): VerticalDefinition | undefined {
+   return Object.values(VERTICALS).find(v => v.plural === plural);
+ }
+ 
+ export function getVerticalByTable(table: string): VerticalDefinition | undefined {
+   return Object.values(VERTICALS).find(v => v.table === table);
+ }
+ 
+ /** Get all vertical IDs (singular form) */
+ export function getAllVerticalIds(): string[] {
+   return Object.values(VERTICALS).map(v => v.id);
+ }
+ 
+ /** Get all vertical plurals for URL routing */
+ export function getAllVerticalPluralIds(): string[] {
+   return Object.values(VERTICALS).map(v => v.plural);
+ }
+ 
+ /** Map legacy plural ID to canonical singular ID */
+ export function normalizeVerticalId(id: string): string {
+   const vertical = getVerticalById(id);
+   return vertical?.id || id;
+ }
+ 
+ /** Get order_type for a vertical (some verticals map to different order types) */
+ export function getOrderTypeForVertical(verticalId: string): string {
+   const vertical = getVerticalById(verticalId);
+   return vertical?.orderType || vertical?.id || verticalId;
+ }

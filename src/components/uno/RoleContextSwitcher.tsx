@@ -1,7 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useUserContext, type AppRole } from '@/hooks/useUserContext';
+import { useUserContext } from '@/hooks/useUserContext';
+import type { AppRole } from '@/types/auth';
+import { ROLE_METADATA } from '@/types/auth';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -19,16 +21,32 @@ import {
   Shield, 
   UserCog,
   ChevronDown,
-  Check 
+  Check,
+  Headphones,
+  Users,
 } from 'lucide-react';
 
-const ROLE_CONFIG: Record<AppRole, {
+// Icon mapping for roles
+const ROLE_ICONS: Partial<Record<AppRole, React.ComponentType<{ className?: string }>>> = {
+  guest: User,
+  user: User,
+  vendor: Store,
+  owner: Building2,
+  property_owner: Building2,
+  admin: Shield,
+  staff: UserCog,
+  uno_team: Headphones,
+  partner: Users,
+};
+
+// Local role config for the switcher UI (only switchable roles need styling)
+const ROLE_SWITCHER_CONFIG: Partial<Record<AppRole, {
   labelEn: string;
   labelRu: string;
   icon: React.ComponentType<{ className?: string }>;
   color: string;
   path: string;
-}> = {
+}>> = {
   user: {
     labelEn: 'Client',
     labelRu: 'Клиент',
@@ -67,10 +85,19 @@ const ROLE_CONFIG: Record<AppRole, {
   uno_team: {
     labelEn: 'myUNO Team',
     labelRu: 'Команда myUNO',
-    icon: UserCog,
+    icon: Headphones,
     color: 'bg-emerald-500',
     path: '/team',
   },
+};
+
+// Default config fallback
+const DEFAULT_ROLE_CONFIG = {
+  labelEn: 'User',
+  labelRu: 'Пользователь',
+  icon: User,
+  color: 'bg-blue-500',
+  path: '/',
 };
 
 interface RoleContextSwitcherProps {
@@ -100,7 +127,7 @@ export function RoleContextSwitcher({ compact = false }: RoleContextSwitcherProp
     return null;
   }
 
-  const currentConfig = ROLE_CONFIG[activeRole] || ROLE_CONFIG.user;
+  const currentConfig = ROLE_SWITCHER_CONFIG[activeRole] || DEFAULT_ROLE_CONFIG;
   const CurrentIcon = currentConfig.icon;
 
   const handleRoleSwitch = async (role: AppRole) => {
@@ -116,9 +143,15 @@ export function RoleContextSwitcher({ compact = false }: RoleContextSwitcherProp
     await switchContext({ role, orgId });
     
     // Navigate to role's default path
-    const config = ROLE_CONFIG[role];
+    const config = ROLE_SWITCHER_CONFIG[role];
     if (config) {
       navigate(config.path);
+    } else {
+      // Fallback to ROLE_METADATA
+      const meta = ROLE_METADATA[role];
+      if (meta) {
+        navigate(meta.defaultPath);
+      }
     }
   };
 
@@ -137,7 +170,7 @@ export function RoleContextSwitcher({ compact = false }: RoleContextSwitcherProp
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           {availableRoles.map((role) => {
-            const config = ROLE_CONFIG[role];
+            const config = ROLE_SWITCHER_CONFIG[role];
             if (!config) return null;
             const Icon = config.icon;
             const isActive = role === activeRole;
@@ -190,7 +223,7 @@ export function RoleContextSwitcher({ compact = false }: RoleContextSwitcherProp
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {availableRoles.map((role) => {
-          const config = ROLE_CONFIG[role];
+          const config = ROLE_SWITCHER_CONFIG[role];
           if (!config) return null;
           const Icon = config.icon;
           const isActive = role === activeRole;

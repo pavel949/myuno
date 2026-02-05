@@ -17410,6 +17410,11 @@ export type Database = {
         | "disputed"
         | "pending_advance"
         | "awaiting_client_payment"
+        | "checked_in"
+        | "checked_out"
+        | "no_show"
+        | "pending_deposit"
+        | "deposit_paid"
       payment_method: "cash" | "wallet" | "stripe" | "bank_transfer"
       payment_status:
         | "pending"
@@ -17635,6 +17640,11 @@ export const Constants = {
         "disputed",
         "pending_advance",
         "awaiting_client_payment",
+        "checked_in",
+        "checked_out",
+        "no_show",
+        "pending_deposit",
+        "deposit_paid",
       ],
       payment_method: ["cash", "wallet", "stripe", "bank_transfer"],
       payment_status: [

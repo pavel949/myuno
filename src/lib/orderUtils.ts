@@ -101,12 +101,17 @@ export function getStatusColorClasses(status: OrderStatus): {
   const colors: Record<OrderStatus, { bg: string; text: string; border: string }> = {
     draft: { bg: 'bg-muted', text: 'text-muted-foreground', border: 'border-muted' },
     pending: { bg: 'bg-yellow-500/20', text: 'text-yellow-600', border: 'border-yellow-500/30' },
+    pending_deposit: { bg: 'bg-amber-500/20', text: 'text-amber-600', border: 'border-amber-500/30' },
+    deposit_paid: { bg: 'bg-blue-400/20', text: 'text-blue-500', border: 'border-blue-400/30' },
     confirmed: { bg: 'bg-blue-500/20', text: 'text-blue-600', border: 'border-blue-500/30' },
     in_progress: { bg: 'bg-purple-500/20', text: 'text-purple-600', border: 'border-purple-500/30' },
+    checked_in: { bg: 'bg-teal-500/20', text: 'text-teal-600', border: 'border-teal-500/30' },
+    checked_out: { bg: 'bg-slate-500/20', text: 'text-slate-600', border: 'border-slate-500/30' },
     completed: { bg: 'bg-green-500/20', text: 'text-green-600', border: 'border-green-500/30' },
     cancelled: { bg: 'bg-red-500/20', text: 'text-red-600', border: 'border-red-500/30' },
     refunded: { bg: 'bg-orange-500/20', text: 'text-orange-600', border: 'border-orange-500/30' },
     disputed: { bg: 'bg-red-500/20', text: 'text-red-600', border: 'border-red-500/30' },
+    no_show: { bg: 'bg-gray-500/20', text: 'text-gray-600', border: 'border-gray-500/30' },
   };
   
   return colors[status] || colors.pending;
