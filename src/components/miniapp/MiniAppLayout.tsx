@@ -206,7 +206,7 @@ export function MiniAppLayout({
   }));
 
   return (
-    <AppLayout showBottomNav={showBottomNav} className="overflow-x-hidden max-w-full">
+    <AppLayout showBottomNav={showBottomNav} className="max-w-full min-w-0">
       {/* Unified Sticky Header */}
       <div className="sticky top-0 z-40">
         <UnifiedHeader
