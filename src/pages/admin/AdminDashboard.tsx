@@ -8,6 +8,7 @@ import {
   AdminRevenueBlock,
   AdminActivityBlock,
 } from '@/components/admin/dashboard';
+import { LaunchSwitch } from '@/components/maintenance/LaunchSwitch';
 
 export default function AdminDashboard() {
   const { language } = useLanguage();
@@ -24,6 +25,9 @@ export default function AdminDashboard() {
           {isRussian ? 'Обзор платформы UNO' : 'UNO platform overview'}
         </p>
       </div>
+
+      {/* Launch Switch - Site Status Control */}
+      <LaunchSwitch />
 
       {/* Row 1: KPI Metrics */}
       <AdminKPIGrid />
