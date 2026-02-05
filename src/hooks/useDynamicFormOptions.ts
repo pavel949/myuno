@@ -64,8 +64,17 @@ export function usePropertyFormOptions() {
   const { options: extraServices, isLoading: l13 } = useTaxonomy('extra_service');
   const { options: houseRulesPresets, isLoading: l14 } = useTaxonomy('house_rule');
   const { options: highlights, isLoading: l15 } = useTaxonomy('property_highlight');
+  
+  // Property characteristics (new)
+  const { options: parkingTypes, isLoading: l16 } = useTaxonomy('parking_type');
+  const { options: poolTypes, isLoading: l17 } = useTaxonomy('pool_type');
+  const { options: gardenTypes, isLoading: l18 } = useTaxonomy('garden_type');
+  const { options: cancellationPolicies, isLoading: l19 } = useTaxonomy('cancellation_policy');
+  const { options: ownershipForms, isLoading: l20 } = useTaxonomy('ownership_form');
+  const { options: managementTypes, isLoading: l21 } = useTaxonomy('management_type');
+  const { options: equipment, isLoading: l22 } = useTaxonomy('equipment');
 
-  const isLoading = l1 || l2 || l3 || l4 || l5 || l6 || l7 || l8 || l9 || l10 || l11 || l12 || l13 || l14 || l15;
+  const isLoading = l1 || l2 || l3 || l4 || l5 || l6 || l7 || l8 || l9 || l10 || l11 || l12 || l13 || l14 || l15 || l16 || l17 || l18 || l19 || l20 || l21 || l22;
 
   // Group districts by zone (from metadata)
   const districtsByZone = useMemo(() => {
@@ -96,6 +105,21 @@ export function usePropertyFormOptions() {
     return grouped;
   }, [amenities]);
 
+  // Group equipment by category (from metadata.is_category)
+  const equipmentByCategory = useMemo(() => {
+    const categories = equipment.filter(e => e.metadata?.is_category === true);
+    const items = equipment.filter(e => !e.metadata?.is_category);
+    const grouped: Record<string, FormOption[]> = {};
+    
+    categories.forEach(cat => {
+      grouped[cat.value] = items
+        .filter(item => item.parentId === cat.id || item.metadata?.category === cat.value)
+        .map(toFormOption);
+    });
+    
+    return grouped;
+  }, [equipment]);
+
   return {
     propertyTypes: toFormOptions(propertyTypes),
     districts: districts.map(d => ({
@@ -121,6 +145,16 @@ export function usePropertyFormOptions() {
     extraServices: toFormOptions(extraServices),
     houseRulesPresets: toFormOptions(houseRulesPresets),
     highlights: toFormOptions(highlights),
+    // New property characteristics
+    parkingTypes: toFormOptions(parkingTypes),
+    poolTypes: toFormOptions(poolTypes),
+    gardenTypes: toFormOptions(gardenTypes),
+    cancellationPolicies: toFormOptions(cancellationPolicies),
+    ownershipForms: toFormOptions(ownershipForms),
+    managementTypes: toFormOptions(managementTypes),
+    equipment: toFormOptions(equipment.filter(e => !e.metadata?.is_category)),
+    equipmentCategories: toFormOptions(equipment.filter(e => e.metadata?.is_category === true)),
+    equipmentByCategory,
     isLoading,
   };
 }

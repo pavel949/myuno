@@ -6,7 +6,7 @@
  */
 
 export const TAXONOMY_TYPES = {
-  // Property
+  // Property - Core
   PROPERTY_TYPE: 'property_type',
   DISTRICT: 'district',
   BEDROOM: 'bedroom',
@@ -18,6 +18,15 @@ export const TAXONOMY_TYPES = {
   INCLUDED_SERVICE: 'included_service',
   EXTRA_SERVICE: 'extra_service',
   PROPERTY_HIGHLIGHT: 'property_highlight',
+  
+  // Property - Characteristics
+  PARKING_TYPE: 'parking_type',
+  POOL_TYPE: 'pool_type',
+  GARDEN_TYPE: 'garden_type',
+  CANCELLATION_POLICY: 'cancellation_policy',
+  OWNERSHIP_FORM: 'ownership_form',
+  MANAGEMENT_TYPE: 'management_type',
+  EQUIPMENT: 'equipment',
   
   // Transport
   VEHICLE_CATEGORY: 'vehicle_category',

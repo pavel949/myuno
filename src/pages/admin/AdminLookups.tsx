@@ -15,7 +15,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { 
   Plus, Edit2, Trash2, GripVertical, MapPin, UtensilsCrossed, 
   Palmtree, Home, Sailboat, Calendar, Settings, PawPrint, Car,
-  Dumbbell, Sparkles, Stethoscope, Wrench
+  Dumbbell, Sparkles, Stethoscope, Wrench, CircleParking, Waves,
+  TreePine, FileX, ScrollText, Users, Sofa, Eye
 } from 'lucide-react';
 import { useLookupValues, LookupValue, LookupType, LOOKUP_TYPE_LABELS } from '@/hooks/useLookupValues';
 import { useAutoTranslate } from '@/hooks/useAutoTranslate';
@@ -35,6 +36,15 @@ const LOOKUP_TYPE_ICONS: Record<LookupType, React.ComponentType<{ className?: st
   gym_type: Dumbbell,
   salon_type: Sparkles,
   clinic_specialty: Stethoscope,
+  parking_type: CircleParking,
+  pool_type: Waves,
+  garden_type: TreePine,
+  cancellation_policy: FileX,
+  ownership_form: ScrollText,
+  management_type: Users,
+  equipment: Sofa,
+  view_type: Eye,
+  furnishing_level: Sofa,
 };
 
 const AVAILABLE_TYPES: LookupType[] = [
@@ -51,6 +61,15 @@ const AVAILABLE_TYPES: LookupType[] = [
   'gym_type',
   'salon_type',
   'clinic_specialty',
+  'parking_type',
+  'pool_type',
+  'garden_type',
+  'cancellation_policy',
+  'ownership_form',
+  'management_type',
+  'equipment',
+  'view_type',
+  'furnishing_level',
 ];
 
 export default function AdminLookups() {

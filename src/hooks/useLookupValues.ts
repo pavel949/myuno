@@ -32,7 +32,16 @@ export type LookupType =
   | 'vehicle_type'
   | 'gym_type'
   | 'salon_type'
-  | 'clinic_specialty';
+  | 'clinic_specialty'
+  | 'parking_type'
+  | 'pool_type'
+  | 'garden_type'
+  | 'cancellation_policy'
+  | 'ownership_form'
+  | 'management_type'
+  | 'equipment'
+  | 'view_type'
+  | 'furnishing_level';
 
 export const LOOKUP_TYPE_LABELS: Record<LookupType, { en: string; ru: string }> = {
   district: { en: 'Districts / Locations', ru: 'Районы / Локации' },
@@ -48,6 +57,15 @@ export const LOOKUP_TYPE_LABELS: Record<LookupType, { en: string; ru: string }> 
   gym_type: { en: 'Gym Types', ru: 'Типы залов' },
   salon_type: { en: 'Salon Types', ru: 'Типы салонов' },
   clinic_specialty: { en: 'Medical Specialties', ru: 'Медицинские специальности' },
+  parking_type: { en: 'Parking Types', ru: 'Типы парковки' },
+  pool_type: { en: 'Pool Types', ru: 'Типы бассейнов' },
+  garden_type: { en: 'Garden Types', ru: 'Типы садов' },
+  cancellation_policy: { en: 'Cancellation Policies', ru: 'Политики отмены' },
+  ownership_form: { en: 'Ownership Forms', ru: 'Формы собственности' },
+  management_type: { en: 'Management Types', ru: 'Типы управления' },
+  equipment: { en: 'Equipment & Amenities', ru: 'Оборудование и удобства' },
+  view_type: { en: 'View Types', ru: 'Типы видов' },
+  furnishing_level: { en: 'Furnishing Levels', ru: 'Уровни меблировки' },
 };
 
 export function useLookupValues(lookupType?: LookupType) {
