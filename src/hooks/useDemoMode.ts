@@ -38,14 +38,17 @@ export const useDemoMode = () => {
   const trackDemoAction = (action: string, metadata?: Record<string, unknown>) => {
     if (!isDemo) return;
     
-    console.log('[Demo Tracking]', {
-      action,
-      type: demoType,
-      token: demoToken,
-      source: demoSource,
-      timestamp: new Date().toISOString(),
-      ...metadata,
-    });
+    // Debug-only logging for demo tracking
+    if (import.meta.env.DEV) {
+      console.debug('[Demo Tracking]', {
+        action,
+        type: demoType,
+        token: demoToken,
+        source: demoSource,
+        timestamp: new Date().toISOString(),
+        ...metadata,
+      });
+    }
 
     // Store in localStorage for analytics
     try {
