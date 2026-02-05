@@ -6,11 +6,11 @@ export const BUILD_TIMESTAMP = new Date().toISOString();
 // Check for updates via network (bypasses cache)
 export async function checkForUpdates(): Promise<boolean> {
   try {
-    const response = await fetch('/manifest.json?_=' + Date.now(), { 
+    const response = await fetch('/version.json?_=' + Date.now(), { 
       cache: 'no-store' 
     });
-    const manifest = await response.json();
-    return manifest.version !== APP_VERSION;
+    const data = await response.json();
+    return data.version !== APP_VERSION;
   } catch {
     return false;
   }

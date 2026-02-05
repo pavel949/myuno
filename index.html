@@ -18,7 +18,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="myUNO" />
 
-    <link rel="manifest" href="/manifest.json" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
     <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
     <link rel="canonical" href="https://myuno.app" />
@@ -54,7 +54,7 @@
         }
         
         // LEVEL 2: Network-based version check (non-blocking)
-        fetch('/manifest.json?_=' + Date.now(), { cache: 'no-store' })
+        fetch('/version.json?_=' + Date.now(), { cache: 'no-store' })
           .then(function(r) { return r.json(); })
           .then(function(data) {
             var serverVersion = data.version;
