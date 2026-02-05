@@ -161,10 +161,10 @@ export function useBookingOperations(bookingId?: string) {
 
       if (error) throw error;
 
-      // Update booking status
+      // Update order status (unified orders system)
       await supabase
-        .from('property_bookings')
-        .update({ status: 'checked_in' })
+        .from('orders')
+        .update({ status: 'in_progress' })
         .eq('id', bookingId);
 
       // Complete check-in task
@@ -184,6 +184,7 @@ export function useBookingOperations(bookingId?: string) {
       queryClient.invalidateQueries({ queryKey: ['booking-operations', bookingId] });
       queryClient.invalidateQueries({ queryKey: ['operational-tasks'] });
       queryClient.invalidateQueries({ queryKey: ['property-bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['all-property-bookings'] });
       toast({
         title: t('Check-in completed', 'Заезд подтверждён'),
         description: t('Guest has been checked in successfully', 'Гость успешно заселён'),
@@ -226,10 +227,10 @@ export function useBookingOperations(bookingId?: string) {
 
       if (error) throw error;
 
-      // Update booking status
+      // Update order status (unified orders system)
       await supabase
-        .from('property_bookings')
-        .update({ status: 'checked_out' })
+        .from('orders')
+        .update({ status: 'completed' })
         .eq('id', bookingId);
 
       // Complete check-out task
@@ -249,6 +250,7 @@ export function useBookingOperations(bookingId?: string) {
       queryClient.invalidateQueries({ queryKey: ['booking-operations', bookingId] });
       queryClient.invalidateQueries({ queryKey: ['operational-tasks'] });
       queryClient.invalidateQueries({ queryKey: ['property-bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['all-property-bookings'] });
       toast({
         title: t('Check-out completed', 'Выезд подтверждён'),
         description: t('Guest has been checked out successfully', 'Гость успешно выселен'),
