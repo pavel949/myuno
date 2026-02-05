@@ -14,22 +14,29 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Wrench, Sparkles } from 'lucide-react';
+import { Wrench, Sparkles, Flame, Star, TrendingUp, Menu } from 'lucide-react';
 import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 // Unified components
 import { CrossSellSection } from '@/components/crosssell';
+import { 
+  UnifiedFilterRibbon,
+  FilterRibbonItem,
+} from '@/components/shared';
 
 // Hooks
 import { useServices } from '@/hooks/useServices';
 import { useCategories } from '@/hooks/useCategories';
 import { useHomeServices } from '@/hooks/useHomeServices';
 import { useUserPersonas, UserPersona } from '@/hooks/useUserPersonas';
+import { useFeaturedCategories } from '@/hooks/useSuperAppCatalog';
 
 // Service marketplace components
 import {
@@ -47,7 +54,7 @@ import {
 // Legacy components (for filtered views only)
 import { MiniAppsGrid } from '@/components/discover/MiniAppsGrid';
 import { ThematicSection, THEMATIC_SECTIONS } from '@/components/discover/ThematicSection';
-import { useFeaturedCategories } from '@/hooks/useFeaturedCategories';
+import { useFeaturedCategories as useLegacyFeaturedCategories } from '@/hooks/useFeaturedCategories';
 import { useCategoryCounts } from '@/hooks/useCategoryCounts';
 
 // Map UserPersona to audience filter for category filtering
@@ -72,10 +79,11 @@ export default function Discover() {
   
   // Data hooks
   const { groups, getName, isLoading: categoriesLoading, refetch: refetchCategories } = useCategories();
-  const { isFeatured } = useFeaturedCategories();
+  const { isFeatured } = useLegacyFeaturedCategories();
   const { getCount } = useCategoryCounts();
   const { services, isLoading: servicesLoading, refetch: refetchServices } = useServices({ limit: 20 });
   const { providers, isLoading: providersLoading } = useHomeServices();
+  const { featured: featuredCategories } = useFeaturedCategories();
 
   // Determine if we should show filtered view based on saved personas
   const hasSpecificPersona = personas.length > 0;
@@ -134,6 +142,35 @@ export default function Discover() {
   // Always show marketplace view (no filter ribbon needed - persona is set on home page)
   const showMarketplaceView = true;
 
+  // Quick action items for ribbon - consistent with Market
+  const quickActionItems: FilterRibbonItem[] = useMemo(() => [
+    { id: 'deals', label: isRu ? 'Акции' : 'Deals', icon: Flame, variant: 'accent' as const },
+    { id: 'popular', label: isRu ? 'Топ' : 'Top', icon: Star },
+    { id: 'new', label: isRu ? 'Новое' : 'New', icon: Sparkles },
+  ], [isRu]);
+
+  // Category items for ribbon (top 3 from featured)
+  const categoryItems: FilterRibbonItem[] = useMemo(() => {
+    return featuredCategories.slice(0, 3).map(cat => ({
+      id: cat.vertical,
+      label: cat.label,
+      emoji: cat.icon,
+    }));
+  }, [featuredCategories]);
+
+  const handleQuickActionSelect = (id: string) => {
+    navigate(`/services?filter=${id}`);
+  };
+
+  const handleCategorySelect = (vertical: string) => {
+    const cat = featuredCategories.find(c => c.vertical === vertical);
+    if (cat) {
+      navigate(cat.path);
+    }
+  };
+
+  const remainingCategoryCount = Math.max(0, featuredCategories.length - 3);
+
   return (
     <MiniAppLayout
       title={isRu ? 'Услуги' : 'Services'}
@@ -146,9 +183,39 @@ export default function Discover() {
       showCategories={false}
       showFilter={false}
     >
-      {/* Category Drawer only (no audience filter - it's set on home page) */}
-      <div className="-mx-4 -mt-4 mb-4 sticky top-0 z-10 bg-background/95 backdrop-blur-md border-b border-border/30 px-4 py-2">
-        <ServiceCategoryDrawer />
+      {/* Filter Ribbon - Consistent with Market */}
+      <div className="sticky top-0 z-30 -mx-4 bg-background/95 backdrop-blur-sm border-b border-border/30">
+        <UnifiedFilterRibbon
+          items={quickActionItems}
+          onSelect={handleQuickActionSelect}
+          leadingAction={<ServiceCategoryDrawer />}
+          trailingAction={
+            <>
+              {categoryItems.map(item => (
+                <button
+                  key={item.id}
+                  onClick={() => handleCategorySelect(item.id)}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium bg-muted/60 hover:bg-muted text-foreground transition-colors shrink-0"
+                >
+                  <span className="text-base">{item.emoji}</span>
+                  <span className="whitespace-nowrap">{item.label}</span>
+                </button>
+              ))}
+              {remainingCategoryCount > 0 && (
+                <Badge
+                  variant="secondary"
+                  className="px-3 py-2 text-xs font-medium cursor-pointer hover:bg-secondary/80 shrink-0"
+                  onClick={() => {
+                    // Open catalog drawer programmatically - for now navigate
+                    navigate('/services');
+                  }}
+                >
+                  +{remainingCategoryCount} {isRu ? 'ещё' : 'more'}
+                </Badge>
+              )}
+            </>
+          }
+        />
       </div>
 
       <PullToRefresh onRefresh={handleRefresh} className="min-h-0">

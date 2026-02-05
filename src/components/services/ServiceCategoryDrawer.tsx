@@ -4,7 +4,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Menu, Search, X, Sparkles } from 'lucide-react';
+import { Menu, Search, X, Sparkles, LayoutGrid } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   SuperAppCatalogAccordion,
@@ -31,18 +31,17 @@ export function ServiceCategoryDrawer({ className }: ServiceCategoryDrawerProps)
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
           className={cn(
-            "gap-2 px-3 py-2 h-auto",
-            "bg-gradient-to-r from-primary/10 to-amber-500/10",
-            "border border-primary/20 hover:border-primary/40",
-            "text-primary font-medium text-xs rounded-xl",
-            "transition-all duration-200",
+            "gap-1.5 px-3 py-2 h-auto rounded-xl shrink-0",
+            "border-primary/30 bg-primary/5 hover:bg-primary/10",
+            "text-primary font-medium text-xs",
+            "transition-all duration-200 shadow-sm hover:shadow",
             className
           )}
         >
-          <Menu className="w-4 h-4" />
+          <LayoutGrid className="w-4 h-4" />
           <span>{language === 'ru' ? 'Каталог' : 'Catalog'}</span>
         </Button>
       </SheetTrigger>
