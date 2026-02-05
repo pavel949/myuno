@@ -267,8 +267,8 @@ const MarketCategoryPage = () => {
         {/* Products */}
         {isLoading ? (
           <div className={cn(
-            "gap-3",
-            viewMode === 'grid' ? "grid grid-cols-2" : "flex flex-col"
+            "gap-3 md:gap-4",
+            viewMode === 'grid' ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6" : "flex flex-col"
           )}>
             {[1, 2, 3, 4].map(i => (
               <div key={i} className="bg-card rounded-2xl border border-border overflow-hidden">
@@ -288,8 +288,8 @@ const MarketCategoryPage = () => {
           </div>
         ) : (
           <div className={cn(
-            "gap-3",
-            viewMode === 'grid' ? "grid grid-cols-2" : "flex flex-col"
+            "gap-3 md:gap-4",
+            viewMode === 'grid' ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6" : "flex flex-col"
           )}>
             {filteredProducts.map(product => (
               <ProfessionalProductCard
