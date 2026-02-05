@@ -24,29 +24,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { LifeSituationBadge } from '@/components/life-flow/LifeSituationBadge';
 import { GuidedFallback } from '@/components/life-flow/GuidedFallback';
 import { 
-  ArrowLeft, Package, Home, Ship, Car, UtensilsCrossed, 
-  Compass, MapPin, ArrowRight, ChevronRight, Shield
+  ArrowLeft, Package, Compass, ArrowRight, ChevronRight, Shield
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import * as LucideIcons from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
-
-// Entity type to icon/route mapping
-const ENTITY_CONFIG: Record<string, { 
-  icon: LucideIcon; 
-  route: string; 
-  labelEn: string; 
-  labelRu: string;
-  priority: 'primary' | 'secondary';
-}> = {
-  property: { icon: Home, route: '/properties', labelEn: 'Accommodation', labelRu: 'Жильё', priority: 'primary' },
-  transport: { icon: Car, route: '/transport', labelEn: 'Transport', labelRu: 'Транспорт', priority: 'primary' },
-  service: { icon: Package, route: '/services', labelEn: 'Services', labelRu: 'Услуги', priority: 'secondary' },
-  yacht: { icon: Ship, route: '/yachts', labelEn: 'Yachts', labelRu: 'Яхты', priority: 'secondary' },
-  restaurant: { icon: UtensilsCrossed, route: '/restaurants', labelEn: 'Food', labelRu: 'Еда', priority: 'secondary' },
-  tour: { icon: MapPin, route: '/tours', labelEn: 'Tours', labelRu: 'Туры', priority: 'secondary' },
-  experience: { icon: Compass, route: '/experiences', labelEn: 'Experiences', labelRu: 'Впечатления', priority: 'secondary' },
-};
+import { getEntityType, isPrimaryEntityType } from '@/lib/config/entityTypes';
 
 export default function LifeFlowPage() {
   const { code } = useParams<{ code: string }>();
@@ -93,8 +76,7 @@ export default function LifeFlowPage() {
     const secondary: typeof grouped = {};
 
     Object.entries(grouped).forEach(([type, items]) => {
-      const config = ENTITY_CONFIG[type];
-      if (config?.priority === 'primary') {
+      if (isPrimaryEntityType(type)) {
         primary[type] = items;
       } else {
         secondary[type] = items;
@@ -113,31 +95,25 @@ export default function LifeFlowPage() {
   const hasCatalogItems = Object.keys(primaryBlocks).length > 0 || Object.keys(secondaryBlocks).length > 0;
 
   // Render a suggested block section
-  const renderBlock = (entityType: string, items: typeof catalogItems, isPrimary: boolean) => {
-    const config = ENTITY_CONFIG[entityType] || {
-      icon: Package,
-      route: '/',
-      labelEn: entityType,
-      labelRu: entityType,
-      priority: 'secondary',
-    };
-    const EntityIcon = config.icon;
+  const renderBlock = (entityType: string, items: typeof catalogItems, isPrimaryBlock: boolean) => {
+    const entityConfig = getEntityType(entityType);
+    const EntityIcon = entityConfig.icon;
 
     return (
-      <section key={entityType} className={cn("space-y-3", isPrimary && "bg-card rounded-2xl p-4 border")}>
+      <section key={entityType} className={cn("space-y-3", isPrimaryBlock && "bg-card rounded-2xl p-4 border")}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div 
               className={cn(
                 "w-8 h-8 rounded-lg flex items-center justify-center",
-                isPrimary ? "bg-primary/10" : "bg-muted"
+                isPrimaryBlock ? "bg-primary/10" : "bg-muted"
               )}
             >
-              <EntityIcon className={cn("w-4 h-4", isPrimary ? "text-primary" : "text-muted-foreground")} />
+              <EntityIcon className={cn("w-4 h-4", isPrimaryBlock ? "text-primary" : "text-muted-foreground")} />
             </div>
             <div>
-              <h3 className={cn("font-semibold", isPrimary ? "text-base" : "text-sm")}>
-                {isRussian ? config.labelRu : config.labelEn}
+              <h3 className={cn("font-semibold", isPrimaryBlock ? "text-base" : "text-sm")}>
+                {isRussian ? entityConfig.pluralRu : entityConfig.pluralEn}
               </h3>
               <span className="text-xs text-muted-foreground">
                 {items.length} {isRussian ? 'вариантов' : 'options'}
@@ -148,7 +124,7 @@ export default function LifeFlowPage() {
             variant="ghost"
             size="sm"
             className="gap-1 text-xs"
-            onClick={() => navigate(config.route)}
+            onClick={() => navigate(entityConfig.route)}
           >
             {isRussian ? 'Все' : 'View all'}
             <ChevronRight className="w-3 h-3" />
@@ -157,36 +133,40 @@ export default function LifeFlowPage() {
 
         <div className={cn(
           "grid gap-3",
-          isPrimary ? "grid-cols-2" : "grid-cols-3"
+          isPrimaryBlock ? "grid-cols-2" : "grid-cols-3"
         )}>
-          {items.slice(0, isPrimary ? 4 : 3).map((item) => (
+          {items.slice(0, isPrimaryBlock ? 4 : 3).map((item) => (
             <button
               key={item.entity_id}
-              onClick={() => navigate(`${config.route}/${item.entity_id}`)}
+              onClick={() => navigate(`${entityConfig.route}/${item.entity_id}`)}
               className={cn(
                 "p-3 rounded-xl border bg-background text-left",
                 "hover:border-primary/30 hover:shadow-sm transition-all",
-                isPrimary && "p-4"
+                isPrimaryBlock && "p-4"
               )}
             >
               <div className="flex items-start justify-between mb-2">
                 <EntityIcon className={cn(
                   "text-muted-foreground",
-                  isPrimary ? "w-6 h-6" : "w-5 h-5"
+                  isPrimaryBlock ? "w-6 h-6" : "w-5 h-5"
                 )} />
                 {item.trust_level === 'verified' && (
                   <Shield className="w-3 h-3 text-primary" />
                 )}
               </div>
-              <p className={cn("font-medium truncate", isPrimary ? "text-sm" : "text-xs")}>
-                {item.title_localized || item.title || `ID: ${item.entity_id.slice(0, 8)}...`}
+              {/* UX Fix: Allow 2 lines instead of truncate for better readability */}
+              <p className={cn(
+                "font-medium line-clamp-2",
+                isPrimaryBlock ? "text-sm" : "text-xs"
+              )}>
+                {item.title_localized || item.title || (isRussian ? entityConfig.labelRu : entityConfig.labelEn)}
               </p>
               {item.price && (
                 <p className="text-xs text-muted-foreground mt-1">
                   {item.currency} {item.price.toLocaleString()}
                 </p>
               )}
-              {/* Relevance indicator */}
+              {/* UX Fix: Add "Match" prefix for clarity */}
               <div className="mt-2 flex items-center gap-1">
                 <div className="flex-1 h-1 rounded-full bg-muted overflow-hidden">
                   <div
@@ -194,8 +174,8 @@ export default function LifeFlowPage() {
                     style={{ width: `${item.weight}%` }}
                   />
                 </div>
-                <span className="text-[10px] text-muted-foreground">
-                  {item.weight}%
+                <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                  {isRussian ? 'Релев.' : 'Match'} {item.weight}%
                 </span>
               </div>
             </button>
