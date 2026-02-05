@@ -5,100 +5,64 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BackButton } from "@/components/uno/BackButton";
+import { LoadingState } from "@/components/uno/LoadingSpinner";
+import { useLegalService } from "@/hooks/useLegalServices";
 import { 
   Star, 
   MapPin, 
   Phone, 
   Mail, 
   Globe, 
-  Clock, 
   CheckCircle2,
   Languages,
-  Award,
-  FileText,
-  MessageCircle,
   Calendar,
-  Building2,
-  Users,
-  Shield
+  AlertCircle,
+  Banknote
 } from "lucide-react";
 
 const LegalProviderDetail = () => {
   const { id } = useParams();
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const isRu = language === 'ru';
+  
+  const { service, isLoading } = useLegalService(id || '');
 
-  // Demo provider data
-  const provider = {
-    id: id,
-    name: "Phuket Legal Partners",
-    category: language === "ru" ? "Юридические услуги" : "Legal Services",
-    rating: 4.9,
-    reviews: 87,
-    experience: language === "ru" ? "15 лет на Пхукете" : "15 years in Phuket",
-    description: language === "ru" 
-      ? "Ведущая юридическая фирма на Пхукете, специализирующаяся на обслуживании иностранных клиентов. Мы помогаем с регистрацией бизнеса, сделками с недвижимостью, визовыми вопросами и трудовым правом."
-      : "Leading law firm in Phuket specializing in serving foreign clients. We help with business registration, real estate transactions, visa matters, and employment law.",
-    address: language === "ru" ? "123/45 Thaweewong Road, Патонг, Пхукет 83150" : "123/45 Thaweewong Road, Patong, Phuket 83150",
-    phone: "+66 76 123 456",
-    email: "info@phuketlegal.com",
-    website: "www.phuketlegal.com",
-    workingHours: language === "ru" ? "Пн-Пт: 9:00-18:00, Сб: 9:00-13:00" : "Mon-Fri: 9:00-18:00, Sat: 9:00-13:00",
-    verified: true,
-    languages: ["English", "Thai", "Russian", "Chinese"],
-    licenses: [
-      language === "ru" ? "Лицензия адвоката Таиланда #12345" : "Thai Bar License #12345",
-      language === "ru" ? "Член Ассоциации адвокатов Пхукета" : "Phuket Bar Association Member",
-    ],
-    teamSize: 12,
-    foundedYear: 2009,
-    image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&h=400&fit=crop",
-    services: [
-      {
-        name: language === "ru" ? "Регистрация компании" : "Company Registration",
-        price: 35000,
-        description: language === "ru" ? "Полное сопровождение регистрации Thai Co. Ltd" : "Full support for Thai Co. Ltd registration",
-      },
-      {
-        name: language === "ru" ? "Сопровождение сделок с недвижимостью" : "Real Estate Transaction",
-        price: 25000,
-        description: language === "ru" ? "Проверка документов, составление договоров" : "Document verification, contract drafting",
-      },
-      {
-        name: language === "ru" ? "Визовая консультация" : "Visa Consultation",
-        price: 5000,
-        description: language === "ru" ? "Консультация по типам виз и требованиям" : "Consultation on visa types and requirements",
-      },
-      {
-        name: language === "ru" ? "Трудовое право" : "Employment Law",
-        price: 8000,
-        description: language === "ru" ? "Контракты, увольнения, споры" : "Contracts, terminations, disputes",
-      },
-      {
-        name: language === "ru" ? "Due Diligence" : "Due Diligence",
-        price: 50000,
-        description: language === "ru" ? "Полная проверка компании перед покупкой" : "Complete company check before acquisition",
-      },
-    ],
-    recentReviews: [
-      {
-        author: "Michael S.",
-        rating: 5,
-        date: "2024-01-10",
-        text: language === "ru" 
-          ? "Отличная команда! Помогли с регистрацией компании и work permit. Всё прошло гладко."
-          : "Great team! Helped with company registration and work permit. Everything went smoothly.",
-      },
-      {
-        author: "Anna K.",
-        rating: 5,
-        date: "2024-01-05",
-        text: language === "ru"
-          ? "Профессионально и быстро решили вопрос с визой. Рекомендую!"
-          : "Professionally and quickly resolved visa issue. Highly recommend!",
-      },
-    ],
-  };
+  if (isLoading) {
+    return (
+      <AppLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <LoadingState />
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (!service) {
+    return (
+      <AppLayout>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 px-4">
+          <AlertCircle className="w-12 h-12 text-muted-foreground" />
+          <p className="text-muted-foreground text-center">
+            {isRu ? 'Услуга не найдена' : 'Service not found'}
+          </p>
+          <Button variant="outline" onClick={() => navigate('/legal')}>
+            {isRu ? 'К списку услуг' : 'Back to services'}
+          </Button>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  const name = isRu ? service.name_ru : service.name_en;
+  const description = isRu ? service.description_ru : service.description_en;
+  const serviceTypeLabel = service.service_type === 'law_firm' 
+    ? (isRu ? 'Юридическая фирма' : 'Law Firm')
+    : service.service_type === 'notary'
+    ? (isRu ? 'Нотариус' : 'Notary')
+    : service.service_type === 'visa_agent'
+    ? (isRu ? 'Визовый агент' : 'Visa Agent')
+    : (isRu ? 'Юридические услуги' : 'Legal Services');
 
   return (
     <AppLayout>
@@ -107,19 +71,19 @@ const LegalProviderDetail = () => {
         <div className="relative h-48">
           <BackButton fallbackPath="/legal" variant="overlay" className="absolute top-4 left-4 z-10" />
           <img
-            src={provider.image}
-            alt={provider.name}
+            src={service.cover_image || 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&h=400&fit=crop'}
+            alt={name}
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent" />
           <div className="absolute bottom-4 left-4 right-4">
             <div className="flex items-center gap-2 mb-1">
-              <h1 className="text-xl font-bold text-foreground">{provider.name}</h1>
-              {provider.verified && (
+              <h1 className="text-xl font-bold text-foreground">{name}</h1>
+              {service.is_verified && (
                 <CheckCircle2 className="w-5 h-5 text-primary" />
               )}
             </div>
-            <p className="text-sm text-muted-foreground">{provider.category}</p>
+            <p className="text-sm text-muted-foreground">{serviceTypeLabel}</p>
           </div>
         </div>
 
@@ -128,198 +92,168 @@ const LegalProviderDetail = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1">
-                <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                <span className="font-semibold">{provider.rating}</span>
-                <span className="text-sm text-muted-foreground">({provider.reviews})</span>
+                <Star className="w-5 h-5 fill-warning text-warning" />
+                <span className="font-semibold">{service.rating?.toFixed(1) || '—'}</span>
+                <span className="text-sm text-muted-foreground">({service.review_count || 0})</span>
               </div>
-              <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                <Clock className="w-4 h-4" />
-                <span>{provider.experience}</span>
+              {service.price_consultation && (
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <Banknote className="w-4 h-4" />
+                  <span>{service.currency} {service.price_consultation.toLocaleString()}</span>
+                </div>
+              )}
+            </div>
+            {service.languages && service.languages.length > 0 && (
+              <div className="flex gap-1">
+                {service.languages.slice(0, 3).map((lang) => (
+                  <Badge key={lang} variant="secondary" className="text-xs">
+                    {lang.slice(0, 2).toUpperCase()}
+                  </Badge>
+                ))}
               </div>
-            </div>
-            <div className="flex gap-1">
-              {provider.languages.slice(0, 3).map((lang) => (
-                <Badge key={lang} variant="secondary" className="text-xs">
-                  {lang.slice(0, 2).toUpperCase()}
-                </Badge>
-              ))}
-            </div>
+            )}
           </div>
         </div>
 
         {/* Tabs */}
         <Tabs defaultValue="about" className="px-4 pt-4">
-          <TabsList className="w-full grid grid-cols-3">
-            <TabsTrigger value="about">{language === "ru" ? "О нас" : "About"}</TabsTrigger>
-            <TabsTrigger value="services">{language === "ru" ? "Услуги" : "Services"}</TabsTrigger>
-            <TabsTrigger value="reviews">{language === "ru" ? "Отзывы" : "Reviews"}</TabsTrigger>
+          <TabsList className="w-full grid grid-cols-2">
+            <TabsTrigger value="about">{isRu ? "О нас" : "About"}</TabsTrigger>
+            <TabsTrigger value="specializations">{isRu ? "Услуги" : "Services"}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="about" className="space-y-4 mt-4">
             {/* Description */}
-            <div className="bg-card border border-border rounded-xl p-4">
-              <p className="text-sm text-muted-foreground">{provider.description}</p>
-            </div>
-
-            {/* Quick Info */}
-            <div className="bg-card border border-border rounded-xl p-4 space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-primary" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">{language === "ru" ? "Основана" : "Founded"}</p>
-                    <p className="text-sm font-medium">{provider.foundedYear}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-primary" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">{language === "ru" ? "Команда" : "Team"}</p>
-                    <p className="text-sm font-medium">{provider.teamSize} {language === "ru" ? "специалистов" : "specialists"}</p>
-                  </div>
-                </div>
+            {description && (
+              <div className="bg-card border border-border rounded-xl p-4">
+                <p className="text-sm text-muted-foreground">{description}</p>
               </div>
-            </div>
+            )}
 
             {/* Contact Info */}
             <div className="bg-card border border-border rounded-xl p-4 space-y-3">
-              <h3 className="font-semibold">{language === "ru" ? "Контакты" : "Contact"}</h3>
+              <h3 className="font-semibold">{isRu ? "Контакты" : "Contact"}</h3>
               <div className="space-y-2">
-                <div className="flex items-center gap-3 text-sm">
-                  <MapPin className="w-4 h-4 text-muted-foreground" />
-                  <span>{provider.address}</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <Phone className="w-4 h-4 text-muted-foreground" />
-                  <span>{provider.phone}</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <Mail className="w-4 h-4 text-muted-foreground" />
-                  <span>{provider.email}</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <Globe className="w-4 h-4 text-muted-foreground" />
-                  <span>{provider.website}</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <Clock className="w-4 h-4 text-muted-foreground" />
-                  <span>{provider.workingHours}</span>
-                </div>
+                {service.address && (
+                  <div className="flex items-center gap-3 text-sm">
+                    <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                    <span className="line-clamp-2">{service.address}</span>
+                  </div>
+                )}
+                {service.phone && (
+                  <div className="flex items-center gap-3 text-sm">
+                    <Phone className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                    <a href={`tel:${service.phone}`} className="text-primary hover:underline">
+                      {service.phone}
+                    </a>
+                  </div>
+                )}
+                {service.email && (
+                  <div className="flex items-center gap-3 text-sm">
+                    <Mail className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                    <a href={`mailto:${service.email}`} className="text-primary hover:underline">
+                      {service.email}
+                    </a>
+                  </div>
+                )}
+                {service.website && (
+                  <div className="flex items-center gap-3 text-sm">
+                    <Globe className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                    <a 
+                      href={service.website.startsWith('http') ? service.website : `https://${service.website}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      {service.website}
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Languages */}
-            <div className="bg-card border border-border rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Languages className="w-4 h-4 text-primary" />
-                <h3 className="font-semibold">{language === "ru" ? "Языки" : "Languages"}</h3>
+            {service.languages && service.languages.length > 0 && (
+              <div className="bg-card border border-border rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Languages className="w-4 h-4 text-primary" />
+                  <h3 className="font-semibold">{isRu ? "Языки" : "Languages"}</h3>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {service.languages.map((lang) => (
+                    <Badge key={lang} variant="outline">{lang}</Badge>
+                  ))}
+                </div>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {provider.languages.map((lang) => (
-                  <Badge key={lang} variant="outline">{lang}</Badge>
-                ))}
-              </div>
-            </div>
-
-            {/* Licenses */}
-            <div className="bg-card border border-border rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Award className="w-4 h-4 text-primary" />
-                <h3 className="font-semibold">{language === "ru" ? "Лицензии" : "Licenses"}</h3>
-              </div>
-              <div className="space-y-2">
-                {provider.licenses.map((license, idx) => (
-                  <div key={idx} className="flex items-center gap-2 text-sm">
-                    <CheckCircle2 className="w-4 h-4 text-green-500" />
-                    <span>{license}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            )}
           </TabsContent>
 
-          <TabsContent value="services" className="space-y-3 mt-4">
-            {provider.services.map((service, idx) => (
-              <div
-                key={idx}
-                className="bg-card border border-border rounded-xl p-4"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h3 className="font-semibold">{service.name}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">{service.description}</p>
+          <TabsContent value="specializations" className="space-y-3 mt-4">
+            {service.specializations && service.specializations.length > 0 ? (
+              service.specializations.map((spec, idx) => (
+                <div
+                  key={idx}
+                  className="bg-card border border-border rounded-xl p-4 flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
+                    <span className="font-medium">{spec}</span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                {isRu ? 'Специализации не указаны' : 'No specializations listed'}
+              </div>
+            )}
+
+            {/* Consultation Price */}
+            {service.price_consultation && (
+              <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 mt-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold">{isRu ? 'Консультация' : 'Consultation'}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {isRu ? 'Первичная консультация' : 'Initial consultation'}
+                    </p>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-primary">฿{service.price.toLocaleString()}</p>
+                    <p className="text-xl font-bold text-primary">
+                      {service.currency} {service.price_consultation.toLocaleString()}
+                    </p>
                   </div>
                 </div>
                 <Button
                   className="w-full mt-3"
-                  variant="outline"
-                  onClick={() => navigate(`/legal/booking/${id}?service=${encodeURIComponent(service.name)}`)}
+                  onClick={() => navigate(`/legal/booking/${id}`)}
                 >
                   <Calendar className="w-4 h-4 mr-2" />
-                  {language === "ru" ? "Записаться на консультацию" : "Book Consultation"}
+                  {isRu ? "Записаться на консультацию" : "Book Consultation"}
                 </Button>
               </div>
-            ))}
-          </TabsContent>
-
-          <TabsContent value="reviews" className="space-y-3 mt-4">
-            {/* Rating Summary */}
-            <div className="bg-card border border-border rounded-xl p-4 flex items-center gap-4">
-              <div className="text-center">
-                <div className="text-3xl font-bold">{provider.rating}</div>
-                <div className="flex items-center gap-0.5 mt-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      className={`w-4 h-4 ${star <= Math.round(provider.rating) ? "fill-yellow-400 text-yellow-400" : "text-muted"}`}
-                    />
-                  ))}
-                </div>
-                <p className="text-sm text-muted-foreground mt-1">{provider.reviews} {language === "ru" ? "отзывов" : "reviews"}</p>
-              </div>
-            </div>
-
-            {/* Reviews List */}
-            {provider.recentReviews.map((review, idx) => (
-              <div key={idx} className="bg-card border border-border rounded-xl p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                      <span className="text-sm font-semibold text-primary">{review.author[0]}</span>
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">{review.author}</p>
-                      <p className="text-xs text-muted-foreground">{review.date}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-0.5">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        className={`w-3 h-3 ${star <= review.rating ? "fill-yellow-400 text-yellow-400" : "text-muted"}`}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground">{review.text}</p>
-              </div>
-            ))}
+            )}
           </TabsContent>
         </Tabs>
 
         {/* Fixed Bottom Actions */}
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur border-t border-border">
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur border-t border-border safe-area-bottom">
           <div className="flex gap-3 max-w-lg mx-auto">
-            <Button variant="outline" className="flex-1" onClick={() => window.open(`tel:${provider.phone}`)}>
-              <Phone className="w-4 h-4 mr-2" />
-              {language === "ru" ? "Позвонить" : "Call"}
-            </Button>
-            <Button className="flex-1" onClick={() => navigate(`/legal/booking/${id}`)}>
+            {service.phone && (
+              <Button 
+                variant="outline" 
+                className="flex-1 min-h-[44px]" 
+                onClick={() => window.open(`tel:${service.phone}`)}
+              >
+                <Phone className="w-4 h-4 mr-2" />
+                {isRu ? "Позвонить" : "Call"}
+              </Button>
+            )}
+            <Button 
+              className="flex-1 min-h-[44px]" 
+              onClick={() => navigate(`/legal/booking/${id}`)}
+            >
               <Calendar className="w-4 h-4 mr-2" />
-              {language === "ru" ? "Записаться" : "Book"}
+              {isRu ? "Записаться" : "Book"}
             </Button>
           </div>
         </div>
