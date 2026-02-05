@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Plane, MapPin, Users, Check, ArrowRight, Briefcase, Shield, Star, ChevronLeft, Loader2, User, Calendar, Clock } from 'lucide-react';
+import { Plane, MapPin, Users, Check, ArrowRight, Briefcase, Shield, Star, ChevronLeft, Loader2, User, Calendar, Clock, CreditCard, Handshake } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { useBooking } from '@/hooks/useBooking';
+import { useOrders, PaymentMethod } from '@/hooks/useOrders';
 import { useVehicleTypes } from '@/hooks/useTransportConfig';
 import { useProfile } from '@/hooks/useProfile';
 import { cn, transliterate } from '@/lib/utils';
@@ -23,6 +23,7 @@ const terminals = [
 ];
 
 type TransferDirection = 'from-airport' | 'to-airport';
+type TransferPaymentMethod = 'stripe' | 'concierge_advance';
 
 export default function AirportTransferBooking() {
   const navigate = useNavigate();
@@ -32,13 +33,16 @@ export default function AirportTransferBooking() {
   const { toast } = useToast();
   
   const { vehicleTypes, isLoading: isLoadingVehicles } = useVehicleTypes('airport_transfer');
-  const { createBooking, isSubmitting } = useBooking();
+  const { createOrder, isCreating } = useOrders();
   const { profile } = useProfile();
 
   // Track if user manually edited the meeting sign name
   const meetingSignManuallyEdited = useRef(false);
 
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [createdOrderId, setCreatedOrderId] = useState<string | null>(null);
+  const [createdOrderNumber, setCreatedOrderNumber] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
     direction: (searchParams.get('direction') as TransferDirection) || 'from-airport',
@@ -55,6 +59,7 @@ export default function AirportTransferBooking() {
     email: '',
     notes: '',
     meetingSignName: '', // Name for meeting sign (transliterated)
+    paymentMethod: 'stripe' as TransferPaymentMethod,
   });
 
   // Set default vehicle type when loaded
@@ -113,64 +118,100 @@ export default function AirportTransferBooking() {
       return;
     }
 
-    const result = await createBooking({
-      booking_type: 'transport',
-      scheduled_at: `${formData.arrivalDate}T${formData.arrivalTime}:00`,
+    const scheduledAt = `${formData.arrivalDate}T${formData.arrivalTime}:00`;
+    const vehicleName = language === 'ru' ? selectedVehicle?.name_ru : selectedVehicle?.name_en;
+
+    const result = await createOrder({
+      order_type: 'vehicle',
+      start_at: scheduledAt,
       total_amount: totalPrice,
       currency: 'THB',
-      notes: `Airport Transfer\nDirection: ${formData.direction}\nTerminal: ${formData.terminal}\nFlight: ${formData.flightNumber}\nPassengers: ${formData.passengers}\nLuggage: ${formData.luggage}\nVehicle: ${selectedVehicle?.name_en || formData.vehicleType}\n${formData.notes}`,
-      participants: [{
-        name: formData.name,
-        phone: formData.phone,
-        email: formData.email,
-        is_primary: true,
-      }],
-      addresses: [
-        {
-          address_type: formData.direction === 'from-airport' ? 'pickup' : 'dropoff',
-          address: `Phuket Airport - ${formData.terminal === 'domestic' ? 'Domestic' : 'International'} Terminal`,
-        },
-        {
-          address_type: formData.direction === 'from-airport' ? 'dropoff' : 'pickup',
-          address: formData.destinationAddress,
-        },
-      ],
+      notes: formData.notes || undefined,
       metadata: {
         transfer_type: 'airport',
         direction: formData.direction,
         terminal: formData.terminal,
         flight_number: formData.flightNumber,
         vehicle_type: formData.vehicleType,
+        vehicle_name: vehicleName,
         passengers: parseInt(formData.passengers),
         luggage: parseInt(formData.luggage),
         meeting_sign_name: formData.meetingSignName,
-        destination_address: formData.destinationAddress,
       },
+      items: [{
+        item_name: `Airport Transfer - ${vehicleName}`,
+        item_type: 'transport',
+        unit_price: totalPrice,
+        amount: totalPrice,
+        qty: 1,
+        metadata: {
+          vehicle_type: formData.vehicleType,
+          direction: formData.direction,
+        },
+      }],
+      participants: [{
+        role: 'primary',
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+      }],
+      addresses: [
+        {
+          address_type: formData.direction === 'from-airport' ? 'pickup' : 'dropoff',
+          address_text: `Phuket Airport - ${formData.terminal === 'domestic' ? 'Domestic' : 'International'} Terminal`,
+        },
+        {
+          address_type: formData.direction === 'from-airport' ? 'dropoff' : 'pickup',
+          address_text: formData.destinationAddress,
+        },
+      ],
+      payment: {
+        method: formData.paymentMethod as PaymentMethod,
+        amount: totalPrice,
+      },
+      serviceName: `Airport Transfer - ${vehicleName}`,
+      openWhatsAppOnCash: false,
     });
 
-    if (result.success && result.booking_id) {
-      // Save transport-specific details to order_item_transport_details
-      const { data: orderItems } = await supabase
-        .from('order_items')
-        .select('id')
-        .eq('order_id', result.booking_id)
-        .limit(1);
+    if (result.success && result.order_id) {
+      setCreatedOrderId(result.order_id);
+      setCreatedOrderNumber(result.order_number || null);
 
-      if (orderItems && orderItems.length > 0) {
-        await supabase
-          .from('order_item_transport_details')
-          .insert({
-            order_item_id: orderItems[0].id,
-            vehicle_type: formData.vehicleType,
-            flight_number: formData.flightNumber,
-            passenger_count: parseInt(formData.passengers),
-            luggage_count: parseInt(formData.luggage),
-            is_round_trip: false,
-            meeting_sign_name: formData.meetingSignName,
+      // Handle payment based on method
+      if (formData.paymentMethod === 'stripe') {
+        setIsProcessingPayment(true);
+        try {
+          const { data, error } = await supabase.functions.invoke('create-checkout', {
+            body: {
+              order_id: result.order_id,
+              order_type: 'transport',
+              amount: totalPrice,
+              currency: 'THB',
+              description: `Airport Transfer - ${vehicleName}`,
+              success_url: `${window.location.origin}/transport/transfer-success?order_id=${result.order_id}`,
+              cancel_url: `${window.location.origin}/transport/airport-transfer`,
+            },
           });
-      }
 
-      setIsSuccess(true);
+          if (error) throw error;
+          if (data?.url) {
+            window.location.href = data.url;
+            return;
+          }
+        } catch (err) {
+          console.error('Stripe checkout error:', err);
+          toast({
+            title: language === 'ru' ? 'Ошибка оплаты' : 'Payment Error',
+            description: language === 'ru' ? 'Попробуйте другой способ оплаты' : 'Please try another payment method',
+            variant: 'destructive',
+          });
+          setIsProcessingPayment(false);
+          return;
+        }
+      } else {
+        // Concierge advance - show success directly
+        setIsSuccess(true);
+      }
     }
   };
 
@@ -188,17 +229,34 @@ export default function AirportTransferBooking() {
           <h2 className="text-2xl font-display font-bold mb-2 text-center">
             {language === 'ru' ? 'Трансфер забронирован!' : 'Transfer Booked!'}
           </h2>
+          {createdOrderNumber && (
+            <p className="text-lg font-semibold text-primary mb-2">#{createdOrderNumber}</p>
+          )}
           <p className="text-muted-foreground text-center max-w-sm mb-2">
             {language === 'ru' 
               ? `Рейс ${formData.flightNumber} • ${formData.arrivalDate}`
               : `Flight ${formData.flightNumber} • ${formData.arrivalDate}`}
           </p>
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-2">
             <Badge variant="secondary" className="bg-success/10 text-success">
               <Shield className="w-3 h-3 mr-1" />
               {language === 'ru' ? 'Подтверждено' : 'Confirmed'}
             </Badge>
+            {formData.paymentMethod === 'concierge_advance' && (
+              <Badge variant="secondary" className="bg-amber-500/10 text-amber-600">
+                <Handshake className="w-3 h-3 mr-1" />
+                myUNO
+              </Badge>
+            )}
           </div>
+          
+          {formData.paymentMethod === 'concierge_advance' && (
+            <p className="text-sm text-muted-foreground text-center max-w-sm mb-4">
+              {language === 'ru' 
+                ? 'Мы оплатим за вас. После трансфера вы вернёте сумму удобным способом.'
+                : 'We\'ll pay for you. Return the amount after the transfer.'}
+            </p>
+          )}
           
           {/* Meeting sign name and destination */}
           {formData.direction === 'from-airport' && (
@@ -565,6 +623,72 @@ export default function AirportTransferBooking() {
                 rows={2}
               />
             </div>
+
+            {/* Payment Method Selection */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-muted-foreground">
+                {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
+              </Label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, paymentMethod: 'stripe' })}
+                  className={cn(
+                    "p-3 rounded-xl border-2 transition-all text-left relative",
+                    formData.paymentMethod === 'stripe'
+                      ? "border-primary bg-primary/10"
+                      : "border-border/50 bg-card hover:border-primary/50"
+                  )}
+                >
+                  {formData.paymentMethod === 'stripe' && (
+                    <div className="absolute top-2 right-2">
+                      <Check className="w-3 h-3 text-primary" />
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 mb-1">
+                    <CreditCard className="w-4 h-4 text-primary" />
+                  </div>
+                  <p className="font-medium text-sm">
+                    {language === 'ru' ? 'Картой онлайн' : 'Pay by Card'}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">
+                    Visa, Mastercard
+                  </p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, paymentMethod: 'concierge_advance' })}
+                  className={cn(
+                    "p-3 rounded-xl border-2 transition-all text-left relative",
+                    formData.paymentMethod === 'concierge_advance'
+                      ? "border-primary bg-primary/10"
+                      : "border-border/50 bg-card hover:border-primary/50"
+                  )}
+                >
+                  {formData.paymentMethod === 'concierge_advance' && (
+                    <div className="absolute top-2 right-2">
+                      <Check className="w-3 h-3 text-primary" />
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 mb-1">
+                    <Handshake className="w-4 h-4 text-amber-500" />
+                  </div>
+                  <p className="font-medium text-sm">
+                    {language === 'ru' ? 'Оплата через myUNO' : 'myUNO Pays'}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {language === 'ru' ? '0% комиссия' : '0% fee'}
+                  </p>
+                </button>
+              </div>
+              {formData.paymentMethod === 'concierge_advance' && (
+                <p className="text-xs text-muted-foreground p-2 bg-amber-50 dark:bg-amber-950/30 rounded-lg">
+                  {language === 'ru' 
+                    ? '💡 myUNO оплатит трансфер. Вы вернёте сумму после поездки удобным способом.'
+                    : '💡 myUNO will pay for your transfer. Return the amount after your trip.'}
+                </p>
+              )}
+            </div>
           </form>
         </div>
       </ScrollArea>
@@ -574,12 +698,14 @@ export default function AirportTransferBooking() {
         <Button
           type="submit"
           className="w-full h-12"
-          disabled={isSubmitting || !canSubmit || !formData.name || !formData.phone}
+          disabled={isCreating || isProcessingPayment || !canSubmit || !formData.name || !formData.phone}
           onClick={handleSubmit}
         >
-          {isSubmitting 
-            ? (language === 'ru' ? 'Бронирование...' : 'Booking...') 
-            : (language === 'ru' ? `Забронировать • ฿${totalPrice}` : `Book Transfer • ฿${totalPrice}`)}
+          {isCreating || isProcessingPayment
+            ? (language === 'ru' ? 'Обработка...' : 'Processing...') 
+            : formData.paymentMethod === 'stripe'
+              ? (language === 'ru' ? `Оплатить ฿${totalPrice}` : `Pay ฿${totalPrice}`)
+              : (language === 'ru' ? `Забронировать • ฿${totalPrice}` : `Book • ฿${totalPrice}`)}
         </Button>
       </div>
     </AppLayout>

@@ -22,9 +22,115 @@ interface OrderNotificationPayload {
   scheduled_at?: string;
   notes?: string;
   provider_name?: string;
+  payment_method?: string;
+  addresses?: Array<{
+    address_type: string;
+    address_text: string;
+  }>;
 }
 
 const ADMIN_EMAIL = 'admin@uno.ae'; // Default admin email
+const ADMIN_WHATSAPP = '66922407355'; // Admin WhatsApp number
+
+// Send WhatsApp notification via URL API
+async function sendWhatsAppNotification(payload: OrderNotificationPayload): Promise<void> {
+  try {
+    const orderTypeEmoji: Record<string, string> = {
+      restaurant: '🍽️',
+      flowers: '💐',
+      yacht: '🛥️',
+      tour: '🗺️',
+      transport: '🚗',
+      cleaning: '🧹',
+      beauty: '💅',
+      medical: '🏥',
+      pet: '🐾',
+      education: '📚',
+      legal: '⚖️',
+      event: '🎉',
+      property: '🏠',
+      vehicle: '🚙',
+    };
+
+    const emoji = orderTypeEmoji[payload.order_type] || '📦';
+    
+    // Format scheduled time
+    const scheduledTime = payload.scheduled_at 
+      ? new Date(payload.scheduled_at).toLocaleString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      : 'Not scheduled';
+
+    // Format items
+    const itemsList = payload.items?.map(item => 
+      `• ${item.name}${item.quantity > 1 ? ` x${item.quantity}` : ''}`
+    ).join('\n') || '';
+
+    // Format addresses
+    const pickupAddr = payload.addresses?.find(a => a.address_type === 'pickup')?.address_text || '';
+    const dropoffAddr = payload.addresses?.find(a => a.address_type === 'dropoff')?.address_text || '';
+
+    // Payment method labels
+    const paymentLabels: Record<string, string> = {
+      cash: '💵 Cash',
+      stripe: '💳 Card',
+      wallet: '👛 Wallet',
+      concierge_advance: '🤝 myUNO Advance',
+    };
+    const paymentLabel = paymentLabels[payload.payment_method || 'cash'] || payload.payment_method;
+
+    const message = `${emoji} *NEW ORDER #${payload.order_number}*
+
+📁 *Type:* ${payload.order_type}
+💰 *Amount:* ${payload.currency} ${payload.total_amount.toLocaleString()}
+💳 *Payment:* ${paymentLabel}
+📅 *Date:* ${scheduledTime}
+
+👤 *Customer:*
+${payload.customer_name || 'Guest'}
+${payload.customer_phone ? `📱 ${payload.customer_phone}` : ''}
+${payload.customer_email ? `📧 ${payload.customer_email}` : ''}
+${pickupAddr ? `\n📍 *From:* ${pickupAddr}` : ''}${dropoffAddr ? `\n🏁 *To:* ${dropoffAddr}` : ''}
+${itemsList ? `\n📦 *Items:*\n${itemsList}` : ''}
+${payload.notes ? `\n📝 *Notes:* ${payload.notes}` : ''}
+
+🔗 View: https://uno.ae/admin/operations`;
+
+    // Use WhatsApp API URL - this creates a clickable link for webhook services
+    // For production, integrate with Twilio/MessageBird/UltraMsg API
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=${ADMIN_WHATSAPP}&text=${encodeURIComponent(message)}`;
+    
+    console.log('[WhatsApp] Notification prepared for:', ADMIN_WHATSAPP);
+    console.log('[WhatsApp] Message:', message);
+    
+    // Try to send via UltraMsg API if configured
+    const ultraMsgInstance = Deno.env.get('ULTRAMSG_INSTANCE');
+    const ultraMsgToken = Deno.env.get('ULTRAMSG_TOKEN');
+    
+    if (ultraMsgInstance && ultraMsgToken) {
+      const response = await fetch(`https://api.ultramsg.com/${ultraMsgInstance}/messages/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          token: ultraMsgToken,
+          to: `+${ADMIN_WHATSAPP}`,
+          body: message,
+        }),
+      });
+      
+      const result = await response.json();
+      console.log('[WhatsApp] UltraMsg response:', result);
+    } else {
+      console.log('[WhatsApp] No API configured, logging message only');
+    }
+  } catch (error) {
+    console.error('[WhatsApp] Error sending notification:', error);
+  }
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -46,6 +152,11 @@ Deno.serve(async (req) => {
 
     console.log('Sending admin notification for order:', payload.order_number);
 
+    // Send WhatsApp notification (non-blocking)
+    sendWhatsAppNotification(payload).catch(err => 
+      console.error('[WhatsApp] Failed to send:', err)
+    );
+
     // Format order type for display
     const orderTypeLabels: Record<string, string> = {
       restaurant: '🍽️ Restaurant Order',
@@ -62,6 +173,7 @@ Deno.serve(async (req) => {
       event: '🎉 Event Booking',
       property: '🏠 Property Rental',
       water_activity: '🌊 Water Activity',
+      vehicle: '🚙 Vehicle Rental',
       general: '📦 General Order',
     };
 
