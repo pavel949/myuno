@@ -1,286 +1,219 @@
 
-# Технический аудит критических процессов платформы UNO
+# План оптимизации модуля бронирования недвижимости — Airbnb Pattern
 
-## Резюме аудита
+## Анализ текущих проблем
 
-По результатам глубокого анализа кодовой базы выявлено **47 критических проблем** в 5 ключевых областях:
-1. Процесс бронирования (Booking Flow)
-2. Онбординг поставщиков (Vendor Onboarding)
-3. Управление каталогом товаров/услуг
-4. UI-компоненты (Select, Dropdown, Scroll)
-5. Админ-панели
+### 1. "Scrambled" верхний фильтр
+Сейчас sticky header содержит **4 ряда интерактивных элементов**:
+- Ряд 1: BackButton + Заголовок + PropertyModeToggle (Аренда/Покупка)
+- Ряд 2: AirbnbSearchBar (полноэкранная поисковая строка)
+- Ряд 3: PropertyTypeSelector (pills) + кнопка Filters
+- Ряд 4: BedroomChips (ещё один ряд chips)
+
+**Результат:** Огромный sticky header занимает ~40% экрана на мобильных.
+
+### 2. "Огромные карточки локаций"
+В `AirbnbSearchBar.tsx` селектор локаций использует `grid-cols-2` с крупными карточками (`p-4 rounded-2xl`):
+```tsx
+// Строки 240-261 — мобильная версия
+<motion.button className="flex items-center gap-3 p-4 rounded-2xl...">
+  <span className="text-2xl">{loc.icon}</span>
+  <span className="text-sm font-medium">...</span>
+</motion.button>
+```
+Карточки слишком громоздкие, занимают много места и сложны для сканирования.
+
+### 3. Дублирование фильтров
+- Районы есть в AirbnbSearchBar И в QuickFiltersRibbon
+- Спальни есть отдельно BedroomChips И в UniversalFilter
+- PropertyTypeSelector дублирует опции из фильтра
 
 ---
 
-## Часть 1: Диагностика проблем
+## Референс: Airbnb Pattern
 
-### 1.1 Критические ошибки бронирования
-
-| Проблема | Файл | Причина |
-|----------|------|---------|
-| Ошибки в конце flow | `useOrders.ts:239` | RPC `create_order_atomic` может не возвращать ошибку в ожидаемом формате |
-| Отсутствие валидации availability | `ExperienceBooking.tsx` | Проверка доступности слота происходит ПОСЛЕ нажатия "Подтвердить" |
-| Wallet payment blocked | `BookingPaymentSelect.tsx:107` | Баланс кошелька проверяется, но ошибка показывается только как disabled state |
-
-**Корневая причина:** Атомарная RPC-функция `create_order_atomic` работает корректно, но:
-- Нет предварительной проверки доступности на уровне БД
-- Ошибки RPC не всегда содержат понятное сообщение для пользователя
-- Отсутствует retry-логика при временных сбоях
-
-### 1.2 Проблемы онбординга поставщиков
-
-| Проблема | Файл | Влияние |
-|----------|------|---------|
-| Hardcoded verticals | `VendorOnboarding.tsx:44-60` | 15 категорий зашиты в код |
-| Дублирование записей | `useVendor.ts:291-324` | При повторном submit создаются duplicate providers |
-| marketplace_vendor не создаётся | `useVendor.ts:329-364` | Ошибка может быть проигнорирована (catch + console.warn) |
-
-**Последствие:** Вендор успешно создаётся, но не может добавлять товары из-за отсутствия `marketplace_vendor_id`.
-
-### 1.3 Проблемы каталога товаров/услуг
-
-| Проблема | Файл | Влияние |
-|----------|------|---------|
-| Select внутри Dialog | `AdminServices.tsx:457-614` | На мобильных устройствах dropdown не скроллится |
-| Нет multi-select для категорий | `VendorProducts.tsx:500+` | Товар может быть только в 1 категории |
-| ScrollArea конфликт | `AdminServices.tsx:479` | Вложенный скролл блокирует touch события |
-
-### 1.4 UI-компоненты
-
-**SelectContent (src/components/ui/select.tsx:61-90):**
+```text
+┌─────────────────────────────────────────────┐
+│  [←]  Homes in Phuket         [Map] [Filter]│  ← Компактный header
+├─────────────────────────────────────────────┤
+│  🏠 All │ 🏢 Condo │ 🏡 Villa │ ••• │       │  ← Категории (1 ряд)
+├─────────────────────────────────────────────┤
+│ ┌─────────────────────────────────────────┐ │
+│ │ 🔍 Anywhere · Any week · Add guests     │ │  ← Компактный search
+│ └─────────────────────────────────────────┘ │
+├─────────────────────────────────────────────┤
+│        [PROPERTY CARDS GRID]                │
+└─────────────────────────────────────────────┘
 ```
-max-h-96 overflow-hidden → Ограничение 384px
-```
-- На мобильных с длинными списками (50+ провайдеров) dropdown обрезается
-- `overflow-hidden` блокирует scroll внутри
 
-**Отсутствующие компоненты:**
-- `MultiSelect` - нет в проекте, эмулируется через Checkbox grid
-- `VirtualizedSelect` - для списков 100+ элементов
-- `SearchableSelect` - комбинация Input + Select
-
-### 1.5 Админ-панели
-
-| Проблема | Локация | Решение |
-|----------|---------|---------|
-| 65+ отдельных страниц | `src/pages/admin/` | Избыточность, сложно поддерживать |
-| Dialog для форм | Везде | Блокирует основной UI, сложно с мобильного |
-| Нет inline editing | Таблицы | Каждое изменение требует открытия модала |
+**Ключевые принципы Airbnb:**
+1. Search bar — компактный, открывается в модал
+2. Категории — один горизонтальный ряд с иконками
+3. Фильтры — консолидированы в одну кнопку/модал
+4. Локации — список, а не крупные карточки
 
 ---
 
-## Часть 2: План системных исправлений
+## План реализации
 
-### Фаза 1: Стабилизация UI-компонентов (Высокий приоритет)
+### ФАЗА 1: Рефакторинг Header (Критическая)
 
-**1.1 Улучшение SelectContent**
+**Файл:** `src/pages/property/PropertyIndex.tsx`
 
-Добавить `overflow-y-auto`, увеличить `max-h`, исправить z-index:
+**Изменения:**
+1. **Консолидация header до 2 рядов:**
+   - Ряд 1: BackButton + Title + [Map] + [Filter button]
+   - Ряд 2: Категории + Rent/Buy toggle (интегрирован в категории)
+
+2. **Перенос BedroomChips внутрь UniversalFilter** — убрать отдельный ряд
+
+3. **QuickFiltersRibbon** — убрать из header, разместить как горизонтальные tags после результатов
+
+```text
+Было:                           Станет:
+├─ BackButton + Title + Mode    ├─ BackButton + Title + Map + Filter
+├─ AirbnbSearchBar              ├─ CompactSearchBar (кликабельный)
+├─ PropertyTypeSelector + Filt  ├─ CategoryRibbon (Rent|Buy + Types)
+├─ BedroomChips                 └─ [RESULTS]
+└─ QuickFiltersRibbon
+```
+
+### ФАЗА 2: Редизайн SearchBar (Airbnb-style)
+
+**Файл:** `src/components/property/AirbnbSearchBar.tsx`
+
+**Изменения:**
+
+1. **Компактный вид (collapsed):**
+```tsx
+// Новый компактный вид — одна строка
+<div className="flex items-center gap-2 px-4 py-2.5 bg-card rounded-full border shadow-sm">
+  <Search className="w-4 h-4 text-muted-foreground" />
+  <span className="text-sm font-medium truncate">Anywhere</span>
+  <span className="text-muted-foreground">·</span>
+  <span className="text-sm text-muted-foreground">Any week</span>
+  <span className="text-muted-foreground">·</span>
+  <span className="text-sm text-muted-foreground">Add guests</span>
+</div>
+```
+
+2. **Селектор локаций — список вместо карточек:**
+```tsx
+// Компактный список вместо grid
+<div className="space-y-1 max-h-[300px] overflow-y-auto">
+  {locations.map((loc) => (
+    <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted">
+      <span className="text-lg w-6">{loc.icon}</span>
+      <span className="text-sm">{loc.label}</span>
+      {selected && <Check className="w-4 h-4 ml-auto text-primary" />}
+    </button>
+  ))}
+</div>
+```
+
+3. **Размеры карточек:**
+   - Было: `p-4 rounded-2xl text-2xl` (48px+ height)
+   - Станет: `px-3 py-2.5 rounded-lg text-lg` (40px height)
+
+### ФАЗА 3: Unified Category Ribbon
+
+**Новый файл:** `src/components/property/PropertyCategoryRibbon.tsx`
+
+Объединяет:
+- PropertyModeToggle (Rent/Buy)
+- PropertyTypeSelector (All/Condo/Villa/...)
+- Иконки категорий Airbnb-style
 
 ```tsx
-// src/components/ui/select.tsx - SelectContent
-className={cn(
-  "relative z-[999] max-h-[min(400px,80vh)] min-w-[8rem] overflow-y-auto",
-  "rounded-md border bg-popover text-popover-foreground shadow-lg",
-  // ...остальные классы
-)}
-```
-
-**1.2 Создание SearchableSelect**
-
-Новый компонент для длинных списков провайдеров:
-- Поле поиска сверху
-- Виртуализация для 50+ элементов
-- Группировка по категориям
-
-**1.3 Создание MultiSelectTags**
-
-Для случаев мультивыбора (категории, verticals):
-- Отображение выбранных как tags/chips
-- Dropdown с чекбоксами
-- Поддержка keyboard navigation
-
-### Фаза 2: Исправление Booking Flow
-
-**2.1 Предварительная проверка availability**
-
-Перед финальным submit проверять:
-1. Доступность слота в календаре
-2. Достаточность баланса кошелька
-3. Активность провайдера
-
-```typescript
-// Добавить в ExperienceBooking.tsx перед handleSubmit
-const { isAvailable, error } = await checkAvailability({
-  experience_id: experience.id,
-  date: selectedDate,
-  time: selectedTime,
-  participants,
-});
-
-if (!isAvailable) {
-  toast.error(error || 'Slot not available');
-  return;
+interface PropertyCategoryRibbonProps {
+  mode: 'rent' | 'buy';
+  onModeChange: (mode: 'rent' | 'buy') => void;
+  selectedType: string;
+  onTypeChange: (type: string) => void;
+  types: PropertyTypeOption[];
 }
+
+// Визуал:
+// [🏠 Rent] [🏢 Buy] | [All] [Condo] [Villa] [House] [•••]
 ```
 
-**2.2 Улучшение обработки ошибок RPC**
+**Дизайн по Airbnb:**
+- Категории с иконками сверху, текст снизу
+- Underline indicator для активной категории
+- Плавный scroll с `touch-pan-y`
 
-В `useOrders.ts` добавить маппинг кодов ошибок:
+### ФАЗА 4: Консолидация фильтров
 
-```typescript
-const ERROR_MESSAGES = {
-  'insufficient_wallet': { en: 'Insufficient wallet balance', ru: 'Недостаточно средств' },
-  'slot_unavailable': { en: 'Time slot no longer available', ru: 'Слот уже занят' },
-  'provider_inactive': { en: 'Provider is currently unavailable', ru: 'Провайдер недоступен' },
-};
-```
+**Файл:** `src/components/filters/UniversalFilter.tsx`
 
-### Фаза 3: Исправление Vendor Onboarding
+**Добавить секции:**
+1. **Спальни** — перенести из BedroomChips
+2. **Районы** — основной UI здесь, убрать дублирование
+3. **Amenities** — уже есть
+4. **Price Range** — уже есть
 
-**3.1 Динамическая загрузка вертикалей**
+**QuickFiltersRibbon** — трансформировать в "быстрые теги" ПОСЛЕ списка результатов, как "Popular filters" suggestion.
 
-Заменить `availableVerticals` на хук:
+### ФАЗА 5: Итоговая структура страницы
 
-```typescript
-// VendorOnboarding.tsx
-const { verticals, isLoading } = useVerticals(); // из taxonomy_definitions
-```
-
-**3.2 Атомарное создание vendor bundle**
-
-Создать RPC `create_vendor_bundle` который:
-1. Проверяет существование
-2. Создаёт provider
-3. Создаёт marketplace_vendor
-4. Создаёт org + org_member
-5. Возвращает все ID или откатывает всё
-
-### Фаза 4: Рефакторинг Admin Forms
-
-**4.1 Переход от Dialog к Sheet/Drawer**
-
-Для форм создания/редактирования:
-- Desktop: Sheet (side="right", width="500px")
-- Mobile: Full-screen drawer
-
-Это устранит проблемы с вложенным scroll и select.
-
-**4.2 Inline Editing в таблицах**
-
-Для часто редактируемых полей (цена, статус, активность):
-- Double-click для редактирования
-- Enter для сохранения
-- Escape для отмены
-
-**4.3 Консолидация админ-страниц**
-
-```
-/admin/catalog → UnifiedCatalogTable (все вертикали)
-/admin/catalog/:vertical → Фильтрованный вид
-/admin/catalog/:id/edit → Sheet с формой
-```
-
-### Фаза 5: Стандартизация скролла
-
-**5.1 Создание ScrollableSelect**
-
-```typescript
-// Новый компонент с правильным touch handling
-export const ScrollableSelect = ({ options, ...props }) => (
-  <Select {...props}>
-    <SelectContent 
-      className="max-h-[60vh] overflow-y-auto touch-pan-y"
-      onPointerDownOutside={(e) => e.preventDefault()}
-    >
-      {/* Используем виртуализацию для длинных списков */}
-    </SelectContent>
-  </Select>
-);
-```
-
-**5.2 Глобальные scroll utilities**
-
-Расширить `src/lib/scrollUtils.ts`:
-
-```typescript
-export const SELECT_CONTENT_CLASSES = 
-  'max-h-[60vh] overflow-y-auto touch-pan-y overscroll-contain';
-
-export const DIALOG_FORM_CLASSES = 
-  'overflow-y-auto touch-pan-y max-h-[80vh]';
+```text
+┌─────────────────────────────────────────────┐
+│ [←]  Аренда жилья              [🗺] [⚙️3]  │  Header (compact)
+├─────────────────────────────────────────────┤
+│ 🔍 Весь Пхукет · Выберите даты · 2 гостя   │  Search (collapsed)
+├─────────────────────────────────────────────┤
+│ [Аренда] [Покупка] │ 🏠All 🏢Condo 🏡Villa…│  Categories
+├─────────────────────────────────────────────┤
+│ Консультация CTA                            │  (compact banner)
+├─────────────────────────────────────────────┤
+│ 142 объекта найдено                         │  Results count
+├─────────────────────────────────────────────┤
+│ [Beachfront] [Pool] [Sea View] [Pet OK]    │  Quick filter tags
+├─────────────────────────────────────────────┤
+│ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐            │
+│ │     │ │     │ │     │ │     │            │  Property Grid
+│ │ 📷  │ │ 📷  │ │ 📷  │ │ 📷  │            │
+│ └─────┘ └─────┘ └─────┘ └─────┘            │
+└─────────────────────────────────────────────┘
 ```
 
 ---
 
-## Часть 3: Детали реализации
-
-### Новые файлы
-
-| Файл | Назначение |
-|------|------------|
-| `src/components/ui/searchable-select.tsx` | Select с поиском |
-| `src/components/ui/multi-select.tsx` | Мультивыбор с tags |
-| `src/hooks/useAvailabilityCheck.ts` | Проверка слотов перед booking |
-| `src/lib/rpcErrorMessages.ts` | Маппинг ошибок RPC |
+## Технические детали
 
 ### Файлы для изменения
 
-| Файл | Изменения |
-|------|-----------|
-| `src/components/ui/select.tsx` | max-h, overflow-y-auto, touch-pan-y |
-| `src/pages/admin/AdminServices.tsx` | Sheet вместо Dialog |
-| `src/pages/vendor/VendorOnboarding.tsx` | Динамические вертикали |
-| `src/hooks/useVendor.ts` | Атомарное создание bundle |
-| `src/pages/experiences/ExperienceBooking.tsx` | Предварительная проверка |
-| `src/hooks/useOrders.ts` | Улучшенная обработка ошибок |
+| Файл | Действие |
+|------|----------|
+| `src/pages/property/PropertyIndex.tsx` | Реструктуризация layout, удаление BedroomChips из header |
+| `src/components/property/AirbnbSearchBar.tsx` | Компактный режим + список локаций |
+| `src/components/property/PropertyCategoryRibbon.tsx` | **Новый** — объединённый ribbon |
+| `src/components/property/BedroomChips.tsx` | Удалить или интегрировать в filter |
+| `src/components/property/QuickFiltersRibbon.tsx` | Перенести после результатов |
+| `src/components/filters/UniversalFilter.tsx` | Добавить bedroom/district sections |
 
-### Миграции БД
+### Метрики улучшения
 
-```sql
--- 1. RPC для атомарного создания вендора
-CREATE OR REPLACE FUNCTION create_vendor_bundle(...)
-RETURNS jsonb AS $$ ... $$;
+| Метрика | Было | Станет |
+|---------|------|--------|
+| Высота sticky header | ~220px | ~120px |
+| Рядов фильтров | 4 | 2 |
+| Размер location card | 80x48px | 100% x 40px (список) |
+| Дублирование фильтров | 3 места | 1 место (UniversalFilter) |
 
--- 2. RPC для проверки доступности
-CREATE OR REPLACE FUNCTION check_booking_availability(
-  p_resource_type text,
-  p_resource_id uuid,
-  p_start_at timestamptz,
-  p_end_at timestamptz
-) RETURNS jsonb AS $$ ... $$;
-```
+### Совместимость с бэкендом
 
----
-
-## Часть 4: Приоритеты
-
-### P0 (Критично - немедленно)
-1. Исправить `SelectContent` overflow
-2. Добавить обработку ошибок в booking flow
-3. Исправить дублирование vendor записей
-
-### P1 (Высокий - эта неделя)
-4. Создать SearchableSelect для провайдеров
-5. Перевести AdminServices на Sheet
-6. Динамические вертикали в онбординге
-
-### P2 (Средний - следующий спринт)
-7. MultiSelect компонент
-8. Inline editing в таблицах
-9. Availability pre-check
-
-### P3 (Улучшения)
-10. Консолидация админ-страниц
-11. Виртуализация длинных списков
-12. Полный аудит touch-action
+- PropertyTypeSelector уже использует `usePropertyFilterOptions()` → lookup_values
+- Районы из `lookup_values` (type: district)
+- Amenities из `lookup_values` (type: amenity)
+- **Никаких изменений БД не требуется**
 
 ---
 
-## Ожидаемые результаты
+## Ожидаемый результат
 
-После реализации плана:
-- **Booking успешность**: 60% → 95%+ (устранение ошибок в конце flow)
-- **Onboarding конверсия**: исправление silent failures
-- **Admin UX**: время на операцию сократится на 40%
-- **Mobile usability**: все Select и Dropdown полностью функциональны
+✅ Компактный header — больше места для контента  
+✅ Список локаций вместо громоздких карточек  
+✅ Единый паттерн категорий Airbnb-style  
+✅ Консолидированные фильтры без дублирования  
+✅ Профессиональный индустриальный UX  
