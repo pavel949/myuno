@@ -281,7 +281,7 @@ const MarketIndex = () => {
       showFilter={false}
     >
       {/* Filter Ribbon - Quick Actions Row */}
-      <div className="sticky top-0 z-30 -mx-4 bg-background/95 backdrop-blur-sm border-b border-border/30">
+      <div className="sticky top-0 z-30 -mx-4 px-4 md:px-6 lg:px-8 bg-background/95 backdrop-blur-sm border-b border-border/30">
         <UnifiedFilterRibbon
           items={quickActionItems}
           onSelect={handleQuickActionSelect}
@@ -330,22 +330,28 @@ const MarketIndex = () => {
 
       <div className="pb-32">
         {/* 1. Quick Category Icons Grid first - Amazon style */}
-        <QuickCategoryIcons 
-          categories={activeCategories} 
-          productCounts={productCounts}
-          maxItems={8}
-        />
+        <div className="max-w-[1800px] mx-auto">
+          <QuickCategoryIcons 
+            categories={activeCategories} 
+            productCounts={productCounts}
+            maxItems={8}
+          />
+        </div>
 
         {/* 2. Hero Promo Carousel */}
-        <PromoCarousel />
+        <div className="max-w-[1800px] mx-auto">
+          <PromoCarousel />
+        </div>
 
         {/* 3. Flash Deals Section with Countdown */}
-        <FlashDealsSection products={allProducts} />
+        <div className="max-w-[1800px] mx-auto">
+          <FlashDealsSection products={allProducts} />
+        </div>
 
         {/* 4. Bestsellers Section */}
         {popularProducts.length > 0 && (
           <section className="py-3">
-            <div className="px-4 max-w-7xl mx-auto">
+            <div className="px-4 md:px-6 lg:px-8 max-w-[1800px] mx-auto">
               <UnifiedSectionHeader
                 icon={Flame}
                 iconColor="text-orange-500"
@@ -373,12 +379,14 @@ const MarketIndex = () => {
         )}
 
         {/* 5. Featured Vendors Carousel */}
-        <FeaturedVendorsCarousel />
+        <div className="max-w-[1800px] mx-auto">
+          <FeaturedVendorsCarousel />
+        </div>
 
         {/* 6. New Arrivals Section */}
         {newProducts.length > 0 && (
           <section className="py-3 bg-muted/30">
-            <div className="px-4 max-w-7xl mx-auto">
+            <div className="px-4 md:px-6 lg:px-8 max-w-[1800px] mx-auto">
               <UnifiedSectionHeader
                 icon={Sparkles}
                 iconColor="text-purple-500"
@@ -417,7 +425,7 @@ const MarketIndex = () => {
           
           return (
             <section key={category.id} className={cn("py-3 border-t border-border/30", isMuted && "bg-muted/30")}>
-              <div className="px-4 max-w-7xl mx-auto">
+              <div className="px-4 md:px-6 lg:px-8 max-w-[1800px] mx-auto">
                 <UnifiedSectionHeader
                   iconEmoji={category.icon || getCategoryFallbackIcon(category.slug)}
                   iconImage={category.image_url || undefined}
@@ -450,13 +458,13 @@ const MarketIndex = () => {
         <RecentlyViewedProducts />
 
         {/* 9. All Products Grid */}
-        <section className="py-4 px-4 max-w-7xl mx-auto">
+        <section className="py-4 px-4 md:px-6 lg:px-8 max-w-[1800px] mx-auto">
           <UnifiedSectionHeader
             title={isRu ? 'Все товары' : 'All Products'}
             count={allProducts.length}
           />
           
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-3 md:gap-4">
             {allProducts.slice(0, 20).map(product => (
               <ProfessionalProductCard
                 key={product.id}
