@@ -7,12 +7,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useServices } from '@/hooks/useServices';
-import { UnifiedSectionHeader } from '@/components/shared';
+import { UnifiedScrollSection } from '@/components/shared';
 import { Badge } from '@/components/ui/badge';
 import { IconBadge } from '@/components/ui/IconBadge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
-import { Flame, Clock, Zap, Star, ChevronRight } from 'lucide-react';
+import { Flame, Clock, Zap, Star, ChevronRight, Users, TrendingUp } from 'lucide-react';
 
 export function FlashServicesSection() {
   const { language } = useLanguage();
@@ -93,7 +94,7 @@ export function FlashServicesSection() {
       </div>
 
       {/* Scrollable cards */}
-      <div className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide snap-x snap-mandatory touch-pan-y">
+      <UnifiedScrollSection className="py-0">
         {services.slice(0, 6).map((service, idx) => (
           <FlashServiceCard 
             key={service.id} 
@@ -102,7 +103,7 @@ export function FlashServicesSection() {
             onClick={() => navigate(`/services/${service.id}`)}
           />
         ))}
-      </div>
+      </UnifiedScrollSection>
     </section>
   );
 }
@@ -120,6 +121,11 @@ function FlashServiceCard({ service, index, onClick }: FlashServiceCardProps) {
   // Mock discount for demo (in real app, this comes from DB)
   const discountPercent = [25, 30, 15, 20, 35, 10][index % 6];
   const originalPrice = service.price ? Math.round(service.price * (100 / (100 - discountPercent))) : null;
+  
+  // Mock social proof data (in real app, from DB)
+  const bookingsToday = [12, 8, 15, 6, 22, 9][index % 6];
+  const spotsLeft = [3, 5, 2, 7, 1, 4][index % 6];
+  const progressPercent = 100 - (spotsLeft * 10);
   
   // Urgency badge variations
   const urgencyBadges = [
@@ -178,20 +184,36 @@ function FlashServiceCard({ service, index, onClick }: FlashServiceCardProps) {
           {isRu ? service.name_ru || service.name_en : service.name_en}
         </h3>
         
-        {/* Rating */}
-        {service.rating && (
-          <div className="flex items-center gap-1">
-            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-            <span className="text-xs font-medium">{service.rating}</span>
-            <span className="text-xs text-muted-foreground">
-              ({service.review_count || 0})
+        {/* Social proof: Bookings today */}
+        <div className="flex items-center gap-1 text-muted-foreground">
+          <Users className="w-3 h-3" />
+          <span className="text-[10px]">
+            {bookingsToday} {isRu ? 'забронировали сегодня' : 'booked today'}
+          </span>
+        </div>
+        
+        {/* Availability progress bar */}
+        <div className="space-y-0.5">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-muted-foreground">
+              {spotsLeft} {isRu ? 'мест осталось' : 'spots left'}
             </span>
+            {service.rating && (
+            <div className="flex items-center gap-0.5">
+            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+              <span className="text-[10px] font-medium">{service.rating}</span>
+            </div>
+            )}
           </div>
-        )}
+          <Progress 
+            value={progressPercent} 
+            className="h-1.5 bg-muted"
+          />
+        </div>
         
         {/* Price */}
         {service.price && (
-          <div className="flex items-baseline gap-1.5">
+          <div className="flex items-baseline gap-1.5 pt-1">
             <span className="font-bold text-primary">
               ฿{service.price.toLocaleString()}
             </span>

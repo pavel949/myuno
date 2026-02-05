@@ -14,3 +14,6 @@ export type {
   PricePreset,
   ChipSection,
 } from './UnifiedFiltersKlook';
+
+// Trust and social proof components
+export { TrustBadge, TrustSignalsRow, SocialProofBadge } from './TrustSignalsBadges';

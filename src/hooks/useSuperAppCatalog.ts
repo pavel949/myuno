@@ -111,6 +111,35 @@ const VERTICAL_ORDER: TaxonomyVertical[] = [
   'events',
 ];
 
+// Valid route prefixes for path validation
+const VALID_ROUTE_PREFIXES = [
+  '/yachts',
+  '/tours', 
+  '/restaurants',
+  '/property',
+  '/transport',
+  '/services',
+  '/salons',
+  '/medical',
+  '/pets',
+  '/events',
+  '/discover',
+  '/invest',
+  '/offplan',
+  '/complexes',
+];
+
+// Validate and sanitize path
+function validatePath(path: string): string {
+  // Check if path starts with a valid prefix
+  const isValid = VALID_ROUTE_PREFIXES.some(prefix => path.startsWith(prefix));
+  if (!isValid) {
+    console.warn(`Invalid catalog path: ${path}, falling back to /discover`);
+    return '/discover';
+  }
+  return path;
+}
+
 export function useSuperAppCatalog() {
   const { language } = useLanguage();
   const { groupedByVertical, isLoading: isLoadingDefinitions } = useTaxonomyDefinitions();
@@ -182,7 +211,7 @@ export function useSuperAppCatalog() {
           value: parent.value,
           label: language === 'ru' ? parent.labelRu : parent.labelEn,
           icon: parent.icon,
-          path: `${config.path}?domain=${parent.value}`,
+          path: validatePath(`${config.path}?domain=${parent.value}`),
           children: allChildren
             .filter(child => child.metadata?.domain === parent.value)
             .map(child => ({
@@ -190,7 +219,7 @@ export function useSuperAppCatalog() {
               value: child.value,
               label: language === 'ru' ? child.labelRu : child.labelEn,
               icon: child.icon,
-              path: `${config.path}?${config.queryParam}=${child.value}`,
+              path: validatePath(`${config.path}?${config.queryParam}=${child.value}`),
             })),
         }));
       } else if (config.customHub && vertical === 'property') {
@@ -240,7 +269,7 @@ export function useSuperAppCatalog() {
           value: opt.value,
           label: language === 'ru' ? opt.labelRu : opt.labelEn,
           icon: opt.icon,
-          path: `${config.path}?${config.queryParam}=${opt.value}`,
+            path: validatePath(`${config.path}?${config.queryParam}=${opt.value}`),
         }));
       }
 
