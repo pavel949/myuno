@@ -42,7 +42,7 @@ export function ExperiencesSection() {
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>
-      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
+      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 touch-pan-y snap-x snap-mandatory">
         {experiences.map((experience, index) => {
           const isTour = experience.experience_type === 'tour';
           const isHero = index === 0;
