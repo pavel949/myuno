@@ -1659,6 +1659,75 @@ export type Database = {
         }
         Relationships: []
       }
+      catalog_facet_definitions: {
+        Row: {
+          created_at: string
+          entity_type: string
+          facet_key: string
+          facet_label_en: string
+          facet_label_ru: string | null
+          facet_type: string
+          id: string
+          is_active: boolean
+          sort_order: number
+          source_field: string
+        }
+        Insert: {
+          created_at?: string
+          entity_type: string
+          facet_key: string
+          facet_label_en: string
+          facet_label_ru?: string | null
+          facet_type?: string
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          source_field: string
+        }
+        Update: {
+          created_at?: string
+          entity_type?: string
+          facet_key?: string
+          facet_label_en?: string
+          facet_label_ru?: string | null
+          facet_type?: string
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          source_field?: string
+        }
+        Relationships: []
+      }
+      catalog_hygiene_log: {
+        Row: {
+          created_at: string
+          details: Json
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          operation_type: string
+          performed_by: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          operation_type: string
+          performed_by?: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          operation_type?: string
+          performed_by?: string
+        }
+        Relationships: []
+      }
       catalog_life_map: {
         Row: {
           created_at: string | null
@@ -2975,6 +3044,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      entity_classification_hints: {
+        Row: {
+          admin_notes: string | null
+          classification: string
+          confidence: string
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          classification: string
+          confidence?: string
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          classification?: string
+          confidence?: string
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       event_bookings: {
         Row: {
@@ -11809,6 +11911,45 @@ export type Database = {
         }
         Relationships: []
       }
+      provider_input_rules: {
+        Row: {
+          created_at: string
+          entity_type: string
+          field_name: string
+          id: string
+          is_active: boolean
+          message_en: string
+          message_ru: string | null
+          rule_config: Json
+          rule_type: string
+          severity: string
+        }
+        Insert: {
+          created_at?: string
+          entity_type: string
+          field_name: string
+          id?: string
+          is_active?: boolean
+          message_en: string
+          message_ru?: string | null
+          rule_config?: Json
+          rule_type: string
+          severity?: string
+        }
+        Update: {
+          created_at?: string
+          entity_type?: string
+          field_name?: string
+          id?: string
+          is_active?: boolean
+          message_en?: string
+          message_ru?: string | null
+          rule_config?: Json
+          rule_type?: string
+          severity?: string
+        }
+        Relationships: []
+      }
       provider_payout_methods: {
         Row: {
           account_holder_name: string | null
@@ -14004,6 +14145,39 @@ export type Database = {
           type_key?: string
           updated_at?: string | null
           vertical?: string | null
+        }
+        Relationships: []
+      }
+      taxonomy_normalization: {
+        Row: {
+          created_at: string
+          entity_type: string
+          field_name: string
+          id: string
+          is_active: boolean
+          normalization_type: string
+          normalized_value: string
+          original_value: string
+        }
+        Insert: {
+          created_at?: string
+          entity_type: string
+          field_name: string
+          id?: string
+          is_active?: boolean
+          normalization_type?: string
+          normalized_value: string
+          original_value: string
+        }
+        Update: {
+          created_at?: string
+          entity_type?: string
+          field_name?: string
+          id?: string
+          is_active?: boolean
+          normalization_type?: string
+          normalized_value?: string
+          original_value?: string
         }
         Relationships: []
       }
@@ -17297,6 +17471,72 @@ export type Database = {
       }
     }
     Views: {
+      experiences_normalized: {
+        Row: {
+          age_restriction: number | null
+          approval_status: string | null
+          available_days: string[] | null
+          category: string | null
+          category_normalized: string | null
+          certification_details: string | null
+          commission_rate: number | null
+          cover_image: string | null
+          created_at: string | null
+          created_by_uno_team: boolean | null
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          difficulty: string | null
+          difficulty_normalized: string | null
+          duration_minutes: number | null
+          equipment_included: boolean | null
+          excludes: Json | null
+          experience_type: string | null
+          external_link: string | null
+          highlights: Json | null
+          id: string | null
+          images: string[] | null
+          includes: Json | null
+          inferred_classification: string | null
+          is_active: boolean | null
+          is_certified: boolean | null
+          is_featured: boolean | null
+          itinerary: Json | null
+          location_name: string | null
+          max_participants: number | null
+          meeting_point: string | null
+          meeting_point_lat: number | null
+          meeting_point_lng: number | null
+          min_participants: number | null
+          partner_id: string | null
+          price: number | null
+          price_per: string | null
+          provider_id: string | null
+          rating: number | null
+          rejection_reason: string | null
+          requirements: Json | null
+          review_count: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          safety_briefing_required: boolean | null
+          source_type: string | null
+          start_times: string[] | null
+          tags: string[] | null
+          title_en: string | null
+          title_ru: string | null
+          uno_team_creator_id: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiences_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       life_os_catalog: {
         Row: {
           currency: string | null
