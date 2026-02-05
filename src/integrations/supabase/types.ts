@@ -1659,6 +1659,47 @@ export type Database = {
         }
         Relationships: []
       }
+      catalog_life_map: {
+        Row: {
+          created_at: string | null
+          entity_id: string
+          entity_type: string
+          id: string
+          life_situation_id: string | null
+          rules: Json | null
+          updated_at: string | null
+          weight: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          life_situation_id?: string | null
+          rules?: Json | null
+          updated_at?: string | null
+          weight?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          life_situation_id?: string | null
+          rules?: Json | null
+          updated_at?: string | null
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_life_map_life_situation_id_fkey"
+            columns: ["life_situation_id"]
+            isOneToOne: false
+            referencedRelation: "life_situations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           color: string | null
@@ -4900,6 +4941,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      life_situations: {
+        Row: {
+          code: string
+          color: string | null
+          created_at: string | null
+          description_en: string | null
+          description_ru: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          priority: number | null
+          title_en: string
+          title_ru: string
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          color?: string | null
+          created_at?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          priority?: number | null
+          title_en: string
+          title_ru: string
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          color?: string | null
+          created_at?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          priority?: number | null
+          title_en?: string
+          title_ru?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       listing_applications: {
         Row: {
@@ -18147,6 +18233,15 @@ export type Database = {
       refund_wallet_booking: {
         Args: { p_booking_id: string; p_user_id: string }
         Returns: boolean
+      }
+      resolve_catalog_by_life_situation: {
+        Args: { p_life_code: string; p_limit?: number }
+        Returns: {
+          entity_id: string
+          entity_type: string
+          rules: Json
+          weight: number
+        }[]
       }
       rotate_ical_token: { Args: { p_property_id: string }; Returns: string }
       set_user_pin: {

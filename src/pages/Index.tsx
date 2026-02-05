@@ -25,6 +25,7 @@ const HomeProductsSection = lazy(() => import('@/components/home/HomeProductsSec
 const ContentPreviewRibbon = lazy(() => import('@/components/home/ContentPreviewRibbon').then(m => ({ default: m.ContentPreviewRibbon })));
 const QuickAccessChips = lazy(() => import('@/components/home/QuickAccessChips').then(m => ({ default: m.QuickAccessChips })));
 const InvestorPromoCard = lazy(() => import('@/components/home/InvestorPromoCard').then(m => ({ default: m.InvestorPromoCard })));
+const LifeSituationSelector = lazy(() => import('@/components/home/LifeSituationSelector'));
 
 // Lazy load modals
 const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
@@ -134,7 +135,15 @@ const Index = () => {
           <HeroBlock />
 
           {/* ═══════════════════════════════════════════════════════════
-              BLOCK 2: Smart Widget (Phuket Today + Quick Stats)
+              BLOCK 2: Life Situation Selector
+              "What do you need right now?" - contextual navigation
+              ═══════════════════════════════════════════════════════════ */}
+          <Suspense fallback={<RibbonSkeleton />}>
+            <LifeSituationSelector />
+          </Suspense>
+
+          {/* ═══════════════════════════════════════════════════════════
+              BLOCK 3: Smart Widget (Phuket Today + Quick Stats)
               Immediately visible context and quick actions
               ═══════════════════════════════════════════════════════════ */}
           <Suspense fallback={<WidgetSkeleton />}>
@@ -142,20 +151,20 @@ const Index = () => {
           </Suspense>
 
           {/* ═══════════════════════════════════════════════════════════
-              BLOCK 3: Persona Selector
+              BLOCK 4: Persona Selector
               Who are you? Tourist | Resident | Owner | Investor
               ═══════════════════════════════════════════════════════════ */}
           <PersonaSelectorBlock />
 
           {/* ═══════════════════════════════════════════════════════════
-              BLOCK 4: Quick Actions (persona-driven)
+              BLOCK 5: Quick Actions (persona-driven)
               6 buttons that change based on active persona
               "More" button leads to /discover (services) or /market (products)
               ═══════════════════════════════════════════════════════════ */}
           <QuickActionsGrid contentMode={contentMode} />
 
           {/* ═══════════════════════════════════════════════════════════
-              BLOCK 5: Content Toggle + Category Ribbon
+              BLOCK 6: Content Toggle + Category Ribbon
               Services / Products mode switch
               ═══════════════════════════════════════════════════════════ */}
           <div className="space-y-3">
@@ -184,7 +193,7 @@ const Index = () => {
           </div>
 
           {/* ═══════════════════════════════════════════════════════════
-              BLOCK 6: Featured Content
+              BLOCK 7: Featured Content
               Mode-specific content sections
               ═══════════════════════════════════════════════════════════ */}
           {contentMode === 'services' ? (
