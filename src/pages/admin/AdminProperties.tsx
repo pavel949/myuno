@@ -388,6 +388,7 @@ export default function AdminProperties() {
                 property={property}
                 variant="list"
                 mode="admin"
+               onView={() => openEditDialog(property)}
                 onEdit={() => openEditDialog(property)}
                 onDelete={() => setDeleteConfirmId(property.id)}
                 showApprovalStatus
