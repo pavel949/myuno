@@ -28,7 +28,7 @@ export function useBuyNow() {
       name: product.name_en,
       nameRu: product.name_ru,
       price: product.price,
-      currency: '฿',
+      currency: product.currency || 'THB',
       image: product.cover_image || undefined,
       providerId: 'marketplace',
       providerName: product.vendor_name || 'myUNO Market',

@@ -24,6 +24,7 @@ import {
 import { triggerRipple } from '@/hooks/useRipple';
 import { format, parseISO } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
+import { getCurrencySymbol } from '@/lib/config/currencies';
 
 const typeIcons: Record<CartItem['type'], React.ElementType> = {
   food: UtensilsCrossed,
@@ -252,7 +253,7 @@ const Cart = () => {
                       )}
                       
                       <p className="text-primary font-semibold mt-1">
-                        {item.currency === 'THB' ? '฿' : item.currency}{item.price.toLocaleString()}
+                        {getCurrencySymbol(item.currency || 'THB')}{item.price.toLocaleString()}
                       </p>
                     </div>
 
@@ -308,7 +309,7 @@ const Cart = () => {
               {language === 'ru' ? 'Итого' : 'Total'}
             </span>
             <span className="text-2xl font-bold">
-              ฿{getTotal().toLocaleString()}
+              {getCurrencySymbol('THB')}{getTotal().toLocaleString()}
             </span>
           </div>
           <Button 

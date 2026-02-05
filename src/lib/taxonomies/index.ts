@@ -16,6 +16,9 @@ export * as TransportTaxonomy from '../config/transportTaxonomy';
 export * as HomeServicesTaxonomy from '../config/homeServicesTaxonomy';
 export * as ExperiencesTaxonomy from './experiencesTaxonomy';
 export * as BeautyTaxonomy from './beautyTaxonomy';
+export * as RestaurantTaxonomy from './restaurantTaxonomy';
+export * as MedicalTaxonomy from './medicalTaxonomy';
+export * as EducationTaxonomy from './educationTaxonomy';
 
 // ============= DYNAMIC TAXONOMY HOOKS =============
 // Primary interface for fetching taxonomy data

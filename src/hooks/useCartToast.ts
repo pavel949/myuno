@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { CartItem } from '@/contexts/CartContext';
+import { getCurrencySymbol } from '@/lib/config/currencies';
 
 interface CartToastOptions {
   /** Item that was added */
@@ -25,7 +26,7 @@ export function useCartToast() {
       const continueText = language === 'ru' ? 'Продолжить покупки' : 'Continue shopping';
 
       toast.success(addedText, {
-        description: `${itemName} — ฿${item.price.toLocaleString()}`,
+        description: `${itemName} — ${getCurrencySymbol(item.currency || 'THB')}${item.price.toLocaleString()}`,
         duration,
         action: {
           label: viewCartText,

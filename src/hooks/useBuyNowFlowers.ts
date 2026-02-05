@@ -27,7 +27,7 @@ export function useBuyNowFlowers() {
       name: bouquet.name_en,
       nameRu: bouquet.name_ru,
       price: bouquet.price,
-      currency: '฿',
+      currency: bouquet.currency || 'THB',
       image: bouquet.image || undefined,
       providerId: bouquet.shop?.provider_id || 'flowers-shop',
       providerName: bouquet.shop?.name_en || 'Phuket Flowers',

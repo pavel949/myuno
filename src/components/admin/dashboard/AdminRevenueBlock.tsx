@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TrendingUp, TrendingDown, DollarSign, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getCurrencySymbol } from '@/lib/config/currencies';
 
 export function AdminRevenueBlock() {
   const navigate = useNavigate();
@@ -13,9 +14,10 @@ export function AdminRevenueBlock() {
   const { summary, isLoading } = useAdminAnalytics(14);
 
   const formatCurrency = (value: number) => {
-    if (value >= 1000000) return `฿${(value / 1000000).toFixed(1)}M`;
-    if (value >= 1000) return `฿${(value / 1000).toFixed(0)}K`;
-    return `฿${value.toFixed(0)}`;
+    const symbol = getCurrencySymbol('THB');
+    if (value >= 1000000) return `${symbol}${(value / 1000000).toFixed(1)}M`;
+    if (value >= 1000) return `${symbol}${(value / 1000).toFixed(0)}K`;
+    return `${symbol}${value.toFixed(0)}`;
   };
 
   if (isLoading) {

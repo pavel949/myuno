@@ -44,6 +44,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { getPropertyTypeLabel } from '@/lib/propertyTaxonomy';
+import { getCurrencySymbol } from '@/lib/config/currencies';
 
 // ============= TYPES =============
 
@@ -150,6 +151,7 @@ function getOperationalStatus(
 
 function formatPrice(price: number | undefined, period: string | undefined, isRu: boolean): string {
   if (!price) return '';
+  const symbol = getCurrencySymbol('THB');
   const periodLabel = period === 'day' || period === 'night'
     ? (isRu ? '/ночь' : '/night')
     : period === 'month'
@@ -157,7 +159,7 @@ function formatPrice(price: number | undefined, period: string | undefined, isRu
       : period === 'year'
         ? (isRu ? '/год' : '/yr')
         : '';
-  return `฿${price.toLocaleString()}${periodLabel}`;
+  return `${symbol}${price.toLocaleString()}${periodLabel}`;
 }
 
 // ============= HERO VARIANT =============
@@ -228,7 +230,7 @@ function HeroVariant({ cardProps, stats, isRu, onClick }: HeroVariantProps) {
         {/* Revenue if available */}
         {stats?.thisMonthRevenue !== undefined && stats.thisMonthRevenue > 0 && (
           <p className="text-sm font-medium text-success mt-2">
-            ฿{stats.thisMonthRevenue.toLocaleString()} {isRu ? 'в этом месяце' : 'this month'}
+            {getCurrencySymbol('THB')}{stats.thisMonthRevenue.toLocaleString()} {isRu ? 'в этом месяце' : 'this month'}
           </p>
         )}
       </div>

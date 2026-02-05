@@ -39,6 +39,7 @@ import { VendorOnboardingChecklist } from '@/components/vendor/dashboard/VendorO
 import { VendorModerationQueue } from '@/components/vendor/dashboard/VendorModerationQueue';
 import { Period, getPeriodDateRange, getComparisonPeriodRange } from '@/components/vendor/dashboard/VendorPeriodSelector';
 import { useVendorProfile } from '@/hooks/useVendor';
+import { getCurrencySymbol } from '@/lib/config/currencies';
 
 const statusColors: Record<string, string> = {
   pending: 'bg-muted text-muted-foreground',
@@ -127,8 +128,9 @@ const VendorDashboard = () => {
   }, [orders]);
 
   const formatCurrency = (amount: number) => {
-    if (amount >= 1000) return `฿${(amount / 1000).toFixed(0)}K`;
-    return `฿${amount.toLocaleString()}`;
+    const symbol = getCurrencySymbol('THB');
+    if (amount >= 1000) return `${symbol}${(amount / 1000).toFixed(0)}K`;
+    return `${symbol}${amount.toLocaleString()}`;
   };
 
   const getStatusBadge = (status: string) => {

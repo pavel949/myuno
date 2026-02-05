@@ -14,6 +14,7 @@ import {
   Gift
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getCurrencySymbol } from '@/lib/config/currencies';
 
 const tierIcons: Record<string, React.ReactNode> = {
   compass: <Compass className="h-5 w-5" />,
@@ -86,7 +87,7 @@ const formatCurrency = (amount: number) => {
     style: 'decimal',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  }).format(amount) + ' ฿';
+  }).format(amount) + ' ' + getCurrencySymbol('THB');
 };
 
 export const LoyaltyStatusCard = () => {
