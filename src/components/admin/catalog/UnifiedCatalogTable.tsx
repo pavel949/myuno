@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUnifiedCatalog, CatalogItemType, UnifiedCatalogItem } from '@/hooks/useUnifiedCatalog';
 import { useBulkSelection } from '@/hooks/useBulkSelection';
 import { BulkActionsBar, useCatalogBulkActions } from '@/components/admin/BulkActionsBar';
+import { CatalogExportButton } from '@/components/admin/CatalogExportButton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -242,6 +243,8 @@ export function UnifiedCatalogTable() {
         <Badge variant="secondary" className="h-10 px-3 flex items-center">
           {items.length} {isRussian ? 'элементов' : 'items'}
         </Badge>
+
+        <CatalogExportButton items={items} filename="catalog" />
       </div>
 
       {/* Table */}
