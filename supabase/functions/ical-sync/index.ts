@@ -83,6 +83,79 @@ function parseICalEvents(icalContent: string): Array<{
   return events;
 }
 
+// Create or update an order for an external calendar event
+async function upsertOrderForEvent(
+  supabase: any,
+  event: { uid: string; summary: string; dtstart: string | null; dtend: string | null; description?: string },
+  calendar: any,
+  existingOrderId?: string
+): Promise<string> {
+  const startAt = `${event.dtstart}T14:00:00Z`;
+  const endAt = `${event.dtend}T12:00:00Z`;
+  
+  const orderData = {
+    order_type: 'property',
+    vertical: 'property',
+    start_at: startAt,
+    end_at: endAt,
+    status: 'confirmed',
+    notes: event.description || `Synced from ${calendar.name}`,
+    metadata: {
+      source: 'ical',
+      source_calendar_id: calendar.id,
+      source_calendar_name: calendar.name,
+      external_id: event.uid,
+      guest_name: event.summary || 'External Booking',
+    },
+  };
+
+  if (existingOrderId) {
+    // Update existing order
+    await supabase
+      .from('orders')
+      .update(orderData)
+      .eq('id', existingOrderId);
+    return existingOrderId;
+  } else {
+    // Insert new order
+    const { data: order, error } = await supabase
+      .from('orders')
+      .insert(orderData)
+      .select('id')
+      .single();
+    
+    if (error) throw error;
+    
+    // Create order_item linking to property
+    await supabase
+      .from('order_items')
+      .insert({
+        order_id: order.id,
+        item_type: 'property',
+        item_name: event.summary || 'External Booking',
+        qty: 1,
+        unit_price: 0,
+        amount: 0,
+        start_at: startAt,
+        end_at: endAt,
+        metadata: {
+          property_id: calendar.property_id,
+        },
+      });
+    
+    // Create guest participant
+    await supabase
+      .from('order_participants')
+      .insert({
+        order_id: order.id,
+        role: 'guest',
+        name: event.summary || 'External Booking',
+      });
+    
+    return order.id;
+  }
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -162,24 +235,37 @@ Deno.serve(async (req) => {
         
         console.log(`Parsed ${events.length} events from ${calendar.name}`);
 
-        // Get existing bookings from this calendar
-        const { data: existingBookings } = await supabase
-          .from('property_bookings')
-          .select('id, external_id')
-          .eq('property_id', calendar.property_id)
-          .eq('source_calendar_id', calendar.id);
+        // Get existing orders from this calendar (stored in metadata)
+        const { data: existingOrders } = await supabase
+          .from('orders')
+          .select('id, metadata')
+          .eq('vertical', 'property')
+          .is('deleted_at', null);
 
-        const existingIds = new Set((existingBookings || []).map(b => b.external_id));
+        // Filter orders that came from this calendar
+        const calendarOrders = (existingOrders || []).filter((o: any) => 
+          o.metadata?.source_calendar_id === calendar.id
+        );
+        
+        // Map external_id -> order.id
+        const existingIdMap = new Map<string, string>();
+        for (const order of calendarOrders) {
+          const extId = order.metadata?.external_id;
+          if (extId) existingIdMap.set(extId, order.id);
+        }
+        
         const newEventIds = new Set(events.map(e => e.uid));
 
-        // Delete bookings that no longer exist in external calendar
-        const toDelete = (existingBookings || []).filter(b => !newEventIds.has(b.external_id));
+        // Soft-delete orders that no longer exist in external calendar
+        const toDelete = calendarOrders.filter((o: any) => 
+          o.metadata?.external_id && !newEventIds.has(o.metadata.external_id)
+        );
         if (toDelete.length > 0) {
           await supabase
-            .from('property_bookings')
-            .delete()
-            .in('id', toDelete.map(b => b.id));
-          console.log(`Deleted ${toDelete.length} cancelled bookings`);
+            .from('orders')
+            .update({ deleted_at: new Date().toISOString() })
+            .in('id', toDelete.map((o: any) => o.id));
+          console.log(`Soft-deleted ${toDelete.length} cancelled bookings`);
         }
 
         // Insert or update events
@@ -187,32 +273,8 @@ Deno.serve(async (req) => {
         for (const event of events) {
           if (!event.dtstart || !event.dtend) continue;
 
-          const bookingData = {
-            property_id: calendar.property_id,
-            owner_id: calendar.owner_id,
-            guest_name: event.summary || 'External Booking',
-            check_in: event.dtstart,
-            check_out: event.dtend,
-            source: calendar.name,
-            source_calendar_id: calendar.id,
-            external_id: event.uid,
-            notes: event.description || `Synced from ${calendar.name}`,
-            status: 'confirmed',
-          };
-
-          if (existingIds.has(event.uid)) {
-            // Update existing
-            await supabase
-              .from('property_bookings')
-              .update(bookingData)
-              .eq('external_id', event.uid)
-              .eq('source_calendar_id', calendar.id);
-          } else {
-            // Insert new
-            await supabase
-              .from('property_bookings')
-              .insert(bookingData);
-          }
+          const existingOrderId = existingIdMap.get(event.uid);
+          await upsertOrderForEvent(supabase, event, calendar, existingOrderId);
           syncedCount++;
         }
 

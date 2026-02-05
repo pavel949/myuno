@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, forwardRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, Sparkles, Wallet, TrendingUp } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -60,7 +60,8 @@ const chips: ChipData[] = [
   },
 ];
 
-export const QuickAccessChips = memo(function QuickAccessChips() {
+export const QuickAccessChips = memo(forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  function QuickAccessChips(props, ref) {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -74,7 +75,7 @@ export const QuickAccessChips = memo(function QuickAccessChips() {
   }, [navigate]);
 
   return (
-    <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+    <div ref={ref} className="flex gap-2 overflow-x-auto scrollbar-hide pb-1" {...props}>
       {chips.map((chip) => {
         const Icon = chip.icon;
         const label = isRu ? chip.labelRu : chip.label;
@@ -99,4 +100,4 @@ export const QuickAccessChips = memo(function QuickAccessChips() {
       })}
     </div>
   );
-});
+}));
