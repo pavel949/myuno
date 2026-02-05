@@ -49,11 +49,9 @@ export default function Auth() {
     searchParams.get('redirect') || 
     '/';
 
+
   // Determine initial view based on PIN availability - single source of truth
-  const [view, setView] = useState<AuthView>(() => {
-    // Start with a loading-safe default
-    return 'email-auth';
-  });
+  const [view, setView] = useState<AuthView>('email-auth');
   
   // Track if we've already handled the authenticated user
   const [authHandled, setAuthHandled] = useState(false);
