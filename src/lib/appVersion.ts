@@ -1,7 +1,20 @@
 // App version for PWA cache busting
 // Increment this when deploying significant changes
-export const APP_VERSION = '3.4.3';
+export const APP_VERSION = '3.4.4';
 export const BUILD_TIMESTAMP = new Date().toISOString();
+
+// Check for updates via network (bypasses cache)
+export async function checkForUpdates(): Promise<boolean> {
+  try {
+    const response = await fetch('/manifest.json?_=' + Date.now(), { 
+      cache: 'no-store' 
+    });
+    const manifest = await response.json();
+    return manifest.version !== APP_VERSION;
+  } catch {
+    return false;
+  }
+}
 
 // Force cache clear function - can be called manually
 export async function forceCleanAllCaches(): Promise<void> {

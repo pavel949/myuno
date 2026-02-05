@@ -13,7 +13,7 @@
     <meta name="description" content="myUNO - Home is where myUNO is. Your life abroad, simplified." />
     <meta name="author" content="myUNO" />
     <meta name="theme-color" content="#d4af37" />
-    <meta name="version" content="3.4.3" />
+    <meta name="version" content="3.4.4" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="myUNO" />
@@ -43,33 +43,76 @@
     <!-- Early version check - runs BEFORE React loads -->
     <script>
       (function() {
-        var CURRENT_VERSION = '3.4.3';
-        var stored = localStorage.getItem('app_version');
+        var CURRENT_VERSION = '3.4.4';
         
-        if (stored !== CURRENT_VERSION) {
-          console.log('[myUNO] Version ' + CURRENT_VERSION + ' - cleaning caches');
+        // LEVEL 1: Listen for SW controller change - immediate reload
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.addEventListener('controllerchange', function() {
+            console.log('[myUNO] New SW controller detected - reloading');
+            window.location.reload();
+          });
+        }
+        
+        // LEVEL 2: Network-based version check (non-blocking)
+        fetch('/manifest.json?_=' + Date.now(), { cache: 'no-store' })
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            var serverVersion = data.version;
+            var storedManifestVersion = localStorage.getItem('manifest_version');
+            
+            console.log('[myUNO] Server version: ' + serverVersion + ', Stored: ' + storedManifestVersion);
+            
+            if (storedManifestVersion && storedManifestVersion !== serverVersion) {
+              console.log('[myUNO] Version mismatch detected! Cleaning and reloading...');
+              localStorage.setItem('manifest_version', serverVersion);
+              localStorage.setItem('app_version', serverVersion);
+              localStorage.setItem('last_cache_cleanup', Date.now().toString());
+              
+              // Clear all caches
+              if ('caches' in window) {
+                caches.keys().then(function(keys) {
+                  keys.forEach(function(key) { caches.delete(key); });
+                });
+              }
+              
+              // Unregister service workers
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(regs) {
+                  regs.forEach(function(reg) { reg.unregister(); });
+                });
+              }
+              
+              // Force reload to root
+              setTimeout(function() {
+                window.location.replace('/');
+              }, 100);
+            } else if (!storedManifestVersion) {
+              // First visit - just save
+              localStorage.setItem('manifest_version', serverVersion);
+              localStorage.setItem('app_version', serverVersion);
+            }
+          })
+          .catch(function(err) {
+            console.log('[myUNO] Manifest check failed (offline?), using fallback');
+          });
+        
+        // LEVEL 3: Fallback sync check for offline scenarios
+        var storedAppVersion = localStorage.getItem('app_version');
+        if (storedAppVersion && storedAppVersion !== CURRENT_VERSION) {
+          console.log('[myUNO] Fallback version check: ' + storedAppVersion + ' → ' + CURRENT_VERSION);
           localStorage.setItem('app_version', CURRENT_VERSION);
           localStorage.setItem('last_cache_cleanup', Date.now().toString());
           
-          // Delete all caches
           if ('caches' in window) {
             caches.keys().then(function(keys) {
               keys.forEach(function(key) { caches.delete(key); });
             });
           }
           
-          // Unregister service workers
           if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(function(regs) {
               regs.forEach(function(reg) { reg.unregister(); });
             });
-          }
-          
-          // If upgrading (not first visit), reload to home
-          if (stored) {
-            setTimeout(function() {
-              window.location.replace('/');
-            }, 100);
           }
         }
       })();

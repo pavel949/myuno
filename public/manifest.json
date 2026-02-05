@@ -1,6 +1,7 @@
 {
   "name": "myUNO",
   "short_name": "myUNO",
+  "version": "3.4.4",
   "description": "Все услуги в одном приложении",
   "start_url": "/",
   "display": "standalone",
