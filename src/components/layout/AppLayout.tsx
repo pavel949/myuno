@@ -33,7 +33,7 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
         
         <main
           className={cn(
-            "flex-1 w-full max-w-7xl mx-auto",
+            "flex-1 w-full",
             showBottomNav && "pb-20 md:pb-4",
             contentClassName
           )}
