@@ -17,10 +17,8 @@ import { cn } from '@/lib/utils';
 import { ConsultationCTA } from '@/components/property/ConsultationCTA';
 import { VerticalCTA } from '@/components/leads/VerticalCTA';
 import { QuickFiltersRibbon } from '@/components/property/QuickFiltersRibbon';
-import { PropertyTypeSelector } from '@/components/property/PropertyTypeSelector';
-import { BedroomChips } from '@/components/property/BedroomChips';
+import { PropertyCategoryRibbon, PropertyMode } from '@/components/property/PropertyCategoryRibbon';
 import { ProjectPromoSection } from '@/components/property/ProjectPromoSection';
-import { PropertyModeToggle, PropertyMode } from '@/components/property/PropertyModeToggle';
 import { OffplanCTASection } from '@/components/property/OffplanCTASection';
 import { applyQuickFilters } from '@/hooks/usePropertyQuickFilters';
 import { matchesFilter, matchesSingleFilter, normalizeForFilter } from '@/lib/filterUtils';
@@ -204,73 +202,69 @@ export default function PropertyIndex() {
   return (
     <AppLayout showHeader={false} showBottomNav={true}>
       <div className="min-h-screen bg-background">
-        {/* Sticky Header with Search */}
-        <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b">
-          <div className="container max-w-7xl mx-auto px-4 py-4">
-            <div className="flex items-center justify-between gap-4 mb-4">
+        {/* Compact Sticky Header - Airbnb style */}
+        <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b space-y-3 pb-3">
+          {/* Row 1: Back + Title + Map + Filter */}
+          <div className="container max-w-7xl mx-auto px-4 pt-3">
+            <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <BackButton fallbackPath="/" variant="ghost" size="sm" />
-                <h1 className="text-xl font-bold">
+                <h1 className="text-lg font-bold truncate">
                   {propertyMode === 'buy' 
                     ? (language === 'ru' ? 'Купить недвижимость' : 'Buy Property')
                     : (language === 'ru' ? 'Аренда жилья' : 'Vacation Rentals')
                   }
                 </h1>
               </div>
-              {/* Rent/Buy Toggle */}
-              <PropertyModeToggle 
-                value={propertyMode} 
-                onChange={setPropertyMode}
-                className="w-48"
-              />
+              
+              {/* Map + Filter buttons */}
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate('/property/map')}>
+                  <MapPin className="w-4 h-4" />
+                  <span className="hidden sm:inline">{language === 'ru' ? 'Карта' : 'Map'}</span>
+                </Button>
+                
+                <UniversalFilter
+                  config={filterConfig}
+                  values={filterValues}
+                  onChange={setFilterValues}
+                  activeCount={activeFilterCount}
+                >
+                  <Button variant="outline" size="sm" className="gap-1.5">
+                    <SlidersHorizontal className="w-4 h-4" />
+                    {activeFilterCount > 0 && (
+                      <Badge variant="secondary" className="h-5 px-1.5 text-xs">
+                        {activeFilterCount}
+                      </Badge>
+                    )}
+                  </Button>
+                </UniversalFilter>
+              </div>
             </div>
+          </div>
             
-            {/* Airbnb-style Search Bar */}
+          {/* Row 2: Compact Search Bar */}
+          <div className="container max-w-7xl mx-auto px-4">
             <AirbnbSearchBar 
               onSearch={setSearchParams}
-              className="mb-4"
             />
+          </div>
 
-            {/* Property Type Selector - Priority types + dropdown */}
-            <div className="flex items-center gap-2">
-              <PropertyTypeSelector
-                selectedType={selectedType}
-                onTypeChange={setSelectedType}
-                propertyTypes={propertyTypes}
-                className="flex-1"
-              />
-
-              {/* Filter Button */}
-              <UniversalFilter
-                config={filterConfig}
-                values={filterValues}
-                onChange={setFilterValues}
-                activeCount={activeFilterCount}
-              >
-                <Button variant="outline" size="sm" className="gap-2 shrink-0">
-                  <SlidersHorizontal className="w-4 h-4" />
-                  {language === 'ru' ? 'Фильтры' : 'Filters'}
-                  {activeFilterCount > 0 && (
-                    <Badge variant="secondary" className="h-5 px-1.5 text-xs">
-                      {activeFilterCount}
-                    </Badge>
-                  )}
-                </Button>
-              </UniversalFilter>
-            </div>
-
-            {/* Bedroom Chips - Inline filter */}
-            <BedroomChips
-              selectedBedrooms={selectedBedrooms}
-              onBedroomsChange={setSelectedBedrooms}
-              className="mt-3"
+          {/* Row 3: Category Ribbon (Mode + Types) */}
+          <div className="container max-w-7xl mx-auto px-4">
+            <PropertyCategoryRibbon
+              mode={propertyMode}
+              onModeChange={setPropertyMode}
+              selectedType={selectedType}
+              onTypeChange={setSelectedType}
+              propertyTypes={propertyTypes}
             />
           </div>
         </header>
 
         {/* Active Filters */}
         {activeFilterCount > 0 && (
-          <div className="container max-w-7xl mx-auto px-4 py-3">
+          <div className="container max-w-7xl mx-auto px-4 py-2">
             <ActiveFilters
               config={filterConfig}
               values={filterValues}
@@ -285,13 +279,15 @@ export default function PropertyIndex() {
           <ConsultationCTA context={propertyMode === 'buy' ? 'purchase' : 'rental'} />
         </div>
 
-        {/* Project Promo Section - Visual carousel of complexes */}
-        <div className="container max-w-7xl mx-auto px-4 py-3">
-          <ProjectPromoSection mode={propertyMode} />
-        </div>
-
-        {/* Quick Filters Ribbon (Agoda/Airbnb style) */}
-        <div className="container max-w-7xl mx-auto px-4 py-3">
+        {/* Results Count + Quick Filter Tags */}
+        <div className="container max-w-7xl mx-auto px-4 py-2">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-sm text-muted-foreground">
+              {properties.length} {language === 'ru' ? 'объектов' : 'places'}
+            </p>
+          </div>
+          
+          {/* Quick Filters as suggestion tags - below results count */}
           <QuickFiltersRibbon 
             selectedFilters={quickFilters}
             selectedDistricts={selectedDistricts}
@@ -312,15 +308,9 @@ export default function PropertyIndex() {
           />
         </div>
 
-        {/* Results Count */}
-        <div className="container max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            {properties.length} {language === 'ru' ? 'объектов найдено' : 'places found'}
-          </p>
-          <Button variant="ghost" size="sm" className="gap-2" onClick={() => navigate('/property/map')}>
-            <MapPin className="w-4 h-4" />
-            {language === 'ru' ? 'На карте' : 'Show map'}
-          </Button>
+        {/* Project Promo Section - Visual carousel of complexes */}
+        <div className="container max-w-7xl mx-auto px-4 py-2">
+          <ProjectPromoSection mode={propertyMode} />
         </div>
 
         {/* Property Grid - Airbnb Style */}
@@ -408,51 +398,65 @@ export default function PropertyIndex() {
                     </p>
 
                     {/* Specs */}
-                    <p className="text-sm text-muted-foreground">
-                      {property.bedrooms || 0} {language === 'ru' ? 'спален' : 'beds'} · {property.bathrooms || 0} {language === 'ru' ? 'ванных' : 'baths'} · {property.max_guests || 0} {language === 'ru' ? 'гостей' : 'guests'}
-                    </p>
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <BedDouble className="w-3.5 h-3.5" />
+                        {property.bedrooms || 0}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Bath className="w-3.5 h-3.5" />
+                        {property.bathrooms || 0}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Users className="w-3.5 h-3.5" />
+                        {property.max_guests || 2}
+                      </span>
+                    </div>
 
                     {/* Price */}
-                    <p className="pt-1">
-                      <span className="font-semibold">{formatPrice(property.price || 0)}</span>
-                      <span className="text-muted-foreground">{formatPriceLabel(property.price_period)}</span>
+                    <p className="text-sm font-semibold pt-1">
+                      {propertyMode === 'buy' 
+                        ? formatPrice((property as any).sale_price || property.price || 0)
+                        : (
+                          <>
+                            {formatPrice(property.price || 0)}
+                            <span className="font-normal text-muted-foreground">
+                              {formatPriceLabel(property.price_period || 'night')}
+                            </span>
+                          </>
+                        )
+                      }
                     </p>
-                    
-                    {/* Instant booking CTA hint */}
-                    {property.instant_booking && (
-                      <p className="text-xs text-amber-600 flex items-center gap-1 mt-1">
-                        <Zap className="w-3 h-3" />
-                        {language === 'ru' ? 'Забронировать сейчас' : 'Book now'}
-                      </p>
-                    )}
                   </div>
                 </div>
               ))}
-              
-              {properties.length === 0 && (
-                <div className="col-span-full text-center py-16">
-                  <Home className="w-16 h-16 mx-auto text-muted-foreground/30 mb-4" />
-                  <h3 className="text-lg font-medium mb-2">
-                    {language === 'ru' ? 'Объекты не найдены' : 'No places found'}
-                  </h3>
-                  <p className="text-muted-foreground mb-4">
-                    {language === 'ru' 
-                      ? 'Попробуйте изменить параметры поиска' 
-                      : 'Try adjusting your search criteria'}
-                  </p>
-                  <Button variant="outline" onClick={() => {
-                    setSearchParams({ locations: [], checkIn: undefined, checkOut: undefined, guests: 2 });
-                    setSelectedType('all');
-                    setFilterValues({});
-                    setQuickFilters([]);
-                    setSelectedProjectId(null);
-                    setSelectedBedrooms([]);
-                    setSelectedDistricts([]);
-                  }}>
-                    {language === 'ru' ? 'Сбросить фильтры' : 'Clear all filters'}
-                  </Button>
-                </div>
-              )}
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!isLoading && properties.length === 0 && (
+            <div className="text-center py-16">
+              <Home className="w-16 h-16 mx-auto text-muted-foreground/50 mb-4" />
+              <h3 className="text-lg font-semibold mb-2">
+                {language === 'ru' ? 'Ничего не найдено' : 'No properties found'}
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                {language === 'ru' 
+                  ? 'Попробуйте изменить фильтры' 
+                  : 'Try adjusting your filters'}
+              </p>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setFilterValues({});
+                  setQuickFilters([]);
+                  setSelectedDistricts([]);
+                  setSelectedBedrooms([]);
+                  setSelectedType('all');
+                }}
+              >
+                {language === 'ru' ? 'Сбросить фильтры' : 'Reset filters'}
+              </Button>
             </div>
           )}
 

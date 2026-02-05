@@ -8,6 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { InlineIcon } from '@/components/ui/IconBadge';
+import { Bed } from 'lucide-react';
 
 // ====== UNIVERSAL FILTER TYPES ======
 
@@ -85,6 +86,57 @@ function PriceLevelSelect({ value, onChange, maxLevel = 4 }: PriceLevelSelectPro
           </span>
         </button>
       ))}
+    </div>
+  );
+}
+
+// ====== BEDROOM SELECT (Airbnb style) ======
+
+interface BedroomSelectProps {
+  value: string[];
+  onChange: (value: string[]) => void;
+}
+
+const BEDROOM_OPTIONS = [
+  { id: 'studio', labelEn: 'Studio', labelRu: 'Студия' },
+  { id: '1', labelEn: '1', labelRu: '1' },
+  { id: '2', labelEn: '2', labelRu: '2' },
+  { id: '3', labelEn: '3', labelRu: '3' },
+  { id: '4', labelEn: '4', labelRu: '4' },
+  { id: '5+', labelEn: '5+', labelRu: '5+' },
+];
+
+function BedroomSelect({ value, onChange }: BedroomSelectProps) {
+  const { language } = useLanguage();
+
+  const toggleOption = (optionId: string) => {
+    if (value.includes(optionId)) {
+      onChange(value.filter(v => v !== optionId));
+    } else {
+      onChange([...value, optionId]);
+    }
+  };
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {BEDROOM_OPTIONS.map((option) => {
+        const isActive = value.includes(option.id);
+        return (
+          <button
+            key={option.id}
+            onClick={() => toggleOption(option.id)}
+            className={cn(
+              "inline-flex items-center justify-center min-w-[48px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all",
+              "border-2",
+              isActive
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-secondary text-secondary-foreground border-border hover:border-primary/50"
+            )}
+          >
+            {language === 'ru' ? option.labelRu : option.labelEn}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -298,11 +350,18 @@ export function UniversalFilter({
                 )}
 
                 {section.type === 'multi' && (
+                  section.id === 'bedrooms' ? (
+                    <BedroomSelect
+                      value={(localValues[section.id] as string[]) || []}
+                      onChange={(value) => updateSectionValue(section.id, value)}
+                    />
+                  ) : (
                   <MultiSelectChips
                     options={section.options}
                     value={(localValues[section.id] as string[]) || []}
                     onChange={(value) => updateSectionValue(section.id, value)}
                   />
+                  )
                 )}
               </div>
             ))}

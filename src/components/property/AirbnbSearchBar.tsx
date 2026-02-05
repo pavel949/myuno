@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Search, MapPin, X, Minus, Plus } from 'lucide-react';
+import { Search, MapPin, X, Minus, Plus, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
@@ -23,7 +23,7 @@ export interface SearchParams {
 }
 
 const locations = [
-  { id: 'all', labelEn: 'Anywhere in Phuket', labelRu: 'Весь Пхукет', icon: '🏝️' },
+  { id: 'all', labelEn: 'All Phuket', labelRu: 'Весь Пхукет', icon: '🏝️' },
   { id: 'patong', labelEn: 'Patong', labelRu: 'Патонг', icon: '🎉' },
   { id: 'kata', labelEn: 'Kata', labelRu: 'Ката', icon: '🏖️' },
   { id: 'karon', labelEn: 'Karon', labelRu: 'Карон', icon: '🌊' },
@@ -158,25 +158,26 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
       {/* Mobile Search Bar - Enhanced visibility */}
       <div className="md:hidden">
         <motion.div 
-          className="flex items-center gap-3 p-3 bg-gradient-to-r from-primary/5 via-primary/10 to-accent/10 rounded-2xl border-2 border-primary/20 shadow-xl cursor-pointer ring-2 ring-primary/10 ring-offset-2 ring-offset-background"
+          className="flex items-center gap-2 px-4 py-2.5 bg-card rounded-full border shadow-sm cursor-pointer"
           onClick={() => setIsOpen(true)}
           whileTap={{ scale: 0.98 }}
-          whileHover={{ scale: 1.01 }}
         >
-          <div className="bg-gradient-to-br from-primary to-primary/80 p-3 rounded-xl shadow-md">
-            <Search className="w-5 h-5 text-primary-foreground" />
-          </div>
+          <Search className="w-4 h-4 text-muted-foreground shrink-0" />
           <div className="flex-1 min-w-0">
-            <p className="font-bold text-base text-foreground truncate">{locationLabel}</p>
-            <p className="text-sm text-muted-foreground truncate font-medium">
-              {checkIn && checkOut 
-                ? `${formatDate(checkIn)} – ${formatDate(checkOut)} · ${totalGuests} ${language === 'ru' ? 'гост.' : 'guests'}`
-                : language === 'ru' ? '📅 Выберите даты · 👥 Гости' : '📅 Select dates · 👥 Guests'
-              }
-            </p>
-          </div>
-          <div className="shrink-0 bg-primary text-primary-foreground px-3 py-1.5 rounded-full text-xs font-semibold">
-            {language === 'ru' ? 'Найти' : 'Search'}
+            <div className="flex items-center gap-1 text-sm">
+              <span className="font-medium truncate">{locationLabel}</span>
+              <span className="text-muted-foreground">·</span>
+              <span className="text-muted-foreground truncate">
+                {checkIn && checkOut 
+                  ? `${formatDate(checkIn)} – ${formatDate(checkOut)}`
+                  : (language === 'ru' ? 'Даты' : 'Any week')
+                }
+              </span>
+              <span className="text-muted-foreground">·</span>
+              <span className="text-muted-foreground">
+                {totalGuests} {language === 'ru' ? 'гост.' : 'guests'}
+              </span>
+            </div>
           </div>
         </motion.div>
 
@@ -237,37 +238,41 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                         className="p-4 space-y-4"
                       >
                         <h3 className="text-xl font-bold">{language === 'ru' ? 'Куда вы едете?' : 'Where are you going?'}</h3>
-                        <div className="grid grid-cols-2 gap-3">
-                          {locations.filter(l => l.id !== 'all').map((loc) => (
-                            <motion.button
+                        
+                        {/* Compact list instead of grid cards */}
+                        <div className="space-y-1 max-h-[300px] overflow-y-auto">
+                          {locations.map((loc) => (
+                            <button
                               key={loc.id}
                               className={cn(
-                                "flex items-center gap-3 p-4 rounded-2xl text-left transition-all border-2",
-                                selectedLocations.includes(loc.id)
-                                  ? "border-primary bg-primary/5" 
-                                  : "border-border hover:border-primary/30"
+                                "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors",
+                                loc.id === 'all' && selectedLocations.length === 0
+                                  ? "bg-primary/10 text-primary"
+                                  : selectedLocations.includes(loc.id)
+                                    ? "bg-primary/10 text-primary" 
+                                    : "hover:bg-muted"
                               )}
                               onClick={() => toggleLocation(loc.id)}
-                              whileTap={{ scale: 0.97 }}
                             >
-                              <span className="text-2xl">{loc.icon}</span>
-                              <span className={cn(
-                                "text-sm font-medium",
-                                selectedLocations.includes(loc.id) && "text-primary"
-                              )}>
+                              <span className="text-lg w-6">{loc.icon}</span>
+                              <span className="flex-1 text-sm font-medium">
                                 {language === 'ru' ? loc.labelRu : loc.labelEn}
                               </span>
-                            </motion.button>
+                              {(loc.id === 'all' && selectedLocations.length === 0) || selectedLocations.includes(loc.id) ? (
+                                <Check className="w-4 h-4 text-primary" />
+                              ) : null}
+                            </button>
                           ))}
                         </div>
+                        
                         {selectedLocations.length > 0 && (
-                          <div className="flex flex-wrap gap-2 pt-2">
+                          <div className="flex flex-wrap gap-2 pt-2 border-t">
                             {selectedLocations.map(locId => {
                               const loc = locations.find(l => l.id === locId);
                               return loc ? (
-                                <span key={locId} className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
+                                <span key={locId} className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary rounded-full text-xs">
                                   {loc.icon} {language === 'ru' ? loc.labelRu : loc.labelEn}
-                                  <button onClick={() => toggleLocation(locId)} className="ml-1 hover:text-primary/70">
+                                  <button onClick={(e) => { e.stopPropagation(); toggleLocation(locId); }} className="ml-1 hover:text-primary/70">
                                     <X className="w-3 h-3" />
                                   </button>
                                 </span>
@@ -275,14 +280,6 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                             })}
                           </div>
                         )}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full mt-2"
-                          onClick={goToNextTab}
-                        >
-                          {language === 'ru' ? 'Далее' : 'Next'} →
-                        </Button>
                       </motion.div>
                     )}
 
