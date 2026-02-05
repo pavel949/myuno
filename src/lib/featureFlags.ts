@@ -105,21 +105,6 @@ const FLAGS: Record<string, FeatureFlag> = {
     description: 'New map-based property search',
     rolloutPercentage: 100,
   },
-  BETA_CHAT_V2: {
-    key: 'beta_chat_v2',
-    enabled: false,
-    description: 'New chat interface with threads',
-    rolloutPercentage: 0,
-    environments: ['development'],
-  },
-  
-  // Test Mode Features (Wave testing)
-  TEST_MODE_UTILITIES: {
-    key: 'test_mode_utilities',
-    enabled: import.meta.env.VITE_TEST_MODE === 'true',
-    description: 'Test utilities for Wave testing (account switching, state clearing)',
-    environments: ['development', 'staging'],
-  },
 } as const;
 
 /**

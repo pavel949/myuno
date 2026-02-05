@@ -116,9 +116,8 @@ export function useBookingVouchers() {
     if (navigator.share) {
       try {
         await navigator.share(shareData);
-      } catch (err) {
-        // User cancelled or share failed
-        console.log('Share cancelled');
+      } catch {
+        // User cancelled or share failed - silent in production
       }
     } else {
       // Fallback: copy to clipboard

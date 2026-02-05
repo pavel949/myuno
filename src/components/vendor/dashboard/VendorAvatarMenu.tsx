@@ -33,7 +33,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from 'next-themes';
 import { cn } from '@/lib/utils';
-import { TestUtilitiesMenu } from '@/components/test/TestUtilitiesMenu';
 
 interface VendorAvatarMenuProps {
   className?: string;
@@ -154,9 +153,6 @@ export function VendorAvatarMenu({ className }: VendorAvatarMenuProps) {
             </DropdownMenuSubContent>
           </DropdownMenuPortal>
         </DropdownMenuSub>
-
-        {/* Test Utilities (only in test mode) */}
-        <TestUtilitiesMenu />
 
         <DropdownMenuSeparator />
 
