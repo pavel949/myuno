@@ -397,25 +397,37 @@ export function useAllPropertyBookings() {
         throw error;
       }
 
-      // Enrich with property data
-      const enrichedData = await Promise.all((data || []).map(async (order) => {
-        const resourceId = order.order_items?.[0]?.resource_id;
-        
-        let propertyData = null;
-        if (resourceId) {
-          const { data: prop } = await supabase
-            .from('owner_properties')
-            .select('id, title, title_ru, address, cover_image')
-            .eq('id', resourceId)
-            .single();
-          propertyData = prop;
-        }
+      // P1 FIX: Batch property lookup instead of N+1 queries
+      const resourceIds = [...new Set(
+        (data || [])
+          .map(order => order.order_items?.[0]?.resource_id)
+          .filter(Boolean) as string[]
+      )];
 
+      let propertiesMap: Record<string, { id: string; title: string; title_ru: string | null; address: string | null; cover_image: string | null }> = {};
+      
+      if (resourceIds.length > 0) {
+        const { data: props } = await supabase
+          .from('owner_properties')
+          .select('id, title, title_ru, address, cover_image')
+          .in('id', resourceIds);
+        
+        propertiesMap = (props || []).reduce((acc, prop) => {
+          acc[prop.id] = prop;
+          return acc;
+        }, {} as typeof propertiesMap);
+      }
+
+      // Map orders with pre-fetched property data
+      const enrichedData = (data || []).map(order => {
+        const resourceId = order.order_items?.[0]?.resource_id;
+        const propertyData = resourceId ? propertiesMap[resourceId] || null : null;
+        
         return {
           ...mapOrderToBooking(order, resourceId || ''),
           owner_properties: propertyData,
         };
-      }));
+      });
 
       return enrichedData;
     },
@@ -472,25 +484,37 @@ export function useGuestPropertyBookings() {
         throw error;
       }
 
-      // Enrich with property data
-      const enrichedData = await Promise.all((data || []).map(async (order) => {
-        const resourceId = order.order_items?.[0]?.resource_id;
-        
-        let propertyData = null;
-        if (resourceId) {
-          const { data: prop } = await supabase
-            .from('owner_properties')
-            .select('id, title, title_ru, address, cover_image, check_in_time, check_out_time')
-            .eq('id', resourceId)
-            .single();
-          propertyData = prop;
-        }
+      // P1 FIX: Batch property lookup instead of N+1 queries
+      const resourceIds = [...new Set(
+        (data || [])
+          .map(order => order.order_items?.[0]?.resource_id)
+          .filter(Boolean) as string[]
+      )];
 
+      let propertiesMap: Record<string, { id: string; title: string; title_ru: string | null; address: string | null; cover_image: string | null; check_in_time: string | null; check_out_time: string | null }> = {};
+      
+      if (resourceIds.length > 0) {
+        const { data: props } = await supabase
+          .from('owner_properties')
+          .select('id, title, title_ru, address, cover_image, check_in_time, check_out_time')
+          .in('id', resourceIds);
+        
+        propertiesMap = (props || []).reduce((acc, prop) => {
+          acc[prop.id] = prop;
+          return acc;
+        }, {} as typeof propertiesMap);
+      }
+
+      // Map orders with pre-fetched property data
+      const enrichedData = (data || []).map(order => {
+        const resourceId = order.order_items?.[0]?.resource_id;
+        const propertyData = resourceId ? propertiesMap[resourceId] || null : null;
+        
         return {
           ...mapOrderToBooking(order, resourceId || ''),
           owner_properties: propertyData,
         };
-      }));
+      });
 
       return enrichedData;
     },

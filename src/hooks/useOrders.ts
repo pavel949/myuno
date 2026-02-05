@@ -163,7 +163,7 @@ export function useOrders() {
 
   // Fetch user's orders
   const { data: orders, isLoading: ordersLoading, refetch: refetchOrders } = useQuery({
-    queryKey: ['orders', user?.id],
+   queryKey: ['orders', user?.id, 'recent'],
     queryFn: async (): Promise<Order[]> => {
       if (!user?.id) return [];
 
@@ -176,7 +176,9 @@ export function useOrders() {
           order_addresses(*)
         `)
         .eq('customer_user_id', user.id)
-        .order('created_at', { ascending: false });
+       .is('deleted_at', null)
+       .order('created_at', { ascending: false })
+       .limit(100); // P0 FIX: Limit for scalability
 
       if (error) throw error;
       return (data || []) as Order[];
@@ -442,7 +444,9 @@ export function useVendorOrders(orgId?: string) {
           order_addresses(*)
         `)
         .eq('provider_org_id', effectiveOrgId)
-        .order('created_at', { ascending: false });
+       .is('deleted_at', null)
+       .order('created_at', { ascending: false })
+       .limit(200); // P0 FIX: Limit for scalability
 
       if (error) throw error;
       return (data || []) as Order[];

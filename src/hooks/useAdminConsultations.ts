@@ -21,7 +21,8 @@ export function useAdminConsultations(filters?: ConsultationFilters) {
       let query = supabase
         .from('consultation_requests')
         .select('*')
-        .order('created_at', { ascending: false });
+       .order('created_at', { ascending: false })
+       .limit(500); // P0 FIX: Limit for scalability - use pagination UI for older records
 
       if (filters?.status && filters.status !== 'all') {
         query = query.eq('status', filters.status);
