@@ -317,6 +317,7 @@ const AdminIntakeConfigs = lazy(() => import('@/pages/admin/AdminIntakeConfigs')
 const AdminLeadConfigs = lazy(() => import('@/pages/admin/AdminLeadConfigs'));
 const AdminVendorProspects = lazy(() => import('@/pages/admin/AdminVendorProspects'));
 const AdminLifeSituations = lazy(() => import('@/pages/admin/AdminLifeSituations'));
+const AdminLifeOS = lazy(() => import('@/pages/admin/AdminLifeOS'));
 
 // Life Flow public page
 const LifeFlowPage = lazy(() => import('@/pages/LifeFlowPage'));
@@ -805,8 +806,9 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/admin/marketing" element={<MarketingDashboard />} />
           {/* Experience Categories */}
           <Route path="/admin/experience-categories" element={<ExperienceCategoriesPage />} />
-          {/* Life Situations Management */}
-          <Route path="/admin/life-situations" element={<AdminLifeSituations />} />
+          {/* LifeOS Control Center */}
+          <Route path="/admin/life-situations" element={<AdminLifeOS />} />
+          <Route path="/admin/lifeos" element={<AdminLifeOS />} />
         </Route>
         
         {/* Staff Routes - Protected */}
