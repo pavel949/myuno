@@ -13667,6 +13667,124 @@ export type Database = {
           },
         ]
       }
+      simulation_entity_links: {
+        Row: {
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          run_id: string
+        }
+        Insert: {
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          run_id: string
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          run_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "simulation_entity_links_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "simulation_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      simulation_events: {
+        Row: {
+          actor_role: string | null
+          actor_user_id: string | null
+          duration_ms: number | null
+          entity_id: string | null
+          entity_type: string | null
+          error: string | null
+          event_type: string
+          id: string
+          payload: Json | null
+          run_id: string
+          ts: string
+        }
+        Insert: {
+          actor_role?: string | null
+          actor_user_id?: string | null
+          duration_ms?: number | null
+          entity_id?: string | null
+          entity_type?: string | null
+          error?: string | null
+          event_type: string
+          id?: string
+          payload?: Json | null
+          run_id: string
+          ts?: string
+        }
+        Update: {
+          actor_role?: string | null
+          actor_user_id?: string | null
+          duration_ms?: number | null
+          entity_id?: string | null
+          entity_type?: string | null
+          error?: string | null
+          event_type?: string
+          id?: string
+          payload?: Json | null
+          run_id?: string
+          ts?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "simulation_events_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "simulation_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      simulation_runs: {
+        Row: {
+          completed_at: string | null
+          config: Json | null
+          created_at: string
+          created_by: string | null
+          id: string
+          label: string
+          notes: Json | null
+          purged_at: string | null
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          config?: Json | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label: string
+          notes?: Json | null
+          purged_at?: string | null
+          status?: string
+        }
+        Update: {
+          completed_at?: string | null
+          config?: Json | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string
+          notes?: Json | null
+          purged_at?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       staff_profiles: {
         Row: {
           avg_rating: number | null
@@ -18761,6 +18879,7 @@ export type Database = {
         Args: { p_property_id: string; p_user_id: string }
         Returns: string
       }
+      get_simulation_report: { Args: { p_run_id: string }; Returns: Json }
       get_subscription_revenue: {
         Args: { p_days?: number }
         Returns: {
@@ -18807,10 +18926,18 @@ export type Database = {
       is_admin_or_uno_team: { Args: never; Returns: boolean }
       is_mcc_admin: { Args: never; Returns: boolean }
       is_org_owner: { Args: { check_org_id: string }; Returns: boolean }
+      is_simulation_entity: {
+        Args: { p_entity_id: string; p_entity_type: string }
+        Returns: boolean
+      }
       is_team_member: { Args: { check_user_id: string }; Returns: boolean }
       is_verified_purchase: {
         Args: { p_item_id: string; p_item_type: string; p_user_id: string }
         Returns: boolean
+      }
+      link_simulation_entity: {
+        Args: { p_entity_id: string; p_entity_type: string; p_run_id: string }
+        Returns: undefined
       }
       log_security_event: {
         Args: {
@@ -18819,6 +18946,19 @@ export type Database = {
           p_ip_address?: string
           p_user_agent?: string
           p_user_id?: string
+        }
+        Returns: string
+      }
+      log_simulation_event: {
+        Args: {
+          p_actor_role?: string
+          p_duration_ms?: number
+          p_entity_id?: string
+          p_entity_type?: string
+          p_error?: string
+          p_event_type: string
+          p_payload?: Json
+          p_run_id: string
         }
         Returns: string
       }
@@ -18845,6 +18985,7 @@ export type Database = {
         Args: { p_owner_property_id: string }
         Returns: string
       }
+      purge_simulation_run: { Args: { p_run_id: string }; Returns: Json }
       recalculate_user_segment: {
         Args: { p_user_id: string }
         Returns: undefined
@@ -18891,6 +19032,10 @@ export type Database = {
         Returns: boolean
       }
       soft_delete_order: { Args: { p_order_id: string }; Returns: boolean }
+      start_simulation_run: {
+        Args: { p_config?: Json; p_label: string }
+        Returns: string
+      }
       topup_wallet_atomic: {
         Args: {
           p_amount: number
