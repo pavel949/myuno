@@ -1,298 +1,271 @@
 
-# План: Каталог "Решение Проблем" для Домашних Услуг (Фаза 1)
+# Системный аудит: Канонические элементы и Sources of Truth
 
-## Обзор
+## Резюме
 
-Реализация каталога домашних услуг с фокусом на **решениях бытовых проблем** вместо списка мастеров. На первом этапе заявки обрабатываются вручную администратором через систему лидов с уведомлениями в WhatsApp.
+Проведен глубокий технический аудит платформы myUNO для выявления дублирующихся определений, разрозненных констант и отсутствующих "единых точек правды" (Sources of Truth). Обнаружено **6 критических категорий данных**, требующих канонизации, и **18 файлов** с дублирующейся логикой.
+
+---
+
+## Часть 1: Критические проблемы (P0-P1)
+
+### 1.1 Статусы транзакций — РАСХОЖДЕНИЕ
+
+**Проблема:** Две конкурирующие системы статусов для заказов.
+
+| Источник | Расположение | Статусы |
+|----------|--------------|---------|
+| `OrderStatus` | `src/types/orders.ts` | `draft`, `pending`, `confirmed`, `in_progress`, `completed`, `cancelled`, `refunded`, `disputed` |
+| `BOOKING_STATUS` | `src/lib/constants.ts` | `pending`, `pending_deposit`, `deposit_paid`, `confirmed`, `checked_in`, `checked_out`, `completed`, `cancelled`, `cancelled_by_guest`, `cancelled_by_host`, `no_show` |
+| DB Enum | `public.order_status` | Включает дополнительно: `pending_advance`, `awaiting_client_payment` |
+| DB Enum | `public.booking_status` | `draft`, `submitted`, `confirmed`, `in_progress`, `completed`, `cancelled_by_user`, `cancelled_by_provider`, `expired` |
+
+**Риск:** Несовместимость между фронтендом и БД, невозможность отследить реальный статус бронирования.
+
+**Решение:**
+```text
+┌─────────────────────────────────────────────────────────────┐
+│                 CANONICAL ORDER STATUS                       │
+├─────────────────────────────────────────────────────────────┤
+│ draft → pending → confirmed → in_progress → completed       │
+│                  ↓            ↓                              │
+│              cancelled    checked_in → checked_out          │
+│                  ↓                                          │
+│         refunded / disputed / no_show                       │
+└─────────────────────────────────────────────────────────────┘
+```
+- Расширить `order_status` ENUM в БД
+- Удалить `BOOKING_STATUS` из `constants.ts`
+- Добавить `metadata.cancellation_reason` для детализации (`by_guest`, `by_host`)
+
+---
+
+### 1.2 Идентификаторы вертикалей — ФРАГМЕНТАЦИЯ
+
+**Проблема:** 5 разных списков вертикалей с несогласованным именованием.
+
+| Система | Singular | Plural | Примеры расхождений |
+|---------|----------|--------|---------------------|
+| Orders (`OrderType`) | ✓ | - | `property`, `vehicle`, `cleaning` |
+| Taxonomy | ✓ | - | `property`, `transport`, `home_services` |
+| Team Permissions | - | ✓ | `properties`, `vehicles`, `cleaning` |
+| Lead Config | - | ✓ | `properties`, `vehicles` |
+| AI Intake | Mixed | - | `properties`, `legal_services` |
+
+**Риск:** Ошибки маппинга между формами лидов, заказами и правами доступа.
+
+**Решение:**
+- Создать `src/lib/verticals.ts` как единый реестр:
+```typescript
+export const VERTICALS = {
+  PROPERTY: { id: 'property', plural: 'properties', table: 'properties', icon: '🏠' },
+  YACHT: { id: 'yacht', plural: 'yachts', table: 'yachts', icon: '🚤' },
+  VEHICLE: { id: 'vehicle', plural: 'vehicles', table: 'vehicles', icon: '🚗' },
+  CLEANING: { id: 'cleaning', plural: 'cleaning', table: 'cleaning_providers', icon: '🧹' },
+  // ... 15+ verticals
+} as const;
+```
+- Мигрировать все файлы на импорт из этого единого источника
+
+---
+
+### 1.3 Модели ценообразования — ДУБЛИРОВАНИЕ
+
+**Проблема:** Pricing models определены в 4+ местах с разным набором значений.
+
+| Компонент | Значения |
+|-----------|----------|
+| Admin Taxonomy Editor | `fixed`, `per_hour`, `per_day`, `per_night`, `per_km`, `negotiable` |
+| Vendor Wizard | `fixed`, `per_hour`, `per_day`, `per_person` |
+| DB Fields | `price_per_hour`, `price_per_day`, `price_per_night`, `price_per_km`, `price_per_course` |
+
+**Риск:** Провайдер не может выбрать нужную модель; данные сохраняются некорректно.
+
+**Решение:**
+- Создать каноническое перечисление:
+```typescript
+// src/lib/pricing.ts
+export const PRICING_MODELS = {
+  FIXED: { id: 'fixed', labelEn: 'Fixed Price', labelRu: 'Фикс. цена' },
+  HOURLY: { id: 'per_hour', labelEn: 'Per Hour', labelRu: 'За час' },
+  DAILY: { id: 'per_day', labelEn: 'Per Day', labelRu: 'За день' },
+  NIGHTLY: { id: 'per_night', labelEn: 'Per Night', labelRu: 'За ночь' },
+  PER_PERSON: { id: 'per_person', labelEn: 'Per Person', labelRu: 'За человека' },
+  PER_KM: { id: 'per_km', labelEn: 'Per KM', labelRu: 'За км' },
+  NEGOTIABLE: { id: 'negotiable', labelEn: 'Negotiable', labelRu: 'По договорённости' },
+} as const;
+```
+- Унифицировать схему: `base_price` + `pricing_model` вместо множества полей `price_per_*`
+
+---
+
+## Часть 2: Высокий приоритет (P1)
+
+### 2.1 Валюты — ХАРДКОД
+
+**Текущее состояние:**
+- Символ `฿` встречается в **100+ файлах** напрямую
+- Метаданные валют дублируются в 3 местах:
+  - `src/contexts/CurrencyContext.tsx`
+  - `src/types/marketing.ts`
+  - `src/lib/constants.ts`
+
+**Решение:**
+- Создать `src/lib/config/currencies.ts`:
+```typescript
+export const CURRENCIES = {
+  THB: { code: 'THB', symbol: '฿', flag: '🇹🇭', nameEn: 'Thai Baht', nameRu: 'Тайский бат' },
+  USD: { code: 'USD', symbol: '$', flag: '🇺🇸', nameEn: 'US Dollar', nameRu: 'Доллар США' },
+  // ...
+} as const;
+```
+- Запретить хардкод символов в JSX (через линтер или code review)
+- Все компоненты должны использовать `formatPrice()` из `useCurrency()`
+
+---
+
+### 2.2 Роли пользователей — НЕСОГЛАСОВАННОСТЬ
+
+**Текущее состояние:**
+- DB Enum `app_role`: 16 значений (включая `ombudsman`, `investor`)
+- Frontend `AppRole` (useUserRoles): 12 значений (не включает `ombudsman`)
+- Frontend `AppRole` (useUserContext): 10 значений (другой набор)
+
+**Решение:**
+- Вынести в `src/types/auth.ts`:
+```typescript
+// Синхронизировано с public.app_role ENUM
+export type AppRole = 
+  | 'guest' | 'user' | 'tourist' | 'resident'
+  | 'partner' | 'owner' | 'property_owner' | 'vendor'
+  | 'staff' | 'admin' | 'ombudsman' | 'uno_team'
+  | 'finance' | 'support' | 'sales' | 'investor';
+```
+- Все хуки (`useUserRoles`, `useUserContext`, `useIsAdmin`) должны импортировать этот тип
+
+---
+
+### 2.3 UI Бейджи — ВИЗУАЛЬНАЯ ФРАГМЕНТАЦИЯ
+
+**Проблема:** Разные иконки и стили для одних и тех же статусов:
+- Verified: `CheckCircle2` vs `Shield` vs `ShieldCheck`
+- Featured: `Star` vs `⭐ Featured` (текст) vs градиент
+
+**Решение:**
+- Использовать `BADGE_SYSTEM` из `src/lib/designTokens.ts` как единственный источник
+- Создать `<StatusBadge status="verified" />` компонент для унификации
+- Обязательное использование `UnifiedContentCard` для всех карточек
+
+---
+
+## Часть 3: Средний приоритет (P2)
+
+### 3.1 Таксономии по вертикалям
+
+**Статус:** Частично канонизировано, но разрознено по папкам.
+
+| Вертикаль | Файл таксономии | Статус |
+|-----------|-----------------|--------|
+| Property | `src/lib/propertyTaxonomy.ts` | ✓ Полный |
+| Transport | `src/lib/config/transportTaxonomy.ts` | ✓ Полный |
+| Home Services | `src/lib/config/homeServicesTaxonomy.ts` | ✓ Полный |
+| Experiences | `src/lib/taxonomies/experiencesTaxonomy.ts` | ✓ Полный |
+| Beauty | `src/lib/taxonomies/beautyTaxonomy.ts` | ✓ Полный |
+| Restaurants | Отсутствует | ✗ Нужен |
+| Medical | Отсутствует | ✗ Нужен |
+| Education | Отсутствует | ✗ Нужен |
+
+**Решение:**
+- Консолидировать все таксономии в `src/lib/taxonomies/`
+- Создать недостающие файлы по шаблону существующих
+
+---
+
+### 3.2 Provider ID Mapping
+
+**Статус:** Уже канонизировано в `src/lib/providerIdMapping.ts`.
+
+**Рекомендация:** Добавить недостающие таблицы:
+- `events` → `provider_id`
+- `water_activities` → `provider_id`
+- `experiences` → `provider_id`
+
+---
+
+## Часть 4: Регламенты системы
+
+### 4.1 Обязательные правила разработки
+
+| Правило | Описание |
+|---------|----------|
+| **SoT-001** | Все новые статусы добавляются ТОЛЬКО через DB ENUM с последующей синхронизацией типов |
+| **SoT-002** | Вертикали используют singular ID (`property`, не `properties`) во всех внутренних системах |
+| **SoT-003** | Цены форматируются ТОЛЬКО через `formatPrice()`, хардкод символов запрещен |
+| **SoT-004** | Новые роли добавляются в ENUM `app_role` и синхронизируются с `AppRole` type |
+| **SoT-005** | Любой boolean-флаг маркетинга (`is_featured`, `is_hot`) управляется только админами |
+
+### 4.2 Структура Sources of Truth
 
 ```text
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                          ПОЛЬЗОВАТЕЛЬСКИЙ ПУТЬ                               │
-├──────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│  [Домашние услуги] → [Категория: AC] → [Чистка кондиционера]                │
-│                            │                    │                            │
-│                            ▼                    ▼                            │
-│                      Карточки функций     Форма заказа                      │
-│                      (цена, время)        (адрес, дата, контакт)            │
-│                                                 │                            │
-│                                                 ▼                            │
-│                                           ┌─────────────────┐                │
-│                                           │ consultation_   │                │
-│                                           │ requests        │                │
-│                                           │ (vertical_id:   │                │
-│                                           │  home_services) │                │
-│                                           └────────┬────────┘                │
-│                                                    │                         │
-│                              ┌─────────────────────┴──────────────────┐      │
-│                              ▼                                        ▼      │
-│                    [Admin: /admin/consultations]           [WhatsApp: +66922407355]  │
-│                    (Фильтр по vertical_id)                  (Уведомление)    │
-│                                                                              │
-└──────────────────────────────────────────────────────────────────────────────┘
+src/
+├── lib/
+│   ├── constants.ts          # STORAGE_KEYS, VALIDATION, CASHBACK (immutable)
+│   ├── verticals.ts          # NEW: Master vertical registry
+│   ├── pricing.ts            # NEW: Pricing models
+│   ├── config/
+│   │   └── currencies.ts     # NEW: Currency metadata
+│   └── taxonomies/
+│       ├── index.ts          # Re-exports all taxonomies
+│       ├── taxonomyTypes.ts  # Taxonomy type keys
+│       └── [vertical].ts     # Per-vertical taxonomy
+├── types/
+│   ├── auth.ts               # NEW: AppRole, Permission types
+│   └── orders.ts             # OrderType, OrderStatus (sync with DB)
+└── contexts/
+    └── CurrencyContext.tsx   # Uses currencies.ts config
 ```
 
 ---
 
-## Фаза 1: Канонические Функции (Static Config)
+## Часть 5: План реализации
 
-### 1.1 Создать конфигурацию функций услуг
+### Фаза 1 (Критическое) — 1 день
+1. Расширить `order_status` ENUM в БД, добавив `checked_in`, `checked_out`, `no_show`
+2. Удалить `BOOKING_STATUS` из `constants.ts`, мигрировать все использования
+3. Создать `src/lib/verticals.ts` с мастер-реестром
 
-**Файл:** `src/lib/config/homeServiceFunctions.ts`
+### Фаза 2 (Высокий приоритет) — 2 дня
+4. Создать `src/lib/pricing.ts` с каноническими моделями
+5. Создать `src/lib/config/currencies.ts`
+6. Унифицировать `AppRole` в `src/types/auth.ts`
 
-Определяет ~35 канонических бытовых проблем и их решений:
-
-| Категория | Функция | Цена от (THB) | Время | Что входит |
-|-----------|---------|---------------|-------|------------|
-| **ac** | ac_cleaning | 800 | 1-2ч | Промывка фильтров, дезинфекция, проверка давления |
-| **ac** | ac_install | 3,500 | 3-5ч | Монтаж блоков, прокладка трассы, пуско-наладка |
-| **ac** | ac_repair | 1,500 | 1-3ч | Диагностика, замена деталей |
-| **ac** | ac_gas_refill | 600 | 30м | Заправка фреоном, проверка утечек |
-| **plumbing** | leak_repair | 1,200 | 1-2ч | Устранение течи, замена прокладок |
-| **plumbing** | faucet_install | 1,500 | 1ч | Демонтаж старого, установка нового |
-| **plumbing** | drain_cleaning | 2,000 | 1-2ч | Прочистка канализации, профилактика |
-| **plumbing** | toilet_repair | 1,000 | 1ч | Ремонт сливного механизма |
-| **plumbing** | water_heater | 2,500 | 2-3ч | Установка/ремонт водонагревателя |
-| **electrical** | socket_install | 500 | 30м | Установка розетки/выключателя |
-| **electrical** | wiring_repair | 2,000 | 2-4ч | Ремонт проводки, поиск замыкания |
-| **electrical** | chandelier_install | 1,000 | 1ч | Монтаж люстры/светильника |
-| **electrical** | breaker_repair | 1,500 | 1-2ч | Ремонт автоматов, щитка |
-| **handyman** | furniture_assembly | 500 | 1-2ч | Сборка мебели IKEA и др. |
-| **handyman** | door_repair | 800 | 1ч | Ремонт/регулировка дверей |
-| **handyman** | lock_change | 1,200 | 30м-1ч | Замена замков |
-| **handyman** | tv_mounting | 800 | 1ч | Монтаж ТВ на стену |
-| **repair** | washing_machine | 1,500 | 1-2ч | Ремонт стиральной машины |
-| **repair** | fridge_repair | 2,000 | 1-3ч | Ремонт холодильника |
-| **repair** | oven_repair | 1,500 | 1-2ч | Ремонт духовки/плиты |
-
-И еще ~15 функций для cleaning, pool, garden, pest, security и др.
+### Фаза 3 (Рефакторинг) — 3 дня
+7. Массовая замена хардкода `฿` на `formatPrice()`
+8. Консолидация таксономий в единую папку
+9. Добавление недостающих таксономий (Restaurants, Medical, Education)
 
 ---
 
-## Фаза 2: Новый UI Каталога
+## Техническое приложение: Файлы для изменения
 
-### 2.1 Создать хук `useServiceFunctions`
+### Создать новые файлы:
+- `src/lib/verticals.ts`
+- `src/lib/pricing.ts`
+- `src/lib/config/currencies.ts`
+- `src/types/auth.ts`
+- `src/lib/taxonomies/restaurantTaxonomy.ts`
+- `src/lib/taxonomies/medicalTaxonomy.ts`
+- `src/lib/taxonomies/educationTaxonomy.ts`
 
-**Файл:** `src/hooks/useServiceFunctions.ts`
+### Обновить существующие:
+- `src/lib/constants.ts` — удалить `BOOKING_STATUS`, `CURRENCY.SYMBOLS`
+- `src/types/orders.ts` — синхронизировать с расширенным ENUM
+- `src/hooks/useUserRoles.ts` — импорт `AppRole` из `auth.ts`
+- `src/hooks/useUserContext.ts` — импорт `AppRole` из `auth.ts`
+- `src/contexts/CurrencyContext.tsx` — использовать `currencies.ts`
+- `src/lib/leadVerticalConfig.ts` — использовать singular IDs
+- `src/hooks/useUnoTeamPermissions.ts` — использовать singular IDs
 
-```typescript
-// Читает статические данные из homeServiceFunctions.ts
-// Группирует по категориям
-// Возвращает: { functions, byCategory, getFunction, isLoading }
-```
-
-### 2.2 Создать компонент карточки функции
-
-**Файл:** `src/components/services/ServiceFunctionCard.tsx`
-
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│ ❄️  Чистка кондиционера                                        │
-│     Промывка фильтров, дезинфекция, проверка давления          │
-│                                                                 │
-│     ⏱ 1-2 часа                              от ฿800            │
-│                                         [Заказать →]           │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### 2.3 Рефакторинг ServicesIndex.tsx
-
-**Изменения:**
-- Импорт `useServiceFunctions` вместо `useHomeServices` для главного списка
-- Заменить `HomeServiceProviderCard` на `ServiceFunctionCard`
-- Быстрый поиск по названию функции
-- При клике на функцию → переход на страницу заказа
-
----
-
-## Фаза 3: Форма Заказа Услуги
-
-### 3.1 Создать страницу заказа
-
-**Файл:** `src/pages/services/ServiceFunctionOrder.tsx`
-
-**Компоненты формы (1 экран):**
-1. **Выбранная услуга** (readonly): название, описание, цена от
-2. **Дата и время**: выбор предпочтительной даты/времени
-3. **Адрес**: Input + кнопка геолокации (как в трансферах)
-4. **Описание проблемы**: Textarea для деталей
-5. **Контактные данные**: Имя, телефон, предпочтительный способ связи
-6. **CTA**: "Отправить заявку"
-
-### 3.2 Интеграция с Universal Lead System
-
-При отправке заявки → вызов `useUniversalLead`:
-
-```typescript
-submitLead({
-  vertical_id: 'home_services',
-  request_type: 'service_order',
-  lead_source: 'cta',
-  entry_point: `/services/order/${functionId}`,
-  name: formData.name,
-  phone: formData.phone,
-  notes: formData.problemDescription,
-  vertical_metadata: {
-    function_id: 'ac_cleaning',
-    function_name: 'AC Cleaning',
-    category: 'ac',
-    service_address: formData.address,
-    preferred_date: formData.date,
-    preferred_time: formData.time,
-    base_price: 800,
-    estimated_time: '1-2ч',
-  },
-});
-```
-
----
-
-## Фаза 4: WhatsApp Уведомления
-
-### 4.1 Создать Edge Function для уведомлений о лидах
-
-**Файл:** `supabase/functions/notify-lead-whatsapp/index.ts`
-
-Вызывается после создания записи в `consultation_requests`:
-
-```text
-🛠️ *НОВАЯ ЗАЯВКА: ДОМАШНИЕ УСЛУГИ*
-
-📋 *Услуга:* Чистка кондиционера
-💰 *Цена от:* ฿800
-⏱ *Время:* 1-2 часа
-
-👤 *Клиент:* Иван Петров
-📱 *Телефон:* +7 999 123-45-67
-💬 *Связь:* WhatsApp
-
-📍 *Адрес:* Patong Beach, Phuket
-📅 *Дата:* 15 января 2026, 10:00
-
-📝 *Описание:*
-Кондиционер плохо охлаждает, давно не чистили.
-
-🔗 Открыть: https://uno.ae/admin/consultations
-```
-
-### 4.2 Триггер на создание лида
-
-Модифицировать `useUniversalLead.ts` для вызова Edge Function после успешного создания:
-
-```typescript
-onSuccess: async (data, variables) => {
-  // Existing code...
-  
-  // Send WhatsApp notification for home_services
-  if (variables.vertical_id === 'home_services') {
-    await supabase.functions.invoke('notify-lead-whatsapp', {
-      body: { leadId: data.id },
-    });
-  }
-};
-```
-
----
-
-## Фаза 5: Интеграция в Админку
-
-### 5.1 Расширить LeadVerticalConfig
-
-**Файл:** `src/lib/leadVerticalConfig.ts`
-
-Добавить вертикаль `home_services`:
-
-```typescript
-{
-  id: 'home_services',
-  icon: '🔧',
-  nameEn: 'Home Services',
-  nameRu: 'Домашние услуги',
-  shortDescEn: 'Repairs and maintenance',
-  shortDescRu: 'Ремонт и обслуживание',
-  ctaTextEn: 'Request Service',
-  ctaTextRu: 'Заказать услугу',
-  popularityScore: 75,
-  requestTypes: [
-    { value: 'service_order', labelEn: 'Service Order', labelRu: 'Заказ услуги' },
-    { value: 'urgent_repair', labelEn: 'Urgent Repair', labelRu: 'Срочный ремонт' },
-    { value: 'consultation', labelEn: 'Consultation', labelRu: 'Консультация' },
-  ],
-  fields: [...],
-}
-```
-
-### 5.2 AdminConsultations - Фильтр по вертикали
-
-Уже поддерживается! Фильтр `verticalId` в `useAdminConsultations` позволит фильтровать по `home_services`.
-
-Админ увидит:
-- Badge: "🔧 Домашние услуги"
-- В деталях: Функция (AC Cleaning), адрес, описание проблемы
-- Заметки клиента и внутренние заметки
-- Статусы: Новая → Связались → В работе → Завершена
-
----
-
-## Маршрутизация
-
-### Новые маршруты
-
-| Путь | Компонент | Описание |
-|------|-----------|----------|
-| `/services` | ServicesIndex (обновлённый) | Каталог функций |
-| `/services/order/:functionId` | ServiceFunctionOrder | Форма заказа |
-
----
-
-## Файлы для создания/изменения
-
-| Файл | Действие |
-|------|----------|
-| `src/lib/config/homeServiceFunctions.ts` | **Создать** - канонические функции |
-| `src/hooks/useServiceFunctions.ts` | **Создать** - хук для функций |
-| `src/components/services/ServiceFunctionCard.tsx` | **Создать** - карточка решения |
-| `src/pages/services/ServiceFunctionOrder.tsx` | **Создать** - форма заказа |
-| `supabase/functions/notify-lead-whatsapp/index.ts` | **Создать** - уведомления |
-| `src/pages/services/ServicesIndex.tsx` | **Изменить** - каталог функций |
-| `src/hooks/useUniversalLead.ts` | **Изменить** - вызов уведомления |
-| `src/lib/leadVerticalConfig.ts` | **Изменить** - добавить вертикаль |
-| `src/components/layout/AnimatedRoutes.tsx` | **Изменить** - добавить маршрут |
-| `supabase/config.toml` | **Изменить** - регистрация функции |
-
----
-
-## Техническая Архитектура
-
-```text
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                            АРХИТЕКТУРА ДАННЫХ                               │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  homeServiceFunctions.ts          consultation_requests                    │
-│  ┌─────────────────────┐          ┌──────────────────────────────┐         │
-│  │ id: 'ac_cleaning'   │          │ vertical_id: 'home_services' │         │
-│  │ category: 'ac'      │   →      │ request_type: 'service_order'│         │
-│  │ base_price: 800     │          │ vertical_metadata: {         │         │
-│  │ estimated_time: ... │          │   function_id: 'ac_cleaning',│         │
-│  │ includes: [...]     │          │   service_address: '...',    │         │
-│  └─────────────────────┘          │   preferred_date: '...'      │         │
-│                                   │ }                            │         │
-│                                   └──────────────────────────────┘         │
-│                                              │                              │
-│                                              ▼                              │
-│                                   notify-lead-whatsapp                      │
-│                                   (WhatsApp → +66922407355)                 │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Ожидаемый Результат
-
-1. **UX**: Пользователь видит "Чистка кондиционера - от ฿800, 1-2 часа" и сразу заказывает
-2. **Admin Flow**: Заявка появляется в /admin/consultations с полным описанием задачи
-3. **Оповещения**: WhatsApp уведомление на +66922407355 с деталями заявки
-4. **Масштабируемость**: Новые функции добавляются в конфиг без изменения БД
-5. **Будущее**: Фаза 2 добавит привязку провайдеров к функциям и автоматическое назначение
+### Миграция БД:
+- Расширить `public.order_status` ENUM
+- Опционально: удалить устаревший `booking_status` ENUM после полной миграции
