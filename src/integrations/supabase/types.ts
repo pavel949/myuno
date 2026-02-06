@@ -2789,6 +2789,78 @@ export type Database = {
           },
         ]
       }
+      data_provenance: {
+        Row: {
+          created_at: string
+          entity_id: string
+          entity_type: string
+          field_name: string
+          field_value: string | null
+          id: string
+          scraped_at: string
+          source_type: string | null
+          source_url: string
+        }
+        Insert: {
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          field_name: string
+          field_value?: string | null
+          id?: string
+          scraped_at?: string
+          source_type?: string | null
+          source_url: string
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          field_name?: string
+          field_value?: string | null
+          id?: string
+          scraped_at?: string
+          source_type?: string | null
+          source_url?: string
+        }
+        Relationships: []
+      }
+      data_quality_issues: {
+        Row: {
+          detected_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          issue_code: string
+          message: string
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+        }
+        Insert: {
+          detected_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          issue_code: string
+          message: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity: string
+        }
+        Update: {
+          detected_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          issue_code?: string
+          message?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+        }
+        Relationships: []
+      }
       developers: {
         Row: {
           address: string | null
@@ -13244,6 +13316,44 @@ export type Database = {
           },
         ]
       }
+      restaurant_hours: {
+        Row: {
+          close_time: string
+          created_at: string
+          day_of_week: number
+          id: string
+          notes: string | null
+          open_time: string
+          restaurant_id: string
+        }
+        Insert: {
+          close_time: string
+          created_at?: string
+          day_of_week: number
+          id?: string
+          notes?: string | null
+          open_time: string
+          restaurant_id: string
+        }
+        Update: {
+          close_time?: string
+          created_at?: string
+          day_of_week?: number
+          id?: string
+          notes?: string | null
+          open_time?: string
+          restaurant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_hours_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       restaurant_menu_categories: {
         Row: {
           created_at: string
@@ -13360,6 +13470,56 @@ export type Database = {
           },
         ]
       }
+      restaurant_menus: {
+        Row: {
+          created_at: string
+          currency: string | null
+          external_url: string | null
+          file_url: string | null
+          id: string
+          is_active: boolean | null
+          menu_type: string
+          restaurant_id: string
+          scraped_at: string | null
+          source_url: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string | null
+          external_url?: string | null
+          file_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          menu_type?: string
+          restaurant_id: string
+          scraped_at?: string | null
+          source_url?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string | null
+          external_url?: string | null
+          file_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          menu_type?: string
+          restaurant_id?: string
+          scraped_at?: string | null
+          source_url?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_menus_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       restaurants: {
         Row: {
           address: string | null
@@ -13379,6 +13539,7 @@ export type Database = {
           delivery_time: string | null
           description_en: string | null
           description_ru: string | null
+          description_short: string | null
           district: string | null
           email: string | null
           features: string[] | null
@@ -13401,6 +13562,7 @@ export type Database = {
           needs_manual_verification: boolean | null
           order_url: string | null
           phone: string | null
+          price_band: string | null
           price_level: string | null
           price_range: number | null
           provider_id: string | null
@@ -13438,6 +13600,7 @@ export type Database = {
           delivery_time?: string | null
           description_en?: string | null
           description_ru?: string | null
+          description_short?: string | null
           district?: string | null
           email?: string | null
           features?: string[] | null
@@ -13460,6 +13623,7 @@ export type Database = {
           needs_manual_verification?: boolean | null
           order_url?: string | null
           phone?: string | null
+          price_band?: string | null
           price_level?: string | null
           price_range?: number | null
           provider_id?: string | null
@@ -13497,6 +13661,7 @@ export type Database = {
           delivery_time?: string | null
           description_en?: string | null
           description_ru?: string | null
+          description_short?: string | null
           district?: string | null
           email?: string | null
           features?: string[] | null
@@ -13519,6 +13684,7 @@ export type Database = {
           needs_manual_verification?: boolean | null
           order_url?: string | null
           phone?: string | null
+          price_band?: string | null
           price_level?: string | null
           price_range?: number | null
           provider_id?: string | null
