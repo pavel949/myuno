@@ -257,17 +257,26 @@ const FlowersIndex = () => {
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-3">
-          {filteredBouquets.map((bouquet) => (
-            <ItemCard
-              key={bouquet.id}
-              title={language === 'ru' ? bouquet.name_ru : bouquet.name_en}
-              image={bouquet.image || undefined}
-              price={bouquet.price}
-              tags={bouquet.is_popular ? [language === 'ru' ? 'Хит' : 'Popular'] : undefined}
-              variant="vertical"
-              onClick={() => navigate(`/flowers/bouquet/${bouquet.id}`)}
-            />
-          ))}
+          {filteredBouquets.map((bouquet) => {
+            // Show "from" price (Size S) when variants exist
+            const hasVariants = bouquet.size_variants?.length;
+            const displayPrice = hasVariants 
+              ? (bouquet.size_variants as any[])[0]?.price || bouquet.price
+              : bouquet.price;
+            
+            return (
+              <ItemCard
+                key={bouquet.id}
+                title={language === 'ru' ? bouquet.name_ru : bouquet.name_en}
+                image={bouquet.image || undefined}
+                price={displayPrice}
+                pricePrefix={hasVariants ? (language === 'ru' ? 'от ' : 'from ') : undefined}
+                tags={bouquet.is_popular ? [language === 'ru' ? 'Хит' : 'Popular'] : undefined}
+                variant="vertical"
+                onClick={() => navigate(`/flowers/bouquet/${bouquet.id}`)}
+              />
+            );
+          })}
         </div>
       )}
 

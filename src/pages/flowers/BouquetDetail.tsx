@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Star, Heart, Share2, ShoppingCart, Plus, Minus, Flower2, Truck, Clock, Shield, Loader2, Zap } from 'lucide-react';
+import { ArrowLeft, Star, Heart, Share2, ShoppingCart, Plus, Minus, Flower2, Truck, Clock, Shield, Loader2, Zap, Package } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
@@ -8,19 +8,43 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { triggerRipple } from '@/hooks/useRipple';
-import { useBouquet } from '@/hooks/useBouquets';
+import { useBouquet, SizeVariant } from '@/hooks/useBouquets';
 import { useCartToast } from '@/hooks/useCartToast';
 import { useBuyNowFlowers } from '@/hooks/useBuyNowFlowers';
+import { SIZE_NOTE_EN, SIZE_NOTE_RU } from '@/types/bouquet';
+
+type SizeKey = 'S' | 'M' | 'L';
+
 const BouquetDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { language } = useLanguage();
   const { addItem, removeItem, updateQuantity, items, getItemsByType } = useCart();
-  const [isFavorite, setIsFavorite] = React.useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [selectedSize, setSelectedSize] = useState<SizeKey>('M');
   const { showAddedToast } = useCartToast();
   const { buyNow } = useBuyNowFlowers();
 
   const { bouquet, isLoading } = useBouquet(id || '');
+
+  // Get size variants or create default from base price
+  const sizeVariants = useMemo<SizeVariant[]>(() => {
+    if (bouquet?.size_variants?.length) {
+      return bouquet.size_variants as SizeVariant[];
+    }
+    // Fallback for bouquets without variants
+    if (bouquet) {
+      return [
+        { size: 'S', label_en: 'Small', label_ru: 'Маленький', price: bouquet.price * 0.7, flower_count: 15 },
+        { size: 'M', label_en: 'Medium', label_ru: 'Средний', price: bouquet.price, flower_count: 25 },
+        { size: 'L', label_en: 'Large', label_ru: 'Большой', price: bouquet.price * 1.5, flower_count: 40 },
+      ];
+    }
+    return [];
+  }, [bouquet]);
+
+  const currentVariant = sizeVariants.find(v => v.size === selectedSize) || sizeVariants[1];
+  const currentPrice = currentVariant?.price || bouquet?.price || 0;
   
   if (isLoading) {
     return (
@@ -46,16 +70,18 @@ const BouquetDetail = () => {
   const totalItems = flowersInCart.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = flowersInCart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const cartItemId = `bouquet-${bouquet.id}`;
+  // Cart item ID includes size for separate tracking
+  const cartItemId = `bouquet-${bouquet.id}-${selectedSize}`;
   const quantity = items.find(i => i.id === cartItemId)?.quantity || 0;
 
   const addToCart = () => {
+    const sizeLabel = language === 'ru' ? currentVariant.label_ru : currentVariant.label_en;
     const item = {
       id: cartItemId,
       type: 'flowers' as const,
-      name: bouquet.name_en,
-      nameRu: bouquet.name_ru,
-      price: bouquet.price,
+      name: `${bouquet.name_en} (${currentVariant.size})`,
+      nameRu: `${bouquet.name_ru} (${sizeLabel})`,
+      price: currentPrice,
       currency: '฿',
       image: bouquet.image || undefined,
       providerId: bouquet.shop?.provider_id || 'flowers-shop',
@@ -139,24 +165,73 @@ const BouquetDetail = () => {
             )}
             <div className="flex items-baseline gap-2 mt-3">
               <span className="text-3xl font-bold text-primary">
-                ฿{bouquet.price.toLocaleString()}
+                ฿{currentPrice.toLocaleString()}
               </span>
+              {currentVariant?.flower_count && (
+                <span className="text-sm text-muted-foreground">
+                  ~{currentVariant.flower_count} {language === 'ru' ? 'цветов' : 'flowers'}
+                </span>
+              )}
             </div>
           </div>
 
-          {/* Category badge */}
-          {bouquet.category && (
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary">
-                {bouquet.category}
-              </Badge>
-              {bouquet.size && (
-                <Badge variant="outline">
-                  {bouquet.size}
-                </Badge>
-              )}
+          {/* Size Selector */}
+          <div className="space-y-3">
+            <h2 className="font-semibold text-sm">
+              {language === 'ru' ? 'Выберите размер' : 'Select Size'}
+            </h2>
+            <div className="grid grid-cols-3 gap-2">
+              {sizeVariants.map((variant) => (
+                <button
+                  key={variant.size}
+                  onClick={() => setSelectedSize(variant.size as SizeKey)}
+                  className={cn(
+                    "relative p-3 rounded-xl border-2 transition-all duration-200",
+                    "flex flex-col items-center gap-1",
+                    selectedSize === variant.size
+                      ? "border-primary bg-primary/10 shadow-sm"
+                      : "border-border hover:border-primary/50 bg-background"
+                  )}
+                >
+                  <span className="text-lg font-bold">{variant.size}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {language === 'ru' ? variant.label_ru : variant.label_en}
+                  </span>
+                  <span className="text-sm font-semibold text-primary">
+                    ฿{variant.price.toLocaleString()}
+                  </span>
+                  {variant.flower_count && (
+                    <span className="text-xs text-muted-foreground">
+                      ~{variant.flower_count} {language === 'ru' ? 'шт' : 'pcs'}
+                    </span>
+                  )}
+                  {selectedSize === variant.size && (
+                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
+                      <div className="w-2 h-2 bg-white rounded-full" />
+                    </div>
+                  )}
+                </button>
+              ))}
             </div>
-          )}
+            <p className="text-xs text-muted-foreground">
+              {language === 'ru' ? SIZE_NOTE_RU : SIZE_NOTE_EN}
+            </p>
+          </div>
+
+          {/* Category and style badges */}
+          <div className="flex flex-wrap gap-2">
+            {bouquet.style && (
+              <Badge variant="secondary">{bouquet.style}</Badge>
+            )}
+            {bouquet.color_palette && (
+              <Badge variant="outline">{bouquet.color_palette}</Badge>
+            )}
+            {bouquet.occasion_tags?.slice(0, 3).map((tag) => (
+              <Badge key={tag} variant="outline" className="text-xs">
+                {tag}
+              </Badge>
+            ))}
+          </div>
 
           {/* Description */}
           {(bouquet.description_en || bouquet.description_ru) && (
@@ -170,7 +245,19 @@ const BouquetDetail = () => {
             </div>
           )}
 
-          {/* Details */}
+          {/* Composition */}
+          {(bouquet.composition_en || bouquet.composition_ru) && (
+            <div>
+              <h2 className="font-semibold mb-2">
+                {language === 'ru' ? 'Состав' : 'Composition'}
+              </h2>
+              <p className="text-muted-foreground">
+                {language === 'ru' ? bouquet.composition_ru : bouquet.composition_en}
+              </p>
+            </div>
+          )}
+
+          {/* Details Grid */}
           <div className="grid grid-cols-2 gap-3">
             {bouquet.flowers && bouquet.flowers.length > 0 && (
               <div className="flex items-center gap-2 p-3 rounded-lg bg-secondary/50">
@@ -183,6 +270,17 @@ const BouquetDetail = () => {
                 </div>
               </div>
             )}
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-secondary/50">
+              <Package className="w-5 h-5 text-primary" />
+              <div>
+                <p className="text-xs text-muted-foreground">
+                  {language === 'ru' ? 'Размер' : 'Size'}
+                </p>
+                <p className="font-medium">
+                  {selectedSize} - {language === 'ru' ? currentVariant.label_ru : currentVariant.label_en}
+                </p>
+              </div>
+            </div>
             <div className="flex items-center gap-2 p-3 rounded-lg bg-secondary/50">
               <Truck className="w-5 h-5 text-primary" />
               <div>
@@ -201,16 +299,16 @@ const BouquetDetail = () => {
                 <p className="font-medium">{language === 'ru' ? '7+ дней' : '7+ days'}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-secondary/50">
-              <Shield className="w-5 h-5 text-primary" />
-              <div>
-                <p className="text-xs text-muted-foreground">
-                  {language === 'ru' ? 'Гарантия' : 'Guarantee'}
-                </p>
-                <p className="font-medium">{language === 'ru' ? '100%' : '100%'}</p>
-              </div>
-            </div>
           </div>
+
+          {/* Availability Note */}
+          {bouquet.availability_note && (
+            <div className="p-3 rounded-lg bg-muted/50 border">
+              <p className="text-xs text-muted-foreground">
+                {bouquet.availability_note}
+              </p>
+            </div>
+          )}
 
           {/* Shop info if available */}
           {bouquet.shop && (
@@ -234,7 +332,9 @@ const BouquetDetail = () => {
                 <Button
                   onClick={(e) => {
                     triggerRipple(e);
-                    buyNow(bouquet);
+                    // Pass bouquet with modified price for the selected size
+                    const modifiedBouquet = { ...bouquet, price: currentPrice };
+                    buyNow(modifiedBouquet);
                   }}
                   className="flex-1 h-12 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
                 >
@@ -287,7 +387,8 @@ const BouquetDetail = () => {
                 <Button
                   onClick={(e) => {
                     triggerRipple(e);
-                    buyNow(bouquet, quantity);
+                    const modifiedBouquet = { ...bouquet, price: currentPrice };
+                    buyNow(modifiedBouquet, quantity);
                   }}
                   className="flex-1 h-12 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
                 >

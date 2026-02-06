@@ -1275,6 +1275,7 @@ export type Database = {
           price: number
           shop_id: string
           size: string | null
+          size_variants: Json | null
           sku: string | null
           stock_quantity: number | null
           style: string | null
@@ -1308,6 +1309,7 @@ export type Database = {
           price: number
           shop_id: string
           size?: string | null
+          size_variants?: Json | null
           sku?: string | null
           stock_quantity?: number | null
           style?: string | null
@@ -1341,6 +1343,7 @@ export type Database = {
           price?: number
           shop_id?: string
           size?: string | null
+          size_variants?: Json | null
           sku?: string | null
           stock_quantity?: number | null
           style?: string | null

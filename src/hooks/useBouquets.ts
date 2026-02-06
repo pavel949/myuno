@@ -1,45 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { BouquetWithShop, SizeVariant } from '@/types/bouquet';
 
-export interface Bouquet {
-  id: string;
-  shop_id: string;
-  sku: string | null;
-  name_en: string;
-  name_ru: string;
-  description_en: string | null;
-  description_ru: string | null;
-  composition_en: string | null;
-  composition_ru: string | null;
-  category: string | null;
-  image: string | null;
-  images: string[] | null;
-  price: number;
-  currency: string | null;
-  flowers: string[] | null;
-  colors: string[] | null;
-  size: string | null;
-  style: string | null;
-  occasion_tags: string[] | null;
-  color_palette: string | null;
-  lifeos_tags: string[] | null;
-  availability_note: string | null;
-  preparation_time_minutes: number | null;
-  is_popular: boolean | null;
-  is_active: boolean | null;
-  is_verified: boolean | null;
-  stock_quantity: number | null;
-  created_at: string;
-  // Joined data
-  shop?: {
-    id: string;
-    name_en: string;
-    name_ru: string;
-    delivery_fee: number | null;
-    min_order_amount: number | null;
-    provider_id: string | null;
-  };
-}
+// Re-export types for backward compatibility
+export type { SizeVariant } from '@/types/bouquet';
+export type Bouquet = BouquetWithShop;
 
 interface UseBouquetsOptions {
   shopId?: string;
