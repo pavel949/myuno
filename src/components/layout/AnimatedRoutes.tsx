@@ -80,6 +80,7 @@ const TransportBooking = lazy(() => import('@/pages/transport/TransportBooking')
 const AirportTransferBooking = lazy(() => import('@/pages/transport/AirportTransferBooking'));
 const TaxiBooking = lazy(() => import('@/pages/transport/TaxiBooking'));
 const TransferSuccess = lazy(() => import('@/pages/transport/TransferSuccess'));
+const AirportTransferLanding = lazy(() => import('@/pages/landing/AirportTransferLanding'));
 
 // Fitness Mini-App
 const FitnessIndex = lazy(() => import('@/pages/fitness/FitnessIndex'));
@@ -603,6 +604,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/transport/transfer-success" element={<LazyPage><TransferSuccess /></LazyPage>} />
         <Route path="/transport/airport" element={<Navigate to="/transport/airport-transfer" replace />} />
         <Route path="/airport-transfer" element={<Navigate to="/transport/airport-transfer" replace />} />
+        <Route path="/transfer" element={<LazyPage><AirportTransferLanding /></LazyPage>} />
         <Route path="/transport/taxi" element={<LazyPage><TaxiBooking /></LazyPage>} />
         <Route path="/taxi-booking" element={<Navigate to="/transport/taxi" replace />} />
         
