@@ -12945,9 +12945,11 @@ export type Database = {
         Row: {
           address: string | null
           approval_status: string | null
+          booking_flow: string | null
           business_category: string | null
           commission_rate: number | null
           cover_image: string | null
+          coverage_areas: string[] | null
           created_at: string
           created_by_uno_team: boolean | null
           description_en: string | null
@@ -12972,6 +12974,7 @@ export type Database = {
           response_time_minutes: number | null
           review_count: number | null
           service_domains: string[] | null
+          source_urls: string[] | null
           total_earnings: number | null
           trust_score: number | null
           uno_team_creator_id: string | null
@@ -12982,9 +12985,11 @@ export type Database = {
         Insert: {
           address?: string | null
           approval_status?: string | null
+          booking_flow?: string | null
           business_category?: string | null
           commission_rate?: number | null
           cover_image?: string | null
+          coverage_areas?: string[] | null
           created_at?: string
           created_by_uno_team?: boolean | null
           description_en?: string | null
@@ -13009,6 +13014,7 @@ export type Database = {
           response_time_minutes?: number | null
           review_count?: number | null
           service_domains?: string[] | null
+          source_urls?: string[] | null
           total_earnings?: number | null
           trust_score?: number | null
           uno_team_creator_id?: string | null
@@ -13019,9 +13025,11 @@ export type Database = {
         Update: {
           address?: string | null
           approval_status?: string | null
+          booking_flow?: string | null
           business_category?: string | null
           commission_rate?: number | null
           cover_image?: string | null
+          coverage_areas?: string[] | null
           created_at?: string
           created_by_uno_team?: boolean | null
           description_en?: string | null
@@ -13046,6 +13054,7 @@ export type Database = {
           response_time_minutes?: number | null
           review_count?: number | null
           service_domains?: string[] | null
+          source_urls?: string[] | null
           total_earnings?: number | null
           trust_score?: number | null
           uno_team_creator_id?: string | null
@@ -14495,6 +14504,8 @@ export type Database = {
       services: {
         Row: {
           approval_status: string | null
+          availability_mode: string | null
+          booking_flow: string | null
           category_id: string | null
           commission_rate: number | null
           created_at: string
@@ -14503,25 +14514,32 @@ export type Database = {
           description_en: string | null
           description_ru: string | null
           duration_minutes: number | null
+          high_risk_service: boolean | null
           id: string
           images: string[] | null
           is_active: boolean | null
           is_verified: boolean | null
           languages: string[] | null
+          lead_time_hours: number | null
           location_id: string | null
           name_en: string
           name_ru: string
           price: number | null
+          pricing_model: string | null
           provider_id: string
           rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
+          source_url: string | null
           tags: string[] | null
+          unit: string | null
           uno_team_creator_id: string | null
           updated_at: string
         }
         Insert: {
           approval_status?: string | null
+          availability_mode?: string | null
+          booking_flow?: string | null
           category_id?: string | null
           commission_rate?: number | null
           created_at?: string
@@ -14530,25 +14548,32 @@ export type Database = {
           description_en?: string | null
           description_ru?: string | null
           duration_minutes?: number | null
+          high_risk_service?: boolean | null
           id?: string
           images?: string[] | null
           is_active?: boolean | null
           is_verified?: boolean | null
           languages?: string[] | null
+          lead_time_hours?: number | null
           location_id?: string | null
           name_en: string
           name_ru: string
           price?: number | null
+          pricing_model?: string | null
           provider_id: string
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          source_url?: string | null
           tags?: string[] | null
+          unit?: string | null
           uno_team_creator_id?: string | null
           updated_at?: string
         }
         Update: {
           approval_status?: string | null
+          availability_mode?: string | null
+          booking_flow?: string | null
           category_id?: string | null
           commission_rate?: number | null
           created_at?: string
@@ -14557,20 +14582,25 @@ export type Database = {
           description_en?: string | null
           description_ru?: string | null
           duration_minutes?: number | null
+          high_risk_service?: boolean | null
           id?: string
           images?: string[] | null
           is_active?: boolean | null
           is_verified?: boolean | null
           languages?: string[] | null
+          lead_time_hours?: number | null
           location_id?: string | null
           name_en?: string
           name_ru?: string
           price?: number | null
+          pricing_model?: string | null
           provider_id?: string
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          source_url?: string | null
           tags?: string[] | null
+          unit?: string | null
           uno_team_creator_id?: string | null
           updated_at?: string
         }
