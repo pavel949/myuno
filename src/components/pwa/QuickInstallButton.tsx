@@ -1,36 +1,51 @@
 import { useState } from 'react';
-import { Download, Share, Plus, X } from 'lucide-react';
+import { Download, Share, Plus, X, Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
+type InstallState = 'idle' | 'installing' | 'success';
+
 export function QuickInstallButton() {
   const { isInstalled, canInstall, isIOS, install } = usePWAInstall();
   const { language } = useLanguage();
   const [showIOSModal, setShowIOSModal] = useState(false);
+  const [installState, setInstallState] = useState<InstallState>('idle');
   const isRu = language === 'ru';
 
-  // Don't show if already installed
-  if (isInstalled) {
-    return null;
+  // Show success state if installed
+  if (isInstalled || installState === 'success') {
+    return (
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-500/10 border border-green-500/30"
+      >
+        <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+          <Check className="h-5 w-5 text-white" />
+        </div>
+        <span className="font-medium text-green-600 dark:text-green-400">
+          {isRu ? 'Приложение установлено' : 'App Installed'}
+        </span>
+      </motion.div>
+    );
   }
 
   const handleInstall = async () => {
     if (canInstall) {
-      // Android/Chrome - trigger native install prompt
+      setInstallState('installing');
       const success = await install();
       if (success) {
-        // Installation successful - button will hide automatically
+        setInstallState('success');
         return;
       }
+      setInstallState('idle');
     }
     
     if (isIOS) {
-      // iOS - show quick instruction modal
       setShowIOSModal(true);
     } else if (!canInstall) {
-      // Other browsers without native prompt - go to install page
       window.location.href = '/install';
     }
   };
@@ -39,11 +54,21 @@ export function QuickInstallButton() {
     <>
       <Button
         onClick={handleInstall}
-        className="gap-2 bg-primary hover:bg-primary/90"
+        disabled={installState === 'installing'}
+        className="gap-2 bg-primary hover:bg-primary/90 min-w-[200px]"
         size="lg"
       >
-        <Download className="h-5 w-5" />
-        {isRu ? 'Установить приложение' : 'Install App'}
+        {installState === 'installing' ? (
+          <>
+            <Loader2 className="h-5 w-5 animate-spin" />
+            {isRu ? 'Установка...' : 'Installing...'}
+          </>
+        ) : (
+          <>
+            <Download className="h-5 w-5" />
+            {isRu ? 'Установить приложение' : 'Install App'}
+          </>
+        )}
       </Button>
 
       {/* iOS Quick Install Modal */}
@@ -61,7 +86,7 @@ export function QuickInstallButton() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 100, opacity: 0 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="w-full max-w-sm bg-background rounded-2xl p-5 shadow-xl"
+              className="w-full max-w-sm bg-background rounded-2xl p-5 shadow-xl relative"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close button */}
