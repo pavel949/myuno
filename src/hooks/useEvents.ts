@@ -47,6 +47,16 @@ export interface Event {
   is_global: boolean;
   is_recurring: boolean;
   is_last_minute: boolean;
+  // Platform-level fields
+  slug: string | null;
+  age_policy: string | null;
+  dress_code: string | null;
+  ticket_url: string | null;
+  booking_flow: string | null;
+  marketing_tags: string[];
+  lifeos_context: string | null;
+  source_urls: string[];
+  organizer_type: string | null;
 }
 
 interface UseEventsOptions {
@@ -63,6 +73,8 @@ const transformEvent = (event: unknown): Event => {
     includes: Array.isArray(e.includes) ? e.includes as IncludeExcludeItem[] : [],
     excludes: Array.isArray(e.excludes) ? e.excludes as IncludeExcludeItem[] : [],
     itinerary: Array.isArray(e.itinerary) ? e.itinerary as ItineraryItem[] : [],
+    marketing_tags: (e.marketing_tags as string[]) || [],
+    source_urls: (e.source_urls as string[]) || [],
   } as Event;
 };
 

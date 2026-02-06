@@ -2,22 +2,38 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Star, MapPin, Clock, Calendar, Users,
-  Share2, CheckCircle, AlertCircle, Building2, ChevronRight
+  Share2, CheckCircle, AlertCircle, Building2, ChevronRight,
+  ExternalLink, ShieldCheck, Tag
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { useEvent } from '@/hooks/useEvents';
 import { useVenue, VENUE_TYPES } from '@/hooks/useVenues';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { useViewHistory } from '@/hooks/useViewHistory';
 
+const AGE_POLICY_LABELS: Record<string, { en: string; ru: string }> = {
+  'all_ages': { en: 'All Ages', ru: 'Все возрасты' },
+  '18+': { en: '18+ Only', ru: 'Только 18+' },
+  '20+': { en: '20+ Only', ru: 'Только 20+' },
+  'unknown': { en: 'Check with organizer', ru: 'Уточняйте у организатора' },
+};
+
+const DRESS_CODE_LABELS: Record<string, { en: string; ru: string }> = {
+  'none': { en: 'No dress code', ru: 'Без дресс-кода' },
+  'smart_casual': { en: 'Smart Casual', ru: 'Смарт-кэжуал' },
+  'beach': { en: 'Beach / Casual', ru: 'Пляжный / повседневный' },
+};
+
 const EventDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { currencyInfo } = useCurrency();
   const { event, isLoading } = useEvent(id);
   const { venue } = useVenue(event?.venue_id || undefined);
   const [selectedImage, setSelectedImage] = useState(0);
@@ -39,13 +55,9 @@ const EventDetail = () => {
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return '';
     const date = new Date(dateStr);
-    const options: Intl.DateTimeFormatOptions = { 
-      day: 'numeric', 
-      month: 'long',
-      year: 'numeric',
-      weekday: 'long'
-    };
-    return date.toLocaleDateString(language === 'ru' ? 'ru-RU' : 'en-US', options);
+    return date.toLocaleDateString(language === 'ru' ? 'ru-RU' : 'en-US', { 
+      day: 'numeric', month: 'long', year: 'numeric', weekday: 'long'
+    });
   };
 
   if (isLoading) {
@@ -75,17 +87,15 @@ const EventDetail = () => {
   }
 
   const images = event.images.length > 0 ? event.images : [event.cover_image || ''];
+  const isFree = event.price === 0 || event.price === null;
   const totalPrice = (event.price || 0) * tickets;
+  const hasTicketUrl = event.ticket_url && event.ticket_url.length > 0;
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
       {/* Header Image */}
       <div className="relative h-72">
-        <img
-          src={images[selectedImage]}
-          alt={event.title_en}
-          className="w-full h-full object-cover"
-        />
+        <img src={images[selectedImage]} alt={event.title_en} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         
         {/* Top Actions */}
@@ -112,16 +122,24 @@ const EventDetail = () => {
           </div>
         </div>
 
+        {/* Badges overlay */}
+        <div className="absolute bottom-4 left-4 flex gap-2 flex-wrap">
+          {event.is_hot && <Badge className="bg-red-500 text-white">🔥 Hot</Badge>}
+          {event.is_recurring && <Badge variant="secondary">🔄 {language === 'ru' ? 'Еженедельно' : 'Weekly'}</Badge>}
+          {event.age_policy && event.age_policy !== 'all_ages' && (
+            <Badge className="bg-orange-500 text-white">{event.age_policy}</Badge>
+          )}
+          {isFree && <Badge className="bg-green-500 text-white">🆓 {language === 'ru' ? 'Бесплатно' : 'Free Entry'}</Badge>}
+        </div>
+
         {/* Image Thumbnails */}
         {images.length > 1 && (
-          <div className="absolute bottom-4 left-4 right-4 flex gap-2 justify-center">
-            {images.map((img, idx) => (
+          <div className="absolute bottom-4 right-4 flex gap-2">
+            {images.slice(0, 4).map((img, idx) => (
               <button
                 key={idx}
                 onClick={() => setSelectedImage(idx)}
-                className={`w-12 h-12 rounded-lg overflow-hidden border-2 ${
-                  selectedImage === idx ? 'border-primary' : 'border-white/50'
-                }`}
+                className={`w-10 h-10 rounded-lg overflow-hidden border-2 ${selectedImage === idx ? 'border-primary' : 'border-white/50'}`}
               >
                 <img src={img} alt="" className="w-full h-full object-cover" />
               </button>
@@ -132,7 +150,7 @@ const EventDetail = () => {
 
       {/* Content */}
       <div className="flex-1 px-4 py-6 -mt-6 bg-background rounded-t-3xl relative z-10">
-        {/* Title Section */}
+        {/* Title */}
         <div className="mb-4">
           <div className="flex items-start justify-between">
             <div className="flex-1">
@@ -140,13 +158,15 @@ const EventDetail = () => {
                 {language === 'ru' ? event.title_ru : event.title_en}
               </h1>
             </div>
-            <div className="text-right">
-              <div className="flex items-center gap-1">
-                <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                <span className="font-bold">{event.rating}</span>
+            {event.rating > 0 && (
+              <div className="text-right">
+                <div className="flex items-center gap-1">
+                  <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                  <span className="font-bold">{event.rating}</span>
+                </div>
+                <p className="text-sm text-muted-foreground">{event.review_count} reviews</p>
               </div>
-              <p className="text-sm text-muted-foreground">{event.review_count} reviews</p>
-            </div>
+            )}
           </div>
         </div>
 
@@ -160,53 +180,54 @@ const EventDetail = () => {
           <div className="bg-card rounded-xl p-3 border border-border text-center">
             <Clock className="w-5 h-5 mx-auto mb-1 text-primary" />
             <p className="text-xs font-medium">
-              {event.duration_hours} {language === 'ru' ? 'ч' : 'h'}
+              {event.duration_hours ? `${event.duration_hours}${language === 'ru' ? 'ч' : 'h'}` : '—'}
             </p>
           </div>
           <div className="bg-card rounded-xl p-3 border border-border text-center">
-            <Users className="w-5 h-5 mx-auto mb-1 text-primary" />
-            <p className="text-xs font-medium">{event.spots_left}</p>
-            <p className="text-xs text-muted-foreground">
-              {language === 'ru' ? 'мест' : 'spots'}
+            <Tag className="w-5 h-5 mx-auto mb-1 text-primary" />
+            <p className="text-xs font-medium">
+              {isFree ? (language === 'ru' ? 'Бесплатно' : 'Free') : `${currencyInfo.symbol}${event.price?.toLocaleString()}`}
             </p>
           </div>
         </div>
 
-        {/* Location / Venue */}
+        {/* Age Policy & Dress Code */}
+        {(event.age_policy !== 'all_ages' || (event.dress_code && event.dress_code !== 'none')) && (
+          <div className="flex gap-3 mb-6">
+            {event.age_policy && event.age_policy !== 'all_ages' && (
+              <div className="flex items-center gap-2 bg-orange-50 dark:bg-orange-950/30 text-orange-700 dark:text-orange-400 rounded-lg px-3 py-2 text-sm">
+                <ShieldCheck className="w-4 h-4" />
+                {AGE_POLICY_LABELS[event.age_policy]?.[language === 'ru' ? 'ru' : 'en'] || event.age_policy}
+              </div>
+            )}
+            {event.dress_code && event.dress_code !== 'none' && (
+              <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 rounded-lg px-3 py-2 text-sm">
+                👔 {DRESS_CODE_LABELS[event.dress_code]?.[language === 'ru' ? 'ru' : 'en'] || event.dress_code}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Venue Card */}
         {venue ? (
-          <Card 
-            className="mb-6 cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => navigate(`/venues/${venue.id}`)}
-          >
+          <Card className="mb-6 cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate(`/venues/${venue.id}`)}>
             <CardContent className="p-3 flex items-center gap-3">
               <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
-                <img 
-                  src={venue.cover_image || '/placeholder.svg'} 
-                  alt={language === 'ru' ? venue.name_ru : venue.name_en}
-                  className="w-full h-full object-cover"
-                />
+                <img src={venue.cover_image || '/placeholder.svg'} alt={language === 'ru' ? venue.name_ru : venue.name_en} className="w-full h-full object-cover" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <Building2 className="w-4 h-4 text-primary" />
-                  <p className="font-medium truncate">
-                    {language === 'ru' ? venue.name_ru : venue.name_en}
-                  </p>
+                  <p className="font-medium truncate">{language === 'ru' ? venue.name_ru : venue.name_en}</p>
                 </div>
                 <p className="text-sm text-muted-foreground truncate">
                   {language === 'ru' ? (venue.address_ru || venue.address) : venue.address}
                 </p>
-                {venue.capacity && (
-                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                    <Users className="w-3 h-3" />
-                    {language === 'ru' ? 'Вместимость:' : 'Capacity:'} {venue.capacity.toLocaleString()}
-                  </p>
-                )}
               </div>
               <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
             </CardContent>
           </Card>
-        ) : (
+        ) : event.location_name && (
           <div className="flex items-center gap-2 mb-6 text-sm text-muted-foreground">
             <MapPin className="w-4 h-4" />
             <span>{language === 'ru' ? event.location_ru : event.location_name}</span>
@@ -215,20 +236,25 @@ const EventDetail = () => {
 
         {/* Description */}
         <div className="mb-6">
-          <h3 className="font-semibold mb-2">
-            {language === 'ru' ? 'Описание' : 'Description'}
-          </h3>
-          <p className="text-muted-foreground text-sm">
+          <h3 className="font-semibold mb-2">{language === 'ru' ? 'Описание' : 'Description'}</h3>
+          <p className="text-muted-foreground text-sm leading-relaxed">
             {language === 'ru' ? event.description_ru : event.description_en}
           </p>
         </div>
 
+        {/* Marketing Tags */}
+        {event.marketing_tags && event.marketing_tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-6">
+            {event.marketing_tags.map((tag, idx) => (
+              <Badge key={idx} variant="outline" className="text-xs">#{tag}</Badge>
+            ))}
+          </div>
+        )}
+
         {/* Itinerary */}
         {event.itinerary.length > 0 && (
           <div className="mb-6">
-            <h3 className="font-semibold mb-3">
-              {language === 'ru' ? 'Программа' : 'Itinerary'}
-            </h3>
+            <h3 className="font-semibold mb-3">{language === 'ru' ? 'Программа' : 'Itinerary'}</h3>
             <div className="space-y-3">
               {event.itinerary.map((item, idx) => (
                 <div key={idx} className="flex gap-3">
@@ -262,7 +288,7 @@ const EventDetail = () => {
 
         {/* Excludes */}
         {event.excludes.length > 0 && (
-          <div className="mb-24">
+          <div className="mb-6">
             <h3 className="font-semibold mb-2 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-orange-500" />
               {language === 'ru' ? 'Не включено' : 'Not Included'}
@@ -277,44 +303,57 @@ const EventDetail = () => {
             </div>
           </div>
         )}
+
+        {/* Source verification */}
+        {event.source_urls && event.source_urls.length > 0 && (
+          <div className="mb-24 p-3 rounded-lg bg-muted/50 border border-border">
+            <p className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
+              <ShieldCheck className="w-3 h-3" />
+              {language === 'ru' ? 'Данные от организатора' : 'Data from organizer'}
+            </p>
+            {event.source_urls.map((url, idx) => (
+              <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
+                <ExternalLink className="w-3 h-3" />
+                {new URL(url).hostname}
+              </a>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Fixed Bottom CTA */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border">
         <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center border border-border rounded-lg">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => setTickets(Math.max(1, tickets - 1))}
-                disabled={tickets <= 1}
-              >
-                -
-              </Button>
-              <span className="w-8 text-center font-medium">{tickets}</span>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => setTickets(Math.min(event.spots_left, tickets + 1))}
-                disabled={tickets >= event.spots_left}
-              >
-                +
-              </Button>
+          {!isFree && (
+            <div className="flex items-center gap-3">
+              <div className="flex items-center border border-border rounded-lg">
+                <Button variant="ghost" size="sm" onClick={() => setTickets(Math.max(1, tickets - 1))} disabled={tickets <= 1}>-</Button>
+                <span className="w-8 text-center font-medium">{tickets}</span>
+                <Button variant="ghost" size="sm" onClick={() => setTickets(Math.min(event.spots_left || 10, tickets + 1))}>+</Button>
+              </div>
+              <div>
+                <p className="text-xl font-bold text-primary">{currencyInfo.symbol}{totalPrice.toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground">{tickets} {language === 'ru' ? 'билет(ов)' : 'ticket(s)'}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-xl font-bold text-primary">฿{totalPrice.toLocaleString()}</p>
-              <p className="text-xs text-muted-foreground">
-                {tickets} {language === 'ru' ? 'билет(ов)' : 'ticket(s)'}
-              </p>
-            </div>
-          </div>
-          <Button 
-            size="lg"
-            onClick={() => navigate(`/events/booking/${id}?tickets=${tickets}`)}
-          >
-            {language === 'ru' ? 'Забронировать' : 'Book Now'}
-          </Button>
+          )}
+          
+          {hasTicketUrl ? (
+            <Button size="lg" className="flex-1" asChild>
+              <a href={event.ticket_url!} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                <ExternalLink className="w-4 h-4" />
+                {language === 'ru' ? 'Купить билет' : 'Get Tickets'}
+              </a>
+            </Button>
+          ) : isFree ? (
+            <Button size="lg" className="flex-1" onClick={() => navigate(`/events/booking/${id}?tickets=1`)}>
+              {language === 'ru' ? 'Зарегистрироваться' : 'Register'}
+            </Button>
+          ) : (
+            <Button size="lg" onClick={() => navigate(`/events/booking/${id}?tickets=${tickets}`)}>
+              {language === 'ru' ? 'Забронировать' : 'Book Now'}
+            </Button>
+          )}
         </div>
       </div>
     </div>

@@ -108,7 +108,7 @@ export {
   eventCategoryOptions,
   eventFeatureOptions,
   eventDateOptions,
-  eventTimeOptions,
+  eventAgePolicyOptions,
 } from './EventsFilters';
 
 // Services filters

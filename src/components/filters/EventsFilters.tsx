@@ -1,15 +1,19 @@
 import { FilterConfig, FilterOption } from './UniversalFilter';
 
-// ====== EVENT CATEGORIES (Entertainment focused) ======
+// ====== EVENT CATEGORIES (Platform taxonomy) ======
 export const eventCategoryOptions: FilterOption[] = [
-  { id: 'concerts', labelEn: 'Concerts', labelRu: 'Концерты', icon: '🎤' },
-  { id: 'shows', labelEn: 'Shows', labelRu: 'Шоу', icon: '🎭' },
-  { id: 'parties', labelEn: 'Parties', labelRu: 'Вечеринки', icon: '🎉' },
-  { id: 'clubs', labelEn: 'Clubs & Bars', labelRu: 'Клубы и бары', icon: '🍸' },
-  { id: 'sports', labelEn: 'Sports Events', labelRu: 'Спортивные события', icon: '🥊' },
-  { id: 'festivals', labelEn: 'Festivals', labelRu: 'Фестивали', icon: '🎪' },
+  { id: 'music_live', labelEn: 'Live Music', labelRu: 'Живая музыка', icon: '🎵' },
+  { id: 'dj_party', labelEn: 'DJ Party', labelRu: 'DJ вечеринка', icon: '🎧' },
+  { id: 'beach_club', labelEn: 'Beach Club', labelRu: 'Пляжный клуб', icon: '🏖️' },
+  { id: 'festival', labelEn: 'Festivals', labelRu: 'Фестивали', icon: '🎪' },
+  { id: 'cultural', labelEn: 'Culture & Shows', labelRu: 'Культура и шоу', icon: '🎭' },
+  { id: 'sports_fitness', labelEn: 'Sports', labelRu: 'Спорт', icon: '🥊' },
   { id: 'nightlife', labelEn: 'Nightlife', labelRu: 'Ночная жизнь', icon: '🌙' },
-  { id: 'live-music', labelEn: 'Live Music', labelRu: 'Живая музыка', icon: '🎵' },
+  { id: 'food_drink', labelEn: 'Food & Drink', labelRu: 'Еда и напитки', icon: '🍸' },
+  { id: 'wellness', labelEn: 'Wellness', labelRu: 'Велнес', icon: '🧘' },
+  { id: 'kids_family', labelEn: 'Family', labelRu: 'Для семьи', icon: '👨‍👩‍👧' },
+  { id: 'business_networking', labelEn: 'Networking', labelRu: 'Нетворкинг', icon: '🤝' },
+  { id: 'community', labelEn: 'Community', labelRu: 'Сообщество', icon: '🌍' },
 ];
 
 // ====== EVENT FEATURES ======
@@ -20,10 +24,6 @@ export const eventFeatureOptions: FilterOption[] = [
   { id: 'recurring', labelEn: 'Weekly Events', labelRu: 'Еженедельные', icon: '🔄' },
   { id: 'last-minute', labelEn: 'Last Tickets!', labelRu: 'Последние билеты!', icon: '⚡' },
   { id: 'free', labelEn: 'Free Entry', labelRu: 'Бесплатный вход', icon: '🆓' },
-  { id: 'family', labelEn: 'Family Friendly', labelRu: 'Для семьи', icon: '👨‍👩‍👧' },
-  { id: '18+', labelEn: '18+ Only', labelRu: 'Только 18+', icon: '🔞' },
-  { id: 'outdoor', labelEn: 'Outdoor', labelRu: 'На открытом воздухе', icon: '☀️' },
-  { id: 'beach', labelEn: 'Beach Party', labelRu: 'Пляжная вечеринка', icon: '🏖️' },
   { id: 'vip', labelEn: 'VIP Available', labelRu: 'Есть VIP', icon: '👑' },
 ];
 
@@ -36,11 +36,11 @@ export const eventDateOptions: FilterOption[] = [
   { id: 'this-month', labelEn: 'This Month', labelRu: 'В этом месяце', icon: '📅' },
 ];
 
-// ====== TIME OF DAY (Entertainment focused) ======
-export const eventTimeOptions: FilterOption[] = [
-  { id: 'daytime', labelEn: 'Daytime', labelRu: 'Днём', icon: '☀️' },
-  { id: 'evening', labelEn: 'Evening', labelRu: 'Вечером', icon: '🌆' },
-  { id: 'night', labelEn: 'Night', labelRu: 'Ночью', icon: '🌙' },
+// ====== AGE POLICY ======
+export const eventAgePolicyOptions: FilterOption[] = [
+  { id: 'all_ages', labelEn: 'All Ages', labelRu: 'Все возрасты', icon: '👶' },
+  { id: '18+', labelEn: '18+', labelRu: '18+', icon: '🔞' },
+  { id: '20+', labelEn: '20+', labelRu: '20+', icon: '🔞' },
 ];
 
 // ====== COMPLETE EVENTS FILTER CONFIG ======
@@ -68,11 +68,11 @@ export const eventsFilterConfig: FilterConfig = {
       options: eventDateOptions,
     },
     {
-      id: 'time',
-      titleEn: 'Time',
-      titleRu: 'Время',
-      type: 'multi',
-      options: eventTimeOptions,
+      id: 'agePolicy',
+      titleEn: 'Age Policy',
+      titleRu: 'Возраст',
+      type: 'single',
+      options: eventAgePolicyOptions,
     },
     {
       id: 'features',
