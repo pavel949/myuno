@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { BabyIcon, Utensils, Banknote, CreditCard } from 'lucide-react';
+import { BabyIcon, Utensils, CreditCard } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBooking } from '@/hooks/useBooking';
+import { useRestaurant } from '@/hooks/useRestaurants';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { 
@@ -18,8 +19,13 @@ import { type ContactFormData } from '@/components/booking/BookingContactForm';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { getRestaurantById } from './restaurantsData';
 import { BackButton } from '@/components/uno/BackButton';
+import { DetailPageSkeleton } from '@/components/ui/page-skeletons';
+
+const DEFAULT_RESERVATION_SLOTS = [
+  '11:00', '11:30', '12:00', '12:30', '13:00', '13:30',
+  '18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00'
+];
 
 export default function TableReservation() {
   const { id } = useParams();
@@ -28,7 +34,7 @@ export default function TableReservation() {
   const { user, isLoading: authLoading } = useAuth();
   const { createBooking, isSubmitting } = useBooking();
 
-  const restaurant = getRestaurantById(id || '');
+  const { restaurant, isLoading: restaurantLoading } = useRestaurant(id);
 
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState('');
@@ -57,6 +63,14 @@ export default function TableReservation() {
     return null;
   }
 
+  if (restaurantLoading || authLoading) {
+    return (
+      <AppLayout showBottomNav={false}>
+        <DetailPageSkeleton />
+      </AppLayout>
+    );
+  }
+
   if (!restaurant) {
     return (
       <AppLayout showBottomNav={false}>
@@ -69,21 +83,12 @@ export default function TableReservation() {
     );
   }
 
-  if (authLoading) {
-    return (
-      <AppLayout showBottomNav={false}>
-        <div className="flex items-center justify-center min-h-screen">
-          <p className="text-muted-foreground">
-            {language === 'ru' ? 'Загрузка...' : 'Loading...'}
-          </p>
-        </div>
-      </AppLayout>
-    );
-  }
-
-  // Check if deposit is required for this restaurant
-  const depositRequired = restaurant.depositRequired;
-  const depositAmount = restaurant.depositAmount || 0;
+  // Extract reservation config from working_hours or features, with defaults
+  const workingHours = restaurant.working_hours as Record<string, any> | null;
+  const reservationSlots = (workingHours as any)?.reservation_slots || DEFAULT_RESERVATION_SLOTS;
+  const depositRequired = (workingHours as any)?.deposit_required || false;
+  const depositAmount = (workingHours as any)?.deposit_amount || 0;
+  const maxPartySize = (workingHours as any)?.max_party_size || 12;
 
   const isFormValid = selectedDate && selectedTime && contactData.name && contactData.phone;
 
@@ -107,7 +112,7 @@ export default function TableReservation() {
         body: {
           booking_type: 'table_reservation',
           restaurant_id: restaurant.id,
-          restaurant_name: restaurant.nameEn,
+          restaurant_name: restaurant.name_en,
           amount: depositAmount,
           currency: 'thb',
           metadata: {
@@ -141,8 +146,8 @@ export default function TableReservation() {
         is_primary: true,
       }],
       metadata: {
-        restaurantName: restaurant.nameEn,
-        restaurantNameRu: restaurant.nameRu,
+        restaurantName: restaurant.name_en,
+        restaurantNameRu: restaurant.name_ru,
         guests,
         time: selectedTime,
         bookingType: 'table_reservation',
@@ -161,7 +166,7 @@ export default function TableReservation() {
     return (
       <BookingConfirmation
         bookingId={bookingId}
-        title={language === 'ru' ? restaurant.nameRu : restaurant.nameEn}
+        title={language === 'ru' ? restaurant.name_ru : restaurant.name_en}
         date={format(selectedDate, 'dd.MM.yyyy')}
         time={selectedTime}
         location={restaurant.address}
@@ -185,7 +190,7 @@ export default function TableReservation() {
                 {language === 'ru' ? 'Бронирование столика' : 'Table Reservation'}
               </h1>
               <p className="text-sm text-muted-foreground">
-                {language === 'ru' ? restaurant.nameRu : restaurant.nameEn}
+                {language === 'ru' ? restaurant.name_ru : restaurant.name_en}
               </p>
             </div>
           </div>
@@ -195,20 +200,22 @@ export default function TableReservation() {
           {/* Restaurant Card */}
           <div className="flex gap-4 p-4 rounded-xl bg-card border border-border/50">
             <img 
-              src={restaurant.image} 
-              alt={restaurant.nameEn}
+              src={restaurant.cover_image || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400'} 
+              alt={restaurant.name_en}
               className="w-20 h-20 rounded-lg object-cover"
             />
             <div>
               <h2 className="font-semibold">
-                {language === 'ru' ? restaurant.nameRu : restaurant.nameEn}
+                {language === 'ru' ? restaurant.name_ru : restaurant.name_en}
               </h2>
               <p className="text-sm text-muted-foreground">
-                {language === 'ru' ? restaurant.cuisineRu : restaurant.cuisine}
+                {restaurant.cuisine}
               </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {restaurant.address}
-              </p>
+              {restaurant.address && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  {restaurant.address}
+                </p>
+              )}
             </div>
           </div>
 
@@ -218,7 +225,7 @@ export default function TableReservation() {
             onDateChange={setSelectedDate}
             time={selectedTime}
             onTimeChange={setSelectedTime}
-            availableTimes={restaurant.reservationSlots}
+            availableTimes={reservationSlots}
             minDate={new Date()}
             showQuickDates
           />
@@ -228,7 +235,7 @@ export default function TableReservation() {
             count={guests}
             onChange={setGuests}
             min={1}
-            max={restaurant.maxPartySize}
+            max={maxPartySize}
             label={language === 'ru' ? 'Количество гостей' : 'Number of Guests'}
           />
 
@@ -285,7 +292,7 @@ export default function TableReservation() {
             showEmail
           />
 
-          {/* Reservation Notice - Conditional based on deposit */}
+          {/* Reservation Notice */}
           {depositRequired ? (
             <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
               <CreditCard className="w-5 h-5 text-amber-600 flex-shrink-0" />
