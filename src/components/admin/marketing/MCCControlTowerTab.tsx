@@ -9,6 +9,7 @@ import {
   MousePointerClick, Target, ArrowRight, AlertTriangle, AlertCircle,
   Info, Sparkles, Check, X, ChevronRight, Loader2
 } from 'lucide-react';
+import { useMCCNavigation } from '@/pages/admin/marketing/MarketingDashboard';
 import {
   usePulseKPIs,
   useLandingFunnelBoard,
@@ -36,6 +37,7 @@ const STATE_LABELS: Record<string, { en: string; ru: string }> = {
 export function MCCControlTowerTab() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const { navigateTo } = useMCCNavigation();
   const [period, setPeriod] = useState<Period>('7d');
 
   const { data: pulse, isLoading: pulseLoading } = usePulseKPIs(period);
@@ -142,7 +144,16 @@ export function MCCControlTowerTab() {
                 <span className="text-muted-foreground ml-2">{alert.description}</span>
               </div>
               {alert.action && (
-                <Button variant="outline" size="sm" className="shrink-0 h-7 text-xs">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0 h-7 text-xs"
+                  onClick={() => {
+                    if (alert.landing_id) navigateTo('funnel-diag', { landingId: alert.landing_id });
+                    else if (alert.action === 'Campaign') navigateTo('campaign-rules');
+                    else navigateTo('states');
+                  }}
+                >
                   {alert.action}
                 </Button>
               )}
@@ -175,7 +186,7 @@ export function MCCControlTowerTab() {
                 {(funnel || []).map((row) => {
                   const conv = row.views > 0 ? ((row.completed / row.views) * 100).toFixed(1) : '0';
                   return (
-                    <tr key={row.landing_id} className="border-t hover:bg-muted/30">
+                    <tr key={row.landing_id} className="border-t hover:bg-muted/30 cursor-pointer" onClick={() => navigateTo('landings', { landingId: row.landing_id })}>
                       <td className="p-2">
                         <div className="flex items-center gap-2">
                           <div className={cn('w-2 h-2 rounded-full', row.is_active ? 'bg-success' : 'bg-muted-foreground')} />

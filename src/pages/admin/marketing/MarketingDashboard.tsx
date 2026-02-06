@@ -1,20 +1,9 @@
-import React from 'react';
+import React, { createContext, useContext, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  Activity,
-  LayoutDashboard, 
-  Megaphone, 
-  Users, 
-  GitBranch, 
-  Sparkles,
-  BarChart3,
-  Zap,
-  Globe,
-  UserCog,
-  Search,
-  Target,
-  User
+  Activity, LayoutDashboard, Megaphone, Users, GitBranch, Sparkles,
+  BarChart3, Zap, Globe, UserCog, Search, Target, User
 } from 'lucide-react';
 import { MCCControlTowerTab } from '@/components/admin/marketing/MCCControlTowerTab';
 import { MCCOverviewTab } from '@/components/admin/marketing/MCCOverviewTab';
@@ -30,13 +19,34 @@ import { MCCFunnelDiagnosticsTab } from '@/components/admin/marketing/MCCFunnelD
 import { MCCCampaignCenterTab } from '@/components/admin/marketing/MCCCampaignCenterTab';
 import { MCCUserTimelineTab } from '@/components/admin/marketing/MCCUserTimelineTab';
 
+// ── Cross-tab navigation context ──
+interface MCCNavContext {
+  navigateTo: (tab: string, context?: Record<string, string>) => void;
+  navContext: Record<string, string>;
+}
+
+const MCCNavigationContext = createContext<MCCNavContext>({
+  navigateTo: () => {},
+  navContext: {},
+});
+
+export function useMCCNavigation() {
+  return useContext(MCCNavigationContext);
+}
+
 export default function MarketingDashboard() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const [activeTab, setActiveTab] = React.useState('control-tower');
+  const [navContext, setNavContext] = React.useState<Record<string, string>>({});
+
+  const navigateTo = useCallback((tab: string, context?: Record<string, string>) => {
+    if (context) setNavContext(context);
+    setActiveTab(tab);
+  }, []);
 
   const tabs = [
-    { id: 'control-tower', label: isRu ? 'Control Tower' : 'Control Tower', icon: Activity },
+    { id: 'control-tower', label: 'Control Tower', icon: Activity },
     { id: 'overview', label: isRu ? 'Обзор' : 'Overview', icon: LayoutDashboard },
     { id: 'landings', label: isRu ? 'Лендинги' : 'Landings', icon: Globe },
     { id: 'states', label: isRu ? 'Состояния' : 'States', icon: UserCog },
@@ -52,50 +62,50 @@ export default function MarketingDashboard() {
   ];
 
   return (
-    <div className="p-4 md:p-6 space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold flex items-center gap-2">
-            <span className="bg-gradient-to-r from-primary to-chart-1 bg-clip-text text-transparent">
-              Marketing Command Center
-            </span>
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            Lead Factory • Growth OS • AI Marketing Brain
-          </p>
+    <MCCNavigationContext.Provider value={{ navigateTo, navContext }}>
+      <div className="p-4 md:p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold flex items-center gap-2">
+              <span className="bg-gradient-to-r from-primary to-chart-1 bg-clip-text text-transparent">
+                Marketing Command Center
+              </span>
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              Lead Factory • Growth OS • AI Marketing Brain
+            </p>
+          </div>
         </div>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1">
+            {tabs.map((tab) => (
+              <TabsTrigger
+                key={tab.id}
+                value={tab.id}
+                className="gap-1.5 data-[state=active]:bg-background text-xs"
+              >
+                <tab.icon className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">{tab.label}</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          <TabsContent value="control-tower" className="mt-4"><MCCControlTowerTab /></TabsContent>
+          <TabsContent value="overview" className="mt-4"><MCCOverviewTab /></TabsContent>
+          <TabsContent value="landings" className="mt-4"><MCCLandingControlTab /></TabsContent>
+          <TabsContent value="states" className="mt-4"><MCCUserStatesTab /></TabsContent>
+          <TabsContent value="funnel-diag" className="mt-4"><MCCFunnelDiagnosticsTab /></TabsContent>
+          <TabsContent value="campaigns" className="mt-4"><MCCCampaignsTab /></TabsContent>
+          <TabsContent value="campaign-rules" className="mt-4"><MCCCampaignCenterTab /></TabsContent>
+          <TabsContent value="leads" className="mt-4"><MCCLeadsTab /></TabsContent>
+          <TabsContent value="timeline" className="mt-4"><MCCUserTimelineTab /></TabsContent>
+          <TabsContent value="funnels" className="mt-4"><MCCFunnelsTab /></TabsContent>
+          <TabsContent value="content" className="mt-4"><MCCContentLabTab /></TabsContent>
+          <TabsContent value="analytics" className="mt-4"><MCCAnalyticsTab /></TabsContent>
+          <TabsContent value="automation" className="mt-4"><MCCAutomationTab /></TabsContent>
+        </Tabs>
       </div>
-
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1">
-          {tabs.map((tab) => (
-            <TabsTrigger
-              key={tab.id}
-              value={tab.id}
-              className="gap-1.5 data-[state=active]:bg-background text-xs"
-            >
-              <tab.icon className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">{tab.label}</span>
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        <TabsContent value="control-tower" className="mt-4"><MCCControlTowerTab /></TabsContent>
-        <TabsContent value="overview" className="mt-4"><MCCOverviewTab /></TabsContent>
-        <TabsContent value="landings" className="mt-4"><MCCLandingControlTab /></TabsContent>
-        <TabsContent value="states" className="mt-4"><MCCUserStatesTab /></TabsContent>
-        <TabsContent value="funnel-diag" className="mt-4"><MCCFunnelDiagnosticsTab /></TabsContent>
-        <TabsContent value="campaigns" className="mt-4"><MCCCampaignsTab /></TabsContent>
-        <TabsContent value="campaign-rules" className="mt-4"><MCCCampaignCenterTab /></TabsContent>
-        <TabsContent value="leads" className="mt-4"><MCCLeadsTab /></TabsContent>
-        <TabsContent value="timeline" className="mt-4"><MCCUserTimelineTab /></TabsContent>
-        <TabsContent value="funnels" className="mt-4"><MCCFunnelsTab /></TabsContent>
-        <TabsContent value="content" className="mt-4"><MCCContentLabTab /></TabsContent>
-        <TabsContent value="analytics" className="mt-4"><MCCAnalyticsTab /></TabsContent>
-        <TabsContent value="automation" className="mt-4"><MCCAutomationTab /></TabsContent>
-      </Tabs>
-    </div>
+    </MCCNavigationContext.Provider>
   );
 }

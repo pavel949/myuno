@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +9,7 @@ import {
   CheckCircle, Flag, MessageSquare, Tag, Loader2
 } from 'lucide-react';
 import { useUserTimeline } from '@/hooks/useMCCControlTower';
+import { useMCCNavigation } from '@/pages/admin/marketing/MarketingDashboard';
 import { formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 
@@ -26,15 +27,22 @@ const EVENT_ICONS: Record<string, React.ElementType> = {
 export function MCCUserTimelineTab() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const { navContext } = useMCCNavigation();
   const [searchId, setSearchId] = useState('');
   const [activeUserId, setActiveUserId] = useState('');
+
+  // Accept userId from cross-tab navigation
+  useEffect(() => {
+    if (navContext.userId) {
+      setSearchId(navContext.userId);
+      setActiveUserId(navContext.userId);
+    }
+  }, [navContext.userId]);
 
   const { data, isLoading } = useUserTimeline(activeUserId);
 
   const handleSearch = () => {
-    if (searchId.trim()) {
-      setActiveUserId(searchId.trim());
-    }
+    if (searchId.trim()) setActiveUserId(searchId.trim());
   };
 
   return (
@@ -85,11 +93,11 @@ export function MCCUserTimelineTab() {
           {/* User Summary */}
           <Card>
             <CardContent className="p-4">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <div className="flex items-start gap-4 flex-wrap">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                   <User className="h-6 w-6 text-primary" />
                 </div>
-                <div className="flex-1 space-y-1">
+                <div className="flex-1 space-y-1 min-w-0">
                   <h3 className="font-medium">
                     {data?.profile?.full_name || (isRu ? 'Неизвестный пользователь' : 'Unknown User')}
                   </h3>
@@ -97,7 +105,7 @@ export function MCCUserTimelineTab() {
                     {data?.profile?.email && <span>{data.profile.email}</span>}
                     {data?.profile?.phone && <span>{data.profile.phone}</span>}
                   </div>
-                  <div className="flex gap-2 mt-2">
+                  <div className="flex gap-2 mt-2 flex-wrap">
                     {data?.state && (
                       <Badge variant="default" className="text-xs">{data.state.state}</Badge>
                     )}
@@ -113,7 +121,7 @@ export function MCCUserTimelineTab() {
                     )}
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 shrink-0">
                   <Button variant="outline" size="sm" className="h-8 text-xs">
                     <Tag className="h-3 w-3 mr-1" />
                     {isRu ? 'Тег' : 'Tag'}
@@ -154,7 +162,7 @@ export function MCCUserTimelineTab() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-sm font-medium">{event.event_name}</span>
                             {event.landing_id && (
                               <Badge variant="outline" className="text-xs">{event.landing_id}</Badge>
@@ -172,7 +180,7 @@ export function MCCUserTimelineTab() {
                         </div>
                         {event.payload && Object.keys(event.payload).length > 0 && (
                           <div className="mt-1 text-xs text-muted-foreground font-mono bg-muted/50 rounded p-1.5 overflow-x-auto">
-                            {JSON.stringify(event.payload, null, 0).slice(0, 120)}
+                            {JSON.stringify(event.payload, null, 0).slice(0, 200)}
                           </div>
                         )}
                       </div>
