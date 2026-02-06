@@ -1,36 +1,57 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, Flame, Star, Sparkles, ChevronRight } from 'lucide-react';
+import { 
+  Menu, Flame, Star, Sparkles, ChevronRight,
+  Leaf, Milk, Beef, Fish, Croissant, CupSoda, Cookie,
+  Snowflake, Box, Baby, Home, Droplets, Dog, Smartphone, Shirt,
+  type LucideIcon
+} from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMarketplaceCategories } from '@/hooks/useMarketplace';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { cn } from '@/lib/utils';
+import { getIconForEmoji, isEmoji } from '@/lib/iconMap';
 
-// Fallback category icon mapping
-const getCategoryFallbackIcon = (slug: string) => {
-  const icons: Record<string, string> = {
-    'fruits-vegetables': '🥬',
-    'dairy-eggs': '🥛',
-    'meat': '🥩',
-    'seafood': '🦐',
-    'bakery': '🥖',
-    'beverages': '🥤',
-    'snacks': '🍿',
-    'organic': '🌿',
-    'frozen': '❄️',
-    'pantry': '🏺',
-    'baby': '👶',
-    'household': '🏠',
-    'personal-care': '🧴',
-    'pet-supplies': '🐕',
-    'electronics': '📱',
-    'fashion': '👔',
-  };
-  return icons[slug] || '📦';
+// Lucide icon mapping for categories
+const categoryIconMap: Record<string, LucideIcon> = {
+  'fruits-vegetables': Leaf,
+  'dairy-eggs': Milk,
+  'meat': Beef,
+  'seafood': Fish,
+  'bakery': Croissant,
+  'beverages': CupSoda,
+  'snacks': Cookie,
+  'organic': Leaf,
+  'frozen': Snowflake,
+  'pantry': Box,
+  'baby': Baby,
+  'household': Home,
+  'personal-care': Droplets,
+  'pet-supplies': Dog,
+  'electronics': Smartphone,
+  'fashion': Shirt,
+};
+
+const getCategoryIcon = (slug: string): LucideIcon => {
+  return categoryIconMap[slug] || Box;
 };
 
 const MAX_VISIBLE_CATEGORIES = 5;
+
+// Helper to render icon from string or use Lucide
+const renderCategoryIcon = (iconStr: string | null, slug: string) => {
+  // If icon string exists and is an emoji, try to map it
+  if (iconStr && isEmoji(iconStr)) {
+    const LucideIcon = getIconForEmoji(iconStr);
+    if (LucideIcon) {
+      return <LucideIcon className="w-4 h-4" />;
+    }
+  }
+  // Fallback to slug-based mapping
+  const Icon = getCategoryIcon(slug);
+  return <Icon className="w-4 h-4" />;
+};
 
 export function HomeCategoryRibbon() {
   const navigate = useNavigate();
@@ -100,7 +121,7 @@ export function HomeCategoryRibbon() {
           onClick={() => handleQuickAction('/market/category/deals')}
           className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium shrink-0 bg-muted/60 hover:bg-muted text-foreground"
         >
-          <span className="text-base">🔥</span>
+          <Flame className="w-4 h-4 text-orange-500" />
           <span>{isRu ? 'Акции' : 'Deals'}</span>
         </motion.button>
 
@@ -109,7 +130,7 @@ export function HomeCategoryRibbon() {
           onClick={() => handleQuickAction('/market/category/popular')}
           className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium shrink-0 bg-muted/60 hover:bg-muted text-foreground"
         >
-          <span className="text-base">⭐</span>
+          <Star className="w-4 h-4 text-amber-500" />
           <span>{isRu ? 'Хиты' : 'Hits'}</span>
         </motion.button>
 
@@ -118,7 +139,7 @@ export function HomeCategoryRibbon() {
           onClick={() => handleQuickAction('/market/category/new')}
           className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium shrink-0 bg-muted/60 hover:bg-muted text-foreground"
         >
-          <span className="text-base">✨</span>
+          <Sparkles className="w-4 h-4 text-blue-500" />
           <span>{isRu ? 'Новинки' : 'New'}</span>
         </motion.button>
       </div>
@@ -132,7 +153,7 @@ export function HomeCategoryRibbon() {
             onClick={() => handleCategoryClick(category.slug)}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium shrink-0 bg-muted/60 hover:bg-muted text-foreground"
           >
-            <span className="text-base">{category.icon || getCategoryFallbackIcon(category.slug)}</span>
+            {renderCategoryIcon(category.icon, category.slug)}
             <span className="whitespace-nowrap">{isRu ? category.name_ru : category.name_en}</span>
           </motion.button>
         ))}

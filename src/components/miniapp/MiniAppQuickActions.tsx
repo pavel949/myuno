@@ -1,9 +1,11 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { triggerRipple } from '@/hooks/useRipple';
+import { getIconForEmoji, isEmoji } from '@/lib/iconMap';
+import { Box, type LucideIcon } from 'lucide-react';
 
 export interface QuickAction {
-  icon: string;
+  icon: string | LucideIcon;
   label: string;
   price?: string;
   onClick?: () => void;
@@ -14,6 +16,25 @@ interface MiniAppQuickActionsProps {
   columns?: 3 | 4;
   className?: string;
 }
+
+const renderActionIcon = (icon: string | LucideIcon) => {
+  // If it's already a Lucide component
+  if (typeof icon !== 'string') {
+    const Icon = icon;
+    return <Icon className="w-6 h-6 text-primary" />;
+  }
+  
+  // If it's an emoji string, try to map it
+  if (isEmoji(icon)) {
+    const LucideIcon = getIconForEmoji(icon);
+    if (LucideIcon) {
+      return <LucideIcon className="w-6 h-6 text-primary" />;
+    }
+  }
+  
+  // Fallback to Box icon
+  return <Box className="w-6 h-6 text-primary" />;
+};
 
 export function MiniAppQuickActions({
   actions,
@@ -35,7 +56,7 @@ export function MiniAppQuickActions({
           }}
           className="relative overflow-hidden flex flex-col items-center p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all active:scale-95"
         >
-          <span className="text-2xl mb-1">{action.icon}</span>
+          <div className="mb-1">{renderActionIcon(action.icon)}</div>
           <span className="text-xs font-medium text-center truncate w-full">
             {action.label}
           </span>
