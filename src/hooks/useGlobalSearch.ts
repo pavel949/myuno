@@ -333,6 +333,26 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
   const [isLoading, setIsLoading] = useState(false);
   const { language } = useLanguage();
 
+  // Keyword synonyms for common searches
+  const SEARCH_SYNONYMS: Record<string, SearchResult> = {
+    // Rental keywords
+    'rent': { id: 'cat-rent', type: 'category', titleEn: 'Property Rentals', titleRu: 'Аренда жилья', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/property?mode=rent', isCategory: true },
+    'rental': { id: 'cat-rent', type: 'category', titleEn: 'Property Rentals', titleRu: 'Аренда жилья', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/property?mode=rent', isCategory: true },
+    'villa': { id: 'cat-villa', type: 'category', titleEn: 'Villas', titleRu: 'Виллы', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/property?type=villa', isCategory: true },
+    'condo': { id: 'cat-condo', type: 'category', titleEn: 'Condos', titleRu: 'Кондо', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/property?type=condo', isCategory: true },
+    'apartment': { id: 'cat-apt', type: 'category', titleEn: 'Apartments', titleRu: 'Квартиры', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/property?type=apartment', isCategory: true },
+    'house': { id: 'cat-house', type: 'category', titleEn: 'Houses', titleRu: 'Дома', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/property?type=house', isCategory: true },
+    'аренда': { id: 'cat-rent', type: 'category', titleEn: 'Property Rentals', titleRu: 'Аренда жилья', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/property?mode=rent', isCategory: true },
+    'вилла': { id: 'cat-villa', type: 'category', titleEn: 'Villas', titleRu: 'Виллы', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/property?type=villa', isCategory: true },
+    'квартира': { id: 'cat-apt', type: 'category', titleEn: 'Apartments', titleRu: 'Квартиры', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/property?type=apartment', isCategory: true },
+    'кондо': { id: 'cat-condo', type: 'category', titleEn: 'Condos', titleRu: 'Кондо', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/property?type=condo', isCategory: true },
+    // Transfer keywords
+    'transfer': { id: 'cat-transfer', type: 'category', titleEn: 'Airport Transfer', titleRu: 'Трансфер из аэропорта', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/transport/airport-transfer', isCategory: true },
+    'airport': { id: 'cat-transfer', type: 'category', titleEn: 'Airport Transfer', titleRu: 'Трансфер из аэропорта', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/transport/airport-transfer', isCategory: true },
+    'трансфер': { id: 'cat-transfer', type: 'category', titleEn: 'Airport Transfer', titleRu: 'Трансфер из аэропорта', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/transport/airport-transfer', isCategory: true },
+    'аэропорт': { id: 'cat-transfer', type: 'category', titleEn: 'Airport Transfer', titleRu: 'Трансфер из аэропорта', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/transport/airport-transfer', isCategory: true },
+  };
+
   useEffect(() => {
     let isMounted = true;
     
@@ -346,7 +366,18 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
       setIsLoading(true);
       // Use original query for ilike - it handles case-insensitivity for all languages including Cyrillic
       const searchTerm = query.trim();
+      const searchTermLower = searchTerm.toLowerCase();
       const allResults: SearchResult[] = [];
+
+      // Check for synonym matches first
+      Object.entries(SEARCH_SYNONYMS).forEach(([keyword, result]) => {
+        if (searchTermLower.includes(keyword) || keyword.includes(searchTermLower)) {
+          // Avoid duplicates
+          if (!allResults.find(r => r.id === result.id)) {
+            allResults.push(result);
+          }
+        }
+      });
 
       try {
         // 1. Search categories first (instant suggestions)

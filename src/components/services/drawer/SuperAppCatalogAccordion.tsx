@@ -95,6 +95,7 @@ function CatalogSectionItem({
   section: CatalogSection;
   onItemClick: (path: string) => void;
 }) {
+  const { language } = useLanguage();
   const gradient = VERTICAL_GRADIENTS[section.vertical] || 'from-primary to-accent';
   const hasChildren = section.children.length > 0;
   const childCount = section.hasHierarchy 
@@ -119,7 +120,7 @@ function CatalogSectionItem({
           gradient={gradient}
         />
         <span className="flex-1 font-medium text-sm">
-          {section.nameRu}
+          {language === 'ru' ? section.nameRu : section.nameEn}
         </span>
         <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
       </button>
@@ -142,7 +143,7 @@ function CatalogSectionItem({
             gradient={gradient}
           />
           <span className="font-medium text-sm">
-            {section.nameRu}
+            {language === 'ru' ? section.nameRu : section.nameEn}
           </span>
           <Badge variant="secondary" className="text-xs">
             {childCount}

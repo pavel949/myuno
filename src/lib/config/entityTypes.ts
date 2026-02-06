@@ -40,7 +40,7 @@ export const ENTITY_TYPES: Record<string, EntityTypeDefinition> = {
   property: {
     type: 'property',
     icon: Home,
-    route: '/properties',
+    route: '/property',
     labelEn: 'Accommodation',
     labelRu: 'Жильё',
     pluralEn: 'Properties',
