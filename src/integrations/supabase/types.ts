@@ -18797,13 +18797,16 @@ export type Database = {
       }
       yachts: {
         Row: {
+          addons: string[] | null
           approval_status: string | null
           balance_due_hours: number | null
           bathrooms: number | null
           beam: string | null
+          booking_flow: string | null
           cabins: number | null
           cancellation_policy: string | null
           capacity: number | null
+          charter_options: string[] | null
           cover_image: string | null
           created_at: string
           created_by_uno_team: boolean | null
@@ -18817,6 +18820,7 @@ export type Database = {
           features_en: string[] | null
           features_ru: string[] | null
           fuel_capacity: string | null
+          fuel_policy: string | null
           has_catering: boolean | null
           has_crew: boolean | null
           ical_token: string | null
@@ -18824,38 +18828,51 @@ export type Database = {
           ical_token_refreshed_at: string | null
           id: string
           images: string[] | null
+          insurance_included: string | null
+          insurance_notes: string | null
           is_active: boolean | null
           is_featured: boolean | null
           is_verified: boolean | null
           lat: number | null
           length_meters: number | null
+          lifeos_context: string | null
           lng: number | null
           location_name: string | null
           location_ru: string | null
+          marketing_tags: string[] | null
           max_speed: string | null
           name_en: string
           name_ru: string
           price_full_day: number | null
           price_half_day: number | null
+          price_overnight: number | null
+          price_sunset: number | null
           provider_id: string | null
           rating: number | null
           rejection_reason: string | null
           review_count: number | null
           reviewed_at: string | null
           reviewed_by: string | null
+          skipper_included: string | null
+          slug: string | null
+          source_urls: string[] | null
           uno_team_creator_id: string | null
           updated_at: string
+          weather_dependency: string | null
           yacht_type: string | null
           year_built: number | null
         }
         Insert: {
+          addons?: string[] | null
           approval_status?: string | null
           balance_due_hours?: number | null
           bathrooms?: number | null
           beam?: string | null
+          booking_flow?: string | null
           cabins?: number | null
           cancellation_policy?: string | null
           capacity?: number | null
+          charter_options?: string[] | null
           cover_image?: string | null
           created_at?: string
           created_by_uno_team?: boolean | null
@@ -18869,6 +18886,7 @@ export type Database = {
           features_en?: string[] | null
           features_ru?: string[] | null
           fuel_capacity?: string | null
+          fuel_policy?: string | null
           has_catering?: boolean | null
           has_crew?: boolean | null
           ical_token?: string | null
@@ -18876,38 +18894,51 @@ export type Database = {
           ical_token_refreshed_at?: string | null
           id?: string
           images?: string[] | null
+          insurance_included?: string | null
+          insurance_notes?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
           is_verified?: boolean | null
           lat?: number | null
           length_meters?: number | null
+          lifeos_context?: string | null
           lng?: number | null
           location_name?: string | null
           location_ru?: string | null
+          marketing_tags?: string[] | null
           max_speed?: string | null
           name_en: string
           name_ru: string
           price_full_day?: number | null
           price_half_day?: number | null
+          price_overnight?: number | null
+          price_sunset?: number | null
           provider_id?: string | null
           rating?: number | null
           rejection_reason?: string | null
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          skipper_included?: string | null
+          slug?: string | null
+          source_urls?: string[] | null
           uno_team_creator_id?: string | null
           updated_at?: string
+          weather_dependency?: string | null
           yacht_type?: string | null
           year_built?: number | null
         }
         Update: {
+          addons?: string[] | null
           approval_status?: string | null
           balance_due_hours?: number | null
           bathrooms?: number | null
           beam?: string | null
+          booking_flow?: string | null
           cabins?: number | null
           cancellation_policy?: string | null
           capacity?: number | null
+          charter_options?: string[] | null
           cover_image?: string | null
           created_at?: string
           created_by_uno_team?: boolean | null
@@ -18921,6 +18952,7 @@ export type Database = {
           features_en?: string[] | null
           features_ru?: string[] | null
           fuel_capacity?: string | null
+          fuel_policy?: string | null
           has_catering?: boolean | null
           has_crew?: boolean | null
           ical_token?: string | null
@@ -18928,27 +18960,37 @@ export type Database = {
           ical_token_refreshed_at?: string | null
           id?: string
           images?: string[] | null
+          insurance_included?: string | null
+          insurance_notes?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
           is_verified?: boolean | null
           lat?: number | null
           length_meters?: number | null
+          lifeos_context?: string | null
           lng?: number | null
           location_name?: string | null
           location_ru?: string | null
+          marketing_tags?: string[] | null
           max_speed?: string | null
           name_en?: string
           name_ru?: string
           price_full_day?: number | null
           price_half_day?: number | null
+          price_overnight?: number | null
+          price_sunset?: number | null
           provider_id?: string | null
           rating?: number | null
           rejection_reason?: string | null
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          skipper_included?: string | null
+          slug?: string | null
+          source_urls?: string[] | null
           uno_team_creator_id?: string | null
           updated_at?: string
+          weather_dependency?: string | null
           yacht_type?: string | null
           year_built?: number | null
         }
