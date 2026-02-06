@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useCallback } from 'react';
 import { LucideIcon, ShoppingCart, MapIcon, SlidersHorizontal } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -10,12 +10,25 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { UniversalFilter, type FilterConfig, type FilterValues } from '@/components/filters/UniversalFilter';
 import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
 import { UnifiedFilterRibbon, type FilterRibbonItem } from '@/components/shared/UnifiedFilterRibbon';
+import { FilterChip, FilterChipGroup } from '@/components/uno/FilterChip';
 
 export interface MiniAppCategory {
   id: string;
   labelEn: string;
   labelRu: string;
   icon?: string;
+}
+
+export interface QuickFilterOption {
+  id: string;
+  labelEn: string;
+  labelRu: string;
+  icon?: string;
+}
+
+export interface QuickFilterSection {
+  id: string; // matches filterValues key
+  options: QuickFilterOption[];
 }
 
 export interface MiniAppLayoutProps {
@@ -43,6 +56,8 @@ export interface MiniAppLayoutProps {
   selectedCategory?: string;
   onCategoryChange?: (categoryId: string) => void;
   showCategories?: boolean;
+  // Quick filter chips (visible inline, no drawer)
+  quickFilters?: QuickFilterSection[];
   filterConfig?: FilterConfig;
   filterValues?: FilterValues;
   onFilterChange?: (values: FilterValues) => void;
@@ -97,6 +112,9 @@ export function MiniAppLayout({
   onCategoryChange,
   showCategories = true,
   
+  // Quick filters (visible chips)
+  quickFilters = [],
+  
   // Filter
   filterConfig,
   filterValues,
@@ -130,6 +148,23 @@ export function MiniAppLayout({
 }: MiniAppLayoutProps) {
   const navigate = useNavigate();
   const { language, t } = useLanguage();
+
+  // Toggle a quick filter value
+  const handleQuickFilterToggle = useCallback((sectionId: string, optionId: string) => {
+    if (!onFilterChange || !filterValues) return;
+    
+    const currentValues = (filterValues[sectionId] as string[]) || [];
+    const isActive = currentValues.includes(optionId);
+    
+    const newValues = isActive
+      ? currentValues.filter(v => v !== optionId)
+      : [...currentValues, optionId];
+    
+    onFilterChange({
+      ...filterValues,
+      [sectionId]: newValues.length > 0 ? newValues : undefined,
+    });
+  }, [filterValues, onFilterChange]);
 
   // Build header right actions
   const buildHeaderActions = () => {
@@ -247,6 +282,31 @@ export function MiniAppLayout({
             gradientVia={heroGradientVia}
             gradientTo={heroGradientTo}
           />
+        )}
+
+        {/* Quick Filter Chips */}
+        {quickFilters.length > 0 && onFilterChange && (
+          <div className="space-y-2">
+            {quickFilters.map((section) => (
+              <FilterChipGroup key={section.id} scrollable>
+                {section.options.map((opt) => {
+                  const sectionValues = (filterValues?.[section.id] as string[]) || [];
+                  const isActive = sectionValues.includes(opt.id);
+                  
+                  return (
+                    <FilterChip
+                      key={opt.id}
+                      label={language === 'ru' ? opt.labelRu : opt.labelEn}
+                      icon={opt.icon}
+                      isActive={isActive}
+                      onToggle={() => handleQuickFilterToggle(section.id, opt.id)}
+                      size="sm"
+                    />
+                  );
+                })}
+              </FilterChipGroup>
+            ))}
+          </div>
         )}
 
         {/* Quick Actions */}
