@@ -20,7 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useFavorites } from '@/hooks/useFavorites';
+import { useUserCollections } from '@/hooks/useUserCollections';
 import { cn } from '@/lib/utils';
 
 // Mock data - in production would come from API
@@ -136,7 +136,7 @@ export default function PetServiceDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { isFavorite, toggleFavorite } = useFavorites();
+  const { isFavorite, toggleFavorite } = useUserCollections();
   const [selectedService, setSelectedService] = useState<string | null>(null);
 
   const service = servicesData[id || ''] || { ...defaultService, id };

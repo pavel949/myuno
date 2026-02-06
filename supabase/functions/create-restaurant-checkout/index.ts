@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@14.21.0";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { createStripeClient } from "../_shared/stripe.ts";
+import { createClient } from "../_shared/supabase.ts";
 import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
 
 const corsHeaders = {
@@ -80,9 +80,7 @@ serve(async (req) => {
     console.log("Creating restaurant checkout session:", { booking_type, restaurant_id, amount, currency });
 
     // Initialize Stripe
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
-      apiVersion: "2023-10-16",
-    });
+    const stripe = createStripeClient();
 
     // Check if customer exists
     const customers = await stripe.customers.list({

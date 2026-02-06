@@ -3,16 +3,26 @@ import { useNavigate } from 'react-router-dom';
 import { Eye, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { useRecentlyViewedServices } from '@/hooks/useRecentlyViewedServices';
+import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
 import { UnifiedSectionHeader, UnifiedScrollSection } from '@/components/shared';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+
+interface RecentService {
+  id: string;
+  name_en: string;
+  name_ru: string;
+  price: number | null;
+  image: string | null;
+  provider_id: string;
+  provider_name: string;
+}
 
 export function RecentlyViewedServices() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
-  const { recentServices, clearAll, hasHistory } = useRecentlyViewedServices();
+  const { items: recentServices, clearAll, hasHistory } = useRecentlyViewed<RecentService>('myuno_recently_viewed_services');
   const isRu = language === 'ru';
 
   if (!hasHistory) return null;
@@ -48,7 +58,6 @@ export function RecentlyViewedServices() {
               "transition-all duration-200 group touch-manipulation"
             )}
           >
-            {/* Image */}
             <div className="aspect-square relative overflow-hidden">
               <img
                 src={service.image || '/placeholder.svg'}
@@ -56,8 +65,6 @@ export function RecentlyViewedServices() {
                 className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
               />
             </div>
-
-            {/* Content */}
             <div className="p-2">
               <h4 className="text-xs font-medium line-clamp-2 text-foreground leading-tight min-h-[2rem]">
                 {isRu ? service.name_ru : service.name_en}

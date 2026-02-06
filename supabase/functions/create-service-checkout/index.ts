@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@14.21.0";
+import { createStripeClient } from "../_shared/stripe.ts";
 import { createClient } from "../_shared/supabase.ts";
 
 const corsHeaders = {
@@ -68,9 +68,7 @@ serve(async (req) => {
     if (!services || services.length === 0) throw new Error("No services selected");
     if (total_amount < 1) throw new Error("Total must be at least 1");
 
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
-      apiVersion: "2023-10-16",
-    });
+    const stripe = createStripeClient();
 
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     let customerId: string;

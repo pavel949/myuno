@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { createErrorHandler } from '@/lib/errorHandler';
+
+const errorLog = createErrorHandler('useViewHistory');
 
 export interface ViewHistoryItem {
   id: string;
@@ -43,50 +46,16 @@ export function useViewHistory() {
       
       setHistory((data || []) as ViewHistoryItem[]);
     } catch (error) {
-      console.error('Error fetching view history:', error);
+      errorLog.silent(error, 'fetch_history');
     } finally {
       setIsLoading(false);
     }
   }, [user]);
 
+  // Single fetch on mount — no duplicate
   useEffect(() => {
-    let isMounted = true;
-    
-    const loadHistory = async () => {
-      if (!user) {
-        setHistory([]);
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase
-          .from('view_history')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('viewed_at', { ascending: false })
-          .limit(50);
-
-        if (error) throw error;
-        
-        if (isMounted) {
-          setHistory((data || []) as ViewHistoryItem[]);
-        }
-      } catch (error) {
-        console.error('Error fetching view history:', error);
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-    
-    loadHistory();
-    
-    return () => {
-      isMounted = false;
-    };
-  }, [user]);
+    fetchHistory();
+  }, [fetchHistory]);
 
   const trackView = useCallback(async (
     itemId: string,
@@ -96,7 +65,6 @@ export function useViewHistory() {
     if (!user) return;
 
     try {
-      // Check if item already exists in history
       const { data: existing } = await supabase
         .from('view_history')
         .select('id, view_count')
@@ -106,7 +74,6 @@ export function useViewHistory() {
         .single();
 
       if (existing) {
-        // Update existing entry
         await supabase
           .from('view_history')
           .update({
@@ -116,7 +83,6 @@ export function useViewHistory() {
           })
           .eq('id', existing.id);
       } else {
-        // Insert new entry
         await supabase
           .from('view_history')
           .insert({
@@ -127,10 +93,9 @@ export function useViewHistory() {
           });
       }
 
-      // Refresh history
       fetchHistory();
     } catch (error) {
-      console.error('Error tracking view:', error);
+      errorLog.silent(error, 'track_view');
     }
   }, [user, fetchHistory]);
 
@@ -145,7 +110,7 @@ export function useViewHistory() {
 
       setHistory([]);
     } catch (error) {
-      console.error('Error clearing history:', error);
+      errorLog.silent(error, 'clear_history');
     }
   }, [user]);
 
@@ -160,7 +125,7 @@ export function useViewHistory() {
 
       setHistory(prev => prev.filter(item => item.id !== itemId));
     } catch (error) {
-      console.error('Error removing from history:', error);
+      errorLog.silent(error, 'remove_from_history');
     }
   }, [user]);
 

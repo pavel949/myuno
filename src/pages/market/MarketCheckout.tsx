@@ -12,7 +12,7 @@ import { useDeliverySettings } from '@/hooks/useMarketplace';
 import { useProfile } from '@/hooks/useProfile';
 import { useUserAddresses } from '@/hooks/useUserAddresses';
 import { useConciergeAdvance } from '@/hooks/useConciergeAdvance';
-import { useStripeMarketCheckout } from '@/hooks/useStripeMarketCheckout';
+import { useStripeUnifiedCheckout } from '@/hooks/useStripeUnifiedCheckout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -151,7 +151,7 @@ const MarketCheckout = () => {
   const { profile } = useProfile();
   const { addresses, defaultAddress, createAddressAsync } = useUserAddresses();
   const { createAdvanceRequest, navigateToAdvanceRequested, calculateFee, feePercent } = useConciergeAdvance();
-  const { createMarketCheckout, isProcessing: isStripeProcessing } = useStripeMarketCheckout();
+  const { createCheckout, isProcessing: isStripeProcessing } = useStripeUnifiedCheckout();
   
   // Check for Buy Now mode
   const locationState = location.state as { 
@@ -314,7 +314,7 @@ const MarketCheckout = () => {
         price: item.price,
       }));
 
-      await createMarketCheckout({
+      await createCheckout('create-market-checkout', {
         items: stripeItems,
         delivery_fee: deliveryFee,
         total_amount: total,

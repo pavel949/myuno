@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useWallet } from '@/hooks/useWallet';
-import { useFavorites } from '@/hooks/useFavorites';
+import { useUserCollections } from '@/hooks/useUserCollections';
 import { useOrders } from '@/hooks/useOrders';
 import { Calendar, Wallet, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -44,7 +44,7 @@ export function DashboardStatsBar() {
 
   const { orders, isLoading: ordersLoading } = useOrders();
   const { balance, isLoading: walletLoading } = useWallet();
-  const { favorites, loading: favoritesLoading } = useFavorites();
+  const { favorites, loading: favoritesLoading } = useUserCollections();
 
   // Count active bookings (pending, confirmed, in_progress)
   const activeBookingsCount = orders.filter(

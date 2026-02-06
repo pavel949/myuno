@@ -2,7 +2,7 @@ import React, { forwardRef } from 'react';
 import { Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useFavorites } from '@/hooks/useFavorites';
+import { useUserCollections } from '@/hooks/useUserCollections';
 
 interface FavoriteButtonProps {
   itemType: string;
@@ -22,8 +22,8 @@ export const FavoriteButton = forwardRef<HTMLButtonElement, FavoriteButtonProps>
     variant = 'ghost',
     className 
   }, ref) {
-    const { isFavorite, toggleFavorite } = useFavorites();
-    const isActive = isFavorite(itemType, itemId);
+    const { isInCollection, toggleCollection } = useUserCollections();
+    const isActive = isInCollection(itemType as any, itemId);
 
     const sizeClasses = {
       sm: 'w-8 h-8',
@@ -40,7 +40,7 @@ export const FavoriteButton = forwardRef<HTMLButtonElement, FavoriteButtonProps>
     const handleClick = async (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      await toggleFavorite(itemType, itemId, itemData);
+      await toggleCollection(itemType as any, itemId, itemData);
     };
 
     return (
