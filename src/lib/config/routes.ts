@@ -58,20 +58,18 @@ export const APP_ROUTES = {
   G_TRUST: '/g-trust',
   
   // Info Pages
-  ABOUT: '/info/about',
-  FAQ: '/info/faq',
-  CONTACT: '/info/contact',
+  ABOUT: '/about',
+  FAQ: '/faq',
+  CONTACT: '/contact',
   
   // User
   PROFILE: '/profile',
   BOOKINGS: '/bookings',
-  ORDERS: '/orders',
   FAVORITES: '/favorites',
   WALLET: '/wallet',
   
-  // Cart & Checkout
+  // Cart
   CART: '/cart',
-  CHECKOUT: '/checkout',
 } as const;
 
 /**
@@ -94,8 +92,16 @@ export const LEGACY_REDIRECTS: Record<string, string> = {
   // Life → Experiences (contextual discovery)
   '/life': APP_ROUTES.EXPERIENCES,
   
-  // Info pages
+  // Legacy /info/* → root-level info pages
+  '/info/about': APP_ROUTES.ABOUT,
+  '/info/faq': APP_ROUTES.FAQ,
+  '/info/contact': APP_ROUTES.CONTACT,
+  '/info/partners': '/partners',
+  '/info/become-partner': APP_ROUTES.BECOME_PARTNER,
   '/info/g-trust': APP_ROUTES.G_TRUST,
+  
+  // Legacy /orders → /bookings
+  '/orders': APP_ROUTES.BOOKINGS,
 } as const;
 
 /**

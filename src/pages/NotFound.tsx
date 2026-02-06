@@ -69,7 +69,7 @@ const NotFound = () => {
             {isRu ? 'Поиск услуг' : 'Browse Services'}
           </button>
           <button
-            onClick={() => navigate('/info/contact')}
+            onClick={() => navigate('/contact')}
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <HelpCircle className="w-3.5 h-3.5" />

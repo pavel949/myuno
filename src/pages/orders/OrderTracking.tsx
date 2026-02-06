@@ -83,7 +83,7 @@ export default function OrderTracking() {
             <p className="text-muted-foreground mb-4">
               {isRu ? 'Возможно, заказ был удалён или у вас нет доступа' : 'The order may have been deleted or you don\'t have access'}
             </p>
-            <Button onClick={() => navigate('/orders')}>
+            <Button onClick={() => navigate('/bookings')}>
               {isRu ? 'Мои заказы' : 'My Orders'}
             </Button>
           </div>

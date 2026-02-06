@@ -87,7 +87,7 @@ export function NotificationItem({ notification, onMarkRead, onDelete }: Notific
     } else if (notification.data?.booking_id) {
       navigate(`/bookings/${notification.data.booking_id}`);
     } else if (notification.data?.order_id) {
-      navigate(`/orders/${notification.data.order_id}`);
+      navigate(`/orders/${notification.data.order_id}/tracking`);
     }
   };
 

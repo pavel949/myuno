@@ -46,7 +46,7 @@ export const DemoBanner = () => {
 
   const handleCTA = () => {
     trackDemoAction('cta_clicked', { type: isVendor ? 'become_partner' : 'create_account' });
-    navigate(isVendor ? '/info/become-partner' : '/auth');
+    navigate(isVendor ? '/become-partner' : '/auth');
   };
 
   return (
