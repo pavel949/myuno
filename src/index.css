@@ -37,10 +37,10 @@ body {
   max-width: 100vw;
 }
 
-/* Root app container constrains width - add to #root or main layout wrapper */
+/* Root app container - IMPORTANT: No overflow-x:hidden here to allow nested horizontal scrolls */
 #root {
   max-width: 100vw;
-  overflow-x: hidden;
+  /* overflow-x: hidden is moved to specific layout wrappers, not root */
 }
 
 /* Allow horizontal scroll ONLY for specific wide content like tables */
