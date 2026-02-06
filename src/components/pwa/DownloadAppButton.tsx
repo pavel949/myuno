@@ -15,11 +15,14 @@ export function DownloadAppButton() {
   const handleClick = async () => {
     if (canInstall) {
       // Android/Chrome - trigger native install prompt
-      await install();
-    } else {
-      // iOS or fallback - go to install page with instructions
-      window.location.href = '/install';
+      const success = await install();
+      if (success) {
+        // Installation successful - button will hide automatically
+        return;
+      }
     }
+    // iOS or fallback - go to install page with instructions
+    window.location.href = '/install';
   };
 
   const texts = {

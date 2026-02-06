@@ -19,12 +19,18 @@ export function QuickInstallButton() {
   const handleInstall = async () => {
     if (canInstall) {
       // Android/Chrome - trigger native install prompt
-      await install();
-    } else if (isIOS) {
+      const success = await install();
+      if (success) {
+        // Installation successful - button will hide automatically
+        return;
+      }
+    }
+    
+    if (isIOS) {
       // iOS - show quick instruction modal
       setShowIOSModal(true);
-    } else {
-      // Other browsers - go to install page
+    } else if (!canInstall) {
+      // Other browsers without native prompt - go to install page
       window.location.href = '/install';
     }
   };
