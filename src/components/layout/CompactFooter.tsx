@@ -11,10 +11,13 @@ export function CompactFooter() {
 
   const handleInstallClick = async () => {
     if (canInstall) {
-      await install();
-    } else {
-      window.location.href = '/install';
+      const success = await install();
+      if (success) {
+        // Installation successful - button will hide automatically
+        return;
+      }
     }
+    window.location.href = '/install';
   };
 
   const navLinks = [

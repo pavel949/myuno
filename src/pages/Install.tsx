@@ -25,69 +25,25 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { IOSInstallGuide } from "@/components/pwa/IOSInstallGuide";
 import { usePWATracking } from "@/hooks/usePWATracking";
-
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-}
+import { usePWAInstall } from "@/hooks/usePWAInstall";
 
 type InstallState = 'idle' | 'installing' | 'success' | 'already-installed';
 
 const Install = () => {
   const { language } = useLanguage();
   const { trackInstall } = usePWATracking();
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const { canInstall, isInstalled, isIOS, isAndroid, install } = usePWAInstall();
+  
   const [installState, setInstallState] = useState<InstallState>('idle');
   const [progress, setProgress] = useState(0);
-  const [isIOS, setIsIOS] = useState(false);
-  const [isAndroid, setIsAndroid] = useState(false);
   const [showIOSGuide, setShowIOSGuide] = useState(false);
 
+  // Sync installed state from context
   useEffect(() => {
-    // Detect platform
-    const userAgent = window.navigator.userAgent.toLowerCase();
-    setIsIOS(/iphone|ipad|ipod/.test(userAgent));
-    setIsAndroid(/android/.test(userAgent));
-
-    // More robust check for standalone mode
-    // Only mark as installed if BOTH conditions are met:
-    // 1. Display mode is standalone
-    // 2. We're on our actual domain (not preview/iframe)
-    const isStandalone = window.matchMedia("(display-mode: standalone)").matches || 
-                         (window.navigator as any).standalone === true;
-    const isOurDomain = window.location.hostname.includes('myuno') || 
-                        window.location.hostname.includes('lovable.app');
-    
-    // Don't auto-detect as installed - let user decide
-    // Only mark installed if truly in standalone mode on our domain
-    if (isStandalone && isOurDomain && !window.location.search.includes('force')) {
-      // Double check by looking for our specific app marker
-      const isReallyOurApp = document.title.includes('myUNO');
-      if (isReallyOurApp) {
-        setInstallState('already-installed');
-      }
+    if (isInstalled && !window.location.search.includes('force')) {
+      setInstallState('already-installed');
     }
-
-    // Listen for install prompt
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-    };
-
-    // Listen for app installed
-    const handleAppInstalled = () => {
-      setInstallState('success');
-      setDeferredPrompt(null);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
-    };
-  }, []);
+  }, [isInstalled]);
 
   const simulateProgress = () => {
     setProgress(0);
@@ -104,21 +60,19 @@ const Install = () => {
   };
 
   const handleInstallClick = async () => {
-    // If we have the native prompt, use it
-    if (deferredPrompt) {
+    // If we have the native prompt (via context), use it
+    if (canInstall) {
       setInstallState('installing');
       const progressInterval = simulateProgress();
 
       try {
-        await deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
+        const success = await install();
 
         clearInterval(progressInterval);
 
-        if (outcome === 'accepted') {
+        if (success) {
           setProgress(100);
           setInstallState('success');
-          setDeferredPrompt(null);
           
           // Track the install
           const platform = isIOS ? 'ios' : isAndroid ? 'android' : 'desktop';
@@ -137,7 +91,7 @@ const Install = () => {
       setShowIOSGuide(true);
     } else if (isAndroid) {
       // For Android without native prompt, show instructions
-      // and track as potential install
+      setShowIOSGuide(false); // Show manual steps on page
     }
   };
 
@@ -351,7 +305,7 @@ const Install = () => {
   }
 
   // Determine which steps to show
-  const showNativeInstall = !!deferredPrompt;
+  const showNativeInstall = canInstall;
   const currentSteps = isIOS ? t.iosSteps : t.androidSteps;
   const stepsTitle = isIOS ? t.iosTitle : t.androidTitle;
 
