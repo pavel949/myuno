@@ -3431,11 +3431,114 @@ export type Database = {
         }
         Relationships: []
       }
+      experience_media: {
+        Row: {
+          alt_text: string | null
+          created_at: string
+          experience_id: string
+          id: string
+          media_type: string
+          sort_order: number
+          source_image_url: string | null
+          stored_path: string | null
+        }
+        Insert: {
+          alt_text?: string | null
+          created_at?: string
+          experience_id: string
+          id?: string
+          media_type?: string
+          sort_order?: number
+          source_image_url?: string | null
+          stored_path?: string | null
+        }
+        Update: {
+          alt_text?: string | null
+          created_at?: string
+          experience_id?: string
+          id?: string
+          media_type?: string
+          sort_order?: number
+          source_image_url?: string | null
+          stored_path?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experience_media_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experience_media_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences_normalized"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experience_pricing: {
+        Row: {
+          created_at: string
+          experience_id: string
+          id: string
+          max_pax: number | null
+          min_pax: number | null
+          price_name: string
+          price_notes: string | null
+          price_thb: number
+          price_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          experience_id: string
+          id?: string
+          max_pax?: number | null
+          min_pax?: number | null
+          price_name: string
+          price_notes?: string | null
+          price_thb: number
+          price_type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          experience_id?: string
+          id?: string
+          max_pax?: number | null
+          min_pax?: number | null
+          price_name?: string
+          price_notes?: string | null
+          price_thb?: number
+          price_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experience_pricing_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experience_pricing_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences_normalized"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       experiences: {
         Row: {
           age_restriction: number | null
           approval_status: string | null
           available_days: string[] | null
+          booking_url: string | null
           category: string | null
           certification_details: string | null
           commission_rate: number | null
@@ -3449,23 +3552,28 @@ export type Database = {
           duration_minutes: number | null
           equipment_included: boolean | null
           excludes: Json | null
+          exclusions: Json | null
           experience_type: string
           external_link: string | null
           highlights: Json | null
           id: string
           images: string[] | null
           includes: Json | null
+          inclusions: Json | null
           is_active: boolean | null
           is_certified: boolean | null
           is_featured: boolean | null
           itinerary: Json | null
           location_name: string | null
+          long_description: string | null
           max_participants: number | null
           meeting_point: string | null
           meeting_point_lat: number | null
           meeting_point_lng: number | null
           min_participants: number | null
+          notes: Json | null
           partner_id: string | null
+          pickup_included: boolean | null
           price: number | null
           price_per: string | null
           provider_id: string | null
@@ -3476,8 +3584,12 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           safety_briefing_required: boolean | null
+          short_description: string | null
+          slug: string | null
+          source_page_url: string | null
           source_type: string | null
           start_times: string[] | null
+          status: string | null
           tags: string[] | null
           title_en: string
           title_ru: string
@@ -3488,6 +3600,7 @@ export type Database = {
           age_restriction?: number | null
           approval_status?: string | null
           available_days?: string[] | null
+          booking_url?: string | null
           category?: string | null
           certification_details?: string | null
           commission_rate?: number | null
@@ -3501,23 +3614,28 @@ export type Database = {
           duration_minutes?: number | null
           equipment_included?: boolean | null
           excludes?: Json | null
+          exclusions?: Json | null
           experience_type?: string
           external_link?: string | null
           highlights?: Json | null
           id?: string
           images?: string[] | null
           includes?: Json | null
+          inclusions?: Json | null
           is_active?: boolean | null
           is_certified?: boolean | null
           is_featured?: boolean | null
           itinerary?: Json | null
           location_name?: string | null
+          long_description?: string | null
           max_participants?: number | null
           meeting_point?: string | null
           meeting_point_lat?: number | null
           meeting_point_lng?: number | null
           min_participants?: number | null
+          notes?: Json | null
           partner_id?: string | null
+          pickup_included?: boolean | null
           price?: number | null
           price_per?: string | null
           provider_id?: string | null
@@ -3528,8 +3646,12 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           safety_briefing_required?: boolean | null
+          short_description?: string | null
+          slug?: string | null
+          source_page_url?: string | null
           source_type?: string | null
           start_times?: string[] | null
+          status?: string | null
           tags?: string[] | null
           title_en: string
           title_ru: string
@@ -3540,6 +3662,7 @@ export type Database = {
           age_restriction?: number | null
           approval_status?: string | null
           available_days?: string[] | null
+          booking_url?: string | null
           category?: string | null
           certification_details?: string | null
           commission_rate?: number | null
@@ -3553,23 +3676,28 @@ export type Database = {
           duration_minutes?: number | null
           equipment_included?: boolean | null
           excludes?: Json | null
+          exclusions?: Json | null
           experience_type?: string
           external_link?: string | null
           highlights?: Json | null
           id?: string
           images?: string[] | null
           includes?: Json | null
+          inclusions?: Json | null
           is_active?: boolean | null
           is_certified?: boolean | null
           is_featured?: boolean | null
           itinerary?: Json | null
           location_name?: string | null
+          long_description?: string | null
           max_participants?: number | null
           meeting_point?: string | null
           meeting_point_lat?: number | null
           meeting_point_lng?: number | null
           min_participants?: number | null
+          notes?: Json | null
           partner_id?: string | null
+          pickup_included?: boolean | null
           price?: number | null
           price_per?: string | null
           provider_id?: string | null
@@ -3580,8 +3708,12 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           safety_briefing_required?: boolean | null
+          short_description?: string | null
+          slug?: string | null
+          source_page_url?: string | null
           source_type?: string | null
           start_times?: string[] | null
+          status?: string | null
           tags?: string[] | null
           title_en?: string
           title_ru?: string
