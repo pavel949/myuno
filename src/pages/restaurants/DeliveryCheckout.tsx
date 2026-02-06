@@ -6,6 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { useBooking } from '@/hooks/useBooking';
+import { useRestaurant } from '@/hooks/useRestaurants';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   BookingContactForm,
@@ -17,8 +18,8 @@ import {
 import { type ContactFormData } from '@/components/booking/BookingContactForm';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { getRestaurantById } from './restaurantsData';
 import { BackButton } from '@/components/uno/BackButton';
+import { DetailPageSkeleton } from '@/components/ui/page-skeletons';
 
 export default function DeliveryCheckout() {
   const { id } = useParams();
@@ -28,12 +29,13 @@ export default function DeliveryCheckout() {
   const { getItemsByProvider, clearByProvider } = useCart();
   const { createBooking, isSubmitting } = useBooking();
 
-  const restaurant = getRestaurantById(id || '');
+  const { restaurant, isLoading: restaurantLoading } = useRestaurant(id);
   const cartItems = getItemsByProvider(id || '');
 
   const [address, setAddress] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [isSuccess, setIsSuccess] = useState(false);
+  const [bookingId, setBookingId] = useState('');
   
   const [contactData, setContactData] = useState<ContactFormData>({
     name: '',
@@ -48,6 +50,14 @@ export default function DeliveryCheckout() {
     }
   }, [user, authLoading, navigate, id]);
 
+  if (restaurantLoading || authLoading) {
+    return (
+      <AppLayout showBottomNav={false}>
+        <DetailPageSkeleton />
+      </AppLayout>
+    );
+  }
+
   if (!restaurant) {
     return (
       <AppLayout showBottomNav={false}>
@@ -60,30 +70,16 @@ export default function DeliveryCheckout() {
     );
   }
 
-  if (authLoading) {
-    return (
-      <AppLayout showBottomNav={false}>
-        <div className="flex items-center justify-center min-h-screen">
-          <p className="text-muted-foreground">
-            {language === 'ru' ? 'Загрузка...' : 'Loading...'}
-          </p>
-        </div>
-      </AppLayout>
-    );
-  }
-
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const deliveryFee = restaurant.deliveryFee;
+  const deliveryFee = restaurant.delivery_fee || 0;
   const total = subtotal + deliveryFee;
 
   const isFormValid = address && contactData.name && contactData.phone && cartItems.length > 0;
 
-  const [bookingId, setBookingId] = useState('');
 
   const handleSubmit = async () => {
     if (!user || !isFormValid) return;
 
-    // Create booking items for all payment methods
     const bookingItems = cartItems.map(item => ({
       item_type: 'food',
       item_name: language === 'ru' ? (item.nameRu || item.name) : item.name,
@@ -116,23 +112,19 @@ export default function DeliveryCheckout() {
         notes: contactData.notes,
       }],
       metadata: {
-        restaurantName: restaurant.nameEn,
-        restaurantNameRu: restaurant.nameRu,
-        deliveryTime: restaurant.deliveryTime,
+        restaurantName: restaurant.name_en,
+        restaurantNameRu: restaurant.name_ru,
+        deliveryTime: restaurant.delivery_time,
       },
     };
 
-    // If online payment - create pending booking first, then redirect to Stripe
     if (paymentMethod === 'online') {
-      // Create pending booking before Stripe redirect
       const result = await createBooking({
         ...bookingParams,
         payment: { ...bookingParams.payment, status: 'pending' as const },
       });
 
-      if (!result.success || !result.booking_id) {
-        return; // Error already shown by useBooking
-      }
+      if (!result.success || !result.booking_id) return;
 
       const checkoutItems = cartItems.map(item => ({
         name: language === 'ru' ? (item.nameRu || item.name) : item.name,
@@ -140,7 +132,6 @@ export default function DeliveryCheckout() {
         price: item.price,
       }));
       
-      // Add delivery fee as separate item
       checkoutItems.push({
         name: language === 'ru' ? 'Доставка' : 'Delivery',
         quantity: 1,
@@ -149,10 +140,10 @@ export default function DeliveryCheckout() {
 
       const response = await supabase.functions.invoke('create-restaurant-checkout', {
         body: {
-          booking_id: result.booking_id, // Pass booking ID for webhook to update
+          booking_id: result.booking_id,
           booking_type: 'food_delivery',
           restaurant_id: restaurant.id,
-          restaurant_name: restaurant.nameEn,
+          restaurant_name: restaurant.name_en,
           amount: total,
           currency: 'thb',
           items: checkoutItems,
@@ -173,7 +164,6 @@ export default function DeliveryCheckout() {
       return;
     }
 
-    // For non-online payments, create booking directly
     const result = await createBooking(bookingParams);
 
     if (result.success && result.booking_id) {
@@ -187,7 +177,7 @@ export default function DeliveryCheckout() {
     return (
       <BookingConfirmation
         bookingId={bookingId}
-        title={language === 'ru' ? `Заказ из ${restaurant.nameRu}` : `Order from ${restaurant.nameEn}`}
+        title={language === 'ru' ? `Заказ из ${restaurant.name_ru}` : `Order from ${restaurant.name_en}`}
         location={address}
         total={total}
         currency="THB"
@@ -209,7 +199,7 @@ export default function DeliveryCheckout() {
                 {language === 'ru' ? 'Оформление заказа' : 'Checkout'}
               </h1>
               <p className="text-sm text-muted-foreground">
-                {language === 'ru' ? restaurant.nameRu : restaurant.nameEn}
+                {language === 'ru' ? restaurant.name_ru : restaurant.name_en}
               </p>
             </div>
           </div>
@@ -240,10 +230,12 @@ export default function DeliveryCheckout() {
               </div>
             </div>
             
-            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50 text-sm text-muted-foreground">
-              <Clock className="w-4 h-4" />
-              <span>{language === 'ru' ? 'Доставка' : 'Delivery'}: {restaurant.deliveryTime} min</span>
-            </div>
+            {restaurant.delivery_time && (
+              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50 text-sm text-muted-foreground">
+                <Clock className="w-4 h-4" />
+                <span>{language === 'ru' ? 'Доставка' : 'Delivery'}: {restaurant.delivery_time} min</span>
+              </div>
+            )}
           </div>
 
           {/* Delivery Address */}

@@ -13,13 +13,15 @@ export interface VendorRestaurant {
   phone?: string;
   email?: string;
   website?: string;
-  price_level?: number;
+  price_range?: number;
   cover_image?: string;
   images?: string[];
   working_hours?: any;
-  has_delivery?: boolean;
-  has_takeout?: boolean;
-  has_reservations?: boolean;
+  delivery_available?: boolean;
+  delivery_fee?: number;
+  delivery_time?: string;
+  min_order_amount?: number;
+  features?: string[];
   is_active?: boolean;
   is_featured?: boolean;
   is_verified?: boolean;
@@ -29,6 +31,7 @@ export interface VendorRestaurant {
   lng?: number;
   created_at: string;
   updated_at: string;
+  approval_status?: string;
 }
 
 export function useVendorRestaurants(providerId?: string) {
@@ -38,7 +41,7 @@ export function useVendorRestaurants(providerId?: string) {
     providerIdField: 'provider_id',
     orderByColumn: 'created_at',
     orderAscending: false,
-    select: 'id,provider_id,name_en,name_ru,description_en,description_ru,cuisine,address,district,phone,email,website,price_level,cover_image,images,working_hours,has_delivery,has_takeout,has_reservations,is_active,is_featured,is_verified,rating,review_count,lat,lng,created_at,updated_at',
+    select: 'id,provider_id,name_en,name_ru,description_en,description_ru,cuisine,address,district,phone,email,website,price_range,cover_image,images,working_hours,delivery_available,delivery_fee,delivery_time,min_order_amount,features,is_active,is_featured,is_verified,rating,review_count,lat,lng,created_at,updated_at,approval_status',
   });
 
   return {

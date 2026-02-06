@@ -68,17 +68,18 @@ const VendorRestaurants = () => {
     name_ru: '',
     description_en: '',
     description_ru: '',
-    cuisine_type: 'thai',
+    cuisine: 'thai',
     address: '',
     district: '',
     phone: '',
     email: '',
     cover_image: '',
     images: [] as string[],
-    price_level: '2',
-    has_delivery: false,
-    has_takeout: false,
-    has_reservations: true,
+    price_range: '2',
+    delivery_available: false,
+    delivery_fee: '',
+    delivery_time: '',
+    min_order_amount: '',
     is_active: true,
   });
 
@@ -102,17 +103,18 @@ const VendorRestaurants = () => {
       name_ru: '',
       description_en: '',
       description_ru: '',
-      cuisine_type: 'thai',
+      cuisine: 'thai',
       address: '',
       district: '',
       phone: '',
       email: '',
       cover_image: '',
       images: [],
-      price_level: '2',
-      has_delivery: false,
-      has_takeout: false,
-      has_reservations: true,
+      price_range: '2',
+      delivery_available: false,
+      delivery_fee: '',
+      delivery_time: '',
+      min_order_amount: '',
       is_active: true,
     });
     setEditingItem(null);
@@ -125,17 +127,18 @@ const VendorRestaurants = () => {
       name_ru: item.name_ru || '',
       description_en: item.description_en || '',
       description_ru: item.description_ru || '',
-      cuisine_type: item.cuisine || 'thai',
+      cuisine: (item as any).cuisine || 'thai',
       address: item.address || '',
       district: item.district || '',
       phone: item.phone || '',
       email: item.email || '',
       cover_image: item.cover_image || '',
       images: item.images || [],
-      price_level: (item.price_level || 2).toString(),
-      has_delivery: item.has_delivery || false,
-      has_takeout: item.has_takeout || false,
-      has_reservations: item.has_reservations ?? true,
+      price_range: ((item as any).price_range || 2).toString(),
+      delivery_available: (item as any).delivery_available || false,
+      delivery_fee: ((item as any).delivery_fee || '').toString(),
+      delivery_time: (item as any).delivery_time || '',
+      min_order_amount: ((item as any).min_order_amount || '').toString(),
       is_active: item.is_active ?? true,
     });
     setIsDialogOpen(true);
@@ -154,17 +157,18 @@ const VendorRestaurants = () => {
         name_ru: formData.name_ru || formData.name_en,
         description_en: formData.description_en || undefined,
         description_ru: formData.description_ru || undefined,
-        cuisine_type: formData.cuisine_type,
+        cuisine: formData.cuisine,
         address: formData.address || undefined,
         district: formData.district || undefined,
         phone: formData.phone || undefined,
         email: formData.email || undefined,
         cover_image: formData.cover_image || undefined,
         images: formData.images,
-        price_level: parseInt(formData.price_level),
-        has_delivery: formData.has_delivery,
-        has_takeout: formData.has_takeout,
-        has_reservations: formData.has_reservations,
+        price_range: parseInt(formData.price_range),
+        delivery_available: formData.delivery_available,
+        delivery_fee: formData.delivery_fee ? parseFloat(formData.delivery_fee) : 0,
+        delivery_time: formData.delivery_time || undefined,
+        min_order_amount: formData.min_order_amount ? parseFloat(formData.min_order_amount) : 0,
         is_active: formData.is_active,
       };
 
@@ -336,11 +340,7 @@ const VendorRestaurants = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <Label>{isRussian ? 'Доставка' : 'Delivery'}</Label>
-                  <Switch checked={formData.has_delivery} onCheckedChange={(v) => setFormData(prev => ({ ...prev, has_delivery: v }))} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label>{isRussian ? 'Бронирование' : 'Reservations'}</Label>
-                  <Switch checked={formData.has_reservations} onCheckedChange={(v) => setFormData(prev => ({ ...prev, has_reservations: v }))} />
+                  <Switch checked={formData.delivery_available} onCheckedChange={(v) => setFormData(prev => ({ ...prev, delivery_available: v }))} />
                 </div>
               </div>
             </ScrollArea>

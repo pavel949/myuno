@@ -3,14 +3,13 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { MapPin, Star, ArrowLeft, Navigation, List } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useRestaurants } from '@/hooks/useRestaurants';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from '@/integrations/supabase/client';
-import { demoRestaurants } from './restaurantsData';
 import { CITY_GEOGRAPHY } from '@/lib/config/geography';
-import { useRestaurantCoordinates } from '@/hooks/useRestaurantCoordinates';
 
 export default function RestaurantMap() {
   const navigate = useNavigate();
@@ -22,16 +21,14 @@ export default function RestaurantMap() {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapboxToken, setMapboxToken] = useState<string | null>(null);
   
-  // Fetch coordinates from DB instead of hardcoded
-  const { data: restaurantCoordinates = {} } = useRestaurantCoordinates();
-
   const mode = searchParams.get('mode') || 'delivery';
 
-  const filteredRestaurants = demoRestaurants.filter(rest => {
-    if (mode === 'delivery') return rest.acceptsDelivery;
-    if (mode === 'reservation') return rest.acceptsReservations;
-    return true;
+  const { restaurants } = useRestaurants({
+    deliveryOnly: mode === 'delivery' ? true : undefined,
   });
+
+  // Filter restaurants that have coordinates
+  const filteredRestaurants = restaurants.filter(r => r.lat && r.lng);
 
   useEffect(() => {
     let isMounted = true;
@@ -50,9 +47,7 @@ export default function RestaurantMap() {
     };
     getToken();
     
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, []);
 
   useEffect(() => {
@@ -77,17 +72,14 @@ export default function RestaurantMap() {
       'top-right'
     );
 
-    // Store markers and listeners for cleanup
     const markers: mapboxgl.Marker[] = [];
     const clickListeners: Array<{ el: HTMLElement; handler: () => void }> = [];
 
     map.on('load', () => {
       setMapLoaded(true);
       
-      // Add markers for each restaurant
       filteredRestaurants.forEach((restaurant) => {
-        const coords = restaurantCoordinates[restaurant.id];
-        if (!coords) return;
+        if (!restaurant.lat || !restaurant.lng) return;
 
         const el = document.createElement('div');
         el.className = 'restaurant-marker';
@@ -100,7 +92,7 @@ export default function RestaurantMap() {
         const clickHandler = () => {
           setSelectedRestaurant(restaurant.id);
           map.flyTo({
-            center: [coords.lng, coords.lat],
+            center: [restaurant.lng!, restaurant.lat!],
             zoom: 14,
           });
         };
@@ -109,7 +101,7 @@ export default function RestaurantMap() {
         clickListeners.push({ el, handler: clickHandler });
 
         const marker = new mapboxgl.Marker(el)
-          .setLngLat([coords.lng, coords.lat])
+          .setLngLat([restaurant.lng!, restaurant.lat!])
           .addTo(map);
         markers.push(marker);
       });
@@ -118,11 +110,9 @@ export default function RestaurantMap() {
     mapRef.current = map;
 
     return () => {
-      // Clean up event listeners
       clickListeners.forEach(({ el, handler }) => {
         el.removeEventListener('click', handler);
       });
-      // Remove markers
       markers.forEach(marker => marker.remove());
       map.remove();
       mapRef.current = null;
@@ -181,24 +171,24 @@ export default function RestaurantMap() {
             <div className="bg-card rounded-xl border shadow-lg p-4">
               <div className="flex gap-3">
                 <img
-                  src={selected.image}
-                  alt={language === 'ru' ? selected.nameRu : selected.nameEn}
+                  src={selected.cover_image || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400'}
+                  alt={language === 'ru' ? selected.name_ru : selected.name_en}
                   className="w-20 h-20 rounded-lg object-cover"
                 />
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold truncate">
-                    {language === 'ru' ? selected.nameRu : selected.nameEn}
+                    {language === 'ru' ? selected.name_ru : selected.name_en}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    {language === 'ru' ? selected.cuisineRu : selected.cuisine}
+                    {selected.cuisine}
                   </p>
                   <div className="flex items-center gap-2 mt-1">
                     <div className="flex items-center gap-1">
                       <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
                       <span className="text-sm font-medium">{selected.rating}</span>
                     </div>
-                    <Badge variant={selected.isOpen ? 'default' : 'secondary'}>
-                      {selected.isOpen 
+                    <Badge variant={selected.is_active ? 'default' : 'secondary'}>
+                      {selected.is_active 
                         ? (language === 'ru' ? 'Открыто' : 'Open')
                         : (language === 'ru' ? 'Закрыто' : 'Closed')}
                     </Badge>

@@ -86,7 +86,7 @@ export default function AdminRestaurants() {
     name_ru: '',
     description_en: '',
     description_ru: '',
-    cuisine_type: 'international',
+    cuisine: 'international',
     cover_image: '',
     images: [] as string[],
     address: '',
@@ -94,10 +94,11 @@ export default function AdminRestaurants() {
     phone: '',
     email: '',
     website: '',
-    price_range: '$$',
-    has_delivery: false,
-    has_takeaway: false,
-    has_reservation: true,
+    price_range: '2',
+    delivery_available: false,
+    delivery_fee: '',
+    delivery_time: '',
+    min_order_amount: '',
     is_featured: false,
     is_active: true,
   });
@@ -119,7 +120,7 @@ export default function AdminRestaurants() {
       name_ru: '',
       description_en: '',
       description_ru: '',
-      cuisine_type: 'international',
+      cuisine: 'international',
       cover_image: '',
       images: [],
       address: '',
@@ -127,10 +128,11 @@ export default function AdminRestaurants() {
       phone: '',
       email: '',
       website: '',
-      price_range: '$$',
-      has_delivery: false,
-      has_takeaway: false,
-      has_reservation: true,
+      price_range: '2',
+      delivery_available: false,
+      delivery_fee: '',
+      delivery_time: '',
+      min_order_amount: '',
       is_featured: false,
       is_active: true,
     });
@@ -145,7 +147,7 @@ export default function AdminRestaurants() {
       name_ru: item.name_ru || '',
       description_en: item.description_en || '',
       description_ru: item.description_ru || '',
-      cuisine_type: item.cuisine_type || 'international',
+      cuisine: item.cuisine || 'international',
       cover_image: item.cover_image || '',
       images: item.images || [],
       address: item.address || '',
@@ -153,10 +155,11 @@ export default function AdminRestaurants() {
       phone: item.phone || '',
       email: item.email || '',
       website: item.website || '',
-      price_range: item.price_range || '$$',
-      has_delivery: item.has_delivery ?? false,
-      has_takeaway: item.has_takeaway ?? false,
-      has_reservation: item.has_reservation ?? true,
+      price_range: (item.price_range || 2).toString(),
+      delivery_available: item.delivery_available ?? false,
+      delivery_fee: (item.delivery_fee || '').toString(),
+      delivery_time: item.delivery_time || '',
+      min_order_amount: (item.min_order_amount || '').toString(),
       is_featured: item.is_featured ?? false,
       is_active: item.is_active ?? true,
     });
@@ -390,7 +393,7 @@ export default function AdminRestaurants() {
                 </div>
 
                 <div><Label>Cuisine</Label>
-                  <Select value={formData.cuisine_type} onValueChange={(v) => setFormData({...formData, cuisine_type: v})}>
+                  <Select value={formData.cuisine} onValueChange={(v) => setFormData({...formData, cuisine: v})}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {cuisineTypes.map(t => <SelectItem key={t.value} value={t.value}>{isRussian ? t.labelRu : t.label}</SelectItem>)}
@@ -418,19 +421,17 @@ export default function AdminRestaurants() {
                     <Select value={formData.price_range} onValueChange={(v) => setFormData({...formData, price_range: v})}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="$">$</SelectItem>
-                        <SelectItem value="$$">$$</SelectItem>
-                        <SelectItem value="$$$">$$$</SelectItem>
-                        <SelectItem value="$$$$">$$$$</SelectItem>
+                        <SelectItem value="1">$</SelectItem>
+                        <SelectItem value="2">$$</SelectItem>
+                        <SelectItem value="3">$$$</SelectItem>
+                        <SelectItem value="4">$$$$</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
 
                 <div className="flex flex-wrap gap-6">
-                  <div className="flex items-center gap-2"><Switch checked={formData.has_delivery} onCheckedChange={(v) => setFormData({...formData, has_delivery: v})} /><Label>Delivery</Label></div>
-                  <div className="flex items-center gap-2"><Switch checked={formData.has_takeaway} onCheckedChange={(v) => setFormData({...formData, has_takeaway: v})} /><Label>Takeaway</Label></div>
-                  <div className="flex items-center gap-2"><Switch checked={formData.has_reservation} onCheckedChange={(v) => setFormData({...formData, has_reservation: v})} /><Label>Reservation</Label></div>
+                  <div className="flex items-center gap-2"><Switch checked={formData.delivery_available} onCheckedChange={(v) => setFormData({...formData, delivery_available: v})} /><Label>Delivery</Label></div>
                   <div className="flex items-center gap-2"><Switch checked={formData.is_featured} onCheckedChange={(v) => setFormData({...formData, is_featured: v})} /><Label>Featured</Label></div>
                 </div>
               </div>

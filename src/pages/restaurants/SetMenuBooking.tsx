@@ -5,6 +5,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBooking } from '@/hooks/useBooking';
+import { useRestaurant } from '@/hooks/useRestaurants';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { 
@@ -20,8 +21,25 @@ import {
 import { type ContactFormData } from '@/components/booking/BookingContactForm';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { getRestaurantById } from './restaurantsData';
 import { BackButton } from '@/components/uno/BackButton';
+import { DetailPageSkeleton } from '@/components/ui/page-skeletons';
+
+// Set menu data structure (will come from DB in future)
+interface SetMenu {
+  id: string;
+  nameEn: string;
+  nameRu: string;
+  descriptionEn: string;
+  descriptionRu: string;
+  price: number;
+  originalPrice?: number;
+  image: string;
+  includes: string[];
+  includesRu: string[];
+  duration: string;
+  availableTimes: string[];
+  maxGuests: number;
+}
 
 export default function SetMenuBooking() {
   const { id, setId } = useParams();
@@ -30,8 +48,12 @@ export default function SetMenuBooking() {
   const { user, isLoading: authLoading } = useAuth();
   const { createBooking, isSubmitting } = useBooking();
 
-  const restaurant = getRestaurantById(id || '');
-  const setMenu = restaurant?.setMenus?.find(s => s.id === setId);
+  const { restaurant, isLoading: restaurantLoading } = useRestaurant(id);
+
+  // Extract set menus from restaurant working_hours metadata (temporary until DB table exists)
+  const workingHours = restaurant?.working_hours as Record<string, any> | null;
+  const setMenus: SetMenu[] = (workingHours as any)?.set_menus || [];
+  const setMenu = setMenus.find(s => s.id === setId);
 
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState('');
@@ -54,24 +76,20 @@ export default function SetMenuBooking() {
     }
   }, [user, authLoading, navigate, id, setId]);
 
+  if (restaurantLoading || authLoading) {
+    return (
+      <AppLayout showBottomNav={false}>
+        <DetailPageSkeleton />
+      </AppLayout>
+    );
+  }
+
   if (!restaurant || !setMenu) {
     return (
       <AppLayout showBottomNav={false}>
         <div className="flex items-center justify-center min-h-screen">
           <p className="text-muted-foreground">
             {language === 'ru' ? 'Сет-меню не найдено' : 'Set menu not found'}
-          </p>
-        </div>
-      </AppLayout>
-    );
-  }
-
-  if (authLoading) {
-    return (
-      <AppLayout showBottomNav={false}>
-        <div className="flex items-center justify-center min-h-screen">
-          <p className="text-muted-foreground">
-            {language === 'ru' ? 'Загрузка...' : 'Loading...'}
           </p>
         </div>
       </AppLayout>
@@ -88,13 +106,12 @@ export default function SetMenuBooking() {
     const [hours, minutes] = selectedTime.split(':');
     scheduledAt.setHours(parseInt(hours), parseInt(minutes));
 
-    // If online payment selected, redirect to Stripe
     if (paymentMethod === 'online') {
       const response = await supabase.functions.invoke('create-restaurant-checkout', {
         body: {
           booking_type: 'set_menu',
           restaurant_id: restaurant.id,
-          restaurant_name: restaurant.nameEn,
+          restaurant_name: restaurant.name_en,
           amount: totalPrice,
           currency: 'thb',
           items: [{
@@ -142,8 +159,8 @@ export default function SetMenuBooking() {
         is_primary: true,
       }],
       metadata: {
-        restaurantName: restaurant.nameEn,
-        restaurantNameRu: restaurant.nameRu,
+        restaurantName: restaurant.name_en,
+        restaurantNameRu: restaurant.name_ru,
         setMenuName: setMenu.nameEn,
         setMenuNameRu: setMenu.nameRu,
         duration: setMenu.duration,
@@ -186,7 +203,7 @@ export default function SetMenuBooking() {
                 {language === 'ru' ? 'Бронирование сета' : 'Book Set Menu'}
               </h1>
               <p className="text-sm text-muted-foreground">
-                {language === 'ru' ? restaurant.nameRu : restaurant.nameEn}
+                {language === 'ru' ? restaurant.name_ru : restaurant.name_en}
               </p>
             </div>
           </div>
@@ -197,7 +214,7 @@ export default function SetMenuBooking() {
           <BookingSummary
             image={setMenu.image}
             title={language === 'ru' ? setMenu.nameRu : setMenu.nameEn}
-            subtitle={language === 'ru' ? restaurant.nameRu : restaurant.nameEn}
+            subtitle={language === 'ru' ? restaurant.name_ru : restaurant.name_en}
             price={setMenu.price}
             originalPrice={setMenu.originalPrice}
             sourceCurrency="THB"
