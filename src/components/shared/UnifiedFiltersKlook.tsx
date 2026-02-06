@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 import { cn } from '@/lib/utils';
 
 // ============ TYPES ============
@@ -388,7 +388,7 @@ export function UnifiedFiltersKlook({
       <div className={cn("sticky z-20 bg-background/95 backdrop-blur-sm border-b -mx-4 px-4 py-2", stickyTop)}>
         {/* Date Quick Filters (if enabled) */}
         <div 
-          className="flex gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-2 -mx-1 px-1"
+          className="flex gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-2 -mx-1 px-1 scroll-x-container"
           style={{ touchAction: 'pan-x pan-y', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
         >
           {config.showDateFilters && datePresets.map((preset) => (
@@ -565,10 +565,10 @@ export function UnifiedFiltersKlook({
         </div>
       </div>
 
-      {/* Filter Bottom Sheet */}
+      {/* Filter Bottom Sheet - Full height for better UX */}
       <Drawer open={isFilterOpen} onOpenChange={handleOpenChange}>
-        <DrawerContent className="max-h-[85vh]">
-          <DrawerHeader className="border-b pb-4">
+        <DrawerContent className="max-h-[92vh] flex flex-col">
+          <DrawerHeader className="border-b pb-4 flex-shrink-0">
             <div className="flex items-center justify-between">
               <DrawerTitle className="text-lg">
                 {isRu ? labels.filtersRu || 'Фильтры' : labels.filtersEn || 'Filters'}
@@ -585,7 +585,7 @@ export function UnifiedFiltersKlook({
             </div>
           </DrawerHeader>
 
-          <ScrollArea className="flex-1 max-h-[calc(85vh-160px)]">
+          <div className="flex-1 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
             <div className="px-4 py-5 space-y-5">
               
               {/* Price Range */}
@@ -680,9 +680,9 @@ export function UnifiedFiltersKlook({
                 </React.Fragment>
               ))}
             </div>
-          </ScrollArea>
+          </div>
 
-          <DrawerFooter className="border-t pt-4">
+          <DrawerFooter className="border-t pt-4 flex-shrink-0 pb-safe">
             <Button onClick={handleApplyFilters} className="w-full h-12 text-base">
               {isRu 
                 ? `${labels.showResultsRu || 'Показать'} ${resultsCount} ${labels.resultsRu || 'результатов'}` 
