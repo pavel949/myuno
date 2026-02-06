@@ -65,6 +65,7 @@ const navigationGroups: NavGroup[] = [
     titleRu: 'Контент',
     items: [
       { title: 'Dashboard', titleRu: 'Дашборд', path: '/admin', icon: LayoutDashboard },
+      { title: 'Create Content', titleRu: 'Создать контент', path: '/admin/vendor-content', icon: UserPlus },
       { title: 'Catalog', titleRu: 'Каталог', path: '/admin/catalog', icon: Package },
       { title: 'Projects', titleRu: 'Проекты / ЖК', path: '/admin/projects', icon: Building2 },
       { title: 'Investments', titleRu: 'Инвестиции', path: '/admin/investments', icon: TrendingUp },
