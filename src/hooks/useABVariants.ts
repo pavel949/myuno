@@ -90,14 +90,13 @@ export function useUpdateABVariant() {
       variant_b?: VariantContent;
       traffic_split?: number;
     }) => {
-      const update: Record<string, unknown> = {};
-      if (input.variant_a) update.variant_a = input.variant_a as unknown as Json;
-      if (input.variant_b) update.variant_b = input.variant_b as unknown as Json;
-      if (input.traffic_split !== undefined) update.traffic_split = input.traffic_split;
-      
       const { error } = await supabase
         .from('mcc_ab_tests')
-        .update(update)
+        .update({
+          ...(input.variant_a ? { variant_a: input.variant_a as unknown as Json } : {}),
+          ...(input.variant_b ? { variant_b: input.variant_b as unknown as Json } : {}),
+          ...(input.traffic_split !== undefined ? { traffic_split: input.traffic_split } : {}),
+        })
         .eq('id', input.id);
       if (error) throw error;
     },
@@ -109,13 +108,12 @@ export function useToggleABTest() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
-      const update: Record<string, unknown> = { is_active };
-      if (is_active) update.started_at = new Date().toISOString();
-      if (!is_active) update.ended_at = new Date().toISOString();
-      
       const { error } = await supabase
         .from('mcc_ab_tests')
-        .update(update)
+        .update({
+          is_active,
+          ...(is_active ? { started_at: new Date().toISOString() } : { ended_at: new Date().toISOString() }),
+        })
         .eq('id', id);
       if (error) throw error;
     },
