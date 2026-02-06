@@ -25,10 +25,15 @@
 
 /* UNO SuperApp Premium Dark Design System */
 
-/* Prevent browser back/forward gestures and horizontal overflow - mobile app feel */
-html, body {
+/* Prevent browser back/forward gestures - mobile app feel */
+/* CRITICAL: Do NOT add overflow-x: hidden to html/body - it blocks carousel scroll */
+html {
   overscroll-behavior-x: none;
-  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+body {
+  overscroll-behavior-x: none;
   width: 100%;
   max-width: 100vw;
 }
@@ -38,6 +43,14 @@ html, body {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   max-width: 100vw;
+}
+
+/* Explicit horizontal scroll container - overrides parent restrictions */
+.scroll-x-container {
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
+  overscroll-behavior-x: contain;
 }
 
 @layer base {
