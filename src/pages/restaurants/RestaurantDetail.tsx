@@ -16,6 +16,7 @@ import { useViewHistory } from '@/hooks/useViewHistory';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { ReviewsSection } from '@/components/reviews/ReviewsSection';
 import { Card, CardContent } from '@/components/ui/card';
+import { SEOHead } from '@/components/seo/SEOHead';
 
 const PRICE_BAND_LABEL: Record<string, string> = {
   budget: '฿',
@@ -99,6 +100,27 @@ export default function RestaurantDetail() {
 
   return (
     <AppLayout>
+      <SEOHead
+        title={r.seo_title || (language === 'ru' ? restaurant.name_ru : restaurant.name_en)}
+        description={r.seo_description || r.description_short || (language === 'ru' ? restaurant.description_ru : restaurant.description_en)}
+        image={heroImage}
+        type="article"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'Restaurant',
+          name: restaurant.name_en,
+          description: r.seo_description || r.description_short,
+          image: heroImage,
+          address: restaurant.address ? { '@type': 'PostalAddress', streetAddress: restaurant.address } : undefined,
+          telephone: restaurant.phone,
+          servesCuisine: cuisineTags,
+          priceRange: priceBand ? PRICE_BAND_LABEL[priceBand] : undefined,
+          ...(restaurant.rating > 0 && {
+            aggregateRating: { '@type': 'AggregateRating', ratingValue: restaurant.rating, reviewCount: restaurant.review_count || 0 },
+          }),
+          ...(reservationUrl && { acceptsReservations: true, url: reservationUrl }),
+        }}
+      />
       <div className="pb-24">
         {/* Hero Image */}
         <div className="relative h-56">

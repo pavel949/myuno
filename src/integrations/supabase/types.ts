@@ -13526,6 +13526,7 @@ export type Database = {
           approval_status: string | null
           area: string | null
           avg_check_thb: number | null
+          canonical_description_source: string | null
           city: string | null
           cover_image: string | null
           created_at: string
@@ -13575,6 +13576,8 @@ export type Database = {
           review_count: number | null
           reviewed_at: string | null
           reviewed_by: string | null
+          seo_description: string | null
+          seo_title: string | null
           slug: string | null
           uno_team_creator_id: string | null
           updated_at: string
@@ -13587,6 +13590,7 @@ export type Database = {
           approval_status?: string | null
           area?: string | null
           avg_check_thb?: number | null
+          canonical_description_source?: string | null
           city?: string | null
           cover_image?: string | null
           created_at?: string
@@ -13636,6 +13640,8 @@ export type Database = {
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
           slug?: string | null
           uno_team_creator_id?: string | null
           updated_at?: string
@@ -13648,6 +13654,7 @@ export type Database = {
           approval_status?: string | null
           area?: string | null
           avg_check_thb?: number | null
+          canonical_description_source?: string | null
           city?: string | null
           cover_image?: string | null
           created_at?: string
@@ -13697,6 +13704,8 @@ export type Database = {
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
           slug?: string | null
           uno_team_creator_id?: string | null
           updated_at?: string
