@@ -145,6 +145,16 @@ const Install = lazy(() => import('@/pages/Install'));
 // List With Us (Become a Host/Vendor)
 const ListWithUsPage = lazy(() => import('@/pages/ListWithUsPage'));
 
+// Transport catch-all redirect: /transport/:id -> /transport/vehicle/:id
+const TransportIdRedirect = () => {
+  const { id } = useParams();
+  // Skip known sub-paths
+  if (id === 'vehicle' || id === 'booking' || id === 'airport-transfer' || id === 'transfer-success' || id === 'airport' || id === 'taxi') {
+    return null;
+  }
+  return <Navigate to={`/transport/vehicle/${id}`} replace />;
+};
+
 // Tours & Water Activities Mini-Apps (LEGACY - all redirect to /experiences)
 // Redirect helpers for legacy routes
 const TourRedirect = () => {
@@ -615,6 +625,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/taxi-booking" element={<Navigate to="/transport/taxi" replace />} />
         <Route path="/transfers" element={<Navigate to="/transfer" replace />} />
         <Route path="/life" element={<Navigate to="/experiences" replace />} />
+        {/* Catch /transport/:id and redirect to /transport/vehicle/:id */}
+        <Route path="/transport/:id" element={<TransportIdRedirect />} />
         
         {/* Fitness Mini-App Routes */}
         <Route path="/fitness" element={<LazyPage><FitnessIndex /></LazyPage>} />
