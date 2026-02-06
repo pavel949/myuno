@@ -16030,8 +16030,10 @@ export type Database = {
           features: string[] | null
           free_km_per_day: number | null
           fuel_type: string | null
+          helmet_included: boolean | null
           id: string
           images: string[] | null
+          insurance_note: string | null
           is_active: boolean | null
           is_available: boolean | null
           is_featured: boolean | null
@@ -16040,12 +16042,15 @@ export type Database = {
           location_name: string | null
           location_ru: string | null
           luggage_capacity: number | null
+          mileage_policy: string | null
           min_rental_days: number | null
           name_en: string
           name_ru: string
           price_airport_transfer: number | null
           price_per_day: number | null
           price_per_hour: number | null
+          price_per_month: number | null
+          price_per_week: number | null
           provider_id: string | null
           rating: number | null
           rejection_reason: string | null
@@ -16076,8 +16081,10 @@ export type Database = {
           features?: string[] | null
           free_km_per_day?: number | null
           fuel_type?: string | null
+          helmet_included?: boolean | null
           id?: string
           images?: string[] | null
+          insurance_note?: string | null
           is_active?: boolean | null
           is_available?: boolean | null
           is_featured?: boolean | null
@@ -16086,12 +16093,15 @@ export type Database = {
           location_name?: string | null
           location_ru?: string | null
           luggage_capacity?: number | null
+          mileage_policy?: string | null
           min_rental_days?: number | null
           name_en: string
           name_ru: string
           price_airport_transfer?: number | null
           price_per_day?: number | null
           price_per_hour?: number | null
+          price_per_month?: number | null
+          price_per_week?: number | null
           provider_id?: string | null
           rating?: number | null
           rejection_reason?: string | null
@@ -16122,8 +16132,10 @@ export type Database = {
           features?: string[] | null
           free_km_per_day?: number | null
           fuel_type?: string | null
+          helmet_included?: boolean | null
           id?: string
           images?: string[] | null
+          insurance_note?: string | null
           is_active?: boolean | null
           is_available?: boolean | null
           is_featured?: boolean | null
@@ -16132,12 +16144,15 @@ export type Database = {
           location_name?: string | null
           location_ru?: string | null
           luggage_capacity?: number | null
+          mileage_policy?: string | null
           min_rental_days?: number | null
           name_en?: string
           name_ru?: string
           price_airport_transfer?: number | null
           price_per_day?: number | null
           price_per_hour?: number | null
+          price_per_month?: number | null
+          price_per_week?: number | null
           provider_id?: string | null
           rating?: number | null
           rejection_reason?: string | null

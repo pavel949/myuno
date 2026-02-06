@@ -24,6 +24,8 @@ export interface Vehicle {
   location_ru: string | null;
   price_per_hour: number | null;
   price_per_day: number | null;
+  price_per_week: number | null;
+  price_per_month: number | null;
   price_airport_transfer: number | null;
   deposit_amount: number | null;
   min_rental_days: number;
@@ -38,6 +40,10 @@ export interface Vehicle {
   is_verified: boolean;
   is_active: boolean;
   provider_id: string | null;
+  // Extended fields for rental details
+  insurance_note: string | null;
+  mileage_policy: string | null;
+  helmet_included: boolean;
 }
 
 async function fetchVehicles(vehicleType?: string): Promise<Vehicle[]> {
