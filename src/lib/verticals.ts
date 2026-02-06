@@ -188,15 +188,24 @@
      orderType: 'flowers',
    },
    INSURANCE: {
-     id: 'insurance',
-     plural: 'insurance',
-     table: 'insurance_providers',
-     icon: '🛡️',
-     labelEn: 'Insurance',
-     labelRu: 'Страхование',
-     bookable: false,
-   },
- } as const;
+      id: 'insurance',
+      plural: 'insurance',
+      table: 'insurance_providers',
+      icon: '🛡️',
+      labelEn: 'Insurance',
+      labelRu: 'Страхование',
+      bookable: false,
+    },
+    TRANSFER: {
+      id: 'transfer',
+      plural: 'transfers',
+      table: 'transfers',
+      icon: '🚕',
+      labelEn: 'Transfers',
+      labelRu: 'Трансферы',
+      bookable: true,
+    },
+  } as const;
  
  export type VerticalKey = keyof typeof VERTICALS;
  export type VerticalId = typeof VERTICALS[VerticalKey]['id'];

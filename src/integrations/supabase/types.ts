@@ -15141,6 +15141,149 @@ export type Database = {
           },
         ]
       }
+      transfers: {
+        Row: {
+          availability_note: string | null
+          child_seat_available: boolean | null
+          comfort_level: string
+          cover_image: string | null
+          created_at: string | null
+          created_by_uno_team: boolean | null
+          currency: string
+          destination_en: string
+          destination_ru: string
+          distance_km: number | null
+          duration_minutes: number | null
+          flight_tracking: boolean | null
+          full_description_en: string | null
+          full_description_ru: string | null
+          hourly_rate: number | null
+          id: string
+          images: string[] | null
+          is_active: boolean | null
+          is_available: boolean | null
+          is_featured: boolean | null
+          lifeos_tags: string[] | null
+          luggage_max: number
+          meet_and_greet: boolean | null
+          minimum_hours: number | null
+          name_en: string
+          name_ru: string
+          one_way_price: number
+          origin_en: string
+          origin_ru: string
+          passengers_max: number
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          round_trip_price: number | null
+          short_description_en: string | null
+          short_description_ru: string | null
+          sku: string
+          transfer_type: string
+          uno_team_creator_id: string | null
+          updated_at: string | null
+          vehicle_type: string
+          waiting_time_included: number | null
+        }
+        Insert: {
+          availability_note?: string | null
+          child_seat_available?: boolean | null
+          comfort_level?: string
+          cover_image?: string | null
+          created_at?: string | null
+          created_by_uno_team?: boolean | null
+          currency?: string
+          destination_en: string
+          destination_ru: string
+          distance_km?: number | null
+          duration_minutes?: number | null
+          flight_tracking?: boolean | null
+          full_description_en?: string | null
+          full_description_ru?: string | null
+          hourly_rate?: number | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_available?: boolean | null
+          is_featured?: boolean | null
+          lifeos_tags?: string[] | null
+          luggage_max?: number
+          meet_and_greet?: boolean | null
+          minimum_hours?: number | null
+          name_en: string
+          name_ru: string
+          one_way_price: number
+          origin_en: string
+          origin_ru: string
+          passengers_max?: number
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          round_trip_price?: number | null
+          short_description_en?: string | null
+          short_description_ru?: string | null
+          sku: string
+          transfer_type?: string
+          uno_team_creator_id?: string | null
+          updated_at?: string | null
+          vehicle_type?: string
+          waiting_time_included?: number | null
+        }
+        Update: {
+          availability_note?: string | null
+          child_seat_available?: boolean | null
+          comfort_level?: string
+          cover_image?: string | null
+          created_at?: string | null
+          created_by_uno_team?: boolean | null
+          currency?: string
+          destination_en?: string
+          destination_ru?: string
+          distance_km?: number | null
+          duration_minutes?: number | null
+          flight_tracking?: boolean | null
+          full_description_en?: string | null
+          full_description_ru?: string | null
+          hourly_rate?: number | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_available?: boolean | null
+          is_featured?: boolean | null
+          lifeos_tags?: string[] | null
+          luggage_max?: number
+          meet_and_greet?: boolean | null
+          minimum_hours?: number | null
+          name_en?: string
+          name_ru?: string
+          one_way_price?: number
+          origin_en?: string
+          origin_ru?: string
+          passengers_max?: number
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          round_trip_price?: number | null
+          short_description_en?: string | null
+          short_description_ru?: string | null
+          sku?: string
+          transfer_type?: string
+          uno_team_creator_id?: string | null
+          updated_at?: string | null
+          vehicle_type?: string
+          waiting_time_included?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transfers_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       translations: {
         Row: {
           category: string | null
