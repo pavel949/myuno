@@ -319,12 +319,32 @@ export function useFlowerFilterOptions() {
 
   const isLoading = loadingCategories || loadingOccasions || loadingColors;
 
-  // Size options (static - not taxonomy)
+  // Size options matching actual data (S, M, L)
   const sizeOptions: FilterOption[] = [
-    { id: 'small', labelEn: 'Small', labelRu: 'Маленький', icon: '🌱' },
-    { id: 'medium', labelEn: 'Medium', labelRu: 'Средний', icon: '🌿' },
-    { id: 'large', labelEn: 'Large', labelRu: 'Большой', icon: '🌳' },
-    { id: 'xl', labelEn: 'Extra Large', labelRu: 'Очень большой', icon: '🌴' },
+    { id: 'S', labelEn: 'Small', labelRu: 'Маленький', icon: '🌱' },
+    { id: 'M', labelEn: 'Medium', labelRu: 'Средний', icon: '🌿' },
+    { id: 'L', labelEn: 'Large', labelRu: 'Большой', icon: '🌳' },
+  ];
+
+  // Style options
+  const styleOptions: FilterOption[] = [
+    { id: 'Classic', labelEn: 'Classic', labelRu: 'Классика', icon: '🎩' },
+    { id: 'Romantic', labelEn: 'Romantic', labelRu: 'Романтика', icon: '💕' },
+    { id: 'Minimal', labelEn: 'Minimal', labelRu: 'Минимализм', icon: '✨' },
+    { id: 'Bright', labelEn: 'Bright', labelRu: 'Яркий', icon: '🌈' },
+    { id: 'Luxury', labelEn: 'Luxury', labelRu: 'Люкс', icon: '👑' },
+    { id: 'Elegant', labelEn: 'Elegant', labelRu: 'Элегант', icon: '🎀' },
+    { id: 'Soft', labelEn: 'Soft', labelRu: 'Нежный', icon: '☁️' },
+  ];
+
+  // Color palette options
+  const colorPaletteOptions: FilterOption[] = [
+    { id: 'Red', labelEn: 'Red', labelRu: 'Красный', icon: '🔴' },
+    { id: 'Pink', labelEn: 'Pink', labelRu: 'Розовый', icon: '🩷' },
+    { id: 'White', labelEn: 'White', labelRu: 'Белый', icon: '⚪' },
+    { id: 'Yellow', labelEn: 'Yellow', labelRu: 'Жёлтый', icon: '🟡' },
+    { id: 'Pastel', labelEn: 'Pastel', labelRu: 'Пастель', icon: '🌸' },
+    { id: 'Mix', labelEn: 'Mix', labelRu: 'Микс', icon: '🌈' },
   ];
 
   // Delivery options (static)
@@ -332,7 +352,6 @@ export function useFlowerFilterOptions() {
     { id: 'express-2h', labelEn: 'Express 2h', labelRu: 'Экспресс 2ч', icon: '⚡' },
     { id: 'same-day', labelEn: 'Same Day', labelRu: 'В тот же день', icon: '📅' },
     { id: 'scheduled', labelEn: 'Scheduled', labelRu: 'По расписанию', icon: '🗓️' },
-    { id: 'free-delivery', labelEn: 'Free Delivery', labelRu: 'Бесплатная доставка', icon: '🆓' },
   ];
 
   const filterConfig: FilterConfig = useMemo(() => ({
@@ -352,18 +371,18 @@ export function useFlowerFilterOptions() {
         options: toFilterOptions(occasions),
       },
       {
-        id: 'flowerType',
-        titleEn: 'Flower Type',
-        titleRu: 'Тип цветов',
+        id: 'style',
+        titleEn: 'Style',
+        titleRu: 'Стиль',
         type: 'multi',
-        options: toFilterOptions(categories),
+        options: styleOptions,
       },
       {
-        id: 'color',
-        titleEn: 'Color',
-        titleRu: 'Цвет',
+        id: 'colorPalette',
+        titleEn: 'Color Palette',
+        titleRu: 'Цветовая гамма',
         type: 'multi',
-        options: toFilterOptions(colors),
+        options: colorPaletteOptions,
       },
       {
         id: 'size',
@@ -373,11 +392,11 @@ export function useFlowerFilterOptions() {
         options: sizeOptions,
       },
       {
-        id: 'delivery',
-        titleEn: 'Delivery',
-        titleRu: 'Доставка',
+        id: 'flowerType',
+        titleEn: 'Flower Type',
+        titleRu: 'Тип цветов',
         type: 'multi',
-        options: deliveryOptions,
+        options: toFilterOptions(categories),
       },
     ],
   }), [categories, occasions, colors]);
@@ -394,7 +413,8 @@ export function useFlowerFilterOptions() {
     occasions: toFilterOptions(occasions),
     colors: toFilterOptions(colors),
     sizeOptions,
-    deliveryOptions,
+    styleOptions,
+    colorPaletteOptions,
     categoryRibbon,
     isLoading,
   };

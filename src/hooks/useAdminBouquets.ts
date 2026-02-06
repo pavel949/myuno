@@ -6,10 +6,13 @@ import { toast } from 'sonner';
 export interface AdminBouquet {
   id: string;
   shop_id: string;
+  sku: string | null;
   name_en: string;
   name_ru: string;
   description_en: string | null;
   description_ru: string | null;
+  composition_en: string | null;
+  composition_ru: string | null;
   category: string | null;
   image: string | null;
   images: string[] | null;
@@ -18,8 +21,15 @@ export interface AdminBouquet {
   flowers: string[] | null;
   colors: string[] | null;
   size: string | null;
+  style: string | null;
+  occasion_tags: string[] | null;
+  color_palette: string | null;
+  lifeos_tags: string[] | null;
+  availability_note: string | null;
+  preparation_time_minutes: number | null;
   is_popular: boolean | null;
   is_active: boolean | null;
+  is_verified: boolean | null;
   stock_quantity: number | null;
   created_at: string;
   shop?: {
@@ -31,10 +41,13 @@ export interface AdminBouquet {
 
 export interface BouquetFormData {
   shop_id: string;
+  sku: string;
   name_en: string;
   name_ru: string;
   description_en: string;
   description_ru: string;
+  composition_en: string;
+  composition_ru: string;
   category: string;
   image: string;
   images: string[];
@@ -43,6 +56,12 @@ export interface BouquetFormData {
   flowers: string[];
   colors: string[];
   size: string;
+  style: string;
+  occasion_tags: string[];
+  color_palette: string;
+  lifeos_tags: string[];
+  availability_note: string;
+  preparation_time_minutes: number;
   is_popular: boolean;
   is_active: boolean;
   stock_quantity: number | null;

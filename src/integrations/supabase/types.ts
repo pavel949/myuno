@@ -1249,8 +1249,12 @@ export type Database = {
       bouquets: {
         Row: {
           approval_status: string | null
+          availability_note: string | null
           category: string | null
+          color_palette: string | null
           colors: string[] | null
+          composition_en: string | null
+          composition_ru: string | null
           created_at: string
           created_by_uno_team: boolean | null
           currency: string | null
@@ -1263,18 +1267,27 @@ export type Database = {
           is_active: boolean | null
           is_popular: boolean | null
           is_verified: boolean | null
+          lifeos_tags: string[] | null
           name_en: string
           name_ru: string
+          occasion_tags: string[] | null
+          preparation_time_minutes: number | null
           price: number
           shop_id: string
           size: string | null
+          sku: string | null
           stock_quantity: number | null
+          style: string | null
           uno_team_creator_id: string | null
         }
         Insert: {
           approval_status?: string | null
+          availability_note?: string | null
           category?: string | null
+          color_palette?: string | null
           colors?: string[] | null
+          composition_en?: string | null
+          composition_ru?: string | null
           created_at?: string
           created_by_uno_team?: boolean | null
           currency?: string | null
@@ -1287,18 +1300,27 @@ export type Database = {
           is_active?: boolean | null
           is_popular?: boolean | null
           is_verified?: boolean | null
+          lifeos_tags?: string[] | null
           name_en: string
           name_ru: string
+          occasion_tags?: string[] | null
+          preparation_time_minutes?: number | null
           price: number
           shop_id: string
           size?: string | null
+          sku?: string | null
           stock_quantity?: number | null
+          style?: string | null
           uno_team_creator_id?: string | null
         }
         Update: {
           approval_status?: string | null
+          availability_note?: string | null
           category?: string | null
+          color_palette?: string | null
           colors?: string[] | null
+          composition_en?: string | null
+          composition_ru?: string | null
           created_at?: string
           created_by_uno_team?: boolean | null
           currency?: string | null
@@ -1311,12 +1333,17 @@ export type Database = {
           is_active?: boolean | null
           is_popular?: boolean | null
           is_verified?: boolean | null
+          lifeos_tags?: string[] | null
           name_en?: string
           name_ru?: string
+          occasion_tags?: string[] | null
+          preparation_time_minutes?: number | null
           price?: number
           shop_id?: string
           size?: string | null
+          sku?: string | null
           stock_quantity?: number | null
+          style?: string | null
           uno_team_creator_id?: string | null
         }
         Relationships: [
