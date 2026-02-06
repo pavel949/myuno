@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Car } from 'lucide-react';
+import { Car, CalendarDays } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { MiniAppLayout, MiniAppQuickGrid, ItemCard, type QuickGridItem } from '@/components/miniapp';
@@ -10,6 +10,7 @@ import { VerticalCTA } from '@/components/leads/VerticalCTA';
 import { CrossSellSection } from '@/components/crosssell';
 import { normalizeVehicleType } from '@/lib/taxonomies';
 import { mapVehicleToCardProps } from '@/lib/adapters/vehicleAdapters';
+import { Button } from '@/components/ui/button';
 
 export default function TransportIndex() {
   const { language } = useLanguage();
@@ -168,21 +169,33 @@ export default function TransportIndex() {
         {filteredVehicles.map((vehicle) => {
           const cardProps = mapVehicleToCardProps(vehicle, language);
           return (
-            <ItemCard
-              key={vehicle.id}
-              image={cardProps.image}
-              title={cardProps.title}
-              subtitle={cardProps.subtitle}
-              rating={cardProps.rating}
-              price={cardProps.price}
-              currency={cardProps.currency}
-              priceLabel={cardProps.priceLabel}
-              meta={cardProps.meta}
-              tags={cardProps.tags}
-              badge={cardProps.badge}
-              isVerified={cardProps.isVerified}
-              onClick={() => navigate(`/transport/vehicle/${vehicle.id}`)}
-            />
+            <div key={vehicle.id} className="relative">
+              <ItemCard
+                image={cardProps.image}
+                title={cardProps.title}
+                subtitle={cardProps.subtitle}
+                rating={cardProps.rating}
+                price={cardProps.price}
+                currency={cardProps.currency}
+                priceLabel={cardProps.priceLabel}
+                meta={cardProps.meta}
+                tags={cardProps.tags}
+                badge={cardProps.badge}
+                isVerified={cardProps.isVerified}
+                onClick={() => navigate(`/transport/vehicle/${vehicle.id}`)}
+              />
+              <Button
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/transport/booking/${vehicle.id}`);
+                }}
+                className="absolute bottom-3 right-3 h-8 px-4 text-xs font-semibold shadow-md"
+              >
+                <CalendarDays className="w-3.5 h-3.5 mr-1.5" />
+                {language === 'ru' ? 'Забронировать' : 'Book Now'}
+              </Button>
+            </div>
           );
         })}
       </div>

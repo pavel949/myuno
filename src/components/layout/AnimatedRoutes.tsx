@@ -613,6 +613,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/new-developments" element={<LazyPage><NewDevelopmentsLanding /></LazyPage>} />
         <Route path="/transport/taxi" element={<LazyPage><TaxiBooking /></LazyPage>} />
         <Route path="/taxi-booking" element={<Navigate to="/transport/taxi" replace />} />
+        <Route path="/transfers" element={<Navigate to="/transfer" replace />} />
+        <Route path="/life" element={<Navigate to="/experiences" replace />} />
         
         {/* Fitness Mini-App Routes */}
         <Route path="/fitness" element={<LazyPage><FitnessIndex /></LazyPage>} />
