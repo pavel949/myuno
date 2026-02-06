@@ -1,131 +1,88 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Star, MapPin, Clock, Phone, Globe, Heart, Share2, Plus, Minus } from 'lucide-react';
+import { ArrowLeft, Star, MapPin, Clock, Phone, Globe, Heart, Share2, Plus, Minus, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { triggerRipple } from '@/hooks/useRipple';
 import { StickyCartBar } from '@/components/cart/StickyCartBar';
 import { useCartToast } from '@/hooks/useCartToast';
+import { useSupabaseSingle, useSupabaseQuery, QueryFilter } from '@/hooks/useSupabaseQuery';
+import { useMemo, useCallback } from 'react';
 
-const shopData = {
-  'shop-1': {
-    name: 'Phuket Flowers',
-    nameRu: 'Цветы Пхукета',
-    image: 'https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=800',
-    rating: 4.9,
-    reviewCount: 234,
-    location: 'Patong Beach',
-    locationRu: 'Патонг Бич',
-    address: '123 Beach Road, Patong',
-    addressRu: 'Бич Роуд 123, Патонг',
-    phone: '+66 76 123 456',
-    website: 'www.phuketflowers.com',
-    workingHours: '8:00 - 20:00',
-    description: 'Premium flower shop with the freshest blooms in Phuket. We offer same-day delivery and custom arrangements for any occasion.',
-    descriptionRu: 'Премиальный цветочный магазин с самыми свежими цветами на Пхукете. Предлагаем доставку в день заказа и индивидуальные композиции для любого случая.',
-  },
-  'shop-2': {
-    name: 'Orchid Paradise',
-    nameRu: 'Орхидея Рай',
-    image: 'https://images.unsplash.com/photo-1563241527-3004b7be0ffd?w=800',
-    rating: 4.8,
-    reviewCount: 189,
-    location: 'Kata Beach',
-    locationRu: 'Ката Бич',
-    address: '45 Kata Road, Kata',
-    addressRu: 'Ката Роуд 45, Ката',
-    phone: '+66 76 234 567',
-    website: 'www.orchidparadise.com',
-    workingHours: '9:00 - 21:00',
-    description: 'Specialists in exotic orchids and tropical arrangements. Perfect for special occasions and luxury gifts.',
-    descriptionRu: 'Специалисты по экзотическим орхидеям и тропическим композициям. Идеально для особых случаев и роскошных подарков.',
-  },
-};
+interface FlowerShop {
+  id: string;
+  name_en: string;
+  name_ru: string;
+  description_en: string | null;
+  description_ru: string | null;
+  cover_image: string | null;
+  images: string[] | null;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
+  working_hours: any;
+  rating: number | null;
+  review_count: number | null;
+  delivery_available: boolean | null;
+}
 
-const products = [
-  {
-    id: 'product-1',
-    name: 'Classic Rose Bouquet',
-    nameRu: 'Классический букет роз',
-    image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=400',
-    price: 1500,
-    description: '12 premium red roses',
-    descriptionRu: '12 премиальных красных роз',
-  },
-  {
-    id: 'product-2',
-    name: 'Tropical Paradise',
-    nameRu: 'Тропический Рай',
-    image: 'https://images.unsplash.com/photo-1508610048659-a06b669e3321?w=400',
-    price: 2200,
-    description: 'Exotic flowers mix',
-    descriptionRu: 'Микс экзотических цветов',
-  },
-  {
-    id: 'product-3',
-    name: 'White Elegance',
-    nameRu: 'Белая Элегантность',
-    image: 'https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=400',
-    price: 1800,
-    description: 'White lilies & roses',
-    descriptionRu: 'Белые лилии и розы',
-  },
-  {
-    id: 'product-4',
-    name: 'Sunflower Joy',
-    nameRu: 'Радость Подсолнухов',
-    image: 'https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=400',
-    price: 1200,
-    description: 'Bright sunflowers',
-    descriptionRu: 'Яркие подсолнухи',
-  },
-  {
-    id: 'product-5',
-    name: 'Orchid Collection',
-    nameRu: 'Коллекция Орхидей',
-    image: 'https://images.unsplash.com/photo-1563241527-3004b7be0ffd?w=400',
-    price: 3500,
-    description: 'Premium orchids',
-    descriptionRu: 'Премиальные орхидеи',
-  },
-  {
-    id: 'product-6',
-    name: 'Birthday Special',
-    nameRu: 'Праздничный букет',
-    image: 'https://images.unsplash.com/photo-1455659817273-f96807779a8a?w=400',
-    price: 2000,
-    description: 'Colorful mix with balloons',
-    descriptionRu: 'Яркий микс с шарами',
-  },
-];
+interface Bouquet {
+  id: string;
+  name_en: string;
+  name_ru: string;
+  description_en: string | null;
+  description_ru: string | null;
+  image: string | null;
+  price: number;
+  shop_id: string;
+}
 
 const FlowerShopDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { language } = useLanguage();
+  const { formatPrice } = useCurrency();
   const { addItem, removeItem, updateQuantity, items, getItemsByProvider } = useCart();
   const [isFavorite, setIsFavorite] = useState(false);
   const { showAddedToast } = useCartToast();
 
-  const shop = shopData[id as keyof typeof shopData] || shopData['shop-1'];
-  const providerId = id || 'shop-1';
+  const transform = useCallback((data: unknown) => data as FlowerShop, []);
+  const { data: shop, isLoading: shopLoading } = useSupabaseSingle<FlowerShop>({
+    table: 'flower_shops',
+    id: id || '',
+    transform,
+  });
+
+  const bouquetFilters = useMemo((): QueryFilter[] => [
+    { column: 'shop_id', value: id || '' },
+    { column: 'is_active', value: true },
+  ], [id]);
+
+  const { data: bouquets, isLoading: bouquetsLoading } = useSupabaseQuery<Bouquet>({
+    table: 'bouquets',
+    filters: bouquetFilters,
+    enabled: !!id,
+  });
+
+  const providerId = id || '';
   const cartItems = getItemsByProvider(providerId);
 
-  const addToCart = (product: typeof products[0]) => {
+  const addToCart = (product: Bouquet) => {
     const item = {
       id: `flowers-${providerId}-${product.id}`,
       type: 'flowers' as const,
-      name: product.name,
-      nameRu: product.nameRu,
+      name: product.name_en,
+      nameRu: product.name_ru,
       price: product.price,
       currency: '฿',
-      image: product.image,
-      providerId: providerId,
-      providerName: shop.name,
-      providerNameRu: shop.nameRu,
+      image: product.image || undefined,
+      providerId,
+      providerName: shop?.name_en || '',
+      providerNameRu: shop?.name_ru || '',
     };
     addItem(item);
     showAddedToast({ item });
@@ -146,170 +103,99 @@ const FlowerShopDetail = () => {
     return items.find(i => i.id === cartItemId)?.quantity || 0;
   };
 
-  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  if (shopLoading) {
+    return (
+      <AppLayout showBottomNav={false}>
+        <div className="flex items-center justify-center min-h-screen"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
+      </AppLayout>
+    );
+  }
+
+  if (!shop) {
+    return (
+      <AppLayout showBottomNav={false}>
+        <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+          <p className="text-muted-foreground">{language === 'ru' ? 'Магазин не найден' : 'Shop not found'}</p>
+          <Button onClick={() => navigate('/flowers')}>{language === 'ru' ? 'К магазинам' : 'Back to shops'}</Button>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  const shopName = language === 'ru' ? shop.name_ru : shop.name_en;
 
   return (
     <AppLayout showBottomNav={false}>
       <div className="min-h-screen bg-background pb-24">
-        {/* Header Image */}
         <div className="relative h-64">
-          <img
-            src={shop.image}
-            alt={language === 'ru' ? shop.nameRu : shop.name}
-            className="w-full h-full object-cover"
-          />
+          <img src={shop.cover_image || 'https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=800'} alt={shopName} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-          
-          {/* Header Actions */}
           <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate('/flowers')}
-              className="bg-black/20 backdrop-blur-sm text-white hover:bg-black/40"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
+            <Button variant="ghost" size="icon" onClick={() => navigate('/flowers')} className="bg-black/20 backdrop-blur-sm text-white hover:bg-black/40"><ArrowLeft className="w-5 h-5" /></Button>
             <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsFavorite(!isFavorite)}
-                className="bg-black/20 backdrop-blur-sm text-white hover:bg-black/40"
-              >
+              <Button variant="ghost" size="icon" onClick={() => setIsFavorite(!isFavorite)} className="bg-black/20 backdrop-blur-sm text-white hover:bg-black/40">
                 <Heart className={cn("w-5 h-5", isFavorite && "fill-red-500 text-red-500")} />
               </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="bg-black/20 backdrop-blur-sm text-white hover:bg-black/40"
-              >
-                <Share2 className="w-5 h-5" />
-              </Button>
+              <Button variant="ghost" size="icon" className="bg-black/20 backdrop-blur-sm text-white hover:bg-black/40"><Share2 className="w-5 h-5" /></Button>
             </div>
           </div>
         </div>
 
-        {/* Shop Info */}
         <div className="p-4 space-y-4">
           <div>
-            <h1 className="text-2xl font-display font-bold">
-              {language === 'ru' ? shop.nameRu : shop.name}
-            </h1>
+            <h1 className="text-2xl font-display font-bold">{shopName}</h1>
             <div className="flex items-center gap-2 mt-2">
               <Star className="w-5 h-5 fill-primary text-primary" />
-              <span className="font-medium">{shop.rating}</span>
-              <span className="text-muted-foreground">({shop.reviewCount} {language === 'ru' ? 'отзывов' : 'reviews'})</span>
+              <span className="font-medium">{shop.rating ?? 0}</span>
+              <span className="text-muted-foreground">({shop.review_count ?? 0} {language === 'ru' ? 'отзывов' : 'reviews'})</span>
             </div>
           </div>
-
-          <p className="text-muted-foreground">
-            {language === 'ru' ? shop.descriptionRu : shop.description}
-          </p>
-
+          <p className="text-muted-foreground">{language === 'ru' ? shop.description_ru : shop.description_en}</p>
           <div className="flex flex-col gap-2 text-sm">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <MapPin className="w-4 h-4" />
-              <span>{language === 'ru' ? shop.addressRu : shop.address}</span>
-            </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Clock className="w-4 h-4" />
-              <span>{shop.workingHours}</span>
-            </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Phone className="w-4 h-4" />
-              <span>{shop.phone}</span>
-            </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Globe className="w-4 h-4" />
-              <span>{shop.website}</span>
-            </div>
+            {shop.address && <div className="flex items-center gap-2 text-muted-foreground"><MapPin className="w-4 h-4" /><span>{shop.address}</span></div>}
+            {shop.phone && <div className="flex items-center gap-2 text-muted-foreground"><Phone className="w-4 h-4" /><span>{shop.phone}</span></div>}
           </div>
         </div>
 
-        {/* Products */}
         <div className="p-4">
-          <h2 className="text-lg font-semibold mb-4">
-            {language === 'ru' ? 'Букеты' : 'Bouquets'}
-          </h2>
-          <div className="grid grid-cols-2 gap-4">
-            {products.map((product) => {
-              const quantity = getQuantity(product.id);
-              return (
-                <div
-                  key={product.id}
-                  className="rounded-xl bg-card border border-border/50 overflow-hidden"
-                >
-                  <div className="relative aspect-square">
-                    <img
-                      src={product.image}
-                      alt={language === 'ru' ? product.nameRu : product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="p-3">
-                    <h3 className="font-medium text-sm truncate">
-                      {language === 'ru' ? product.nameRu : product.name}
-                    </h3>
-                    <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                      {language === 'ru' ? product.descriptionRu : product.description}
-                    </p>
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="font-semibold text-primary">
-                        ฿{product.price.toLocaleString()}
-                      </span>
-                      {quantity === 0 ? (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={(e) => {
-                            triggerRipple(e);
-                            addToCart(product);
-                          }}
-                          className="relative overflow-hidden h-8 px-3 active:scale-95"
-                        >
-                          <Plus className="w-4 h-4" />
-                        </Button>
-                      ) : (
-                        <div className="flex items-center gap-1">
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            onClick={(e) => {
-                              triggerRipple(e);
-                              removeFromCart(product.id);
-                            }}
-                            className="relative overflow-hidden h-7 w-7 active:scale-95"
-                          >
-                            <Minus className="w-3 h-3" />
+          <h2 className="text-lg font-semibold mb-4">{language === 'ru' ? 'Букеты' : 'Bouquets'}</h2>
+          {bouquetsLoading ? (
+            <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              {(bouquets || []).map((product) => {
+                const quantity = getQuantity(product.id);
+                return (
+                  <div key={product.id} className="rounded-xl bg-card border border-border/50 overflow-hidden">
+                    <div className="relative aspect-square">
+                      <img src={product.image || 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=400'} alt={language === 'ru' ? product.name_ru : product.name_en} className="w-full h-full object-cover" />
+                    </div>
+                    <div className="p-3">
+                      <h3 className="font-medium text-sm truncate">{language === 'ru' ? product.name_ru : product.name_en}</h3>
+                      <p className="text-xs text-muted-foreground mt-0.5 truncate">{language === 'ru' ? product.description_ru : product.description_en}</p>
+                      <div className="flex items-center justify-between mt-2">
+                        <span className="font-semibold text-primary">{formatPrice(product.price)}</span>
+                        {quantity === 0 ? (
+                          <Button size="sm" variant="outline" onClick={(e) => { triggerRipple(e); addToCart(product); }} className="relative overflow-hidden h-8 px-3 active:scale-95">
+                            <Plus className="w-4 h-4" />
                           </Button>
-                          <span className="w-6 text-center font-medium text-sm">{quantity}</span>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            onClick={(e) => {
-                              triggerRipple(e);
-                              addToCart(product);
-                            }}
-                            className="relative overflow-hidden h-7 w-7 active:scale-95"
-                          >
-                            <Plus className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      )}
+                        ) : (
+                          <div className="flex items-center gap-1">
+                            <Button size="icon" variant="outline" onClick={(e) => { triggerRipple(e); removeFromCart(product.id); }} className="relative overflow-hidden h-7 w-7 active:scale-95"><Minus className="w-3 h-3" /></Button>
+                            <span className="w-6 text-center font-medium text-sm">{quantity}</span>
+                            <Button size="icon" variant="outline" onClick={(e) => { triggerRipple(e); addToCart(product); }} className="relative overflow-hidden h-7 w-7 active:scale-95"><Plus className="w-3 h-3" /></Button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        <StickyCartBar 
-          providerId={providerId} 
-          buttonLabel={language === 'ru' ? 'Оформить заказ' : 'Checkout'}
-          className="bottom-0"
-        />
+        <StickyCartBar providerId={providerId} buttonLabel={language === 'ru' ? 'Оформить заказ' : 'Checkout'} className="bottom-0" />
       </div>
     </AppLayout>
   );
