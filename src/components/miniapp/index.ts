@@ -4,7 +4,7 @@ export { MiniAppQuickActions } from './MiniAppQuickActions';
 export type { QuickAction } from './MiniAppQuickActions';
 export { ListCard } from './ListCard';
 export { MiniAppLayout } from './MiniAppLayout';
-export type { MiniAppCategory } from './MiniAppLayout';
+export type { MiniAppCategory, QuickFilterOption, QuickFilterSection } from './MiniAppLayout';
 export { MiniAppQuickGrid } from './MiniAppQuickGrid';
 export type { QuickGridItem } from './MiniAppQuickGrid';
 export { ItemCard } from './ItemCard';

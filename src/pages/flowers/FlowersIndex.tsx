@@ -10,7 +10,7 @@ import { Flower, ShoppingCart, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
-import { MiniAppLayout, ItemCard, type MiniAppCategory } from '@/components/miniapp';
+import { MiniAppLayout, ItemCard, type MiniAppCategory, type QuickFilterSection } from '@/components/miniapp';
 import { ActiveFilters, FilterValues } from '@/components/filters';
 import { matchesSingleFilter } from '@/lib/filterUtils';
 import { useBouquets, Bouquet } from '@/hooks/useBouquets';
@@ -31,8 +31,33 @@ const FlowersIndex = () => {
   const { 
     categoryRibbon, 
     filterConfig: dynamicFilterConfig,
+    occasions,
+    colorPaletteOptions,
+    styleOptions,
     isLoading: filtersLoading 
   } = useFlowerFilterOptions();
+
+  // Build quick filter sections for inline chips
+  const quickFilters: QuickFilterSection[] = useMemo(() => [
+    {
+      id: 'occasion',
+      options: occasions.slice(0, 8).map(o => ({
+        id: o.id,
+        labelEn: o.labelEn,
+        labelRu: o.labelRu,
+        icon: typeof o.icon === 'string' ? o.icon : undefined,
+      })),
+    },
+    {
+      id: 'colorPalette',
+      options: colorPaletteOptions.map(o => ({
+        id: o.id,
+        labelEn: o.labelEn,
+        labelRu: o.labelRu,
+        icon: typeof o.icon === 'string' ? o.icon : undefined,
+      })),
+    },
+  ], [occasions, colorPaletteOptions]);
 
   // Convert to MiniAppCategory format
   const categories: MiniAppCategory[] = useMemo(() => {
@@ -174,6 +199,8 @@ const FlowersIndex = () => {
       categories={categories}
       selectedCategory={selectedCategory}
       onCategoryChange={setSelectedCategory}
+      
+      quickFilters={quickFilters}
       
       showCartButton
       cartItemCount={totalItems}
