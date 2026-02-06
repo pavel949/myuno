@@ -16097,6 +16097,7 @@ export type Database = {
       transfers: {
         Row: {
           availability_note: string | null
+          booking_flow: string | null
           child_seat_available: boolean | null
           comfort_level: string
           cover_image: string | null
@@ -16118,11 +16119,14 @@ export type Database = {
           is_featured: boolean | null
           lifeos_tags: string[] | null
           luggage_max: number
+          marketing_tags: string[] | null
           meet_and_greet: boolean | null
           minimum_hours: number | null
           name_en: string
           name_ru: string
+          night_service: boolean | null
           one_way_price: number
+          operating_hours: string | null
           origin_en: string
           origin_ru: string
           passengers_max: number
@@ -16133,14 +16137,18 @@ export type Database = {
           short_description_en: string | null
           short_description_ru: string | null
           sku: string
+          slug: string | null
+          source_urls: string[] | null
           transfer_type: string
           uno_team_creator_id: string | null
           updated_at: string | null
           vehicle_type: string
           waiting_time_included: number | null
+          wheelchair_access: boolean | null
         }
         Insert: {
           availability_note?: string | null
+          booking_flow?: string | null
           child_seat_available?: boolean | null
           comfort_level?: string
           cover_image?: string | null
@@ -16162,11 +16170,14 @@ export type Database = {
           is_featured?: boolean | null
           lifeos_tags?: string[] | null
           luggage_max?: number
+          marketing_tags?: string[] | null
           meet_and_greet?: boolean | null
           minimum_hours?: number | null
           name_en: string
           name_ru: string
+          night_service?: boolean | null
           one_way_price: number
+          operating_hours?: string | null
           origin_en: string
           origin_ru: string
           passengers_max?: number
@@ -16177,14 +16188,18 @@ export type Database = {
           short_description_en?: string | null
           short_description_ru?: string | null
           sku: string
+          slug?: string | null
+          source_urls?: string[] | null
           transfer_type?: string
           uno_team_creator_id?: string | null
           updated_at?: string | null
           vehicle_type?: string
           waiting_time_included?: number | null
+          wheelchair_access?: boolean | null
         }
         Update: {
           availability_note?: string | null
+          booking_flow?: string | null
           child_seat_available?: boolean | null
           comfort_level?: string
           cover_image?: string | null
@@ -16206,11 +16221,14 @@ export type Database = {
           is_featured?: boolean | null
           lifeos_tags?: string[] | null
           luggage_max?: number
+          marketing_tags?: string[] | null
           meet_and_greet?: boolean | null
           minimum_hours?: number | null
           name_en?: string
           name_ru?: string
+          night_service?: boolean | null
           one_way_price?: number
+          operating_hours?: string | null
           origin_en?: string
           origin_ru?: string
           passengers_max?: number
@@ -16221,11 +16239,14 @@ export type Database = {
           short_description_en?: string | null
           short_description_ru?: string | null
           sku?: string
+          slug?: string | null
+          source_urls?: string[] | null
           transfer_type?: string
           uno_team_creator_id?: string | null
           updated_at?: string | null
           vehicle_type?: string
           waiting_time_included?: number | null
+          wheelchair_access?: boolean | null
         }
         Relationships: [
           {
