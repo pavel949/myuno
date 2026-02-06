@@ -1,11 +1,21 @@
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Send, Instagram, MessageCircle } from 'lucide-react';
+import { Send, Instagram, MessageCircle, Download, Smartphone } from 'lucide-react';
 import { COMPANY_CONTACTS } from '@/lib/config';
+import { usePWAInstall } from '@/hooks/usePWAInstall';
 
 export function CompactFooter() {
   const { language } = useLanguage();
+  const { isInstalled, canInstall, isIOS, install } = usePWAInstall();
   const isRu = language === 'ru';
+
+  const handleInstallClick = async () => {
+    if (canInstall) {
+      await install();
+    } else {
+      window.location.href = '/install';
+    }
+  };
 
   const navLinks = [
     { to: '/about', label: isRu ? 'О нас' : 'About' },
@@ -39,6 +49,23 @@ export function CompactFooter() {
   return (
     <footer className="border-t border-border/50 bg-muted/30 mt-auto pb-20 md:pb-0">
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
+        {/* Install App Button - only show if not installed */}
+        {!isInstalled && (
+          <div className="flex justify-center">
+            <button
+              onClick={handleInstallClick}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 hover:bg-primary/20 border border-primary/20 text-primary text-sm font-medium transition-all hover:scale-[1.02] active:scale-[0.98]"
+            >
+              {isIOS ? (
+                <Smartphone className="w-4 h-4" />
+              ) : (
+                <Download className="w-4 h-4" />
+              )}
+              {isRu ? 'Скачать приложение' : 'Download App'}
+            </button>
+          </div>
+        )}
+
         {/* Social Links */}
         <div className="flex justify-center gap-6">
           {socialLinks.map((social) => (
