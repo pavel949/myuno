@@ -75,7 +75,7 @@ export const QuickAccessChips = memo(forwardRef<HTMLDivElement, React.HTMLAttrib
   }, [navigate]);
 
   return (
-    <div ref={ref} className="flex gap-2 overflow-x-auto scrollbar-hide pb-1" {...props}>
+    <div ref={ref} className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 scroll-x-container -mx-4 px-4" {...props}>
       {chips.map((chip) => {
         const Icon = chip.icon;
         const label = isRu ? chip.labelRu : chip.label;
