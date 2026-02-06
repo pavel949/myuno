@@ -332,9 +332,8 @@ const BouquetDetail = () => {
                 <Button
                   onClick={(e) => {
                     triggerRipple(e);
-                    // Pass bouquet with modified price for the selected size
                     const modifiedBouquet = { ...bouquet, price: currentPrice };
-                    buyNow(modifiedBouquet);
+                    buyNow(modifiedBouquet, 1, { size: selectedSize, sizeVariant: currentVariant });
                   }}
                   className="flex-1 h-12 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
                 >
@@ -388,7 +387,7 @@ const BouquetDetail = () => {
                   onClick={(e) => {
                     triggerRipple(e);
                     const modifiedBouquet = { ...bouquet, price: currentPrice };
-                    buyNow(modifiedBouquet, quantity);
+                    buyNow(modifiedBouquet, quantity, { size: selectedSize, sizeVariant: currentVariant });
                   }}
                   className="flex-1 h-12 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
                 >
