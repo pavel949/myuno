@@ -6241,6 +6241,63 @@ export type Database = {
           },
         ]
       }
+      mcc_ai_recommendations: {
+        Row: {
+          applied_at: string | null
+          applied_by: string | null
+          confidence: number
+          created_at: string | null
+          data_points: Json | null
+          dismissed_at: string | null
+          dismissed_reason: string | null
+          expected_impact: string | null
+          expires_at: string | null
+          id: string
+          recommendation_type: string
+          status: string | null
+          target_entity: string | null
+          what_happened: string
+          what_to_do: string
+          why_it_matters: string
+        }
+        Insert: {
+          applied_at?: string | null
+          applied_by?: string | null
+          confidence?: number
+          created_at?: string | null
+          data_points?: Json | null
+          dismissed_at?: string | null
+          dismissed_reason?: string | null
+          expected_impact?: string | null
+          expires_at?: string | null
+          id?: string
+          recommendation_type: string
+          status?: string | null
+          target_entity?: string | null
+          what_happened: string
+          what_to_do: string
+          why_it_matters: string
+        }
+        Update: {
+          applied_at?: string | null
+          applied_by?: string | null
+          confidence?: number
+          created_at?: string | null
+          data_points?: Json | null
+          dismissed_at?: string | null
+          dismissed_reason?: string | null
+          expected_impact?: string | null
+          expires_at?: string | null
+          id?: string
+          recommendation_type?: string
+          status?: string | null
+          target_entity?: string | null
+          what_happened?: string
+          what_to_do?: string
+          why_it_matters?: string
+        }
+        Relationships: []
+      }
       mcc_automation_rules: {
         Row: {
           actions: Json
@@ -6289,6 +6346,54 @@ export type Database = {
           trigger_type?: string
           updated_at?: string | null
           user_state_filter?: string[] | null
+        }
+        Relationships: []
+      }
+      mcc_campaign_rules: {
+        Row: {
+          campaign_id: string
+          channel: string | null
+          cooldown_hours: number | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          max_sends_per_day: number | null
+          message_template: Json | null
+          quiet_hours_end: number | null
+          quiet_hours_start: number | null
+          target_state: string | null
+          trigger_event: string
+          updated_at: string | null
+        }
+        Insert: {
+          campaign_id: string
+          channel?: string | null
+          cooldown_hours?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_sends_per_day?: number | null
+          message_template?: Json | null
+          quiet_hours_end?: number | null
+          quiet_hours_start?: number | null
+          target_state?: string | null
+          trigger_event: string
+          updated_at?: string | null
+        }
+        Update: {
+          campaign_id?: string
+          channel?: string | null
+          cooldown_hours?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_sends_per_day?: number | null
+          message_template?: Json | null
+          quiet_hours_end?: number | null
+          quiet_hours_start?: number | null
+          target_state?: string | null
+          trigger_event?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -6874,6 +6979,162 @@ export type Database = {
           term?: string | null
           touchpoints?: Json | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      mcc_message_log: {
+        Row: {
+          campaign_id: string | null
+          channel: string
+          clicked_at: string | null
+          content_hash: string | null
+          created_at: string | null
+          delivered_at: string | null
+          error: string | null
+          id: string
+          opened_at: string | null
+          priority: string
+          sent_at: string | null
+          status: string | null
+          template_id: string | null
+          user_id: string
+        }
+        Insert: {
+          campaign_id?: string | null
+          channel: string
+          clicked_at?: string | null
+          content_hash?: string | null
+          created_at?: string | null
+          delivered_at?: string | null
+          error?: string | null
+          id?: string
+          opened_at?: string | null
+          priority?: string
+          sent_at?: string | null
+          status?: string | null
+          template_id?: string | null
+          user_id: string
+        }
+        Update: {
+          campaign_id?: string | null
+          channel?: string
+          clicked_at?: string | null
+          content_hash?: string | null
+          created_at?: string | null
+          delivered_at?: string | null
+          error?: string | null
+          id?: string
+          opened_at?: string | null
+          priority?: string
+          sent_at?: string | null
+          status?: string | null
+          template_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mcc_sessions: {
+        Row: {
+          anon_id: string | null
+          campaign_id: string | null
+          country: string | null
+          created_at: string | null
+          device: string | null
+          events_count: number | null
+          id: string
+          landing_id: string | null
+          last_activity_at: string | null
+          locale: string | null
+          page_views: number | null
+          referrer: string | null
+          session_id: string
+          started_at: string | null
+          user_id: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+        }
+        Insert: {
+          anon_id?: string | null
+          campaign_id?: string | null
+          country?: string | null
+          created_at?: string | null
+          device?: string | null
+          events_count?: number | null
+          id?: string
+          landing_id?: string | null
+          last_activity_at?: string | null
+          locale?: string | null
+          page_views?: number | null
+          referrer?: string | null
+          session_id: string
+          started_at?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Update: {
+          anon_id?: string | null
+          campaign_id?: string | null
+          country?: string | null
+          created_at?: string | null
+          device?: string | null
+          events_count?: number | null
+          id?: string
+          landing_id?: string | null
+          last_activity_at?: string | null
+          locale?: string | null
+          page_views?: number | null
+          referrer?: string | null
+          session_id?: string
+          started_at?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Relationships: []
+      }
+      mcc_state_history: {
+        Row: {
+          created_at: string | null
+          from_state: string | null
+          id: string
+          landing_id: string | null
+          metadata: Json | null
+          to_state: string
+          trigger_event: string | null
+          trigger_event_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          from_state?: string | null
+          id?: string
+          landing_id?: string | null
+          metadata?: Json | null
+          to_state: string
+          trigger_event?: string | null
+          trigger_event_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          from_state?: string | null
+          id?: string
+          landing_id?: string | null
+          metadata?: Json | null
+          to_state?: string
+          trigger_event?: string | null
+          trigger_event_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -19418,6 +19679,11 @@ export type Database = {
           p_payload?: Json
           p_run_id: string
         }
+        Returns: string
+      }
+      mcc_check_inactivity: { Args: never; Returns: undefined }
+      mcc_derive_user_state: {
+        Args: { p_event_name: string; p_landing_id?: string; p_user_id: string }
         Returns: string
       }
       mcc_transition_user_state: {
