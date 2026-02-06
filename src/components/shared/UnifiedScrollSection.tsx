@@ -1,4 +1,4 @@
-import React, { memo, ReactNode } from 'react';
+import React, { memo, ReactNode, useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 
 interface UnifiedScrollSectionProps {
@@ -6,23 +6,54 @@ interface UnifiedScrollSectionProps {
   className?: string;
   variant?: 'default' | 'muted';
   noPadding?: boolean;
+  showFadeIndicators?: boolean;
 }
 
 /**
  * Consistent horizontal scroll section for both Services and Products
- * Provides unified background styling and scroll behavior
+ * Provides unified background styling, scroll behavior, and fade indicators
  */
 export const UnifiedScrollSection = memo(function UnifiedScrollSection({
   children,
   className,
   variant = 'default',
   noPadding = false,
+  showFadeIndicators = true,
 }: UnifiedScrollSectionProps) {
   const bgClass = variant === 'muted' ? 'bg-muted/30' : 'bg-transparent';
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [showRightFade, setShowRightFade] = useState(true);
+  const [showLeftFade, setShowLeftFade] = useState(false);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || !showFadeIndicators) return;
+
+    const handleScroll = () => {
+      const { scrollLeft, scrollWidth, clientWidth } = el;
+      setShowLeftFade(scrollLeft > 10);
+      setShowRightFade(scrollLeft < scrollWidth - clientWidth - 10);
+    };
+
+    handleScroll();
+    el.addEventListener('scroll', handleScroll, { passive: true });
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, [showFadeIndicators]);
   
   return (
-    <section className={cn("py-4", bgClass, className)}>
+    <section className={cn("py-4 relative", bgClass, className)}>
+      {/* Left fade indicator */}
+      {showFadeIndicators && showLeftFade && (
+        <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+      )}
+      
+      {/* Right fade indicator */}
+      {showFadeIndicators && showRightFade && (
+        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+      )}
+      
       <div 
+        ref={scrollRef}
         className={cn(
           "flex gap-3 pb-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory",
           "overscroll-x-contain",

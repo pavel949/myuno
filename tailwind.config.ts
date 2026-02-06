@@ -76,6 +76,13 @@ export default {
           light: "hsl(var(--gold-light))",
           dark: "hsl(var(--gold-dark))",
         },
+        // New semantic accent colors
+        coral: {
+          DEFAULT: "hsl(var(--accent-coral))",
+        },
+        teal: {
+          DEFAULT: "hsl(var(--accent-teal))",
+        },
         success: {
           DEFAULT: "hsl(var(--success))",
           foreground: "hsl(0 0% 100%)",

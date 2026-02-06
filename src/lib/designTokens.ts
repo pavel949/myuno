@@ -58,12 +58,17 @@ export const DESIGN_TOKENS = {
     image: 'transition-transform duration-300',
   },
   
-  // ============ Card Variants ============
+  // ============ Card Variants (Unified Hierarchy) ============
   card: {
-    base: 'bg-card border border-border',
-    interactive: 'bg-card border border-border hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer',
-    elevated: 'bg-card border border-border shadow-sm',
-    featured: 'bg-card border border-border shadow-lg',
+    // Level 1: Surface - subtle background, no shadow (containers)
+    surface: 'bg-muted/30 dark:bg-muted/10',
+    // Level 2: Content - default cards (products, services)
+    base: 'bg-card border border-border dark:border-transparent shadow-sm',
+    // Level 3: Interactive - hover lift (clickable items)
+    interactive: 'bg-card border border-border dark:border-transparent shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer',
+    // Level 4: Elevated - prominent (modals, featured)
+    elevated: 'bg-card border border-border dark:border-transparent shadow-lg',
+    featured: 'bg-card border border-border dark:border-transparent shadow-xl',
   },
   
   // ============ Button Behavior ============

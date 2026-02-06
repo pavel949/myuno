@@ -67,24 +67,30 @@ body {
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 43 74% 42%;
+    /* Enhanced Gold - brighter for better contrast */
+    --primary: 42 78% 52%;
     --primary-foreground: 0 0% 100%;
+    --primary-light: 42 78% 65%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
     --muted: 220 14% 92%;
     --muted-foreground: 220 10% 38%;
-    --accent: 43 74% 42%;
+    /* Enhanced Gold accent */
+    --accent: 42 78% 52%;
     --accent-foreground: 0 0% 100%;
+    /* New semantic accent colors */
+    --accent-coral: 16 85% 60%;
+    --accent-teal: 180 65% 45%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 220 13% 85%;
     --input: 220 13% 80%;
-    --ring: 43 74% 42%;
+    --ring: 42 78% 52%;
     --radius: 0.75rem;
 
-    /* Premium colors */
-    --gold: 43 74% 42%;
-    --gold-light: 43 74% 55%;
+    /* Premium colors - enhanced gold */
+    --gold: 42 78% 52%;
+    --gold-light: 42 78% 65%;
     --gold-dark: 43 74% 35%;
     --success: 142 76% 36%;
     --warning: 38 92% 50%;
@@ -105,12 +111,12 @@ body {
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 43 74% 42%;
+    --sidebar-primary: 42 78% 52%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 85%;
-    --sidebar-ring: 43 74% 42%;
+    --sidebar-ring: 42 78% 52%;
   }
 
   .dark {
@@ -124,9 +130,10 @@ body {
     --popover: 240 10% 6%;
     --popover-foreground: 0 0% 95%;
     
-    /* Gold accent as primary */
-    --primary: 43 74% 49%;
+    /* Enhanced Gold accent as primary */
+    --primary: 42 78% 55%;
     --primary-foreground: 240 10% 4%;
+    --primary-light: 42 78% 68%;
     
     --secondary: 240 5% 15%;
     --secondary-foreground: 0 0% 95%;
@@ -134,19 +141,23 @@ body {
     --muted: 240 5% 22%;
     --muted-foreground: 240 5% 65%;
     
-    --accent: 43 74% 49%;
+    /* Enhanced Gold accent */
+    --accent: 42 78% 55%;
     --accent-foreground: 240 10% 4%;
+    /* New semantic accent colors */
+    --accent-coral: 16 85% 65%;
+    --accent-teal: 180 65% 50%;
     
     --destructive: 0 62.8% 50%;
     --destructive-foreground: 0 0% 95%;
     
     --border: 240 5% 20%;
     --input: 240 5% 28%;
-    --ring: 43 74% 49%;
+    --ring: 42 78% 55%;
 
-    /* Premium colors */
-    --gold: 43 74% 49%;
-    --gold-light: 43 74% 60%;
+    /* Premium colors - enhanced */
+    --gold: 42 78% 55%;
+    --gold-light: 42 78% 68%;
     --gold-dark: 43 74% 40%;
     --success: 142 76% 42%;
     --warning: 38 92% 50%;
@@ -164,12 +175,12 @@ body {
 
     --sidebar-background: 240 10% 5%;
     --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 43 74% 49%;
+    --sidebar-primary: 42 78% 55%;
     --sidebar-primary-foreground: 240 10% 4%;
     --sidebar-accent: 240 5% 15%;
     --sidebar-accent-foreground: 0 0% 95%;
     --sidebar-border: 240 5% 18%;
-    --sidebar-ring: 43 74% 49%;
+    --sidebar-ring: 42 78% 55%;
   }
 }
 
@@ -357,6 +368,59 @@ body {
   /* Operations section improved touch */
   .operations-card {
     @apply min-h-[56px] p-3;
+  }
+
+  /* ============ Card Hierarchy System ============ */
+  /* Level 1: Surface - subtle background, no shadow */
+  .card-surface {
+    @apply bg-muted/30 rounded-2xl;
+  }
+  
+  /* Level 2: Content - default cards with border */
+  .card-content {
+    @apply bg-card border border-border rounded-2xl shadow-sm;
+  }
+  
+  /* Level 3: Interactive - hover lift effect */
+  .card-interactive {
+    @apply bg-card border border-border rounded-2xl shadow-sm 
+           hover:shadow-md hover:-translate-y-0.5 
+           transition-all duration-200 cursor-pointer;
+  }
+  
+  /* Level 4: Elevated - prominent shadow */
+  .card-elevated {
+    @apply bg-card border border-border rounded-2xl shadow-lg;
+  }
+  
+  /* Dark mode: remove borders, rely on shadows */
+  .dark .card-content,
+  .dark .card-interactive,
+  .dark .card-elevated {
+    @apply border-transparent;
+  }
+
+  /* ============ Scroll Fade Indicators ============ */
+  .scroll-fade-right {
+    mask-image: linear-gradient(to right, black 85%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+  }
+  
+  .scroll-fade-left {
+    mask-image: linear-gradient(to left, black 85%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to left, black 85%, transparent 100%);
+  }
+  
+  .scroll-fade-both {
+    mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+  }
+
+  /* ============ Navigation Indicator ============ */
+  .nav-indicator {
+    @apply absolute -top-0.5 left-1/2 -translate-x-1/2 
+           w-4 h-1 rounded-full bg-primary 
+           transition-all duration-200;
   }
 }
 
