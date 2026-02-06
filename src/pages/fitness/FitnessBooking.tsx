@@ -1,11 +1,13 @@
-import { useState } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBooking } from "@/hooks/useBooking";
+import { useGuestCheckout } from "@/hooks/useGuestCheckout";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageContainer } from "@/components/uno/PageContainer";
 import { PageHeader } from "@/components/uno/PageHeader";
+import { LoginRequiredModal } from "@/components/guest/LoginRequiredModal";
 import { 
   BookingSummary, 
   BookingDateTimeSelect, 
@@ -28,10 +30,16 @@ const membershipTypes = {
 export default function FitnessBooking() {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const { language } = useLanguage();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user } = useAuth();
   const { createBooking, isSubmitting } = useBooking();
+  const { 
+    showLoginModal, 
+    setShowLoginModal, 
+    requireLogin, 
+    getPreservedState, 
+    clearPreservedState,
+  } = useGuestCheckout();
 
   const membershipType = searchParams.get('type') || 'day';
   const membership = membershipTypes[membershipType as keyof typeof membershipTypes] || membershipTypes.day;
@@ -42,11 +50,18 @@ export default function FitnessBooking() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
   const [bookingResult, setBookingResult] = useState<{ success: boolean; bookingId?: string } | null>(null);
 
-  // Auth redirect
-  if (!authLoading && !user) {
-    navigate('/auth', { state: { from: `/fitness/booking/${id}` } });
-    return null;
-  }
+  // Restore preserved state after login
+  useEffect(() => {
+    if (user) {
+      const preserved = getPreservedState();
+      if (preserved?.formData) {
+        const data = preserved.formData as { contactData?: ContactFormData; date?: string };
+        if (data.contactData) setContactData(data.contactData);
+        if (data.date) setDate(new Date(data.date));
+        clearPreservedState();
+      }
+    }
+  }, [user, getPreservedState, clearPreservedState]);
 
   // Success state
   if (bookingResult?.success && bookingResult.bookingId) {
@@ -67,6 +82,14 @@ export default function FitnessBooking() {
 
   const handleSubmit = async () => {
     if (!contactData.name || !contactData.phone) return;
+
+    // Guest checkout: show login modal at commitment boundary
+    if (!user) {
+      const needsLogin = requireLogin({ 
+        formData: { contactData, date: date?.toISOString() } 
+      }, 'booking');
+      if (needsLogin) return;
+    }
 
     const scheduledAt = date || new Date();
 
@@ -170,6 +193,14 @@ export default function FitnessBooking() {
           submitLabel={language === 'ru' ? 'Подтвердить' : 'Confirm'}
         />
       </PageContainer>
+
+      {/* Login Required Modal for guest checkout */}
+      <LoginRequiredModal 
+        open={showLoginModal}
+        onOpenChange={setShowLoginModal}
+        context="booking"
+        preserveState={{ contactData, date: date?.toISOString() }}
+      />
     </AppLayout>
   );
 }
