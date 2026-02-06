@@ -12,6 +12,7 @@ import { CurrencySwitcher } from '@/components/uno/CurrencySwitcher';
 import { MiniCart } from '@/components/market/MiniCart';
 import { RoleContextSwitcher } from '@/components/uno/RoleContextSwitcher';
 import { useUserContext } from '@/hooks/useUserContext';
+import { GuestModeBadge } from '@/components/guest/GuestModeBadge';
 
 interface AppHeaderProps {
   title?: string;
@@ -101,11 +102,15 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
               </Link>
             </>
           ) : (
-            <Link to="/auth" className="ml-1">
-              <PremiumButton size="sm" className="h-9 text-sm px-3">
-                {t('auth.login')}
-              </PremiumButton>
-            </Link>
+            <div className="flex items-center gap-2 ml-1">
+              {/* Guest mode indicator */}
+              <GuestModeBadge className="hidden sm:flex" />
+              <Link to="/auth">
+                <PremiumButton size="sm" className="h-9 text-sm px-3">
+                  {t('auth.login')}
+                </PremiumButton>
+              </Link>
+            </div>
           )}
         </div>
       </div>

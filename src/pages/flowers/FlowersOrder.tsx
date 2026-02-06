@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Calendar, CreditCard, Truck, Gift, Check, Wallet, Loader2, Sparkles } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -22,6 +22,9 @@ import { BackButton } from '@/components/uno/BackButton';
 import { AddressPickerInput, BookingStepProgress, deliveryBookingSteps } from '@/components/booking';
 import { useStripeFlowersCheckout } from '@/hooks/useStripeFlowersCheckout';
 import { FlowersBuyNowItem } from '@/hooks/useBuyNowFlowers';
+import { useGuestCheckout } from '@/hooks/useGuestCheckout';
+import { LoginRequiredModal } from '@/components/guest/LoginRequiredModal';
+import { GuestModeBadge } from '@/components/guest/GuestModeBadge';
 
 const deliverySlots = [
   { id: 'morning', timeEn: '9:00 - 12:00', timeRu: '9:00 - 12:00', labelEn: 'Morning', labelRu: 'Утро' },
@@ -44,6 +47,16 @@ const FlowersOrder = () => {
   const { createBooking, isSubmitting } = useBooking();
   const { createFlowersCheckout, isProcessing: isStripeProcessing } = useStripeFlowersCheckout();
   const { createAdvanceRequest, navigateToAdvanceRequested, calculateFee, isProcessing: isAdvanceProcessing, feePercent } = useConciergeAdvance();
+  
+  // Guest checkout flow
+  const { 
+    isGuest, 
+    showLoginModal, 
+    setShowLoginModal, 
+    requireLogin, 
+    getPreservedState, 
+    clearPreservedState,
+  } = useGuestCheckout();
   
   // Check for Buy Now item in state
   const buyNowState = location.state as BuyNowState | null;
@@ -89,6 +102,20 @@ const FlowersOrder = () => {
     giftWrap: false,
   });
 
+  // Restore preserved state after login
+  useEffect(() => {
+    if (user) {
+      const preserved = getPreservedState();
+      if (preserved?.formData) {
+        setFormData(prev => ({
+          ...prev,
+          ...(preserved.formData as typeof formData),
+        }));
+        clearPreservedState();
+      }
+    }
+  }, [user, getPreservedState, clearPreservedState]);
+
   const deliveryFee = 100;
   const giftWrapFee = formData.giftWrap ? 150 : 0;
   const finalTotal = totalPrice + deliveryFee + giftWrapFee;
@@ -111,10 +138,10 @@ const FlowersOrder = () => {
       return;
     }
 
+    // Guest checkout: show login modal at commitment boundary
     if (!user) {
-      toast.error(language === 'ru' ? 'Войдите в аккаунт' : 'Please sign in');
-      navigate('/auth');
-      return;
+      const needsLogin = requireLogin({ formData, selectedItems: cartItems }, 'order');
+      if (needsLogin) return;
     }
 
     // Get first provider from cart items
@@ -726,6 +753,14 @@ const FlowersOrder = () => {
           </Button>
         </form>
       </div>
+
+      {/* Login Required Modal for guest checkout */}
+      <LoginRequiredModal 
+        open={showLoginModal}
+        onOpenChange={setShowLoginModal}
+        context="order"
+        preserveState={{ formData }}
+      />
     </AppLayout>
   );
 };
