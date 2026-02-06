@@ -169,7 +169,7 @@ export default function TransportIndex() {
         {filteredVehicles.map((vehicle) => {
           const cardProps = mapVehicleToCardProps(vehicle, language);
           return (
-            <div key={vehicle.id} className="relative">
+            <div key={vehicle.id} className="bg-card rounded-2xl overflow-hidden shadow-sm border hover:shadow-md hover:border-primary/30 transition-all">
               <ItemCard
                 image={cardProps.image}
                 title={cardProps.title}
@@ -183,18 +183,21 @@ export default function TransportIndex() {
                 badge={cardProps.badge}
                 isVerified={cardProps.isVerified}
                 onClick={() => navigate(`/transport/vehicle/${vehicle.id}`)}
+                className="border-0 shadow-none rounded-none"
               />
-              <Button
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/transport/booking/${vehicle.id}`);
-                }}
-                className="absolute bottom-3 right-3 h-8 px-4 text-xs font-semibold shadow-md"
-              >
-                <CalendarDays className="w-3.5 h-3.5 mr-1.5" />
-                {language === 'ru' ? 'Забронировать' : 'Book Now'}
-              </Button>
+              <div className="px-3 pb-3">
+                <Button
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/transport/booking/${vehicle.id}`);
+                  }}
+                  className="w-full h-9 text-xs font-semibold"
+                >
+                  <CalendarDays className="w-3.5 h-3.5 mr-1.5" />
+                  {language === 'ru' ? 'Забронировать' : 'Book Now'}
+                </Button>
+              </div>
             </div>
           );
         })}
