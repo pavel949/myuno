@@ -1,3 +1,15 @@
+/**
+ * MiniAppLayout - Unified layout for all mini-apps
+ * 
+ * Standard structure:
+ * 1. Sticky header with search + filter button
+ * 2. Sticky sub-header with quick-chips (4-6 chips in horizontal scroll)
+ * 3. Optional hero section
+ * 4. Content area
+ * 
+ * This ensures consistent UX across all verticals (Flowers, Restaurants, Market, etc.)
+ */
+
 import React, { ReactNode, useCallback } from 'react';
 import { LucideIcon, ShoppingCart, MapIcon, SlidersHorizontal } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -56,7 +68,7 @@ export interface MiniAppLayoutProps {
   selectedCategory?: string;
   onCategoryChange?: (categoryId: string) => void;
   showCategories?: boolean;
-  // Quick filter chips (visible inline, no drawer)
+  // Quick filter chips (visible inline in sticky sub-header)
   quickFilters?: QuickFilterSection[];
   filterConfig?: FilterConfig;
   filterValues?: FilterValues;
@@ -79,6 +91,9 @@ export interface MiniAppLayoutProps {
   children: ReactNode;
   showBottomNav?: boolean;
   contentClassName?: string;
+  // Sub-header customization
+  stickySubHeader?: ReactNode;
+  showQuickFiltersInSubHeader?: boolean;
 }
 
 export function MiniAppLayout({
@@ -112,7 +127,7 @@ export function MiniAppLayout({
   onCategoryChange,
   showCategories = true,
   
-  // Quick filters (visible chips)
+  // Quick filters (visible chips in sticky sub-header)
   quickFilters = [],
   
   // Filter
@@ -145,6 +160,10 @@ export function MiniAppLayout({
   
   // Quick actions
   quickActions,
+  
+  // Sub-header customization
+  stickySubHeader,
+  showQuickFiltersInSubHeader = true,
 }: MiniAppLayoutProps) {
   const navigate = useNavigate();
   const { language, t } = useLanguage();
@@ -240,6 +259,11 @@ export function MiniAppLayout({
     emoji: cat.icon, // MiniAppCategory uses string emoji icons
   }));
 
+  // Check if we should render quick filters in sticky sub-header
+  const hasQuickFilters = quickFilters.length > 0 && onFilterChange && showQuickFiltersInSubHeader;
+  const hasCategories = showCategories && categoryItems.length > 0 && onCategoryChange;
+  const hasStickySubHeader = stickySubHeader || hasQuickFilters || hasCategories;
+
   return (
     <AppLayout showBottomNav={showBottomNav} showHeader={false} className="max-w-full min-w-0">
       {/* Unified Sticky Header */}
@@ -257,15 +281,46 @@ export function MiniAppLayout({
           isSearching={isSearching}
         />
         
-        {/* Category Filter Ribbon */}
-        {showCategories && categoryItems.length > 0 && onCategoryChange && (
+        {/* Unified Sticky Sub-Header: Categories OR Quick Filters OR Custom */}
+        {hasStickySubHeader && (
           <div className="bg-background/95 backdrop-blur-sm border-b border-border/30">
-            <UnifiedFilterRibbon
-              items={categoryItems}
-              activeId={selectedCategory}
-              onSelect={onCategoryChange}
-              className="px-4 py-2 border-0"
-            />
+            {/* Custom sticky sub-header (Market uses this) */}
+            {stickySubHeader}
+            
+            {/* Category Filter Ribbon (if no custom sub-header) */}
+            {!stickySubHeader && hasCategories && (
+              <UnifiedFilterRibbon
+                items={categoryItems}
+                activeId={selectedCategory}
+                onSelect={onCategoryChange}
+                className="px-4 py-2 border-0"
+              />
+            )}
+            
+            {/* Quick Filter Chips in sticky sub-header (if no categories and no custom) */}
+            {!stickySubHeader && !hasCategories && hasQuickFilters && (
+              <div className="px-4 py-2">
+                <FilterChipGroup scrollable>
+                  {quickFilters.flatMap((section) =>
+                    section.options.map((opt) => {
+                      const sectionValues = (filterValues?.[section.id] as string[]) || [];
+                      const isActive = sectionValues.includes(opt.id);
+                      
+                      return (
+                        <FilterChip
+                          key={`${section.id}-${opt.id}`}
+                          label={language === 'ru' ? opt.labelRu : opt.labelEn}
+                          icon={opt.icon}
+                          isActive={isActive}
+                          onToggle={() => handleQuickFilterToggle(section.id, opt.id)}
+                          size="sm"
+                        />
+                      );
+                    })
+                  )}
+                </FilterChipGroup>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -284,8 +339,8 @@ export function MiniAppLayout({
           />
         )}
 
-        {/* Quick Filter Chips - single horizontal scrollable row */}
-        {quickFilters.length > 0 && onFilterChange && (
+        {/* Quick Filter Chips in content area (when categories are shown in sub-header) */}
+        {quickFilters.length > 0 && onFilterChange && hasCategories && (
           <FilterChipGroup scrollable>
             {quickFilters.flatMap((section) =>
               section.options.map((opt) => {

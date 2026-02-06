@@ -1,9 +1,18 @@
+/**
+ * RestaurantsIndex - Unified restaurant catalog
+ * 
+ * Uses MiniAppLayout with standardized filter pattern:
+ * - Categories in sticky sub-header
+ * - Quick chips for locations/features
+ * - Filter drawer for detailed filtering
+ */
+
 import { useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { UtensilsCrossed, Clock, Star, MapPin, Bike, ArrowRight, Flame, CalendarDays } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useRestaurants } from '@/hooks/useRestaurants';
-import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from '@/components/miniapp';
+import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem, type QuickFilterSection } from '@/components/miniapp';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,20 +29,25 @@ import { VerticalCTA } from '@/components/leads/VerticalCTA';
 type Mode = 'delivery' | 'reservation';
 
 const CUISINE_CATEGORIES: MiniAppCategory[] = [
-  { id: 'all', labelEn: 'All', labelRu: 'Все' },
-  { id: 'thai', labelEn: 'Thai', labelRu: 'Тайская' },
-  { id: 'seafood', labelEn: 'Seafood', labelRu: 'Морепродукты' },
-  { id: 'japanese', labelEn: 'Japanese', labelRu: 'Японская' },
-  { id: 'italian', labelEn: 'Italian', labelRu: 'Итальянская' },
-  { id: 'indian', labelEn: 'Indian', labelRu: 'Индийская' },
+  { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '🍽️' },
+  { id: 'thai', labelEn: 'Thai', labelRu: 'Тайская', icon: '🍜' },
+  { id: 'seafood', labelEn: 'Seafood', labelRu: 'Морепродукты', icon: '🦐' },
+  { id: 'japanese', labelEn: 'Japanese', labelRu: 'Японская', icon: '🍣' },
+  { id: 'italian', labelEn: 'Italian', labelRu: 'Итальянская', icon: '🍝' },
+  { id: 'indian', labelEn: 'Indian', labelRu: 'Индийская', icon: '🍛' },
 ];
 
-const LOCATION_CATEGORIES: MiniAppCategory[] = [
-  { id: 'all', labelEn: 'All areas', labelRu: 'Все районы' },
-  { id: 'Patong', labelEn: 'Patong', labelRu: 'Патонг' },
-  { id: 'Kata', labelEn: 'Kata', labelRu: 'Ката' },
-  { id: 'Kamala', labelEn: 'Kamala', labelRu: 'Камала' },
-  { id: 'Phuket Town', labelEn: 'Phuket Town', labelRu: 'Пхукет Таун' },
+// Location quick filters
+const LOCATION_QUICK_FILTERS: QuickFilterSection[] = [
+  {
+    id: 'location',
+    options: [
+      { id: 'Patong', labelEn: 'Patong', labelRu: 'Патонг', icon: '📍' },
+      { id: 'Kata', labelEn: 'Kata', labelRu: 'Ката', icon: '📍' },
+      { id: 'Kamala', labelEn: 'Kamala', labelRu: 'Камала', icon: '📍' },
+      { id: 'Phuket Town', labelEn: 'Phuket Town', labelRu: 'Пхукет Таун', icon: '📍' },
+    ],
+  },
 ];
 
 export default function RestaurantsIndex() {
@@ -45,12 +59,15 @@ export default function RestaurantsIndex() {
   const [mode, setMode] = useState<Mode>(initialMode);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCuisine, setSelectedCuisine] = useState('all');
-  const [selectedLocation, setSelectedLocation] = useState('all');
   const [filterValues, setFilterValues] = useState<FilterValues>({});
+
+  // Get selected location from filterValues (managed by quick filters)
+  const selectedLocations = (filterValues.location as string[]) || [];
+  const selectedLocation = selectedLocations.length === 1 ? selectedLocations[0] : undefined;
 
   const { restaurants, isLoading } = useRestaurants({
     cuisine: selectedCuisine === 'all' ? undefined : selectedCuisine,
-    district: selectedLocation === 'all' ? undefined : selectedLocation,
+    district: selectedLocation,
     searchQuery: searchQuery || undefined,
     deliveryOnly: mode === 'delivery' ? true : undefined,
   });
@@ -157,6 +174,7 @@ export default function RestaurantsIndex() {
       categories={CUISINE_CATEGORIES}
       selectedCategory={selectedCuisine}
       onCategoryChange={setSelectedCuisine}
+      quickFilters={LOCATION_QUICK_FILTERS}
       filterConfig={filterConfig}
       filterValues={filterValues}
       onFilterChange={setFilterValues}
@@ -183,20 +201,7 @@ export default function RestaurantsIndex() {
         </TabsList>
       </Tabs>
 
-      {/* Location filters */}
-      <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide mb-4">
-        {LOCATION_CATEGORIES.map((loc) => (
-          <Button
-            key={loc.id}
-            variant={selectedLocation === loc.id ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setSelectedLocation(loc.id)}
-            className="shrink-0"
-          >
-            📍 {language === 'ru' ? loc.labelRu : loc.labelEn}
-          </Button>
-        ))}
-      </div>
+      {/* Location filters now handled via quickFilters prop in MiniAppLayout */}
 
       <MiniAppQuickGrid 
         items={mode === 'delivery' ? quickItemsDelivery : quickItemsReservation} 
@@ -206,18 +211,18 @@ export default function RestaurantsIndex() {
 
       {/* Featured Banner - only for delivery */}
       {mode === 'delivery' && filteredRestaurants.some(r => r.is_featured) && (
-        <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-orange-500 to-red-500 p-4 mb-6">
+        <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-primary to-destructive p-4 mb-6">
           <div className="flex items-center gap-3">
-            <Flame className="w-8 h-8 text-white" />
+            <Flame className="w-8 h-8 text-primary-foreground" />
             <div className="flex-1">
-              <p className="text-white font-bold">
+              <p className="text-primary-foreground font-bold">
                 {language === 'ru' ? 'Горячие предложения!' : 'Hot Deals!'}
               </p>
-              <p className="text-white/80 text-sm">
+              <p className="text-primary-foreground/80 text-sm">
                 {language === 'ru' ? 'Скидка 20% на первый заказ' : '20% off your first order'}
               </p>
             </div>
-            <ArrowRight className="w-5 h-5 text-white" />
+            <ArrowRight className="w-5 h-5 text-primary-foreground" />
           </div>
         </div>
       )}
