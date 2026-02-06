@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useFavorites } from '@/hooks/useFavorites';
+import { useUserCollections } from '@/hooks/useUserCollections';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
@@ -38,7 +38,7 @@ type ViewMode = 'grid' | 'list';
 export default function Favorites() {
   const { language } = useLanguage();
   const navigate = useNavigate();
-  const { favorites, loading, toggleFavorite, refetch } = useFavorites();
+  const { favorites, loading, toggleFavorite, refetch } = useUserCollections();
   const [filter, setFilter] = useState<FilterType>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedCollection, setSelectedCollection] = useState('all');
@@ -99,7 +99,7 @@ export default function Favorites() {
   };
 
   const handleRemove = async (item: { item_type: string; item_id: string }) => {
-    await toggleFavorite(item.item_type, item.item_id);
+    await toggleFavorite(item.item_type as any, item.item_id);
   };
 
   return (

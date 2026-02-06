@@ -3,10 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import { Eye, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { useRecentlyViewedProducts } from '@/hooks/useRecentlyViewedProducts';
+import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
 import { UnifiedSectionHeader, UnifiedScrollSection } from '@/components/shared';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+
+interface RecentProduct {
+  id: string;
+  name_en: string;
+  name_ru: string;
+  price: number;
+  cover_image: string | null;
+  vendor_name: string | null;
+}
 
 interface RecentlyViewedProductsProps {
   className?: string;
@@ -18,7 +27,7 @@ export const RecentlyViewedProducts: React.FC<RecentlyViewedProductsProps> = ({
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
-  const { recentProducts, clearAll, hasHistory } = useRecentlyViewedProducts();
+  const { items: recentProducts, clearAll, hasHistory } = useRecentlyViewed<RecentProduct>('myuno_recently_viewed_products');
   const isRu = language === 'ru';
 
   if (!hasHistory) return null;
@@ -54,7 +63,6 @@ export const RecentlyViewedProducts: React.FC<RecentlyViewedProductsProps> = ({
               "transition-all duration-200 group touch-manipulation"
             )}
           >
-            {/* Image */}
             <div className="aspect-square relative overflow-hidden">
               <img
                 src={product.cover_image || '/placeholder.svg'}
@@ -62,8 +70,6 @@ export const RecentlyViewedProducts: React.FC<RecentlyViewedProductsProps> = ({
                 className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
               />
             </div>
-
-            {/* Content */}
             <div className="p-2">
               <h4 className="text-xs font-medium line-clamp-2 text-foreground leading-tight min-h-[2rem]">
                 {isRu ? product.name_ru : product.name_en}

@@ -22,7 +22,13 @@ export type CollectionItemType =
   | 'pet_service'
   | 'salon'
   | 'clinic'
-  | 'spa';
+  | 'spa'
+  | 'course'
+  | 'tutor'
+  | 'event'
+  | 'vehicle'
+  | 'gym'
+  | 'water_activity';
 
 export interface CollectionItem {
   id: string;

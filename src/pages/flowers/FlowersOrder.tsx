@@ -20,7 +20,7 @@ import { triggerRipple } from '@/hooks/useRipple';
 import { supabase } from '@/integrations/supabase/client';
 import { BackButton } from '@/components/uno/BackButton';
 import { AddressPickerInput, BookingStepProgress, deliveryBookingSteps } from '@/components/booking';
-import { useStripeFlowersCheckout } from '@/hooks/useStripeFlowersCheckout';
+import { useStripeUnifiedCheckout } from '@/hooks/useStripeUnifiedCheckout';
 import { FlowersBuyNowItem } from '@/hooks/useBuyNowFlowers';
 import { useGuestCheckout } from '@/hooks/useGuestCheckout';
 import { LoginRequiredModal } from '@/components/guest/LoginRequiredModal';
@@ -45,7 +45,7 @@ const FlowersOrder = () => {
   const { balance, payFromWallet, hasEnoughBalance, isLoading: isWalletLoading } = useWallet();
   const { getItemsByType, clearByType } = useCart();
   const { createBooking, isSubmitting } = useBooking();
-  const { createFlowersCheckout, isProcessing: isStripeProcessing } = useStripeFlowersCheckout();
+  const { createCheckout, isProcessing: isStripeProcessing } = useStripeUnifiedCheckout();
   const { createAdvanceRequest, navigateToAdvanceRequested, calculateFee, isProcessing: isAdvanceProcessing, feePercent } = useConciergeAdvance();
   
   // Guest checkout flow
@@ -150,7 +150,7 @@ const FlowersOrder = () => {
     try {
       // For card payments, redirect to Stripe Checkout
       if (formData.paymentMethod === 'card') {
-        const success = await createFlowersCheckout({
+        const success = await createCheckout('create-flowers-checkout', {
           items: cartItems.map(item => ({
             id: item.id,
             name: language === 'ru' ? item.nameRu : item.name,

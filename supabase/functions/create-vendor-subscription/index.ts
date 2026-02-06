@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@18.5.0";
+import { createStripeClient } from "../_shared/stripe.ts";
 import { createClient } from "../_shared/supabase.ts";
 import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
 
@@ -98,7 +98,7 @@ serve(async (req) => {
     }
 
     // Paid plan - create Stripe checkout
-    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+    const stripe = createStripeClient();
 
     // Check for existing Stripe customer
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });

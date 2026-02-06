@@ -1,6 +1,6 @@
  import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
- import Stripe from "https://esm.sh/stripe@18.5.0";
- import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { createStripeClient } from "../_shared/stripe.ts";
+import { createClient } from "../_shared/supabase.ts";
  
  const corsHeaders = {
    "Access-Control-Allow-Origin": "*",
@@ -43,9 +43,7 @@
  
      console.log(`[create-checkout] Processing ${order_type} order ${order_id} for ${amount} ${currency}`);
  
-     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
-       apiVersion: "2025-08-27.basil",
-     });
+     const stripe = createStripeClient();
  
      // Get or create Stripe customer
      const customers = await stripe.customers.list({ email: user.email, limit: 1 });
