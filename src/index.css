@@ -26,18 +26,21 @@
 /* UNO SuperApp Premium Dark Design System */
 
 /* Prevent browser back/forward gestures - mobile app feel */
-/* Prevent page-level horizontal scroll while allowing carousel children to scroll */
+/* Prevent browser back/forward gestures without blocking child scroll containers */
 html {
   overscroll-behavior-x: none;
-  max-width: 100vw;
-  overflow-x: clip; /* clip prevents scroll but allows overflow for positioned elements */
 }
 
 body {
   overscroll-behavior-x: none;
   width: 100%;
   max-width: 100vw;
-  overflow-x: clip; /* clip instead of hidden - allows child scroll containers */
+}
+
+/* Root app container constrains width - add to #root or main layout wrapper */
+#root {
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 /* Allow horizontal scroll ONLY for specific wide content like tables */
