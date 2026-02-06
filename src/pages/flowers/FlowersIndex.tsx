@@ -37,11 +37,22 @@ const FlowersIndex = () => {
     isLoading: filtersLoading 
   } = useFlowerFilterOptions();
 
+  // Price range options for quick filters
+  const priceRangeOptions = useMemo(() => [
+    { id: 'budget', labelEn: 'Up to ฿1,500', labelRu: 'До ฿1,500', icon: '💰' },
+    { id: 'mid', labelEn: '฿1,500–3,000', labelRu: '฿1,500–3,000', icon: '💎' },
+    { id: 'premium', labelEn: '฿3,000+', labelRu: '฿3,000+', icon: '👑' },
+  ], []);
+
   // Build quick filter sections for inline chips
   const quickFilters: QuickFilterSection[] = useMemo(() => [
     {
+      id: 'priceRange',
+      options: priceRangeOptions,
+    },
+    {
       id: 'occasion',
-      options: occasions.slice(0, 8).map(o => ({
+      options: occasions.slice(0, 6).map(o => ({
         id: o.id,
         labelEn: o.labelEn,
         labelRu: o.labelRu,
@@ -57,7 +68,7 @@ const FlowersIndex = () => {
         icon: typeof o.icon === 'string' ? o.icon : undefined,
       })),
     },
-  ], [occasions, colorPaletteOptions]);
+  ], [occasions, colorPaletteOptions, priceRangeOptions]);
 
   // Convert to MiniAppCategory format
   const categories: MiniAppCategory[] = useMemo(() => {
@@ -105,7 +116,21 @@ const FlowersIndex = () => {
       // Category filter is already applied at API level, but keep for fallback data
       if (selectedCategory !== 'all' && bouquet.category !== selectedCategory) return false;
       
-      // Price level filter
+      // Quick price range filter (new)
+      const priceRangeFilter = filterValues.priceRange as string[] | undefined;
+      if (priceRangeFilter?.length) {
+        const inRange = priceRangeFilter.some(range => {
+          switch (range) {
+            case 'budget': return bouquet.price <= 1500;
+            case 'mid': return bouquet.price > 1500 && bouquet.price <= 3000;
+            case 'premium': return bouquet.price > 3000;
+            default: return true;
+          }
+        });
+        if (!inRange) return false;
+      }
+      
+      // Price level filter (from drawer)
       const priceLevel = filterValues.priceLevel as string | null;
       if (priceLevel) {
         const level = parseInt(priceLevel);
