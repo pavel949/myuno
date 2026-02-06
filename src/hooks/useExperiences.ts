@@ -61,6 +61,15 @@ export interface Experience {
   is_featured: boolean;
   provider_id: string | null;
   external_link: string | null;
+  booking_url: string | null;
+  source_page_url: string | null;
+  short_description: string | null;
+  long_description: string | null;
+  pickup_included: boolean;
+  inclusions: string[];
+  exclusions: string[];
+  slug: string | null;
+  status: string | null;
 }
 
 // ====== CATEGORIES ======
@@ -142,6 +151,15 @@ const transformExperience = (raw: Record<string, unknown>): Experience => {
     is_featured: (raw.is_featured as boolean) ?? false,
     provider_id: raw.provider_id as string | null,
     external_link: raw.external_link as string | null,
+    booking_url: raw.booking_url as string | null,
+    source_page_url: raw.source_page_url as string | null,
+    short_description: raw.short_description as string | null,
+    long_description: raw.long_description as string | null,
+    pickup_included: (raw.pickup_included as boolean) ?? false,
+    inclusions: parseJsonArray(raw.inclusions as Json) as string[],
+    exclusions: parseJsonArray(raw.exclusions as Json) as string[],
+    slug: raw.slug as string | null,
+    status: raw.status as string | null,
   };
 };
 

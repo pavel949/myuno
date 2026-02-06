@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Compass, Waves, Star, Shield, Clock, MapPin, Users, Calendar,
-  Check, X, AlertTriangle, Info, Phone, MessageCircle
+  Check, X, AlertTriangle, Info, Phone, MessageCircle, ExternalLink, Truck
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useExperience, formatDuration, getDifficultyColor } from '@/hooks/useExperiences';
+import { useExperiencePricing } from '@/hooks/useExperiencePricing';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { CrossSellSection } from '@/components/crosssell';
 import { cn } from '@/lib/utils';
@@ -19,6 +20,7 @@ export default function ExperienceDetail() {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
   const { experience, isLoading, error } = useExperience(id);
+  const { data: pricingOptions = [] } = useExperiencePricing(id);
   const [activeImage, setActiveImage] = useState(0);
   const isRu = language === 'ru';
 
@@ -176,30 +178,58 @@ export default function ExperienceDetail() {
           </Card>
         </div>
 
-        {/* Price Card */}
+        {/* Pricing Options */}
         <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  {isRu ? 'Цена' : 'Price'}
+            {pricingOptions.length > 0 ? (
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-muted-foreground">
+                  {isRu ? 'Варианты цен' : 'Pricing Options'}
                 </p>
-                <p className="text-3xl font-bold text-primary">
-                  ฿{experience.price?.toLocaleString()}
-                  {experience.price_per && (
-                    <span className="text-sm font-normal text-muted-foreground ml-1">
-                      /{isRu ? 'чел' : 'person'}
-                    </span>
-                  )}
-                </p>
+                {pricingOptions.map((opt) => (
+                  <div key={opt.id} className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-sm">{opt.price_name}</p>
+                      {opt.price_notes && (
+                        <p className="text-xs text-muted-foreground">{opt.price_notes}</p>
+                      )}
+                    </div>
+                    <p className="text-lg font-bold text-primary">
+                      ฿{opt.price_thb.toLocaleString()}
+                    </p>
+                  </div>
+                ))}
               </div>
-              <Button 
-                size="lg" 
-                onClick={() => navigate(`/experiences/${experience.id}/book`)}
+            ) : (
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">{isRu ? 'Цена от' : 'From'}</p>
+                  <p className="text-3xl font-bold text-primary">
+                    ฿{experience.price?.toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Pickup badge */}
+            {experience.pickup_included && (
+              <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
+                <Truck className="w-4 h-4" />
+                {isRu ? 'Трансфер включён' : 'Pickup included'}
+              </div>
+            )}
+
+            {/* Book with Operator CTA */}
+            {experience.booking_url && (
+              <Button
+                className="w-full mt-4 gap-2"
+                size="lg"
+                onClick={() => window.open(experience.booking_url!, '_blank', 'noopener')}
               >
-                {isRu ? 'Забронировать' : 'Book Now'}
+                <ExternalLink className="w-4 h-4" />
+                {isRu ? 'Забронировать у оператора' : 'Book with Operator'}
               </Button>
-            </div>
+            )}
           </CardContent>
         </Card>
 
@@ -384,20 +414,22 @@ export default function ExperienceDetail() {
             {isRu ? 'Цена от' : 'From'}
           </p>
           <p className="text-xl font-bold text-primary">
-            ฿{experience.price?.toLocaleString()}
+            ฿{(pricingOptions.length > 0 ? pricingOptions[0].price_thb : experience.price)?.toLocaleString()}
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="icon">
-            <Phone className="w-4 h-4" />
-          </Button>
-          <Button variant="outline" size="icon">
-            <MessageCircle className="w-4 h-4" />
-          </Button>
-          <Button onClick={() => navigate(`/experiences/${experience.id}/book`)}>
-            {isRu ? 'Забронировать' : 'Book Now'}
-          </Button>
-        </div>
+        <Button 
+          onClick={() => {
+            if (experience.booking_url) {
+              window.open(experience.booking_url, '_blank', 'noopener');
+            } else {
+              navigate(`/experiences/${experience.id}/book`);
+            }
+          }}
+          className="gap-2"
+        >
+          {experience.booking_url && <ExternalLink className="w-4 h-4" />}
+          {isRu ? 'Забронировать' : 'Book with Operator'}
+        </Button>
       </div>
     </MiniAppLayout>
   );
