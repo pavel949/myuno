@@ -1,10 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dumbbell, SlidersHorizontal } from 'lucide-react';
+import { Dumbbell } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Button } from '@/components/ui/button';
 import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory } from '@/components/miniapp';
-import { UniversalFilter, ActiveFilters, fitnessFilterConfig, FilterValues } from '@/components/filters';
+import { ActiveFilters, fitnessFilterConfig, FilterValues } from '@/components/filters';
 import { useGyms } from '@/hooks/useGyms';
 import { matchesFilter, matchesPriceLevel, matchesMembership, isOpenNow } from '@/lib/filterUtils';
 import { CrossSellSection } from '@/components/crosssell';
@@ -112,28 +111,15 @@ export default function FitnessIndex() {
       selectedCategory={selectedCategory}
       onCategoryChange={setSelectedCategory}
       
+      filterConfig={fitnessFilterConfig}
+      filterValues={filterValues}
+      onFilterChange={setFilterValues}
+      filterActiveCount={activeFilterCount}
+      
       isLoading={isLoading}
       isEmpty={filteredGyms.length === 0}
       emptyIcon={Dumbbell}
       emptyText={language === 'ru' ? 'Залы не найдены' : 'No gyms found'}
-      
-      filterButton={
-        <UniversalFilter
-          config={fitnessFilterConfig}
-          values={filterValues}
-          onChange={setFilterValues}
-          activeCount={activeFilterCount}
-        >
-          <Button variant="outline" size="icon" className="relative shrink-0 h-10 w-10">
-            <SlidersHorizontal className="w-4 h-4" />
-            {activeFilterCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
-                {activeFilterCount}
-              </span>
-            )}
-          </Button>
-        </UniversalFilter>
-      }
       
       quickActions={
         <MiniAppQuickGrid 
