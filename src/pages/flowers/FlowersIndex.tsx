@@ -44,20 +44,29 @@ const FlowersIndex = () => {
     { id: 'premium', labelEn: '฿3,000+', labelRu: '฿3,000+', icon: '👑' },
   ], []);
 
+  // Special holiday occasion chips (priority display)
+  const holidayOccasions = useMemo(() => [
+    { id: 'valentines', labelEn: "Valentine's Day", labelRu: '14 февраля', icon: '❤️' },
+    { id: 'womens_day', labelEn: "Women's Day", labelRu: '8 марта', icon: '🌷' },
+  ], []);
+
   // Build quick filter sections for inline chips
   const quickFilters: QuickFilterSection[] = useMemo(() => [
     {
-      id: 'priceRange',
-      options: priceRangeOptions,
+      id: 'occasion',
+      options: [
+        ...holidayOccasions,
+        ...occasions.slice(0, 4).map(o => ({
+          id: o.id,
+          labelEn: o.labelEn,
+          labelRu: o.labelRu,
+          icon: typeof o.icon === 'string' ? o.icon : undefined,
+        })),
+      ],
     },
     {
-      id: 'occasion',
-      options: occasions.slice(0, 6).map(o => ({
-        id: o.id,
-        labelEn: o.labelEn,
-        labelRu: o.labelRu,
-        icon: typeof o.icon === 'string' ? o.icon : undefined,
-      })),
+      id: 'priceRange',
+      options: priceRangeOptions,
     },
     {
       id: 'colorPalette',
@@ -68,7 +77,7 @@ const FlowersIndex = () => {
         icon: typeof o.icon === 'string' ? o.icon : undefined,
       })),
     },
-  ], [occasions, colorPaletteOptions, priceRangeOptions]);
+  ], [occasions, colorPaletteOptions, priceRangeOptions, holidayOccasions]);
 
   // Convert to MiniAppCategory format
   const categories: MiniAppCategory[] = useMemo(() => {
