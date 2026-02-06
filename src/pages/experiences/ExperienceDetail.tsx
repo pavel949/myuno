@@ -243,8 +243,8 @@ export default function ExperienceDetail() {
           <CardContent>
             <p className="text-muted-foreground whitespace-pre-line">
               {isRu 
-                ? experience.description_ru || experience.description_en
-                : experience.description_en || experience.description_ru
+                ? experience.long_description || experience.description_ru || experience.description_en
+                : experience.long_description || experience.description_en || experience.description_ru
               }
             </p>
           </CardContent>

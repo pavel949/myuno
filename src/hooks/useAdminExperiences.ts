@@ -43,6 +43,14 @@ export interface AdminExperience {
   review_count?: number;
   approval_status?: string;
   external_link?: string;
+  booking_url?: string;
+  source_page_url?: string;
+  pickup_included?: boolean;
+  inclusions?: Json;
+  exclusions?: Json;
+  slug?: string;
+  status?: string;
+  notes?: Json;
   created_at: string;
   updated_at: string;
 }
@@ -67,16 +75,7 @@ export function useAdminExperiences(options: UseAdminExperiencesOptions = {}) {
     orderByColumn: 'created_at',
     orderAscending: false,
     additionalFilters,
-    select: `
-      id,provider_id,experience_type,title_en,title_ru,description_en,description_ru,
-      category,difficulty,duration_minutes,price,price_per,currency,
-      min_participants,max_participants,meeting_point,meeting_point_lat,meeting_point_lng,location_name,
-      includes,excludes,highlights,requirements,itinerary,
-      cover_image,images,available_days,start_times,tags,
-      equipment_included,is_certified,certification_details,safety_briefing_required,age_restriction,
-      is_active,is_featured,rating,review_count,approval_status,external_link,
-      created_at,updated_at
-    `.replace(/\s+/g, ''),
+    select: '*',
   });
 
   return {

@@ -5,7 +5,7 @@ import { CACHE_PROFILES } from '@/lib/queryConfig';
 import type { Json } from '@/integrations/supabase/types';
 
 // ====== TYPES ======
-export type ExperienceType = 'tour' | 'activity';
+export type ExperienceType = 'tour' | 'activity' | 'class';
 
 export interface ItineraryItem {
   time?: string;
@@ -82,6 +82,12 @@ export const EXPERIENCE_CATEGORIES = [
   { id: 'nature', labelEn: 'Nature', labelRu: 'Природа', icon: '🌿' },
   { id: 'adventure', labelEn: 'Adventure', labelRu: 'Приключения', icon: '🧗' },
   { id: 'water-sports', labelEn: 'Water Sports', labelRu: 'Водный спорт', icon: '🏄' },
+  { id: 'wildlife', labelEn: 'Wildlife', labelRu: 'Животные', icon: '🐘' },
+  { id: 'sea_canoe', labelEn: 'Sea Canoe', labelRu: 'Каноэ', icon: '🛶' },
+  { id: 'boat_tour', labelEn: 'Boat Tour', labelRu: 'Лодочный тур', icon: '⛵' },
+  { id: 'charter', labelEn: 'Charter', labelRu: 'Чартер', icon: '🚤' },
+  { id: 'cooking_class', labelEn: 'Cooking Class', labelRu: 'Кулинарный класс', icon: '👨‍🍳' },
+  { id: 'zipline', labelEn: 'Zipline', labelRu: 'Зиплайн', icon: '🏗️' },
   // Activities
   { id: 'diving', labelEn: 'Diving', labelRu: 'Дайвинг', icon: '🤿' },
   { id: 'snorkeling', labelEn: 'Snorkeling', labelRu: 'Снорклинг', icon: '🥽' },
