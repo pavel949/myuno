@@ -13364,114 +13364,177 @@ export type Database = {
         Row: {
           address: string | null
           approval_status: string | null
+          area: string | null
+          avg_check_thb: number | null
+          city: string | null
           cover_image: string | null
           created_at: string
           created_by_uno_team: boolean | null
           cuisine: string
+          cuisine_tags: string[] | null
+          data_sources: Json | null
           delivery_available: boolean | null
           delivery_fee: number | null
+          delivery_provider: string | null
           delivery_time: string | null
           description_en: string | null
           description_ru: string | null
           district: string | null
           email: string | null
           features: string[] | null
+          gallery_image_urls: string[] | null
+          grabfood_search_query: string | null
+          hero_image_url: string | null
           id: string
           images: string[] | null
           is_active: boolean | null
           is_featured: boolean | null
           is_verified: boolean | null
+          last_verified_at: string | null
           lat: number | null
           lng: number | null
+          menu_last_updated_note: string | null
+          menu_url: string | null
           min_order_amount: number | null
           name_en: string
           name_ru: string
+          needs_manual_verification: boolean | null
+          order_url: string | null
           phone: string | null
+          price_level: string | null
           price_range: number | null
           provider_id: string | null
           rating: number | null
           rejection_reason: string | null
+          reservation_policy: string | null
+          reservation_provider: string | null
+          reservation_supported: boolean | null
+          reservation_url: string | null
           review_count: number | null
           reviewed_at: string | null
           reviewed_by: string | null
+          slug: string | null
           uno_team_creator_id: string | null
           updated_at: string
+          verification_notes: string | null
           website: string | null
           working_hours: Json | null
         }
         Insert: {
           address?: string | null
           approval_status?: string | null
+          area?: string | null
+          avg_check_thb?: number | null
+          city?: string | null
           cover_image?: string | null
           created_at?: string
           created_by_uno_team?: boolean | null
           cuisine?: string
+          cuisine_tags?: string[] | null
+          data_sources?: Json | null
           delivery_available?: boolean | null
           delivery_fee?: number | null
+          delivery_provider?: string | null
           delivery_time?: string | null
           description_en?: string | null
           description_ru?: string | null
           district?: string | null
           email?: string | null
           features?: string[] | null
+          gallery_image_urls?: string[] | null
+          grabfood_search_query?: string | null
+          hero_image_url?: string | null
           id?: string
           images?: string[] | null
           is_active?: boolean | null
           is_featured?: boolean | null
           is_verified?: boolean | null
+          last_verified_at?: string | null
           lat?: number | null
           lng?: number | null
+          menu_last_updated_note?: string | null
+          menu_url?: string | null
           min_order_amount?: number | null
           name_en: string
           name_ru: string
+          needs_manual_verification?: boolean | null
+          order_url?: string | null
           phone?: string | null
+          price_level?: string | null
           price_range?: number | null
           provider_id?: string | null
           rating?: number | null
           rejection_reason?: string | null
+          reservation_policy?: string | null
+          reservation_provider?: string | null
+          reservation_supported?: boolean | null
+          reservation_url?: string | null
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          slug?: string | null
           uno_team_creator_id?: string | null
           updated_at?: string
+          verification_notes?: string | null
           website?: string | null
           working_hours?: Json | null
         }
         Update: {
           address?: string | null
           approval_status?: string | null
+          area?: string | null
+          avg_check_thb?: number | null
+          city?: string | null
           cover_image?: string | null
           created_at?: string
           created_by_uno_team?: boolean | null
           cuisine?: string
+          cuisine_tags?: string[] | null
+          data_sources?: Json | null
           delivery_available?: boolean | null
           delivery_fee?: number | null
+          delivery_provider?: string | null
           delivery_time?: string | null
           description_en?: string | null
           description_ru?: string | null
           district?: string | null
           email?: string | null
           features?: string[] | null
+          gallery_image_urls?: string[] | null
+          grabfood_search_query?: string | null
+          hero_image_url?: string | null
           id?: string
           images?: string[] | null
           is_active?: boolean | null
           is_featured?: boolean | null
           is_verified?: boolean | null
+          last_verified_at?: string | null
           lat?: number | null
           lng?: number | null
+          menu_last_updated_note?: string | null
+          menu_url?: string | null
           min_order_amount?: number | null
           name_en?: string
           name_ru?: string
+          needs_manual_verification?: boolean | null
+          order_url?: string | null
           phone?: string | null
+          price_level?: string | null
           price_range?: number | null
           provider_id?: string | null
           rating?: number | null
           rejection_reason?: string | null
+          reservation_policy?: string | null
+          reservation_provider?: string | null
+          reservation_supported?: boolean | null
+          reservation_url?: string | null
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          slug?: string | null
           uno_team_creator_id?: string | null
           updated_at?: string
+          verification_notes?: string | null
           website?: string | null
           working_hours?: Json | null
         }
