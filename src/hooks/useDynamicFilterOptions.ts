@@ -309,3 +309,93 @@ export function useRestaurantFilterOptions() {
     isLoading,
   };
 }
+
+// ============= FLOWER FILTERS =============
+
+export function useFlowerFilterOptions() {
+  const { options: categories, isLoading: loadingCategories } = useTaxonomy('flower_category');
+  const { options: occasions, isLoading: loadingOccasions } = useTaxonomy('flower_occasion');
+  const { options: colors, isLoading: loadingColors } = useTaxonomy('flower_color');
+
+  const isLoading = loadingCategories || loadingOccasions || loadingColors;
+
+  // Size options (static - not taxonomy)
+  const sizeOptions: FilterOption[] = [
+    { id: 'small', labelEn: 'Small', labelRu: 'Маленький', icon: '🌱' },
+    { id: 'medium', labelEn: 'Medium', labelRu: 'Средний', icon: '🌿' },
+    { id: 'large', labelEn: 'Large', labelRu: 'Большой', icon: '🌳' },
+    { id: 'xl', labelEn: 'Extra Large', labelRu: 'Очень большой', icon: '🌴' },
+  ];
+
+  // Delivery options (static)
+  const deliveryOptions: FilterOption[] = [
+    { id: 'express-2h', labelEn: 'Express 2h', labelRu: 'Экспресс 2ч', icon: '⚡' },
+    { id: 'same-day', labelEn: 'Same Day', labelRu: 'В тот же день', icon: '📅' },
+    { id: 'scheduled', labelEn: 'Scheduled', labelRu: 'По расписанию', icon: '🗓️' },
+    { id: 'free-delivery', labelEn: 'Free Delivery', labelRu: 'Бесплатная доставка', icon: '🆓' },
+  ];
+
+  const filterConfig: FilterConfig = useMemo(() => ({
+    sections: [
+      {
+        id: 'priceLevel',
+        titleEn: 'Price Level',
+        titleRu: 'Уровень цен',
+        type: 'price-level',
+        options: [],
+      },
+      {
+        id: 'occasion',
+        titleEn: 'Occasion',
+        titleRu: 'Повод',
+        type: 'multi',
+        options: toFilterOptions(occasions),
+      },
+      {
+        id: 'flowerType',
+        titleEn: 'Flower Type',
+        titleRu: 'Тип цветов',
+        type: 'multi',
+        options: toFilterOptions(categories),
+      },
+      {
+        id: 'color',
+        titleEn: 'Color',
+        titleRu: 'Цвет',
+        type: 'multi',
+        options: toFilterOptions(colors),
+      },
+      {
+        id: 'size',
+        titleEn: 'Size',
+        titleRu: 'Размер',
+        type: 'single',
+        options: sizeOptions,
+      },
+      {
+        id: 'delivery',
+        titleEn: 'Delivery',
+        titleRu: 'Доставка',
+        type: 'multi',
+        options: deliveryOptions,
+      },
+    ],
+  }), [categories, occasions, colors]);
+
+  // Category ribbon for flowers
+  const categoryRibbon = useMemo(() => [
+    { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '🌟' },
+    ...toFilterOptions(categories),
+  ], [categories]);
+
+  return {
+    filterConfig,
+    categories: toFilterOptions(categories),
+    occasions: toFilterOptions(occasions),
+    colors: toFilterOptions(colors),
+    sizeOptions,
+    deliveryOptions,
+    categoryRibbon,
+    isLoading,
+  };
+}

@@ -9,3 +9,4 @@ export { AddressPickerInput } from './AddressPickerInput';
 export { BookingStepProgress, defaultBookingSteps, eventBookingSteps, deliveryBookingSteps, serviceBookingSteps, type BookingStep } from './BookingStepProgress';
 export { BookingStepHint } from './BookingStepHint';
 export { VoucherCard } from './VoucherCard';
+export { DateRangePickerCard, type DateRangePickerCardProps } from './DateRangePickerCard';

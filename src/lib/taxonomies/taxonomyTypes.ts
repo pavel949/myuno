@@ -34,6 +34,11 @@ export const TAXONOMY_TYPES = {
   FUEL_TYPE: 'fuel_type',
   VEHICLE_FEATURE: 'vehicle_feature',
   
+  // Flowers
+  FLOWER_CATEGORY: 'flower_category',
+  FLOWER_OCCASION: 'flower_occasion',
+  FLOWER_COLOR: 'flower_color',
+  
   // Home Services
   SERVICE_DOMAIN: 'service_domain',
   SERVICE_CATEGORY: 'service_category',

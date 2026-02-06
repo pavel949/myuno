@@ -1,28 +1,24 @@
+/**
+ * FlowersIndex - Main catalog page for flower delivery
+ * 
+ * Uses dynamic taxonomy from DB via useFlowerFilterOptions
+ */
+
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Flower, Heart, SlidersHorizontal, ShoppingCart, Loader2 } from 'lucide-react';
+import { Flower, SlidersHorizontal, ShoppingCart, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { MiniAppLayout, ItemCard, type MiniAppCategory } from '@/components/miniapp';
-import { UniversalFilter, ActiveFilters, flowerFilterConfig, FilterValues } from '@/components/filters';
-import { toast } from 'sonner';
-import { matchesFilter, matchesSingleFilter } from '@/lib/filterUtils';
+import { UniversalFilter, ActiveFilters, FilterValues, FilterConfig } from '@/components/filters';
+import { matchesSingleFilter } from '@/lib/filterUtils';
 import { useBouquets, Bouquet } from '@/hooks/useBouquets';
+import { useFlowerFilterOptions } from '@/hooks/useDynamicFilterOptions';
 import { CrossSellSection } from '@/components/crosssell';
 
-const FLOWER_CATEGORIES: MiniAppCategory[] = [
-  { id: 'all', labelEn: 'All', labelRu: 'Все' },
-  { id: 'roses', labelEn: 'Roses', labelRu: 'Розы', icon: '🌹' },
-  { id: 'mixed', labelEn: 'Mixed', labelRu: 'Микс', icon: '💐' },
-  { id: 'tulips', labelEn: 'Tulips', labelRu: 'Тюльпаны', icon: '🌷' },
-  { id: 'peonies', labelEn: 'Peonies', labelRu: 'Пионы', icon: '🌸' },
-  { id: 'orchids', labelEn: 'Orchids', labelRu: 'Орхидеи', icon: '🪻' },
-  { id: 'premium', labelEn: 'Premium', labelRu: 'Премиум', icon: '✨' },
-];
-
 // Fallback data when database is empty
-const FALLBACK_BOUQUETS = [
+const FALLBACK_BOUQUETS: Partial<Bouquet>[] = [
   {
     id: 'bouquet-1',
     name_en: 'Romantic Red Roses',
@@ -89,15 +85,32 @@ const FALLBACK_BOUQUETS = [
     is_popular: true,
     shop_id: '',
   },
-] as Partial<Bouquet>[];
+];
 
 const FlowersIndex = () => {
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { addItem, items, getItemsByType } = useCart();
+  const { getItemsByType } = useCart();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterValues, setFilterValues] = useState<FilterValues>({});
+
+  // Dynamic filter options from DB
+  const { 
+    categoryRibbon, 
+    filterConfig: dynamicFilterConfig,
+    isLoading: filtersLoading 
+  } = useFlowerFilterOptions();
+
+  // Convert to MiniAppCategory format
+  const categories: MiniAppCategory[] = useMemo(() => {
+    return categoryRibbon.map(opt => ({
+      id: opt.id,
+      labelEn: opt.labelEn,
+      labelRu: opt.labelRu,
+      icon: typeof opt.icon === 'string' ? opt.icon : undefined,
+    }));
+  }, [categoryRibbon]);
 
   // Fetch bouquets from database
   const { bouquets: dbBouquets, isLoading } = useBouquets({
@@ -179,6 +192,15 @@ const FlowersIndex = () => {
         return false;
       }
       
+      // Occasion filter
+      const occasionFilter = filterValues.occasion as string[] | undefined;
+      if (occasionFilter?.length) {
+        // Check if bouquet matches any occasion (via name or tags)
+        const bouquetName = ((bouquet.name_en || '') + ' ' + (bouquet.name_ru || '')).toLowerCase();
+        const hasOccasion = occasionFilter.some(o => bouquetName.includes(o.toLowerCase()));
+        if (!hasOccasion) return false;
+      }
+      
       return true;
     });
   }, [bouquets, selectedCategory, searchQuery, filterValues, language]);
@@ -199,7 +221,7 @@ const FlowersIndex = () => {
       onSearchChange={setSearchQuery}
       searchPlaceholder={language === 'ru' ? 'Поиск букетов...' : 'Search bouquets...'}
       
-      categories={FLOWER_CATEGORIES}
+      categories={categories}
       selectedCategory={selectedCategory}
       onCategoryChange={setSelectedCategory}
       
@@ -208,7 +230,7 @@ const FlowersIndex = () => {
       
       filterButton={
         <UniversalFilter
-          config={flowerFilterConfig}
+          config={dynamicFilterConfig}
           values={filterValues}
           onChange={setFilterValues}
           activeCount={activeFilterCount}
@@ -231,7 +253,7 @@ const FlowersIndex = () => {
       {/* Active Filters */}
       {activeFilterCount > 0 && (
         <ActiveFilters
-          config={flowerFilterConfig}
+          config={dynamicFilterConfig}
           values={filterValues}
           onRemove={handleRemoveFilter}
           onClearAll={() => setFilterValues({})}
@@ -240,7 +262,7 @@ const FlowersIndex = () => {
       )}
 
       {/* Bouquets Grid - Vertical cards for flowers */}
-      {isLoading ? (
+      {isLoading || filtersLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
