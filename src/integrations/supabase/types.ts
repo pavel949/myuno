@@ -6176,6 +6176,71 @@ export type Database = {
           },
         ]
       }
+      mcc_ab_tests: {
+        Row: {
+          conversions_a: number | null
+          conversions_b: number | null
+          created_at: string
+          ended_at: string | null
+          id: string
+          impressions_a: number | null
+          impressions_b: number | null
+          is_active: boolean | null
+          landing_id: string
+          started_at: string | null
+          test_type: string
+          traffic_split: number | null
+          updated_at: string
+          variant_a: Json
+          variant_b: Json
+          winner: string | null
+        }
+        Insert: {
+          conversions_a?: number | null
+          conversions_b?: number | null
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          impressions_a?: number | null
+          impressions_b?: number | null
+          is_active?: boolean | null
+          landing_id: string
+          started_at?: string | null
+          test_type: string
+          traffic_split?: number | null
+          updated_at?: string
+          variant_a: Json
+          variant_b: Json
+          winner?: string | null
+        }
+        Update: {
+          conversions_a?: number | null
+          conversions_b?: number | null
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          impressions_a?: number | null
+          impressions_b?: number | null
+          is_active?: boolean | null
+          landing_id?: string
+          started_at?: string | null
+          test_type?: string
+          traffic_split?: number | null
+          updated_at?: string
+          variant_a?: Json
+          variant_b?: Json
+          winner?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mcc_ab_tests_landing_id_fkey"
+            columns: ["landing_id"]
+            isOneToOne: false
+            referencedRelation: "mcc_landing_registry"
+            referencedColumns: ["landing_id"]
+          },
+        ]
+      }
       mcc_automation_rules: {
         Row: {
           actions: Json
@@ -6185,11 +6250,13 @@ export type Database = {
           executions_count: number | null
           id: string
           is_active: boolean | null
+          landing_filter: string[] | null
           last_executed_at: string | null
           name: string
           trigger_conditions: Json
           trigger_type: string
           updated_at: string | null
+          user_state_filter: string[] | null
         }
         Insert: {
           actions: Json
@@ -6199,11 +6266,13 @@ export type Database = {
           executions_count?: number | null
           id?: string
           is_active?: boolean | null
+          landing_filter?: string[] | null
           last_executed_at?: string | null
           name: string
           trigger_conditions: Json
           trigger_type: string
           updated_at?: string | null
+          user_state_filter?: string[] | null
         }
         Update: {
           actions?: Json
@@ -6213,11 +6282,13 @@ export type Database = {
           executions_count?: number | null
           id?: string
           is_active?: boolean | null
+          landing_filter?: string[] | null
           last_executed_at?: string | null
           name?: string
           trigger_conditions?: Json
           trigger_type?: string
           updated_at?: string | null
+          user_state_filter?: string[] | null
         }
         Relationships: []
       }
@@ -6232,6 +6303,7 @@ export type Database = {
           goal: string
           id: string
           kpi_targets: Json | null
+          landing_id: string | null
           name: string
           performance_data: Json | null
           schedule: Json | null
@@ -6249,6 +6321,7 @@ export type Database = {
           goal: string
           id?: string
           kpi_targets?: Json | null
+          landing_id?: string | null
           name: string
           performance_data?: Json | null
           schedule?: Json | null
@@ -6266,6 +6339,7 @@ export type Database = {
           goal?: string
           id?: string
           kpi_targets?: Json | null
+          landing_id?: string | null
           name?: string
           performance_data?: Json | null
           schedule?: Json | null
@@ -6590,6 +6664,102 @@ export type Database = {
         }
         Relationships: []
       }
+      mcc_landing_events: {
+        Row: {
+          ab_variant: string | null
+          campaign_id: string | null
+          created_at: string
+          event_name: string
+          id: string
+          landing_id: string | null
+          payload: Json | null
+          session_id: string
+          temp_id: string | null
+          user_id: string | null
+          vertical: string | null
+        }
+        Insert: {
+          ab_variant?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          event_name: string
+          id?: string
+          landing_id?: string | null
+          payload?: Json | null
+          session_id: string
+          temp_id?: string | null
+          user_id?: string | null
+          vertical?: string | null
+        }
+        Update: {
+          ab_variant?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          event_name?: string
+          id?: string
+          landing_id?: string | null
+          payload?: Json | null
+          session_id?: string
+          temp_id?: string | null
+          user_id?: string | null
+          vertical?: string | null
+        }
+        Relationships: []
+      }
+      mcc_landing_registry: {
+        Row: {
+          created_at: string
+          cta_label_en: string | null
+          cta_label_ru: string | null
+          cta_variant: string | null
+          forbidden_elements: string[] | null
+          hero_variant: string | null
+          id: string
+          is_active: boolean | null
+          landing_id: string
+          name_en: string
+          name_ru: string | null
+          next_actions: Json | null
+          route_path: string
+          target_path: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          cta_label_en?: string | null
+          cta_label_ru?: string | null
+          cta_variant?: string | null
+          forbidden_elements?: string[] | null
+          hero_variant?: string | null
+          id?: string
+          is_active?: boolean | null
+          landing_id: string
+          name_en: string
+          name_ru?: string | null
+          next_actions?: Json | null
+          route_path: string
+          target_path: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          cta_label_en?: string | null
+          cta_label_ru?: string | null
+          cta_variant?: string | null
+          forbidden_elements?: string[] | null
+          hero_variant?: string | null
+          id?: string
+          is_active?: boolean | null
+          landing_id?: string
+          name_en?: string
+          name_ru?: string | null
+          next_actions?: Json | null
+          route_path?: string
+          target_path?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       mcc_leads: {
         Row: {
           ai_insights: Json | null
@@ -6704,6 +6874,45 @@ export type Database = {
           term?: string | null
           touchpoints?: Json | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      mcc_user_states: {
+        Row: {
+          created_at: string
+          first_vertical: string | null
+          id: string
+          previous_state: string | null
+          source_landing: string | null
+          state: string
+          transitioned_at: string | null
+          updated_at: string
+          user_id: string
+          verticals_used: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          first_vertical?: string | null
+          id?: string
+          previous_state?: string | null
+          source_landing?: string | null
+          state?: string
+          transitioned_at?: string | null
+          updated_at?: string
+          user_id: string
+          verticals_used?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          first_vertical?: string | null
+          id?: string
+          previous_state?: string | null
+          source_landing?: string | null
+          state?: string
+          transitioned_at?: string | null
+          updated_at?: string
+          user_id?: string
+          verticals_used?: string[] | null
         }
         Relationships: []
       }
@@ -19210,6 +19419,15 @@ export type Database = {
           p_run_id: string
         }
         Returns: string
+      }
+      mcc_transition_user_state: {
+        Args: {
+          p_new_state: string
+          p_source_landing?: string
+          p_user_id: string
+          p_vertical?: string
+        }
+        Returns: undefined
       }
       pay_from_wallet_atomic: {
         Args: {
