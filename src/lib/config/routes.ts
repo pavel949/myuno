@@ -88,6 +88,12 @@ export const LEGACY_REDIRECTS: Record<string, string> = {
   '/tours': `${APP_ROUTES.EXPERIENCES}?type=tour`,
   '/water': `${APP_ROUTES.EXPERIENCES}?type=activity`,
   
+  // Transfers → Transfer landing
+  '/transfers': '/transfer',
+  
+  // Life → Experiences (contextual discovery)
+  '/life': APP_ROUTES.EXPERIENCES,
+  
   // Info pages
   '/info/g-trust': APP_ROUTES.G_TRUST,
 } as const;
