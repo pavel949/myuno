@@ -22,12 +22,15 @@ export const UnifiedScrollSection = memo(function UnifiedScrollSection({
   
   return (
     <section className={cn("py-4", bgClass, className)}>
-      <div className={cn(
-        "flex gap-3 pb-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory",
-        "touch-pan-y overscroll-x-contain", // Allow vertical scroll while horizontal swipe works
-        !noPadding && "px-4",
-        "max-w-7xl mx-auto"
-      )}>
+      <div 
+        className={cn(
+          "flex gap-3 pb-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory",
+          "overscroll-x-contain",
+          !noPadding && "px-4",
+          "max-w-7xl mx-auto"
+        )}
+        style={{ touchAction: 'pan-x pan-y', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
+      >
         {children}
       </div>
     </section>

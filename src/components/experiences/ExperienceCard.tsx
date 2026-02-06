@@ -20,15 +20,19 @@ interface ExperienceCardProps {
   className?: string;
 }
 
-export const ExperienceCard = React.forwardRef<HTMLDivElement, ExperienceCardProps>(
-  ({ experience, language, className }, ref) => {
-    const navigate = useNavigate();
-    const isTour = experience.experience_type === 'tour';
-    const isRu = language === 'ru';
-    
-    return (
-      <motion.div
-        ref={ref}
+/**
+ * ExperienceCard - no forwardRef needed, Framer Motion handles layout internally
+ * This fixes the "ref is not a prop" warning with AnimatePresence
+ */
+export function ExperienceCard({ experience, language, className }: ExperienceCardProps) {
+  const navigate = useNavigate();
+  const isTour = experience.experience_type === 'tour';
+  const isRu = language === 'ru';
+  
+  return (
+    <motion.div
+      layout
+      layoutId={experience.id}
         data-testid="experience-card"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -145,11 +149,8 @@ export const ExperienceCard = React.forwardRef<HTMLDivElement, ExperienceCardPro
             </Button>
           </div>
         </div>
-      </motion.div>
-    );
-  }
-);
-
-ExperienceCard.displayName = 'ExperienceCard';
+    </motion.div>
+  );
+}
 
 export default ExperienceCard;
