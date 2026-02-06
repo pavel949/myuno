@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+/* Fonts loaded via index.html for better performance */
 
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
@@ -180,7 +180,6 @@ body {
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', sans-serif;
     font-size: 14px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
@@ -189,23 +188,19 @@ body {
 
   /* Typography Scale - optimized for Russian text (longer words) */
   h1 {
-    font-family: 'Playfair Display', serif;
-    @apply text-xl sm:text-2xl md:text-3xl font-bold tracking-tight leading-tight;
+    @apply font-display text-xl sm:text-2xl md:text-3xl font-bold tracking-tight leading-tight;
   }
   
   h2 {
-    font-family: 'Playfair Display', serif;
-    @apply text-lg sm:text-xl md:text-2xl font-semibold tracking-tight leading-snug;
+    @apply font-display text-lg sm:text-xl md:text-2xl font-semibold tracking-tight leading-snug;
   }
   
   h3 {
-    font-family: 'Playfair Display', serif;
-    @apply text-base sm:text-lg font-semibold tracking-tight leading-snug;
+    @apply font-display text-base sm:text-lg font-semibold tracking-tight leading-snug;
   }
   
   h4, h5, h6 {
-    font-family: 'Playfair Display', serif;
-    @apply text-sm sm:text-base font-semibold tracking-tight leading-snug;
+    @apply font-display text-sm sm:text-base font-semibold tracking-tight leading-snug;
   }
 
   p {
