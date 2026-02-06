@@ -51,9 +51,12 @@ export function useUpdateLandingVariant() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, field, value }: { id: string; field: 'hero_variant' | 'cta_variant'; value: string }) => {
+      const updateData = field === 'hero_variant' 
+        ? { hero_variant: value } 
+        : { cta_variant: value };
       const { error } = await supabase
         .from('mcc_landing_registry')
-        .update({ [field]: value })
+        .update(updateData)
         .eq('id', id);
       if (error) throw error;
     },
