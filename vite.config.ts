@@ -58,7 +58,7 @@ export default defineConfig(({ mode }) => ({
             urlPattern: ({ request }) => request.mode === 'navigate',
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'pages-v11',
+              cacheName: 'pages-v12',
               networkTimeoutSeconds: 2,
               expiration: {
                 maxEntries: 30,
@@ -70,7 +70,7 @@ export default defineConfig(({ mode }) => ({
             urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'supabase-cache-v11',
+              cacheName: 'supabase-cache-v12',
               networkTimeoutSeconds: 3,
               expiration: {
                 maxEntries: 50,
@@ -85,7 +85,7 @@ export default defineConfig(({ mode }) => ({
             urlPattern: /\.(?:js|css)$/i,
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'static-assets-v11',
+              cacheName: 'static-assets-v12',
               networkTimeoutSeconds: 2,
               expiration: {
                 maxEntries: 100,
@@ -97,7 +97,7 @@ export default defineConfig(({ mode }) => ({
             urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/i,
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'images-cache-v11',
+              cacheName: 'images-cache-v12',
               expiration: {
                 maxEntries: 100,
                 maxAgeSeconds: 60 * 60
