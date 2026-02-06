@@ -21,7 +21,8 @@ import {
   Calendar,
   Wrench,
   Building2,
-  Key
+  Key,
+  Droplets
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserPersonas, UserPersona } from '@/hooks/useUserPersonas';
@@ -82,6 +83,17 @@ const TOURIST_ACTIONS: QuickAction[] = [
     bgColor: 'bg-gradient-to-br from-rose-400 to-pink-600',
   },
   {
+    id: 'delivery',
+    icon: Droplets,
+    label: 'Delivery',
+    labelRu: 'Доставка',
+    path: '/market?category=groceries',
+    iconColor: 'text-white',
+    bgColor: 'bg-gradient-to-br from-sky-400 to-blue-600',
+    badge: 'Water',
+    badgeRu: 'Вода',
+  },
+  {
     id: 'transport',
     icon: Car,
     label: 'Transport',
@@ -107,15 +119,6 @@ const TOURIST_ACTIONS: QuickAction[] = [
     path: '/yachts',
     iconColor: 'text-white',
     bgColor: 'bg-gradient-to-br from-cyan-400 to-blue-600',
-  },
-  {
-    id: 'beauty',
-    icon: Sparkles,
-    label: 'Beauty',
-    labelRu: 'Красота',
-    path: '/beauty',
-    iconColor: 'text-white',
-    bgColor: 'bg-gradient-to-br from-pink-400 to-rose-600',
   },
   {
     id: 'restaurants',
