@@ -1,165 +1,235 @@
 
-# Plan: Fix Mobile Horizontal Scroll and Snap ("Sniper") Issues
+# План улучшений и стандартизации 4 ключевых вертикалей
 
-## Problem Analysis
+## Резюме проблем
 
-Based on thorough code analysis and session replay data, I've identified **three root causes** for the broken horizontal scroll and snap behavior on mobile:
+После глубокого анализа выявлены следующие категории проблем:
 
-### Root Cause 1: Global CSS Blocks All Horizontal Scrolling
-**File:** `src/index.css` (lines 29-34)
-```css
-html, body {
-  overscroll-behavior-x: none;
-  overflow-x: hidden;  /* ← BLOCKS ALL HORIZONTAL SCROLL */
-  width: 100%;
-  max-width: 100vw;
-}
-```
-This global rule prevents horizontal scrolling on the entire page, which kills carousels.
+### 1. Несогласованность таксономии между слоями
+- **Transport**: `TRANSPORT_CATEGORIES` в коде содержит `car, motorbike, scooter`, а в БД `lookup_values` — `sedan, compact, suv, van, luxury, motorcycle, electric`
+- **Flowers**: Категории захардкожены в `FlowersIndex.tsx` (`FLOWER_CATEGORIES`), в БД таксономия для цветов **пустая** (0 записей в `lookup_values`)
+- **Property**: Хорошо синхронизирована с БД через `usePropertyFilterOptions`
 
-### Root Cause 2: Parent Container overflow-x-hidden
-Multiple parent containers apply `overflow-x-hidden`:
-- `MiniAppLayout.tsx` via `AppLayout` 
-- Various dashboard layouts (Admin, Vendor, Owner, Manager)
+### 2. Проблемы с потоками бронирования
+- **Transport Rental**: `TransportBooking.tsx` использует demo-fallback данные вместо реальных из БД
+- **Airport Transfer**: Типы машин загружаются из `transport_vehicle_types`, но `base_price = 0` для airport_transfer
+- **Flowers**: Полноценный поток доставки работает, но категории не синхронизированы с БД
 
-This creates a CSS cascade where child scroll containers cannot scroll horizontally.
+### 3. Пробелы в календарях и availability
+- **Transport Rental**: Нет проверки доступности через `useAvailabilityCheck`, используется простой `<Input type="date">`
+- **Property**: Полноценный `PropertyBookingCard` с блокированными датами
+- **Flowers**: Только слоты доставки (morning/afternoon/evening), что корректно
 
-### Root Cause 3: AnimatePresence + forwardRef Conflict
-**File:** `src/pages/experiences/ExperiencesIndex.tsx` (lines 26-152)
-
-The `ExperienceCard` uses `React.forwardRef` but wraps content in `motion.div`, then is rendered inside `AnimatePresence mode="popLayout"`. This causes the console warning:
-```
-Warning: ref is not a prop. Trying to access it will result in undefined
-```
-Framer Motion's `motion.div` doesn't forward refs the same way React expects, causing layout instability.
+### 4. Отсутствие тайского перевода
+- Во всех файлах используется паттерн `labelEn/labelRu` без `labelTh`
+- В `lookup_values` нет колонки `value_th`
 
 ---
 
-## Solution
+## Группа A: Синхронизация таксономии Transport
 
-### Step 1: Fix Global CSS (Critical)
-Modify `src/index.css` to allow horizontal scroll for specific containers while blocking page-level overscroll:
+### A.1 Обновить `TRANSPORT_CATEGORIES` в `transportFiltersKlook.ts`
+Заменить хардкод на динамическую загрузку через `useTransportFilterOptions().categoryRibbon`
 
-**Before:**
-```css
-html, body {
-  overscroll-behavior-x: none;
-  overflow-x: hidden;
-  width: 100%;
-  max-width: 100vw;
-}
+```text
+Было:
+car, motorbike, scooter, suv (хардкод)
+
+Станет:
+sedan, compact, suv, van, luxury, motorcycle, electric (из БД)
 ```
 
-**After:**
-```css
-html {
-  overscroll-behavior-x: none;
-  max-width: 100vw;
-}
-
-body {
-  overscroll-behavior-x: none;
-  width: 100%;
-  max-width: 100vw;
-}
-
-/* Remove overflow-x: hidden from html/body - it kills carousels */
-/* Layout stability is maintained via max-w-full + min-w-0 on flex containers */
+### A.2 Использовать динамический хук в `TransportIndex.tsx`
+```
+- Добавить: const { categoryRibbon } = useTransportFilterOptions();
+- Заменить статические категории на categoryRibbon
 ```
 
-### Step 2: Add Horizontal Scroll Container Utility
-Add a new utility class in `src/index.css` for explicit horizontal scroll enablement:
-
-```css
-/* Explicit horizontal scroll container - overrides parent restrictions */
-.scroll-x-container {
-  overflow-x: auto !important;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain;
-}
-```
-
-### Step 3: Fix ExperienceCard ref Forwarding
-Update `ExperienceCard` to properly handle refs with Framer Motion:
-
-**Before:**
-```tsx
-const ExperienceCard = React.forwardRef<HTMLDivElement, Props>(
-  ({ experience, language }, ref) => {
-    return (
-      <motion.div
-        ref={ref}  // ← Causes warning
-        ...
-```
-
-**After:**
-```tsx
-// Remove forwardRef - AnimatePresence popLayout handles exit animations internally
-const ExperienceCard = ({ experience, language }: Props) => {
-  return (
-    <motion.div
-      layout
-      layoutId={experience.id}
-      ...
-```
-
-### Step 4: Update UnifiedFiltersKlook Scroll Container
-Add explicit scroll-enabling classes to the filter chips row in `src/components/shared/UnifiedFiltersKlook.tsx`:
-
-**Before:**
-```tsx
-<div className="flex gap-2 overflow-x-auto scrollbar-hide touch-pan-y snap-x snap-mandatory pb-2 -mx-1 px-1">
-```
-
-**After:**
-```tsx
-<div className="flex gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-2 -mx-1 px-1"
-     style={{ touchAction: 'pan-x pan-y', WebkitOverflowScrolling: 'touch' }}>
-```
-
-### Step 5: Update MiniAppLayout Content Container
-Remove implicit overflow restrictions from `MiniAppLayout.tsx`:
-
-The `AppLayout` wrapper already has `max-w-full min-w-0` which prevents layout overflow without blocking scroll. No changes needed there, but ensure the content div doesn't add restrictions.
+### A.3 Добавить записи в БД для vehicle_feature
+Текущий lookup_type `vehicle_feature` пуст — нужно заполнить:
+- `ac`, `gps`, `bluetooth`, `child_seat`, `insurance`, `unlimited_km`
 
 ---
 
-## Files to Modify
+## Группа B: Миграция таксономии Flowers в БД
 
-| File | Change |
-|------|--------|
-| `src/index.css` | Remove `overflow-x: hidden` from html/body, add scroll utility |
-| `src/pages/experiences/ExperiencesIndex.tsx` | Fix ExperienceCard ref forwarding with motion |
-| `src/components/shared/UnifiedFiltersKlook.tsx` | Add inline touch-action styles for reliability |
-| `src/components/shared/UnifiedScrollSection.tsx` | Add inline touch-action as backup |
-
----
-
-## Technical Details
-
-### Why touch-action Matters
-```css
-touch-action: pan-x pan-y;
+### B.1 Создать записи в `lookup_values` для цветов
+```sql
+INSERT INTO lookup_values (lookup_type, value_key, value_en, value_ru, icon, sort_order)
+VALUES
+('flower_category', 'roses', 'Roses', 'Розы', '🌹', 1),
+('flower_category', 'mixed', 'Mixed', 'Микс', '💐', 2),
+('flower_category', 'tulips', 'Tulips', 'Тюльпаны', '🌷', 3),
+...
 ```
-This explicitly tells the browser to allow both horizontal and vertical touch gestures, preventing gesture hijacking by the browser's back/forward navigation.
 
-### Why We Remove overflow-x-hidden from Body
-The memory context explicitly states:
-> "Root layout containers like AppLayout.tsx and MiniAppLayout.tsx must NOT apply 'overflow-x-hidden'. This class, when used on parent wrappers, blocks the native horizontal scroll of child carousels on mobile devices."
+### B.2 Создать хук `useFlowerFilterOptions`
+```text
+Файл: src/hooks/useDynamicFilterOptions.ts
+Добавить: useFlowerFilterOptions() аналогично useTransportFilterOptions()
+```
 
-The global CSS in `index.css` violates this principle.
-
-### Why We Fix the forwardRef Pattern
-Framer Motion v12+ handles refs internally for `motion.*` components. Using `React.forwardRef` and passing `ref` to `motion.div` directly causes a double-ref situation that triggers React warnings and can cause layout calculation issues during AnimatePresence transitions.
+### B.3 Рефакторинг `FlowersIndex.tsx`
+```text
+- Удалить: const FLOWER_CATEGORIES = [...]
+- Добавить: const { categoryRibbon } = useFlowerFilterOptions();
+- Заменить: categories={categoryRibbon}
+```
 
 ---
 
-## Verification Checklist
+## Группа C: Исправление потока бронирования Transport
 
-After implementation, test on mobile:
-- [ ] Horizontal scroll works in Experience filters (date chips, category pills)
-- [ ] Cards snap correctly when swiping (snap-x snap-mandatory works)
-- [ ] No horizontal page overflow (page doesn't shift right)
-- [ ] No console warnings about refs
-- [ ] Cross-sell carousel scrolls smoothly
-- [ ] Service promo carousel works
+### C.1 Рефакторинг `TransportBooking.tsx`
+```text
+Проблема: Использует demoVehicles вместо реальных данных
+
+Решение:
+1. Получать vehicle из location.state или загружать через useVehicle(id)
+2. Убрать fallback на demoVehicles
+3. Добавить proper loading state
+```
+
+### C.2 Интегрировать Calendar (date range picker)
+```text
+Заменить:
+<Input type="date" value={pickupDate} .../>
+
+На:
+<Popover><Calendar mode="range" .../></Popover>
+(аналогично PropertyBookingCard)
+```
+
+### C.3 Добавить availability check для транспорта
+```text
+import { useAvailabilityCheck } from '@/hooks/useAvailabilityCheck';
+- Проверять доступность машины на выбранные даты
+- Показывать blocked dates в календаре
+```
+
+### C.4 Исправить цены в Airport Transfer
+```text
+Проблема: transport_vehicle_types.base_price = 0 для airport_transfer
+
+Решение: Обновить записи в БД через migration:
+UPDATE transport_vehicle_types 
+SET base_price = 800 WHERE type = 'airport_transfer' AND name_en = 'Sedan';
+```
+
+---
+
+## Группа D: Стандартизация Property Booking Flow
+
+### D.1 Текущее состояние — ХОРОШО
+- `PropertyBookingCard` с date range selection ✅
+- Blocked dates через `usePropertyBlockedDates` ✅
+- Pricing с discounts ✅
+- Validation (min_stay, max_guests) ✅
+
+### D.2 Мелкие улучшения
+```text
+1. PropertyInquiry.tsx: Добавить step progress indicator
+2. Унифицировать PaymentStageSelector с другими вертикалями
+```
+
+---
+
+## Группа E: Унификация UX между вертикалями
+
+### E.1 Создать общий компонент `DateRangePickerCard`
+```text
+Файл: src/components/booking/DateRangePickerCard.tsx
+
+Props:
+- startDate, endDate
+- blockedDates
+- minStay, maxStay
+- onRangeChange
+- labels (localized)
+```
+
+### E.2 Переиспользовать во всех вертикалях
+```text
+- PropertyBookingCard → использует DateRangePickerCard
+- TransportBooking → использует DateRangePickerCard
+- YachtBooking → использует DateRangePickerCard
+```
+
+### E.3 Стандартизировать Bottom CTA Bar
+```text
+Все detail-страницы должны использовать единый паттерн:
+1. Цена слева
+2. Phone/WhatsApp иконки
+3. Primary CTA справа
+```
+
+---
+
+## Группа F: Добавление тайского языка (подготовка)
+
+### F.1 Миграция БД: добавить колонку `value_th`
+```sql
+ALTER TABLE lookup_values ADD COLUMN value_th TEXT;
+```
+
+### F.2 Обновить типы и хуки
+```text
+- useTaxonomy: добавить labelTh в TaxonomyOption
+- FilterOption: добавить labelTh
+- Все компоненты: добавить проверку language === 'th'
+```
+
+### F.3 Приоритетные страницы для перевода
+```text
+1. Home (QuickActionsGrid)
+2. Transport Index + Booking
+3. Flowers Index + Order
+4. Property Index + Booking
+```
+
+---
+
+## Технический раздел
+
+### Файлы для модификации
+
+| Файл | Изменения |
+|------|-----------|
+| `src/lib/filterConfigs/transportFiltersKlook.ts` | Убрать хардкод TRANSPORT_CATEGORIES |
+| `src/pages/transport/TransportIndex.tsx` | Использовать динамические категории |
+| `src/pages/transport/TransportBooking.tsx` | Calendar, availability, убрать demo |
+| `src/hooks/useDynamicFilterOptions.ts` | Добавить useFlowerFilterOptions |
+| `src/pages/flowers/FlowersIndex.tsx` | Динамические категории |
+| `src/components/booking/DateRangePickerCard.tsx` | Новый компонент |
+| `src/components/filters/FlowersFilters.tsx` | Миграция на БД |
+
+### Миграции БД
+
+1. **Заполнить lookup_values для цветов** (~15 записей)
+2. **Заполнить lookup_values для vehicle_feature** (~12 записей)
+3. **Исправить base_price для airport_transfer** (4 записи)
+4. **Добавить колонку value_th** (миграция схемы)
+
+### Порядок выполнения
+
+```text
+1. [DB] Миграции lookup_values для цветов и транспорта
+2. [Code] useFlowerFilterOptions хук
+3. [Code] DateRangePickerCard компонент
+4. [Code] TransportBooking.tsx рефакторинг
+5. [Code] FlowersIndex.tsx рефакторинг
+6. [DB] value_th колонка
+7. [Code] Тайские переводы (итеративно)
+```
+
+---
+
+## Ожидаемый результат
+
+| Вертикаль | До | После |
+|-----------|-----|-------|
+| Transport | Хардкод категорий, простой date input, demo данные | БД-driven, Calendar с availability, реальные данные |
+| Flowers | Хардкод категорий, нет связи с БД | БД-driven таксономия, консистентный UX |
+| Property | Хорошо | Унифицированные компоненты |
+| Общее | RU/EN only | Подготовка к TH |
+
