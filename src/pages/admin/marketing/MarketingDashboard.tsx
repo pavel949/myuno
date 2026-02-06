@@ -2,6 +2,7 @@ import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
+  Activity,
   LayoutDashboard, 
   Megaphone, 
   Users, 
@@ -10,8 +11,12 @@ import {
   BarChart3,
   Zap,
   Globe,
-  UserCog
+  UserCog,
+  Search,
+  Target,
+  User
 } from 'lucide-react';
+import { MCCControlTowerTab } from '@/components/admin/marketing/MCCControlTowerTab';
 import { MCCOverviewTab } from '@/components/admin/marketing/MCCOverviewTab';
 import { MCCCampaignsTab } from '@/components/admin/marketing/MCCCampaignsTab';
 import { MCCLeadsTab } from '@/components/admin/marketing/MCCLeadsTab';
@@ -21,58 +26,29 @@ import { MCCAnalyticsTab } from '@/components/admin/marketing/MCCAnalyticsTab';
 import { MCCAutomationTab } from '@/components/admin/marketing/MCCAutomationTab';
 import { MCCLandingControlTab } from '@/components/admin/marketing/MCCLandingControlTab';
 import { MCCUserStatesTab } from '@/components/admin/marketing/MCCUserStatesTab';
+import { MCCFunnelDiagnosticsTab } from '@/components/admin/marketing/MCCFunnelDiagnosticsTab';
+import { MCCCampaignCenterTab } from '@/components/admin/marketing/MCCCampaignCenterTab';
+import { MCCUserTimelineTab } from '@/components/admin/marketing/MCCUserTimelineTab';
 
 export default function MarketingDashboard() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const [activeTab, setActiveTab] = React.useState('overview');
+  const [activeTab, setActiveTab] = React.useState('control-tower');
 
   const tabs = [
-    { 
-      id: 'overview', 
-      label: isRu ? 'Обзор' : 'Overview', 
-      icon: LayoutDashboard,
-    },
-    { 
-      id: 'landings', 
-      label: isRu ? 'Лендинги' : 'Landings', 
-      icon: Globe,
-    },
-    { 
-      id: 'states', 
-      label: isRu ? 'Состояния' : 'User States', 
-      icon: UserCog,
-    },
-    { 
-      id: 'campaigns', 
-      label: isRu ? 'Кампании' : 'Campaigns', 
-      icon: Megaphone,
-    },
-    { 
-      id: 'leads', 
-      label: isRu ? 'Лиды' : 'Leads', 
-      icon: Users,
-    },
-    { 
-      id: 'funnels', 
-      label: isRu ? 'Воронки' : 'Funnels', 
-      icon: GitBranch,
-    },
-    { 
-      id: 'content', 
-      label: isRu ? 'Контент' : 'Content Lab', 
-      icon: Sparkles,
-    },
-    { 
-      id: 'analytics', 
-      label: isRu ? 'Аналитика' : 'Analytics', 
-      icon: BarChart3,
-    },
-    { 
-      id: 'automation', 
-      label: isRu ? 'Автоматизация' : 'Automation', 
-      icon: Zap,
-    },
+    { id: 'control-tower', label: isRu ? 'Control Tower' : 'Control Tower', icon: Activity },
+    { id: 'overview', label: isRu ? 'Обзор' : 'Overview', icon: LayoutDashboard },
+    { id: 'landings', label: isRu ? 'Лендинги' : 'Landings', icon: Globe },
+    { id: 'states', label: isRu ? 'Состояния' : 'States', icon: UserCog },
+    { id: 'funnel-diag', label: isRu ? 'Воронка' : 'Funnel Diag', icon: Search },
+    { id: 'campaigns', label: isRu ? 'Кампании' : 'Campaigns', icon: Megaphone },
+    { id: 'campaign-rules', label: isRu ? 'Правила L1' : 'Rules L1', icon: Target },
+    { id: 'leads', label: isRu ? 'Лиды' : 'Leads', icon: Users },
+    { id: 'timeline', label: isRu ? 'Таймлайн' : 'Timeline', icon: User },
+    { id: 'funnels', label: isRu ? 'Воронки' : 'Funnels', icon: GitBranch },
+    { id: 'content', label: isRu ? 'Контент' : 'Content', icon: Sparkles },
+    { id: 'analytics', label: isRu ? 'Аналитика' : 'Analytics', icon: BarChart3 },
+    { id: 'automation', label: isRu ? 'Автоматизация' : 'Automation', icon: Zap },
   ];
 
   return (
@@ -86,7 +62,7 @@ export default function MarketingDashboard() {
             </span>
           </h1>
           <p className="text-muted-foreground text-sm">
-            {isRu ? 'Lead Factory • Growth OS • AI Marketing Brain' : 'Lead Factory • Growth OS • AI Marketing Brain'}
+            Lead Factory • Growth OS • AI Marketing Brain
           </p>
         </div>
       </div>
@@ -98,49 +74,27 @@ export default function MarketingDashboard() {
             <TabsTrigger
               key={tab.id}
               value={tab.id}
-              className="gap-2 data-[state=active]:bg-background"
+              className="gap-1.5 data-[state=active]:bg-background text-xs"
             >
-              <tab.icon className="h-4 w-4" />
+              <tab.icon className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">{tab.label}</span>
             </TabsTrigger>
           ))}
         </TabsList>
 
-        <TabsContent value="overview" className="mt-4">
-          <MCCOverviewTab />
-        </TabsContent>
-
-        <TabsContent value="landings" className="mt-4">
-          <MCCLandingControlTab />
-        </TabsContent>
-
-        <TabsContent value="states" className="mt-4">
-          <MCCUserStatesTab />
-        </TabsContent>
-
-        <TabsContent value="campaigns" className="mt-4">
-          <MCCCampaignsTab />
-        </TabsContent>
-
-        <TabsContent value="leads" className="mt-4">
-          <MCCLeadsTab />
-        </TabsContent>
-
-        <TabsContent value="funnels" className="mt-4">
-          <MCCFunnelsTab />
-        </TabsContent>
-
-        <TabsContent value="content" className="mt-4">
-          <MCCContentLabTab />
-        </TabsContent>
-
-        <TabsContent value="analytics" className="mt-4">
-          <MCCAnalyticsTab />
-        </TabsContent>
-
-        <TabsContent value="automation" className="mt-4">
-          <MCCAutomationTab />
-        </TabsContent>
+        <TabsContent value="control-tower" className="mt-4"><MCCControlTowerTab /></TabsContent>
+        <TabsContent value="overview" className="mt-4"><MCCOverviewTab /></TabsContent>
+        <TabsContent value="landings" className="mt-4"><MCCLandingControlTab /></TabsContent>
+        <TabsContent value="states" className="mt-4"><MCCUserStatesTab /></TabsContent>
+        <TabsContent value="funnel-diag" className="mt-4"><MCCFunnelDiagnosticsTab /></TabsContent>
+        <TabsContent value="campaigns" className="mt-4"><MCCCampaignsTab /></TabsContent>
+        <TabsContent value="campaign-rules" className="mt-4"><MCCCampaignCenterTab /></TabsContent>
+        <TabsContent value="leads" className="mt-4"><MCCLeadsTab /></TabsContent>
+        <TabsContent value="timeline" className="mt-4"><MCCUserTimelineTab /></TabsContent>
+        <TabsContent value="funnels" className="mt-4"><MCCFunnelsTab /></TabsContent>
+        <TabsContent value="content" className="mt-4"><MCCContentLabTab /></TabsContent>
+        <TabsContent value="analytics" className="mt-4"><MCCAnalyticsTab /></TabsContent>
+        <TabsContent value="automation" className="mt-4"><MCCAutomationTab /></TabsContent>
       </Tabs>
     </div>
   );
