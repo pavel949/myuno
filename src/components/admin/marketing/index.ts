@@ -5,6 +5,8 @@ export { MCCFunnelsTab } from './MCCFunnelsTab';
 export { MCCContentLabTab } from './MCCContentLabTab';
 export { MCCAnalyticsTab } from './MCCAnalyticsTab';
 export { MCCAutomationTab } from './MCCAutomationTab';
+export { MCCLandingControlTab } from './MCCLandingControlTab';
+export { MCCUserStatesTab } from './MCCUserStatesTab';
 export { CampaignFormSheet } from './CampaignFormSheet';
 export { CampaignDetailSheet } from './CampaignDetailSheet';
 export { CampaignCard } from './CampaignCard';

@@ -8,7 +8,9 @@ import {
   GitBranch, 
   Sparkles,
   BarChart3,
-  Zap
+  Zap,
+  Globe,
+  UserCog
 } from 'lucide-react';
 import { MCCOverviewTab } from '@/components/admin/marketing/MCCOverviewTab';
 import { MCCCampaignsTab } from '@/components/admin/marketing/MCCCampaignsTab';
@@ -17,6 +19,8 @@ import { MCCFunnelsTab } from '@/components/admin/marketing/MCCFunnelsTab';
 import { MCCContentLabTab } from '@/components/admin/marketing/MCCContentLabTab';
 import { MCCAnalyticsTab } from '@/components/admin/marketing/MCCAnalyticsTab';
 import { MCCAutomationTab } from '@/components/admin/marketing/MCCAutomationTab';
+import { MCCLandingControlTab } from '@/components/admin/marketing/MCCLandingControlTab';
+import { MCCUserStatesTab } from '@/components/admin/marketing/MCCUserStatesTab';
 
 export default function MarketingDashboard() {
   const { language } = useLanguage();
@@ -28,43 +32,46 @@ export default function MarketingDashboard() {
       id: 'overview', 
       label: isRu ? 'Обзор' : 'Overview', 
       icon: LayoutDashboard,
-      description: isRu ? 'KPI и инсайты' : 'KPIs & insights'
+    },
+    { 
+      id: 'landings', 
+      label: isRu ? 'Лендинги' : 'Landings', 
+      icon: Globe,
+    },
+    { 
+      id: 'states', 
+      label: isRu ? 'Состояния' : 'User States', 
+      icon: UserCog,
     },
     { 
       id: 'campaigns', 
       label: isRu ? 'Кампании' : 'Campaigns', 
       icon: Megaphone,
-      description: isRu ? 'Управление кампаниями' : 'Campaign management'
     },
     { 
       id: 'leads', 
       label: isRu ? 'Лиды' : 'Leads', 
       icon: Users,
-      description: isRu ? 'CRM-lite' : 'CRM-lite'
     },
     { 
       id: 'funnels', 
       label: isRu ? 'Воронки' : 'Funnels', 
       icon: GitBranch,
-      description: isRu ? 'Конверсионные воронки' : 'Conversion funnels'
     },
     { 
       id: 'content', 
       label: isRu ? 'Контент' : 'Content Lab', 
       icon: Sparkles,
-      description: isRu ? 'AI-генерация' : 'AI generation'
     },
     { 
       id: 'analytics', 
       label: isRu ? 'Аналитика' : 'Analytics', 
       icon: BarChart3,
-      description: isRu ? 'Отчёты и атрибуция' : 'Reports & attribution'
     },
     { 
       id: 'automation', 
       label: isRu ? 'Автоматизация' : 'Automation', 
       icon: Zap,
-      description: isRu ? 'Правила и триггеры' : 'Rules & triggers'
     },
   ];
 
@@ -75,7 +82,7 @@ export default function MarketingDashboard() {
         <div>
           <h1 className="text-xl font-bold flex items-center gap-2">
             <span className="bg-gradient-to-r from-primary to-chart-1 bg-clip-text text-transparent">
-              {isRu ? 'Marketing Command Center' : 'Marketing Command Center'}
+              Marketing Command Center
             </span>
           </h1>
           <p className="text-muted-foreground text-sm">
@@ -101,6 +108,14 @@ export default function MarketingDashboard() {
 
         <TabsContent value="overview" className="mt-4">
           <MCCOverviewTab />
+        </TabsContent>
+
+        <TabsContent value="landings" className="mt-4">
+          <MCCLandingControlTab />
+        </TabsContent>
+
+        <TabsContent value="states" className="mt-4">
+          <MCCUserStatesTab />
         </TabsContent>
 
         <TabsContent value="campaigns" className="mt-4">
