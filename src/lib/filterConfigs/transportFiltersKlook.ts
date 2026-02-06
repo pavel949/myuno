@@ -110,11 +110,10 @@ export const TRANSPORT_KLOOK_CONFIG: UnifiedFiltersKlookConfig = {
   },
 };
 
-// Legacy static categories - use useTransportFilterOptions().categoryRibbon instead
+// ============= DEPRECATED =============
+// Use useTransportFilterOptions().categoryRibbon instead of this static array
+// Keeping for backward compatibility only
 export const TRANSPORT_CATEGORIES = [
   { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '🌟' },
-  { id: 'car', labelEn: 'Cars', labelRu: 'Авто', icon: '🚗' },
-  { id: 'motorbike', labelEn: 'Bikes', labelRu: 'Мото', icon: '🏍️' },
-  { id: 'scooter', labelEn: 'Scooters', labelRu: 'Скутеры', icon: '🛵' },
-  { id: 'suv', labelEn: 'SUV', labelRu: 'Внедорожники', icon: '🚙' },
+  // Dynamic categories loaded from DB via useTransportFilterOptions
 ];

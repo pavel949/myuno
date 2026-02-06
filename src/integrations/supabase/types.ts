@@ -5336,6 +5336,7 @@ export type Database = {
           value_en: string
           value_key: string
           value_ru: string | null
+          value_th: string | null
         }
         Insert: {
           city_id?: string | null
@@ -5352,6 +5353,7 @@ export type Database = {
           value_en: string
           value_key: string
           value_ru?: string | null
+          value_th?: string | null
         }
         Update: {
           city_id?: string | null
@@ -5368,6 +5370,7 @@ export type Database = {
           value_en?: string
           value_key?: string
           value_ru?: string | null
+          value_th?: string | null
         }
         Relationships: [
           {

@@ -3,6 +3,7 @@
  * 
  * Provides transport vertical with its specific filter configuration
  * using the shared UnifiedFiltersKlook component.
+ * Now uses dynamic taxonomy from database via useTransportFilterOptions
  */
 
 import React, { useMemo } from 'react';
@@ -11,9 +12,9 @@ import {
   type FilterCategory,
   type DatePreset 
 } from '@/components/shared/UnifiedFiltersKlook';
-import { TRANSPORT_KLOOK_CONFIG, TRANSPORT_CATEGORIES } from '@/lib/filterConfigs';
+import { TRANSPORT_KLOOK_CONFIG } from '@/lib/filterConfigs';
+import { useTransportFilterOptions } from '@/hooks/useDynamicFilterOptions';
 
-export { TRANSPORT_CATEGORIES };
 export type { DatePreset };
 export type SortOption = 'price_asc' | 'rating' | 'newest';
 
@@ -91,6 +92,19 @@ export function TransportFiltersKlook({
   resultsCount,
   language,
 }: TransportFiltersKlookProps) {
+  // Get dynamic categories from DB
+  const { categoryRibbon, isLoading: categoriesLoading } = useTransportFilterOptions();
+
+  // Convert to FilterCategory format
+  const dynamicCategories: FilterCategory[] = useMemo(() => {
+    return categoryRibbon.map(opt => ({
+      id: opt.id,
+      labelEn: opt.labelEn,
+      labelRu: opt.labelRu,
+      icon: typeof opt.icon === 'string' ? opt.icon : undefined,
+    }));
+  }, [categoryRibbon]);
+
   // Map chip selections to unified format
   const chipSelections = useMemo(() => ({
     vehicleType: selectedVehicleType,
@@ -119,7 +133,7 @@ export function TransportFiltersKlook({
   return (
     <UnifiedFiltersKlook
       config={TRANSPORT_KLOOK_CONFIG}
-      categories={TRANSPORT_CATEGORIES as FilterCategory[]}
+      categories={dynamicCategories}
       selectedCategory={selectedCategory}
       onCategoryChange={onCategoryChange}
       sortBy={sortBy}
