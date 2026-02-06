@@ -77,7 +77,7 @@ export function GuestAlertPanel({
       title: 'Active Orders',
       titleRu: 'Активные заказы',
       count: activeOrders,
-      href: '/guest/orders',
+      href: '/bookings',
     });
   }
 

@@ -293,7 +293,7 @@ export default function VendorDemo() {
             className="w-full"
             onClick={() => {
               trackDemoAction('become_partner_clicked');
-              navigate('/info/become-partner');
+              navigate('/become-partner');
             }}
           >
             {t.becomePartner}

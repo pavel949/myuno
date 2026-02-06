@@ -101,7 +101,7 @@ export default function PropertyDepositSuccess() {
           
           <Button 
             variant={orderId ? 'outline' : 'default'}
-            onClick={() => navigate('/orders')} 
+            onClick={() => navigate('/bookings')} 
             className="w-full gap-2"
           >
             <Calendar className="w-4 h-4" />
