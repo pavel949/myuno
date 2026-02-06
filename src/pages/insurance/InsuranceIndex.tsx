@@ -64,6 +64,8 @@ const quickItems: QuickGridItem[] = [
       categories={categories}
       selectedCategory={selectedCategory}
       onCategoryChange={setSelectedCategory}
+      filterValues={filterValues}
+      onFilterChange={setFilterValues}
       isLoading={isLoading}
       isEmpty={providers.length === 0}
       emptyIcon={Shield}
