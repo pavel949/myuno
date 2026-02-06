@@ -157,17 +157,9 @@ Framer Motion v12+ handles refs internally for `motion.*` components. Using `Rea
 ## Verification Checklist
 
 After implementation, test on mobile:
-- [x] Horizontal scroll works in Experience filters (date chips, category pills)
-- [x] Cards snap correctly when swiping (snap-x snap-mandatory works)
-- [x] No horizontal page overflow (page doesn't shift right)
-- [x] No console warnings about refs
-- [x] Cross-sell carousel scrolls smoothly
-- [x] Service promo carousel works
-
-## Implementation Complete ✅
-
-All fixes applied:
-1. `src/index.css` - Removed `overflow-x: hidden` from html/body, added `.scroll-x-container` utility
-2. `src/components/experiences/ExperienceCard.tsx` - Removed `forwardRef`, added `layout` and `layoutId` props
-3. `src/components/shared/UnifiedFiltersKlook.tsx` - Added inline `touchAction` styles
-4. `src/components/shared/UnifiedScrollSection.tsx` - Added inline `touchAction` styles
+- [ ] Horizontal scroll works in Experience filters (date chips, category pills)
+- [ ] Cards snap correctly when swiping (snap-x snap-mandatory works)
+- [ ] No horizontal page overflow (page doesn't shift right)
+- [ ] No console warnings about refs
+- [ ] Cross-sell carousel scrolls smoothly
+- [ ] Service promo carousel works
