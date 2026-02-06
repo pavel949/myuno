@@ -40,94 +40,9 @@
     <link rel="preconnect" href="https://api.mapbox.com" />
     <link rel="dns-prefetch" href="https://api.mapbox.com" />
     
-    <!-- Blocking splash screen while version check -->
-    <style id="splash-styles">
-      #version-splash {
-        position: fixed;
-        inset: 0;
-        z-index: 99999;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(135deg, #0a0a0b 0%, #1a1a1b 100%);
-        color: #d4af37;
-        font-family: system-ui, -apple-system, sans-serif;
-        transition: opacity 0.3s ease-out;
-      }
-      #version-splash.fade-out {
-        opacity: 0;
-        pointer-events: none;
-      }
-      #splash-logo {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
-      }
-      #splash-spinner {
-        width: 40px;
-        height: 40px;
-        border: 3px solid rgba(212, 175, 55, 0.2);
-        border-top-color: #d4af37;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-      }
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
-    </style>
-    
-    <!-- Early version check - runs BEFORE React loads -->
+    <!-- Non-blocking version check -->
     <script>
       (function() {
-        var VERSION_CHECK_TIMEOUT = 2000; // 2 second max wait
-        var splashCreated = false;
-        
-        // Create splash immediately
-        function createSplash() {
-          if (splashCreated) return;
-          splashCreated = true;
-          var splash = document.createElement('div');
-          splash.id = 'version-splash';
-          splash.innerHTML = '<div id="splash-logo">my<span style="background:#d4af37;color:#0a0a0b;padding:0.1em 0.3em;border-radius:6px;margin:0 0.2em;">U</span>UNO</div><div id="splash-spinner"></div>';
-          document.body.appendChild(splash);
-        }
-        
-        function removeSplash() {
-          var splash = document.getElementById('version-splash');
-          var styles = document.getElementById('splash-styles');
-          if (splash) {
-            splash.classList.add('fade-out');
-            setTimeout(function() {
-              if (splash.parentNode) splash.parentNode.removeChild(splash);
-              if (styles && styles.parentNode) styles.parentNode.removeChild(styles);
-            }, 300);
-          }
-        }
-        
-        // Clear ALL caches
-        async function clearAllCaches() {
-          console.log('[myUNO] Clearing all caches...');
-          try {
-            if ('caches' in window) {
-              var keys = await caches.keys();
-              await Promise.all(keys.map(function(key) {
-                console.log('[myUNO] Deleting cache:', key);
-                return caches.delete(key);
-              }));
-            }
-            if ('serviceWorker' in navigator) {
-              var regs = await navigator.serviceWorker.getRegistrations();
-              await Promise.all(regs.map(function(reg) {
-                console.log('[myUNO] Unregistering SW:', reg.scope);
-                return reg.unregister();
-              }));
-            }
-          } catch (e) {
-            console.log('[myUNO] Cache clear error:', e);
-          }
-        }
-        
         // Listen for SW controller change
         if ('serviceWorker' in navigator) {
           navigator.serviceWorker.addEventListener('controllerchange', function() {
@@ -136,68 +51,58 @@
           });
         }
         
-        // Version check with anti-loop protection
-        var versionChecked = false;
-        var reloadAttempted = sessionStorage.getItem('uno_reload_attempted');
+        // Anti-loop protection
+        var reloadKey = 'uno_reload_' + Date.now().toString().slice(0, -4); // ~10 sec window
+        var recentReloads = Object.keys(sessionStorage).filter(function(k) {
+          return k.startsWith('uno_reload_');
+        });
         
-        // If we already tried reloading this session, skip version check
-        if (reloadAttempted) {
-          console.log('[myUNO] Already reloaded this session, skipping version check');
-          sessionStorage.removeItem('uno_reload_attempted');
-          versionChecked = true;
+        if (recentReloads.length > 2) {
+          console.log('[myUNO] Too many reloads, skipping version check');
+          recentReloads.forEach(function(k) { sessionStorage.removeItem(k); });
         } else {
+          // Background version check (non-blocking)
           fetch('/version.json?_=' + Date.now(), { cache: 'no-store' })
             .then(function(r) { return r.json(); })
-            .then(async function(data) {
+            .then(function(data) {
               var serverVersion = data.version;
               var storedVersion = localStorage.getItem('manifest_version');
               
               console.log('[myUNO] Server: ' + serverVersion + ', Stored: ' + storedVersion);
               
-              // Only reload if stored version exists AND differs from server
+              // Only reload if stored version exists AND differs
               if (storedVersion && storedVersion !== serverVersion) {
-                console.log('[myUNO] Version mismatch! Updating...');
+                console.log('[myUNO] New version available, clearing caches...');
                 
                 localStorage.setItem('manifest_version', serverVersion);
                 localStorage.setItem('app_version', serverVersion);
-                sessionStorage.setItem('uno_reload_attempted', 'true');
+                sessionStorage.setItem(reloadKey, '1');
                 
-                await clearAllCaches();
+                // Clear caches in background
+                if ('caches' in window) {
+                  caches.keys().then(function(keys) {
+                    keys.forEach(function(key) { caches.delete(key); });
+                  });
+                }
+                if ('serviceWorker' in navigator) {
+                  navigator.serviceWorker.getRegistrations().then(function(regs) {
+                    regs.forEach(function(reg) { reg.unregister(); });
+                  });
+                }
                 
-                // Go to root, not reload current page
-                window.location.href = '/';
-                return;
+                // Redirect to home
+                setTimeout(function() {
+                  window.location.href = '/';
+                }, 100);
+              } else {
+                // Save version
+                localStorage.setItem('manifest_version', serverVersion);
+                localStorage.setItem('app_version', serverVersion);
               }
-              
-              // Save current version
-              localStorage.setItem('manifest_version', serverVersion);
-              localStorage.setItem('app_version', serverVersion);
-              versionChecked = true;
-              removeSplash();
             })
-            .catch(function(err) {
-              console.log('[myUNO] Version check failed, proceeding');
-              versionChecked = true;
-              removeSplash();
+            .catch(function() {
+              console.log('[myUNO] Version check failed (offline?)');
             });
-        }
-        
-        // Timeout fallback - always remove splash
-        setTimeout(function() {
-          if (!versionChecked) {
-            console.log('[myUNO] Timeout, removing splash');
-            versionChecked = true;
-          }
-          removeSplash();
-        }, VERSION_CHECK_TIMEOUT);
-        
-        // Create splash when DOM ready (only if not already checked)
-        if (!versionChecked) {
-          if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', createSplash);
-          } else {
-            createSplash();
-          }
         }
       })();
     </script>
