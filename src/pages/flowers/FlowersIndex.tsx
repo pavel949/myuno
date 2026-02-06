@@ -6,12 +6,12 @@
 
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Flower, SlidersHorizontal, ShoppingCart, Loader2 } from 'lucide-react';
+import { Flower, ShoppingCart, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { MiniAppLayout, ItemCard, type MiniAppCategory } from '@/components/miniapp';
-import { UniversalFilter, ActiveFilters, FilterValues, FilterConfig } from '@/components/filters';
+import { ActiveFilters, FilterValues } from '@/components/filters';
 import { matchesSingleFilter } from '@/lib/filterUtils';
 import { useBouquets, Bouquet } from '@/hooks/useBouquets';
 import { useFlowerFilterOptions } from '@/hooks/useDynamicFilterOptions';
@@ -163,8 +163,9 @@ const FlowersIndex = () => {
       heroIcon={Flower}
       heroTitle={language === 'ru' ? 'Доставка цветов' : 'Flower Delivery'}
       heroSubtitle={language === 'ru' ? 'Свежие букеты с доставкой за 2 часа' : 'Fresh bouquets delivered in 2 hours'}
-      heroImage="https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?w=800"
-      heroGradient={{ from: 'from-pink-500/20', via: 'via-rose-500/20', to: 'to-primary/20' }}
+      heroGradientFrom="from-pink-500/20"
+      heroGradientVia="via-rose-500/20"
+      heroGradientTo="to-primary/20"
       
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}
@@ -177,23 +178,10 @@ const FlowersIndex = () => {
       showCartButton
       cartItemCount={totalItems}
       
-      filterButton={
-        <UniversalFilter
-          config={dynamicFilterConfig}
-          values={filterValues}
-          onChange={setFilterValues}
-          activeCount={activeFilterCount}
-        >
-          <Button variant="outline" size="icon" className="relative shrink-0 h-10 w-10">
-            <SlidersHorizontal className="w-4 h-4" />
-            {activeFilterCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
-                {activeFilterCount}
-              </span>
-            )}
-          </Button>
-        </UniversalFilter>
-      }
+      filterConfig={dynamicFilterConfig}
+      filterValues={filterValues}
+      onFilterChange={setFilterValues}
+      filterActiveCount={activeFilterCount}
       
       showBottomNav={false}
       resultsCount={filteredBouquets.length}
