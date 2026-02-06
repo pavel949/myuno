@@ -46,20 +46,8 @@ const Install = () => {
     }
   }, [isInstalled]);
 
-  // Auto-show install guide on mobile devices when no native prompt
-  useEffect(() => {
-    if (!canInstall && !isInstalled && installState === 'idle') {
-      // Small delay for better UX
-      const timer = setTimeout(() => {
-        if (isIOS) {
-          setShowIOSGuide(true);
-        } else if (isAndroid) {
-          setShowAndroidGuide(true);
-        }
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [isIOS, isAndroid, canInstall, isInstalled, installState]);
+  // NOTE: Auto-show of guides removed - guides now only shown when user clicks install button
+  // and native prompt is not available (canInstall === false)
 
   const simulateProgress = () => {
     setProgress(0);
