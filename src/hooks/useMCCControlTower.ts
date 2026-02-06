@@ -296,6 +296,97 @@ export function useCampaignRules() {
   });
 }
 
+export function useCreateCampaignRule() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (rule: {
+      campaign_id: string;
+      trigger_event: string;
+      target_state?: string;
+      channel?: string;
+      cooldown_hours?: number;
+      message_template?: Record<string, string>;
+    }) => {
+      const { data, error } = await supabase
+        .from('mcc_campaign_rules')
+        .insert({
+          campaign_id: rule.campaign_id,
+          trigger_event: rule.trigger_event,
+          target_state: rule.target_state || null,
+          channel: rule.channel || 'push',
+          cooldown_hours: rule.cooldown_hours || 48,
+          message_template: rule.message_template || null,
+          is_active: true,
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['mcc-campaign-rules'] }),
+  });
+}
+
+export function useToggleCampaignRule() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
+      const { error } = await supabase
+        .from('mcc_campaign_rules')
+        .update({ is_active })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['mcc-campaign-rules'] }),
+  });
+}
+
+export function useDeleteCampaignRule() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('mcc_campaign_rules')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['mcc-campaign-rules'] }),
+  });
+}
+
+// ── Churn Risk Users ──
+export function useChurnRiskUsers() {
+  return useQuery({
+    queryKey: ['mcc-churn-risk-users'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('mcc_user_states')
+        .select('user_id, state, source_landing, verticals_used, updated_at')
+        .in('state', ['dormant', 'churned'])
+        .order('updated_at', { ascending: false })
+        .limit(50);
+      if (error) throw error;
+
+      // Enrich with profile names
+      const userIds = (data || []).map(u => u.user_id);
+      if (userIds.length === 0) return [];
+
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, full_name, email')
+        .in('id', userIds);
+
+      const profileMap = new Map((profiles || []).map(p => [p.id, p]));
+      return (data || []).map(u => ({
+        ...u,
+        full_name: profileMap.get(u.user_id)?.full_name || null,
+        email: profileMap.get(u.user_id)?.email || null,
+      }));
+    },
+  });
+}
+
 // ── Funnel Diagnostics ──
 export function useFunnelDiagnostics(landingId: string, days: number = 7) {
   return useQuery({

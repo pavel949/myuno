@@ -1,25 +1,19 @@
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { 
-  Globe, 
-  Plane, 
-  Flower2, 
-  Car, 
-  Home, 
-  Building2,
-  ExternalLink,
-  FlaskConical,
-  ToggleLeft,
-  Ban,
-  ChevronRight,
-  Loader2
+  Globe, Plane, Flower2, Car, Home, Building2,
+  FlaskConical, Ban, ChevronRight, Loader2, Eye,
+  MousePointerClick, Target, CheckCircle, ArrowRight
 } from 'lucide-react';
 import { useLandingRegistry, useToggleLanding, useUpdateLandingVariant } from '@/hooks/useLandingRegistry';
+import { useLandingFunnelBoard } from '@/hooks/useMCCControlTower';
+import { useMCCNavigation } from '@/pages/admin/marketing/MarketingDashboard';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 const LANDING_ICONS: Record<string, React.ElementType> = {
   transfer: Plane,
@@ -32,9 +26,16 @@ const LANDING_ICONS: Record<string, React.ElementType> = {
 export function MCCLandingControlTab() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const { navigateTo } = useMCCNavigation();
   const { data: landings, isLoading } = useLandingRegistry();
+  const { data: funnelData } = useLandingFunnelBoard('7d');
   const toggleMutation = useToggleLanding();
   const variantMutation = useUpdateLandingVariant();
+
+  // Build funnel lookup
+  const funnelMap = new Map(
+    (funnelData || []).map(f => [f.landing_id, f])
+  );
 
   const handleToggle = (id: string, currentState: boolean) => {
     toggleMutation.mutate(
@@ -47,7 +48,7 @@ export function MCCLandingControlTab() {
     const next = current === 'A' ? 'B' : 'A';
     variantMutation.mutate(
       { id, field, value: next },
-      { onSuccess: () => toast.success(isRu ? `Вариант переключён на ${next}` : `Switched to variant ${next}`) }
+      { onSuccess: () => toast.success(isRu ? `Вариант → ${next}` : `Switched to ${next}`) }
     );
   };
 
@@ -81,6 +82,9 @@ export function MCCLandingControlTab() {
       <div className="space-y-4">
         {landings?.map((landing) => {
           const Icon = LANDING_ICONS[landing.landing_id] || Globe;
+          const funnel = funnelMap.get(landing.landing_id);
+          const conv = funnel && funnel.views > 0 ? ((funnel.completed / funnel.views) * 100).toFixed(1) : '0';
+
           return (
             <Card key={landing.id} className={!landing.is_active ? 'opacity-60' : ''}>
               <CardContent className="p-4">
@@ -108,9 +112,36 @@ export function MCCLandingControlTab() {
                       />
                     </div>
 
+                    {/* Mini Funnel */}
+                    {funnel && landing.is_active && (
+                      <div
+                        className="flex items-center gap-1.5 overflow-x-auto cursor-pointer rounded-lg p-2 bg-muted/30 hover:bg-muted/50 transition-colors"
+                        onClick={() => navigateTo('funnel-diag', { landingId: landing.landing_id })}
+                      >
+                        {[
+                          { icon: Eye, label: isRu ? 'Просм' : 'Views', value: funnel.views },
+                          { icon: MousePointerClick, label: 'CTA', value: funnel.clicks },
+                          { icon: Target, label: isRu ? 'Инт' : 'Int', value: funnel.intents },
+                          { icon: CheckCircle, label: isRu ? 'Гот' : 'Done', value: funnel.completed },
+                        ].map((step, i, arr) => (
+                          <React.Fragment key={step.label}>
+                            <div className="text-center min-w-[52px]">
+                              <p className="text-[10px] text-muted-foreground">{step.label}</p>
+                              <p className="text-sm font-bold tabular-nums">{step.value}</p>
+                            </div>
+                            {i < arr.length - 1 && <ArrowRight className="h-3 w-3 text-muted-foreground shrink-0" />}
+                          </React.Fragment>
+                        ))}
+                        <div className="ml-2">
+                          <Badge variant={Number(conv) >= 8 ? 'default' : Number(conv) >= 5 ? 'secondary' : 'destructive'} className="text-xs">
+                            {conv}%
+                          </Badge>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Controls Row */}
                     <div className="flex flex-wrap items-center gap-3">
-                      {/* Hero Variant */}
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-muted-foreground">{isRu ? 'Заголовок:' : 'Hero:'}</span>
                         <Button
@@ -123,8 +154,6 @@ export function MCCLandingControlTab() {
                           {isRu ? 'Вариант' : 'Variant'} {landing.hero_variant}
                         </Button>
                       </div>
-
-                      {/* CTA Variant */}
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-muted-foreground">CTA:</span>
                         <Button
