@@ -58,11 +58,11 @@ export default defineConfig(({ mode }) => ({
             urlPattern: ({ request }) => request.mode === 'navigate',
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'pages-v8',
-              networkTimeoutSeconds: 3,
+              cacheName: 'pages-v10',
+              networkTimeoutSeconds: 2,
               expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 // 1 minute
+                maxEntries: 30,
+                maxAgeSeconds: 30 // 30 seconds - very aggressive
               }
             }
           },
@@ -70,10 +70,11 @@ export default defineConfig(({ mode }) => ({
             urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'supabase-cache-v8',
+              cacheName: 'supabase-cache-v10',
+              networkTimeoutSeconds: 3,
               expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24
+                maxAgeSeconds: 60 * 60
               },
               cacheableResponse: {
                 statuses: [0, 200]
@@ -84,10 +85,11 @@ export default defineConfig(({ mode }) => ({
             urlPattern: /\.(?:js|css)$/i,
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'static-assets-v8',
+              cacheName: 'static-assets-v10',
+              networkTimeoutSeconds: 2,
               expiration: {
                 maxEntries: 100,
-                maxAgeSeconds: 60 * 5 // 5 minutes
+                maxAgeSeconds: 60 // 1 minute
               }
             }
           },
@@ -95,10 +97,10 @@ export default defineConfig(({ mode }) => ({
             urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/i,
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'images-cache-v8',
+              cacheName: 'images-cache-v10',
               expiration: {
                 maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24
+                maxAgeSeconds: 60 * 60
               }
             }
           }
