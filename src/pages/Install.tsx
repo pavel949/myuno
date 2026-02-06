@@ -39,6 +39,7 @@ const Install = () => {
   const [progress, setProgress] = useState(0);
   const [showIOSGuide, setShowIOSGuide] = useState(false);
   const [showAndroidGuide, setShowAndroidGuide] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
   // Sync installed state from context
   useEffect(() => {
     if (isInstalled && !window.location.search.includes('force')) {
@@ -250,25 +251,56 @@ const Install = () => {
     );
   }
 
-  // Already installed screen
   if (installState === 'already-installed') {
+    
     const handleClearCache = async () => {
-      // Unregister all service workers
-      if ('serviceWorker' in navigator) {
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        for (const registration of registrations) {
-          await registration.unregister();
+      setIsClearing(true);
+      console.log('[myUNO] Starting aggressive cache clear...');
+      
+      try {
+        // 1. Unregister ALL service workers
+        if ('serviceWorker' in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          console.log(`[myUNO] Found ${registrations.length} service workers`);
+          await Promise.all(registrations.map(async (reg) => {
+            console.log('[myUNO] Unregistering SW:', reg.scope);
+            await reg.unregister();
+          }));
         }
-      }
-      // Clear caches
-      if ('caches' in window) {
-        const cacheNames = await caches.keys();
-        for (const name of cacheNames) {
-          await caches.delete(name);
+        
+        // 2. Clear ALL Cache Storage
+        if ('caches' in window) {
+          const cacheNames = await caches.keys();
+          console.log(`[myUNO] Found ${cacheNames.length} caches:`, cacheNames);
+          await Promise.all(cacheNames.map(async (name) => {
+            console.log('[myUNO] Deleting cache:', name);
+            await caches.delete(name);
+          }));
         }
+        
+        // 3. Clear localStorage markers (except auth)
+        const keysToRemove = ['app_version', 'manifest_version', 'last_cache_cleanup', 'pwa_installed'];
+        keysToRemove.forEach(key => {
+          localStorage.removeItem(key);
+          console.log('[myUNO] Removed localStorage:', key);
+        });
+        
+        // 4. Clear sessionStorage
+        sessionStorage.clear();
+        console.log('[myUNO] Cleared sessionStorage');
+        
+        // 5. Wait a moment for cleanup
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        console.log('[myUNO] Cache cleared! Hard reloading...');
+        
+        // 6. Force hard reload - bypass ALL caches
+        window.location.replace(window.location.origin + '/?cache_bust=' + Date.now());
+      } catch (error) {
+        console.error('[myUNO] Cache clear error:', error);
+        // Still try to reload
+        window.location.reload();
       }
-      // Reload with force flag
-      window.location.href = '/install?force=1';
     };
 
     return (
@@ -298,9 +330,17 @@ const Install = () => {
               onClick={handleClearCache}
               variant="outline"
               size="sm"
-              className="text-muted-foreground"
+              className="text-muted-foreground gap-2"
+              disabled={isClearing}
             >
-              {language === 'ru' ? 'Не вижу иконку? Сбросить кэш' : "Don't see the icon? Clear cache"}
+              {isClearing ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  {language === 'ru' ? 'Очистка...' : 'Clearing...'}
+                </>
+              ) : (
+                language === 'ru' ? 'Не вижу иконку? Сбросить кэш' : "Don't see the icon? Clear cache"
+              )}
             </Button>
           </div>
         </div>
