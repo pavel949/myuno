@@ -24,6 +24,7 @@ import { PageHeader } from "@/components/uno/PageHeader";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { IOSInstallGuide } from "@/components/pwa/IOSInstallGuide";
+import { AndroidInstallGuide } from "@/components/pwa/AndroidInstallGuide";
 import { usePWATracking } from "@/hooks/usePWATracking";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
 
@@ -32,18 +33,33 @@ type InstallState = 'idle' | 'installing' | 'success' | 'already-installed';
 const Install = () => {
   const { language } = useLanguage();
   const { trackInstall } = usePWATracking();
-  const { canInstall, isInstalled, isIOS, isAndroid, install } = usePWAInstall();
+  const { canInstall, isInstalled, isIOS, isAndroid, isMobile, install } = usePWAInstall();
   
   const [installState, setInstallState] = useState<InstallState>('idle');
   const [progress, setProgress] = useState(0);
   const [showIOSGuide, setShowIOSGuide] = useState(false);
-
+  const [showAndroidGuide, setShowAndroidGuide] = useState(false);
   // Sync installed state from context
   useEffect(() => {
     if (isInstalled && !window.location.search.includes('force')) {
       setInstallState('already-installed');
     }
   }, [isInstalled]);
+
+  // Auto-show install guide on mobile devices when no native prompt
+  useEffect(() => {
+    if (!canInstall && !isInstalled && installState === 'idle') {
+      // Small delay for better UX
+      const timer = setTimeout(() => {
+        if (isIOS) {
+          setShowIOSGuide(true);
+        } else if (isAndroid) {
+          setShowAndroidGuide(true);
+        }
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isIOS, isAndroid, canInstall, isInstalled, installState]);
 
   const simulateProgress = () => {
     setProgress(0);
@@ -90,8 +106,8 @@ const Install = () => {
       // Show iOS interactive guide
       setShowIOSGuide(true);
     } else if (isAndroid) {
-      // For Android without native prompt, show instructions
-      setShowIOSGuide(false); // Show manual steps on page
+      // Show Android interactive guide
+      setShowAndroidGuide(true);
     }
   };
 
@@ -315,6 +331,13 @@ const Install = () => {
       <AnimatePresence>
         {showIOSGuide && (
           <IOSInstallGuide onClose={() => setShowIOSGuide(false)} />
+        )}
+      </AnimatePresence>
+
+      {/* Android Interactive Guide Modal */}
+      <AnimatePresence>
+        {showAndroidGuide && (
+          <AndroidInstallGuide onClose={() => setShowAndroidGuide(false)} />
         )}
       </AnimatePresence>
 
