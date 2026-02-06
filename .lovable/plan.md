@@ -1,246 +1,104 @@
 
 
-# Professional Design Review: myUNO Platform
+# UX Audit: Guest Experience on myUNO Platform
 
-## Executive Summary
-
-The myUNO platform has a **solid architectural foundation** with well-organized design tokens, motion presets, and a consistent component library. However, there are several areas where the user experience and visual polish can be significantly improved.
-
----
-
-## Current Strengths
-
-1. **Design Token System** - Well-structured `designTokens.ts` and `motionPresets.ts` provide centralized styling
-2. **Typography** - Modern DM Sans + Space Grotesk pairing with Cyrillic support
-3. **Component Consistency** - Unified card styles, badge system, and shadow tokens
-4. **Accessibility** - Touch targets (44px minimum) and safe area padding implemented
-5. **Responsive Architecture** - Mobile-first approach with adaptive navigation
+## Overall Impression
+The platform has a premium, polished visual identity with a clear Klook/Airbnb-inspired design. Navigation is consistent, the bottom tab bar works well, and the home page contextual funnel is logical. However, there are several issues ranging from broken routes to booking flow dead-ends.
 
 ---
 
-## Areas for Improvement
+## CRITICAL Issues (Blocks Guest From Completing Goal)
 
-### 1. Visual Hierarchy & Information Density
+### 1. `/transfers` route is 404
+The route `/transfers` returns a "Page Not Found" error. Transfer services live at `/transfer` (landing page) or are nested inside `/transport`. If any link in the app points to `/transfers`, guests hit a dead-end.
+**Fix**: Add a redirect from `/transfers` to `/transfer` in the router.
 
-**Problem:** The home page has too many competing elements, making it hard to focus.
+### 2. `/life` route is 404
+Navigating to `/life` shows a 404. The correct route is `/life-flow`. Any internal links or sitemap references to `/life` are broken.
+**Fix**: Add redirect `/life` -> `/life-flow`.
 
-**Recommendations:**
-- Reduce visual weight of secondary elements (SmartWidget, PersonaSelector)
-- Add more breathing room between sections (increase spacing from `space-y-4` to `space-y-6`)
-- Implement progressive disclosure - show less initially, reveal on interaction
-- Use card elevation more strategically - not every element needs a border
-
-```text
-Current Layout:              Improved Layout:
-+------------------+         +------------------+
-| Hero (compact)   |         | Hero (prominent) |
-+------------------+         +------------------+
-| LifeSituation    |         |                  |
-+------------------+         | Quick Actions    |
-| SmartWidget      |         | (6 icons max)    |
-+------------------+         +------------------+
-| PersonaSelector  |         |                  |
-+------------------+         | Discovery Feed   |
-| QuickActions     |         | (scrollable)     |
-+------------------+         +------------------+
-| Toggle + Ribbon  |         | Persona (subtle) |
-+------------------+         +------------------+
-```
+### 3. Flower booking flow dead-end
+On the flower delivery landing (`/flower-delivery`), clicking "Vybirat buket" (Select Bouquet) opens a modal/card but there is no clear "Add to Cart" or "Order" CTA visible to complete the purchase. The flow stops at browsing without a clear next step.
+**Fix**: Ensure the flower detail card has a prominent "Add to Cart" / "Order Now" button that routes to checkout or cart.
 
 ---
 
-### 2. Color Palette Refinement
+## HIGH Priority Issues (Hurts Conversion / Confusing)
 
-**Problem:** The gold accent color (#B8860B area) can appear muddy in certain contexts.
+### 4. Property page shows no listings
+The `/property?mode=rent` page renders the structure (hero, filters, project promo section) but shows zero actual property cards in the listings grid. For a guest, this looks like an empty platform with nothing to offer.
+**Fix**: Verify database seeding for rental properties. Ensure the query doesn't filter out all results (check RLS, status filters, or location defaults).
 
-**Recommendations:**
-- Brighten the primary gold slightly for better contrast
-- Add a dedicated "accent-secondary" color for variety
-- Implement semantic color usage more consistently:
-  - Green for confirmations/success only
-  - Blue for informational content
-  - Amber/Gold for premium/featured
-  - Red for errors/urgent only
+### 5. Experiences page shows loading skeleton indefinitely
+The `/experiences` page renders the layout structure but shows skeleton placeholders that never resolve into actual content. This suggests a data-fetching issue or empty dataset.
+**Fix**: Debug the experiences query (check `providers`, `services` tables for experience-type entries). Ensure fallback empty-state messaging exists.
 
-**Proposed Token Update:**
-```css
-/* Enhanced Gold */
---primary: 42 78% 52%;        /* Slightly brighter */
---primary-light: 42 78% 65%;  /* For hover states */
+### 6. Yachts page shows empty state
+The `/yachts` page loads the layout but shows no yacht listings. Same pattern as property and experiences -- the catalog verticals appear to have no visible inventory for a guest user.
+**Fix**: Verify yacht data in the database and that queries work for unauthenticated users (RLS policies allowing anon reads).
 
-/* New Accent Colors */
---accent-coral: 16 85% 60%;   /* For warm highlights */
---accent-teal: 180 65% 45%;   /* For cool contrast */
-```
+### 7. Market page content is thin
+The `/market` page shows the marketplace layout with proper structure (hero carousel, categories) but the actual product grid appears sparse. A guest sees mostly placeholder-like content.
+**Fix**: Seed marketplace products or ensure product queries return data.
 
 ---
 
-### 3. Card Design Consistency
+## MEDIUM Priority Issues (UX Polish)
 
-**Problem:** Card styles vary across components (some have borders, some don't; inconsistent padding).
+### 8. Home page "Phuket Today" widget shows placeholder data
+The weather/utility widget appears functional but may show stale or mock data. For a real guest, inaccurate local info erodes trust.
+**Fix**: Verify data source and freshness, or show clear "demo" labels.
 
-**Recommendations:**
-- Standardize all cards to use `rounded-2xl` (currently mixed)
-- Remove borders in dark mode, use subtle shadows instead
-- Implement consistent inner padding (`p-4` everywhere, not mixed with `p-3`)
-- Add subtle hover lift animation to all interactive cards
+### 9. Transport page has content but no clear booking CTA
+The `/transport` page shows vehicle rental cards with prices, but the path from browsing to booking isn't immediately obvious. Cards need a stronger "Book Now" or "Reserve" button.
+**Fix**: Add a clear primary CTA on each vehicle card leading to the booking form.
 
-**Unified Card Hierarchy:**
-```text
-Level 1: Surface Cards (no shadow, subtle bg difference)
-         Use for: sections, containers
+### 10. Life Flow page loads but feels disconnected
+The `/life-flow` page shows the situation selector properly but the page layout has a lot of whitespace and the situations feel disconnected from actionable next steps. After selecting a situation, the results are unclear.
+**Fix**: Ensure each life situation maps to visible, bookable services with clear CTAs.
 
-Level 2: Content Cards (shadow-sm, border)
-         Use for: products, services, listings
-
-Level 3: Interactive Cards (shadow-md on hover, lift)
-         Use for: clickable items
-
-Level 4: Elevated Cards (shadow-lg, prominent)
-         Use for: modals, featured items
-```
+### 11. Rent Phuket landing page CTA leads nowhere visible
+The `/rent-phuket` landing page has nice hero copy and trust messaging, but the CTA button's destination should be the property catalog with pre-applied filters. Verify it navigates correctly.
 
 ---
 
-### 4. Mobile Navigation Enhancement
+## POSITIVE Observations (What Works Well)
 
-**Problem:** The bottom navigation is functional but lacks visual polish and clear active states.
-
-**Recommendations:**
-- Add indicator pill/bar above active icon (like iOS tab bar)
-- Increase icon-to-label spacing
-- Animate icon on selection (subtle scale + color change)
-- Consider pill-shaped active state background
-
-```text
-Current:                     Improved:
-[ 🏠 ] [ 🧭 ] [ 🛒 ]         [━━━━]
-Home   Svc  Market           [ 🏠 ] [ 🧭 ] [ 🛒 ]
-                               ●
-                             Home   Svc  Market
-```
+- **Home page structure** is excellent: hero, smart widget, persona selector, quick actions -- logical contextual funnel
+- **Bottom navigation** works correctly and is visually polished with proper active states
+- **Service/Product toggle** on home page is clear and functional
+- **Transfer landing page** (`/transfer`) is well-designed with trust copy, route cards, and fixed pricing
+- **Flower delivery landing** (`/flower-delivery`) has premium visual quality with nice bouquet cards
+- **Catalog drawer** (hamburger menu) provides comprehensive navigation taxonomy
+- **Dark mode** is consistent across all pages
+- **Bilingual support** (RU/EN) works throughout the interface
+- **Visual design tokens** are consistent -- card hierarchy, spacing, typography all feel cohesive
 
 ---
 
-### 5. Typography Scale Fine-Tuning
+## Summary Action Table
 
-**Problem:** Some text sizes feel too similar, creating weak hierarchy.
-
-**Recommendations:**
-- Increase heading sizes on desktop (use responsive classes more aggressively)
-- Add letter-spacing variation (tighter for headings, slightly wider for body)
-- Use font-weight more strategically:
-  - 700 for page titles only
-  - 600 for section headers
-  - 500 for card titles
-  - 400 for body text
-
----
-
-### 6. Carousel/Scroll Indicators
-
-**Problem:** Users may not realize content is scrollable horizontally.
-
-**Recommendations:**
-- Add fade gradient at edges to indicate more content
-- Show partial next card to hint at scrollability
-- Add pagination dots for feature carousels
-- Implement snap points consistently
-
-```text
-[Card 1    ] [Card 2    ] [Car...  ⟹
-                          ↑ fade gradient
-```
+| # | Issue | Severity | Fix Effort |
+|---|-------|----------|------------|
+| 1 | `/transfers` 404 | Critical | Low (add redirect) |
+| 2 | `/life` 404 | Critical | Low (add redirect) |
+| 3 | Flower booking has no CTA to order | Critical | Medium |
+| 4 | Property page shows 0 listings | High | Medium (data/query) |
+| 5 | Experiences page stuck on skeleton | High | Medium (data/query) |
+| 6 | Yachts page empty | High | Medium (data/query) |
+| 7 | Market page sparse content | High | Medium (seeding) |
+| 8 | Phuket Today widget accuracy | Medium | Low |
+| 9 | Transport cards missing booking CTA | Medium | Low |
+| 10 | Life Flow results unclear | Medium | Medium |
+| 11 | Rent Phuket CTA destination | Medium | Low |
 
 ---
 
-### 7. Loading States & Skeleton Consistency
+## Recommended Implementation Order
 
-**Problem:** Skeleton loaders vary in style and don't always match final content.
-
-**Recommendations:**
-- Match skeleton aspect ratios to actual content exactly
-- Use consistent shimmer animation speed (currently 1.5s - good)
-- Add micro-delays for staggered appearance
-- Consider content placeholders instead of pure grey blocks
-
----
-
-### 8. Icon System Unification
-
-**Problem:** Mixed use of emoji and Lucide icons creates inconsistency.
-
-**Recommendations:**
-- Use Lucide icons for all UI elements
-- Reserve emoji for category indicators only (food categories, etc.)
-- Standardize icon sizes: 16px (small), 20px (default), 24px (large)
-- Use consistent icon weight/stroke-width
-
----
-
-### 9. Form Input Styling
-
-**Problem:** Input fields could have more visual polish.
-
-**Recommendations:**
-- Increase input height slightly (44px minimum for touch)
-- Add focus ring animation (scale up slightly)
-- Use consistent placeholder color
-- Add icon prefix support for all inputs
-
----
-
-### 10. Micro-Interactions
-
-**Problem:** Interactions feel slightly flat despite having Framer Motion.
-
-**Recommendations:**
-- Add haptic-style feedback on all buttons (already partially done)
-- Implement staggered animations for lists
-- Add subtle scale effect on card press
-- Use spring physics for more natural motion
-
----
-
-## Implementation Priority
-
-| Priority | Improvement | Impact | Effort |
-|----------|-------------|--------|--------|
-| 1 | Visual Hierarchy (spacing, reduce density) | High | Low |
-| 2 | Card Design Consistency | High | Medium |
-| 3 | Mobile Navigation Polish | Medium | Low |
-| 4 | Scroll Indicators | Medium | Low |
-| 5 | Typography Scale | Medium | Low |
-| 6 | Color Palette Refinement | Medium | Medium |
-| 7 | Icon System Unification | Low | Medium |
-| 8 | Loading States | Low | Low |
-| 9 | Form Input Styling | Low | Low |
-| 10 | Micro-Interactions | Low | High |
-
----
-
-## Technical Implementation Notes
-
-### Files to Modify
-- `src/index.css` - Color token adjustments, spacing utilities
-- `src/lib/designTokens.ts` - Card hierarchy standardization
-- `src/components/layout/AdaptiveBottomNav.tsx` - Navigation polish
-- `src/pages/Index.tsx` - Section spacing and order
-- `src/components/ui/card.tsx` - Unified styling
-- `src/components/home/*` - Individual component refinements
-
-### New Utilities to Add
-- `.card-surface`, `.card-content`, `.card-interactive`, `.card-elevated` - standardized variants
-- `.scroll-fade-left`, `.scroll-fade-right` - gradient indicators
-- `.nav-indicator` - bottom nav active state
-
----
-
-## Next Steps
-
-Would you like me to implement these improvements? I recommend starting with:
-
-1. **Visual Hierarchy** - Adjust spacing and reduce home page density
-2. **Card Consistency** - Standardize all card components
-3. **Navigation Polish** - Enhance bottom nav active states
+1. Fix broken routes (redirects for `/transfers`, `/life`) -- immediate, 5 min
+2. Fix flower ordering CTA -- ensures at least one vertical is bookable E2E
+3. Debug empty catalogs (property, experiences, yachts) -- likely a shared issue with data seeding or RLS for anon users
+4. Add booking CTAs to transport cards
+5. Polish Life Flow results display
 
