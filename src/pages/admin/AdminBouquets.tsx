@@ -36,18 +36,41 @@ const CATEGORIES = [
 ];
 
 const SIZES = [
-  { id: 'small', labelEn: 'Small', labelRu: 'Маленький' },
-  { id: 'medium', labelEn: 'Medium', labelRu: 'Средний' },
-  { id: 'large', labelEn: 'Large', labelRu: 'Большой' },
-  { id: 'xl', labelEn: 'Extra Large', labelRu: 'Очень большой' },
+  { id: 'S', labelEn: 'Small', labelRu: 'Маленький' },
+  { id: 'M', labelEn: 'Medium', labelRu: 'Средний' },
+  { id: 'L', labelEn: 'Large', labelRu: 'Большой' },
 ];
+
+const STYLES = [
+  { id: 'Classic', labelEn: 'Classic', labelRu: 'Классика' },
+  { id: 'Romantic', labelEn: 'Romantic', labelRu: 'Романтика' },
+  { id: 'Minimal', labelEn: 'Minimal', labelRu: 'Минимализм' },
+  { id: 'Bright', labelEn: 'Bright', labelRu: 'Яркий' },
+  { id: 'Luxury', labelEn: 'Luxury', labelRu: 'Люкс' },
+  { id: 'Elegant', labelEn: 'Elegant', labelRu: 'Элегант' },
+  { id: 'Soft', labelEn: 'Soft', labelRu: 'Нежный' },
+];
+
+const COLOR_PALETTES = [
+  { id: 'Red', labelEn: 'Red', labelRu: 'Красный' },
+  { id: 'Pink', labelEn: 'Pink', labelRu: 'Розовый' },
+  { id: 'White', labelEn: 'White', labelRu: 'Белый' },
+  { id: 'Yellow', labelEn: 'Yellow', labelRu: 'Жёлтый' },
+  { id: 'Pastel', labelEn: 'Pastel', labelRu: 'Пастель' },
+  { id: 'Mix', labelEn: 'Mix', labelRu: 'Микс' },
+];
+
+const OCCASION_TAGS = ['Love', 'Birthday', 'Anniversary', 'ThankYou', 'Sorry', 'Congratulations', 'Corporate', 'Proposal'];
 
 const defaultFormData: BouquetFormData = {
   shop_id: '',
+  sku: '',
   name_en: '',
   name_ru: '',
   description_en: '',
   description_ru: '',
+  composition_en: '',
+  composition_ru: '',
   category: 'roses',
   image: '',
   images: [],
@@ -55,7 +78,13 @@ const defaultFormData: BouquetFormData = {
   currency: 'THB',
   flowers: [],
   colors: [],
-  size: 'medium',
+  size: 'M',
+  style: 'Classic',
+  occasion_tags: [],
+  color_palette: 'Mix',
+  lifeos_tags: [],
+  availability_note: 'Flowers may be substituted with equivalent seasonal varieties while preserving style and value.',
+  preparation_time_minutes: 90,
   is_popular: false,
   is_active: true,
   stock_quantity: null,
@@ -101,10 +130,13 @@ export default function AdminBouquets() {
     setEditingItem(item);
     setFormData({
       shop_id: item.shop_id || '',
+      sku: item.sku || '',
       name_en: item.name_en || '',
       name_ru: item.name_ru || '',
       description_en: item.description_en || '',
       description_ru: item.description_ru || '',
+      composition_en: item.composition_en || '',
+      composition_ru: item.composition_ru || '',
       category: item.category || 'roses',
       image: item.image || '',
       images: item.images || [],
@@ -112,7 +144,13 @@ export default function AdminBouquets() {
       currency: item.currency || 'THB',
       flowers: item.flowers || [],
       colors: item.colors || [],
-      size: item.size || 'medium',
+      size: item.size || 'M',
+      style: item.style || 'Classic',
+      occasion_tags: item.occasion_tags || [],
+      color_palette: item.color_palette || 'Mix',
+      lifeos_tags: item.lifeos_tags || [],
+      availability_note: item.availability_note || '',
+      preparation_time_minutes: item.preparation_time_minutes || 90,
       is_popular: item.is_popular ?? false,
       is_active: item.is_active ?? true,
       stock_quantity: item.stock_quantity,

@@ -17,75 +17,7 @@ import { useBouquets, Bouquet } from '@/hooks/useBouquets';
 import { useFlowerFilterOptions } from '@/hooks/useDynamicFilterOptions';
 import { CrossSellSection } from '@/components/crosssell';
 
-// Fallback data when database is empty
-const FALLBACK_BOUQUETS: Partial<Bouquet>[] = [
-  {
-    id: 'bouquet-1',
-    name_en: 'Romantic Red Roses',
-    name_ru: 'Романтические красные розы',
-    image: 'https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?w=600',
-    price: 1800,
-    category: 'roses',
-    size: 'medium',
-    is_popular: true,
-    shop_id: '',
-  },
-  {
-    id: 'bouquet-2',
-    name_en: 'Gentle Pink Peonies',
-    name_ru: 'Нежные розовые пионы',
-    image: 'https://images.unsplash.com/photo-1562690868-60bbe7293e94?w=600',
-    price: 2500,
-    category: 'peonies',
-    size: 'medium',
-    is_popular: true,
-    shop_id: '',
-  },
-  {
-    id: 'bouquet-3',
-    name_en: 'Spring Mix',
-    name_ru: 'Весенний микс',
-    image: 'https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=600',
-    price: 1200,
-    category: 'mixed',
-    size: 'large',
-    is_popular: false,
-    shop_id: '',
-  },
-  {
-    id: 'bouquet-4',
-    name_en: 'White Orchid Elegance',
-    name_ru: 'Белые орхидеи элегант',
-    image: 'https://images.unsplash.com/photo-1563241527-3004b7be0ffd?w=600',
-    price: 3500,
-    category: 'orchids',
-    size: 'medium',
-    is_popular: true,
-    shop_id: '',
-  },
-  {
-    id: 'bouquet-5',
-    name_en: 'Sunny Tulips',
-    name_ru: 'Солнечные тюльпаны',
-    image: 'https://images.unsplash.com/photo-1520763185298-1b434c919102?w=600',
-    price: 950,
-    category: 'tulips',
-    size: 'medium',
-    is_popular: false,
-    shop_id: '',
-  },
-  {
-    id: 'bouquet-6',
-    name_en: 'Luxury Rose Box',
-    name_ru: 'Люкс розы в коробке',
-    image: 'https://images.unsplash.com/photo-1455659817273-f96807779a8a?w=600',
-    price: 4500,
-    category: 'premium',
-    size: 'xl',
-    is_popular: true,
-    shop_id: '',
-  },
-];
+// No fallback - use production data only
 
 const FlowersIndex = () => {
   const navigate = useNavigate();
@@ -118,8 +50,8 @@ const FlowersIndex = () => {
     onlyActive: true,
   });
 
-  // Use database data or fallback
-  const bouquets = dbBouquets.length > 0 ? dbBouquets : FALLBACK_BOUQUETS as Bouquet[];
+  // Use database data directly - no fallback needed with production seeded data
+  const bouquets = dbBouquets;
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -192,13 +124,30 @@ const FlowersIndex = () => {
         return false;
       }
       
-      // Occasion filter
+      // Occasion filter - match against occasion_tags array
       const occasionFilter = filterValues.occasion as string[] | undefined;
       if (occasionFilter?.length) {
-        // Check if bouquet matches any occasion (via name or tags)
-        const bouquetName = ((bouquet.name_en || '') + ' ' + (bouquet.name_ru || '')).toLowerCase();
-        const hasOccasion = occasionFilter.some(o => bouquetName.includes(o.toLowerCase()));
+        const bouquetTags = bouquet.occasion_tags || [];
+        const hasOccasion = occasionFilter.some(o => 
+          bouquetTags.some(tag => tag.toLowerCase() === o.toLowerCase())
+        );
         if (!hasOccasion) return false;
+      }
+      
+      // Color palette filter - match against color_palette field
+      const colorPaletteFilter = filterValues.colorPalette as string[] | undefined;
+      if (colorPaletteFilter?.length) {
+        const palette = (bouquet.color_palette || '').toLowerCase();
+        const hasColorPalette = colorPaletteFilter.some(c => palette.includes(c.toLowerCase()));
+        if (!hasColorPalette) return false;
+      }
+      
+      // Style filter - match against style field
+      const styleFilter = filterValues.style as string[] | undefined;
+      if (styleFilter?.length) {
+        const bouquetStyle = (bouquet.style || '').toLowerCase();
+        const hasStyle = styleFilter.some(s => bouquetStyle === s.toLowerCase());
+        if (!hasStyle) return false;
       }
       
       return true;
