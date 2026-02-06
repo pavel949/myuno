@@ -12,6 +12,7 @@ import {
 import { useLandingRegistry, useToggleLanding, useUpdateLandingVariant } from '@/hooks/useLandingRegistry';
 import { useLandingFunnelBoard } from '@/hooks/useMCCControlTower';
 import { useMCCNavigation } from '@/pages/admin/marketing/MarketingDashboard';
+import { ABVariantManager } from './ABVariantManager';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -31,6 +32,7 @@ export function MCCLandingControlTab() {
   const { data: funnelData } = useLandingFunnelBoard('7d');
   const toggleMutation = useToggleLanding();
   const variantMutation = useUpdateLandingVariant();
+  const [expandedLanding, setExpandedLanding] = React.useState<string | null>(null);
 
   // Build funnel lookup
   const funnelMap = new Map(
@@ -171,6 +173,15 @@ export function MCCLandingControlTab() {
                           </span>
                         )}
                       </div>
+                      <Button
+                        variant={expandedLanding === landing.landing_id ? 'secondary' : 'outline'}
+                        size="sm"
+                        className="h-7 text-xs gap-1"
+                        onClick={() => setExpandedLanding(expandedLanding === landing.landing_id ? null : landing.landing_id)}
+                      >
+                        <FlaskConical className="h-3 w-3" />
+                        {isRu ? 'A/B тесты' : 'A/B Tests'}
+                      </Button>
                     </div>
 
                     {/* Next Actions */}
@@ -198,6 +209,16 @@ export function MCCLandingControlTab() {
                             </Badge>
                           ))}
                         </div>
+                      </div>
+                    )}
+
+                    {/* A/B Variant Manager (expanded) */}
+                    {expandedLanding === landing.landing_id && (
+                      <div className="border-t pt-4 mt-2">
+                        <ABVariantManager
+                          landingId={landing.landing_id}
+                          landingName={isRu ? landing.name_ru || landing.name_en : landing.name_en}
+                        />
                       </div>
                     )}
                   </div>

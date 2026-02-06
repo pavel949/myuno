@@ -14,3 +14,6 @@ export { MCCUserTimelineTab } from './MCCUserTimelineTab';
 export { CampaignFormSheet } from './CampaignFormSheet';
 export { CampaignDetailSheet } from './CampaignDetailSheet';
 export { CampaignCard } from './CampaignCard';
+export { ABVariantManager } from './ABVariantManager';
+export { ABVariantEditorModal } from './ABVariantEditorModal';
+export { ABVariantPerformancePanel } from './ABVariantPerformancePanel';
