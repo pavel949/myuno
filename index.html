@@ -164,8 +164,8 @@
                 
                 await clearAllCaches();
                 
-                // Reload once
-                window.location.reload();
+                // Go to root, not reload current page
+                window.location.href = '/';
                 return;
               }
               
