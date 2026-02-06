@@ -8,6 +8,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { DetailPageSkeleton } from '@/components/ui/page-skeletons';
 import { cn } from '@/lib/utils';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { useViewHistory } from '@/hooks/useViewHistory';
@@ -51,19 +52,7 @@ export default function VehicleDetail() {
   if (isLoading) {
     return (
       <AppLayout>
-        <div className="pb-24">
-          <div className="sticky top-0 z-20 flex items-center justify-between p-4 bg-background/80 backdrop-blur-sm border-b border-border/50">
-            <BackButton fallbackPath="/transport" variant="ghost" />
-          </div>
-          <Skeleton className="aspect-[16/10] w-full" />
-          <div className="px-4 space-y-4 mt-4">
-            <Skeleton className="h-8 w-3/4" />
-            <Skeleton className="h-6 w-1/2" />
-            <div className="grid grid-cols-4 gap-3">
-              {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-20" />)}
-            </div>
-          </div>
-        </div>
+        <DetailPageSkeleton />
       </AppLayout>
     );
   }
@@ -71,10 +60,14 @@ export default function VehicleDetail() {
   if (!vehicle) {
     return (
       <AppLayout>
-        <div className="p-8 text-center">
+        <div className="flex flex-col items-center justify-center py-20 text-center px-6">
+          <Settings2 className="w-16 h-16 text-muted-foreground mb-4" />
           <h2 className="text-xl font-semibold mb-2">
             {isRussian ? 'Транспорт не найден' : 'Vehicle not found'}
           </h2>
+          <p className="text-muted-foreground mb-6">
+            {isRussian ? 'Возможно, он был удалён или недоступен' : 'It may have been removed or is unavailable'}
+          </p>
           <Button onClick={() => navigate('/transport')}>
             {isRussian ? 'Назад к каталогу' : 'Back to catalog'}
           </Button>

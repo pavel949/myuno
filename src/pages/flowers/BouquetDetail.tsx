@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Star, Heart, Share2, ShoppingCart, Plus, Minus, Flower2, Truck, Clock, Shield, Loader2, Zap, Package } from 'lucide-react';
+import { DetailPageSkeleton } from '@/components/ui/page-skeletons';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
@@ -49,9 +50,7 @@ const BouquetDetail = () => {
   if (isLoading) {
     return (
       <AppLayout showBottomNav={false}>
-        <div className="min-h-screen flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
+        <DetailPageSkeleton />
       </AppLayout>
     );
   }
@@ -59,8 +58,17 @@ const BouquetDetail = () => {
   if (!bouquet) {
     return (
       <AppLayout showBottomNav={false}>
-        <div className="min-h-screen flex items-center justify-center">
-          <p>{language === 'ru' ? 'Букет не найден' : 'Bouquet not found'}</p>
+        <div className="flex flex-col items-center justify-center py-20 text-center px-6">
+          <Flower2 className="w-16 h-16 text-muted-foreground mb-4" />
+          <h2 className="text-xl font-semibold mb-2">
+            {language === 'ru' ? 'Букет не найден' : 'Bouquet not found'}
+          </h2>
+          <p className="text-muted-foreground mb-6">
+            {language === 'ru' ? 'Возможно, он был удалён или недоступен' : 'It may have been removed or is unavailable'}
+          </p>
+          <Button onClick={() => navigate('/flowers')}>
+            {language === 'ru' ? 'К каталогу цветов' : 'Back to flowers'}
+          </Button>
         </div>
       </AppLayout>
     );
