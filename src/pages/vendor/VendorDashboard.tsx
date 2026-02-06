@@ -55,7 +55,7 @@ const VendorDashboard = () => {
   const { language } = useLanguage();
   const { activeOrg, vendorOrgs, isLoading: contextLoading } = useUserContext();
   const { profile: vendorProfile } = useVendorProfile();
-  const { orders, isLoading: ordersLoading, stats } = useVendorOrders();
+  const { orders, isLoading: ordersLoading, stats, updateStatus } = useVendorOrders();
 
   // State for FAB actions
   const [showBulkImport, setShowBulkImport] = useState(false);
@@ -286,7 +286,7 @@ const VendorDashboard = () => {
                       <Button 
                         variant="ghost" 
                         size="icon" 
-                        className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="h-8 w-8 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                       >
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
@@ -297,7 +297,7 @@ const VendorDashboard = () => {
                         {isRu ? 'Просмотр' : 'View'}
                       </DropdownMenuItem>
                       {order.status === 'pending' && (
-                        <DropdownMenuItem onClick={() => {}}>
+                        <DropdownMenuItem onClick={() => updateStatus({ orderId: order.id, status: 'confirmed' })}>
                           <CheckCircle className="h-4 w-4 mr-2" />
                           {isRu ? 'Подтвердить' : 'Confirm'}
                         </DropdownMenuItem>
