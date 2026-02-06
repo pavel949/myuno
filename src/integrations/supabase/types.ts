@@ -3242,10 +3242,59 @@ export type Database = {
           },
         ]
       }
+      event_occurrences: {
+        Row: {
+          created_at: string | null
+          ends_at: string | null
+          event_id: string
+          id: string
+          is_cancelled: boolean | null
+          notes: string | null
+          source_urls: string[] | null
+          starts_at: string
+          timezone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          ends_at?: string | null
+          event_id: string
+          id?: string
+          is_cancelled?: boolean | null
+          notes?: string | null
+          source_urls?: string[] | null
+          starts_at: string
+          timezone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          ends_at?: string | null
+          event_id?: string
+          id?: string
+          is_cancelled?: boolean | null
+          notes?: string | null
+          source_urls?: string[] | null
+          starts_at?: string
+          timezone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_occurrences_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           address: string | null
+          age_policy: string | null
           approval_status: string | null
+          booking_flow: string | null
           category: string
           cover_image: string | null
           created_at: string
@@ -3253,7 +3302,9 @@ export type Database = {
           currency: string | null
           description_en: string | null
           description_ru: string | null
+          dress_code: string | null
           duration_hours: number | null
+          ends_at: string | null
           event_date: string | null
           event_time: string | null
           excludes: Json | null
@@ -3268,10 +3319,13 @@ export type Database = {
           is_recurring: boolean | null
           itinerary: Json | null
           lat: number | null
+          lifeos_context: string | null
           lng: number | null
           location_name: string | null
           location_ru: string | null
+          marketing_tags: string[] | null
           max_spots: number | null
+          organizer_type: string | null
           original_price: number | null
           price: number | null
           provider_id: string | null
@@ -3280,7 +3334,11 @@ export type Database = {
           review_count: number | null
           reviewed_at: string | null
           reviewed_by: string | null
+          slug: string | null
+          source_urls: string[] | null
           spots_left: number | null
+          starts_at: string | null
+          ticket_url: string | null
           title_en: string
           title_ru: string
           uno_team_creator_id: string | null
@@ -3289,7 +3347,9 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          age_policy?: string | null
           approval_status?: string | null
+          booking_flow?: string | null
           category?: string
           cover_image?: string | null
           created_at?: string
@@ -3297,7 +3357,9 @@ export type Database = {
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
+          dress_code?: string | null
           duration_hours?: number | null
+          ends_at?: string | null
           event_date?: string | null
           event_time?: string | null
           excludes?: Json | null
@@ -3312,10 +3374,13 @@ export type Database = {
           is_recurring?: boolean | null
           itinerary?: Json | null
           lat?: number | null
+          lifeos_context?: string | null
           lng?: number | null
           location_name?: string | null
           location_ru?: string | null
+          marketing_tags?: string[] | null
           max_spots?: number | null
+          organizer_type?: string | null
           original_price?: number | null
           price?: number | null
           provider_id?: string | null
@@ -3324,7 +3389,11 @@ export type Database = {
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          slug?: string | null
+          source_urls?: string[] | null
           spots_left?: number | null
+          starts_at?: string | null
+          ticket_url?: string | null
           title_en: string
           title_ru: string
           uno_team_creator_id?: string | null
@@ -3333,7 +3402,9 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          age_policy?: string | null
           approval_status?: string | null
+          booking_flow?: string | null
           category?: string
           cover_image?: string | null
           created_at?: string
@@ -3341,7 +3412,9 @@ export type Database = {
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
+          dress_code?: string | null
           duration_hours?: number | null
+          ends_at?: string | null
           event_date?: string | null
           event_time?: string | null
           excludes?: Json | null
@@ -3356,10 +3429,13 @@ export type Database = {
           is_recurring?: boolean | null
           itinerary?: Json | null
           lat?: number | null
+          lifeos_context?: string | null
           lng?: number | null
           location_name?: string | null
           location_ru?: string | null
+          marketing_tags?: string[] | null
           max_spots?: number | null
+          organizer_type?: string | null
           original_price?: number | null
           price?: number | null
           provider_id?: string | null
@@ -3368,7 +3444,11 @@ export type Database = {
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          slug?: string | null
+          source_urls?: string[] | null
           spots_left?: number | null
+          starts_at?: string | null
+          ticket_url?: string | null
           title_en?: string
           title_ru?: string
           uno_team_creator_id?: string | null
