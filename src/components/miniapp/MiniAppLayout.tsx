@@ -284,29 +284,27 @@ export function MiniAppLayout({
           />
         )}
 
-        {/* Quick Filter Chips */}
+        {/* Quick Filter Chips - single horizontal scrollable row */}
         {quickFilters.length > 0 && onFilterChange && (
-          <div className="space-y-2">
-            {quickFilters.map((section) => (
-              <FilterChipGroup key={section.id} scrollable>
-                {section.options.map((opt) => {
-                  const sectionValues = (filterValues?.[section.id] as string[]) || [];
-                  const isActive = sectionValues.includes(opt.id);
-                  
-                  return (
-                    <FilterChip
-                      key={opt.id}
-                      label={language === 'ru' ? opt.labelRu : opt.labelEn}
-                      icon={opt.icon}
-                      isActive={isActive}
-                      onToggle={() => handleQuickFilterToggle(section.id, opt.id)}
-                      size="sm"
-                    />
-                  );
-                })}
-              </FilterChipGroup>
-            ))}
-          </div>
+          <FilterChipGroup scrollable>
+            {quickFilters.flatMap((section) =>
+              section.options.map((opt) => {
+                const sectionValues = (filterValues?.[section.id] as string[]) || [];
+                const isActive = sectionValues.includes(opt.id);
+                
+                return (
+                  <FilterChip
+                    key={`${section.id}-${opt.id}`}
+                    label={language === 'ru' ? opt.labelRu : opt.labelEn}
+                    icon={opt.icon}
+                    isActive={isActive}
+                    onToggle={() => handleQuickFilterToggle(section.id, opt.id)}
+                    size="sm"
+                  />
+                );
+              })
+            )}
+          </FilterChipGroup>
         )}
 
         {/* Quick Actions */}
