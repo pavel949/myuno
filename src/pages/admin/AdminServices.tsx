@@ -5,10 +5,12 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck, useAdminProviders, useAdminServices, useAdminCategories, Service } from '@/hooks/useAdmin';
 import { useAdminFormHotkeys, useFormProgress } from '@/hooks/useAdminFormHotkeys';
 import { useAutoTranslate } from '@/hooks/useAutoTranslate';
+import { useOnBehalfContext } from '@/hooks/useAdminContentCreation';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { AdminFormToolbar } from '@/components/admin/AdminFormToolbar';
+import { OnBehalfBanner } from '@/components/admin/OnBehalfBanner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -61,6 +63,7 @@ export default function AdminServices() {
   const { isAdmin, isLoading: adminLoading } = useAdminCheck();
   const { providers } = useAdminProviders();
   const { categories } = useAdminCategories();
+  const { isOnBehalf } = useOnBehalfContext();
   
   const providerId = searchParams.get('provider') || undefined;
   const { services, isLoading: servicesLoading, createService, updateService, deleteService } = useAdminServices(providerId);
@@ -302,6 +305,9 @@ export default function AdminServices() {
           }
           showBack
         />
+
+        {/* On-behalf context banner */}
+        {isOnBehalf && <OnBehalfBanner className="mb-4" />}
 
         {/* Filter by Provider */}
         {!providerId && (

@@ -24,6 +24,7 @@ export interface UnifiedCatalogFilters {
   status?: 'all' | 'active' | 'inactive' | 'featured';
   search?: string;
   providerId?: string;
+  createdByAdmin?: boolean;
 }
 
 export function useUnifiedCatalog(filters: UnifiedCatalogFilters = {}) {
@@ -42,13 +43,16 @@ export function useUnifiedCatalog(filters: UnifiedCatalogFilters = {}) {
       if (!filters.type || filters.type === 'all' || filters.type === 'service') {
         let servicesQuery = supabase
           .from('services')
-          .select('id, name_en, name_ru, price, currency, is_active, provider_id, created_at, images')
+          .select('id, name_en, name_ru, price, currency, is_active, provider_id, created_at, images, created_by_uno_team')
           .order('created_at', { ascending: false })
           .limit(100);
 
         if (filters.status === 'active') servicesQuery = servicesQuery.eq('is_active', true);
         if (filters.status === 'inactive') servicesQuery = servicesQuery.eq('is_active', false);
         if (filters.providerId) servicesQuery = servicesQuery.eq('provider_id', filters.providerId);
+        if (filters.createdByAdmin !== undefined) {
+          servicesQuery = servicesQuery.eq('created_by_uno_team', filters.createdByAdmin);
+        }
         if (filters.search) {
           servicesQuery = servicesQuery.or(`name_en.ilike.%${filters.search}%,name_ru.ilike.%${filters.search}%`);
         }
@@ -155,7 +159,7 @@ export function useUnifiedCatalog(filters: UnifiedCatalogFilters = {}) {
     } finally {
       setIsLoading(false);
     }
-  }, [filters.type, filters.status, filters.search, filters.providerId]);
+  }, [filters.type, filters.status, filters.search, filters.providerId, filters.createdByAdmin]);
 
   useEffect(() => {
     fetchItems();

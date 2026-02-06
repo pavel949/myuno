@@ -75,12 +75,14 @@ export function UnifiedCatalogTable() {
   
   const [typeFilter, setTypeFilter] = useState<CatalogItemType | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive' | 'featured'>('all');
+  const [creatorFilter, setCreatorFilter] = useState<'all' | 'admin' | 'vendor'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   
   const { items, isLoading, bulkUpdateStatus, bulkUpdateFeatured, bulkDelete, refetch } = useUnifiedCatalog({
     type: typeFilter,
     status: statusFilter,
     search: searchQuery,
+    createdByAdmin: creatorFilter === 'admin' ? true : creatorFilter === 'vendor' ? false : undefined,
   });
 
   const { 
@@ -227,6 +229,17 @@ export function UnifiedCatalogTable() {
             <SelectItem value="active">{isRussian ? 'Активные' : 'Active'}</SelectItem>
             <SelectItem value="inactive">{isRussian ? 'Неактивные' : 'Inactive'}</SelectItem>
             <SelectItem value="featured">{isRussian ? 'Избранные' : 'Featured'}</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={creatorFilter} onValueChange={(v) => setCreatorFilter(v as any)}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{isRussian ? 'Все создатели' : 'All creators'}</SelectItem>
+            <SelectItem value="admin">{isRussian ? 'Создано админом' : 'Admin-created'}</SelectItem>
+            <SelectItem value="vendor">{isRussian ? 'Создано вендором' : 'Vendor-created'}</SelectItem>
           </SelectContent>
         </Select>
 

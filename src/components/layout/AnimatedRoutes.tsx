@@ -307,6 +307,7 @@ const AdminDataImport = lazy(() => import('@/pages/admin/AdminDataImport'));
 // Unified Admin pages
 const AdminUnifiedCatalog = lazy(() => import('@/pages/admin/AdminUnifiedCatalog'));
 const AdminControlCenter = lazy(() => import('@/pages/admin/AdminControlCenter'));
+const AdminVendorContentCreator = lazy(() => import('@/pages/admin/AdminVendorContentCreator'));
 
 // AI Agents pages
 const AdminAIAgents = lazy(() => import('@/pages/admin/AdminAIAgents'));
@@ -747,6 +748,7 @@ export const AnimatedRoutes: React.FC = () => {
           {/* New unified pages */}
           <Route path="/admin/catalog" element={<AdminUnifiedCatalog />} />
           <Route path="/admin/control" element={<AdminControlCenter />} />
+          <Route path="/admin/vendor-content" element={<AdminVendorContentCreator />} />
           {/* Legacy routes - kept for backward compatibility */}
           <Route path="/admin/analytics" element={<AdminAnalytics />} />
           <Route path="/admin/providers" element={<AdminProviders />} />
