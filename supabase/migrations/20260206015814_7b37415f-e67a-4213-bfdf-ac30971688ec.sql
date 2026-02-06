@@ -1,0 +1,46 @@
+
+-- Create official UNO Transport Phuket provider
+INSERT INTO public.providers (
+  id,
+  name,
+  description_en,
+  description_ru,
+  phone,
+  email,
+  website,
+  is_verified,
+  is_active,
+  trust_score,
+  rating,
+  review_count,
+  business_category,
+  provider_type,
+  has_insurance,
+  has_guarantee,
+  created_by_uno_team,
+  address,
+  approval_status
+) VALUES (
+  'a0000000-0000-0000-0000-000000000001',
+  'UNO Transport Phuket',
+  'Official UNO Transport partner offering reliable car and motorbike rental across Phuket. All vehicles inspected, insured, and ready for delivery.',
+  'Официальный транспортный партнёр UNO. Надёжная аренда авто и байков по всему Пхукету. Все транспортные средства проверены, застрахованы и доступны с доставкой.',
+  '+66 76 123 456',
+  'transport@uno-phuket.com',
+  'https://uno-phuket.com/transport',
+  true,
+  true,
+  9.5,
+  4.8,
+  234,
+  'transport',
+  'company',
+  true,
+  true,
+  true,
+  'Phuket, Thailand',
+  'approved'
+) ON CONFLICT (id) DO UPDATE SET
+  is_active = true,
+  is_verified = true,
+  approval_status = 'approved';
