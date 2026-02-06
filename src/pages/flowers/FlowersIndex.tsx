@@ -272,20 +272,6 @@ const FlowersIndex = () => {
       )}
 
       <CrossSellSection currentVertical="flowers" className="mb-20" />
-
-      {/* Floating Cart Button */}
-      {totalItems > 0 && (
-        <div className="fixed bottom-6 left-4 right-4 z-50">
-          <Button
-            size="lg"
-            className="w-full shadow-lg"
-            onClick={() => navigate('/cart')}
-          >
-            <ShoppingCart className="w-5 h-5 mr-2" />
-            {language === 'ru' ? 'Корзина' : 'Cart'} ({totalItems})
-          </Button>
-        </div>
-      )}
     </MiniAppLayout>
   );
 };
