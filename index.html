@@ -13,7 +13,7 @@
     <meta name="description" content="myUNO - Home is where myUNO is. Your life abroad, simplified." />
     <meta name="author" content="myUNO" />
     <meta name="theme-color" content="#d4af37" />
-    <meta name="version" content="3.7.8" />
+    <meta name="version" content="3.7.9" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="myUNO" />
@@ -45,7 +45,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet" />
     
-    <!-- Non-blocking version check -->
+    <!-- Version check with forced reload on mismatch -->
     <script>
       (function() {
         // On SW controller change, reload once
@@ -58,7 +58,7 @@
           });
         }
         
-        // Simple version check — no reload loops
+        // Version check — clear caches AND reload on mismatch
         fetch('/version.json?_=' + Date.now(), { cache: 'no-store' })
           .then(function(r) { return r.json(); })
           .then(function(data) {
@@ -69,19 +69,38 @@
             localStorage.setItem('manifest_version', serverVersion);
             localStorage.setItem('app_version', serverVersion);
             
-            // Only clear caches if version changed — do NOT reload (app code handles it)
             if (storedVersion && storedVersion !== serverVersion) {
-              console.log('[myUNO] New version detected, clearing SW caches...');
-              if ('caches' in window) {
-                caches.keys().then(function(keys) {
-                  keys.forEach(function(key) { caches.delete(key); });
-                });
+              console.log('[myUNO] Version mismatch! Clearing all caches and reloading...');
+              
+              // Guard against reload loops: max 1 reload per version change
+              var reloadKey = 'uno_reloaded_for_' + serverVersion;
+              if (sessionStorage.getItem(reloadKey)) {
+                console.log('[myUNO] Already reloaded for ' + serverVersion + ', skipping');
+                return;
               }
+              sessionStorage.setItem(reloadKey, '1');
+              
+              // 1. Unregister all service workers
+              var swPromise = Promise.resolve();
               if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(function(regs) {
-                  regs.forEach(function(reg) { reg.unregister(); });
+                swPromise = navigator.serviceWorker.getRegistrations().then(function(regs) {
+                  return Promise.all(regs.map(function(reg) { return reg.unregister(); }));
                 });
               }
+              
+              // 2. Delete all caches
+              var cachePromise = Promise.resolve();
+              if ('caches' in window) {
+                cachePromise = caches.keys().then(function(keys) {
+                  return Promise.all(keys.map(function(key) { return caches.delete(key); }));
+                });
+              }
+              
+              // 3. After both complete, force reload from network
+              Promise.all([swPromise, cachePromise]).then(function() {
+                console.log('[myUNO] Caches cleared, reloading...');
+                window.location.reload();
+              });
             }
           })
           .catch(function() {
