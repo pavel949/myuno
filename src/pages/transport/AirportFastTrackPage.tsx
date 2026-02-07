@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useAirportServices, type AirportService } from '@/hooks/useAirportServices';
+import { TransferUpsellScreen } from '@/components/transport/TransferUpsellScreen';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
 import { addDays, format, parse, isAfter } from 'date-fns';
@@ -64,6 +65,7 @@ export default function AirportFastTrackPage() {
   const [selectedAddons, setSelectedAddons] = useState<Set<string>>(new Set());
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [step, setStep] = useState<'service' | 'passenger' | 'review'>('service');
+  const [showUpsell, setShowUpsell] = useState(false);
 
   // ─── Derived ───
   const selectedService = useMemo(() => {
@@ -180,9 +182,21 @@ export default function AirportFastTrackPage() {
       navigate('/auth');
       return;
     }
-    // TODO: Create booking via supabase, then navigate to transfer upsell
-    toast({ title: isRu ? 'Бронирование создано!' : 'Booking created!', description: isRu ? 'Переход к выбору трансфера' : 'Proceeding to transfer selection' });
-    navigate('/transport/airport-transfer?from=fast-track');
+    // TODO: Create booking via supabase
+    toast({ title: isRu ? 'Бронирование создано!' : 'Booking created!' });
+    if (direction === 'arrival') {
+      setShowUpsell(true);
+    } else {
+      navigate('/bookings');
+    }
+  };
+
+  const handleTransferSelect = (vehicleType: string) => {
+    navigate(`/transport/airport-transfer?from=fast-track&vehicle=${vehicleType}&date=${flightDate}&time=${flightTime}`);
+  };
+
+  const handleUpsellSkip = () => {
+    navigate('/bookings');
   };
 
   const minDate = format(addDays(new Date(), 1), 'yyyy-MM-dd');
@@ -586,6 +600,17 @@ export default function AirportFastTrackPage() {
           )}
         </div>
       </div>
+
+      {/* Transfer Upsell Overlay */}
+      {showUpsell && (
+        <TransferUpsellScreen
+          flightDate={flightDate}
+          flightTime={flightTime}
+          direction={direction}
+          onSkip={handleUpsellSkip}
+          onSelectTransfer={handleTransferSelect}
+        />
+      )}
     </AppLayout>
   );
 }
