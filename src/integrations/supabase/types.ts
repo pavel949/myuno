@@ -5443,6 +5443,114 @@ export type Database = {
         }
         Relationships: []
       }
+      lifeos_routes: {
+        Row: {
+          alternative_entity_ids: string[] | null
+          created_at: string
+          cta_target: string | null
+          cta_text_en: string
+          cta_text_ru: string
+          cta_type: string
+          emotional_state: string
+          id: string
+          is_active: boolean
+          life_situation_id: string
+          next_routes: string[] | null
+          next_routes_labels_en: string[] | null
+          next_routes_labels_ru: string[] | null
+          pain_type: string
+          reassurance_en: string
+          reassurance_ru: string
+          recognition_en: string
+          recognition_ru: string
+          recommended_entity_id: string | null
+          recommended_entity_type: string | null
+          recommended_title_en: string
+          recommended_title_ru: string
+          recommended_why_en: string
+          recommended_why_ru: string
+          risk_level: string
+          updated_at: string
+          what_matters_en: string[]
+          what_matters_ru: string[]
+        }
+        Insert: {
+          alternative_entity_ids?: string[] | null
+          created_at?: string
+          cta_target?: string | null
+          cta_text_en?: string
+          cta_text_ru?: string
+          cta_type?: string
+          emotional_state?: string
+          id?: string
+          is_active?: boolean
+          life_situation_id: string
+          next_routes?: string[] | null
+          next_routes_labels_en?: string[] | null
+          next_routes_labels_ru?: string[] | null
+          pain_type?: string
+          reassurance_en: string
+          reassurance_ru: string
+          recognition_en: string
+          recognition_ru: string
+          recommended_entity_id?: string | null
+          recommended_entity_type?: string | null
+          recommended_title_en: string
+          recommended_title_ru: string
+          recommended_why_en: string
+          recommended_why_ru: string
+          risk_level?: string
+          updated_at?: string
+          what_matters_en?: string[]
+          what_matters_ru?: string[]
+        }
+        Update: {
+          alternative_entity_ids?: string[] | null
+          created_at?: string
+          cta_target?: string | null
+          cta_text_en?: string
+          cta_text_ru?: string
+          cta_type?: string
+          emotional_state?: string
+          id?: string
+          is_active?: boolean
+          life_situation_id?: string
+          next_routes?: string[] | null
+          next_routes_labels_en?: string[] | null
+          next_routes_labels_ru?: string[] | null
+          pain_type?: string
+          reassurance_en?: string
+          reassurance_ru?: string
+          recognition_en?: string
+          recognition_ru?: string
+          recommended_entity_id?: string | null
+          recommended_entity_type?: string | null
+          recommended_title_en?: string
+          recommended_title_ru?: string
+          recommended_why_en?: string
+          recommended_why_ru?: string
+          risk_level?: string
+          updated_at?: string
+          what_matters_en?: string[]
+          what_matters_ru?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lifeos_routes_life_situation_id_fkey"
+            columns: ["life_situation_id"]
+            isOneToOne: true
+            referencedRelation: "life_situations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lifeos_routes_life_situation_id_fkey"
+            columns: ["life_situation_id"]
+            isOneToOne: true
+            referencedRelation: "lifeos_health_view"
+            referencedColumns: ["situation_id"]
+          },
+        ]
+      }
       listing_applications: {
         Row: {
           address: string | null
