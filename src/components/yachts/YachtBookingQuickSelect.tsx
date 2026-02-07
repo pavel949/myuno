@@ -10,6 +10,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart, CartItem } from '@/contexts/CartContext';
 import { Yacht } from '@/hooks/useYachts';
 import { cn } from '@/lib/utils';
+import { getCurrencySymbol } from '@/lib/config/currencies';
 
 interface YachtBookingQuickSelectProps {
   yacht: Yacht;
@@ -32,16 +33,18 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
   const today = new Date();
   const tomorrow = addDays(today, 1);
 
+  const defaultHalfDayTimes = ['09:00', '14:00'];
+  const defaultFullDayTimes = ['08:00', '09:00', '10:00'];
   const availableTimes = charterType === 'half_day' 
-    ? ['09:00', '14:00']
-    : ['08:00', '09:00', '10:00'];
+    ? (yacht.departure_times || defaultHalfDayTimes)
+    : (yacht.departure_times || defaultFullDayTimes);
 
   const basePrice = charterType === 'half_day'
     ? (yacht.price_half_day || 0)
     : (yacht.price_full_day || 0);
   
   const totalPrice = basePrice;
-  const currencySymbol = yacht.currency === 'THB' ? '฿' : '$';
+  const currencySymbol = getCurrencySymbol(yacht.currency || 'THB');
 
   const yachtName = language === 'ru' ? yacht.name_ru : yacht.name_en;
 

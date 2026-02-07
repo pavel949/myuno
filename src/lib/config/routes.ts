@@ -69,6 +69,11 @@ export const APP_ROUTES = {
   FAVORITES: '/favorites',
   WALLET: '/wallet',
   
+  // Yachts
+  YACHTS: '/yachts',
+  YACHT_DETAIL: (id: string) => `/yachts/${id}`,
+  YACHT_BOOKING: (id: string) => `/yachts/${id}/booking`,
+
   // Cart
   CART: '/cart',
 } as const;
@@ -123,6 +128,8 @@ export function isValidRoute(path: string): boolean {
     /^\/property\/[^/]+$/,
     /^\/market\/category\/[^/]+$/,
     /^\/market\/product\/[^/]+$/,
+    /^\/yachts\/[^/]+$/,
+    /^\/yachts\/[^/]+\/booking$/,
   ];
   
   return dynamicPatterns.some(pattern => pattern.test(path));

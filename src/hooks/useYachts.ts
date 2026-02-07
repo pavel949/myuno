@@ -13,6 +13,8 @@ export interface Yacht {
   capacity: number;
   price_half_day: number | null;
   price_full_day: number | null;
+  price_sunset: number | null;
+  price_overnight: number | null;
   currency: string;
   location_name: string | null;
   location_ru: string | null;
@@ -38,6 +40,9 @@ export interface Yacht {
   provider_id?: string | null;
   approval_status?: string | null;
   is_active?: boolean;
+  addons?: unknown;
+  charter_options?: unknown;
+  departure_times?: string[] | null;
 }
 
 export function useYachts(yachtType?: string) {
