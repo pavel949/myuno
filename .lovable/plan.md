@@ -1,106 +1,79 @@
 
 
-## Naming Normalization Audit: Yacht Vertical
+# Airbnb-style Address Autocomplete for Airport Transfer
 
-### Industry Standard Analysis
+## Problem
+The current `AddressAutocomplete` only searches a small list of local property projects and 8 hardcoded areas. Users can't find their specific hotel, villa, or address -- making the transfer booking incomplete.
 
-Global charter platforms use a consistent pattern:
+## Solution
+Replace with a Mapbox Geocoding-powered autocomplete (like Airbnb/Grab), proxied through a backend function to keep the API token secure.
 
-| Platform | Primary Label (EN) | Navigation |
-|----------|-------------------|------------|
-| Sailo | Boat Rentals | "Rent a Boat" |
-| GetMyBoat | Boat Rentals | "Find a Boat" |
-| Click&Boat | Boat Rental | "Rent a Boat" |
-| Boatsetter | Boat Rentals | "Rent a Boat" |
+## Architecture
 
-Common pattern: **"Boat Charters"** or **"Boat Rentals"** -- never "Yachts & Boats" (asset-listing language, not intent language).
+```text
+User types "Hilton Pat..."
+       |
+       v
+AddressAutocomplete (debounced 300ms)
+       |
+       v
+Edge Function: geocode-address
+  - Calls Mapbox Geocoding API
+  - Scoped to Phuket (proximity + bbox)
+  - Returns top 5 results
+       |
+       v
+Dropdown: Mapbox results + DB projects + popular areas
+```
 
-### Current myUNO Inconsistencies Found
+## Implementation Steps
 
-| Location | Current EN | Current RU | Issue |
-|----------|-----------|-----------|-------|
-| YachtsIndex.tsx (page title) | "Yachts & Boats" | "Яхты и лодки" | Non-standard |
-| categories table (DB) | "Yachts & Boats" | "Яхты и лодки" | Non-standard |
-| ThematicSection.tsx | "Yachts & Boats" | "Яхты и катера" | Inconsistent RU |
-| VipConcierge.tsx | "Yachts & Boats" | "Яхты и катера" | Mixed variant |
-| RefundPolicyPage.tsx | "Yachts & Boats" | "Яхты и катера" | Mixed variant |
-| TermsPage.tsx | "Yachts & boats" | "Яхты и катера" | Lowercase "boats" |
-| DisputeResolutionPage.tsx | "Yachts & boats" | "Яхты и катера" | Lowercase |
-| verticals.ts (SoT) | "Yachts" | "Яхты" | Short form only |
-| entityTypes.ts | "Yachts" | "Яхты" | Short form only |
-| ContentPreviewRibbon.tsx | "Yachts" | "Яхты" | Short form |
-| AdminVerticalsBlock.tsx | "Yachts" | "Яхты" | Short form |
-| DashboardQuickServices.tsx | "Yachts" | "Яхты" | Short form |
-| leadVerticalConfig.ts | "Yachts" | "Яхты" | Short form |
-| BusinessCardScanner.tsx | "Yachts & Boats" | "Яхты и лодки" | Non-standard |
-| scan-business-card (edge fn) | "Yachts & Boats" | "Яхты и лодки" | Non-standard |
-| searchData.ts | "Yachts" | "Яхты" | Short form |
-| ContentCreatorMenu.tsx | "Yacht" | "Яхта" | Singular |
-| useTaxonomyDefinitions.ts | "Yachts" | "Яхты" | Short form |
+### 1. Create Edge Function `geocode-address`
+- Accepts `query` param and optional `language` (en/ru)
+- Calls `https://api.mapbox.com/geocoding/v5/mapbox.places/{query}.json` with:
+  - `proximity=98.3923,7.8804` (Phuket center)
+  - `bbox=98.2,7.7,98.5,8.2` (Phuket bounds)
+  - `types=poi,address,place` (hotels, addresses, areas)
+  - `limit=5`
+  - `language` param
+- Returns simplified results: `{ id, name, address, lat, lng, type }`
+- Rate-limited using existing `_shared/rate-limit.ts`
 
-**3 different RU variants**: "Яхты и лодки", "Яхты и катера", "Яхты"
+### 2. Rebuild `AddressAutocomplete` Component
+- **Debounced input** (300ms) triggers the edge function when query >= 2 chars
+- **Three result sections** in dropdown:
+  1. Mapbox geocoding results (hotels, addresses, POIs)
+  2. Property projects from DB (existing `usePropertyProjects`)
+  3. Popular areas (static fallback, shown when empty)
+- **"Use my location" button** -- reverse geocodes via the same edge function
+- **Manual typing allowed** -- user can just type a free-text address and submit without selecting a suggestion
+- Icons: MapPin for geocoded places, Building2 for DB projects, Navigation for "my location"
 
-### Proposed Canonical Naming
+### 3. Update AirportTransferBooking
+- Swap old `AddressAutocomplete` import for the rebuilt version (same file, no import changes needed)
+- The `destinationAddress` state continues to work as-is
 
-Based on industry standards and the Phuket charter market context:
+## Technical Details
 
-| Context | EN | RU |
-|---------|----|----|
-| **Full label** (page title, catalog) | Boat Charters | Аренда яхт и катеров |
-| **Short label** (nav, icons, admin grids) | Charters | Чартер |
-| **Vertical SoT** (verticals.ts) | Boat Charters | Чартер |
-| **CTA / action** | Charter a Boat | Арендовать яхту |
-| **Search category label** | Charters | Чартер |
+### Edge Function Response Shape
+```typescript
+interface GeocodeSuggestion {
+  id: string;
+  name: string;      // "Hilton Phuket Arcadia"
+  address: string;   // "333 Patak Rd, Karon, Phuket"
+  lat: number;
+  lng: number;
+  type: 'poi' | 'address' | 'place';
+}
+```
 
-### Implementation Plan
+### Debounce Strategy
+- < 2 characters: show popular areas + DB projects only (no API call)
+- >= 2 characters: fire geocoding request after 300ms idle
+- Loading spinner in input while fetching
 
-**Step 1: Update Sources of Truth**
-
-- `src/lib/verticals.ts` -- change `labelEn: 'Yachts'` to `'Boat Charters'`, `labelRu: 'Яхты'` to `'Чартер'`
-- `src/lib/config/entityTypes.ts` -- update `labelEn`, `labelRu`, `pluralEn`, `pluralRu`
-
-**Step 2: Update Page Title and Catalog**
-
-- `src/pages/yachts/YachtsIndex.tsx` -- title from "Yachts & Boats" to "Boat Charters" / "Аренда яхт и катеров"
-- `src/hooks/useSuperAppCatalog.ts` -- verify catalog section name
-- `src/hooks/useTaxonomyDefinitions.ts` -- VERTICAL_CONFIG yachts label
-
-**Step 3: Update Navigation and Discovery**
-
-- `src/components/home/ContentPreviewRibbon.tsx` -- label
-- `src/components/account/DashboardQuickServices.tsx` -- label
-- `src/components/discover/ThematicSection.tsx` -- category name
-- `src/lib/searchData.ts` -- category label
-- `src/lib/leadVerticalConfig.ts` -- nameEn/nameRu, CTA text
-
-**Step 4: Update Admin and Vendor Labels**
-
-- `src/components/admin/dashboard/AdminVerticalsBlock.tsx`
-- `src/components/admin/dashboard/AdminAllVerticalsGrid.tsx`
-- `src/components/admin/ContentCreatorMenu.tsx`
-- `src/components/admin/data-import/BusinessCardScanner.tsx`
-
-**Step 5: Update Info/Legal Pages**
-
-- `src/pages/info/TermsPage.tsx`
-- `src/pages/info/RefundPolicyPage.tsx`
-- `src/pages/info/DisputeResolutionPage.tsx`
-- `src/pages/VipConcierge.tsx`
-
-**Step 6: Update Database**
-
-- SQL migration to update `categories` table: `name_en = 'Boat Charters'`, `name_ru = 'Аренда яхт и катеров'` where `slug = 'yachts'`
-
-**Step 7: Update Edge Functions**
-
-- `supabase/functions/scan-business-card/index.ts` -- category label
-- `supabase/functions/ai-smart-search/index.ts` -- category description
-
-### Technical Notes
-
-- URL routes (`/yachts`, `/yachts/:id`) remain unchanged -- they are slugs, not labels
-- Database table name `yachts` remains unchanged -- it is an internal identifier
-- Internal keys (`yacht`, `yachts`, `yacht_type`) remain unchanged -- they are system identifiers
-- Only user-facing labels and display text change
-- Total files affected: ~20 source files + 1 DB migration + 2 edge functions
+### Mobile UX
+- Dropdown uses `max-h-[60vh]` with `overflow-y-auto touch-pan-y`
+- Large touch targets (48px rows)
+- Keyboard-friendly: dropdown closes on blur outside
 
