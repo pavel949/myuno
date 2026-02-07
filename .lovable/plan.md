@@ -1,141 +1,76 @@
 
 
-# Full UX Audit: Vacation Rentals -- Mobile User Journey (Search to Booking)
+# Fix Data Alignment and Remove Emojis from Property Search
 
-## Executive Summary
+## Problem Summary
 
-I walked through the entire flow on a 390x844 mobile viewport, acting as a real user. The system has a solid foundation but **6 critical UX issues** break or confuse the booking funnel. The most important: **the mobile "Check Dates" button is a dead end** -- it navigates to the inquiry page without dates, which immediately redirects back.
+Three issues discovered after comparing search/filter UI with actual database data:
 
----
+1. **Location Mismatch**: The search bar has 10 hardcoded locations, but the database (`lookup_values` district type) has 22 districts. Keys also don't match (e.g., `bangtao` in search vs `bang-tao` in DB), causing location filters to silently fail.
 
-## Step-by-Step Journey & Findings
+2. **Amenity/Highlight Alignment**: Quick filters and the filter drawer both read from `lookup_values`, which is correct. However, the search bar locations are completely disconnected from the same source.
 
-### Step 1: Landing on /property (Search Page)
-
-**What works:**
-- Sticky header with title, Map button, and filter drawer icon
-- Airbnb-style search bar (location, dates, guests)
-- Category ribbon (Rent/Buy toggle + property type pills)
-- Projects carousel visible
-- Quick filter chips (beachfront, instant booking, sea view, etc.) -- scrollable
-- Sort selector + results count
-- Infinite scroll loads 27 properties correctly
-- Property cards show image, district, title, specs, price
-
-**Issues found:**
-- [P2] The sticky header is very tall (~180px): Back button + title + search bar + category ribbon. On a 844px viewport, ~21% is eaten by chrome before content appears.
-- [P3] Quick filter chips are not visually distinguishable from category chips -- two horizontally scrolling rows look similar.
+3. **Emoji Usage**: Multiple places render raw emojis instead of Lucide icons -- the `AirbnbSearchBar` location list, `usePropertyQuickFilters` fallback icons, `usePropertyFilterOptions` bedroom/listing type options, and `useDynamicFilterOptions` static options all contain emoji strings that bypass the icon conversion system.
 
 ---
 
-### Step 2: Clicking a Property Card (Detail Page)
+## What Changes
 
-**What works:**
-- Image gallery with photo counter badge and lightbox
-- Title, rating, verified badge, district
-- Airbnb-style highlights (property type, view, instant booking, building info)
-- Specs grid (beds, baths, area, guests)
-- Description, amenities, price breakdown, included services, utilities, check-in details, house rules, cancellation policy, location section
-- Share and Favorite buttons in sticky header
+### 1. AirbnbSearchBar -- Dynamic Locations from DB
 
-**Issues found:**
-- [P1] **Image gallery**: For properties with fewer than 5 images (most DB records have only 1 cover_image), the gallery renders a single full-width image with no visual cue that you can open a lightbox. Only a tiny "1 photos" badge in the corner.
-- [P2] The detail page is extremely long on mobile (amenities, utilities, house rules, check-in details, etc.) before reaching any CTA. Users must scroll significantly.
+Replace the hardcoded `locations` array with data from `lookup_values` (district type), loaded via the existing `usePropertyQuickFilters` hook which already fetches districts.
 
----
+- Import `usePropertyQuickFilters` into `AirbnbSearchBar.tsx`
+- Remove the hardcoded `locations` constant (lines 26-37)
+- Build the location list from `districts` returned by the hook, prepending an "All Phuket" option
+- District `valueKey` values will match what owners set in the property form (e.g., `bang-tao`, `nai-harn`), ensuring filter-to-data alignment
 
-### Step 3: Mobile Bottom Bar (The Critical CTA)
+### 2. Remove All Emoji Icons
 
-**What works:**
-- Fixed bottom bar shows price per night, instant booking badge, Phone icon, Message icon, and main CTA button.
-- CTA dynamically changes label: "Book Now" for instant booking, "Check Dates" otherwise.
+Replace emoji strings with `undefined` or Lucide icon names across these files:
 
-**CRITICAL ISSUE [P0]:**
-- **The "Check Dates" / "Проверить даты" button navigates to `/property/:id/inquiry` WITHOUT date parameters** (line 648: `navigate(\`/property/${id}/inquiry\`)`).
-- The inquiry page (PropertyInquiry.tsx, line 67-72) checks for `checkIn` and `checkOut` params. If missing, it shows an error toast and **redirects back** to the detail page.
-- **Result: The mobile booking button is a dead end. Clicking it flashes back to the same page with an error toast.** The user has no way to proceed on mobile.
+**AirbnbSearchBar.tsx:**
+- Location items: remove emoji icons, use a `MapPin` Lucide icon for all locations instead of per-location emojis
+- The "All Phuket" option: use `Globe` icon
 
-**Root cause:** On desktop, the `PropertyBookingCard` sidebar has a date picker that collects dates and passes them as URL params to the inquiry page. On mobile, that sidebar is `hidden lg:block` (line 592), so the date picker is completely invisible. The bottom bar button has no date selection mechanism.
+**usePropertyFilterOptions.ts:**
+- Bedroom options (lines 85-91): replace `'🛏️'`, `'1️⃣'`, etc. with `undefined` (the `Bed` Lucide icon is already contextually clear)
+- Listing type options (lines 93-96): replace `'🔑'` and `'🏷️'` with `undefined`
 
----
+**usePropertyQuickFilters.ts:**
+- Default fallback icon (line 116): change `'✨'` to `undefined`
+- District fallback icon (line 145): change `'📍'` to `undefined`
 
-### Step 4: Inquiry Page (if accessed with dates)
+**useDynamicFilterOptions.ts:**
+- Transport passenger options (lines 107-111): remove emoji icons
+- Yacht capacity/duration options (lines 258-270): remove emoji icons
+- Flower size/style/color/delivery options (lines 323-355): remove emoji icons
+- Category ribbon "All" options: remove `'🌟'` emoji
 
-**What works (when accessed directly with date params):**
-- Clean layout with check-in/check-out summary, nights count, guests
-- Contact form with auto-fill from profile
-- Auth gate (sign in required)
-- Deposit payment options appear when form is valid
-- Booking terms card with cancellation policy, house rules
-- Validation for min-stay and max-guests
+**PropertyIndex.tsx:**
+- Property type pills "All" item (line 77): remove `'🏠'` emoji
 
-**Issues found:**
-- [P1] **No way to change dates on the inquiry page** -- there's only a "Change dates" link that sends users back to the detail page, where they still can't select dates on mobile.
-- [P2] No step progress indicator -- the user doesn't know where they are in the booking process.
+### 3. Filtering Logic Verification
+
+The current filtering in `PropertyIndex.tsx` (lines 117-119) uses `includes()` for location matching against `searchParams.locations`. After making locations dynamic from the DB, the `valueKey` format (`bang-tao`) will match the property `district` field (`bang-tao`) exactly, fixing the current silent mismatch.
 
 ---
 
-## Summary of All Issues (Priority Order)
+## Files to Modify
 
-| # | Priority | Issue | Impact |
-|---|----------|-------|--------|
-| 1 | P0 | Mobile "Check Dates" button is a dead end (no date picker, redirects back) | **Booking is impossible on mobile** |
-| 2 | P1 | No mobile date picker anywhere in the detail-to-booking flow | Users cannot select dates on mobile |
-| 3 | P1 | Most properties have only 1 image -- gallery looks flat, no multi-photo UX | Low engagement, low trust |
-| 4 | P2 | No booking step indicator (no progress stepper) | User disorientation |
-| 5 | P2 | Bottom bar Phone button has no onClick handler | Dead button |
-| 6 | P2 | Sticky header takes ~21% of mobile viewport | Less content visible |
-| 7 | P3 | Quick filters and category ribbon look visually similar | Minor confusion |
+| File | Changes |
+|------|---------|
+| `src/components/property/AirbnbSearchBar.tsx` | Replace hardcoded locations with DB-driven districts; remove emojis from location rendering |
+| `src/hooks/usePropertyFilterOptions.ts` | Remove emojis from bedroom and listing type static options |
+| `src/hooks/usePropertyQuickFilters.ts` | Remove emoji fallbacks for icons |
+| `src/hooks/useDynamicFilterOptions.ts` | Remove emojis from all static filter options (transport, yacht, flower, category ribbons) |
+| `src/pages/property/PropertyIndex.tsx` | Remove emoji from "All" property type pill |
 
 ---
 
-## Implementation Plan
+## Technical Notes
 
-### Fix 1 (P0/P1): Add Mobile Date Picker to Detail Page
-
-The core fix. On mobile, when the user taps "Check Dates", instead of navigating to the inquiry page, open an **inline date range picker sheet/drawer** directly on the detail page. Once dates are selected, the CTA changes to "Reserve" / "Book Now" and navigates to `/property/:id/inquiry?checkIn=...&checkOut=...&guests=...`.
-
-**Changes:**
-- **PropertyDetail.tsx**: Add state for `dateRange` and `guests`. Import `Calendar` component + `Sheet` (Vaul drawer).
-- When CTA is tapped without dates: open a bottom sheet with a date range picker + guest selector.
-- When dates are selected: update CTA text to show price calculation and "Reserve" action.
-- CTA with dates: navigate to inquiry page with full params.
-- Remove the `hidden lg:block` restriction from a **simplified** mobile booking card, or integrate date picker directly into the bottom bar flow.
-
-### Fix 2 (P2): Add Booking Step Progress
-
-**Changes:**
-- Import existing `BookingStepProgress` component into `PropertyInquiry.tsx`
-- Add 3 steps: Dates -> Contact -> Payment
-- Show step 2 (Contact) when on the inquiry page
-
-### Fix 3 (P2): Wire up the Phone Button
-
-**Changes:**
-- Add `onClick` to the Phone button in the bottom bar: `window.open(\`tel:${rentalTerms?.manager_phone}\`)` or open a contact sheet if no phone available.
-
-### Fix 4 (P2): Compact the Sticky Header on Scroll
-
-**Changes:**
-- Collapse the search bar and category ribbon on scroll (e.g., hide search bar after 100px scroll, show a compact single-line version).
-
-### Fix 5 (P3): Visual Distinction for Filter Rows
-
-**Changes:**
-- Add subtle section labels or different chip styling between category ribbon and quick filter chips.
-
----
-
-## Technical Details
-
-### Files to modify:
-1. `src/pages/property/PropertyDetail.tsx` -- Add mobile date picker sheet, wire phone button, manage date state
-2. `src/pages/property/PropertyInquiry.tsx` -- Add BookingStepProgress, handle missing dates gracefully
-3. `src/pages/property/PropertyIndex.tsx` -- Optional: compact header on scroll
-
-### New components needed:
-- None required -- reuse existing `Calendar` (react-day-picker), `Sheet` (vaul), and `BookingStepProgress`
-
-### Dependencies:
-- All already installed (vaul, react-day-picker, date-fns)
+- The `FilterChip` component already has `isEmoji()` + `getIconForEmoji()` conversion as a safety net, but the goal is to stop sending emojis at the source level
+- Removing emoji icon props (`undefined`) means `FilterChip.renderIcon()` returns `null`, showing text-only chips -- which is the clean, professional look
+- The `lookup_values` table still stores emoji strings in the `icon` column for DB-driven options; those will continue to be auto-converted by `FilterChip` via the `iconMap` system. The change here only affects hardcoded/static options in TypeScript files.
 
