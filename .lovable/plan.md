@@ -1,76 +1,153 @@
 
 
-# Fix Data Alignment and Remove Emojis from Property Search
+# Life Flow Page -- Redesign and Mapping Improvement
 
-## Problem Summary
+## Current Problems
 
-Three issues discovered after comparing search/filter UI with actual database data:
+### 1. Mapping Gaps (Critical)
 
-1. **Location Mismatch**: The search bar has 10 hardcoded locations, but the database (`lookup_values` district type) has 22 districts. Keys also don't match (e.g., `bangtao` in search vs `bang-tao` in DB), causing location filters to silently fail.
+Several life situations have missing or illogical entity type coverage:
 
-2. **Amenity/Highlight Alignment**: Quick filters and the filter drawer both read from `lookup_values`, which is correct. However, the search bar locations are completely disconnected from the same source.
+| Situation | Has Now | Missing |
+|-----------|---------|---------|
+| **Just Arrived** (arrival_first_day) | 2 restaurants | clinics/pharmacies, transport/taxi, experiences, marketplace (SIM cards, essentials) |
+| **Trip Planning** (pre_trip_planning) | property, vehicle | experiences, tours (pre-bookable activities) |
+| **Business & Work** | yacht, property, vehicle, restaurant | legal_service (company registration, tax) |
+| **Long-term Stay** | property, clinic, legal_service | restaurant, gym, salon (daily life services) |
+| **Family with Kids** | babysitter, clinic, tour, restaurant | experiences (family activities), property (family-friendly housing) |
 
-3. **Emoji Usage**: Multiple places render raw emojis instead of Lucide icons -- the `AirbnbSearchBar` location list, `usePropertyQuickFilters` fallback icons, `usePropertyFilterOptions` bedroom/listing type options, and `useDynamicFilterOptions` static options all contain emoji strings that bypass the icon conversion system.
+### 2. Page UX Issues
 
----
+- **No real content preview**: Cards show only entity type icon + title + weight bar. No photos, no ratings, no actionable info.
+- **"Match %" bar is confusing**: End users don't know what "75%" means. This is an internal admin metric (weight) exposed raw.
+- **No category-level quick navigation**: User must scroll through all blocks to find what they need.
+- **All cards look identical**: No visual difference between "Book a villa" and "Find a restaurant".
+- **Missing entity images**: The resolver returns `entity_id` but the page never fetches the actual entity data (photo, rating, price range).
 
-## What Changes
+### 3. Data Architecture Issue
 
-### 1. AirbnbSearchBar -- Dynamic Locations from DB
-
-Replace the hardcoded `locations` array with data from `lookup_values` (district type), loaded via the existing `usePropertyQuickFilters` hook which already fetches districts.
-
-- Import `usePropertyQuickFilters` into `AirbnbSearchBar.tsx`
-- Remove the hardcoded `locations` constant (lines 26-37)
-- Build the location list from `districts` returned by the hook, prepending an "All Phuket" option
-- District `valueKey` values will match what owners set in the property form (e.g., `bang-tao`, `nai-harn`), ensuring filter-to-data alignment
-
-### 2. Remove All Emoji Icons
-
-Replace emoji strings with `undefined` or Lucide icon names across these files:
-
-**AirbnbSearchBar.tsx:**
-- Location items: remove emoji icons, use a `MapPin` Lucide icon for all locations instead of per-location emojis
-- The "All Phuket" option: use `Globe` icon
-
-**usePropertyFilterOptions.ts:**
-- Bedroom options (lines 85-91): replace `'🛏️'`, `'1️⃣'`, etc. with `undefined` (the `Bed` Lucide icon is already contextually clear)
-- Listing type options (lines 93-96): replace `'🔑'` and `'🏷️'` with `undefined`
-
-**usePropertyQuickFilters.ts:**
-- Default fallback icon (line 116): change `'✨'` to `undefined`
-- District fallback icon (line 145): change `'📍'` to `undefined`
-
-**useDynamicFilterOptions.ts:**
-- Transport passenger options (lines 107-111): remove emoji icons
-- Yacht capacity/duration options (lines 258-270): remove emoji icons
-- Flower size/style/color/delivery options (lines 323-355): remove emoji icons
-- Category ribbon "All" options: remove `'🌟'` emoji
-
-**PropertyIndex.tsx:**
-- Property type pills "All" item (line 77): remove `'🏠'` emoji
-
-### 3. Filtering Logic Verification
-
-The current filtering in `PropertyIndex.tsx` (lines 117-119) uses `includes()` for location matching against `searchParams.locations`. After making locations dynamic from the DB, the `valueKey` format (`bang-tao`) will match the property `district` field (`bang-tao`) exactly, fixing the current silent mismatch.
+The `resolve_life_os_context` RPC returns generic metadata (title, price, trust_level) but NOT entity-specific rich data (cover photo, rating, address). This means the page can only show minimal cards.
 
 ---
 
-## Files to Modify
+## Proposed Solution
 
-| File | Changes |
-|------|---------|
-| `src/components/property/AirbnbSearchBar.tsx` | Replace hardcoded locations with DB-driven districts; remove emojis from location rendering |
-| `src/hooks/usePropertyFilterOptions.ts` | Remove emojis from bedroom and listing type static options |
-| `src/hooks/usePropertyQuickFilters.ts` | Remove emoji fallbacks for icons |
-| `src/hooks/useDynamicFilterOptions.ts` | Remove emojis from all static filter options (transport, yacht, flower, category ribbons) |
-| `src/pages/property/PropertyIndex.tsx` | Remove emoji from "All" property type pill |
+### Phase 1: Fix Mappings (Database)
+
+Add missing mappings to `catalog_life_map` for critical gaps:
+
+**arrival_first_day** -- Add:
+- 3 clinics (pharmacies/medical) -- weight 80-85, primary
+- 3 vehicles (taxi/transport) -- weight 75-80, primary  
+- 2 experiences (orientation tours) -- weight 55-60, secondary
+
+**pre_trip_planning** -- Add:
+- 2 tours (pre-bookable excursions) -- weight 55-60, secondary
+- 2 experiences -- weight 50-55, secondary
+
+**business_work** -- Add:
+- 2 legal_services (company, tax) -- weight 70-75, primary
+
+**long_term_living** -- Add:
+- 2 restaurants -- weight 45-50, secondary
+
+**family_with_children** -- Add:
+- 2 properties (family-friendly) -- weight 70-75, primary
+
+### Phase 2: Redesign the LifeFlowPage
+
+Replace the current generic card grid with a structured, actionable layout:
+
+```text
++--------------------------------------------------+
+|  [<] Just Arrived           [Sparkles] 12 items   |
+|  First day essentials for Phuket                  |
++--------------------------------------------------+
+|                                                    |
+|  [Quick Nav Chips]                                |
+|  [ Medical ] [ Transport ] [ Food ] [ Tours ]     |
+|                                                    |
+|  --- ESSENTIALS (primary blocks) ---              |
+|                                                    |
+|  Medical & Pharmacy                    View all > |
+|  +-------------+  +-------------+                 |
+|  | [photo]     |  | [photo]     |                 |
+|  | Clinic Name |  | Clinic Name |                 |
+|  | Verified    |  | Rating 4.8  |                 |
+|  | Open 24h    |  | 2km away    |                 |
+|  +-------------+  +-------------+                 |
+|                                                    |
+|  Transport & Taxi                      View all > |
+|  +--------------------------------------------+  |
+|  | [horizontal scroll cards with photos]       |  |
+|  +--------------------------------------------+  |
+|                                                    |
+|  --- ALSO USEFUL ---                              |
+|                                                    |
+|  Restaurants                           View all > |
+|  [compact list cards]                             |
+|                                                    |
+|  +--------------------------------------------+  |
+|  | [Compass] Explore Full Catalog         [>]  |  |
+|  +--------------------------------------------+  |
++--------------------------------------------------+
+```
+
+Key changes:
+- **Quick nav chips at top**: Horizontal scroll of entity type chips for instant jump-to-section
+- **Entity photos**: Fetch actual entity cover images via a lightweight join or separate query
+- **Replace "Match %" with trust badges**: Show "Verified", "Featured", "Top Rated" instead of raw weight numbers
+- **Horizontal scroll for secondary blocks**: Save vertical space
+- **"Open now" / "24h" indicators**: For clinics and restaurants, show operational status
+
+### Phase 3: Enrich Data Layer
+
+Update the `resolve_life_os_context` RPC or add a client-side enrichment step:
+- After receiving entity IDs from the resolver, batch-fetch cover images and ratings from entity tables (properties, restaurants, clinics, etc.)
+- This avoids changing the RPC but provides rich card content
 
 ---
 
-## Technical Notes
+## Technical Details
 
-- The `FilterChip` component already has `isEmoji()` + `getIconForEmoji()` conversion as a safety net, but the goal is to stop sending emojis at the source level
-- Removing emoji icon props (`undefined`) means `FilterChip.renderIcon()` returns `null`, showing text-only chips -- which is the clean, professional look
-- The `lookup_values` table still stores emoji strings in the `icon` column for DB-driven options; those will continue to be auto-converted by `FilterChip` via the `iconMap` system. The change here only affects hardcoded/static options in TypeScript files.
+### Files to Create/Modify
 
+| File | Action |
+|------|--------|
+| **Database migration** | INSERT new mappings into `catalog_life_map` for 5 situations |
+| `src/pages/LifeFlowPage.tsx` | Major rewrite: add quick nav chips, photo-enriched cards, replace weight bars with badges |
+| `src/hooks/useLifeOS.ts` | Add `useEnrichCatalogItems()` hook to batch-fetch entity photos/ratings |
+| `src/components/life-flow/LifeFlowCategoryChips.tsx` | New: horizontal scroll chips for quick category navigation |
+| `src/components/life-flow/LifeFlowEntityCard.tsx` | New: rich card component with photo, title, badge, and CTA |
+| `src/components/life-flow/GuidedFallback.tsx` | Minor: no changes needed |
+
+### Enrichment Hook Pattern
+
+```text
+useEnrichCatalogItems(catalogItems)
+  -> Group by entity_type
+  -> For each type, query the corresponding table by IDs
+  -> Return merged data: { ...catalogItem, coverImage, rating, isOpen }
+```
+
+This keeps the resolver lightweight while providing rich UI data.
+
+### Badge Logic (replacing weight %)
+
+```text
+weight >= 85  -> "Top Pick" badge (gold star)
+weight >= 70  -> "Recommended" badge (primary color)
+trust_level = "verified" -> "Verified" shield icon
+otherwise -> no badge, clean card
+```
+
+### Database: New Mappings
+
+Approximately 15 new rows in `catalog_life_map`, selected from real active entities in the database:
+- 3 clinics for `arrival_first_day` (from 20 active clinics)
+- 3 vehicles for `arrival_first_day` (from 64 active vehicles)
+- 2 experiences for `arrival_first_day` (from 71 active)
+- 2 tours for `pre_trip_planning` (from 29 active)
+- 2 legal_services for `business_work` (from 14 active)
+- 2 restaurants for `long_term_living` (from 25 active)
+- 2 properties for `family_with_children` (from 28 active)
