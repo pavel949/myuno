@@ -17,8 +17,15 @@ import { useProfile } from '@/hooks/useProfile';
 import { usePropertyWithRentalTerms } from '@/hooks/useProperties';
 import { DepositPaymentOptions } from '@/components/property/DepositPaymentOptions';
 import { BookingTermsCard } from '@/components/property/BookingTermsCard';
+import { BookingStepProgress, type BookingStep } from '@/components/booking/BookingStepProgress';
 import { differenceInDays, format, parseISO } from 'date-fns';
 import { ru } from 'date-fns/locale';
+
+const propertyBookingSteps: BookingStep[] = [
+  { id: 'dates', labelEn: 'Dates', labelRu: 'Даты' },
+  { id: 'contact', labelEn: 'Contact', labelRu: 'Контакты' },
+  { id: 'payment', labelEn: 'Payment', labelRu: 'Оплата' },
+];
 
 export default function PropertyInquiry() {
   const { id } = useParams();
@@ -126,17 +133,22 @@ export default function PropertyInquiry() {
     <AppLayout showBottomNav={false}>
       <div className="pb-8">
         {/* Header */}
-        <div className="sticky top-0 z-20 flex items-center gap-4 p-4 bg-background/95 backdrop-blur-md border-b">
-          <BackButton fallbackPath={`/property/${id}`} variant="ghost" />
-          <div>
-            <h1 className="text-lg font-display font-bold">
-              {isRu ? 'Бронирование' : 'Book Property'}
-            </h1>
-            {property && (
-              <p className="text-sm text-muted-foreground truncate max-w-[250px]">
-                {propertyTitle}
-              </p>
-            )}
+        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md border-b">
+          <div className="flex items-center gap-4 p-4">
+            <BackButton fallbackPath={`/property/${id}`} variant="ghost" />
+            <div>
+              <h1 className="text-lg font-display font-bold">
+                {isRu ? 'Бронирование' : 'Book Property'}
+              </h1>
+              {property && (
+                <p className="text-sm text-muted-foreground truncate max-w-[250px]">
+                  {propertyTitle}
+                </p>
+              )}
+            </div>
+          </div>
+          <div className="px-4 pb-2">
+            <BookingStepProgress steps={propertyBookingSteps} currentStep={1} />
           </div>
         </div>
 
