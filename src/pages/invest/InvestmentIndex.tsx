@@ -54,7 +54,7 @@ export default function InvestmentIndex() {
   const businessProjects = allProjects?.filter(p => !p.project_type.startsWith('real_estate')) || [];
 
   const CategoryChips = () => (
-    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide touch-pan-y">
       <Button
         variant={selectedCategory === null ? 'default' : 'outline'}
         size="sm"

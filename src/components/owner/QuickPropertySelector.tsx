@@ -23,7 +23,7 @@ export function QuickPropertySelector({
 
   if (isLoading) {
     return (
-      <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
+      <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide touch-pan-y">
         {[1, 2, 3].map((i) => (
           <Skeleton key={i} className="w-28 h-20 rounded-xl shrink-0" />
         ))}
@@ -41,7 +41,7 @@ export function QuickPropertySelector({
   }
 
   return (
-    <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
+    <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide touch-pan-y">
       {properties.map((property) => {
         const isSelected = selectedId === property.id;
         const title = isRu && property.title_ru ? property.title_ru : property.title;

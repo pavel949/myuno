@@ -102,7 +102,7 @@ export function ActiveStaysWidget() {
         </h3>
       </div>
       
-      <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 touch-pan-x snap-x snap-mandatory">
+      <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 touch-pan-y snap-x snap-mandatory">
         {activeStays.map((stay) => (
           <Card 
             key={stay.bookingId}

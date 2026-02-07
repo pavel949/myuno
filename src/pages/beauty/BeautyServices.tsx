@@ -76,7 +76,7 @@ export default function BeautyServices() {
           <Input placeholder={language === 'ru' ? 'Поиск услуг...' : 'Search services...'} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10 h-12 bg-card border-border/50" />
         </div>
 
-        <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+        <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide touch-pan-y">
           {categories.map((cat) => (
             <FilterChip key={cat.id} label={language === 'ru' ? cat.labelRu : cat.labelEn} isActive={selectedCategory === cat.id} onToggle={() => setSelectedCategory(cat.id)} />
           ))}

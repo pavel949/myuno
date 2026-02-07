@@ -73,7 +73,7 @@ export function StaffPicker({
         {isRu ? 'Выберите мастера' : 'Choose Your Specialist'}
       </h3>
       
-      <div className="flex gap-3 pb-2 overflow-x-auto scrollbar-hide touch-pan-x snap-x snap-mandatory -mx-4 px-4">
+      <div className="flex gap-3 pb-2 overflow-x-auto scrollbar-hide touch-pan-y snap-x snap-mandatory -mx-4 px-4">
         {/* "Any available" option */}
         {allowAny && (
           <Card

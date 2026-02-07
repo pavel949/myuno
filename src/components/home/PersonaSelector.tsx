@@ -107,7 +107,7 @@ export const PersonaSelector = memo(function PersonaSelector() {
           <Sparkles className="w-4 h-4 text-primary" />
           <Skeleton className="h-4 w-32" />
         </div>
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide touch-pan-x -mx-4 px-4 pb-1">
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide touch-pan-y -mx-4 px-4 pb-1">
           {[1, 2, 3].map((i) => (
             <Skeleton key={i} className="h-12 w-32 rounded-xl flex-shrink-0" />
           ))}
@@ -133,7 +133,7 @@ export const PersonaSelector = memo(function PersonaSelector() {
       
       {/* Persona chips */}
       <div 
-        className="flex gap-2 overflow-x-auto scrollbar-hide touch-pan-x -mx-4 px-4 pb-1"
+        className="flex gap-2 overflow-x-auto scrollbar-hide touch-pan-y -mx-4 px-4 pb-1"
         style={{ scrollSnapType: 'x mandatory' }}
       >
         {allPersonas.map((persona) => (

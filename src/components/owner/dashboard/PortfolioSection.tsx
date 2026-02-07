@@ -101,7 +101,7 @@ export function PortfolioSection() {
           </div>
         </div>
       ) : (
-        <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 touch-pan-x snap-x snap-mandatory">
+        <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 touch-pan-y snap-x snap-mandatory">
           {properties.slice(0, 5).map((property) => (
             <div key={property.id} className="w-[85vw] max-w-[280px] flex-shrink-0 snap-start touch-manipulation">
               <PropertyCard property={property} variant="hero" mode="owner" />

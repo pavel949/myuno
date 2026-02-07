@@ -71,7 +71,7 @@ export function PropertyTypeSelector({
   const isOtherSelected = !!selectedOtherType;
 
   return (
-    <div className={cn('flex items-center gap-2 overflow-x-auto scrollbar-hide', className)}>
+    <div className={cn('flex items-center gap-2 overflow-x-auto scrollbar-hide touch-pan-y', className)}>
       {/* Priority type pills */}
       {priorityTypes.map((type) => {
         const iconStr = typeof type.icon === 'string' ? type.icon : undefined;

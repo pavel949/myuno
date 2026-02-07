@@ -394,7 +394,7 @@ export function QuickFilterBar({ options, value, onChange, className }: QuickFil
   const { language } = useLanguage();
 
   return (
-    <div className={cn("flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4", className)}>
+    <div className={cn("flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 touch-pan-y", className)}>
       {options.map((option) => {
         const isActive = value === option.id;
         return (
@@ -476,7 +476,7 @@ export function ActiveFilters({
   if (activeFilters.length === 0) return null;
 
   return (
-    <div className={cn("flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4", className)}>
+    <div className={cn("flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 touch-pan-y", className)}>
       {activeFilters.map((filter, idx) => (
         <button
           key={`${filter.sectionId}-${filter.optionId}-${idx}`}

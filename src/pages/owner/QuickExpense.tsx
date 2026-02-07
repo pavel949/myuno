@@ -163,7 +163,7 @@ export default function QuickExpense() {
           </Label>
           
           {/* Quick Amount Chips */}
-          <div className="flex gap-1.5 mb-3 overflow-x-auto scrollbar-hide -mx-1 px-1">
+          <div className="flex gap-1.5 mb-3 overflow-x-auto scrollbar-hide -mx-1 px-1 touch-pan-y">
             {QUICK_AMOUNTS.map(amt => (
               <Button
                 key={amt}
