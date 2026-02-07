@@ -16,7 +16,14 @@ export type ExperienceCategory =
   | 'adventure'
   | 'nature'
   | 'food-tour'
-  | 'private-charter';
+  | 'private-charter'
+  | 'waterpark'
+  | 'karting'
+  | 'attraction'
+  | 'playground'
+  | 'wildlife'
+  | 'zipline'
+  | 'surfing';
 
 export type DifficultyLevel = 'easy' | 'moderate' | 'challenging';
 
@@ -54,6 +61,14 @@ export const EXPERIENCE_CATEGORIES: ExperienceCategoryConfig[] = [
   { id: 'adventure', labelEn: 'Adventure', labelRu: 'Приключения', icon: '🧗', type: 'land' },
   { id: 'nature', labelEn: 'Nature', labelRu: 'Природа', icon: '🌿', type: 'land' },
   { id: 'food-tour', labelEn: 'Food Tour', labelRu: 'Гастротур', icon: '🍜', type: 'land' },
+  // Family & entertainment
+  { id: 'waterpark', labelEn: 'Water Park', labelRu: 'Аквапарк', icon: '🏊', type: 'land', popular: true },
+  { id: 'karting', labelEn: 'Go-Kart', labelRu: 'Картинг', icon: '🏎️', type: 'land' },
+  { id: 'attraction', labelEn: 'Attraction', labelRu: 'Аттракцион', icon: '🎡', type: 'land', popular: true },
+  { id: 'playground', labelEn: 'Kids Zone', labelRu: 'Детская зона', icon: '🎪', type: 'land' },
+  { id: 'wildlife', labelEn: 'Wildlife', labelRu: 'Животные', icon: '🐘', type: 'land' },
+  { id: 'zipline', labelEn: 'Zipline', labelRu: 'Зиплайн', icon: '🪂', type: 'land' },
+  { id: 'surfing', labelEn: 'Surfing', labelRu: 'Сёрфинг', icon: '🏄', type: 'water' },
 ];
 
 // ====== DIFFICULTY LEVELS ======
