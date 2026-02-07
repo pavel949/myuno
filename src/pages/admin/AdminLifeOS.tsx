@@ -14,7 +14,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Sparkles, Link2, Eye, ShieldCheck, History, Activity, Brain } from 'lucide-react';
+import { Sparkles, Link2, Eye, ShieldCheck, History, Activity, Brain, Route } from 'lucide-react';
 import { LifeOSSituationsTab } from '@/components/admin/lifeos/LifeOSSituationsTab';
 import { LifeOSMappingsTab } from '@/components/admin/lifeos/LifeOSMappingsTab';
 import { LifeOSResolverPreviewTab } from '@/components/admin/lifeos/LifeOSResolverPreviewTab';
@@ -23,6 +23,7 @@ import { LifeOSAuditTab } from '@/components/admin/lifeos/LifeOSAuditTab';
 import { LifeOSHealthTab } from '@/components/admin/lifeos/LifeOSHealthTab';
 import { ManualModeBadge } from '@/components/admin/lifeos/ManualModeBadge';
 import { LifeOSAIPanel } from '@/components/admin/lifeos/LifeOSAIPanel';
+import { LifeOSRoutesTab } from '@/components/admin/lifeos/LifeOSRoutesTab';
 
 export default function AdminLifeOS() {
   const { language } = useLanguage();
@@ -41,6 +42,12 @@ export default function AdminLifeOS() {
       label: isRussian ? 'Маппинги' : 'Mappings', 
       icon: Link2,
       description: isRussian ? 'Ядро' : 'Core'
+    },
+    { 
+      id: 'routes', 
+      label: isRussian ? 'Маршруты' : 'Routes', 
+      icon: Route,
+      description: isRussian ? 'Путь' : 'Path'
     },
     { 
       id: 'preview', 
@@ -121,6 +128,10 @@ export default function AdminLifeOS() {
 
         <TabsContent value="preview" className="mt-4">
           <LifeOSResolverPreviewTab />
+        </TabsContent>
+
+        <TabsContent value="routes" className="mt-4">
+          <LifeOSRoutesTab />
         </TabsContent>
 
         <TabsContent value="health" className="mt-4">
