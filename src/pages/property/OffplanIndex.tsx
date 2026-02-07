@@ -145,7 +145,7 @@ export default function OffplanIndex() {
         </div>
 
         {/* Filters row */}
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1 touch-pan-y">
           {/* Status chips */}
           {STATUS_OPTIONS.map(status => (
             <Button

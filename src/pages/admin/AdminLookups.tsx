@@ -206,7 +206,7 @@ export default function AdminLookups() {
         </div>
 
         {/* Type Selector Tabs */}
-        <div className="overflow-x-auto pb-2">
+        <div className="overflow-x-auto pb-2 touch-pan-y">
           <Tabs value={selectedType} onValueChange={(v) => setSelectedType(v as LookupType)}>
             <TabsList className="inline-flex h-auto flex-wrap gap-1 bg-transparent p-0">
               {AVAILABLE_TYPES.map((type) => {

@@ -139,7 +139,7 @@ export const ForYouSection = forwardRef<HTMLDivElement, React.ComponentPropsWith
         </button>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide touch-pan-x">
+      <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide touch-pan-y">
         {recommendations.map((item) => {
           const ReasonIcon = reasonIcons[item.reason];
           const reasonLabel = reasonLabels[item.reason][language];

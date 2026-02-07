@@ -30,7 +30,7 @@ export function NotificationFilters({ activeFilter, onFilterChange, counts }: No
   const isRu = language === 'ru';
 
   return (
-    <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+    <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide touch-pan-y">
       {filters.map((filter) => {
         const Icon = filter.icon;
         const count = counts[filter.id];

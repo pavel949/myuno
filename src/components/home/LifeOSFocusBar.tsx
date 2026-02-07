@@ -52,6 +52,7 @@ export const LifeOSFocusBar = memo(function LifeOSFocusBar({ className }: LifeOS
   return (
     <AnimatePresence>
       <motion.div
+        key="lifeos-focus-bar"
         initial={{ opacity: 0, y: -8, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: -8, scale: 0.98 }}

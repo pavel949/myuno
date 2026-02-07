@@ -23,7 +23,7 @@ export function DomainTabs({ selectedDomain, onDomainChange, className }: Domain
   const tabs = [allTab, ...SERVICE_DOMAINS];
 
   return (
-    <div className={cn("flex gap-2 overflow-x-auto pb-2 scrollbar-hide", className)}>
+    <div className={cn("flex gap-2 overflow-x-auto pb-2 scrollbar-hide touch-pan-y", className)}>
       {tabs.map((tab) => {
         const isSelected = selectedDomain === tab.id;
         const label = language === 'ru' ? tab.labelRu : tab.labelEn;

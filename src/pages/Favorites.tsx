@@ -159,7 +159,7 @@ export default function Favorites() {
 
             <TabsContent value="items" className="mt-4 space-y-4">
               {/* Filters */}
-              <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+              <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide touch-pan-y">
                 {filters.map((f) => (
                   <Button
                     key={f.value}

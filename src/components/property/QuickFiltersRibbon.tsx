@@ -47,7 +47,7 @@ export function QuickFiltersRibbon({
   return (
     <div className={cn("space-y-3", className)}>
       {/* Quick Filter Chips (Tags) */}
-      <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 touch-pan-x">
+      <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 touch-pan-y">
         {/* Project filter chip */}
         {selectedProjectName && onProjectClear && (
           <FilterChip
@@ -75,7 +75,7 @@ export function QuickFiltersRibbon({
       {districts.length > 0 && onDistrictToggle && (
         <div className="flex items-center gap-2">
           <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mr-4 pr-4 touch-pan-x">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mr-4 pr-4 touch-pan-y">
             {districts.map((district) => (
               <FilterChip
                 key={district.id}

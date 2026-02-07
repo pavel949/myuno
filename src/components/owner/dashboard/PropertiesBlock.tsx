@@ -107,7 +107,7 @@ export function PropertiesBlock() {
         </div>
 
         {/* Property thumbnails scroll - compact */}
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-3 px-3 touch-pan-x snap-x">
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-3 px-3 touch-pan-y snap-x">
           {properties.slice(0, 6).map((property) => {
             const status = getStatusIndicator(property);
             const title = isRu ? (property.title_ru || property.title) : property.title;
