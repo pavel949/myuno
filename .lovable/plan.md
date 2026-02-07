@@ -1,124 +1,126 @@
 
-
-# "Family with Kids" -- Page Redesign
+# CTA Audit & Cross-Sell Enhancement
 
 ## Problem
 
-Currently the `family_with_children` Life Flow page shows only 9 mapped items: 3 babysitters, 2 clinics, 2 properties, 1 tour, 1 restaurant. A parent opening this page sees nannies and clinics first -- not what they're looking for when planning family fun in Phuket.
+Multiple cards and detail pages across the platform are purely informational -- they show price and info but lack a clear action button ("Book", "Buy", "Get Tickets"). Additionally, when a user views an activity like a zipline, there's no suggestion to complement it with dinner at a nearby restaurant or a related experience.
 
-## What We'll Build
+## Audit Results: Missing CTAs
 
-A rich, activity-focused page with **real Phuket family entertainment** seeded into the database and properly mapped to this Life OS situation. The page layout will be reorganized to prioritize **fun and activities** over utilities.
+### Cards Without CTA Buttons
 
----
+| Card Component | Used In | Issue |
+|---|---|---|
+| `LifeFlowEntityCard` | Life Flow pages (Family, Arrival, etc.) | No CTA button at all -- just title, price, photo |
+| `ItemCard` (horizontal) | Events, Gyms, Salons, Clinics, etc. | No CTA button -- only clickable area |
+| `WaterSection` cards | Home page | Inline cards with price but no "Book" button |
+| `ToursSection` cards | Home page | Inline cards with price but no "Book" button |
 
-## Section 1: Seed Real Family-Friendly Data
+### Detail Pages: CTA Status
 
-We'll insert **~20 real Phuket family attractions** into the `experiences` table (using `experience_type: 'activity'`) with a new set of family-relevant categories:
+| Detail Page | Has Fixed Bottom CTA? | CTA Text | Status |
+|---|---|---|---|
+| ExperienceDetail | Yes | "Book with Operator" | OK |
+| EventDetail | Yes | "Get Tickets" / "Book Now" | OK |
+| PropertyDetail | Yes | "Reserve" / "Book Now" | OK |
+| RestaurantDetail | Yes | "Reserve a Table" | OK |
+| BabysitterDetail | Yes | "Book" | OK |
+| CleaningDetail | Yes | "Book" | OK |
+| VehicleDetail | Yes | "Book Now" | OK |
+| TutorDetail | Yes | "Book Lesson" | OK |
+| ProductDetailPage | Yes | "Add to Cart" | OK |
+| InsuranceDetail | Yes | "Contact" | OK |
+| LegalProviderDetail | Yes | "Contact" | OK |
+| ServiceProviderDetail | Yes | "Book Services" | OK |
 
-| Activity | Category | Source |
-|----------|----------|--------|
-| Hanuman World Zipline | zipline | Already in DB |
-| Andamanda Water Park | waterpark | New seed |
-| Splash Jungle Water Park | waterpark | New seed |
-| Blue Tree Phuket (pool/activities) | waterpark | New seed |
-| Baan Teelanka (Upside Down House) | attraction | New seed |
-| Phuket Trickeye Museum | attraction | New seed |
-| Phuket Go-Kart Speedway (Kathu) | karting | New seed |
-| Phuket Wake Park | wakeboarding | Already in DB |
-| Phuket Shooting Range | attraction | New seed |
-| Flying Hanuman (separate from Hanuman World) | zipline | New seed |
-| Phuket Elephant Sanctuary | wildlife | Already in DB |
-| Mini Golf Phuket (Dino Park) | attraction | New seed |
-| Phuket Aquarium | attraction | New seed |
-| Thai Cooking Class for Kids | cooking_class | Already in DB |
-| Tiger Kingdom Phuket | wildlife | New seed |
-| Surf House Kata (FlowRider) | surfing | New seed |
-| Rawai Park (kids playground) | playground | New seed |
-| Kids Club at Laguna | playground | New seed |
-| Boat Avenue Family Market | attraction | New seed |
+Detail pages are generally covered. The main gaps are in **card-level CTAs** and **contextual cross-sell**.
 
-Also seed **education/childcare** entries for the practical side:
-- 2-3 international schools (British International, HeadStart, UWC Thailand)
-- 2-3 kindergartens/camps (Gecko Kids, Phuket International Kindergarten)
+## Solution
 
-These will go into relevant existing tables or `experiences` with appropriate categories.
+### 1. Add CTA Button to `LifeFlowEntityCard`
 
----
+Add a small action button at the bottom of each card. The CTA text is determined by entity type:
+- experience/tour: "Book" 
+- restaurant: "Reserve"
+- property: "View"
+- service/salon/clinic: "Book"
+- marketplace_product: "Buy"
 
-## Section 2: Enrich `catalog_life_map` Mappings
+This converts passive browsing cards into conversion-oriented cards.
 
-Insert ~25 new mappings for `family_with_children` with updated weights:
+### 2. Add CTA prop to `ItemCard`
 
-| Tier | Entity Type | Weight | Content |
-|------|-------------|--------|---------|
-| Essentials (top) | experience | 90 | Waterparks, Go-Kart, Ziplines |
-| Essentials | experience | 85 | Upside Down House, Aquarium, Dino Park |
-| Essentials | experience | 80 | Elephant Sanctuary, Cooking Class |
-| Fun & Active | tour | 70 | Island trips, ATV |
-| Dining | restaurant | 65 | Family-friendly restaurants |
-| Childcare | babysitter | 60 | Existing babysitters |
-| Education | school | 55 | International schools |
-| Education | kindergarten | 50 | Kindergartens, day camps |
-| Practical | clinic | 45 | Pediatric clinics |
-| Practical | property | 40 | Family villas |
+Add an optional `ctaLabel` prop to `ItemCard`. When provided, render a small button in the bottom-right corner next to the price. This allows every index page (Events, Gyms, Salons, etc.) to add context-appropriate CTAs like "Get Tickets", "Book", "Buy".
 
-This ensures **activities appear first**, clinics and property move to "Also Useful" section.
+### 3. Add CTA to Home Page Section Cards
 
----
+Add small "Book" buttons to `WaterSection` and `ToursSection` inline cards, matching the pattern already used in `ExperienceCard` ("Details" button).
 
-## Section 3: Custom Section Ordering for Family Page
+### 4. Contextual Cross-Sell on ExperienceDetail
 
-Modify `LifeFlowPage.tsx` to support **situation-specific section ordering**. For `family_with_children`, sections will be arranged:
+Currently `ExperienceDetail` has a generic `CrossSellSection` at the bottom. Enhance it with **contextual suggestions** based on the current experience category:
 
-1. **Fun & Activities** (experiences with categories: waterpark, karting, zipline, attraction, playground)
-2. **Tours & Nature** (tours: islands, elephant sanctuary, ATV)
-3. **Dining** (family-friendly restaurants)
-4. **Childcare** (babysitters, kindergartens)
-5. **Schools & Camps** (schools, education)
-6. **Health & Safety** (clinics) -- in "Also Useful"
-7. **Family Housing** (properties) -- in "Also Useful"
+- **Zipline/Adventure** -> Suggest: Celebration dinner at a restaurant, Photography service
+- **Waterpark** -> Suggest: Nearby restaurant, Sunscreen/gear from marketplace
+- **Wildlife/Nature** -> Suggest: Related tours, Photography
+- **Cooking class** -> Suggest: Restaurant with same cuisine, Market tour
+- **Karting/Sports** -> Suggest: After-party dinner, Related activities
 
-Implementation: use the existing `weight` field from `catalog_life_map` to control ordering. The page already sorts by weight; we just need the new weights to reflect the correct priority.
+Implementation: Add a `contextualCrossSell` config map in `crossSellConfig.ts` that maps experience categories to recommended verticals with custom titles (e.g., "Celebrate after your adventure").
 
----
+### 5. Add "Complete Your Day" Section to ExperienceDetail
 
-## Section 4: Entity Type Enhancements
+Below the existing cross-sell, add a "Complete Your Day" section that suggests:
+- A restaurant near the experience location (using district matching)
+- A related activity in the same area
+- Transport to/from the venue
 
-Add missing entity types to `entityTypes.ts` if not already present:
-- `activity` (for standalone activities like karting, waterparks) -- or reuse `experience` type
-
-Add experience sub-categories to `experiencesTaxonomy.ts`:
-- `waterpark`, `karting`, `attraction`, `playground`
-
----
+This uses existing data from the database, filtered by district/location proximity.
 
 ## Technical Details
 
-### Database Changes (SQL migration)
+### Files to Modify
 
-1. **Insert ~15 new experiences** into `experiences` table with:
-   - `experience_type: 'activity'`
-   - `category`: waterpark / karting / attraction / playground / wildlife
-   - `age_restriction: 0` (family-friendly)
-   - Real titles, descriptions, prices, locations
-   - `is_active: true`, `approval_status: 'approved'`
-
-2. **Insert ~25 new rows** into `catalog_life_map` linking new + existing entities to `family_with_children` situation (id: `47dd9683-4648-4ccb-acdb-060551b8379d`)
-
-3. **Update existing mappings**: Lower weights for clinic (from 80/75 to 45) and property (from 75/72 to 40) so they appear in "Also Useful"
-
-### Frontend Changes
-
-1. **`src/lib/taxonomies/experiencesTaxonomy.ts`**: Add `waterpark`, `karting`, `attraction`, `playground` categories
-
-2. **`src/pages/LifeFlowPage.tsx`**: Add situation-specific section priority config so `experience` and `tour` types render above `clinic` and `property` for family context. This is mostly already handled by weights, but we'll ensure the `isPrimaryEntityType` logic respects the actual weight ordering from the DB rather than the static config.
-
-### Files Changed
 | File | Change |
-|------|--------|
-| SQL Migration | Seed ~15 experiences + ~25 catalog_life_map rows, update existing weights |
-| `src/lib/taxonomies/experiencesTaxonomy.ts` | Add 4 new categories |
-| `src/pages/LifeFlowPage.tsx` | Sort sections by average weight instead of static primary/secondary |
-| `src/hooks/useEnrichCatalogItems.ts` | No change needed (experience already supported) |
+|---|---|
+| `src/components/life-flow/LifeFlowEntityCard.tsx` | Add CTA button based on entity type |
+| `src/components/miniapp/ItemCard.tsx` | Add optional `ctaLabel` prop with button rendering |
+| `src/components/home/WaterSection.tsx` | Add "Book" button to inline cards |
+| `src/components/home/ToursSection.tsx` | Add "Book" button to inline cards |
+| `src/pages/events/EventsIndex.tsx` | Pass `ctaLabel="Get Tickets"` to ItemCard |
+| `src/lib/crossSellConfig.ts` | Add contextual cross-sell category mappings |
+| `src/pages/experiences/ExperienceDetail.tsx` | Add "Complete Your Day" section with contextual suggestions |
 
+### CTA Label Logic (for LifeFlowEntityCard)
+
+```text
+Entity Type -> CTA Label (EN / RU)
+experience  -> "Book" / "Забронировать"
+tour        -> "Book" / "Забронировать"  
+restaurant  -> "Reserve" / "Столик"
+property    -> "View" / "Смотреть"
+service     -> "Book" / "Записаться"
+salon       -> "Book" / "Записаться"
+clinic      -> "Visit" / "Записаться"
+gym         -> "Join" / "Записаться"
+event       -> "Tickets" / "Билеты"
+flower_shop -> "Order" / "Заказать"
+marketplace -> "Buy" / "Купить"
+default     -> "Open" / "Открыть"
+```
+
+### Contextual Cross-Sell Config
+
+```text
+Experience Category -> Suggested Verticals
+zipline/adventure   -> restaurants (Celebrate!), tours (More adventures)
+waterpark           -> restaurants (Lunch nearby), marketplace (Beach gear)
+wildlife            -> tours (Nature tours), restaurants (Thai dinner)
+cooking_class       -> restaurants (Try the cuisine), marketplace (Ingredients)
+karting/sports      -> restaurants (Refuel after), experiences (More thrills)
+attraction          -> restaurants (Family dining), tours (Explore more)
+```
+
+### ItemCard CTA Button Design
+
+Small pill button (`size="sm"`, `variant="default"`) placed in the bottom-right of the card, replacing empty space next to the price. Stops event propagation so tapping the button can trigger a specific action (e.g., direct booking) vs tapping the card (goes to detail page).
