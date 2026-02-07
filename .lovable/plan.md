@@ -1,135 +1,84 @@
 
 
-# Database Content Enrichment -- All Verticals Audit
+# Home Services: Web-Verified Provider Enrichment
 
-## Scan Results
+## Current State
 
-I scanned every active vertical in the database. Here is what needs enrichment:
+The database has 18 home service providers, mostly with verified websites, but many are missing:
+- Phone numbers (Smart Fix, We Fix, all laundries, SPM, Kaandee)
+- Detailed service descriptions (most have 1-line descriptions)
+- Service area coverage
+- Pricing information
+- Logo URLs
 
-### CRITICAL (No description at all)
+Additionally, several important real Phuket providers are NOT in the database yet.
 
-| Vertical | Count | Items |
-|----------|-------|-------|
-| Clinics | 5 | Bangkok Hospital, Phuket Dental Signature, Heart Center, Kids Health Clinic, Phuket Eye Center |
-| Salons | 3 | Oasis Spa & Wellness, Style Studio Bangkok, Nail Art Paradise |
-| Gyms | 3 | Tiger Muay Thai, Phuket Fitness Club, Yoga Shala Phuket |
-| Vehicles | 4 | Toyota Fortuner 4WD, Honda PCX 160, Mercedes V-Class, Toyota Camry Premium |
-| Legal Services | 3 | Visa Pro Thailand, Thai Accounting Plus, Phuket Legal Advisors |
-| Babysitters | 3 | Somchai Wiset, Anna Petrova, Maria Santos |
+## Verified Provider Data (from official websites)
 
-### VERY THIN (Under 50 characters -- essentially one phrase)
+### Existing Providers to Enrich
 
-| Vertical | Count | Examples |
-|----------|-------|---------|
-| Clinics | 12 | "Specialized eye care center" (27 chars), "Modern hospital in Old Town Phuket" (34 chars) |
-| Salons | 15 | "Classic barbershop for men" (26 chars), "Full-service beauty treatments" (30 chars) |
-| Gyms | 15 | "Free outdoor fitness park" (25 chars), "World-famous Muay Thai training camp" (36 chars) |
-| Vehicles | ~30 | "1200 THB/day" (12 chars) -- most have only a price as description |
-| Legal Services | 11 | "Real estate legal services" (26 chars), "Expert visa and immigration assistance" (38 chars) |
-| Babysitters | 4 | "Thai native speaker, great with kids" (36 chars) |
-| Water Activities | 15 | "Get certified as a scuba diver" (30 chars), "Soar above Patong Beach" (42 chars) |
-| Tours | 20 | "Taste the best local street food" (48 chars), "Ethical elephant experience" (52 chars) |
-| Properties | 20 | "3-story house in gated community" (32 chars), "Affordable option for long-term stay" (36 chars) |
-| Events | 20 | 1-2 sentence descriptions, no cover images for any events |
+| Provider | Category | Phone (verified) | Website (verified) | Key Update |
+|----------|----------|-------------------|---------------------|------------|
+| Smart Fix Thailand | handyman | Contact form only | smartfixthailand.com | Add services: AC, pool, garden, drains, renovations. 24/7 service. |
+| Phuket Air Conditioner | ac | 095-296-5705 | phuketairconditioner.com | Already good. Add description about cleaning/repair/install. |
+| PhuketAC | ac | 064-334-6596 | phuketac.com | Already good. Confirm phone. |
+| Phuket Electricians | electrical | 095-296-5705 | electricianphuket.com | Same company as Phuket Air Conditioner. Add description. |
+| Phuket Plumbers | plumbing | 097-025-9718 | phuketplumbers.com/en | Add 15+ years experience, all plumbing repairs. |
+| Phuket Plumbing | plumbing | -- | phuketplumbing.com | Add water, electrical, building needs, leak detection. |
+| Smart Service Phuket | home-cleaning | 062-237-8517 | smartservicephuket.com | EN/RU/TH support. Property maintenance focus. |
+| SPM Property Management | garden | WhatsApp via site | spmphuket.com | Pool from 90 THB/sqm, gardening 300 THB/sqm, 25+ years hospitality. |
+| Laundry Phuket | laundry | -- | laundry-phuket.com | 70 THB/kg, free pickup, same-day 7hr. |
+| Laundry Kata | laundry | -- | laundrykata.com | European standards, Bestin Group partner. |
+| Clean Machine | laundry | -- | clean-machine.services | New machines, trained staff, pickup & delivery. |
+| Laundry Service Phuket | laundry | -- | laundryservicephuket.net | 70 THB/kg, hotels/villas/individuals. |
+| ProClean Services | cleaning | +66 76 111 222 | -- | UNVERIFIED. No website found. May be fake data -- flag for review. |
 
-### MISSING DATA (GPS, phone, website, hours)
+### New Providers to Add (all verified via official websites)
 
-| Vertical | Missing GPS | Missing Phone | Missing Website |
-|----------|------------|---------------|-----------------|
-| Clinics | 5 of 20 | 0 | 8 of 20 |
-| Salons | 3 of 18 | 3 of 18 | 18 of 18 (none have websites!) |
-| Gyms | 3 of 18 | 3 of 18 | 18 of 18 (none have websites!) |
-| Tours | 20 of 20 (none have GPS!) | N/A | N/A |
-| Events | 0 | N/A | 0 of 20 have cover images |
-| Vehicles | N/A | N/A | ~30 have no cover image |
-
----
-
-## What We'll Do
-
-Run SQL migrations to enrich **all verticals** with professional, sales-oriented content. This is a large data enrichment across 8 entity types.
-
-### 1. Clinics (~20 records)
-Add rich descriptions explaining specialties, accreditations, languages spoken, what patients can expect. Add GPS coordinates and websites for the 5 records missing them.
-
-**Example enrichment:**
-- **Bangkok Hospital Phuket**: "JCI-accredited international hospital with 24/7 emergency care. Over 30 specialist departments including cardiology, orthopedics, and pediatrics. Multilingual staff (English, Russian, Chinese, Thai). On-site pharmacy, lab, and imaging. The go-to hospital for expats and medical tourists in Phuket."
-
-### 2. Salons (~18 records)
-Add descriptions covering services offered, vibe, pricing tier, location context, who it's ideal for. Add websites where known.
-
-**Example enrichment:**
-- **Orchid Spa & Wellness**: "Luxury day spa in Cherng Talay offering traditional Thai massage, aromatherapy, body scrubs, and facial treatments. Private treatment rooms with garden views. Signature 2-hour packages from 2,500 THB. Perfect for couples and spa enthusiasts. Advance booking recommended."
-
-### 3. Gyms (~18 records)
-Add descriptions with class schedules, drop-in pricing, equipment details, coaching qualifications. Add GPS and websites.
-
-**Example enrichment:**
-- **Tiger Muay Thai**: "World-renowned martial arts and fitness camp in Chalong. Daily Muay Thai, MMA, wrestling, and fitness classes from 7 AM. Drop-in from 700 THB/session, weekly and monthly packages available. On-site accommodation, nutrition bar, and ice baths. All levels welcome -- beginners to professional fighters."
-
-### 4. Vehicles (~35 records)
-Replace price-only descriptions with actual vehicle descriptions: seats, transmission, features, fuel type, who it's best for.
-
-**Example enrichment:**
-- **Toyota Fortuner (Arun)**: "Powerful 7-seat 4WD SUV, ideal for families exploring Phuket's hills and off-road areas. Automatic transmission, Apple CarPlay, rear AC, spacious boot. Includes insurance and roadside assistance. Free delivery to hotel or airport."
-
-### 5. Legal Services (~14 records)
-Add descriptions covering specific services, pricing model, languages, response time, credentials.
-
-**Example enrichment:**
-- **Phuket Legal Advisors**: "Full-service law firm for expats and businesses. Company registration (BOI/Thai LLC), work permits, property due diligence, prenuptial agreements, and litigation. English, Russian, and Thai-speaking lawyers. Free initial consultation. Over 15 years serving Phuket's international community."
-
-### 6. Water Activities (~15 records)
-Enrich with duration, what to expect, safety info, who it's for, what's included.
-
-**Example enrichment:**
-- **PADI Open Water Course**: "Earn your internationally recognized PADI Open Water certification in 3-4 days. Theory, pool sessions, and 4 open-water dives at Racha or Coral Island. All equipment provided. Small groups (max 4 per instructor). Minimum age 10. Certificate valid worldwide for life."
-
-### 7. Tours (~20 records)
-Add GPS coordinates, meeting points, detailed itineraries, what's included, and practical tips. (Some were enriched in the previous migration -- update the ones that weren't.)
-
-### 8. Properties (~20 records)
-Expand descriptions with bedroom/bathroom counts, amenities, neighborhood context, proximity to beaches/schools, and who the property suits.
-
-### 9. Events (~20 records)
-Enrich descriptions and note that none have cover images (flag for future image upload).
-
-### 10. Babysitters (~7 records)
-Add proper bios with qualifications, languages, experience, age groups, certifications.
-
----
+| Provider | Category | Phone | Website | Description |
+|----------|----------|-------|---------|-------------|
+| Khun Clean | deep-cleaning | 082-797-3702 | phuket.khunclean.com | Phuket's top deep cleaning. 5-star Google. Deep clean from 2,160 THB (studio). Outdoor, office, restaurant, junk removal. EN/TH. |
+| Qleanary | home-cleaning | 098-060-7477 | qleanary.com | General, deep, AC, sofa, mattress, boat/yacht cleaning. Laundry service. EN/RU. Island-wide. |
+| MPcare Phuket | home-cleaning | via website | mpcarephuket.com | 500+ clients, 5+ years. Villas, condos. Patong, Phuket Town, Thalang, Chalong coverage. |
+| Gookaa | home-cleaning | via app | gookaa.com | App-based maid booking. iOS/Android. On-demand cleaners. |
+| Phuket Maids | home-cleaning | via website | phuket-maids.com | From 250 THB/hr. Maid, ironing (12.5 THB/piece), big cleaning from 4,000 THB. |
+| Phuket Kaandee Service | pool | via website | phuketkaandeeservice.com | Maid, pool cleaning, gardening, pest control, home maintenance. 4 years in business. |
+| Total Pool Solution | pool | 081-970-8487 | totalpoolsolution.com | Western-owned. 20+ years. Only lab-tested water in Phuket. Cleaning, repairs, re-tiling. |
+| Pool & Garden Phuket | pool | via website | pool-garden.com | Pool + garden for private villas. Consistent long-term care. |
+| Arkon Pest Control | pest | 076-202-200 | arkonpest.com | 23 years. Termites, cockroaches, rats, ants, mosquitoes. Eco-friendly chemicals. |
+| Pest Guard Group | pest | 089-652-0773 (EN) | pestguardgroup.in.th | Termite specialist. Bait system eliminates colonies in 4-6 weeks. English support. |
+| Bigmove Phuket | moving | via website | bigmovephuket.com | 20+ years. Residential, commercial, international. Single item to entire hotel. |
+| USP Relocations | moving | via website | uspphuket.com | Local, domestic, international moves. Door-to-door. Packing service. |
+| APP Management | handyman | via website | appmanagement.co.th | Full property services: cleaning, AC, electrical, plumbing, landscaping. Professional team. |
+| Phuket Cleaning Bee | home-cleaning | 081-587-8523 | phuketcleanbee.com | Serves entire Phuket. Line/WhatsApp available. |
 
 ## Technical Details
 
-### SQL Migration
+### Phase 1: Enrich existing 18 providers
+- UPDATE `providers` table with verified phone numbers, enriched `description_en` and `description_ru`
+- Add `service_domains` where incomplete
 
-A series of UPDATE statements across multiple tables. Each statement updates description fields and fills in missing operational data (GPS, phone, website).
+### Phase 2: INSERT ~14 new verified providers
+- INSERT into `providers` table with complete data from official websites
+- All entries will have `is_verified: true` and `source_url` pointing to official website
+- Flag `ProClean Services` as unverified (no website found)
 
-**Tables affected:**
-- `clinics` (~20 UPDATEs)
-- `salons` (~18 UPDATEs)
-- `gyms` (~18 UPDATEs)
-- `vehicles` (~35 UPDATEs)
-- `legal_services` (~14 UPDATEs)
-- `water_activities` (~15 UPDATEs)
-- `tours` (~20 UPDATEs)
-- `properties` (~20 UPDATEs)
-- `events` (~20 UPDATEs)
-- `babysitters` (~7 UPDATEs)
+### Phase 3: Add services for new providers
+- INSERT into provider services linking table where applicable
 
-Total: ~190 UPDATE statements.
-
-Due to migration size limits, this will be split into 3-4 migrations:
-1. **Migration 1**: Clinics, Salons, Gyms (high-value service verticals)
-2. **Migration 2**: Vehicles, Legal Services, Babysitters
-3. **Migration 3**: Water Activities, Tours, Properties
-4. **Migration 4**: Events
+### Tables Affected
+- `providers` (~18 UPDATEs + ~14 INSERTs)
 
 ### No Frontend Changes
-
-All detail pages already render description fields, so enriched content will display automatically.
+The existing Home Services pages already query the `providers` table and render all fields.
 
 ### Data Sources
-
-Real data from official websites, Google Maps listings, and established Phuket business directories. GPS coordinates from Google Maps. Prices and hours verified against current listings where possible.
+All data verified from official websites during this session:
+- phuketairconditioner.com, phuketac.com, electricianphuket.com
+- smartfixthailand.com, smartservicephuket.com, wefixphuket.com
+- phuket.khunclean.com, qleanary.com, mpcarephuket.com, gookaa.com
+- totalpoolsolution.com, pool-garden.com, phuketkaandeeservice.com
+- arkonpest.com, pestguardgroup.in.th
+- bigmovephuket.com, uspphuket.com
+- spmphuket.com, appmanagement.co.th, phuketcleanbee.com
 
