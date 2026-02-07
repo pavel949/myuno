@@ -15,7 +15,7 @@ import { YACHT_KLOOK_CONFIG, YACHT_CATEGORIES } from '@/lib/filterConfigs';
 
 export { YACHT_CATEGORIES };
 export type { DatePreset };
-export type SortOption = 'rating' | 'price_asc' | 'price_desc' | 'capacity';
+export type SortOption = 'rating' | 'price_asc' | 'price_desc' | 'capacity' | 'length' | 'newest';
 
 interface YachtFiltersKlookProps {
   // Category

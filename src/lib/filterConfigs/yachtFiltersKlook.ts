@@ -41,7 +41,9 @@ export const YACHT_KLOOK_CONFIG: UnifiedFiltersKlookConfig = {
     { id: 'rating', labelEn: 'Top Rated', labelRu: 'По рейтингу' },
     { id: 'price_asc', labelEn: 'Price: Low to High', labelRu: 'Цена ↑' },
     { id: 'price_desc', labelEn: 'Price: High to Low', labelRu: 'Цена ↓' },
+    { id: 'length', labelEn: 'Length', labelRu: 'По длине' },
     { id: 'capacity', labelEn: 'Capacity', labelRu: 'Вместимость' },
+    { id: 'newest', labelEn: 'Newest', labelRu: 'Новые' },
   ],
   
   // Quick filter chips in drawer (static - booking options)
@@ -103,11 +105,11 @@ export const YACHT_KLOOK_CONFIG: UnifiedFiltersKlookConfig = {
   },
 };
 
-// Legacy static categories - use useYachtFilterOptions().categoryRibbon instead
+// Categories aligned with actual DB yacht_type values
 export const YACHT_CATEGORIES = [
   { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '🌟' },
-  { id: 'yacht', labelEn: 'Yachts', labelRu: 'Яхты', icon: '🛥️' },
+  { id: 'motor_yacht', labelEn: 'Motor Yachts', labelRu: 'Моторные яхты', icon: '🛥️' },
   { id: 'catamaran', labelEn: 'Catamarans', labelRu: 'Катамараны', icon: '⛵' },
   { id: 'speedboat', labelEn: 'Speedboats', labelRu: 'Катера', icon: '🚤' },
-  { id: 'sailing', labelEn: 'Sailing', labelRu: 'Парусные', icon: '⛵' },
+  { id: 'superyacht', labelEn: 'Superyachts', labelRu: 'Суперяхты', icon: '💎' },
 ];

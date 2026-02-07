@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format, addDays } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
-import { Calendar, Clock, Users, ShoppingCart, Zap, Check, Anchor } from 'lucide-react';
+import { Calendar, Clock, Users, ShoppingCart, Zap, Check, Anchor, Sun, Moon, Sunset } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
@@ -16,7 +16,17 @@ interface YachtBookingQuickSelectProps {
   yacht: Yacht;
 }
 
-type CharterType = 'half_day' | 'full_day';
+type CharterType = 'half_day' | 'full_day' | 'sunset' | 'overnight';
+
+interface CharterOption {
+  type: CharterType;
+  labelEn: string;
+  labelRu: string;
+  descEn: string;
+  descRu: string;
+  icon: typeof Sun;
+  price: number;
+}
 
 export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps) {
   const { language } = useLanguage();
@@ -27,36 +37,52 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [guests, setGuests] = useState(2);
-  const [charterType, setCharterType] = useState<CharterType>('full_day');
   const [showCalendar, setShowCalendar] = useState(false);
+
+  // Build available charter options from pricing
+  const charterOptions = useMemo((): CharterOption[] => {
+    const options: CharterOption[] = [];
+    if (yacht.price_half_day && yacht.price_half_day > 0) {
+      options.push({ type: 'half_day', labelEn: 'Half Day', labelRu: 'Полдня', descEn: '4-5 hours', descRu: '4-5 часов', icon: Sun, price: yacht.price_half_day });
+    }
+    if (yacht.price_full_day && yacht.price_full_day > 0) {
+      options.push({ type: 'full_day', labelEn: 'Full Day', labelRu: 'Полный день', descEn: '8-10 hours', descRu: '8-10 часов', icon: Calendar, price: yacht.price_full_day });
+    }
+    if (yacht.price_sunset && yacht.price_sunset > 0) {
+      options.push({ type: 'sunset', labelEn: 'Sunset Cruise', labelRu: 'Закатный круиз', descEn: '2-3 hours', descRu: '2-3 часа', icon: Sunset, price: yacht.price_sunset });
+    }
+    if (yacht.price_overnight && yacht.price_overnight > 0) {
+      options.push({ type: 'overnight', labelEn: 'Overnight', labelRu: 'С ночёвкой', descEn: '24 hours', descRu: '24 часа', icon: Moon, price: yacht.price_overnight });
+    }
+    return options;
+  }, [yacht]);
+
+  const [charterType, setCharterType] = useState<CharterType>(charterOptions[0]?.type || 'full_day');
+
+  const selectedOption = charterOptions.find(o => o.type === charterType) || charterOptions[0];
+  const basePrice = selectedOption?.price || 0;
 
   const today = new Date();
   const tomorrow = addDays(today, 1);
 
-  const defaultHalfDayTimes = ['09:00', '14:00'];
-  const defaultFullDayTimes = ['08:00', '09:00', '10:00'];
-  const availableTimes = charterType === 'half_day' 
-    ? (yacht.departure_times || defaultHalfDayTimes)
-    : (yacht.departure_times || defaultFullDayTimes);
+  const defaultTimes: Record<CharterType, string[]> = {
+    half_day: ['09:00', '14:00'],
+    full_day: ['08:00', '09:00', '10:00'],
+    sunset: ['16:00', '16:30', '17:00'],
+    overnight: ['10:00', '12:00'],
+  };
+  const availableTimes = yacht.departure_times?.length ? yacht.departure_times : (defaultTimes[charterType] || defaultTimes.full_day);
 
-  const basePrice = charterType === 'half_day'
-    ? (yacht.price_half_day || 0)
-    : (yacht.price_full_day || 0);
-  
   const totalPrice = basePrice;
   const currencySymbol = getCurrencySymbol(yacht.currency || 'THB');
-
   const yachtName = language === 'ru' ? yacht.name_ru : yacht.name_en;
 
-  // Check if yacht is already in cart with same date/time/type
   const cartItemId = useMemo(() => {
     if (!selectedDate || !selectedTime) return null;
     return `${yacht.id}-${format(selectedDate, 'yyyy-MM-dd')}-${selectedTime}-${charterType}`;
   }, [yacht.id, selectedDate, selectedTime, charterType]);
 
-  const isInCart = useMemo(() => {
-    return items.some(item => item.id === cartItemId);
-  }, [items, cartItemId]);
+  const isInCart = useMemo(() => items.some(item => item.id === cartItemId), [items, cartItemId]);
 
   const quickDates = [
     { label: language === 'ru' ? 'Сегодня' : 'Today', date: today },
@@ -65,7 +91,6 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
 
   const handleAddToCart = () => {
     if (!selectedDate || !selectedTime) return;
-
     const cartItem: Omit<CartItem, 'quantity'> = {
       id: cartItemId!,
       type: 'yacht',
@@ -78,30 +103,26 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
       scheduledDate: format(selectedDate, 'yyyy-MM-dd'),
       scheduledTime: selectedTime,
       participants: guests,
-      charterType: charterType,
+      charterType,
     };
-
     addItem(cartItem);
     setIsOpen(false);
   };
 
   const handleBookNow = () => {
     if (!selectedDate || !selectedTime) return;
-    
     const state = {
-      bookNowData: {
-        date: selectedDate.toISOString(),
-        time: selectedTime,
-        guests,
-        charterType,
-      }
+      bookNowData: { date: selectedDate.toISOString(), time: selectedTime, guests, charterType },
     };
-    
-    navigate(`/yachts/${yacht.id}/booking?type=${charterType === 'half_day' ? 'half' : 'full'}`, { state });
+    navigate(`/yachts/${yacht.id}/booking?type=${charterType}`, { state });
     setIsOpen(false);
   };
 
   const canProceed = selectedDate && selectedTime;
+
+  // "From" price for bottom bar
+  const fromPrice = Math.min(...charterOptions.map(o => o.price).filter(p => p > 0)) || 0;
+  const fromLabel = charterOptions.find(o => o.price === fromPrice);
 
   return (
     <>
@@ -111,12 +132,10 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
           <div>
             <p className="text-xs text-muted-foreground">{language === 'ru' ? 'от' : 'from'}</p>
             <p className="text-xl font-bold text-primary">
-              {currencySymbol}{(yacht.price_half_day || yacht.price_full_day || 0).toLocaleString()}
+              {currencySymbol}{fromPrice.toLocaleString()}
             </p>
             <p className="text-xs text-muted-foreground">
-              {yacht.price_half_day 
-                ? (language === 'ru' ? '/полдня' : '/half day')
-                : (language === 'ru' ? '/день' : '/day')}
+              {fromLabel ? (language === 'ru' ? `/${fromLabel.labelRu.toLowerCase()}` : `/${fromLabel.labelEn.toLowerCase()}`) : ''}
             </p>
           </div>
           
@@ -143,51 +162,39 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
               </SheetHeader>
               
               <div className="overflow-y-auto py-4 space-y-6 pb-32">
-                {/* Charter Type Selection */}
+                {/* Charter Type Selection - all available types */}
                 <div>
                   <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
                     <Clock className="w-4 h-4 text-muted-foreground" />
                     {language === 'ru' ? 'Тип аренды' : 'Charter Type'}
                   </h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    {yacht.price_half_day && (
-                      <button
-                        onClick={() => setCharterType('half_day')}
-                        className={cn(
-                          "p-3 rounded-xl border-2 text-left transition-all",
-                          charterType === 'half_day'
-                            ? "border-primary bg-primary/5"
-                            : "border-border hover:border-primary/50"
-                        )}
-                      >
-                        <p className="font-medium text-sm">
-                          {language === 'ru' ? 'Полдня' : 'Half Day'}
-                        </p>
-                        <p className="text-xs text-muted-foreground">4 {language === 'ru' ? 'часа' : 'hours'}</p>
-                        <p className="text-primary font-semibold mt-1">
-                          {currencySymbol}{yacht.price_half_day?.toLocaleString()}
-                        </p>
-                      </button>
-                    )}
-                    {yacht.price_full_day && (
-                      <button
-                        onClick={() => setCharterType('full_day')}
-                        className={cn(
-                          "p-3 rounded-xl border-2 text-left transition-all",
-                          charterType === 'full_day'
-                            ? "border-primary bg-primary/5"
-                            : "border-border hover:border-primary/50"
-                        )}
-                      >
-                        <p className="font-medium text-sm">
-                          {language === 'ru' ? 'Полный день' : 'Full Day'}
-                        </p>
-                        <p className="text-xs text-muted-foreground">8 {language === 'ru' ? 'часов' : 'hours'}</p>
-                        <p className="text-primary font-semibold mt-1">
-                          {currencySymbol}{yacht.price_full_day?.toLocaleString()}
-                        </p>
-                      </button>
-                    )}
+                  <div className={cn("grid gap-2", charterOptions.length <= 2 ? "grid-cols-2" : "grid-cols-2")}>
+                    {charterOptions.map((option) => {
+                      const Icon = option.icon;
+                      return (
+                        <button
+                          key={option.type}
+                          onClick={() => setCharterType(option.type)}
+                          className={cn(
+                            "p-3 rounded-xl border-2 text-left transition-all",
+                            charterType === option.type
+                              ? "border-primary bg-primary/5"
+                              : "border-border hover:border-primary/50"
+                          )}
+                        >
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <Icon className="w-3.5 h-3.5 text-muted-foreground" />
+                            <p className="font-medium text-sm">
+                              {language === 'ru' ? option.labelRu : option.labelEn}
+                            </p>
+                          </div>
+                          <p className="text-xs text-muted-foreground">{language === 'ru' ? option.descRu : option.descEn}</p>
+                          <p className="text-primary font-semibold mt-1">
+                            {currencySymbol}{option.price.toLocaleString()}
+                          </p>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -218,19 +225,14 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
                         onClick={() => setShowCalendar(true)}
                         className={cn(
                           "px-4 py-2 rounded-full border transition-all text-sm",
-                          selectedDate && !quickDates.some(qd => 
-                            format(selectedDate, 'yyyy-MM-dd') === format(qd.date, 'yyyy-MM-dd')
-                          )
+                          selectedDate && !quickDates.some(qd => format(selectedDate, 'yyyy-MM-dd') === format(qd.date, 'yyyy-MM-dd'))
                             ? "border-primary bg-primary text-primary-foreground"
                             : "border-border hover:border-primary"
                         )}
                       >
-                        {selectedDate && !quickDates.some(qd => 
-                          format(selectedDate, 'yyyy-MM-dd') === format(qd.date, 'yyyy-MM-dd')
-                        )
+                        {selectedDate && !quickDates.some(qd => format(selectedDate, 'yyyy-MM-dd') === format(qd.date, 'yyyy-MM-dd'))
                           ? format(selectedDate, 'd MMM', { locale: language === 'ru' ? ru : enUS })
-                          : (language === 'ru' ? 'Другая дата' : 'Other date')
-                        }
+                          : (language === 'ru' ? 'Другая дата' : 'Other date')}
                       </button>
                     </div>
                   ) : (
@@ -238,20 +240,12 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
                       <CalendarComponent
                         mode="single"
                         selected={selectedDate}
-                        onSelect={(date) => {
-                          setSelectedDate(date);
-                          setShowCalendar(false);
-                        }}
+                        onSelect={(date) => { setSelectedDate(date); setShowCalendar(false); }}
                         disabled={(date) => date < today}
                         locale={language === 'ru' ? ru : enUS}
                         className="rounded-xl border p-3"
                       />
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => setShowCalendar(false)}
-                        className="w-full"
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => setShowCalendar(false)} className="w-full">
                         {language === 'ru' ? 'Назад' : 'Back'}
                       </Button>
                     </div>
@@ -296,9 +290,7 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
                         onClick={() => setGuests(Math.max(1, guests - 1))}
                         disabled={guests <= 1}
                         className="w-10 h-10 rounded-full bg-background border flex items-center justify-center text-lg font-medium disabled:opacity-50"
-                      >
-                        −
-                      </button>
+                      >−</button>
                       <div className="flex-1 text-center">
                         <span className="text-2xl font-bold">{guests}</span>
                         <p className="text-xs text-muted-foreground">
@@ -309,9 +301,7 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
                         onClick={() => setGuests(Math.min(yacht.capacity || 12, guests + 1))}
                         disabled={guests >= (yacht.capacity || 12)}
                         className="w-10 h-10 rounded-full bg-background border flex items-center justify-center text-lg font-medium disabled:opacity-50"
-                      >
-                        +
-                      </button>
+                      >+</button>
                     </div>
                   </div>
                 )}
@@ -321,18 +311,13 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
                   <div className="p-4 bg-muted/50 rounded-xl space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">
-                        {charterType === 'half_day' 
-                          ? (language === 'ru' ? 'Аренда (полдня)' : 'Charter (half day)')
-                          : (language === 'ru' ? 'Аренда (полный день)' : 'Charter (full day)')
-                        }
+                        {selectedOption ? (language === 'ru' ? `Аренда (${selectedOption.labelRu.toLowerCase()})` : `Charter (${selectedOption.labelEn.toLowerCase()})`) : ''}
                       </span>
                       <span>{currencySymbol}{basePrice.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between font-semibold pt-2 border-t">
                       <span>{language === 'ru' ? 'Итого' : 'Total'}</span>
-                      <span className="text-primary text-lg">
-                        {currencySymbol}{totalPrice.toLocaleString()}
-                      </span>
+                      <span className="text-primary text-lg">{currencySymbol}{totalPrice.toLocaleString()}</span>
                     </div>
                   </div>
                 )}
@@ -341,29 +326,10 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
               {/* Action Buttons */}
               <div className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t">
                 <div className="flex gap-3">
-                  <Button
-                    variant="outline"
-                    className="flex-1 h-12 gap-2"
-                    disabled={!canProceed || isInCart}
-                    onClick={handleAddToCart}
-                  >
-                    {isInCart ? (
-                      <>
-                        <Check className="w-4 h-4" />
-                        {language === 'ru' ? 'В корзине' : 'In Cart'}
-                      </>
-                    ) : (
-                      <>
-                        <ShoppingCart className="w-4 h-4" />
-                        {language === 'ru' ? 'В корзину' : 'Add to Cart'}
-                      </>
-                    )}
+                  <Button variant="outline" className="flex-1 h-12 gap-2" disabled={!canProceed || isInCart} onClick={handleAddToCart}>
+                    {isInCart ? (<><Check className="w-4 h-4" />{language === 'ru' ? 'В корзине' : 'In Cart'}</>) : (<><ShoppingCart className="w-4 h-4" />{language === 'ru' ? 'В корзину' : 'Add to Cart'}</>)}
                   </Button>
-                  <Button
-                    className="flex-1 h-12 gap-2"
-                    disabled={!canProceed}
-                    onClick={handleBookNow}
-                  >
+                  <Button className="flex-1 h-12 gap-2" disabled={!canProceed} onClick={handleBookNow}>
                     <Zap className="w-4 h-4" />
                     {language === 'ru' ? 'Забронировать' : 'Book Now'}
                   </Button>

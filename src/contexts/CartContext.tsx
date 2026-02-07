@@ -22,7 +22,7 @@ export interface CartItem {
   scheduledDate?: string;
   scheduledTime?: string;
   participants?: number;
-  charterType?: 'half_day' | 'full_day';
+  charterType?: 'half_day' | 'full_day' | 'sunset' | 'overnight';
 }
 
 interface CartContextType {
