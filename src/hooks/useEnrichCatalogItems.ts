@@ -50,12 +50,10 @@ const TABLE_CONFIG: Record<string, {
   experience: {
     table: 'experiences', nameEn: 'title_en', nameRu: 'title_ru',
     coverImage: 'cover_image', rating: 'rating', reviewCount: 'review_count',
-    isVerified: 'is_verified',
   },
   tour: {
     table: 'tours', nameEn: 'title_en', nameRu: 'title_ru',
     coverImage: 'cover_image', rating: 'rating', reviewCount: 'review_count',
-    isVerified: 'is_verified',
   },
   legal_service: {
     table: 'legal_services', nameEn: 'name_en', nameRu: 'name_ru',
