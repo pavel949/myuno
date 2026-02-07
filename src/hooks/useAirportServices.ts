@@ -21,6 +21,7 @@ export interface AirportService {
   bundle_components: Record<string, string> | null;
   bundle_savings_text_en: string | null;
   bundle_savings_text_ru: string | null;
+  includes_items: string[] | null;
   max_passengers: number;
   cutoff_hours: number;
   is_active: boolean;
