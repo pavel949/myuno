@@ -1,95 +1,124 @@
 
 
-# Super Search: Deep Audit and Fix
+# "Family with Kids" -- Page Redesign
 
-## Issues Found
+## Problem
 
-### 1. "Page Jump" Bug -- Root Cause
-The `InlineSearch` dropdown uses `position: absolute` inside a `space-y-3` flex container on the home page. When the dropdown appears/disappears via AnimatePresence, it doesn't cause layout shift itself (it's absolute), **but** the real problem is:
+Currently the `family_with_children` Life Flow page shows only 9 mapped items: 3 babysitters, 2 clinics, 2 properties, 1 tour, 1 restaurant. A parent opening this page sees nannies and clinics first -- not what they're looking for when planning family fun in Phuket.
 
-- **Mode flipping between `ai` and `search`**: The `isLikelyQuestion()` function in `useAISearch.ts` classifies queries as "questions" if they contain common Russian words like "ищу" (I'm looking for). When typing "Яхта" character by character ("Я" -> "Ях" -> "Яхт" -> "Яхта"), the first character "Я" alone doesn't trigger anything, but the mode can flip between `ai` and `search` mid-typing because:
-  - At 3+ chars, `isLikelyQuestion` re-evaluates on every keystroke
-  - When mode flips, the dropdown content completely re-renders (AI loading spinner vs search results vs "no results"), causing visible flicker
-  - The `useGlobalSearch` hook is conditionally enabled (`enabled && !isQuestion`) -- so when mode flips to AI, regular search results disappear; when it flips back, they reload from scratch
+## What We'll Build
 
-- **Concurrent request issues**: `useAISearch` fires an edge function call to `ai-smart-search`, but that function doesn't exist in `supabase/functions/`. This means every "question" query returns an error, which then flashes an error state before falling back.
-
-### 2. Redundant Search Components
-There are **3 separate search implementations**:
-- `InlineSearch` (home page) -- uses `useAISearch` + `useGlobalSearch`
-- `GlobalSearchModal` (dialog) -- uses only `useGlobalSearch`
-- `MiniAppSearch` (mini apps) -- simple local filter, no DB search
-- `UnifiedHeader` search -- simple input, delegates to parent
-
-### 3. Missing AI Edge Function
-`useAISearch.ts` calls `supabase.functions.invoke('ai-smart-search')` but no such function exists. Every AI search attempt fails silently, showing a brief error flicker.
-
-### 4. `useGlobalSearch` Performance
-- Fires **21 parallel database queries** on every keystroke (after 300ms debounce)
-- No query caching between renders
-- Searches 21 tables sequentially with individual `ilike` queries
+A rich, activity-focused page with **real Phuket family entertainment** seeded into the database and properly mapped to this Life OS situation. The page layout will be reorganized to prioritize **fun and activities** over utilities.
 
 ---
 
-## Solution: Unified Super Search
+## Section 1: Seed Real Family-Friendly Data
 
-### Phase 1: Fix the Page Jump (Critical)
+We'll insert **~20 real Phuket family attractions** into the `experiences` table (using `experience_type: 'activity'`) with a new set of family-relevant categories:
 
-**File: `src/hooks/useAISearch.ts`**
-- Remove the `isLikelyQuestion` mode-switching logic entirely for now
-- Always use `useGlobalSearch` as the primary search engine
-- Only activate AI mode when user explicitly presses an "Ask AI" button or types "?" prefix
-- This eliminates the mode-flipping that causes the jump
+| Activity | Category | Source |
+|----------|----------|--------|
+| Hanuman World Zipline | zipline | Already in DB |
+| Andamanda Water Park | waterpark | New seed |
+| Splash Jungle Water Park | waterpark | New seed |
+| Blue Tree Phuket (pool/activities) | waterpark | New seed |
+| Baan Teelanka (Upside Down House) | attraction | New seed |
+| Phuket Trickeye Museum | attraction | New seed |
+| Phuket Go-Kart Speedway (Kathu) | karting | New seed |
+| Phuket Wake Park | wakeboarding | Already in DB |
+| Phuket Shooting Range | attraction | New seed |
+| Flying Hanuman (separate from Hanuman World) | zipline | New seed |
+| Phuket Elephant Sanctuary | wildlife | Already in DB |
+| Mini Golf Phuket (Dino Park) | attraction | New seed |
+| Phuket Aquarium | attraction | New seed |
+| Thai Cooking Class for Kids | cooking_class | Already in DB |
+| Tiger Kingdom Phuket | wildlife | New seed |
+| Surf House Kata (FlowRider) | surfing | New seed |
+| Rawai Park (kids playground) | playground | New seed |
+| Kids Club at Laguna | playground | New seed |
+| Boat Avenue Family Market | attraction | New seed |
 
-**File: `src/components/search/InlineSearch.tsx`**
-- Remove the dual-mode rendering that switches between AI and search results
-- Use a single consistent results view
-- Add an "Ask AI" chip/button at the bottom of results for question-style queries
-- Fix the dropdown to use a stable height container with overflow scroll
+Also seed **education/childcare** entries for the practical side:
+- 2-3 international schools (British International, HeadStart, UWC Thailand)
+- 2-3 kindergartens/camps (Gecko Kids, Phuket International Kindergarten)
 
-### Phase 2: Create a Super Search Experience
+These will go into relevant existing tables or `experiences` with appropriate categories.
 
-**File: `src/components/search/InlineSearch.tsx` (rewrite)**
-- Stable dropdown that doesn't flicker between states
-- Show results immediately from `useGlobalSearch`
-- Group results by category (Property, Yachts, Tours, etc.) with section headers
-- Add "Ask AI" button that appears when query is 5+ words, triggering AI mode on demand
-- Recent searches + trending (already exists, keep)
+---
 
-**File: `src/hooks/useGlobalSearch.ts` (optimize)**
-- Add result caching with `useRef` to avoid re-fetching the same query
-- Batch results rendering instead of waiting for all 21 tables
-- Prioritize category matches (instant) over entity matches (slower)
+## Section 2: Enrich `catalog_life_map` Mappings
 
-### Phase 3: Wire AI Search Properly (Optional, separate task)
+Insert ~25 new mappings for `family_with_children` with updated weights:
 
-Create the missing `ai-smart-search` edge function using Lovable AI, or remove all AI search references until it's properly implemented. For now, Phase 1 removes the broken AI dependency.
+| Tier | Entity Type | Weight | Content |
+|------|-------------|--------|---------|
+| Essentials (top) | experience | 90 | Waterparks, Go-Kart, Ziplines |
+| Essentials | experience | 85 | Upside Down House, Aquarium, Dino Park |
+| Essentials | experience | 80 | Elephant Sanctuary, Cooking Class |
+| Fun & Active | tour | 70 | Island trips, ATV |
+| Dining | restaurant | 65 | Family-friendly restaurants |
+| Childcare | babysitter | 60 | Existing babysitters |
+| Education | school | 55 | International schools |
+| Education | kindergarten | 50 | Kindergartens, day camps |
+| Practical | clinic | 45 | Pediatric clinics |
+| Practical | property | 40 | Family villas |
+
+This ensures **activities appear first**, clinics and property move to "Also Useful" section.
+
+---
+
+## Section 3: Custom Section Ordering for Family Page
+
+Modify `LifeFlowPage.tsx` to support **situation-specific section ordering**. For `family_with_children`, sections will be arranged:
+
+1. **Fun & Activities** (experiences with categories: waterpark, karting, zipline, attraction, playground)
+2. **Tours & Nature** (tours: islands, elephant sanctuary, ATV)
+3. **Dining** (family-friendly restaurants)
+4. **Childcare** (babysitters, kindergartens)
+5. **Schools & Camps** (schools, education)
+6. **Health & Safety** (clinics) -- in "Also Useful"
+7. **Family Housing** (properties) -- in "Also Useful"
+
+Implementation: use the existing `weight` field from `catalog_life_map` to control ordering. The page already sorts by weight; we just need the new weights to reflect the correct priority.
+
+---
+
+## Section 4: Entity Type Enhancements
+
+Add missing entity types to `entityTypes.ts` if not already present:
+- `activity` (for standalone activities like karting, waterparks) -- or reuse `experience` type
+
+Add experience sub-categories to `experiencesTaxonomy.ts`:
+- `waterpark`, `karting`, `attraction`, `playground`
 
 ---
 
 ## Technical Details
 
-### Changes to `useAISearch.ts`
-- Make AI mode opt-in only (triggered by explicit action, not auto-detection)
-- Default behavior: always return `useGlobalSearch` results
-- Expose a `triggerAI()` function that the UI can call when user clicks "Ask AI"
+### Database Changes (SQL migration)
 
-### Changes to `InlineSearch.tsx`
-- Single rendering path: always show search results
-- Stable container: `min-h-[200px]` on the dropdown to prevent jump
-- Grouped results with category headers
-- "Ask AI" CTA at the bottom of results list
-- Smooth transitions without mode switching
+1. **Insert ~15 new experiences** into `experiences` table with:
+   - `experience_type: 'activity'`
+   - `category`: waterpark / karting / attraction / playground / wildlife
+   - `age_restriction: 0` (family-friendly)
+   - Real titles, descriptions, prices, locations
+   - `is_active: true`, `approval_status: 'approved'`
 
-### Changes to `useGlobalSearch.ts`
-- Add `lastQuery` ref to skip duplicate fetches
-- Cache results for 5 seconds to prevent re-fetch on re-renders
-- Priority ordering: synonym matches first, category matches second, entity results third
+2. **Insert ~25 new rows** into `catalog_life_map` linking new + existing entities to `family_with_children` situation (id: `47dd9683-4648-4ccb-acdb-060551b8379d`)
 
-### Files Modified
+3. **Update existing mappings**: Lower weights for clinic (from 80/75 to 45) and property (from 75/72 to 40) so they appear in "Also Useful"
+
+### Frontend Changes
+
+1. **`src/lib/taxonomies/experiencesTaxonomy.ts`**: Add `waterpark`, `karting`, `attraction`, `playground` categories
+
+2. **`src/pages/LifeFlowPage.tsx`**: Add situation-specific section priority config so `experience` and `tour` types render above `clinic` and `property` for family context. This is mostly already handled by weights, but we'll ensure the `isPrimaryEntityType` logic respects the actual weight ordering from the DB rather than the static config.
+
+### Files Changed
 | File | Change |
 |------|--------|
-| `src/hooks/useAISearch.ts` | Make AI opt-in, remove auto-detection |
-| `src/components/search/InlineSearch.tsx` | Single-mode rendering, grouped results, Ask AI button |
-| `src/hooks/useGlobalSearch.ts` | Add caching, prevent duplicate fetches |
+| SQL Migration | Seed ~15 experiences + ~25 catalog_life_map rows, update existing weights |
+| `src/lib/taxonomies/experiencesTaxonomy.ts` | Add 4 new categories |
+| `src/pages/LifeFlowPage.tsx` | Sort sections by average weight instead of static primary/secondary |
+| `src/hooks/useEnrichCatalogItems.ts` | No change needed (experience already supported) |
 
