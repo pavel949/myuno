@@ -97,18 +97,20 @@ export function ProjectCarouselCard({ project, className }: ProjectCarouselCardP
           </div>
         )}
 
-        {/* Min price */}
-        {project.minRentPrice && (
+        {/* Min price - from linked properties or from project itself */}
+        {(project.minRentPrice || project.priceFrom) && (
           <p className="text-sm">
             <span className="text-muted-foreground">{isRu ? 'от' : 'from'} </span>
             <span className="font-semibold text-primary">
-              {formatPrice(project.minRentPrice)}
+              {formatPrice(project.minRentPrice || project.priceFrom!)}
             </span>
-            <span className="text-muted-foreground">{isRu ? '/мес' : '/mo'}</span>
+            {project.minRentPrice && (
+              <span className="text-muted-foreground">{isRu ? '/мес' : '/mo'}</span>
+            )}
           </p>
         )}
 
-        {!hasProperties && (
+        {!hasProperties && !project.priceFrom && (
           <p className="text-xs text-muted-foreground italic">
             {isRu ? 'Скоро появятся объекты' : 'Properties coming soon'}
           </p>

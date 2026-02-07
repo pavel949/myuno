@@ -18,6 +18,7 @@ export interface ProjectWithStats {
   minRentPrice: number | null;
   minSalePrice: number | null;
   amenities: string[] | null;
+  priceFrom: number | null;
 }
 
 export function usePropertyProjectsWithStats() {
@@ -27,7 +28,7 @@ export function usePropertyProjectsWithStats() {
       // Fetch projects first
       const { data: projects, error: projectsError } = await supabase
         .from('property_projects')
-        .select('id, name_en, name_ru, cover_image, district, is_featured, amenities')
+        .select('id, name_en, name_ru, cover_image, district, is_featured, amenities, price_from')
         .eq('is_active', true)
         .order('is_featured', { ascending: false })
         .order('name_en');
@@ -97,6 +98,7 @@ export function usePropertyProjectsWithStats() {
           district: p.district,
           isFeatured: p.is_featured || false,
           amenities: p.amenities,
+          priceFrom: (p as any).price_from || null,
           ...stats,
         };
       });

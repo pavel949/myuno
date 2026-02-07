@@ -33,6 +33,7 @@ export const APP_ROUTES = {
   // Property
   PROPERTY: '/property',
   PROPERTY_DETAIL: (id: string) => `/property/${id}`,
+  COMPLEXES: '/complexes',
   
   // Marketplace
   MARKET: '/market',

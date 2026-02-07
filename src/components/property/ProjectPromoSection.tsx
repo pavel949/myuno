@@ -59,20 +59,15 @@ export function ProjectPromoSection({ className, mode = 'rent' }: ProjectPromoSe
 
   const { title, subtitle } = getPromoText();
 
-  // Sort and filter based on mode
+  // Sort based on mode — show ALL projects, prioritize those with listings
   const sortedProjects = React.useMemo(() => {
     if (!projects) return [];
     
-    let filtered = [...projects];
-    
-    // In rent mode, prefer projects with high rent count
-    if (mode === 'rent') {
-      filtered = filtered.filter(p => p.rentCount > 0);
-    }
-    
-    return filtered.sort((a, b) => {
+    return [...projects].sort((a, b) => {
+      // Featured first
       if (a.isFeatured !== b.isFeatured) return b.isFeatured ? 1 : -1;
       
+      // Then by listing count (projects with listings first)
       if (mode === 'rent') {
         return b.rentCount - a.rentCount;
       }
