@@ -1,5 +1,8 @@
 project_id = "kakkwibljrjsawxgnupk"
 
+[functions.geocode-address]
+verify_jwt = false
+
 [functions.get-mapbox-token]
 verify_jwt = false
 
