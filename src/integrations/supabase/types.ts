@@ -615,6 +615,7 @@ export type Database = {
           service_type: string
           sku: string
           sort_order: number | null
+          supplier_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -644,6 +645,7 @@ export type Database = {
           service_type: string
           sku: string
           sort_order?: number | null
+          supplier_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -673,9 +675,18 @@ export type Database = {
           service_type?: string
           sku?: string
           sort_order?: number | null
+          supplier_id?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "airport_services_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "airport_suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       airport_suppliers: {
         Row: {

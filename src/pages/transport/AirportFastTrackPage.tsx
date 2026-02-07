@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plane, Shield, Clock, Users, Plus, Minus, ChevronLeft, Loader2, AlertCircle, Check, Star, Crown, Sparkles } from 'lucide-react';
+import { Plane, Shield, Clock, Users, Plus, Minus, ChevronLeft, Loader2, AlertCircle, Check, Star, Crown, Sparkles, Globe } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { useAirportServices, type AirportService } from '@/hooks/useAirportServices';
+import { useAirportServices, type AirportService, type AirportSupplier } from '@/hooks/useAirportServices';
 import { TransferUpsellScreen } from '@/components/transport/TransferUpsellScreen';
 import { PriceDisplay } from '@/components/uno/PriceDisplay';
 import { cn } from '@/lib/utils';
@@ -57,7 +57,8 @@ export default function AirportFastTrackPage() {
   const { toast } = useToast();
   const isRu = language === 'ru';
 
-  const { fastTrackServices, addons, bundles, isLoading } = useAirportServices();
+  const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(null);
+  const { fastTrackServices, addons, bundles, suppliers, isLoading } = useAirportServices('HKT', selectedSupplierId || undefined);
 
   // ─── Form State ───
   const [direction, setDirection] = useState<Direction>('arrival');
@@ -73,7 +74,7 @@ export default function AirportFastTrackPage() {
   const [passengers, setPassengers] = useState<PassengerData[]>([{ ...emptyPassenger }]);
   const [selectedAddons, setSelectedAddons] = useState<Set<string>>(new Set());
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [step, setStep] = useState<'service' | 'passenger' | 'review'>('service');
+  const [step, setStep] = useState<'supplier' | 'service' | 'passenger' | 'review'>('supplier');
   const [showUpsell, setShowUpsell] = useState(false);
 
   // ─── Derived ───
@@ -126,6 +127,13 @@ export default function AirportFastTrackPage() {
     setDirection(d);
     setSelectedServiceId(null);
     setSelectedAddons(new Set());
+  };
+
+  const handleSupplierSelect = (supplierId: string) => {
+    setSelectedSupplierId(supplierId);
+    setSelectedServiceId(null);
+    setSelectedAddons(new Set());
+    setStep('service');
   };
 
   // ─── Handlers ───
@@ -185,7 +193,9 @@ export default function AirportFastTrackPage() {
   };
 
   const handleNext = () => {
-    if (step === 'service') {
+    if (step === 'supplier') {
+      // supplier step doesn't use handleNext, selection auto-advances
+    } else if (step === 'service') {
       if (validateStep('passenger')) setStep('passenger');
     } else if (step === 'passenger') {
       if (validateStep('review')) setStep('review');
@@ -193,7 +203,8 @@ export default function AirportFastTrackPage() {
   };
 
   const handleBack = () => {
-    if (step === 'passenger') setStep('service');
+    if (step === 'service') setStep('supplier');
+    else if (step === 'passenger') setStep('service');
     else if (step === 'review') setStep('passenger');
     else navigate(-1);
   };
@@ -250,7 +261,7 @@ export default function AirportFastTrackPage() {
           </Button>
         </div>
 
-        {/* Hero with Coral branding */}
+        {/* Hero */}
         <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-background px-4 py-6">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
@@ -261,7 +272,7 @@ export default function AirportFastTrackPage() {
                 {isRu ? 'VIP Сервис — Аэропорт Пхукет' : 'VIP Service — Phuket Airport'}
               </h1>
               <p className="text-sm text-muted-foreground">
-                {isRu ? 'Coral Executive Lounge · с 06:00 до 24:00' : 'Coral Executive Lounge · 06:00–24:00'}
+                {isRu ? 'Fast Track и лаунжи от лучших поставщиков' : 'Fast Track & lounges from top providers'}
               </p>
             </div>
           </div>
@@ -284,19 +295,79 @@ export default function AirportFastTrackPage() {
         {/* Step indicator */}
         <div className="px-4 py-3">
           <div className="flex gap-1">
-            {['service', 'passenger', 'review'].map((s, i) => (
+            {['supplier', 'service', 'passenger', 'review'].map((s, i) => (
               <div key={s} className={cn(
                 "h-1 flex-1 rounded-full transition-colors",
-                i <= ['service', 'passenger', 'review'].indexOf(step) ? "bg-primary" : "bg-muted"
+                i <= ['supplier', 'service', 'passenger', 'review'].indexOf(step) ? "bg-primary" : "bg-muted"
               )} />
             ))}
           </div>
           <p className="text-xs text-muted-foreground mt-1">
-            {step === 'service' && (isRu ? 'Шаг 1: Рейс и услуги' : 'Step 1: Flight & services')}
-            {step === 'passenger' && (isRu ? 'Шаг 2: Данные пассажиров' : 'Step 2: Passenger details')}
-            {step === 'review' && (isRu ? 'Шаг 3: Подтверждение' : 'Step 3: Confirmation')}
+            {step === 'supplier' && (isRu ? 'Шаг 1: Выбор поставщика' : 'Step 1: Choose provider')}
+            {step === 'service' && (isRu ? 'Шаг 2: Рейс и услуги' : 'Step 2: Flight & services')}
+            {step === 'passenger' && (isRu ? 'Шаг 3: Данные пассажиров' : 'Step 3: Passenger details')}
+            {step === 'review' && (isRu ? 'Шаг 4: Подтверждение' : 'Step 4: Confirmation')}
           </p>
         </div>
+
+        {/* ═══ Step 0: Supplier ═══ */}
+        {step === 'supplier' && (
+          <div className="px-4 space-y-4">
+            <Label>{isRu ? 'Выберите поставщика услуг' : 'Choose service provider'}</Label>
+            <div className="space-y-3">
+              {suppliers.map(supplier => {
+                const isCoral = supplier.name_en.includes('Coral');
+                const isPFT = supplier.name_en.includes('Phuket Fast Track');
+                return (
+                  <button
+                    key={supplier.id}
+                    type="button"
+                    onClick={() => handleSupplierSelect(supplier.id)}
+                    className={cn(
+                      "w-full p-4 rounded-2xl border-2 text-left transition-all",
+                      selectedSupplierId === supplier.id
+                        ? "border-primary bg-primary/5 shadow-sm"
+                        : "border-border hover:border-primary/30"
+                    )}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={cn(
+                        "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+                        isCoral ? "bg-primary/10 text-primary" : "bg-secondary text-secondary-foreground"
+                      )}>
+                        {isCoral ? <Crown className="w-5 h-5" /> : <Globe className="w-5 h-5" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-sm">{isRu ? (supplier.name_ru || supplier.name_en) : supplier.name_en}</h3>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {isCoral && (isRu ? 'Собственные лаунжи 3 уровней · Локальный премиум' : 'Own 3-tier lounges · Local premium')}
+                          {isPFT && (isRu ? 'Глобальная сеть 350+ аэропортов · Рейтинг 4.7/5' : 'Global network 350+ airports · 4.7/5 rating')}
+                        </p>
+                        <div className="flex gap-1.5 mt-2 flex-wrap">
+                          {isCoral && (
+                            <>
+                              <Badge variant="outline" className="text-[10px]">Executive</Badge>
+                              <Badge variant="outline" className="text-[10px]">Premium</Badge>
+                              <Badge variant="outline" className="text-[10px]">First Class</Badge>
+                            </>
+                          )}
+                          {isPFT && (
+                            <>
+                              <Badge variant="outline" className="text-[10px]">
+                                <Star className="w-2.5 h-2.5 mr-0.5" />4.7/5 Viator
+                              </Badge>
+                              <Badge variant="outline" className="text-[10px]">{isRu ? 'Трансферы' : 'Transfers'}</Badge>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* ═══ Step 1: Service ═══ */}
         {step === 'service' && (
@@ -657,7 +728,9 @@ export default function AirportFastTrackPage() {
             <div className="p-4 rounded-2xl border bg-card space-y-3">
               <div className="flex items-center gap-2 mb-1">
                 <Shield className="w-4 h-4 text-primary" />
-                <span className="text-xs text-muted-foreground font-medium">Coral Executive Lounge</span>
+                <span className="text-xs text-muted-foreground font-medium">
+                  {suppliers.find(s => s.id === selectedSupplierId)?.name_en || 'Provider'}
+                </span>
               </div>
               <h3 className="font-semibold">{isRu ? 'Детали бронирования' : 'Booking Summary'}</h3>
               <div className="space-y-2 text-sm">
@@ -711,23 +784,25 @@ export default function AirportFastTrackPage() {
       </div>
 
       {/* Bottom bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 pb-safe z-50">
-        <div className="flex items-center justify-between mb-2">
-          <div>
-            <p className="text-xs text-muted-foreground">{isRu ? 'Итого' : 'Total'}</p>
-            <PriceDisplay price={pricing.total} size="lg" sourceCurrency="THB" />
+      {step !== 'supplier' && (
+        <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 pb-safe z-50">
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <p className="text-xs text-muted-foreground">{isRu ? 'Итого' : 'Total'}</p>
+              <PriceDisplay price={pricing.total} size="lg" sourceCurrency="THB" />
+            </div>
+            {step === 'review' ? (
+              <Button onClick={handleSubmit} className="px-8" disabled={cutoffViolated}>
+                {isRu ? 'Забронировать' : 'Book Now'}
+              </Button>
+            ) : (
+              <Button onClick={handleNext} className="px-8" disabled={cutoffViolated || (!selectedServiceId && step === 'service')}>
+                {isRu ? 'Далее' : 'Next'}
+              </Button>
+            )}
           </div>
-          {step === 'review' ? (
-            <Button onClick={handleSubmit} className="px-8" disabled={cutoffViolated}>
-              {isRu ? 'Забронировать' : 'Book Now'}
-            </Button>
-          ) : (
-            <Button onClick={handleNext} className="px-8" disabled={cutoffViolated || (!selectedServiceId && step === 'service')}>
-              {isRu ? 'Далее' : 'Next'}
-            </Button>
-          )}
         </div>
-      </div>
+      )}
 
       {/* Transfer Upsell Overlay */}
       {showUpsell && (
