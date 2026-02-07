@@ -38,6 +38,10 @@ export interface ItemCardProps {
   badge?: { text: string; className?: string };
   variant?: 'horizontal' | 'vertical';
   className?: string;
+  /** Optional CTA button label. When provided, renders a small action button. */
+  ctaLabel?: string;
+  /** Optional CTA click handler. Defaults to onClick if not provided. */
+  onCtaClick?: () => void;
 }
 
 export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
@@ -65,6 +69,8 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
       badge,
       variant = 'horizontal',
       className,
+      ctaLabel,
+      onCtaClick,
     },
     ref
   ) => {
@@ -274,21 +280,31 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
               ))}
             </div>
 
-            {/* Price */}
-            {price !== undefined && (
-              <div className="text-right">
-                {pricePrefix && <span className="text-xs text-muted-foreground mr-1">{pricePrefix}</span>}
-                <span className="text-base font-bold text-primary">
-                  {symbol}{price.toLocaleString()}
-                </span>
-                {priceUnit && <span className="text-xs text-muted-foreground">{priceUnit}</span>}
-                {priceLabel && (
-                  <span className="text-xs text-muted-foreground">
-                    {priceLabel}
+            {/* Price + CTA */}
+            <div className="flex items-center gap-2">
+              {price !== undefined && (
+                <div className="text-right">
+                  {pricePrefix && <span className="text-xs text-muted-foreground mr-1">{pricePrefix}</span>}
+                  <span className="text-base font-bold text-primary">
+                    {symbol}{price.toLocaleString()}
                   </span>
-                )}
-              </div>
-            )}
+                  {priceUnit && <span className="text-xs text-muted-foreground">{priceUnit}</span>}
+                  {priceLabel && (
+                    <span className="text-xs text-muted-foreground">
+                      {priceLabel}
+                    </span>
+                  )}
+                </div>
+              )}
+              {ctaLabel && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); (onCtaClick || onClick)?.(); }}
+                  className="text-[11px] font-semibold text-primary-foreground bg-primary px-2.5 py-1 rounded-md whitespace-nowrap flex-shrink-0"
+                >
+                  {ctaLabel}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

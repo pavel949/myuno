@@ -7,10 +7,25 @@ import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getEntityType } from '@/lib/config/entityTypes';
-import { Shield, Star, Award, Clock } from 'lucide-react';
+import { Shield, Star, Award, Clock, ArrowRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import type { EnrichedCatalogItem } from '@/hooks/useEnrichCatalogItems';
+
+const CTA_LABELS: Record<string, { en: string; ru: string }> = {
+  experience: { en: 'Book', ru: 'Забронировать' },
+  tour: { en: 'Book', ru: 'Забронировать' },
+  restaurant: { en: 'Reserve', ru: 'Столик' },
+  property: { en: 'View', ru: 'Смотреть' },
+  service: { en: 'Book', ru: 'Записаться' },
+  salon: { en: 'Book', ru: 'Записаться' },
+  clinic: { en: 'Visit', ru: 'Записаться' },
+  gym: { en: 'Join', ru: 'Записаться' },
+  event: { en: 'Tickets', ru: 'Билеты' },
+  flower_shop: { en: 'Order', ru: 'Заказать' },
+  marketplace_product: { en: 'Buy', ru: 'Купить' },
+};
 
 interface LifeFlowEntityCardProps {
   item: EnrichedCatalogItem;
@@ -133,6 +148,19 @@ export function LifeFlowEntityCard({ item, isPrimary, index }: LifeFlowEntityCar
             </p>
           )}
         </div>
+
+        {/* CTA Button */}
+        <Button
+          size="sm"
+          className="w-full mt-1.5 h-7 text-xs gap-1"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleClick();
+          }}
+        >
+          {(CTA_LABELS[item.entity_type] || { en: 'Open', ru: 'Открыть' })[isRu ? 'ru' : 'en']}
+          <ArrowRight className="w-3 h-3" />
+        </Button>
       </div>
     </motion.button>
   );

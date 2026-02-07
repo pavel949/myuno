@@ -13,6 +13,7 @@ import { useExperience, formatDuration, getDifficultyColor } from '@/hooks/useEx
 import { useExperiencePricing } from '@/hooks/useExperiencePricing';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { CrossSellSection } from '@/components/crosssell';
+import { getContextualCrossSell } from '@/lib/crossSellConfig';
 import { cn } from '@/lib/utils';
 
 export default function ExperienceDetail() {
@@ -403,7 +404,21 @@ export default function ExperienceDetail() {
           </Card>
         )}
 
-        {/* Cross-sell */}
+        {/* Contextual Cross-sell based on category */}
+        {experience.category && (() => {
+          const contextItems = getContextualCrossSell(experience.category);
+          if (contextItems.length === 0) return null;
+          return contextItems.map((item, idx) => (
+            <CrossSellSection
+              key={idx}
+              currentVertical={item.vertical}
+              title={{ en: item.titleEn, ru: item.titleRu }}
+              maxItems={3}
+            />
+          ));
+        })()}
+
+        {/* Generic Cross-sell */}
         <CrossSellSection currentVertical="experiences" />
       </div>
 

@@ -65,7 +65,15 @@ export function ToursSection() {
                 <span>•</span>
                 <span>{tour.duration_hours}h</span>
               </div>
-              <p className="text-primary font-bold mt-2">{formatPrice(tour.price || 0)}</p>
+              <div className="flex items-center justify-between mt-2">
+                <p className="text-primary font-bold">{formatPrice(tour.price || 0)}</p>
+                <button
+                  onClick={(e) => { e.stopPropagation(); navigate(`/tours/${tour.id}`); }}
+                  className="text-[11px] font-semibold text-primary-foreground bg-primary px-2.5 py-1 rounded-md"
+                >
+                  {language === 'ru' ? 'Забронировать' : 'Book'}
+                </button>
+              </div>
             </div>
           </div>
         ))}

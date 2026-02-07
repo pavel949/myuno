@@ -128,3 +128,54 @@ export function getCrossSellLinks(vertical: string, maxItems = 4): CrossSellLink
   const links = CROSS_SELL_MATRIX[vertical] || [];
   return links.slice(0, maxItems);
 }
+
+// Contextual cross-sell for experience categories
+export interface ContextualCrossSellItem {
+  vertical: string;
+  titleEn: string;
+  titleRu: string;
+}
+
+export const CONTEXTUAL_CROSS_SELL: Record<string, ContextualCrossSellItem[]> = {
+  zipline: [
+    { vertical: 'restaurants', titleEn: 'Celebrate After Your Adventure!', titleRu: 'Отпразднуйте после приключения!' },
+    { vertical: 'tours', titleEn: 'More Adventures Nearby', titleRu: 'Ещё приключения рядом' },
+  ],
+  adventure: [
+    { vertical: 'restaurants', titleEn: 'Celebrate After Your Adventure!', titleRu: 'Отпразднуйте после приключения!' },
+    { vertical: 'tours', titleEn: 'More Adventures Nearby', titleRu: 'Ещё приключения рядом' },
+  ],
+  waterpark: [
+    { vertical: 'restaurants', titleEn: 'Hungry After the Slides?', titleRu: 'Проголодались после горок?' },
+    { vertical: 'market', titleEn: 'Beach Gear & Sunscreen', titleRu: 'Пляжные товары' },
+  ],
+  wildlife: [
+    { vertical: 'tours', titleEn: 'More Nature Tours', titleRu: 'Ещё туры на природу' },
+    { vertical: 'restaurants', titleEn: 'Thai Dinner Nearby', titleRu: 'Тайский ужин рядом' },
+  ],
+  cooking_class: [
+    { vertical: 'restaurants', titleEn: 'Try the Cuisine', titleRu: 'Попробуйте кухню' },
+    { vertical: 'market', titleEn: 'Ingredients & Cookware', titleRu: 'Ингредиенты и посуда' },
+  ],
+  karting: [
+    { vertical: 'restaurants', titleEn: 'Refuel After the Race', titleRu: 'Перекусите после гонки' },
+    { vertical: 'experiences', titleEn: 'More Thrills', titleRu: 'Ещё адреналин' },
+  ],
+  surfing: [
+    { vertical: 'restaurants', titleEn: 'Refuel After the Waves', titleRu: 'Перекусите после волн' },
+    { vertical: 'market', titleEn: 'Surf Gear', titleRu: 'Снаряжение для сёрфинга' },
+  ],
+  attraction: [
+    { vertical: 'restaurants', titleEn: 'Family Dining Nearby', titleRu: 'Семейный ужин рядом' },
+    { vertical: 'tours', titleEn: 'Explore More of Phuket', titleRu: 'Ещё больше Пхукета' },
+  ],
+  playground: [
+    { vertical: 'restaurants', titleEn: 'Kid-Friendly Restaurants', titleRu: 'Рестораны для детей' },
+    { vertical: 'experiences', titleEn: 'More Family Fun', titleRu: 'Ещё развлечения для семьи' },
+  ],
+};
+
+export function getContextualCrossSell(category: string | null | undefined): ContextualCrossSellItem[] {
+  if (!category) return [];
+  return CONTEXTUAL_CROSS_SELL[category] || [];
+}

@@ -229,6 +229,7 @@ export default function EventsIndex() {
                 ...(event.is_recurring ? [{ icon: Users, label: language === 'ru' ? 'Еженедельно' : 'Weekly' }] : []),
               ]}
               onClick={() => navigate(`/events/${event.id}`)}
+              ctaLabel={language === 'ru' ? 'Билеты' : 'Get Tickets'}
             />
           );
         })}
