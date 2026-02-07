@@ -5,9 +5,10 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { MiniAppLayout, MiniAppQuickGrid, ItemCard } from '@/components/miniapp';
 import { YachtFiltersKlook, type DatePreset, type SortOption } from '@/components/yachts/YachtFiltersKlook';
 import { useYachts } from '@/hooks/useYachts';
-import { matchesFilter, matchesPriceLevel } from '@/lib/filterUtils';
+import { matchesFilter } from '@/lib/filterUtils';
 import { CrossSellSection } from '@/components/crosssell';
 import { VerticalCTA } from '@/components/leads/VerticalCTA';
+import { mapYachtToCardProps } from '@/lib/adapters/yachtAdapters';
 
 const popularRoutes = [
   { icon: '🏝️', label: 'Phi Phi', path: '/yachts?route=phi-phi' },
@@ -45,8 +46,8 @@ export default function YachtsIndex() {
         if (!name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       }
       
-      // Price filter
-      const price = y.price_full_day || y.price_half_day || 0;
+      // Price filter - use "from" price (lowest available)
+      const price = y.price_half_day || y.price_full_day || y.price_sunset || y.price_overnight || 0;
       if (price < priceRange[0] || price > priceRange[1]) return false;
       
       // Capacity filter
@@ -76,21 +77,20 @@ export default function YachtsIndex() {
         if (!hasExperience) return false;
       }
       
-      // Duration filter (inline quick filter)
+      // Duration filter
       if (selectedDuration.length > 0) {
-        // Check if yacht supports the selected duration options
         const hasDuration = selectedDuration.some(dur => {
           switch (dur) {
             case 'half-day': return y.price_half_day && y.price_half_day > 0;
             case 'full-day': return y.price_full_day && y.price_full_day > 0;
-            case 'overnight': return y.cabins && y.cabins > 0;
+            case 'overnight': return y.price_overnight && y.price_overnight > 0;
             default: return true;
           }
         });
         if (!hasDuration) return false;
       }
       
-      // Quick filters (drawer)
+      // Quick filters
       if (selectedQuickFilters.includes('crew') && !y.has_crew) return false;
       if (selectedQuickFilters.includes('catering') && !y.has_catering) return false;
       
@@ -101,11 +101,15 @@ export default function YachtsIndex() {
     results.sort((a, b) => {
       switch (sortBy) {
         case 'price_asc':
-          return (a.price_full_day || 0) - (b.price_full_day || 0);
+          return (a.price_half_day || a.price_full_day || 0) - (b.price_half_day || b.price_full_day || 0);
         case 'price_desc':
-          return (b.price_full_day || 0) - (a.price_full_day || 0);
+          return (b.price_half_day || b.price_full_day || 0) - (a.price_half_day || a.price_full_day || 0);
         case 'capacity':
           return (b.capacity || 0) - (a.capacity || 0);
+        case 'length':
+          return (b.length_meters || 0) - (a.length_meters || 0);
+        case 'newest':
+          return (b.year_built || 0) - (a.year_built || 0);
         case 'rating':
         default:
           if (a.is_featured !== b.is_featured) return a.is_featured ? -1 : 1;
@@ -138,7 +142,6 @@ export default function YachtsIndex() {
       resultsCount={filteredYachts.length}
       resultsLabel={language === 'ru' ? 'Доступные яхты' : 'Available Yachts'}
     >
-      {/* Klook-style Unified Filters */}
       <YachtFiltersKlook
         selectedCategory={selectedCategory}
         onCategoryChange={setSelectedCategory}
@@ -175,28 +178,28 @@ export default function YachtsIndex() {
         }))} columns={4} />
       </div>
 
-      {/* Results Grid */}
+      {/* Results Grid - using adapter */}
       <div className="grid gap-4 mt-6">
-        {filteredYachts.map((yacht) => (
-          <ItemCard
-            key={yacht.id}
-            title={language === 'ru' ? yacht.name_ru : yacht.name_en}
-            image={yacht.cover_image || 'https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?w=600'}
-            price={yacht.price_full_day || yacht.price_half_day || 0}
-            priceLabel={`/${language === 'ru' ? 'день' : 'day'}`}
-            rating={yacht.rating}
-            reviewCount={yacht.review_count}
-            location={language === 'ru' ? yacht.location_ru : yacht.location_name}
-            meta={[
-              { icon: Users, value: yacht.capacity || 0 },
-              { icon: Anchor, value: `${yacht.capacity}p` },
-            ]}
-            tags={yacht.features_en?.slice(0, 2) || []}
-            isFeatured={yacht.is_featured}
-            isVerified={yacht.is_verified}
-            onClick={() => navigate(`/yachts/${yacht.id}`)}
-          />
-        ))}
+        {filteredYachts.map((yacht) => {
+          const card = mapYachtToCardProps(yacht, language);
+          return (
+            <ItemCard
+              key={yacht.id}
+              title={card.title}
+              image={card.image}
+              price={card.price || 0}
+              priceLabel={card.priceLabel}
+              rating={card.rating}
+              reviewCount={card.reviewCount}
+              location={card.location}
+              meta={card.meta.map(m => ({ icon: m.icon, value: m.label }))}
+              tags={card.tags}
+              isFeatured={card.isFeatured}
+              isVerified={card.isVerified}
+              onClick={() => navigate(`/yachts/${yacht.id}`)}
+            />
+          );
+        })}
       </div>
       
       <VerticalCTA vertical="yachts" className="my-6" />

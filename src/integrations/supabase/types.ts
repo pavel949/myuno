@@ -18947,6 +18947,8 @@ export type Database = {
           description_ru: string | null
           draft: string | null
           engines: string | null
+          exclusions_en: string[] | null
+          exclusions_ru: string[] | null
           features_en: string[] | null
           features_ru: string[] | null
           fuel_capacity: string | null
@@ -19014,6 +19016,8 @@ export type Database = {
           description_ru?: string | null
           draft?: string | null
           engines?: string | null
+          exclusions_en?: string[] | null
+          exclusions_ru?: string[] | null
           features_en?: string[] | null
           features_ru?: string[] | null
           fuel_capacity?: string | null
@@ -19081,6 +19085,8 @@ export type Database = {
           description_ru?: string | null
           draft?: string | null
           engines?: string | null
+          exclusions_en?: string[] | null
+          exclusions_ru?: string[] | null
           features_en?: string[] | null
           features_ru?: string[] | null
           fuel_capacity?: string | null

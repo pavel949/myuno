@@ -28,3 +28,10 @@ export {
   getVehicleSpecs,
   type VehicleCardProps,
 } from './vehicleAdapters';
+
+// Yacht adapters
+export {
+  mapYachtToCardProps,
+  mapYachtToBookingContext,
+  type YachtCardProps,
+} from './yachtAdapters';
