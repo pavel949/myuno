@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format, addDays } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
-import { Calendar, Clock, Users, ShoppingCart, Zap, Check, Anchor, Sun, Moon, Sunset } from 'lucide-react';
+import { Calendar, Clock, Users, ShoppingCart, Zap, Check, Anchor, Sun, Moon, Sunset, Shield } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
@@ -147,7 +147,7 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
                 </Button>
                 <Button className="gap-2">
                   <Zap className="w-4 h-4" />
-                  {language === 'ru' ? 'Забронировать' : 'Book Now'}
+                  {language === 'ru' ? 'Выбрать дату' : 'Choose Date'}
                 </Button>
               </div>
             </SheetTrigger>
@@ -156,17 +156,17 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
               <SheetHeader className="text-left pb-4 border-b">
                 <SheetTitle className="flex items-center gap-2">
                   <Anchor className="w-5 h-5 text-primary" />
-                  {language === 'ru' ? 'Бронирование яхты' : 'Book Yacht'}
+                  {language === 'ru' ? 'Спланируйте морской день' : 'Plan Your Sea Day'}
                 </SheetTitle>
                 <p className="text-sm text-muted-foreground">{yachtName}</p>
               </SheetHeader>
               
               <div className="overflow-y-auto py-4 space-y-6 pb-32">
-                {/* Charter Type Selection - all available types */}
+                {/* Charter Type Selection */}
                 <div>
                   <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
                     <Clock className="w-4 h-4 text-muted-foreground" />
-                    {language === 'ru' ? 'Тип аренды' : 'Charter Type'}
+                    {language === 'ru' ? 'Какой формат?' : 'What experience?'}
                   </h4>
                   <div className={cn("grid gap-2", charterOptions.length <= 2 ? "grid-cols-2" : "grid-cols-2")}>
                     {charterOptions.map((option) => {
@@ -202,7 +202,7 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
                 <div>
                   <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-muted-foreground" />
-                    {language === 'ru' ? 'Выберите дату' : 'Select Date'}
+                    {language === 'ru' ? 'Когда?' : 'When?'}
                   </h4>
                   
                   {!showCalendar ? (
@@ -283,7 +283,7 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
                   <div>
                     <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
                       <Users className="w-4 h-4 text-muted-foreground" />
-                      {language === 'ru' ? 'Количество гостей' : 'Number of Guests'}
+                      {language === 'ru' ? 'Сколько гостей?' : 'How many guests?'}
                     </h4>
                     <div className="flex items-center gap-4 bg-muted/50 rounded-xl p-3">
                       <button
@@ -321,9 +321,22 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
                     </div>
                   </div>
                 )}
+
+                {/* Trust banner */}
+                <div className="flex items-center gap-3 p-3 bg-emerald-50/60 dark:bg-emerald-950/20 rounded-xl border border-emerald-200/50 dark:border-emerald-800/30">
+                  <Shield className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                  <div>
+                    <p className="text-xs font-medium text-emerald-800 dark:text-emerald-300">
+                      {language === 'ru' ? 'Защищено myUNO' : 'Protected by myUNO'}
+                    </p>
+                    <p className="text-[11px] text-emerald-700/70 dark:text-emerald-400/60">
+                      {language === 'ru' ? 'Проверенный оператор • Экипаж • Страховка' : 'Verified operator • Crew • Insurance'}
+                    </p>
+                  </div>
+                </div>
               </div>
 
-              {/* Action Buttons */}
+              {/* Action Buttons — intent-based CTA */}
               <div className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t">
                 <div className="flex gap-3">
                   <Button variant="outline" className="flex-1 h-12 gap-2" disabled={!canProceed || isInCart} onClick={handleAddToCart}>

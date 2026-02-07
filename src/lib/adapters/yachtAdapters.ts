@@ -3,7 +3,7 @@
  * Ensures consistency between DB schema and UI components
  */
 
-import { Users, Anchor, Ruler, Calendar } from 'lucide-react';
+import { Users, Anchor, Ruler, Calendar, Clock } from 'lucide-react';
 import type { Yacht } from '@/hooks/useYachts';
 import { getCurrencySymbol } from '@/lib/config/currencies';
 
@@ -12,6 +12,7 @@ export interface YachtCardProps {
   image: string;
   title: string;
   subtitle?: string;
+  experienceLabel?: string;
   rating?: number;
   reviewCount?: number;
   price?: number;
@@ -36,6 +37,29 @@ const YACHT_TYPE_LABELS: Record<string, { en: string; ru: string }> = {
 };
 
 /**
+ * Derive an experience label based on yacht attributes
+ * This creates intent-based framing instead of asset-based
+ */
+function getExperienceLabel(yacht: Yacht, lang: 'en' | 'ru'): string | undefined {
+  const cap = yacht.capacity || 0;
+  const hasSunset = yacht.price_sunset && yacht.price_sunset > 0;
+  const hasOvernight = yacht.price_overnight && yacht.price_overnight > 0;
+  const isLuxury = yacht.yacht_type === 'superyacht' || (yacht.length_meters && yacht.length_meters >= 25);
+  const isSmall = cap <= 6;
+  const isFamily = cap >= 8 && cap <= 15;
+  const isBig = cap > 15;
+
+  if (hasSunset && isSmall) return lang === 'ru' ? '🌅 Романтический закат' : '🌅 Perfect for sunset';
+  if (hasOvernight && isLuxury) return lang === 'ru' ? '✨ VIP-круиз с ночёвкой' : '✨ VIP overnight cruise';
+  if (isLuxury) return lang === 'ru' ? '💎 Премиум-опыт' : '💎 Premium experience';
+  if (isFamily) return lang === 'ru' ? '👨‍👩‍👧‍👦 Семейный день на море' : '👨‍👩‍👧‍👦 Family sea day';
+  if (isBig) return lang === 'ru' ? '🎉 Идеально для праздника' : '🎉 Great for celebrations';
+  if (hasSunset) return lang === 'ru' ? '🌅 Закатный круиз' : '🌅 Sunset cruise';
+  if (isSmall) return lang === 'ru' ? '🏝️ Уютный побег' : '🏝️ Cozy escape';
+  return undefined;
+}
+
+/**
  * Get the lowest available price ("from" price logic)
  */
 function getFromPrice(yacht: Yacht): { price: number; label: { en: string; ru: string } } {
@@ -47,8 +71,6 @@ function getFromPrice(yacht: Yacht): { price: number; label: { en: string; ru: s
   ].filter(p => p.value && p.value > 0);
 
   if (prices.length === 0) return { price: 0, label: { en: '', ru: '' } };
-
-  // Return cheapest option
   prices.sort((a, b) => (a.value || 0) - (b.value || 0));
   return { price: prices[0].value!, label: prices[0].label };
 }
@@ -66,6 +88,24 @@ function getCharterTypes(yacht: Yacht): string[] {
 }
 
 /**
+ * Duration summary for card display
+ */
+function getDurationLabel(yacht: Yacht, lang: 'en' | 'ru'): string | undefined {
+  const types = getCharterTypes(yacht);
+  if (types.length === 0) return undefined;
+  const durationMap: Record<string, { en: string; ru: string }> = {
+    half_day: { en: '4h', ru: '4ч' },
+    full_day: { en: '8h', ru: '8ч' },
+    sunset: { en: '3h', ru: '3ч' },
+    overnight: { en: '24h', ru: '24ч' },
+  };
+  const shortest = types[0];
+  const longest = types[types.length - 1];
+  if (shortest === longest) return durationMap[shortest]?.[lang];
+  return `${durationMap[shortest]?.[lang]}–${durationMap[longest]?.[lang]}`;
+}
+
+/**
  * Map a Yacht from DB to card props
  */
 export function mapYachtToCardProps(
@@ -77,11 +117,15 @@ export function mapYachtToCardProps(
   const fromPrice = getFromPrice(yacht);
   const typeLabel = YACHT_TYPE_LABELS[yacht.yacht_type] || { en: yacht.yacht_type, ru: yacht.yacht_type };
 
-  // Build meta array
   const meta: YachtCardProps['meta'] = [];
 
   if (yacht.capacity) {
     meta.push({ icon: Users, label: `${yacht.capacity} ${lang === 'ru' ? 'гостей' : 'guests'}` });
+  }
+
+  const duration = getDurationLabel(yacht, lang);
+  if (duration) {
+    meta.push({ icon: Clock, label: duration });
   }
 
   if (yacht.length_meters) {
@@ -92,17 +136,13 @@ export function mapYachtToCardProps(
     meta.push({ icon: Anchor, label: `${yacht.cabins} ${lang === 'ru' ? 'кают' : 'cabins'}` });
   }
 
-  if (yacht.year_built) {
-    meta.push({ icon: Calendar, label: `${yacht.year_built}` });
-  }
-
-  // Build subtitle
+  // Subtitle
   const subtitleParts: string[] = [];
   if (yacht.year_built) subtitleParts.push(yacht.year_built.toString());
   subtitleParts.push(lang === 'ru' ? typeLabel.ru : typeLabel.en);
   if (yacht.length_meters) subtitleParts.push(`${yacht.length_meters}m`);
 
-  // Tags from features
+  // Tags from features (max 2)
   const features = lang === 'ru' ? yacht.features_ru : yacht.features_en;
   const tags = (features || []).slice(0, 2);
 
@@ -111,6 +151,7 @@ export function mapYachtToCardProps(
     image: yacht.cover_image || DEFAULT_YACHT_IMAGE,
     title: lang === 'ru' ? yacht.name_ru : yacht.name_en,
     subtitle: subtitleParts.join(' • '),
+    experienceLabel: getExperienceLabel(yacht, lang),
     rating: yacht.rating || undefined,
     reviewCount: yacht.review_count || undefined,
     price: fromPrice.price || undefined,

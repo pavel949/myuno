@@ -186,6 +186,7 @@ export default function YachtsIndex() {
             <ItemCard
               key={yacht.id}
               title={card.title}
+              subtitle={card.experienceLabel}
               image={card.image}
               price={card.price || 0}
               priceLabel={card.priceLabel}
