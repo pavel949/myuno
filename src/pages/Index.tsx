@@ -26,6 +26,7 @@ const ContentPreviewRibbon = lazy(() => import('@/components/home/ContentPreview
 const QuickAccessChips = lazy(() => import('@/components/home/QuickAccessChips').then(m => ({ default: m.QuickAccessChips })));
 const InvestorPromoCard = lazy(() => import('@/components/home/InvestorPromoCard').then(m => ({ default: m.InvestorPromoCard })));
 const LifeSituationSelector = lazy(() => import('@/components/home/LifeSituationSelector'));
+const LifeOSFocusBar = lazy(() => import('@/components/home/LifeOSFocusBar').then(m => ({ default: m.LifeOSFocusBar })));
 
 // Lazy load modals
 const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
@@ -135,7 +136,15 @@ const Index = () => {
           <HeroBlock />
 
           {/* ═══════════════════════════════════════════════════════════
-              BLOCK 2: Life Situation Selector
+              BLOCK 2: LifeOS Focus Bar — active route context
+              "Here's what you need right now" — single guided path
+              ═══════════════════════════════════════════════════════════ */}
+          <Suspense fallback={<WidgetSkeleton />}>
+            <LifeOSFocusBar />
+          </Suspense>
+
+          {/* ═══════════════════════════════════════════════════════════
+              BLOCK 2b: Life Situation Selector
               "What do you need right now?" - contextual navigation
               ═══════════════════════════════════════════════════════════ */}
           <Suspense fallback={<RibbonSkeleton />}>

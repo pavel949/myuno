@@ -181,26 +181,17 @@ export default function LifeFlowPage() {
                 currentLabel={isRussian ? 'После этого вам может понадобиться' : 'After this, you may need'}
               />
 
-              {/* Explore catalog — quiet, tertiary */}
-              <motion.div
+              {/* Quiet footer — not a CTA, just an escape hatch */}
+              <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.7 }}
-                className="pt-2"
+                className="text-center text-xs text-muted-foreground/60 pt-4 pb-2"
               >
-                <Link
-                  to="/discover"
-                  className={cn(
-                    "flex items-center justify-center gap-2 p-3 rounded-xl",
-                    "text-sm text-muted-foreground hover:text-foreground",
-                    "border border-transparent hover:border-border",
-                    "transition-all duration-200"
-                  )}
-                >
-                  {isRussian ? 'Или исследуйте каталог' : 'Or explore the full catalog'}
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </motion.div>
+                {isRussian 
+                  ? 'Мы с вами. Если нужна помощь — напишите нам.'
+                  : "We're with you. If you need help — reach out."}
+              </motion.p>
             </>
           )}
         </div>
