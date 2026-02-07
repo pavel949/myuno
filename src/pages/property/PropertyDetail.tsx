@@ -30,113 +30,7 @@ import { ProjectInfoCard } from '@/components/property/ProjectInfoCard';
 import { UnitSpecs } from '@/components/property/UnitSpecs';
 import { ExitIntentModal } from '@/components/leads/ExitIntentModal';
 
-// Demo property data as fallback
-const demoProperty = {
-  id: 'prop-1',
-  title_en: 'Luxury Ocean View Villa',
-  title_ru: 'Роскошная вилла с видом на океан',
-  description_en: 'Stunning 4-bedroom villa with panoramic ocean views, private infinity pool, and modern amenities. Perfect for families or groups seeking luxury accommodation in the heart of Kamala.',
-  description_ru: 'Потрясающая вилла с 4 спальнями и панорамным видом на океан, частным бассейном-инфинити и современными удобствами. Идеально подходит для семей или групп, ищущих роскошное жильё в самом сердце Камалы.',
-  images: [
-    'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800',
-    'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800',
-    'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800',
-    'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800',
-  ],
-  cover_image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800',
-  rating: 4.9,
-  review_count: 48,
-  district: 'Kamala',
-  address: '123 Kamala Beach Road, Kamala, Phuket 83150',
-  price: 85000,
-  price_period: 'month',
-  property_type: 'villa',
-  listing_type: 'rent',
-  bedrooms: 4,
-  bathrooms: 3,
-  area_sqm: 350,
-  max_guests: 8,
-  min_stay_nights: 30,
-  is_verified: true,
-  amenities: ['Pool', 'Ocean View', 'Fitness Center', 'Garden', 'Parking', 'WiFi', 'AC', 'Kitchen'],
-  rentalTerms: {
-    price_per_night: 3500,
-    min_stay_nights: 30,
-    max_guests: 8,
-    weekly_discount: 10,
-    monthly_discount: 25,
-    check_in_time: '14:00',
-    check_out_time: '12:00',
-    deposit_amount: 10000,
-    deposit_currency: 'THB',
-    deposit_type: 'fixed',
-    house_rules: 'No smoking indoors. Quiet hours after 10pm. Please respect the neighbors.',
-    house_rules_ru: 'Не курить в помещении. Тишина после 22:00. Пожалуйста, уважайте соседей.',
-    cancellation_policy: 'flexible',
-    instant_booking: true,
-    electricity_included: false,
-    electricity_unit_price: 7,
-    electricity_provider: 'PEA',
-    electricity_metering: 'meter',
-    electricity_notes: undefined,
-    electricity_notes_ru: undefined,
-    water_included: true,
-    water_unit_price: undefined,
-    water_notes: undefined,
-    water_notes_ru: undefined,
-    internet_speed: '100 Mbps',
-    internet_provider: 'True',
-    included_services: ['wifi', 'ac', 'cleaning_weekly', 'pool', 'parking', 'security'],
-    extra_services: [
-      { id: 'extra_cleaning', price: 500, currency: 'THB' },
-      { id: 'airport_transfer', price: 1200, currency: 'THB' },
-      { id: 'linen_change', price: 300, currency: 'THB' },
-    ],
-    key_handover: 'in_person',
-    check_in_instructions: 'Meet at the property entrance',
-    check_in_instructions_ru: 'Встреча у входа в объект',
-    transfer_available: true,
-    transfer_airport_price: 1200,
-    transfer_notes: undefined,
-    transfer_notes_ru: undefined,
-    manager_name: 'Somchai',
-    manager_phone: '+66-81-234-5678',
-    manager_line_id: undefined,
-    host_languages: ['Thai', 'English', 'Russian'],
-    pets_allowed: false,
-    pet_deposit: undefined,
-    pet_notes: undefined,
-    pet_notes_ru: undefined,
-    parties_allowed: false,
-    max_party_guests: undefined,
-    quiet_hours_start: '22:00',
-    quiet_hours_end: '08:00',
-    children_friendly: true,
-    has_crib: true,
-    has_high_chair: true,
-    extra_guest_price: 500,
-    extra_guest_threshold: 4,
-    early_checkin_price: 500,
-    late_checkout_price: 500,
-    late_checkout_penalty: 2000,
-    smoking_penalty: 5000,
-    emergency_contact_name: undefined,
-    emergency_contact_phone: undefined,
-  } as PropertyRentalTerms,
-  project_id: undefined as string | undefined,
-  floor: undefined as number | undefined,
-  unit_number: undefined as string | undefined,
-  view_type: undefined as string | undefined,
-  furnishing_level: undefined as string | undefined,
-  equipment: undefined as string[] | undefined,
-  project: null as PropertyProject | null,
-  host: {
-    name: 'Phuket Luxury Homes',
-    image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100',
-    responseRate: 98,
-    responseTime: '< 1 hour',
-  },
-};
+// Demo fallback removed — only real DB data is used
 
 // Import centralized taxonomy for amenities
 import { getAmenityIcon, getAmenityLabel, normalizeAmenityId } from '@/lib/taxonomies';
@@ -164,18 +58,8 @@ export default function PropertyDetail() {
   // Fetch real property from DB
   const { data: dbProperty, isLoading } = usePropertyWithRentalTerms(id);
 
-  // Use DB data or fallback to demo
-  const property = useMemo(() => {
-    if (dbProperty) return dbProperty;
-    if (id?.startsWith('prop-')) return demoProperty;
-    return demoProperty;
-  }, [dbProperty, id]);
-
-  const images = (property.images && property.images.length > 0) 
-    ? property.images 
-    : [property.cover_image].filter(Boolean);
-  const amenities = property.amenities || [];
-  const rentalTerms = property.rentalTerms;
+  const property = dbProperty;
+  const rentalTerms = property?.rentalTerms;
 
   // Parse included_services and extra_services from JSON if needed
   const includedServices = useMemo(() => {
@@ -198,30 +82,23 @@ export default function PropertyDetail() {
     }
   }, [rentalTerms?.extra_services]);
 
-  // Share functionality (after property is defined)
+  // Share functionality
   const handleShare = useCallback(async () => {
     const shareUrl = window.location.href;
-    const shareTitle = isRu ? property.title_ru : property.title_en;
+    const shareTitle = isRu ? (property?.title_ru || '') : (property?.title_en || '');
     const shareText = isRu 
       ? `Посмотрите это жильё: ${shareTitle}` 
       : `Check out this property: ${shareTitle}`;
 
-    // Try Web Share API first (mobile)
     if (navigator.share) {
       try {
-        await navigator.share({
-          title: shareTitle,
-          text: shareText,
-          url: shareUrl,
-        });
+        await navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
         return;
       } catch (err) {
-        // User cancelled or error - fall through to clipboard
         if ((err as Error).name === 'AbortError') return;
       }
     }
 
-    // Fallback: copy to clipboard
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
@@ -230,7 +107,36 @@ export default function PropertyDetail() {
     } catch {
       toast.error(isRu ? 'Не удалось скопировать' : 'Failed to copy');
     }
-  }, [isRu, property.title_en, property.title_ru]);
+  }, [isRu, property?.title_en, property?.title_ru]);
+
+  if (isLoading) {
+    return (
+      <AppLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (!property) {
+    return (
+      <AppLayout>
+        <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+          <Home className="w-16 h-16 text-muted-foreground/50" />
+          <h2 className="text-xl font-semibold">{language === 'ru' ? 'Объект не найден' : 'Property not found'}</h2>
+          <Button variant="outline" onClick={() => navigate('/property')}>
+            {language === 'ru' ? 'К списку' : 'Back to listings'}
+          </Button>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  const images = (property.images && property.images.length > 0) 
+    ? property.images 
+    : [property.cover_image].filter(Boolean);
+  const amenities = property.amenities || [];
 
   if (isLoading) {
     return (
@@ -674,43 +580,6 @@ export default function PropertyDetail() {
             </>
           )}
 
-          {/* Host Card - Airbnb Style */}
-          {'host' in property && property.host && (
-            <>
-              <Separator />
-              <div className="p-5 rounded-2xl border border-border bg-card">
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <img
-                      src={property.host.image}
-                      alt={property.host.name}
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
-                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-                      <Award className="w-3.5 h-3.5 text-primary-foreground" />
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-lg">{property.host.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {isRu ? 'Суперхозяин' : 'Superhost'}
-                    </p>
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                </div>
-                <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-border">
-                  <div>
-                    <p className="text-2xl font-bold">{property.host.responseRate}%</p>
-                    <p className="text-sm text-muted-foreground">{isRu ? 'Ответов' : 'Response rate'}</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold">{property.host.responseTime}</p>
-                    <p className="text-sm text-muted-foreground">{isRu ? 'Время ответа' : 'Response time'}</p>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
 
           {/* Location */}
           <Separator />
@@ -738,7 +607,7 @@ export default function PropertyDetail() {
                 propertyId={id || 'prop-1'}
                 propertyTitle={property.title_en}
                 propertyTitleRu={property.title_ru}
-                ownerName={'host' in property && property.host ? property.host.name : undefined}
+                ownerName={rentalTerms?.manager_name}
                 variant="outline"
                 fullWidth
               />
