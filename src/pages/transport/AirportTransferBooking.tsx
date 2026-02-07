@@ -19,8 +19,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useGeolocation } from '@/hooks/useGeolocation';
 
 const terminals = [
-  { id: 'domestic', nameEn: 'Domestic Terminal', nameRu: 'Внутренний терминал', icon: '🏠' },
-  { id: 'international', nameEn: 'International Terminal', nameRu: 'Международный терминал', icon: '🌍' },
+  { id: 'domestic', nameEn: 'Domestic Terminal', nameRu: 'Внутренний терминал' },
+  { id: 'international', nameEn: 'International Terminal', nameRu: 'Международный терминал' },
 ];
 
 type TransferDirection = 'from-airport' | 'to-airport';
@@ -135,7 +135,7 @@ export default function AirportTransferBooking() {
     setFormData({ ...formData, direction: dir });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent | React.MouseEvent) => {
     e.preventDefault();
     
     if (!user) {
@@ -459,7 +459,7 @@ export default function AirportTransferBooking() {
                         <Check className="w-3 h-3 text-primary" />
                       </div>
                     )}
-                    <span className="text-xl mb-1 block">{terminal.icon}</span>
+                    <Plane className="w-5 h-5 mb-1 text-primary" />
                     <p className="font-medium text-xs">
                       {language === 'ru' ? terminal.nameRu : terminal.nameEn}
                     </p>
@@ -744,8 +744,8 @@ export default function AirportTransferBooking() {
               {formData.paymentMethod === 'concierge_advance' && (
                 <p className="text-xs text-muted-foreground p-2 bg-amber-50 dark:bg-amber-950/30 rounded-lg">
                   {language === 'ru' 
-                    ? '💡 myUNO оплатит трансфер. Вы вернёте сумму после поездки удобным способом.'
-                    : '💡 myUNO will pay for your transfer. Return the amount after your trip.'}
+                    ? 'myUNO оплатит трансфер. Вы вернёте сумму после поездки удобным способом.'
+                    : 'myUNO will pay for your transfer. Return the amount after your trip.'}
                 </p>
               )}
             </div>
@@ -755,8 +755,15 @@ export default function AirportTransferBooking() {
 
       {/* Fixed Bottom CTA */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-lg border-t border-border/50 safe-area-inset-bottom">
+        {!canSubmit && (formData.destinationAddress || formData.flightNumber) && (
+          <p className="text-xs text-destructive text-center mb-2">
+            {language === 'ru' 
+              ? 'Заполните все обязательные поля: терминал, адрес, рейс, дата, время, тип авто'
+              : 'Fill all required fields: terminal, address, flight, date, time, vehicle'}
+          </p>
+        )}
         <Button
-          type="submit"
+          type="button"
           className="w-full h-12"
           disabled={isCreating || isProcessingPayment || !canSubmit || !formData.name || !formData.phone}
           onClick={handleSubmit}
