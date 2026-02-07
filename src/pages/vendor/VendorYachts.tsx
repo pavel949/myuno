@@ -69,10 +69,10 @@ import {
 import { CancellationPolicySelector } from '@/components/yacht/CancellationPolicySelector';
 
 const yachtTypes = [
-  { value: 'yacht', label: 'Yacht', labelRu: 'Яхта' },
+  { value: 'motor_yacht', label: 'Motor Yacht', labelRu: 'Моторная яхта' },
   { value: 'catamaran', label: 'Catamaran', labelRu: 'Катамаран' },
   { value: 'speedboat', label: 'Speedboat', labelRu: 'Скоростная лодка' },
-  { value: 'sailboat', label: 'Sailboat', labelRu: 'Парусная яхта' },
+  { value: 'superyacht', label: 'Superyacht', labelRu: 'Суперяхта' },
 ];
 
 interface YachtFormData {
@@ -110,7 +110,7 @@ const initialFormData: YachtFormData = {
   name_ru: '',
   description_en: '',
   description_ru: '',
-  yacht_type: 'yacht',
+  yacht_type: 'motor_yacht',
   cover_image: '',
   images: [],
   capacity: '10',

@@ -23,12 +23,28 @@ import { YachtExperienceSelect } from '@/components/yachts/YachtExperienceSelect
 import { useYachtExperiences } from '@/hooks/useYachtExperiences';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
+type CharterType = 'half_day' | 'full_day' | 'sunset' | 'overnight';
+
 interface BookNowData {
   date?: string;
   time?: string;
   guests?: number;
-  charterType?: 'half_day' | 'full_day';
+  charterType?: CharterType;
 }
+
+const CHARTER_DURATIONS: Record<CharterType, number> = {
+  half_day: 4,
+  full_day: 8,
+  sunset: 3,
+  overnight: 24,
+};
+
+const CHARTER_LABELS: Record<CharterType, { en: string; ru: string }> = {
+  half_day: { en: 'Half Day (4 hours)', ru: 'Полдня (4 часа)' },
+  full_day: { en: 'Full Day (8 hours)', ru: 'Полный день (8 часов)' },
+  sunset: { en: 'Sunset Cruise (3 hours)', ru: 'Закатный круиз (3 часа)' },
+  overnight: { en: 'Overnight (24 hours)', ru: 'С ночёвкой (24 часа)' },
+};
 
 export default function YachtBooking() {
   const { id } = useParams();
@@ -48,8 +64,11 @@ export default function YachtBooking() {
   // Get pre-filled data from location state (Book Now flow)
   const bookNowData = (location.state as { bookNowData?: BookNowData })?.bookNowData;
 
-  // Determine if half day from URL params or bookNowData
-  const isHalfDay = bookNowData?.charterType === 'half_day' || searchParams.get('type') === 'half';
+  // Determine charter type from URL params or bookNowData
+  const charterTypeParam = (searchParams.get('type') as CharterType) || bookNowData?.charterType || 'full_day';
+  const charterType: CharterType = ['half_day', 'full_day', 'sunset', 'overnight'].includes(charterTypeParam) 
+    ? charterTypeParam as CharterType 
+    : 'full_day';
 
   // Initialize state with bookNowData if available
   const [date, setDate] = useState<Date | undefined>(() => {
@@ -114,22 +133,32 @@ export default function YachtBooking() {
     return sum + (exp?.price || 0);
   }, 0);
 
-  const basePrice = isHalfDay 
-    ? (yacht.price_half_day || 0) 
-    : (yacht.price_full_day || 0);
+  const priceMap: Record<CharterType, number> = {
+    half_day: yacht.price_half_day || 0,
+    full_day: yacht.price_full_day || 0,
+    sunset: yacht.price_sunset || 0,
+    overnight: yacht.price_overnight || 0,
+  };
+  const basePrice = priceMap[charterType];
   const serviceFee = Math.round((basePrice + experiencesTotal) * (platformFeePercent / 100));
   const total = basePrice + experiencesTotal + serviceFee;
 
-  const defaultHalfDayTimes = ['09:00', '14:00'];
-  const defaultFullDayTimes = ['08:00', '09:00', '10:00'];
-  const availableTimes = isHalfDay 
-    ? (yacht.departure_times || defaultHalfDayTimes)
-    : (yacht.departure_times || defaultFullDayTimes);
-  
+  const defaultTimesMap: Record<CharterType, string[]> = {
+    half_day: ['09:00', '14:00'],
+    full_day: ['08:00', '09:00', '10:00'],
+    sunset: ['16:00', '16:30', '17:00'],
+    overnight: ['10:00', '12:00'],
+  };
+  const availableTimes = yacht.departure_times?.length 
+    ? yacht.departure_times 
+    : (defaultTimesMap[charterType] || defaultTimesMap.full_day);
+
   const yachtName = language === 'ru' ? yacht.name_ru : yacht.name_en;
   const yachtLocation = language === 'ru' 
     ? (yacht.location_ru || yacht.location_name || '') 
     : (yacht.location_name || '');
+  const charterLabel = CHARTER_LABELS[charterType];
+  const charterDuration = CHARTER_DURATIONS[charterType];
 
   const handleSubmit = async () => {
     if (!date || !time || !contactData.name || !contactData.phone || !yacht) return;
@@ -140,7 +169,7 @@ export default function YachtBooking() {
     scheduledAt.setHours(hours, minutes);
     
     const endAt = new Date(scheduledAt);
-    endAt.setHours(endAt.getHours() + (isHalfDay ? 4 : 8));
+    endAt.setHours(endAt.getHours() + charterDuration);
 
     const availability = await checkYachtAvailability(yacht.id, scheduledAt, endAt);
     
@@ -162,7 +191,7 @@ export default function YachtBooking() {
       return exp ? (language === 'ru' ? exp.labelRu : exp.labelEn) : '';
     }).filter(Boolean).join(', ');
 
-    const charterType = isHalfDay ? 'half_day' : 'full_day';
+    const bookingCharterType = charterType;
 
     const result = await createBooking({
       booking_type: 'transport', // Maps to 'yacht' order_type via metadata
@@ -170,7 +199,7 @@ export default function YachtBooking() {
       total_amount: total,
       currency: yacht.currency || 'THB',
       provider_id: yacht.provider_id || undefined,
-      notes: `Yacht: ${yacht.name_en}. ${isHalfDay ? 'Half day' : 'Full day'} charter. ${guests} guests.${experienceNames ? ` Experiences: ${experienceNames}.` : ''} ${contactData.notes || ''}`,
+      notes: `Yacht: ${yacht.name_en}. ${charterLabel.en} charter. ${guests} guests.${experienceNames ? ` Experiences: ${experienceNames}.` : ''} ${contactData.notes || ''}`,
       items: [
         {
           item_type: 'yacht-rental',
@@ -204,7 +233,7 @@ export default function YachtBooking() {
       addresses: [],
       metadata: {
         yacht_id: yacht.id,
-        charter_type: charterType,
+        charter_type: bookingCharterType,
         guests_count: guests,
         crew_included: yacht.has_crew || false,
         catering_included: yacht.has_catering || false,
@@ -229,7 +258,7 @@ export default function YachtBooking() {
           .from('order_item_yacht_details')
           .insert({
             order_item_id: orderItems[0].id,
-            charter_type: charterType,
+            charter_type: bookingCharterType,
             guests_count: guests,
             crew_included: yacht.has_crew || false,
             catering_included: yacht.has_catering || false,
@@ -292,10 +321,7 @@ export default function YachtBooking() {
               </span>
               <span className="flex items-center gap-1">
                 <Clock className="w-4 h-4" />
-                {isHalfDay 
-                  ? (language === 'ru' ? '4 часа' : '4 hours')
-                  : (language === 'ru' ? '8 часов' : '8 hours')
-                }
+                {language === 'ru' ? charterLabel.ru : charterLabel.en}
               </span>
             </div>
           </div>
@@ -368,10 +394,7 @@ export default function YachtBooking() {
           {/* Summary */}
           <BookingSummary
             title={yachtName}
-            subtitle={isHalfDay 
-              ? (language === 'ru' ? 'Полдня (4 часа)' : 'Half Day (4 hours)')
-              : (language === 'ru' ? 'Полный день (8 часов)' : 'Full Day (8 hours)')
-            }
+            subtitle={language === 'ru' ? charterLabel.ru : charterLabel.en}
             image={yacht.cover_image || '/placeholder.svg'}
             date={date}
             time={time}
@@ -379,9 +402,9 @@ export default function YachtBooking() {
             price={total}
             items={[
               {
-                name: isHalfDay 
-                  ? (language === 'ru' ? 'Аренда (полдня)' : 'Charter (half day)')
-                  : (language === 'ru' ? 'Аренда (полный день)' : 'Charter (full day)'),
+                name: language === 'ru' 
+                  ? `Аренда (${charterLabel.ru.toLowerCase()})` 
+                  : `Charter (${charterLabel.en.toLowerCase()})`,
                 quantity: 1,
                 price: basePrice,
               },
