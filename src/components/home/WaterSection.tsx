@@ -59,7 +59,15 @@ export function WaterSection() {
                 <span>•</span>
                 <span>{activity.duration_minutes}min</span>
               </div>
-              <p className="text-primary font-bold mt-2">฿{activity.price?.toLocaleString()}</p>
+              <div className="flex items-center justify-between mt-2">
+                <p className="text-primary font-bold">฿{activity.price?.toLocaleString()}</p>
+                <button
+                  onClick={(e) => { e.stopPropagation(); navigate(`/water/${activity.id}`); }}
+                  className="text-[11px] font-semibold text-primary-foreground bg-primary px-2.5 py-1 rounded-md"
+                >
+                  {language === 'ru' ? 'Забронировать' : 'Book'}
+                </button>
+              </div>
             </div>
           </div>
         ))}
