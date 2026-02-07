@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { MapPin, Building2, Search, Loader2, Navigation, Keyboard } from 'lucide-react';
+import { MapPin, Building2, Search, Loader2, Navigation, Keyboard, ExternalLink } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePropertyProjects } from '@/hooks/usePropertyProjects';
@@ -178,18 +178,36 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
 
   return (
     <div ref={containerRef} className={cn("relative", className)}>
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-        <Input
-          value={value}
-          onChange={handleInputChange}
-          onFocus={handleFocus}
-          placeholder={placeholder || (isRu ? 'Отель, вилла или адрес' : 'Hotel, villa or address')}
-          className="h-11 pl-9 pr-9"
-          autoComplete="off"
-        />
-        {isSearching && (
-          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />
+      <div className="relative flex gap-1.5">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+          <Input
+            value={value}
+            onChange={handleInputChange}
+            onFocus={handleFocus}
+            placeholder={placeholder || (isRu ? 'Отель, вилла или адрес' : 'Hotel, villa or address')}
+            className="h-11 pl-9 pr-9"
+            autoComplete="off"
+          />
+          {isSearching && (
+            <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />
+          )}
+        </div>
+        {value && value.length >= 3 && (
+          <button
+            type="button"
+            title={isRu ? 'Открыть на карте' : 'Open on map'}
+            className="h-11 w-11 shrink-0 rounded-lg border border-border bg-background flex items-center justify-center hover:bg-accent transition-colors"
+            onClick={() => {
+              const mapQuery = encodeURIComponent(value);
+              const mapUrl = isRu
+                ? `https://yandex.ru/maps/?text=${mapQuery}`
+                : `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
+              window.open(mapUrl, '_blank', 'noopener');
+            }}
+          >
+            <ExternalLink className="w-4 h-4 text-muted-foreground" />
+          </button>
         )}
       </div>
 
