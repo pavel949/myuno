@@ -20,6 +20,7 @@ serve(async (req) => {
     const url = new URL(req.url);
     const query = url.searchParams.get("query")?.trim();
     const language = url.searchParams.get("language") || "en";
+    const sessionToken = url.searchParams.get("session_token") || crypto.randomUUID();
 
     if (!query || query.length < 2) {
       return new Response(JSON.stringify({ results: [] }), {
@@ -32,32 +33,40 @@ serve(async (req) => {
       throw new Error("MAPBOX_PUBLIC_TOKEN not configured");
     }
 
+    // Use Mapbox Search Box API v1 (much better POI/hotel coverage than Geocoding v5)
     const encodedQuery = encodeURIComponent(query);
-    const mapboxUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodedQuery}.json?` +
-      `access_token=${mapboxToken}` +
+    const searchUrl = `https://api.mapbox.com/search/searchbox/v1/suggest?` +
+      `q=${encodedQuery}` +
+      `&access_token=${mapboxToken}` +
+      `&session_token=${sessionToken}` +
       `&proximity=98.3923,7.8804` +
       `&bbox=98.2,7.7,98.5,8.2` +
       `&types=poi,address,place` +
       `&limit=5` +
-      `&language=${language}`;
+      `&language=${language}` +
+      `&country=TH`;
 
-    const response = await fetch(mapboxUrl);
+    console.log(`[geocode-address] Searching: "${query}" via Search Box API`);
+
+    const response = await fetch(searchUrl);
+    
     if (!response.ok) {
+      const errorBody = await response.text();
+      console.error(`[geocode-address] Mapbox error ${response.status}:`, errorBody);
       throw new Error(`Mapbox API error: ${response.status}`);
     }
 
     const data = await response.json();
+    console.log(`[geocode-address] Got ${data.suggestions?.length || 0} suggestions`);
 
-    const results = (data.features || []).map((f: any) => ({
-      id: f.id,
-      name: f.text || f.place_name,
-      address: f.place_name,
-      lat: f.center[1],
-      lng: f.center[0],
-      type: f.place_type?.[0] || 'place',
+    const results = (data.suggestions || []).map((s: any) => ({
+      mapbox_id: s.mapbox_id,
+      name: s.name || s.full_address,
+      address: s.full_address || s.place_formatted || '',
+      type: s.feature_type || 'place',
     }));
 
-    return new Response(JSON.stringify({ results }), {
+    return new Response(JSON.stringify({ results, session_token: sessionToken }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {

@@ -18,11 +18,9 @@ const POPULAR_PLACES = [
 ];
 
 interface GeocodeSuggestion {
-  id: string;
+  mapbox_id: string;
   name: string;
   address: string;
-  lat: number;
-  lng: number;
   type: string;
 }
 
@@ -125,7 +123,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
   // Mapbox suggestions
   const mapboxSuggestions = useMemo((): Suggestion[] =>
     geocodeResults.map(r => ({
-      id: r.id,
+      id: r.mapbox_id,
       name: r.name,
       address: r.address,
       source: 'mapbox' as const,
