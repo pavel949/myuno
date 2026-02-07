@@ -13,7 +13,7 @@
     <meta name="description" content="myUNO - Home is where myUNO is. Your life abroad, simplified." />
     <meta name="author" content="myUNO" />
     <meta name="theme-color" content="#d4af37" />
-    <meta name="version" content="3.7.6" />
+    <meta name="version" content="3.7.8" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="myUNO" />
@@ -48,67 +48,45 @@
     <!-- Non-blocking version check -->
     <script>
       (function() {
-        // Listen for SW controller change
+        // On SW controller change, reload once
         if ('serviceWorker' in navigator) {
           navigator.serviceWorker.addEventListener('controllerchange', function() {
-            console.log('[myUNO] New SW controller - reloading');
-            window.location.reload();
+            if (!window.__swReloading) {
+              window.__swReloading = true;
+              window.location.reload();
+            }
           });
         }
         
-        // Anti-loop protection
-        var reloadKey = 'uno_reload_' + Date.now().toString().slice(0, -4); // ~10 sec window
-        var recentReloads = Object.keys(sessionStorage).filter(function(k) {
-          return k.startsWith('uno_reload_');
-        });
-        
-        if (recentReloads.length > 2) {
-          console.log('[myUNO] Too many reloads, skipping version check');
-          recentReloads.forEach(function(k) { sessionStorage.removeItem(k); });
-        } else {
-          // Background version check (non-blocking)
-          fetch('/version.json?_=' + Date.now(), { cache: 'no-store' })
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-              var serverVersion = data.version;
-              var storedVersion = localStorage.getItem('manifest_version');
-              
-              console.log('[myUNO] Server: ' + serverVersion + ', Stored: ' + storedVersion);
-              
-              // Only reload if stored version exists AND differs
-              if (storedVersion && storedVersion !== serverVersion) {
-                console.log('[myUNO] New version available, clearing caches...');
-                
-                localStorage.setItem('manifest_version', serverVersion);
-                localStorage.setItem('app_version', serverVersion);
-                sessionStorage.setItem(reloadKey, '1');
-                
-                // Clear caches in background
-                if ('caches' in window) {
-                  caches.keys().then(function(keys) {
-                    keys.forEach(function(key) { caches.delete(key); });
-                  });
-                }
-                if ('serviceWorker' in navigator) {
-                  navigator.serviceWorker.getRegistrations().then(function(regs) {
-                    regs.forEach(function(reg) { reg.unregister(); });
-                  });
-                }
-                
-                // Redirect to home
-                setTimeout(function() {
-                  window.location.href = '/';
-                }, 100);
-              } else {
-                // Save version
-                localStorage.setItem('manifest_version', serverVersion);
-                localStorage.setItem('app_version', serverVersion);
+        // Simple version check — no reload loops
+        fetch('/version.json?_=' + Date.now(), { cache: 'no-store' })
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            var serverVersion = data.version;
+            var storedVersion = localStorage.getItem('manifest_version');
+            
+            console.log('[myUNO] Server: ' + serverVersion + ', Stored: ' + storedVersion);
+            localStorage.setItem('manifest_version', serverVersion);
+            localStorage.setItem('app_version', serverVersion);
+            
+            // Only clear caches if version changed — do NOT reload (app code handles it)
+            if (storedVersion && storedVersion !== serverVersion) {
+              console.log('[myUNO] New version detected, clearing SW caches...');
+              if ('caches' in window) {
+                caches.keys().then(function(keys) {
+                  keys.forEach(function(key) { caches.delete(key); });
+                });
               }
-            })
-            .catch(function() {
-              console.log('[myUNO] Version check failed (offline?)');
-            });
-        }
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(regs) {
+                  regs.forEach(function(reg) { reg.unregister(); });
+                });
+              }
+            }
+          })
+          .catch(function() {
+            console.log('[myUNO] Version check failed (offline?)');
+          });
       })();
     </script>
   </head>
