@@ -24,7 +24,7 @@ import {
 import { cn } from '@/lib/utils';
 import * as LucideIcons from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
-import { getEntityType, isPrimaryEntityType } from '@/lib/config/entityTypes';
+import { getEntityType } from '@/lib/config/entityTypes';
 import { motion } from 'framer-motion';
 
 export default function LifeFlowPage() {
@@ -56,29 +56,45 @@ export default function LifeFlowPage() {
     }
   }, [currentSituation, catalogItems]);
 
-  // Group enriched items by entity type, split primary/secondary
+  // Group enriched items by entity type, split primary/secondary by WEIGHT
   const { primaryBlocks, secondaryBlocks, allEntityTypes, itemCounts } = React.useMemo(() => {
     const items = enrichedItems || [];
-    const grouped = items.reduce((acc, item) => {
-      if (!acc[item.entity_type]) acc[item.entity_type] = [];
-      acc[item.entity_type].push(item);
-      return acc;
-    }, {} as Record<string, EnrichedCatalogItem[]>);
+    
+    // Group by entity type and calculate average weight per group
+    const grouped: Record<string, EnrichedCatalogItem[]> = {};
+    const avgWeights: Record<string, number> = {};
+    
+    items.forEach(item => {
+      if (!grouped[item.entity_type]) grouped[item.entity_type] = [];
+      grouped[item.entity_type].push(item);
+    });
 
+    // Calculate average weight per entity type group
+    Object.entries(grouped).forEach(([type, typeItems]) => {
+      const totalWeight = typeItems.reduce((sum, item) => sum + (item.weight || 0), 0);
+      avgWeights[type] = totalWeight / typeItems.length;
+    });
+
+    const PRIMARY_WEIGHT_THRESHOLD = 65;
     const primary: typeof grouped = {};
     const secondary: typeof grouped = {};
     const counts: Record<string, number> = {};
 
-    Object.entries(grouped).forEach(([type, typeItems]) => {
-      counts[type] = typeItems.length;
-      if (isPrimaryEntityType(type)) {
-        primary[type] = typeItems;
+    // Sort entity types by average weight descending
+    const sortedTypes = Object.keys(grouped).sort((a, b) => (avgWeights[b] || 0) - (avgWeights[a] || 0));
+
+    sortedTypes.forEach(type => {
+      counts[type] = grouped[type].length;
+      // Sort items within each group by weight descending
+      grouped[type].sort((a, b) => (b.weight || 0) - (a.weight || 0));
+      
+      if (avgWeights[type] >= PRIMARY_WEIGHT_THRESHOLD) {
+        primary[type] = grouped[type];
       } else {
-        secondary[type] = typeItems;
+        secondary[type] = grouped[type];
       }
     });
 
-    // Sort: primary types first, then secondary
     const allTypes = [...Object.keys(primary), ...Object.keys(secondary)];
 
     return { primaryBlocks: primary, secondaryBlocks: secondary, allEntityTypes: allTypes, itemCounts: counts };
