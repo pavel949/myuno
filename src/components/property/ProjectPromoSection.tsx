@@ -17,9 +17,11 @@ import { cn } from '@/lib/utils';
 interface ProjectPromoSectionProps {
   className?: string;
   mode?: 'rent' | 'buy';
+  onProjectSelect?: (id: string) => void;
+  selectedProjectId?: string | null;
 }
 
-export function ProjectPromoSection({ className, mode = 'rent' }: ProjectPromoSectionProps) {
+export function ProjectPromoSection({ className, mode = 'rent', onProjectSelect, selectedProjectId }: ProjectPromoSectionProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { personas } = useUserPersonas();
@@ -123,6 +125,11 @@ export function ProjectPromoSection({ className, mode = 'rent' }: ProjectPromoSe
               key={project.id}
               project={project}
               className="snap-start"
+              onSelect={onProjectSelect ? (id) => {
+                // Toggle: click again to deselect
+                onProjectSelect(selectedProjectId === id ? '' : id);
+              } : undefined}
+              isSelected={selectedProjectId === project.id}
             />
           ))}
         </div>

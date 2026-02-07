@@ -19,6 +19,7 @@ import { VerticalCTA } from '@/components/leads/VerticalCTA';
 import { QuickFiltersRibbon } from '@/components/property/QuickFiltersRibbon';
 import { PropertyCategoryRibbon, PropertyMode } from '@/components/property/PropertyCategoryRibbon';
 import { ProjectPromoSection } from '@/components/property/ProjectPromoSection';
+import { usePropertyProjectsWithStats } from '@/hooks/usePropertyProjectsWithStats';
 import { OffplanCTASection } from '@/components/property/OffplanCTASection';
 import { applyQuickFilters } from '@/hooks/usePropertyQuickFilters';
 import { matchesFilter, matchesSingleFilter, normalizeForFilter } from '@/lib/filterUtils';
@@ -72,6 +73,14 @@ export default function PropertyIndex() {
   }, []);
 
   const { filterConfig, propertyTypes } = usePropertyFilterOptions();
+  const { data: projectsList } = usePropertyProjectsWithStats();
+
+  // Look up selected project name for filter chip
+  const selectedProjectName = useMemo(() => {
+    if (!selectedProjectId || !projectsList) return undefined;
+    const proj = projectsList.find(p => p.id === selectedProjectId);
+    return proj ? (language === 'ru' ? proj.nameRu : proj.nameEn) : undefined;
+  }, [selectedProjectId, projectsList, language]);
   
   const propertyTypePills = useMemo(() => [
     { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -287,7 +296,11 @@ export default function PropertyIndex() {
 
         {/* Project Promo Section */}
         <div className="container max-w-7xl mx-auto px-4 pt-3 pb-2">
-          <ProjectPromoSection mode={propertyMode} />
+          <ProjectPromoSection
+            mode={propertyMode}
+            onProjectSelect={(id) => setSelectedProjectId(id || null)}
+            selectedProjectId={selectedProjectId}
+          />
         </div>
 
         {/* Quick Filter Tags */}
@@ -301,6 +314,8 @@ export default function PropertyIndex() {
             onDistrictToggle={(id) => setSelectedDistricts(prev =>
               prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]
             )}
+            selectedProjectName={selectedProjectName}
+            onProjectClear={() => setSelectedProjectId(null)}
           />
         </div>
 
@@ -322,6 +337,7 @@ export default function PropertyIndex() {
                     setQuickFilters([]);
                     setSelectedDistricts([]);
                     setSelectedBedrooms([]);
+                    setSelectedProjectId(null);
                   }}
                 >
                   {language === 'ru' ? 'Сбросить' : 'Clear'}

@@ -7,7 +7,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { usePropertyQuickFilters } from '@/hooks/usePropertyQuickFilters';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MapPin } from 'lucide-react';
+import { MapPin, Building2 } from 'lucide-react';
 import { FilterChip } from '@/components/uno/FilterChip';
 
 interface QuickFiltersRibbonProps {
@@ -15,6 +15,8 @@ interface QuickFiltersRibbonProps {
   selectedDistricts?: string[];
   onFilterToggle: (filterId: string) => void;
   onDistrictToggle?: (districtId: string) => void;
+  selectedProjectName?: string;
+  onProjectClear?: () => void;
   className?: string;
 }
 
@@ -23,6 +25,8 @@ export function QuickFiltersRibbon({
   selectedDistricts = [],
   onFilterToggle,
   onDistrictToggle,
+  selectedProjectName,
+  onProjectClear,
   className,
 }: QuickFiltersRibbonProps) {
   const { language } = useLanguage();
@@ -44,6 +48,17 @@ export function QuickFiltersRibbon({
     <div className={cn("space-y-3", className)}>
       {/* Quick Filter Chips (Tags) */}
       <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 touch-pan-x">
+        {/* Project filter chip */}
+        {selectedProjectName && onProjectClear && (
+          <FilterChip
+            label={selectedProjectName}
+            icon={<Building2 className="w-3.5 h-3.5" />}
+            isActive={true}
+            onToggle={onProjectClear}
+            onRemove={onProjectClear}
+            size="sm"
+          />
+        )}
         {quickFilters.map((filter) => (
           <FilterChip
             key={filter.id}

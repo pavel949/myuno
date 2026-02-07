@@ -15,9 +15,11 @@ import type { ProjectWithStats } from '@/hooks/usePropertyProjectsWithStats';
 interface ProjectCarouselCardProps {
   project: ProjectWithStats;
   className?: string;
+  onSelect?: (id: string) => void;
+  isSelected?: boolean;
 }
 
-export function ProjectCarouselCard({ project, className }: ProjectCarouselCardProps) {
+export function ProjectCarouselCard({ project, className, onSelect, isSelected }: ProjectCarouselCardProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
@@ -27,8 +29,11 @@ export function ProjectCarouselCard({ project, className }: ProjectCarouselCardP
   const hasProperties = project.rentCount > 0 || project.saleCount > 0;
 
   const handleClick = () => {
-    // Navigate to complexes page with highlight parameter
-    navigate(`/complexes?highlight=${project.id}`);
+    if (onSelect) {
+      onSelect(project.id);
+    } else {
+      navigate(`/complexes?highlight=${project.id}`);
+    }
   };
 
   return (
@@ -36,8 +41,11 @@ export function ProjectCarouselCard({ project, className }: ProjectCarouselCardP
       onClick={handleClick}
       className={cn(
         "group cursor-pointer flex-shrink-0 w-[260px] sm:w-[280px] rounded-2xl overflow-hidden",
-        "bg-card border border-border/50 shadow-sm",
+        "bg-card border shadow-sm",
         "hover:shadow-md hover:-translate-y-0.5 transition-all duration-300",
+        isSelected
+          ? "ring-2 ring-primary border-primary"
+          : "border-border/50",
         className
       )}
     >
