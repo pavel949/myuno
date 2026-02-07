@@ -2,9 +2,9 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   MapPin, Star, BedDouble, Bath, Users, Maximize, 
-  Share2, Calendar, Phone, MessageCircle, Shield,
+  Share2, Calendar as CalendarIcon, Phone, MessageCircle, Shield,
   Zap, Loader2, ChevronRight, Home, Eye, Sofa, Building2,
-  Sparkles, Clock, Award, Copy, Check
+  Sparkles, Clock, Award, Copy, Check, Minus, Plus
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -30,6 +30,12 @@ import { ProjectInfoCard } from '@/components/property/ProjectInfoCard';
 import { UnitSpecs } from '@/components/property/UnitSpecs';
 import { ExitIntentModal } from '@/components/leads/ExitIntentModal';
 import { PhotoLightbox } from '@/components/property/PhotoLightbox';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Calendar } from '@/components/ui/calendar';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { format } from 'date-fns';
+import { ru } from 'date-fns/locale';
+import { DateRange } from 'react-day-picker';
 
 // Demo fallback removed — only real DB data is used
 
@@ -55,6 +61,10 @@ export default function PropertyDetail() {
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [dateSheetOpen, setDateSheetOpen] = useState(false);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [guestCount, setGuestCount] = useState(2);
+  const isMobile = useIsMobile();
   const isRu = language === 'ru';
 
   // Fetch real property from DB
@@ -621,14 +631,30 @@ export default function PropertyDetail() {
                   /{isRu ? 'ночь' : 'night'}
                 </span>
               </div>
-              {rentalTerms?.instant_booking && (
+              {dateRange?.from && dateRange?.to && (
+                <p className="text-xs text-muted-foreground">
+                  {format(dateRange.from, 'd MMM', { locale: isRu ? ru : undefined })} – {format(dateRange.to, 'd MMM', { locale: isRu ? ru : undefined })}
+                </p>
+              )}
+              {!dateRange?.from && rentalTerms?.instant_booking && (
                 <div className="flex items-center gap-1 text-xs text-primary mt-0.5">
                   <Zap className="w-3 h-3" />
                   <span>{isRu ? 'Мгновенное бронирование' : 'Instant booking'}</span>
                 </div>
               )}
             </div>
-            <Button variant="outline" size="icon" className="flex-shrink-0">
+            <Button
+              variant="outline"
+              size="icon"
+              className="flex-shrink-0"
+              onClick={() => {
+                if (rentalTerms?.manager_phone) {
+                  window.open(`tel:${rentalTerms.manager_phone}`);
+                } else {
+                  toast.info(isRu ? 'Телефон не указан' : 'Phone not available');
+                }
+              }}
+            >
               <Phone className="w-5 h-5" />
             </Button>
             <MessageHostButton
@@ -643,24 +669,138 @@ export default function PropertyDetail() {
               size="lg"
               className={cn(
                 "flex-shrink-0 px-6",
-                rentalTerms?.instant_booking && "bg-amber-500 hover:bg-amber-600"
+                rentalTerms?.instant_booking && !dateRange?.from && "bg-amber-500 hover:bg-amber-600"
               )}
-              onClick={() => navigate(`/property/${id}/inquiry`)}
+              onClick={() => {
+                if (dateRange?.from && dateRange?.to) {
+                  // Dates selected — navigate to inquiry
+                  const params = new URLSearchParams({
+                    checkIn: format(dateRange.from, 'yyyy-MM-dd'),
+                    checkOut: format(dateRange.to, 'yyyy-MM-dd'),
+                    guests: guestCount.toString(),
+                  });
+                  navigate(`/property/${id}/inquiry?${params.toString()}`);
+                } else {
+                  // No dates — open date picker sheet
+                  setDateSheetOpen(true);
+                }
+              }}
             >
-              {rentalTerms?.instant_booking ? (
+              {dateRange?.from && dateRange?.to ? (
+                <>
+                  <CalendarIcon className="w-4 h-4 mr-2" />
+                  {isRu ? 'Забронировать' : 'Reserve'}
+                </>
+              ) : rentalTerms?.instant_booking ? (
                 <>
                   <Zap className="w-4 h-4 mr-2" />
                   {isRu ? 'Забронировать' : 'Book Now'}
                 </>
               ) : (
                 <>
-                  <Calendar className="w-4 h-4 mr-2" />
-                  {isRu ? 'Проверить даты' : 'Check Dates'}
+                  <CalendarIcon className="w-4 h-4 mr-2" />
+                  {isRu ? 'Выбрать даты' : 'Select Dates'}
                 </>
               )}
             </Button>
           </div>
         </div>
+
+        {/* Mobile Date Picker Sheet */}
+        <Sheet open={dateSheetOpen} onOpenChange={setDateSheetOpen}>
+          <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto">
+            <SheetHeader className="pb-2">
+              <SheetTitle>
+                {isRu ? 'Выберите даты' : 'Select dates'}
+              </SheetTitle>
+            </SheetHeader>
+            
+            <div className="space-y-4">
+              {/* Calendar */}
+              <div className="flex justify-center">
+                <Calendar
+                  mode="range"
+                  selected={dateRange}
+                  onSelect={setDateRange}
+                  numberOfMonths={1}
+                  disabled={(date) => date < new Date()}
+                  className="pointer-events-auto"
+                />
+              </div>
+
+              {/* Selected range summary */}
+              {dateRange?.from && dateRange?.to && (
+                <div className="flex items-center justify-between px-2 py-3 rounded-xl bg-muted/50">
+                  <div className="text-sm">
+                    <span className="font-medium">{format(dateRange.from, 'd MMM', { locale: isRu ? ru : undefined })}</span>
+                    <span className="mx-2 text-muted-foreground">→</span>
+                    <span className="font-medium">{format(dateRange.to, 'd MMM', { locale: isRu ? ru : undefined })}</span>
+                  </div>
+                  <span className="text-sm font-semibold text-primary">
+                    {Math.ceil((dateRange.to.getTime() - dateRange.from.getTime()) / (1000 * 60 * 60 * 24))} {isRu ? 'ночей' : 'nights'}
+                  </span>
+                </div>
+              )}
+
+              {/* Guest counter */}
+              <div className="flex items-center justify-between px-2">
+                <span className="text-sm font-medium">{isRu ? 'Гости' : 'Guests'}</span>
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8 rounded-full"
+                    onClick={() => setGuestCount(Math.max(1, guestCount - 1))}
+                    disabled={guestCount <= 1}
+                  >
+                    <Minus className="w-4 h-4" />
+                  </Button>
+                  <span className="w-6 text-center font-semibold">{guestCount}</span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8 rounded-full"
+                    onClick={() => setGuestCount(Math.min(rentalTerms?.max_guests || 10, guestCount + 1))}
+                    disabled={guestCount >= (rentalTerms?.max_guests || 10)}
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Min stay warning */}
+              {rentalTerms?.min_stay_nights && dateRange?.from && dateRange?.to && 
+                Math.ceil((dateRange.to.getTime() - dateRange.from.getTime()) / (1000 * 60 * 60 * 24)) < rentalTerms.min_stay_nights && (
+                <p className="text-xs text-destructive px-2">
+                  {isRu ? `Минимум ${rentalTerms.min_stay_nights} ночей` : `Minimum stay: ${rentalTerms.min_stay_nights} nights`}
+                </p>
+              )}
+
+              {/* Confirm button */}
+              <Button
+                className="w-full"
+                size="lg"
+                disabled={!dateRange?.from || !dateRange?.to}
+                onClick={() => {
+                  setDateSheetOpen(false);
+                  if (dateRange?.from && dateRange?.to) {
+                    const params = new URLSearchParams({
+                      checkIn: format(dateRange.from, 'yyyy-MM-dd'),
+                      checkOut: format(dateRange.to, 'yyyy-MM-dd'),
+                      guests: guestCount.toString(),
+                    });
+                    navigate(`/property/${id}/inquiry?${params.toString()}`);
+                  }
+                }}
+              >
+                {dateRange?.from && dateRange?.to
+                  ? (isRu ? 'Перейти к бронированию' : 'Continue to booking')
+                  : (isRu ? 'Выберите даты' : 'Select dates')
+                }
+              </Button>
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
 
       {/* Photo Lightbox */}
