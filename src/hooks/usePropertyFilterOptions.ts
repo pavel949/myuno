@@ -83,17 +83,17 @@ export function usePropertyFilterOptions() {
 
   // Bedroom options - static as they're numeric
   const bedroomOptions: FilterOption[] = useMemo(() => [
-    { id: 'studio', labelEn: 'Studio', labelRu: 'Студия', icon: '🛏️' },
-    { id: '1', labelEn: '1 Bedroom', labelRu: '1 спальня', icon: '1️⃣' },
-    { id: '2', labelEn: '2 Bedrooms', labelRu: '2 спальни', icon: '2️⃣' },
-    { id: '3', labelEn: '3 Bedrooms', labelRu: '3 спальни', icon: '3️⃣' },
-    { id: '4+', labelEn: '4+ Bedrooms', labelRu: '4+ спальни', icon: '4️⃣' },
+    { id: 'studio', labelEn: 'Studio', labelRu: 'Студия' },
+    { id: '1', labelEn: '1 Bedroom', labelRu: '1 спальня' },
+    { id: '2', labelEn: '2 Bedrooms', labelRu: '2 спальни' },
+    { id: '3', labelEn: '3 Bedrooms', labelRu: '3 спальни' },
+    { id: '4+', labelEn: '4+ Bedrooms', labelRu: '4+ спальни' },
   ], []);
 
   // Listing type options - static
   const listingTypeOptions: FilterOption[] = useMemo(() => [
-    { id: 'rent', labelEn: 'For Rent', labelRu: 'Аренда', icon: '🔑' },
-    { id: 'sale', labelEn: 'For Sale', labelRu: 'Продажа', icon: '🏷️' },
+    { id: 'rent', labelEn: 'For Rent', labelRu: 'Аренда' },
+    { id: 'sale', labelEn: 'For Sale', labelRu: 'Продажа' },
   ], []);
 
   // Build dynamic filter config

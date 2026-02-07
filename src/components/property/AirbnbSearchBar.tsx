@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { Search, MapPin, X, Minus, Plus, Check } from 'lucide-react';
+import { Search, MapPin, Globe, X, Minus, Plus, Check } from 'lucide-react';
+import { usePropertyQuickFilters, DistrictOption } from '@/hooks/usePropertyQuickFilters';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
@@ -23,18 +24,7 @@ export interface SearchParams {
   guests: number;
 }
 
-const locations = [
-  { id: 'all', labelEn: 'All Phuket', labelRu: 'Весь Пхукет', icon: '🏝️' },
-  { id: 'patong', labelEn: 'Patong', labelRu: 'Патонг', icon: '🎉' },
-  { id: 'kata', labelEn: 'Kata', labelRu: 'Ката', icon: '🏖️' },
-  { id: 'karon', labelEn: 'Karon', labelRu: 'Карон', icon: '🌊' },
-  { id: 'kamala', labelEn: 'Kamala', labelRu: 'Камала', icon: '🌴' },
-  { id: 'surin', labelEn: 'Surin', labelRu: 'Сурин', icon: '✨' },
-  { id: 'bangtao', labelEn: 'Bang Tao', labelRu: 'Банг Тао', icon: '🏄' },
-  { id: 'rawai', labelEn: 'Rawai', labelRu: 'Равай', icon: '⛵' },
-  { id: 'chalong', labelEn: 'Chalong', labelRu: 'Чалонг', icon: '🚤' },
-  { id: 'naiyang', labelEn: 'Nai Yang', labelRu: 'Най Янг', icon: '✈️' },
-];
+// Locations are now loaded dynamically from the database via usePropertyQuickFilters
 
 const flexibleDates = [
   { id: 'weekend', labelEn: 'Weekend', labelRu: 'Выходные', getDates: () => ({ from: addDays(new Date(), (6 - new Date().getDay()) % 7), to: addDays(new Date(), (7 - new Date().getDay()) % 7 + 1) }) },
@@ -46,6 +36,13 @@ type MobileTab = 'location' | 'dates' | 'guests';
 
 export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
   const { language } = useLanguage();
+  const { districts: dbDistricts } = usePropertyQuickFilters();
+
+  // Build locations from DB districts
+  const locations = useMemo(() => [
+    { id: 'all', labelEn: 'All Phuket', labelRu: 'Весь Пхукет' },
+    ...dbDistricts.map(d => ({ id: d.valueKey, labelEn: d.labelEn, labelRu: d.labelRu })),
+  ], [dbDistricts]);
   const [isOpen, setIsOpen] = useState(false);
   const [activeField, setActiveField] = useState<string | null>(null);
   const [mobileTab, setMobileTab] = useState<MobileTab>('location');
@@ -249,7 +246,10 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                               )}
                               onClick={() => toggleLocation(loc.id)}
                             >
-                              <span className="text-lg w-6">{loc.icon}</span>
+                              {loc.id === 'all' 
+                                ? <Globe className="w-4 h-4 shrink-0" />
+                                : <MapPin className="w-4 h-4 shrink-0" />
+                              }
                               <span className="flex-1 text-sm font-medium">
                                 {language === 'ru' ? loc.labelRu : loc.labelEn}
                               </span>
@@ -266,7 +266,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                               const loc = locations.find(l => l.id === locId);
                               return loc ? (
                                 <span key={locId} className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary rounded-full text-xs">
-                                  {loc.icon} {language === 'ru' ? loc.labelRu : loc.labelEn}
+                                  <MapPin className="w-3 h-3" /> {language === 'ru' ? loc.labelRu : loc.labelEn}
                                   <button onClick={(e) => { e.stopPropagation(); toggleLocation(locId); }} className="ml-1 hover:text-primary/70">
                                     <X className="w-3 h-3" />
                                   </button>
@@ -449,7 +449,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                     )}
                     onClick={() => toggleLocation(loc.id)}
                   >
-                    <span className="text-lg">{loc.icon}</span>
+                    <MapPin className="w-4 h-4 shrink-0 text-muted-foreground" />
                     {language === 'ru' ? loc.labelRu : loc.labelEn}
                   </button>
                 ))}

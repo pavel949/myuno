@@ -13,7 +13,7 @@ export interface QuickFilter {
   type: 'boolean' | 'highlight' | 'amenity' | 'computed' | 'project';
   labelEn: string;
   labelRu: string;
-  icon: string;
+  icon?: string;
   field?: string; // for boolean: 'instant_booking', 'is_verified'
   value?: string; // for highlight/amenity: value_key
   projectId?: string; // for complex/residence filtering
@@ -113,7 +113,7 @@ export function usePropertyQuickFilters() {
           type: (meta.type as QuickFilter['type']) || 'highlight',
           labelEn: h.value_en,
           labelRu: h.value_ru || h.value_en,
-          icon: h.icon || '✨',
+          icon: h.icon || undefined,
           field: meta.field as string | undefined,
           value: meta.value as string | undefined,
           metadata: meta,
@@ -142,7 +142,7 @@ export function usePropertyQuickFilters() {
           valueKey: d.value_key,
           labelEn: d.value_en,
           labelRu: d.value_ru || d.value_en,
-          icon: d.icon || '📍',
+          icon: d.icon || undefined,
         })
       );
 
