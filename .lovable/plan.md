@@ -1,77 +1,73 @@
 
 
-# Populate Yachts Vertical with Real Provider Data
+# Import Real Phuket Property Projects from FazWaz
 
 ## Overview
-Replace the 20 existing placeholder yacht records (which have no images, no real descriptions, and no source URLs) with verified, real-world data scraped from actual Phuket charter providers. The data includes exact specs, seasonal pricing, real photos, amenities, and source URLs.
+Insert 7 verified property projects scraped from FazWaz.com into the `property_projects` table, along with their associated developers in the `developers` table. All data comes from individual FazWaz project pages with real descriptions, photos, amenities, coordinates, and pricing.
 
-## Data Sources (Verified via Live Scraping)
+## Data Collected (7 Projects)
 
-### Provider 1: Tiger Marine Charter (tigermarinecharter.com)
-6 vessels with complete data:
-
-| Vessel | Type | Length | Guests | Cabins | Half-Day (THB) | Full-Day (THB) | Overnight (THB) |
-|--------|------|--------|--------|--------|---------------|----------------|------------------|
-| Shangani 70ft | Luxury Catamaran | 21.3m | 60 | 6 | 98,000 | 135,000-165,000 | 180,000-195,000 |
-| Zambezia 53ft | Power Catamaran | 16.15m | 30 | 4 | 69,500 | 93,000-109,000 | 142,000-158,000 |
-| Sanyati 51ft | Speed Catamaran | 15.5m | 25 | 3 | 66,000 | 83,000-99,000 | 132,000-148,000 |
-| Shashani 43ft | Power Catamaran | 13.1m | 15 | 3 | 59,000 | 73,000-89,000 | 112,000-128,000 |
-| Shibuli 40ft | Speed Catamaran | 12.1m | 15 | 3 | 59,000 | 73,000-89,000 | 112,000-128,000 |
-| Limpopo 28ft | Speedboat (Axopar) | 8.5m | 4 | 0 | 17,000 | 39,500 | N/A |
-
-Each has 8-10 real photos, detailed amenities, and seasonal pricing.
-
-### Provider 2: Simba Sea Trips (simbaseatrips.com)
-3 charter types with real pricing:
-- Speedboat Phang Nga Bay: from 33,800 THB (8h)
-- Speedboat Phi Phi Sunrise: from 33,800 THB (8h)
-- Speedboat Coral Delight: from 30,100 THB (7h)
-- MotorYacht Phang Nga Bay: from 58,600 THB (8h)
-- MotorYacht Sunset: from 48,000 THB (4.5h)
-- Locals Island Tour: from 13,000 THB (4h)
-- Krabi Classics: from 34,700 THB (9h)
+| Project | District | Developer | Status | Units | Floors | Price From (USD) |
+|---------|----------|-----------|--------|-------|--------|-----------------|
+| The VIP Mercury - Wyndham La Vita Phuket | Rawai | VIP Thailand | Completed (Mar 2022) | 516 | 7 | $78,900 |
+| The Deck Patong | Patong | Sansiri | Completed (Aug 2015) | 270 | 7 | $152,000 |
+| 6th Avenue Surin | Choeng Thale (Surin) | Ocean Group Asia | Completed (Feb 2016) | 137 | 8 | $78,600 |
+| Zcape I | Choeng Thale (Laguna) | Tri Property Co., Ltd. | Completed (Jan 2014) | 198 | 8 | $67,900 |
+| The Title V | Rawai | Rhom Bho Property PLC | Completed (May 2021) | 228 | 5 | $126,000 |
+| Bellevue Beachfront Condo | Choeng Thale (Layan) | Bell Land Development | Off Plan (Aug 2026) | 645 | 5 | $148,000 |
+| Skypark Celeste Laguna | Choeng Thale (Laguna) | Banyan Group Residences | Completed (Sep 2025) | 384 | 7 | $158,000 |
 
 ## Implementation Steps
 
-### Step 1: Database Migration -- Clear Old Placeholder Data and Insert Real Records
-A single SQL migration that:
+### Step 1: Insert Developers
+Insert 6 developers into the `developers` table (with ON CONFLICT skip to avoid duplicates):
+- **VIP Thailand** -- developer of Wyndham La Vita, VIP Tropika
+- **Sansiri** -- one of Thailand's largest developers
+- **Ocean Group Asia** -- developer of 6th Avenue, Surin Sands
+- **Tri Property Co., Ltd.** -- developer of Zcape series
+- **Rhom Bho Property PLC** -- developer of The Title series
+- **Bell Land Development** -- developer of Bellevue projects
+- **Banyan Group Residences** -- Laguna Phuket ecosystem developer
 
-1. **Deletes** the 20 existing yacht records (all have `cover_image: null` -- clearly placeholder data)
-2. **Inserts Tiger Marine Charter** as a provider in the `providers` table (if not already present by exact name match)
-3. **Inserts Simba Sea Trips** as a provider
-4. **Inserts 6 Tiger Marine vessels** with:
-   - Real photo URLs from tigermarinecharter.com (cover + gallery of 8-10 images each)
-   - Exact specs (length, guests, cabins)
-   - Low-season pricing as `price_half_day` and `price_full_day`
-   - High-season pricing as `price_overnight`
-   - Real EN descriptions from website
-   - RU translations
-   - `features_en` array: snorkeling, kayak, SUP, fishing, WiFi, bluetooth speakers, AC cabins, hotel transfer, welcome drinks, lunch included
-   - `source_urls` array pointing to exact boat pages
-   - `location_name`: "Royal Phuket Marina, Phuket"
-   - `has_crew: true`, `has_catering: true`
-   - `yacht_type`: "catamaran" or "speedboat"
-   - `is_active: true`, `is_verified: true`, `is_featured` for Shangani
-5. **Inserts 4 Simba Sea Trips vessels** (speedboat + motoryacht) with:
-   - Real photos from simbaseatrips.com CDN
-   - Real pricing in THB
-   - Source URLs
-   - Descriptions from their website
+Each developer will include: name (EN/RU), logo URL from FazWaz CDN, website link, and FazWaz developer page link.
 
-### Step 2: Data Provenance Records
-Insert `data_provenance` entries for each yacht linking back to the exact source URL, scrape timestamp, and provider verification status.
+### Step 2: Insert Property Projects
+Insert 7 projects into `property_projects` with full data:
 
-## Technical Notes
+For each project:
+- **name_en / name_ru**: English name + Russian translation
+- **description_en / description_ru**: Full marketing descriptions from FazWaz pages
+- **district**: Rawai, Patong, Choeng Thale, etc.
+- **address**: Full address from FazWaz (e.g., "81 Rat U Thit 200 Pee Road, Patong, Kathu, Phuket")
+- **lat / lng**: Extracted from Google Street View links on FazWaz (e.g., 7.7738059, 98.3178938)
+- **developer_id**: FK to developers table
+- **developer_name**: Denormalized developer name
+- **year_built**: Completion year
+- **total_units**: Exact unit count (516, 270, 137, etc.)
+- **cover_image**: High-res cover from FazWaz CDN (2850x1515px)
+- **images**: Array of 4-6 gallery photos from FazWaz CDN
+- **amenities**: Real amenities arrays (Pool, Gym, CCTV, Parking, etc.)
+- **project_status**: 'completed' or 'offplan'
+- **completion_date**: Exact date (e.g., '2022-03-01')
+- **price_from / price_to**: USD prices converted to THB (1 USD ~ 35 THB)
+- **is_active**: true
+- **is_featured**: true for premium projects (Wyndham, Skypark)
 
-- **Photos**: Using direct image URLs from provider websites (hotlinked). These are publicly served images from their CDNs.
-- **Pricing**: Using low-season prices as the default `price_half_day` / `price_full_day`. Seasonal variation noted in description.
-- **No code changes needed**: The existing `useYachts`, `useYacht`, yacht detail page, and booking flow already support all the fields being populated.
-- **Provider linkage**: Each yacht will have `provider_id` set to the corresponding provider UUID.
+### Step 3: Insert Data Provenance
+Add `data_provenance` records for each project linking to the exact FazWaz project URL.
+
+## Technical Details
+
+- **Coordinates source**: Extracted from Google Maps Street View links embedded in each FazWaz project page (e.g., `viewpoint=7.9029867,98.3007747`)
+- **Images**: Using FazWaz CDN URLs (publicly served at cdn.fazwaz.com)
+- **Pricing**: Converting USD to THB at ~35 THB/USD for `price_from` / `price_to`
+- **No code changes needed**: The existing `usePropertyProjects`, `useOffplanProjects`, and project detail pages already support all populated fields
+- **Existing placeholder data**: The 6 existing projects (Patong Tower, Laguna Park, Kamala Hills, Chalong Bay, Rawai Beachfront, Title Legendary) will be kept -- new projects are additive
 
 ## Expected Result
-- 10 real yacht/boat listings with professional photos, real pricing, real specs
-- Each yacht card in the app will display a real cover image, real price, and accurate capacity
-- Yacht detail pages will show full photo galleries, specs, and amenities
-- Booking flow will use real pricing
-- All data traceable to source via `source_urls` and `data_provenance`
+- 7 new real property projects visible in the Complexes catalog and property search
+- Each project card shows real FazWaz photos, real developer names, real pricing
+- Off-plan filter will show Bellevue Beachfront (completing Aug 2026)
+- Map pins will appear at correct GPS coordinates for all 7 projects
+- Developer profiles linked for future developer detail pages
 
