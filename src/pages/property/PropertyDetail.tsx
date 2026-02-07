@@ -29,6 +29,7 @@ import {
 import { ProjectInfoCard } from '@/components/property/ProjectInfoCard';
 import { UnitSpecs } from '@/components/property/UnitSpecs';
 import { ExitIntentModal } from '@/components/leads/ExitIntentModal';
+import { PhotoLightbox } from '@/components/property/PhotoLightbox';
 
 // Demo fallback removed — only real DB data is used
 
@@ -52,6 +53,7 @@ export default function PropertyDetail() {
   const { language } = useLanguage();
   const [activeImage, setActiveImage] = useState(0);
   const [showAllPhotos, setShowAllPhotos] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
   const [copied, setCopied] = useState(false);
   const isRu = language === 'ru';
 
@@ -138,15 +140,7 @@ export default function PropertyDetail() {
     : [property.cover_image].filter(Boolean);
   const amenities = property.amenities || [];
 
-  if (isLoading) {
-    return (
-      <AppLayout>
-        <div className="flex items-center justify-center min-h-screen">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-      </AppLayout>
-    );
-  }
+  // Duplicate loading check removed (already handled above)
 
   const pricePerNight = rentalTerms?.price_per_night || property.price || 0;
   const viewLabel = property.view_type ? viewTypeLabels[property.view_type] : null;
@@ -192,7 +186,7 @@ export default function PropertyDetail() {
             <div className="grid grid-cols-2 md:grid-cols-4 grid-rows-2 gap-2 h-[50vh] min-h-[300px] max-h-[500px]">
               <div 
                 className="col-span-2 row-span-2 relative cursor-pointer overflow-hidden rounded-l-xl"
-                onClick={() => setActiveImage(0)}
+                onClick={() => { setLightboxIndex(0); setShowAllPhotos(true); }}
               >
                 <img
                   src={images[0]}
@@ -208,7 +202,7 @@ export default function PropertyDetail() {
                     i === 1 && "rounded-tr-xl",
                     i === 3 && "rounded-br-xl"
                   )}
-                  onClick={() => setActiveImage(i + 1)}
+                  onClick={() => { setLightboxIndex(i + 1); setShowAllPhotos(true); }}
                 >
                   <img
                     src={img}
@@ -668,6 +662,14 @@ export default function PropertyDetail() {
           </div>
         </div>
       </div>
+
+      {/* Photo Lightbox */}
+      <PhotoLightbox
+        images={images}
+        initialIndex={lightboxIndex}
+        open={showAllPhotos}
+        onClose={() => setShowAllPhotos(false)}
+      />
 
       {/* Exit Intent Lead Capture */}
       <ExitIntentModal

@@ -1,13 +1,13 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Home, BedDouble, Bath, Users, SlidersHorizontal, Zap, MapPin, Star, Heart } from 'lucide-react';
+import { Home, BedDouble, Bath, Users, SlidersHorizontal, Zap, MapPin, Star, Heart, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { Button } from '@/components/ui/button';
 import { FilterChip, FilterChipGroup } from '@/components/uno/FilterChip';
 import { UniversalFilter, ActiveFilters, FilterValues } from '@/components/filters/UniversalFilter';
 import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
-import { useProperties, useInstantBookingProperties, Property } from '@/hooks/useProperties';
+import { usePropertiesInfinite, Property } from '@/hooks/useProperties';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -23,17 +23,13 @@ import { OffplanCTASection } from '@/components/property/OffplanCTASection';
 import { applyQuickFilters } from '@/hooks/usePropertyQuickFilters';
 import { matchesFilter, matchesSingleFilter, normalizeForFilter } from '@/lib/filterUtils';
 import { CrossSellSection } from '@/components/crosssell';
-
-// Demo fallback removed — only real DB data is used
-
-// Removed static propertyTypes - now loaded dynamically from usePropertyFilterOptions
+import { PropertySortSelect, PropertySortKey } from '@/components/property/PropertySortSelect';
 
 export default function PropertyIndex() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const [searchParamsUrl, setSearchParamsUrl] = useSearchParams();
   
-  // Property mode: rent or buy
   const [propertyMode, setPropertyMode] = useState<PropertyMode>(
     (searchParamsUrl.get('mode') as PropertyMode) || 'rent'
   );
@@ -47,15 +43,17 @@ export default function PropertyIndex() {
   const [selectedType, setSelectedType] = useState('all');
   const [filterValues, setFilterValues] = useState<FilterValues>({});
   const [hoveredProperty, setHoveredProperty] = useState<string | null>(null);
-  // Quick filters state (Agoda/Airbnb style)
   const [quickFilters, setQuickFilters] = useState<string[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
   const [selectedBedrooms, setSelectedBedrooms] = useState<string[]>([]);
   const [showStickyCTA, setShowStickyCTA] = useState(false);
+  const [sortKey, setSortKey] = useState<PropertySortKey>('recommended');
   const { formatPrice } = useCurrency();
 
-  // Update URL when mode changes
+  // Infinite scroll sentinel
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (propertyMode === 'buy') {
       setSearchParamsUrl({ mode: 'buy' });
@@ -65,48 +63,64 @@ export default function PropertyIndex() {
     }
   }, [propertyMode, setSearchParamsUrl]);
 
-  // Show sticky CTA after scrolling
   useEffect(() => {
     const handleScroll = () => {
-      const scrollY = window.scrollY;
-      setShowStickyCTA(scrollY > 800);
+      setShowStickyCTA(window.scrollY > 800);
     };
-    
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Fetch dynamic filter options from lookup_values (editable in admin)
   const { filterConfig, propertyTypes } = usePropertyFilterOptions();
   
-  // Add "All" option to property types for the pills
   const propertyTypePills = useMemo(() => [
     { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '🏠' },
     ...propertyTypes
   ], [propertyTypes]);
 
-  // Fetch instant booking properties
-  const { data: instantBookingProperties, isLoading: isLoadingInstant } = useInstantBookingProperties(10);
-
-  // Fetch all rental properties from database (filtering done client-side for demo fallback consistency)
-  const { data: dbProperties, isLoading } = useProperties({
+  // Infinite query with server-side filters
+  const {
+    data: infiniteData,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = usePropertiesInfinite({
     listingType: propertyMode === 'buy' ? 'sale' : 'rent',
-  }, 200);
+    propertyType: selectedType !== 'all' ? selectedType : undefined,
+  });
 
-  // Use DB data or fallback to demo, then apply all filters
+  // Infinite scroll observer
+  useEffect(() => {
+    const sentinel = loadMoreRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '400px' }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // Flatten pages + apply client-side filters + sort
   const properties = useMemo(() => {
-    const sourceData = dbProperties || [];
+    const allItems = infiniteData?.pages.flatMap(p => p.properties) || [];
     
-    // First apply standard filters
-    const standardFiltered = sourceData.filter(prop => {
+    // Client-side filters
+    const filtered = allItems.filter(prop => {
       const matchesLocation = searchParams.locations.length === 0 || 
         searchParams.locations.some(loc => 
           prop.district?.toLowerCase().includes(loc.toLowerCase())
         );
-      const matchesType = selectedType === 'all' || prop.property_type === selectedType;
       const matchesGuests = !searchParams.guests || (prop.max_guests || 0) >= searchParams.guests;
       
-      // Bedroom filter - from inline chips (priority) or modal filter
+      // Bedroom filter
       const bedroomsToCheck = selectedBedrooms.length > 0 
         ? selectedBedrooms 
         : (filterValues.bedrooms 
@@ -123,7 +137,7 @@ export default function PropertyIndex() {
         if (!matchesBedrooms) return false;
       }
 
-      // District filter - from chips (priority) or modal filter
+      // District filter
       const districtsToCheck = selectedDistricts.length > 0
         ? selectedDistricts
         : (filterValues.district
@@ -139,7 +153,7 @@ export default function PropertyIndex() {
         if (!matchesDistrict) return false;
       }
 
-      // Amenities filter - multi-select (must have ALL selected)
+      // Amenities filter
       if (filterValues.amenities) {
         const amenityFilters = Array.isArray(filterValues.amenities)
           ? filterValues.amenities as string[]
@@ -147,12 +161,33 @@ export default function PropertyIndex() {
         if (!matchesFilter(prop.amenities, amenityFilters)) return false;
       }
       
-      return matchesLocation && matchesType && matchesGuests;
+      return matchesLocation && matchesGuests;
     }) as unknown as Property[];
 
-    // Then apply quick filters (Agoda/Airbnb style)
-    return applyQuickFilters(standardFiltered, quickFilters, selectedProjectId);
-  }, [dbProperties, searchParams, selectedType, filterValues, quickFilters, selectedProjectId, selectedBedrooms, selectedDistricts, propertyMode]);
+    // Quick filters
+    const quickFiltered = applyQuickFilters(filtered, quickFilters, selectedProjectId);
+
+    // Sort
+    const sorted = [...quickFiltered];
+    switch (sortKey) {
+      case 'price_asc':
+        sorted.sort((a, b) => (a.price || 0) - (b.price || 0));
+        break;
+      case 'price_desc':
+        sorted.sort((a, b) => (b.price || 0) - (a.price || 0));
+        break;
+      case 'rating':
+        sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        break;
+      case 'newest':
+        sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        break;
+      default: // 'recommended' — featured first, already from server
+        break;
+    }
+
+    return sorted;
+  }, [infiniteData, searchParams, filterValues, quickFilters, selectedProjectId, selectedBedrooms, selectedDistricts, sortKey]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -161,14 +196,13 @@ export default function PropertyIndex() {
       else if (Array.isArray(value)) count += value.length;
       else if (value) count++;
     });
-    // Count inline chips
     count += selectedBedrooms.length;
     count += selectedDistricts.length;
-    // Also count quick filters
     count += quickFilters.length;
     if (selectedProjectId) count++;
     return count;
   }, [filterValues, quickFilters, selectedProjectId, selectedBedrooms, selectedDistricts]);
+
   const handleRemoveFilter = (sectionId: string, optionId?: string) => {
     setFilterValues(prev => {
       const newValues = { ...prev };
@@ -197,9 +231,8 @@ export default function PropertyIndex() {
   return (
     <AppLayout showHeader={false} showBottomNav={true}>
       <div className="min-h-screen bg-background">
-        {/* Compact Sticky Header - Airbnb style */}
+        {/* Compact Sticky Header */}
         <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b space-y-3 pb-3">
-          {/* Row 1: Back + Title + Map + Filter */}
           <div className="container max-w-7xl mx-auto px-4 pt-3">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
@@ -212,7 +245,6 @@ export default function PropertyIndex() {
                 </h1>
               </div>
               
-              {/* Map + Filter buttons */}
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate('/property/map')}>
                   <MapPin className="w-4 h-4" />
@@ -238,14 +270,10 @@ export default function PropertyIndex() {
             </div>
           </div>
             
-          {/* Row 2: Compact Search Bar */}
           <div className="container max-w-7xl mx-auto px-4">
-            <AirbnbSearchBar 
-              onSearch={setSearchParams}
-            />
+            <AirbnbSearchBar onSearch={setSearchParams} />
           </div>
 
-          {/* Row 3: Category Ribbon (Mode + Types) */}
           <div className="container max-w-7xl mx-auto px-4">
             <PropertyCategoryRibbon
               mode={propertyMode}
@@ -257,12 +285,12 @@ export default function PropertyIndex() {
           </div>
         </header>
 
-        {/* Project Promo Section - Right after header for discoverability */}
+        {/* Project Promo Section */}
         <div className="container max-w-7xl mx-auto px-4 pt-3 pb-2">
           <ProjectPromoSection mode={propertyMode} />
         </div>
 
-        {/* Quick Filter Tags (Agoda/Airbnb style) */}
+        {/* Quick Filter Tags */}
         <div className="container max-w-7xl mx-auto px-4 py-1">
           <QuickFiltersRibbon
             selectedFilters={quickFilters}
@@ -276,36 +304,39 @@ export default function PropertyIndex() {
           />
         </div>
 
-        {/* Results Count + Quick Filter Tags */}
+        {/* Results Count + Sort */}
         <div className="container max-w-7xl mx-auto px-4 py-2">
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
               {properties.length} {language === 'ru' ? 'объектов найдено' : 'places found'}
             </p>
-            {activeFilterCount > 0 && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-xs h-7"
-                onClick={() => {
-                  setFilterValues({});
-                  setQuickFilters([]);
-                  setSelectedDistricts([]);
-                  setSelectedBedrooms([]);
-                }}
-              >
-                {language === 'ru' ? 'Сбросить фильтры' : 'Clear filters'}
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              <PropertySortSelect value={sortKey} onChange={setSortKey} />
+              {activeFilterCount > 0 && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-xs h-7"
+                  onClick={() => {
+                    setFilterValues({});
+                    setQuickFilters([]);
+                    setSelectedDistricts([]);
+                    setSelectedBedrooms([]);
+                  }}
+                >
+                  {language === 'ru' ? 'Сбросить' : 'Clear'}
+                </Button>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Property Grid - Airbnb Style */}
+        {/* Property Grid */}
         <main className="container max-w-7xl mx-auto px-4 pb-24">
           {/* Loading State */}
           {isLoading && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                 <div key={i} className="space-y-3">
                   <Skeleton className="aspect-square rounded-xl" />
                   <Skeleton className="h-4 w-3/4" />
@@ -315,7 +346,7 @@ export default function PropertyIndex() {
             </div>
           )}
 
-          {/* Property Cards - Airbnb Style */}
+          {/* Property Cards */}
           {!isLoading && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {properties.map((property) => (
@@ -335,20 +366,18 @@ export default function PropertyIndex() {
                         "w-full h-full object-cover transition-transform duration-300",
                         hoveredProperty === property.id && "scale-[1.03]"
                       )}
+                      loading="lazy"
                     />
                     
-                    {/* Favorite Button */}
                     <button 
                       className="absolute top-3 right-3 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
                       onClick={(e) => {
                         e.stopPropagation();
-                        // Handle favorite toggle
                       }}
                     >
                       <Heart className="w-5 h-5" />
                     </button>
 
-                    {/* Badges */}
                     <div className="absolute top-3 left-3 flex flex-col gap-1">
                       {property.is_featured && (
                         <Badge className="bg-background text-foreground border-0 shadow-sm text-xs">
@@ -366,7 +395,6 @@ export default function PropertyIndex() {
 
                   {/* Content */}
                   <div className="space-y-1">
-                    {/* Location & Rating */}
                     <div className="flex items-start justify-between gap-2">
                       <h3 className="font-semibold text-sm line-clamp-1">
                         {property.district || 'Phuket'}
@@ -379,12 +407,10 @@ export default function PropertyIndex() {
                       )}
                     </div>
 
-                    {/* Title */}
                     <p className="text-sm text-muted-foreground line-clamp-1">
                       {language === 'ru' ? property.title_ru : property.title_en}
                     </p>
 
-                    {/* Specs */}
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <BedDouble className="w-3.5 h-3.5" />
@@ -400,7 +426,6 @@ export default function PropertyIndex() {
                       </span>
                     </div>
 
-                    {/* Price */}
                     <p className="text-sm font-semibold pt-1">
                       {propertyMode === 'buy' 
                         ? formatPrice((property as any).sale_price || property.price || 0)
@@ -419,6 +444,18 @@ export default function PropertyIndex() {
               ))}
             </div>
           )}
+
+          {/* Infinite scroll sentinel */}
+          <div ref={loadMoreRef} className="py-8 flex justify-center">
+            {isFetchingNextPage && (
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            )}
+            {!isLoading && !hasNextPage && properties.length > 0 && (
+              <p className="text-sm text-muted-foreground">
+                {language === 'ru' ? 'Все объекты загружены' : 'All properties loaded'}
+              </p>
+            )}
+          </div>
 
           {/* Empty State */}
           {!isLoading && properties.length === 0 && (
@@ -447,12 +484,9 @@ export default function PropertyIndex() {
             </div>
           )}
 
-          {/* Offplan CTA - Lead generation for new developments */}
           <OffplanCTASection className="mt-8" />
-
           <CrossSellSection currentVertical="property" className="mt-8 px-4" />
 
-          {/* Sticky Expert CTA */}
           {showStickyCTA && (
             <VerticalCTA
               vertical="property"
