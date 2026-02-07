@@ -162,11 +162,11 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
           {price !== undefined && (
             <div className="flex items-center gap-2 mt-2">
               <span className="text-base font-bold text-primary">
-                {symbol}{price.toLocaleString()}
+                {formatPrice(price)}
               </span>
               {originalPrice && (
                 <span className="text-xs text-muted-foreground line-through">
-                  {symbol}{originalPrice.toLocaleString()}
+                  {formatPrice(originalPrice)}
                 </span>
               )}
             </div>
@@ -286,7 +286,7 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
                 <div className="text-right">
                   {pricePrefix && <span className="text-xs text-muted-foreground mr-1">{pricePrefix}</span>}
                   <span className="text-base font-bold text-primary">
-                    {symbol}{price.toLocaleString()}
+                    {formatPrice(price)}
                   </span>
                   {priceUnit && <span className="text-xs text-muted-foreground">{priceUnit}</span>}
                   {priceLabel && (
