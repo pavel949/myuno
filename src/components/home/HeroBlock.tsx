@@ -56,6 +56,9 @@ export const HeroBlock = memo(function HeroBlock() {
       <h1 className="text-center text-2xl sm:text-3xl font-display font-bold text-foreground mt-1">
         {isRu ? 'За рубежом как дома' : 'Abroad Like Home'}
       </h1>
+      <p className="text-center text-sm text-muted-foreground -mt-1">
+        {isRu ? 'Все решения в одном приложении' : 'All solutions in one app'}
+      </p>
 
       {/* Search - primary action */}
       <div data-tour="search">
