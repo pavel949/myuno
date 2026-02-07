@@ -151,7 +151,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
       async (pos) => {
         try {
           const { latitude, longitude } = pos.coords;
-          const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/geocode-address?query=${longitude},${latitude}&language=${language}`;
+          const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/geocode-address?lat=${latitude}&lng=${longitude}&language=${language}`;
           const res = await fetch(url, {
             headers: { 'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
           });
