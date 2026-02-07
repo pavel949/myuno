@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useBooking } from '@/hooks/useBooking';
 import { useYacht } from '@/hooks/useYachts';
 import { useAvailabilityCheck } from '@/hooks/useAvailabilityCheck';
+import { useSystemSettings } from '@/hooks/useSystemSettings';
 import { supabase } from '@/integrations/supabase/client';
 import { BookingDateTimeSelect } from '@/components/booking/BookingDateTimeSelect';
 import { BookingParticipants } from '@/components/booking/BookingParticipants';
@@ -40,6 +41,7 @@ export default function YachtBooking() {
   const { yacht, isLoading } = useYacht(id || '');
   const { checkYachtAvailability, isChecking, lastResult } = useAvailabilityCheck();
   const { data: yachtExperiences = [] } = useYachtExperiences();
+  const { platformFeePercent } = useSystemSettings();
 
   const [availabilityError, setAvailabilityError] = useState<string | null>(null);
 
@@ -115,12 +117,14 @@ export default function YachtBooking() {
   const basePrice = isHalfDay 
     ? (yacht.price_half_day || 0) 
     : (yacht.price_full_day || 0);
-  const serviceFee = Math.round((basePrice + experiencesTotal) * 0.05);
+  const serviceFee = Math.round((basePrice + experiencesTotal) * (platformFeePercent / 100));
   const total = basePrice + experiencesTotal + serviceFee;
 
+  const defaultHalfDayTimes = ['09:00', '14:00'];
+  const defaultFullDayTimes = ['08:00', '09:00', '10:00'];
   const availableTimes = isHalfDay 
-    ? ['09:00', '14:00']
-    : ['08:00', '09:00', '10:00'];
+    ? (yacht.departure_times || defaultHalfDayTimes)
+    : (yacht.departure_times || defaultFullDayTimes);
   
   const yachtName = language === 'ru' ? yacht.name_ru : yacht.name_en;
   const yachtLocation = language === 'ru' 
