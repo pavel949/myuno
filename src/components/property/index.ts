@@ -31,6 +31,8 @@ export { CancellationPolicySelector } from './CancellationPolicySelector';
 export { TripServicesGrid } from './TripServicesGrid';
 export { BookingTermsCard } from './BookingTermsCard';
 export { BookingConditionsChips } from './BookingConditionsChips';
+export { PhotoLightbox } from './PhotoLightbox';
+export { PropertySortSelect } from './PropertySortSelect';
 export { PropertyBookingSuccess } from './PropertyBookingSuccess';
 export { ProjectCarouselCard } from './ProjectCarouselCard';
 export { ProjectPromoSection } from './ProjectPromoSection';
