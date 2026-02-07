@@ -379,6 +379,26 @@ export default function AirportTransferBooking() {
 
       <ScrollArea className="flex-1">
         <div className="px-4 py-4 pb-32">
+          {/* Fast Track Upsell Banner */}
+          <button
+            type="button"
+            onClick={() => navigate('/transport/fast-track')}
+            className="w-full mb-4 p-3.5 rounded-2xl border border-primary/20 bg-primary/5 flex items-center gap-3 text-left hover:bg-primary/10 transition-colors"
+          >
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <Shield className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold">
+                {language === 'ru' ? 'Fast Track — без очередей' : 'Fast Track — skip the queues'}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {language === 'ru' ? 'Приоритетное прохождение от ฿2,500' : 'Priority processing from ฿2,500'}
+              </p>
+            </div>
+            <ArrowRight className="w-4 h-4 text-primary shrink-0" />
+          </button>
+
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Direction Toggle */}
             <div className="space-y-2">
