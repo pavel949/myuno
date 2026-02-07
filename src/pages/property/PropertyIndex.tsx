@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Home, BedDouble, Bath, Users, SlidersHorizontal, Zap, MapPin, Star, Heart, Loader2 } from 'lucide-react';
+import { Home, SlidersHorizontal, MapPin, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useCurrency } from '@/contexts/CurrencyContext';
+
 import { Button } from '@/components/ui/button';
-import { FilterChip, FilterChipGroup } from '@/components/uno/FilterChip';
+
 import { UniversalFilter, ActiveFilters, FilterValues } from '@/components/filters/UniversalFilter';
 import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
 import { usePropertiesInfinite, Property } from '@/hooks/useProperties';
@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
 import { AirbnbSearchBar, SearchParams } from '@/components/property/AirbnbSearchBar';
+import { PropertyListingCard } from '@/components/property/PropertyListingCard';
 import { cn } from '@/lib/utils';
 import { ConsultationCTA } from '@/components/property/ConsultationCTA';
 import { VerticalCTA } from '@/components/leads/VerticalCTA';
@@ -50,7 +51,7 @@ export default function PropertyIndex() {
   const [selectedBedrooms, setSelectedBedrooms] = useState<string[]>([]);
   const [showStickyCTA, setShowStickyCTA] = useState(false);
   const [sortKey, setSortKey] = useState<PropertySortKey>('recommended');
-  const { formatPrice } = useCurrency();
+  
 
   // Infinite scroll sentinel
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -225,17 +226,6 @@ export default function PropertyIndex() {
     });
   };
 
-  const formatPriceLabel = (period?: string) => {
-    if (!period) return '';
-    const periodLabels: Record<string, { en: string; ru: string }> = {
-      night: { en: '/night', ru: '/ночь' },
-      week: { en: '/week', ru: '/нед' },
-      month: { en: '/mo', ru: '/мес' },
-      year: { en: '/year', ru: '/год' },
-      total: { en: '', ru: '' },
-    };
-    return periodLabels[period]?.[language] || '';
-  };
 
   return (
     <AppLayout showHeader={false} showBottomNav={true}>
@@ -366,97 +356,13 @@ export default function PropertyIndex() {
           {!isLoading && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {properties.map((property) => (
-                <div 
+                <PropertyListingCard
                   key={property.id}
-                  className="group cursor-pointer"
-                  onClick={() => navigate(`/property/${property.id}`)}
-                  onMouseEnter={() => setHoveredProperty(property.id)}
-                  onMouseLeave={() => setHoveredProperty(null)}
-                >
-                  {/* Image Container */}
-                  <div className="relative aspect-square rounded-2xl overflow-hidden mb-3">
-                    <img 
-                      src={property.cover_image || property.images?.[0] || 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=600'} 
-                      alt={language === 'ru' ? property.title_ru : property.title_en}
-                      className={cn(
-                        "w-full h-full object-cover transition-transform duration-300",
-                        hoveredProperty === property.id && "scale-[1.03]"
-                      )}
-                      loading="lazy"
-                    />
-                    
-                    <button 
-                      className="absolute top-3 right-3 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                      }}
-                    >
-                      <Heart className="w-5 h-5" />
-                    </button>
-
-                    <div className="absolute top-3 left-3 flex flex-col gap-1">
-                      {property.is_featured && (
-                        <Badge className="bg-background text-foreground border-0 shadow-sm text-xs">
-                          {language === 'ru' ? 'Популярное' : 'Guest favorite'}
-                        </Badge>
-                      )}
-                      {property.instant_booking && (
-                        <Badge className="bg-amber-500 text-white border-0 text-xs gap-1">
-                          <Zap className="w-3 h-3" />
-                          {language === 'ru' ? 'Мгновенное' : 'Instant'}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="space-y-1">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-semibold text-sm line-clamp-1">
-                        {property.district || 'Phuket'}
-                      </h3>
-                      {property.rating && property.rating > 0 && (
-                        <div className="flex items-center gap-1 shrink-0">
-                          <Star className="w-3.5 h-3.5 fill-current" />
-                          <span className="text-sm">{property.rating.toFixed(1)}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <p className="text-sm text-muted-foreground line-clamp-1">
-                      {language === 'ru' ? property.title_ru : property.title_en}
-                    </p>
-
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <BedDouble className="w-3.5 h-3.5" />
-                        {property.bedrooms || 0}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Bath className="w-3.5 h-3.5" />
-                        {property.bathrooms || 0}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Users className="w-3.5 h-3.5" />
-                        {property.max_guests || 2}
-                      </span>
-                    </div>
-
-                    <p className="text-sm font-semibold pt-1">
-                      {propertyMode === 'buy' 
-                        ? formatPrice((property as any).sale_price || property.price || 0)
-                        : (
-                          <>
-                            {formatPrice(property.price || 0)}
-                            <span className="font-normal text-muted-foreground">
-                              {formatPriceLabel(property.price_period || 'night')}
-                            </span>
-                          </>
-                        )
-                      }
-                    </p>
-                  </div>
-                </div>
+                  property={property}
+                  mode={propertyMode}
+                  isHovered={hoveredProperty === property.id}
+                  onHover={setHoveredProperty}
+                />
               ))}
             </div>
           )}
