@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useGeolocation } from '@/hooks/useGeolocation';
+import { AddressAutocomplete } from '@/components/transport/AddressAutocomplete';
 
 const terminals = [
   { id: 'domestic', nameEn: 'Domestic Terminal', nameRu: 'Внутренний терминал' },
@@ -477,11 +478,11 @@ export default function AirportTransferBooking() {
                   : (language === 'ru' ? 'Откуда забрать' : 'Pick-up Address')}
               </Label>
               <div className="flex gap-2">
-                <Input
+                <AddressAutocomplete
                   value={formData.destinationAddress}
-                  onChange={(e) => setFormData({ ...formData, destinationAddress: e.target.value })}
-                  placeholder={language === 'ru' ? 'Название отеля или адрес' : 'Hotel name or address'}
-                  className="h-11 flex-1"
+                  onChange={(val) => setFormData({ ...formData, destinationAddress: val })}
+                  placeholder={language === 'ru' ? 'Отель, кондо или адрес' : 'Hotel, condo or address'}
+                  className="flex-1"
                 />
                 {geoSupported && (
                   <Button
@@ -753,27 +754,64 @@ export default function AirportTransferBooking() {
         </div>
       </ScrollArea>
 
-      {/* Fixed Bottom CTA */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-lg border-t border-border/50 safe-area-inset-bottom">
-        {!canSubmit && (formData.destinationAddress || formData.flightNumber) && (
-          <p className="text-xs text-destructive text-center mb-2">
-            {language === 'ru' 
-              ? 'Заполните все обязательные поля: терминал, адрес, рейс, дата, время, тип авто'
-              : 'Fill all required fields: terminal, address, flight, date, time, vehicle'}
-          </p>
-        )}
-        <Button
-          type="button"
-          className="w-full h-12"
-          disabled={isCreating || isProcessingPayment || !canSubmit || !formData.name || !formData.phone}
-          onClick={handleSubmit}
-        >
-          {isCreating || isProcessingPayment
-            ? (language === 'ru' ? 'Обработка...' : 'Processing...') 
-            : formData.paymentMethod === 'stripe'
-              ? (language === 'ru' ? `Оплатить ฿${totalPrice}` : `Pay ฿${totalPrice}`)
-              : (language === 'ru' ? `Забронировать • ฿${totalPrice}` : `Book • ฿${totalPrice}`)}
-        </Button>
+      {/* Fixed Bottom CTA - always visible */}
+      <div 
+        className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border/50 z-50"
+        style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 1rem)' }}
+      >
+        <div className="px-4 pt-3">
+          {/* Price summary always visible */}
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <p className="text-xs text-muted-foreground">
+                {language === 'ru' ? 'Стоимость трансфера' : 'Transfer price'}
+              </p>
+              <p className="text-lg font-bold">฿{totalPrice.toLocaleString()}</p>
+            </div>
+            {selectedVehicle && (
+              <Badge variant="secondary" className="text-xs">
+                {language === 'ru' ? selectedVehicle.name_ru : selectedVehicle.name_en}
+              </Badge>
+            )}
+          </div>
+
+          {!canSubmit && (formData.destinationAddress || formData.flightNumber || formData.terminal) && (
+            <p className="text-[11px] text-destructive text-center mb-1.5">
+              {language === 'ru' 
+                ? `Заполните: ${[
+                    !formData.terminal && 'терминал',
+                    !formData.destinationAddress && 'адрес',
+                    !formData.flightNumber && 'рейс',
+                    !formData.arrivalDate && 'дата',
+                    !formData.arrivalTime && 'время',
+                    !formData.vehicleType && 'авто',
+                  ].filter(Boolean).join(', ')}`
+                : `Missing: ${[
+                    !formData.terminal && 'terminal',
+                    !formData.destinationAddress && 'address',
+                    !formData.flightNumber && 'flight',
+                    !formData.arrivalDate && 'date',
+                    !formData.arrivalTime && 'time',
+                    !formData.vehicleType && 'vehicle',
+                  ].filter(Boolean).join(', ')}`}
+            </p>
+          )}
+
+          <Button
+            type="button"
+            className="w-full h-12 text-base font-semibold"
+            disabled={isCreating || isProcessingPayment || !canSubmit || !formData.name || !formData.phone}
+            onClick={handleSubmit}
+          >
+            {isCreating || isProcessingPayment
+              ? (language === 'ru' ? 'Обработка...' : 'Processing...') 
+              : canSubmit
+                ? (formData.paymentMethod === 'stripe'
+                    ? (language === 'ru' ? `Оплатить ฿${totalPrice.toLocaleString()}` : `Pay ฿${totalPrice.toLocaleString()}`)
+                    : (language === 'ru' ? `Забронировать • ฿${totalPrice.toLocaleString()}` : `Book • ฿${totalPrice.toLocaleString()}`))
+                : (language === 'ru' ? 'Заполните форму' : 'Complete the form')}
+          </Button>
+        </div>
       </div>
     </AppLayout>
   );
