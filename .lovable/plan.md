@@ -1,153 +1,96 @@
 
 
-# Life Flow Page -- Redesign and Mapping Improvement
+# Property Booking UX -- Audit and Project Filter Integration
 
-## Current Problems
+## UX Audit Summary
 
-### 1. Mapping Gaps (Critical)
+### What Works Well
+- **Airbnb-style search bar**: Full-screen mobile modal with tabs (Where/When/Who) is intuitive and polished
+- **Category ribbon**: Rent/Buy mode toggle + property type icons (Condo, Villa, Apartment, More) is clear
+- **Quick filter chips**: Dynamic highlights (Sea View, Pool, Instant Book) and district pills work correctly
+- **Infinite scroll**: Smooth loading with sentinel observer
+- **Sort options**: Price, Rating, Newest, Recommended
+- **Detail page**: Photos, amenities, booking CTA -- all functional
 
-Several life situations have missing or illogical entity type coverage:
+### Issues Found
 
-| Situation | Has Now | Missing |
-|-----------|---------|---------|
-| **Just Arrived** (arrival_first_day) | 2 restaurants | clinics/pharmacies, transport/taxi, experiences, marketplace (SIM cards, essentials) |
-| **Trip Planning** (pre_trip_planning) | property, vehicle | experiences, tours (pre-bookable activities) |
-| **Business & Work** | yacht, property, vehicle, restaurant | legal_service (company registration, tax) |
-| **Long-term Stay** | property, clinic, legal_service | restaurant, gym, salon (daily life services) |
-| **Family with Kids** | babysitter, clinic, tour, restaurant | experiences (family activities), property (family-friendly housing) |
+| # | Problem | Severity |
+|---|---------|----------|
+| 1 | **Project carousel cards navigate away** instead of filtering listings in-place. User clicks "Patong Tower" and gets sent to `/complexes` page, losing context. | High |
+| 2 | **No project filter chip** in the quick filters ribbon. The `selectedProjectId` state exists but has zero UI to activate it. | High |
+| 3 | **Project promo section takes up significant vertical space** but doesn't enable filtering -- it's just a promotion that navigates away. | Medium |
+| 4 | **No "clear project filter" UI** -- even if we wire it up, there's no way for the user to see/remove the project filter. | Medium |
 
-### 2. Page UX Issues
-
-- **No real content preview**: Cards show only entity type icon + title + weight bar. No photos, no ratings, no actionable info.
-- **"Match %" bar is confusing**: End users don't know what "75%" means. This is an internal admin metric (weight) exposed raw.
-- **No category-level quick navigation**: User must scroll through all blocks to find what they need.
-- **All cards look identical**: No visual difference between "Book a villa" and "Find a restaurant".
-- **Missing entity images**: The resolver returns `entity_id` but the page never fetches the actual entity data (photo, rating, price range).
-
-### 3. Data Architecture Issue
-
-The `resolve_life_os_context` RPC returns generic metadata (title, price, trust_level) but NOT entity-specific rich data (cover photo, rating, address). This means the page can only show minimal cards.
+### What Users Expect
+When a user sees "Patong Tower Residence (7 listings)" in the carousel, they expect to **click it and see those 7 listings filtered below**, not navigate to a different page.
 
 ---
 
-## Proposed Solution
+## Proposed Solution: Project-Based Filtering
 
-### Phase 1: Fix Mappings (Database)
+### 1. Make Project Carousel Cards filter in-place
 
-Add missing mappings to `catalog_life_map` for critical gaps:
+Change `ProjectCarouselCard` behavior: instead of `navigate('/complexes?highlight=...')`, emit an `onSelect(projectId)` callback that sets `selectedProjectId` in `PropertyIndex`.
 
-**arrival_first_day** -- Add:
-- 3 clinics (pharmacies/medical) -- weight 80-85, primary
-- 3 vehicles (taxi/transport) -- weight 75-80, primary  
-- 2 experiences (orientation tours) -- weight 55-60, secondary
+### 2. Add project filter chip to QuickFiltersRibbon
 
-**pre_trip_planning** -- Add:
-- 2 tours (pre-bookable excursions) -- weight 55-60, secondary
-- 2 experiences -- weight 50-55, secondary
-
-**business_work** -- Add:
-- 2 legal_services (company, tax) -- weight 70-75, primary
-
-**long_term_living** -- Add:
-- 2 restaurants -- weight 45-50, secondary
-
-**family_with_children** -- Add:
-- 2 properties (family-friendly) -- weight 70-75, primary
-
-### Phase 2: Redesign the LifeFlowPage
-
-Replace the current generic card grid with a structured, actionable layout:
-
+When a project is selected, show a highlighted chip at the beginning of the quick filters row:
 ```text
-+--------------------------------------------------+
-|  [<] Just Arrived           [Sparkles] 12 items   |
-|  First day essentials for Phuket                  |
-+--------------------------------------------------+
-|                                                    |
-|  [Quick Nav Chips]                                |
-|  [ Medical ] [ Transport ] [ Food ] [ Tours ]     |
-|                                                    |
-|  --- ESSENTIALS (primary blocks) ---              |
-|                                                    |
-|  Medical & Pharmacy                    View all > |
-|  +-------------+  +-------------+                 |
-|  | [photo]     |  | [photo]     |                 |
-|  | Clinic Name |  | Clinic Name |                 |
-|  | Verified    |  | Rating 4.8  |                 |
-|  | Open 24h    |  | 2km away    |                 |
-|  +-------------+  +-------------+                 |
-|                                                    |
-|  Transport & Taxi                      View all > |
-|  +--------------------------------------------+  |
-|  | [horizontal scroll cards with photos]       |  |
-|  +--------------------------------------------+  |
-|                                                    |
-|  --- ALSO USEFUL ---                              |
-|                                                    |
-|  Restaurants                           View all > |
-|  [compact list cards]                             |
-|                                                    |
-|  +--------------------------------------------+  |
-|  | [Compass] Explore Full Catalog         [>]  |  |
-|  +--------------------------------------------+  |
-+--------------------------------------------------+
+[ X Patong Tower ] [ Sea View ] [ Pool ] [ Verified ] ...
 ```
 
-Key changes:
-- **Quick nav chips at top**: Horizontal scroll of entity type chips for instant jump-to-section
-- **Entity photos**: Fetch actual entity cover images via a lightweight join or separate query
-- **Replace "Match %" with trust badges**: Show "Verified", "Featured", "Top Rated" instead of raw weight numbers
-- **Horizontal scroll for secondary blocks**: Save vertical space
-- **"Open now" / "24h" indicators**: For clinics and restaurants, show operational status
+Clicking X removes the project filter.
 
-### Phase 3: Enrich Data Layer
+### 3. Wire ProjectPromoSection to PropertyIndex state
 
-Update the `resolve_life_os_context` RPC or add a client-side enrichment step:
-- After receiving entity IDs from the resolver, batch-fetch cover images and ratings from entity tables (properties, restaurants, clinics, etc.)
-- This avoids changing the RPC but provides rich card content
+Pass `onProjectSelect` and `selectedProjectId` props from PropertyIndex down to ProjectPromoSection and then to ProjectCarouselCard. Selected card gets a visual highlight (border/ring).
+
+### 4. Keep "View all complexes" link
+
+The "View all complexes" CTA button at the bottom of the promo section still navigates to `/complexes` for full browsing.
 
 ---
 
 ## Technical Details
 
-### Files to Create/Modify
+### Files to Modify
 
-| File | Action |
+| File | Change |
 |------|--------|
-| **Database migration** | INSERT new mappings into `catalog_life_map` for 5 situations |
-| `src/pages/LifeFlowPage.tsx` | Major rewrite: add quick nav chips, photo-enriched cards, replace weight bars with badges |
-| `src/hooks/useLifeOS.ts` | Add `useEnrichCatalogItems()` hook to batch-fetch entity photos/ratings |
-| `src/components/life-flow/LifeFlowCategoryChips.tsx` | New: horizontal scroll chips for quick category navigation |
-| `src/components/life-flow/LifeFlowEntityCard.tsx` | New: rich card component with photo, title, badge, and CTA |
-| `src/components/life-flow/GuidedFallback.tsx` | Minor: no changes needed |
+| `src/components/property/ProjectCarouselCard.tsx` | Add optional `onSelect` callback prop. When provided, call it instead of navigating. Add visual "selected" state (ring). |
+| `src/components/property/ProjectPromoSection.tsx` | Add `onProjectSelect` and `selectedProjectId` props. Pass them to each `ProjectCarouselCard`. |
+| `src/pages/property/PropertyIndex.tsx` | Pass `onProjectSelect={setSelectedProjectId}` and `selectedProjectId` to `ProjectPromoSection`. |
+| `src/components/property/QuickFiltersRibbon.tsx` | Add `selectedProjectName` and `onProjectClear` props. Render a dismissible chip when a project is selected. |
 
-### Enrichment Hook Pattern
+### Data Flow
 
 ```text
-useEnrichCatalogItems(catalogItems)
-  -> Group by entity_type
-  -> For each type, query the corresponding table by IDs
-  -> Return merged data: { ...catalogItem, coverImage, rating, isOpen }
+PropertyIndex
+  |-- selectedProjectId (state)
+  |-- ProjectPromoSection
+  |     |-- ProjectCarouselCard (onClick -> setSelectedProjectId)
+  |-- QuickFiltersRibbon
+  |     |-- [Project chip with X] (onClick -> setSelectedProjectId(null))
+  |-- applyQuickFilters(properties, quickFilters, selectedProjectId)  // already works!
 ```
 
-This keeps the resolver lightweight while providing rich UI data.
+### ProjectCarouselCard Changes
 
-### Badge Logic (replacing weight %)
+- New props: `onSelect?: (id: string) => void`, `isSelected?: boolean`
+- If `onSelect` provided: call `onSelect(project.id)` on click (toggle behavior -- click again to deselect)
+- If not provided: keep current navigate behavior (used elsewhere)
+- Visual: `isSelected && "ring-2 ring-primary"` on the card container
 
-```text
-weight >= 85  -> "Top Pick" badge (gold star)
-weight >= 70  -> "Recommended" badge (primary color)
-trust_level = "verified" -> "Verified" shield icon
-otherwise -> no badge, clean card
-```
+### QuickFiltersRibbon Changes
 
-### Database: New Mappings
+- New props: `selectedProjectName?: string`, `onProjectClear?: () => void`
+- When `selectedProjectName` is set, render a chip before the quick filters:
+  ```
+  <FilterChip label={selectedProjectName} isActive={true} onToggle={onProjectClear} dismissible />
+  ```
 
-Approximately 15 new rows in `catalog_life_map`, selected from real active entities in the database:
-- 3 clinics for `arrival_first_day` (from 20 active clinics)
-- 3 vehicles for `arrival_first_day` (from 64 active vehicles)
-- 2 experiences for `arrival_first_day` (from 71 active)
-- 2 tours for `pre_trip_planning` (from 29 active)
-- 2 legal_services for `business_work` (from 14 active)
-- 2 restaurants for `long_term_living` (from 25 active)
-- 2 properties for `family_with_children` (from 28 active)
+### PropertyIndex Wiring
+
+- Look up selected project name from the projects list (via `usePropertyQuickFilters` which already fetches projects)
+- Pass project name to QuickFiltersRibbon for display
+
