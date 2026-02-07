@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Anchor, Star, Users, MapPin, Clock, Shield, Check, 
@@ -20,7 +20,8 @@ export default function YachtDetail() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const [currentImage, setCurrentImage] = useState(0);
-  
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
   const { yacht, isLoading } = useYacht(id || '');
 
   if (isLoading) {
@@ -56,11 +57,26 @@ export default function YachtDetail() {
   return (
     <AppLayout>
       {/* Image Gallery */}
-      <div className="relative h-72">
+      <div
+        className="relative h-72 touch-pan-y"
+        onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; touchEndX.current = null; }}
+        onTouchMove={(e) => { touchEndX.current = e.touches[0].clientX; }}
+        onTouchEnd={() => {
+          if (touchStartX.current !== null && touchEndX.current !== null) {
+            const diff = touchStartX.current - touchEndX.current;
+            if (Math.abs(diff) > 50) {
+              if (diff > 0 && currentImage < images.length - 1) setCurrentImage(prev => prev + 1);
+              if (diff < 0 && currentImage > 0) setCurrentImage(prev => prev - 1);
+            }
+          }
+          touchStartX.current = null;
+          touchEndX.current = null;
+        }}
+      >
         <img
           src={images[currentImage]}
           alt={name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover select-none pointer-events-none"
         />
         {/* Back button */}
         <div className="absolute top-4 left-4">
