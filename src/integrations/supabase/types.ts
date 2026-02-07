@@ -377,6 +377,357 @@ export type Database = {
         }
         Relationships: []
       }
+      airport_booking_addons: {
+        Row: {
+          addon_service_id: string
+          booking_id: string
+          created_at: string | null
+          id: string
+          quantity: number | null
+          total_price: number
+          unit_price: number
+        }
+        Insert: {
+          addon_service_id: string
+          booking_id: string
+          created_at?: string | null
+          id?: string
+          quantity?: number | null
+          total_price: number
+          unit_price: number
+        }
+        Update: {
+          addon_service_id?: string
+          booking_id?: string
+          created_at?: string | null
+          id?: string
+          quantity?: number | null
+          total_price?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "airport_booking_addons_addon_service_id_fkey"
+            columns: ["addon_service_id"]
+            isOneToOne: false
+            referencedRelation: "airport_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "airport_booking_addons_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "airport_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      airport_bookings: {
+        Row: {
+          addons_total: number | null
+          airline: string | null
+          airport_code: string
+          assigned_at: string | null
+          base_price: number
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          completed_at: string | null
+          contact_email: string | null
+          contact_whatsapp: string | null
+          created_at: string | null
+          currency: string | null
+          direction: string
+          flight_date: string
+          flight_number: string
+          flight_time: string
+          id: string
+          is_night_flight: boolean | null
+          linked_transfer_booking_id: string | null
+          night_surcharge: number | null
+          order_id: string | null
+          preferred_language: string | null
+          service_id: string
+          special_notes: string | null
+          status: string
+          supplier_id: string | null
+          total_price: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          addons_total?: number | null
+          airline?: string | null
+          airport_code?: string
+          assigned_at?: string | null
+          base_price: number
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          completed_at?: string | null
+          contact_email?: string | null
+          contact_whatsapp?: string | null
+          created_at?: string | null
+          currency?: string | null
+          direction: string
+          flight_date: string
+          flight_number: string
+          flight_time: string
+          id?: string
+          is_night_flight?: boolean | null
+          linked_transfer_booking_id?: string | null
+          night_surcharge?: number | null
+          order_id?: string | null
+          preferred_language?: string | null
+          service_id: string
+          special_notes?: string | null
+          status?: string
+          supplier_id?: string | null
+          total_price: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          addons_total?: number | null
+          airline?: string | null
+          airport_code?: string
+          assigned_at?: string | null
+          base_price?: number
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          completed_at?: string | null
+          contact_email?: string | null
+          contact_whatsapp?: string | null
+          created_at?: string | null
+          currency?: string | null
+          direction?: string
+          flight_date?: string
+          flight_number?: string
+          flight_time?: string
+          id?: string
+          is_night_flight?: boolean | null
+          linked_transfer_booking_id?: string | null
+          night_surcharge?: number | null
+          order_id?: string | null
+          preferred_language?: string | null
+          service_id?: string
+          special_notes?: string | null
+          status?: string
+          supplier_id?: string | null
+          total_price?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "airport_bookings_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "airport_bookings_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "airport_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "airport_bookings_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "airport_suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      airport_passengers: {
+        Row: {
+          booking_id: string
+          created_at: string | null
+          date_of_birth: string
+          first_name: string
+          id: string
+          is_primary: boolean | null
+          last_name: string
+          nationality: string
+          passport_number: string
+          sort_order: number | null
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string | null
+          date_of_birth: string
+          first_name: string
+          id?: string
+          is_primary?: boolean | null
+          last_name: string
+          nationality: string
+          passport_number: string
+          sort_order?: number | null
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string | null
+          date_of_birth?: string
+          first_name?: string
+          id?: string
+          is_primary?: boolean | null
+          last_name?: string
+          nationality?: string
+          passport_number?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "airport_passengers_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "airport_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      airport_services: {
+        Row: {
+          airport_code: string
+          base_price: number
+          bundle_components: Json | null
+          bundle_savings_text_en: string | null
+          bundle_savings_text_ru: string | null
+          created_at: string | null
+          currency: string
+          cutoff_hours: number | null
+          description_en: string | null
+          description_ru: string | null
+          description_th: string | null
+          direction: string | null
+          icon: string | null
+          id: string
+          includes_items: string[] | null
+          is_active: boolean | null
+          max_passengers: number | null
+          name_en: string
+          name_ru: string
+          name_th: string | null
+          night_end: string | null
+          night_start: string | null
+          night_surcharge: number | null
+          service_type: string
+          sku: string
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          airport_code?: string
+          base_price?: number
+          bundle_components?: Json | null
+          bundle_savings_text_en?: string | null
+          bundle_savings_text_ru?: string | null
+          created_at?: string | null
+          currency?: string
+          cutoff_hours?: number | null
+          description_en?: string | null
+          description_ru?: string | null
+          description_th?: string | null
+          direction?: string | null
+          icon?: string | null
+          id?: string
+          includes_items?: string[] | null
+          is_active?: boolean | null
+          max_passengers?: number | null
+          name_en: string
+          name_ru: string
+          name_th?: string | null
+          night_end?: string | null
+          night_start?: string | null
+          night_surcharge?: number | null
+          service_type: string
+          sku: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          airport_code?: string
+          base_price?: number
+          bundle_components?: Json | null
+          bundle_savings_text_en?: string | null
+          bundle_savings_text_ru?: string | null
+          created_at?: string | null
+          currency?: string
+          cutoff_hours?: number | null
+          description_en?: string | null
+          description_ru?: string | null
+          description_th?: string | null
+          direction?: string | null
+          icon?: string | null
+          id?: string
+          includes_items?: string[] | null
+          is_active?: boolean | null
+          max_passengers?: number | null
+          name_en?: string
+          name_ru?: string
+          name_th?: string | null
+          night_end?: string | null
+          night_start?: string | null
+          night_surcharge?: number | null
+          service_type?: string
+          sku?: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      airport_suppliers: {
+        Row: {
+          airport_code: string
+          commission_percent: number | null
+          contact_email: string | null
+          contact_phone: string | null
+          contact_whatsapp: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          max_concurrent_jobs: number | null
+          name_en: string
+          name_ru: string | null
+          priority: number | null
+          sla_minutes: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          airport_code?: string
+          commission_percent?: number | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          contact_whatsapp?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_concurrent_jobs?: number | null
+          name_en: string
+          name_ru?: string | null
+          priority?: number | null
+          sla_minutes?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          airport_code?: string
+          commission_percent?: number | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          contact_whatsapp?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_concurrent_jobs?: number | null
+          name_en?: string
+          name_ru?: string | null
+          priority?: number | null
+          sla_minutes?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       babysitters: {
         Row: {
           age_groups: string[] | null
