@@ -80,6 +80,7 @@ const TransportBooking = lazy(() => import('@/pages/transport/TransportBooking')
 const AirportTransferBooking = lazy(() => import('@/pages/transport/AirportTransferBooking'));
 const TaxiBooking = lazy(() => import('@/pages/transport/TaxiBooking'));
 const TransferSuccess = lazy(() => import('@/pages/transport/TransferSuccess'));
+const AirportFastTrackPage = lazy(() => import('@/pages/transport/AirportFastTrackPage'));
 const AirportTransferLanding = lazy(() => import('@/pages/landing/AirportTransferLanding'));
 const FlowerDeliveryLanding = lazy(() => import('@/pages/landing/FlowerDeliveryLanding'));
 const RentalLanding = lazy(() => import('@/pages/landing/RentalLanding'));
@@ -149,7 +150,7 @@ const ListWithUsPage = lazy(() => import('@/pages/ListWithUsPage'));
 const TransportIdRedirect = () => {
   const { id } = useParams();
   // Skip known sub-paths
-  if (id === 'vehicle' || id === 'booking' || id === 'airport-transfer' || id === 'transfer-success' || id === 'airport' || id === 'taxi') {
+  if (id === 'vehicle' || id === 'booking' || id === 'airport-transfer' || id === 'transfer-success' || id === 'airport' || id === 'taxi' || id === 'fast-track') {
     return null;
   }
   return <Navigate to={`/transport/vehicle/${id}`} replace />;
@@ -616,6 +617,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/transport/booking/:id" element={<LazyPage><TransportBooking /></LazyPage>} />
         <Route path="/transport/airport-transfer" element={<LazyPage><AirportTransferBooking /></LazyPage>} />
         <Route path="/transport/transfer-success" element={<LazyPage><TransferSuccess /></LazyPage>} />
+        <Route path="/transport/fast-track" element={<LazyPage><AirportFastTrackPage /></LazyPage>} />
         <Route path="/transport/airport" element={<Navigate to="/transport/airport-transfer" replace />} />
         <Route path="/airport-transfer" element={<Navigate to="/transport/airport-transfer" replace />} />
         <Route path="/transfer" element={<LazyPage><AirportTransferLanding /></LazyPage>} />
