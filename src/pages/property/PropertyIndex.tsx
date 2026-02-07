@@ -24,9 +24,7 @@ import { applyQuickFilters } from '@/hooks/usePropertyQuickFilters';
 import { matchesFilter, matchesSingleFilter, normalizeForFilter } from '@/lib/filterUtils';
 import { CrossSellSection } from '@/components/crosssell';
 
-// Demo properties loaded from JSON for better maintainability
-import demoPropertiesData from '@/data/demo/properties.json';
-const demoProperties = demoPropertiesData;
+// Demo fallback removed — only real DB data is used
 
 // Removed static propertyTypes - now loaded dynamically from usePropertyFilterOptions
 
@@ -97,10 +95,7 @@ export default function PropertyIndex() {
 
   // Use DB data or fallback to demo, then apply all filters
   const properties = useMemo(() => {
-    const targetListingType = propertyMode === 'buy' ? 'sale' : 'rent';
-    const sourceData = dbProperties && dbProperties.length > 0 
-      ? dbProperties 
-      : demoProperties.filter(p => p.listing_type === targetListingType);
+    const sourceData = dbProperties || [];
     
     // First apply standard filters
     const standardFiltered = sourceData.filter(prop => {
@@ -265,6 +260,20 @@ export default function PropertyIndex() {
         {/* Project Promo Section - Right after header for discoverability */}
         <div className="container max-w-7xl mx-auto px-4 pt-3 pb-2">
           <ProjectPromoSection mode={propertyMode} />
+        </div>
+
+        {/* Quick Filter Tags (Agoda/Airbnb style) */}
+        <div className="container max-w-7xl mx-auto px-4 py-1">
+          <QuickFiltersRibbon
+            selectedFilters={quickFilters}
+            selectedDistricts={selectedDistricts}
+            onFilterToggle={(id) => setQuickFilters(prev => 
+              prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
+            )}
+            onDistrictToggle={(id) => setSelectedDistricts(prev =>
+              prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]
+            )}
+          />
         </div>
 
         {/* Results Count + Quick Filter Tags */}
