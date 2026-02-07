@@ -74,7 +74,7 @@ export default function PropertyIndex() {
   const { filterConfig, propertyTypes } = usePropertyFilterOptions();
   
   const propertyTypePills = useMemo(() => [
-    { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '🏠' },
+    { id: 'all', labelEn: 'All', labelRu: 'Все' },
     ...propertyTypes
   ], [propertyTypes]);
 

@@ -104,10 +104,10 @@ export function useTransportFilterOptions() {
 
   // Static options that don't need DB
   const passengerOptions: FilterOption[] = [
-    { id: '1-2', labelEn: '1-2 Passengers', labelRu: '1-2 пассажира', icon: '👤' },
-    { id: '3-4', labelEn: '3-4 Passengers', labelRu: '3-4 пассажира', icon: '👥' },
-    { id: '5-7', labelEn: '5-7 Passengers', labelRu: '5-7 пассажиров', icon: '👨‍👩‍👧' },
-    { id: '8+', labelEn: '8+ Passengers', labelRu: '8+ пассажиров', icon: '👨‍👩‍👧‍👦' },
+    { id: '1-2', labelEn: '1-2 Passengers', labelRu: '1-2 пассажира' },
+    { id: '3-4', labelEn: '3-4 Passengers', labelRu: '3-4 пассажира' },
+    { id: '5-7', labelEn: '5-7 Passengers', labelRu: '5-7 пассажиров' },
+    { id: '8+', labelEn: '8+ Passengers', labelRu: '8+ пассажиров' },
   ];
 
   const filterConfig: FilterConfig = useMemo(() => ({
@@ -159,7 +159,7 @@ export function useTransportFilterOptions() {
 
   // Category ribbon for transport
   const categoryRibbon = useMemo(() => [
-    { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '🌟' },
+    { id: 'all', labelEn: 'All', labelRu: 'Все' },
     ...toFilterOptions(vehicleTypes),
   ], [vehicleTypes]);
 
@@ -190,12 +190,12 @@ export function useHomeServiceFilterOptions() {
 
   // Static service features
   const serviceFeatures: FilterOption[] = [
-    { id: 'verified', labelEn: 'Verified', labelRu: 'Проверенные', icon: '✅' },
-    { id: 'insured', labelEn: 'Insured', labelRu: 'Застрахованы', icon: '🛡️' },
-    { id: 'guaranteed', labelEn: 'Guaranteed', labelRu: 'Гарантия работ', icon: '💯' },
-    { id: 'fast-response', labelEn: 'Fast Response', labelRu: 'Быстрый отклик', icon: '⚡' },
-    { id: 'english', labelEn: 'English Speaking', labelRu: 'Говорят по-английски', icon: '🇬🇧' },
-    { id: 'russian', labelEn: 'Russian Speaking', labelRu: 'Говорят по-русски', icon: '🇷🇺' },
+    { id: 'verified', labelEn: 'Verified', labelRu: 'Проверенные' },
+    { id: 'insured', labelEn: 'Insured', labelRu: 'Застрахованы' },
+    { id: 'guaranteed', labelEn: 'Guaranteed', labelRu: 'Гарантия работ' },
+    { id: 'fast-response', labelEn: 'Fast Response', labelRu: 'Быстрый отклик' },
+    { id: 'english', labelEn: 'English Speaking', labelRu: 'Говорят по-английски' },
+    { id: 'russian', labelEn: 'Russian Speaking', labelRu: 'Говорят по-русски' },
   ];
 
   const filterConfig: FilterConfig = useMemo(() => ({
@@ -256,22 +256,22 @@ export function useYachtFilterOptions() {
 
   // Static capacity options
   const capacityOptions: FilterOption[] = [
-    { id: '2-6', labelEn: '2-6 guests', labelRu: '2-6 гостей', icon: '👥' },
-    { id: '7-12', labelEn: '7-12 guests', labelRu: '7-12 гостей', icon: '👨‍👩‍👧‍👦' },
-    { id: '13-20', labelEn: '13-20 guests', labelRu: '13-20 гостей', icon: '👨‍👩‍👧‍👦' },
-    { id: '20+', labelEn: '20+ guests', labelRu: '20+ гостей', icon: '🎊' },
+    { id: '2-6', labelEn: '2-6 guests', labelRu: '2-6 гостей' },
+    { id: '7-12', labelEn: '7-12 guests', labelRu: '7-12 гостей' },
+    { id: '13-20', labelEn: '13-20 guests', labelRu: '13-20 гостей' },
+    { id: '20+', labelEn: '20+ guests', labelRu: '20+ гостей' },
   ];
 
   // Duration options
   const durationOptions: FilterOption[] = [
-    { id: 'half-day', labelEn: 'Half Day', labelRu: 'Полдня', icon: '⏱️' },
-    { id: 'full-day', labelEn: 'Full Day', labelRu: 'Весь день', icon: '☀️' },
-    { id: 'overnight', labelEn: 'Overnight', labelRu: 'С ночёвкой', icon: '🌙' },
+    { id: 'half-day', labelEn: 'Half Day', labelRu: 'Полдня' },
+    { id: 'full-day', labelEn: 'Full Day', labelRu: 'Весь день' },
+    { id: 'overnight', labelEn: 'Overnight', labelRu: 'С ночёвкой' },
   ];
 
   // Category ribbon
   const categoryRibbon = useMemo(() => [
-    { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '🌟' },
+    { id: 'all', labelEn: 'All', labelRu: 'Все' },
     ...toFilterOptions(yachtTypes),
   ], [yachtTypes]);
 
@@ -297,7 +297,7 @@ export function useRestaurantFilterOptions() {
 
   // Category ribbon
   const categoryRibbon = useMemo(() => [
-    { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '🌟' },
+    { id: 'all', labelEn: 'All', labelRu: 'Все' },
     ...toFilterOptions(cuisines),
   ], [cuisines]);
 
@@ -321,37 +321,37 @@ export function useFlowerFilterOptions() {
 
   // Size options matching actual data (S, M, L)
   const sizeOptions: FilterOption[] = [
-    { id: 'S', labelEn: 'Small', labelRu: 'Маленький', icon: '🌱' },
-    { id: 'M', labelEn: 'Medium', labelRu: 'Средний', icon: '🌿' },
-    { id: 'L', labelEn: 'Large', labelRu: 'Большой', icon: '🌳' },
+    { id: 'S', labelEn: 'Small', labelRu: 'Маленький' },
+    { id: 'M', labelEn: 'Medium', labelRu: 'Средний' },
+    { id: 'L', labelEn: 'Large', labelRu: 'Большой' },
   ];
 
   // Style options
   const styleOptions: FilterOption[] = [
-    { id: 'Classic', labelEn: 'Classic', labelRu: 'Классика', icon: '🎩' },
-    { id: 'Romantic', labelEn: 'Romantic', labelRu: 'Романтика', icon: '💕' },
-    { id: 'Minimal', labelEn: 'Minimal', labelRu: 'Минимализм', icon: '✨' },
-    { id: 'Bright', labelEn: 'Bright', labelRu: 'Яркий', icon: '🌈' },
-    { id: 'Luxury', labelEn: 'Luxury', labelRu: 'Люкс', icon: '👑' },
-    { id: 'Elegant', labelEn: 'Elegant', labelRu: 'Элегант', icon: '🎀' },
-    { id: 'Soft', labelEn: 'Soft', labelRu: 'Нежный', icon: '☁️' },
+    { id: 'Classic', labelEn: 'Classic', labelRu: 'Классика' },
+    { id: 'Romantic', labelEn: 'Romantic', labelRu: 'Романтика' },
+    { id: 'Minimal', labelEn: 'Minimal', labelRu: 'Минимализм' },
+    { id: 'Bright', labelEn: 'Bright', labelRu: 'Яркий' },
+    { id: 'Luxury', labelEn: 'Luxury', labelRu: 'Люкс' },
+    { id: 'Elegant', labelEn: 'Elegant', labelRu: 'Элегант' },
+    { id: 'Soft', labelEn: 'Soft', labelRu: 'Нежный' },
   ];
 
   // Color palette options
   const colorPaletteOptions: FilterOption[] = [
-    { id: 'Red', labelEn: 'Red', labelRu: 'Красный', icon: '🔴' },
-    { id: 'Pink', labelEn: 'Pink', labelRu: 'Розовый', icon: '🩷' },
-    { id: 'White', labelEn: 'White', labelRu: 'Белый', icon: '⚪' },
-    { id: 'Yellow', labelEn: 'Yellow', labelRu: 'Жёлтый', icon: '🟡' },
-    { id: 'Pastel', labelEn: 'Pastel', labelRu: 'Пастель', icon: '🌸' },
-    { id: 'Mix', labelEn: 'Mix', labelRu: 'Микс', icon: '🌈' },
+    { id: 'Red', labelEn: 'Red', labelRu: 'Красный' },
+    { id: 'Pink', labelEn: 'Pink', labelRu: 'Розовый' },
+    { id: 'White', labelEn: 'White', labelRu: 'Белый' },
+    { id: 'Yellow', labelEn: 'Yellow', labelRu: 'Жёлтый' },
+    { id: 'Pastel', labelEn: 'Pastel', labelRu: 'Пастель' },
+    { id: 'Mix', labelEn: 'Mix', labelRu: 'Микс' },
   ];
 
   // Delivery options (static)
   const deliveryOptions: FilterOption[] = [
-    { id: 'express-2h', labelEn: 'Express 2h', labelRu: 'Экспресс 2ч', icon: '⚡' },
-    { id: 'same-day', labelEn: 'Same Day', labelRu: 'В тот же день', icon: '📅' },
-    { id: 'scheduled', labelEn: 'Scheduled', labelRu: 'По расписанию', icon: '🗓️' },
+    { id: 'express-2h', labelEn: 'Express 2h', labelRu: 'Экспресс 2ч' },
+    { id: 'same-day', labelEn: 'Same Day', labelRu: 'В тот же день' },
+    { id: 'scheduled', labelEn: 'Scheduled', labelRu: 'По расписанию' },
   ];
 
   const filterConfig: FilterConfig = useMemo(() => ({
@@ -403,7 +403,7 @@ export function useFlowerFilterOptions() {
 
   // Category ribbon for flowers
   const categoryRibbon = useMemo(() => [
-    { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '🌟' },
+    { id: 'all', labelEn: 'All', labelRu: 'Все' },
     ...toFilterOptions(categories),
   ], [categories]);
 
