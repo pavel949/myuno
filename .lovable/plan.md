@@ -1,152 +1,106 @@
 
-# Yacht Vertical: Full Audit and Upgrade Plan
 
-## Current State Assessment
+## Naming Normalization Audit: Yacht Vertical
 
-### Data Completeness (97 active yachts)
+### Industry Standard Analysis
 
-| Field | Filled | Missing | Coverage |
-|-------|--------|---------|----------|
-| price_full_day | 43 | 54 | 44% |
-| price_half_day | 29 | 68 | 30% |
-| price_overnight | 27 | 70 | 28% |
-| price_sunset | 2 | 95 | 2% |
-| description_en | 48 | 49 | 49% |
-| features_en | 47 | 50 | 48% |
-| addons | 1 | 96 | 1% |
-| departure_times | 0 | 97 | 0% |
-| beam | 0 | 97 | 0% |
-| engines | 0 | 97 | 0% |
-| slug | 50 | 47 | 52% |
-| pricing_rules (seasonal) | 0 | -- | 0% |
+Global charter platforms use a consistent pattern:
 
-### Critical Issues Found
+| Platform | Primary Label (EN) | Navigation |
+|----------|-------------------|------------|
+| Sailo | Boat Rentals | "Rent a Boat" |
+| GetMyBoat | Boat Rentals | "Find a Boat" |
+| Click&Boat | Boat Rental | "Rent a Boat" |
+| Boatsetter | Boat Rentals | "Rent a Boat" |
 
-**1. 54 yachts have NO pricing at all** -- they show as "0 THB" in listing cards. These are mostly Boat Lagoon Yachting vessels added without prices.
+Common pattern: **"Boat Charters"** or **"Boat Rentals"** -- never "Yachts & Boats" (asset-listing language, not intent language).
 
-**2. Category taxonomy mismatch:** DB has `motor_yacht`, `superyacht`, `catamaran`, `speedboat`, but YACHT_CATEGORIES filter uses `yacht`, `sailing` -- categories that don't exist in data. `motor_yacht` and `superyacht` have no matching filter category.
+### Current myUNO Inconsistencies Found
 
-**3. No yacht content adapter exists** in `src/lib/adapters/` -- yachts are the only major vertical without a canonical `mapYachtToCardProps()` adapter.
+| Location | Current EN | Current RU | Issue |
+|----------|-----------|-----------|-------|
+| YachtsIndex.tsx (page title) | "Yachts & Boats" | "Яхты и лодки" | Non-standard |
+| categories table (DB) | "Yachts & Boats" | "Яхты и лодки" | Non-standard |
+| ThematicSection.tsx | "Yachts & Boats" | "Яхты и катера" | Inconsistent RU |
+| VipConcierge.tsx | "Yachts & Boats" | "Яхты и катера" | Mixed variant |
+| RefundPolicyPage.tsx | "Yachts & Boats" | "Яхты и катера" | Mixed variant |
+| TermsPage.tsx | "Yachts & boats" | "Яхты и катера" | Lowercase "boats" |
+| DisputeResolutionPage.tsx | "Yachts & boats" | "Яхты и катера" | Lowercase |
+| verticals.ts (SoT) | "Yachts" | "Яхты" | Short form only |
+| entityTypes.ts | "Yachts" | "Яхты" | Short form only |
+| ContentPreviewRibbon.tsx | "Yachts" | "Яхты" | Short form |
+| AdminVerticalsBlock.tsx | "Yachts" | "Яхты" | Short form |
+| DashboardQuickServices.tsx | "Yachts" | "Яхты" | Short form |
+| leadVerticalConfig.ts | "Yachts" | "Яхты" | Short form |
+| BusinessCardScanner.tsx | "Yachts & Boats" | "Яхты и лодки" | Non-standard |
+| scan-business-card (edge fn) | "Yachts & Boats" | "Яхты и лодки" | Non-standard |
+| searchData.ts | "Yachts" | "Яхты" | Short form |
+| ContentCreatorMenu.tsx | "Yacht" | "Яхта" | Singular |
+| useTaxonomyDefinitions.ts | "Yachts" | "Яхты" | Short form |
 
-**4. charter_options is always `[full_day]`** for all 97 yachts, even those with half_day/overnight pricing. This field is not used anywhere meaningful.
+**3 different RU variants**: "Яхты и лодки", "Яхты и катера", "Яхты"
 
-**5. Addons system is empty** -- only 1 yacht (My Sky 53) has addons data. No UI exists to display or select addons during booking.
+### Proposed Canonical Naming
 
-**6. No seasonal pricing rules** -- `yacht_pricing_rules` table exists with season/day_of_week/special_event support, but has 0 rows. High/low season pricing is not implemented.
+Based on industry standards and the Phuket charter market context:
 
-**7. Detail page missing key sections** vs. competitors (Sailo, GetMyBoat, Click&Boat):
-   - No "What's Included / Not Included" section
-   - No addons/extras selection
-   - No cancellation policy display
-   - No fuel policy display
-   - No insurance info
-   - No provider/operator info card
-   - No itinerary/route suggestions
-   - No "Similar Yachts" section
+| Context | EN | RU |
+|---------|----|----|
+| **Full label** (page title, catalog) | Boat Charters | Аренда яхт и катеров |
+| **Short label** (nav, icons, admin grids) | Charters | Чартер |
+| **Vertical SoT** (verticals.ts) | Boat Charters | Чартер |
+| **CTA / action** | Charter a Boat | Арендовать яхту |
+| **Search category label** | Charters | Чартер |
 
-**8. Booking flow** only supports half_day/full_day -- no sunset or overnight charter types despite DB columns existing.
+### Implementation Plan
 
----
+**Step 1: Update Sources of Truth**
 
-## Upgrade Plan
+- `src/lib/verticals.ts` -- change `labelEn: 'Yachts'` to `'Boat Charters'`, `labelRu: 'Яхты'` to `'Чартер'`
+- `src/lib/config/entityTypes.ts` -- update `labelEn`, `labelRu`, `pluralEn`, `pluralRu`
 
-### Phase 1: Data Integrity Fix (Database)
+**Step 2: Update Page Title and Catalog**
 
-**1.1 Scrape missing prices from boatlagoonyachting.com** for all 54 vessels with NULL pricing via edge function.
+- `src/pages/yachts/YachtsIndex.tsx` -- title from "Yachts & Boats" to "Boat Charters" / "Аренда яхт и катеров"
+- `src/hooks/useSuperAppCatalog.ts` -- verify catalog section name
+- `src/hooks/useTaxonomyDefinitions.ts` -- VERTICAL_CONFIG yachts label
 
-**1.2 Fix charter_options** to reflect actual pricing availability:
-```sql
-UPDATE yachts SET charter_options = array_remove(
-  array_remove(
-    ARRAY[
-      CASE WHEN price_half_day IS NOT NULL THEN 'half_day' END,
-      CASE WHEN price_full_day IS NOT NULL THEN 'full_day' END,
-      CASE WHEN price_sunset IS NOT NULL THEN 'sunset' END,
-      CASE WHEN price_overnight IS NOT NULL THEN 'overnight' END
-    ], NULL
-  ), NULL
-);
-```
+**Step 3: Update Navigation and Discovery**
 
-**1.3 Generate slugs** for 47 missing entries.
+- `src/components/home/ContentPreviewRibbon.tsx` -- label
+- `src/components/account/DashboardQuickServices.tsx` -- label
+- `src/components/discover/ThematicSection.tsx` -- category name
+- `src/lib/searchData.ts` -- category label
+- `src/lib/leadVerticalConfig.ts` -- nameEn/nameRu, CTA text
 
-**1.4 Populate departure_times** with sensible defaults per charter type.
+**Step 4: Update Admin and Vendor Labels**
 
-### Phase 2: Taxonomy and Filter Alignment
+- `src/components/admin/dashboard/AdminVerticalsBlock.tsx`
+- `src/components/admin/dashboard/AdminAllVerticalsGrid.tsx`
+- `src/components/admin/ContentCreatorMenu.tsx`
+- `src/components/admin/data-import/BusinessCardScanner.tsx`
 
-**2.1 Fix YACHT_CATEGORIES** to match actual DB values:
-```
-all, catamaran, motor_yacht, superyacht, speedboat
-```
-Remove phantom `yacht` and `sailing` categories.
+**Step 5: Update Info/Legal Pages**
 
-**2.2 Add sort by length** (common in yacht marketplaces) and "Newest" sort option.
+- `src/pages/info/TermsPage.tsx`
+- `src/pages/info/RefundPolicyPage.tsx`
+- `src/pages/info/DisputeResolutionPage.tsx`
+- `src/pages/VipConcierge.tsx`
 
-### Phase 3: Content Adapter
+**Step 6: Update Database**
 
-**3.1 Create `mapYachtToCardProps()`** adapter in `src/lib/adapters/yachtAdapters.ts` following the same pattern as vehicleAdapters. Map charter type label, "from" price logic, specs badges (length, cabins, year), and provider name.
+- SQL migration to update `categories` table: `name_en = 'Boat Charters'`, `name_ru = 'Аренда яхт и катеров'` where `slug = 'yachts'`
 
-### Phase 4: Detail Page Upgrade to Industry Standard
+**Step 7: Update Edge Functions**
 
-**4.1 Add "Included / Not Included" section** rendering `features_en` as included items + a new `exclusions_en` text array column.
+- `supabase/functions/scan-business-card/index.ts` -- category label
+- `supabase/functions/ai-smart-search/index.ts` -- category description
 
-**4.2 Add "Extras & Add-ons" section** parsing the `addons` JSONB with structured schema:
-```json
-[
-  { "name_en": "Jet Ski", "name_ru": "...", "price": 15000, "unit": "per_hour" },
-  { "name_en": "Extra guest (11+)", "price": 2000, "unit": "per_person" }
-]
-```
+### Technical Notes
 
-**4.3 Add "Policies" section** displaying:
-- Cancellation policy (from `cancellation_policy` field)
-- Fuel policy (from `fuel_policy`)
-- Insurance (from `insurance_included` + `insurance_notes`)
-- Deposit requirement (from `deposit_percent`)
+- URL routes (`/yachts`, `/yachts/:id`) remain unchanged -- they are slugs, not labels
+- Database table name `yachts` remains unchanged -- it is an internal identifier
+- Internal keys (`yacht`, `yachts`, `yacht_type`) remain unchanged -- they are system identifiers
+- Only user-facing labels and display text change
+- Total files affected: ~20 source files + 1 DB migration + 2 edge functions
 
-**4.4 Add "Operator" card** showing provider name, rating, fleet count, and contact.
-
-**4.5 Add "Similar Yachts" carousel** at the bottom (same type, similar price range).
-
-### Phase 5: Booking Flow Expansion
-
-**5.1 Support all 4 charter types** (half_day, full_day, sunset, overnight) in `YachtBookingQuickSelect` and `YachtBooking` page.
-
-**5.2 Add addons selection step** in booking flow with price calculation.
-
-**5.3 Show cancellation policy and deposit info** in booking summary.
-
-### Phase 6: Seasonal Pricing
-
-**6.1 Seed yacht_pricing_rules** with Phuket high season (Nov-Apr, +20-30%) and low season (May-Oct) baseline for major vessels.
-
-**6.2 Display seasonal pricing badge** on cards ("High Season" / "Low Season") based on current date.
-
----
-
-## Technical Details
-
-### New DB Columns Needed
-- `exclusions_en text[]` -- what's NOT included
-- `exclusions_ru text[]`
-- Standardize `addons` JSONB schema to structured array
-
-### New Files
-- `src/lib/adapters/yachtAdapters.ts` -- content adapter
-- Update `src/lib/adapters/index.ts` -- export yacht adapter
-
-### Modified Files
-- `src/pages/yachts/YachtDetail.tsx` -- add 4 new sections (included/excluded, addons, policies, operator, similar)
-- `src/pages/yachts/YachtsIndex.tsx` -- use adapter for card rendering
-- `src/components/yachts/YachtBookingQuickSelect.tsx` -- support sunset/overnight, addons
-- `src/lib/filterConfigs/yachtFiltersKlook.ts` -- fix categories to match DB
-- `src/components/filters/YachtsFilters.tsx` -- align with actual data
-
-### Execution Order
-1. Database migrations (new columns, data fixes)
-2. Scrape missing prices via edge function
-3. Fix taxonomy/filters
-4. Create adapter
-5. Upgrade detail page
-6. Expand booking flow
-7. Seed seasonal pricing
