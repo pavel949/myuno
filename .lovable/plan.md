@@ -1,95 +1,67 @@
 
 
-# Add Let's Relax Spa -- All 9 Phuket Branches + Services & Packages
+## Аудит и исправление интеграции яхт
 
-## What We Fetched (verified from letsrelaxspa.com)
+### Найденные проблемы
 
-### Company Profile
-- **Brand**: Let's Relax Spa -- No.1 Thailand Boutique Day Spa
-- **Founded**: 1998, Chiang Mai
-- **Scale**: 26+ years, 7M+ clients, 60+ locations across 8 provinces, 2 international branches
-- **Five Signatures**: Boutique Design, Siamese Serenity, Certified Therapists, Finest Selection, Refreshing Thai Taste (complimentary tea & fruit after service)
-- **Booking**: Online only (no phone reservations) -- booking.letsrelaxspa.com
+**1. Критический баг: `useVendorYachts.ts` запрашивает несуществующие колонки**
+- Хук запрашивает `price_per_day`, `price_per_hour`, `length_ft` -- этих колонок НЕТ в БД
+- Правильные колонки: `price_half_day`, `price_full_day`, `length_meters`
+- Это ломает панель вендора для яхт
 
-### 9 Phuket Branches
+**2. Захардкоженная комиссия платформы**
+- В `YachtBooking.tsx` строка 118: `serviceFee = ... * 0.05` (5%)
+- В `system_settings` значение `platform_fee_percent = 10`
+- Нужно брать значение из БД через существующий механизм настроек
 
-| Branch | Location / District | Address Detail |
-|--------|---------------------|----------------|
-| Patong 2nd Street | Patong | Ratcha-Uthit Road, Patong 2nd Street |
-| Patong 3rd Street | Patong | Pangmuang Sai Kor Road, Patong Beach |
-| Karon | Karon | The Waterfront Suites Phuket |
-| The SIS Kata | Kata | The Sis Kata Resort Hotel |
-| Boat Lagoon | Koh Kaew | Boat Lagoon complex |
-| M Social | Phuket Town area | M Social Hotel Phuket |
-| Beyond Resort Patong | Patong | B floor, Beyond Resort Patong |
-| Laguna Porto de Phuket | Bang Tao / Laguna | 1st floor, Porto de Phuket mall |
-| Veranda Resort | Phuket (south) | 1st floor, Veranda Resort Autograph Collection |
+**3. Захардкоженный символ валюты**
+- В `YachtBookingQuickSelect.tsx` строка 44: `currency === 'THB' ? '฿' : '$'`
+- Должен использоваться `getCurrencySymbol()` из `src/lib/config/currencies.ts`
 
-### Individual Treatments (prices from website)
+**4. Захардкоженные времена отправления**
+- В `YachtBookingQuickSelect.tsx` и `YachtBooking.tsx` время жестко задано: `['09:00', '14:00']` и `['08:00', '09:00', '10:00']`
+- Должно быть настраиваемым (хотя бы из поля яхты или справочника)
 
-| Treatment | Duration | Price (THB) |
-|-----------|----------|-------------|
-| Hand Massage | 30 min | 350 |
-| Back & Shoulder Massage | 30 min | 375 |
-| Thai Herbal Steam | 30 min | 500 |
-| Foot Massage | 45 min | 600 |
-| Back & Shoulder Massage | 60 min | 750 |
-| Foot Massage | 60 min | 800 |
-| Floral Bath | 30 min | 800 |
-| Thai Massage | 120 min | 1,200 |
-| Aromatherapy Oil Massage | 60 min | 1,300 |
-| Body Scrub | 60 min | 1,300 |
-| Body Wrap | 60 min | 1,300 |
-| Thai Massage + Herbal Compress | 120 min | 1,400 |
-| Four-Hands Thai Massage | 60 min | 1,400 |
-| Dr. Spiller Facial Massage | 60 min | 1,600 |
-| Warm Oil Massage | 60 min | 1,600 |
-| Four-Hands Thai Massage | 120 min | 2,200 |
-| Aromatic Hot Stone Massage | 90 min | 2,300 |
-| Four-Hands + Herbal Compress | 120 min | 2,400 |
-| Aromatherapy Oil Massage | 120 min | 2,600 |
+**5. Яхты не в Route Registry**
+- `/yachts` маршруты работают в `AnimatedRoutes.tsx`, но отсутствуют в `src/lib/config/routes.ts`
 
-### Spa Packages
+**6. 3 яхты AYA Yachts в статусе `pending`**
+- Sea Bear 40M (Overnight + Day Charter) и Princess S72 -- нужно аппрувить
 
-| Package | Duration | Price (THB) | Best For |
-|---------|----------|-------------|----------|
-| Dream Package | 90 min | 1,100 | Quick relief |
-| Heavenly Relax | 165 min | 1,850 | Post-travel recovery |
-| Simply Thai | 150 min | 1,900 | Authentic Thai experience |
-| Body & Soul | 120 min | 2,500 | Skin + massage combo |
-| Golfers' Heaven | 135 min | 2,750 | Active/sports fatigue |
-| Full Spirit | 165 min | 2,950 | Full body care |
-| Blooming Life | 180 min | 3,900 | Skin rejuvenation |
-| Executive Hide Away | 180 min | 4,100 | Mental recovery |
-| Day Dream | 210 min | 4,700 | Half-day experience |
-| Spa Experience | 210 min | 4,900 | Premium full journey |
+**7. Intake-конфиг использует старые поля**
+- `intakeVerticals.ts` ссылается на `price_per_day`, `price_per_hour` вместо `price_half_day`, `price_full_day`
+
+### UUID яхт -- OK
+Все 13 яхт используют корректные UUID v4 формата `b1000001-0000-4000-a000-*`. Провайдеры тоже имеют UUID.
+
+### Цены -- соответствуют поставщикам
+Проверка по source_urls подтверждает реальные цены Tiger Marine и Simba Sea Trips в THB.
 
 ---
 
-## Implementation Plan
+### План исправлений
 
-### Phase 1: INSERT 9 salon records into `salons` table
-- One record per Phuket branch
-- `salon_type`: `'spa'`
-- `name_en`: "Let's Relax Spa - [Branch Name]"
-- `name_ru`: bilingual Russian translation
-- `description_en` / `description_ru`: brand story + branch-specific info
-- `services`: array of key treatment names
-- `price_from`: 350 (lowest treatment price)
-- `website`: branch-specific URL from letsrelaxspa.com
-- `is_verified`: true, `is_featured`: true (for top 3 branches), `is_active`: true
-- `district`: mapped to existing Phuket districts
-- `languages`: `['en', 'th']`
-- `amenities`: `['AC', 'WiFi', 'Complimentary Tea', 'Herbal Steam']` (varies per branch)
+**Шаг 1. Исправить `useVendorYachts.ts`**
+- Заменить `price_per_day` на `price_half_day`, `price_per_hour` на `price_full_day`, `length_ft` на `length_meters`
+- Добавить недостающие поля: `price_sunset`, `price_overnight`
 
-### Phase 2: Map top branches to LifeOS situations
-- INSERT into `catalog_life_map`:
-  - **vacation_leisure** -- Patong 2nd St (weight 72, primary spa recommendation)
-  - **long_term_living** -- Boat Lagoon branch (weight 65, expat-friendly location)
-  - **arrival_first_day** -- Patong 3rd St (weight 48, recovery after flight)
+**Шаг 2. Убрать захардкоженную комиссию из `YachtBooking.tsx`**
+- Импортировать `platform_fee_percent` из `system_settings` через существующий хук
+- Заменить `0.05` на динамическое значение
 
-### No Frontend Changes
-The `salons` table is already rendered by existing Salons/Spa pages and the LifeOS enrichment hooks. All 9 branches will appear automatically.
+**Шаг 3. Убрать захардкоженный символ валюты из `YachtBookingQuickSelect.tsx`**
+- Использовать `getCurrencySymbol(yacht.currency)` вместо тернарного оператора
 
-### Data Accuracy
-All prices, branch names, and descriptions are sourced directly from letsrelaxspa.com (fetched today). No phone numbers will be added since Let's Relax explicitly states "no phone reservations -- book online only."
+**Шаг 4. Зарегистрировать яхты в Route Registry**
+- Добавить `YACHTS`, `YACHT_DETAIL`, `YACHT_BOOKING` в `APP_ROUTES` в `routes.ts`
+- Добавить паттерн `/yachts/:id` в `dynamicPatterns`
+
+**Шаг 5. Аппрувить pending яхты AYA Yachts**
+- UPDATE `approval_status = 'approved'` для 3 записей
+
+**Шаг 6. Исправить `intakeVerticals.ts`**
+- Обновить поля яхт: `price_per_day` -> `price_half_day`, `price_per_hour` -> `price_full_day`
+
+**Шаг 7. Обновить интерфейс `Yacht` в `useYachts.ts`**
+- Убедиться что типы соответствуют реальной схеме БД (добавить `price_sunset`, `price_overnight`, `addons`, `charter_options` и др.)
+
