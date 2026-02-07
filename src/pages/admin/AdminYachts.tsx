@@ -119,6 +119,7 @@ export default function AdminYachts() {
     has_crew: true,
     is_featured: false,
     is_active: true,
+    departure_times: '',
   });
 
   const isRussian = language === 'ru';
@@ -165,6 +166,7 @@ export default function AdminYachts() {
       has_crew: true,
       is_featured: false,
       is_active: true,
+      departure_times: '',
     });
     setEditingYacht(null);
   };
@@ -200,6 +202,7 @@ export default function AdminYachts() {
       has_crew: yacht.has_crew ?? true,
       is_featured: yacht.is_featured,
       is_active: true,
+      departure_times: (yacht as any).departure_times?.join(', ') || '',
     });
     setIsDialogOpen(true);
   };
@@ -242,6 +245,7 @@ export default function AdminYachts() {
         has_crew: formData.has_crew,
         is_featured: formData.is_featured,
         is_active: formData.is_active,
+        departure_times: formData.departure_times ? formData.departure_times.split(',').map(t => t.trim()).filter(Boolean) : null,
       };
 
       if (editingYacht) {
@@ -700,6 +704,25 @@ export default function AdminYachts() {
                   </div>
                 </div>
 
+                {/* Departure Times */}
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
+                    {isRussian ? 'Расписание отправлений' : 'Departure Schedule'}
+                  </h3>
+                  <div className="space-y-2">
+                    <Label>{isRussian ? 'Время отправления (через запятую)' : 'Departure Times (comma-separated)'}</Label>
+                    <Input
+                      value={formData.departure_times}
+                      onChange={(e) => setFormData(prev => ({ ...prev, departure_times: e.target.value }))}
+                      placeholder="08:00, 09:00, 10:00, 14:00"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      {isRussian 
+                        ? 'Оставьте пустым для стандартного расписания (полдня: 09:00, 14:00 / день: 08:00, 09:00, 10:00)'
+                        : 'Leave empty for default schedule (half day: 09:00, 14:00 / full day: 08:00, 09:00, 10:00)'}
+                    </p>
+                  </div>
+                </div>
                 {/* Toggles */}
                 <div className="space-y-4">
                   <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
