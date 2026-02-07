@@ -1,5 +1,6 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import useEmblaCarousel from 'embla-carousel-react';
 import { 
   Anchor, Star, Users, MapPin, Clock, Shield, Check, 
   Share2, Heart, Ruler
@@ -20,8 +21,19 @@ export default function YachtDetail() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const [currentImage, setCurrentImage] = useState(0);
-  const touchStartX = useRef<number | null>(null);
-  const touchEndX = useRef<number | null>(null);
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false });
+  
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setCurrentImage(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+
+  React.useEffect(() => {
+    if (!emblaApi) return;
+    emblaApi.on('select', onSelect);
+    return () => { emblaApi.off('select', onSelect); };
+  }, [emblaApi, onSelect]);
+
   const { yacht, isLoading } = useYacht(id || '');
 
   if (isLoading) {
@@ -56,28 +68,21 @@ export default function YachtDetail() {
 
   return (
     <AppLayout>
-      {/* Image Gallery */}
-      <div
-        className="relative h-72 touch-pan-y"
-        onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; touchEndX.current = null; }}
-        onTouchMove={(e) => { touchEndX.current = e.touches[0].clientX; }}
-        onTouchEnd={() => {
-          if (touchStartX.current !== null && touchEndX.current !== null) {
-            const diff = touchStartX.current - touchEndX.current;
-            if (Math.abs(diff) > 50) {
-              if (diff > 0 && currentImage < images.length - 1) setCurrentImage(prev => prev + 1);
-              if (diff < 0 && currentImage > 0) setCurrentImage(prev => prev - 1);
-            }
-          }
-          touchStartX.current = null;
-          touchEndX.current = null;
-        }}
-      >
-        <img
-          src={images[currentImage]}
-          alt={name}
-          className="w-full h-full object-cover select-none pointer-events-none"
-        />
+      {/* Image Gallery - Embla Carousel */}
+      <div className="relative h-72">
+        <div className="overflow-hidden h-full" ref={emblaRef}>
+          <div className="flex h-full">
+            {images.map((img, idx) => (
+              <div key={idx} className="flex-[0_0_100%] min-w-0 h-full">
+                <img
+                  src={img}
+                  alt={`${name} ${idx + 1}`}
+                  className="w-full h-full object-cover select-none"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
         {/* Back button */}
         <div className="absolute top-4 left-4">
           <BackButton fallbackPath="/yachts" variant="overlay" />
@@ -97,7 +102,7 @@ export default function YachtDetail() {
             {images.map((_, idx) => (
               <button
                 key={idx}
-                onClick={() => setCurrentImage(idx)}
+                onClick={() => emblaApi?.scrollTo(idx)}
                 className={`w-2 h-2 rounded-full transition-all ${
                   idx === currentImage ? 'bg-white w-4' : 'bg-white/50'
                 }`}
