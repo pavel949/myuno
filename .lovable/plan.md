@@ -1,139 +1,126 @@
 
 
-## Coral Lounge Thailand -- Исследование и план интеграции
+## Интеграция второго поставщика: Phuket Fast Track (Asia Fast Track)
 
-### Что я нашёл о Coral Lounge
+### Результаты исследования
 
-**The Coral Executive Lounge** -- крупнейший оператор VIP-сервисов в аэропортах Таиланда.
+**Phuket Fast Track** -- это локальный бренд глобальной сети **Asia Fast Track**, работающей в 350+ аэропортах. В Таиланде они обслуживают HKT, BKK, DMK, CNX, USM, KBV. Компания работает под брендом **I Asia Thailand** (видно на Viator).
 
 **Контакты:**
-- Сайт: coralthailand.com
-- Email для бронирования: booking@coralphuket.com
-- Email для продаж: sales@coralthailand.com
+- Сайт: phuketfasttrack.com (маркетинг) / asiafasttrack.com (бронирование)
+- WhatsApp: +65 8820 6350 (сингапурский номер, центральный офис)
+- Бронирование: через book.asiafasttrack.com
+- Viator: продукт 90546P94, рейтинг 4.7/5 (297 отзывов, 92% рекомендуют)
 
-**Аэропорты присутствия:**
-- Phuket (HKT)
-- Bangkok Suvarnabhumi (BKK)
-- Bangkok Don Mueang (DMK)
-- Chiang Mai (CNX)
-
-**Часы работы:** 06:00 -- 24:00 ежедневно
-**Минимальное время бронирования:** 12 часов до рейса (на сайте Coral), 24 часа (через агентов)
-**Дети до 2 лет:** бесплатно. Старше 2 лет = тариф взрослого.
+**Часы работы:** Fast Track доступен 06:00--23:59 (по времени рейса)
+**Cutoff:** Отмена/бронирование за 24 часа
+**Дети:** до 2 лет бесплатно, старше 2 -- полный тариф
+**Опыт:** 14+ лет работы в аэропортах Таиланда
 
 ---
 
-### Услуги Coral Lounge в HKT (Phuket) и актуальные цены
+### Услуги Phuket Fast Track в HKT и цены
 
-Цены по прайсу (ноябрь 2025 -- октябрь 2026):
+Цены взяты с Viator (актуальные, в THB по курсу ~35 THB/USD):
 
-#### A. Arrival (International)
+#### Arrival (International)
 
-| Услуга | Цена (THB) | Вне часов работы |
-|--------|-----------|-----------------|
-| VIP Arrival Service (Meet & Greet + Fast Track + Porter) | 2,100 | 2,300 (мин. 2 чел.) |
-| Fast Track Only (immigration lane) | 1,300 | N/A |
+| Услуга | Цена (THB, оценка) | Что входит |
+|--------|-------------------|-----------|
+| Fast Track Arrival (базовый) | ~1,200--1,500 | Meet at skybridge, escort через immigration, помощь с багажом, проводят к водителю |
+| Fast Track Arrival + Lounge | ~2,500--3,000 | То же + 2 часа VIP lounge |
+| Fast Track Arrival + Transfer (Sedan) | ~3,500--4,000 | То же + трансфер до отеля |
+| Fast Track Arrival + Transfer (Van 6 pax) | ~5,000--5,500 | Для групп до 6 чел. |
 
-#### B. Departure (International)
+#### Departure (International)
 
-| Услуга | Coral Executive Lounge | Coral Premium Lounge | Coral First Class |
-|--------|----------------------|---------------------|------------------|
-| VIP Departure (escort + lounge + fast track) | 2,500 | 3,300 (вне часов 3,799) | 4,100 (мин. 8 чел.) |
-| Lounge Only | 1,400 | 1,900 (вне часов 2,185) | 2,900 (мин. 8 чел.) |
-| Fast Track Only | 1,300 | 1,300 | 1,300 |
+| Услуга | Цена (THB, оценка) | Что входит |
+|--------|-------------------|-----------|
+| Fast Track Departure | ~1,200--1,500 | Meet у входа, помощь с check-in, escort через immigration, проводят к gate/lounge |
+| Fast Track Departure + Premium Lounge | ~3,000--3,500 | То же + 2 часа Premium Lounge |
 
-#### Что входит в VIP Arrival:
-1. Meet & Greet у выхода из самолёта
-2. Escort через immigration fast track lane
-3. Помощь с Visa on Arrival (если нужна)
-4. Porter -- до 2 единиц багажа на пассажира
-5. Координация с водителем/отелем у выхода
+#### Ночные доплаты (00:00--05:59)
+- Fast Track: +500 THB/чел (мин. 2 чел.)
+- Fast Track + Premium Lounge: +1,300 THB/чел (мин. 2 чел.)
 
-#### Что входит в VIP Departure:
-1. Meet & Greet на входе в аэропорт
-2. Porter
-3. Fast Track через immigration
-4. Доступ к лаунжу (еда, напитки, алкоголь, Wi-Fi, массаж)
-5. Лаунж -- макс. 2.5 часа (доплата 350 THB/час, 1,000 THB/час для First Class)
-6. Дополнительный багаж сверх 2 шт. -- 100 THB/шт.
+#### Ключевые отличия от Coral Lounge
 
-#### Дополнительная услуга:
-- **Welcome by Coral** (только Arrival) -- встреча с табличкой после таможни, без fast track
-
----
-
-### Что нужно обновить в myUNO
-
-Текущие цены в базе занижены и не соответствуют реальному прайсу Coral:
-
-| SKU | Сейчас в базе | Цена Coral | Рекомендация |
-|-----|--------------|-----------|-------------|
-| HKT-FT-ARR (Fast Track Arrival) | 2,500 | 2,100 (VIP) / 1,300 (FT only) | Разбить на 2 продукта |
-| HKT-FT-DEP (Fast Track Departure) | 2,900 | 2,500 (Executive) / 3,300 (Premium) | Разбить по типам лаунжа |
-| HKT-ADDON-LOUNGE | 1,200 | 1,400--2,900 (зависит от уровня) | Разбить по уровням |
+| Параметр | Coral Lounge | Phuket Fast Track |
+|----------|-------------|-------------------|
+| Тип компании | Локальный оператор лаунжей | Глобальная сеть (350+ аэропортов) |
+| Фокус | Собственные лаунжи (3 уровня) | Meet & Assist + партнёрские лаунжи |
+| Лаунж-тиры | Executive / Premium / First Class | Один уровень (Premium) |
+| Ночные доплаты | +200 THB фиксированно | +500 THB/чел (мин. 2 чел.) |
+| Трансферы | Нет (через myUNO бандлы) | Собственные трансферы (sedan/van) |
+| Viator рейтинг | N/A | 4.7/5 (297 отзывов) |
+| Покрытие аэропортов | Только HKT | HKT, BKK, DMK, CNX, USM, KBV |
 
 ---
 
-### План реализации
+### Предложение по интеграции
 
-#### 1. Внести Coral Lounge как поставщика в `airport_suppliers`
+#### 1. Добавить Phuket Fast Track как второго поставщика
 
-Данные:
-- Название: The Coral Executive Lounge
-- Email: booking@coralphuket.com / sales@coralthailand.com
-- Сайт: coralthailand.com
-- Аэропорты: HKT (сейчас), позже BKK/DMK/CNX
-- Часы: 06:00--24:00
-- Cutoff: 12 часов (для наших целей -- 24 часа)
+Вставить в `airport_suppliers`:
+- name: "Phuket Fast Track (Asia Fast Track)"
+- contact: WhatsApp +65 8820 6350
+- website: phuketfasttrack.com
+- priority: 2 (Coral остаётся primary)
+- SLA: 30 мин
+- commission: 15%
 
-#### 2. Переструктурировать каталог `airport_services`
+#### 2. Добавить SKU-продукты Phuket Fast Track
 
-Вместо текущих 2 общих продуктов -- создать реальную линейку Coral:
+Новые записи в `airport_services` с префиксом `HKT-PFT-`:
 
-**Arrival (International):**
-| SKU | Название | Retail Price | Описание |
-|-----|---------|-------------|---------|
-| HKT-CRL-ARR-VIP | VIP Arrival Service | 2,500 | Meet & Greet + Fast Track + Porter |
-| HKT-CRL-ARR-FT | Fast Track Only (Arrival) | 1,500 | Immigration fast track lane only |
-| HKT-CRL-ARR-MEET | Airport Meet & Greet | 800 | Welcome с табличкой, без fast track |
+**Arrival:**
+| SKU | Название | Retail (THB) |
+|-----|---------|-------------|
+| HKT-PFT-ARR-FT | Fast Track Arrival | 1,500 |
+| HKT-PFT-ARR-LNG | Fast Track Arrival + Lounge | 2,800 |
 
-**Departure (International):**
-| SKU | Название | Retail Price | Описание |
-|-----|---------|-------------|---------|
-| HKT-CRL-DEP-EXEC | VIP Departure -- Executive Lounge | 2,900 | Fast Track + Executive Lounge |
-| HKT-CRL-DEP-PREM | VIP Departure -- Premium Lounge | 3,800 | Fast Track + Premium Lounge |
-| HKT-CRL-DEP-FC | VIP Departure -- First Class | 4,700 | Fast Track + First Class Lounge (мин. 8 чел.) |
-| HKT-CRL-DEP-FT | Fast Track Only (Departure) | 1,500 | Immigration fast track only |
-| HKT-CRL-DEP-LNG-EXEC | Lounge Only -- Executive | 1,600 | Без escort, только лаунж |
-| HKT-CRL-DEP-LNG-PREM | Lounge Only -- Premium | 2,200 | Без escort, Premium Lounge |
+**Departure:**
+| SKU | Название | Retail (THB) |
+|-----|---------|-------------|
+| HKT-PFT-DEP-FT | Fast Track Departure | 1,500 |
+| HKT-PFT-DEP-LNG | Fast Track Departure + Premium Lounge | 3,200 |
 
-**Бандлы (Arrival + Transfer):**
-| SKU | Название | Retail Price | Экономия |
-|-----|---------|-------------|---------|
-| HKT-CRL-BND-SEDAN | VIP Arrival + Sedan Transfer | 3,400 | ~15% vs отдельно |
-| HKT-CRL-BND-VAN | VIP Arrival + Family Van | 3,900 | ~15% vs отдельно |
-| HKT-CRL-BND-FULL | Full VIP Package (Arrival + Assistant + Sedan) | 5,200 | ~20% vs отдельно |
+**Бандлы с трансфером:**
+| SKU | Название | Retail (THB) |
+|-----|---------|-------------|
+| HKT-PFT-BND-SEDAN | Fast Track + Sedan Transfer | 3,200 |
+| HKT-PFT-BND-VAN | Fast Track + Van Transfer (6 pax) | 5,000 |
 
-**Night surcharge (00:01--06:00):** +200 THB (для arrival VIP)
+**Ночные доплаты:** +500 THB/чел (мин. 2 чел.)
 
-#### 3. Привязать к LifeOS ситуации "Trip Planning" (планирую)
+#### 3. UI: Выбор поставщика на странице Fast Track
 
-Fast Track -- услуга для планирования, не для "только прилетел". Переместить основную привязку с `arrival_first_day` на `pre_trip_planning` с высоким весом (85), а в `arrival_first_day` оставить как вторичную (вес 50, "ещё не поздно забронировать").
+Обновить `AirportFastTrackPage.tsx`:
+- Добавить шаг "Выбор поставщика" перед выбором услуги
+- Показывать карточки: Coral Lounge (премиум, собственные лаунжи) vs Phuket Fast Track (международный сервис, 4.7 рейтинг)
+- При выборе поставщика -- фильтровать каталог услуг по `supplier_id`
 
-#### 4. Обновить UI страницы Fast Track
+#### 4. Привязка к `airport_services`
 
-- Добавить выбор уровня лаунжа для Departure (Executive / Premium / First Class)
-- Показать включённые услуги для каждого уровня
-- Отобразить бренд Coral Lounge (логотип, доверие)
-- Обновить копирайт на реальные описания услуг
+Добавить колонку `supplier_id` в таблицу `airport_services` (FK на `airport_suppliers.id`) для маршрутизации каждого SKU к своему поставщику. Обновить существующие Coral-записи.
+
+#### 5. LifeOS -- без изменений
+
+Ситуация "Trip Planning" уже настроена. Оба поставщика будут отображаться как варианты одной услуги.
 
 ---
 
 ### Техническая реализация
 
-1. **INSERT в `airport_suppliers`**: Coral Lounge с полными контактами
-2. **UPDATE `airport_services`**: Заменить generic SKU на реальную линейку Coral с привязкой к supplier
-3. **UPDATE `catalog_life_map`**: Переназначить weight -- `pre_trip_planning` = 85, `arrival_first_day` = 50
-4. **UPDATE UI**: AirportFastTrackPage -- выбор уровня лаунжа, описания услуг Coral
-5. **Мультиязычные тексты**: EN/RU/TH для всех новых продуктов
+1. **SQL Migration:**
+   - ALTER TABLE `airport_services` ADD COLUMN `supplier_id` UUID REFERENCES `airport_suppliers(id)`
+   - INSERT Phuket Fast Track в `airport_suppliers`
+   - INSERT 6 новых SKU в `airport_services`
+   - UPDATE существующие Coral SKU -- проставить `supplier_id`
+
+2. **Hook `useAirportServices`:** Обновить для поддержки фильтрации по `supplier_id`
+
+3. **UI `AirportFastTrackPage`:** Добавить шаг выбора поставщика с карточками-сравнением
+
+4. **Мультиязычные тексты:** EN/RU/TH для всех новых SKU Phuket Fast Track
 
