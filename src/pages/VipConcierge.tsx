@@ -92,8 +92,8 @@ const vipServices: VipService[] = [
   {
     id: 'yachts',
     icon: Anchor,
-    title: 'Yachts & Boats',
-    titleRu: 'Яхты и катера',
+    title: 'Boat Charters',
+    titleRu: 'Аренда яхт и катеров',
     description: 'Yacht charters, sailing trips, boat parties',
     descriptionRu: 'Аренда яхт, парусные поездки, вечеринки на катере',
     color: 'text-blue-500',

@@ -96,7 +96,7 @@ export const searchTypeConfig: Record<string, TypeConfig> = {
   tours: { icon: Compass, label: { en: 'Tours', ru: 'Туры' }, color: 'from-amber-500 to-orange-500' },
   events: { icon: Ticket, label: { en: 'Events', ru: 'События' }, color: 'from-purple-500 to-pink-500' },
   water: { icon: Waves, label: { en: 'Water Sports', ru: 'Водный спорт' }, color: 'from-cyan-500 to-blue-500' },
-  yachts: { icon: Anchor, label: { en: 'Yachts', ru: 'Яхты' }, color: 'from-blue-600 to-indigo-600' },
+  yachts: { icon: Anchor, label: { en: 'Charters', ru: 'Чартер' }, color: 'from-blue-600 to-indigo-600' },
   legal: { icon: Scale, label: { en: 'Legal', ru: 'Юридические' }, color: 'from-indigo-500 to-blue-600' },
   pharmacy: { icon: Pill, label: { en: 'Pharmacy', ru: 'Аптеки' }, color: 'from-green-500 to-emerald-500' },
   flowers: { icon: Flower2, label: { en: 'Flowers', ru: 'Цветы' }, color: 'from-rose-500 to-pink-500' },

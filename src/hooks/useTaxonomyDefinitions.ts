@@ -43,7 +43,7 @@ export const VERTICAL_CONFIG: Record<TaxonomyVertical, { labelEn: string; labelR
   property: { labelEn: 'Property', labelRu: 'Недвижимость', icon: '🏠' },
   transport: { labelEn: 'Transport', labelRu: 'Транспорт', icon: '🚗' },
   home_services: { labelEn: 'Home Services', labelRu: 'Домашние услуги', icon: '🔧' },
-  yachts: { labelEn: 'Yachts', labelRu: 'Яхты', icon: '🚤' },
+  yachts: { labelEn: 'Boat Charters', labelRu: 'Чартер', icon: '🚤' },
   tours: { labelEn: 'Tours', labelRu: 'Туры', icon: '🎯' },
   restaurants: { labelEn: 'Restaurants', labelRu: 'Рестораны', icon: '🍽️' },
   medical: { labelEn: 'Medical', labelRu: 'Медицина', icon: '🏥' },

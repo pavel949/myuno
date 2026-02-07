@@ -19,7 +19,7 @@ const QUICK_SERVICES: QuickService[] = [
   { path: '/beauty', icon: '💆', labelEn: 'Beauty', labelRu: 'Красота', color: 'bg-pink-100 dark:bg-pink-900/30' },
   { path: '/cleaning', icon: '🧹', labelEn: 'Cleaning', labelRu: 'Уборка', color: 'bg-green-100 dark:bg-green-900/30' },
   { path: '/restaurants', icon: '🍽️', labelEn: 'Food', labelRu: 'Еда', color: 'bg-orange-100 dark:bg-orange-900/30' },
-  { path: '/yachts', icon: '🚤', labelEn: 'Yachts', labelRu: 'Яхты', color: 'bg-cyan-100 dark:bg-cyan-900/30' },
+  { path: '/yachts', icon: '🚤', labelEn: 'Charters', labelRu: 'Чартер', color: 'bg-cyan-100 dark:bg-cyan-900/30' },
   { path: '/events', icon: '🎫', labelEn: 'Events', labelRu: 'События', color: 'bg-purple-100 dark:bg-purple-900/30' },
   { path: '/discover', icon: '⚡', labelEn: 'More', labelRu: 'Ещё', color: 'bg-gray-100 dark:bg-gray-800' },
 ];

@@ -70,7 +70,7 @@ export default function RefundPolicyPage() {
     },
     {
       icon: Ship,
-      title: isRu ? 'Яхты и катера' : 'Yachts & Boats',
+      title: isRu ? 'Аренда яхт и катеров' : 'Boat Charters',
       color: 'text-cyan-500',
       serviceType: 'escrow',
       policies: [

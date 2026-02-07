@@ -43,8 +43,8 @@
      plural: 'yachts',
      table: 'yachts',
      icon: '🚤',
-     labelEn: 'Yachts',
-     labelRu: 'Яхты',
+     labelEn: 'Boat Charters',
+     labelRu: 'Чартер',
      bookable: true,
    },
    VEHICLE: {

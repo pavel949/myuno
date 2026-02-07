@@ -121,8 +121,8 @@ export default function DisputeResolutionPage() {
     {
       category: isRu ? 'Полное покрытие' : 'Full Coverage',
       items: isRu 
-        ? ['Яхты и катера', 'Туры и экскурсии', 'Транспорт (escrow)', 'Маркетплейс товаров']
-        : ['Yachts & boats', 'Tours & excursions', 'Transport (escrow)', 'Marketplace products'],
+        ? ['Аренда яхт и катеров', 'Туры и экскурсии', 'Транспорт (escrow)', 'Маркетплейс товаров']
+        : ['Boat charters', 'Tours & excursions', 'Transport (escrow)', 'Marketplace products'],
       maxCoverage: isRu ? 'До 100% стоимости' : 'Up to 100% of cost',
       color: 'bg-green-500/10 border-green-500/30',
     },

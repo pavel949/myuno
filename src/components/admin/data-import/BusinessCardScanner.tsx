@@ -48,7 +48,7 @@ const VERTICALS = [
   { id: 'restaurants', nameEn: 'Restaurants & Cafes', nameRu: 'Рестораны и кафе' },
   { id: 'salons', nameEn: 'Beauty Salons', nameRu: 'Салоны красоты' },
   { id: 'tours', nameEn: 'Tours & Excursions', nameRu: 'Туры и экскурсии' },
-  { id: 'yachts', nameEn: 'Yachts & Boats', nameRu: 'Яхты и лодки' },
+  { id: 'yachts', nameEn: 'Boat Charters', nameRu: 'Аренда яхт и катеров' },
   { id: 'property', nameEn: 'Real Estate', nameRu: 'Недвижимость' },
   { id: 'legal', nameEn: 'Legal Services', nameRu: 'Юридические услуги' },
   { id: 'clinics', nameEn: 'Medical Clinics', nameRu: 'Клиники' },

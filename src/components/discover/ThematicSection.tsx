@@ -150,7 +150,7 @@ export const THEMATIC_SECTIONS: ThematicSectionData[] = [
     emoji: '🌴',
     defaultOpen: true,
     categories: [
-      { id: 'yachts', slug: 'yachts', nameEn: 'Yachts & Boats', nameRu: 'Яхты и катера', icon: '⛵', path: '/yachts' },
+      { id: 'yachts', slug: 'yachts', nameEn: 'Boat Charters', nameRu: 'Аренда яхт и катеров', icon: '⛵', path: '/yachts' },
       { id: 'experiences', slug: 'experiences', nameEn: 'Tours & Experiences', nameRu: 'Туры и впечатления', icon: '🗺️', path: '/experiences' },
       { id: 'restaurants', slug: 'restaurants', nameEn: 'Restaurants', nameRu: 'Рестораны', icon: '🍽️', path: '/restaurants' },
       { id: 'events', slug: 'events', nameEn: 'Events', nameRu: 'События', icon: '🎉', path: '/events' },

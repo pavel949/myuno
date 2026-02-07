@@ -37,7 +37,7 @@ const QUICK_ACTIONS: QuickAction[] = [
 const SERVICE_CATEGORIES: ServiceCategory[] = [
   { id: 'beauty', icon: Sparkles, iconColor: 'text-pink-500', label: 'Beauty', labelRu: 'Красота', path: '/beauty' },
   { id: 'transport', icon: Car, iconColor: 'text-blue-500', label: 'Transport', labelRu: 'Транспорт', path: '/transport' },
-  { id: 'yachts', icon: Anchor, iconColor: 'text-cyan-500', label: 'Yachts', labelRu: 'Яхты', path: '/yachts' },
+  { id: 'yachts', icon: Anchor, iconColor: 'text-cyan-500', label: 'Charters', labelRu: 'Чартер', path: '/yachts' },
   { id: 'property', icon: Home, iconColor: 'text-emerald-500', label: 'Property', labelRu: 'Жильё', path: '/property' },
   { id: 'flowers', icon: Flower2, iconColor: 'text-rose-500', label: 'Flowers', labelRu: 'Цветы', path: '/flowers' },
 ];

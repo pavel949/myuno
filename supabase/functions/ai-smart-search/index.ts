@@ -64,7 +64,7 @@ const SYSTEM_PROMPT_RU = `Ты — умный ассистент платфор�
 3. Предложить конкретные поисковые запросы для услуг
 
 ДОСТУПНЫЕ КАТЕГОРИИ:
-- yachts: Яхты и морские прогулки
+- yachts: Аренда яхт и катеров, чартер
 - tours: Туры и экскурсии
 - property: Аренда жилья (виллы, квартиры)
 - transport: Транспорт (авто, байки)
@@ -105,7 +105,7 @@ YOUR TASKS:
 3. Suggest specific service search queries
 
 AVAILABLE CATEGORIES:
-- yachts: Yachts and boat trips
+- yachts: Boat charters and yacht rentals
 - tours: Tours and excursions
 - property: Property rental (villas, apartments)
 - transport: Transport (cars, bikes)
