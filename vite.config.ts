@@ -81,18 +81,8 @@ export default defineConfig(({ mode }) => ({
               }
             }
           },
-          {
-            urlPattern: /\.(?:js|css)$/i,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'static-assets-v12',
-              networkTimeoutSeconds: 2,
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 // 1 minute
-              }
-            }
-          },
+          // JS/CSS are content-hashed by Vite — no SW caching needed
+          // Old SW cache of JS/CSS was the main cause of stale builds
           {
             urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/i,
             handler: 'NetworkFirst',
