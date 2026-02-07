@@ -183,16 +183,17 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
         </motion.div>
 
         {/* Mobile Full Screen Modal - Using Portal */}
-        <AnimatePresence>
-          {isOpen && createPortal(
-            <motion.div 
-              key="search-modal"
-              className="fixed inset-0 z-[100] bg-background"
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            >
+        {createPortal(
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div 
+                key="search-modal"
+                className="fixed inset-0 z-[100] bg-background"
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              >
               <div className="flex flex-col h-full overflow-hidden">
                 {/* Header with Tabs */}
                 <div className="border-b shrink-0">
@@ -231,12 +232,9 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                 <div className="flex-1 overflow-y-auto">
                     {/* Location Tab */}
                     {mobileTab === 'location' && (
-                      <div 
-                        className="p-4 space-y-4"
-                      >
+                      <div className="p-4 space-y-4">
                         <h3 className="text-xl font-bold">{language === 'ru' ? 'Куда вы едете?' : 'Where are you going?'}</h3>
                         
-                        {/* Compact list instead of grid cards */}
                         <div className="space-y-1 max-h-[300px] overflow-y-auto">
                           {locations.map((loc) => (
                             <button
@@ -282,12 +280,9 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
 
                     {/* Dates Tab */}
                     {mobileTab === 'dates' && (
-                      <div 
-                        className="p-4 space-y-4"
-                      >
+                      <div className="p-4 space-y-4">
                         <h3 className="text-xl font-bold">{language === 'ru' ? 'Когда поездка?' : 'When is your trip?'}</h3>
                         
-                        {/* Flexible Dates */}
                         <div className="flex gap-2 overflow-x-auto pb-2">
                           {flexibleDates.map((option) => (
                             <Button
@@ -319,7 +314,6 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                           </Button>
                         </div>
 
-                        {/* Calendar */}
                         <div className="flex justify-center">
                           <CalendarComponent
                             mode="range"
@@ -339,9 +333,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                         </div>
 
                         {checkIn && checkOut && (
-                          <div 
-                            className="text-center p-3 bg-primary/5 rounded-xl"
-                          >
+                          <div className="text-center p-3 bg-primary/5 rounded-xl">
                             <p className="text-sm font-medium text-primary">
                               {formatDate(checkIn)} – {formatDate(checkOut)}
                             </p>
@@ -352,9 +344,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
 
                     {/* Guests Tab */}
                     {mobileTab === 'guests' && (
-                      <div 
-                        className="p-4 space-y-4"
-                      >
+                      <div className="p-4 space-y-4">
                         <h3 className="text-xl font-bold">{language === 'ru' ? 'Кто едет?' : "Who's coming?"}</h3>
                         
                         <div className="space-y-2">
@@ -387,10 +377,11 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                   </Button>
                 </div>
               </div>
-            </motion.div>,
-            document.body
-          )}
-        </AnimatePresence>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
       </div>
 
       {/* Desktop Search Bar with Backdrop */}
