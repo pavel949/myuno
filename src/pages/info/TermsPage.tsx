@@ -52,8 +52,8 @@ export default function TermsPage() {
       color: 'bg-green-500',
       description: isRu ? 'Оплата полностью через myUNO' : 'Full payment through myUNO',
       examples: isRu 
-        ? ['Яхты и катера', 'Туры и экскурсии', 'Аренда транспорта', 'Маркетплейс товаров', 'Доставка еды']
-        : ['Yachts & boats', 'Tours & excursions', 'Vehicle rentals', 'Marketplace products', 'Food delivery'],
+        ? ['Аренда яхт и катеров', 'Туры и экскурсии', 'Аренда транспорта', 'Маркетплейс товаров', 'Доставка еды']
+        : ['Boat charters', 'Tours & excursions', 'Vehicle rentals', 'Marketplace products', 'Food delivery'],
       protection: isRu ? 'Полная защита G-Trust' : 'Full G-Trust Protection',
     },
     {

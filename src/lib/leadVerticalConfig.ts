@@ -127,11 +127,11 @@ export const LEAD_VERTICALS: LeadVerticalConfig[] = [
   {
     id: 'yachts',
     icon: '🚤',
-    nameEn: 'Yachts',
-    nameRu: 'Яхты',
-    shortDescEn: 'Charter a yacht',
-    shortDescRu: 'Арендовать яхту',
-    ctaTextEn: 'Charter Yacht',
+    nameEn: 'Boat Charters',
+    nameRu: 'Чартер',
+    shortDescEn: 'Charter a boat',
+    shortDescRu: 'Арендовать яхту или катер',
+    ctaTextEn: 'Charter a Boat',
     ctaTextRu: 'Арендовать яхту',
     popularityScore: 90,
     requestTypes: [

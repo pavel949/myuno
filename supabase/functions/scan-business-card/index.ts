@@ -10,7 +10,7 @@ const VERTICALS = [
   { id: 'restaurants', nameEn: 'Restaurants & Cafes', nameRu: 'Рестораны и кафе', keywords: ['restaurant', 'cafe', 'food', 'catering', 'bar', 'kitchen', 'chef', 'dining'] },
   { id: 'salons', nameEn: 'Beauty Salons', nameRu: 'Салоны красоты', keywords: ['salon', 'spa', 'beauty', 'hair', 'nails', 'massage', 'wellness', 'cosmetics'] },
   { id: 'tours', nameEn: 'Tours & Excursions', nameRu: 'Туры и экскурсии', keywords: ['tour', 'travel', 'excursion', 'trip', 'guide', 'adventure', 'island'] },
-  { id: 'yachts', nameEn: 'Yachts & Boats', nameRu: 'Яхты и лодки', keywords: ['yacht', 'boat', 'marine', 'charter', 'sailing', 'cruise', 'sea'] },
+  { id: 'yachts', nameEn: 'Boat Charters', nameRu: 'Аренда яхт и катеров', keywords: ['yacht', 'boat', 'marine', 'charter', 'sailing', 'cruise', 'sea'] },
   { id: 'property', nameEn: 'Real Estate', nameRu: 'Недвижимость', keywords: ['property', 'real estate', 'villa', 'condo', 'apartment', 'house', 'rent', 'agent'] },
   { id: 'legal', nameEn: 'Legal Services', nameRu: 'Юридические услуги', keywords: ['legal', 'lawyer', 'attorney', 'visa', 'immigration', 'law', 'consultant'] },
   { id: 'clinics', nameEn: 'Medical Clinics', nameRu: 'Клиники', keywords: ['clinic', 'medical', 'doctor', 'dental', 'hospital', 'health', 'pharmacy'] },

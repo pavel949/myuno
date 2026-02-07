@@ -7,7 +7,7 @@ import { Ship, Home, Utensils, Scissors, MapPin, Dumbbell, ChevronRight, Plus } 
 import { cn } from '@/lib/utils';
 
 const VERTICALS = [
-  { key: 'yachts', icon: Ship, label: 'Yachts', labelRu: 'Яхты', href: '/admin/yachts', color: 'text-info' },
+  { key: 'yachts', icon: Ship, label: 'Charters', labelRu: 'Чартер', href: '/admin/yachts', color: 'text-info' },
   { key: 'properties', icon: Home, label: 'Properties', labelRu: 'Недвижимость', href: '/admin/properties', color: 'text-success' },
   { key: 'restaurants', icon: Utensils, label: 'Restaurants', labelRu: 'Рестораны', href: '/admin/restaurants', color: 'text-destructive' },
   { key: 'salons', icon: Scissors, label: 'Salons', labelRu: 'Салоны', href: '/admin/salons', color: 'text-purple-500' },

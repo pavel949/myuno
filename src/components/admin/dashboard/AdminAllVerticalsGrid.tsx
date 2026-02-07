@@ -12,7 +12,7 @@ import {
 import { cn } from '@/lib/utils';
 
 const ALL_VERTICALS = [
-  { key: 'yachts', icon: Ship, label: 'Yachts', labelRu: 'Яхты', href: '/admin/yachts', color: 'text-info' },
+  { key: 'yachts', icon: Ship, label: 'Charters', labelRu: 'Чартер', href: '/admin/yachts', color: 'text-info' },
   { key: 'properties', icon: Home, label: 'Properties', labelRu: 'Недвижимость', href: '/admin/properties', color: 'text-success' },
   { key: 'tours', icon: MapPin, label: 'Tours', labelRu: 'Туры', href: '/admin/tours', color: 'text-warning' },
   { key: 'restaurants', icon: Utensils, label: 'Restaurants', labelRu: 'Рестораны', href: '/admin/restaurants', color: 'text-destructive' },

@@ -122,11 +122,11 @@ export default function YachtsIndex() {
 
   return (
     <MiniAppLayout
-      title={language === 'ru' ? 'Яхты и лодки' : 'Yachts & Boats'}
+      title={language === 'ru' ? 'Аренда яхт и катеров' : 'Boat Charters'}
       subtitle={language === 'ru' ? `${filteredYachts.length} вариантов` : `${filteredYachts.length} options`}
       fallbackPath="/"
       heroIcon={Anchor}
-      heroTitle={language === 'ru' ? 'Лучшие яхты Пхукета' : 'Best Yachts in Phuket'}
+      heroTitle={language === 'ru' ? 'Чартер яхт и катеров на Пхукете' : 'Boat Charters in Phuket'}
       heroSubtitle={language === 'ru' ? 'Для незабываемых приключений на воде' : 'For unforgettable adventures on the water'}
       heroBackgroundImage="https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?w=800"
       heroGradientFrom="from-sky-500/20"
@@ -134,13 +134,13 @@ export default function YachtsIndex() {
       heroGradientTo="to-indigo-500/20"
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}
-      searchPlaceholder={language === 'ru' ? 'Поиск яхт...' : 'Search yachts...'}
+      searchPlaceholder={language === 'ru' ? 'Поиск яхт и катеров...' : 'Search charters...'}
       isLoading={isLoading}
       isEmpty={filteredYachts.length === 0}
       emptyIcon={Anchor}
-      emptyText={language === 'ru' ? 'Яхты не найдены' : 'No yachts found'}
+      emptyText={language === 'ru' ? 'Чартеры не найдены' : 'No charters found'}
       resultsCount={filteredYachts.length}
-      resultsLabel={language === 'ru' ? 'Доступные яхты' : 'Available Yachts'}
+      resultsLabel={language === 'ru' ? 'Доступные чартеры' : 'Available Charters'}
     >
       <YachtFiltersKlook
         selectedCategory={selectedCategory}
