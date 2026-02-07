@@ -1,0 +1,1 @@
+ALTER TABLE public.yachts ADD COLUMN IF NOT EXISTS departure_times text[] DEFAULT NULL;

@@ -18941,6 +18941,7 @@ export type Database = {
           created_by_uno_team: boolean | null
           cruising_speed: string | null
           currency: string | null
+          departure_times: string[] | null
           deposit_percent: number | null
           description_en: string | null
           description_ru: string | null
@@ -19007,6 +19008,7 @@ export type Database = {
           created_by_uno_team?: boolean | null
           cruising_speed?: string | null
           currency?: string | null
+          departure_times?: string[] | null
           deposit_percent?: number | null
           description_en?: string | null
           description_ru?: string | null
@@ -19073,6 +19075,7 @@ export type Database = {
           created_by_uno_team?: boolean | null
           cruising_speed?: string | null
           currency?: string | null
+          departure_times?: string[] | null
           deposit_percent?: number | null
           description_en?: string | null
           description_ru?: string | null
