@@ -191,36 +191,64 @@ export default function LifeFlowPage() {
                 currentLabel={isRussian ? 'После этого вам может понадобиться' : 'After this, you may need'}
               />
 
-              {/* Trip Planner CTA */}
+              {/* Quick actions: Transfer + Trip Planner */}
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-                className="rounded-2xl border border-border bg-card p-4 cursor-pointer hover:shadow-md transition-shadow"
-                onClick={() => navigate('/trip-planner')}
+                transition={{ delay: 0.55 }}
+                className="space-y-2"
               >
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-                    style={{
-                      background: currentSituation?.color
-                        ? `linear-gradient(135deg, ${currentSituation.color}25, ${currentSituation.color}10)`
-                        : undefined,
-                    }}
-                  >
-                    <LucideIcons.Palmtree className="w-5 h-5" style={{ color: currentSituation?.color || 'hsl(var(--primary))' }} />
+                {/* Book Transfer CTA */}
+                <div
+                  className="rounded-2xl border-2 border-primary/20 bg-primary/5 p-4 cursor-pointer hover:shadow-md hover:border-primary/40 transition-all"
+                  onClick={() => navigate('/transport/airport-transfer')}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 bg-primary/15">
+                      <LucideIcons.Car className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold">
+                        {isRussian ? 'Забронировать трансфер' : 'Book Airport Transfer'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {isRussian
+                          ? 'Машина будет ждать вас у выхода из аэропорта'
+                          : 'Your car will be waiting at the airport exit'}
+                      </p>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-primary shrink-0" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold">
-                      {isRussian ? 'Планируете поездку?' : 'Planning a trip?'}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {isRussian
-                        ? 'Билеты, страховка, Arrival Card, трансфер — всё в одном месте'
-                        : 'Flights, insurance, Arrival Card, transfer — all in one place'}
-                    </p>
+                </div>
+
+                {/* Trip Planner CTA */}
+                <div
+                  className="rounded-2xl border border-border bg-card p-4 cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => navigate('/trip-planner')}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+                      style={{
+                        background: currentSituation?.color
+                          ? `linear-gradient(135deg, ${currentSituation.color}25, ${currentSituation.color}10)`
+                          : undefined,
+                      }}
+                    >
+                      <LucideIcons.Palmtree className="w-5 h-5" style={{ color: currentSituation?.color || 'hsl(var(--primary))' }} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold">
+                        {isRussian ? 'Полный план поездки' : 'Full Trip Planner'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {isRussian
+                          ? 'Билеты, страховка, Arrival Card — всё в одном месте'
+                          : 'Flights, insurance, Arrival Card — all in one place'}
+                      </p>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-muted-foreground/50 shrink-0" />
                   </div>
-                  <ArrowRight className="w-4 h-4 text-muted-foreground/50 shrink-0" />
                 </div>
               </motion.div>
 
