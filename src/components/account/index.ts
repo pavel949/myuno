@@ -10,3 +10,6 @@ export { RecentPurchasesWidget } from './RecentPurchasesWidget';
 export { DashboardQuickServices } from './DashboardQuickServices';
 export { AccountMenu } from './AccountMenu';
 export { MyApplicationsWidget } from './MyApplicationsWidget';
+// Airbnb-clarity redesign
+export { AccountActivitySection } from './AccountActivitySection';
+export { AccountFlatMenu } from './AccountFlatMenu';
