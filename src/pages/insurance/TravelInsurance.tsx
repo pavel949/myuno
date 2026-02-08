@@ -1,9 +1,12 @@
+import { useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ArrowLeft, Shield, AlertTriangle, Heart, Plane, Clock, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { InsurancePolicyUpload } from '@/components/insurance/InsurancePolicyUpload';
+import { toast } from 'sonner';
 
 const FACTS = {
   en: [
@@ -32,13 +35,29 @@ export default function TravelInsurance() {
   const facts = isRu ? FACTS.ru : FACTS.en;
   const coverage = isRu ? COVERAGE_ITEMS.ru : COVERAGE_ITEMS.en;
 
+  // Check if user returned from partner site
+  useEffect(() => {
+    const redirectFlag = sessionStorage.getItem('insurance_redirect');
+    if (redirectFlag) {
+      sessionStorage.removeItem('insurance_redirect');
+      setTimeout(() => {
+        toast.info(
+          isRu
+            ? 'Купили страховку? Загрузите полис ниже — мы поможем при страховом случае'
+            : "Bought insurance? Upload your policy below — we'll help during claims",
+          { duration: 8000 }
+        );
+      }, 500);
+    }
+  }, [isRu]);
+
   const handleCherehapa = () => {
-    // TODO: Replace with actual partner ID after registration
+    sessionStorage.setItem('insurance_redirect', 'true');
     window.open('https://cherehapa.ru/country/thailand?partnerid=MYUNO', '_blank');
   };
 
   const handleSafetyWing = () => {
-    // TODO: Replace with actual affiliate link after registration
+    sessionStorage.setItem('insurance_redirect', 'true');
     window.open('https://safetywing.com/nomad-insurance?referenceID=myuno', '_blank');
   };
 
@@ -183,16 +202,8 @@ export default function TravelInsurance() {
           </Card>
         </div>
 
-        {/* Already have insurance note */}
-        <Card variant="surface">
-          <CardContent className="p-4 text-center">
-            <p className="text-xs text-muted-foreground">
-              {isRu
-                ? '💡 Уже есть страховка? Сохраните полис в разделе «Мои документы» в профиле для быстрого доступа.'
-                : '💡 Already insured? Save your policy in "My Documents" in your profile for quick access.'}
-            </p>
-          </CardContent>
-        </Card>
+        {/* Upload policy block */}
+        <InsurancePolicyUpload />
 
         {/* Existing providers link */}
         <div className="text-center">
