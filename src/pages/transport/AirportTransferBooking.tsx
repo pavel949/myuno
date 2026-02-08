@@ -378,7 +378,7 @@ export default function AirportTransferBooking() {
       </div>
 
       <ScrollArea className="flex-1">
-        <div className="px-4 py-4 pb-32">
+        <div className="px-4 py-4 pb-40">
           {/* Fast Track Upsell Banner */}
           <button
             type="button"
@@ -776,10 +776,9 @@ export default function AirportTransferBooking() {
 
       {/* Fixed Bottom CTA - always visible */}
       <div 
-        className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border/50 z-50"
-        style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 1rem)' }}
+        className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border/50 z-50 pb-[max(env(safe-area-inset-bottom),16px)]"
       >
-        <div className="px-4 pt-3">
+        <div className="px-4 pt-3 pb-2">
           {/* Price summary always visible */}
           <div className="flex items-center justify-between mb-2">
             <div>
