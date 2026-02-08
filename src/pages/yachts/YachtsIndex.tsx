@@ -1,210 +1,83 @@
-import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Anchor, Users } from 'lucide-react';
+import { Anchor, ArrowLeft, Bell } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { MiniAppLayout, MiniAppQuickGrid, ItemCard } from '@/components/miniapp';
-import { YachtFiltersKlook, type DatePreset, type SortOption } from '@/components/yachts/YachtFiltersKlook';
-import { useYachts } from '@/hooks/useYachts';
-import { matchesFilter } from '@/lib/filterUtils';
-import { CrossSellSection } from '@/components/crosssell';
-import { VerticalCTA } from '@/components/leads/VerticalCTA';
-import { mapYachtToCardProps } from '@/lib/adapters/yachtAdapters';
-
-const popularRoutes = [
-  { icon: '🏝️', label: 'Phi Phi', path: '/yachts?route=phi-phi' },
-  { icon: '🎬', label: 'James Bond', path: '/yachts?route=james-bond' },
-  { icon: '🐠', label: 'Similan', path: '/yachts?route=similan' },
-  { icon: '🌅', label: 'Sunset', path: '/yachts?route=sunset' },
-];
+import { AppLayout } from '@/components/layout/AppLayout';
+import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 
 export default function YachtsIndex() {
   const { language } = useLanguage();
   const navigate = useNavigate();
-  const { yachts, isLoading } = useYachts();
-  
-  // Filter state
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<SortOption>('rating');
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500000]);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [datePreset, setDatePreset] = useState<DatePreset>('any');
-  const [selectedDuration, setSelectedDuration] = useState<string[]>([]);
-  const [selectedExperiences, setSelectedExperiences] = useState<string[]>([]);
-  const [selectedCapacity, setSelectedCapacity] = useState<string[]>([]);
-  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
-  const [selectedQuickFilters, setSelectedQuickFilters] = useState<string[]>([]);
-
-  const filteredYachts = useMemo(() => {
-    let results = yachts.filter(y => {
-      // Category filter
-      if (selectedCategory !== 'all' && y.yacht_type !== selectedCategory) return false;
-      
-      // Search filter
-      if (searchQuery) {
-        const name = language === 'ru' ? y.name_ru : y.name_en;
-        if (!name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-      }
-      
-      // Price filter - use "from" price (lowest available)
-      const price = y.price_half_day || y.price_full_day || y.price_sunset || y.price_overnight || 0;
-      if (price < priceRange[0] || price > priceRange[1]) return false;
-      
-      // Capacity filter
-      if (selectedCapacity.length > 0) {
-        const cap = y.capacity || 0;
-        const matchesCapacity = selectedCapacity.some(range => {
-          switch (range) {
-            case '2-6': return cap >= 2 && cap <= 6;
-            case '7-12': return cap >= 7 && cap <= 12;
-            case '13-20': return cap >= 13 && cap <= 20;
-            case '20+': return cap > 20;
-            default: return true;
-          }
-        });
-        if (!matchesCapacity) return false;
-      }
-      
-      // Amenities filter
-      if (!matchesFilter(y.features_en, selectedAmenities)) return false;
-      
-      // Experience filter
-      if (selectedExperiences.length > 0) {
-        const yachtFeatures = [...(y.features_en || []), y.name_en || ''].join(' ').toLowerCase();
-        const hasExperience = selectedExperiences.some(exp => 
-          yachtFeatures.includes(exp.toLowerCase())
-        );
-        if (!hasExperience) return false;
-      }
-      
-      // Duration filter
-      if (selectedDuration.length > 0) {
-        const hasDuration = selectedDuration.some(dur => {
-          switch (dur) {
-            case 'half-day': return y.price_half_day && y.price_half_day > 0;
-            case 'full-day': return y.price_full_day && y.price_full_day > 0;
-            case 'overnight': return y.price_overnight && y.price_overnight > 0;
-            default: return true;
-          }
-        });
-        if (!hasDuration) return false;
-      }
-      
-      // Quick filters
-      if (selectedQuickFilters.includes('crew') && !y.has_crew) return false;
-      if (selectedQuickFilters.includes('catering') && !y.has_catering) return false;
-      
-      return true;
-    });
-    
-    // Sort
-    results.sort((a, b) => {
-      switch (sortBy) {
-        case 'price_asc':
-          return (a.price_half_day || a.price_full_day || 0) - (b.price_half_day || b.price_full_day || 0);
-        case 'price_desc':
-          return (b.price_half_day || b.price_full_day || 0) - (a.price_half_day || a.price_full_day || 0);
-        case 'capacity':
-          return (b.capacity || 0) - (a.capacity || 0);
-        case 'length':
-          return (b.length_meters || 0) - (a.length_meters || 0);
-        case 'newest':
-          return (b.year_built || 0) - (a.year_built || 0);
-        case 'rating':
-        default:
-          if (a.is_featured !== b.is_featured) return a.is_featured ? -1 : 1;
-          return (b.rating || 0) - (a.rating || 0);
-      }
-    });
-    
-    return results;
-  }, [yachts, selectedCategory, searchQuery, sortBy, priceRange, selectedCapacity, selectedAmenities, selectedExperiences, selectedDuration, selectedQuickFilters, language]);
+  const isRu = language === 'ru';
 
   return (
-    <MiniAppLayout
-      title={language === 'ru' ? 'Аренда яхт и катеров' : 'Boat Charters'}
-      subtitle={language === 'ru' ? `${filteredYachts.length} вариантов` : `${filteredYachts.length} options`}
-      fallbackPath="/"
-      heroIcon={Anchor}
-      heroTitle={language === 'ru' ? 'Чартер яхт и катеров на Пхукете' : 'Boat Charters in Phuket'}
-      heroSubtitle={language === 'ru' ? 'Для незабываемых приключений на воде' : 'For unforgettable adventures on the water'}
-      heroBackgroundImage="https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?w=800"
-      heroGradientFrom="from-sky-500/20"
-      heroGradientVia="via-blue-500/20"
-      heroGradientTo="to-indigo-500/20"
-      searchValue={searchQuery}
-      onSearchChange={setSearchQuery}
-      searchPlaceholder={language === 'ru' ? 'Поиск яхт и катеров...' : 'Search charters...'}
-      isLoading={isLoading}
-      isEmpty={filteredYachts.length === 0}
-      emptyIcon={Anchor}
-      emptyText={language === 'ru' ? 'Чартеры не найдены' : 'No charters found'}
-      resultsCount={filteredYachts.length}
-      resultsLabel={language === 'ru' ? 'Доступные чартеры' : 'Available Charters'}
-    >
-      <YachtFiltersKlook
-        selectedCategory={selectedCategory}
-        onCategoryChange={setSelectedCategory}
-        sortBy={sortBy}
-        onSortChange={setSortBy}
-        priceRange={priceRange}
-        onPriceRangeChange={setPriceRange}
-        selectedDate={selectedDate}
-        onDateChange={setSelectedDate}
-        datePreset={datePreset}
-        onDatePresetChange={setDatePreset}
-        selectedDuration={selectedDuration}
-        onDurationChange={setSelectedDuration}
-        selectedExperiences={selectedExperiences}
-        onExperiencesChange={setSelectedExperiences}
-        selectedCapacity={selectedCapacity}
-        onCapacityChange={setSelectedCapacity}
-        selectedAmenities={selectedAmenities}
-        onAmenitiesChange={setSelectedAmenities}
-        selectedQuickFilters={selectedQuickFilters}
-        onQuickFiltersChange={setSelectedQuickFilters}
-        resultsCount={filteredYachts.length}
-        language={language}
-      />
+    <AppLayout>
+      <div className="min-h-screen bg-background">
+        {/* Header */}
+        <div className="flex items-center gap-3 p-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(-1)}
+            className="shrink-0"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <h1 className="text-lg font-bold">
+            {isRu ? 'Аренда яхт' : 'Boat Charters'}
+          </h1>
+        </div>
 
-      {/* Quick Routes */}
-      <div className="mt-4">
-        <h3 className="text-sm font-medium text-muted-foreground mb-2">
-          {language === 'ru' ? 'Популярные маршруты' : 'Popular Routes'}
-        </h3>
-        <MiniAppQuickGrid items={popularRoutes.map(r => ({
-          ...r,
-          label: language === 'ru' && r.label === 'Sunset' ? 'Закат' : r.label
-        }))} columns={4} />
-      </div>
+        {/* Coming Soon */}
+        <div className="flex flex-col items-center justify-center px-6 pt-16 pb-24 text-center">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 200 }}
+            className="relative mb-8"
+          >
+            <div className="w-28 h-28 rounded-3xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center shadow-lg">
+              <Anchor className="w-12 h-12 text-primary" />
+            </div>
+            <motion.div
+              animate={{ y: [0, -6, 0] }}
+              transition={{ repeat: Infinity, duration: 2.5 }}
+              className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-lg"
+            >
+              <Bell className="w-4 h-4 text-primary-foreground" />
+            </motion.div>
+          </motion.div>
 
-      {/* Results Grid - using adapter */}
-      <div className="grid gap-4 mt-6">
-        {filteredYachts.map((yacht) => {
-          const card = mapYachtToCardProps(yacht, language);
-          return (
-            <ItemCard
-              key={yacht.id}
-              title={card.title}
-              subtitle={card.experienceLabel}
-              image={card.image}
-              price={card.price || 0}
-              priceLabel={card.priceLabel}
-              rating={card.rating}
-              reviewCount={card.reviewCount}
-              location={card.location}
-              meta={card.meta.map(m => ({ icon: m.icon, value: m.label }))}
-              tags={card.tags}
-              isFeatured={card.isFeatured}
-              isVerified={card.isVerified}
-              onClick={() => navigate(`/yachts/${yacht.id}`)}
-            />
-          );
-        })}
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+          >
+            <h2 className="text-2xl font-bold mb-3">
+              {isRu ? 'Скоро открытие' : 'Coming Soon'}
+            </h2>
+            <p className="text-muted-foreground max-w-sm mx-auto leading-relaxed mb-8">
+              {isRu
+                ? 'Мы готовим для вас лучшие яхты и катера Пхукета. Следите за обновлениями!'
+                : "We're curating the best boat charters in Phuket. Stay tuned!"}
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="flex flex-col gap-3 w-full max-w-xs"
+          >
+            <Button onClick={() => navigate('/')} className="w-full">
+              {isRu ? 'На главную' : 'Go Home'}
+            </Button>
+            <Button variant="outline" onClick={() => navigate('/discover')} className="w-full">
+              {isRu ? 'Другие сервисы' : 'Browse Services'}
+            </Button>
+          </motion.div>
+        </div>
       </div>
-      
-      <VerticalCTA vertical="yachts" className="my-6" />
-      <CrossSellSection currentVertical="yachts" />
-    </MiniAppLayout>
+    </AppLayout>
   );
 }
