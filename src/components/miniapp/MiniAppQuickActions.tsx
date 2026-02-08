@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { triggerRipple } from '@/hooks/useRipple';
-import { getIconForEmoji, isEmoji } from '@/lib/iconMap';
+import { resolveIcon } from '@/lib/iconMap';
 import { Box, type LucideIcon } from 'lucide-react';
 
 export interface QuickAction {
@@ -18,22 +18,8 @@ interface MiniAppQuickActionsProps {
 }
 
 const renderActionIcon = (icon: string | LucideIcon) => {
-  // If it's already a Lucide component
-  if (typeof icon !== 'string') {
-    const Icon = icon;
-    return <Icon className="w-6 h-6 text-primary" />;
-  }
-  
-  // If it's an emoji string, try to map it
-  if (isEmoji(icon)) {
-    const LucideIcon = getIconForEmoji(icon);
-    if (LucideIcon) {
-      return <LucideIcon className="w-6 h-6 text-primary" />;
-    }
-  }
-  
-  // Fallback to Box icon
-  return <Box className="w-6 h-6 text-primary" />;
+  const Resolved = resolveIcon(icon);
+  return <Resolved className="w-6 h-6 text-primary" />;
 };
 
 export function MiniAppQuickActions({

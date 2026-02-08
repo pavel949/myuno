@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { resolveIcon } from '@/lib/iconMap';
 import { 
   Sheet, 
   SheetContent, 
@@ -156,7 +157,7 @@ export function VerticalCTA({
       <>
         <Card className={cn("border-dashed", className)}>
           <CardContent className="py-8 text-center">
-            <span className="text-4xl mb-4 block">{verticalConfig.icon}</span>
+            {(() => { const Icon = resolveIcon(verticalConfig.icon); return <Icon className="w-10 h-10 text-primary mb-4 mx-auto" />; })()}
             <h3 className="font-semibold mb-2">{text.title}</h3>
             <p className="text-sm text-muted-foreground mb-4">{text.subtitle}</p>
             <Button onClick={() => setIsOpen(true)}>
@@ -190,7 +191,7 @@ export function VerticalCTA({
           {/* Avatar/Icon */}
           <div className="relative flex-shrink-0">
             <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center border-2 border-primary/30">
-              <span className="text-2xl">{verticalConfig.icon}</span>
+              {(() => { const Icon = resolveIcon(verticalConfig.icon); return <Icon className="w-7 h-7 text-primary" />; })()}
             </div>
             {/* Online indicator */}
             <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 rounded-full border-2 border-background flex items-center justify-center">

@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Plane, MapPin, Users, Check, ArrowRight, Briefcase, Shield, Star, ChevronLeft, Loader2, User, Calendar, Clock, CreditCard, Handshake, LocateFixed, Banknote } from 'lucide-react';
+import { resolveIcon } from '@/lib/iconMap';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -661,7 +662,7 @@ export default function AirportTransferBooking() {
                           : "border-border/50 bg-card"
                       )}
                     >
-                      <span className="text-xl">{vehicle.icon || '🚗'}</span>
+                      {(() => { const Icon = resolveIcon(vehicle.icon || '🚗'); return <Icon className="w-6 h-6 text-primary" />; })()}
                       <p className="font-medium text-xs text-center">
                         {language === 'ru' ? vehicle.name_ru : vehicle.name_en}
                       </p>

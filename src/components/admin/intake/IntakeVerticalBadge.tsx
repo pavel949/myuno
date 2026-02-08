@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIntakeConfigs } from '@/hooks/useIntakeConfigs';
 import { cn } from '@/lib/utils';
+import { resolveIcon } from '@/lib/iconMap';
 
 interface IntakeVerticalBadgeProps {
   verticalId: string;
@@ -33,7 +34,7 @@ export function IntakeVerticalBadge({ verticalId, confidence, size = 'md' }: Int
         size === 'sm' && "text-xs px-2 py-0.5"
       )}
     >
-      <span>{vertical.icon}</span>
+      {(() => { const Icon = resolveIcon(vertical.icon); return <Icon className="w-3.5 h-3.5" />; })()}
       <span>{isRu ? vertical.nameRu : vertical.nameEn}</span>
       {confidence !== undefined && (
         <span className="text-muted-foreground ml-1">

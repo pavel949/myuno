@@ -1,6 +1,6 @@
 import { memo, forwardRef } from 'react';
 import { Sparkles, type LucideIcon } from 'lucide-react';
-import { getIconForEmoji, iconSizes, type IconSize } from '@/lib/iconMap';
+import { resolveIcon, iconSizes, type IconSize } from '@/lib/iconMap';
 import { cn } from '@/lib/utils';
 
 export interface IconBadgeProps {
@@ -41,19 +41,7 @@ export const IconBadge = memo(forwardRef<HTMLDivElement, IconBadgeProps>(functio
   },
   ref
 ) {
-  // Resolve icon - either direct LucideIcon or emoji string
-  let IconComponent: LucideIcon | null = null;
-  
-  if (typeof icon === 'string') {
-    IconComponent = getIconForEmoji(icon);
-  } else if (typeof icon === 'function' || (typeof icon === 'object' && icon !== null)) {
-    IconComponent = icon as LucideIcon;
-  }
-
-  // Fallback to Sparkles if no icon found
-  if (!IconComponent) {
-    IconComponent = Sparkles;
-  }
+  const IconComponent = resolveIcon(icon);
 
   const sizeClass = iconSizes[size];
   const containerSize = containerSizes[size];
@@ -89,18 +77,7 @@ export const InlineIcon = memo(function InlineIcon({
   size = 'sm',
   className,
 }: InlineIconProps) {
-  let IconComponent: LucideIcon | null = null;
-  
-  if (typeof icon === 'string') {
-    IconComponent = getIconForEmoji(icon);
-  } else if (typeof icon === 'function' || (typeof icon === 'object' && icon !== null)) {
-    IconComponent = icon as LucideIcon;
-  }
-
-  if (!IconComponent) {
-    IconComponent = Sparkles;
-  }
-
+  const IconComponent = resolveIcon(icon);
   const sizeClass = iconSizes[size];
 
   return <IconComponent className={cn(sizeClass, 'flex-shrink-0', className)} />;

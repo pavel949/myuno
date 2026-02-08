@@ -12,6 +12,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageCircle, Phone, X, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { resolveIcon } from '@/lib/iconMap';
 import { 
   getLeadVerticalsSorted, 
   detectVerticalFromPath,
@@ -231,7 +232,7 @@ function VerticalOption({
       onClick={onClick}
     >
       <div className="flex items-center gap-3">
-        <span className="text-xl">{vertical.icon}</span>
+        <span className="flex items-center justify-center w-6 h-6">{(() => { const Icon = resolveIcon(vertical.icon); return <Icon className="w-5 h-5 text-primary" />; })()}</span>
         <div className="text-left">
           <div className="font-medium text-sm">
             {isRu ? vertical.nameRu : vertical.nameEn}

@@ -7,6 +7,7 @@ import { useOrders } from '@/hooks/useOrders';
 import { format, isToday, isTomorrow, formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { Calendar, Clock, MapPin, ChevronRight, Package } from 'lucide-react';
+import { resolveIcon } from '@/lib/iconMap';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
@@ -149,7 +150,7 @@ export function UpcomingBookingsWidget() {
                 isUrgent && "bg-primary/5 border border-primary/20"
               )}
             >
-              <div className="text-2xl">{icon}</div>
+              {(() => { const BookingIcon = resolveIcon(icon); return <BookingIcon className="w-6 h-6 text-primary" />; })()}
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-sm truncate">{title}</p>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">

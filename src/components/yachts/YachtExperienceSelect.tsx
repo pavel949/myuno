@@ -4,6 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useYachtExperiences, type YachtExperience } from '@/hooks/useYachtExperiences';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import { resolveIcon } from '@/lib/iconMap';
 
 // Re-export type for consumers
 export type { YachtExperience };
@@ -91,7 +92,7 @@ export function YachtExperienceSelect({ selected, onChange, className }: YachtEx
                 </div>
               )}
 
-              <span className="text-2xl mb-2 block">{exp.icon}</span>
+              {(() => { const Icon = resolveIcon(exp.icon); return <Icon className="w-6 h-6 text-primary mb-2" />; })()}
               <p className="font-medium text-sm line-clamp-1">
                 {language === 'ru' ? exp.labelRu : exp.labelEn}
               </p>
@@ -164,7 +165,7 @@ export function ExperienceFilterChips({ selected, onChange }: ExperienceFilterCh
                   : "border-border bg-card hover:border-primary/30"
               )}
             >
-              <span className="text-base">{exp.icon}</span>
+              {(() => { const Icon = resolveIcon(exp.icon); return <Icon className="w-4 h-4" />; })()}
               <span className="text-xs">{language === 'ru' ? exp.labelRu : exp.labelEn}</span>
             </button>
           );

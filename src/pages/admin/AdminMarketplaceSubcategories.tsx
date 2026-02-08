@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { resolveIcon } from '@/lib/iconMap';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminMarketplaceSubcategories, useAdminMarketplaceCategories } from '@/hooks/useAdminMarketplace';
@@ -173,7 +174,7 @@ export default function AdminMarketplaceSubcategories() {
                   <TableRow key={sub.id}>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        {sub.icon && <span className="text-lg">{sub.icon}</span>}
+                        {sub.icon && (() => { const Icon = resolveIcon(sub.icon); return <Icon className="w-5 h-5" />; })()}
                         <div>
                           <div className="font-medium">{isRu ? sub.name_ru : sub.name_en}</div>
                           <div className="text-xs text-muted-foreground">{!isRu ? sub.name_ru : sub.name_en}</div>

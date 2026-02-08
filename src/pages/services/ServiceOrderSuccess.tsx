@@ -1,5 +1,6 @@
  import { useNavigate, useLocation } from 'react-router-dom';
  import { CheckCircle2, Home, ArrowRight } from 'lucide-react';
+ import { resolveIcon } from '@/lib/iconMap';
  import { Button } from '@/components/ui/button';
  import { Card, CardContent } from '@/components/ui/card';
  import { useLanguage } from '@/contexts/LanguageContext';
@@ -41,7 +42,7 @@
              {/* Service info */}
              {functionName && (
                <div className="flex items-center justify-center gap-2 mb-4">
-                 <span className="text-2xl">{functionIcon}</span>
+                 {(() => { const Icon = resolveIcon(functionIcon); return <Icon className="w-6 h-6 text-primary" />; })()}
                  <span className="text-muted-foreground">{functionName}</span>
                </div>
              )}

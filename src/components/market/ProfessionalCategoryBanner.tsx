@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
+import { resolveIcon } from '@/lib/iconMap';
 import { ChevronRight, ArrowRight } from 'lucide-react';
 import { MarketplaceCategory, MarketplaceProduct } from '@/types/marketplace';
 import { Badge } from '@/components/ui/badge';
@@ -81,7 +82,7 @@ export const ProfessionalCategoryBanner: React.FC<ProfessionalCategoryBannerProp
             <div className="flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-2xl drop-shadow-lg">{heroCategory.icon}</span>
+                  {(() => { const Icon = resolveIcon(heroCategory.icon); return <Icon className="w-6 h-6 drop-shadow-lg" />; })()}
                   <h2 className="text-xl font-bold drop-shadow-lg">
                     {language === 'ru' ? heroCategory.name_ru : heroCategory.name_en}
                   </h2>
@@ -140,7 +141,7 @@ export const ProfessionalCategoryBanner: React.FC<ProfessionalCategoryBannerProp
                 
                 <div>
                   <div className="flex items-center gap-1.5 mb-0.5">
-                    <span className="text-lg drop-shadow">{category.icon}</span>
+                    {(() => { const Icon = resolveIcon(category.icon); return <Icon className="w-5 h-5 drop-shadow" />; })()}
                     <h3 className="font-semibold text-sm drop-shadow line-clamp-1">
                       {language === 'ru' ? category.name_ru : category.name_en}
                     </h3>

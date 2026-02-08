@@ -22,6 +22,7 @@ import {
   CheckCircle2,
   ChevronDown
 } from 'lucide-react';
+import { resolveIcon } from '@/lib/iconMap';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PageContainer } from '@/components/uno/PageContainer';
@@ -463,7 +464,7 @@ export default function SOS() {
                   className="w-full flex items-center justify-between p-3 hover:bg-muted/30 transition-colors"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">{category.icon}</span>
+                    {(() => { const Icon = resolveIcon(category.icon); return <Icon className="w-5 h-5" />; })()}
                     <span className="font-medium text-sm">
                       {language === 'ru' ? category.titleRu : category.title}
                     </span>

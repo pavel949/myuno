@@ -7,7 +7,6 @@ import {
   Anchor, Ship, Crown, Gem, Sun, Camera, Fish, Shell, Flower2, Gift, Calendar,
   Star, Dumbbell, PawPrint, Home, Building2, BedDouble, MapPin, Phone,
   HandMetal, Footprints, SprayCan, Smile, Wrench, Key, Briefcase,
-  // New imports for extended coverage
   Brain, Wind, Palette, PenTool, Moon, Flame, AlertCircle, CheckCircle, Video,
   Croissant, Activity, Bandage, Microscope, FlaskConical, ParkingCircle, Mic,
   Tent, Martini, Volume2, ShoppingCart, Wifi, Coffee, CircleUserRound, CircleDollarSign,
@@ -311,9 +310,16 @@ export const emojiToIconMap: Record<string, LucideIcon> = {
   '🔐': Lock,
 };
 
-// Get Lucide icon for an emoji, with fallback
-export function getIconForEmoji(emoji: string): LucideIcon | null {
-  return emojiToIconMap[emoji] || null;
+// Get Lucide icon for an emoji — ALWAYS returns an icon (never null)
+export function getIconForEmoji(emoji: string): LucideIcon {
+  return emojiToIconMap[emoji] || CircleHelp;
+}
+
+// Resolve any icon value (emoji string or Lucide component) to a LucideIcon component
+export function resolveIcon(icon: string | LucideIcon | undefined | null): LucideIcon {
+  if (!icon) return CircleHelp;
+  if (typeof icon === 'string') return getIconForEmoji(icon);
+  return icon as LucideIcon;
 }
 
 // Check if a string is an emoji

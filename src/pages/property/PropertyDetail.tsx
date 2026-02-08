@@ -6,6 +6,7 @@ import {
   Zap, Loader2, ChevronRight, Home, Eye, Sofa, Building2,
   Sparkles, Clock, Award, Copy, Check, Minus, Plus
 } from 'lucide-react';
+import { resolveIcon } from '@/lib/iconMap';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -530,7 +531,7 @@ export default function PropertyDetail() {
                         key={i}
                         className="flex items-center gap-3 py-2"
                       >
-                        <span className="text-xl w-8">{icon}</span>
+                        {(() => { const AmenityIcon = resolveIcon(icon); return <AmenityIcon className="w-5 h-5 text-primary" />; })()}
                         <span className="text-sm">{label}</span>
                       </div>
                     );

@@ -5,7 +5,7 @@ import { triggerRipple } from '@/hooks/useRipple';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { playSound } from '@/hooks/useSoundEffects';
 import { getFeedbackSettings } from '@/hooks/useFeedbackSettings';
-import { getIconForEmoji, isEmoji } from '@/lib/iconMap';
+import { resolveIcon } from '@/lib/iconMap';
 import type { LucideIcon } from 'lucide-react';
 
 export interface QuickGridItem {
@@ -34,22 +34,8 @@ export const MiniAppQuickGrid = forwardRef<HTMLDivElement, MiniAppQuickGridProps
   };
 
   const renderIcon = (icon: string | LucideIcon) => {
-    // If it's already a Lucide component
-    if (typeof icon !== 'string') {
-      const IconComponent = icon;
-      return <IconComponent className="w-6 h-6 text-primary" />;
-    }
-    
-    // If it's an emoji string, try to get a Lucide icon
-    if (isEmoji(icon)) {
-      const LucideIcon = getIconForEmoji(icon);
-      if (LucideIcon) {
-        return <LucideIcon className="w-6 h-6 text-primary" />;
-      }
-    }
-    
-    // Fallback to displaying the emoji/string
-    return <span className="text-2xl">{icon}</span>;
+    const Resolved = resolveIcon(icon);
+    return <Resolved className="w-6 h-6 text-primary" />;
   };
 
   return (
