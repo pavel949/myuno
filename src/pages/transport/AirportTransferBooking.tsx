@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Plane, MapPin, Users, Check, ArrowRight, Briefcase, Shield, Star, ChevronLeft, Loader2, User, Calendar, Clock, CreditCard, Handshake, LocateFixed } from 'lucide-react';
+import { Plane, MapPin, Users, Check, ArrowRight, Briefcase, Shield, Star, ChevronLeft, Loader2, User, Calendar, Clock, CreditCard, Handshake, LocateFixed, Banknote } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -25,7 +25,7 @@ const terminals = [
 ];
 
 type TransferDirection = 'from-airport' | 'to-airport';
-type TransferPaymentMethod = 'stripe' | 'concierge_advance';
+type TransferPaymentMethod = 'stripe' | 'cash' | 'concierge_advance';
 
 export default function AirportTransferBooking() {
   const navigate = useNavigate();
@@ -271,7 +271,7 @@ export default function AirportTransferBooking() {
           return;
         }
       } else {
-        // Concierge advance - show success directly
+        // Cash or Concierge advance - show success directly
         setIsSuccess(true);
       }
     }
@@ -742,7 +742,7 @@ export default function AirportTransferBooking() {
               <Label className="text-sm font-medium text-muted-foreground">
                 {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
               </Label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, paymentMethod: 'stripe' })}
@@ -761,18 +761,43 @@ export default function AirportTransferBooking() {
                   <div className="flex items-center gap-2 mb-1">
                     <CreditCard className="w-4 h-4 text-primary" />
                   </div>
-                  <p className="font-medium text-sm">
-                    {language === 'ru' ? 'Картой онлайн' : 'Pay by Card'}
+                  <p className="font-medium text-xs">
+                    {language === 'ru' ? 'Картой' : 'Card'}
                   </p>
                   <p className="text-[10px] text-muted-foreground">
-                    Visa, Mastercard
+                    Visa, MC
+                  </p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, paymentMethod: 'cash' })}
+                  className={cn(
+                    "p-3 rounded-xl border-2 transition-all text-left relative",
+                    formData.paymentMethod === 'cash'
+                      ? "border-primary bg-primary/10"
+                      : "border-border/50 bg-card hover:border-primary/50"
+                  )}
+                >
+                  {formData.paymentMethod === 'cash' && (
+                    <div className="absolute top-2 right-2">
+                      <Check className="w-3 h-3 text-primary" />
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 mb-1">
+                    <Banknote className="w-4 h-4 text-green-600" />
+                  </div>
+                  <p className="font-medium text-xs">
+                    {language === 'ru' ? 'Наличные' : 'Cash'}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {language === 'ru' ? 'Водителю' : 'To driver'}
                   </p>
                 </button>
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, paymentMethod: 'concierge_advance' })}
                   className={cn(
-                    "p-3 rounded-xl border-2 transition-all text-left relative",
+                    "p-3 rounded-xl border-2 transition-all relative",
                     formData.paymentMethod === 'concierge_advance'
                       ? "border-primary bg-primary/10"
                       : "border-border/50 bg-card hover:border-primary/50"
@@ -786,14 +811,21 @@ export default function AirportTransferBooking() {
                   <div className="flex items-center gap-2 mb-1">
                     <Handshake className="w-4 h-4 text-amber-500" />
                   </div>
-                  <p className="font-medium text-sm">
-                    {language === 'ru' ? 'Оплата через myUNO' : 'myUNO Pays'}
+                  <p className="font-medium text-xs">
+                    myUNO
                   </p>
                   <p className="text-[10px] text-muted-foreground">
-                    {language === 'ru' ? '0% комиссия' : '0% fee'}
+                    {language === 'ru' ? '0% ком.' : '0% fee'}
                   </p>
                 </button>
               </div>
+              {formData.paymentMethod === 'cash' && (
+                <p className="text-xs text-muted-foreground p-2 bg-green-50 dark:bg-green-950/30 rounded-lg">
+                  {language === 'ru' 
+                    ? 'Оплата наличными водителю при встрече. THB или USD.'
+                    : 'Pay cash to the driver upon meeting. THB or USD.'}
+                </p>
+              )}
               {formData.paymentMethod === 'concierge_advance' && (
                 <p className="text-xs text-muted-foreground p-2 bg-amber-50 dark:bg-amber-950/30 rounded-lg">
                   {language === 'ru' 
@@ -860,7 +892,9 @@ export default function AirportTransferBooking() {
               : canSubmit
                 ? (formData.paymentMethod === 'stripe'
                     ? (language === 'ru' ? `Оплатить ฿${totalPrice.toLocaleString()}` : `Pay ฿${totalPrice.toLocaleString()}`)
-                    : (language === 'ru' ? `Забронировать • ฿${totalPrice.toLocaleString()}` : `Book • ฿${totalPrice.toLocaleString()}`))
+                    : formData.paymentMethod === 'cash'
+                      ? (language === 'ru' ? `Забронировать • наличные ฿${totalPrice.toLocaleString()}` : `Book • Cash ฿${totalPrice.toLocaleString()}`)
+                      : (language === 'ru' ? `Забронировать • ฿${totalPrice.toLocaleString()}` : `Book • ฿${totalPrice.toLocaleString()}`))
                 : (language === 'ru' ? 'Заполните форму' : 'Complete the form')}
           </Button>
         </div>
