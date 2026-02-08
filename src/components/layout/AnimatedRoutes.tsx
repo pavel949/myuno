@@ -135,6 +135,7 @@ const InsuranceIndex = lazy(() => import('@/pages/insurance/InsuranceIndex'));
 const InsuranceDetail = lazy(() => import('@/pages/insurance/InsuranceDetail'));
 const InsuranceQuote = lazy(() => import('@/pages/insurance/InsuranceQuote'));
 const InsurancePlanDetail = lazy(() => import('@/pages/insurance/InsurancePlanDetail'));
+const TravelInsurance = lazy(() => import('@/pages/insurance/TravelInsurance'));
 
 // Expat Services
 const BankingPage = lazy(() => import('@/pages/expat/BankingPage'));
@@ -679,6 +680,7 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* Insurance Mini-App Routes */}
         <Route path="/insurance" element={<LazyPage><InsuranceIndex /></LazyPage>} />
+        <Route path="/insurance/travel" element={<LazyPage><TravelInsurance /></LazyPage>} />
         <Route path="/insurance/plan/:planId" element={<LazyPage><InsurancePlanDetail /></LazyPage>} />
         <Route path="/insurance/:id" element={<LazyPage><InsuranceDetail /></LazyPage>} />
         <Route path="/insurance/:id/quote" element={<LazyPage><InsuranceQuote /></LazyPage>} />

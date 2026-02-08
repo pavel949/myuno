@@ -69,6 +69,10 @@ export const APP_ROUTES = {
   FAVORITES: '/favorites',
   WALLET: '/wallet',
   
+  // Insurance
+  INSURANCE: '/insurance',
+  INSURANCE_TRAVEL: '/insurance/travel',
+
   // Yachts
   YACHTS: '/yachts',
   YACHT_DETAIL: (id: string) => `/yachts/${id}`,
