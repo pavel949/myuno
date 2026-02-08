@@ -17,6 +17,7 @@ import { GuidedFallback } from '@/components/life-flow/GuidedFallback';
 import { RouteRecognitionBlock } from '@/components/life-flow/RouteRecognitionBlock';
 import { RouteRecommendedBlock } from '@/components/life-flow/RouteRecommendedBlock';
 import { RouteNextSteps } from '@/components/life-flow/RouteNextSteps';
+import { InsurancePromptBlock, shouldShowInsurancePrompt } from '@/components/life-flow/InsurancePromptBlock';
 import { ArrowLeft, Compass, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import * as LucideIcons from 'lucide-react';
@@ -173,6 +174,14 @@ export default function LifeFlowPage() {
                 recommendedItem={recommendedItem}
                 alternatives={alternativeItems}
               />
+
+              {/* Insurance prompt — contextual, between recommended and next steps */}
+              {code && shouldShowInsurancePrompt(code) && (
+                <InsurancePromptBlock
+                  routeCode={code}
+                  accentColor={currentSituation?.color}
+                />
+              )}
 
               {/* 7: Next routes */}
               <RouteNextSteps
