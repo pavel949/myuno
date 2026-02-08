@@ -69,7 +69,7 @@ export function RecentlyViewedSection() {
         </button>
       </div>
 
-      <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide touch-pan-y snap-x snap-mandatory">
+      <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide touch-pan-y snap-x snap-proximity">
         {recentItems.map((item) => {
           const data = item.item_data || {};
           const title = language === 'ru' 

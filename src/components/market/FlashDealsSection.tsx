@@ -149,7 +149,7 @@ export const FlashDealsSection: React.FC<FlashDealsSectionProps> = ({
       </div>
 
       {/* Products - horizontal scroll */}
-      <div className="flex gap-3 px-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory touch-pan-y pb-3">
+      <div className="flex gap-3 px-4 overflow-x-auto scrollbar-hide snap-x snap-proximity touch-pan-y pb-3">
         {flashDealProducts.map((product, index) => {
           // Simulate stock remaining (visual only)
           const stockPercent = Math.max(10, 100 - (index * 12 + 15));
