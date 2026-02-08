@@ -15,7 +15,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useBooking } from "@/hooks/useBooking";
 import { useVehicle } from "@/hooks/useVehicles";
 import { useAvailabilityCheck } from "@/hooks/useAvailabilityCheck";
+import { useConciergeAdvance } from "@/hooks/useConciergeAdvance";
+import { useStripeUnifiedCheckout } from "@/hooks/useStripeUnifiedCheckout";
 import { supabase } from "@/integrations/supabase/client";
+import { ConciergeAdvanceOption } from "@/components/booking/ConciergeAdvanceOption";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageContainer } from "@/components/uno/PageContainer";
 import { PageHeader } from "@/components/uno/PageHeader";
@@ -43,6 +46,8 @@ export default function TransportBooking() {
   const { user, isLoading: authLoading } = useAuth();
   const { createBooking, isSubmitting } = useBooking();
   const { checkAvailability, isChecking: checkingAvailability } = useAvailabilityCheck();
+  const { createAdvanceRequest, navigateToAdvanceRequested, calculateFee, isProcessing: advanceProcessing, feePercent } = useConciergeAdvance();
+  const { createCheckout, isProcessing: stripeProcessing } = useStripeUnifiedCheckout();
 
   // Get vehicle from DB
   const { vehicle, isLoading: vehicleLoading } = useVehicle(id || '');
@@ -180,6 +185,8 @@ export default function TransportBooking() {
     const scheduledAt = pickupDate;
     const endAt = returnDate || addDays(pickupDate, 1);
 
+    const effectivePayment = paymentMethod === 'concierge_advance' ? 'cash' : paymentMethod;
+
     const result = await createBooking({
       booking_type: 'transport',
       scheduled_at: scheduledAt,
@@ -206,7 +213,7 @@ export default function TransportBooking() {
       }],
       payment: {
         amount: totalAmount,
-        payment_method: paymentMethod,
+        payment_method: effectivePayment,
       },
       metadata: {
         vehicle_id: id,
@@ -214,13 +221,14 @@ export default function TransportBooking() {
         pickup_date: pickupDate.toISOString(),
         return_date: returnDate?.toISOString(),
         vehicle_type: vehicleData.vehicle_type || 'car',
+        payment_method_requested: paymentMethod,
       },
       serviceName: vehicleName,
-      openWhatsAppOnCash: true,
+      openWhatsAppOnCash: paymentMethod === 'cash',
     });
 
     if (result.success && result.booking_id) {
-      // Save transport-specific details to order_item_transport_details
+      // Save transport-specific details
       const { data: orderItems } = await supabase
         .from('order_items')
         .select('id')
@@ -239,6 +247,41 @@ export default function TransportBooking() {
             luggage_count: 0,
             is_round_trip: false,
           });
+      }
+
+      // Handle payment method routing
+      if (paymentMethod === 'online') {
+        await createCheckout('create-checkout', {
+          order_id: result.booking_id,
+          order_type: 'transport',
+          amount: totalAmount,
+          currency: 'THB',
+          description: vehicleName,
+        });
+        return; // Redirect happens in createCheckout
+      }
+
+      if (paymentMethod === 'concierge_advance') {
+        await createAdvanceRequest({
+          orderId: result.booking_id,
+          orderNumber: result.booking_id.slice(0, 8).toUpperCase(),
+          orderType: 'transport',
+          baseAmount: totalAmount,
+          currency: 'THB',
+          providerName: vehicleName,
+          deliveryDetails: {
+            pickup_location: pickupLocation,
+            pickup_date: pickupDate.toISOString(),
+            return_date: returnDate?.toISOString(),
+            rental_days: days,
+          },
+        });
+        navigateToAdvanceRequested(
+          result.booking_id.slice(0, 8).toUpperCase(),
+          totalAmount,
+          'transport'
+        );
+        return;
       }
 
       setBookingResult({ success: true, bookingId: result.booking_id });
@@ -324,23 +367,47 @@ export default function TransportBooking() {
             {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
           </h3>
           <BookingPaymentSelect
-            selected={paymentMethod}
+            selected={paymentMethod === 'concierge_advance' ? 'cash' : paymentMethod}
             onSelect={setPaymentMethod}
             amount={totalAmount}
             currency="THB"
             showWallet
             showCash
+            showOnline
           />
+
+          {/* Concierge Advance Option */}
+          <div className="mt-4">
+            <ConciergeAdvanceOption
+              isSelected={paymentMethod === 'concierge_advance'}
+              onSelect={() => setPaymentMethod(paymentMethod === 'concierge_advance' ? 'cash' : 'concierge_advance' as PaymentMethod)}
+              baseAmount={totalAmount}
+              feePercent={feePercent}
+              currency="THB"
+            />
+          </div>
         </div>
 
         {/* Bottom Bar */}
         <BookingBottomBar
-          total={totalAmount}
+          total={paymentMethod === 'concierge_advance' ? calculateFee(totalAmount).totalWithFee : totalAmount}
           onSubmit={handleSubmit}
-          isSubmitting={isSubmitting || checkingAvailability}
+          isSubmitting={isSubmitting || checkingAvailability || advanceProcessing || stripeProcessing}
           disabled={!isFormValid}
-          submitLabel={language === 'ru' ? 'Забронировать' : 'Book Now'}
-          hint={language === 'ru' ? '🔒 Безопасное бронирование — никаких списаний до подтверждения' : '🔒 Secure booking — no charges until confirmed'}
+          submitLabel={
+            paymentMethod === 'online'
+              ? (language === 'ru' ? 'Перейти к оплате' : 'Proceed to Payment')
+              : paymentMethod === 'concierge_advance'
+                ? (language === 'ru' ? 'Отправить запрос' : 'Submit Request')
+                : (language === 'ru' ? 'Забронировать' : 'Book Now')
+          }
+          hint={
+            paymentMethod === 'online'
+              ? (language === 'ru' ? '💳 Безопасная оплата через Stripe' : '💳 Secure payment via Stripe')
+              : paymentMethod === 'concierge_advance'
+                ? (language === 'ru' ? '✨ myUNO оплатит за вас провайдеру' : '✨ myUNO will pay the provider for you')
+                : (language === 'ru' ? '🔒 Безопасное бронирование — никаких списаний до подтверждения' : '🔒 Secure booking — no charges until confirmed')
+          }
         />
       </PageContainer>
     </AppLayout>
