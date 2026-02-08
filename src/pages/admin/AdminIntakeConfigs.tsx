@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { resolveIcon } from '@/lib/iconMap';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -209,7 +210,7 @@ export default function AdminIntakeConfigs() {
                         }`}
                       >
                         <div className="flex items-center gap-2">
-                          <span className="text-lg">{config.icon || '📦'}</span>
+                          {(() => { const Icon = resolveIcon(config.icon || '📦'); return <Icon className="w-5 h-5" />; })()}
                           <div>
                             <p className="text-sm font-medium">
                               {language === 'ru' ? config.name_ru : config.name_en}
@@ -245,7 +246,7 @@ export default function AdminIntakeConfigs() {
                 <CardTitle className="text-lg flex items-center gap-2">
                   {editedConfig ? (
                     <>
-                      <span>{editedConfig.icon || '📦'}</span>
+                      {(() => { const Icon = resolveIcon(editedConfig.icon || '📦'); return <Icon className="w-5 h-5" />; })()}
                       {language === 'ru' ? editedConfig.name_ru : editedConfig.name_en}
                     </>
                   ) : (

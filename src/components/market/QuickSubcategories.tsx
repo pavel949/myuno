@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { resolveIcon } from '@/lib/iconMap';
 
 import { Badge } from '@/components/ui/badge';
 import { ChevronRight } from 'lucide-react';
@@ -32,7 +33,7 @@ export const QuickSubcategories: React.FC<QuickSubcategoriesProps> = ({
             onClick={() => navigate(`/market/category/${categorySlug}?sub=${sub.slug}`)}
             className="flex items-center gap-2 px-3 py-2 rounded-full bg-muted/50 hover:bg-muted transition-colors whitespace-nowrap snap-start touch-manipulation"
           >
-            {sub.icon && <span className="text-sm">{sub.icon}</span>}
+            {sub.icon && (() => { const Icon = resolveIcon(sub.icon); return <Icon className="w-4 h-4" />; })()}
             <span className="text-xs font-medium">
               {language === 'ru' ? sub.name_ru : sub.name_en}
             </span>

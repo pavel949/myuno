@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
+import { resolveIcon } from '@/lib/iconMap';
 import { ChevronRight } from 'lucide-react';
 
 export interface CategoryBannerData {
@@ -64,7 +65,7 @@ export const CategoryBannerGrid: React.FC<CategoryBannerGridProps> = ({
           {/* Content */}
           <div className="absolute inset-0 p-4 flex flex-col justify-end text-white">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-2xl">{banner.icon}</span>
+              {(() => { const Icon = resolveIcon(banner.icon); return <Icon className="w-6 h-6" />; })()}
               <h3 className={cn(
                 "font-bold",
                 index === 0 ? "text-xl" : "text-base"

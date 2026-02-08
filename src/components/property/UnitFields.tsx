@@ -1,4 +1,5 @@
 import React, { useState, memo } from 'react';
+import { resolveIcon } from '@/lib/iconMap';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -654,7 +655,7 @@ function UnitFieldsInner({
                       )}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground">{category.icon}</span>
+                        {(() => { const Icon = resolveIcon(category.icon as string); return <Icon className="w-4 h-4 text-muted-foreground" />; })()}
                         <span className="text-sm font-medium">
                           {isRu ? category.labelRu : category.labelEn}
                         </span>

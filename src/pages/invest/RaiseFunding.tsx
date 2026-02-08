@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { resolveIcon } from '@/lib/iconMap';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -204,7 +205,7 @@ ${description}
                       onClick={() => setCategory(cat.key)}
                       className="rounded-full gap-1.5"
                     >
-                      <span>{cat.icon}</span>
+                      {(() => { const Icon = resolveIcon(cat.icon); return <Icon className="w-4 h-4" />; })()}
                       <span>{isRu ? cat.ru : cat.en}</span>
                     </Button>
                   ))}

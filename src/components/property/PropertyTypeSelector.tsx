@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { ChevronDown, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { resolveIcon } from '@/lib/iconMap';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
   DropdownMenu,
@@ -35,11 +36,8 @@ const PRIORITY_TYPES = ['all', 'condo', 'villa'];
 // Helper to render icon (string emoji or Lucide component)
 function renderIcon(icon: PropertyTypeOption['icon'], className?: string) {
   if (!icon) return null;
-  if (typeof icon === 'string') {
-    return <span className={className}>{icon}</span>;
-  }
-  const IconComponent = icon;
-  return <IconComponent className={className || 'w-4 h-4'} />;
+  const Resolved = resolveIcon(icon as any);
+  return <Resolved className={className || 'w-4 h-4'} />;
 }
 
 export function PropertyTypeSelector({

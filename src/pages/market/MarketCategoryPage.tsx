@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Search, ShoppingBag, LayoutGrid, List, Flame, Star, Sparkles } from 'lucide-react';
+import { resolveIcon } from '@/lib/iconMap';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -205,7 +206,7 @@ const MarketCategoryPage = () => {
             <div className="absolute inset-0 p-4 flex items-end text-white">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-2xl">{category.icon}</span>
+                  {(() => { const Icon = resolveIcon(category.icon); return <Icon className="w-6 h-6" />; })()}
                   <h1 className="text-xl font-bold">
                     {language === 'ru' ? category.name_ru : category.name_en}
                   </h1>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { resolveIcon } from '@/lib/iconMap';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -218,7 +219,7 @@ export function QuickConnectCards({ onConnected }: QuickConnectCardsProps) {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <span className="text-2xl">{selectedOta?.icon}</span>
+              {(() => { const Icon = resolveIcon(selectedOta?.icon); return <Icon className="w-6 h-6" />; })()}
               {isRu ? 'Подключить' : 'Connect'} {selectedOta?.name}
             </DialogTitle>
             <DialogDescription>

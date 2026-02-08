@@ -1,6 +1,7 @@
 import React from 'react';
 import { Check } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { resolveIcon } from '@/lib/iconMap';
 import { 
   TAXONOMY_TYPES, 
   getTaxonomyLabel, 
@@ -38,7 +39,7 @@ export function IncludedServices({ services, className }: IncludedServicesProps)
               key={serviceId}
               className="flex items-center gap-2 p-2.5 rounded-lg bg-primary/5 border border-primary/10"
             >
-              <span className="text-lg">{icon}</span>
+              {(() => { const Icon = resolveIcon(icon); return <Icon className="w-5 h-5 text-primary" />; })()}
               <span className="text-sm font-medium">{label}</span>
             </div>
           );

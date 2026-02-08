@@ -1,5 +1,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { resolveIcon } from '@/lib/iconMap';
 import { PROVIDER_TYPE_OPTIONS, ProviderType } from '@/lib/config/homeServicesTaxonomy';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -29,7 +30,7 @@ export function ProviderTypeToggle({ selectedType, onTypeChange, className }: Pr
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
-            <span className="text-base">{option.icon}</span>
+            {(() => { const Icon = resolveIcon(option.icon); return <Icon className="w-4 h-4" />; })()}
             <span>{label}</span>
           </button>
         );

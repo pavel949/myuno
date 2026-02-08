@@ -3,7 +3,7 @@ import { X, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { triggerRipple } from '@/hooks/useRipple';
-import { getIconForEmoji, isEmoji } from '@/lib/iconMap';
+import { resolveIcon } from '@/lib/iconMap';
 
 interface FilterChipProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   label: string;
@@ -32,16 +32,10 @@ export const FilterChip = forwardRef<HTMLButtonElement, FilterChipProps>(
     const renderIcon = () => {
       if (!icon) return null;
       
-      // If icon is a string (emoji), try to convert to Lucide icon
+      // If icon is a string (emoji), resolve to Lucide icon
       if (typeof icon === 'string') {
-        if (isEmoji(icon)) {
-          const LucideIcon = getIconForEmoji(icon);
-          if (LucideIcon) {
-            return <LucideIcon className={cn(iconSizeClasses[size], "flex-shrink-0")} />;
-          }
-        }
-        // Fallback to emoji if no mapping found
-        return <span className="flex-shrink-0 text-sm">{icon}</span>;
+        const Resolved = resolveIcon(icon);
+        return <Resolved className={cn(iconSizeClasses[size], "flex-shrink-0")} />;
       }
       
       // React node (already an icon component)

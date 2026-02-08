@@ -23,6 +23,7 @@ import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
 
 import { cn } from '@/lib/utils';
+import { resolveIcon } from '@/lib/iconMap';
 
 // ============ TYPES ============
 
@@ -163,9 +164,8 @@ export interface UnifiedFiltersKlookProps {
 
 function renderIcon(icon: string | LucideIcon | undefined): React.ReactNode {
   if (!icon) return null;
-  if (typeof icon === 'string') return <span className="text-sm">{icon}</span>;
-  const IconComponent = icon as LucideIcon;
-  return <IconComponent className="w-4 h-4" />;
+  const Resolved = resolveIcon(icon);
+  return <Resolved className="w-4 h-4" />;
 }
 
 function ChipSectionComponent({

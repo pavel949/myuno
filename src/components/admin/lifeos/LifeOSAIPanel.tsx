@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { resolveIcon } from '@/lib/iconMap';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { 
   useLifeOSAIInsights, 
@@ -123,7 +124,7 @@ export function LifeOSAIPanel({ situationCode, entityType, className }: LifeOSAI
                     onClick={() => setSelectedMode(mode)}
                     className="gap-1.5 text-xs"
                   >
-                    <span>{info.icon}</span>
+                    {(() => { const Icon = resolveIcon(info.icon); return <Icon className="w-4 h-4" />; })()}
                     {info.label}
                   </Button>
                 );

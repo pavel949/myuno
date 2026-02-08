@@ -1,5 +1,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { resolveIcon } from '@/lib/iconMap';
 import { SERVICE_DOMAINS } from '@/lib/taxonomies';
 import type { ServiceDomain } from '@/lib/config/homeServicesTaxonomy';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -40,7 +41,7 @@ export function DomainTabs({ selectedDomain, onDomainChange, className }: Domain
                 : "bg-card text-muted-foreground border-border hover:bg-accent hover:text-foreground"
             )}
           >
-            <span>{tab.icon}</span>
+            {(() => { const Icon = resolveIcon(tab.icon); return <Icon className="w-4 h-4" />; })()}
             <span>{label}</span>
           </button>
         );

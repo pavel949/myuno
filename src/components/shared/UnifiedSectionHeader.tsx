@@ -4,6 +4,7 @@ import { ChevronRight, LucideIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { resolveIcon } from '@/lib/iconMap';
 
 interface UnifiedSectionHeaderProps {
   icon?: LucideIcon;
@@ -55,9 +56,14 @@ export const UnifiedSectionHeader = memo(forwardRef<HTMLDivElement, UnifiedSecti
             className="w-10 h-10 rounded-xl object-cover shrink-0"
           />
         ) : iconEmoji ? (
-          <div className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center text-xl shrink-0">
-            {iconEmoji}
-          </div>
+          (() => {
+            const ResolvedIcon = resolveIcon(iconEmoji);
+            return (
+              <div className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center shrink-0">
+                <ResolvedIcon className="w-5 h-5 text-primary" />
+              </div>
+            );
+          })()
         ) : Icon ? (
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shrink-0">
             <Icon className={cn("w-5 h-5", iconColor)} />
