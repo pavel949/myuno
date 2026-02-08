@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
+import { forceCleanAllCaches } from '@/lib/appVersion';
 
 interface PullToRefreshProps {
   onRefresh: () => Promise<void> | void;
@@ -134,10 +135,11 @@ export function PullToRefresh({
       triggerHaptic('success');
       
       try {
-        await onRefresh();
-      } finally {
-        setIsRefreshing(false);
-        setPullDistance(0);
+        await forceCleanAllCaches();
+        window.location.reload();
+      } catch {
+        // Fallback: just reload
+        window.location.reload();
       }
     } else {
       setPullDistance(0);
