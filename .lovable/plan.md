@@ -1,47 +1,43 @@
 
+# Trip Planner: LifeOS Integration and Messaging Improvements
 
-## Загрузка страхового полиса после покупки
+## Problem
+1. No navigation link from LifeOS pages (`/life-flow/*`) to the Trip Planner (`/trip-planner`) -- users can't discover it
+2. The Trip Planner checklist lacks a reassuring "we've got you covered" message
+3. Flights and Insurance items need stronger, more actionable descriptions
 
-### Проблема
+## Changes
 
-Пользователь покупает страховку на внешнем сайте (Cherehapa / SafetyWing), но в myUNO нет удобного способа сохранить полис сразу после покупки. Сейчас есть только текстовая подсказка "сохраните в Мои документы".
+### 1. Add "Plan Your Trip" CTA block on LifeFlowPage
+Add a prominent card at the bottom of the LifeFlow guided path (before the footer text) that links to `/trip-planner`. This will be a styled banner with a Palmtree icon and bilingual text like:
+- RU: "Планируете поездку? Мы обо всём позаботимся"
+- EN: "Planning a trip? We've got you covered"
 
-### Решение
+With a button navigating to `/trip-planner`. This card will appear on all LifeFlow routes (especially `arrival_first_day`).
 
-Добавить блок загрузки полиса прямо на страницу `/insurance/travel` и улучшить возврат после покупки.
+### 2. Add "We've got you covered" reassurance message to TripChecklist
+Insert a small reassurance banner above the checklist items with text:
+- RU: "Мы позаботимся обо всём. Просто отмечайте готовое."
+- EN: "We've got you covered. Just check off what's done."
 
-### Изменения
+This follows the LifeOS pain-first philosophy: calm, decisive reassurance before the task list.
 
-#### 1. TravelInsurance.tsx -- блок "Уже купили? Загрузите полис"
+### 3. Improve Flights and Insurance checklist item copy
+Update the descriptions in `TripChecklist.tsx`:
+- **Flights**: More helpful description pointing to tips and recommendations, not just "book on your preferred platform"
+  - EN: "Tips on the best routes and when to book"
+  - RU: "Советы по лучшим маршрутам и когда бронировать"
+- **Insurance**: Stronger positioning of myUNO's expertise
+  - EN: "We'll help you pick the right coverage"
+  - RU: "Поможем выбрать подходящую страховку"
 
-Заменить текстовую подсказку внизу страницы на полноценный интерактивный блок:
+## Technical Details
 
-- Если пользователь **не авторизован** -- показать кнопку "Войти, чтобы сохранить полис"
-- Если **авторизован и полис уже загружен** (есть запись `insurance` в `user_documents`) -- показать карточку с данными полиса (номер, срок, файл) и кнопку "Обновить"
-- Если **авторизован, полиса нет** -- показать форму быстрой загрузки:
-  - Загрузка файла (PDF/фото) через `UnifiedMediaUploader` в режиме `document`
-  - Номер полиса (опционально)
-  - Срок действия (опционально)
-  - Кнопка "Сохранить полис"
+### Files to modify:
+1. **`src/pages/LifeFlowPage.tsx`** -- Add a `TripPlannerCTA` card between `RouteNextSteps` and the footer paragraph. It will use `useNavigate` to link to `/trip-planner` and be styled with the situation's accent color.
 
-Данные сохраняются через существующий хук `useUserDocuments.createDocument` с типом `insurance`.
+2. **`src/components/trip-planner/TripChecklist.tsx`** -- 
+   - Add a reassurance banner (Shield icon + "We've got you covered" text) between the progress bar and the checklist items
+   - Update `descEn`/`descRu` for the `flights` and `insurance` items
 
-#### 2. Возврат после покупки на внешнем сайте
-
-При клике на Cherehapa/SafetyWing -- сохранить в `sessionStorage` флаг `insurance_redirect`. При возврате на страницу -- показать подсказку-тост: "Купили страховку? Загрузите полис ниже, чтобы мы могли помочь при страховом случае".
-
-#### 3. Файлы для изменения
-
-| Файл | Что меняется |
-|------|-------------|
-| `src/pages/insurance/TravelInsurance.tsx` | Заменить текстовую подсказку на блок загрузки полиса с формой, добавить логику redirect-возврата |
-
-### Техническая реализация
-
-- Импортировать `useUserDocuments` и `useAuth` в TravelInsurance
-- Использовать `UnifiedMediaUploader` mode="document" для загрузки файла полиса
-- Использовать `getDocument('insurance')` для проверки существующего полиса
-- При `handleCherehapa` / `handleSafetyWing` -- записать `sessionStorage.setItem('insurance_redirect', 'true')`
-- В `useEffect` при монтировании -- проверить флаг и показать тост через `sonner`
-- Один файл, все изменения локальные
-
+### No new files or dependencies required.
