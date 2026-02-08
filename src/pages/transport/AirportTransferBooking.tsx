@@ -207,6 +207,38 @@ export default function AirportTransferBooking() {
       setCreatedOrderId(result.order_id);
       setCreatedOrderNumber(result.order_number || null);
 
+      // Send notifications (non-blocking)
+      const pickupAddr = formData.direction === 'from-airport'
+        ? `Phuket Airport - ${formData.terminal === 'domestic' ? 'Domestic' : 'International'} Terminal`
+        : formData.destinationAddress;
+      const dropoffAddr = formData.direction === 'from-airport'
+        ? formData.destinationAddress
+        : `Phuket Airport - ${formData.terminal === 'domestic' ? 'Domestic' : 'International'} Terminal`;
+
+      supabase.functions.invoke('notify-transfer-booking', {
+        body: {
+          order_id: result.order_id,
+          order_number: result.order_number || '',
+          direction: formData.direction,
+          terminal: formData.terminal,
+          flight_number: formData.flightNumber,
+          vehicle_name: vehicleName,
+          meeting_sign_name: formData.meetingSignName || formData.name,
+          passengers: parseInt(formData.passengers),
+          luggage: parseInt(formData.luggage),
+          pickup_address: pickupAddr,
+          dropoff_address: dropoffAddr,
+          scheduled_at: scheduledAt,
+          total_amount: totalPrice,
+          currency: 'THB',
+          payment_method: formData.paymentMethod,
+          customer_name: formData.name,
+          customer_phone: formData.phone,
+          customer_email: formData.email,
+          notes: formData.notes || undefined,
+        },
+      }).catch(err => console.error('[Notify] Transfer notification error:', err));
+
       // Handle payment based on method
       if (formData.paymentMethod === 'stripe') {
         setIsProcessingPayment(true);
