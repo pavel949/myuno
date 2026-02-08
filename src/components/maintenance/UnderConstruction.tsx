@@ -170,7 +170,7 @@ export function UnderConstruction() {
 
         {/* Footer */}
         <p className="text-xs text-muted-foreground pt-8">
-          © 2025 myUNO • Phuket Edition
+          © 2025–2026 myUNO • Phuket Edition
         </p>
       </motion.div>
     </div>
