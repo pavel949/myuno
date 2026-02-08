@@ -1,55 +1,47 @@
 
 
-## Добавление оплаты и CTA на страницу аренды транспорта
+## Загрузка страхового полиса после покупки
 
 ### Проблема
 
-Страница аренды транспорта (`/transport/booking/:id`) имеет компонент выбора оплаты, но:
-- Нет опции **"Оплатить картой онлайн"** через Stripe (нет интеграции с `create-checkout`)
-- Нет опции **"Пусть оплатит myUNO"** (Concierge Advance)
-- Кнопка внизу всегда показывает "Забронировать" вне зависимости от выбранного метода оплаты
-- Нет Stripe redirect после создания заказа
+Пользователь покупает страховку на внешнем сайте (Cherehapa / SafetyWing), но в myUNO нет удобного способа сохранить полис сразу после покупки. Сейчас есть только текстовая подсказка "сохраните в Мои документы".
 
 ### Решение
 
-Привести страницу аренды в соответствие с другими вертикалями (Flowers, Market, Airport Transfer).
+Добавить блок загрузки полиса прямо на страницу `/insurance/travel` и улучшить возврат после покупки.
 
 ### Изменения
 
-#### 1. `TransportBooking.tsx` -- добавить Concierge Advance + Stripe
+#### 1. TravelInsurance.tsx -- блок "Уже купили? Загрузите полис"
 
-- Импортировать `ConciergeAdvanceOption` из `@/components/booking/ConciergeAdvanceOption`
-- Добавить блок Concierge Advance под `BookingPaymentSelect` (аналогично FlowersOrder)
-- После `createBooking` при выборе `online` -- вызывать `create-checkout` Edge Function и делать redirect на Stripe
-- При выборе `concierge_advance` -- показывать подтверждение без оплаты
-- Обновить текст кнопки в `BookingBottomBar`:
-  - `online` --> "Перейти к оплате ฿X" / "Proceed to Payment ฿X"
-  - `concierge_advance` --> "Отправить запрос" / "Submit Request"
-  - `cash` --> "Забронировать" / "Book Now"
+Заменить текстовую подсказку внизу страницы на полноценный интерактивный блок:
 
-#### 2. Логика оплаты (в `handleSubmit`)
+- Если пользователь **не авторизован** -- показать кнопку "Войти, чтобы сохранить полис"
+- Если **авторизован и полис уже загружен** (есть запись `insurance` в `user_documents`) -- показать карточку с данными полиса (номер, срок, файл) и кнопку "Обновить"
+- Если **авторизован, полиса нет** -- показать форму быстрой загрузки:
+  - Загрузка файла (PDF/фото) через `UnifiedMediaUploader` в режиме `document`
+  - Номер полиса (опционально)
+  - Срок действия (опционально)
+  - Кнопка "Сохранить полис"
 
-```text
-handleSubmit()
-  |
-  +-- createBooking(...) --> order_id
-  |
-  +-- if online/promptpay:
-  |     invoke('create-checkout', { order_id, amount, ... })
-  |     redirect to Stripe URL
-  |
-  +-- if concierge_advance:
-  |     show success with myUNO badge
-  |
-  +-- if cash/wallet:
-        show standard confirmation
-```
+Данные сохраняются через существующий хук `useUserDocuments.createDocument` с типом `insurance`.
+
+#### 2. Возврат после покупки на внешнем сайте
+
+При клике на Cherehapa/SafetyWing -- сохранить в `sessionStorage` флаг `insurance_redirect`. При возврате на страницу -- показать подсказку-тост: "Купили страховку? Загрузите полис ниже, чтобы мы могли помочь при страховом случае".
 
 #### 3. Файлы для изменения
 
 | Файл | Что меняется |
 |------|-------------|
-| `src/pages/transport/TransportBooking.tsx` | Добавить Stripe checkout, ConciergeAdvanceOption, динамический текст CTA |
+| `src/pages/insurance/TravelInsurance.tsx` | Заменить текстовую подсказку на блок загрузки полиса с формой, добавить логику redirect-возврата |
 
-Один файл, все изменения локальные. Паттерн полностью повторяет существующие вертикали (FlowersOrder, MarketCheckout).
+### Техническая реализация
+
+- Импортировать `useUserDocuments` и `useAuth` в TravelInsurance
+- Использовать `UnifiedMediaUploader` mode="document" для загрузки файла полиса
+- Использовать `getDocument('insurance')` для проверки существующего полиса
+- При `handleCherehapa` / `handleSafetyWing` -- записать `sessionStorage.setItem('insurance_redirect', 'true')`
+- В `useEffect` при монтировании -- проверить флаг и показать тост через `sonner`
+- Один файл, все изменения локальные
 
