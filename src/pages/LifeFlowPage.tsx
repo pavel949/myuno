@@ -12,6 +12,7 @@ import { useLifeOSRoute } from '@/hooks/useLifeOSRoutes';
 import { useEnrichCatalogItems, type EnrichedCatalogItem } from '@/hooks/useEnrichCatalogItems';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
+import { WhatsAppConciergeBlock } from '@/components/life-flow/WhatsAppConciergeBlock';
 import { Skeleton } from '@/components/ui/skeleton';
 import { GuidedFallback } from '@/components/life-flow/GuidedFallback';
 import { RouteRecognitionBlock } from '@/components/life-flow/RouteRecognitionBlock';
@@ -222,6 +223,9 @@ export default function LifeFlowPage() {
                   <ArrowRight className="w-4 h-4 text-muted-foreground/50 shrink-0" />
                 </div>
               </motion.div>
+
+              {/* WhatsApp concierge CTA */}
+              <WhatsAppConciergeBlock context="trip" />
 
               {/* Quiet footer — not a CTA, just an escape hatch */}
               <motion.p

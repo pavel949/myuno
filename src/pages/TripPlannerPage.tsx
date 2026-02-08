@@ -11,6 +11,7 @@ import { TripPositioningHero } from '@/components/trip-planner/TripPositioningHe
 import { TripChecklist } from '@/components/trip-planner/TripChecklist';
 import { ArrowLeft, Palmtree } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { WhatsAppConciergeBlock } from '@/components/life-flow/WhatsAppConciergeBlock';
 
 export default function TripPlannerPage() {
   const navigate = useNavigate();
@@ -64,6 +65,9 @@ export default function TripPlannerPage() {
         <div className="p-4 space-y-6">
           <TripPositioningHero />
           <TripChecklist />
+
+          {/* WhatsApp concierge CTA */}
+          <WhatsAppConciergeBlock context="trip" />
 
           {/* Footer */}
           <motion.p
