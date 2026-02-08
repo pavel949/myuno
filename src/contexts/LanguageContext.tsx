@@ -84,7 +84,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero section
     'home.heroTitle': 'Дом там, где myUNO',
-    'home.heroSubtitle': 'Всё для комфортной жизни за рубежом — проверенные сервисы, надёжные партнёры, прозрачные цены',
+    'home.heroSubtitle': 'Всё для комфортной жизни зарубежом — проверенные сервисы, надёжные партнёры, прозрачные цены',
     'home.trustBadge': 'Надёжная инфраструктура',
     'home.forOwners': 'Для владельцев',
     'home.listProperty': 'Разместите и управляйте объектом',
