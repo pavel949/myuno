@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useActivePropertyRental } from '@/hooks/useActivePropertyRental';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { Json } from '@/integrations/supabase/types';
@@ -26,20 +27,25 @@ export interface ConciergeAdvanceResult {
 }
 
 const CONCIERGE_FEE_PERCENT = 0.05; // 5%
+const CONCIERGE_FEE_PERCENT_WAIVED = 0; // 0% for property guests
 
 export function useConciergeAdvance() {
   const { user } = useAuth();
   const { language } = useLanguage();
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
+  const { hasActiveRental } = useActivePropertyRental();
+
+  // 0% fee if user has active property rental through myUNO
+  const effectiveFeePercent = hasActiveRental ? CONCIERGE_FEE_PERCENT_WAIVED : CONCIERGE_FEE_PERCENT;
 
   const calculateFee = useCallback((baseAmount: number) => {
-    const fee = Math.round(baseAmount * CONCIERGE_FEE_PERCENT * 100) / 100;
+    const fee = Math.round(baseAmount * effectiveFeePercent * 100) / 100;
     return {
       conciergeFee: fee,
       totalWithFee: baseAmount + fee,
     };
-  }, []);
+  }, [effectiveFeePercent]);
 
   const createAdvanceRequest = useCallback(async (
     params: ConciergeAdvanceRequest
@@ -187,6 +193,7 @@ export function useConciergeAdvance() {
     navigateToAdvanceRequested,
     calculateFee,
     isProcessing,
-    feePercent: CONCIERGE_FEE_PERCENT * 100, // Return as percentage (5)
+    feePercent: effectiveFeePercent * 100, // Return as percentage (5 or 0)
+    hasActiveRental,
   };
 }

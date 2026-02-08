@@ -64,9 +64,15 @@ export function ConciergeAdvanceOption({
                 ? 'Попросить myUNO оплатить' 
                 : 'Ask myUNO to pay'}
             </span>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-400 font-medium">
-              +{feePercent}%
-            </span>
+            {feePercent > 0 ? (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-400 font-medium">
+                +{feePercent}%
+              </span>
+            ) : (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-700 dark:text-green-400 font-medium">
+                {language === 'ru' ? 'Бесплатно' : 'Free'}
+              </span>
+            )}
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -84,9 +90,13 @@ export function ConciergeAdvanceOption({
           </div>
           
           <p className="text-sm text-muted-foreground mb-3">
-            {language === 'ru'
-              ? 'Нет батов? Нет тайского счёта? Мы оплатим за вас!'
-              : 'No Thai Baht? No Thai bank account? We\'ll pay for you!'}
+            {feePercent > 0
+              ? (language === 'ru'
+                ? 'Нет батов? Нет тайского счёта? Мы оплатим за вас!'
+                : 'No Thai Baht? No Thai bank account? We\'ll pay for you!')
+              : (language === 'ru'
+                ? '🏠 Бесплатно для гостей myUNO! Мы оплатим за вас.'
+                : '🏠 Free for myUNO property guests! We\'ll pay for you.')}
           </p>
           
           {/* Pricing breakdown */}
