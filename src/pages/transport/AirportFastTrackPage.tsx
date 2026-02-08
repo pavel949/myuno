@@ -17,6 +17,7 @@ import { PriceDisplay } from '@/components/uno/PriceDisplay';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
 import { addDays, format } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
 
 // ─── Validation ───
 const LATIN_REGEX = /^[a-zA-Z\s\-'.]+$/;
@@ -202,17 +203,73 @@ export default function AirportFastTrackPage() {
     else navigate(-1);
   };
 
-  const handleSubmit = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
     if (!user) {
       toast({ title: isRu ? 'Войдите в аккаунт' : 'Please sign in', variant: 'destructive' });
       navigate('/auth');
       return;
     }
-    toast({ title: isRu ? 'Бронирование создано!' : 'Booking created!' });
-    if (direction === 'arrival') {
-      setShowUpsell(true);
-    } else {
-      navigate('/bookings');
+    if (!selectedService) return;
+
+    setIsSubmitting(true);
+    try {
+      const serviceName = isRu ? selectedService.name_ru : selectedService.name_en;
+
+      const { data, error } = await supabase.functions.invoke('notify-fasttrack-booking', {
+        body: {
+          user_id: user.id,
+          service_id: selectedService.id,
+          service_name: serviceName,
+          direction,
+          flight_number: flightNumber,
+          airline: airline || undefined,
+          flight_date: flightDate,
+          flight_time: flightTime,
+          is_night_flight: isNightFlight,
+          contact_whatsapp: contactWhatsapp || undefined,
+          contact_email: contactEmail || undefined,
+          preferred_language: preferredLang,
+          special_notes: specialNotes || undefined,
+          base_price: pricing.base,
+          night_surcharge: pricing.nightSurcharge,
+          addons_total: pricing.addonsTotal,
+          total_price: pricing.total,
+          currency: selectedService.currency || 'THB',
+          passengers: passengers.map((p, i) => ({
+            first_name: p.firstName,
+            last_name: p.lastName,
+            passport_number: p.passportNumber,
+            nationality: p.nationality,
+            date_of_birth: p.dateOfBirth,
+            is_primary: i === 0,
+          })),
+          addon_ids: Array.from(selectedAddons),
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: isRu ? 'Бронирование создано!' : 'Booking created!',
+        description: isRu ? 'Мы свяжемся с вами для подтверждения' : "We'll contact you to confirm",
+      });
+
+      if (direction === 'arrival') {
+        setShowUpsell(true);
+      } else {
+        navigate('/bookings');
+      }
+    } catch (err) {
+      console.error('Fast Track booking error:', err);
+      toast({
+        title: isRu ? 'Ошибка' : 'Error',
+        description: isRu ? 'Не удалось создать бронирование. Попробуйте снова.' : 'Failed to create booking. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -726,8 +783,10 @@ export default function AirportFastTrackPage() {
             <PriceDisplay price={pricing.total} size="lg" sourceCurrency="THB" />
           </div>
           {step === 'review' ? (
-            <Button onClick={handleSubmit} className="px-8" disabled={cutoffViolated}>
-              {isRu ? 'Забронировать' : 'Book Now'}
+            <Button onClick={handleSubmit} className="px-8" disabled={cutoffViolated || isSubmitting}>
+              {isSubmitting
+                ? (isRu ? 'Отправка...' : 'Submitting...')
+                : (isRu ? 'Забронировать' : 'Book Now')}
             </Button>
           ) : (
             <Button onClick={handleNext} className="px-8" disabled={cutoffViolated || (!selectedServiceId && step === 'service')}>
