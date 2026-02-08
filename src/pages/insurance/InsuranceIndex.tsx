@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, Heart, Plane, Home, Car, Users } from 'lucide-react';
+import { Shield, Heart, Plane, Home, Car, Users, AlertTriangle, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from '@/components/miniapp';
 import { FilterValues } from '@/components/filters';
@@ -40,7 +40,7 @@ export default function InsuranceIndex() {
 
 const quickItems: QuickGridItem[] = [
     { icon: '🏥', label: language === 'ru' ? 'Здоровье' : 'Health', onClick: () => setSelectedCategory('health') },
-    { icon: '✈️', label: language === 'ru' ? 'Путешествия' : 'Travel', onClick: () => setSelectedCategory('travel') },
+    { icon: '✈️', label: language === 'ru' ? 'Туристам' : 'Tourists', onClick: () => navigate('/insurance/travel') },
     { icon: '🏠', label: language === 'ru' ? 'Имущество' : 'Property', onClick: () => setSelectedCategory('property') },
     { icon: '🚗', label: language === 'ru' ? 'Авто' : 'Vehicle', onClick: () => setSelectedCategory('vehicle') },
   ];
@@ -72,6 +72,29 @@ const quickItems: QuickGridItem[] = [
       emptyText={language === 'ru' ? 'Страховые компании не найдены' : 'No insurance providers found'}
     >
       <MiniAppQuickGrid items={quickItems} columns={4} className="mb-6" />
+
+      {/* Travel Insurance Promo Banner */}
+      <div
+        onClick={() => navigate('/insurance/travel')}
+        className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-destructive/10 via-orange-500/10 to-primary/10 border border-destructive/20 cursor-pointer hover:border-destructive/40 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center shrink-0">
+            <AlertTriangle className="w-5 h-5 text-destructive" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-sm">
+              {language === 'ru' ? '🚫 Не летите без страховки!' : "🚫 Don't Fly Without Insurance!"}
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {language === 'ru'
+                ? 'Быстрая туристическая страховка от 100 ₽/день'
+                : 'Quick travel insurance from $1/day'}
+            </p>
+          </div>
+          <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
+        </div>
+      </div>
 
       {/* Popular Plans */}
       {popularPlans.length > 0 && (
