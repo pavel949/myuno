@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { RefreshCw, X, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { APP_VERSION, BUILD_TIMESTAMP } from '@/lib/appVersion';
+import { APP_VERSION } from '@/lib/appVersion';
 
 export function PWAUpdatePrompt() {
   const { language } = useLanguage();
@@ -14,23 +14,31 @@ export function PWAUpdatePrompt() {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
   } = useRegisterSW({
+    immediate: true,
     onRegisteredSW(swUrl, r) {
       console.log(`[PWA] SW registered: ${swUrl} | App v${APP_VERSION}`);
-      // Check for updates every 5 minutes (more aggressive)
       if (r) {
-        // Immediate check on registration
+        // Immediate check
         r.update();
-        
+        // Check for updates every 2 minutes
         setInterval(() => {
-          console.log('[PWA] Checking for updates...');
+          console.log('[PWA] Checking for SW updates...');
           r.update();
-        }, 5 * 60 * 1000); // 5 minutes instead of 30
+        }, 2 * 60 * 1000);
       }
     },
     onRegisterError(error) {
       console.error('[PWA] SW registration error:', error);
     },
   });
+
+  // Auto-update: when new SW is ready, activate it immediately
+  React.useEffect(() => {
+    if (needRefresh) {
+      console.log('[PWA] New SW ready — activating immediately...');
+      updateServiceWorker(true);
+    }
+  }, [needRefresh, updateServiceWorker]);
 
   const handleUpdate = () => {
     updateServiceWorker(true);
@@ -41,6 +49,7 @@ export function PWAUpdatePrompt() {
     setNeedRefresh(false);
   };
 
+  // Show prompt only as fallback if auto-update didn't trigger reload
   const showPrompt = needRefresh && !dismissed;
 
   const texts = {
@@ -72,12 +81,9 @@ export function PWAUpdatePrompt() {
         >
           <div className="bg-background/95 backdrop-blur-xl border-2 border-primary/50 rounded-2xl p-4 shadow-2xl shadow-primary/20">
             <div className="flex items-start gap-3">
-              {/* Icon */}
               <div className="flex-shrink-0 w-12 h-12 rounded-xl gradient-gold flex items-center justify-center">
                 <Sparkles className="w-6 h-6 text-primary-foreground" />
               </div>
-              
-              {/* Content */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
                   <h3 className="font-semibold text-foreground">{t.title}</h3>
@@ -89,26 +95,13 @@ export function PWAUpdatePrompt() {
                     <X className="w-4 h-4 text-muted-foreground" />
                   </button>
                 </div>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  {t.description}
-                </p>
-                
-                {/* Actions */}
+                <p className="text-sm text-muted-foreground mt-0.5">{t.description}</p>
                 <div className="flex items-center gap-2 mt-3">
-                  <Button
-                    onClick={handleUpdate}
-                    size="sm"
-                    className="gap-2 flex-1"
-                  >
+                  <Button onClick={handleUpdate} size="sm" className="gap-2 flex-1">
                     <RefreshCw className="w-4 h-4" />
                     {t.update}
                   </Button>
-                  <Button
-                    onClick={handleDismiss}
-                    size="sm"
-                    variant="ghost"
-                    className="text-muted-foreground"
-                  >
+                  <Button onClick={handleDismiss} size="sm" variant="ghost" className="text-muted-foreground">
                     {t.later}
                   </Button>
                 </div>
