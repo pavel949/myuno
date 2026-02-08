@@ -80,9 +80,14 @@ export default function ProjectsIndex() {
       );
     }
 
-    // Apply district filter
+    // Apply district filter (case-insensitive, supports slug and display formats)
     if (selectedDistrict !== 'all') {
-      result = result.filter(p => p.district === selectedDistrict);
+      const filterLower = selectedDistrict.toLowerCase().replace(/\s+/g, '-');
+      result = result.filter(p => {
+        if (!p.district) return false;
+        const districtLower = p.district.toLowerCase().replace(/\s+/g, '-');
+        return districtLower === filterLower || p.district.toLowerCase() === selectedDistrict.toLowerCase();
+      });
     }
 
     // Separate featured projects
