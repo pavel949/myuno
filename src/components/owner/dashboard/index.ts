@@ -20,5 +20,10 @@ export { OwnerPerformanceCard } from './OwnerPerformanceCard';
 export { BookingSearchBar } from './BookingSearchBar';
 export { ActiveStaysWidget } from './ActiveStaysWidget';
 
+// Airbnb-clarity redesign
+export { OwnerPropertiesList } from './OwnerPropertiesList';
+export { OwnerOperationsFlat } from './OwnerOperationsFlat';
+export { OwnerDashboardMenu } from './OwnerDashboardMenu';
+
 // Property Wizard Steps
 export * from '../property-wizard';
