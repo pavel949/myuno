@@ -340,6 +340,7 @@ const AdminLifeOS = lazy(() => import('@/pages/admin/AdminLifeOS'));
 
 // Life Flow public page
 const LifeFlowPage = lazy(() => import('@/pages/LifeFlowPage'));
+const TripPlannerPage = lazy(() => import('@/pages/TripPlannerPage'));
 const MarketingDashboard = lazy(() => import('@/pages/admin/marketing/MarketingDashboard'));
 
 // Experience Categories Management
@@ -566,6 +567,7 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* Life Flow - Contextual navigation by life situation */}
         <Route path="/life-flow/:code" element={<LazyPage><LifeFlowPage /></LazyPage>} />
+        <Route path="/trip-planner" element={<LazyPage><TripPlannerPage /></LazyPage>} />
         
         {/* List With Us - Become a Host/Vendor */}
         <Route path="/list-with-us" element={<ListWithUsPage />} />

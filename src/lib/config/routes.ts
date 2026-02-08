@@ -73,6 +73,9 @@ export const APP_ROUTES = {
   INSURANCE: '/insurance',
   INSURANCE_TRAVEL: '/insurance/travel',
 
+  // Trip Planner
+  TRIP_PLANNER: '/trip-planner',
+
   // Yachts
   YACHTS: '/yachts',
   YACHT_DETAIL: (id: string) => `/yachts/${id}`,

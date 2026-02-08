@@ -1,0 +1,83 @@
+/**
+ * TripPlannerPage - LifeOS "Trip to Phuket" Arrival Planner
+ * Helps users prepare for arrival with an interactive checklist
+ * and integration with myUNO services.
+ */
+import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { Button } from '@/components/ui/button';
+import { TripPositioningHero } from '@/components/trip-planner/TripPositioningHero';
+import { TripChecklist } from '@/components/trip-planner/TripChecklist';
+import { ArrowLeft, Palmtree } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+export default function TripPlannerPage() {
+  const navigate = useNavigate();
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
+
+  return (
+    <AppLayout>
+      <div className="min-h-screen bg-background">
+        {/* Header */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-primary/5 to-transparent">
+          <div className="absolute top-0 right-0 w-48 h-48 rounded-full blur-3xl bg-primary/10" />
+
+          <div className="relative z-10">
+            <div className="flex items-center gap-3 p-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate(-1)}
+                className="shrink-0 bg-background/80 backdrop-blur-sm"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="px-4 pb-5"
+            >
+              <div className="flex items-start gap-4">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 bg-primary/15 shadow-lg">
+                  <Palmtree className="w-7 h-7 text-primary" />
+                </div>
+                <div className="flex-1 pt-0.5">
+                  <h1 className="text-lg font-bold">
+                    {isRu ? 'Поездка на Пхукет' : 'Trip to Phuket'}
+                  </h1>
+                  <p className="text-sm text-muted-foreground mt-0.5">
+                    {isRu
+                      ? 'Планировщик прибытия'
+                      : 'Arrival Planner'}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-4 space-y-6">
+          <TripPositioningHero />
+          <TripChecklist />
+
+          {/* Footer */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="text-center text-xs text-muted-foreground/60 pt-2 pb-4"
+          >
+            {isRu
+              ? 'Мы — ваш локальный эксперт по Пхукету. Если нужна помощь — напишите нам.'
+              : "We're your local Phuket experts. Need help? Reach out anytime."}
+          </motion.p>
+        </div>
+      </div>
+    </AppLayout>
+  );
+}
