@@ -29,7 +29,7 @@ interface OrderNotificationPayload {
   }>;
 }
 
-const ADMIN_EMAIL = 'admin@uno.ae'; // Default admin email
+const ADMIN_EMAIL = 'pavel@ignatevestate.com'; // Admin email
 const ADMIN_WHATSAPP = '66922407355'; // Admin WhatsApp number
 
 // Send WhatsApp notification via URL API

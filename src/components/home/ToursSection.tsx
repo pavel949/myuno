@@ -4,14 +4,14 @@ import { Compass, ArrowRight, Star } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { Badge } from '@/components/ui/badge';
-import { useTours } from '@/hooks/useTours';
+import { useExperiences, formatDuration } from '@/hooks/useExperiences';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 
 export function ToursSection() {
   const { t, language } = useLanguage();
   const { formatPrice } = useCurrency();
   const navigate = useNavigate();
-  const { tours, isLoading } = useTours({ featured: true, limit: 3 });
+  const { experiences: tours, isLoading } = useExperiences({ type: 'tour', featured: true, limit: 3 });
 
   if (isLoading || tours.length === 0) return null;
 
@@ -34,7 +34,7 @@ export function ToursSection() {
         {tours.map((tour) => (
           <div 
             key={tour.id}
-            onClick={() => navigate(`/tours/${tour.id}`)}
+            onClick={() => navigate(`/experiences/${tour.id}`)}
             className="flex-shrink-0 w-64 snap-start touch-manipulation bg-card rounded-2xl overflow-hidden border hover:shadow-lg transition-all cursor-pointer group"
           >
             <div className="relative h-36 overflow-hidden">
@@ -60,15 +60,15 @@ export function ToursSection() {
               <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                 <span className="flex items-center gap-0.5">
                   <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                  {tour.rating}
+                  {tour.rating.toFixed(1)}
                 </span>
                 <span>•</span>
-                <span>{tour.duration_hours}h</span>
+                <span>{formatDuration(tour.duration_minutes, language)}</span>
               </div>
               <div className="flex items-center justify-between mt-2">
                 <p className="text-primary font-bold">{formatPrice(tour.price || 0)}</p>
                 <button
-                  onClick={(e) => { e.stopPropagation(); navigate(`/tours/${tour.id}`); }}
+                  onClick={(e) => { e.stopPropagation(); navigate(`/experiences/${tour.id}`); }}
                   className="text-[11px] font-semibold text-primary-foreground bg-primary px-2.5 py-1 rounded-md"
                 >
                   {language === 'ru' ? 'Забронировать' : 'Book'}
