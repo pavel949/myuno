@@ -14,8 +14,13 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === "development" && componentTagger(),
     VitePWA({
+      // injectManifest = full control over the service worker
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'icons/*.png'],
+      injectRegister: false, // We register manually via virtual:pwa-register/react
+      
       manifest: {
         name: 'myUNO - All Services in One',
         short_name: 'myUNO',
@@ -47,82 +52,40 @@ export default defineConfig(({ mode }) => ({
           }
         ]
       },
-      workbox: {
-        skipWaiting: true,
-        clientsClaim: true,
-        cleanupOutdatedCaches: true,
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        // Network-first for all navigation and assets
-        runtimeCaching: [
-          {
-            urlPattern: ({ request }) => request.mode === 'navigate',
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'pages-v12',
-              networkTimeoutSeconds: 2,
-              expiration: {
-                maxEntries: 30,
-                maxAgeSeconds: 30 // 30 seconds - very aggressive
-              }
-            }
-          },
-          {
-            urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'supabase-cache-v12',
-              networkTimeoutSeconds: 3,
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          },
-          // JS/CSS are content-hashed by Vite — no SW caching needed
-          // Old SW cache of JS/CSS was the main cause of stale builds
-          {
-            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/i,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'images-cache-v12',
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60
-              }
-            }
-          }
-        ],
-        navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/api/, /^\/supabase/]
-      }
+      
+      includeAssets: ['favicon.ico', 'icons/*.png'],
+      
+      injectManifest: {
+        // Precache ONLY hashed assets — NO html
+        globPatterns: ['**/*.{js,css,ico,png,svg,woff2}'],
+        // Maximum file size for precache (2MB)
+        maximumFileSizeToCacheInBytes: 2 * 1024 * 1024,
+      },
+      
+      devOptions: {
+        enabled: false,
+      },
     })
   ].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-    // Deduplicate React to prevent multiple instances
     dedupe: ['react', 'react-dom'],
   },
   optimizeDeps: {
-    // Force Vite to pre-bundle React properly
     include: ['react', 'react-dom', 'react/jsx-runtime'],
   },
   build: {
     rollupOptions: {
       output: {
         manualChunks: {
-          // Core vendor chunks
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
           'vendor-ui': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-popover', '@radix-ui/react-select', '@radix-ui/react-tabs'],
           'vendor-motion': ['framer-motion'],
           'vendor-query': ['@tanstack/react-query'],
           'vendor-charts': ['recharts'],
           'vendor-map': ['mapbox-gl'],
-          // Feature chunks
           'feature-admin': [
             './src/pages/admin/AdminDashboard.tsx',
             './src/pages/admin/AdminAnalytics.tsx',
