@@ -54,6 +54,97 @@ export interface CleaningServiceDetail {
   includesRu: string[];
 }
 
+// Generate "What's Included" from service type
+const SERVICE_INCLUDES: Record<string, { en: string[]; ru: string[] }> = {
+  'ac': {
+    en: ['Filter deep cleaning', 'Evaporator coil wash', 'Drain line flush', 'Anti-bacterial treatment', 'Performance check'],
+    ru: ['Глубокая чистка фильтров', 'Промывка испарителя', 'Прочистка дренажа', 'Антибактериальная обработка', 'Проверка работы'],
+  },
+  'cleaning': {
+    en: ['Floor mopping & vacuuming', 'Surface dusting', 'Bathroom sanitizing', 'Kitchen cleaning', 'Trash removal'],
+    ru: ['Мытьё и пылесос полов', 'Протирка поверхностей', 'Санитарная обработка ванной', 'Уборка кухни', 'Вынос мусора'],
+  },
+  'deep': {
+    en: ['All standard cleaning', 'Inside appliances', 'Window washing', 'Cabinet interiors', 'Ceiling fan cleaning', 'Balcony/terrace'],
+    ru: ['Вся стандартная уборка', 'Внутри бытовой техники', 'Мытьё окон', 'Внутри шкафов', 'Чистка вентиляторов', 'Балкон/терраса'],
+  },
+  'laundry': {
+    en: ['Free pickup', 'Professional washing', 'Tumble drying', 'Folding & packaging', 'Free delivery'],
+    ru: ['Бесплатный забор', 'Профессиональная стирка', 'Сушка', 'Складывание и упаковка', 'Бесплатная доставка'],
+  },
+  'move': {
+    en: ['Full apartment cleaning', 'Inside all cabinets', 'Bathroom descaling', 'Kitchen degreasing', 'Window cleaning', 'Photo documentation'],
+    ru: ['Полная уборка квартиры', 'Внутри всех шкафов', 'Удаление налёта в ванной', 'Обезжиривание кухни', 'Мытьё окон', 'Фото-документация'],
+  },
+  'office': {
+    en: ['Desk & workstation cleaning', 'Floor maintenance', 'Restroom sanitizing', 'Kitchen/pantry', 'Trash & recycling'],
+    ru: ['Уборка столов и рабочих мест', 'Уход за полами', 'Санитарная обработка туалетов', 'Кухня/пантри', 'Мусор и переработка'],
+  },
+  'carpet': {
+    en: ['Hot water extraction', 'Stain pre-treatment', 'Deodorizing', 'Quick-dry technology', 'Optional stain protection'],
+    ru: ['Горячая экстракция', 'Предварительная обработка пятен', 'Удаление запахов', 'Быстрая сушка', 'Защитное покрытие (опция)'],
+  },
+  'electrical': {
+    en: ['Diagnostics & inspection', 'Wiring repair/installation', 'Safety compliance check', 'Cleanup after work', '90-day warranty'],
+    ru: ['Диагностика и осмотр', 'Ремонт/прокладка проводки', 'Проверка безопасности', 'Уборка после работ', 'Гарантия 90 дней'],
+  },
+  'plumbing': {
+    en: ['Leak detection', 'Pipe repair/replacement', 'Drain unclogging', 'Pressure testing', 'Cleanup after work'],
+    ru: ['Поиск утечек', 'Ремонт/замена труб', 'Прочистка засоров', 'Проверка давления', 'Уборка после работ'],
+  },
+  'pest_control': {
+    en: ['Property inspection', 'Targeted treatment', 'WHO-approved chemicals', 'Safety briefing', '30-day guarantee'],
+    ru: ['Осмотр объекта', 'Целевая обработка', 'Препараты одобренные ВОЗ', 'Инструктаж по безопасности', 'Гарантия 30 дней'],
+  },
+  'pool': {
+    en: ['Chemical balancing', 'Surface skimming', 'Filter cleaning', 'Pump inspection', 'Water quality report'],
+    ru: ['Балансировка химии', 'Чистка поверхности', 'Промывка фильтра', 'Проверка насоса', 'Отчёт о качестве воды'],
+  },
+  'garden': {
+    en: ['Lawn mowing', 'Hedge trimming', 'Tree pruning', 'Leaf removal', 'Irrigation check'],
+    ru: ['Стрижка газона', 'Подрезка живой изгороди', 'Обрезка деревьев', 'Уборка листьев', 'Проверка полива'],
+  },
+  'maid': {
+    en: ['Daily cleaning', 'Laundry & ironing', 'Cooking (optional)', 'Shopping & errands', 'Household management'],
+    ru: ['Ежедневная уборка', 'Стирка и глажка', 'Готовка (опция)', 'Покупки и поручения', 'Ведение хозяйства'],
+  },
+  'ironing': {
+    en: ['Pickup service', 'Steam pressing', 'Hanger packaging', 'Delicate fabric care', 'Next-day delivery'],
+    ru: ['Забор белья', 'Отпаривание', 'Упаковка на вешалки', 'Уход за деликатными тканями', 'Доставка на следующий день'],
+  },
+  'dry_cleaning': {
+    en: ['Garment inspection', 'Eco-friendly solvents', 'Stain removal', 'Hand finishing', 'Protective packaging'],
+    ru: ['Осмотр вещей', 'Экологичные растворители', 'Выведение пятен', 'Ручная финишная обработка', 'Защитная упаковка'],
+  },
+};
+
+function getIncludesForService(tags: string[] | undefined, nameEn: string): { en: string[]; ru: string[] } {
+  // Try to match by tags first
+  if (tags?.length) {
+    for (const tag of tags) {
+      if (SERVICE_INCLUDES[tag]) return SERVICE_INCLUDES[tag];
+    }
+  }
+  // Fallback: match by name
+  const nameLower = nameEn.toLowerCase();
+  if (nameLower.includes('deep')) return SERVICE_INCLUDES['deep'];
+  if (nameLower.includes('move')) return SERVICE_INCLUDES['move'];
+  if (nameLower.includes('office')) return SERVICE_INCLUDES['office'];
+  if (nameLower.includes('carpet') || nameLower.includes('upholstery')) return SERVICE_INCLUDES['carpet'];
+  if (nameLower.includes('laundry')) return SERVICE_INCLUDES['laundry'];
+  if (nameLower.includes('iron')) return SERVICE_INCLUDES['ironing'];
+  if (nameLower.includes('dry clean')) return SERVICE_INCLUDES['dry_cleaning'];
+  if (nameLower.includes('maid')) return SERVICE_INCLUDES['maid'];
+  if (nameLower.includes('pest')) return SERVICE_INCLUDES['pest_control'];
+  if (nameLower.includes('pool')) return SERVICE_INCLUDES['pool'];
+  if (nameLower.includes('garden')) return SERVICE_INCLUDES['garden'];
+  if (nameLower.includes('plumb')) return SERVICE_INCLUDES['plumbing'];
+  if (nameLower.includes('electr')) return SERVICE_INCLUDES['electrical'];
+  if (nameLower.includes('ac ') || nameLower.includes('air con')) return SERVICE_INCLUDES['ac'];
+  if (nameLower.includes('clean')) return SERVICE_INCLUDES['cleaning'];
+  return SERVICE_INCLUDES['cleaning'];
+}
+
 // Fallback data
 const FALLBACK_SERVICES: CleaningService[] = [
   { id: 'clean-regular', nameEn: 'Regular Home Cleaning', nameRu: 'Регулярная уборка', price: 800, duration: '2-3h' },
@@ -227,6 +318,7 @@ export function useCleaningServiceById(id: string) {
   const dbService = services?.find(s => s.id === id);
   
   if (dbService) {
+    const serviceIncludes = getIncludesForService(dbService.features, dbService.name_en);
     // Transform to detail format
     const detail: CleaningServiceDetail = {
       id: dbService.id,
@@ -241,8 +333,8 @@ export function useCleaningServiceById(id: string) {
       rating: dbService.rating || 4.8,
       reviewCount: dbService.review_count || 0,
       provider: 'UNO Services',
-      includes: dbService.features || [],
-      includesRu: dbService.features || [],
+      includes: serviceIncludes.en,
+      includesRu: serviceIncludes.ru,
     };
     return { service: detail, isLoading };
   }
