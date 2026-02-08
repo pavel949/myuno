@@ -113,7 +113,7 @@ export const FeaturedVendorsCarousel: React.FC<FeaturedVendorsCarouselProps> = (
           ))}
         </div>
       ) : (
-        <div className="flex gap-3 px-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory touch-pan-y pb-2">
+        <div className="flex gap-3 px-4 overflow-x-auto scrollbar-hide snap-x snap-proximity touch-pan-y pb-2">
           {vendors.slice(0, 10).map((vendor) => (
             <VendorCard
               key={vendor.id}

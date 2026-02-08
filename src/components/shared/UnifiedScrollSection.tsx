@@ -55,12 +55,12 @@ export const UnifiedScrollSection = memo(function UnifiedScrollSection({
       <div 
         ref={scrollRef}
         className={cn(
-          "flex gap-3 pb-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory",
+          "flex gap-3 pb-2 overflow-x-auto scrollbar-hide snap-x snap-proximity",
           "overscroll-x-contain",
           !noPadding && "px-4",
           "max-w-7xl mx-auto"
         )}
-        style={{ touchAction: 'pan-x pan-y', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
+        style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
       >
         {children}
       </div>

@@ -23,7 +23,7 @@ export const QuickSubcategories: React.FC<QuickSubcategoriesProps> = ({
   if (subcategories.length === 0) return null;
 
   return (
-    <div className="flex gap-2 pb-2 overflow-x-auto scrollbar-hide touch-pan-y snap-x snap-mandatory">
+    <div className="flex gap-2 pb-2 overflow-x-auto scrollbar-hide touch-pan-y snap-x snap-proximity">
       {subcategories.slice(0, 10).map((sub) => {
         const count = productCounts[sub.slug] || 0;
         return (

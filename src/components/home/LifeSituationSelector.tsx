@@ -82,7 +82,7 @@ export const LifeSituationSelector = memo(function LifeSituationSelector({
       </div>
 
       {/* Horizontal scroll chips - UX Contract §2.2 */}
-      <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide scroll-x-container touch-pan-y snap-x snap-mandatory" style={{ WebkitOverflowScrolling: 'touch' }}>
+      <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide scroll-x-container touch-pan-y snap-x snap-proximity" style={{ WebkitOverflowScrolling: 'touch' }}>
         {displayedSituations.map((situation) => {
           const Icon = getIcon(situation.icon);
           const isSelected = isActive(situation.code);
