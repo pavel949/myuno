@@ -100,7 +100,7 @@ export function FlashServicesSection() {
             key={service.id} 
             service={service} 
             index={idx}
-            onClick={() => navigate(`/services/${service.id}`)}
+            onClick={() => navigate(`/services/provider/${service.id}`)}
           />
         ))}
       </UnifiedScrollSection>
