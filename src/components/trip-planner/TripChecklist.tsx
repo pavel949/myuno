@@ -30,8 +30,8 @@ const CHECKLIST_ITEMS: ChecklistItemConfig[] = [
     icon: Plane,
     labelEn: 'Flights to / from Phuket',
     labelRu: 'Авиабилеты на Пхукет',
-    descEn: 'Book on your preferred airline platform',
-    descRu: 'Забронируйте на удобной вам платформе',
+    descEn: 'Tips on the best routes and when to book',
+    descRu: 'Советы по лучшим маршрутам и когда бронировать',
     action: 'external',
     target: 'https://www.aviasales.ru/',
   },
@@ -80,8 +80,8 @@ const CHECKLIST_ITEMS: ChecklistItemConfig[] = [
     icon: Shield,
     labelEn: 'Travel Insurance',
     labelRu: 'Страховка',
-    descEn: 'What you really need for Thailand',
-    descRu: 'Что действительно нужно в Таиланде',
+    descEn: "We'll help you pick the right coverage",
+    descRu: 'Поможем выбрать подходящую страховку',
     action: 'navigate',
     target: '/insurance/travel',
   },
@@ -138,6 +138,16 @@ export function TripChecklist() {
           </div>
         </div>
         <Progress value={progress} className="h-2" />
+      </div>
+
+      {/* Reassurance banner */}
+      <div className="flex items-center gap-2.5 rounded-xl bg-primary/5 border border-primary/10 px-3.5 py-2.5">
+        <Shield className="w-4 h-4 text-primary shrink-0" />
+        <p className="text-xs text-muted-foreground">
+          {isRu
+            ? 'Мы позаботимся обо всём. Просто отмечайте готовое.'
+            : "We've got you covered. Just check off what's done."}
+        </p>
       </div>
 
       {/* Checklist items */}

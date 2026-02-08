@@ -190,6 +190,37 @@ export default function LifeFlowPage() {
                 currentLabel={isRussian ? 'После этого вам может понадобиться' : 'After this, you may need'}
               />
 
+              {/* Trip Planner CTA */}
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                className="rounded-2xl border border-border bg-card p-4 cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => navigate('/trip-planner')}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+                    style={{
+                      background: currentSituation?.color
+                        ? `linear-gradient(135deg, ${currentSituation.color}25, ${currentSituation.color}10)`
+                        : undefined,
+                    }}
+                  >
+                    <LucideIcons.Palmtree className="w-5 h-5" style={{ color: currentSituation?.color || 'hsl(var(--primary))' }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold">
+                      {isRussian ? 'Планируете поездку?' : 'Planning a trip?'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {isRussian ? 'Мы обо всём позаботимся' : "We've got you covered"}
+                    </p>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-muted-foreground/50 shrink-0" />
+                </div>
+              </motion.div>
+
               {/* Quiet footer — not a CTA, just an escape hatch */}
               <motion.p
                 initial={{ opacity: 0 }}
