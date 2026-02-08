@@ -3,14 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserContext } from '@/hooks/useUserContext';
-import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Edit2 } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 
 const ROLE_LABELS: Record<string, { en: string; ru: string; color: string }> = {
   user: { en: 'Buyer', ru: 'Покупатель', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
@@ -25,19 +23,17 @@ export function AccountProfileCard() {
   const { language } = useLanguage();
   const { user } = useAuth();
   const { activeRole, isLoading: roleLoading } = useUserContext();
-  const isRussian = language === 'ru';
+  const isRu = language === 'ru';
 
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ['profile', user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
-
       const { data, error } = await supabase
         .from('profiles')
         .select('full_name, avatar_url')
         .eq('id', user.id)
         .maybeSingle();
-
       if (error) throw error;
       return data;
     },
@@ -48,17 +44,13 @@ export function AccountProfileCard() {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center gap-3">
-            <Skeleton className="h-14 w-14 rounded-full" />
-            <div className="flex-1 space-y-2">
-              <Skeleton className="h-5 w-32" />
-              <Skeleton className="h-4 w-48" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex items-center gap-4">
+        <Skeleton className="h-16 w-16 rounded-full" />
+        <div className="flex-1 space-y-2">
+          <Skeleton className="h-6 w-36" />
+          <Skeleton className="h-4 w-48" />
+        </div>
+      </div>
     );
   }
 
@@ -67,40 +59,26 @@ export function AccountProfileCard() {
   const roleConfig = ROLE_LABELS[activeRole] || ROLE_LABELS.user;
 
   return (
-    <Card className="overflow-hidden">
-      <CardContent className="p-4">
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Avatar className="h-14 w-14 border-2 border-primary/10">
-              <AvatarImage src={profile?.avatar_url || undefined} alt={displayName} />
-              <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-          </div>
+    <button
+      onClick={() => navigate('/profile/edit')}
+      className="w-full flex items-center gap-4 py-2 text-left hover:opacity-80 transition-opacity"
+    >
+      <Avatar className="h-16 w-16 border-2 border-primary/10">
+        <AvatarImage src={profile?.avatar_url || undefined} alt={displayName} />
+        <AvatarFallback className="bg-primary/10 text-primary font-semibold text-lg">
+          {initials}
+        </AvatarFallback>
+      </Avatar>
 
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h2 className="font-semibold text-lg truncate">{displayName}</h2>
-            </div>
-            <div className="flex items-center gap-2 mt-0.5">
-              <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
-            </div>
-            <Badge className={`mt-1.5 text-[10px] ${roleConfig.color}`}>
-              {isRussian ? roleConfig.ru : roleConfig.en}
-            </Badge>
-          </div>
+      <div className="flex-1 min-w-0">
+        <h2 className="font-semibold text-xl truncate">{displayName}</h2>
+        <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
+        <Badge className={`mt-1 text-[10px] ${roleConfig.color}`}>
+          {isRu ? roleConfig.ru : roleConfig.en}
+        </Badge>
+      </div>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            className="shrink-0"
-            onClick={() => navigate('/profile/edit')}
-          >
-            <Edit2 className="h-4 w-4" />
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+      <ChevronRight className="h-5 w-5 text-muted-foreground/50 flex-shrink-0" />
+    </button>
   );
 }
