@@ -8,27 +8,27 @@ import { clientsClaim } from 'workbox-core';
 
 declare let self: ServiceWorkerGlobalScope;
 
-// Take control immediately — no waiting for old tabs to close
+// AGGRESSIVE: Take control immediately — no waiting for old tabs
 self.skipWaiting();
 clientsClaim();
 
-// Clean up old caches from previous SW versions
+// Clean up ALL old caches from previous SW versions
 cleanupOutdatedCaches();
 
 // Precache ONLY hashed static assets (injected by vite-plugin-pwa)
 // index.html is explicitly EXCLUDED via globPatterns in vite config
 precacheAndRoute(self.__WB_MANIFEST);
 
-// ─── NAVIGATION: Always NetworkFirst ───
-// This ensures index.html is NEVER served from cache without checking network first
+// ─── NAVIGATION: ALWAYS NetworkFirst (NEVER cache HTML) ───
+// This ensures index.html is ALWAYS fetched from network first
 const navigationStrategy = new NetworkFirst({
-  cacheName: 'navigation-v1',
-  networkTimeoutSeconds: 3,
+  cacheName: 'navigation-v2', // Changed cache name to invalidate old cache
+  networkTimeoutSeconds: 5, // Increased timeout
   plugins: [
-    new CacheableResponsePlugin({ statuses: [0, 200] }),
+    new CacheableResponsePlugin({ statuses: [200] }), // Only cache 200, not 0
     new ExpirationPlugin({
-      maxEntries: 5,
-      maxAgeSeconds: 60, // 1 minute — very short for HTML
+      maxEntries: 1,
+      maxAgeSeconds: 60, // 1 minute max
     }),
   ],
 });
@@ -41,12 +41,12 @@ registerRoute(new NavigationRoute(navigationStrategy, {
 registerRoute(
   ({ request }) => request.destination === 'image',
   new CacheFirst({
-    cacheName: 'images-v1',
+    cacheName: 'images-v2',
     plugins: [
       new CacheableResponsePlugin({ statuses: [0, 200] }),
       new ExpirationPlugin({
         maxEntries: 100,
-        maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
+        maxAgeSeconds: 7 * 24 * 60 * 60,
       }),
     ],
   })
@@ -56,12 +56,12 @@ registerRoute(
 registerRoute(
   ({ request }) => request.destination === 'font',
   new CacheFirst({
-    cacheName: 'fonts-v1',
+    cacheName: 'fonts-v2',
     plugins: [
       new CacheableResponsePlugin({ statuses: [0, 200] }),
       new ExpirationPlugin({
         maxEntries: 30,
-        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+        maxAgeSeconds: 30 * 24 * 60 * 60,
       }),
     ],
   })
@@ -71,38 +71,50 @@ registerRoute(
 registerRoute(
   ({ url }) => url.hostname.endsWith('.supabase.co'),
   new NetworkFirst({
-    cacheName: 'supabase-v1',
-    networkTimeoutSeconds: 3,
+    cacheName: 'supabase-v2',
+    networkTimeoutSeconds: 5,
     plugins: [
       new CacheableResponsePlugin({ statuses: [0, 200] }),
       new ExpirationPlugin({
         maxEntries: 50,
-        maxAgeSeconds: 60 * 60, // 1 hour
+        maxAgeSeconds: 60 * 60,
       }),
     ],
   })
 );
 
-// ─── GOOGLE FONTS CSS/WOFF2: CacheFirst ───
+// ─── GOOGLE FONTS: CacheFirst ───
 registerRoute(
   ({ url }) => url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com',
   new CacheFirst({
-    cacheName: 'google-fonts-v1',
+    cacheName: 'google-fonts-v2',
     plugins: [
       new CacheableResponsePlugin({ statuses: [0, 200] }),
       new ExpirationPlugin({
         maxEntries: 30,
-        maxAgeSeconds: 365 * 24 * 60 * 60, // 1 year
+        maxAgeSeconds: 365 * 24 * 60 * 60,
       }),
     ],
   })
 );
 
-// Log SW lifecycle
-self.addEventListener('install', (event) => {
-  console.log('[SW] Installing new service worker...');
+// ─── ACTIVATE: Delete ALL old caches ───
+self.addEventListener('activate', (event) => {
+  console.log('[SW v3.16] Activated — cleaning old caches');
+  event.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys
+          .filter((key) => key.endsWith('-v1')) // Delete old v1 caches
+          .map((key) => {
+            console.log('[SW] Deleting old cache:', key);
+            return caches.delete(key);
+          })
+      );
+    })
+  );
 });
 
-self.addEventListener('activate', (event) => {
-  console.log('[SW] Activated — now controlling all clients');
+self.addEventListener('install', () => {
+  console.log('[SW v3.16] Installing new service worker...');
 });
