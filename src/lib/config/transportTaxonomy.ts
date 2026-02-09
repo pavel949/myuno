@@ -3,7 +3,7 @@
  * Based on Turo/Rentalcars industry standards
  */
 
-export type VehicleCategory = 'sedan' | 'suv' | 'van' | 'luxury' | 'motorcycle' | 'electric' | 'compact';
+export type VehicleCategory = 'sedan' | 'suv' | 'van' | 'luxury' | 'motorcycle' | 'scooter' | 'electric' | 'compact';
 export type TransmissionType = 'automatic' | 'manual';
 export type FuelType = 'petrol' | 'diesel' | 'hybrid' | 'electric';
 
@@ -39,12 +39,13 @@ export interface VehicleFeatureConfig {
 
 // ====== VEHICLE CATEGORIES ======
 export const VEHICLE_CATEGORIES: VehicleCategoryConfig[] = [
-  { id: 'sedan', labelEn: 'Sedan', labelRu: 'Седан', icon: '🚗', aliases: ['car', 'standard', 'full-size'] },
+  { id: 'scooter', labelEn: 'Scooter', labelRu: 'Скутер', icon: '🛵', aliases: ['moped'] },
+  { id: 'motorcycle', labelEn: 'Motorcycle', labelRu: 'Мотоцикл', icon: '🏍️', aliases: ['motorbike', 'bike'] },
   { id: 'compact', labelEn: 'Compact', labelRu: 'Компакт', icon: '🚙', aliases: ['economy', 'small'] },
-  { id: 'suv', labelEn: 'SUV', labelRu: 'Внедорожник', icon: '🚙', aliases: ['crossover', '4x4'] },
+  { id: 'sedan', labelEn: 'Sedan', labelRu: 'Седан', icon: '🚗', aliases: ['car', 'standard', 'full-size'] },
+  { id: 'suv', labelEn: 'SUV', labelRu: 'Внедорожник', icon: '🚙', aliases: ['crossover', '4x4', 'pickup'] },
   { id: 'van', labelEn: 'Van', labelRu: 'Минивэн', icon: '🚐', aliases: ['minivan', 'mpv'] },
   { id: 'luxury', labelEn: 'Luxury', labelRu: 'Премиум', icon: '🏎️', aliases: ['premium', 'vip'] },
-  { id: 'motorcycle', labelEn: 'Motorcycle', labelRu: 'Мотоцикл', icon: '🏍️', aliases: ['motorbike', 'bike', 'scooter'] },
   { id: 'electric', labelEn: 'Electric', labelRu: 'Электро', icon: '⚡', aliases: ['ev', 'tesla'] },
 ];
 
@@ -115,6 +116,18 @@ export const VEHICLE_FEATURES: VehicleFeatureConfig[] = [
   { id: 'roof rails', labelEn: 'Roof Rails', labelRu: 'Рейлинги', icon: '📐' },
   { id: 'window curtains', labelEn: 'Window Curtains', labelRu: 'Шторки на окнах', icon: '🪟' },
   { id: 'ottoman function', labelEn: 'Ottoman Function', labelRu: 'Оттоманка', icon: '🛋️' },
+  // Bike-specific features
+  { id: 'abs', labelEn: 'ABS', labelRu: 'ABS', icon: '🛞' },
+  { id: 'traction_control', labelEn: 'Traction Control', labelRu: 'Трекшн-контроль', icon: '⚙️' },
+  { id: 'smart_key', labelEn: 'Smart Key', labelRu: 'Бесключевой доступ', icon: '🔑' },
+  { id: 'phone_holder', labelEn: 'Phone Holder', labelRu: 'Держатель телефона', icon: '📱' },
+  { id: 'usb_charger', labelEn: 'USB Charger', labelRu: 'USB зарядка', icon: '🔌' },
+  { id: 'sport_mode', labelEn: 'Sport Mode', labelRu: 'Спорт-режим', icon: '🏎️' },
+  { id: 'adventure_style', labelEn: 'Adventure Style', labelRu: 'Стиль Adventure', icon: '🏔️' },
+  { id: 'classic_style', labelEn: 'Classic Style', labelRu: 'Классический стиль', icon: '🎩' },
+  { id: 'off_road', labelEn: 'Off-Road', labelRu: 'Внедорожный', icon: '🏜️' },
+  { id: 'sport', labelEn: 'Sport', labelRu: 'Спорт', icon: '🏁' },
+  { id: 'adventure', labelEn: 'Adventure', labelRu: 'Adventure', icon: '🌍' },
 ];
 
 // ====== MAPS FOR QUICK LOOKUP ======
