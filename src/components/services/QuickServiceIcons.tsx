@@ -9,6 +9,7 @@ import { useFeaturedCategories } from '@/hooks/useSuperAppCatalog';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { IconBadge } from '@/components/ui/IconBadge';
+import { ExploreVerticalsSheet } from '@/components/shared/ExploreVerticalsSheet';
 
 // Vertical-specific gradients
 const VERTICAL_GRADIENTS: Record<string, string> = {
@@ -46,7 +47,7 @@ export function QuickServiceIcons() {
   return (
     <div className="px-4 py-3">
       <div className="grid grid-cols-4 gap-2">
-        {featured.slice(0, 8).map((cat) => {
+        {featured.slice(0, 7).map((cat) => {
           const gradient = VERTICAL_GRADIENTS[cat.vertical] || 'from-primary to-accent';
           
           return (
@@ -72,6 +73,8 @@ export function QuickServiceIcons() {
             </button>
           );
         })}
+        {/* 8th slot: "More" button opening all verticals */}
+        <ExploreVerticalsSheet />
       </div>
     </div>
   );

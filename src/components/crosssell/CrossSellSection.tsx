@@ -4,7 +4,7 @@ import { ChevronRight, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getCrossSellLinks } from '@/lib/crossSellConfig';
 import { CrossSellCard } from './CrossSellCard';
-
+import { ExploreVerticalsSheet } from '@/components/shared/ExploreVerticalsSheet';
 import { cn } from '@/lib/utils';
 
 interface CrossSellSectionProps {
@@ -46,13 +46,14 @@ export const CrossSellSection = memo(function CrossSellSection({
             {language === 'ru' ? sectionTitle.ru : sectionTitle.en}
           </h3>
         </div>
-        <button
-          onClick={() => navigate('/')}
-          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
-        >
-          {language === 'ru' ? 'Все' : 'All'}
-          <ChevronRight className="w-4 h-4" />
-        </button>
+        <ExploreVerticalsSheet
+          trigger={
+            <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors">
+              {language === 'ru' ? 'Все' : 'All'}
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          }
+        />
       </div>
 
       {variant === 'scroll' ? (
