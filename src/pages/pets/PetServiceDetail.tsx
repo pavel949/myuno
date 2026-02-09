@@ -13,6 +13,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserCollections } from '@/hooks/useUserCollections';
 import { usePetService } from '@/hooks/usePetServices';
 import { cn } from '@/lib/utils';
+import { RelatedServicesSection } from '@/components/crosssell';
 
 export default function PetServiceDetail() {
   const { id } = useParams();
@@ -154,6 +155,11 @@ export default function PetServiceDetail() {
             </TabsContent>
           </Tabs>
         </div>
+      </div>
+
+      {/* Cross-sell */}
+      <div className="px-4 pb-24">
+        <RelatedServicesSection currentVertical="pets" />
       </div>
 
       {/* Bottom Bar */}

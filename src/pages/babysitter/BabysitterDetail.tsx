@@ -9,6 +9,7 @@ import { PageContainer } from '@/components/uno/PageContainer';
 import { DetailPageHeader } from '@/components/uno/DetailPageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { RelatedServicesSection } from '@/components/crosssell';
 
 const babysitters = [
   {
@@ -233,6 +234,11 @@ export default function BabysitterDetail() {
                 : 'Background check verified'}
             </span>
           </div>
+        </div>
+
+        {/* Cross-sell */}
+        <div className="pb-24">
+          <RelatedServicesSection currentVertical="babysitter" />
         </div>
 
         {/* Bottom Bar */}

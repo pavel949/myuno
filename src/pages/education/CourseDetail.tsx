@@ -9,6 +9,7 @@ import { FavoriteButton } from "@/components/uno/FavoriteButton";
 import { useViewHistory } from "@/hooks/useViewHistory";
 import { useSupabaseSingle } from "@/hooks/useSupabaseQuery";
 import { useCallback } from "react";
+import { RelatedServicesSection } from '@/components/crosssell';
 
 interface EducationProvider {
   id: string;
@@ -166,6 +167,11 @@ export default function CourseDetail() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Cross-sell */}
+      <div className="px-4 pb-24">
+        <RelatedServicesSection currentVertical="education" />
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 bg-card border-t p-4 flex items-center justify-between">
