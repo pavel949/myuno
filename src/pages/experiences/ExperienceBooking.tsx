@@ -4,6 +4,7 @@ import { Calendar, Users, Clock, CreditCard, AlertTriangle } from 'lucide-react'
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,6 +29,7 @@ export default function ExperienceBooking() {
   const navigate = useNavigate();
   const { experience, isLoading } = useExperience(id);
   const { createBooking, isSubmitting } = useBooking();
+  const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
   
   const [currentStep, setCurrentStep] = useState(0);
@@ -201,7 +203,7 @@ export default function ExperienceBooking() {
                 <span>{formatDuration(experience.duration_minutes, language)}</span>
               </div>
               <p className="text-primary font-bold mt-1">
-                ฿{experience.price?.toLocaleString()} / {isRu ? 'чел' : 'person'}
+                {formatPrice(experience.price || 0)} / {isRu ? 'чел' : 'person'}
               </p>
             </div>
           </CardContent>
@@ -379,7 +381,7 @@ export default function ExperienceBooking() {
                 </div>
                 <div className="flex justify-between py-3 bg-primary/5 rounded-lg px-3">
                   <span className="font-semibold">{isRu ? 'Итого' : 'Total'}</span>
-                  <span className="font-bold text-xl text-primary">฿{totalPrice.toLocaleString()}</span>
+                  <span className="font-bold text-xl text-primary">{formatPrice(totalPrice)}</span>
                 </div>
               </CardContent>
             </Card>
