@@ -115,6 +115,10 @@ export const LEGACY_REDIRECTS: Record<string, string> = {
   
   // Legacy /orders → /bookings
   '/orders': APP_ROUTES.BOOKINGS,
+  
+  // Legacy /salons → /beauty
+  '/salons': '/beauty',
+  '/spa': '/beauty',
 } as const;
 
 /**
