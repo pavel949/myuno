@@ -28,12 +28,8 @@ const stepHints = {
     ru: '✍️ Укажите контакты — никаких списаний',
   },
   2: {
-    en: '💳 Choose payment method',
-    ru: '💳 Выберите способ оплаты',
-  },
-  3: {
-    en: '🔒 Secure confirmation',
-    ru: '🔒 Безопасное подтверждение',
+    en: '🔒 Review & confirm your booking',
+    ru: '🔒 Проверьте и подтвердите бронирование',
   },
 };
 
@@ -45,7 +41,7 @@ export function BookingBottomBar({
   submitLabel,
   showBreakdown,
   step,
-  totalSteps = 4,
+  totalSteps = 3,
   hint,
 }: BookingBottomBarProps) {
   const { language, t } = useLanguage();
