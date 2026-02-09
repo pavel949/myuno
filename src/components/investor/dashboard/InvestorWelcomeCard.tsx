@@ -34,14 +34,14 @@ export function InvestorWelcomeCard() {
 
   if (loadingInterests) {
     return (
-      <Card className="bg-gradient-to-br from-emerald-600 to-teal-700 text-white border-0">
+      <Card className="bg-primary text-primary-foreground border-0">
         <CardContent className="p-6 space-y-4">
-          <Skeleton className="h-7 w-48 bg-white/20" />
-          <Skeleton className="h-5 w-full bg-white/20" />
+          <Skeleton className="h-7 w-48 bg-primary-foreground/20" />
+          <Skeleton className="h-5 w-full bg-primary-foreground/20" />
           <div className="flex gap-4">
-            <Skeleton className="h-16 flex-1 bg-white/20" />
-            <Skeleton className="h-16 flex-1 bg-white/20" />
-            <Skeleton className="h-16 flex-1 bg-white/20" />
+            <Skeleton className="h-16 flex-1 bg-primary-foreground/20" />
+            <Skeleton className="h-16 flex-1 bg-primary-foreground/20" />
+            <Skeleton className="h-16 flex-1 bg-primary-foreground/20" />
           </div>
         </CardContent>
       </Card>
@@ -49,12 +49,8 @@ export function InvestorWelcomeCard() {
   }
 
   return (
-    <Card className="bg-gradient-to-br from-emerald-600 to-teal-700 text-white border-0 overflow-hidden relative">
-      {/* Decorative circles */}
-      <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-      <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
-      
-      <CardContent className="relative z-10 p-6 space-y-4">
+    <Card className="bg-primary text-primary-foreground border-0 overflow-hidden">
+      <CardContent className="p-6 space-y-4">
         {/* Welcome */}
         <div className="flex items-center gap-2">
           <span className="text-2xl">👋</span>
@@ -63,7 +59,7 @@ export function InvestorWelcomeCard() {
           </h2>
         </div>
         
-        <p className="text-white/90 text-sm">
+        <p className="text-primary-foreground/80 text-sm">
           {isRu 
             ? 'Управляйте своими инвестиционными интересами и следите за статусами заявок'
             : 'Manage your investment interests and track application statuses'
@@ -72,15 +68,15 @@ export function InvestorWelcomeCard() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-3 gap-3 pt-2">
-          <div className="bg-white/15 backdrop-blur rounded-xl p-3 text-center">
+          <div className="bg-primary-foreground/10 rounded-xl p-3 text-center">
             <FileText className="h-5 w-5 mx-auto mb-1 opacity-90" />
             <div className="text-2xl font-bold">{activeInterests.length}</div>
-            <div className="text-xs text-white/80">
+            <div className="text-xs text-primary-foreground/70">
               {isRu ? 'Активных' : 'Active'}
             </div>
           </div>
           
-          <div className="bg-white/15 backdrop-blur rounded-xl p-3 text-center">
+          <div className="bg-primary-foreground/10 rounded-xl p-3 text-center">
             <DollarSign className="h-5 w-5 mx-auto mb-1 opacity-90" />
             <div className="text-2xl font-bold">
               {totalAmount >= 1000000 
@@ -90,15 +86,15 @@ export function InvestorWelcomeCard() {
                   : `$${totalAmount}`
               }
             </div>
-            <div className="text-xs text-white/80">
+            <div className="text-xs text-primary-foreground/70">
               {isRu ? 'Интерес' : 'Interest'}
             </div>
           </div>
           
-          <div className="bg-white/15 backdrop-blur rounded-xl p-3 text-center">
+          <div className="bg-primary-foreground/10 rounded-xl p-3 text-center">
             <BarChart3 className="h-5 w-5 mx-auto mb-1 opacity-90" />
             <div className="text-2xl font-bold">{avgRoi}%</div>
-            <div className="text-xs text-white/80">
+            <div className="text-xs text-primary-foreground/70">
               {isRu ? 'Avg ROI' : 'Avg ROI'}
             </div>
           </div>

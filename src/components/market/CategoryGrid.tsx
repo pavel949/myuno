@@ -62,8 +62,7 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
             >
               <div className={cn(
                 "w-12 h-12 rounded-xl flex items-center justify-center text-2xl",
-                "bg-gradient-to-br shadow-sm transition-transform group-hover:scale-105",
-                cat.gradient || "from-primary/20 to-primary/10"
+                "bg-muted shadow-sm transition-transform group-hover:scale-105"
               )}>
                 {cat.icon}
               </div>
@@ -109,17 +108,14 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
                   loading="lazy"
                 />
                 
-                {/* Gradient Overlay */}
-                <div className={cn(
-                  "absolute inset-0 bg-gradient-to-t opacity-90",
-                  "from-black/80 via-black/40 to-transparent"
-                )} />
+                {/* Overlay */}
+                <div className="absolute inset-0 bg-black/50" />
                 
                 {/* Content */}
                 <div className="absolute inset-0 p-3 flex flex-col justify-between text-white">
                   {/* Product count */}
                   <div className="flex justify-end">
-                    <Badge className="bg-white/20 backdrop-blur-sm text-white border-0 text-[10px] px-2 py-0.5">
+                    <Badge className="bg-white/20 text-white border-0 text-[10px] px-2 py-0.5">
                       {count} {language === 'ru' ? 'шт' : 'items'}
                     </Badge>
                   </div>
@@ -141,7 +137,7 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
                 </div>
                 
                 {/* Hover arrow */}
-                <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <ChevronRight className="w-3.5 h-3.5 text-white" />
                 </div>
               </div>

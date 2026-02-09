@@ -237,7 +237,7 @@ const Wallet = () => {
     <AppLayout title={t('wallet.title')}>
       <div className="p-4 space-y-6 pb-24">
         {/* Balance Card */}
-        <Card className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground overflow-hidden">
+        <Card className="bg-primary text-primary-foreground overflow-hidden">
           <CardContent className="p-6">
             {isLoading ? (
               <div className="space-y-3">
@@ -376,7 +376,7 @@ const Wallet = () => {
         <CashbackRatesCard />
 
         {/* Promo Banner */}
-        <Card className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-amber-500/20">
+        <Card className="bg-amber-500/5 border-amber-500/20">
           <CardContent className="p-4 flex items-center gap-4">
             <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center">
               <Gift className="w-6 h-6 text-amber-500" />
