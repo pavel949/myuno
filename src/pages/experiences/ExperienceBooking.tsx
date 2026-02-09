@@ -113,7 +113,7 @@ export default function ExperienceBooking() {
       toast.error(isRu ? 'Заполните контактные данные' : 'Please fill in contact details');
       return;
     }
-    if (currentStep < 3) {
+    if (currentStep < 2) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -327,32 +327,15 @@ export default function ExperienceBooking() {
         )}
 
         {currentStep === 2 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <CreditCard className="w-5 h-5 text-primary" />
-                {isRu ? 'Способ оплаты' : 'Payment Method'}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <BookingPaymentSelect
-                selected={paymentMethod}
-                onSelect={setPaymentMethod}
-                amount={totalPrice}
-              />
-            </CardContent>
-          </Card>
-        )}
-
-        {currentStep === 3 && (
           <div className="space-y-4">
+            {/* Order Summary */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">
-                  {isRu ? 'Подтверждение' : 'Confirmation'}
+                  {isRu ? 'Ваш заказ' : 'Your Order'}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3">
                 <div className="flex justify-between py-2 border-b">
                   <span className="text-muted-foreground">{isRu ? 'Дата' : 'Date'}</span>
                   <span className="font-medium">
@@ -368,21 +351,30 @@ export default function ExperienceBooking() {
                   <span className="font-medium">{participants}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b">
-                  <span className="text-muted-foreground">{isRu ? 'Имя' : 'Name'}</span>
+                  <span className="text-muted-foreground">{isRu ? 'Контакт' : 'Contact'}</span>
                   <span className="font-medium">{contactData.name}</span>
-                </div>
-                <div className="flex justify-between py-2 border-b">
-                  <span className="text-muted-foreground">{isRu ? 'Телефон' : 'Phone'}</span>
-                  <span className="font-medium">{contactData.phone}</span>
-                </div>
-                <div className="flex justify-between py-2 border-b">
-                  <span className="text-muted-foreground">{isRu ? 'Оплата' : 'Payment'}</span>
-                  <span className="font-medium capitalize">{paymentMethod}</span>
                 </div>
                 <div className="flex justify-between py-3 bg-primary/5 rounded-lg px-3">
                   <span className="font-semibold">{isRu ? 'Итого' : 'Total'}</span>
                   <span className="font-bold text-xl text-primary">{formatPrice(totalPrice)}</span>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Payment Method */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <CreditCard className="w-5 h-5 text-primary" />
+                  {isRu ? 'Способ оплаты' : 'Payment Method'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <BookingPaymentSelect
+                  selected={paymentMethod}
+                  onSelect={setPaymentMethod}
+                  amount={totalPrice}
+                />
               </CardContent>
             </Card>
           </div>
@@ -392,14 +384,14 @@ export default function ExperienceBooking() {
       {/* Bottom Bar */}
       <BookingBottomBar
         total={totalPrice}
-        onSubmit={currentStep === 3 ? handleSubmit : handleNext}
+        onSubmit={currentStep === 2 ? handleSubmit : handleNext}
         isSubmitting={isSubmitting}
         disabled={currentStep === 0 && (!selectedDate || !selectedTime)}
         step={currentStep}
-        totalSteps={4}
+        totalSteps={3}
         submitLabel={
-          currentStep === 3 
-            ? (isRu ? 'Подтвердить' : 'Confirm')
+          currentStep === 2 
+            ? (isRu ? 'Подтвердить и оплатить' : 'Confirm & Pay')
             : (isRu ? 'Далее' : 'Next')
         }
       />
