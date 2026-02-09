@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Package, ChevronRight, Trash2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -17,7 +17,7 @@ interface MiniCartProps {
   className?: string;
 }
 
-export const MiniCart = forwardRef<HTMLButtonElement | HTMLDivElement, MiniCartProps>(({ className }, ref) => {
+export function MiniCart({ className }: MiniCartProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
@@ -33,7 +33,6 @@ export const MiniCart = forwardRef<HTMLButtonElement | HTMLDivElement, MiniCartP
   if (totalItems === 0) {
     return (
       <button 
-        ref={ref as React.Ref<HTMLButtonElement>}
         className={cn("relative p-2 rounded-full hover:bg-muted transition-colors", className)}
         onClick={() => navigate('/cart')}
       >
@@ -46,7 +45,6 @@ export const MiniCart = forwardRef<HTMLButtonElement | HTMLDivElement, MiniCartP
     <Popover>
       <PopoverTrigger asChild>
         <button 
-          ref={ref as React.Ref<HTMLButtonElement>}
           className={cn("relative p-2 rounded-full hover:bg-muted transition-colors", className)}
         >
           <ShoppingCart className="w-6 h-6" />
@@ -147,6 +145,4 @@ export const MiniCart = forwardRef<HTMLButtonElement | HTMLDivElement, MiniCartP
       </PopoverContent>
     </Popover>
   );
-});
-
-MiniCart.displayName = 'MiniCart';
+}
