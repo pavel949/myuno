@@ -22,6 +22,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 const DiscoveryCarousel = lazy(() => import('@/components/home/DiscoveryCarousel').then(m => ({ default: m.DiscoveryCarousel })));
 const PersonaChips = lazy(() => import('@/components/home/PersonaChips').then(m => ({ default: m.PersonaChips })));
 const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
+const QuickAccessStrip = lazy(() => import('@/components/home/QuickAccessStrip').then(m => ({ default: m.QuickAccessStrip })));
+const ConciergeBanner = lazy(() => import('@/components/home/ConciergeBanner').then(m => ({ default: m.ConciergeBanner })));
+const PopularServicesRow = lazy(() => import('@/components/home/PopularServicesRow').then(m => ({ default: m.PopularServicesRow })));
+const TrustBanner = lazy(() => import('@/components/home/TrustBanner').then(m => ({ default: m.TrustBanner })));
 
 const SectionSkeleton = () => (
   <div className="space-y-3">
@@ -87,10 +91,29 @@ const Index = () => {
             </Suspense>
           )}
 
-          {/* Discovery — promotions */}
+          {/* Quick Access Strip */}
+          <Suspense fallback={null}>
+            <QuickAccessStrip />
+          </Suspense>
 
+          {/* Concierge Banner */}
+          <Suspense fallback={null}>
+            <ConciergeBanner />
+          </Suspense>
+
+          {/* Discovery — promotions */}
           <Suspense fallback={<SectionSkeleton />}>
             <DiscoveryCarousel />
+          </Suspense>
+
+          {/* Popular Services */}
+          <Suspense fallback={<SectionSkeleton />}>
+            <PopularServicesRow />
+          </Suspense>
+
+          {/* Trust Stats */}
+          <Suspense fallback={null}>
+            <TrustBanner />
           </Suspense>
 
         </div>
