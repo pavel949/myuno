@@ -22,7 +22,7 @@ const services: ServiceItem[] = [
   { id: 'restaurant', icon: UtensilsCrossed, labelEn: 'Restaurants', labelRu: 'Рестораны', path: '/restaurants' },
   { id: 'fitness', icon: Dumbbell, labelEn: 'Fitness', labelRu: 'Фитнес', path: '/fitness' },
   { id: 'flower', icon: Flower2, labelEn: 'Flowers', labelRu: 'Цветы', path: '/flowers' },
-  { id: 'water', icon: Waves, labelEn: 'Water Sports', labelRu: 'Водный спорт', path: '/water-activities' },
+  { id: 'water', icon: Waves, labelEn: 'Water Sports', labelRu: 'Водный спорт', path: '/water' },
   { id: 'event', icon: CalendarDays, labelEn: 'Events', labelRu: 'Мероприятия', path: '/events' },
   { id: 'insurance', icon: Shield, labelEn: 'Insurance', labelRu: 'Страхование', path: '/insurance' },
 ];

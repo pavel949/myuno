@@ -3,15 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import {
-  Settings,
   Calendar,
   Receipt,
   Download,
   Sparkles,
-  FileText,
   BarChart3,
   MessageCircle,
-  Plus,
   ChevronRight,
   HelpCircle,
   BookOpen,
@@ -26,14 +23,12 @@ interface MenuItem {
 
 const MENU_ITEMS: MenuItem[] = [
   { path: '/owner/calendar', icon: Calendar, labelEn: 'Calendar', labelRu: 'Календарь' },
-  { path: '/owner/finances', icon: Receipt, labelEn: 'Finances', labelRu: 'Финансы' },
+  { path: '/owner/financials', icon: Receipt, labelEn: 'Finances', labelRu: 'Финансы' },
   { path: '/owner/channels', icon: Download, labelEn: 'Channel Manager', labelRu: 'Менеджер каналов' },
   { path: '/owner/service-request?type=cleaning', icon: Sparkles, labelEn: 'Request Cleaning', labelRu: 'Заказать уборку' },
-  { path: '/owner/documents', icon: FileText, labelEn: 'Documents', labelRu: 'Документы' },
-  { path: '/owner/analytics', icon: BarChart3, labelEn: 'Analytics', labelRu: 'Аналитика' },
-  { path: '/messages', icon: MessageCircle, labelEn: 'Messages', labelRu: 'Сообщения' },
+  { path: '/owner/reports', icon: BarChart3, labelEn: 'Reports', labelRu: 'Отчёты' },
+  { path: '/owner/messages', icon: MessageCircle, labelEn: 'Messages', labelRu: 'Сообщения' },
   { path: '/owner/guide', icon: BookOpen, labelEn: 'Owner Guide', labelRu: 'Материалы для хозяев' },
-  { path: '/owner/settings', icon: Settings, labelEn: 'Settings', labelRu: 'Настройки' },
   { path: '/support', icon: HelpCircle, labelEn: 'Help', labelRu: 'Помощь' },
 ];
 

@@ -36,7 +36,7 @@ export const VERTICAL_GROUPS: VerticalGroup[] = [
     items: [
       { verticalId: 'transfer' },
       { verticalId: 'vehicle' },
-      { route: '/transport/airport-fast-track', icon: '✈️', labelEn: 'Fast Track', labelRu: 'Фаст-трек' },
+      { route: '/transport/fast-track', icon: '✈️', labelEn: 'Fast Track', labelRu: 'Фаст-трек' },
     ],
   },
   {
@@ -49,7 +49,7 @@ export const VERTICAL_GROUPS: VerticalGroup[] = [
       { verticalId: 'cleaning' },
       { verticalId: 'babysitter' },
       { verticalId: 'pet_service' },
-      { route: '/expat', icon: '🌍', labelEn: 'Relocation Services', labelRu: 'Релокация' },
+      { route: '/banking', icon: '🌍', labelEn: 'Relocation Services', labelRu: 'Релокация' },
     ],
   },
   {
@@ -87,7 +87,7 @@ export const VERTICAL_GROUPS: VerticalGroup[] = [
     labelRu: 'Премиум и помощь',
     icon: '⭐',
     items: [
-      { route: '/concierge', icon: '🎩', labelEn: 'Concierge', labelRu: 'Консьерж' },
+      { route: '/vip-concierge', icon: '🎩', labelEn: 'Concierge', labelRu: 'Консьерж' },
       { route: '/sos', icon: '🆘', labelEn: 'Emergency Help', labelRu: 'Экстренная помощь' },
     ],
   },
