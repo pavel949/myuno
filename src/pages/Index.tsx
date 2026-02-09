@@ -19,7 +19,6 @@ import { PWAWelcomeScreen } from '@/components/pwa/PWAWelcomeScreen';
 import { Skeleton } from '@/components/ui/skeleton';
 
 // Lazy load secondary components
-const QuickActionsGrid = lazy(() => import('@/components/home/QuickActionsGrid').then(m => ({ default: m.QuickActionsGrid })));
 const DiscoveryCarousel = lazy(() => import('@/components/home/DiscoveryCarousel').then(m => ({ default: m.DiscoveryCarousel })));
 const PersonaChips = lazy(() => import('@/components/home/PersonaChips').then(m => ({ default: m.PersonaChips })));
 const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
@@ -88,10 +87,7 @@ const Index = () => {
             </Suspense>
           )}
 
-          {/* Quick Actions & Discovery — always visible */}
-          <Suspense fallback={<SectionSkeleton />}>
-            <QuickActionsGrid contentMode="services" />
-          </Suspense>
+          {/* Discovery — promotions */}
 
           <Suspense fallback={<SectionSkeleton />}>
             <DiscoveryCarousel />

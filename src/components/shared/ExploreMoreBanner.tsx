@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 
 const PREVIEW_VERTICALS = [
   VERTICALS.YACHT,
-  VERTICALS.TOUR,
+  VERTICALS.EXPERIENCE,
   VERTICALS.RESTAURANT,
   VERTICALS.BEAUTY,
   VERTICALS.MEDICAL,
@@ -18,7 +18,7 @@ const PREVIEW_VERTICALS = [
 
 const MINI_GRADIENTS: Record<string, string> = {
   yacht: 'from-blue-500 to-cyan-400',
-  tour: 'from-amber-500 to-orange-400',
+  experience: 'from-purple-500 to-indigo-400',
   restaurant: 'from-rose-500 to-pink-400',
   beauty: 'from-pink-500 to-purple-400',
   medical: 'from-teal-500 to-emerald-400',

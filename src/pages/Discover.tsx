@@ -1,350 +1,172 @@
 /**
- * Discover Page - Klook-style Super-App Service Marketplace
- * Structure:
- * 1. Hero Promo Carousel
- * 2. Quick Category Icons (IconBadge)
- * 3. Flash Deals with urgency
- * 4. Vertical Showcases (Yachts, Property, Beauty)
- * 5. Featured Providers with trust signals
- * 6. Partner CTA
- * 7. Popular Services
- * 8. Recently Viewed
- * 9. Cross-sell
+ * Discover Page — Services Hub with grouped catalog
+ * Renders all verticals organized into logical groups
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Wrench, Sparkles, Flame, Star, TrendingUp, Menu } from 'lucide-react';
+import { Search, ChevronRight } from 'lucide-react';
 import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/contexts/AuthContext';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
-import { EmptyState } from '@/components/uno/EmptyState';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { IconBadge } from '@/components/ui/IconBadge';
+import { VERTICALS } from '@/lib/verticals';
+import { VERTICAL_GROUPS, type VerticalGroupItem } from '@/lib/verticalGroups';
+import { cn } from '@/lib/utils';
 
-// Unified components
-import { CrossSellSection } from '@/components/crosssell';
-import { 
-  UnifiedFilterRibbon,
-  FilterRibbonItem,
-} from '@/components/shared';
-
-// Hooks
-import { useServices } from '@/hooks/useServices';
-import { useCategories } from '@/hooks/useCategories';
-import { useHomeServices } from '@/hooks/useHomeServices';
-import { useUserPersonas, UserPersona } from '@/hooks/useUserPersonas';
-import { useFeaturedCategories } from '@/hooks/useSuperAppCatalog';
-
-// Service marketplace components
-import {
-  ServiceCategoryDrawer,
-  ServicePromoCarousel,
-  QuickServiceIcons,
-  FeaturedProvidersCarousel,
-  PopularServicesSection,
-  RecentlyViewedServices,
-  FlashServicesSection,
-  VerticalShowcaseSection,
-  PartnerCTACard,
-} from '@/components/services';
-
-// Legacy components (for filtered views only)
-import { MiniAppsGrid } from '@/components/discover/MiniAppsGrid';
-import { ThematicSection, THEMATIC_SECTIONS } from '@/components/discover/ThematicSection';
-import { useFeaturedCategories as useLegacyFeaturedCategories } from '@/hooks/useFeaturedCategories';
-import { useCategoryCounts } from '@/hooks/useCategoryCounts';
-
-// Map UserPersona to audience filter for category filtering
-const PERSONA_TO_CATEGORIES: Record<UserPersona, Set<string>> = {
-  tourist: new Set(['yachts', 'tours', 'transport', 'restaurants', 'events', 'water-activities', 'beauty-spa']),
-  resident: new Set(['legal', 'insurance', 'medical', 'banking', 'education', 'fitness', 'veterinary']),
-  property_owner: new Set(['real-estate', 'cleaning', 'storage', 'maintenance', 'property-management']),
-  investor: new Set(['real-estate', 'banking', 'legal', 'insurance']),
+const VERTICAL_GRADIENTS: Record<string, string> = {
+  property: 'from-emerald-500 to-green-400',
+  yacht: 'from-blue-500 to-cyan-400',
+  vehicle: 'from-indigo-500 to-violet-400',
+  experience: 'from-purple-500 to-indigo-400',
+  cleaning: 'from-amber-500 to-yellow-400',
+  babysitter: 'from-pink-400 to-rose-300',
+  beauty: 'from-pink-500 to-purple-400',
+  restaurant: 'from-rose-500 to-pink-400',
+  medical: 'from-teal-500 to-emerald-400',
+  legal: 'from-slate-500 to-gray-400',
+  education: 'from-blue-400 to-indigo-300',
+  fitness: 'from-orange-500 to-red-400',
+  event: 'from-purple-500 to-indigo-400',
+  water_activity: 'from-cyan-500 to-blue-400',
+  pet_service: 'from-orange-500 to-amber-400',
+  flower: 'from-pink-400 to-rose-300',
+  insurance: 'from-slate-500 to-blue-400',
+  transfer: 'from-indigo-500 to-blue-400',
 };
+
+function resolveItem(item: VerticalGroupItem, language: string) {
+  if (item.verticalId) {
+    const v = Object.values(VERTICALS).find(v => v.id === item.verticalId);
+    if (!v) return null;
+    return {
+      id: v.id,
+      icon: v.icon,
+      label: language === 'ru' ? v.labelRu : v.labelEn,
+      route: `/${v.plural}`,
+      gradient: VERTICAL_GRADIENTS[v.id] || 'from-primary to-accent',
+    };
+  }
+  // Standalone screen
+  return {
+    id: item.route || '',
+    icon: item.icon || '📦',
+    label: language === 'ru' ? (item.labelRu || '') : (item.labelEn || ''),
+    route: item.route || '/',
+    gradient: 'from-gray-500 to-gray-400',
+  };
+}
 
 export default function Discover() {
   const { language } = useLanguage();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const isRu = language === 'ru';
-  
-  const [refreshKey, setRefreshKey] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Get saved persona from global state
-  const { personas } = useUserPersonas();
-  
-  // Data hooks
-  const { groups, getName, isLoading: categoriesLoading, refetch: refetchCategories } = useCategories();
-  const { isFeatured } = useLegacyFeaturedCategories();
-  const { getCount } = useCategoryCounts();
-  const { services, isLoading: servicesLoading, refetch: refetchServices } = useServices({ limit: 20 });
-  const { providers, isLoading: providersLoading } = useHomeServices();
-  const { featured: featuredCategories } = useFeaturedCategories();
-
-  // Determine if we should show filtered view based on saved personas
-  const hasSpecificPersona = personas.length > 0;
-  
-  // Get combined categories for all selected personas
-  const personaCategories = useMemo(() => {
-    if (personas.length === 0) return new Set<string>();
-    
-    const combined = new Set<string>();
-    personas.forEach(persona => {
-      PERSONA_TO_CATEGORIES[persona]?.forEach(cat => combined.add(cat));
-    });
-    return combined;
-  }, [personas]);
-
-  // Filter groups based on saved personas (only if personas selected)
-  const filteredGroups = useMemo(() => {
-    if (!hasSpecificPersona) return groups;
-    
-    return groups
-      .map(group => ({
-        ...group,
-        categories: (group.categories || []).filter(cat => 
-          personaCategories.has(cat.slug) || personaCategories.has(cat.miniAppType || '')
-        )
-      }))
-      .filter(group => group.categories.length > 0);
-  }, [groups, hasSpecificPersona, personaCategories]);
-
-  // Filter thematic sections based on personas
-  const filteredThematicSections = useMemo(() => {
-    if (!hasSpecificPersona) return THEMATIC_SECTIONS;
-    
-    const personaSectionMap: Record<UserPersona, string[]> = {
-      tourist: ['leisure'],
-      resident: ['life'],
-      property_owner: ['business', 'life'],
-      investor: ['business'],
-    };
-    
-    const allowedSections = new Set<string>();
-    personas.forEach(persona => {
-      personaSectionMap[persona]?.forEach(s => allowedSections.add(s));
-    });
-    
-    return THEMATIC_SECTIONS.filter(section => allowedSections.has(section.id));
-  }, [hasSpecificPersona, personas]);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const handleRefresh = useCallback(async () => {
-    await Promise.all([refetchCategories(), refetchServices()]);
+    await new Promise(resolve => setTimeout(resolve, 500));
     setRefreshKey(prev => prev + 1);
-  }, [refetchCategories, refetchServices]);
+  }, []);
 
-  const isLoading = categoriesLoading;
-
-  // Always show marketplace view (no filter ribbon needed - persona is set on home page)
-  const showMarketplaceView = true;
-
-  // Quick action items for ribbon - consistent with Market
-  const quickActionItems: FilterRibbonItem[] = useMemo(() => [
-    { id: 'deals', label: isRu ? 'Акции' : 'Deals', icon: Flame, variant: 'accent' as const },
-    { id: 'popular', label: isRu ? 'Топ' : 'Top', icon: Star },
-    { id: 'new', label: isRu ? 'Новое' : 'New', icon: Sparkles },
-  ], [isRu]);
-
-  // Category items for ribbon (top 3 from featured)
-  const categoryItems: FilterRibbonItem[] = useMemo(() => {
-    return featuredCategories.slice(0, 3).map(cat => ({
-      id: cat.vertical,
-      label: cat.label,
-      emoji: cat.icon,
+  // Resolve all groups with labels
+  const resolvedGroups = useMemo(() => {
+    return VERTICAL_GROUPS.map(group => ({
+      ...group,
+      label: isRu ? group.labelRu : group.labelEn,
+      resolvedItems: group.items
+        .map(item => resolveItem(item, language))
+        .filter(Boolean) as ReturnType<typeof resolveItem>[],
     }));
-  }, [featuredCategories]);
+  }, [language, isRu]);
 
-  const handleQuickActionSelect = (id: string) => {
-    navigate(`/services?filter=${id}`);
-  };
-
-  const handleCategorySelect = (vertical: string) => {
-    const cat = featuredCategories.find(c => c.vertical === vertical);
-    if (cat) {
-      navigate(cat.path);
-    }
-  };
-
-  const remainingCategoryCount = Math.max(0, featuredCategories.length - 3);
+  // Filter by search
+  const filteredGroups = useMemo(() => {
+    if (!searchQuery.trim()) return resolvedGroups;
+    const q = searchQuery.toLowerCase();
+    return resolvedGroups
+      .map(group => ({
+        ...group,
+        resolvedItems: group.resolvedItems.filter(item =>
+          item && item.label.toLowerCase().includes(q)
+        ),
+      }))
+      .filter(group => group.resolvedItems.length > 0);
+  }, [resolvedGroups, searchQuery]);
 
   return (
     <MiniAppLayout
       title={isRu ? 'Услуги' : 'Services'}
-      subtitle={isRu ? 'Все сервисы для жизни в Таиланде' : 'All services for life in Thailand'}
+      subtitle={isRu ? 'Все сервисы для жизни' : 'All services for your life'}
       fallbackPath="/"
-      searchPlaceholder={isRu ? 'Поиск услуг...' : 'Search services...'}
-      searchValue={searchQuery}
-      onSearchChange={setSearchQuery}
       showHero={false}
       showCategories={false}
       showFilter={false}
     >
-      {/* Filter Ribbon - Consistent with Market */}
-      <div className="sticky top-0 z-30 -mx-4 bg-background/95 backdrop-blur-sm border-b border-border/30">
-        <UnifiedFilterRibbon
-          items={quickActionItems}
-          onSelect={handleQuickActionSelect}
-          leadingAction={<ServiceCategoryDrawer />}
-          trailingAction={
-            <>
-              {categoryItems.map(item => (
-                <button
-                  key={item.id}
-                  onClick={() => handleCategorySelect(item.id)}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium bg-muted/60 hover:bg-muted text-foreground transition-colors shrink-0"
-                >
-                  <span className="text-base">{item.emoji}</span>
-                  <span className="whitespace-nowrap">{item.label}</span>
-                </button>
-              ))}
-              {remainingCategoryCount > 0 && (
-                <Badge
-                  variant="secondary"
-                  className="px-3 py-2 text-xs font-medium cursor-pointer hover:bg-secondary/80 shrink-0"
-                  onClick={() => {
-                    // Open catalog drawer programmatically - for now navigate
-                    navigate('/services');
-                  }}
-                >
-                  +{remainingCategoryCount} {isRu ? 'ещё' : 'more'}
-                </Badge>
-              )}
-            </>
-          }
-        />
+      {/* Search */}
+      <div className="sticky top-0 z-30 -mx-4 px-4 py-3 bg-background/95 backdrop-blur-sm border-b border-border/30">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder={isRu ? 'Найти услугу...' : 'Search services...'}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9 h-10 rounded-xl bg-muted/50 border-border/50"
+          />
+        </div>
       </div>
 
       <PullToRefresh onRefresh={handleRefresh} className="min-h-0">
-        <div key={refreshKey} className="space-y-4 pb-24">
-          
-          {isLoading ? (
-            <LoadingSkeleton />
-          ) : showMarketplaceView ? (
-            /* KLOOK-STYLE MARKETPLACE VIEW */
-            <>
-              {/* 1. Hero Promo Carousel */}
-              <ServicePromoCarousel />
-              
-              {/* 2. Quick Category Icons with IconBadge */}
-              <QuickServiceIcons />
-              
-              {/* 3. Flash Deals with urgency */}
-              <FlashServicesSection />
-              
-              {/* 4. Premium Vertical Showcases */}
-              <VerticalShowcaseSection />
-              
-              {/* 5. Featured Providers with trust signals */}
-              <FeaturedProvidersCarousel />
-              
-              {/* 6. Partner CTA - attract providers */}
-              <PartnerCTACard />
-              
-              {/* 7. Popular Services */}
-              <PopularServicesSection />
-              
-              {/* 8. Recently Viewed */}
-              <RecentlyViewedServices />
-              
-              {/* 9. Cross-sell to other verticals */}
-              <CrossSellSection currentVertical="services" />
-            </>
-          ) : (
-            /* FILTERED VIEW - Legacy structure for audience segments */
-            <>
-              {filteredGroups.length === 0 && filteredThematicSections.length === 0 ? (
-                <EmptyState
-                  icon={Wrench}
-                  title={isRu ? 'Ничего не найдено' : 'Nothing found'}
-                  description={isRu ? 'Попробуйте другой фильтр' : 'Try a different filter'}
-                />
-              ) : (
-                <>
-                  {/* Mini-Apps Grid (filtered by audience) */}
-                  <MiniAppsGrid
-                    groups={filteredGroups}
-                    getName={getName}
-                    language={language}
-                    isFeatured={isFeatured}
-                    getCount={getCount}
-                  />
+        <div key={refreshKey} className="space-y-6 pb-24 pt-4">
+          {filteredGroups.map((group) => (
+            <section key={group.id}>
+              {/* Group header */}
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-lg">{group.icon}</span>
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                  {group.label}
+                </h2>
+              </div>
 
-                  {/* Thematic Sections (filtered) */}
-                  <div className="space-y-2 px-4">
-                    <h2 className="text-lg font-bold text-foreground">
-                      {isRu ? 'Категории' : 'Categories'}
-                    </h2>
-                    {filteredThematicSections.map(section => (
-                      <ThematicSection key={section.id} section={section} />
-                    ))}
-                  </div>
-                </>
-              )}
-              
-              {/* Cross-Sell */}
-              <CrossSellSection currentVertical="services" />
-            </>
+              {/* Service items grid */}
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                {group.resolvedItems.map((item) => {
+                  if (!item) return null;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => navigate(item.route)}
+                      className={cn(
+                        'flex flex-col items-center gap-2 p-3 rounded-xl',
+                        'hover:bg-muted/50 active:bg-muted transition-all duration-200',
+                        'touch-manipulation active:scale-95'
+                      )}
+                    >
+                      <IconBadge
+                        icon={item.icon}
+                        size="lg"
+                        variant="gradient"
+                        gradient={item.gradient}
+                        className="shadow-md"
+                      />
+                      <span className="text-[11px] font-medium text-center text-foreground leading-tight line-clamp-2">
+                        {item.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          ))}
+
+          {filteredGroups.length === 0 && searchQuery && (
+            <div className="text-center py-12 text-muted-foreground">
+              {isRu ? 'Ничего не найдено' : 'Nothing found'}
+            </div>
           )}
         </div>
       </PullToRefresh>
     </MiniAppLayout>
-  );
-}
-
-// Loading skeleton
-function LoadingSkeleton() {
-  return (
-    <div className="space-y-6">
-      {/* Promo carousel skeleton */}
-      <div className="px-4">
-        <div className="flex gap-3 overflow-hidden">
-          <Skeleton className="w-[280px] h-[140px] rounded-2xl shrink-0" />
-          <Skeleton className="w-[280px] h-[140px] rounded-2xl shrink-0" />
-        </div>
-      </div>
-      
-      {/* Quick icons skeleton */}
-      <div className="px-4">
-        <div className="grid grid-cols-4 gap-2">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="flex flex-col items-center gap-2">
-              <Skeleton className="w-12 h-12 rounded-xl" />
-              <Skeleton className="w-10 h-2" />
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      {/* Flash deals skeleton */}
-      <div className="px-4">
-        <Skeleton className="h-6 w-48 mb-4" />
-        <div className="flex gap-3 overflow-hidden">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="w-[160px] h-[180px] rounded-2xl shrink-0" />
-          ))}
-        </div>
-      </div>
-      
-      {/* Vertical showcases skeleton */}
-      <div className="px-4 space-y-3">
-        <Skeleton className="h-[120px] rounded-2xl" />
-        <Skeleton className="h-[120px] rounded-2xl" />
-        <Skeleton className="h-[120px] rounded-2xl" />
-      </div>
-      
-      {/* Featured providers skeleton */}
-      <div className="px-4">
-        <Skeleton className="h-6 w-40 mb-4" />
-        <div className="flex gap-3 overflow-hidden">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="w-[200px] h-[220px] rounded-2xl shrink-0" />
-          ))}
-        </div>
-      </div>
-    </div>
   );
 }

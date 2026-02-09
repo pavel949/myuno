@@ -19,7 +19,6 @@ const VERTICAL_GRADIENTS: Record<string, string> = {
   property: 'from-emerald-500 to-green-400',
   yacht: 'from-blue-500 to-cyan-400',
   vehicle: 'from-indigo-500 to-violet-400',
-  tour: 'from-amber-500 to-orange-400',
   experience: 'from-purple-500 to-indigo-400',
   cleaning: 'from-amber-500 to-yellow-400',
   babysitter: 'from-pink-400 to-rose-300',
