@@ -7,8 +7,11 @@ interface MiniAppHeroProps {
   title: string;
   subtitle?: string;
   backgroundImage?: string;
+  /** @deprecated Gradients removed per Calm LifeOS manifest. Prop ignored. */
   gradientFrom?: string;
+  /** @deprecated */
   gradientVia?: string;
+  /** @deprecated */
   gradientTo?: string;
   className?: string;
 }
@@ -18,16 +21,12 @@ export function MiniAppHero({
   title,
   subtitle,
   backgroundImage,
-  gradientFrom = 'from-primary/20',
-  gradientVia = 'via-primary/10',
-  gradientTo = 'to-background',
   className,
 }: MiniAppHeroProps) {
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-2xl p-6",
-        `bg-gradient-to-br ${gradientFrom} ${gradientVia} ${gradientTo}`,
+        "relative overflow-hidden rounded-2xl p-6 bg-muted/30 border border-border/60",
         className
       )}
     >

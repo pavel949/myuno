@@ -88,9 +88,9 @@ export default function MedicalIndex() {
       emptyText={language === 'ru' ? 'Клиники не найдены' : 'No clinics found'}
     >
       {/* myUNO Alert Banner */}
-      <div className="p-4 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 border border-primary/20 mb-4">
+      <div className="p-4 rounded-2xl bg-muted/30 border border-border/60 mb-4">
         <div className="flex items-start gap-3">
-          <div className="p-2 rounded-xl bg-primary/15 shrink-0">
+          <div className="p-2 rounded-xl bg-primary/10 shrink-0">
             <ShieldAlert className="w-5 h-5 text-primary" />
           </div>
           <div className="flex-1 min-w-0">
@@ -118,10 +118,10 @@ export default function MedicalIndex() {
       </div>
 
       {/* Emergency Banner */}
-      <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 mb-6">
+      <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/30 mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-semibold text-sm text-red-500">
+            <p className="font-semibold text-sm text-destructive">
               {language === 'ru' ? 'Экстренная помощь' : 'Emergency'}
             </p>
             <p className="text-xs text-muted-foreground">
@@ -156,8 +156,8 @@ export default function MedicalIndex() {
               location={clinic.district || clinic.address || ''}
               isVerified={clinic.is_verified}
               isFeatured={clinic.is_featured}
-              badge={isOpen 
-                ? { text: language === 'ru' ? 'Открыто' : 'Open', className: 'bg-green-500 text-white' }
+               badge={isOpen 
+                 ? { text: language === 'ru' ? 'Открыто' : 'Open', className: 'bg-primary text-primary-foreground' }
                 : { text: language === 'ru' ? 'Закрыто' : 'Closed', className: 'bg-muted text-muted-foreground' }
               }
               tags={clinic.languages}

@@ -50,7 +50,7 @@ export const UnifiedHeader = memo(function UnifiedHeader({
   const isSearchClickable = !!onSearchClick && !isSearchInteractive;
 
   return (
-    <div className={cn("bg-background/95 backdrop-blur-sm border-b border-border/50", className)}>
+    <div className={cn("bg-background border-b border-border/50", className)}>
       <div className="px-4 py-3 max-w-7xl mx-auto">
         {/* Top row: back, title, badge, right action */}
         <div className="flex items-center gap-3 mb-3">

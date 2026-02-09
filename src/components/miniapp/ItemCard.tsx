@@ -118,12 +118,12 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
               </span>
             )}
             {isNew && (
-              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-success text-white">
+              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-primary text-primary-foreground">
                 NEW
               </span>
             )}
             {isFeatured && (
-              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-gold text-black flex items-center gap-0.5">
+              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-primary text-primary-foreground flex items-center gap-0.5">
                 <Star className={cn(iconSizes.xs, "fill-current")} />
               </span>
             )}
@@ -204,13 +204,13 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
           
           {/* Badges */}
           <div className="absolute top-2 left-2 flex flex-col gap-1">
-            {isNew && (
-              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-success text-white">
+             {isNew && (
+              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-primary text-primary-foreground">
                 NEW
               </span>
             )}
             {isFeatured && (
-              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-gold text-black flex items-center gap-0.5">
+              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-primary text-primary-foreground flex items-center gap-0.5">
                 <Star className={cn(iconSizes.xs, "fill-current")} />
               </span>
             )}
@@ -259,7 +259,7 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
               ))}
               {rating !== undefined && (
                 <span className="flex items-center gap-1">
-                  <Star className={cn(iconSizes.sm, "fill-yellow-400 text-yellow-400")} />
+                  <Star className={cn(iconSizes.sm, "fill-primary text-primary")} />
                   {rating}
                   {reviewCount !== undefined && (
                     <span className="text-muted-foreground">({reviewCount})</span>

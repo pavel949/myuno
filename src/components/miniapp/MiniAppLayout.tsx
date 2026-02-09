@@ -283,7 +283,7 @@ export function MiniAppLayout({
         
         {/* Unified Sticky Sub-Header: Categories OR Quick Filters OR Custom */}
         {hasStickySubHeader && (
-          <div className="bg-background/95 backdrop-blur-sm border-b border-border/30">
+          <div className="bg-background border-b border-border/30">
             {/* Custom sticky sub-header (Market uses this) */}
             {stickySubHeader}
             
