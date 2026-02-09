@@ -438,6 +438,31 @@ body {
   animation: shimmer 1.5s infinite;
 }
 
+/* ============================
+   Desktop Power-User Enhancements
+   Only applies on lg+ breakpoints
+   ============================ */
+@layer base {
+  @media (min-width: 1024px) {
+    *:focus-visible {
+      outline: 2px solid hsl(var(--primary));
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+    table tbody tr td {
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+    }
+    .group:hover .desktop-hover-reveal {
+      opacity: 1;
+    }
+    .desktop-hover-reveal {
+      opacity: 0;
+      transition: opacity 150ms ease;
+    }
+  }
+}
+
 /* Print Styles for PDF Export */
 @media print {
   .no-print {

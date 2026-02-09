@@ -111,7 +111,7 @@ export function AdminKPICard({
       )}
       onClick={handleClick}
     >
-      <CardContent className="p-4">
+      <CardContent className="p-4 lg:p-3">
         {/* Header row */}
         <div className="flex items-start justify-between mb-2">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
@@ -126,7 +126,7 @@ export function AdminKPICard({
         {/* Value */}
         <div className="flex items-end justify-between">
           <div>
-            <p className="text-2xl font-bold tracking-tight">
+            <p className="text-2xl lg:text-xl font-bold tracking-tight">
               {typeof value === 'number' ? value.toLocaleString() : value}
             </p>
             

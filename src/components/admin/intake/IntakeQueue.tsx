@@ -88,7 +88,7 @@ export function IntakeQueue({
         </TabsList>
 
         <TabsContent value="all" className="mt-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 lg:gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {session.items.map(item => (
               <IntakeItemCard
                 key={item.id}
@@ -109,7 +109,7 @@ export function IntakeQueue({
               <p>{isRu ? 'Нет ожидающих объектов' : 'No pending items'}</p>
             </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 lg:gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {pendingItems.map(item => (
                 <IntakeItemCard
                   key={item.id}
@@ -131,7 +131,7 @@ export function IntakeQueue({
               <p>{isRu ? 'Пока нет созданных листингов' : 'No created listings yet'}</p>
             </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 lg:gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {createdItems.map(item => (
                 <IntakeItemCard
                   key={item.id}
@@ -152,7 +152,7 @@ export function IntakeQueue({
               <p>{isRu ? 'Нет отклонённых объектов' : 'No discarded items'}</p>
             </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 lg:gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {discardedItems.map(item => (
                 <IntakeItemCard
                   key={item.id}
