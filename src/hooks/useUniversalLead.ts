@@ -89,12 +89,28 @@ export function useUniversalLead() {
       
       // Trigger WhatsApp notification for specific verticals
       if (data && WHATSAPP_NOTIFICATION_VERTICALS.includes(input.vertical_id)) {
-        // Fire and forget - don't block the main flow
         supabase.functions.invoke('notify-lead-whatsapp', {
           body: { leadId: data.id },
         }).catch(err => {
           console.error('Failed to send WhatsApp notification:', err);
         });
+      }
+
+      // Notify admin about new lead via email (fire & forget)
+      if (data) {
+        supabase.functions.invoke('notify-admin-order', {
+          body: {
+            order_id: data.id,
+            order_number: `LEAD-${data.id.slice(0, 8).toUpperCase()}`,
+            order_type: input.vertical_id,
+            total_amount: input.budget_max || input.budget_min || 0,
+            currency: input.currency || 'THB',
+            customer_name: input.name,
+            customer_email: input.email,
+            customer_phone: input.phone,
+            notes: input.notes || `Lead: ${input.request_type} via ${input.entry_point}`,
+          },
+        }).catch(err => console.error('Failed to send lead admin notification:', err));
       }
       
       return data;
