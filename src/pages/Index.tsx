@@ -16,6 +16,7 @@ import { useLifeSituationContext } from '@/contexts/LifeSituationContext';
 import { SEOHead, createOrganizationSchema } from '@/components/seo';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { HeroBlock } from '@/components/home/HeroBlock';
+import { QuickActionsGrid } from '@/components/home/QuickActionsGrid';
 import { LifeSituationSelector } from '@/components/home/LifeSituationSelector';
 import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanner';
 import { InstallBanner } from '@/components/pwa/InstallBanner';
@@ -67,6 +68,9 @@ const Index = () => {
 
           {/* Hero: Greeting + Search + SOS */}
           <HeroBlock />
+
+          {/* Quick Actions — role-adaptive shortcuts */}
+          <QuickActionsGrid />
 
           {/* When context is active → show status dashboard */}
           {hasContext && (
