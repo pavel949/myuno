@@ -21,11 +21,40 @@ import { RouteRecognitionBlock } from '@/components/life-flow/RouteRecognitionBl
 import { RouteRecommendedBlock } from '@/components/life-flow/RouteRecommendedBlock';
 import { RouteNextSteps } from '@/components/life-flow/RouteNextSteps';
 import { InsurancePromptBlock, shouldShowInsurancePrompt } from '@/components/life-flow/InsurancePromptBlock';
-import { ArrowLeft, Compass, ArrowRight, Car, Palmtree } from 'lucide-react';
+import { ArrowLeft, Compass, ArrowRight, Car, Palmtree, Home, Plus, Sparkles, Calendar, Banknote } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import * as LucideIcons from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
+
+function PropertyQuickAction({ icon: Icon, title, subtitle, onClick, accent }: {
+  icon: LucideIcon;
+  title: string;
+  subtitle: string;
+  onClick: () => void;
+  accent?: boolean;
+}) {
+  return (
+    <button
+      className="w-full rounded-2xl border border-border/60 bg-card p-4 text-left hover:shadow-sm active:scale-[0.99] transition-all touch-manipulation"
+      onClick={onClick}
+    >
+      <div className="flex items-center gap-3">
+        <div className={cn(
+          "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+          accent ? "bg-primary/8" : "bg-muted"
+        )}>
+          <Icon className={cn("w-5 h-5", accent ? "text-primary" : "text-muted-foreground")} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold">{title}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
+        </div>
+        <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+      </div>
+    </button>
+  );
+}
 
 export default function LifeFlowPage() {
   const { code } = useParams<{ code: string }>();
@@ -165,58 +194,89 @@ export default function LifeFlowPage() {
                 currentLabel={isRussian ? 'Что может понадобиться дальше' : 'What you may need next'}
               />
 
-              {/* Quick actions — calm cards */}
+              {/* Quick actions — context-dependent */}
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
                 className="space-y-2"
               >
-                {/* Book Transfer */}
-                <button
-                  className="w-full rounded-2xl border border-border/60 bg-card p-4 text-left hover:shadow-sm active:scale-[0.99] transition-all touch-manipulation"
-                  onClick={() => navigate('/transport/airport-transfer')}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center shrink-0">
-                      <Car className="w-5 h-5 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold">
-                        {isRussian ? 'Забронировать трансфер' : 'Book Airport Transfer'}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {isRussian
-                          ? 'Машина будет ждать вас у выхода'
-                          : 'Your car will be waiting at the exit'}
-                      </p>
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
-                  </div>
-                </button>
-
-                {/* Trip Planner */}
-                <button
-                  className="w-full rounded-2xl border border-border/60 bg-card p-4 text-left hover:shadow-sm active:scale-[0.99] transition-all touch-manipulation"
-                  onClick={() => navigate('/trip-planner')}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center shrink-0">
-                      <Palmtree className="w-5 h-5 text-muted-foreground" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold">
-                        {isRussian ? 'Полный план поездки' : 'Full Trip Planner'}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {isRussian
-                          ? 'Билеты, страховка, Arrival Card — всё в одном месте'
-                          : 'Flights, insurance, Arrival Card — all in one place'}
-                      </p>
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
-                  </div>
-                </button>
+                {code === 'property' ? (
+                  <>
+                    <PropertyQuickAction
+                      icon={Home}
+                      title={isRussian ? 'Управление объектами' : 'Manage Properties'}
+                      subtitle={isRussian ? 'Все ваши объекты в одном месте' : 'All your properties in one place'}
+                      onClick={() => navigate('/owner')}
+                      accent
+                    />
+                    <PropertyQuickAction
+                      icon={Plus}
+                      title={isRussian ? 'Добавить объект' : 'Add Property'}
+                      subtitle={isRussian ? 'Зарегистрировать новую недвижимость' : 'Register a new property'}
+                      onClick={() => navigate('/owner/properties/new')}
+                    />
+                    <PropertyQuickAction
+                      icon={Sparkles}
+                      title={isRussian ? 'Заказать уборку' : 'Order Cleaning'}
+                      subtitle={isRussian ? 'Клининг перед заездом или после выезда' : 'Cleaning before check-in or after check-out'}
+                      onClick={() => navigate('/owner/service-request?type=cleaning')}
+                    />
+                    <PropertyQuickAction
+                      icon={Calendar}
+                      title={isRussian ? 'Календарь бронирований' : 'Booking Calendar'}
+                      subtitle={isRussian ? 'Расписание заездов и выездов' : 'Check-in and check-out schedule'}
+                      onClick={() => navigate('/owner/calendar')}
+                    />
+                    <PropertyQuickAction
+                      icon={Banknote}
+                      title={isRussian ? 'Финансы и расходы' : 'Financials & Expenses'}
+                      subtitle={isRussian ? 'Доходы, налоги, депозиты' : 'Income, taxes, deposits'}
+                      onClick={() => navigate('/owner/financials')}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <button
+                      className="w-full rounded-2xl border border-border/60 bg-card p-4 text-left hover:shadow-sm active:scale-[0.99] transition-all touch-manipulation"
+                      onClick={() => navigate('/transport/airport-transfer')}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center shrink-0">
+                          <Car className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold">
+                            {isRussian ? 'Забронировать трансфер' : 'Book Airport Transfer'}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {isRussian ? 'Машина будет ждать вас у выхода' : 'Your car will be waiting at the exit'}
+                          </p>
+                        </div>
+                        <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+                      </div>
+                    </button>
+                    <button
+                      className="w-full rounded-2xl border border-border/60 bg-card p-4 text-left hover:shadow-sm active:scale-[0.99] transition-all touch-manipulation"
+                      onClick={() => navigate('/trip-planner')}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center shrink-0">
+                          <Palmtree className="w-5 h-5 text-muted-foreground" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold">
+                            {isRussian ? 'Полный план поездки' : 'Full Trip Planner'}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {isRussian ? 'Билеты, страховка, Arrival Card — всё в одном месте' : 'Flights, insurance, Arrival Card — all in one place'}
+                          </p>
+                        </div>
+                        <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+                      </div>
+                    </button>
+                  </>
+                )}
               </motion.div>
 
               {/* WhatsApp concierge */}
