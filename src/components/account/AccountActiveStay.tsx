@@ -82,7 +82,7 @@ export function AccountActiveStay() {
   };
 
   return (
-    <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+    <Card className="overflow-hidden border-primary/20 bg-primary/5">
       <CardContent className="p-0">
         <div className="flex gap-3 p-4">
           {/* Property Image */}

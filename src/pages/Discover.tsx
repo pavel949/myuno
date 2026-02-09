@@ -154,26 +154,7 @@ const SECONDARY_CONTEXTS = [
 ];
 
 // ── Resolve vertical for search ───────────────────────────────────
-const VERTICAL_GRADIENTS: Record<string, string> = {
-  property: 'from-emerald-500 to-teal-400',
-  yacht: 'from-blue-500 to-cyan-400',
-  vehicle: 'from-violet-500 to-purple-400',
-  experience: 'from-fuchsia-500 to-pink-400',
-  cleaning: 'from-amber-500 to-orange-400',
-  babysitter: 'from-pink-400 to-rose-300',
-  beauty: 'from-pink-500 to-fuchsia-400',
-  restaurant: 'from-rose-500 to-red-400',
-  medical: 'from-teal-500 to-cyan-400',
-  legal: 'from-slate-500 to-zinc-400',
-  education: 'from-blue-400 to-sky-300',
-  fitness: 'from-orange-500 to-amber-400',
-  event: 'from-purple-500 to-violet-400',
-  water_activity: 'from-cyan-500 to-sky-400',
-  pet_service: 'from-orange-400 to-yellow-400',
-  flower: 'from-pink-400 to-rose-300',
-  insurance: 'from-indigo-500 to-blue-400',
-  transfer: 'from-indigo-500 to-violet-400',
-};
+// Vertical gradients removed — using flat muted backgrounds
 
 function resolveItem(item: VerticalGroupItem, language: string) {
   if (item.verticalId) {
@@ -184,7 +165,6 @@ function resolveItem(item: VerticalGroupItem, language: string) {
       icon: v.icon,
       label: language === 'ru' ? v.labelRu : v.labelEn,
       route: `/${v.plural}`,
-      gradient: VERTICAL_GRADIENTS[v.id] || 'from-primary to-accent',
     };
   }
   return {
@@ -192,7 +172,6 @@ function resolveItem(item: VerticalGroupItem, language: string) {
     icon: item.icon || '📦',
     label: language === 'ru' ? (item.labelRu || '') : (item.labelEn || ''),
     route: item.route || '/',
-    gradient: 'from-muted-foreground to-muted-foreground',
   };
 }
 

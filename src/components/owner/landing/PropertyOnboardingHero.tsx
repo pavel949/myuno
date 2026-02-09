@@ -28,7 +28,7 @@ export function PropertyOnboardingHero() {
   ];
 
   return (
-    <Card className="border-primary/30 bg-gradient-to-br from-primary/5 via-primary/10 to-transparent">
+    <Card className="border-primary/30 bg-primary/5">
       <CardContent className="p-6 text-center">
         {/* Icon */}
         <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mx-auto mb-4">

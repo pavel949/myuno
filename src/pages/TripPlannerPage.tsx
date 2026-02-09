@@ -22,16 +22,14 @@ export default function TripPlannerPage() {
     <AppLayout>
       <div className="min-h-screen bg-background">
         {/* Header */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-primary/5 to-transparent">
-          <div className="absolute top-0 right-0 w-48 h-48 rounded-full blur-3xl bg-primary/10" />
-
-          <div className="relative z-10">
+        <div className="border-b border-border/50">
+          <div>
             <div className="flex items-center gap-3 p-4">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => navigate(-1)}
-                className="shrink-0 bg-background/80 backdrop-blur-sm"
+                className="shrink-0"
               >
                 <ArrowLeft className="w-5 h-5" />
               </Button>
@@ -43,7 +41,7 @@ export default function TripPlannerPage() {
               className="px-4 pb-5"
             >
               <div className="flex items-start gap-4">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 bg-primary/15 shadow-lg">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-primary/8">
                   <Palmtree className="w-7 h-7 text-primary" />
                 </div>
                 <div className="flex-1 pt-0.5">
