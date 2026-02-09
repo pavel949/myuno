@@ -1,6 +1,6 @@
 import React, { forwardRef, useCallback, memo } from 'react';
 import { motion, HTMLMotionProps } from 'framer-motion';
-import { ChevronRight, Sparkles } from 'lucide-react';
+import { ChevronRight, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
@@ -22,17 +22,17 @@ type Language = 'ru' | 'en' | 'th';
 
 const texts = {
   headline: { 
-    en: 'The world is yours. At home everywhere.', 
-    ru: 'Мир — твой. Везде как дома.', 
-    th: 'โลกเป็นของคุณ ทุกที่คือบ้าน' 
+    en: 'Your life abroad, organized', 
+    ru: 'Жизнь за рубежом — без хаоса', 
+    th: 'ชีวิตต่างแดน เป็นระเบียบ' 
   },
   subtitle: { 
-    en: 'All services for living abroad — in one app', 
-    ru: 'Все сервисы для жизни за рубежом — в одном приложении', 
-    th: 'บริการทั้งหมดสำหรับการใช้ชีวิตในต่างประเทศ — ในแอปเดียว' 
+    en: 'One system for housing, services, and daily needs', 
+    ru: 'Одна система для жилья, сервисов и повседневных задач', 
+    th: 'ระบบเดียวสำหรับที่อยู่ บริการ และความต้องการในชีวิตประจำวัน' 
   },
   comingSoon: { en: 'Coming soon', ru: 'Скоро', th: 'เร็วๆ นี้' },
-  getStarted: { en: 'Get Started', ru: 'Начать', th: 'เริ่มต้น' },
+  getStarted: { en: 'Continue', ru: 'Продолжить', th: 'ดำเนินการต่อ' },
 };
 
 const languageOptions = [
@@ -47,19 +47,16 @@ export const OnboardingModal = memo(forwardRef<HTMLDivElement, OnboardingModalPr
   const { activeCities, comingSoonCities, isLoading, setCity } = useLocation();
   const lang = language as Language;
 
-  // Get the first active city for display
   const activeCity = activeCities[0];
 
   const handleComplete = useCallback(() => {
     localStorage.setItem('myuno-onboarding-complete', 'true');
-    // Set the first active city as the user's location
     if (activeCity) {
       setCity(activeCity.slug);
     }
     onComplete();
   }, [onComplete, activeCity, setCity]);
 
-  // Get localized city name
   const getCityName = (city: typeof activeCity, lang: Language) => {
     if (!city) return '';
     switch (lang) {
@@ -74,53 +71,47 @@ export const OnboardingModal = memo(forwardRef<HTMLDivElement, OnboardingModalPr
       <DialogContent ref={ref} className="sm:max-w-sm p-0 gap-0 overflow-hidden border-0" hideCloseButton>
         <DialogTitle className="sr-only">Welcome to myUNO</DialogTitle>
         <div className="relative flex flex-col">
-          {/* Background gradient */}
-          <div 
-            className="absolute inset-0 pointer-events-none" 
-            style={{ background: 'radial-gradient(circle at 50% 20%, hsl(var(--primary) / 0.2) 0%, transparent 60%)' }} 
-          />
-
           <MotionDiv
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
             className="p-6 sm:p-8 relative z-10 flex flex-col items-center text-center"
           >
-            {/* Logo */}
+            {/* Icon — calm, functional */}
             <motion.div
-              initial={{ scale: 0.5, opacity: 0 }}
+              initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.1, type: "spring", stiffness: 200, damping: 15 }}
-              className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary via-primary to-primary/70 flex items-center justify-center shadow-xl shadow-primary/30 mb-6"
+              transition={{ delay: 0.1, duration: 0.3 }}
+              className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-6"
             >
-              <Sparkles className="w-10 h-10 text-primary-foreground" />
+              <Globe className="w-8 h-8 text-primary" />
             </motion.div>
 
-            {/* Location badge - dynamic from database */}
+            {/* Location badge */}
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6"
+              className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted border border-border/60 mb-6"
             >
               {isLoading ? (
                 <Skeleton className="h-5 w-24" />
               ) : activeCity ? (
                 <>
-                  <span className="text-xl">{activeCity.flag}</span>
-                  <span className="font-semibold text-sm text-primary">
+                  <span className="text-lg">{activeCity.flag}</span>
+                  <span className="font-medium text-sm text-foreground">
                     {getCityName(activeCity, lang)}
                   </span>
                 </>
               ) : null}
             </motion.div>
             
-            {/* Headline */}
+            {/* Headline — calm, factual */}
             <motion.h1
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-2xl sm:text-3xl font-bold leading-tight mb-3"
+              className="text-xl font-semibold leading-tight mb-2"
             >
               {texts.headline[lang]}
             </motion.h1>
@@ -130,12 +121,12 @@ export const OnboardingModal = memo(forwardRef<HTMLDivElement, OnboardingModalPr
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
-              className="text-sm sm:text-base text-muted-foreground mb-8"
+              className="text-sm text-muted-foreground mb-8"
             >
               {texts.subtitle[lang]}
             </motion.p>
 
-            {/* Future locations - dynamic from database */}
+            {/* Future locations */}
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -160,7 +151,7 @@ export const OnboardingModal = memo(forwardRef<HTMLDivElement, OnboardingModalPr
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
+              transition={{ delay: 0.5 }}
               className="flex justify-center gap-2 mb-6"
             >
               {languageOptions.map(opt => (
@@ -170,8 +161,8 @@ export const OnboardingModal = memo(forwardRef<HTMLDivElement, OnboardingModalPr
                   className={cn(
                     "px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 transition-all",
                     language === opt.code 
-                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25" 
-                      : "bg-muted/50 hover:bg-muted text-muted-foreground"
+                      ? "bg-primary text-primary-foreground" 
+                      : "bg-muted hover:bg-muted/80 text-muted-foreground"
                   )}
                 >
                   <span>{opt.flag}</span>
@@ -180,15 +171,15 @@ export const OnboardingModal = memo(forwardRef<HTMLDivElement, OnboardingModalPr
               ))}
             </motion.div>
 
-            {/* CTA Button */}
+            {/* CTA */}
             <motion.div 
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7 }}
+              transition={{ delay: 0.6 }}
               className="w-full"
             >
               <Button 
-                className="w-full h-12 text-base font-semibold rounded-xl" 
+                className="w-full h-12 text-base font-medium rounded-xl" 
                 onClick={handleComplete}
                 disabled={isLoading}
               >

@@ -41,7 +41,7 @@ export const HeroBlock = memo(function HeroBlock() {
       {/* Greeting */}
       <div>
         <h1 className="text-xl font-semibold text-foreground leading-tight">
-          {getGreeting()} 👋
+          {getGreeting()}
         </h1>
         <p className="text-sm text-muted-foreground mt-0.5">
           {isRu ? 'Чем можем помочь сегодня?' : 'How can we help today?'}

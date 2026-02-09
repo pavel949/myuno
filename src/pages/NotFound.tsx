@@ -13,7 +13,6 @@ const NotFound = () => {
   const isRu = language === 'ru';
 
   useEffect(() => {
-    // Check for legacy redirect
     const redirect = getLegacyRedirect(location.pathname);
     if (redirect) {
       navigate(redirect, { replace: true });
@@ -25,21 +24,20 @@ const NotFound = () => {
   return (
     <AppLayout showFooter={false}>
       <div className="flex flex-col items-center justify-center min-h-[70vh] px-6 text-center">
-        {/* Animated 404 */}
-        <div className="relative mb-8">
-          <span className="text-[120px] font-bold leading-none tracking-tighter bg-gradient-to-b from-primary to-primary/30 bg-clip-text text-transparent select-none">
+        {/* 404 — calm, not aggressive */}
+        <div className="mb-8">
+          <span className="text-7xl font-bold leading-none tracking-tight text-muted-foreground/30 select-none">
             404
           </span>
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
         </div>
         
-        <h1 className="text-2xl font-bold text-foreground mb-2">
+        <h1 className="text-xl font-semibold text-foreground mb-2">
           {isRu ? 'Страница не найдена' : 'Page not found'}
         </h1>
-        <p className="text-muted-foreground max-w-sm mb-8">
+        <p className="text-sm text-muted-foreground max-w-sm mb-8">
           {isRu 
-            ? 'Эта страница была удалена, переименована, или временно недоступна.'
-            : 'This page may have been removed, renamed, or is temporarily unavailable.'}
+            ? 'Возможно, страница была перемещена или временно недоступна.'
+            : 'This page may have been moved or is temporarily unavailable.'}
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
