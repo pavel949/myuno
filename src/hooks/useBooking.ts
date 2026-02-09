@@ -167,14 +167,20 @@ export function useBooking() {
           staff_id: params.staff_id,
           legacy_booking_type: params.booking_type,
         },
-        items: (params.items || []).map(item => ({
-          product_id: item.item_id,
-          item_name: item.item_name,
-          item_type: item.item_type,
-          qty: item.quantity || 1,
-          unit_price: item.unit_price || 0,
-          amount: item.subtotal || (item.unit_price || 0) * (item.quantity || 1),
-        })),
+        items: (params.items || []).map(item => {
+          // Only set product_id for items that reference the products table
+          // Experiences, tours, services etc. store their IDs in metadata
+          const isProductRef = item.item_type === 'product' || item.item_type === 'marketplace';
+          return {
+            product_id: isProductRef ? item.item_id : undefined,
+            item_name: item.item_name,
+            item_type: item.item_type,
+            qty: item.quantity || 1,
+            unit_price: item.unit_price || 0,
+            amount: item.subtotal || (item.unit_price || 0) * (item.quantity || 1),
+            metadata: !isProductRef && item.item_id ? { source_id: item.item_id } : undefined,
+          };
+        }),
         participants: (params.participants || []).map((p, idx) => ({
           role: p.is_primary || idx === 0 ? 'primary' as const : 'guest' as const,
           name: p.name,
