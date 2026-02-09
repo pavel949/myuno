@@ -44,8 +44,8 @@ const EMPTY_STATES: Record<string, {
   },
   services: {
     icon: Rocket,
-    titleEn: 'Start selling',
-    titleRu: 'Начните продавать',
+    titleEn: 'No services yet',
+    titleRu: 'Пока нет услуг',
     descriptionEn: 'Add your first service or product to start receiving orders',
     descriptionRu: 'Добавьте вашу первую услугу или товар, чтобы начать получать заказы',
     actionEn: 'Create listing',
@@ -64,8 +64,8 @@ const EMPTY_STATES: Record<string, {
   },
   success: {
     icon: CheckCircle2,
-    titleEn: 'All caught up!',
-    titleRu: 'Всё готово!',
+    titleEn: 'All clear',
+    titleRu: 'Всё в порядке',
     descriptionEn: 'No pending tasks or orders requiring your attention',
     descriptionRu: 'Нет задач или заказов, требующих внимания',
     color: 'text-success',
