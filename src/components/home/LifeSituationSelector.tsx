@@ -5,7 +5,7 @@
  * - Max 6-8 situations
  * - No nesting, no filters
  */
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useLifeSituations } from '@/hooks/useLifeOS';
@@ -29,6 +29,7 @@ export const LifeSituationSelector = memo(function LifeSituationSelector({
   const { data: situations, isLoading } = useLifeSituations();
   const { setLifeSituation, isActive } = useLifeSituationContext();
   const isRussian = language === 'ru';
+  const [showAll, setShowAll] = useState(false);
 
   const handleSelect = (situation: {
     code: string;
@@ -68,8 +69,9 @@ export const LifeSituationSelector = memo(function LifeSituationSelector({
 
   if (!situations?.length) return null;
 
-  // Per UX Contract §2.2: Max 6-8 situations
-  const displayedSituations = situations.slice(0, 8);
+  const VISIBLE_COUNT = 8;
+  const displayedSituations = showAll ? situations : situations.slice(0, VISIBLE_COUNT);
+  const hiddenCount = situations.length - VISIBLE_COUNT;
 
   return (
     <section className={cn("space-y-3", className)}>
@@ -118,6 +120,22 @@ export const LifeSituationSelector = memo(function LifeSituationSelector({
             </button>
           );
         })}
+        {!showAll && hiddenCount > 0 && (
+          <button
+            onClick={() => setShowAll(true)}
+            className={cn(
+              "flex-shrink-0 flex flex-col items-center justify-center gap-1",
+              "w-20 h-20 rounded-xl border border-dashed border-muted-foreground/30",
+              "bg-muted/30 hover:bg-accent/50 transition-all duration-200",
+              "snap-start"
+            )}
+          >
+            <span className="text-lg font-semibold text-muted-foreground">+{hiddenCount}</span>
+            <span className="text-[10px] text-muted-foreground">
+              {isRussian ? 'Ещё' : 'More'}
+            </span>
+          </button>
+        )}
       </div>
     </section>
   );
