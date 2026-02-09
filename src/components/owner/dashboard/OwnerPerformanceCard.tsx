@@ -106,8 +106,8 @@ export function OwnerPerformanceCard() {
             {isRu ? 'Эффективность' : 'Performance'}
           </h2>
           {isSuperhost && (
-            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-600">
-              ⭐ Superhost
+            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-warning/10 text-warning">
+              Superhost
             </span>
           )}
         </div>
@@ -119,9 +119,9 @@ export function OwnerPerformanceCard() {
 
       {/* Progress towards Superhost */}
       {!isSuperhost && progress && (
-        <Card className="p-3 bg-gradient-to-br from-amber-500/5 to-orange-500/5 border-amber-500/20">
+        <Card className="p-3 bg-warning/5 border-warning/20">
           <div className="flex items-center gap-3 mb-2">
-            <Award className="h-4 w-4 text-amber-600" />
+            <Award className="h-4 w-4 text-warning" />
             <span className="text-sm font-medium">
               {isRu ? 'Путь к Суперхозяину' : 'Superhost Progress'}
             </span>

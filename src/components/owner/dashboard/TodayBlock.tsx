@@ -43,7 +43,7 @@ export function TodayBlock() {
   if (pendingTasks.length === 0) {
     return (
       <Card 
-        className="overflow-hidden border-success/20 bg-gradient-to-br from-success/5 to-transparent cursor-pointer hover:shadow-md transition-all"
+        className="overflow-hidden border-success/20 bg-success/5 cursor-pointer hover:shadow-md transition-all"
         onClick={() => navigate('/owner/operations')}
       >
         <CardContent className="p-3">

@@ -45,18 +45,17 @@ export function OffplanPromoSection({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5">
+          <div className="p-2.5 rounded-xl bg-primary/8">
             <Building2 className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h2 className="font-bold text-lg flex items-center gap-2">
+            <h2 className="font-bold text-lg">
               {isRu ? 'Новостройки Пхукета' : 'Phuket New Developments'}
-              <Sparkles className="w-4 h-4 text-amber-500" />
             </h2>
             <p className="text-xs text-muted-foreground">
               {isRu 
-                ? 'Инвестируйте в лучшие проекты с экспертизой muUNO' 
-                : 'Invest in top projects with muUNO expertise'}
+                ? 'Проверенные проекты с экспертизой myUNO' 
+                : 'Verified projects with myUNO expertise'}
             </p>
           </div>
         </div>
@@ -80,7 +79,7 @@ export function OffplanPromoSection({
             <span>{projects.length} {isRu ? 'проектов' : 'projects'}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <TrendingUp className="w-3.5 h-3.5 text-green-500" />
+            <TrendingUp className="w-3.5 h-3.5 text-success" />
             <span>
               {isRu ? 'до' : 'up to'} {Math.max(...projects.map(p => p.roiProjected || 0))}% ROI
             </span>
