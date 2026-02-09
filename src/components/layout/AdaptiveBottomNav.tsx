@@ -178,12 +178,12 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
                 )}
                 
                 <div className={cn(
-                  "flex items-center justify-center w-10 h-10 rounded-2xl transition-all duration-200",
-                  active ? "bg-primary/15 scale-105" : "hover:bg-muted/50"
+                  "flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-150",
+                  active ? "bg-primary/12" : ""
                 )}>
                   <Icon className={cn(
-                    "w-5 h-5 transition-transform duration-200",
-                    active && "scale-110"
+                    "w-5 h-5 transition-transform duration-150",
+                    active && "scale-105"
                   )} />
                 </div>
                 <span className={cn(

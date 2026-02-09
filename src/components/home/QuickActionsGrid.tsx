@@ -643,7 +643,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
   }, [queryClient]);
 
   return (
-    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 md:gap-3">
+    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-1.5 md:gap-3">
       {quickActions.map((action) => {
         const Icon = action.icon;
         const label = language === 'ru' ? action.labelRu : action.label;
@@ -657,11 +657,11 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
             onTouchStart={() => handlePrefetch(action.path)}
             className={cn(
               "relative flex flex-col items-center p-2 rounded-xl",
-              "hover:bg-card/80 transition-all group active:scale-95",
+              "hover:bg-card/80 transition-all group active:scale-[0.97]",
               action.isUrgent && "ring-1 ring-red-500/30"
             )}
           >
-            {/* Badge - only for SOS */}
+            {/* Badge */}
             {badge && (
               <Badge 
                 className="absolute -top-1 -right-1 text-[8px] px-1.5 py-0.5 border-0 z-10 bg-red-500 text-white animate-pulse"
@@ -670,18 +670,18 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
               </Badge>
             )}
             
-            {/* Icon Container - vibrant gradient style */}
+            {/* Icon Container — calmer, less shadow */}
             <div className={cn(
-              "w-14 h-14 rounded-2xl flex items-center justify-center mb-1.5 shadow-lg ring-2 ring-white/20",
+              "w-12 h-12 rounded-xl flex items-center justify-center mb-1.5 shadow-md",
               action.bgColor,
-              "group-hover:scale-110 group-hover:shadow-xl transition-all duration-200"
+              "group-hover:scale-105 transition-transform duration-150"
             )}>
-              <Icon className={cn("w-6 h-6", action.iconColor)} />
+              <Icon className={cn("w-5 h-5", action.iconColor)} />
             </div>
             
-            {/* Label - emphasized */}
+            {/* Label */}
             <span className={cn(
-              "text-[11px] font-semibold text-center leading-tight truncate w-full",
+              "text-[11px] font-medium text-center leading-tight truncate w-full",
               "text-foreground"
             )}>
               {label}

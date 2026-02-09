@@ -57,10 +57,12 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
         {/* Right side - Actions */}
         <div className="flex items-center gap-1">
 
-          {/* Switchers - hide currency/theme on mobile */}
+          {/* Switchers — theme hidden on mobile to reduce clutter */}
           <div className="flex items-center gap-0.5 sm:gap-1 mr-0.5 sm:mr-1">
             <LanguageSwitcher size="sm" />
-            <ThemeSwitcher size="sm" />
+            <div className="hidden sm:block">
+              <ThemeSwitcher size="sm" />
+            </div>
             <CurrencySwitcher size="sm" />
           </div>
           

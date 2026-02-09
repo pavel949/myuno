@@ -136,7 +136,7 @@ export const DiscoveryCarousel = memo(forwardRef<HTMLDivElement, object>(functio
   };
 
   return (
-    <div ref={ref} className="space-y-4">
+    <div ref={ref} className="space-y-3">
       {/* Section Header */}
       <UnifiedSectionHeader
         icon={Compass}
