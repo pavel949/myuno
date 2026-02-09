@@ -1,7 +1,6 @@
 import React, { memo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Bell } from 'lucide-react';
-import logoMyuno from '@/assets/logo-myuno-v2.png';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -42,8 +41,9 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
     >
       <div className="flex items-center justify-between h-12 px-4 max-w-7xl mx-auto">
         {/* Logo — simple text, no gradients */}
-        <Link to="/" className="flex items-center">
-          <img src={logoMyuno} alt="myUNO" className="h-6 w-auto" />
+        <Link to="/" className="flex items-center gap-1">
+          <span className="text-sm text-muted-foreground">my</span>
+          <span className="text-base font-semibold text-foreground">UNO</span>
         </Link>
         
         {title && (
