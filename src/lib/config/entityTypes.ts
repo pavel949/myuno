@@ -9,7 +9,7 @@
 import {
   Home, Car, Ship, UtensilsCrossed, Compass, MapPin, Package,
   Scissors, Building2, Dumbbell, Baby, PawPrint, Scale, Flower2,
-  ShoppingBag, GraduationCap, Briefcase, Heart, Sparkles
+  ShoppingBag, GraduationCap, Briefcase, Heart, Sparkles, FileText
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -305,6 +305,26 @@ export const ENTITY_TYPES: Record<string, EntityTypeDefinition> = {
     labelRu: 'Услуги аэропорта',
     pluralEn: 'Airport Services',
     pluralRu: 'Услуги аэропорта',
+    priority: 'secondary',
+  },
+  transfer: {
+    type: 'transfer',
+    icon: Car,
+    route: '/transport/airport-transfer',
+    labelEn: 'Transfer',
+    labelRu: 'Трансфер',
+    pluralEn: 'Transfers',
+    pluralRu: 'Трансферы',
+    priority: 'primary',
+  },
+  page: {
+    type: 'page',
+    icon: FileText,
+    route: '/',
+    labelEn: 'Page',
+    labelRu: 'Страница',
+    pluralEn: 'Pages',
+    pluralRu: 'Страницы',
     priority: 'secondary',
   },
 } as const;
