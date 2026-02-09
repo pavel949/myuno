@@ -1,85 +1,94 @@
 
-# Проверка готовности платформы к коммерческому использованию
 
-## Результаты тестирования
+# P0 Fix: LifeSituation Gate Breaking All Pages
 
-Я прошёл по основным пользовательским маршрутам как обычный пользователь (без прав администратора) на мобильном viewport (390x844). Вот что обнаружил:
+## Problem
 
----
+The `LifeSituationGate` component fully replaces page content with a situation selector when no context is active. Since it wraps ~20 routes + the Home page, every page looks identical -- showing the same "What's happening in your life?" selector.
 
-## КРИТИЧЕСКАЯ ПРОБЛЕМА: Maintenance Mode блокирует ВСЮ платформу
+Two bugs:
+1. **All pages identical**: Gate replaces content instead of guiding the user
+2. **Wrong redirect**: Selecting a situation on `/beauty` navigates to `/life-flow/:code` instead of staying on `/beauty`
 
-**Статус: БЛОКЕР для коммерческого использования**
+## Solution
 
-Сейчас в `MaintenanceContext.tsx` (строка 29) maintenance mode **включён по умолчанию**:
+Remove the hard-blocking `RequireLifeSituation` wrapper from all vertical routes. Instead, use a **non-blocking prompt** approach:
+
+### Changes
+
+**1. `LifeSituationGate.tsx` -- Fix redirect behavior**
+- When `handleSelect` is called, set the life situation context but do NOT navigate away
+- The user stays on the current page, which now renders because context is active
+
+**2. `AnimatedRoutes.tsx` -- Remove `RequireLifeSituation` from all vertical routes**
+- Remove the wrapper from all ~20 routes (`/beauty`, `/property`, `/restaurants`, `/transport`, `/fitness`, `/medical`, `/events`, `/education`, `/flowers`, `/services`, `/legal`, `/insurance`, `/banking`, `/discover`, etc.)
+- Verticals render normally regardless of life situation state
+
+**3. `Index.tsx` -- Keep gate only on Home page**
+- Home page keeps `LifeSituationGate` but as a **non-blocking suggestion** below the hero
+- Vertical content (QuickActions, Discovery) always renders -- gate becomes a prompt, not a wall
+
+**4. Vertical index pages -- Add soft banner (optional, lightweight)**
+- Each vertical can show the `ActiveSituationBanner` to indicate context
+- No blocking behavior
+
+### Architecture after fix
 
 ```text
-const stored = localStorage.getItem(MAINTENANCE_KEY);
-return stored === null ? true : stored === 'true';
+Home (/)
+  +-- HeroBlock (always visible)
+  +-- LifeSituation prompt (suggestion, not blocker)
+  +-- QuickActions + Discovery (always visible)
+
+/beauty, /yachts, etc.
+  +-- ActiveSituationBanner (if context active)
+  +-- Normal page content (always renders)
 ```
 
-Это значит, что **каждый новый пользователь**, зашедший на опубликованный сайт `uno-connect-hub.lovable.app`, видит страницу "Coming Soon" вместо платформы. Обойти можно только через `?admin=true` в URL или через admin-маршруты.
+### Technical details
 
-**Решение:** Изменить дефолтное значение на `false` (сайт открыт), чтобы обычные пользователи могли пользоваться платформой. Администраторы смогут включить maintenance обратно через toggle в admin-панели.
+**`AnimatedRoutes.tsx`**: Unwrap all `<RequireLifeSituation>` wrappers:
+```tsx
+// BEFORE:
+<Route path="/beauty" element={<LazyPage><RequireLifeSituation><BeautySpaIndex /></RequireLifeSituation></LazyPage>} />
 
----
-
-## Что работает (при bypass maintenance)
-
-| Страница | Статус | Комментарий |
-|----------|--------|-------------|
-| Главная `/` | OK | Hero, Quick Actions, навигация работают |
-| Трансфер `/transport/airport-transfer` | OK | Форма загружается, автокомплит адресов работает, выбор направления/терминала функционален |
-| LifeFlow `/life-flow/pre_trip_planning` | OK | Контент загружается, WhatsApp CTA блок на месте |
-| Экспириенсы `/experiences` | OK | Карточки загружаются из базы данных |
-
----
-
-## Прочие замечания
-
-1. **Год в footer UnderConstruction**: указан "2025", нужно обновить на "2025-2026" или убрать год
-2. **Подписка email на maintenance page**: форма не сохраняет email в базу данных (только `setSubscribed(true)` локально) -- если оставлять maintenance page, email-подписку нужно довести до рабочего состояния
-3. **Console ошибки**: CORS-ошибка manifest.webmanifest -- это инфраструктурный момент preview-среды, на продакшене не повторится
-
----
-
-## План действий
-
-### Шаг 1: Отключить Maintenance Mode по умолчанию
-- В `src/contexts/MaintenanceContext.tsx` изменить дефолт с `true` на `false`
-- Это мгновенно откроет платформу для всех пользователей
-
-### Шаг 2: Обновить год в footer
-- В `src/components/maintenance/UnderConstruction.tsx` обновить "2025" на "2025-2026"
-
-### Шаг 3 (опционально): Реализовать email-подписку
-- Создать таблицу `launch_subscribers` для сохранения email-адресов
-- Подключить форму на maintenance page к базе данных
-
----
-
-## Технические детали
-
-### Изменение 1: MaintenanceContext.tsx
-
-Строка 29 -- изменить дефолтное значение:
-```text
-// Было:
-return stored === null ? true : stored === 'true';
-
-// Станет:
-return stored === null ? false : stored === 'true';
+// AFTER:
+<Route path="/beauty" element={<LazyPage><BeautySpaIndex /></LazyPage>} />
 ```
 
-### Изменение 2: UnderConstruction.tsx
+This applies to all routes: `/beauty`, `/property`, `/restaurants`, `/transport`, `/fitness`, `/medical`, `/events`, `/education`, `/flowers`, `/services`, `/legal`, `/insurance`, `/banking`, `/discover`
 
-Строка 173 -- обновить footer:
-```text
-// Было:
-© 2025 myUNO · Phuket Edition
+**`LifeSituationGate.tsx`**: Remove `navigate()` from `handleSelect`:
+```tsx
+// BEFORE:
+const handleSelect = (situation) => {
+  setLifeSituation(situation.code, title, situation.color);
+  navigate(`/life-flow/${situation.code}`);  // <-- wrong redirect
+};
 
-// Станет:
-© 2025-2026 myUNO · Phuket Edition
+// AFTER:
+const handleSelect = (situation) => {
+  setLifeSituation(situation.code, title, situation.color);
+  // Stay on current page -- context is now set, children will render
+};
 ```
 
-Шаг 3 (email-подписка) оставим на потом, если потребуется.
+**`Index.tsx`**: Make gate non-blocking -- always show verticals:
+```tsx
+// Show life situation prompt if no context, but don't block content
+{!hasContext && <LifeSituationPrompt />}
+<QuickActionsGrid />
+<DiscoveryCarousel />
+```
+
+### Files to modify
+- `src/components/layout/AnimatedRoutes.tsx` -- remove RequireLifeSituation from ~20 routes
+- `src/components/life-os/LifeSituationGate.tsx` -- remove navigate redirect
+- `src/pages/Index.tsx` -- make gate non-blocking
+
+### What this preserves
+- LifeSituation context still works as global state
+- ActiveSituationBanner still shows when context is active
+- `/life-flow/:code` route still works as a first-class route
+- P0 intent (LifeOS as primary axis) remains -- it's just not breaking the app
+
