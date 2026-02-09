@@ -1,99 +1,58 @@
 
 
-## Ignatev Estate Rental Properties Import Pipeline
+## Улучшение видимости выбранной ситуации и расширение выбора
 
-### Overview
-Build a dedicated Edge Function that scrapes all rental listings from ignatevestate.ru, extracts structured property data (title, price, bedrooms, bathrooms, area, amenities, images, district, description), and imports them into the unified `properties` table. The management company (Ignatev Estate) will be linked as a provider.
+### Проблема
+1. **Выбранная ситуация теряется** -- после выбора она отображается как тонкая полоска наверху страницы (ActiveSituationBanner), которую легко не заметить
+2. **Мало вариантов** -- сейчас всего 8 жизненных ситуаций, пользователю может не хватить
 
-### Discovery Phase Results
+### Решение
 
-From scraping the site, I identified **~15+ rental listings** accessible via `https://www.ignatevestate.ru/listings?type=1`. The listing URLs follow the pattern:
+#### 1. Улучшить ActiveSituationBanner
+Сделать баннер более заметным:
+- Увеличить размер и добавить иконку ситуации
+- Добавить цветной фон (не прозрачный) с градиентом на основе цвета ситуации
+- Увеличить шрифт и паддинги
+- Показывать баннер в стиле "pill/chip" чтобы он выглядел как активный выбор
+
+#### 2. Добавить новые жизненные ситуации в базу данных
+Добавить 4-6 дополнительных ситуаций:
+- **Pet Care** / Питомцы -- уход за животными на острове
+- **Education** / Образование -- школы, курсы, обучение
+- **Shopping & Lifestyle** / Шоппинг -- торговые центры, рынки, доставка
+- **Nightlife & Social** / Ночная жизнь -- бары, клубы, мероприятия
+- **Sports & Fitness** / Спорт -- залы, активности, тренеры
+- **Visa Run & Travel** / Визаран -- поездки за визой, путешествия по ЮВА
+
+Итого будет 12-14 ситуаций вместо 8.
+
+#### 3. Обновить LifeSituationSelector на Home
+- Показывать все ситуации в сетке 2 колонки (без скролла) вместо горизонтальных чипов
+- Для 12+ элементов показывать первые 8 с кнопкой "Ещё" (уже реализовано)
+
+### Технические детали
+
+**Файлы для изменения:**
+
+| Файл | Что меняем |
+|------|-----------|
+| `src/components/life-os/ActiveSituationBanner.tsx` | Редизайн: крупнее, цветной фон, иконка, лучшая видимость |
+| `src/components/home/LifeSituationSelector.tsx` | Сетка 2 колонки для удобного выбора |
+| Database migration | Добавить 4-6 новых life_situations |
+
+**ActiveSituationBanner -- новый вид:**
+- Высота ~48px вместо ~32px
+- Цветной фон `{color}15` с левой полоской `{color}`
+- Иконка ситуации слева
+- Текст крупнее (text-sm вместо text-xs)
+- Кнопки "Сменить" и "X" остаются
+
+**Новые записи в life_situations:**
 ```
-/listings/{slug}-{id}
+pets      | Pet Care           | Питомцы          | Dog     | #A855F7
+education | Education          | Образование      | GraduationCap | #0EA5E9
+shopping  | Shopping           | Шоппинг          | ShoppingBag   | #F97316
+nightlife | Nightlife & Social | Ночная жизнь     | Music   | #D946EF
+sports    | Sports & Fitness   | Спорт и фитнес   | Dumbbell| #22C55E
+visa_travel| Visa Run & Travel | Визаран           | Globe   | #14B8A6
 ```
-
-Each listing page contains rich data:
-- Title, description, property type (Villa, Condo, Apartment)
-- Price in THB/USD, bedrooms, bathrooms, area (sqm)
-- District/location, address
-- Gallery images (8-20 photos per listing)
-- Amenities (pool, security, CCTV, garden, parking, etc.)
-- IE reference code (e.g. IE-RNT-195)
-- Unit/floor plan details
-
-Management company: **Ignatev Estate** (info@ignatev-estate.com, +66 92 240 7355, WhatsApp, Telegram, LinkedIn, Instagram, Facebook)
-
-### Implementation Plan
-
-#### Phase 1: Create/Verify Provider Record
-- Ensure "Ignatev Estate" exists in the `providers` table as an active provider
-- Store contact details (email, phone, social links)
-
-#### Phase 2: New Edge Function `ignatev-scrape-rentals`
-
-The function will:
-
-1. **Discover rental URLs** -- Scrape the listings index page (`/listings?type=1`) via Firecrawl to collect all rental listing URLs
-2. **Scrape each listing** -- Use Firecrawl to get full markdown + links for each detail page
-3. **AI Extraction** -- Use Gemini Flash to parse markdown into structured JSON:
-   - `title_en`, `description_en` (from page content)
-   - `property_type` (villa/condo/apartment)
-   - `bedrooms`, `bathrooms`, `area_sqm`
-   - `price`, `currency` (THB or USD)
-   - `district`, `address`
-   - `amenities[]`
-   - `images[]` (gallery URLs)
-   - `ie_reference_code` (IE-RNT-xxx)
-4. **Russian Translation** -- Auto-translate title and description to Russian via Gemini Flash Lite
-5. **Deduplication** -- Match by title (ilike) to avoid duplicates with existing properties
-6. **Upsert into `properties`** -- Insert new or update existing records with:
-   - `listing_type: 'rent'`
-   - `listing_modes: ['rent']`
-   - `provider_id` linked to Ignatev Estate provider
-   - `approval_status: 'approved'`
-   - `is_active: true`
-
-#### Phase 3: Image Caching
-- Download cover images from ignatevestate.ru and store in Supabase Storage to avoid hotlinking issues
-- Use the existing `proxy-image` function pattern
-
-### Data Mapping
-
-```text
-Ignatev Estate Field       -->  properties Column
-----------------------------------------------------
-Title                      -->  title_en / title_ru
-Description                -->  description_en / description_ru
-Property Type (Villa, etc) -->  property_type
-Bedrooms                   -->  bedrooms
-Bathrooms                  -->  bathrooms
-Area (sqm)                 -->  area_sqm
-Price                      -->  price
-Currency (THB/USD)         -->  currency
-Price period               -->  price_period ('month')
-District                   -->  district
-Address                    -->  address
-Amenities                  -->  amenities[]
-Gallery images             -->  images[]
-Cover image                -->  cover_image
-IE Reference               -->  internal_name
-Listing type               -->  listing_type ('rent')
-```
-
-### Technical Details
-
-- Reuses existing patterns from `fazwaz-scrape-project` Edge Function (Firecrawl + Gemini extraction + Russian translation)
-- Batch processing with rate limiting (max 5 concurrent scrapes)
-- Dry-run mode available for testing before actual import
-- Provider/management company metadata stored alongside properties
-
-### Files to Create/Modify
-
-| Action | File |
-|--------|------|
-| Create | `supabase/functions/ignatev-scrape-rentals/index.ts` |
-| Modify | Database: ensure Ignatev Estate provider record exists |
-
-### Estimated Rental Listings to Import
-Based on the index page scrape: ~15-20 rental properties including villas in Layan, Rawai, Patong, Pasak, Cherng Thale, Paklok, Kamala, Bang Tao, and condominiums in various districts.
-
