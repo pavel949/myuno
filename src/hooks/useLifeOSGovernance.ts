@@ -35,18 +35,15 @@ export interface HealthMetrics {
   title_en: string;
   title_ru: string;
   is_active: boolean;
-  total_entities: number;
-  primary_count: number;
-  secondary_count: number;
-  avg_weight: number;
-  min_weight: number | null;
-  max_weight: number | null;
-  last_updated_at: string | null;
-  entity_type_count: number;
-  flag_no_primary: boolean;
-  flag_low_coverage: boolean;
-  flag_primary_overload: boolean;
-  flag_weight_out_of_range: boolean;
+  scenario_count: number;
+  task_count: number;
+  legacy_entity_count: number;
+  new_entity_count: number;
+  flag_no_scenarios: boolean;
+  flag_no_tasks: boolean;
+  flag_no_entities: boolean;
+  orphan_scenario_count: number;
+  orphan_task_count: number;
   entity_overuse_count: number;
   health_score: number;
 }
