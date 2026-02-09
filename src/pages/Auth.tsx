@@ -197,6 +197,17 @@ export default function Auth() {
             console.error('Error applying referral code:', refError);
           }
         }
+
+        // Notify admin about new registration (fire & forget)
+        supabase.functions.invoke('notify-new-signup', {
+          body: {
+            user_email: email,
+            user_name: fullName,
+            user_phone: phone.replace(/\D/g, '') || undefined,
+            referral_code: referralCode || undefined,
+            signup_source: 'auth_page',
+          },
+        }).catch(err => console.error('Signup notification error:', err));
         
         toast({
           title: t('message.success'),
