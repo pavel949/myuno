@@ -13,7 +13,6 @@ const actions = [
     labelEn: 'Import OTA', 
     labelRu: 'Импорт OTA',
     path: '/owner/channels',
-    color: 'bg-destructive/10 text-destructive hover:bg-destructive/20',
   },
   { 
     id: 'expense', 
@@ -21,7 +20,6 @@ const actions = [
     labelEn: 'Add Expense', 
     labelRu: 'Расход',
     path: '/owner/quick-expense',
-    color: 'bg-warning/10 text-warning hover:bg-warning/20',
   },
   { 
     id: 'cleaning', 
@@ -29,7 +27,6 @@ const actions = [
     labelEn: 'Cleaning', 
     labelRu: 'Уборка',
     path: '/owner/service-request?type=cleaning',
-    color: 'bg-accent/50 text-accent-foreground hover:bg-accent',
   },
   { 
     id: 'calendar', 
@@ -37,7 +34,6 @@ const actions = [
     labelEn: 'Calendar', 
     labelRu: 'Календарь',
     path: '/owner/calendar',
-    color: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
   },
   { 
     id: 'property', 
@@ -45,7 +41,6 @@ const actions = [
     labelEn: 'Add Property', 
     labelRu: 'Объект',
     path: '/owner/properties/new',
-    color: 'bg-primary/10 text-primary hover:bg-primary/20',
   },
 ];
 
@@ -63,10 +58,7 @@ export function QuickActionsBar() {
             key={action.id}
             variant="ghost"
             size="sm"
-            className={cn(
-              "flex-shrink-0 h-auto py-2 px-3 rounded-xl gap-2",
-              action.color
-            )}
+            className="flex-shrink-0 h-auto py-2 px-3 rounded-xl gap-2 bg-primary/8 text-primary hover:bg-primary/15"
             onClick={() => navigate(action.path)}
             data-tour={action.id === 'property' ? 'add-property' : undefined}
           >

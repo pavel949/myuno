@@ -30,7 +30,7 @@ const quickActions: QuickAction[] = [
     title: 'Expense', 
     titleRu: 'Расход',
     type: 'expense',
-    color: 'text-orange-500'
+    color: 'text-primary'
   },
   { 
     id: 'cleaning',
@@ -38,7 +38,7 @@ const quickActions: QuickAction[] = [
     title: 'Cleaning', 
     titleRu: 'Клининг',
     type: 'cleaning',
-    color: 'text-info'
+    color: 'text-primary'
   },
   { 
     id: 'repair',
@@ -46,7 +46,7 @@ const quickActions: QuickAction[] = [
     title: 'Repair', 
     titleRu: 'Ремонт',
     type: 'maintenance',
-    color: 'text-warning'
+    color: 'text-primary'
   },
   { 
     id: 'shopping',
@@ -54,7 +54,7 @@ const quickActions: QuickAction[] = [
     title: 'Shopping', 
     titleRu: 'Закупки',
     type: 'shopping',
-    color: 'text-pink-500'
+    color: 'text-primary'
   },
   { 
     id: 'check-in',
@@ -62,7 +62,7 @@ const quickActions: QuickAction[] = [
     title: 'Check-in', 
     titleRu: 'Check-in',
     type: 'check_in',
-    color: 'text-success'
+    color: 'text-primary'
   },
   { 
     id: 'inspection',
@@ -70,7 +70,7 @@ const quickActions: QuickAction[] = [
     title: 'Inspect', 
     titleRu: 'Осмотр',
     type: 'inspection',
-    color: 'text-purple-500'
+    color: 'text-primary'
   },
 ];
 
@@ -106,11 +106,8 @@ export function OwnerQuickActions() {
               className="h-auto flex-col gap-1.5 py-3 hover:bg-muted"
               onClick={() => handleAction(action)}
             >
-              <div className={cn(
-                "p-2 rounded-full bg-muted",
-                action.color
-              )}>
-                <action.icon className="h-4 w-4" />
+              <div className="p-2 rounded-full bg-primary/8">
+                <action.icon className="h-4 w-4 text-primary" />
               </div>
               <span className="text-xs font-medium">
                 {isRu ? action.titleRu : action.title}
