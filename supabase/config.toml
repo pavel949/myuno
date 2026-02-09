@@ -110,3 +110,6 @@ verify_jwt = false
 
 [functions.fazwaz-scrape-project]
 verify_jwt = false
+
+[functions.ignatev-scrape-rentals]
+verify_jwt = false
