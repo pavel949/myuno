@@ -21,6 +21,8 @@ export interface IncludeItem {
   icon?: string;
 }
 
+export type BookingModel = 'group' | 'private';
+
 export interface Experience {
   id: string;
   experience_type: ExperienceType;
@@ -70,6 +72,7 @@ export interface Experience {
   exclusions: string[];
   slug: string | null;
   status: string | null;
+  booking_model: BookingModel;
 }
 
 // ====== CATEGORIES ======
@@ -84,8 +87,8 @@ export const EXPERIENCE_CATEGORIES = [
   { id: 'water-sports', labelEn: 'Water Sports', labelRu: 'Водный спорт', icon: '🏄' },
   { id: 'wildlife', labelEn: 'Wildlife', labelRu: 'Животные', icon: '🐘' },
   { id: 'sea_canoe', labelEn: 'Sea Canoe', labelRu: 'Каноэ', icon: '🛶' },
-  { id: 'boat_tour', labelEn: 'Boat Tour', labelRu: 'Лодочный тур', icon: '⛵' },
-  { id: 'charter', labelEn: 'Charter', labelRu: 'Чартер', icon: '🚤' },
+  { id: 'city-tour', labelEn: 'City Tour', labelRu: 'Городской тур', icon: '🏛️' },
+  { id: 'food-tour', labelEn: 'Food Tour', labelRu: 'Гастротур', icon: '🍜' },
   { id: 'cooking_class', labelEn: 'Cooking Class', labelRu: 'Кулинарный класс', icon: '👨‍🍳' },
   { id: 'zipline', labelEn: 'Zipline', labelRu: 'Зиплайн', icon: '🏗️' },
   // Activities
@@ -95,9 +98,14 @@ export const EXPERIENCE_CATEGORIES = [
   { id: 'kayaking', labelEn: 'Kayaking', labelRu: 'Каякинг', icon: '🛶' },
   { id: 'parasailing', labelEn: 'Parasailing', labelRu: 'Парасейлинг', icon: '🪂' },
   { id: 'jet-ski', labelEn: 'Jet Ski', labelRu: 'Гидроцикл', icon: '🚤' },
-  { id: 'yacht', labelEn: 'Yacht', labelRu: 'Яхта', icon: '⛵' },
   { id: 'surfing', labelEn: 'Surfing', labelRu: 'Серфинг', icon: '🏄‍♂️' },
   { id: 'wakeboarding', labelEn: 'Wakeboarding', labelRu: 'Вейкбординг', icon: '🏂' },
+  { id: 'extreme', labelEn: 'Extreme', labelRu: 'Экстрим', icon: '🤸' },
+  { id: 'shooting', labelEn: 'Shooting Range', labelRu: 'Тир', icon: '🎯' },
+  { id: 'escape-room', labelEn: 'Escape Room', labelRu: 'Квест-комната', icon: '🔐' },
+  { id: 'golf', labelEn: 'Golf', labelRu: 'Гольф', icon: '⛳' },
+  { id: 'paintball', labelEn: 'Paintball', labelRu: 'Пейнтбол', icon: '🎨' },
+  { id: 'martial-arts', labelEn: 'Martial Arts', labelRu: 'Единоборства', icon: '🥊' },
 ] as const;
 
 // ====== OPTIONS ======
@@ -166,6 +174,7 @@ const transformExperience = (raw: Record<string, unknown>): Experience => {
     exclusions: parseJsonArray(raw.exclusions as Json) as string[],
     slug: raw.slug as string | null,
     status: raw.status as string | null,
+    booking_model: (raw.booking_model as BookingModel) || 'group',
   };
 };
 
