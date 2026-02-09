@@ -23,7 +23,7 @@ export const HeroBlock = memo(function HeroBlock() {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="space-y-3"
+      className="space-y-3 lg:space-y-2"
     >
       {/* Compact Header: Location + Brand + SOS */}
       <div className="flex items-center justify-between">
@@ -53,10 +53,10 @@ export const HeroBlock = memo(function HeroBlock() {
       </div>
 
       {/* Main headline */}
-      <h1 className="text-center text-2xl sm:text-3xl font-display font-bold text-foreground mt-1">
+      <h1 className="text-center lg:text-left text-2xl sm:text-3xl lg:text-2xl font-display font-bold text-foreground mt-1">
         {isRu ? 'Дом вдали от дома' : 'Home Away From Home'}
       </h1>
-      <p className="text-center text-sm text-muted-foreground -mt-1">
+      <p className="text-center lg:text-left text-sm text-muted-foreground -mt-1">
         {isRu ? 'Все решения в одном приложении' : 'All solutions in one app'}
       </p>
 

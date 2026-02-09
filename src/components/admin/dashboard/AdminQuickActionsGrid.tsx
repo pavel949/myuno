@@ -86,7 +86,7 @@ export function AdminQuickActionsGrid() {
           {isRu ? 'Быстрые действия' : 'Quick Actions'}
         </h3>
       </div>
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-4 sm:grid-cols-5 lg:grid-cols-8 gap-2">
         {QUICK_ACTIONS.map((action) => {
           const Icon = action.icon;
           const isPrimary = action.variant === 'primary';
@@ -97,13 +97,14 @@ export function AdminQuickActionsGrid() {
               variant={isPrimary ? 'default' : 'outline'}
               size="sm"
               className={cn(
-                "h-auto py-2.5 px-2 flex flex-col items-center gap-1.5",
+                "h-auto py-2.5 lg:py-2 px-2 flex flex-col lg:flex-row items-center gap-1.5 lg:gap-2",
+                "lg:justify-start",
                 isPrimary && "bg-primary hover:bg-primary/90"
               )}
               onClick={() => navigate(action.href)}
             >
-              <Icon className="h-4 w-4" />
-              <span className="text-[10px] font-medium leading-tight text-center">
+              <Icon className="h-4 w-4 shrink-0" />
+              <span className="text-[10px] lg:text-xs font-medium leading-tight text-center lg:text-left">
                 {isRu ? action.labelRu : action.label}
               </span>
             </Button>

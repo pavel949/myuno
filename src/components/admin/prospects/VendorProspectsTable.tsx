@@ -82,65 +82,65 @@ export function VendorProspectsTable() {
                 const priority = priorityConfig[prospect.ai_priority || ''];
                 const location = prospect.district || prospect.city;
                 
-                return (
-                  <TableRow 
-                    key={prospect.id}
-                    className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => setSelectedProspect(prospect)}
-                  >
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback className="text-xs bg-primary/10 text-primary">
-                            {prospect.business_name?.charAt(0) || '?'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="font-medium">{prospect.business_name}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {prospect.category || '—'}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {location || '—'}
-                    </TableCell>
-                    <TableCell>
-                      <Badge 
-                        variant="outline"
-                        className={cn(status?.color, status?.bgColor)}
-                      >
-                        {isRussian ? status?.labelRu : status?.label}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {priority ? (
+                  return (
+                    <TableRow 
+                      key={prospect.id}
+                      className="cursor-pointer hover:bg-muted/50 group"
+                      onClick={() => setSelectedProspect(prospect)}
+                    >
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-8 w-8 lg:h-7 lg:w-7">
+                            <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                              {prospect.business_name?.charAt(0) || '?'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="font-medium">{prospect.business_name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {prospect.category || '—'}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {location || '—'}
+                      </TableCell>
+                      <TableCell>
                         <Badge 
                           variant="outline"
-                          className={cn(priority?.color, priority?.bgColor)}
+                          className={cn(status?.color, status?.bgColor)}
                         >
-                          {priority?.label}
+                          {isRussian ? status?.labelRu : status?.label}
                         </Badge>
-                      ) : (
-                        <span className="text-muted-foreground">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {prospect.ai_score !== null ? (
-                        <div className="flex items-center gap-1">
-                          <Star className="h-3 w-3 text-yellow-500" />
-                          <span>{prospect.ai_score}</span>
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground capitalize">
-                      {prospect.source_type?.replace('_', ' ')}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {format(new Date(prospect.created_at), 'dd.MM.yy')}
-                    </TableCell>
-                  </TableRow>
+                      </TableCell>
+                      <TableCell>
+                        {priority ? (
+                          <Badge 
+                            variant="outline"
+                            className={cn(priority?.color, priority?.bgColor)}
+                          >
+                            {priority?.label}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {prospect.ai_score !== null ? (
+                          <div className="flex items-center gap-1">
+                            <Star className="h-3 w-3 text-yellow-500" />
+                            <span>{prospect.ai_score}</span>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground capitalize">
+                        {prospect.source_type?.replace('_', ' ')}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {format(new Date(prospect.created_at), 'dd.MM.yy')}
+                      </TableCell>
+                    </TableRow>
                 );
               })
             )}

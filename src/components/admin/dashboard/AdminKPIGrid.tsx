@@ -23,7 +23,7 @@ function KPICard({ title, value, change, icon: Icon, color, onClick }: KPICardPr
   return (
     <Card 
       className={cn(
-        "p-4 transition-all hover:shadow-md",
+        "p-4 lg:p-3 transition-all hover:shadow-md group",
         onClick && "cursor-pointer hover:bg-muted/30"
       )}
       onClick={onClick}
@@ -33,7 +33,7 @@ function KPICard({ title, value, change, icon: Icon, color, onClick }: KPICardPr
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
             {title}
           </p>
-          <p className="text-2xl font-bold">{value}</p>
+          <p className="text-2xl lg:text-xl font-bold">{value}</p>
           {hasGrowth && (
             <div className={cn(
               "flex items-center gap-1 mt-1 text-xs font-medium",
@@ -117,7 +117,7 @@ export function AdminKPIGrid() {
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-2">
       {kpis.map((kpi) => (
         <KPICard key={kpi.title} {...kpi} />
       ))}

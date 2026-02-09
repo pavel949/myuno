@@ -52,11 +52,12 @@ export function IntakeItemCard({
 
   return (
     <Card className={cn(
-      "transition-all",
+      "transition-all group",
+      "lg:hover:shadow-md lg:hover:border-primary/20",
       item.status === 'created' && "border-green-500/50 bg-green-500/5",
       item.status === 'discarded' && "border-muted bg-muted/30 opacity-60"
     )}>
-      <CardHeader className="pb-2">
+      <CardHeader className="pb-2 lg:pb-1.5 lg:pt-3 lg:px-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
@@ -97,7 +98,7 @@ export function IntakeItemCard({
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-3 lg:space-y-2 lg:px-3 lg:pb-3">
         {/* Confidence bar */}
         <div>
           <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
