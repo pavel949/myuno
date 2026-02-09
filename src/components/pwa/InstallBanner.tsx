@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Download, X, Share, Plus, Loader2, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
@@ -8,27 +8,12 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const texts = {
-  en: {
-    install: 'Install app',
-    download: 'Download',
-    close: 'Close',
-    iosInstall: 'Install on iPhone',
-    androidInstall: 'Install on Android',
-    toScreen: 'To Home Screen',
-    installBtn: 'Install',
-  },
-  ru: {
-    install: 'Установить приложение',
-    download: 'Скачать',
-    close: 'Закрыть',
-    iosInstall: 'Установка на iPhone',
-    androidInstall: 'Установка на Android',
-    toScreen: 'На экран',
-    installBtn: 'Установить',
-  },
+  en: { install: 'Install app for quick access', download: 'Install', close: 'Close', iosTitle: 'Add to Home Screen', androidTitle: 'Install app', toScreen: 'Home Screen' },
+  ru: { install: 'Установите для быстрого доступа', download: 'Установить', close: 'Закрыть', iosTitle: 'Добавить на экран', androidTitle: 'Установить', toScreen: 'На экран' },
 };
+
 const BANNER_DISMISSED_KEY = 'pwa_banner_dismissed';
-const BANNER_DISMISS_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
+const BANNER_DISMISS_DURATION = 7 * 24 * 60 * 60 * 1000;
 
 export function InstallBanner() {
   const [isVisible, setIsVisible] = useState(false);
@@ -41,28 +26,13 @@ export function InstallBanner() {
   const t = texts[language] || texts.en;
 
   useEffect(() => {
-    // Skip if already installed as PWA
-    if (isInstalled) {
-      setIsVisible(false);
-      return;
-    }
-
-    // Check if dismissed recently
+    if (isInstalled) { setIsVisible(false); return; }
     const dismissedAt = localStorage.getItem(BANNER_DISMISSED_KEY);
-    if (dismissedAt) {
-      const dismissedTime = parseInt(dismissedAt, 10);
-      if (Date.now() - dismissedTime < BANNER_DISMISS_DURATION) {
-        setIsVisible(false);
-        return;
-      }
-      // Clear expired dismissal
-      localStorage.removeItem(BANNER_DISMISSED_KEY);
+    if (dismissedAt && Date.now() - parseInt(dismissedAt, 10) < BANNER_DISMISS_DURATION) {
+      setIsVisible(false); return;
     }
-
-    // Show on mobile OR when on iOS/Android regardless of viewport
-    // This ensures it shows on actual mobile devices even if viewport detection fails
-    const shouldShow = isMobileViewport || isIOS || isAndroid;
-    setIsVisible(shouldShow);
+    if (dismissedAt) localStorage.removeItem(BANNER_DISMISSED_KEY);
+    setIsVisible(isMobileViewport || isIOS || isAndroid);
   }, [isMobileViewport, isInstalled, isIOS, isAndroid]);
 
   const handleDismiss = () => {
@@ -73,21 +43,16 @@ export function InstallBanner() {
 
   const handleInstall = async () => {
     setIsLoading(true);
-    
     try {
       if (canInstall) {
-        // Native install prompt available (Chrome/Edge on Android, Desktop)
         const success = await install();
         if (success) {
-          const platform = isAndroid ? 'android' : 'desktop';
-          await trackInstall({ platform, source: 'banner' });
+          await trackInstall({ platform: isAndroid ? 'android' : 'desktop', source: 'banner' });
           setIsVisible(false);
         } else {
-          // User dismissed prompt, show manual instructions
           setShowInstructions(true);
         }
       } else {
-        // No native prompt - show manual instructions
         await trackInstall({ platform: isIOS ? 'ios' : 'android', source: 'banner' });
         setShowInstructions(true);
       }
@@ -100,103 +65,49 @@ export function InstallBanner() {
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
-          className="relative overflow-hidden rounded-xl bg-gradient-to-r from-primary via-primary/90 to-primary/80 p-3 shadow-lg"
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.2 }}
+          className="overflow-hidden"
         >
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-white/20" />
-            <div className="absolute -bottom-2 -left-2 h-16 w-16 rounded-full bg-white/20" />
-          </div>
-
-          <div className="relative">
+          <div className="rounded-xl border border-border/60 bg-card p-3">
             {!showInstructions ? (
-              /* Main Install CTA */
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
-                  <Download className="h-5 w-5 text-primary-foreground" />
+                <div className="w-9 h-9 shrink-0 rounded-lg bg-primary/8 flex items-center justify-center">
+                  <Download className="h-4 w-4 text-primary" />
                 </div>
-
-                <div className="flex-1 min-w-0 mr-1">
-                <h3 className="font-semibold text-primary-foreground text-sm leading-tight">
-                    myUNO
-                  </h3>
-                  <p className="text-xs text-primary-foreground/80 leading-tight">
-                    {t.install}
-                  </p>
-                </div>
-
-                <Button
-                  onClick={handleInstall}
-                  size="sm"
-                  variant="secondary"
-                  disabled={isLoading}
-                  className="shrink-0 gap-1.5 bg-white text-primary hover:bg-white/90 h-9 px-3 disabled:opacity-70"
-                >
-                  {isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Download className="h-4 w-4" />
-                  )}
-                  <span className="text-sm font-medium">
-                    {isLoading ? '...' : t.download}
-                  </span>
+                <p className="flex-1 text-xs text-muted-foreground">{t.install}</p>
+                <Button onClick={handleInstall} size="sm" variant="outline" disabled={isLoading} className="shrink-0 h-8 px-3 text-xs">
+                  {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : t.download}
                 </Button>
-
-                <button
-                  onClick={handleDismiss}
-                  className="shrink-0 p-1 rounded-full text-primary-foreground/60 hover:text-primary-foreground hover:bg-white/10 transition-colors"
-                  aria-label={t.close}
-                >
-                  <X className="h-4 w-4" />
+                <button onClick={handleDismiss} className="p-1 text-muted-foreground hover:text-foreground" aria-label={t.close}>
+                  <X className="h-3.5 w-3.5" />
                 </button>
               </div>
             ) : (
-              /* Manual Install Instructions */
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-primary-foreground text-sm">
-                    {isIOS ? t.iosInstall : t.androidInstall}
-                  </h3>
-                  <button
-                    onClick={handleDismiss}
-                    className="p-1 rounded-full text-primary-foreground/60 hover:text-primary-foreground hover:bg-white/10 transition-colors"
-                  >
-                    <X className="h-4 w-4" />
+                  <p className="text-xs font-medium text-foreground">{isIOS ? t.iosTitle : t.androidTitle}</p>
+                  <button onClick={handleDismiss} className="p-1 text-muted-foreground hover:text-foreground">
+                    <X className="h-3.5 w-3.5" />
                   </button>
                 </div>
-
-                {isIOS ? (
-                  /* iOS Instructions */
-                  <div className="flex items-center gap-4 text-primary-foreground">
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold">1</div>
-                      <Share className="h-4 w-4" />
-                    </div>
-                    <span className="text-primary-foreground/60">→</span>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold">2</div>
-                      <Plus className="h-4 w-4" />
-                      <span className="text-xs">{t.toScreen}</span>
-                    </div>
-                  </div>
-                ) : (
-                  /* Android Instructions */
-                  <div className="flex items-center gap-4 text-primary-foreground">
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold">1</div>
-                      <MoreVertical className="h-4 w-4" />
-                    </div>
-                    <span className="text-primary-foreground/60">→</span>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold">2</div>
-                      <Download className="h-4 w-4" />
-                      <span className="text-xs">{t.installBtn}</span>
-                    </div>
-                  </div>
-                )}
+                <div className="flex items-center gap-3 text-muted-foreground text-xs">
+                  {isIOS ? (
+                    <>
+                      <div className="flex items-center gap-1"><span className="font-medium">1.</span><Share className="h-3.5 w-3.5" /></div>
+                      <span>→</span>
+                      <div className="flex items-center gap-1"><span className="font-medium">2.</span><Plus className="h-3.5 w-3.5" /><span>{t.toScreen}</span></div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-1"><span className="font-medium">1.</span><MoreVertical className="h-3.5 w-3.5" /></div>
+                      <span>→</span>
+                      <div className="flex items-center gap-1"><span className="font-medium">2.</span><Download className="h-3.5 w-3.5" /><span>{t.download}</span></div>
+                    </>
+                  )}
+                </div>
               </div>
             )}
           </div>

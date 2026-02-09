@@ -1,6 +1,7 @@
 /**
- * LifeSituationSelector - "What do you need right now?" entry point
- * 2-column grid layout with show more toggle
+ * LifeSituationSelector — Calm life context picker
+ * "What's happening in your life?" — not "what do you need?"
+ * Soft cards, no sparkle icons, trust-first tone
  */
 import React, { memo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -10,7 +11,7 @@ import { useLifeSituationContext } from '@/contexts/LifeSituationContext';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import * as LucideIcons from 'lucide-react';
-import { LucideIcon, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
+import { LucideIcon, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface LifeSituationSelectorProps {
   className?: string;
@@ -25,7 +26,7 @@ export const LifeSituationSelector = memo(function LifeSituationSelector({
   const navigate = useNavigate();
   const { data: situations, isLoading } = useLifeSituations();
   const { setLifeSituation, isActive } = useLifeSituationContext();
-  const isRussian = language === 'ru';
+  const isRu = language === 'ru';
   const [showAll, setShowAll] = useState(false);
 
   const handleSelect = (situation: {
@@ -34,9 +35,8 @@ export const LifeSituationSelector = memo(function LifeSituationSelector({
     title_ru: string;
     color: string;
   }) => {
-    const title = isRussian ? situation.title_ru : situation.title_en;
+    const title = isRu ? situation.title_ru : situation.title_en;
     setLifeSituation(situation.code, title, situation.color);
-    
     if (onSelect) {
       onSelect(situation.code);
     } else {
@@ -52,10 +52,10 @@ export const LifeSituationSelector = memo(function LifeSituationSelector({
   if (isLoading) {
     return (
       <div className={cn("space-y-3", className)}>
-        <Skeleton className="h-6 w-48" />
-        <div className="grid grid-cols-2 gap-3">
+        <Skeleton className="h-5 w-40" />
+        <div className="grid grid-cols-2 gap-2.5">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Skeleton key={i} className="h-16 rounded-xl" />
+            <Skeleton key={i} className="h-14 rounded-xl" />
           ))}
         </div>
       </div>
@@ -64,58 +64,53 @@ export const LifeSituationSelector = memo(function LifeSituationSelector({
 
   if (!situations?.length) return null;
 
-  const VISIBLE_COUNT = 8;
+  const VISIBLE_COUNT = 6;
   const displayedSituations = showAll ? situations : situations.slice(0, VISIBLE_COUNT);
   const hiddenCount = situations.length - VISIBLE_COUNT;
 
   return (
     <section className={cn("space-y-3", className)}>
-      {/* Header */}
-      <div className="flex items-center gap-2">
-        <Sparkles className="w-5 h-5 text-primary" />
-        <h2 className="text-[15px] font-bold">
-          {isRussian ? 'Что вам сейчас нужно?' : 'What do you need right now?'}
-        </h2>
-      </div>
+      {/* Section label — calm, not pushy */}
+      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+        {isRu ? 'Ваша ситуация' : 'Your situation'}
+      </p>
 
-      {/* 2-column grid — compact cards */}
-      <div className="grid grid-cols-2 gap-2">
+      {/* 2-column grid — minimal cards */}
+      <div className="grid grid-cols-2 gap-2.5">
         {displayedSituations.map((situation) => {
           const Icon = getIcon(situation.icon);
-          const isSelected = isActive(situation.code);
+          const selected = isActive(situation.code);
           
           return (
             <button
               key={situation.id}
               onClick={() => handleSelect(situation)}
               className={cn(
-                "flex items-center gap-2.5 p-2.5 rounded-xl border transition-all duration-150",
-                "bg-card hover:bg-accent/50 active:scale-[0.98]",
-                "text-left",
-                isSelected ? "ring-2 ring-primary border-primary" : "border-border shadow-sm"
+                "flex items-center gap-3 px-3 py-3 rounded-xl border transition-all duration-150",
+                "text-left active:scale-[0.97]",
+                selected
+                  ? "bg-primary/5 border-primary/30 ring-1 ring-primary/20"
+                  : "bg-card border-border/60 hover:border-border"
               )}
-              style={{
-                borderColor: isSelected ? situation.color : undefined,
-              }}
             >
               <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                style={{ backgroundColor: `${situation.color}15` }}
+                style={{ backgroundColor: `${situation.color}10` }}
               >
                 <Icon
                   className="w-4 h-4"
                   style={{ color: situation.color }}
                 />
               </div>
-              <span className="text-xs font-medium leading-tight line-clamp-2">
-                {isRussian ? situation.title_ru : situation.title_en}
+              <span className="text-[13px] font-medium leading-tight line-clamp-2 text-foreground">
+                {isRu ? situation.title_ru : situation.title_en}
               </span>
             </button>
           );
         })}
       </div>
 
-      {/* Show more / less toggle */}
+      {/* Show more/less */}
       {hiddenCount > 0 && (
         <button
           onClick={() => setShowAll(!showAll)}
@@ -123,12 +118,12 @@ export const LifeSituationSelector = memo(function LifeSituationSelector({
         >
           {showAll ? (
             <>
-              {isRussian ? 'Свернуть' : 'Show less'}
+              {isRu ? 'Свернуть' : 'Show less'}
               <ChevronUp className="w-3.5 h-3.5" />
             </>
           ) : (
             <>
-              {isRussian ? `Ещё ${hiddenCount}` : `${hiddenCount} more`}
+              {isRu ? `Ещё ${hiddenCount} ситуаций` : `${hiddenCount} more`}
               <ChevronDown className="w-3.5 h-3.5" />
             </>
           )}
