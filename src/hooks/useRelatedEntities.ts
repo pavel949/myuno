@@ -74,6 +74,31 @@ const RELATED_ENTITY_MAP: Record<string, Array<{
     { vertical: 'transport', table: 'vehicles', nameEn: 'name_en', nameRu: 'name_ru', pathPrefix: '/transport', ctaEn: 'Rent', ctaRu: 'Арендовать', priceField: 'price_per_day', limit: 2 },
     { vertical: 'beauty', table: 'salons', nameEn: 'name_en', nameRu: 'name_ru', pathPrefix: '/beauty', ctaEn: 'Book', ctaRu: 'Записаться', priceField: 'price_from', limit: 2 },
   ],
+  cleaning: [
+    { vertical: 'beauty', table: 'salons', nameEn: 'name_en', nameRu: 'name_ru', pathPrefix: '/beauty', ctaEn: 'Book', ctaRu: 'Записаться', priceField: 'price_from', limit: 2 },
+    { vertical: 'restaurants', table: 'restaurants', nameEn: 'name_en', nameRu: 'name_ru', pathPrefix: '/restaurants', ctaEn: 'Reserve', ctaRu: 'Забронировать', priceField: 'price_range', limit: 2 },
+  ],
+  babysitter: [
+    { vertical: 'restaurants', table: 'restaurants', nameEn: 'name_en', nameRu: 'name_ru', pathPrefix: '/restaurants', ctaEn: 'Reserve', ctaRu: 'Забронировать', priceField: 'price_range', limit: 2 },
+    { vertical: 'beauty', table: 'salons', nameEn: 'name_en', nameRu: 'name_ru', pathPrefix: '/beauty', ctaEn: 'Book', ctaRu: 'Записаться', priceField: 'price_from', limit: 2 },
+  ],
+  pets: [
+    { vertical: 'transport', table: 'vehicles', nameEn: 'name_en', nameRu: 'name_ru', pathPrefix: '/transport', ctaEn: 'Rent', ctaRu: 'Арендовать', priceField: 'price_per_day', limit: 2 },
+    { vertical: 'beauty', table: 'salons', nameEn: 'name_en', nameRu: 'name_ru', pathPrefix: '/beauty', ctaEn: 'Book', ctaRu: 'Записаться', priceField: 'price_from', limit: 2 },
+  ],
+  insurance: [
+    { vertical: 'transport', table: 'vehicles', nameEn: 'name_en', nameRu: 'name_ru', pathPrefix: '/transport', ctaEn: 'Rent', ctaRu: 'Арендовать', priceField: 'price_per_day', limit: 2 },
+    { vertical: 'restaurants', table: 'restaurants', nameEn: 'name_en', nameRu: 'name_ru', pathPrefix: '/restaurants', ctaEn: 'Reserve', ctaRu: 'Забронировать', priceField: 'price_range', limit: 2 },
+  ],
+  education: [
+    { vertical: 'restaurants', table: 'restaurants', nameEn: 'name_en', nameRu: 'name_ru', pathPrefix: '/restaurants', ctaEn: 'Reserve', ctaRu: 'Забронировать', priceField: 'price_range', limit: 2 },
+    { vertical: 'transport', table: 'vehicles', nameEn: 'name_en', nameRu: 'name_ru', pathPrefix: '/transport', ctaEn: 'Rent', ctaRu: 'Арендовать', priceField: 'price_per_day', limit: 2 },
+  ],
+  events: [
+    { vertical: 'restaurants', table: 'restaurants', nameEn: 'name_en', nameRu: 'name_ru', pathPrefix: '/restaurants', ctaEn: 'Reserve', ctaRu: 'Забронировать', priceField: 'price_range', limit: 2 },
+    { vertical: 'transport', table: 'vehicles', nameEn: 'name_en', nameRu: 'name_ru', pathPrefix: '/transport', ctaEn: 'Rent', ctaRu: 'Арендовать', priceField: 'price_per_day', limit: 2 },
+    { vertical: 'flowers', table: 'bouquets', nameEn: 'name_en', nameRu: 'name_ru', pathPrefix: '/flowers', ctaEn: 'Order', ctaRu: 'Заказать', priceField: 'price', limit: 2 },
+  ],
 };
 
 async function fetchFeaturedEntities(config: typeof RELATED_ENTITY_MAP[string][0]): Promise<RelatedEntity[]> {

@@ -8,6 +8,7 @@ import { DetailPageHeader } from '@/components/uno/DetailPageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useCleaningServiceById, FALLBACK_CLEANING_DETAIL } from '@/hooks/useCleaningServices';
+import { RelatedServicesSection } from '@/components/crosssell';
 
 export default function CleaningDetail() {
   const { id } = useParams<{ id: string }>();
@@ -97,6 +98,11 @@ export default function CleaningDetail() {
                 : 'All specialists are verified and insured'}
             </span>
           </div>
+        </div>
+
+        {/* Cross-sell */}
+        <div className="pb-24">
+          <RelatedServicesSection currentVertical="cleaning" />
         </div>
 
         {/* Bottom Bar */}

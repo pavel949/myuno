@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { RelatedServicesSection } from '@/components/crosssell';
 
 export default function VenueDetail() {
   const { id } = useParams<{ id: string }>();
@@ -257,6 +258,11 @@ export default function VenueDetail() {
               </CardContent>
             </Card>
           )}
+        </div>
+
+        {/* Cross-sell */}
+        <div className="pb-24">
+          <RelatedServicesSection currentVertical="events" />
         </div>
 
         {/* Bottom CTA */}

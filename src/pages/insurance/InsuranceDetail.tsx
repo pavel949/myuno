@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BackButton } from '@/components/uno/BackButton';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 import { useInsuranceProvider, useInsurancePlans } from '@/hooks/useInsurance';
+import { RelatedServicesSection } from '@/components/crosssell';
 import {
   Star,
   Phone,
@@ -272,6 +273,11 @@ export default function InsuranceDetail() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Cross-sell */}
+        <div className="pb-24">
+          <RelatedServicesSection currentVertical="insurance" />
+        </div>
 
         {/* Fixed Bottom Actions */}
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur border-t border-border">
