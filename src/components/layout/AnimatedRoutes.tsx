@@ -12,6 +12,7 @@ import { VendorLayout } from '@/components/vendor/VendorLayout';
 import { GuestLayout } from '@/components/guest/GuestLayout';
 import { ManagerLayout } from '@/components/manager/ManagerLayout';
 import { useNavigationDirection } from '@/hooks/useNavigationDirection';
+import { RequireLifeSituation } from '@/components/life-os/RequireLifeSituation';
 
 // Core pages - load eagerly for fast initial navigation
 import Index from '@/pages/Index';
@@ -535,7 +536,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/auth/reset-password" element={<LazyPage><ResetPassword /></LazyPage>} />
         
         {/* Lazy loaded routes */}
-        <Route path="/discover" element={<LazyPage><Discover /></LazyPage>} />
+        <Route path="/discover" element={<LazyPage><RequireLifeSituation><Discover /></RequireLifeSituation></LazyPage>} />
         <Route path="/categories" element={<Navigate to="/discover" replace />} />
         <Route path="/map" element={<LazyPage><MapView /></LazyPage>} />
         <Route path="/bookings" element={<LazyPage><Bookings /></LazyPage>} />
@@ -573,7 +574,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/list-with-us" element={<ListWithUsPage />} />
         
         {/* Beauty & Spa Mini-App Routes */}
-        <Route path="/beauty" element={<LazyPage><BeautySpaIndex /></LazyPage>} />
+        <Route path="/beauty" element={<LazyPage><RequireLifeSituation><BeautySpaIndex /></RequireLifeSituation></LazyPage>} />
         <Route path="/beauty/salon/:id" element={<LazyPage><SalonDetail /></LazyPage>} />
         <Route path="/beauty/booking/:id" element={<LazyPage><BeautyBooking /></LazyPage>} />
         <Route path="/beauty/services" element={<LazyPage><BeautyServices /></LazyPage>} />
@@ -583,7 +584,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/spa" element={<Navigate to="/beauty" replace />} />
         
         {/* Property Mini-App Routes */}
-        <Route path="/property" element={<LazyPage><PropertyIndex /></LazyPage>} />
+        <Route path="/property" element={<LazyPage><RequireLifeSituation><PropertyIndex /></RequireLifeSituation></LazyPage>} />
         <Route path="/property/consultation" element={<LazyPage><PropertyConsultation /></LazyPage>} />
         <Route path="/property/deposit-success" element={<LazyPage><PropertyDepositSuccess /></LazyPage>} />
         <Route path="/property/project/:id" element={<LazyPage><ProjectDetail /></LazyPage>} />
@@ -610,7 +611,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/food/checkout" element={<Navigate to="/restaurants" replace />} />
         
         {/* Restaurants Mini-App Routes */}
-        <Route path="/restaurants" element={<LazyPage><RestaurantsIndex /></LazyPage>} />
+        <Route path="/restaurants" element={<LazyPage><RequireLifeSituation><RestaurantsIndex /></RequireLifeSituation></LazyPage>} />
         <Route path="/restaurants/map" element={<LazyPage><RestaurantMap /></LazyPage>} />
         <Route path="/restaurants/:id" element={<LazyPage><RestaurantDetail /></LazyPage>} />
         <Route path="/restaurants/:id/reserve" element={<LazyPage><TableReservation /></LazyPage>} />
@@ -618,7 +619,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/restaurants/:id/experience/:setId" element={<LazyPage><SetMenuBooking /></LazyPage>} />
         
         {/* Transport Mini-App Routes */}
-        <Route path="/transport" element={<LazyPage><TransportIndex /></LazyPage>} />
+        <Route path="/transport" element={<LazyPage><RequireLifeSituation><TransportIndex /></RequireLifeSituation></LazyPage>} />
         <Route path="/transport/vehicle/:id" element={<LazyPage><VehicleDetail /></LazyPage>} />
         <Route path="/transport/booking/:id" element={<LazyPage><TransportBooking /></LazyPage>} />
         <Route path="/transport/airport-transfer" element={<LazyPage><AirportTransferBooking /></LazyPage>} />
@@ -638,29 +639,29 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/transport/:id" element={<TransportIdRedirect />} />
         
         {/* Fitness Mini-App Routes */}
-        <Route path="/fitness" element={<LazyPage><FitnessIndex /></LazyPage>} />
+        <Route path="/fitness" element={<LazyPage><RequireLifeSituation><FitnessIndex /></RequireLifeSituation></LazyPage>} />
         <Route path="/fitness/gym/:id" element={<LazyPage><GymDetail /></LazyPage>} />
         <Route path="/fitness/booking/:id" element={<LazyPage><FitnessBooking /></LazyPage>} />
         
         {/* Medical Mini-App Routes */}
-        <Route path="/medical" element={<LazyPage><MedicalIndex /></LazyPage>} />
+        <Route path="/medical" element={<LazyPage><RequireLifeSituation><MedicalIndex /></RequireLifeSituation></LazyPage>} />
         <Route path="/medical/clinic/:id" element={<LazyPage><ClinicDetail /></LazyPage>} />
         <Route path="/medical/appointment/:id" element={<LazyPage><MedicalAppointment /></LazyPage>} />
         
         {/* Events Mini-App Routes */}
-        <Route path="/events" element={<LazyPage><EventsIndex /></LazyPage>} />
+        <Route path="/events" element={<LazyPage><RequireLifeSituation><EventsIndex /></RequireLifeSituation></LazyPage>} />
         <Route path="/events/:id" element={<LazyPage><EventDetail /></LazyPage>} />
         <Route path="/events/booking/:id" element={<LazyPage><EventBooking /></LazyPage>} />
         <Route path="/venues/:id" element={<LazyPage><VenueDetail /></LazyPage>} />
         
         {/* Education Mini-App Routes */}
-        <Route path="/education" element={<LazyPage><EducationIndex /></LazyPage>} />
+        <Route path="/education" element={<LazyPage><RequireLifeSituation><EducationIndex /></RequireLifeSituation></LazyPage>} />
         <Route path="/education/course/:id" element={<LazyPage><CourseDetail /></LazyPage>} />
         <Route path="/education/tutor/:id" element={<LazyPage><TutorDetail /></LazyPage>} />
         <Route path="/education/booking/:id" element={<LazyPage><EducationBooking /></LazyPage>} />
         
         {/* Flowers Mini-App Routes */}
-        <Route path="/flowers" element={<LazyPage><FlowersIndex /></LazyPage>} />
+        <Route path="/flowers" element={<LazyPage><RequireLifeSituation><FlowersIndex /></RequireLifeSituation></LazyPage>} />
         <Route path="/flowers/bouquet/:id" element={<LazyPage><BouquetDetail /></LazyPage>} />
         <Route path="/flowers/shop" element={<Navigate to="/flowers" replace />} />
         <Route path="/flowers/shop/:id" element={<LazyPage><FlowerShopDetail /></LazyPage>} />
@@ -669,7 +670,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/flowers/success" element={<LazyPage><FlowersSuccess /></LazyPage>} />
         
         {/* Home Services Mini-App Routes */}
-        <Route path="/services" element={<LazyPage><ServicesIndex /></LazyPage>} />
+        <Route path="/services" element={<LazyPage><RequireLifeSituation><ServicesIndex /></RequireLifeSituation></LazyPage>} />
         <Route path="/services/provider/:id" element={<LazyPage><ServiceProviderDetail /></LazyPage>} />
         <Route path="/services/booking/:id" element={<LazyPage><ServiceBooking /></LazyPage>} />
         <Route path="/services/map" element={<LazyPage><ServicesMap /></LazyPage>} />
@@ -677,21 +678,21 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/services/order/success" element={<LazyPage><ServiceOrderSuccess /></LazyPage>} />
         
         {/* Legal & Business Services Mini-App Routes */}
-        <Route path="/legal" element={<LazyPage><LegalServicesIndex /></LazyPage>} />
+        <Route path="/legal" element={<LazyPage><RequireLifeSituation><LegalServicesIndex /></RequireLifeSituation></LazyPage>} />
         <Route path="/legal/provider/:id" element={<LazyPage><LegalProviderDetail /></LazyPage>} />
         <Route path="/legal/visa/:id" element={<LazyPage><VisaServiceDetail /></LazyPage>} />
         <Route path="/legal/booking/:id" element={<LazyPage><LegalBooking /></LazyPage>} />
         <Route path="/visa" element={<LazyPage><VisaImmigrationPage /></LazyPage>} />
         
         {/* Insurance Mini-App Routes */}
-        <Route path="/insurance" element={<LazyPage><InsuranceIndex /></LazyPage>} />
+        <Route path="/insurance" element={<LazyPage><RequireLifeSituation><InsuranceIndex /></RequireLifeSituation></LazyPage>} />
         <Route path="/insurance/travel" element={<LazyPage><TravelInsurance /></LazyPage>} />
         <Route path="/insurance/plan/:planId" element={<LazyPage><InsurancePlanDetail /></LazyPage>} />
         <Route path="/insurance/:id" element={<LazyPage><InsuranceDetail /></LazyPage>} />
         <Route path="/insurance/:id/quote" element={<LazyPage><InsuranceQuote /></LazyPage>} />
         
         {/* Expat Services Routes */}
-        <Route path="/banking" element={<LazyPage><BankingPage /></LazyPage>} />
+        <Route path="/banking" element={<LazyPage><RequireLifeSituation><BankingPage /></RequireLifeSituation></LazyPage>} />
         <Route path="/veterinary" element={<LazyPage><VeterinaryPage /></LazyPage>} />
         
         {/* Knowledge Hub Routes */}
@@ -700,7 +701,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/knowledge/:section/:slug" element={<LazyPage><KnowledgeArticlePage /></LazyPage>} />
         
         {/* Experiences Mini-App Routes (unified tours + activities) */}
-        <Route path="/experiences" element={<LazyPage><ExperiencesIndex /></LazyPage>} />
+        <Route path="/experiences" element={<LazyPage><RequireLifeSituation><ExperiencesIndex /></RequireLifeSituation></LazyPage>} />
         <Route path="/experiences/:id" element={<LazyPage><ExperienceDetail /></LazyPage>} />
         <Route path="/experiences/:id/book" element={<LazyPage><ExperienceBooking /></LazyPage>} />
         
@@ -715,10 +716,10 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/water/:id/book" element={<WaterBookRedirect />} />
         
         {/* Pharmacy Mini-App Routes */}
-        <Route path="/pharmacy" element={<LazyPage><PharmacyIndex /></LazyPage>} />
+        <Route path="/pharmacy" element={<LazyPage><RequireLifeSituation><PharmacyIndex /></RequireLifeSituation></LazyPage>} />
         
         {/* Pets Mini-App Routes */}
-        <Route path="/pets" element={<LazyPage><PetsIndex /></LazyPage>} />
+        <Route path="/pets" element={<LazyPage><RequireLifeSituation><PetsIndex /></RequireLifeSituation></LazyPage>} />
         <Route path="/pets/transport" element={<LazyPage><PetTransport /></LazyPage>} />
         <Route path="/pets/:id" element={<LazyPage><PetServiceDetail /></LazyPage>} />
         <Route path="/pets/:id/booking" element={<LazyPage><PetServiceBooking /></LazyPage>} />
@@ -726,25 +727,25 @@ export const AnimatedRoutes: React.FC = () => {
         
         
         {/* Yachts Mini-App Routes */}
-        <Route path="/yachts" element={<LazyPage><YachtsIndex /></LazyPage>} />
+        <Route path="/yachts" element={<LazyPage><RequireLifeSituation><YachtsIndex /></RequireLifeSituation></LazyPage>} />
         <Route path="/yachts/:id" element={<LazyPage><YachtDetail /></LazyPage>} />
         <Route path="/yachts/:id/booking" element={<LazyPage><YachtBooking /></LazyPage>} />
         
         {/* Cleaning Mini-App Routes */}
-        <Route path="/cleaning" element={<LazyPage><CleaningIndex /></LazyPage>} />
+        <Route path="/cleaning" element={<LazyPage><RequireLifeSituation><CleaningIndex /></RequireLifeSituation></LazyPage>} />
         <Route path="/cleaning/:id" element={<LazyPage><CleaningDetail /></LazyPage>} />
         <Route path="/cleaning/:id/book" element={<LazyPage><CleaningBooking /></LazyPage>} />
         
         {/* Babysitter Mini-App Routes */}
-        <Route path="/babysitter" element={<LazyPage><BabysitterIndex /></LazyPage>} />
+        <Route path="/babysitter" element={<LazyPage><RequireLifeSituation><BabysitterIndex /></RequireLifeSituation></LazyPage>} />
         <Route path="/babysitter/:id" element={<LazyPage><BabysitterDetail /></LazyPage>} />
         <Route path="/babysitter/:id/book" element={<LazyPage><BabysitterBooking /></LazyPage>} />
         
         {/* Delivery Mini-App Routes */}
-        <Route path="/delivery" element={<LazyPage><DeliveryIndex /></LazyPage>} />
+        <Route path="/delivery" element={<LazyPage><RequireLifeSituation><DeliveryIndex /></RequireLifeSituation></LazyPage>} />
         
         {/* Market Mini-App Routes */}
-        <Route path="/market" element={<LazyPage><MarketIndex /></LazyPage>} />
+        <Route path="/market" element={<LazyPage><RequireLifeSituation><MarketIndex /></RequireLifeSituation></LazyPage>} />
         <Route path="/market/categories" element={<LazyPage><MarketCatalogPage /></LazyPage>} />
         <Route path="/market/category/:categoryId" element={<LazyPage><MarketCategoryPage /></LazyPage>} />
         <Route path="/market/product/:productId" element={<LazyPage><ProductDetailPage /></LazyPage>} />

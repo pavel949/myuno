@@ -2,7 +2,7 @@ import React, { ReactNode, forwardRef } from 'react';
 import { cn } from '@/lib/utils';
 import { AppHeader } from './AppHeader';
 import { Footer } from './Footer';
-// UniversalHelpFAB removed - using global UnifiedChatFAB instead
+import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanner';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -10,6 +10,8 @@ interface AppLayoutProps {
   showHeader?: boolean;
   showBottomNav?: boolean;
   showFooter?: boolean;
+  /** Show the active life situation banner below header */
+  showSituationBanner?: boolean;
   className?: string;
   contentClassName?: string;
 }
@@ -22,6 +24,7 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
       showHeader = true,
       showBottomNav = true,
       showFooter = false,
+      showSituationBanner = false,
       className,
       contentClassName,
     },
@@ -30,6 +33,7 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
     return (
       <div ref={ref} className={cn("min-h-screen bg-background flex flex-col max-w-full min-w-0 overflow-x-clip", className)}>
         {showHeader && <AppHeader title={title} />}
+        {showSituationBanner && <ActiveSituationBanner />}
         
         <main
           className={cn(

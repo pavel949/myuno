@@ -1,23 +1,27 @@
-// Index page - Clean Airbnb-style home screen
+/**
+ * Index page — P0.1: LifeOS-First Home
+ * Primary entry: Life Situations ("What's happening in your life?")
+ * Secondary: Vertical access only after situation selection or explicit bypass
+ */
 import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLifeSituationContext } from '@/contexts/LifeSituationContext';
 import { SEOHead, createOrganizationSchema } from '@/components/seo';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
-import { QuickActionsGrid } from '@/components/home/QuickActionsGrid';
 import { HeroBlock } from '@/components/home/HeroBlock';
-import { PersonaChips } from '@/components/home/PersonaChips';
-import { supabase } from '@/integrations/supabase/client';
+import { LifeSituationGate } from '@/components/life-os/LifeSituationGate';
+import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanner';
 import { InstallBanner } from '@/components/pwa/InstallBanner';
 import { PWAWelcomeScreen } from '@/components/pwa/PWAWelcomeScreen';
 import { Skeleton } from '@/components/ui/skeleton';
 
-// Lazy load components
+// Lazy load secondary components (shown only with active context)
+const QuickActionsGrid = lazy(() => import('@/components/home/QuickActionsGrid').then(m => ({ default: m.QuickActionsGrid })));
 const DiscoveryCarousel = lazy(() => import('@/components/home/DiscoveryCarousel').then(m => ({ default: m.DiscoveryCarousel })));
-
-// Lazy load modals
+const PersonaChips = lazy(() => import('@/components/home/PersonaChips').then(m => ({ default: m.PersonaChips })));
 const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
 
 const SectionSkeleton = () => (
@@ -34,6 +38,7 @@ const Index = () => {
   const { language } = useLanguage();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { activeCode } = useLifeSituationContext();
   const [refreshKey, setRefreshKey] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(() => {
     return !localStorage.getItem('myuno-onboarding-complete');
@@ -43,6 +48,8 @@ const Index = () => {
     await new Promise(resolve => setTimeout(resolve, 1000));
     setRefreshKey(prev => prev + 1);
   }, []);
+
+  const hasContext = !!activeCode;
 
   return (
     <AppLayout showFooter>
@@ -59,6 +66,9 @@ const Index = () => {
         </Suspense>
       )}
 
+      {/* Active situation banner — persists across navigation */}
+      <ActiveSituationBanner />
+
       <PullToRefresh onRefresh={handleRefresh} key={refreshKey}>
         <div className="px-4 py-5 pb-24 space-y-6 overflow-x-visible">
           
@@ -68,16 +78,23 @@ const Index = () => {
           {/* Hero: Brand + Search + SOS */}
           <HeroBlock />
 
-          {/* Persona chips — compact "I'm here as:" */}
-          <PersonaChips />
+          {/* P0.1: Life Situation Gate — PRIMARY ENTRY POINT */}
+          {/* If no context: shows life situation selector */}
+          {/* If context active: shows persona chips + quick actions + discovery */}
+          <LifeSituationGate allowBypass={true}>
+            {/* Secondary content — only visible with active life situation */}
+            <Suspense fallback={null}>
+              <PersonaChips />
+            </Suspense>
 
-          {/* Quick Actions — persona-aware grid */}
-          <QuickActionsGrid contentMode="services" />
+            <Suspense fallback={<SectionSkeleton />}>
+              <QuickActionsGrid contentMode="services" />
+            </Suspense>
 
-          {/* Featured content */}
-          <Suspense fallback={<SectionSkeleton />}>
-            <DiscoveryCarousel />
-          </Suspense>
+            <Suspense fallback={<SectionSkeleton />}>
+              <DiscoveryCarousel />
+            </Suspense>
+          </LifeSituationGate>
 
         </div>
       </PullToRefresh>
