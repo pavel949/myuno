@@ -15,6 +15,7 @@ import { YachtIncludedExcluded } from '@/components/yachts/YachtIncludedExcluded
 import { YachtPolicies } from '@/components/yachts/YachtPolicies';
 import { YachtOperatorCard } from '@/components/yachts/YachtOperatorCard';
 import { YachtSimilarSection } from '@/components/yachts/YachtSimilarSection';
+import { RelatedServicesSection } from '@/components/crosssell';
 
 export default function YachtDetail() {
   const { id } = useParams();
@@ -158,6 +159,9 @@ export default function YachtDetail() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Related Services Cross-sell */}
+        <RelatedServicesSection currentVertical="yachts" />
 
         {/* Similar Yachts */}
         <YachtSimilarSection currentYacht={yacht} allYachts={allYachts || []} />

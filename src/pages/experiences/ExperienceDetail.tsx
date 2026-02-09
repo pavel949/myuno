@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useExperience, formatDuration, getDifficultyColor } from '@/hooks/useExperiences';
 import { useExperiencePricing } from '@/hooks/useExperiencePricing';
 import { OptimizedImage } from '@/components/ui/optimized-image';
-import { CrossSellSection } from '@/components/crosssell';
+import { CrossSellSection, RelatedServicesSection } from '@/components/crosssell';
 import { getContextualCrossSell } from '@/lib/crossSellConfig';
 import { cn } from '@/lib/utils';
 
@@ -417,6 +417,9 @@ export default function ExperienceDetail() {
             />
           ));
         })()}
+
+        {/* Entity-level cross-sell */}
+        <RelatedServicesSection currentVertical="experiences" />
 
         {/* Generic Cross-sell */}
         <CrossSellSection currentVertical="experiences" />
