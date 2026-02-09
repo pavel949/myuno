@@ -121,13 +121,13 @@ export const ExitIntentModal = memo(function ExitIntentModal({
       benefit3: isRu ? 'Сравнение с аналогами' : 'Comparison with alternatives',
     },
     property: {
-      title: isRu ? 'Подождите!' : 'Wait!',
+      title: isRu ? 'Уходите?' : 'Leaving?',
       subtitle: isRu 
-        ? 'Наш эксперт подберёт идеальный вариант под ваш бюджет'
-        : 'Our expert will find the perfect option for your budget',
+        ? 'Наш эксперт подберёт подходящий вариант под ваш бюджет'
+        : 'Our expert will find a suitable option for your budget',
       cta: isRu ? 'Получить подборку' : 'Get Selection',
       benefit1: isRu ? 'Персональная подборка' : 'Personal selection',
-      benefit2: isRu ? 'Лучшие цены' : 'Best prices',
+      benefit2: isRu ? 'Проверенные цены' : 'Verified prices',
       benefit3: isRu ? 'Проверенные объекты' : 'Verified properties',
     },
   };

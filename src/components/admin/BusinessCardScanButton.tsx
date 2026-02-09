@@ -110,7 +110,7 @@ export function BusinessCardScanButton({
       onDataExtracted(formData);
 
       toast({
-        title: isRu ? '✨ Данные извлечены!' : '✨ Data Extracted!',
+        title: isRu ? 'Данные извлечены' : 'Data Extracted',
         description: isRu
           ? `Уверенность: ${data.confidence}%. Проверьте и сохраните.`
           : `Confidence: ${data.confidence}%. Review and save.`,

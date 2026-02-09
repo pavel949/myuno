@@ -67,10 +67,10 @@ const EMPTY_STATES: Record<string, {
   },
   success: {
     icon: Home,
-    titleEn: 'Welcome!',
-    titleRu: 'Добро пожаловать!',
+    titleEn: 'Welcome',
+    titleRu: 'Добро пожаловать',
     descriptionEn: 'Enjoy your stay. We are here if you need anything.',
-    descriptionRu: 'Приятного отдыха! Мы рядом, если что-то понадобится.',
+    descriptionRu: 'Приятного отдыха. Мы рядом, если что-то понадобится.',
     color: 'text-success',
     bgColor: 'bg-success/10',
   },

@@ -66,7 +66,7 @@ export function AIDescriptionGenerator({
 
       if (data?.description) {
         onChange(data.description);
-        toast.success(language === 'ru' ? 'Описание сгенерировано!' : 'Description generated!');
+        toast.success(language === 'ru' ? 'Описание сгенерировано' : 'Description generated');
       }
     } catch (err: any) {
       console.error('Generation error:', err);

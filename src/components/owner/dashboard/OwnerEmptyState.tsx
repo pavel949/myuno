@@ -56,8 +56,8 @@ const EMPTY_STATES: Record<string, {
   },
   tasks: {
     icon: CheckCircle2,
-    titleEn: 'All done!',
-    titleRu: 'Всё готово!',
+    titleEn: 'All clear',
+    titleRu: 'Всё в порядке',
     descriptionEn: 'No pending tasks. Your properties are running smoothly.',
     descriptionRu: 'Нет задач. Ваши объекты работают отлично.',
     color: 'text-success',
@@ -145,8 +145,8 @@ export function OwnerSuccessState({ className }: { className?: string }) {
         <CheckCircle2 className="h-5 w-5 text-success" />
       </div>
       <div>
-        <p className="text-sm font-medium text-success">
-          {isRu ? 'Всё готово!' : 'All done!'}
+         <p className="text-sm font-medium text-success">
+          {isRu ? 'Всё в порядке' : 'All clear'}
         </p>
         <p className="text-xs text-muted-foreground">
           {isRu ? 'Нет задач на сегодня' : 'No tasks for today'}

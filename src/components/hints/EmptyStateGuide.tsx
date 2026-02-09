@@ -61,15 +61,11 @@ export const EmptyStateGuide = forwardRef<HTMLDivElement, EmptyStateGuideProps>(
         )}
       >
         {/* Icon/Emoji */}
-        {(Icon || emoji) && (
+        {Icon && (
           <div className="mb-4">
-            {emoji ? (
-              <span className="text-4xl">{emoji}</span>
-            ) : Icon ? (
-              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-                <Icon className="w-8 h-8 text-muted-foreground" />
-              </div>
-            ) : null}
+            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+              <Icon className="w-8 h-8 text-muted-foreground" />
+            </div>
           </div>
         )}
 

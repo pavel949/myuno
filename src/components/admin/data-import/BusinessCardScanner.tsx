@@ -179,7 +179,7 @@ export function BusinessCardScanner({ onProviderCreated }: BusinessCardScannerPr
       setEditedData(data);
 
       toast({
-        title: isRu ? 'Карточка распознана!' : 'Card Scanned!',
+        title: isRu ? 'Карточка распознана' : 'Card Scanned',
         description: isRu 
           ? `Уверенность: ${data.confidence}%` 
           : `Confidence: ${data.confidence}%`,
@@ -237,7 +237,7 @@ export function BusinessCardScanner({ onProviderCreated }: BusinessCardScannerPr
       if (error) throw error;
 
       toast({
-        title: isRu ? 'Провайдер создан!' : 'Provider Created!',
+        title: isRu ? 'Провайдер создан' : 'Provider Created',
         description: editedData.company_name,
       });
 
