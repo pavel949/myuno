@@ -616,3 +616,119 @@ function escapeHtml(text: string): string {
   };
   return text.replace(/[&<>"']/g, (m) => map[m]);
 }
+
+// ===== ORDER STATUS CHANGE EMAIL =====
+
+interface OrderStatusChangeData extends BaseEmailData {
+  newStatus: string;
+  reason?: string;
+  trackingUrl?: string;
+}
+
+export function generateOrderStatusChangeEmail(data: OrderStatusChangeData): { subject: string; html: string } {
+  const lang = data.language || 'en';
+  const typeInfo = ORDER_TYPE_LABELS[data.orderType] || ORDER_TYPE_LABELS.general;
+
+  const statusLabels: Record<string, { en: string; ru: string; emoji: string; color: string }> = {
+    confirmed: { en: 'Confirmed', ru: 'Подтверждён', emoji: '✅', color: '#059669' },
+    in_progress: { en: 'In Progress', ru: 'В работе', emoji: '🚀', color: '#7c3aed' },
+    completed: { en: 'Completed', ru: 'Завершён', emoji: '🎉', color: '#059669' },
+    cancelled: { en: 'Cancelled', ru: 'Отменён', emoji: '❌', color: '#dc2626' },
+  };
+
+  const statusInfo = statusLabels[data.newStatus] || { en: data.newStatus, ru: data.newStatus, emoji: '📋', color: '#6366f1' };
+
+  const texts = {
+    en: {
+      subject: `${statusInfo.emoji} Order #${data.orderNumber} — ${statusInfo.en}`,
+      heading: `Your order is ${statusInfo.en.toLowerCase()}`,
+      greeting: `Hi ${data.customerName}!`,
+      orderNumber: 'Order Number',
+      orderType: 'Service',
+      total: 'Total',
+      reason: 'Reason',
+      viewOrder: 'View My Bookings',
+      contact: 'Questions? Contact us anytime.',
+      footer: 'myUNO — Your Phuket Concierge',
+    },
+    ru: {
+      subject: `${statusInfo.emoji} Заказ #${data.orderNumber} — ${statusInfo.ru}`,
+      heading: `Ваш заказ ${statusInfo.ru.toLowerCase()}`,
+      greeting: `Привет, ${data.customerName}!`,
+      orderNumber: 'Номер заказа',
+      orderType: 'Услуга',
+      total: 'Итого',
+      reason: 'Причина',
+      viewOrder: 'Мои бронирования',
+      contact: 'Вопросы? Свяжитесь с нами.',
+      footer: 'myUNO — Ваш консьерж на Пхукете',
+    },
+  };
+
+  const t = texts[lang];
+  const badgeClass = data.newStatus === 'cancelled' ? 'cancelled-badge' : 'success-badge';
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      ${baseStyles}
+    </head>
+    <body>
+      <div class="container">
+        <div class="header" style="background: linear-gradient(135deg, ${statusInfo.color} 0%, ${statusInfo.color}cc 100%);">
+          <h1>${statusInfo.emoji} ${t.heading}</h1>
+        </div>
+        
+        <div class="content">
+          <p style="font-size: 18px;">${t.greeting}</p>
+          
+          <div class="order-card">
+            <span class="${badgeClass}">${statusInfo.emoji} ${lang === 'ru' ? statusInfo.ru : statusInfo.en}</span>
+            
+            <div style="margin-top: 16px;">
+              <div class="label">${t.orderNumber}</div>
+              <div class="order-value">#${data.orderNumber}</div>
+            </div>
+            
+            <div class="label">${t.orderType}</div>
+            <div class="value">${typeInfo.emoji} ${lang === 'ru' ? typeInfo.ru : typeInfo.en}</div>
+            
+            <div class="total-row">
+              <span class="total-label">${t.total}</span>
+              <span class="total-amount">${data.totalAmount} ${data.currency}</span>
+            </div>
+
+            ${data.reason ? `
+              <div style="margin-top: 16px; background: #fef2f2; padding: 12px; border-radius: 8px;">
+                <div class="label">${t.reason}</div>
+                <div class="value" style="margin-bottom: 0;">${escapeHtml(data.reason)}</div>
+              </div>
+            ` : ''}
+          </div>
+          
+          ${data.trackingUrl ? `
+            <div style="text-align: center;">
+              <a href="${data.trackingUrl}" class="button">${t.viewOrder} →</a>
+            </div>
+          ` : ''}
+          
+          <p style="color: #6b7280; text-align: center;">${t.contact}</p>
+        </div>
+        
+        <div class="footer">
+          <p style="margin: 0;">${t.footer}</p>
+          <p style="margin: 8px 0 0 0; font-size: 12px;">
+            <a href="https://uno.ae">uno.ae</a> • 
+            <a href="mailto:support@uno.ae">support@uno.ae</a>
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return { subject: t.subject, html };
+}
