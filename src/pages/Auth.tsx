@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { usePinAuth } from '@/hooks/usePinAuth';
 import { PinLogin } from '@/components/auth/PinLogin';
+import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrengthIndicator';
 import { PinSetup } from '@/components/auth/PinSetup';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -33,7 +34,8 @@ export default function Auth() {
   const [referralCode, setReferralCode] = useState(searchParams.get('ref') || '');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string; fullName?: string; phone?: string }>({});
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string; fullName?: string; phone?: string }>({});
   const [showPinSetup, setShowPinSetup] = useState(false);
   const [signupStep, setSignupStep] = useState<SignupStep>('info');
 
@@ -126,6 +128,9 @@ export default function Auth() {
         passwordSchema.parse(password);
       } catch (e) {
         newErrors.password = isRu ? 'Пароль должен быть не менее 6 символов' : 'Password must be at least 6 characters';
+      }
+      if (password !== confirmPassword) {
+        newErrors.confirmPassword = isRu ? 'Пароли не совпадают' : 'Passwords do not match';
       }
     }
     
@@ -378,13 +383,15 @@ export default function Auth() {
                     </button>
                   )}
 
-                  <form onSubmit={handleLogin} className="space-y-4">
+                  <form onSubmit={handleLogin} name="login" className="space-y-4">
                     <div className="space-y-2">
                       <label className="text-sm font-medium">{t('auth.email')}</label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                         <input
                           type="email"
+                          name="email"
+                          autoComplete="email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           placeholder="your@email.com"
@@ -404,6 +411,8 @@ export default function Auth() {
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                         <input
                           type={showPassword ? 'text' : 'password'}
+                          name="password"
+                          autoComplete="current-password"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           placeholder="••••••••"
@@ -479,6 +488,8 @@ export default function Auth() {
                               <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                               <input
                                 type="text"
+                                name="fullName"
+                                autoComplete="name"
                                 value={fullName}
                                 onChange={(e) => setFullName(e.target.value)}
                                 placeholder={isRu ? 'Иван Иванов' : 'John Doe'}
@@ -534,6 +545,8 @@ export default function Auth() {
                               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                               <input
                                 type="email"
+                                name="email"
+                                autoComplete="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="your@email.com"
@@ -559,6 +572,8 @@ export default function Auth() {
                               <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                               <input
                                 type="tel"
+                                name="phone"
+                                autoComplete="tel"
                                 value={phone}
                                 onChange={(e) => setPhone(e.target.value)}
                                 placeholder="+7 999 123-45-67"
@@ -614,6 +629,8 @@ export default function Auth() {
                               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                               <input
                                 type={showPassword ? 'text' : 'password'}
+                                name="new-password"
+                                autoComplete="new-password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="••••••••"
@@ -633,6 +650,31 @@ export default function Auth() {
                               </button>
                             </div>
                             {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+                            <PasswordStrengthIndicator password={password} />
+                          </div>
+
+                          {/* Confirm password */}
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium">
+                              {isRu ? 'Подтвердите пароль' : 'Confirm password'}
+                            </label>
+                            <div className="relative">
+                              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                              <input
+                                type={showPassword ? 'text' : 'password'}
+                                name="confirm-password"
+                                autoComplete="new-password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                placeholder="••••••••"
+                                className={cn(
+                                  "w-full h-14 pl-10 pr-4 rounded-xl bg-secondary border transition-colors",
+                                  "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
+                                  errors.confirmPassword ? "border-destructive" : "border-border"
+                                )}
+                              />
+                            </div>
+                            {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
                           </div>
 
                           {!searchParams.get('ref') && (
