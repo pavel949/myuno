@@ -8,6 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { VendorProspectDetail } from './VendorProspectDetail';
+import { VendorProspectPanel } from './VendorProspectPanel';
+import { PersistentPanelLayout } from '@/components/uno/PersistentPanelLayout';
+import { useIsDesktop } from '@/hooks/use-desktop';
 import { Search, Star, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -15,6 +18,7 @@ import { cn } from '@/lib/utils';
 export function VendorProspectsTable() {
   const { language } = useLanguage();
   const isRussian = language === 'ru';
+  const isDesktop = useIsDesktop();
   const { data: prospects, isLoading, refetch } = useVendorProspects();
   const [search, setSearch] = useState('');
   const [selectedProspect, setSelectedProspect] = useState<VendorProspect | null>(null);
@@ -26,6 +30,10 @@ export function VendorProspectsTable() {
     p.city?.toLowerCase().includes(search.toLowerCase())
   ) || [];
 
+  const handleRowClick = (prospect: VendorProspect) => {
+    setSelectedProspect(prospect);
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-3">
@@ -35,7 +43,7 @@ export function VendorProspectsTable() {
     );
   }
 
-  return (
+  const tableContent = (
     <div className="space-y-4">
       {/* Search and actions */}
       <div className="flex items-center gap-3">
@@ -81,81 +89,99 @@ export function VendorProspectsTable() {
                 const status = statusConfig[prospect.status];
                 const priority = priorityConfig[prospect.ai_priority || ''];
                 const location = prospect.district || prospect.city;
+                const isActive = selectedProspect?.id === prospect.id;
                 
-                  return (
-                    <TableRow 
-                      key={prospect.id}
-                      className="cursor-pointer hover:bg-muted/50 group"
-                      onClick={() => setSelectedProspect(prospect)}
-                    >
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-8 w-8 lg:h-7 lg:w-7">
-                            <AvatarFallback className="text-xs bg-primary/10 text-primary">
-                              {prospect.business_name?.charAt(0) || '?'}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="font-medium">{prospect.business_name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {prospect.category || '—'}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {location || '—'}
-                      </TableCell>
-                      <TableCell>
+                return (
+                  <TableRow 
+                    key={prospect.id}
+                    className={cn(
+                      "cursor-pointer hover:bg-muted/50 group",
+                      isActive && "bg-primary/5 border-l-2 border-l-primary"
+                    )}
+                    onClick={() => handleRowClick(prospect)}
+                  >
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-8 w-8 lg:h-7 lg:w-7">
+                          <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                            {prospect.business_name?.charAt(0) || '?'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium">{prospect.business_name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {prospect.category || '—'}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {location || '—'}
+                    </TableCell>
+                    <TableCell>
+                      <Badge 
+                        variant="outline"
+                        className={cn(status?.color, status?.bgColor)}
+                      >
+                        {isRussian ? status?.labelRu : status?.label}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {priority ? (
                         <Badge 
                           variant="outline"
-                          className={cn(status?.color, status?.bgColor)}
+                          className={cn(priority?.color, priority?.bgColor)}
                         >
-                          {isRussian ? status?.labelRu : status?.label}
+                          {priority?.label}
                         </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {priority ? (
-                          <Badge 
-                            variant="outline"
-                            className={cn(priority?.color, priority?.bgColor)}
-                          >
-                            {priority?.label}
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground">—</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {prospect.ai_score !== null ? (
-                          <div className="flex items-center gap-1">
-                            <Star className="h-3 w-3 text-yellow-500" />
-                            <span>{prospect.ai_score}</span>
-                          </div>
-                        ) : (
-                          <span className="text-muted-foreground">—</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground capitalize">
-                        {prospect.source_type?.replace('_', ' ')}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {format(new Date(prospect.created_at), 'dd.MM.yy')}
-                      </TableCell>
-                    </TableRow>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {prospect.ai_score !== null ? (
+                        <div className="flex items-center gap-1">
+                          <Star className="h-3 w-3 text-yellow-500" />
+                          <span>{prospect.ai_score}</span>
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground capitalize">
+                      {prospect.source_type?.replace('_', ' ')}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {format(new Date(prospect.created_at), 'dd.MM.yy')}
+                    </TableCell>
+                  </TableRow>
                 );
               })
             )}
           </TableBody>
         </Table>
       </div>
+    </div>
+  );
 
-      {/* Detail sheet */}
-      {selectedProspect && (
+  return (
+    <>
+      <PersistentPanelLayout
+        rightPanel={selectedProspect ? (
+          <VendorProspectPanel prospect={selectedProspect} />
+        ) : null}
+        rightPanelTitle={selectedProspect?.business_name || (isRussian ? 'Детали' : 'Details')}
+        onCloseRightPanel={() => setSelectedProspect(null)}
+      >
+        {tableContent}
+      </PersistentPanelLayout>
+
+      {/* Mobile/tablet: keep Sheet behavior */}
+      {!isDesktop && selectedProspect && (
         <VendorProspectDetail
           prospect={selectedProspect}
           open={!!selectedProspect}
           onClose={() => setSelectedProspect(null)}
         />
       )}
-    </div>
+    </>
   );
 }

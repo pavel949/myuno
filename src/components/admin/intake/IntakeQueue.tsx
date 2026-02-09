@@ -3,7 +3,10 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { IntakeSession, IntakeSummary, IntakeItem } from '@/hooks/useIntakeAgent';
 import { IntakeItemCard } from './IntakeItemCard';
 import { IntakeItemEditor } from './IntakeItemEditor';
+import { IntakeItemPanel } from './IntakeItemPanel';
 import { IntakeBulkActions } from './IntakeBulkActions';
+import { PersistentPanelLayout } from '@/components/uno/PersistentPanelLayout';
+import { useIsDesktop } from '@/hooks/use-desktop';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Clock, CheckCircle, XCircle, List } from 'lucide-react';
 
@@ -30,9 +33,11 @@ export function IntakeQueue({
 }: IntakeQueueProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isDesktop = useIsDesktop();
   
   const [activeTab, setActiveTab] = useState('pending');
   const [editingItem, setEditingItem] = useState<IntakeItem | null>(null);
+  const [selectedItem, setSelectedItem] = useState<IntakeItem | null>(null);
   const [approvingItemId, setApprovingItemId] = useState<string | null>(null);
 
   const pendingItems = session.items.filter(i => i.status === 'pending');
@@ -50,7 +55,42 @@ export function IntakeQueue({
     setEditingItem(null);
   };
 
-  return (
+  const handleCardClick = (item: IntakeItem) => {
+    if (isDesktop) {
+      setSelectedItem(item);
+    }
+  };
+
+  const gridClass = "grid gap-4 lg:gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
+
+  const renderItems = (items: IntakeItem[], showActions: boolean) => (
+    <div className={gridClass}>
+      {items.map(item => (
+        <div 
+          key={item.id}
+          onClick={() => handleCardClick(item)}
+          className={selectedItem?.id === item.id ? 'ring-2 ring-primary rounded-lg' : ''}
+        >
+          <IntakeItemCard
+            item={item}
+            onApprove={showActions ? () => handleApprove(item.id) : () => {}}
+            onDiscard={showActions ? () => onDiscard(item.id) : () => {}}
+            onEdit={showActions ? () => setEditingItem(item) : () => {}}
+            isApproving={approvingItemId === item.id}
+          />
+        </div>
+      ))}
+    </div>
+  );
+
+  const emptyState = (icon: React.ReactNode, text: string) => (
+    <div className="text-center py-12 text-muted-foreground">
+      {icon}
+      <p>{text}</p>
+    </div>
+  );
+
+  const mainContent = (
     <div className="space-y-4">
       {/* Bulk actions bar */}
       <IntakeBulkActions
@@ -88,92 +128,58 @@ export function IntakeQueue({
         </TabsList>
 
         <TabsContent value="all" className="mt-4">
-          <div className="grid gap-4 lg:gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {session.items.map(item => (
-              <IntakeItemCard
-                key={item.id}
-                item={item}
-                onApprove={() => handleApprove(item.id)}
-                onDiscard={() => onDiscard(item.id)}
-                onEdit={() => setEditingItem(item)}
-                isApproving={approvingItemId === item.id}
-              />
-            ))}
-          </div>
+          {renderItems(session.items, true)}
         </TabsContent>
 
         <TabsContent value="pending" className="mt-4">
-          {pendingItems.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>{isRu ? 'Нет ожидающих объектов' : 'No pending items'}</p>
-            </div>
-          ) : (
-            <div className="grid gap-4 lg:gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {pendingItems.map(item => (
-                <IntakeItemCard
-                  key={item.id}
-                  item={item}
-                  onApprove={() => handleApprove(item.id)}
-                  onDiscard={() => onDiscard(item.id)}
-                  onEdit={() => setEditingItem(item)}
-                  isApproving={approvingItemId === item.id}
-                />
-              ))}
-            </div>
-          )}
+          {pendingItems.length === 0 
+            ? emptyState(<Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />, isRu ? 'Нет ожидающих объектов' : 'No pending items')
+            : renderItems(pendingItems, true)
+          }
         </TabsContent>
 
         <TabsContent value="created" className="mt-4">
-          {createdItems.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <CheckCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>{isRu ? 'Пока нет созданных листингов' : 'No created listings yet'}</p>
-            </div>
-          ) : (
-            <div className="grid gap-4 lg:gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {createdItems.map(item => (
-                <IntakeItemCard
-                  key={item.id}
-                  item={item}
-                  onApprove={() => {}}
-                  onDiscard={() => {}}
-                  onEdit={() => {}}
-                />
-              ))}
-            </div>
-          )}
+          {createdItems.length === 0
+            ? emptyState(<CheckCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />, isRu ? 'Пока нет созданных листингов' : 'No created listings yet')
+            : renderItems(createdItems, false)
+          }
         </TabsContent>
 
         <TabsContent value="discarded" className="mt-4">
-          {discardedItems.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <XCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>{isRu ? 'Нет отклонённых объектов' : 'No discarded items'}</p>
-            </div>
-          ) : (
-            <div className="grid gap-4 lg:gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {discardedItems.map(item => (
-                <IntakeItemCard
-                  key={item.id}
-                  item={item}
-                  onApprove={() => {}}
-                  onDiscard={() => {}}
-                  onEdit={() => {}}
-                />
-              ))}
-            </div>
-          )}
+          {discardedItems.length === 0
+            ? emptyState(<XCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />, isRu ? 'Нет отклонённых объектов' : 'No discarded items')
+            : renderItems(discardedItems, false)
+          }
         </TabsContent>
       </Tabs>
+    </div>
+  );
 
-      {/* Editor modal */}
+  return (
+    <>
+      <PersistentPanelLayout
+        rightPanel={selectedItem ? (
+          <IntakeItemPanel
+            item={selectedItem}
+            onApprove={() => handleApprove(selectedItem.id)}
+            onDiscard={() => { onDiscard(selectedItem.id); setSelectedItem(null); }}
+            onEdit={() => setEditingItem(selectedItem)}
+            isApproving={approvingItemId === selectedItem.id}
+          />
+        ) : null}
+        rightPanelTitle={isRu ? 'Детали' : 'Details'}
+        onCloseRightPanel={() => setSelectedItem(null)}
+      >
+        {mainContent}
+      </PersistentPanelLayout>
+
+      {/* Editor modal — shared by both mobile and desktop */}
       <IntakeItemEditor
         item={editingItem}
         open={!!editingItem}
         onOpenChange={(open) => !open && setEditingItem(null)}
         onSave={handleEditSave}
       />
-    </div>
+    </>
   );
 }
