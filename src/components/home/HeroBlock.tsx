@@ -20,10 +20,10 @@ export const HeroBlock = memo(function HeroBlock() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -10 }}
+      initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="space-y-3 lg:space-y-2"
+      transition={{ duration: 0.25, ease: 'easeOut' }}
+      className="space-y-2.5 lg:space-y-2"
     >
       {/* Compact Header: Location + Brand + SOS */}
       <div className="flex items-center justify-between">
@@ -45,18 +45,18 @@ export const HeroBlock = memo(function HeroBlock() {
         {/* Right: SOS Button */}
         <Link 
           to="/sos" 
-          className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-destructive/10 border border-destructive/30 hover:bg-destructive/20 transition-colors"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-destructive/10 border border-destructive/30 hover:bg-destructive/20 active:bg-destructive/25 transition-colors"
         >
           <AlertTriangle className="w-3 h-3 text-destructive" />
           <span className="text-[10px] font-bold text-destructive">SOS</span>
         </Link>
       </div>
 
-      {/* Main headline */}
-      <h1 className="text-center lg:text-left text-2xl sm:text-3xl lg:text-2xl font-display font-bold text-foreground mt-1">
+      {/* Main headline — tighter on mobile */}
+      <h1 className="text-center lg:text-left text-xl sm:text-2xl lg:text-2xl font-display font-bold text-foreground">
         {isRu ? 'Дом вдали от дома' : 'Home Away From Home'}
       </h1>
-      <p className="text-center lg:text-left text-sm text-muted-foreground -mt-1">
+      <p className="text-center lg:text-left text-[13px] text-muted-foreground -mt-1.5">
         {isRu ? 'Все решения в одном приложении' : 'All solutions in one app'}
       </p>
 

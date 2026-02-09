@@ -78,8 +78,8 @@ export const LifeSituationSelector = memo(function LifeSituationSelector({
         </h2>
       </div>
 
-      {/* 2-column grid */}
-      <div className="grid grid-cols-2 gap-2.5">
+      {/* 2-column grid — compact cards */}
+      <div className="grid grid-cols-2 gap-2">
         {displayedSituations.map((situation) => {
           const Icon = getIcon(situation.icon);
           const isSelected = isActive(situation.code);
@@ -89,21 +89,21 @@ export const LifeSituationSelector = memo(function LifeSituationSelector({
               key={situation.id}
               onClick={() => handleSelect(situation)}
               className={cn(
-                "flex items-center gap-2.5 p-3 rounded-xl border transition-all duration-200",
-                "bg-card hover:bg-accent/50 hover:border-primary/30",
-                "shadow-sm hover:shadow-md text-left",
-                isSelected && "ring-2 ring-primary border-primary"
+                "flex items-center gap-2.5 p-2.5 rounded-xl border transition-all duration-150",
+                "bg-card hover:bg-accent/50 active:scale-[0.98]",
+                "text-left",
+                isSelected ? "ring-2 ring-primary border-primary" : "border-border/60"
               )}
               style={{
-                borderColor: isSelected ? situation.color : `${situation.color}30`,
+                borderColor: isSelected ? situation.color : undefined,
               }}
             >
               <div
-                className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
                 style={{ backgroundColor: `${situation.color}15` }}
               >
                 <Icon
-                  className="w-4.5 h-4.5"
+                  className="w-4 h-4"
                   style={{ color: situation.color }}
                 />
               </div>
