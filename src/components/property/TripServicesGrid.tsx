@@ -102,7 +102,7 @@ const TRIP_SERVICES: TripService[] = [
   {
     id: 'babysitter',
     icon: Baby,
-    path: '/babysitters',
+    path: '/babysitter',
     labelEn: 'Babysitter',
     labelRu: 'Няня',
     descEn: 'Childcare service',
