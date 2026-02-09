@@ -58,7 +58,7 @@ export const PropertyHeroCard = forwardRef<HTMLDivElement, PropertyHeroCardProps
         return { 
           icon: AlertTriangle, 
           label: `${stats.pendingTasks} ${isRu ? 'задач' : 'tasks'}`,
-          color: 'bg-orange-500/10 text-orange-600 border-orange-500/20'
+          color: 'bg-warning/10 text-warning border-warning/20'
         };
       }
       return { 
@@ -87,7 +87,7 @@ export const PropertyHeroCard = forwardRef<HTMLDivElement, PropertyHeroCardProps
               loading="lazy"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+            <div className="w-full h-full flex items-center justify-center bg-muted">
               <Home className="h-12 w-12 text-muted-foreground/50" />
             </div>
           )}

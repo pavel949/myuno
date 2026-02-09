@@ -69,18 +69,12 @@ export const HomeServiceProviderCard = memo(function HomeServiceProviderCard({
     >
       {/* Avatar/Logo */}
       <Avatar className={cn(
-        "w-14 h-14 ring-2 shrink-0",
-        isIndividual ? "ring-amber-500/30" : "ring-primary/20"
+        "w-14 h-14 ring-2 shrink-0 ring-border"
       )}>
         {imageUrl || provider.logo_url ? (
           <AvatarImage src={imageUrl || provider.logo_url || ''} alt={provider.name} />
         ) : null}
-        <AvatarFallback className={cn(
-          "font-semibold text-sm",
-          isIndividual 
-            ? "bg-gradient-to-br from-amber-500/20 to-amber-500/5 text-amber-700 dark:text-amber-300" 
-            : "bg-gradient-to-br from-primary/20 to-primary/5 text-primary"
-        )}>
+        <AvatarFallback className="font-semibold text-sm bg-muted text-muted-foreground">
           {getInitials(provider.name)}
         </AvatarFallback>
       </Avatar>

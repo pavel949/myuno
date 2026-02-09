@@ -154,14 +154,14 @@ function FlashServiceCard({ service, index, onClick }: FlashServiceCardProps) {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-            <IconBadge icon="✨" size="lg" variant="muted" />
+           <div className="w-full h-full bg-muted flex items-center justify-center">
+            <IconBadge icon="Sparkles" size="lg" variant="muted" />
           </div>
         )}
         
         {/* Discount badge */}
         <Badge 
-          className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5"
+          className="absolute top-2 left-2 bg-destructive text-destructive-foreground text-[10px] font-bold px-1.5 py-0.5"
         >
           -{discountPercent}%
         </Badge>

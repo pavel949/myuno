@@ -55,32 +55,32 @@ export function useFeatureDiscoveryToast() {
 export const FEATURE_TIPS = {
   FAVORITES: {
     id: 'favorites-tip',
-    title: '💡 Совет',
+    title: 'Совет',
     description: 'Добавьте в избранное, чтобы быстро находить понравившиеся услуги',
   },
   WALLET: {
     id: 'wallet-tip',
-    title: '💰 Кэшбек',
+    title: 'Кэшбек',
     description: 'Получайте до 10% возврата с каждого бронирования в UNO Wallet',
   },
   REVIEWS: {
     id: 'reviews-tip',
-    title: '⭐ Отзывы',
+    title: 'Отзывы',
     description: 'Оставьте отзыв после визита и получите бонусные баллы',
   },
   SOS: {
     id: 'sos-tip',
-    title: '🆘 Экстренная помощь',
+    title: 'Экстренная помощь',
     description: 'Кнопка SOS доступна 24/7 для любых экстренных ситуаций',
   },
   ESCROW: {
     id: 'escrow-tip',
-    title: '🛡️ Защита платежей',
+    title: 'Защита платежей',
     description: 'Ваши деньги защищены до подтверждения оказания услуги',
   },
   CHAT: {
     id: 'chat-tip',
-    title: '💬 Чат с провайдером',
+    title: 'Чат с провайдером',
     description: 'Общайтесь напрямую с исполнителем через безопасный чат',
   },
 };
