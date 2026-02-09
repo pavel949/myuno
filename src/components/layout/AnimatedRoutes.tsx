@@ -578,6 +578,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/beauty/booking/:id" element={<LazyPage><BeautyBooking /></LazyPage>} />
         <Route path="/beauty/services" element={<LazyPage><BeautyServices /></LazyPage>} />
         <Route path="/beauty/map" element={<LazyPage><BeautyMap /></LazyPage>} />
+        {/* Legacy redirects */}
+        <Route path="/salons" element={<Navigate to="/beauty" replace />} />
+        <Route path="/spa" element={<Navigate to="/beauty" replace />} />
         
         {/* Property Mini-App Routes */}
         <Route path="/property" element={<LazyPage><PropertyIndex /></LazyPage>} />
