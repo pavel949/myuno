@@ -1,78 +1,163 @@
 
 
-# Консолидация Tours в Experiences — удаление дублирования
+# Global Information Architecture Overhaul
+## 4 User Modes, Normalized Naming, Grouped Services Hub
 
-## Проблема
+---
 
-Таблица `tours` содержит 0 активных записей. Все реальные данные (88 активных туров) хранятся в `experiences` с `experience_type = 'tour'`. При этом ~9 файлов и ~15 запросов продолжают обращаться к мёртвой таблице `tours`, создавая путаницу в Admin/Vendor панелях и ложные нули в статистике.
+## What Changes
 
-## План
+This is a **UX/IA/naming-layer-only** refactoring. No routes, database tables, or APIs are modified. The changes affect how content is labeled, grouped, and navigated.
 
-### Шаг 1: Перенаправить Admin и Vendor экраны
+---
 
-**AdminTours.tsx** — переписать на использование `useAdminExperiences({ experienceType: 'tour' })` вместо `useAdminTours()`. Форма останется та же, но данные будут из `experiences`.
+## 1. Bottom Navigation: 4 Tabs
 
-**VendorTours.tsx** — переписать на использование `useVendorExperiences(providerId, 'tour')` вместо `useVendorTours()`.
+Current (5 tabs): `Home | Discover | Services (drawer) | Bookings | Account`
 
-### Шаг 2: Очистить хуки-запросы к `tours`
+New (4 tabs): `Life | Services | Marketplace | Me`
 
-Удалить/переключить обращения к `from('tours')` в:
-- `useCategoryCounts.ts` — заменить на `from('experiences').eq('experience_type', 'tour')`
-- `useHomePageData.ts` — заменить на `from('experiences').eq('experience_type', 'tour')`
-- `usePrefetch.ts` — удалить/заменить два запроса к tours
-- `useTodayEvents.ts` — заменить на experiences
-- `useRecommendations.ts` — заменить на experiences
-- `routePrefetch.ts` — заменить на experiences
-- `useAdminDashboardStats.ts` — заменить на experiences с фильтром
+| Tab | Icon | Route | Purpose |
+|-----|------|-------|---------|
+| Life | Sparkles | `/` (Home) | LifeOS situations, context-driven guidance |
+| Services | LayoutGrid | `/discover` (reused) | Grouped service catalog |
+| Marketplace | ShoppingBag | `/market` | Products, transactions |
+| Me | User | `/account` | Orders, properties, settings |
 
-### Шаг 3: Пометить legacy-файлы как deprecated
+**File**: `src/components/layout/AdaptiveBottomNav.tsx`
+- Replace 5 `guestNavItems` with 4
+- Remove `isServicesSheet` logic and `ExploreVerticalsSheet` import
+- Remove `/bookings` tab (accessible from Me section)
+- Labels: EN `Life / Services / Marketplace / Me`, RU `Жизнь / Услуги / Маркет / Мой`
 
-Файлы, которые станут неиспользуемыми после шагов 1-2:
-- `src/hooks/useTours.ts` — удалить (полностью заменён `useExperiences`)
-- `src/hooks/useVendorTours.ts` — удалить (заменён `useVendorExperiences`)
-- `src/hooks/useAdminContent.ts` (`useAdminTours` функция) — удалить функцию
+---
 
-### Шаг 4: Консолидировать роуты
+## 2. Global Naming Normalization
 
-- `/admin/tours` — редирект на `/admin/experiences?type=tour`
-- `/vendor/tours` — редирект на `/vendor/experiences?type=tour`
-- Убрать `AdminTours` и `VendorTours` из pageRegistry (или оставить как редиректы)
+Update `labelEn` and `labelRu` in `src/lib/verticals.ts`:
 
-### Шаг 5: Домашняя страница
+| Internal ID | Old labelEn | New labelEn | New labelRu |
+|-------------|-------------|-------------|-------------|
+| property | Property | Real Estate | Недвижимость |
+| yacht | Boat Charters | Yacht Charter | Яхт-чартер |
+| vehicle | Transport | Car & Bike Rental | Аренда авто и мото |
+| experience | Experiences | Things To Do | Чем заняться |
+| cleaning | Cleaning | Home Cleaning | Клининг |
+| babysitter | Babysitters | Childcare | Присмотр за детьми |
+| beauty | Beauty & Spa | Beauty & Wellness | Красота и велнес |
+| medical | Medical | Healthcare | Здоровье |
+| legal | Legal | Legal Services | Юридические услуги |
+| education | Education | Education & Courses | Образование |
+| fitness | Fitness | Fitness & Gyms | Фитнес и залы |
+| water_activity | Water Activities | Water Sports | Водный спорт |
+| pet_service | Pet Services | Pet Care | Уход за питомцами |
+| flower | Flowers | Flower Delivery | Доставка цветов |
+| transfer | Transfers | Airport & City Transfers | Трансферы |
+| insurance | Insurance | Insurance | Страхование |
+| restaurant | Restaurants | Restaurants | Рестораны |
+| event | Events | Events | События |
 
-`ToursSection.tsx` — уже использует `useExperiences`, но само название файла вводит в заблуждение. Переименовать не обязательно (косметика), но можно объединить с `ExperiencesSection.tsx` в будущем.
+**Also remove TOUR entry** from `VERTICALS` (deprecated; data lives in experiences).
 
-### Шаг 6: Обновить E2E тесты
+**Also update** `src/lib/config/entityTypes.ts` to match the same canonical names.
 
-`tour-booking.spec.ts` — убедиться, что навигация идёт на `/experiences?type=tour`, а не на `/tours`.
+---
 
-## Что НЕ меняется
+## 3. Services Hub: Grouped Catalog
 
-- Таблица `tours` в БД остаётся (не удаляем, чтобы не ломать миграции)
-- Публичные роуты `/tours` уже редиректят на `/experiences?type=tour` (это уже сделано)
-- UI карточек и фильтров
-- Таблица `experiences` и её структура
+Create `src/lib/verticalGroups.ts` — the grouping registry:
 
-## Технические детали
+```text
+Transport & Mobility:
+  - transfer (Airport & City Transfers)
+  - vehicle (Car & Bike Rental)
+  - [airport_fast_track] (Fast Track)
 
-### Файлы для изменения (~10 файлов):
+Home & Living:
+  - property (Real Estate)
+  - cleaning (Home Cleaning)
+  - babysitter (Childcare)
+  - pet_service (Pet Care)
+  - [expat] (Relocation Services)
 
-| Файл | Действие |
-|------|----------|
-| `src/pages/admin/AdminTours.tsx` | Переписать на `useAdminExperiences` |
-| `src/pages/vendor/VendorTours.tsx` | Переписать на `useVendorExperiences` |
-| `src/hooks/useCategoryCounts.ts` | Заменить `from('tours')` на `from('experiences')` |
-| `src/hooks/useHomePageData.ts` | Заменить запрос |
-| `src/hooks/usePrefetch.ts` | Заменить 2 запроса |
-| `src/hooks/useTodayEvents.ts` | Заменить запрос |
-| `src/hooks/useRecommendations.ts` | Заменить запрос |
-| `src/lib/routePrefetch.ts` | Заменить запрос |
-| `src/hooks/useAdminDashboardStats.ts` | Заменить 2 запроса |
-| `src/components/layout/AnimatedRoutes.tsx` | Добавить редиректы admin/vendor tours |
+Leisure & Lifestyle:
+  - experience (Things To Do)
+  - event (Events)
+  - water_activity (Water Sports)
+  - yacht (Yacht Charter)
+  - fitness (Fitness & Gyms)
+  - beauty (Beauty & Wellness)
+  - restaurant (Restaurants)
+  - flower (Flower Delivery)
 
-### Файлы для удаления (3 файла):
+Health & Administration:
+  - medical (Healthcare)
+  - [pharmacy] (Pharmacy)
+  - insurance (Insurance)
+  - legal (Legal Services)
+  - education (Education & Courses)
 
-- `src/hooks/useTours.ts`
-- `src/hooks/useVendorTours.ts`
-- Функция `useAdminTours` из `src/hooks/useAdminContent.ts`
+Premium & Assistance:
+  - [vip_concierge] (Concierge)
+  - [sos] (Emergency Help)
+```
+
+Items in `[brackets]` are standalone screens (not in `VERTICALS`); they are mapped by route.
+
+**Refactor** `src/pages/Discover.tsx` (which already serves as the services discovery screen) to render grouped sections instead of the current flat Klook-style layout. Each group gets a collapsible section header with verticals displayed as icon+label buttons.
+
+**Remove** `ExploreVerticalsSheet` flat grid usage from the bottom nav (the sheet component itself stays for other uses).
+
+---
+
+## 4. Home Page = Life Mode
+
+`src/pages/Index.tsx` changes:
+- Remove `QuickActionsGrid` (services now live on Services tab)
+- Keep: `HeroBlock`, `LifeSituationSelector`, `ActiveSituationBanner`, `PersonaChips`, `DiscoveryCarousel` (promotions only)
+- The page focuses on: "What's happening in your life?" + contextual recommendations
+
+---
+
+## 5. Me Tab Consolidation
+
+The `/account` route already exists. Bookings (previously a separate tab) become a section within Me. No new page needed — just the tab removal from bottom nav. Users still access `/bookings` via the account menu.
+
+---
+
+## Files to Create
+
+| File | Purpose |
+|------|---------|
+| `src/lib/verticalGroups.ts` | Canonical grouping registry with labels EN/RU |
+
+## Files to Modify
+
+| File | Change |
+|------|--------|
+| `src/lib/verticals.ts` | Update all `labelEn`/`labelRu`, remove TOUR |
+| `src/lib/config/entityTypes.ts` | Align labels with new canonical names |
+| `src/components/layout/AdaptiveBottomNav.tsx` | 4 tabs, remove sheet logic |
+| `src/pages/Discover.tsx` | Grouped services hub layout |
+| `src/pages/Index.tsx` | Remove QuickActionsGrid |
+| `src/components/shared/ExploreVerticalsSheet.tsx` | Remove TOUR, use new labels |
+| `src/components/home/QuickActionsGrid.tsx` | Update labels to match canonical names |
+
+## Files NOT Changed
+
+- All route definitions (AnimatedRoutes.tsx)
+- All database hooks and queries
+- All mini-app pages (pages/flowers, pages/yachts, etc.)
+- Database schema and tables
+- Authentication and authorization
+
+---
+
+## Summary
+
+- **4 clear modes**: Life (situations) / Services (grouped catalog) / Marketplace (products) / Me (control center)
+- **29 services** organized into **5 logical groups** instead of a flat list
+- **Consistent naming** across all screens — no more "Boat Charters" vs "Yacht" vs "Charter" confusion
+- **Zero route changes**, zero DB changes, zero API changes
+- User never sees words: mini-app, vertical, hub, engine
 
