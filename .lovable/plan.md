@@ -2,78 +2,83 @@
 
 ## Проблема
 
-Сейчас главная страница (`/`) одинакова для всех пользователей:
-1. Приветствие + поиск
-2. Выбор жизненной ситуации (или статус активной)
-3. Баннер консьержа
-4. Trust-баннер
+Три разрыва в UX собственника недвижимости:
 
-**Что потеряно при нормализации:**
-- Компонент `QuickActionsGrid` (уже существует, ~700 строк, полная логика по ролям) был убран со страницы
-- Нет быстрого доступа к популярным сервисам: трансфер, цветы, яхты, аренда, туры
-- При переключении роли (Owner/Vendor/Investor) главная страница **не меняется вообще**
+1. **На главной странице** (QuickActionsGrid, роль Owner) — нет прямой кнопки "Мои объекты" ведущей в /owner dashboard. Текущие OWNER_ACTIONS ведут на сторонние сервисы, но не в собственный модуль управления.
 
-Дэшборды Owner (`/owner`) и Vendor (`/vendor`) — в порядке, у них свои специализированные интерфейсы. Проблема именно в **общей главной странице** (`/`).
+2. **Страница Life Situation "Недвижимость"** (/life/property) — внизу захардкожены "Забронировать трансфер" и "Trip Planner", что не имеет отношения к управлению недвижимостью. Вместо них нужны операционные действия собственника.
+
+3. **Нет моста** между Life OS ситуацией "property" и реальными микро-задачами собственника: check-in/check-out, клининг, счётчики, налоги, депозиты — всё это существует в /owner/*, но не видно из Life OS.
 
 ---
 
-## Решение
+## Решение (3 изменения)
 
-Вернуть `QuickActionsGrid` на главную страницу, но нормализовать его визуально под Calm-стиль (убрать градиенты `bg-gradient-to-br`, заменить на плоские токены).
-
-### Шаг 1: Нормализация визуала `QuickActionsGrid`
+### 1. Добавить "Мои объекты" в OWNER_ACTIONS (QuickActionsGrid)
 
 Файл: `src/components/home/QuickActionsGrid.tsx`
 
-- Заменить все `bg-gradient-to-br from-X to-Y` на плоские `bg-{color}/12` с `text-{color}` для иконок
-- Убрать `shadow-md` с иконок
-- Использовать нейтральные, но различимые цвета для каждой категории
-- Сохранить всю ролевую логику (Tourist / Resident / Owner / Vendor / Admin / Investor) без изменений
-
-Было:
-```text
-bgColor: 'bg-gradient-to-br from-teal-400 to-emerald-600'
-iconColor: 'text-white'
-```
-
-Станет:
-```text
-bgColor: 'bg-teal-500/12'
-iconColor: 'text-teal-600 dark:text-teal-400'
-```
-
-### Шаг 2: Добавить `QuickActionsGrid` обратно на Index
-
-Файл: `src/pages/Index.tsx`
-
-Разместить сразу после `HeroBlock`, перед Life Situation блоком:
+Первый элемент в OWNER_ACTIONS станет прямой вход в Owner Dashboard:
 
 ```text
-HeroBlock (greeting + search)
-    |
-QuickActionsGrid  <-- ВОЗВРАЩАЕМ (адаптируется по роли)
-    |
-LifeSituationSelector / LifeOSStatusBlock
-    |
-ConciergeBanner
-    |
-TrustBanner
+OWNER_ACTIONS (было):
+  Services -> /services
+  Management -> /services?category=property-management
+  Rental -> /property
+  Legal, Insurance, Cleaning
+
+OWNER_ACTIONS (станет):
+  My Properties -> /owner           <-- НОВЫЙ, первый приоритет
+  Calendar -> /owner/calendar
+  Services -> /services
+  Rental -> /property
+  Legal -> /legal
+  Cleaning -> /cleaning
 ```
 
-Логика работы (уже реализована в компоненте):
-- **Роль не выбрана (user)** -> показывает Tourist-приоритетные сервисы: Аренда, Трансфер, Цветы, Доставка, Транспорт + "Ещё"
-- **Owner** -> Сервис, УК, Аренда, Юрист, Страховка, Клининг
-- **Vendor** -> Панель, Заказы, Услуги, Календарь, Маркет, Банки
-- **Investor** -> Инвестиции, Новостройки, Купить, Юрист, Банки, Страховка
-- **Admin** -> Админ, Команда, Сервисы, Жильё, Маркет, Юрист
+Это гарантирует: при переключении роли на Owner — первая кнопка на главной = вход в полный модуль управления.
 
-### Шаг 3: Что остается без изменений
+---
 
-- Owner Dashboard (`/owner`) -- свой специализированный интерфейс, всё ок
-- Vendor Dashboard (`/vendor`) -- свой специализированный интерфейс, всё ок
-- Account page (`/account`) -- профиль с `RoleSwitchMenu`, всё ок
-- Discover (`/discover`) -- Life Context Hub, всё ок
-- Вся ролевая логика в `useUserContext` и `QuickActionsGrid` -- сохраняется полностью
+### 2. Заменить хардкод на LifeFlowPage для ситуации "property"
+
+Файл: `src/pages/LifeFlowPage.tsx`
+
+Сейчас в конце страницы захардкожены 2 карточки (Transfer + Trip Planner) для ВСЕХ ситуаций. Нужна контекстная логика:
+
+- Если `code === 'property'` — показать операционные карточки собственника:
+  - "Управление объектами" -> /owner
+  - "Добавить объект" -> /owner/properties/new
+  - "Заказать уборку" -> /owner/service-request?type=cleaning
+  - "Календарь бронирований" -> /owner/calendar
+  - "Финансы и расходы" -> /owner/financials
+
+- Для всех остальных ситуаций — оставить текущие карточки (Transfer + Trip Planner)
+
+Это свяжет Life OS с реальным функционалом Owner-модуля.
+
+---
+
+### 3. Обновить сценарий "property.management" в Life OS
+
+Текущие задачи в базе:
+- property.management.maintenance — "Обслуживание недвижимости"
+- property.management.rental_mgmt — "Управление арендой"
+
+Этого мало. Нужно добавить жизненные задачи, которые уже реализованы в приложении:
+
+| Задача | Маршрут в приложении |
+|--------|---------------------|
+| Check-in / Check-out гостей | /owner/operations |
+| Уборка и клининг | /owner/service-request?type=cleaning |
+| Показания счётчиков (вода, электричество) | /owner/properties/:id/manage |
+| Депозиты и залоги | /owner/financials |
+| Налоги на недвижимость | /owner/financials |
+| Инспекция объекта | /owner/inspection |
+| Канал-менеджер (OTA) | /owner/channels |
+| Отчёты о доходах | /owner/reports |
+
+Это добавление через SQL-миграцию в таблицу `life_tasks` со связкой к сценарию `property.management`.
 
 ---
 
@@ -81,10 +86,8 @@ TrustBanner
 
 | Файл | Изменения |
 |------|-----------|
-| `src/components/home/QuickActionsGrid.tsx` | Нормализация визуала: убрать градиенты, плоские токены |
-| `src/pages/Index.tsx` | Добавить QuickActionsGrid между HeroBlock и LifeSituation |
+| `src/components/home/QuickActionsGrid.tsx` | OWNER_ACTIONS: добавить "My Properties" -> /owner как первый элемент, заменить "Management" на "Calendar" |
+| `src/pages/LifeFlowPage.tsx` | Контекстная логика: для `code === 'property'` — показать операционные карточки собственника вместо Transfer/Trip Planner |
+| SQL миграция | Добавить ~6 life_tasks к сценарию property.management (check-in, cleaning, meters, deposits, taxes, inspection) |
 
-**Итого: 2 файла, минимальные изменения, максимальный эффект.**
-
-Результат: при переключении роли через `RoleContextSwitcher` в хедере, главная страница мгновенно показывает другой набор быстрых действий — сервис становится удобным для каждой роли, а популярные услуги (трансфер, цветы, яхты, аренда) всегда на расстоянии одного тапа.
-
+**Итого: 2 файла + 1 миграция. Собственник получает прямой доступ ко всем своим инструментам и с главной страницы, и через Life OS.**
