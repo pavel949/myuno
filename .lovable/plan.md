@@ -1,139 +1,87 @@
 
+# План улучшений семантического ядра LifeOS
 
-# Аудит соответствия текстов жизненным ситуациям
+## Обзор проблем
 
-## Выявленные проблемы
-
-### 1. КРИТИЧЕСКИЕ: Несовпадение кодов в next_routes
-
-Маршруты (`lifeos_routes`) ссылаются на коды ситуаций, которых **нет** среди активных ситуаций:
-
-| Маршрут | next_routes содержит | Проблема |
-|---------|---------------------|----------|
-| arrival | `emergency_medical` | Нет ситуации с таким кодом. Реальный код: **`health`** |
-| arrival | `long_term_living` | Нет такого кода. Реальный код: **`living`** |
-| arrival | `vacation_leisure` | Нет такого кода. Реальный код: **`leisure`** |
-| living | `relocation_visa` | Нет такого кода. Реальный код: **`relocation`** |
-| living | `family_with_children` | Нет такого кода. Реальный код: **`family`** |
-| living | `business_work` | Нет такого кода. Реальный код: **`business`** |
-| leisure | `family_with_children` | Нет. Правильно: **`family`** |
-| leisure | `emergency_medical` | Нет. Правильно: **`health`** |
-| health | `relocation_visa` | Нет. Правильно: **`relocation`** |
-| health | `long_term_living` | Нет. Правильно: **`living`** |
-| family | `emergency_medical` | Нет. Правильно: **`health`** |
-| family | `vacation_leisure` | Нет. Правильно: **`leisure`** |
-| family | `long_term_living` | Нет. Правильно: **`living`** |
-| business | `relocation_visa` | Нет. Правильно: **`relocation`** |
-| business | `long_term_living` | Нет. Правильно: **`living`** |
-| business | `vacation_leisure` | Нет. Правильно: **`leisure`** |
-| property | `relocation_visa` | Нет. Правильно: **`relocation`** |
-| property | `business_work` | Нет. Правильно: **`business`** |
-| relocation | `long_term_living` | Нет. Правильно: **`living`** |
-| relocation | `business_work` | Нет. Правильно: **`business`** |
-| relocation | `investment_property` | Нет. Правильно: **`property`** |
-| pre_trip | `arrival_first_day` | Нет. Правильно: **`arrival`** |
-| pre_trip | `vacation_leisure` | Нет. Правильно: **`leisure`** |
-| pre_trip | `family_with_children` | Нет. Правильно: **`family`** |
-
-**Результат**: Ссылки "Что может понадобиться дальше" ведут на несуществующие маршруты (пользователь видит fallback/пустую страницу).
-
-### 2. Несовпадение кодов в InsurancePromptBlock
-
-Файл `InsurancePromptBlock.tsx` использует устаревшие коды:
-- `family_with_children` -- реальный код `family`
-- `arrival_first_day` -- реальный код `arrival`
-- `emergency_medical` -- реальный код `health`
-- `vacation_leisure` -- реальный код `leisure`
-- `pre_trip_planning` -- не активен (`is_active: false`)
-
-**Результат**: Страховой блок **никогда не показывается**, потому что ни один код не совпадает.
-
-### 3. Несовпадение кодов в ContextualHeader
-
-`ContextualHeader.tsx` использует ключи `arrival`, `living`, `medical`, `leisure`, `investment`. Код `medical` не существует (правильно `health`), `investment` не существует (правильно `property`).
-
-### 4. Несовпадение кодов в getLifeOSAIContext
-
-`useLifeOS.ts` содержит маппинг с устаревшими кодами:
-- `arrival_first_day` (правильно `arrival`)
-- `long_term_living` (правильно `living`)
-- `family_with_children` (правильно `family`)
-- `emergency_medical` (правильно `health`)
-- `investment_property` (правильно `property`)
-- `departure_day`, `wedding_event`, `retirement_living` -- все неактивны
-
-### 5. Несоответствия в текстах CTA
-
-| Ситуация | CTA RU | CTA target | Проблема |
-|----------|--------|------------|----------|
-| business | "Выбрать коворкинг" | `/properties` | CTA говорит "коворкинг", но ведёт на недвижимость |
-| business | recommended_title_ru: "Лучшие коворкинги" | entity_type: property | Заголовок обещает коворкинги, но рекомендует объекты недвижимости |
-
-### 6. Слабые / пустые описания (description)
-
-Несколько ситуаций имеют минималистичные описания, которые не помогают пользователю:
-- `visa_travel`: "Visa runs, SEA travel" / "Поездки за визой, путешествия" -- слишком коротко
-- `sports`: "Gyms, activities, trainers" -- нет контекста Пхукета
-- `nightlife`: "Bars, clubs, events" -- нет контекста
-- `shopping`: "Malls, markets, delivery" -- нет контекста
-- `education`: "Schools, courses, tutoring" -- нет контекста
-- `pets`: "Vets, grooming, pet-friendly places" -- нет контекста
-
-### 7. Нет lifeos_routes для 6 активных ситуаций
-
-Ситуации `visa_travel`, `sports`, `nightlife`, `shopping`, `education`, `pets` не имеют записей в `lifeos_routes` -- пользователь видит только fallback "Подбираем лучшие варианты".
+| # | Проблема | Приоритет | Тип |
+|---|----------|-----------|-----|
+| 1 | 6 ситуаций без маппингов в каталоге (0 рекомендаций) | P0 | БД |
+| 2 | 287 маппингов привязаны к 5 неактивным ситуациям | P1 | БД |
+| 3 | `transfer` и `page` отсутствуют в entityTypes.ts (62+5 записей используют их) | P1 | Код |
+| 4 | `tours` таблица пуста (0 записей), но 7 маппингов ссылаются на tour | P1 | БД |
+| 5 | Слабое покрытие каталога: 78% experiences и 60% yachts не привязаны к LifeOS | P2 | БД |
 
 ---
 
-## План исправлений
+## Шаг 1: Заполнить catalog_life_map для 6 пустых ситуаций (P0)
 
-### Шаг 1: Исправить next_routes в БД (миграция)
+Добавить маппинги на основе реальных данных в БД. Логика подбора:
 
-Обновить все записи в `lifeos_routes`, заменив устаревшие коды на актуальные:
+| Ситуация | Релевантные entity_type | Кол-во реальных записей |
+|----------|------------------------|------------------------|
+| `visa_travel` | transfer (40), legal_service (9), insurance, property | ~60 записей |
+| `sports` | gym (13), experience (88), water_activity, salon | ~110 записей |
+| `nightlife` | event (15), restaurant (25), experience | ~128 записей |
+| `shopping` | flower_shop (4), marketplace_product, restaurant | ~29 записей |
+| `education` | education (14), babysitter (5), kindergarten | ~19 записей |
+| `pets` | pet_service (5), clinic (16), cleaning (15) | ~36 записей |
+
+Для каждой ситуации будет добавлено 8-15 маппингов с весами по governance-правилам:
+- Primary блоки: вес 70-85
+- Secondary блоки: вес 40-60
+
+## Шаг 2: Перенести маппинги неактивных ситуаций (P1)
+
+287 записей привязаны к 5 неактивным ситуациям. Варианты:
+- `digital_nomad` -> перенести в `business`
+- `pre_trip_planning` -> перенести в `arrival`
+- `wedding_event` -> перенести в `leisure`
+- `departure_day` -> перенести в `arrival`
+- `retirement_living` -> перенести в `living`
+
+Миграция: UPDATE life_situation_id для каждой группы, затем удаление дубликатов.
+
+## Шаг 3: Добавить `transfer` и `page` в entityTypes.ts (P1)
+
+62 маппинга используют entity_type `transfer`, но его нет в `ENTITY_TYPES`. Добавить:
 
 ```text
-emergency_medical    -->  health
-long_term_living     -->  living
-vacation_leisure     -->  leisure
-relocation_visa      -->  relocation
-family_with_children -->  family
-business_work        -->  business
-investment_property  -->  property
-arrival_first_day    -->  arrival
+transfer: { type: 'transfer', icon: Car, route: '/transport/airport-transfer', ... }
+page:     { type: 'page', icon: FileText, route: '/', ... }
 ```
 
-### Шаг 2: Исправить InsurancePromptBlock.tsx
+## Шаг 4: Очистить пустые tour маппинги (P1)
 
-Обновить `INSURANCE_ROUTES` и `contextMap` на актуальные коды:
-- `arrival_first_day` -> `arrival`
-- `family_with_children` -> `family`
-- `emergency_medical` -> `health`
-- `vacation_leisure` -> `leisure`
-- `pre_trip_planning` -> оставить (может активироваться)
+Таблица `tours` содержит 0 активных записей. Действия:
+- Удалить 7 маппингов entity_type=`tour` из catalog_life_map (ведут в пустоту)
+- Или перенести их на entity_type=`experience` (консолидация по архитектурному стандарту "Experiences = Tours + Activities")
 
-### Шаг 3: Исправить ContextualHeader.tsx
+## Шаг 5: Расширить покрытие каталога (P2)
 
-- `medical` -> `health`
-- `investment` -> `property`
-
-### Шаг 4: Исправить getLifeOSAIContext в useLifeOS.ts
-
-Обновить все ключи маппинга на актуальные коды ситуаций.
-
-### Шаг 5: Исправить CTA бизнеса
-
-- `cta_target` с `/properties` на `/coworking` или оставить `/properties` но исправить текст CTA на "Найти жильё рядом"
-- Либо обновить `recommended_entity_type` на `coworking` с реальным коворкингом
-
-### Шаг 6: Улучшить описания
-
-Обновить `description_en` / `description_ru` для 6 ситуаций с контекстом Пхукета.
-
-### Шаг 7: Создать lifeos_routes для новых ситуаций
-
-Добавить записи маршрутов для `visa_travel`, `sports`, `nightlife`, `shopping`, `education`, `pets` с реалистичными текстами recognition/reassurance/what_matters.
+Добавить маппинги для неподключённых записей:
+- 69 из 88 experiences не в LifeOS -> привязать к `leisure`, `sports`, `family`
+- 58 из 97 yachts не в LifeOS -> привязать к `leisure`, `arrival`
+- 18 из 33 vehicles не в LifeOS -> привязать к `living`, `arrival`
 
 ---
 
-### Итого: 7 правок, из них 4 критические (ломают навигацию и скрывают блоки)
+## Технические детали
 
+### Миграция БД (один SQL-файл):
+
+1. INSERT INTO catalog_life_map для 6 пустых ситуаций (~60 записей)
+2. UPDATE catalog_life_map SET life_situation_id для 287 записей неактивных ситуаций
+3. DELETE дубликатов после переноса
+4. DELETE или UPDATE 7 маппингов tour -> experience
+
+### Код (один файл):
+
+- `src/lib/config/entityTypes.ts`: добавить `transfer` и `page`
+
+### Что НЕ меняется:
+
+- Мобильный UX
+- Десктопный UX
+- Компоненты карточек
+- Роутинг
+- LifeOS фронтенд-логика (только данные)
