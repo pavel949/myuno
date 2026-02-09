@@ -78,8 +78,8 @@ export const LifeSituationSelector = memo(function LifeSituationSelector({
       {/* Header per UX Contract §2.1 */}
       <div className="flex items-center gap-2">
         <Sparkles className="w-5 h-5 text-primary" />
-        <h2 className="text-base font-semibold">
-          {isRussian ? 'Что вам нужно сейчас?' : 'What do you need right now?'}
+        <h2 className="text-[15px] font-bold">
+          {isRussian ? 'Что вам сейчас нужно?' : 'What do you need right now?'}
         </h2>
       </div>
 

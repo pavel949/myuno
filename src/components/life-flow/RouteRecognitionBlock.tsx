@@ -28,7 +28,7 @@ export function RouteRecognitionBlock({
       className="space-y-4"
     >
       {/* Recognition — empathy */}
-      <p className="text-base font-medium leading-relaxed text-foreground">
+      <p className="text-[15px] font-semibold leading-relaxed text-foreground">
         {recognition}
       </p>
 
@@ -39,8 +39,8 @@ export function RouteRecognitionBlock({
 
       {/* What matters now — focus */}
       <div className="space-y-2.5 pt-1">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          {isRu ? 'Сейчас важно:' : 'Right now it\'s important to:'}
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+          {isRu ? 'Сейчас важно' : 'What matters now'}
         </p>
         {whatMatters.map((item, i) => (
           <motion.div

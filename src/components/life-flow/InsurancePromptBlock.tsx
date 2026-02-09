@@ -110,7 +110,7 @@ export function InsurancePromptBlock({ routeCode, accentColor }: InsurancePrompt
     >
       <div className="flex items-center gap-2">
         <div className="h-px flex-1 bg-border" />
-        <span className="text-[11px] font-medium text-muted-foreground px-2 whitespace-nowrap">
+        <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground px-2 whitespace-nowrap">
           {isRu ? 'Важно для безопасности' : 'Important for safety'}
         </span>
         <div className="h-px flex-1 bg-border" />

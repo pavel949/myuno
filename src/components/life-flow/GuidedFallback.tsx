@@ -63,13 +63,13 @@ export const GuidedFallback = memo(function GuidedFallback({
         >
           <h3 className="text-xl font-bold mb-3">
             {isRussian 
-              ? 'Мы готовим рекомендации' 
-              : 'Preparing Your Recommendations'}
+              ? 'Подбираем лучшие варианты' 
+              : 'Curating the Best Options'}
           </h3>
           <p className="text-muted-foreground text-sm max-w-sm mx-auto leading-relaxed">
             {isRussian
-              ? `Для ситуации "${situationTitle || 'вашего запроса'}" мы подбираем лучшие варианты. А пока наш консьерж готов помочь.`
-              : `For "${situationTitle || 'your request'}" we're curating the best options. Meanwhile, our concierge is ready to assist.`}
+              ? `Для ситуации «${situationTitle || 'вашего запроса'}» мы готовим персональные рекомендации. А пока наш консьерж готов помочь прямо сейчас.`
+              : `We're preparing personalized recommendations for "${situationTitle || 'your request'}". Meanwhile, our concierge is ready to assist.`}
           </p>
         </motion.div>
       </div>
@@ -102,7 +102,7 @@ export const GuidedFallback = memo(function GuidedFallback({
               {isRussian ? 'Написать консьержу' : 'Chat with Concierge'}
             </p>
             <p className="text-sm opacity-90">
-              {isRussian ? 'Обычно отвечаем за 5 минут' : 'Usually respond in 5 minutes'}
+              {isRussian ? 'Отвечаем в течение 5 минут' : 'We respond within 5 minutes'}
             </p>
           </div>
         </button>
