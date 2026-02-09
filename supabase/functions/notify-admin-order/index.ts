@@ -255,15 +255,39 @@ Deno.serve(async (req) => {
               <div class="label">Scheduled For</div>
               <div class="value">📅 ${scheduledTime}</div>
               
+              ${payload.payment_method ? `
+              <div class="label" style="margin-top: 10px;">Payment Method</div>
+              <div class="value">${payload.payment_method === 'cash' ? '💵 Cash' : payload.payment_method === 'wallet' ? '👛 Wallet' : payload.payment_method === 'stripe' ? '💳 Card' : payload.payment_method}</div>
+              ` : ''}
+              
               ${payload.notes ? `
               <div class="label" style="margin-top: 10px;">Notes</div>
               <div class="value">${payload.notes}</div>
               ` : ''}
             </div>
 
-            <a href="https://uno.ae/admin/operations" class="button">
-              View in Operations Hub →
-            </a>
+            ${payload.addresses && payload.addresses.length > 0 ? `
+            <div class="order-details">
+              <div class="label">📍 Addresses</div>
+              ${payload.addresses.map(a => `
+                <div style="margin-top: 8px;">
+                  <strong style="text-transform: capitalize; font-size: 12px; color: #6b7280;">${a.address_type === 'pickup' ? '📍 From' : a.address_type === 'dropoff' ? '🏁 To' : a.address_type === 'service' ? '📍 Location' : a.address_type}:</strong>
+                  <div>${a.address_text}</div>
+                </div>
+              `).join('')}
+            </div>
+            ` : ''}
+
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <a href="https://uno.ae/admin/operations" class="button">
+                View in Operations Hub →
+              </a>
+              ${payload.customer_email ? `
+              <a href="mailto:${payload.customer_email}" class="button" style="background: #374151;">
+                Reply to Customer →
+              </a>
+              ` : ''}
+            </div>
           </div>
           
           <div class="footer">

@@ -6,67 +6,91 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Calendar, Clock, CheckCircle, XCircle, AlertCircle, Eye } from 'lucide-react';
+import { Search, Calendar, Clock, CheckCircle, XCircle, AlertCircle, Eye, Package } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
-
-const statusConfig: Record<string, { label: string; labelRu: string; color: string }> = {
-  submitted: { label: 'Submitted', labelRu: 'Отправлен', color: 'bg-yellow-500/20 text-yellow-700' },
-  confirmed: { label: 'Confirmed', labelRu: 'Подтверждён', color: 'bg-blue-500/20 text-blue-700' },
-  completed: { label: 'Completed', labelRu: 'Завершён', color: 'bg-green-500/20 text-green-700' },
-  cancelled_by_user: { label: 'Cancelled', labelRu: 'Отменён', color: 'bg-red-500/20 text-red-700' },
-  cancelled_by_provider: { label: 'Cancelled', labelRu: 'Отменён', color: 'bg-red-500/20 text-red-700' },
-  in_progress: { label: 'In Progress', labelRu: 'В процессе', color: 'bg-purple-500/20 text-purple-700' },
-  draft: { label: 'Draft', labelRu: 'Черновик', color: 'bg-gray-500/20 text-gray-700' },
-  expired: { label: 'Expired', labelRu: 'Истёк', color: 'bg-gray-500/20 text-gray-700' },
-};
+import { ORDER_STATUS_CONFIG } from '@/types/orders';
+import type { OrderStatus } from '@/types/orders';
+import { AdminOrderDetailSheet } from './AdminOrderDetailSheet';
 
 export function OperationsBookingsTab() {
   const { language } = useLanguage();
-  const isRussian = language === 'ru';
+  const isRu = language === 'ru';
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
-  const { data: bookings, isLoading } = useQuery({
-    queryKey: ['admin-all-bookings', statusFilter],
+  const { data: orders, isLoading, refetch } = useQuery({
+    queryKey: ['admin-orders', statusFilter],
     queryFn: async () => {
       let query = supabase
-        .from('bookings')
+        .from('orders')
         .select(`
           *,
-          services:service_id (name_en, name_ru),
-          providers:provider_id (name)
+          order_items (id, item_name, item_type, qty, unit_price, amount),
+          order_participants (id, name, phone, email, role),
+          order_addresses (id, address_type, address_text, notes)
         `)
+        .is('deleted_at', null)
         .order('created_at', { ascending: false })
-        .limit(100);
-      
+        .limit(200);
+
       if (statusFilter && statusFilter !== 'all') {
-        query = query.eq('status', statusFilter as 'submitted' | 'confirmed' | 'completed' | 'cancelled_by_user' | 'cancelled_by_provider' | 'in_progress' | 'draft' | 'expired');
+        query = query.eq('status', statusFilter as any);
       }
-      
+
       const { data, error } = await query;
       if (error) throw error;
       return data;
-    }
+    },
   });
+
+  // Fetch profiles for customer names
+  const customerIds = [...new Set(orders?.map((o) => o.customer_user_id) || [])];
+  const { data: profiles } = useQuery({
+    queryKey: ['admin-order-profiles', customerIds],
+    queryFn: async () => {
+      if (!customerIds.length) return [];
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, full_name, phone')
+        .in('id', customerIds);
+      return data || [];
+    },
+    enabled: customerIds.length > 0,
+  });
+
+  const profileMap = new Map(profiles?.map((p) => [p.id, p]) || []);
 
   const stats = {
-    submitted: bookings?.filter(b => b.status === 'submitted').length || 0,
-    confirmed: bookings?.filter(b => b.status === 'confirmed').length || 0,
-    completed: bookings?.filter(b => b.status === 'completed').length || 0,
-    cancelled: bookings?.filter(b => b.status === 'cancelled_by_user' || b.status === 'cancelled_by_provider').length || 0,
+    pending: orders?.filter((o) => o.status === 'pending').length || 0,
+    confirmed: orders?.filter((o) => o.status === 'confirmed').length || 0,
+    completed: orders?.filter((o) => o.status === 'completed').length || 0,
+    cancelled: orders?.filter((o) => o.status === 'cancelled').length || 0,
   };
 
-  const filteredBookings = bookings?.filter(b => {
+  const filteredOrders = orders?.filter((o) => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
+    const profile = profileMap.get(o.customer_user_id);
+    const customerName = profile?.full_name || '';
+    const primaryParticipant = o.order_participants?.find((p: any) => p.role === 'primary');
     return (
-      b.id.toLowerCase().includes(q) ||
-      b.services?.name_en?.toLowerCase().includes(q) ||
-      b.providers?.name?.toLowerCase().includes(q)
+      o.order_number?.toLowerCase().includes(q) ||
+      o.id.toLowerCase().includes(q) ||
+      customerName.toLowerCase().includes(q) ||
+      primaryParticipant?.name?.toLowerCase().includes(q) ||
+      o.order_items?.some((item: any) => item.item_name?.toLowerCase().includes(q))
     );
   });
+
+  const getCustomerDisplay = (order: any) => {
+    const primary = order.order_participants?.find((p: any) => p.role === 'primary');
+    if (primary) return { name: primary.name, phone: primary.phone };
+    const profile = profileMap.get(order.customer_user_id);
+    return { name: profile?.full_name || '—', phone: profile?.phone || null };
+  };
 
   return (
     <div className="space-y-4">
@@ -76,8 +100,8 @@ export function OperationsBookingsTab() {
           <CardContent className="p-4 flex items-center gap-3">
             <AlertCircle className="h-8 w-8 text-yellow-500" />
             <div>
-              <p className="text-2xl font-bold">{stats.submitted}</p>
-              <p className="text-sm text-muted-foreground">{isRussian ? 'Ожидают' : 'Submitted'}</p>
+              <p className="text-2xl font-bold">{stats.pending}</p>
+              <p className="text-sm text-muted-foreground">{isRu ? 'Ожидают' : 'Pending'}</p>
             </div>
           </CardContent>
         </Card>
@@ -86,7 +110,7 @@ export function OperationsBookingsTab() {
             <Clock className="h-8 w-8 text-blue-500" />
             <div>
               <p className="text-2xl font-bold">{stats.confirmed}</p>
-              <p className="text-sm text-muted-foreground">{isRussian ? 'Подтверждено' : 'Confirmed'}</p>
+              <p className="text-sm text-muted-foreground">{isRu ? 'Подтверждено' : 'Confirmed'}</p>
             </div>
           </CardContent>
         </Card>
@@ -95,7 +119,7 @@ export function OperationsBookingsTab() {
             <CheckCircle className="h-8 w-8 text-green-500" />
             <div>
               <p className="text-2xl font-bold">{stats.completed}</p>
-              <p className="text-sm text-muted-foreground">{isRussian ? 'Завершено' : 'Completed'}</p>
+              <p className="text-sm text-muted-foreground">{isRu ? 'Завершено' : 'Completed'}</p>
             </div>
           </CardContent>
         </Card>
@@ -104,7 +128,7 @@ export function OperationsBookingsTab() {
             <XCircle className="h-8 w-8 text-red-500" />
             <div>
               <p className="text-2xl font-bold">{stats.cancelled}</p>
-              <p className="text-sm text-muted-foreground">{isRussian ? 'Отменено' : 'Cancelled'}</p>
+              <p className="text-sm text-muted-foreground">{isRu ? 'Отменено' : 'Cancelled'}</p>
             </div>
           </CardContent>
         </Card>
@@ -114,8 +138,8 @@ export function OperationsBookingsTab() {
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            {isRussian ? 'Все бронирования' : 'All Bookings'}
+            <Package className="h-5 w-5" />
+            {isRu ? 'Все заказы' : 'All Orders'}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -123,7 +147,7 @@ export function OperationsBookingsTab() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder={isRussian ? 'Поиск...' : 'Search...'}
+                placeholder={isRu ? 'Поиск по имени, номеру...' : 'Search by name, number...'}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
@@ -131,76 +155,96 @@ export function OperationsBookingsTab() {
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder={isRussian ? 'Статус' : 'Status'} />
+                <SelectValue placeholder={isRu ? 'Статус' : 'Status'} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{isRussian ? 'Все' : 'All'}</SelectItem>
-                <SelectItem value="submitted">{isRussian ? 'Ожидают' : 'Submitted'}</SelectItem>
-                <SelectItem value="confirmed">{isRussian ? 'Подтверждённые' : 'Confirmed'}</SelectItem>
-                <SelectItem value="completed">{isRussian ? 'Завершённые' : 'Completed'}</SelectItem>
-                <SelectItem value="cancelled_by_user">{isRussian ? 'Отменённые' : 'Cancelled'}</SelectItem>
+                <SelectItem value="all">{isRu ? 'Все' : 'All'}</SelectItem>
+                <SelectItem value="pending">{isRu ? 'Ожидают' : 'Pending'}</SelectItem>
+                <SelectItem value="confirmed">{isRu ? 'Подтверждённые' : 'Confirmed'}</SelectItem>
+                <SelectItem value="in_progress">{isRu ? 'В работе' : 'In Progress'}</SelectItem>
+                <SelectItem value="completed">{isRu ? 'Завершённые' : 'Completed'}</SelectItem>
+                <SelectItem value="cancelled">{isRu ? 'Отменённые' : 'Cancelled'}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {isLoading ? (
             <div className="text-center py-8 text-muted-foreground">
-              {isRussian ? 'Загрузка...' : 'Loading...'}
+              {isRu ? 'Загрузка...' : 'Loading...'}
             </div>
           ) : (
             <div className="rounded-md border overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{isRussian ? 'ID' : 'ID'}</TableHead>
-                    <TableHead>{isRussian ? 'Услуга' : 'Service'}</TableHead>
-                    <TableHead>{isRussian ? 'Провайдер' : 'Provider'}</TableHead>
-                    <TableHead>{isRussian ? 'Дата' : 'Date'}</TableHead>
-                    <TableHead>{isRussian ? 'Сумма' : 'Amount'}</TableHead>
-                    <TableHead>{isRussian ? 'Статус' : 'Status'}</TableHead>
+                    <TableHead>{isRu ? '№ Заказа' : 'Order #'}</TableHead>
+                    <TableHead>{isRu ? 'Тип' : 'Type'}</TableHead>
+                    <TableHead>{isRu ? 'Клиент' : 'Customer'}</TableHead>
+                    <TableHead>{isRu ? 'Дата' : 'Date'}</TableHead>
+                    <TableHead>{isRu ? 'Сумма' : 'Amount'}</TableHead>
+                    <TableHead>{isRu ? 'Статус' : 'Status'}</TableHead>
                     <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredBookings?.map((booking) => (
-                    <TableRow key={booking.id}>
-                      <TableCell className="font-mono text-xs">
-                        {booking.id.slice(0, 8)}...
-                      </TableCell>
-                      <TableCell>
-                        {isRussian 
-                          ? booking.services?.name_ru || booking.services?.name_en 
-                          : booking.services?.name_en || '—'}
-                      </TableCell>
-                      <TableCell>{booking.providers?.name || '—'}</TableCell>
-                      <TableCell className="text-sm">
-                        {booking.scheduled_at 
-                          ? format(new Date(booking.scheduled_at), 'dd.MM.yyyy HH:mm')
-                          : '—'}
-                      </TableCell>
-                      <TableCell>
-                        {booking.total_amount 
-                          ? `${booking.total_amount.toLocaleString()} ${booking.currency || 'THB'}`
-                          : '—'}
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={statusConfig[booking.status as keyof typeof statusConfig]?.color || 'bg-muted'}>
-                          {isRussian 
-                            ? statusConfig[booking.status as keyof typeof statusConfig]?.labelRu 
-                            : statusConfig[booking.status as keyof typeof statusConfig]?.label || booking.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {(!filteredBookings || filteredBookings.length === 0) && (
+                  {filteredOrders?.map((order) => {
+                    const customer = getCustomerDisplay(order);
+                    const status = (order.status || 'pending') as OrderStatus;
+                    const statusCfg = ORDER_STATUS_CONFIG[status] || ORDER_STATUS_CONFIG.pending;
+
+                    return (
+                      <TableRow
+                        key={order.id}
+                        className="cursor-pointer hover:bg-muted/50"
+                        onClick={() => setSelectedOrderId(order.id)}
+                      >
+                        <TableCell className="font-mono text-xs font-medium">
+                          {order.order_number || order.id.slice(0, 8)}
+                        </TableCell>
+                        <TableCell className="capitalize text-sm">
+                          {order.order_type}
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm font-medium">{customer.name}</div>
+                          {customer.phone && (
+                            <div className="text-xs text-muted-foreground">{customer.phone}</div>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {order.start_at
+                            ? format(new Date(order.start_at), 'dd.MM.yyyy HH:mm')
+                            : order.created_at
+                            ? format(new Date(order.created_at), 'dd.MM.yyyy HH:mm')
+                            : '—'}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {order.total_amount?.toLocaleString()} {order.currency || 'THB'}
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={`${statusCfg.bgColor} ${statusCfg.color} border-0`}>
+                            {isRu ? statusCfg.labelRu : statusCfg.labelEn}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedOrderId(order.id);
+                            }}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                  {(!filteredOrders || filteredOrders.length === 0) && (
                     <TableRow>
                       <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                        {isRussian ? 'Бронирования не найдены' : 'No bookings found'}
+                        {isRu ? 'Заказы не найдены' : 'No orders found'}
                       </TableCell>
                     </TableRow>
                   )}
@@ -210,6 +254,13 @@ export function OperationsBookingsTab() {
           )}
         </CardContent>
       </Card>
+
+      {/* Order Detail Sheet */}
+      <AdminOrderDetailSheet
+        orderId={selectedOrderId}
+        onClose={() => setSelectedOrderId(null)}
+        onStatusChanged={() => refetch()}
+      />
     </div>
   );
 }
