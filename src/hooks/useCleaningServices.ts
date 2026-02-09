@@ -116,6 +116,26 @@ const SERVICE_INCLUDES: Record<string, { en: string[]; ru: string[] }> = {
     en: ['Garment inspection', 'Eco-friendly solvents', 'Stain removal', 'Hand finishing', 'Protective packaging'],
     ru: ['Осмотр вещей', 'Экологичные растворители', 'Выведение пятен', 'Ручная финишная обработка', 'Защитная упаковка'],
   },
+  'window': {
+    en: ['Interior & exterior glass', 'Frame & sill wiping', 'Screen cleaning', 'Hard water stain removal', 'Streak-free finish'],
+    ru: ['Стёкла внутри и снаружи', 'Протирка рам и подоконников', 'Чистка москитных сеток', 'Удаление известкового налёта', 'Без разводов'],
+  },
+  'handyman': {
+    en: ['Furniture assembly', 'Minor repairs', 'Shelf/curtain mounting', 'Door/lock fixing', 'Cleanup after work'],
+    ru: ['Сборка мебели', 'Мелкий ремонт', 'Монтаж полок/карнизов', 'Ремонт дверей/замков', 'Уборка после работ'],
+  },
+  'security': {
+    en: ['CCTV installation', 'Alarm system setup', 'Lock replacement', 'Access control', 'System testing'],
+    ru: ['Установка камер', 'Настройка сигнализации', 'Замена замков', 'Контроль доступа', 'Тестирование системы'],
+  },
+  'water_delivery': {
+    en: ['Purified drinking water', 'Scheduled delivery', 'Dispenser sanitizing', 'Empty bottle pickup', 'Flexible schedule'],
+    ru: ['Очищенная питьевая вода', 'Доставка по расписанию', 'Санитарная обработка кулера', 'Забор пустых бутылей', 'Гибкий график'],
+  },
+  'moving': {
+    en: ['Packing materials', 'Furniture disassembly', 'Careful loading', 'Transport to destination', 'Reassembly & placement'],
+    ru: ['Упаковочные материалы', 'Разборка мебели', 'Аккуратная погрузка', 'Транспортировка', 'Сборка и расстановка'],
+  },
 };
 
 function getIncludesForService(tags: string[] | undefined, nameEn: string): { en: string[]; ru: string[] } {
@@ -141,6 +161,11 @@ function getIncludesForService(tags: string[] | undefined, nameEn: string): { en
   if (nameLower.includes('plumb')) return SERVICE_INCLUDES['plumbing'];
   if (nameLower.includes('electr')) return SERVICE_INCLUDES['electrical'];
   if (nameLower.includes('ac ') || nameLower.includes('air con')) return SERVICE_INCLUDES['ac'];
+  if (nameLower.includes('window')) return SERVICE_INCLUDES['window'];
+  if (nameLower.includes('handyman') || nameLower.includes('repair')) return SERVICE_INCLUDES['handyman'];
+  if (nameLower.includes('security') || nameLower.includes('cctv')) return SERVICE_INCLUDES['security'];
+  if (nameLower.includes('water deliver')) return SERVICE_INCLUDES['water_delivery'];
+  if (nameLower.includes('moving') || nameLower.includes('relocation')) return SERVICE_INCLUDES['moving'];
   if (nameLower.includes('clean')) return SERVICE_INCLUDES['cleaning'];
   return SERVICE_INCLUDES['cleaning'];
 }
