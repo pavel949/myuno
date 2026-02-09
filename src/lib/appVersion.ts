@@ -1,6 +1,6 @@
 // App version for PWA cache busting
 // Increment this when deploying significant changes
-export const APP_VERSION = '3.19.0';
+export const APP_VERSION = '3.20.0';
 export const BUILD_TIMESTAMP = new Date().toISOString();
 
 // Check for updates via network (bypasses cache)
