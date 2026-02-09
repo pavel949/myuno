@@ -22,7 +22,6 @@ interface Promo {
   badge: string;
   badgeRu: string;
   path: string;
-  gradient: string;
   icon: typeof Gift;
 }
 
@@ -33,11 +32,10 @@ const promos: Promo[] = [
     title: '10% Cashback on Tours',
     titleRu: '10% кэшбэк на туры',
     subtitle: 'Book any island tour this week',
-    subtitleRu: 'Бронируй любой тур на острова',
+    subtitleRu: 'Забронируйте любой тур на острова',
     badge: 'LIMITED',
     badgeRu: 'АКЦИЯ',
     path: '/experiences?type=tour',
-    gradient: 'from-emerald-500 to-teal-500',
     icon: Percent,
   },
   {
@@ -45,12 +43,11 @@ const promos: Promo[] = [
     type: 'discount',
     title: 'First Spa Visit -20%',
     titleRu: '-20% на первый визит в СПА',
-    subtitle: 'New members exclusive offer',
-    subtitleRu: 'Только для новых клиентов',
+    subtitle: 'For new members',
+    subtitleRu: 'Для новых клиентов',
     badge: 'NEW',
     badgeRu: 'НОВОЕ',
     path: '/beauty',
-    gradient: 'from-pink-500 to-rose-500',
     icon: Sparkles,
   },
   {
@@ -63,7 +60,6 @@ const promos: Promo[] = [
     badge: 'BONUS',
     badgeRu: 'БОНУС',
     path: '/property',
-    gradient: 'from-blue-500 to-indigo-500',
     icon: Gift,
   },
 ];
@@ -80,39 +76,33 @@ const PromoSlide = memo(function PromoSlide({ promo, language, onNavigate }: Pro
   return (
     <button
       onClick={() => onNavigate(promo.path)}
-      className="relative w-full overflow-hidden rounded-2xl group"
+      className="relative w-full overflow-hidden rounded-2xl bg-primary group"
     >
-      {/* Background gradient */}
-      <div className={cn(
-        "absolute inset-0 bg-gradient-to-r",
-        promo.gradient
-      )} />
-      
       {/* Content */}
       <div className="relative z-10 w-full p-4 text-left">
         <div className="flex items-center gap-4">
           {/* Icon */}
-          <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 group-hover:scale-[1.03] transition-transform duration-300">
-            <Icon className="w-6 h-6 text-white" />
+          <div className="w-12 h-12 rounded-xl bg-primary-foreground/15 flex items-center justify-center flex-shrink-0 group-hover:scale-[1.03] transition-transform duration-200">
+            <Icon className="w-6 h-6 text-primary-foreground" />
           </div>
 
           {/* Text */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <span className="px-2 py-0.5 rounded-full bg-white/20 text-[10px] font-bold text-white uppercase tracking-wide">
+              <span className="px-2 py-0.5 rounded-full bg-primary-foreground/15 text-[10px] font-bold text-primary-foreground uppercase tracking-wide">
                 {language === 'ru' ? promo.badgeRu : promo.badge}
               </span>
             </div>
-            <h3 className="text-base font-bold text-white line-clamp-1">
+            <h3 className="text-base font-bold text-primary-foreground line-clamp-1">
               {language === 'ru' ? promo.titleRu : promo.title}
             </h3>
-            <p className="text-xs text-white/80 line-clamp-1">
+            <p className="text-xs text-primary-foreground/70 line-clamp-1">
               {language === 'ru' ? promo.subtitleRu : promo.subtitle}
             </p>
           </div>
 
           {/* Arrow */}
-          <ArrowRight className="w-5 h-5 text-white/80 flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+          <ArrowRight className="w-5 h-5 text-primary-foreground/70 flex-shrink-0 group-hover:translate-x-1 transition-transform duration-200" />
         </div>
       </div>
     </button>
@@ -125,7 +115,6 @@ export const PromoBanner = memo(function PromoBanner() {
   const [api, setApi] = useState<CarouselApi>();
   const [currentIndex, setCurrentIndex] = useState(0);
   
-  // Memoize autoplay plugin to prevent recreation
   const autoplayPlugin = useMemo(
     () =>
       Autoplay({
@@ -136,7 +125,6 @@ export const PromoBanner = memo(function PromoBanner() {
     []
   );
 
-  // Sync current index with Embla
   useEffect(() => {
     if (!api) return;
 
@@ -149,7 +137,7 @@ export const PromoBanner = memo(function PromoBanner() {
     };
 
     api.on('select', onSelect);
-    onSelect(); // Initial sync
+    onSelect();
 
     return () => {
       api.off('select', onSelect);
@@ -197,10 +185,10 @@ export const PromoBanner = memo(function PromoBanner() {
             key={index}
             onClick={() => goToSlide(index)}
             className={cn(
-              "w-1.5 h-1.5 rounded-full transition-all duration-300",
+              "w-1.5 h-1.5 rounded-full transition-all duration-200",
               index === currentIndex 
-                ? "w-4 bg-white" 
-                : "bg-white/40 hover:bg-white/60"
+                ? "w-4 bg-primary-foreground" 
+                : "bg-primary-foreground/40 hover:bg-primary-foreground/60"
             )}
             aria-label={`Go to slide ${index + 1}`}
           />
