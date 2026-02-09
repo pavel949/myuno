@@ -1,104 +1,119 @@
 
+# Plan: Import Real Estate Projects from FazWaz
 
-# Очистка каталога и расширение портфеля Experiences
+## Overview
 
-## 1. Найденные дубликаты (для деактивации)
+Scrape all real estate development projects from FazWaz for 6 priority Phuket districts, extract full details (name, developer, description, amenities, prices, GPS, images), and import them into our `property_projects` and `developers` tables with proper relationships.
 
-### Experiences (8 пар дублей)
-| Название | Оставить ID | Деактивировать ID |
-|----------|------------|-------------------|
-| James Bond Island Tour | cb34f286 | 6a26c077 |
-| Similan Islands Snorkeling | ebd84de7 (4500 THB) | c7fa678c (3200 THB) |
-| Big Buddha & Temples Tour | 43d5cb55 | d71c7aa6 |
-| Sunset Dinner Cruise | 961a6cf0 | 6c89543b |
-| Thai Cooking Class | 063fe9dd | 1e38938a |
-| Scuba Diving Adventure | 05539219 | 658371b5 |
-| Stand Up Paddleboard | bb20d4e2 | 9c091fec |
-| Wakeboarding Session | 0aa73fce | 9a5e13f8 |
+## Target Districts (north to south)
 
-### Yachts (4 дубля)
-- Fountaine Pajot 40, Princess V39, Princess 54, Ferretti 80 -- по 2 записи у разных провайдеров (оставить обе, если разные провайдеры, или деактивировать одну)
+| Priority | District | FazWaz URL path |
+|----------|----------|-----------------|
+| 1 | Bang Tao | `/thalang/choeng-thale` + `/thalang/si-sunthon` (Bang Tao overlaps both) |
+| 2 | Surin / Kamala | `/thalang/choeng-thale` (Surin area) + `/kathu/kamala` |
+| 3 | Patong | `/kathu/patong` |
+| 4 | Ko Kaew | `/phuket-town/ko-kaew` |
+| 5 | Nai Yang | `/thalang/sakhu` |
+| 6 | Mai Khao | `/thalang/mai-khao` |
 
-### Туры с пересекающимися категориями
-- "James Bond Island Tour" (category: `islands`) дублирует "James Bond Island & Phang Nga Bay Tour" (category: `island-tour`) -- разные записи, но фактически один маршрут
-- Категории `islands` и `island-tour` используются параллельно -- нужно объединить в одну (`islands`)
+## Current State
 
----
+- **67 projects** already exist in DB (mostly from prior FazWaz import)
+- **12 developers** in `developers` table
+- FazWaz blocks direct fetch but works via Firecrawl (confirmed)
+- Firecrawl connector is active with API key configured
 
-## 2. Проблема: чартер vs. групповые водные прогулки
+## Architecture: 3-Phase Edge Function Pipeline
 
-Сейчас в базе перемешаны 3 разных типа водных активностей:
+### Phase 1: Discovery -- `fazwaz-discover-projects`
+- Scrape project directory pages for each district via Firecrawl
+- Extract project URLs from the listing pages (pattern: `/projects/thailand/phuket/{amphoe}/{tambon}/{slug}`)
+- Deduplicate against existing projects in DB (match by name)
+- Output: list of new project URLs to scrape
 
-| Где сейчас | Примеры | Модель бронирования |
-|------------|---------|---------------------|
-| experiences, category=charter | Private Boat Charter, Private Speedboat Trip | Приватный чартер, цена за лодку |
-| experiences, category=yacht/sailing | Catamaran Sailing Day, Sunset Yacht Cruise | Групповая прогулка, цена за человека |
-| yachts | 60+ яхт/катамаранов | Приватный чартер, 4 типа цен |
+### Phase 2: Scrape & Extract -- `fazwaz-scrape-project`
+- For each discovered project URL, scrape the detail page via Firecrawl
+- Use AI (Gemini Flash) to parse the scraped markdown into structured JSON:
+  - Project name (EN)
+  - Developer name
+  - Location (district, address, GPS)
+  - Property types available (condo, villa, house)
+  - Total units, completion date, project status
+  - Price range (min/max in THB)
+  - Description
+  - Amenities & facilities
+  - Cover image URL + gallery image URLs
+- Rate-limited: process 5 projects at a time with delays
 
-**Предложение по разграничению:**
+### Phase 3: Insert -- `fazwaz-import-projects`
+- For each extracted project:
+  1. **Developer resolution**: Check if developer exists in `developers` table by name match. If not, create new developer record
+  2. **Project insertion**: Insert into `property_projects` with `developer_id` FK
+  3. **Image caching**: Download cover image to `project-images` storage bucket (reuse existing infrastructure)
+  4. **Russian translation**: Generate `name_ru` and `description_ru` via AI translate
 
-Ввести поле `booking_model` в experiences для явного разделения:
+## Data Mapping
 
-- `group` -- групповая экскурсия (цена за человека, фиксированное расписание)
-- `private` -- приватный чартер (цена за лодку/группу, гибкое время)
+```text
+FazWaz Field            -> DB Column (property_projects)
+------------------------------------------------------
+Project Name            -> name_en
+Developer               -> developer_name + developer_id (FK)
+Location/District       -> district, address
+GPS Coordinates         -> lat, lng
+Completion Date         -> completion_date
+Status (Off Plan/etc)   -> project_status ('offplan'|'under_construction'|'completed')
+Total Units             -> total_units
+Price Range             -> price_from, price_to
+Description             -> description_en
+Facilities              -> amenities[]
+Cover Photo             -> cover_image (cached to storage)
+Gallery Photos          -> images[]
+```
 
-Также нормализовать категории: убрать `yacht`, `sailing`, `boat_tour`, `charter` из experiences и заменить на:
-- `island_group_tour` -- групповые экскурсии на острова (Phi Phi, Similan, James Bond)
-- `private_charter` -- приватные чартеры (перенести в yachts или пометить отдельно)
-- `sunset_cruise` -- закатные круизы (группа или приват)
+## Deduplication Strategy
 
----
+Before inserting, check for existing projects by:
+1. Normalized name match (lowercase, strip spaces)
+2. Same district
+3. If match found, update rather than insert (merge new data)
 
-## 3. Новые on-island experiences для добавления
+## Estimated Volume
 
-Сейчас в базе уже есть: Go-Kart (1), Laser Tag (1), ATV (2), Zipline (4). Необходимо добавить больше разнообразных наземных активностей:
+Based on FazWaz directory pages for these districts:
+- Bang Tao / Choeng Thale: ~80-120 projects
+- Surin / Kamala: ~30-50 projects
+- Patong: ~40-60 projects
+- Ko Kaew: ~10-20 projects
+- Nai Yang / Sakhu: ~10-20 projects
+- Mai Khao: ~5-10 projects
+- **Total estimate: 175-280 new projects**
 
-### Развлечения и аттракционы (experience_type: activity)
-1. **Phuket Shooting Range** -- Тир (Kathu) -- ~1,500 THB
-2. **Escape Room Phuket** -- Квест-комнаты -- ~800 THB
-3. **Surf House Phuket** -- Искусственная волна (Kata Beach) -- ~600 THB
-4. **Phuket Bungy Jump** -- Тарзанка 50м (Kathu) -- ~1,900 THB
-5. **Flying Hanuman Zipline** -- Зиплайн в джунглях (28 платформ) -- ~3,500 THB
+## Execution Plan
 
-### Культурные и городские (experience_type: tour)
-6. **Phuket Old Town Walking Tour** -- Пешая экскурсия по Старому городу -- ~1,200 THB
-7. **Phuket Night Market Food Tour** -- Гастротур по ночным рынкам -- ~1,800 THB
-8. **Phuket Big Buddha & Temples Half-Day** -- Храмы + смотровые (уже есть, но обогатить описание)
-9. **Phuket Instagram Spots Tour** -- Фото-тур по самым красивым точкам -- ~1,500 THB
+Since Firecrawl has rate limits and edge functions have 60s timeouts, the process will be batched:
 
-### Семейные
-10. **Phuket Wake Park (Anthem Wakepark)** -- Вейкпарк (уже есть wakeboarding, обогатить)
-11. **Tiger Kingdom Phuket** -- Тигриный парк -- ~1,000 THB
-12. **Phuket Elephant Sanctuary** -- Этический приют слонов -- ~3,500 THB
+1. Run discovery function per district (6 calls) -- collect all project URLs
+2. Process scraping in batches of 5 projects per function call
+3. Each batch: scrape -> extract -> insert -> cache images
+4. Track progress in a temporary `import_progress` record or return results
 
-### Спортивные
-13. **Muay Thai Training Session** -- Тренировка по тайскому боксу -- ~1,500 THB (уже есть martial-arts, 1 запись)
-14. **Phuket Golf (Blue Canyon)** -- Гольф -- ~5,500 THB
-15. **Phuket Paintball** -- Пейнтбол -- ~1,200 THB
+## Technical Details
 
----
+### Files to create:
+1. `supabase/functions/fazwaz-discover-projects/index.ts` -- Phase 1: discover project URLs from directory pages
+2. `supabase/functions/fazwaz-scrape-project/index.ts` -- Phase 2+3: scrape detail page, extract data, upsert into DB
 
-## 4. Техническая реализация
+### Files to modify:
+- None (new edge functions only)
 
-### Шаг 1: Миграция БД
-- Добавить колонку `booking_model` (enum: `group`, `private`) в таблицу `experiences` с дефолтом `group`
-- Обновить существующие записи: пометить private charters
-- Объединить категории `islands` и `island-tour` в одну `islands`
+### Dependencies:
+- Firecrawl API (connector already configured)
+- Lovable AI (Gemini Flash for markdown-to-JSON extraction and EN->RU translation)
+- Existing `project-images` storage bucket for image caching
 
-### Шаг 2: Деактивация 8 дублей
-- SQL: `UPDATE experiences SET is_active = false WHERE id IN (...)` для второй копии каждой пары
-
-### Шаг 3: Вставка 12-15 новых experiences
-- Реальные провайдеры Пхукета (Flying Hanuman, Tiger Kingdom, Anthem Wakepark, etc.)
-- С GPS, ценами, описаниями EN/RU
-- Правильные категории и experience_type
-
-### Шаг 4: Обновить EXPERIENCE_CATEGORIES
-- Добавить новые категории: `shooting`, `escape_room`, `golf`, `extreme`
-- Убрать дубли: `island-tour` (объединить с `islands`)
-
-### Шаг 5: Обновить фронтенд
-- `useExperiences.ts` -- добавить новые категории в EXPERIENCE_CATEGORIES
-- Фильтры -- поддержка `booking_model` (группа / приват)
-- Карточки -- визуальная метка "Group" / "Private"
-
+### Safeguards:
+- Deduplication by project name + district
+- Maximum 300 projects per import run
+- Error logging for failed scrapes
+- Dry-run mode to preview extracted data before inserting
