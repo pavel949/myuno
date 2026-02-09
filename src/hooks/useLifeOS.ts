@@ -197,6 +197,9 @@ export function getLifeOSAIContext(
     family_with_children: { intent: 'care', time_horizon: '7d', risk_level: 'high' },
     emergency_medical: { intent: 'urgent_help', time_horizon: '1h', risk_level: 'critical' },
     investment_property: { intent: 'invest', time_horizon: '90d', risk_level: 'medium' },
+    departure_day: { intent: 'depart', time_horizon: '12h', risk_level: 'medium' },
+    wedding_event: { intent: 'celebrate', time_horizon: '30d', risk_level: 'medium' },
+    retirement_living: { intent: 'settle_long_term', time_horizon: '180d', risk_level: 'low' },
   };
 
   const defaults = { intent: 'explore', time_horizon: '7d', risk_level: 'low' };
