@@ -14,7 +14,12 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Safe area insets for iOS notch/home indicator */
+/* Global Lucide icon size boost for mobile readability */
+.lucide {
+  width: 1.25em;
+  height: 1.25em;
+}
+
 .pb-safe {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
