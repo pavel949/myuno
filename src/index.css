@@ -60,127 +60,121 @@ body {
 
 @layer base {
   :root {
-    /* Light mode с улучшенной контрастностью */
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Calm Light — warm off-white, trust-first palette */
+    --background: 40 20% 98%;
+    --foreground: 220 20% 12%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 220 20% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    /* Enhanced Gold - brighter for better contrast */
-    --primary: 42 78% 52%;
+    --popover-foreground: 220 20% 12%;
+    /* Primary — warm gold, single accent */
+    --primary: 42 65% 48%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 42 78% 65%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 220 14% 92%;
-    --muted-foreground: 220 10% 32%;
-    /* Enhanced Gold accent */
-    --accent: 42 78% 52%;
-    --accent-foreground: 0 0% 100%;
-    /* New semantic accent colors */
-    --accent-coral: 16 85% 60%;
-    --accent-teal: 180 65% 45%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 220 13% 85%;
-    --input: 220 13% 80%;
-    --ring: 42 78% 52%;
+    --primary-light: 42 60% 62%;
+    --secondary: 40 15% 95%;
+    --secondary-foreground: 220 15% 18%;
+    --muted: 40 12% 93%;
+    --muted-foreground: 220 8% 46%;
+    /* Accent = primary (single accent rule) */
+    --accent: 40 15% 95%;
+    --accent-foreground: 220 15% 18%;
+    /* Semantic accents */
+    --accent-coral: 16 70% 56%;
+    --accent-teal: 180 50% 42%;
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 40 10% 88%;
+    --input: 40 10% 84%;
+    --ring: 42 65% 48%;
     --radius: 0.75rem;
 
-    /* Premium colors - enhanced gold */
-    --gold: 42 78% 52%;
-    --gold-light: 42 78% 65%;
-    --gold-dark: 43 74% 35%;
-    --success: 142 76% 36%;
-    --warning: 38 92% 50%;
-    --info: 199 89% 48%;
+    /* Semantic colors */
+    --gold: 42 65% 48%;
+    --gold-light: 42 60% 62%;
+    --gold-dark: 43 60% 34%;
+    --success: 152 60% 38%;
+    --warning: 38 80% 50%;
+    --info: 210 70% 50%;
 
-    /* ============ Unified Card Tokens ============ */
-    --card-radius: 1rem;           /* 16px = rounded-2xl */
-    --card-radius-compact: 0.75rem; /* 12px = rounded-xl */
-    --card-padding: 1rem;          /* 16px */
-    --card-padding-compact: 0.75rem; /* 12px */
-    --card-gap: 0.75rem;           /* 12px */
+    /* Card tokens */
+    --card-radius: 1rem;
+    --card-radius-compact: 0.75rem;
+    --card-padding: 1rem;
+    --card-padding-compact: 0.75rem;
+    --card-gap: 0.75rem;
     
-    /* Unified Shadow Tokens */
-    --shadow-card: 0 1px 3px 0 hsl(0 0% 0% / 0.1);
-    --shadow-card-hover: 0 4px 12px -2px hsl(0 0% 0% / 0.12);
-    --shadow-elevated: 0 10px 25px -5px hsl(0 0% 0% / 0.15);
-    --shadow-float: 0 20px 40px -10px hsl(0 0% 0% / 0.2);
+    /* Shadows — subtle */
+    --shadow-card: 0 1px 2px 0 hsl(0 0% 0% / 0.04);
+    --shadow-card-hover: 0 2px 8px -2px hsl(0 0% 0% / 0.08);
+    --shadow-elevated: 0 8px 20px -6px hsl(0 0% 0% / 0.1);
+    --shadow-float: 0 16px 32px -8px hsl(0 0% 0% / 0.12);
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 42 78% 52%;
+    --sidebar-background: 40 15% 97%;
+    --sidebar-foreground: 220 15% 25%;
+    --sidebar-primary: 42 65% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 85%;
-    --sidebar-ring: 42 78% 52%;
+    --sidebar-accent: 40 12% 95%;
+    --sidebar-accent-foreground: 220 15% 12%;
+    --sidebar-border: 40 10% 88%;
+    --sidebar-ring: 42 65% 48%;
   }
 
   .dark {
-    /* Premium dark theme с улучшенной видимостью */
-    --background: 240 10% 4%;
-    --foreground: 0 0% 95%;
+    /* Calm Dark — muted, not flashy */
+    --background: 220 12% 6%;
+    --foreground: 40 10% 92%;
     
-    --card: 240 10% 6%;
-    --card-foreground: 0 0% 95%;
+    --card: 220 12% 8%;
+    --card-foreground: 40 10% 92%;
     
-    --popover: 240 10% 6%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 220 12% 8%;
+    --popover-foreground: 40 10% 92%;
     
-    /* Enhanced Gold accent as primary */
-    --primary: 42 78% 55%;
-    --primary-foreground: 240 10% 4%;
-    --primary-light: 42 78% 68%;
+    --primary: 42 60% 52%;
+    --primary-foreground: 220 12% 6%;
+    --primary-light: 42 55% 64%;
     
-    --secondary: 240 5% 15%;
-    --secondary-foreground: 0 0% 95%;
+    --secondary: 220 8% 14%;
+    --secondary-foreground: 40 10% 90%;
     
-    --muted: 240 5% 22%;
-    --muted-foreground: 240 5% 65%;
+    --muted: 220 8% 18%;
+    --muted-foreground: 220 6% 56%;
     
-    /* Enhanced Gold accent */
-    --accent: 42 78% 55%;
-    --accent-foreground: 240 10% 4%;
-    /* New semantic accent colors */
-    --accent-coral: 16 85% 65%;
-    --accent-teal: 180 65% 50%;
+    --accent: 220 8% 14%;
+    --accent-foreground: 40 10% 90%;
+    --accent-coral: 16 70% 60%;
+    --accent-teal: 180 50% 48%;
     
-    --destructive: 0 62.8% 50%;
+    --destructive: 0 60% 48%;
     --destructive-foreground: 0 0% 95%;
     
-    --border: 240 5% 20%;
-    --input: 240 5% 28%;
-    --ring: 42 78% 55%;
+    --border: 220 8% 18%;
+    --input: 220 8% 22%;
+    --ring: 42 60% 52%;
 
-    /* Premium colors - enhanced */
-    --gold: 42 78% 55%;
-    --gold-light: 42 78% 68%;
-    --gold-dark: 43 74% 40%;
-    --success: 142 76% 42%;
-    --warning: 38 92% 50%;
-    --info: 199 89% 48%;
+    --gold: 42 60% 52%;
+    --gold-light: 42 55% 64%;
+    --gold-dark: 43 60% 38%;
+    --success: 152 55% 40%;
+    --warning: 38 80% 50%;
+    --info: 210 65% 50%;
 
-    /* Elevated surfaces */
-    --card-elevated: 240 10% 8%;
-    --card-hover: 240 10% 10%;
+    --card-elevated: 220 12% 10%;
+    --card-hover: 220 12% 12%;
     
-    /* ============ Unified Card Tokens (Dark) ============ */
-    --shadow-card: 0 1px 3px 0 hsl(0 0% 0% / 0.3);
-    --shadow-card-hover: 0 4px 12px -2px hsl(0 0% 0% / 0.4);
-    --shadow-elevated: 0 10px 25px -5px hsl(0 0% 0% / 0.5);
-    --shadow-float: 0 20px 40px -10px hsl(0 0% 0% / 0.6);
+    --shadow-card: 0 1px 2px 0 hsl(0 0% 0% / 0.2);
+    --shadow-card-hover: 0 2px 8px -2px hsl(0 0% 0% / 0.3);
+    --shadow-elevated: 0 8px 20px -6px hsl(0 0% 0% / 0.4);
+    --shadow-float: 0 16px 32px -8px hsl(0 0% 0% / 0.5);
 
-    --sidebar-background: 240 10% 5%;
-    --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 42 78% 55%;
-    --sidebar-primary-foreground: 240 10% 4%;
-    --sidebar-accent: 240 5% 15%;
-    --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 240 5% 18%;
-    --sidebar-ring: 42 78% 55%;
+    --sidebar-background: 220 12% 7%;
+    --sidebar-foreground: 40 10% 88%;
+    --sidebar-primary: 42 60% 52%;
+    --sidebar-primary-foreground: 220 12% 6%;
+    --sidebar-accent: 220 8% 14%;
+    --sidebar-accent-foreground: 40 10% 92%;
+    --sidebar-border: 220 8% 16%;
+    --sidebar-ring: 42 60% 52%;
   }
 }
 

@@ -1,8 +1,8 @@
 import React, { forwardRef, useCallback } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { 
-  Sparkles, 
-  LayoutGrid, 
+  Home, 
+  Compass, 
   ShoppingBag, 
   User,
   LayoutDashboard,
@@ -33,11 +33,11 @@ type NavItem = {
   labelRu: string;
 };
 
-// Guest/User navigation — 4 tabs: Life / Services / Marketplace / Me
+// Guest/User navigation — 4 tabs: Home / Discover / Market / Me
 const guestNavItems: NavItem[] = [
-  { path: '/', icon: Sparkles, labelEn: 'Life', labelRu: 'Жизнь' },
-  { path: '/discover', icon: LayoutGrid, labelEn: 'Services', labelRu: 'Услуги' },
-  { path: '/market', icon: ShoppingBag, labelEn: 'Marketplace', labelRu: 'Маркет' },
+  { path: '/', icon: Home, labelEn: 'Home', labelRu: 'Главная' },
+  { path: '/discover', icon: Compass, labelEn: 'Discover', labelRu: 'Навигатор' },
+  { path: '/market', icon: ShoppingBag, labelEn: 'Market', labelRu: 'Маркет' },
   { path: '/account', icon: User, labelEn: 'Me', labelRu: 'Мой' },
 ];
 
@@ -151,11 +151,11 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
 
     return (
       <nav ref={ref} className="fixed bottom-0 left-0 right-0 z-50 md:hidden" {...props}>
-        {/* Backdrop blur */}
-        <div className="absolute inset-0 bg-background/90 backdrop-blur-xl border-t border-border/50" />
+        {/* Clean backdrop */}
+        <div className="absolute inset-0 bg-background/95 backdrop-blur-md border-t border-border/30" />
         
-        {/* Nav items */}
-        <div className="relative flex items-center justify-around h-16 px-2 max-w-lg mx-auto">
+        {/* Nav items — calm, minimal */}
+        <div className="relative flex items-center justify-around h-14 px-2 max-w-lg mx-auto">
           {navItems.map(({ path, icon: Icon, labelEn, labelRu }) => {
             const active = isActive(path);
             
@@ -167,27 +167,14 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
                 onMouseEnter={() => handlePrefetch(path)}
                 onTouchStart={() => handlePrefetch(path)}
                 className={cn(
-                  "relative overflow-hidden flex flex-col items-center justify-center flex-1 h-full gap-1 transition-all duration-200 active:scale-95",
-                  active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                  "relative flex flex-col items-center justify-center flex-1 h-full gap-0.5 transition-colors",
+                  active ? "text-foreground" : "text-muted-foreground"
                 )}
               >
-                {/* Active indicator pill */}
-                {active && (
-                  <div className="absolute top-1 left-1/2 -translate-x-1/2 w-5 h-1 rounded-full bg-primary animate-in fade-in-0 zoom-in-75 duration-200" />
-                )}
-                
-                <div className={cn(
-                  "flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-150",
-                  active ? "bg-primary/12" : ""
-                )}>
-                  <Icon className={cn(
-                    "w-5 h-5 transition-transform duration-150",
-                    active && "scale-105"
-                  )} />
-                </div>
+                <Icon className={cn("w-5 h-5", active && "text-primary")} />
                 <span className={cn(
-                  "text-[10px] font-medium transition-all truncate max-w-[60px]",
-                  active ? "text-primary font-semibold" : "text-muted-foreground"
+                  "text-[10px]",
+                  active ? "font-semibold text-primary" : "font-medium"
                 )}>
                   {language === 'ru' ? labelRu : labelEn}
                 </span>
@@ -196,8 +183,8 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
           })}
         </div>
         
-        {/* Safe area padding for iOS */}
-        <div className="h-safe-area-inset-bottom bg-background/90" />
+        {/* Safe area */}
+        <div className="h-safe-area-inset-bottom bg-background/95" />
       </nav>
     );
   }
