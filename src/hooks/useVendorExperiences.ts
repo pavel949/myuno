@@ -1,6 +1,6 @@
 import { useSupabaseCRUD } from './useSupabaseCRUD';
 import { Json } from '@/integrations/supabase/types';
-import { ExperienceType } from './useExperiences';
+import { ExperienceType, BookingModel } from './useExperiences';
 
 export interface VendorExperience {
   id: string;
@@ -43,6 +43,7 @@ export interface VendorExperience {
   review_count?: number;
   approval_status?: string;
   external_link?: string;
+  booking_model?: BookingModel;
   created_at: string;
   updated_at: string;
 }

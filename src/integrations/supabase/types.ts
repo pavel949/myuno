@@ -3987,6 +3987,7 @@ export type Database = {
           age_restriction: number | null
           approval_status: string | null
           available_days: string[] | null
+          booking_model: string | null
           booking_url: string | null
           category: string | null
           certification_details: string | null
@@ -4049,6 +4050,7 @@ export type Database = {
           age_restriction?: number | null
           approval_status?: string | null
           available_days?: string[] | null
+          booking_model?: string | null
           booking_url?: string | null
           category?: string | null
           certification_details?: string | null
@@ -4111,6 +4113,7 @@ export type Database = {
           age_restriction?: number | null
           approval_status?: string | null
           available_days?: string[] | null
+          booking_model?: string | null
           booking_url?: string | null
           category?: string | null
           certification_details?: string | null

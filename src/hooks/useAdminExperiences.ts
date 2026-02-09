@@ -1,6 +1,6 @@
 import { useSupabaseCRUD } from './useSupabaseCRUD';
 import { Json } from '@/integrations/supabase/types';
-import { ExperienceType } from './useExperiences';
+import { ExperienceType, BookingModel } from './useExperiences';
 
 export interface AdminExperience {
   id: string;
@@ -51,6 +51,7 @@ export interface AdminExperience {
   slug?: string;
   status?: string;
   notes?: Json;
+  booking_model?: BookingModel;
   created_at: string;
   updated_at: string;
 }

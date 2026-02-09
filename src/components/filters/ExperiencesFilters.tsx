@@ -15,6 +15,8 @@ export const experienceCategoryOptions: FilterOption[] = [
   { id: 'nature', labelEn: 'Nature', labelRu: 'Природа', icon: '🌿' },
   { id: 'adventure', labelEn: 'Adventure', labelRu: 'Приключения', icon: '🧗' },
   { id: 'water-sports', labelEn: 'Water Sports', labelRu: 'Водный спорт', icon: '🏄' },
+  { id: 'city-tour', labelEn: 'City Tour', labelRu: 'Городской тур', icon: '🏛️' },
+  { id: 'food-tour', labelEn: 'Food Tour', labelRu: 'Гастротур', icon: '🍜' },
   // Activities
   { id: 'diving', labelEn: 'Diving', labelRu: 'Дайвинг', icon: '🤿' },
   { id: 'snorkeling', labelEn: 'Snorkeling', labelRu: 'Снорклинг', icon: '🥽' },
@@ -22,9 +24,15 @@ export const experienceCategoryOptions: FilterOption[] = [
   { id: 'kayaking', labelEn: 'Kayaking', labelRu: 'Каякинг', icon: '🛶' },
   { id: 'parasailing', labelEn: 'Parasailing', labelRu: 'Парасейлинг', icon: '🪂' },
   { id: 'jet-ski', labelEn: 'Jet Ski', labelRu: 'Гидроцикл', icon: '🚤' },
-  { id: 'yacht', labelEn: 'Yacht', labelRu: 'Яхта', icon: '⛵' },
   { id: 'surfing', labelEn: 'Surfing', labelRu: 'Серфинг', icon: '🏄‍♂️' },
   { id: 'wakeboarding', labelEn: 'Wakeboarding', labelRu: 'Вейкбординг', icon: '🏂' },
+  { id: 'extreme', labelEn: 'Extreme', labelRu: 'Экстрим', icon: '🤸' },
+  { id: 'shooting', labelEn: 'Shooting Range', labelRu: 'Тир', icon: '🎯' },
+  { id: 'escape-room', labelEn: 'Escape Room', labelRu: 'Квест-комната', icon: '🔐' },
+  { id: 'golf', labelEn: 'Golf', labelRu: 'Гольф', icon: '⛳' },
+  { id: 'paintball', labelEn: 'Paintball', labelRu: 'Пейнтбол', icon: '🎨' },
+  { id: 'martial-arts', labelEn: 'Martial Arts', labelRu: 'Единоборства', icon: '🥊' },
+  { id: 'wildlife', labelEn: 'Wildlife', labelRu: 'Животные', icon: '🐘' },
 ];
 
 // ====== DURATION OPTIONS ======
