@@ -104,3 +104,9 @@ verify_jwt = false
 
 [functions.notify-lead-whatsapp]
 verify_jwt = false
+
+[functions.fazwaz-discover-projects]
+verify_jwt = false
+
+[functions.fazwaz-scrape-project]
+verify_jwt = false
