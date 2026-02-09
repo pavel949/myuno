@@ -2159,6 +2159,13 @@ export type Database = {
             foreignKeyName: "catalog_life_map_life_situation_id_fkey"
             columns: ["life_situation_id"]
             isOneToOne: false
+            referencedRelation: "catalog_life_map_v2"
+            referencedColumns: ["life_situation_id"]
+          },
+          {
+            foreignKeyName: "catalog_life_map_life_situation_id_fkey"
+            columns: ["life_situation_id"]
+            isOneToOne: false
             referencedRelation: "life_situations"
             referencedColumns: ["id"]
           },
@@ -5730,6 +5737,76 @@ export type Database = {
           },
         ]
       }
+      life_scenarios: {
+        Row: {
+          code: string
+          created_at: string
+          description_en: string | null
+          description_ru: string | null
+          icon: string | null
+          id: string
+          is_active: boolean
+          life_situation_id: string
+          priority: number
+          title_en: string
+          title_ru: string
+          updated_at: string
+          urgency_level: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          life_situation_id: string
+          priority?: number
+          title_en: string
+          title_ru: string
+          updated_at?: string
+          urgency_level?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          life_situation_id?: string
+          priority?: number
+          title_en?: string
+          title_ru?: string
+          updated_at?: string
+          urgency_level?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "life_scenarios_life_situation_id_fkey"
+            columns: ["life_situation_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_life_map_v2"
+            referencedColumns: ["life_situation_id"]
+          },
+          {
+            foreignKeyName: "life_scenarios_life_situation_id_fkey"
+            columns: ["life_situation_id"]
+            isOneToOne: false
+            referencedRelation: "life_situations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "life_scenarios_life_situation_id_fkey"
+            columns: ["life_situation_id"]
+            isOneToOne: false
+            referencedRelation: "lifeos_health_view"
+            referencedColumns: ["situation_id"]
+          },
+        ]
+      }
       life_situations: {
         Row: {
           code: string
@@ -5775,6 +5852,53 @@ export type Database = {
         }
         Relationships: []
       }
+      life_tasks: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          life_scenario_id: string
+          priority: number
+          task_type: string
+          title_en: string
+          title_ru: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          life_scenario_id: string
+          priority?: number
+          task_type?: string
+          title_en: string
+          title_ru: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          life_scenario_id?: string
+          priority?: number
+          task_type?: string
+          title_en?: string
+          title_ru?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "life_tasks_life_scenario_id_fkey"
+            columns: ["life_scenario_id"]
+            isOneToOne: false
+            referencedRelation: "life_scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lifeos_governance: {
         Row: {
           description: string | null
@@ -5816,6 +5940,7 @@ export type Database = {
           emotional_state: string
           id: string
           is_active: boolean
+          life_scenario_id: string | null
           life_situation_id: string
           next_routes: string[] | null
           next_routes_labels_en: string[] | null
@@ -5846,6 +5971,7 @@ export type Database = {
           emotional_state?: string
           id?: string
           is_active?: boolean
+          life_scenario_id?: string | null
           life_situation_id: string
           next_routes?: string[] | null
           next_routes_labels_en?: string[] | null
@@ -5876,6 +6002,7 @@ export type Database = {
           emotional_state?: string
           id?: string
           is_active?: boolean
+          life_scenario_id?: string | null
           life_situation_id?: string
           next_routes?: string[] | null
           next_routes_labels_en?: string[] | null
@@ -5897,6 +6024,20 @@ export type Database = {
           what_matters_ru?: string[]
         }
         Relationships: [
+          {
+            foreignKeyName: "lifeos_routes_life_scenario_id_fkey"
+            columns: ["life_scenario_id"]
+            isOneToOne: false
+            referencedRelation: "life_scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lifeos_routes_life_situation_id_fkey"
+            columns: ["life_situation_id"]
+            isOneToOne: true
+            referencedRelation: "catalog_life_map_v2"
+            referencedColumns: ["life_situation_id"]
+          },
           {
             foreignKeyName: "lifeos_routes_life_situation_id_fkey"
             columns: ["life_situation_id"]
@@ -15905,6 +16046,53 @@ export type Database = {
         }
         Relationships: []
       }
+      task_entity_map: {
+        Row: {
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          is_active: boolean
+          life_task_id: string
+          relevance_weight: number
+          role_scope: string[] | null
+          rules: Json | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          is_active?: boolean
+          life_task_id: string
+          relevance_weight?: number
+          role_scope?: string[] | null
+          rules?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          is_active?: boolean
+          life_task_id?: string
+          relevance_weight?: number
+          role_scope?: string[] | null
+          rules?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_entity_map_life_task_id_fkey"
+            columns: ["life_task_id"]
+            isOneToOne: false
+            referencedRelation: "life_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       taxonomy_definitions: {
         Row: {
           created_at: string | null
@@ -19506,6 +19694,22 @@ export type Database = {
       }
     }
     Views: {
+      catalog_life_map_v2: {
+        Row: {
+          entity_id: string | null
+          entity_type: string | null
+          id: string | null
+          life_situation_id: string | null
+          role_scope: string[] | null
+          rules: Json | null
+          scenario_code: string | null
+          task_code: string | null
+          task_type: string | null
+          urgency_level: string | null
+          weight: number | null
+        }
+        Relationships: []
+      }
       experiences_normalized: {
         Row: {
           age_restriction: number | null
@@ -19588,25 +19792,22 @@ export type Database = {
       }
       lifeos_health_view: {
         Row: {
-          avg_weight: number | null
           entity_overuse_count: number | null
-          entity_type_count: number | null
-          flag_low_coverage: boolean | null
-          flag_no_primary: boolean | null
-          flag_primary_overload: boolean | null
-          flag_weight_out_of_range: boolean | null
+          flag_no_entities: boolean | null
+          flag_no_scenarios: boolean | null
+          flag_no_tasks: boolean | null
           health_score: number | null
           is_active: boolean | null
-          last_updated_at: string | null
-          max_weight: number | null
-          min_weight: number | null
-          primary_count: number | null
-          secondary_count: number | null
+          legacy_entity_count: number | null
+          new_entity_count: number | null
+          orphan_scenario_count: number | null
+          orphan_task_count: number | null
+          scenario_count: number | null
           situation_code: string | null
           situation_id: string | null
+          task_count: number | null
           title_en: string | null
           title_ru: string | null
-          total_entities: number | null
         }
         Relationships: []
       }
@@ -20779,6 +20980,52 @@ export type Database = {
           title_localized: string
           trust_level: string
           weight: number
+        }[]
+      }
+      resolve_life_scenarios: {
+        Args: { p_locale?: string; p_situation_code: string }
+        Returns: {
+          code: string
+          description: string
+          icon: string
+          id: string
+          priority: number
+          task_count: number
+          title: string
+          urgency_level: string
+        }[]
+      }
+      resolve_life_tasks: {
+        Args: { p_locale?: string; p_scenario_code: string }
+        Returns: {
+          code: string
+          entity_count: number
+          id: string
+          priority: number
+          task_type: string
+          title: string
+        }[]
+      }
+      resolve_task_entities: {
+        Args: {
+          p_limit?: number
+          p_locale?: string
+          p_task_code: string
+          p_user_role?: string
+        }
+        Returns: {
+          currency: string
+          entity_id: string
+          entity_type: string
+          location: string
+          price: number
+          provider_id: string
+          relevance_weight: number
+          role_scope: string[]
+          rules: Json
+          title: string
+          title_localized: string
+          trust_level: string
         }[]
       }
       rotate_ical_token: { Args: { p_property_id: string }; Returns: string }
