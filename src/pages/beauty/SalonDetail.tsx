@@ -12,6 +12,7 @@ import { BackButton } from '@/components/uno/BackButton';
 import { useSalon, useSalonServices } from '@/hooks/useSalons';
 import { Button } from '@/components/ui/button';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
+import { RelatedServicesSection } from '@/components/crosssell';
 
 export default function SalonDetail() {
   const { id } = useParams<{ id: string }>();
@@ -168,6 +169,11 @@ export default function SalonDetail() {
             </p>
           )}
         </div>
+      </div>
+
+      {/* Cross-sell */}
+      <div className="px-4 pb-24">
+        <RelatedServicesSection currentVertical="beauty" />
       </div>
 
       {/* Bottom booking bar */}

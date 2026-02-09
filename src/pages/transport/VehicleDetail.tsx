@@ -14,6 +14,7 @@ import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { useViewHistory } from '@/hooks/useViewHistory';
 import { BackButton } from '@/components/uno/BackButton';
 import { useVehicle } from '@/hooks/useVehicles';
+import { RelatedServicesSection } from '@/components/crosssell';
 
 const transmissionLabels: Record<string, { en: string; ru: string }> = {
   automatic: { en: 'Auto', ru: 'Авто' },
@@ -306,6 +307,11 @@ export default function VehicleDetail() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Cross-sell */}
+        <div className="pb-24">
+          <RelatedServicesSection currentVertical="transport" />
         </div>
 
         {/* Fixed Bottom CTA */}

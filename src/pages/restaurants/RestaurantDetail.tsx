@@ -17,6 +17,7 @@ import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { ReviewsSection } from '@/components/reviews/ReviewsSection';
 import { Card, CardContent } from '@/components/ui/card';
 import { SEOHead } from '@/components/seo/SEOHead';
+import { RelatedServicesSection } from '@/components/crosssell';
 
 const PRICE_BAND_LABEL: Record<string, string> = {
   budget: '฿',
@@ -419,6 +420,11 @@ export default function RestaurantDetail() {
             />
           </div>
         )}
+
+        {/* Cross-sell */}
+        <div className="px-4">
+          <RelatedServicesSection currentVertical="restaurants" />
+        </div>
       </div>
     </AppLayout>
   );

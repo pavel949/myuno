@@ -28,6 +28,7 @@ import {
   MessageHostButton
 } from '@/components/property';
 import { ProjectInfoCard } from '@/components/property/ProjectInfoCard';
+import { RelatedServicesSection } from '@/components/crosssell';
 import { UnitSpecs } from '@/components/property/UnitSpecs';
 import { ExitIntentModal } from '@/components/leads/ExitIntentModal';
 import { PhotoLightbox } from '@/components/property/PhotoLightbox';
@@ -802,6 +803,11 @@ export default function PropertyDetail() {
             </div>
           </SheetContent>
         </Sheet>
+      </div>
+
+      {/* Cross-sell */}
+      <div className="px-4">
+        <RelatedServicesSection currentVertical="property" />
       </div>
 
       {/* Photo Lightbox */}
