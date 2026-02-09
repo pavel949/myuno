@@ -107,7 +107,7 @@ export function HomeCategoryRibbon() {
           onClick={() => handleQuickAction('/market')}
           className={cn(
             "flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium shrink-0",
-            "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20"
+            "bg-primary/8 hover:bg-primary/15 text-primary border border-primary/20"
           )}
         >
           <Menu className="w-4 h-4" />
@@ -121,7 +121,7 @@ export function HomeCategoryRibbon() {
           onClick={() => handleQuickAction('/market/category/deals')}
           className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium shrink-0 bg-muted/60 hover:bg-muted text-foreground"
         >
-          <Flame className="w-4 h-4 text-orange-500" />
+          <Flame className="w-4 h-4 text-destructive" />
           <span>{isRu ? 'Акции' : 'Deals'}</span>
         </motion.button>
 
@@ -130,7 +130,7 @@ export function HomeCategoryRibbon() {
           onClick={() => handleQuickAction('/market/category/popular')}
           className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium shrink-0 bg-muted/60 hover:bg-muted text-foreground"
         >
-          <Star className="w-4 h-4 text-amber-500" />
+          <Star className="w-4 h-4 text-warning" />
           <span>{isRu ? 'Хиты' : 'Hits'}</span>
         </motion.button>
 
@@ -139,7 +139,7 @@ export function HomeCategoryRibbon() {
           onClick={() => handleQuickAction('/market/category/new')}
           className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium shrink-0 bg-muted/60 hover:bg-muted text-foreground"
         >
-          <Sparkles className="w-4 h-4 text-blue-500" />
+          <Sparkles className="w-4 h-4 text-primary" />
           <span>{isRu ? 'Новинки' : 'New'}</span>
         </motion.button>
       </div>

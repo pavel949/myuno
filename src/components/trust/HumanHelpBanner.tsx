@@ -52,17 +52,17 @@ export function HumanHelpBanner({
     return (
       <div className={cn(
         'flex items-center gap-3 py-2.5 px-3 rounded-lg',
-        'bg-emerald-500/5 border border-emerald-500/10',
+        'bg-success/5 border border-success/10',
         className
       )}>
-        <MessageCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+        <MessageCircle className="w-4 h-4 text-success shrink-0" />
         <p className="text-xs text-muted-foreground flex-1">
           {heading || defaultHeading}{' '}
           <a
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-emerald-600 dark:text-emerald-400 font-medium hover:underline"
+            className="text-success font-medium hover:underline"
           >
             {isRu ? 'Напишите нам' : 'Message us'}
           </a>
@@ -83,8 +83,8 @@ export function HumanHelpBanner({
         className
       )}>
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-emerald-500/10">
-            <MessageCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-success/10">
+            <MessageCircle className="w-5 h-5 text-success" />
           </div>
           <div>
             <h4 className="text-sm font-semibold">{heading || defaultHeading}</h4>
@@ -96,7 +96,7 @@ export function HumanHelpBanner({
         <div className="flex gap-2">
           <Button
             size="sm"
-            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+            className="flex-1 bg-success hover:bg-success/90 text-success-foreground"
             onClick={() => window.open(whatsappUrl, '_blank')}
           >
             <MessageCircle className="w-3.5 h-3.5" />
@@ -130,8 +130,8 @@ export function HumanHelpBanner({
       'flex items-center gap-3',
       className
     )}>
-      <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 bg-emerald-500/15">
-        <MessageCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+      <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 bg-success/15">
+        <MessageCircle className="w-4 h-4 text-success" />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-xs font-medium">{heading || defaultHeading}</p>
@@ -141,7 +141,7 @@ export function HumanHelpBanner({
       </div>
       <Button
         size="sm"
-        className="shrink-0 bg-emerald-600 hover:bg-emerald-700 text-white"
+        className="shrink-0 bg-success hover:bg-success/90 text-success-foreground"
         onClick={() => window.open(whatsappUrl, '_blank')}
       >
         <MessageCircle className="w-3.5 h-3.5" />

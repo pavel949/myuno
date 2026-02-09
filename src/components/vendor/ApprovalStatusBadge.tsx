@@ -24,7 +24,7 @@ const statusConfig = {
     descriptionEn: 'Your listing is being reviewed by our team',
     descriptionRu: 'Ваша карточка рассматривается нашей командой',
     variant: 'outline' as const,
-    className: 'border-yellow-500 text-yellow-600 bg-yellow-50 dark:bg-yellow-950/20',
+    className: 'border-warning text-warning bg-warning/5',
     icon: Clock,
   },
   approved: {
@@ -33,7 +33,7 @@ const statusConfig = {
     descriptionEn: 'Your listing is visible to users',
     descriptionRu: 'Ваша карточка видна пользователям',
     variant: 'outline' as const,
-    className: 'border-green-500 text-green-600 bg-green-50 dark:bg-green-950/20',
+    className: 'border-success text-success bg-success/5',
     icon: CheckCircle,
   },
   rejected: {
@@ -42,7 +42,7 @@ const statusConfig = {
     descriptionEn: 'Your listing was not approved',
     descriptionRu: 'Ваша карточка была отклонена',
     variant: 'outline' as const,
-    className: 'border-red-500 text-red-600 bg-red-50 dark:bg-red-950/20',
+    className: 'border-destructive text-destructive bg-destructive/5',
     icon: XCircle,
   },
   unknown: {

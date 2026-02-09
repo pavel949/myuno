@@ -80,7 +80,7 @@ const AchievementBadge = ({ definition, isUnlocked, achievement }: AchievementBa
       
       {isUnlocked && achievement && (
         <div className="absolute -top-1 -right-1">
-          <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+          <div className="w-4 h-4 bg-success rounded-full flex items-center justify-center">
             <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
             </svg>
@@ -121,7 +121,7 @@ export const AchievementsCard = () => {
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-amber-500" />
+            <Trophy className="h-5 w-5 text-warning" />
             {language === 'ru' ? 'Достижения' : 'Achievements'}
           </CardTitle>
           <Badge variant="secondary">
