@@ -308,11 +308,11 @@ serve(async (req) => {
         // Step 4: Resolve developer
         const developerId = await resolveOrCreateDeveloper(supabase, extracted.developer_name);
 
-        // Step 5: Translate to Russian
-        const nameRu = await translateToRussian(extracted.project_name);
-        const descRu = extracted.description
-          ? await translateToRussian(extracted.description.slice(0, 2000))
-          : null;
+        // Step 5: Translate to Russian (batch both in one call)
+        const textToTranslate = [extracted.project_name, extracted.description?.slice(0, 2000) || ''].join('\n---SEPARATOR---\n');
+        const translated = await translateToRussian(textToTranslate);
+        const [nameRu, descRu] = translated.split('---SEPARATOR---').map(s => s.trim());
+
 
         // Step 6: Prepare record
         const projectData: Record<string, any> = {
@@ -378,24 +378,15 @@ serve(async (req) => {
           results.push({ url, status: 'inserted', id: projectId, name: extracted.project_name });
         }
 
-        // Step 7: Cache cover image
-        if (extracted.cover_image_url) {
-          const cachedUrl = await cacheImage(supabase, extracted.cover_image_url, projectId);
-          if (cachedUrl) {
-            await supabase
-              .from('property_projects')
-              .update({ cover_image: cachedUrl })
-              .eq('id', projectId);
-            console.log(`Cached cover image for ${projectId}`);
-          }
-        }
+        // Step 7: Skip image caching during batch import (run import-project-images separately)
+        // Cover image URL is already stored in the record from extracted data
       } catch (err) {
         console.error(`Error processing ${url}:`, err);
         results.push({ url, status: 'error', error: err instanceof Error ? err.message : String(err) });
       }
 
-      // Rate limit delay between projects
-      await new Promise(r => setTimeout(r, 1000));
+      // Minimal delay between projects
+      await new Promise(r => setTimeout(r, 200));
     }
 
     const inserted = results.filter(r => r.status === 'inserted').length;
