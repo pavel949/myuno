@@ -34,7 +34,7 @@ const GENERAL_CATEGORIES = [
   { id: 'legal', labelEn: 'Legal Services', labelRu: 'Юридические услуги', icon: '⚖️' },
   { id: 'pets', labelEn: 'Pet Services', labelRu: 'Услуги для питомцев', icon: '🐕' },
   { id: 'events', labelEn: 'Events', labelRu: 'Мероприятия', icon: '🎉' },
-  { id: 'yachts', labelEn: 'Yachts', labelRu: 'Яхты', icon: '⛵' },
+  { id: 'yachts', labelEn: 'Boat Charters', labelRu: 'Чартер', icon: '⛵' },
   { id: 'flowers', labelEn: 'Flowers', labelRu: 'Цветы', icon: '💐' },
 ];
 

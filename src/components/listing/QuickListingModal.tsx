@@ -54,7 +54,7 @@ const SUBCATEGORIES: Record<string, Array<{ id: string; icon: React.ElementType;
   ],
   experience: [
     { id: 'tour', icon: Compass, labelEn: 'Tour', labelRu: 'Экскурсия' },
-    { id: 'yacht', icon: Ship, labelEn: 'Yacht', labelRu: 'Яхта' },
+    { id: 'yacht', icon: Ship, labelEn: 'Boat Charter', labelRu: 'Чартер' },
     { id: 'activity', icon: Compass, labelEn: 'Activity', labelRu: 'Активность' },
     { id: 'event', icon: Calendar, labelEn: 'Event', labelRu: 'Мероприятие' },
   ],

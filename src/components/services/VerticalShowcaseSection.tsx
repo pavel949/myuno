@@ -33,13 +33,13 @@ const SHOWCASES: VerticalShowcase[] = [
   {
     id: 'yachts',
     icon: '🛥️',
-    nameEn: 'Luxury Yachts',
-    nameRu: 'Яхты класса люкс',
+    nameEn: 'Boat Charters',
+    nameRu: 'Чартер',
     taglineEn: 'Charter the perfect vessel',
-    taglineRu: 'Чартер идеальной яхты',
+    taglineRu: 'Чартер идеального судна',
     path: '/yachts',
     gradient: 'from-blue-600 via-cyan-500 to-blue-400',
-    stats: { count: 150, labelEn: 'vessels', labelRu: 'яхт' },
+    stats: { count: 150, labelEn: 'vessels', labelRu: 'судов' },
     badges: ['Premium', 'Verified Captains'],
   },
   {

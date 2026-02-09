@@ -114,8 +114,8 @@ const TOURIST_ACTIONS: QuickAction[] = [
   {
     id: 'yachts',
     icon: Anchor,
-    label: 'Yachts',
-    labelRu: 'Яхты',
+    label: 'Charters',
+    labelRu: 'Чартер',
     path: '/yachts',
     iconColor: 'text-white',
     bgColor: 'bg-gradient-to-br from-cyan-400 to-blue-600',

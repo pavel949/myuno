@@ -13,7 +13,7 @@ interface CatalogServicesTabProps {
 }
 
 const serviceCategories = [
-  { key: 'yachts', label: 'Yachts', labelRu: 'Яхты', icon: Ship, path: '/admin/yachts' },
+  { key: 'yachts', label: 'Boat Charters', labelRu: 'Чартер', icon: Ship, path: '/admin/yachts' },
   { key: 'tours', label: 'Tours', labelRu: 'Туры', icon: Compass, path: '/admin/tours' },
   { key: 'restaurants', label: 'Restaurants', labelRu: 'Рестораны', icon: Utensils, path: '/admin/restaurants' },
   { key: 'salons', label: 'Salons', labelRu: 'Салоны', icon: Scissors, path: '/admin/salons' },

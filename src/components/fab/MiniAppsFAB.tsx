@@ -14,7 +14,7 @@ import { triggerHaptic } from '@/hooks/useHapticFeedback';
 
 // All available mini-apps
 const ALL_MINI_APPS = [
-  { id: 'yachts', icon: Anchor, label: 'Yachts', labelRu: 'Яхты', path: '/yachts', color: 'from-cyan-500 to-blue-500' },
+  { id: 'yachts', icon: Anchor, label: 'Boat Charters', labelRu: 'Чартер', path: '/yachts', color: 'from-cyan-500 to-blue-500' },
   { id: 'transfer', icon: Plane, label: 'Transfer', labelRu: 'Трансфер', path: '/transport/airport-transfer', color: 'from-indigo-500 to-purple-500' },
   { id: 'flowers', icon: Flower2, label: 'Flowers', labelRu: 'Цветы', path: '/flowers', color: 'from-rose-400 to-pink-500' },
   { id: 'property', icon: Home, label: 'Property', labelRu: 'Жильё', path: '/property', color: 'from-teal-500 to-emerald-500' },
