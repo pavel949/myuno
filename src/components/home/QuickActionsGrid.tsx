@@ -58,11 +58,11 @@ const RESIDENT_ACTIONS: QuickAction[] = [
 ];
 
 const OWNER_ACTIONS: QuickAction[] = [
+  { id: 'my-properties', icon: Home, label: 'My Properties', labelRu: 'Мои объекты', path: '/owner', iconColor: 'text-teal-600 dark:text-teal-400', bgColor: 'bg-teal-500/12' },
+  { id: 'owner-calendar', icon: Calendar, label: 'Calendar', labelRu: 'Календарь', path: '/owner/calendar', iconColor: 'text-indigo-600 dark:text-indigo-400', bgColor: 'bg-indigo-500/12' },
   { id: 'services', icon: Wrench, label: 'Services', labelRu: 'Сервис', path: '/services', iconColor: 'text-amber-600 dark:text-amber-400', bgColor: 'bg-amber-500/12' },
-  { id: 'property-management', icon: Building2, label: 'Management', labelRu: 'УК', path: '/services?category=property-management', iconColor: 'text-indigo-600 dark:text-indigo-400', bgColor: 'bg-indigo-500/12' },
   { id: 'rental', icon: Key, label: 'Rental', labelRu: 'Аренда', path: '/property', iconColor: 'text-teal-600 dark:text-teal-400', bgColor: 'bg-teal-500/12' },
   { id: 'legal', icon: Scale, label: 'Legal', labelRu: 'Юрист', path: '/legal', iconColor: 'text-slate-600 dark:text-slate-400', bgColor: 'bg-slate-500/12' },
-  { id: 'insurance', icon: Shield, label: 'Insurance', labelRu: 'Страховка', path: '/insurance', iconColor: 'text-sky-600 dark:text-sky-400', bgColor: 'bg-sky-500/12' },
   { id: 'cleaning', icon: Sparkles, label: 'Cleaning', labelRu: 'Клининг', path: '/cleaning', iconColor: 'text-pink-600 dark:text-pink-400', bgColor: 'bg-pink-500/12' },
 ];
 
