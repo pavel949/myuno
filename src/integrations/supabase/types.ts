@@ -18762,6 +18762,47 @@ export type Database = {
         }
         Relationships: []
       }
+      vertical_life_tasks: {
+        Row: {
+          context_notes: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          life_task_id: string
+          priority_weight: number
+          updated_at: string
+          vertical_code: string
+        }
+        Insert: {
+          context_notes?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          life_task_id: string
+          priority_weight?: number
+          updated_at?: string
+          vertical_code: string
+        }
+        Update: {
+          context_notes?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          life_task_id?: string
+          priority_weight?: number
+          updated_at?: string
+          vertical_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vertical_life_tasks_life_task_id_fkey"
+            columns: ["life_task_id"]
+            isOneToOne: false
+            referencedRelation: "life_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vertical_metrics: {
         Row: {
           active_listings: number | null
@@ -20526,6 +20567,17 @@ export type Database = {
           },
         ]
       }
+      vertical_task_coverage: {
+        Row: {
+          contextual_tasks: number | null
+          core_tasks: number | null
+          support_tasks: number | null
+          task_codes: string[] | null
+          task_count: number | null
+          vertical_code: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       add_team_points: {
@@ -21026,6 +21078,34 @@ export type Database = {
           title: string
           title_localized: string
           trust_level: string
+        }[]
+      }
+      resolve_tasks_for_vertical: {
+        Args: { p_vertical_code: string }
+        Returns: {
+          priority_weight: number
+          scenario_code: string
+          situation_code: string
+          task_code: string
+          task_title_en: string
+          task_type: string
+        }[]
+      }
+      resolve_verticals_for_situation: {
+        Args: { p_situation_code: string }
+        Returns: {
+          max_priority: number
+          task_count: number
+          tasks: string[]
+          vertical_code: string
+        }[]
+      }
+      resolve_verticals_for_task: {
+        Args: { p_task_code: string }
+        Returns: {
+          context_notes: string
+          priority_weight: number
+          vertical_code: string
         }[]
       }
       rotate_ical_token: { Args: { p_property_id: string }; Returns: string }
