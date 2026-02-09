@@ -5,18 +5,8 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { LanguageIndicator } from '@/components/ui/LanguageIndicator';
 import { Service } from '@/hooks/useServices';
 
-// Category color mapping for visual distinction
+// Category color strip — unified to primary for brand consistency
 const CATEGORY_COLORS: Record<string, string> = {
-  'beauty-spa': 'bg-pink-500',
-  'beauty': 'bg-pink-500',
-  'medical': 'bg-emerald-500',
-  'fitness': 'bg-blue-500',
-  'restaurants': 'bg-orange-500',
-  'food': 'bg-orange-500',
-  'transport': 'bg-cyan-500',
-  'events': 'bg-purple-500',
-  'cleaning': 'bg-teal-500',
-  'services': 'bg-amber-500',
   'default': 'bg-primary',
 };
 
@@ -84,7 +74,7 @@ export const ServiceProviderCard = memo(function ServiceProviderCard({
                 {providerName}
               </span>
               {service.provider?.is_verified && (
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-success shrink-0" />
               )}
             </div>
           )}
@@ -92,7 +82,7 @@ export const ServiceProviderCard = memo(function ServiceProviderCard({
           <div className="flex items-center gap-2 mt-1.5">
             {service.rating && (
               <span className="flex items-center gap-1 text-sm font-medium">
-                <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                <Star className="w-3.5 h-3.5 text-warning fill-warning" />
                 {service.rating.toFixed(1)}
               </span>
             )}
@@ -160,7 +150,7 @@ export const ServiceProviderCard = memo(function ServiceProviderCard({
         {/* Rating badge */}
         {service.rating && (
           <div className="absolute top-2.5 right-2.5 flex items-center gap-1 px-2 py-1 rounded-lg bg-background/95 backdrop-blur-sm text-xs font-semibold shadow-sm">
-            <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+            <Star className="w-3.5 h-3.5 text-warning fill-warning" />
             {service.rating.toFixed(1)}
           </div>
         )}
@@ -178,7 +168,7 @@ export const ServiceProviderCard = memo(function ServiceProviderCard({
           
           {/* Verified checkmark on avatar */}
           {service.provider?.is_verified && (
-            <div className="absolute -bottom-0.5 -right-0.5 bg-emerald-500 rounded-full p-0.5">
+            <div className="absolute -bottom-0.5 -right-0.5 bg-success rounded-full p-0.5">
               <CheckCircle2 className="w-3 h-3 text-white" fill="currentColor" />
             </div>
           )}

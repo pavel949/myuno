@@ -29,36 +29,30 @@ interface NotificationItemProps {
   onDelete: (id: string) => void;
 }
 
-const typeConfig: Record<string, { icon: React.ElementType; gradient: string; iconBg: string }> = {
+const typeConfig: Record<string, { icon: React.ElementType; iconBg: string }> = {
   booking: {
     icon: Calendar,
-    gradient: 'from-blue-500/10 to-transparent',
-    iconBg: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+    iconBg: 'bg-primary/10 text-primary',
   },
   promotion: {
     icon: Tag,
-    gradient: 'from-amber-500/10 to-transparent',
-    iconBg: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+    iconBg: 'bg-warning/10 text-warning',
   },
   status: {
     icon: Info,
-    gradient: 'from-green-500/10 to-transparent',
-    iconBg: 'bg-green-500/10 text-green-600 dark:text-green-400',
+    iconBg: 'bg-success/10 text-success',
   },
   order: {
     icon: Package,
-    gradient: 'from-purple-500/10 to-transparent',
-    iconBg: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
+    iconBg: 'bg-primary/10 text-primary',
   },
   message: {
     icon: MessageSquare,
-    gradient: 'from-cyan-500/10 to-transparent',
-    iconBg: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400',
+    iconBg: 'bg-primary/10 text-primary',
   },
   wallet: {
     icon: Wallet,
-    gradient: 'from-emerald-500/10 to-transparent',
-    iconBg: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+    iconBg: 'bg-success/10 text-success',
   },
 };
 
@@ -101,7 +95,6 @@ export function NotificationItem({ notification, onMarkRead, onDelete }: Notific
       exit={{ opacity: 0, x: -100 }}
       className={cn(
         "relative overflow-hidden rounded-xl border p-3 transition-all",
-        `bg-gradient-to-r ${config.gradient}`,
         !notification.is_read 
           ? "border-primary/30 bg-primary/5" 
           : "border-border bg-card",
