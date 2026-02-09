@@ -1,51 +1,202 @@
 
 
-## "Explore More" -- Universal Verticals Drawer
+# Генеральный План Наполнения Вертикалей Реальными Данными и Усиление Кросс-Селла
 
-### Problem
-Users on detail pages (like `/cleaning/...`) or deep vertical views have no way to discover other available verticals without navigating back to the Home or Discover page. The existing `CrossSellSection` only shows contextually related verticals (3-4 items), not the full catalog.
+---
 
-### Solution
-Create a reusable `ExploreVerticalsSheet` bottom-sheet (Drawer) component that displays all 19 verticals from `VERTICALS` registry in a clean icon grid. Then surface it via:
+## 1. ТЕКУЩЕЕ СОСТОЯНИЕ: Аудит Всех Вертикалей
 
-1. **A "More Services" row** at the bottom of every detail page and vertical listing page
-2. **A "See All" button** appended to the existing `QuickServiceIcons` grid (the 8th slot becomes "More")
-3. **Integration with `CrossSellSection`** -- add a trailing "See all" link that opens the sheet
+| Вертикаль | Активных | Без фото | Без провайдера | Оценка качества |
+|-----------|----------|----------|----------------|-----------------|
+| Рестораны | 25 | **12** | **25** | Критично: половина без фото |
+| Experiences | 89 | 0 | **65** | Без привязки к провайдерам |
+| Яхты | 97 | 0 | 91 без провайдера | Данные хорошие |
+| Транспорт | 21 | 0 | 18 | Исправлены фото |
+| Недвижимость | 28 | 0 | 27 | Хорошо |
+| Букеты/Цветы | 11 | -- | -- | Проверены, норма |
+| Маркетплейс | 55 | 0 | -- | Тонкие категории (3-8 товаров) |
+| События | 15 | 0 | -- | Средне |
+| Салоны/Красота | 27 | 0 | -- | Unsplash-фото (не реальные!) |
+| Фитнес/Спортзалы | 18 | -- | -- | Unsplash-фото |
+| Клиники | 20 | -- | -- | Unsplash-фото |
+| Юр. услуги | 13 | -- | -- | Unsplash-фото |
+| Образование | 16 | -- | -- | Unsplash-фото |
+| Няни | 5 | -- | -- | Мало записей |
+| Страхование | 7 | -- | -- | Мало записей |
+| Уборка | 15 | -- | -- | Средне |
+| Банки | 14 | -- | -- | Средне |
+| Трансферы | 40 | -- | -- | Хорошо |
+| Петсервис | 7 | -- | -- | Unsplash-фото |
+| Туры | 29 | -- | -- | Средне |
 
-### What Users Will See
+### Критические проблемы:
+1. **12 ресторанов без фото** (включая Michelin-уровня: hom, Age, Tambu, SAMUT, Su Va Na)
+2. **Салоны, фитнес, клиники, юристы, образование, петсервис** -- все используют **стоковые Unsplash-фото**, а не реальные
+3. **65 experiences без provider_id** -- нет привязки к поставщику
+4. **Маркетплейс** -- категории тонкие (3-8 товаров вместо 15-20)
+5. **Кросс-селл** ведет только на вертикали (категории), но не на конкретные товары/услуги
 
-- On any detail page (e.g., `/cleaning/...`): a section near the bottom titled "Explore More" / "Ещё услуги" with a compact 2-row icon strip + "View all" button that opens a full-screen drawer with all 19 verticals organized in a 4-column grid
-- On the Discover page `QuickServiceIcons`: the 8th icon slot replaced with a "More" button opening the same drawer
-- The drawer shows all verticals from `VERTICALS` registry with emoji-resolved Lucide icons, localized labels, and navigation to the vertical's listing page
+---
 
-### Technical Details
+## 2. ПЛАН ПО ВЕРТИКАЛЯМ
 
-**New file: `src/components/shared/ExploreVerticalsSheet.tsx`**
-- Uses `vaul` Drawer (already installed) for mobile-native bottom sheet
-- Reads all verticals from `VERTICALS` registry (`src/lib/verticals.ts`)
-- Resolves emoji icons via `resolveIcon()` from `src/lib/iconMap.ts`
-- 4-column grid layout matching existing `QuickServiceIcons` visual style
-- Bilingual labels (EN/RU) from `VerticalDefinition.labelEn/labelRu`
-- Each item navigates to `/${vertical.plural}` and closes the sheet
-- Accepts optional `trigger` prop for custom trigger buttons, or renders a default one
+### Фаза 1: Критические исправления (Рестораны + Салоны)
 
-**Modified: `src/components/services/QuickServiceIcons.tsx`**
-- Show 7 featured items instead of 8
-- Add a "More" icon button in the 8th slot that opens `ExploreVerticalsSheet`
+**2.1 Рестораны -- 12 без фото**
 
-**New file: `src/components/shared/ExploreMoreBanner.tsx`**
-- Lightweight horizontal strip component showing 5-6 vertical icons + "All" button
-- Designed to be dropped into any detail page layout
-- Opens `ExploreVerticalsSheet` on "All" click
-- Title: "Explore More" / "Ещё услуги"
+Добавить реальные фото с официальных сайтов для:
+- hom (InterContinental) -- intercontinental.com
+- Age Restaurant (Anantara Layan) -- anantara.com
+- Tambu Phuket -- tambu.com
+- SAMUT Phuket -- chivitrhotel.com
+- Su Va Na (Central Floresta) -- suvana.com
+- AJa Bistro, Sizzle Rooftop, Issara, Takieng, Benihana, Pine Beach Bar, La Sala
 
-**Modified: `src/components/crosssell/CrossSellSection.tsx`**
-- Add trailing "See all services" link that opens `ExploreVerticalsSheet`
+Источники: Chope, TripAdvisor, Google Maps, официальные сайты.
 
-### Architecture Alignment
-- Uses `VERTICALS` from `src/lib/verticals.ts` as single source of truth (per memory)
-- Uses `resolveIcon` for consistent emoji-to-Lucide mapping
-- Follows existing Drawer/Sheet pattern (vaul) used elsewhere in the app
-- Follows `space-y-6` spacing and `rounded-2xl` card hierarchy standards
-- Mobile-first with `touch-manipulation` and `active:scale-95` interaction patterns
+**2.2 Салоны/Красота -- заменить Unsplash на реальные**
+
+Все 27 салонов используют стоковые фото. Нужно:
+- Найти реальные салоны Пхукета (Let's Relax Spa, Oasis Spa, Kim's Massage, Breeze Spa)
+- Заменить данные на реальные: названия, адреса, телефоны, фото с официальных сайтов
+- Деактивировать фейковые записи (Luxe Nail Bar, Nail Art Paradise, Barber Bros -- не существуют)
+
+### Фаза 2: Вторичные вертикали
+
+**2.3 Фитнес/Спортзалы (18 записей)**
+- Заменить на реальные: Tiger Muay Thai, Titan Fitness, Unit-27, CrossFit Chalong, RPM Health Club
+- Реальные цены дневных/месячных абонементов
+- Фото с официальных сайтов и Google Maps
+
+**2.4 Клиники (20 записей)**
+- Заменить на реальные: Bangkok Hospital Phuket, Phuket International Hospital, Dibuk Hospital, Siriroj Hospital
+- Реальные специализации, телефоны, адреса
+- Фото фасадов с Google Maps / официальных сайтов
+
+**2.5 Образование (16 записей)**
+- Реальные школы: British International School Phuket, HeadStart, QSI, Kajonkiet, UWC Thailand
+- Реальные детсады и языковые школы
+- Цены, контакты, фото
+
+**2.6 Юридические услуги (13 записей)**
+- Реальные фирмы: Phuket Lawyer, Siam Legal, Thailawonline, DFDL
+- Специализации: иммиграция, недвижимость, бизнес
+- Реальные контакты
+
+**2.7 Петсервис (7 записей)**
+- Все на Unsplash. Заменить на реальные: Phuket Vet, Pet Kingdom, Island Groomers
+- Добавить реальные ветклиники
+
+### Фаза 3: Углубление контента
+
+**2.8 Маркетплейс -- добавить товары в тонкие категории**
+
+Текущее покрытие:
+- Home & Living: 3 товара (нужно 12+)
+- Baby & Kids: 3 (нужно 10+)
+- Thai Fashion: 3 (нужно 10+)
+- Health & Pharmacy: 4 (нужно 10+)
+
+Источники: Tops, Villa Market, Big C, Central, Jim Thompson, NaRaYa
+
+**2.9 Experiences -- привязать к провайдерам**
+
+65 из 89 активных experiences без provider_id. Нужно:
+- Создать провайдеров для основных операторов (Siam Adventure, Phuket Tours Direct, Sea Star)
+- Привязать experiences к реальным провайдерам
+
+**2.10 События -- обновить до актуальных**
+
+15 событий -- проверить актуальность дат, добавить текущие мероприятия Пхукета.
+
+### Фаза 4: Няни и Страхование
+
+**2.11 Няни (5 записей)** -- добавить до 10: реальные агентства (Phuket Nanny, Thai Nanny Service)
+
+**2.12 Страхование (7 записей)** -- проверить актуальность данных, добавить реальные планы
+
+---
+
+## 3. КРОСС-СЕЛЛ: Конкретные Услуги Вместо Категорий
+
+### Текущая проблема
+Кросс-селл сейчас ведет только на вертикали-категории (например, "Рестораны", "Транспорт"). Пользователь не видит конкретных предложений.
+
+### Решение: Двухуровневый кросс-селл
+
+**Уровень 1 (текущий)**: Иконки категорий -- остается как есть.
+
+**Уровень 2 (новый)**: Секция "Дополните ваш день" с конкретными карточками товаров/услуг из связанных вертикалей.
+
+Техническая реализация:
+
+1. Создать новый компонент `RelatedServicesSection` который:
+   - Получает `currentVertical` и `currentEntityId`
+   - По матрице кросс-селла определяет связанные вертикали
+   - Загружает по 2-3 конкретных featured-элемента из каждой связанной вертикали
+   - Отображает их как мини-карточки с фото, ценой и CTA
+
+2. Примеры контекстных рекомендаций:
+
+   **На странице яхты** показывать:
+   - Конкретный букет "Romantic Rose Box" -- 2,500 THB
+   - Конкретный ресторан "Acqua Restaurant" -- Italian Fine Dining
+   - Конкретный трансфер "Marina Transfer" -- от 800 THB
+
+   **На странице тура** показывать:
+   - Конкретный ресторан рядом с локацией тура
+   - Конкретный автомобиль в аренду
+   - Конкретное событие в тот же день
+
+   **На странице недвижимости** показывать:
+   - Конкретная клининговая компания
+   - Конкретный юрист по недвижимости
+   - Конкретный автомобиль в аренду
+
+3. Обновить `crossSellConfig.ts`:
+   - Добавить поле `entityQuery` к каждому CrossSellLink для фильтрации конкретных сущностей
+   - Добавить поле `contextHint` для контекстных подсказок ("к ужину после чартера", "трансфер до марины")
+
+4. Новый хук `useRelatedEntities(vertical, entityId)`:
+   - Загружает featured-элементы из связанных вертикалей
+   - Кеширует через React Query с профилем SEMI_STATIC
+   - Возвращает готовые CardProps через существующие адаптеры
+
+---
+
+## 4. ТЕХНИЧЕСКИЙ ПЛАН РЕАЛИЗАЦИИ
+
+### Шаг 1: База данных -- обновление данных
+- SQL-скрипты для обновления cover_image у 12 ресторанов
+- SQL-скрипты для замены/деактивации стоковых салонов, фитнеса, клиник
+- SQL-скрипты для добавления товаров в тонкие категории маркетплейса
+- SQL-скрипты для привязки experiences к провайдерам
+
+### Шаг 2: Кросс-селл компонент
+- Создать `src/components/crosssell/RelatedServicesSection.tsx`
+- Создать `src/hooks/useRelatedEntities.ts`
+- Расширить `CrossSellLink` интерфейс полями `entityQuery` и `contextHint`
+- Интегрировать на все detail-страницы (ExperienceDetail, YachtDetail, PropertyDetail, RestaurantDetail и т.д.)
+
+### Шаг 3: Адаптеры для мини-карточек
+- Создать универсальный `mapEntityToMiniCardProps` в `src/lib/adapters/` который принимает любую сущность из любой вертикали и возвращает унифицированный формат: { title, image, price, cta, path }
+
+### Шаг 4: Валидация
+- Проверить все вертикали через браузер на отсутствие Unsplash-фото
+- Проверить все горизонтальные прокрутки
+- Проверить кросс-селл отображение на мобильных
+
+---
+
+## 5. ПРИОРИТЕТЫ
+
+| Приоритет | Задача | Влияние |
+|-----------|--------|---------|
+| P0 | Фото 12 ресторанов | Michelin-рестораны без фото = потеря доверия |
+| P0 | Заменить стоковые фото салонов | Fake-данные видны пользователю |
+| P1 | Кросс-селл конкретных услуг | Увеличение конверсии |
+| P1 | Маркетплейс -- наполнение тонких категорий | Пустые категории = мертвые зоны |
+| P2 | Фитнес, клиники, образование -- реальные данные | Полнота каталога |
+| P2 | Привязка experiences к провайдерам | Доверие и трекинг |
+| P3 | Няни, страхование, юристы | Нишевые вертикали |
 
