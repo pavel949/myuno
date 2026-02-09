@@ -113,3 +113,6 @@ verify_jwt = false
 
 [functions.ignatev-scrape-rentals]
 verify_jwt = false
+
+[functions.cache-property-images]
+verify_jwt = false
